@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  
+  --color-bg-primary: #0a0a0f;
+  --color-bg-secondary: #12121a;
+  --color-bg-card: #1a1a24;
+  --color-bg-hover: #242430;
+  
+  --color-accent-primary: #ff6b35;
+  --color-accent-secondary: #4ecdc4;
+  --color-accent-tertiary: #ffe66d;
+  
+  --color-text-primary: #f5f5f7;
+  --color-text-secondary: #a1a1aa;
+  --color-text-muted: #71717a;
+  
+  --color-border: #27272a;
+  --color-border-hover: #3f3f46;
+}
+
+@layer base {
+  body {
+    @apply bg-bg-primary text-text-primary font-body antialiased;
+    background-image: 
+      radial-gradient(ellipse at 20% 0%, rgba(255, 107, 53, 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(78, 205, 196, 0.06) 0%, transparent 50%);
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .search-input {
+    @apply w-full bg-bg-secondary border border-border rounded-xl px-5 py-4 text-lg text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary focus:ring-2 focus:ring-accent-primary/20 transition-all duration-200;
+  }
+  
+  .source-card {
+    @apply bg-bg-card border border-border rounded-xl p-4 hover:border-border-hover hover:bg-bg-hover transition-all duration-200 cursor-pointer;
+  }
+  
+  .source-badge {
+    @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200;
+  }
+  
+  .result-card {
+    @apply bg-bg-card border border-border rounded-2xl overflow-hidden hover:border-accent-primary/50 transition-all duration-300;
+  }
+}
