@@ -686,6 +686,73 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   return aggregated;
 }
 
+// Fetch Bandcamp embed data for an artist
+async function getBandcampEmbed(artistUrl: string): Promise<{ embedUrl: string; title: string } | null> {
+  try {
+    // First, fetch the artist page to find an album or track
+    const artistResponse = await fetchWithTimeout(artistUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    }, 5000);
+
+    if (!artistResponse.ok) return null;
+
+    const artistHtml = await artistResponse.text();
+
+    // Look for album or track links
+    const albumMatch = artistHtml.match(/href="(\/album\/[^"]+)"/);
+    const trackMatch = artistHtml.match(/href="(\/track\/[^"]+)"/);
+
+    let itemPath = albumMatch?.[1] || trackMatch?.[1];
+    let itemType: 'album' | 'track' = albumMatch ? 'album' : 'track';
+
+    // If no album/track links found, check if the page itself is a track page
+    if (!itemPath) {
+      // Check for track ID directly on the page (for single-track artists)
+      const trackIdMatch = artistHtml.match(/data-item-id="track-(\d+)"/);
+      if (trackIdMatch) {
+        const trackId = trackIdMatch[1];
+        return {
+          embedUrl: `https://bandcamp.com/EmbeddedPlayer/track=${trackId}/size=small/bgcol=ffffff/linkcol=0687f5/transparent=true/`,
+          title: 'Track',
+        };
+      }
+      return null;
+    }
+
+    // Fetch the album/track page to get the ID
+    const itemUrl = artistUrl.replace(/\/$/, '') + itemPath;
+    const itemResponse = await fetchWithTimeout(itemUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    }, 5000);
+
+    if (!itemResponse.ok) return null;
+
+    const itemHtml = await itemResponse.text();
+
+    // Extract the item ID
+    const idMatch = itemHtml.match(new RegExp(`${itemType}=(\\d+)`));
+    if (!idMatch) return null;
+
+    const itemId = idMatch[1];
+
+    // Extract title
+    const titleMatch = itemHtml.match(/<title>([^<]+)<\/title>/);
+    const title = titleMatch?.[1]?.split('|')[0]?.trim() || 'Music';
+
+    return {
+      embedUrl: `https://bandcamp.com/EmbeddedPlayer/${itemType}=${itemId}/size=small/bgcol=ffffff/linkcol=0687f5/transparent=true/`,
+      title,
+    };
+  } catch (error: any) {
+    console.error('Bandcamp embed error:', error.message);
+    return null;
+  }
+}
+
 function sendJson(res: ServerResponse, status: number, data: unknown) {
   res.writeHead(status, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(data));
@@ -717,6 +784,33 @@ export async function handleApiRequest(req: IncomingMessage, res: ServerResponse
     } catch (error) {
       console.error('Search error:', error);
       sendJson(res, 500, { error: 'Failed to search', query, results: [] });
+    }
+    return true;
+  }
+
+  if (url.pathname === '/api/embed/bandcamp') {
+    if (req.method !== 'GET') {
+      sendJson(res, 405, { error: 'Method not allowed' });
+      return true;
+    }
+
+    const artistUrl = url.searchParams.get('url');
+
+    if (!artistUrl) {
+      sendJson(res, 400, { error: 'URL parameter is required' });
+      return true;
+    }
+
+    try {
+      const embedData = await getBandcampEmbed(artistUrl);
+      if (embedData) {
+        sendJson(res, 200, embedData);
+      } else {
+        sendJson(res, 404, { error: 'Could not find embeddable content' });
+      }
+    } catch (error) {
+      console.error('Embed error:', error);
+      sendJson(res, 500, { error: 'Failed to fetch embed data' });
     }
     return true;
   }
