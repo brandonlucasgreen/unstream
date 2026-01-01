@@ -58,18 +58,22 @@ export function ResultCard({ result }: ResultCardProps) {
     }
   };
 
-  // Group platforms by category
+  // Separate verified matches from search-only links
+  const verifiedPlatforms = result.platforms.filter(p => !sources[p.sourceId]?.searchOnly);
+  const searchOnlyPlatforms = result.platforms.filter(p => sources[p.sourceId]?.searchOnly);
+
+  // Group verified platforms by category
   const categorizedPlatforms = {
-    marketplace: result.platforms.filter(p =>
+    marketplace: verifiedPlatforms.filter(p =>
       sourceCategories.marketplace.sources.includes(p.sourceId)
     ),
-    patronage: result.platforms.filter(p =>
+    patronage: verifiedPlatforms.filter(p =>
       sourceCategories.patronage.sources.includes(p.sourceId)
     ),
-    library: result.platforms.filter(p =>
+    library: verifiedPlatforms.filter(p =>
       sourceCategories.library.sources.includes(p.sourceId)
     ),
-    decentralized: result.platforms.filter(p =>
+    decentralized: verifiedPlatforms.filter(p =>
       sourceCategories.decentralized.sources.includes(p.sourceId)
     ),
   };
@@ -144,7 +148,7 @@ export function ResultCard({ result }: ResultCardProps) {
             </button>
           )}
           <span className="text-sm text-accent-secondary">
-            {result.platforms.length} platform{result.platforms.length !== 1 ? 's' : ''}
+            {verifiedPlatforms.length} platform{verifiedPlatforms.length !== 1 ? 's' : ''}
           </span>
           <svg
             className={`w-5 h-5 transition-transform ${expanded ? 'rotate-180' : ''}`}
@@ -268,6 +272,20 @@ export function ResultCard({ result }: ResultCardProps) {
                   />
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Search-only platforms - subtle section */}
+          {searchOnlyPlatforms.length > 0 && (
+            <div className="pt-2 mt-2 border-t border-border/50 flex items-center flex-wrap">
+              <span className="text-sm text-text-secondary py-1">Also try: </span>
+              {searchOnlyPlatforms.map(platform => (
+                <SourceBadge
+                  key={platform.sourceId}
+                  source={sources[platform.sourceId]}
+                  url={platform.url}
+                />
+              ))}
             </div>
           )}
         </div>

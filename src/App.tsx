@@ -28,15 +28,24 @@ function App() {
     }
   }, []);
 
+  const handleGoHome = useCallback(() => {
+    setResults([]);
+    setHasSearched(false);
+    setError(null);
+  }, []);
+
   return (
     <div className="min-h-screen">
       {/* Header */}
       <header className="pt-16 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="font-display text-5xl md:text-6xl font-bold mb-4">
-            <span className="bg-gradient-to-r from-accent-primary via-accent-secondary to-accent-tertiary bg-clip-text text-transparent">
+            <button
+              onClick={handleGoHome}
+              className="bg-gradient-to-r from-accent-primary via-accent-secondary to-accent-tertiary bg-clip-text text-transparent hover:opacity-80 transition-opacity cursor-pointer"
+            >
               Unstream
-            </span>
+            </button>
           </h1>
           <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto mb-8">
             Find music on ethical platforms. Support artists directly through independent marketplaces,
