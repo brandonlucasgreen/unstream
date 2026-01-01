@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/search/sources"
+  to = "/.netlify/functions/search-sources"
+  status = 200
+
+[[redirects]]
+  from = "/api/embed/bandcamp"
+  to = "/.netlify/functions/embed-bandcamp"
+  status = 200

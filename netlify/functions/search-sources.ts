@@ -1,0 +1,605 @@
+import { parse } from 'node-html-parser';
+
+type SourceId =
+  | 'bandcamp'
+  | 'mirlo'
+  | 'ampwall'
+  | 'bandwagon'
+  | 'faircamp'
+  | 'patreon'
+  | 'buymeacoffee'
+  | 'kofi'
+  | 'hoopla'
+  | 'qobuz';
+
+interface PlatformResult {
+  sourceId: SourceId;
+  name: string;
+  artist?: string;
+  type: 'artist' | 'album' | 'track';
+  url: string;
+  imageUrl?: string;
+}
+
+interface AggregatedResult {
+  id: string;
+  name: string;
+  artist?: string;
+  type: 'artist' | 'album' | 'track';
+  imageUrl?: string;
+  platforms: {
+    sourceId: SourceId;
+    url: string;
+  }[];
+}
+
+interface SearchResponse {
+  query: string;
+  results: AggregatedResult[];
+}
+
+// Helper to fetch with timeout
+async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs: number = 3000): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    return response;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+// Search Bandcamp by scraping search results page (PRIMARY SOURCE)
+async function searchBandcamp(query: string): Promise<PlatformResult[]> {
+  const results: PlatformResult[] = [];
+  const searchUrl = `https://bandcamp.com/search?q=${encodeURIComponent(query)}`;
+
+  try {
+    const response = await fetchWithTimeout(searchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    }, 5000);
+
+    if (!response.ok) return results;
+
+    const html = await response.text();
+    const root = parse(html);
+    const resultItems = root.querySelectorAll('.searchresult');
+
+    for (let i = 0; i < Math.min(10, resultItems.length); i++) {
+      const item = resultItems[i];
+      const resultType = item.querySelector('.result-info .itemtype')?.textContent?.trim().toLowerCase();
+      const heading = item.querySelector('.result-info .heading a');
+      const name = heading?.textContent?.trim();
+      const url = heading?.getAttribute('href')?.split('?')[0];
+
+      const subhead = item.querySelector('.result-info .subhead')?.textContent?.trim();
+      let artist: string | undefined;
+      if (subhead && subhead.startsWith('by ')) {
+        artist = subhead.substring(3).trim();
+      }
+
+      const img = item.querySelector('.art img');
+      const imageUrl = img?.getAttribute('src');
+
+      if (name && url) {
+        let type: 'artist' | 'album' | 'track' = 'artist';
+        if (resultType === 'album') type = 'album';
+        else if (resultType === 'track') type = 'track';
+
+        results.push({
+          sourceId: 'bandcamp',
+          name,
+          artist,
+          type,
+          url,
+          imageUrl: imageUrl || undefined,
+        });
+      }
+    }
+  } catch (error: unknown) {
+    const err = error as { name?: string; message?: string };
+    if (err.name !== 'AbortError') {
+      console.error('Bandcamp search error:', err.message);
+    }
+  }
+
+  return results;
+}
+
+function normalizeForComparison(str: string): string {
+  return str.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+// Search Bandwagon for artists by scraping search results
+async function searchBandwagon(query: string): Promise<Map<string, string>> {
+  const results = new Map<string, string>();
+  const searchUrl = `https://bandwagon.fm/artists?q=${encodeURIComponent(query)}`;
+
+  try {
+    const response = await fetchWithTimeout(searchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    }, 3000);
+
+    if (!response.ok) return results;
+
+    const html = await response.text();
+    const root = parse(html);
+    const queryNormalized = normalizeForComparison(query);
+
+    const artistLinks = root.querySelectorAll('a[href*="bandwagon.fm/@"]');
+    const seen = new Set<string>();
+
+    for (const link of artistLinks) {
+      const href = link.getAttribute('href');
+      const nameEl = link.querySelector('.bold');
+      const name = nameEl?.textContent?.trim();
+
+      if (href && name && !seen.has(href) && name.length > 0 && name.length < 100) {
+        seen.add(href);
+        const normalizedName = normalizeForComparison(name);
+
+        if (normalizedName === queryNormalized ||
+            normalizedName.includes(queryNormalized) ||
+            queryNormalized.includes(normalizedName)) {
+          if (!results.has(normalizedName)) {
+            results.set(normalizedName, href);
+          }
+          if (results.size >= 10) break;
+        }
+      }
+    }
+  } catch (error: unknown) {
+    const err = error as { name?: string; message?: string };
+    if (err.name !== 'AbortError') {
+      console.error('Bandwagon search error:', err.message);
+    }
+  }
+
+  return results;
+}
+
+// Helper to delay execution (for rate limiting)
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Search MusicBrainz for major artists and return results with Hoopla if they have pre-2005 releases
+async function searchMusicBrainz(query: string): Promise<PlatformResult[]> {
+  const results: PlatformResult[] = [];
+
+  try {
+    const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=artist:${encodeURIComponent(query)}&fmt=json&limit=1`;
+
+    const response = await globalThis.fetch(searchUrl, {
+      headers: {
+        'User-Agent': 'Unstream/1.0 (https://github.com/unstream - ethical music finder)',
+      },
+    });
+
+    if (!response.ok) return results;
+
+    const data = await response.json() as { artists?: { id: string; name: string; score: number }[] };
+    const artists = data.artists || [];
+
+    if (artists.length === 0) return results;
+
+    const artist = artists[0];
+    if (artist.score < 95) return results;
+
+    await delay(1100);
+
+    const releasesUrl = `https://musicbrainz.org/ws/2/release-group/?artist=${artist.id}&fmt=json&limit=20`;
+
+    const releasesResponse = await globalThis.fetch(releasesUrl, {
+      headers: {
+        'User-Agent': 'Unstream/1.0 (https://github.com/unstream - ethical music finder)',
+      },
+    });
+
+    if (!releasesResponse.ok) return results;
+
+    const releasesData = await releasesResponse.json() as { 'release-groups'?: { 'first-release-date'?: string }[] };
+    const releaseGroups = releasesData['release-groups'] || [];
+
+    for (const rg of releaseGroups) {
+      const firstReleaseDate = rg['first-release-date'];
+      if (firstReleaseDate) {
+        const year = parseInt(firstReleaseDate.substring(0, 4), 10);
+        if (year < 2005) {
+          console.log('Adding Hoopla for:', artist.name);
+          const hooplaSearchUrl = `https://www.hoopladigital.com/search?q=${encodeURIComponent(artist.name)}&type=music`;
+          results.push({
+            sourceId: 'hoopla',
+            name: artist.name,
+            type: 'artist',
+            url: hooplaSearchUrl,
+          });
+          break;
+        }
+      }
+    }
+  } catch (error: unknown) {
+    const err = error as { name?: string; message?: string };
+    console.error('MusicBrainz search error:', err.name, err.message);
+  }
+
+  return results;
+}
+
+// Search Mirlo by checking if artist page exists
+async function searchMirlo(query: string): Promise<PlatformResult[]> {
+  const results: PlatformResult[] = [];
+  const normalizedQuery = query.toLowerCase().replace(/\s+/g, '');
+  const artistUrl = `https://mirlo.space/${normalizedQuery}`;
+
+  try {
+    const response = await fetchWithTimeout(artistUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    }, 3000);
+
+    if (!response.ok) return results;
+
+    const html = await response.text();
+    const ogTitleMatch = html.match(/<meta property="og:title" content="([^"]+)"/);
+    if (ogTitleMatch) {
+      const ogTitle = ogTitleMatch[1].toLowerCase();
+      if (ogTitle !== 'mirlo' && ogTitle.includes(normalizedQuery.substring(0, 4))) {
+        const ogImageMatch = html.match(/<meta property="og:image" content="([^"]+)"/);
+        const imageUrl = ogImageMatch ? ogImageMatch[1] : undefined;
+
+        results.push({
+          sourceId: 'mirlo',
+          name: ogTitleMatch[1],
+          type: 'artist',
+          url: artistUrl,
+          imageUrl,
+        });
+      }
+    }
+  } catch (error: unknown) {
+    const err = error as { name?: string; message?: string };
+    if (err.name !== 'AbortError') {
+      console.error('Mirlo search error:', err.message);
+    }
+  }
+
+  return results;
+}
+
+// Faircamp webring directory cache
+let faircampDirectoryCache: Record<string, { title: string; artists: string[]; description: string }> | null = null;
+let faircampCacheTime = 0;
+const FAIRCAMP_CACHE_TTL = 10 * 60 * 1000;
+
+async function getFaircampDirectory(): Promise<Record<string, { title: string; artists: string[]; description: string }>> {
+  const now = Date.now();
+  if (faircampDirectoryCache && (now - faircampCacheTime) < FAIRCAMP_CACHE_TTL) {
+    return faircampDirectoryCache;
+  }
+
+  try {
+    const response = await fetchWithTimeout('https://faircamp.webr.ing/directory.json', {}, 5000);
+    if (!response.ok) {
+      return faircampDirectoryCache || {};
+    }
+    faircampDirectoryCache = await response.json() as Record<string, { title: string; artists: string[]; description: string }>;
+    faircampCacheTime = now;
+    return faircampDirectoryCache;
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    console.error('Faircamp directory fetch error:', err.message);
+    return faircampDirectoryCache || {};
+  }
+}
+
+async function searchFaircamp(query: string): Promise<Map<string, string>> {
+  const results = new Map<string, string>();
+  const queryLower = query.toLowerCase();
+
+  try {
+    const directory = await getFaircampDirectory();
+
+    for (const [domain, info] of Object.entries(directory)) {
+      for (const artist of info.artists || []) {
+        if (artist.toLowerCase().includes(queryLower) || queryLower.includes(artist.toLowerCase())) {
+          const normalizedArtist = artist.toLowerCase().replace(/[^a-z0-9]/g, '');
+          results.set(normalizedArtist, `https://${domain}`);
+        }
+      }
+      if (results.size >= 10) break;
+    }
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    console.error('Faircamp search error:', err.message);
+  }
+
+  return results;
+}
+
+async function searchPatreon(query: string): Promise<Map<string, string>> {
+  const results = new Map<string, string>();
+
+  try {
+    const searchUrl = `https://www.patreon.com/api/search?q=${encodeURIComponent(query)}`;
+    const response = await fetchWithTimeout(searchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        'Accept': 'application/json',
+      },
+    }, 5000);
+
+    if (!response.ok) return results;
+
+    const data = await response.json() as {
+      data?: {
+        type: string;
+        attributes?: {
+          creator_name?: string;
+          url?: string;
+        };
+      }[];
+    };
+
+    const campaigns = data.data || [];
+
+    for (const campaign of campaigns) {
+      if (campaign.type === 'campaign-document' && campaign.attributes) {
+        const creatorName = campaign.attributes.creator_name;
+        const url = campaign.attributes.url;
+
+        if (creatorName && url) {
+          const normalizedName = normalizeForComparison(creatorName);
+          if (!results.has(normalizedName)) {
+            results.set(normalizedName, url);
+          }
+          const urlSlug = url.split('/').pop();
+          if (urlSlug) {
+            const normalizedSlug = normalizeForComparison(urlSlug);
+            if (!results.has(normalizedSlug)) {
+              results.set(normalizedSlug, url);
+            }
+          }
+        }
+      }
+      if (results.size >= 20) break;
+    }
+  } catch (error: unknown) {
+    const err = error as { name?: string; message?: string };
+    if (err.name !== 'AbortError') {
+      console.error('Patreon search error:', err.message);
+    }
+  }
+
+  return results;
+}
+
+async function searchQobuz(query: string): Promise<Map<string, string>> {
+  const results = new Map<string, string>();
+
+  try {
+    const searchUrl = `https://www.qobuz.com/us-en/search/artists/${encodeURIComponent(query)}`;
+    const response = await fetchWithTimeout(searchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    }, 5000);
+
+    if (!response.ok) return results;
+
+    const html = await response.text();
+    const interpreterRegex = /href="(\/us-en\/interpreter\/([^/]+)\/(\d+))"/g;
+    let match;
+    const queryNormalized = normalizeForComparison(query);
+
+    while ((match = interpreterRegex.exec(html)) !== null && results.size < 10) {
+      const [, path, slug] = match;
+      const slugNormalized = slug.replace(/-/g, '');
+
+      if (slugNormalized === queryNormalized ||
+          slugNormalized.includes(queryNormalized) ||
+          queryNormalized.includes(slugNormalized)) {
+        const artistName = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        const normalizedName = normalizeForComparison(artistName);
+
+        if (!results.has(normalizedName)) {
+          results.set(normalizedName, `https://www.qobuz.com${path}`);
+        }
+      }
+    }
+  } catch (error: unknown) {
+    const err = error as { name?: string; message?: string };
+    if (err.name !== 'AbortError') {
+      console.error('Qobuz search error:', err.message);
+    }
+  }
+
+  return results;
+}
+
+function generateResultId(name: string, artist?: string): string {
+  const normalized = normalizeForComparison(artist ? `${artist}-${name}` : name);
+  return normalized || Math.random().toString(36).substring(2);
+}
+
+function aggregateResults(allResults: PlatformResult[]): AggregatedResult[] {
+  const resultMap = new Map<string, AggregatedResult>();
+
+  for (const result of allResults) {
+    if (result.name.startsWith('Search "')) continue;
+
+    const key = generateResultId(result.name, result.artist);
+
+    if (resultMap.has(key)) {
+      const existing = resultMap.get(key)!;
+      if (!existing.platforms.some(p => p.sourceId === result.sourceId)) {
+        existing.platforms.push({
+          sourceId: result.sourceId,
+          url: result.url,
+        });
+      }
+      if (!existing.imageUrl && result.imageUrl) {
+        existing.imageUrl = result.imageUrl;
+      }
+    } else {
+      resultMap.set(key, {
+        id: key,
+        name: result.name,
+        artist: result.artist,
+        type: result.type,
+        imageUrl: result.imageUrl,
+        platforms: [{
+          sourceId: result.sourceId,
+          url: result.url,
+        }],
+      });
+    }
+  }
+
+  return Array.from(resultMap.values())
+    .sort((a, b) => b.platforms.length - a.platforms.length);
+}
+
+async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
+  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, patreonResults, qobuzResults, musicbrainzResults] = await Promise.allSettled([
+    searchBandcamp(query),
+    searchBandwagon(query),
+    searchMirlo(query),
+    searchFaircamp(query),
+    searchPatreon(query),
+    searchQobuz(query),
+    searchMusicBrainz(query),
+  ]);
+
+  const allResults: PlatformResult[] = [];
+
+  if (bandcampResults.status === 'fulfilled') {
+    allResults.push(...bandcampResults.value.filter(r => r.type === 'artist'));
+  }
+  if (mirloResults.status === 'fulfilled') {
+    allResults.push(...mirloResults.value.filter(r => r.type === 'artist'));
+  }
+  if (musicbrainzResults.status === 'fulfilled') {
+    allResults.push(...musicbrainzResults.value.filter(r => r.type === 'artist'));
+  }
+
+  const bandwagonMatches = bandwagonResults.status === 'fulfilled' ? bandwagonResults.value : new Map<string, string>();
+  const faircampMatches = faircampResults.status === 'fulfilled' ? faircampResults.value : new Map<string, string>();
+  const patreonMatches = patreonResults.status === 'fulfilled' ? patreonResults.value : new Map<string, string>();
+  const qobuzMatches = qobuzResults.status === 'fulfilled' ? qobuzResults.value : new Map<string, string>();
+
+  const aggregated = aggregateResults(allResults);
+
+  for (const result of aggregated) {
+    if (result.type === 'artist') {
+      if (result.platforms.some(p => p.sourceId === 'bandcamp')) {
+        result.platforms.push({
+          sourceId: 'ampwall',
+          url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(result.name)}`,
+        });
+        result.platforms.push({
+          sourceId: 'kofi',
+          url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(result.name)}`,
+        });
+      }
+
+      const normalizedName = normalizeForComparison(result.name);
+
+      if (bandwagonMatches.has(normalizedName)) {
+        result.platforms.push({
+          sourceId: 'bandwagon',
+          url: bandwagonMatches.get(normalizedName)!,
+        });
+      }
+
+      if (faircampMatches.has(normalizedName)) {
+        result.platforms.push({
+          sourceId: 'faircamp',
+          url: faircampMatches.get(normalizedName)!,
+        });
+      }
+
+      if (patreonMatches.has(normalizedName)) {
+        result.platforms.push({
+          sourceId: 'patreon',
+          url: patreonMatches.get(normalizedName)!,
+        });
+      }
+
+      if (qobuzMatches.has(normalizedName)) {
+        result.platforms.push({
+          sourceId: 'qobuz',
+          url: qobuzMatches.get(normalizedName)!,
+        });
+      }
+
+      const searchOnlyPlatforms = new Set(['ampwall', 'kofi']);
+      result.platforms.sort((a, b) => {
+        const aIsSearchOnly = searchOnlyPlatforms.has(a.sourceId);
+        const bIsSearchOnly = searchOnlyPlatforms.has(b.sourceId);
+        if (aIsSearchOnly && !bIsSearchOnly) return 1;
+        if (!aIsSearchOnly && bIsSearchOnly) return -1;
+        return 0;
+      });
+    }
+  }
+
+  return aggregated;
+}
+
+// Netlify function handler
+export async function handler(event: { queryStringParameters?: Record<string, string> }) {
+  const query = event.queryStringParameters?.query;
+
+  if (!query) {
+    return {
+      statusCode: 400,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+      body: JSON.stringify({ error: 'Query parameter is required' }),
+    };
+  }
+
+  try {
+    const results = await searchAllPlatforms(query);
+
+    const response: SearchResponse = {
+      query,
+      results,
+    };
+
+    return {
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 's-maxage=300, stale-while-revalidate',
+      },
+      body: JSON.stringify(response),
+    };
+  } catch (error) {
+    console.error('Search error:', error);
+    return {
+      statusCode: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+      body: JSON.stringify({
+        error: 'Failed to search',
+        query,
+        results: [],
+      }),
+    };
+  }
+}
