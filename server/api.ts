@@ -244,72 +244,6 @@ async function searchMusicBrainz(query: string): Promise<PlatformResult[]> {
   return results;
 }
 
-// Check if an artist qualifies for Hoopla (exists in MusicBrainz with pre-2005 releases)
-async function checkHooplaEligibility(artistName: string): Promise<boolean> {
-  try {
-    const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=artist:${encodeURIComponent(artistName)}&fmt=json&limit=1`;
-
-    const response = await fetchWithTimeout(searchUrl, {
-      headers: {
-        'User-Agent': 'Unstream/1.0 (ethical music finder)',
-      },
-    }, 3000);
-
-    if (!response.ok) return false;
-
-    const data = await response.json() as { artists?: { id: string; name: string; score: number }[] };
-    const artists = data.artists || [];
-
-    if (artists.length === 0) return false;
-
-    // Check if the top match is a good match (score > 90) AND name matches closely
-    const topArtist = artists[0];
-    if (topArtist.score < 90) return false;
-
-    // Verify the returned name is similar to the search query (avoid false positives)
-    const normalizedQuery = artistName.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const normalizedResult = topArtist.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-    // Require result name to be at least 3 chars and be a substantial match
-    if (normalizedResult.length < 3 ||
-        (!normalizedQuery.includes(normalizedResult) && !normalizedResult.includes(normalizedQuery))) {
-      return false;
-    }
-
-    // Get the artist's releases to check for pre-2005 releases
-    const artistId = topArtist.id;
-    const releasesUrl = `https://musicbrainz.org/ws/2/release-group/?artist=${artistId}&fmt=json&limit=100`;
-
-    const releasesResponse = await fetchWithTimeout(releasesUrl, {
-      headers: {
-        'User-Agent': 'Unstream/1.0 (ethical music finder)',
-      },
-    }, 3000);
-
-    if (!releasesResponse.ok) return false;
-
-    const releasesData = await releasesResponse.json() as { 'release-groups'?: { 'first-release-date'?: string }[] };
-    const releaseGroups = releasesData['release-groups'] || [];
-
-    // Check if any release is from before 2005
-    for (const rg of releaseGroups) {
-      const firstReleaseDate = rg['first-release-date'];
-      if (firstReleaseDate) {
-        const year = parseInt(firstReleaseDate.substring(0, 4), 10);
-        if (year < 2005) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  } catch (error: any) {
-    if (error.name !== 'AbortError') {
-      console.error('MusicBrainz check error:', error.message);
-    }
-    return false;
-  }
-}
-
 // Search Mirlo by checking if artist page exists (Mirlo is client-side rendered)
 async function searchMirlo(query: string): Promise<PlatformResult[]> {
   const results: PlatformResult[] = [];
@@ -374,9 +308,9 @@ async function getFaircampDirectory(): Promise<Record<string, { title: string; a
       console.error('Faircamp directory fetch failed:', response.status);
       return faircampDirectoryCache || {};
     }
-    faircampDirectoryCache = await response.json();
+    faircampDirectoryCache = await response.json() as Record<string, { title: string; artists: string[]; description: string }>;
     faircampCacheTime = now;
-    return faircampDirectoryCache!;
+    return faircampDirectoryCache;
   } catch (error: any) {
     console.error('Faircamp directory fetch error:', error.message);
     return faircampDirectoryCache || {};
