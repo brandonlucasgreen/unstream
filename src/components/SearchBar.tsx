@@ -16,23 +16,21 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
   }, [query, onSearch]);
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-3xl mx-auto">
-      <div className="relative group">
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-accent-primary via-accent-secondary to-accent-tertiary rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
-        <div className="relative flex gap-3">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search for artists, albums, or songs..."
-            className="search-input flex-1"
-            disabled={isLoading}
-          />
-          <button
-            type="submit"
-            disabled={isLoading || !query.trim()}
-            className="px-6 py-4 bg-accent-primary text-bg-primary font-semibold rounded-xl hover:bg-accent-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2"
-          >
+    <form onSubmit={handleSubmit} className="w-full max-w-2xl mx-auto">
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search for artists, albums, or songs..."
+          className="search-input flex-1"
+          disabled={isLoading}
+        />
+        <button
+          type="submit"
+          disabled={isLoading || !query.trim()}
+          className="px-4 py-3 bg-accent-primary text-bg-primary font-medium rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity flex items-center gap-2"
+        >
             {isLoading ? (
               <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
                 <circle
@@ -57,7 +55,6 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
             )}
             Search
           </button>
-        </div>
       </div>
     </form>
   );

@@ -97,7 +97,7 @@ export function ResultCard({ result }: ResultCardProps) {
         onClick={() => setExpanded(!expanded)}
       >
         {/* Thumbnail */}
-        <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-bg-secondary">
+        <div className="w-16 h-16 flex-shrink-0 rounded overflow-hidden bg-bg-secondary">
           {result.imageUrl && !imageError ? (
             <img
               src={result.imageUrl}
@@ -115,11 +115,11 @@ export function ResultCard({ result }: ResultCardProps) {
         {/* Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs px-2 py-0.5 rounded-full bg-accent-primary/10 text-accent-primary font-medium">
+            <span className="text-xs px-1.5 py-0.5 rounded bg-accent-primary/10 text-accent-primary">
               {typeLabel}
             </span>
           </div>
-          <h3 className="font-semibold text-lg text-text-primary truncate group-hover:text-accent-primary transition-colors">
+          <h3 className="font-medium text-base text-text-primary truncate">
             {result.name}
           </h3>
           {result.artist && (
@@ -135,7 +135,7 @@ export function ResultCard({ result }: ResultCardProps) {
             <button
               onClick={handlePlayClick}
               disabled={embedLoading}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all bg-accent-primary/10 text-accent-primary hover:bg-accent-primary/20 ${embedLoading ? 'opacity-50 cursor-wait' : ''}`}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-sm bg-accent-primary/10 text-accent-primary hover:bg-accent-primary/20 transition-colors ${embedLoading ? 'opacity-50 cursor-wait' : ''}`}
             >
               {embedLoading ? (
                 <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
@@ -168,13 +168,13 @@ export function ResultCard({ result }: ResultCardProps) {
             <iframe
               src={embedData.embedUrl}
               seamless
-              className="flex-1 border-0 rounded-lg"
+              className="flex-1 border-0 rounded"
               style={{ height: '42px' }}
               title={`${result.name} - ${embedData.title}`}
             />
             <button
               onClick={(e) => { e.stopPropagation(); setShowPlayer(false); }}
-              className="flex-shrink-0 p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors"
+              className="flex-shrink-0 p-1.5 rounded text-text-muted hover:text-text-primary transition-colors"
               title="Close preview"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

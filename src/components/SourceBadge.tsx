@@ -35,12 +35,10 @@ export function SourceBadge({ source, url }: SourceBadgeProps) {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="source-badge hover:scale-105 transition-all ring-1 ring-offset-1 ring-offset-bg-primary"
+      className="source-badge hover:opacity-80"
       style={{
-        backgroundColor: `${source.color}30`,
+        backgroundColor: `${source.color}20`,
         color: source.color,
-        borderColor: source.color,
-        borderWidth: '1px',
       }}
       title={`View on ${source.name}`}
     >

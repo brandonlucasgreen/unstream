@@ -39,12 +39,12 @@ function App() {
       {/* Header */}
       <header className="pt-16 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="font-display text-5xl md:text-6xl font-bold mb-4">
+          <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
             <button
               onClick={handleGoHome}
-              className="bg-gradient-to-r from-accent-primary via-accent-secondary to-accent-tertiary bg-clip-text text-transparent hover:opacity-80 transition-opacity cursor-pointer"
+              className="text-text-primary hover:opacity-80 transition-opacity cursor-pointer"
             >
-              Unstream
+              Unstream 🤘🏻
             </button>
           </h1>
           <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto mb-8">
@@ -160,6 +160,17 @@ function App() {
           </p>
           <p className="mt-2 text-text-muted/70">
             Not affiliated with any listed platforms.
+          </p>
+          <p className="mt-2 text-text-muted/70">
+            Made with ❤️ by{' '}
+            <a
+              href="https://bgreen.lol"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent-secondary hover:underline"
+            >
+              brandon lucas green
+            </a>
           </p>
         </div>
       </footer>
