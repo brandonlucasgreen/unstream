@@ -80,7 +80,8 @@ export const sources: Record<SourceId, Source> = {
     icon: '🍵',
     category: 'patronage',
     hasEmbed: false,
-    searchUrlTemplate: 'https://ko-fi.com/explore?query={query}',
+    searchUrlTemplate: 'https://duckduckgo.com/?q=site:ko-fi.com+{query}',
+    searchOnly: true,
   },
   hoopla: {
     id: 'hoopla',
@@ -92,13 +93,23 @@ export const sources: Record<SourceId, Source> = {
     hasEmbed: false,
     searchUrlTemplate: 'https://www.hoopladigital.com/search?q={query}&type=music',
   },
+  qobuz: {
+    id: 'qobuz',
+    name: 'Qobuz',
+    description: 'Hi-res music downloads store',
+    color: '#0070f3',
+    icon: '💿',
+    category: 'marketplace',
+    hasEmbed: false,
+    searchUrlTemplate: 'https://www.qobuz.com/us-en/search/artists/{query}',
+  },
 };
 
 export const sourceCategories = {
   marketplace: {
     name: 'Music Marketplaces',
     description: 'Buy music directly from artists',
-    sources: ['bandcamp', 'mirlo', 'ampwall', 'bandwagon'] as SourceId[],
+    sources: ['bandcamp', 'mirlo', 'ampwall', 'bandwagon', 'qobuz'] as SourceId[],
   },
   patronage: {
     name: 'Patronage Platforms',

@@ -8,7 +8,8 @@ export type SourceId =
   | 'patreon'
   | 'buymeacoffee'
   | 'kofi'
-  | 'hoopla';
+  | 'hoopla'
+  | 'qobuz';
 
 export interface Source {
   id: SourceId;

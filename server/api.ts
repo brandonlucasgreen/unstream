@@ -10,7 +10,8 @@ type SourceId =
   | 'patreon'
   | 'buymeacoffee'
   | 'kofi'
-  | 'hoopla';
+  | 'hoopla'
+  | 'qobuz';
 
 interface PlatformResult {
   sourceId: SourceId;
@@ -496,6 +497,57 @@ async function searchPatreon(query: string): Promise<Map<string, string>> {
   return results;
 }
 
+// Search Qobuz for artists by scraping search results
+// Returns a map of normalized artist name -> direct Qobuz artist URL
+async function searchQobuz(query: string): Promise<Map<string, string>> {
+  const results = new Map<string, string>();
+
+  try {
+    const searchUrl = `https://www.qobuz.com/us-en/search/artists/${encodeURIComponent(query)}`;
+    const response = await fetchWithTimeout(searchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    }, 5000);
+
+    if (!response.ok) {
+      console.error('Qobuz search failed:', response.status);
+      return results;
+    }
+
+    const html = await response.text();
+
+    // Extract interpreter (artist) links: /us-en/interpreter/{slug}/{id}
+    const interpreterRegex = /href="(\/us-en\/interpreter\/([^/]+)\/(\d+))"/g;
+    let match;
+    const queryNormalized = normalizeForComparison(query);
+
+    while ((match = interpreterRegex.exec(html)) !== null && results.size < 10) {
+      const [, path, slug] = match;
+      const slugNormalized = slug.replace(/-/g, '');
+
+      // Check if the slug closely matches the query
+      if (slugNormalized === queryNormalized ||
+          slugNormalized.includes(queryNormalized) ||
+          queryNormalized.includes(slugNormalized)) {
+        // Convert slug back to readable name (replace hyphens with spaces, capitalize)
+        const artistName = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        const normalizedName = normalizeForComparison(artistName);
+
+        if (!results.has(normalizedName)) {
+          results.set(normalizedName, `https://www.qobuz.com${path}`);
+        }
+      }
+    }
+  } catch (error: any) {
+    if (error.name !== 'AbortError') {
+      console.error('Qobuz search error:', error.message);
+    }
+  }
+
+  return results;
+}
+
 function generateResultId(name: string, artist?: string): string {
   const normalized = normalizeForComparison(artist ? `${artist}-${name}` : name);
   return normalized || Math.random().toString(36).substring(2);
@@ -538,12 +590,13 @@ function aggregateResults(allResults: PlatformResult[]): AggregatedResult[] {
 }
 
 async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
-  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, patreonResults, musicbrainzResults] = await Promise.allSettled([
+  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, patreonResults, qobuzResults, musicbrainzResults] = await Promise.allSettled([
     searchBandcamp(query),
     searchBandwagon(query),
     searchMirlo(query),
     searchFaircamp(query),
     searchPatreon(query),
+    searchQobuz(query),
     searchMusicBrainz(query),
   ]);
 
@@ -569,18 +622,26 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   // Get Patreon matches (returns Map of normalized creator name -> URL)
   const patreonMatches = patreonResults.status === 'fulfilled' ? patreonResults.value : new Map<string, string>();
 
+  // Get Qobuz matches (returns Map of normalized artist name -> URL)
+  const qobuzMatches = qobuzResults.status === 'fulfilled' ? qobuzResults.value : new Map<string, string>();
+
   // Get aggregated results
   const aggregated = aggregateResults(allResults);
 
   // Add additional platforms to matching artist results
   for (const result of aggregated) {
     if (result.type === 'artist') {
-      // Add Ampwall search link for artists found on Bandcamp
+      // Add search-only platform links for artists found on Bandcamp
       if (result.platforms.some(p => p.sourceId === 'bandcamp')) {
-        const ampwallSearchUrl = `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(result.name)}`;
+        // Ampwall
         result.platforms.push({
           sourceId: 'ampwall',
-          url: ampwallSearchUrl,
+          url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(result.name)}`,
+        });
+        // Ko-fi (DuckDuckGo site search since Ko-fi has no native search)
+        result.platforms.push({
+          sourceId: 'kofi',
+          url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(result.name)}`,
         });
       }
 
@@ -601,6 +662,24 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
           url: patreonMatches.get(normalizedName)!,
         });
       }
+
+      // Add Qobuz link if artist matches
+      if (qobuzMatches.has(normalizedName)) {
+        result.platforms.push({
+          sourceId: 'qobuz',
+          url: qobuzMatches.get(normalizedName)!,
+        });
+      }
+
+      // Sort platforms: verified matches first, search-only platforms last
+      const searchOnlyPlatforms = new Set(['ampwall', 'kofi']);
+      result.platforms.sort((a, b) => {
+        const aIsSearchOnly = searchOnlyPlatforms.has(a.sourceId);
+        const bIsSearchOnly = searchOnlyPlatforms.has(b.sourceId);
+        if (aIsSearchOnly && !bIsSearchOnly) return 1;
+        if (!aIsSearchOnly && bIsSearchOnly) return -1;
+        return 0;
+      });
     }
   }
 
