@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { SearchBar } from './components/SearchBar';
 import { ResultCard } from './components/ResultCard';
 import type { SearchResult } from './types';
@@ -48,7 +49,10 @@ function App() {
             </button>
           </h1>
           <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto mb-8">
-            Find music on alternative platforms, directly support the artists you love, and move off streaming
+            Find music on alternative platforms, directly support the artists you love, and move off streaming.{' '}
+            <Link to="/about" className="text-accent-secondary hover:underline">
+              Learn more
+            </Link>
           </p>
         </div>
       </header>
@@ -114,9 +118,12 @@ function App() {
                       {category.sources.map(sourceId => {
                         const source = sources[sourceId];
                         return (
-                          <span
+                          <a
                             key={sourceId}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm"
+                            href={source.homepageUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all hover:scale-105 hover:shadow-md"
                             style={{
                               backgroundColor: `${source.color}15`,
                               color: source.color,
@@ -124,7 +131,7 @@ function App() {
                           >
                             <span>{source.icon}</span>
                             <span>{source.name}</span>
-                          </span>
+                          </a>
                         );
                       })}
                     </div>
@@ -144,7 +151,7 @@ function App() {
             Unstream searches ethical music platforms directly. Not affiliated with any listed platforms.
           </p>
           <p className="mt-2 text-text-muted/70">
-            Made with ❤️ by{' '}
+            Made with love by{' '}
             <a
               href="https://bgreen.lol"
               target="_blank"
@@ -153,6 +160,20 @@ function App() {
             >
               brandon lucas green
             </a>
+            {' | '}
+            <Link
+              to="/about"
+              className="text-accent-secondary hover:underline"
+            >
+              About
+            </Link>
+            {' | '}
+            <Link
+              to="/roadmap"
+              className="text-accent-secondary hover:underline"
+            >
+              Roadmap
+            </Link>
           </p>
         </div>
       </footer>

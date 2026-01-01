@@ -13,6 +13,14 @@ type SourceId =
   | 'hoopla'
   | 'qobuz';
 
+interface LatestRelease {
+  title: string;
+  type: 'album' | 'track';
+  url: string;
+  imageUrl?: string;
+  releaseDate?: string;
+}
+
 interface PlatformResult {
   sourceId: SourceId;
   name: string;
@@ -20,6 +28,7 @@ interface PlatformResult {
   type: 'artist' | 'album' | 'track';
   url: string;
   imageUrl?: string;
+  latestRelease?: LatestRelease;
 }
 
 interface AggregatedResult {
@@ -31,6 +40,7 @@ interface AggregatedResult {
   platforms: {
     sourceId: SourceId;
     url: string;
+    latestRelease?: LatestRelease;
   }[];
 }
 
@@ -112,6 +122,145 @@ async function searchBandcamp(query: string): Promise<PlatformResult[]> {
   }
 
   return results;
+}
+
+// Fetch latest release from a Bandcamp artist page, then get release date from album page
+// Uses /music endpoint to get full discography (base URL may redirect to a single release)
+async function getBandcampLatestRelease(artistUrl: string): Promise<LatestRelease | undefined> {
+  try {
+    // Extract base artist URL and append /music for full discography
+    const baseUrl = artistUrl.replace(/\/(music|album|track).*$/, '');
+    const musicUrl = `${baseUrl}/music`;
+
+    const response = await fetchWithTimeout(musicUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    }, 3000);
+
+    if (!response.ok) return undefined;
+
+    const html = await response.text();
+    const root = parse(html);
+
+    // Find the first music grid item (most recent release)
+    const musicGridItem = root.querySelector('.music-grid-item');
+    if (!musicGridItem) return undefined;
+
+    const link = musicGridItem.querySelector('a');
+    const titleEl = musicGridItem.querySelector('.title');
+    const artImg = musicGridItem.querySelector('img');
+
+    if (!link || !titleEl) return undefined;
+
+    const href = link.getAttribute('href');
+    const title = titleEl.textContent?.trim();
+    const imageUrl = artImg?.getAttribute('src') || artImg?.getAttribute('data-original');
+
+    if (!href || !title) return undefined;
+
+    // Determine if it's an album or track based on URL
+    const type: 'album' | 'track' = href.includes('/track/') ? 'track' : 'album';
+
+    // Build full URL if relative
+    const fullUrl = href.startsWith('http') ? href : new URL(href, artistUrl).toString();
+
+    // Fetch the album/track page to get release date
+    let releaseDate: string | undefined;
+    try {
+      const albumResponse = await fetchWithTimeout(fullUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        },
+      }, 3000);
+
+      if (albumResponse.ok) {
+        const albumHtml = await albumResponse.text();
+        // Look for release date in album-info or meta tags
+        const dateMatch = albumHtml.match(/released\s+(\w+\s+\d+,\s+\d{4})/i) ||
+                          albumHtml.match(/"datePublished":\s*"(\d{4}-\d{2}-\d{2})"/);
+        if (dateMatch) {
+          releaseDate = dateMatch[1];
+        }
+      }
+    } catch {
+      // Ignore errors fetching album page
+    }
+
+    return {
+      title,
+      type,
+      url: fullUrl,
+      imageUrl: imageUrl || undefined,
+      releaseDate,
+    };
+  } catch (error: any) {
+    if (error.name !== 'AbortError') {
+      console.error('Bandcamp latest release fetch error:', error.message);
+    }
+    return undefined;
+  }
+}
+
+// Fetch latest release from a Qobuz artist page
+// Qobuz is client-side rendered, so we extract album info from URL patterns
+// Adding sortBy parameter ensures we get releases sorted by date (most recent first)
+async function getQobuzLatestRelease(artistUrl: string): Promise<LatestRelease | undefined> {
+  try {
+    // Add sort parameter to get releases sorted by date (most recent first)
+    const sortedUrl = artistUrl.includes('?')
+      ? `${artistUrl}&%5BsortBy%5D=main_catalog_date_desc`
+      : `${artistUrl}?%5BsortBy%5D=main_catalog_date_desc`;
+
+    const response = await fetchWithTimeout(sortedUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    }, 3000);
+
+    if (!response.ok) return undefined;
+
+    const html = await response.text();
+
+    // Qobuz album URLs are in format: /us-en/album/{album-name-slug}/{id}
+    // Extract from the HTML using regex since page is client-rendered
+    const albumUrlMatch = html.match(/href="(\/us-en\/album\/([^/]+)\/(\d+))"/);
+    if (!albumUrlMatch) return undefined;
+
+    const [, path, albumSlug] = albumUrlMatch;
+
+    // Convert slug to readable title (replace hyphens with spaces, title case)
+    const title = albumSlug
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+
+    // Build full URL
+    const fullUrl = `https://www.qobuz.com${path}`;
+
+    // Try to extract release date from the page
+    let releaseDate: string | undefined;
+    // Look for date patterns in the HTML
+    const dateMatch = html.match(/"releaseDate"[:\s]*"(\d{4}-\d{2}-\d{2})"/) ||
+                      html.match(/(\d{4}-\d{2}-\d{2})/) ||
+                      html.match(/(\w+\s+\d{1,2},?\s+\d{4})/);
+    if (dateMatch) {
+      releaseDate = dateMatch[1];
+    }
+
+    return {
+      title,
+      type: 'album',
+      url: fullUrl,
+      imageUrl: undefined, // Qobuz images require JS rendering
+      releaseDate,
+    };
+  } catch (error: any) {
+    if (error.name !== 'AbortError') {
+      console.error('Qobuz latest release fetch error:', error.message);
+    }
+    return undefined;
+  }
 }
 
 // Search Bandwagon for artists by scraping search results
@@ -615,7 +764,178 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     }
   }
 
+  // Fetch latest releases for Bandcamp and Qobuz artist pages in parallel
+  const releasePromises: Promise<void>[] = [];
+  for (const result of aggregated) {
+    if (result.type === 'artist') {
+      const bandcampPlatform = result.platforms.find(p => p.sourceId === 'bandcamp');
+      if (bandcampPlatform) {
+        releasePromises.push(
+          getBandcampLatestRelease(bandcampPlatform.url).then(release => {
+            if (release) {
+              bandcampPlatform.latestRelease = release;
+            }
+          })
+        );
+      }
+
+      const qobuzPlatform = result.platforms.find(p => p.sourceId === 'qobuz');
+      if (qobuzPlatform) {
+        releasePromises.push(
+          getQobuzLatestRelease(qobuzPlatform.url).then(release => {
+            if (release) {
+              qobuzPlatform.latestRelease = release;
+            }
+          })
+        );
+      }
+    }
+  }
+
+  // Wait for all release fetches with a timeout
+  await Promise.race([
+    Promise.allSettled(releasePromises),
+    new Promise(resolve => setTimeout(resolve, 4000)),
+  ]);
+
+  // For each result, find the most recent release and only keep platforms with that same release
+  for (const result of aggregated) {
+    const platformsWithReleases = result.platforms.filter(p => p.latestRelease);
+    if (platformsWithReleases.length === 0) continue;
+
+    // Parse dates and find the most recent
+    const releasesWithDates = platformsWithReleases.map(p => ({
+      platform: p,
+      date: parseReleaseDate(p.latestRelease?.releaseDate),
+      normalizedTitle: normalizeForComparison(p.latestRelease?.title || ''),
+    }));
+
+    // Sort by date descending (most recent first)
+    releasesWithDates.sort((a, b) => {
+      if (!a.date && !b.date) return 0;
+      if (!a.date) return 1;
+      if (!b.date) return -1;
+      return b.date.getTime() - a.date.getTime();
+    });
+
+    // Get the most recent release
+    const mostRecent = releasesWithDates[0];
+    if (!mostRecent?.normalizedTitle) continue;
+
+    const mostRecentTitle = mostRecent.normalizedTitle;
+    const winningRelease = mostRecent.platform.latestRelease!;
+
+    // For platforms that have a different "latest", try to find the winning release on them
+    const searchPromises: Promise<void>[] = [];
+    for (const platform of result.platforms) {
+      if (platform.latestRelease) {
+        const normalizedTitle = normalizeForComparison(platform.latestRelease.title);
+        if (normalizedTitle !== mostRecentTitle) {
+          // This platform has a different release - try to find the winning release
+          if (platform.sourceId === 'bandcamp') {
+            searchPromises.push(
+              searchBandcampForAlbum(platform.url, winningRelease.title).then(albumUrl => {
+                if (albumUrl) {
+                  platform.latestRelease = {
+                    ...winningRelease,
+                    url: albumUrl,
+                  };
+                } else {
+                  platform.latestRelease = undefined;
+                }
+              })
+            );
+          } else {
+            // For other platforms, just clear if no match
+            platform.latestRelease = undefined;
+          }
+        }
+      }
+    }
+
+    // Wait for album searches
+    if (searchPromises.length > 0) {
+      await Promise.allSettled(searchPromises);
+    }
+  }
+
   return aggregated;
+}
+
+// Search a Bandcamp artist page for a specific album title
+// Uses /music endpoint to access full discography (base URL may redirect to a single release)
+async function searchBandcampForAlbum(artistUrl: string, albumTitle: string): Promise<string | undefined> {
+  try {
+    // Extract base artist URL and append /music for full discography
+    const baseUrl = artistUrl.replace(/\/(music|album|track).*$/, '');
+    const musicUrl = `${baseUrl}/music`;
+
+    const response = await fetchWithTimeout(musicUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    }, 3000);
+
+    if (!response.ok) return undefined;
+
+    const html = await response.text();
+    const root = parse(html);
+    const normalizedSearchTitle = normalizeForComparison(albumTitle);
+
+    // Look through all music grid items for matching title
+    const musicGridItems = root.querySelectorAll('.music-grid-item');
+    for (const item of musicGridItems) {
+      const titleEl = item.querySelector('.title');
+      const title = titleEl?.textContent?.trim();
+      if (!title) continue;
+
+      const normalizedTitle = normalizeForComparison(title);
+      // Check for match (allowing partial matches for long titles)
+      if (normalizedTitle === normalizedSearchTitle ||
+          normalizedTitle.includes(normalizedSearchTitle) ||
+          normalizedSearchTitle.includes(normalizedTitle)) {
+        const link = item.querySelector('a');
+        const href = link?.getAttribute('href');
+        if (href) {
+          return href.startsWith('http') ? href : new URL(href, artistUrl).toString();
+        }
+      }
+    }
+
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+// Parse various date formats into a Date object
+function parseReleaseDate(dateStr: string | undefined): Date | undefined {
+  if (!dateStr) return undefined;
+
+  // Try ISO format: 2024-12-06
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    return new Date(dateStr);
+  }
+
+  // Try "Month Day, Year" format: December 6, 2024
+  const monthDayYear = dateStr.match(/(\w+)\s+(\d{1,2}),?\s+(\d{4})/);
+  if (monthDayYear) {
+    const [, month, day, year] = monthDayYear;
+    const monthIndex = new Date(`${month} 1, 2000`).getMonth();
+    if (!isNaN(monthIndex)) {
+      return new Date(parseInt(year), monthIndex, parseInt(day));
+    }
+  }
+
+  // Try "MM/DD/YYYY" or "DD/MM/YYYY" format (assume MM/DD/YYYY for US)
+  const slashDate = dateStr.match(/(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+  if (slashDate) {
+    const [, first, second, year] = slashDate;
+    // Assume MM/DD/YYYY
+    return new Date(parseInt(year), parseInt(first) - 1, parseInt(second));
+  }
+
+  return undefined;
 }
 
 // Fetch Bandcamp embed data for an artist

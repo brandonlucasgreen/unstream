@@ -21,12 +21,23 @@ export interface Source {
   hasEmbed: boolean;
   searchUrlTemplate: string;
   searchOnly?: boolean; // True if we can't verify the artist exists (shows "Search X" instead)
+  homepageUrl: string;
+}
+
+// Latest release info
+export interface LatestRelease {
+  title: string;
+  type: 'album' | 'track';
+  url: string;
+  imageUrl?: string;
+  releaseDate?: string; // ISO date or human-readable date string
 }
 
 // Platform result from unified search
 export interface PlatformLink {
   sourceId: SourceId;
   url: string;
+  latestRelease?: LatestRelease;
 }
 
 // Search result from the unified API

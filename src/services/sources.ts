@@ -10,6 +10,7 @@ export const sources: Record<SourceId, Source> = {
     category: 'marketplace',
     hasEmbed: true,
     searchUrlTemplate: 'https://bandcamp.com/search?q={query}',
+    homepageUrl: 'https://bandcamp.com',
   },
   mirlo: {
     id: 'mirlo',
@@ -20,6 +21,7 @@ export const sources: Record<SourceId, Source> = {
     category: 'marketplace',
     hasEmbed: false,
     searchUrlTemplate: 'https://mirlo.space/search?query={query}',
+    homepageUrl: 'https://mirlo.space',
   },
   ampwall: {
     id: 'ampwall',
@@ -31,6 +33,7 @@ export const sources: Record<SourceId, Source> = {
     hasEmbed: false,
     searchUrlTemplate: 'https://ampwall.com/explore?searchStyle=search&query={query}',
     searchOnly: true,
+    homepageUrl: 'https://ampwall.com',
   },
   bandwagon: {
     id: 'bandwagon',
@@ -41,6 +44,7 @@ export const sources: Record<SourceId, Source> = {
     category: 'decentralized',
     hasEmbed: false,
     searchUrlTemplate: 'https://bandwagon.fm/artists?q={query}',
+    homepageUrl: 'https://bandwagon.fm',
   },
   faircamp: {
     id: 'faircamp',
@@ -51,6 +55,7 @@ export const sources: Record<SourceId, Source> = {
     category: 'decentralized',
     hasEmbed: false,
     searchUrlTemplate: 'https://duckduckgo.com/?q=site:*.faircamp+{query}',
+    homepageUrl: 'https://simonrepp.com/faircamp',
   },
   patreon: {
     id: 'patreon',
@@ -61,6 +66,7 @@ export const sources: Record<SourceId, Source> = {
     category: 'patronage',
     hasEmbed: false,
     searchUrlTemplate: 'https://www.patreon.com/search?q={query}',
+    homepageUrl: 'https://www.patreon.com',
   },
   buymeacoffee: {
     id: 'buymeacoffee',
@@ -72,6 +78,7 @@ export const sources: Record<SourceId, Source> = {
     hasEmbed: false,
     searchUrlTemplate: 'https://buymeacoffee.com/explore-creators',
     searchOnly: true,
+    homepageUrl: 'https://buymeacoffee.com',
   },
   kofi: {
     id: 'kofi',
@@ -83,6 +90,7 @@ export const sources: Record<SourceId, Source> = {
     hasEmbed: false,
     searchUrlTemplate: 'https://duckduckgo.com/?q=site:ko-fi.com+{query}',
     searchOnly: true,
+    homepageUrl: 'https://ko-fi.com',
   },
   hoopla: {
     id: 'hoopla',
@@ -93,6 +101,7 @@ export const sources: Record<SourceId, Source> = {
     category: 'library',
     hasEmbed: false,
     searchUrlTemplate: 'https://www.hoopladigital.com/search?q={query}&type=music',
+    homepageUrl: 'https://www.hoopladigital.com',
   },
   qobuz: {
     id: 'qobuz',
@@ -103,6 +112,7 @@ export const sources: Record<SourceId, Source> = {
     category: 'marketplace',
     hasEmbed: false,
     searchUrlTemplate: 'https://www.qobuz.com/us-en/search/artists/{query}',
+    homepageUrl: 'https://www.qobuz.com',
   },
 };
 

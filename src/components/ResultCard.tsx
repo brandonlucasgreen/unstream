@@ -24,6 +24,17 @@ export function ResultCard({ result }: ResultCardProps) {
   const bandcampPlatform = result.platforms.find(p => p.sourceId === 'bandcamp');
   const canPlay = !!bandcampPlatform;
 
+  // Separate verified matches from search-only links
+  const verifiedPlatforms = result.platforms.filter(p => !sources[p.sourceId]?.searchOnly);
+
+  // Collect platforms that have latest release info
+  const platformsWithRelease = verifiedPlatforms.filter(p => p.latestRelease);
+  const latestRelease = platformsWithRelease[0]?.latestRelease;
+
+  // Get the Bandcamp release URL for preview (prefer latest release URL over artist page)
+  const bandcampWithRelease = platformsWithRelease.find(p => p.sourceId === 'bandcamp');
+  const previewUrl = bandcampWithRelease?.latestRelease?.url || bandcampPlatform?.url;
+
   const handlePlayClick = async (e: React.MouseEvent) => {
     e.stopPropagation(); // Don't trigger expand
 
@@ -39,13 +50,13 @@ export function ResultCard({ result }: ResultCardProps) {
       return;
     }
 
-    if (!bandcampPlatform) return;
+    if (!previewUrl) return;
 
     setEmbedLoading(true);
     setEmbedError(false);
 
     try {
-      const response = await fetch(`/api/embed/bandcamp?url=${encodeURIComponent(bandcampPlatform.url)}`);
+      const response = await fetch(`/api/embed/bandcamp?url=${encodeURIComponent(previewUrl)}`);
       if (!response.ok) throw new Error('Failed to fetch embed');
       const data = await response.json();
       setEmbedData(data);
@@ -58,8 +69,6 @@ export function ResultCard({ result }: ResultCardProps) {
     }
   };
 
-  // Separate verified matches from search-only links
-  const verifiedPlatforms = result.platforms.filter(p => !sources[p.sourceId]?.searchOnly);
   const searchOnlyPlatforms = result.platforms.filter(p => sources[p.sourceId]?.searchOnly);
 
   // Group verified platforms by category
@@ -129,24 +138,8 @@ export function ResultCard({ result }: ResultCardProps) {
           )}
         </div>
 
-        {/* Preview button and Platform count */}
+        {/* Platform count and expand arrow */}
         <div className="flex-shrink-0 flex items-center gap-3 text-text-muted">
-          {canPlay && !showPlayer && (
-            <button
-              onClick={handlePlayClick}
-              disabled={embedLoading}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-sm bg-accent-primary/10 text-accent-primary hover:bg-accent-primary/20 transition-colors ${embedLoading ? 'opacity-50 cursor-wait' : ''}`}
-            >
-              {embedLoading ? (
-                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              )}
-              <span>Preview</span>
-            </button>
-          )}
           <span className="text-sm text-accent-secondary">
             {verifiedPlatforms.length} platform{verifiedPlatforms.length !== 1 ? 's' : ''}
           </span>
@@ -161,57 +154,142 @@ export function ResultCard({ result }: ResultCardProps) {
         </div>
       </div>
 
-      {/* Embedded Player */}
-      {showPlayer && embedData && (
-        <div className="px-4 pb-4 border-t border-border">
-          <div className="pt-3 flex items-center gap-2">
-            <iframe
-              src={embedData.embedUrl}
-              seamless
-              className="flex-1 border-0 rounded"
-              style={{ height: '42px' }}
-              title={`${result.name} - ${embedData.title}`}
-            />
-            <button
-              onClick={(e) => { e.stopPropagation(); setShowPlayer(false); }}
-              className="flex-shrink-0 p-1.5 rounded text-text-muted hover:text-text-primary transition-colors"
-              title="Close preview"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Embed Error */}
-      {embedError && (
-        <div className="px-4 pb-4 border-t border-border">
-          <div className="pt-3 flex items-center justify-between">
-            <p className="text-sm text-red-400">
-              Could not load preview. Try visiting the Bandcamp page directly.
-            </p>
-            <button
-              onClick={(e) => { e.stopPropagation(); setEmbedError(false); }}
-              className="flex-shrink-0 p-1 rounded text-text-muted hover:text-text-primary"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Expanded platform list */}
       {expanded && (
         <div className="px-4 pb-4 pt-2 border-t border-border space-y-4 animate-in slide-in-from-top-2 duration-200">
+          {/* Latest Release Section with Preview */}
+          {latestRelease && platformsWithRelease.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="text-xs font-medium text-accent-secondary uppercase tracking-wider">
+                Latest Release
+              </h4>
+              <p className="text-sm font-medium text-text-primary">
+                {latestRelease.title}
+              </p>
+              <div className="flex items-start gap-3">
+                {latestRelease.imageUrl && (
+                  <img
+                    src={latestRelease.imageUrl}
+                    alt={latestRelease.title}
+                    className="w-16 h-16 rounded object-cover flex-shrink-0"
+                  />
+                )}
+                <div className="flex-1 min-w-0 space-y-2">
+                  {/* Preview button/player */}
+                  {canPlay && (
+                    <div>
+                      {showPlayer && embedData ? (
+                        <div className="flex items-center gap-2">
+                          <iframe
+                            src={embedData.embedUrl}
+                            seamless
+                            className="flex-1 border-0 rounded"
+                            style={{ height: '42px' }}
+                            title={`${result.name} - ${embedData.title}`}
+                          />
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setShowPlayer(false); }}
+                            className="flex-shrink-0 p-1.5 rounded text-text-muted hover:text-text-primary transition-colors"
+                            title="Close preview"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      ) : embedError ? (
+                        <p className="text-xs text-red-400">Could not load preview</p>
+                      ) : (
+                        <button
+                          onClick={handlePlayClick}
+                          disabled={embedLoading}
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-sm bg-accent-primary/10 text-accent-primary hover:bg-accent-primary/20 transition-colors ${embedLoading ? 'opacity-50 cursor-wait' : ''}`}
+                        >
+                          {embedLoading ? (
+                            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M8 5v14l11-7z" />
+                            </svg>
+                          )}
+                          <span>Preview</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  {/* Platform links for release */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {platformsWithRelease.map(platform => (
+                      <a
+                        key={`release-${platform.sourceId}`}
+                        href={platform.latestRelease?.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium transition-colors hover:opacity-80"
+                        style={{
+                          backgroundColor: `${sources[platform.sourceId].color}20`,
+                          color: sources[platform.sourceId].color,
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <span>{sources[platform.sourceId].icon}</span>
+                        <span>{sources[platform.sourceId].name}</span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Artist Profiles - more compact when we have releases */}
           {categorizedPlatforms.marketplace.length > 0 && (
             <div className="space-y-2">
               <h4 className="text-xs font-medium text-text-muted uppercase tracking-wider">
-                Music Marketplaces
+                {latestRelease ? 'Artist Profiles' : 'Music Marketplaces'}
               </h4>
+              {/* Preview button when no latest release but Bandcamp exists */}
+              {!latestRelease && canPlay && (
+                <div className="mb-2">
+                  {showPlayer && embedData ? (
+                    <div className="flex items-center gap-2">
+                      <iframe
+                        src={embedData.embedUrl}
+                        seamless
+                        className="flex-1 border-0 rounded"
+                        style={{ height: '42px' }}
+                        title={`${result.name} - ${embedData.title}`}
+                      />
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setShowPlayer(false); }}
+                        className="flex-shrink-0 p-1.5 rounded text-text-muted hover:text-text-primary transition-colors"
+                        title="Close preview"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ) : embedError ? (
+                    <p className="text-xs text-red-400">Could not load preview</p>
+                  ) : (
+                    <button
+                      onClick={handlePlayClick}
+                      disabled={embedLoading}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-sm bg-accent-primary/10 text-accent-primary hover:bg-accent-primary/20 transition-colors ${embedLoading ? 'opacity-50 cursor-wait' : ''}`}
+                    >
+                      {embedLoading ? (
+                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      )}
+                      <span>Preview</span>
+                    </button>
+                  )}
+                </div>
+              )}
               <div className="flex flex-wrap gap-2">
                 {categorizedPlatforms.marketplace.map(platform => (
                   <SourceBadge
