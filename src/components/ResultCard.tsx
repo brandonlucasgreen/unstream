@@ -20,10 +20,6 @@ export function ResultCard({ result }: ResultCardProps) {
   const [embedError, setEmbedError] = useState(false);
   const [showPlayer, setShowPlayer] = useState(false);
 
-  // Check if this result has a Bandcamp link
-  const bandcampPlatform = result.platforms.find(p => p.sourceId === 'bandcamp');
-  const canPlay = !!bandcampPlatform;
-
   // Separate verified matches from search-only links
   const verifiedPlatforms = result.platforms.filter(p => !sources[p.sourceId]?.searchOnly);
 
@@ -31,9 +27,12 @@ export function ResultCard({ result }: ResultCardProps) {
   const platformsWithRelease = verifiedPlatforms.filter(p => p.latestRelease);
   const latestRelease = platformsWithRelease[0]?.latestRelease;
 
-  // Get the Bandcamp release URL for preview (prefer latest release URL over artist page)
+  // Only show preview if Bandcamp has the latest release
+  // (Qobuz widget is unreliable, so we don't offer preview for Qobuz-only releases)
   const bandcampWithRelease = platformsWithRelease.find(p => p.sourceId === 'bandcamp');
-  const previewUrl = bandcampWithRelease?.latestRelease?.url || bandcampPlatform?.url;
+
+  const canPlay = !!bandcampWithRelease?.latestRelease;
+  const previewUrl = bandcampWithRelease?.latestRelease?.url;
 
   const handlePlayClick = async (e: React.MouseEvent) => {
     e.stopPropagation(); // Don't trigger expand

@@ -366,13 +366,22 @@ async function searchMusicBrainz(query: string): Promise<PlatformResult[]> {
       if (firstReleaseDate) {
         const year = parseInt(firstReleaseDate.substring(0, 4), 10);
         if (year < 2005) {
-          console.log('Adding Hoopla for:', artist.name);
+          console.log('Adding Hoopla and Freegal for:', artist.name);
+          // Add Hoopla search link
           const hooplaSearchUrl = `https://www.hoopladigital.com/search?q=${encodeURIComponent(artist.name)}&type=music`;
           results.push({
             sourceId: 'hoopla',
             name: artist.name,
             type: 'artist',
             url: hooplaSearchUrl,
+          });
+          // Add Freegal direct artist link (Base64-encoded artist name)
+          const freegalArtistId = Buffer.from(artist.name).toString('base64');
+          results.push({
+            sourceId: 'freegal',
+            name: artist.name,
+            type: 'artist',
+            url: `https://www.freegalmusic.com/artist/${freegalArtistId}`,
           });
           break;
         }
@@ -695,15 +704,6 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         result.platforms.push({
           sourceId: 'qobuz',
           url: qobuzMatches.get(normalizedName)!,
-        });
-      }
-
-      // Add Freegal link with Base64-encoded artist name
-      if (result.platforms.some(p => p.sourceId === 'bandcamp')) {
-        const freegalArtistId = Buffer.from(result.name).toString('base64');
-        result.platforms.push({
-          sourceId: 'freegal',
-          url: `https://www.freegalmusic.com/artist/${freegalArtistId}`,
         });
       }
 

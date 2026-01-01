@@ -374,14 +374,23 @@ async function searchMusicBrainz(query: string): Promise<PlatformResult[]> {
       if (firstReleaseDate) {
         const year = parseInt(firstReleaseDate.substring(0, 4), 10);
         if (year < 2005) {
-          // Found pre-2005 release - add Hoopla link
-          console.log('Adding Hoopla for:', artist.name);
+          // Found pre-2005 release - add Hoopla and Freegal links
+          console.log('Adding Hoopla and Freegal for:', artist.name);
+          // Add Hoopla search link
           const hooplaSearchUrl = `https://www.hoopladigital.com/search?q=${encodeURIComponent(artist.name)}&type=music`;
           results.push({
             sourceId: 'hoopla',
             name: artist.name,
             type: 'artist',
             url: hooplaSearchUrl,
+          });
+          // Add Freegal direct artist link (Base64-encoded artist name)
+          const freegalArtistId = Buffer.from(artist.name).toString('base64');
+          results.push({
+            sourceId: 'freegal',
+            name: artist.name,
+            type: 'artist',
+            url: `https://www.freegalmusic.com/artist/${freegalArtistId}`,
           });
           break;
         }
@@ -753,15 +762,6 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         });
       }
 
-      // Add Freegal link with Base64-encoded artist name
-      if (result.platforms.some(p => p.sourceId === 'bandcamp')) {
-        const freegalArtistId = Buffer.from(result.name).toString('base64');
-        result.platforms.push({
-          sourceId: 'freegal',
-          url: `https://www.freegalmusic.com/artist/${freegalArtistId}`,
-        });
-      }
-
       // Sort platforms: verified matches first, search-only platforms last
       const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee']);
       result.platforms.sort((a, b) => {
@@ -948,23 +948,66 @@ function parseReleaseDate(dateStr: string | undefined): Date | undefined {
   return undefined;
 }
 
-// Fetch Bandcamp embed data for an artist
-async function getBandcampEmbed(artistUrl: string): Promise<{ embedUrl: string; title: string } | null> {
+// Fetch Bandcamp embed data for an artist, album, or track URL
+async function getBandcampEmbed(url: string): Promise<{ embedUrl: string; title: string } | null> {
   try {
-    // First, fetch the artist page to find an album or track
-    const artistResponse = await fetchWithTimeout(artistUrl, {
+    // Check if the URL is already an album or track page
+    const isAlbumUrl = url.includes('/album/');
+    const isTrackUrl = url.includes('/track/');
+
+    // Fetch the page
+    const response = await fetchWithTimeout(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
       },
     }, 5000);
 
-    if (!artistResponse.ok) return null;
+    if (!response.ok) return null;
 
-    const artistHtml = await artistResponse.text();
+    const html = await response.text();
 
-    // Look for album or track links
-    const albumMatch = artistHtml.match(/href="(\/album\/[^"]+)"/);
-    const trackMatch = artistHtml.match(/href="(\/track\/[^"]+)"/);
+    // If we're on an album or track page, extract the ID directly
+    if (isAlbumUrl || isTrackUrl) {
+      const itemType = isAlbumUrl ? 'album' : 'track';
+
+      // Check if this content is embeddable
+      const embeddableMatch = html.match(/"public_embeddable":(true|false)/);
+      if (embeddableMatch && embeddableMatch[1] === 'false') {
+        console.log('Bandcamp content is not publicly embeddable');
+        return null;
+      }
+
+      // Try multiple patterns to find the item ID
+      // Pattern 1: tralbum_param in data-embed JSON
+      const tralbumMatch = html.match(/"tralbum_param":\s*\{\s*"name"\s*:\s*"(album|track)"\s*,\s*"value"\s*:\s*(\d+)\s*\}/);
+      // Pattern 2: Direct album= or track= in URL or script
+      const directMatch = html.match(new RegExp(`${itemType}=(\\d+)`));
+      // Pattern 3: data attribute
+      const dataMatch = html.match(new RegExp(`data-${itemType}-id="(\\d+)"`));
+      // Pattern 4: JSON property
+      const jsonMatch = html.match(new RegExp(`"${itemType}_id"\\s*:\\s*(\\d+)`));
+      // Pattern 5: "id" in current object for album/track
+      const currentIdMatch = html.match(/"current"\s*:\s*\{[^}]*"id"\s*:\s*(\d+)/);
+
+      const idMatch = tralbumMatch || directMatch || dataMatch || jsonMatch || currentIdMatch;
+      if (!idMatch) return null;
+
+      // Get the ID from the appropriate capture group
+      const itemId = tralbumMatch ? tralbumMatch[2] : idMatch[1];
+
+      // Extract title
+      const titleMatch = html.match(/<title>([^<]+)<\/title>/);
+      const title = titleMatch?.[1]?.split('|')[0]?.trim() || 'Music';
+
+      return {
+        embedUrl: `https://bandcamp.com/EmbeddedPlayer/${itemType}=${itemId}/size=small/bgcol=ffffff/linkcol=0687f5/transparent=true/`,
+        title,
+      };
+    }
+
+    // Otherwise, it's an artist page - look for album or track links
+    const albumMatch = html.match(/href="(\/album\/[^"]+)"/);
+    const trackMatch = html.match(/href="(\/track\/[^"]+)"/);
 
     let itemPath = albumMatch?.[1] || trackMatch?.[1];
     let itemType: 'album' | 'track' = albumMatch ? 'album' : 'track';
@@ -972,7 +1015,7 @@ async function getBandcampEmbed(artistUrl: string): Promise<{ embedUrl: string; 
     // If no album/track links found, check if the page itself is a track page
     if (!itemPath) {
       // Check for track ID directly on the page (for single-track artists)
-      const trackIdMatch = artistHtml.match(/data-item-id="track-(\d+)"/);
+      const trackIdMatch = html.match(/data-item-id="track-(\d+)"/);
       if (trackIdMatch) {
         const trackId = trackIdMatch[1];
         return {
@@ -983,8 +1026,10 @@ async function getBandcampEmbed(artistUrl: string): Promise<{ embedUrl: string; 
       return null;
     }
 
-    // Fetch the album/track page to get the ID
-    const itemUrl = artistUrl.replace(/\/$/, '') + itemPath;
+    // Extract base URL for constructing the full item URL
+    const baseUrl = url.replace(/\/$/, '').replace(/\/music$/, '');
+    const itemUrl = baseUrl + itemPath;
+
     const itemResponse = await fetchWithTimeout(itemUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',

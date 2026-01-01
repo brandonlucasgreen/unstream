@@ -11,6 +11,8 @@ Well, for one, the owners of these platforms don’t [actively invest in militar
 
 But Spotify and its former CEO are not the only problems with the streaming model for music. Streaming is a consumer-friendly service offering access to almost the entire history of recorded music in a convenient subscription, but a tiny fraction of your subscription actually goes to the artists who make the music – and you have no control over _which_ artists they go to. 
 
+The exceptions are artists with hundreds of thousands of monthly listeners or more; while many are rightfully deserving of those listeners, the economics of streaming (especially on Spotify) disproportionately benefit those artists thanks to the outsized influence of the 3 major record labels. Smaller artists are effectively shut out from making money in the streaming ecosystem, and increasingly shut out of promotional opportunities to even grow their audience in this ecosystem as well thanks to an increased focus on AI and algorithms. What’s more: streaming platforms, and the incentives they run on, are being flooded with AI-generated music, often created solely for the purposes of exploiting streaming algorithms and capturing more listeners (and thus revenue).
+
 The platforms suggested by Unstream primarily focus on a _direct-support_ model, meaning you pay to _own_ an artist’s music (or support them with a monthly subscription) and the majority of your payment goes to the rights holder of the music – which in many cases is the artist themselves. 
 
 We also link to a number of alternative services that can help you reduce your dependency on streaming, such as _more artist-friendly_ streaming/downloading platforms (like Qobuz) or renting music through your local library (via the services Hoopla and Freegal).
@@ -32,7 +34,23 @@ Hoopla and Freegal are services offered through public libraries in the US. To a
 
 **Do artists get paid when their music is listened to via one of these services? Unclear, and likely not.** However: you now have access to a vast back catalog of music without your money going to a giant tech conglomerate, and you’ve found one more way to support your local library.
 
+### Why did you build this?
+A few reasons! First, [I am a musician](https://kidlightbulbs.com) who’s grown disenchanted by the streaming ecosystem, and I ended up finding much more success building an audience on my own on Bandcamp. I ended up making over $2200 in two years, despite having not performed any of this music live and a tiny following online. I’ve now seen the success of pursuing this path as an independent musician, and I want to encourage fellow artists explore these alternative platforms as homes for their music.
+
+As a consumer, I’ve paid for streaming services for over a decade, mostly Apple Music. But I’ve wanted to cancel it and build my own library of owned music – to rediscover the joy of finding new music myself, to give Apple less of my money, and to give more of that money to the artists whose music I love. In exploring this, I learned _just how many_ of my favorite artists post & sell their music on Bandcamp.
+
+I built Unstream to serve both of these purposes: help fellow listeners find better ways to support the artists they love more easily, build their own libraries, and ultimately reduce their dependency on streaming, while also encouraging fellow artists to trust & use these alternative models rather than relying on streaming as a conduit to success.
+
 ### What are some of the other benefits of moving off a streaming service?
+Lots!
+- Save money
+- Curate your own music library and tastes
+- Discover new music through the recommendations of friends & tastemakers rather than an algorithm designed to keep you paying
+- Support the artists you actually like, rather than the ones signed to the 3 major record labels
+- Support your local library
+
+### What data does Unstream track?
+Virtually nothing. We track visit and visitor counts, by location and source (ie. where you came to Unstream from), but no personal data is captured.
 
 ### I’d like to request a feature. How can I do that?
 You can [email me](mailto:hi@bgreen.lol)!

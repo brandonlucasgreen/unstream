@@ -1,23 +1,19 @@
 # Unstream roadmap
 
 # To do
-- Include details on artist share per platform
-- App analytics
-	- Decide what I want to track
-	- Simple or fathom for now?
-- Rewrite build/deploy to use Cloudflare workers instead of netlify (& close netlify project)
+- Include artist share details in search results somehow
 - Scope out deeplinked searches: be able to share an artist name or Spotify/Apple link to url to determine its name
 	- Shortcut/script to use this 
 - Scope out active listening
 	- Last.fm/scrobbling for inspo 
 	- Chrome extension
 	- Mac app / safari extension 
-- Buy a domain (unstream.xyz)
-- Write FAQ
-	- Info on how to use Hoopla
-	- Info on rev share per platform
-	- About the app & the why
+- Better app analytics (fathom? or is cloudflare’s built in stuff okay?)
 - Write blog post & announcement
+
+# Future ideas
+- 
+- Mobile app?
 
 # Recently done
 - Embed a financial support method (liberapay)
@@ -27,3 +23,5 @@
 - Add Mirlo
 - Add Ampwall
 - Fix search on Netlify build
+- Write FAQ
+- Buy a domain (unstream.stream)
