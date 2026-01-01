@@ -9,6 +9,7 @@ export type SourceId =
   | 'buymeacoffee'
   | 'kofi'
   | 'hoopla'
+  | 'freegal'
   | 'qobuz';
 
 export interface Source {

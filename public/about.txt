@@ -6,9 +6,14 @@ While exploring Bandcamp specifically, I was struck by *just how many bands I kn
 
 # FAQ 
 
-### Why are these platforms Unstream recommends better than Spotify / Apple Music / my streaming app of choice?
+### What’s the problem with streaming? Why are the platforms Unstream recommends better than Spotify / Apple Music / my streaming app of choice?
+Well, for one, the owners of these platforms don’t [actively invest in militarization efforts](https://faroutmagazine.co.uk/spotify-ceo-daniel-ek-chairman-ai-military-million-investment/) 😅
 
-### What are the problems with streaming my music?
+But Spotify and its former CEO are not the only problems with the streaming model for music. Streaming is a consumer-friendly service offering access to almost the entire history of recorded music in a convenient subscription, but a tiny fraction of your subscription actually goes to the artists who make the music – and you have no control over _which_ artists they go to. 
+
+The platforms suggested by Unstream primarily focus on a _direct-support_ model, meaning you pay to _own_ an artist’s music (or support them with a monthly subscription) and the majority of your payment goes to the rights holder of the music – which in many cases is the artist themselves. 
+
+We also link to a number of alternative services that can help you reduce your dependency on streaming, such as _more artist-friendly_ streaming/downloading platforms (like Qobuz) or renting music through your local library (via the services Hoopla and Freegal).
 
 ### How much money does the artist get when I buy their music?
 - **Faircamp sites:** varies, based on the artist’s preferred payment method (typically ~90-97% of sale price)
@@ -22,7 +27,10 @@ While exploring Bandcamp specifically, I was struck by *just how many bands I kn
 ### Why can’t you link to Ko-fi, Ampwall, or Buy Me A Coffee profiles for the artists I search for?
 Basically, it’s a technical limitation. These platforms hide their searches from external sources, meaning we can’t link directly to an artist profile on these sites in an automated way.  The best alternative is to search those platforms manually, which Unstream offers in the results.
 
-### How does Hoopla work? How does this support the artist?
+### How does Hoopla and Freegal work? How does this support the artist?
+Hoopla and Freegal are services offered through public libraries in the US. To access music through them, you’ll most often need a library card from your local library to create an account. Once you do, you’ll be able to _rent_ music on demand. More on Hoopla’s and Freegal’s limits [here](https://www.hoopladigital.com/faq) and [here](https://www.freegalmusic.com/faq).
+
+**Do artists get paid when their music is listened to via one of these services? Unclear, and likely not.** However: you now have access to a vast back catalog of music without your money going to a giant tech conglomerate, and you’ve found one more way to support your local library.
 
 ### What are some of the other benefits of moving off a streaming service?
 
@@ -31,3 +39,6 @@ You can [email me](mailto:hi@bgreen.lol)!
 
 ### I’m having an issue using Unstream. How can I report it?
 Just [let me know via email](mailto:hi@bgreen.lol) and I’ll try and fix it asap. 
+
+### I love using Unstream, how can I best support the app?
+Unstream is totally free to use, but please consider a donation by [going here](https://liberapay.com/brandonlucasgreen)!

@@ -10,6 +10,7 @@ type SourceId =
   | 'buymeacoffee'
   | 'kofi'
   | 'hoopla'
+  | 'freegal'
   | 'qobuz';
 
 interface LatestRelease {
@@ -694,6 +695,15 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         result.platforms.push({
           sourceId: 'qobuz',
           url: qobuzMatches.get(normalizedName)!,
+        });
+      }
+
+      // Add Freegal link with Base64-encoded artist name
+      if (result.platforms.some(p => p.sourceId === 'bandcamp')) {
+        const freegalArtistId = Buffer.from(result.name).toString('base64');
+        result.platforms.push({
+          sourceId: 'freegal',
+          url: `https://www.freegalmusic.com/artist/${freegalArtistId}`,
         });
       }
 

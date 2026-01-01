@@ -103,6 +103,17 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: 'https://www.hoopladigital.com/search?q={query}&type=music',
     homepageUrl: 'https://www.hoopladigital.com',
   },
+  freegal: {
+    id: 'freegal',
+    name: 'Freegal',
+    description: 'Free library music streaming',
+    color: '#e91e63',
+    icon: '🎵',
+    category: 'library',
+    hasEmbed: false,
+    searchUrlTemplate: 'https://www.freegalmusic.com/search-page/{query}',
+    homepageUrl: 'https://www.freegalmusic.com',
+  },
   qobuz: {
     id: 'qobuz',
     name: 'Qobuz',
@@ -130,7 +141,7 @@ export const sourceCategories = {
   library: {
     name: 'Library Services',
     description: 'Access through your local library',
-    sources: ['hoopla'] as SourceId[],
+    sources: ['hoopla', 'freegal'] as SourceId[],
   },
   decentralized: {
     name: 'Decentralized',

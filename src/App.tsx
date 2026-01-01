@@ -104,9 +104,6 @@ function App() {
                 <h2 className="font-display text-2xl font-semibold text-text-primary mb-2">
                   Supported Sources
                 </h2>
-                <p className="text-text-secondary">
-                  We search these ethical platforms for your music
-                </p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
