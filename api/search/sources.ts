@@ -113,10 +113,11 @@ async function searchBandcamp(query: string): Promise<PlatformResult[]> {
   return results;
 }
 
-// Search Bandwagon by scraping their search page
-async function searchBandwagon(query: string): Promise<PlatformResult[]> {
-  const results: PlatformResult[] = [];
-  const searchUrl = `https://bandwagon.fm/albums?q=${encodeURIComponent(query)}`;
+// Search Bandwagon for artists by scraping search results
+// Returns a map of normalized artist name -> direct Bandwagon artist URL
+async function searchBandwagon(query: string): Promise<Map<string, string>> {
+  const results = new Map<string, string>();
+  const searchUrl = `https://bandwagon.fm/artists?q=${encodeURIComponent(query)}`;
 
   try {
     const response = await fetchWithTimeout(searchUrl, {
@@ -129,48 +130,32 @@ async function searchBandwagon(query: string): Promise<PlatformResult[]> {
 
     const html = await response.text();
     const root = parse(html);
+    const queryNormalized = normalizeForComparison(query);
 
-    // Look for album cards in search results
-    const albumLinks = root.querySelectorAll('a[href*="/album/"]');
+    // Look for artist links in search results (Bandwagon uses /@{id} format)
+    const artistLinks = root.querySelectorAll('a[href*="bandwagon.fm/@"]');
     const seen = new Set<string>();
 
-    for (const link of albumLinks) {
-      const href = link.getAttribute('href');
-      const name = link.textContent?.trim();
-
-      if (href && name && !seen.has(href) && name.length > 0 && name.length < 100) {
-        seen.add(href);
-        const fullUrl = href.startsWith('http') ? href : `https://bandwagon.fm${href}`;
-
-        results.push({
-          sourceId: 'bandwagon',
-          name,
-          type: 'album',
-          url: fullUrl,
-        });
-
-        if (results.length >= 5) break;
-      }
-    }
-
-    // Also check for artist links
-    const artistLinks = root.querySelectorAll('a[href*="/artist/"]');
     for (const link of artistLinks) {
       const href = link.getAttribute('href');
-      const name = link.textContent?.trim();
+      // Get the artist name from the nested div with class "bold"
+      const nameEl = link.querySelector('.bold');
+      const name = nameEl?.textContent?.trim();
 
       if (href && name && !seen.has(href) && name.length > 0 && name.length < 100) {
         seen.add(href);
-        const fullUrl = href.startsWith('http') ? href : `https://bandwagon.fm${href}`;
+        const normalizedName = normalizeForComparison(name);
 
-        results.push({
-          sourceId: 'bandwagon',
-          name,
-          type: 'artist',
-          url: fullUrl,
-        });
+        // Check for exact or close match
+        if (normalizedName === queryNormalized ||
+            normalizedName.includes(queryNormalized) ||
+            queryNormalized.includes(normalizedName)) {
+          if (!results.has(normalizedName)) {
+            results.set(normalizedName, href);
+          }
 
-        if (results.length >= 8) break;
+          if (results.size >= 10) break;
+        }
       }
     }
   } catch (error: any) {
@@ -625,15 +610,15 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     // Filter to only artist results
     allResults.push(...bandcampResults.value.filter(r => r.type === 'artist'));
   }
-  if (bandwagonResults.status === 'fulfilled') {
-    allResults.push(...bandwagonResults.value.filter(r => r.type === 'artist'));
-  }
   if (mirloResults.status === 'fulfilled') {
     allResults.push(...mirloResults.value.filter(r => r.type === 'artist'));
   }
   if (musicbrainzResults.status === 'fulfilled') {
     allResults.push(...musicbrainzResults.value.filter(r => r.type === 'artist'));
   }
+
+  // Get Bandwagon matches (returns Map of normalized artist name -> URL)
+  const bandwagonMatches = bandwagonResults.status === 'fulfilled' ? bandwagonResults.value : new Map<string, string>();
 
   // Get Faircamp matches (returns Map of normalized artist name -> URL)
   const faircampMatches = faircampResults.status === 'fulfilled' ? faircampResults.value : new Map<string, string>();
@@ -665,6 +650,14 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
       }
 
       const normalizedName = normalizeForComparison(result.name);
+
+      // Add Bandwagon link if artist matches
+      if (bandwagonMatches.has(normalizedName)) {
+        result.platforms.push({
+          sourceId: 'bandwagon',
+          url: bandwagonMatches.get(normalizedName)!,
+        });
+      }
 
       // Add Faircamp link if artist matches
       if (faircampMatches.has(normalizedName)) {

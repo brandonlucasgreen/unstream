@@ -35,12 +35,12 @@ export const sources: Record<SourceId, Source> = {
   bandwagon: {
     id: 'bandwagon',
     name: 'Bandwagon',
-    description: 'Community music discovery',
+    description: 'ActivityPub-based music community',
     color: '#8b5cf6',
     icon: '🚐',
-    category: 'marketplace',
+    category: 'decentralized',
     hasEmbed: false,
-    searchUrlTemplate: 'https://bandwagon.fm/albums?q={query}',
+    searchUrlTemplate: 'https://bandwagon.fm/artists?q={query}',
   },
   faircamp: {
     id: 'faircamp',
@@ -109,7 +109,7 @@ export const sourceCategories = {
   marketplace: {
     name: 'Music Marketplaces',
     description: 'Buy music directly from artists',
-    sources: ['bandcamp', 'mirlo', 'ampwall', 'bandwagon', 'qobuz'] as SourceId[],
+    sources: ['bandcamp', 'mirlo', 'ampwall', 'qobuz'] as SourceId[],
   },
   patronage: {
     name: 'Patronage Platforms',
@@ -123,8 +123,8 @@ export const sourceCategories = {
   },
   decentralized: {
     name: 'Decentralized',
-    description: 'Self-hosted artist sites',
-    sources: ['faircamp'] as SourceId[],
+    description: 'ActivityPub and self-hosted platforms',
+    sources: ['bandwagon', 'faircamp'] as SourceId[],
   },
 };
 
