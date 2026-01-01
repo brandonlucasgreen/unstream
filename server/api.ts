@@ -562,6 +562,11 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
           sourceId: 'kofi',
           url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(result.name)}`,
         });
+        // Buy Me a Coffee (no query search, just link to explore)
+        result.platforms.push({
+          sourceId: 'buymeacoffee',
+          url: 'https://buymeacoffee.com/explore-creators',
+        });
       }
 
       const normalizedName = normalizeForComparison(result.name);
@@ -599,7 +604,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
       }
 
       // Sort platforms: verified matches first, search-only platforms last
-      const searchOnlyPlatforms = new Set(['ampwall', 'kofi']);
+      const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee']);
       result.platforms.sort((a, b) => {
         const aIsSearchOnly = searchOnlyPlatforms.has(a.sourceId);
         const bIsSearchOnly = searchOnlyPlatforms.has(b.sourceId);

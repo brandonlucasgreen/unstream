@@ -70,7 +70,8 @@ export const sources: Record<SourceId, Source> = {
     icon: '☕',
     category: 'patronage',
     hasEmbed: false,
-    searchUrlTemplate: 'https://www.buymeacoffee.com/search?query={query}',
+    searchUrlTemplate: 'https://buymeacoffee.com/explore-creators',
+    searchOnly: true,
   },
   kofi: {
     id: 'kofi',

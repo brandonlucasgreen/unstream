@@ -48,8 +48,7 @@ function App() {
             </button>
           </h1>
           <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto mb-8">
-            Find music on ethical platforms. Support artists directly through independent marketplaces,
-            patronage platforms, and your local library.
+            Find music on alternative platforms, directly support the artists you love, and move off streaming
           </p>
         </div>
       </header>
@@ -133,20 +132,6 @@ function App() {
                 ))}
               </div>
 
-              {/* Faircamp webring link */}
-              <div className="text-center py-8 border-t border-border">
-                <p className="text-text-muted text-sm">
-                  Discover more artists on the{' '}
-                  <a
-                    href="https://faircamp.webr.ing"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-accent-secondary hover:underline"
-                  >
-                    Faircamp Webring
-                  </a>
-                </p>
-              </div>
             </div>
           )}
         </div>
@@ -156,10 +141,7 @@ function App() {
       <footer className="border-t border-border py-8 px-4">
         <div className="max-w-4xl mx-auto text-center text-text-muted text-sm">
           <p>
-            Unstream searches Bandcamp, Mirlo, and other ethical platforms directly.
-          </p>
-          <p className="mt-2 text-text-muted/70">
-            Not affiliated with any listed platforms.
+            Unstream searches ethical music platforms directly. Not affiliated with any listed platforms.
           </p>
           <p className="mt-2 text-text-muted/70">
             Made with ❤️ by{' '}
