@@ -1,27 +1,26 @@
 # Unstream roadmap
 
-# To do
+## To do
 - Include artist share details in search results somehow
-- Build Shortcut for deeplink searching
 - Scope out active listening
-	- Last.fm/scrobbling for inspo 
 	- Chrome extension
-	- Mac app / safari extension 
+	- Mac app
+	- Last.fm integration?
 - Better app analytics (fathom? or is cloudflare’s built in stuff okay?)
 - Write blog post & announcement
 
-# Future ideas
-- 
+## Future ideas
 - Mobile app?
 
-# Recently done
-- Embed a financial support method (liberapay)
-- Deeplinked searches: be able to share an artist name or Spotify/Apple link to url to determine its name
-- Add Freegal
-- Add Bandwagon.fm
-- Add Qobuz download store
-- Add Mirlo
-- Add Ampwall
-- Fix search on Netlify build
+## Recently done
+- Deeplinked searches: share an artist’s Spotify/Apple Music link to look up that artist instantly
+	- Build Shortcut for deeplink searching
+- Add Freegal support
+- Add Bandwagon.fm support
+- Add Qobuz download store support
+- Add Mirlo support
+- Add Ampwall support
+- Bandcamp music embeds
 - Write FAQ
 - Buy a domain (unstream.stream)
+- Embed a financial support method (liberapay)

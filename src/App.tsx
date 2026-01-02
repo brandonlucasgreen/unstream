@@ -68,6 +68,24 @@ function App() {
 
   return (
     <div className="min-h-screen">
+      {/* Top navigation */}
+      <nav className="absolute top-4 right-4 flex items-center gap-3 text-sm text-text-muted">
+        <Link to="/about" className="hover:text-text-primary transition-colors">
+          About/FAQ
+        </Link>
+        <span className="text-text-muted/40 text-xs">&#x2022;</span>
+        <Link to="/roadmap" className="hover:text-text-primary transition-colors">
+          Roadmap
+        </Link>
+        <span className="text-text-muted/40 text-xs">&#x2022;</span>
+        <a
+          href="mailto:unstream@bgreen.lol?subject=Unstream%20Support"
+          className="hover:text-text-primary transition-colors"
+        >
+          Support
+        </a>
+      </nav>
+
       {/* Header */}
       <header className="pt-16 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">
@@ -80,10 +98,7 @@ function App() {
             </button>
           </h1>
           <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto mb-8">
-            Find music on alternative platforms, directly support the artists you love, and move off streaming.{' '}
-            <Link to="/about" className="text-accent-secondary hover:underline">
-              Learn more
-            </Link>
+            Find music on alternative platforms, directly support the artists you love, and move off streaming.
           </p>
         </div>
       </header>
@@ -181,36 +196,17 @@ function App() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border py-8 px-4">
-        <div className="max-w-4xl mx-auto text-center text-text-muted text-sm">
-          <p>
-            Unstream searches ethical music platforms directly. Not affiliated with any listed platforms.
-          </p>
-          <p className="mt-2 text-text-muted/70">
-            Made with love by{' '}
-            <a
-              href="https://bgreen.lol"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-accent-secondary hover:underline"
-            >
-              brandon lucas green
-            </a>
-            {' | '}
-            <Link
-              to="/about"
-              className="text-accent-secondary hover:underline"
-            >
-              About
-            </Link>
-            {' | '}
-            <Link
-              to="/roadmap"
-              className="text-accent-secondary hover:underline"
-            >
-              Roadmap
-            </Link>
-          </p>
+      <footer className="border-t border-border py-6 px-4">
+        <div className="max-w-4xl mx-auto text-center text-text-muted/70 text-sm">
+          Made with love by{' '}
+          <a
+            href="https://bgreen.lol"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent-secondary hover:underline"
+          >
+            brandon lucas green
+          </a>
         </div>
       </footer>
     </div>

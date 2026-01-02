@@ -17,12 +17,22 @@ The platforms suggested by Unstream primarily focus on a _direct-support_ model,
 
 We also link to a number of alternative services that can help you reduce your dependency on streaming, such as _more artist-friendly_ streaming/downloading platforms (like Qobuz) or renting music through your local library (via the services Hoopla and Freegal).
 
+### Why did you build this?
+A few reasons! First, [I am a musician](https://kidlightbulbs.com) who’s grown disenchanted by the streaming ecosystem, and I ended up finding much more success building an audience on my own on Bandcamp. I ended up making over $2200 in two years, despite having not performed any of this music live and a tiny following online. I’ve now seen the success of pursuing this path as an independent musician, and I want to encourage fellow artists explore these alternative platforms as homes for their music.
+
+As a consumer, I’ve paid for streaming services for over a decade, mostly Apple Music. But I’ve wanted to cancel it and build my own library of owned music – to rediscover the joy of finding new music myself, to give Apple less of my money, and to give more of that money to the artists whose music I love. In exploring this, I learned _just how many_ of my favorite artists post & sell their music on Bandcamp.
+
+I built Unstream to serve both of these purposes: help fellow listeners find better ways to support the artists they love more easily, build their own libraries, and ultimately reduce their dependency on streaming, while also encouraging fellow artists to trust & use these alternative models rather than relying on streaming as a conduit to success.
+
 ### How much money does the artist get when I buy their music?
 - **Faircamp sites:** varies, based on the artist’s preferred payment method (typically ~90-97% of sale price)
 - **Ampwall:** ~92-95% of sale price [(source)](https://ampwall.com/selling)
 - **Mirlo:** ~86-90% of sale price [(source)](https://mirlo.space/pages/about)
 - **Bandcamp:** ~80-85% of sale price [(source)](https://bandcamp.com/fair_trade_music_policy)
 - **Qobuz:** ~70% of sale price [(source)](https://www.reddit.com/r/audiophile/comments/esy440/comment/ffcxlql/)
+- **Patreon:** ~86-90% of sales or memberships [(source)](https://support.patreon.com/hc/en-us/articles/11111747095181-Creator-fees-overview)
+- **Buy Me a Coffee:** ~92% of sales or memberships [(source)](https://help.buymeacoffee.com/en/articles/8105744-how-to-calculate-charges-on-your-payment)
+- **Ko-fi:** ~97% of tips, ~92% of sales [(source)](https://help.ko-fi.com/hc/en-us/articles/360002506494-Does-Ko-fi-take-a-fee)
 
 *More details:* All online transactions involving a credit card transaction incur credit card fees, which are typically ~2.9% of the purchase price, plus an additional 30 cents. This is always applied on top of a platform’s fee, which is why the above percentage values vary a bit. 
 
@@ -33,13 +43,6 @@ Basically, it’s a technical limitation. These platforms hide their searches fr
 Hoopla and Freegal are services offered through public libraries in the US. To access music through them, you’ll most often need a library card from your local library to create an account. Once you do, you’ll be able to _rent_ music on demand. More on Hoopla’s and Freegal’s limits [here](https://www.hoopladigital.com/faq) and [here](https://www.freegalmusic.com/faq).
 
 **Do artists get paid when their music is listened to via one of these services? Unclear, and likely not.** However: you now have access to a vast back catalog of music without your money going to a giant tech conglomerate, and you’ve found one more way to support your local library.
-
-### Why did you build this?
-A few reasons! First, [I am a musician](https://kidlightbulbs.com) who’s grown disenchanted by the streaming ecosystem, and I ended up finding much more success building an audience on my own on Bandcamp. I ended up making over $2200 in two years, despite having not performed any of this music live and a tiny following online. I’ve now seen the success of pursuing this path as an independent musician, and I want to encourage fellow artists explore these alternative platforms as homes for their music.
-
-As a consumer, I’ve paid for streaming services for over a decade, mostly Apple Music. But I’ve wanted to cancel it and build my own library of owned music – to rediscover the joy of finding new music myself, to give Apple less of my money, and to give more of that money to the artists whose music I love. In exploring this, I learned _just how many_ of my favorite artists post & sell their music on Bandcamp.
-
-I built Unstream to serve both of these purposes: help fellow listeners find better ways to support the artists they love more easily, build their own libraries, and ultimately reduce their dependency on streaming, while also encouraging fellow artists to trust & use these alternative models rather than relying on streaming as a conduit to success.
 
 ### What are some of the other benefits of moving off a streaming service?
 Lots!

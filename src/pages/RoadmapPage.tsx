@@ -26,6 +26,24 @@ export function RoadmapPage() {
 
   return (
     <div className="min-h-screen">
+      {/* Top navigation */}
+      <nav className="absolute top-4 right-4 flex items-center gap-3 text-sm text-text-muted">
+        <Link to="/about" className="hover:text-text-primary transition-colors">
+          About/FAQ
+        </Link>
+        <span className="text-text-muted/40 text-xs">&#x2022;</span>
+        <Link to="/roadmap" className="hover:text-text-primary transition-colors">
+          Roadmap
+        </Link>
+        <span className="text-text-muted/40 text-xs">&#x2022;</span>
+        <a
+          href="mailto:unstream@bgreen.lol?subject=Unstream%20Support"
+          className="hover:text-text-primary transition-colors"
+        >
+          Support
+        </a>
+      </nav>
+
       {/* Header */}
       <header className="pt-16 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">
@@ -73,7 +91,7 @@ export function RoadmapPage() {
                   ),
                   // Style paragraphs
                   p: ({ children }: { children?: ReactNode }) => (
-                    <p className="text-text-secondary leading-relaxed mb-4">
+                    <p className="text-text-primary/90 leading-relaxed mb-4">
                       {children}
                     </p>
                   ),
@@ -90,12 +108,12 @@ export function RoadmapPage() {
                   ),
                   // Style lists
                   ul: ({ children }: { children?: ReactNode }) => (
-                    <ul className="list-disc list-inside text-text-secondary mb-4 space-y-1">
+                    <ul className="list-disc ml-5 text-text-primary/90 mb-4 space-y-1 [&_ul]:mt-1 [&_ul]:mb-0">
                       {children}
                     </ul>
                   ),
                   li: ({ children }: { children?: ReactNode }) => (
-                    <li className="text-text-secondary">{children}</li>
+                    <li className="text-text-primary/90">{children}</li>
                   ),
                   // Style emphasis
                   em: ({ children }: { children?: ReactNode }) => (
@@ -127,30 +145,17 @@ export function RoadmapPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border py-8 px-4">
-        <div className="max-w-4xl mx-auto text-center text-text-muted text-sm">
-          <p>
-            Unstream searches ethical music platforms directly. Not affiliated with any listed platforms.
-          </p>
-          <p className="mt-2 text-text-muted/70">
-            Made with love by{' '}
-            <a
-              href="https://bgreen.lol"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-accent-secondary hover:underline"
-            >
-              brandon lucas green
-            </a>
-            {' | '}
-            <Link to="/about" className="text-accent-secondary hover:underline">
-              About
-            </Link>
-            {' | '}
-            <Link to="/roadmap" className="text-accent-secondary hover:underline">
-              Roadmap
-            </Link>
-          </p>
+      <footer className="border-t border-border py-6 px-4">
+        <div className="max-w-4xl mx-auto text-center text-text-muted/70 text-sm">
+          Made with love by{' '}
+          <a
+            href="https://bgreen.lol"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent-secondary hover:underline"
+          >
+            brandon lucas green
+          </a>
         </div>
       </footer>
     </div>
