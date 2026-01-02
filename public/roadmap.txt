@@ -1,11 +1,11 @@
 # Roadmap
 
 ### To do
-- Include artist share details in search results somehow – 
+- Include artist share details in search results somehow
 - Better app analytics – Tinylytics? Fathom? Something else? Figure out what I actually need
-- Scope out active listening feature – 
-- Write blog post & announcement posts – 
-- Publicize shortcut for deeplink feature – 
+- Scope out active listening feature
+- Write blog post & announcement posts
+- Publicize shortcut for deeplink feature
 
 ### Recently done
 - Deeplinked searches: share an artist’s Spotify/Apple Music link to look up that artist instantly (done Jan 2, 2026 at 8:20 AM)
