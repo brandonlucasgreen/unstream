@@ -14,7 +14,7 @@
 
 ## Recently done
 - Deeplinked searches: share an artist’s Spotify/Apple Music link to look up that artist instantly
-	- Build Shortcut for deeplink searching
+	- Build [Shortcut for deeplink searching](https://www.icloud.com/shortcuts/a46f8376626a47a8b8cd6e12e0e17d3f)
 - Add Freegal support
 - Add Bandwagon.fm support
 - Add Qobuz download store support
