@@ -1060,6 +1060,132 @@ async function getBandcampEmbed(url: string): Promise<{ embedUrl: string; title:
   }
 }
 
+// Resolve artist name from Spotify or Apple Music URL
+async function resolveStreamingUrl(url: string): Promise<{ artistName: string; source: 'spotify' | 'apple' } | null> {
+  try {
+    // Handle Spotify URI format (spotify:artist:ID)
+    if (url.startsWith('spotify:')) {
+      const parts = url.split(':');
+      if (parts.length >= 3) {
+        // Convert URI to URL format
+        url = `https://open.spotify.com/${parts[1]}/${parts[2]}`;
+      }
+    }
+
+    // Check if it's a Spotify URL
+    const spotifyMatch = url.match(/open\.spotify\.com\/(artist|album|track)\/([a-zA-Z0-9]+)/);
+    if (spotifyMatch) {
+      const response = await fetchWithTimeout(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        },
+      }, 5000);
+
+      if (!response.ok) return null;
+
+      const html = await response.text();
+
+      // For artist pages, og:title is the artist name
+      // For albums/tracks, we need to find the artist name differently
+      const type = spotifyMatch[1];
+
+      if (type === 'artist') {
+        // Artist page: og:title is the artist name
+        const titleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i) ||
+                          html.match(/<meta\s+content="([^"]+)"\s+property="og:title"/i);
+        if (titleMatch) {
+          return { artistName: titleMatch[1], source: 'spotify' };
+        }
+      } else {
+        // Album/track page: look for artist in various places
+        // Try og:description which often has "by Artist Name"
+        const descMatch = html.match(/<meta\s+property="og:description"\s+content="[^"]*(?:by|from)\s+([^"·]+)/i) ||
+                         html.match(/<meta\s+content="[^"]*(?:by|from)\s+([^"·]+)"\s+property="og:description"/i);
+        if (descMatch) {
+          return { artistName: descMatch[1].trim(), source: 'spotify' };
+        }
+
+        // Try to find artist link in the HTML
+        const artistLinkMatch = html.match(/href="\/artist\/[^"]+">([^<]+)<\/a>/);
+        if (artistLinkMatch) {
+          return { artistName: artistLinkMatch[1].trim(), source: 'spotify' };
+        }
+
+        // Fallback: parse title which is often "Song - Artist" or "Album - Artist"
+        const titleMatch = html.match(/<title>([^<]+)<\/title>/);
+        if (titleMatch) {
+          const parts = titleMatch[1].split(/\s*[-–—]\s*/);
+          if (parts.length >= 2) {
+            // Usually format is "Track/Album - Artist - Spotify" or similar
+            // Take the second part, removing " - Spotify" suffix if present
+            let artist = parts[1].replace(/\s*[-–—]\s*Spotify.*$/i, '').trim();
+            if (artist && artist.toLowerCase() !== 'spotify') {
+              return { artistName: artist, source: 'spotify' };
+            }
+          }
+        }
+      }
+
+      return null;
+    }
+
+    // Check if it's an Apple Music URL
+    const appleMatch = url.match(/music\.apple\.com\/[a-z]{2}\/(artist|album|song)\/([^/]+)\/(\d+)/);
+    if (appleMatch) {
+      const response = await fetchWithTimeout(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        },
+      }, 5000);
+
+      if (!response.ok) return null;
+
+      const html = await response.text();
+      const type = appleMatch[1];
+
+      if (type === 'artist') {
+        // Artist page: og:title is the artist name
+        const titleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i) ||
+                          html.match(/<meta\s+content="([^"]+)"\s+property="og:title"/i);
+        if (titleMatch) {
+          // Remove " - Apple Music" or " on Apple Music" suffix if present
+          const artistName = titleMatch[1]
+            .replace(/\s*[-–—]\s*Apple Music.*$/i, '')
+            .replace(/\s+on Apple Music.*$/i, '')
+            .trim();
+          return { artistName, source: 'apple' };
+        }
+      } else {
+        // Album/song page: title format is usually "Album/Song by Artist" or "Album by Artist on Apple Music"
+        const titleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i) ||
+                          html.match(/<meta\s+content="([^"]+)"\s+property="og:title"/i);
+        if (titleMatch) {
+          // Extract artist name, handling various formats
+          const byMatch = titleMatch[1].match(/^.+?\s+by\s+(.+?)(?:\s+on Apple Music|\s*[-–—]\s*Apple Music)?$/i);
+          if (byMatch) {
+            return { artistName: byMatch[1].trim(), source: 'apple' };
+          }
+        }
+
+        // Try twitter:audio:artist_name meta tag
+        const artistMeta = html.match(/<meta\s+name="twitter:audio:artist_name"\s+content="([^"]+)"/i) ||
+                          html.match(/<meta\s+content="([^"]+)"\s+name="twitter:audio:artist_name"/i);
+        if (artistMeta) {
+          return { artistName: artistMeta[1], source: 'apple' };
+        }
+      }
+
+      return null;
+    }
+
+    // Not a recognized URL format
+    return null;
+  } catch (error: any) {
+    console.error('URL resolution error:', error.message);
+    return null;
+  }
+}
+
 function sendJson(res: ServerResponse, status: number, data: unknown) {
   res.writeHead(status, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(data));
@@ -1118,6 +1244,33 @@ export async function handleApiRequest(req: IncomingMessage, res: ServerResponse
     } catch (error) {
       console.error('Embed error:', error);
       sendJson(res, 500, { error: 'Failed to fetch embed data' });
+    }
+    return true;
+  }
+
+  if (url.pathname === '/api/resolve/url') {
+    if (req.method !== 'GET') {
+      sendJson(res, 405, { error: 'Method not allowed' });
+      return true;
+    }
+
+    const streamingUrl = url.searchParams.get('url');
+
+    if (!streamingUrl) {
+      sendJson(res, 400, { error: 'URL parameter is required' });
+      return true;
+    }
+
+    try {
+      const result = await resolveStreamingUrl(streamingUrl);
+      if (result) {
+        sendJson(res, 200, result);
+      } else {
+        sendJson(res, 404, { error: 'Could not resolve artist from URL' });
+      }
+    } catch (error) {
+      console.error('Resolve error:', error);
+      sendJson(res, 500, { error: 'Failed to resolve URL' });
     }
     return true;
   }

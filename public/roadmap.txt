@@ -2,8 +2,7 @@
 
 # To do
 - Include artist share details in search results somehow
-- Scope out deeplinked searches: be able to share an artist name or Spotify/Apple link to url to determine its name
-	- Shortcut/script to use this 
+- Build Shortcut for deeplink searching
 - Scope out active listening
 	- Last.fm/scrobbling for inspo 
 	- Chrome extension
@@ -17,6 +16,7 @@
 
 # Recently done
 - Embed a financial support method (liberapay)
+- Deeplinked searches: be able to share an artist name or Spotify/Apple link to url to determine its name
 - Add Freegal
 - Add Bandwagon.fm
 - Add Qobuz download store

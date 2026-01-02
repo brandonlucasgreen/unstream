@@ -12,3 +12,8 @@
   from = "/api/embed/bandcamp"
   to = "/.netlify/functions/embed-bandcamp"
   status = 200
+
+[[redirects]]
+  from = "/api/resolve/url"
+  to = "/.netlify/functions/resolve-url"
+  status = 200

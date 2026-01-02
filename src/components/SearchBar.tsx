@@ -1,12 +1,20 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
   isLoading: boolean;
+  initialQuery?: string;
 }
 
-export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
-  const [query, setQuery] = useState('');
+export function SearchBar({ onSearch, isLoading, initialQuery }: SearchBarProps) {
+  const [query, setQuery] = useState(initialQuery || '');
+
+  // Update query when initialQuery changes (for URL resolution)
+  useEffect(() => {
+    if (initialQuery) {
+      setQuery(initialQuery);
+    }
+  }, [initialQuery]);
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();

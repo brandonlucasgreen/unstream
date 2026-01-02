@@ -168,3 +168,22 @@ export async function searchPlatforms(query: string): Promise<SearchResponse> {
     };
   }
 }
+
+// Resolve artist name from a Spotify or Apple Music URL
+export interface ResolveResult {
+  artistName: string;
+  source: 'spotify' | 'apple';
+}
+
+export async function resolveArtistUrl(url: string): Promise<ResolveResult | null> {
+  try {
+    const response = await fetch(`/api/resolve/url?url=${encodeURIComponent(url)}`);
+    if (!response.ok) {
+      return null;
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to resolve URL:', error);
+    return null;
+  }
+}

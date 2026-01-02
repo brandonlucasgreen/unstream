@@ -1,16 +1,46 @@
-import { useState, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useCallback, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { SearchBar } from './components/SearchBar';
 import { ResultCard } from './components/ResultCard';
 import type { SearchResult } from './types';
-import { sources, sourceCategories, searchPlatforms } from './services/sources';
+import { sources, sourceCategories, searchPlatforms, resolveArtistUrl } from './services/sources';
 import './index.css';
 
 function App() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [resolvedQuery, setResolvedQuery] = useState<string>('');
+  const [isResolving, setIsResolving] = useState(false);
+
+  // Handle URL parameter for deep-linked searches
+  useEffect(() => {
+    const urlParam = searchParams.get('url');
+    if (urlParam && !isResolving && !hasSearched) {
+      setIsResolving(true);
+      setError(null);
+
+      resolveArtistUrl(urlParam).then((result) => {
+        if (result) {
+          setResolvedQuery(result.artistName);
+          // Clear the URL param to prevent re-triggering
+          setSearchParams({}, { replace: true });
+          // Trigger search with resolved artist name
+          handleSearch(result.artistName);
+        } else {
+          setError('Could not find artist from that link. Try searching manually.');
+          setSearchParams({}, { replace: true });
+        }
+        setIsResolving(false);
+      }).catch(() => {
+        setError('Failed to resolve link. Try searching manually.');
+        setSearchParams({}, { replace: true });
+        setIsResolving(false);
+      });
+    }
+  }, [searchParams, isResolving, hasSearched, setSearchParams]);
 
   const handleSearch = useCallback(async (query: string) => {
     setIsLoading(true);
@@ -33,6 +63,7 @@ function App() {
     setResults([]);
     setHasSearched(false);
     setError(null);
+    setResolvedQuery('');
   }, []);
 
   return (
@@ -60,7 +91,15 @@ function App() {
       {/* Search */}
       <main className="px-4 pb-16">
         <div className="max-w-4xl mx-auto">
-          <SearchBar onSearch={handleSearch} isLoading={isLoading} />
+          <SearchBar onSearch={handleSearch} isLoading={isLoading || isResolving} initialQuery={resolvedQuery} />
+
+          {/* Resolving URL state */}
+          {isResolving && (
+            <div className="mt-8 flex flex-col items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent-secondary border-t-transparent mb-3"></div>
+              <p className="text-text-muted">Resolving artist from link...</p>
+            </div>
+          )}
 
           {/* Error state */}
           {error && (
