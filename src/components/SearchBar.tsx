@@ -30,7 +30,7 @@ export function SearchBar({ onSearch, isLoading, initialQuery }: SearchBarProps)
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search for artists, albums, or songs..."
+          placeholder="Search for artists..."
           className="search-input flex-1"
           disabled={isLoading}
         />

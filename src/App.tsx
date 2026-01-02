@@ -69,7 +69,7 @@ function App() {
   return (
     <div className="min-h-screen">
       {/* Top navigation */}
-      <nav className="absolute top-4 right-4 flex items-center gap-3 text-sm text-text-muted">
+      <nav className="absolute top-4 left-1/2 -translate-x-1/2 md:left-auto md:right-4 md:translate-x-0 flex items-center gap-3 text-sm text-text-secondary">
         <Link to="/about" className="hover:text-text-primary transition-colors">
           About/FAQ
         </Link>
@@ -107,6 +107,20 @@ function App() {
       <main className="px-4 pb-16">
         <div className="max-w-4xl mx-auto">
           <SearchBar onSearch={handleSearch} isLoading={isLoading || isResolving} initialQuery={resolvedQuery} />
+
+          {/* Tip text */}
+          <p className="text-center text-text-muted text-sm mt-4">
+            Using an iOS device?{' '}
+            <a
+              href="https://www.icloud.com/shortcuts/73296296361e4f609087746e7f046d47"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent-secondary hover:underline"
+            >
+              Download this shortcut
+            </a>
+            {' '}and use it with Spotify or Apple Music to easily search your favorite artists on Unstream.
+          </p>
 
           {/* Resolving URL state */}
           {isResolving && (
@@ -198,15 +212,7 @@ function App() {
       {/* Footer */}
       <footer className="border-t border-border py-6 px-4">
         <div className="max-w-4xl mx-auto text-center text-text-muted/70 text-sm">
-          Made with love by{' '}
-          <a
-            href="https://bgreen.lol"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-accent-secondary hover:underline"
-          >
-            brandon lucas green
-          </a>
+          Made with love in Massachusetts, USA
         </div>
       </footer>
     </div>

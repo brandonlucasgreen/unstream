@@ -27,7 +27,7 @@ export function RoadmapPage() {
   return (
     <div className="min-h-screen">
       {/* Top navigation */}
-      <nav className="absolute top-4 right-4 flex items-center gap-3 text-sm text-text-muted">
+      <nav className="absolute top-4 left-1/2 -translate-x-1/2 md:left-auto md:right-4 md:translate-x-0 flex items-center gap-3 text-sm text-text-secondary">
         <Link to="/about" className="hover:text-text-primary transition-colors">
           About/FAQ
         </Link>
@@ -147,15 +147,7 @@ export function RoadmapPage() {
       {/* Footer */}
       <footer className="border-t border-border py-6 px-4">
         <div className="max-w-4xl mx-auto text-center text-text-muted/70 text-sm">
-          Made with love by{' '}
-          <a
-            href="https://bgreen.lol"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-accent-secondary hover:underline"
-          >
-            brandon lucas green
-          </a>
+          Made with love in Massachusetts, USA
         </div>
       </footer>
     </div>
