@@ -1,9 +1,13 @@
 # Unstream macOS Menubar App - Active Listening
 
 ## Goal
-Build a native macOS menubar app that detects currently playing music from any app (Spotify, Apple Music, etc.) and shows alternative platform results from Unstream.
+Build a native macOS menubar app that:
+1. Detects currently playing music from any app (Spotify, Apple Music, etc.) and shows alternative platform results
+2. Allows manual artist search when nothing is playing or for on-demand lookups
 
 ## User Experience
+
+### When Music is Playing
 ```
 ┌─────────────────────────────────────────┐
 │  🎵  ← Menubar icon (changes when music playing)
@@ -11,6 +15,8 @@ Build a native macOS menubar app that detects currently playing music from any a
          │
          ▼ (click to open popover)
 ┌─────────────────────────────────────────┐
+│  🔍 [Search for artists...           ]  │
+├─────────────────────────────────────────┤
 │  Now Playing                            │
 │  ┌─────┐                                │
 │  │ art │  Radiohead                     │
@@ -21,6 +27,43 @@ Build a native macOS menubar app that detects currently playing music from any a
 │  🚐 Bandwagon  🏕️ Faircamp              │
 │                                         │
 │  [Open in Unstream]                     │
+├─────────────────────────────────────────┤
+│  ⚙️ Settings  |  Quit                   │
+└─────────────────────────────────────────┘
+```
+
+### When Nothing is Playing (or after manual search)
+```
+┌─────────────────────────────────────────┐
+│  🎵  ← Menubar icon (idle state)
+└─────────────────────────────────────────┘
+         │
+         ▼ (click to open popover)
+┌─────────────────────────────────────────┐
+│  🔍 [Radiohead                       ]  │
+├─────────────────────────────────────────┤
+│  Search Results                         │
+│                                         │
+│  Found on 5 platforms:                  │
+│  🎵 Bandcamp  💿 Qobuz  🪺 Mirlo       │
+│  🚐 Bandwagon  🏕️ Faircamp              │
+│                                         │
+│  [Open in Unstream]                     │
+├─────────────────────────────────────────┤
+│  ⚙️ Settings  |  Quit                   │
+└─────────────────────────────────────────┘
+```
+
+### Empty State (nothing playing, no search)
+```
+┌─────────────────────────────────────────┐
+│  🔍 [Search for artists...           ]  │
+├─────────────────────────────────────────┤
+│                                         │
+│  No music playing.                      │
+│  Search for an artist above, or start   │
+│  playing music to see results.          │
+│                                         │
 ├─────────────────────────────────────────┤
 │  ⚙️ Settings  |  Quit                   │
 └─────────────────────────────────────────┘
@@ -39,17 +82,27 @@ Build a native macOS menubar app that detects currently playing music from any a
 1. **UnstreamApp.swift** - Main app entry, menubar configuration
 2. **MediaObserver.swift** - Monitors Now Playing via MediaRemote
 3. **UnstreamAPI.swift** - Calls Unstream web API
-4. **PopoverView.swift** - Main UI in popover
-5. **SettingsView.swift** - User preferences
-6. **NotificationManager.swift** - Handles macOS notifications
+4. **PopoverView.swift** - Main UI in popover (search bar + results)
+5. **SearchBarView.swift** - Manual search input field
+6. **ResultsView.swift** - Platform results display (shared between Now Playing and manual search)
+7. **SettingsView.swift** - User preferences
+8. **NotificationManager.swift** - Handles macOS notifications
 
 ### Data Flow
 ```
-MediaRemote → MediaObserver → detect artist change
-                    ↓
-              UnstreamAPI.searchArtist()
-                    ↓
-              Update UI + optionally notify
+Two input sources → same output:
+
+1. MediaRemote → MediaObserver → detect artist change
+                                        ↓
+                              UnstreamAPI.searchArtist()
+                                        ↓
+                              Update ResultsView + optionally notify
+
+2. SearchBarView → user types artist name → submit
+                                        ↓
+                              UnstreamAPI.searchArtist()
+                                        ↓
+                              Update ResultsView (clears Now Playing display)
 ```
 
 ## Implementation Plan
@@ -101,10 +154,28 @@ struct UnstreamAPI {
 ### Phase 4: UI Implementation
 
 **PopoverView.swift:**
-- Current track info (artist, album, artwork)
+- Search bar at top (always visible)
+- Conditional content area:
+  - If manual search active: show search results
+  - If music playing (and no manual search): show Now Playing info
+  - If neither: show empty state with prompt
 - Platform badges (reuse Unstream color scheme)
-- "Open in Unstream" button (opens web with `?url=` deep link or direct search)
+- "Open in Unstream" button (opens web with search query)
 - Loading state while fetching
+
+**SearchBarView.swift:**
+- Text field with placeholder "Search for artists..."
+- Search icon
+- Submit on Enter key
+- Clear button when text present
+- When user submits: triggers API search, displays results inline
+
+**ResultsView.swift:**
+- Shared component for displaying platform results
+- Shows artist name as header
+- Platform badges in a flow layout
+- "Open in Unstream" button
+- Handles loading and error states
 
 **SettingsView.swift:**
 - Enable/disable notifications toggle
@@ -145,12 +216,16 @@ UnstreamMenubar/
 │   ├── UnstreamAPI.swift             # API client
 │   ├── Models/
 │   │   ├── NowPlaying.swift
-│   │   └── SearchResponse.swift
+│   │   ├── SearchResponse.swift
+│   │   └── AppState.swift            # Shared state (search query, results, now playing)
 │   ├── Views/
-│   │   ├── PopoverView.swift
-│   │   ├── TrackView.swift
-│   │   ├── PlatformBadge.swift
-│   │   └── SettingsView.swift
+│   │   ├── PopoverView.swift         # Main container view
+│   │   ├── SearchBarView.swift       # Manual search input
+│   │   ├── ResultsView.swift         # Platform results (shared)
+│   │   ├── NowPlayingView.swift      # Current track display
+│   │   ├── EmptyStateView.swift      # Nothing playing, no search
+│   │   ├── PlatformBadge.swift       # Individual platform pill
+│   │   └── SettingsView.swift        # Preferences
 │   ├── NotificationManager.swift
 │   └── Assets.xcassets
 └── README.md
@@ -179,15 +254,16 @@ UnstreamMenubar/
 | Step | Task | Complexity |
 |------|------|------------|
 | 1 | Create Xcode project with menubar setup | Low |
-| 2 | Implement basic popover UI | Low |
-| 3 | Add MediaRemote bridge for Now Playing | Medium |
-| 4 | Integrate Unstream API | Low |
-| 5 | Add artist change detection & debouncing | Medium |
-| 6 | Implement notifications | Low |
-| 7 | Add settings persistence (UserDefaults) | Low |
-| 8 | Handle macOS 15.4+ compatibility | Medium |
-| 9 | Polish UI, add app icon | Low |
-| 10 | Create distribution (DMG/README) | Low |
+| 2 | Implement basic popover UI with search bar | Low |
+| 3 | Integrate Unstream API | Low |
+| 4 | Implement manual search with inline results | Low |
+| 5 | Add MediaRemote bridge for Now Playing | Medium |
+| 6 | Add artist change detection & debouncing | Medium |
+| 7 | Implement notifications | Low |
+| 8 | Add settings persistence (UserDefaults) | Low |
+| 9 | Handle macOS 15.4+ compatibility | Medium |
+| 10 | Polish UI, add app icon | Low |
+| 11 | Create distribution (DMG/README) | Low |
 
 ## Resources
 - [MediaRemote Framework Docs](https://theapplewiki.com/wiki/Dev:MediaRemote.framework)

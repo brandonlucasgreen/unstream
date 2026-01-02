@@ -6,6 +6,13 @@ While exploring Bandcamp specifically, I was struck by *just how many bands I kn
 
 # FAQ 
 
+### Why did you build this?
+A few reasons! First, [I am a musician](https://kidlightbulbs.com) who’s grown disenchanted by the streaming ecosystem, and I ended up finding much more success building an audience on my own on Bandcamp. I ended up making over $2200 in two years, despite a tiny following online & having not performed live during that period at all. I’ve now seen the success of pursuing this path as an independent musician, and I want to encourage fellow artists explore these alternative platforms as homes for their music.
+
+As a consumer, I’ve paid for streaming services for over a decade, mostly Apple Music. But I’ve wanted to cancel it and build my own library of owned music – to rediscover the joy of finding new music myself, to give Apple less of my money, and to give more of that money to the artists whose music I love. In exploring this, I learned _just how many_ of my favorite artists post & sell their music on Bandcamp.
+
+I built Unstream to serve both of these purposes: help fellow listeners find better ways to support the artists they love more easily, build their own libraries, and ultimately reduce their dependency on streaming, while also encouraging fellow artists to trust & use these alternative models rather than relying on streaming as a conduit to success.
+
 ### What’s the problem with streaming? Why are the platforms Unstream recommends better than Spotify / Apple Music / my streaming app of choice?
 Well, for one, the owners of these platforms don’t [actively invest in militarization efforts](https://faroutmagazine.co.uk/spotify-ceo-daniel-ek-chairman-ai-military-million-investment/) 😅
 
@@ -16,13 +23,6 @@ The exceptions are artists with hundreds of thousands of monthly listeners or mo
 The platforms suggested by Unstream primarily focus on a _direct-support_ model, meaning you pay to _own_ an artist’s music (or support them with a monthly subscription) and the majority of your payment goes to the rights holder of the music – which in many cases is the artist themselves. 
 
 We also link to a number of alternative services that can help you reduce your dependency on streaming, such as _more artist-friendly_ streaming/downloading platforms (like Qobuz) or renting music through your local library (via the services Hoopla and Freegal).
-
-### Why did you build this?
-A few reasons! First, [I am a musician](https://kidlightbulbs.com) who’s grown disenchanted by the streaming ecosystem, and I ended up finding much more success building an audience on my own on Bandcamp. I ended up making over $2200 in two years, despite having not performed any of this music live and a tiny following online. I’ve now seen the success of pursuing this path as an independent musician, and I want to encourage fellow artists explore these alternative platforms as homes for their music.
-
-As a consumer, I’ve paid for streaming services for over a decade, mostly Apple Music. But I’ve wanted to cancel it and build my own library of owned music – to rediscover the joy of finding new music myself, to give Apple less of my money, and to give more of that money to the artists whose music I love. In exploring this, I learned _just how many_ of my favorite artists post & sell their music on Bandcamp.
-
-I built Unstream to serve both of these purposes: help fellow listeners find better ways to support the artists they love more easily, build their own libraries, and ultimately reduce their dependency on streaming, while also encouraging fellow artists to trust & use these alternative models rather than relying on streaming as a conduit to success.
 
 ### How much money does the artist get when I buy their music?
 - **Faircamp sites:** varies, based on the artist’s preferred payment method (typically ~90-97% of sale price)
@@ -54,6 +54,11 @@ Lots!
 
 ### What data does Unstream track?
 Virtually nothing. We track visit and visitor counts, by location and source (ie. where you came to Unstream from), but no personal data is captured.
+
+### I am ethically opposed to AI. Is AI at all used in Unstream?
+No AI is implemented in the Unstream app itself. I am staunchly opposed to the use of AI in the creation or recommending of art & music, and the app neither uses AI to recommend artists nor is intended to promote artists creating AI-generated music. 
+
+However, I did use AI, specifically Claude Code using the Opus 4.5 model, to help build Unstream under my direction. Read more about my stance on AI in music, culture & software development.
 
 ### I’d like to request a feature. How can I do that?
 You can [email me](mailto:hi@bgreen.lol)!

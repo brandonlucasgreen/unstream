@@ -17,3 +17,8 @@
   from = "/api/resolve/url"
   to = "/.netlify/functions/resolve-url"
   status = 200
+
+[[redirects]]
+  from = "/api/desktop/version"
+  to = "/.netlify/functions/desktop-version"
+  status = 200
