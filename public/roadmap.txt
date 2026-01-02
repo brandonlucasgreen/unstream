@@ -1,26 +1,14 @@
-# Unstream roadmap
+# Roadmap
 
-## To do
-- Include artist share details in search results somehow
-- Scope out active listening
-	- Chrome extension
-	- Mac app
-	- Last.fm integration?
-- Better app analytics (fathom? or is cloudflare’s built in stuff okay?)
-- Write blog post & announcement
+### To do
+- Include artist share details in search results somehow – 
+- Better app analytics – Tinylytics? Fathom? Something else? Figure out what I actually need
+- Scope out active listening feature – 
+- Write blog post & announcement posts – 
+- Publicize shortcut for deeplink feature – 
 
-## Future ideas
-- Mobile app?
-
-## Recently done
-- Deeplinked searches: share an artist’s Spotify/Apple Music link to look up that artist instantly
-	- Build [Shortcut for deeplink searching](https://www.icloud.com/shortcuts/a46f8376626a47a8b8cd6e12e0e17d3f)
-- Add Freegal support
-- Add Bandwagon.fm support
-- Add Qobuz download store support
-- Add Mirlo support
-- Add Ampwall support
-- Bandcamp music embeds
-- Write FAQ
-- Buy a domain (unstream.stream)
-- Embed a financial support method (liberapay)
+### Recently done
+- Deeplinked searches: share an artist’s Spotify/Apple Music link to look up that artist instantly (done Jan 2, 2026 at 8:20 AM)
+- Add Freegal support (done Jan 2, 2026 at 8:20 AM)
+- Add bandwagon.fm support (done Jan 2, 2026 at 8:20 AM)
+- Add hoopla support (done Jan 2, 2026 at 8:20 AM)
