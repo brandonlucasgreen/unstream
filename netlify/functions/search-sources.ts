@@ -759,17 +759,18 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   // If releases don't match, split into separate results
   const disambiguated: AggregatedResult[] = [];
 
-  // Platforms that should have releases (music marketplaces)
-  const platformsExpectedToHaveReleases = new Set(['bandcamp', 'qobuz', 'mirlo']);
+  // Platforms where we actively fetch releases (only these can be "suspicious" if empty)
+  // Note: We only fetch releases from Bandcamp and Qobuz, so only they can be suspicious
+  const platformsWithReleaseFetching = new Set(['bandcamp', 'qobuz']);
 
   for (const result of aggregated) {
     const platformsWithReleases = result.platforms.filter(p => p.latestRelease);
     const platformsWithoutReleases = result.platforms.filter(p => !p.latestRelease);
 
-    // Check for suspicious cases: marketplace platforms without releases
+    // Check for suspicious cases: platforms where we fetched releases but found none
     // (e.g., a Bandcamp page with no music is likely not the real artist)
     const suspiciousPlatforms = platformsWithoutReleases.filter(
-      p => platformsExpectedToHaveReleases.has(p.sourceId)
+      p => platformsWithReleaseFetching.has(p.sourceId)
     );
 
     // If no platforms have releases, mark as unverified and keep as-is
@@ -793,7 +794,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         artist: result.artist,
         type: result.type,
         imageUrl: verifiedImageUrl, // Don't fall back to potentially unverified image
-        platforms: [...platformsWithReleases, ...platformsWithoutReleases.filter(p => !platformsExpectedToHaveReleases.has(p.sourceId))],
+        platforms: [...platformsWithReleases, ...platformsWithoutReleases.filter(p => !platformsWithReleaseFetching.has(p.sourceId))],
         matchConfidence: 'verified',
       };
       disambiguated.push(verifiedResult);
