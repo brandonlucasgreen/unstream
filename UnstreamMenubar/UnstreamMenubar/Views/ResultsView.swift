@@ -31,12 +31,32 @@ struct ResultsView: View {
 
 struct ArtistResultView: View {
     let artist: ArtistResult
+    @EnvironmentObject var licenseManager: LicenseManager
+    @EnvironmentObject var supportListManager: SupportListManager
+
+    private var isSaved: Bool {
+        supportListManager.isArtistSaved(artist.name)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            // Artist name
-            Text(artist.name)
-                .font(.system(size: 14, weight: .semibold))
+            // Artist name with save button
+            HStack {
+                Text(artist.name)
+                    .font(.system(size: 14, weight: .semibold))
+
+                Spacer()
+
+                if licenseManager.isPro {
+                    Button(action: { supportListManager.toggleArtist(artist) }) {
+                        Image(systemName: isSaved ? "heart.fill" : "heart")
+                            .foregroundColor(isSaved ? .red : .secondary)
+                            .font(.system(size: 14))
+                    }
+                    .buttonStyle(.plain)
+                    .help(isSaved ? "Remove from Saved Artists" : "Add to Saved Artists")
+                }
+            }
 
             // Verified platforms section
             if !artist.verifiedPlatforms.isEmpty {
@@ -160,6 +180,8 @@ struct FlowLayout: Layout {
             )
         ]
     )
+    .environmentObject(LicenseManager())
+    .environmentObject(SupportListManager())
     .padding()
     .frame(width: 300)
 }

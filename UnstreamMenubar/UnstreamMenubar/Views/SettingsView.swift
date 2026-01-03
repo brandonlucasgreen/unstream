@@ -2,16 +2,79 @@ import SwiftUI
 import ServiceManagement
 
 struct SettingsView: View {
+    @ObservedObject var licenseManager: LicenseManager
+
     @AppStorage("musicListeningEnabled") private var musicListeningEnabled = true
     @AppStorage("checkForUpdatesAutomatically") private var checkForUpdatesAutomatically = true
     @State private var launchAtLogin = false
     @State private var updateStatus: String? = nil
     @State private var isCheckingForUpdates = false
+    @State private var licenseKeyInput: String = ""
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 16) {
             Spacer()
                 .frame(height: 8)
+
+            // Pro License Section
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("Unstream Plus")
+                        .font(.headline)
+                    if licenseManager.isPro {
+                        Image(systemName: "checkmark.seal.fill")
+                            .foregroundColor(.green)
+                    }
+                }
+
+                if licenseManager.isPro {
+                    // Licensed state
+                    VStack(alignment: .leading, spacing: 4) {
+                        if let email = licenseManager.customerEmail {
+                            Text("Licensed to: \(email)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Button("Remove License") {
+                            licenseManager.clearLicense()
+                            licenseKeyInput = ""
+                        }
+                        .font(.caption)
+                        .foregroundColor(.red)
+                    }
+                } else {
+                    // Unlicensed state
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Unlock the Saved Artists feature to keep track of artists you want to support.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+
+                        HStack {
+                            TextField("License key", text: $licenseKeyInput)
+                                .textFieldStyle(.roundedBorder)
+                                .frame(maxWidth: 200)
+
+                            Button(licenseManager.isValidating ? "..." : "Activate") {
+                                Task {
+                                    await licenseManager.validateLicense(key: licenseKeyInput)
+                                }
+                            }
+                            .disabled(licenseKeyInput.isEmpty || licenseManager.isValidating)
+                        }
+
+                        if let error = licenseManager.validationError {
+                            Text(error)
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        }
+
+                        Link("Purchase a license", destination: URL(string: "https://unstream.stream/plus")!)
+                            .font(.caption)
+                    }
+                }
+            }
+
+            Divider()
 
             // Music Listening
             VStack(alignment: .leading, spacing: 4) {
@@ -71,9 +134,10 @@ struct SettingsView: View {
             Spacer()
         }
         .padding()
-        .frame(width: 320, height: 280)
+        .frame(width: 320, height: 380)
         .onAppear {
             launchAtLogin = getLaunchAtLoginStatus()
+            licenseKeyInput = licenseManager.licenseKey
         }
     }
 
@@ -122,5 +186,5 @@ extension Bundle {
 }
 
 #Preview {
-    SettingsView()
+    SettingsView(licenseManager: LicenseManager())
 }

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -16,6 +16,12 @@
 		81C89F9324EFB329B2999A90 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D70033B2F693E68D6CEC84B3 /* Assets.xcassets */; };
 		8AF8BA4B7F92249D4EAA5920 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B31DB9784DB0CFBF5F20949 /* AppState.swift */; };
 		9C1F168163A8B987B89F98B8 /* ResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E0ED8CFD58286DB2B51054 /* ResultsView.swift */; };
+		A153FE692F0957B90075E5F9 /* LicenseInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A153FE632F0957B90075E5F9 /* LicenseInfo.swift */; };
+		A153FE6A2F0957B90075E5F9 /* SupportListManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A153FE672F0957B90075E5F9 /* SupportListManager.swift */; };
+		A153FE6B2F0957B90075E5F9 /* SupportListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A153FE682F0957B90075E5F9 /* SupportListView.swift */; };
+		A153FE6C2F0957B90075E5F9 /* ProUpgradeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A153FE652F0957B90075E5F9 /* ProUpgradeView.swift */; };
+		A153FE6D2F0957B90075E5F9 /* SupportEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A153FE662F0957B90075E5F9 /* SupportEntry.swift */; };
+		A153FE6E2F0957B90075E5F9 /* LicenseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A153FE642F0957B90075E5F9 /* LicenseManager.swift */; };
 		A3D69F6D151B5BA91BCAD5AF /* NowPlayingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16FEC357D5AF596E6A3C9FF2 /* NowPlayingView.swift */; };
 		C0107F7F16CE5F7D50A0D8BA /* PlatformBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D9B657DD1234685545F8B9 /* PlatformBadge.swift */; };
 		DA0A97C9D04A1D74B50D683A /* SearchResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79AEF0735722A4FCDD838D05 /* SearchResponse.swift */; };
@@ -34,6 +40,12 @@
 		777714ECD054AD86F93188F5 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		79AEF0735722A4FCDD838D05 /* SearchResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResponse.swift; sourceTree = "<group>"; };
 		86E80A0C3502898585C7A7D2 /* MediaObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaObserver.swift; sourceTree = "<group>"; };
+		A153FE632F0957B90075E5F9 /* LicenseInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LicenseInfo.swift; path = UnstreamMenubar/Models/LicenseInfo.swift; sourceTree = "<group>"; };
+		A153FE642F0957B90075E5F9 /* LicenseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LicenseManager.swift; path = UnstreamMenubar/LicenseManager.swift; sourceTree = "<group>"; };
+		A153FE652F0957B90075E5F9 /* ProUpgradeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProUpgradeView.swift; path = UnstreamMenubar/Views/ProUpgradeView.swift; sourceTree = "<group>"; };
+		A153FE662F0957B90075E5F9 /* SupportEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupportEntry.swift; path = UnstreamMenubar/Models/SupportEntry.swift; sourceTree = "<group>"; };
+		A153FE672F0957B90075E5F9 /* SupportListManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupportListManager.swift; path = UnstreamMenubar/SupportListManager.swift; sourceTree = "<group>"; };
+		A153FE682F0957B90075E5F9 /* SupportListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupportListView.swift; path = UnstreamMenubar/Views/SupportListView.swift; sourceTree = "<group>"; };
 		A4D9D8A335FE3D07CE9851A3 /* UnstreamMenubar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = UnstreamMenubar.entitlements; sourceTree = "<group>"; };
 		ADC98F9EF3A0EFF8CE0F6094 /* NowPlaying.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlaying.swift; sourceTree = "<group>"; };
 		B3E0ED8CFD58286DB2B51054 /* ResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsView.swift; sourceTree = "<group>"; };
@@ -42,13 +54,19 @@
 		D30C5DE6E6DA5D1F45AC53F5 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		D337F593A52D74DDB206DFEB /* UnstreamAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnstreamAPI.swift; sourceTree = "<group>"; };
 		D70033B2F693E68D6CEC84B3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		F1D00195134C51491855D73C /* UnstreamMenubar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UnstreamMenubar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F1D00195134C51491855D73C /* Unstream.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Unstream.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		256BC1D3A7EF454594FB982C = {
 			isa = PBXGroup;
 			children = (
+				A153FE632F0957B90075E5F9 /* LicenseInfo.swift */,
+				A153FE642F0957B90075E5F9 /* LicenseManager.swift */,
+				A153FE652F0957B90075E5F9 /* ProUpgradeView.swift */,
+				A153FE662F0957B90075E5F9 /* SupportEntry.swift */,
+				A153FE672F0957B90075E5F9 /* SupportListManager.swift */,
+				A153FE682F0957B90075E5F9 /* SupportListView.swift */,
 				C8179BBE0CAD2763C2FC442D /* UnstreamMenubar */,
 				28A4FB261E9D1AA52E886712 /* Products */,
 			);
@@ -57,7 +75,7 @@
 		28A4FB261E9D1AA52E886712 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F1D00195134C51491855D73C /* UnstreamMenubar.app */,
+				F1D00195134C51491855D73C /* Unstream.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -120,7 +138,7 @@
 			packageProductDependencies = (
 			);
 			productName = UnstreamMenubar;
-			productReference = F1D00195134C51491855D73C /* UnstreamMenubar.app */;
+			productReference = F1D00195134C51491855D73C /* Unstream.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -130,7 +148,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					5B76C3E1CE29129F219B9F03 = {
 						DevelopmentTeam = "";
@@ -148,7 +166,6 @@
 			);
 			mainGroup = 256BC1D3A7EF454594FB982C;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -174,6 +191,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				8AF8BA4B7F92249D4EAA5920 /* AppState.swift in Sources */,
+				A153FE692F0957B90075E5F9 /* LicenseInfo.swift in Sources */,
+				A153FE6A2F0957B90075E5F9 /* SupportListManager.swift in Sources */,
+				A153FE6B2F0957B90075E5F9 /* SupportListView.swift in Sources */,
+				A153FE6C2F0957B90075E5F9 /* ProUpgradeView.swift in Sources */,
+				A153FE6D2F0957B90075E5F9 /* SupportEntry.swift in Sources */,
+				A153FE6E2F0957B90075E5F9 /* LicenseManager.swift in Sources */,
 				FEAC4B5A552639681B17EC47 /* EmptyStateView.swift in Sources */,
 				F98DF5A620640DB76416589E /* MediaObserver.swift in Sources */,
 				0C821B4B6AB77A3C9D3017BF /* NowPlaying.swift in Sources */,
@@ -197,10 +220,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				AUTOMATION_APPLE_EVENTS = YES;
 				CODE_SIGN_ENTITLEMENTS = UnstreamMenubar/UnstreamMenubar.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = UnstreamMenubar/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -247,9 +273,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -270,6 +298,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.9;
@@ -280,10 +309,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				AUTOMATION_APPLE_EVENTS = YES;
 				CODE_SIGN_ENTITLEMENTS = UnstreamMenubar/UnstreamMenubar.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = UnstreamMenubar/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -330,9 +362,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -346,6 +380,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.9;

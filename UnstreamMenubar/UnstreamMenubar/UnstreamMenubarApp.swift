@@ -5,11 +5,15 @@ import Combine
 struct UnstreamMenubarApp: App {
     @StateObject private var appState = AppState()
     @StateObject private var mediaObserver = MediaObserver()
+    @StateObject private var licenseManager = LicenseManager()
+    @StateObject private var supportListManager = SupportListManager()
 
     var body: some Scene {
         MenuBarExtra {
             PopoverView()
                 .environmentObject(appState)
+                .environmentObject(licenseManager)
+                .environmentObject(supportListManager)
                 .onReceive(mediaObserver.$currentTrack) { nowPlaying in
                     Task {
                         await appState.updateNowPlaying(nowPlaying)
@@ -23,7 +27,7 @@ struct UnstreamMenubarApp: App {
 
         // Standalone Settings window
         Window("Unstream Settings", id: "settings") {
-            SettingsView()
+            SettingsView(licenseManager: licenseManager)
         }
         .windowResizability(.contentSize)
         .defaultPosition(.center)

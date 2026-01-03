@@ -22,3 +22,8 @@
   from = "/api/desktop/version"
   to = "/.netlify/functions/desktop-version"
   status = 200
+
+[[redirects]]
+  from = "/plus"
+  to = "https://kidlightbulbs.lemonsqueezy.com/checkout/buy/d4e127a7-2cef-4013-80b8-5d0de691f332"
+  status = 302
