@@ -14,27 +14,55 @@ async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutM
   }
 }
 
-// Fetch Bandcamp embed data for an artist
-async function getBandcampEmbed(artistUrl: string): Promise<{ embedUrl: string; title: string } | null> {
+// Fetch Bandcamp embed data for an artist, album, or track URL
+async function getBandcampEmbed(url: string): Promise<{ embedUrl: string; title: string } | null> {
   try {
-    const artistResponse = await fetchWithTimeout(artistUrl, {
+    // Check if the URL is already an album or track page
+    const isAlbumUrl = url.includes('/album/');
+    const isTrackUrl = url.includes('/track/');
+
+    const response = await fetchWithTimeout(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
       },
     }, 5000);
 
-    if (!artistResponse.ok) return null;
+    if (!response.ok) return null;
 
-    const artistHtml = await artistResponse.text();
+    const html = await response.text();
 
-    const albumMatch = artistHtml.match(/href="(\/album\/[^"]+)"/);
-    const trackMatch = artistHtml.match(/href="(\/track\/[^"]+)"/);
+    // If we're on an album or track page, extract the ID directly
+    if (isAlbumUrl || isTrackUrl) {
+      const itemType = isAlbumUrl ? 'album' : 'track';
+
+      // Try multiple patterns to find the item ID
+      const directMatch = html.match(new RegExp(`${itemType}=(\\d+)`));
+      const jsonMatch = html.match(new RegExp(`"${itemType}_id"\\s*:\\s*(\\d+)`));
+      const currentIdMatch = html.match(/"current"\s*:\s*\{[^}]*"id"\s*:\s*(\d+)/);
+
+      const idMatch = directMatch || jsonMatch || currentIdMatch;
+      if (!idMatch) return null;
+
+      const itemId = idMatch[1];
+
+      const titleMatch = html.match(/<title>([^<]+)<\/title>/);
+      const title = titleMatch?.[1]?.split('|')[0]?.trim() || 'Music';
+
+      return {
+        embedUrl: `https://bandcamp.com/EmbeddedPlayer/${itemType}=${itemId}/size=small/bgcol=ffffff/linkcol=0687f5/transparent=true/`,
+        title,
+      };
+    }
+
+    // Otherwise, it's an artist page - look for album or track links
+    const albumMatch = html.match(/href="(\/album\/[^"]+)"/);
+    const trackMatch = html.match(/href="(\/track\/[^"]+)"/);
 
     let itemPath = albumMatch?.[1] || trackMatch?.[1];
     const itemType: 'album' | 'track' = albumMatch ? 'album' : 'track';
 
     if (!itemPath) {
-      const trackIdMatch = artistHtml.match(/data-item-id="track-(\d+)"/);
+      const trackIdMatch = html.match(/data-item-id="track-(\d+)"/);
       if (trackIdMatch) {
         const trackId = trackIdMatch[1];
         return {
@@ -45,7 +73,10 @@ async function getBandcampEmbed(artistUrl: string): Promise<{ embedUrl: string; 
       return null;
     }
 
-    const itemUrl = artistUrl.replace(/\/$/, '') + itemPath;
+    // Extract base URL for constructing the full item URL
+    const baseUrl = url.replace(/\/$/, '').replace(/\/music$/, '');
+    const itemUrl = baseUrl + itemPath;
+
     const itemResponse = await fetchWithTimeout(itemUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
