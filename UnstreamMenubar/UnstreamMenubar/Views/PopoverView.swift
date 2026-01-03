@@ -63,7 +63,10 @@ struct PopoverView: View {
 
             // Footer
             HStack {
-                Button(action: { openWindow(id: "settings") }) {
+                Button(action: {
+                    openWindow(id: "settings")
+                    NSApplication.shared.activate(ignoringOtherApps: true)
+                }) {
                     Label("Settings", systemImage: "gear")
                         .font(.caption)
                 }

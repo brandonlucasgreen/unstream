@@ -7,24 +7,9 @@ struct SettingsView: View {
     @State private var launchAtLogin = false
     @State private var updateStatus: String? = nil
     @State private var isCheckingForUpdates = false
-    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            // Header
-            HStack {
-                Text("Settings")
-                    .font(.headline)
-                Spacer()
-                Button("Done") {
-                    dismiss()
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.small)
-            }
-
-            Divider()
-
             // Music Listening
             VStack(alignment: .leading, spacing: 4) {
                 Toggle("Music app listening", isOn: $musicListeningEnabled)
@@ -83,7 +68,7 @@ struct SettingsView: View {
             Spacer()
         }
         .padding()
-        .frame(width: 320, height: 340)
+        .frame(width: 320, height: 280)
         .onAppear {
             launchAtLogin = getLaunchAtLoginStatus()
         }
