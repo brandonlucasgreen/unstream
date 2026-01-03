@@ -8,6 +8,7 @@ class AppState: ObservableObject {
     @Published var searchResults: [ArtistResult] = []
     @Published var isSearching: Bool = false
     @Published var searchError: String? = nil
+    @Published var hasSearched: Bool = false
 
     // Now Playing state
     @Published var nowPlaying: NowPlaying? = nil
@@ -28,7 +29,7 @@ class AppState: ObservableObject {
     }
 
     var displayMode: DisplayMode {
-        if !searchResults.isEmpty || isSearching || !searchQuery.isEmpty {
+        if !searchResults.isEmpty || isSearching || hasSearched {
             return .searchResults
         } else if nowPlaying != nil && nowPlaying!.hasContent {
             return .nowPlaying
@@ -68,6 +69,7 @@ class AppState: ObservableObject {
             return
         }
 
+        hasSearched = true
         isSearching = true
         searchError = nil
 
@@ -86,6 +88,7 @@ class AppState: ObservableObject {
         searchQuery = ""
         searchResults = []
         searchError = nil
+        hasSearched = false
     }
 
     func updateNowPlaying(_ nowPlaying: NowPlaying?) async {
