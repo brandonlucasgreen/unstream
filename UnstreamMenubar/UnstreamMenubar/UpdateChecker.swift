@@ -16,7 +16,14 @@ actor UpdateChecker {
         let releaseNotes: String?
     }
 
-    func checkForUpdates() async throws -> String {
+    struct UpdateResult {
+        let message: String
+        let updateAvailable: Bool
+        let downloadUrl: String?
+        let latestVersion: String?
+    }
+
+    func checkForUpdates() async throws -> UpdateResult {
         let (data, _) = try await URLSession.shared.data(from: versionURL)
         let versionInfo = try JSONDecoder().decode(VersionInfo.self, from: data)
 
@@ -24,9 +31,19 @@ actor UpdateChecker {
         lastCheckTime = Date()
 
         if isNewerVersion(versionInfo.latestVersion, than: currentVersion) {
-            return "Update available: v\(versionInfo.latestVersion)"
+            return UpdateResult(
+                message: "Update available: v\(versionInfo.latestVersion)",
+                updateAvailable: true,
+                downloadUrl: versionInfo.downloadUrl,
+                latestVersion: versionInfo.latestVersion
+            )
         } else {
-            return "You're up to date (v\(currentVersion))"
+            return UpdateResult(
+                message: "You're up to date! (v\(currentVersion))",
+                updateAvailable: false,
+                downloadUrl: nil,
+                latestVersion: nil
+            )
         }
     }
 
@@ -38,10 +55,10 @@ actor UpdateChecker {
         }
 
         do {
-            let status = try await checkForUpdates()
-            if status.contains("available") {
+            let result = try await checkForUpdates()
+            if result.updateAvailable {
                 // Could show a notification here
-                print("[UpdateChecker] \(status)")
+                print("[UpdateChecker] \(result.message)")
             }
         } catch {
             print("[UpdateChecker] Failed to check for updates: \(error)")

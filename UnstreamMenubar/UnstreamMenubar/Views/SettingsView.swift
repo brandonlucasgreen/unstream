@@ -8,6 +8,8 @@ struct SettingsView: View {
     @AppStorage("checkForUpdatesAutomatically") private var checkForUpdatesAutomatically = true
     @State private var launchAtLogin = false
     @State private var updateStatus: String? = nil
+    @State private var updateAvailable = false
+    @State private var updateDownloadUrl: String? = nil
     @State private var isCheckingForUpdates = false
     @State private var licenseKeyInput: String = ""
 
@@ -102,7 +104,7 @@ struct SettingsView: View {
                 Toggle("Check for updates automatically", isOn: $checkForUpdatesAutomatically)
 
                 HStack {
-                    Button("Check for Updates Now") {
+                    Button("Check for Updates") {
                         checkForUpdates()
                     }
                     .disabled(isCheckingForUpdates)
@@ -114,9 +116,28 @@ struct SettingsView: View {
                 }
 
                 if let status = updateStatus {
-                    Text(status)
-                        .font(.caption)
-                        .foregroundColor(status.contains("available") ? .blue : .secondary)
+                    HStack(spacing: 4) {
+                        if updateAvailable {
+                            Image(systemName: "arrow.down.circle.fill")
+                                .foregroundColor(.blue)
+                        } else {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                        }
+                        Text(status)
+                            .font(.caption)
+                            .foregroundColor(updateAvailable ? .primary : .secondary)
+                    }
+
+                    if updateAvailable, let url = updateDownloadUrl, let downloadURL = URL(string: url) {
+                        Link(destination: downloadURL) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "arrow.down.to.line")
+                                Text("Download Update")
+                            }
+                            .font(.caption)
+                        }
+                    }
                 }
             }
 
@@ -134,7 +155,7 @@ struct SettingsView: View {
             Spacer()
         }
         .padding()
-        .frame(width: 320, height: 380)
+        .frame(width: 320, height: 420)
         .onAppear {
             launchAtLogin = getLaunchAtLoginStatus()
             licenseKeyInput = licenseManager.licenseKey
@@ -160,17 +181,23 @@ struct SettingsView: View {
     private func checkForUpdates() {
         isCheckingForUpdates = true
         updateStatus = nil
+        updateAvailable = false
+        updateDownloadUrl = nil
 
         Task {
             do {
-                let status = try await UpdateChecker.shared.checkForUpdates()
+                let result = try await UpdateChecker.shared.checkForUpdates()
                 await MainActor.run {
-                    updateStatus = status
+                    updateStatus = result.message
+                    updateAvailable = result.updateAvailable
+                    updateDownloadUrl = result.downloadUrl
                     isCheckingForUpdates = false
                 }
             } catch {
                 await MainActor.run {
                     updateStatus = "Failed to check for updates"
+                    updateAvailable = false
+                    updateDownloadUrl = nil
                     isCheckingForUpdates = false
                 }
             }
