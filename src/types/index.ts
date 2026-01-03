@@ -49,6 +49,9 @@ export interface SearchResult {
   type: 'artist' | 'album' | 'track';
   imageUrl?: string;
   platforms: PlatformLink[];
+  // Match confidence: 'verified' means releases match across platforms,
+  // 'unverified' means name-only match (no release data to compare)
+  matchConfidence?: 'verified' | 'unverified';
 }
 
 // API response from /api/search/sources

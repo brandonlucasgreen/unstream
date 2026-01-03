@@ -42,6 +42,9 @@ interface AggregatedResult {
     url: string;
     latestRelease?: LatestRelease;
   }[];
+  // Match confidence: 'verified' means releases match across platforms,
+  // 'unverified' means name-only match (no release data to compare)
+  matchConfidence?: 'verified' | 'unverified';
 }
 
 interface SearchResponse {
@@ -752,68 +755,112 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     new Promise(resolve => setTimeout(resolve, 4000)),
   ]);
 
-  // For each result, find the most recent release and only keep platforms with that same release
+  // Disambiguate artists by comparing releases across platforms
+  // If releases don't match, split into separate results
+  const disambiguated: AggregatedResult[] = [];
+
   for (const result of aggregated) {
     const platformsWithReleases = result.platforms.filter(p => p.latestRelease);
-    if (platformsWithReleases.length === 0) continue;
+    const platformsWithoutReleases = result.platforms.filter(p => !p.latestRelease);
 
-    // Parse dates and find the most recent
-    const releasesWithDates = platformsWithReleases.map(p => ({
-      platform: p,
-      date: parseReleaseDate(p.latestRelease?.releaseDate),
-      normalizedTitle: normalizeForComparison(p.latestRelease?.title || ''),
-    }));
+    // If no platforms have releases, mark as unverified and keep as-is
+    if (platformsWithReleases.length === 0) {
+      result.matchConfidence = 'unverified';
+      disambiguated.push(result);
+      continue;
+    }
 
-    // Sort by date descending (most recent first)
-    releasesWithDates.sort((a, b) => {
-      if (!a.date && !b.date) return 0;
-      if (!a.date) return 1;
-      if (!b.date) return -1;
-      return b.date.getTime() - a.date.getTime();
-    });
+    // If only one platform has releases, it's the primary; others are unverified
+    if (platformsWithReleases.length === 1) {
+      result.matchConfidence = 'verified';
+      disambiguated.push(result);
+      continue;
+    }
 
-    // Get the most recent release
-    const mostRecent = releasesWithDates[0];
-    if (!mostRecent?.normalizedTitle) continue;
+    // Multiple platforms have releases - group by release title similarity
+    const releaseGroups = new Map<string, typeof result.platforms>();
 
-    const mostRecentTitle = mostRecent.normalizedTitle;
-    const winningRelease = mostRecent.platform.latestRelease!;
+    for (const platform of platformsWithReleases) {
+      const normalizedTitle = normalizeForComparison(platform.latestRelease?.title || '');
 
-    // For platforms that have a different "latest", try to find the winning release on them
-    const searchPromises: Promise<void>[] = [];
-    for (const platform of result.platforms) {
-      if (platform.latestRelease) {
-        const normalizedTitle = normalizeForComparison(platform.latestRelease.title);
-        if (normalizedTitle !== mostRecentTitle) {
-          // This platform has a different release - try to find the winning release
-          if (platform.sourceId === 'bandcamp') {
-            searchPromises.push(
-              searchBandcampForAlbum(platform.url, winningRelease.title).then(albumUrl => {
-                if (albumUrl) {
-                  platform.latestRelease = {
-                    ...winningRelease,
-                    url: albumUrl,
-                  };
-                } else {
-                  platform.latestRelease = undefined;
-                }
-              })
-            );
-          } else {
-            // For other platforms, just clear if no match
-            platform.latestRelease = undefined;
-          }
+      // Find an existing group with a matching release
+      let foundGroup = false;
+      for (const [groupTitle, groupPlatforms] of releaseGroups) {
+        // Check if titles match (allowing partial matches for similar releases)
+        if (normalizedTitle === groupTitle ||
+            normalizedTitle.includes(groupTitle) ||
+            groupTitle.includes(normalizedTitle) ||
+            (normalizedTitle.length > 5 && groupTitle.length > 5 &&
+             (normalizedTitle.substring(0, 5) === groupTitle.substring(0, 5)))) {
+          groupPlatforms.push(platform);
+          foundGroup = true;
+          break;
         }
+      }
+
+      if (!foundGroup) {
+        releaseGroups.set(normalizedTitle, [platform]);
       }
     }
 
-    // Wait for album searches
-    if (searchPromises.length > 0) {
-      await Promise.allSettled(searchPromises);
+    // If all releases match (single group), keep as verified single result
+    if (releaseGroups.size === 1) {
+      result.matchConfidence = 'verified';
+      disambiguated.push(result);
+      continue;
+    }
+
+    // Multiple release groups = different artists with same name
+    // Split into separate results
+    console.log(`[Disambiguation] Splitting "${result.name}" into ${releaseGroups.size} separate artists based on different releases`);
+
+    let groupIndex = 0;
+    for (const [, groupPlatforms] of releaseGroups) {
+      groupIndex++;
+
+      // Get the primary platform (prefer Bandcamp, then Qobuz)
+      const primaryPlatform = groupPlatforms.find(p => p.sourceId === 'bandcamp') ||
+                              groupPlatforms.find(p => p.sourceId === 'qobuz') ||
+                              groupPlatforms[0];
+
+      // Create a new result for this group
+      const newResult: AggregatedResult = {
+        id: `${result.id}-${groupIndex}`,
+        name: result.name,
+        artist: result.artist,
+        type: result.type,
+        imageUrl: groupPlatforms.find(p => p.latestRelease?.imageUrl)?.latestRelease?.imageUrl || result.imageUrl,
+        platforms: [...groupPlatforms],
+        matchConfidence: 'verified',
+      };
+
+      disambiguated.push(newResult);
+    }
+
+    // Platforms without releases go into their own "unverified" group
+    // if there are any remaining
+    if (platformsWithoutReleases.length > 0) {
+      const unverifiedResult: AggregatedResult = {
+        id: `${result.id}-unverified`,
+        name: result.name,
+        artist: result.artist,
+        type: result.type,
+        imageUrl: result.imageUrl,
+        platforms: platformsWithoutReleases,
+        matchConfidence: 'unverified',
+      };
+      disambiguated.push(unverifiedResult);
     }
   }
 
-  return aggregated;
+  // Sort results: verified first, then by platform count
+  disambiguated.sort((a, b) => {
+    if (a.matchConfidence === 'verified' && b.matchConfidence !== 'verified') return -1;
+    if (a.matchConfidence !== 'verified' && b.matchConfidence === 'verified') return 1;
+    return b.platforms.length - a.platforms.length;
+  });
+
+  return disambiguated;
 }
 
 // Search a Bandcamp artist page for a specific album title

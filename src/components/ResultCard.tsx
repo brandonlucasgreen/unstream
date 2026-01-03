@@ -126,6 +126,14 @@ export function ResultCard({ result }: ResultCardProps) {
             <span className="text-xs px-1.5 py-0.5 rounded bg-accent-primary/10 text-accent-primary">
               {typeLabel}
             </span>
+            {result.matchConfidence === 'unverified' && (
+              <span className="text-xs px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-500 flex items-center gap-1" title="Could not verify this is the same artist - no matching releases found">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Unverified
+              </span>
+            )}
           </div>
           <h3 className="font-medium text-base text-text-primary truncate">
             {result.name}
@@ -156,6 +164,18 @@ export function ResultCard({ result }: ResultCardProps) {
       {/* Expanded platform list */}
       {expanded && (
         <div className="px-4 pb-4 pt-2 border-t border-border space-y-4 animate-in slide-in-from-top-2 duration-200">
+          {/* Unverified match warning */}
+          {result.matchConfidence === 'unverified' && (
+            <div className="flex items-start gap-2 p-2 rounded bg-yellow-500/5 border border-yellow-500/20 text-yellow-600 text-xs">
+              <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span>
+                <strong>Unverified match:</strong> We couldn't confirm this is the same "{result.name}" as the other results.
+                This may be a different artist with the same name.
+              </span>
+            </div>
+          )}
           {/* Latest Release Section with Preview */}
           {latestRelease && platformsWithRelease.length > 0 && (
             <div className="space-y-2">
