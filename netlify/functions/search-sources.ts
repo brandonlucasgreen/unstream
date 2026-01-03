@@ -780,38 +780,15 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
       continue;
     }
 
-    // If we have releases from some platforms, but marketplace platforms are missing releases,
-    // split those suspicious ones into a separate unverified result
+    // If we have releases from at least one platform, trust the name match for others
+    // Missing release data (fetch failures, timeouts) shouldn't trigger a split
+    // We only split when we have CONFLICTING releases, not MISSING releases
+    // Keep all platforms together and mark as verified
     if (suspiciousPlatforms.length > 0 && platformsWithReleases.length > 0) {
-      console.log(`[Disambiguation] Splitting "${result.name}": ${suspiciousPlatforms.map(p => p.sourceId).join(', ')} have no releases`);
-
-      // Create main verified result with platforms that have releases
-      // Only use images from verified platforms (those with releases)
-      const verifiedImageUrl = platformsWithReleases.find(p => p.latestRelease?.imageUrl)?.latestRelease?.imageUrl;
-      const verifiedResult: AggregatedResult = {
-        id: result.id,
-        name: result.name,
-        artist: result.artist,
-        type: result.type,
-        imageUrl: verifiedImageUrl, // Don't fall back to potentially unverified image
-        platforms: [...platformsWithReleases, ...platformsWithoutReleases.filter(p => !platformsWithReleaseFetching.has(p.sourceId))],
-        matchConfidence: 'verified',
-      };
-      disambiguated.push(verifiedResult);
-
-      // Create separate unverified results for suspicious platforms
-      for (const platform of suspiciousPlatforms) {
-        const unverifiedResult: AggregatedResult = {
-          id: `${result.id}-${platform.sourceId}`,
-          name: result.name,
-          artist: result.artist,
-          type: result.type,
-          imageUrl: result.imageUrl,
-          platforms: [platform],
-          matchConfidence: 'unverified',
-        };
-        disambiguated.push(unverifiedResult);
-      }
+      console.log(`[Disambiguation] "${result.name}": ${suspiciousPlatforms.map(p => p.sourceId).join(', ')} missing releases, but trusting name match`);
+      // Keep all platforms together - the name match + verified releases from other platforms is enough
+      result.matchConfidence = 'verified';
+      disambiguated.push(result);
       continue;
     }
 
