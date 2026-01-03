@@ -785,12 +785,14 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
       console.log(`[Disambiguation] Splitting "${result.name}": ${suspiciousPlatforms.map(p => p.sourceId).join(', ')} have no releases`);
 
       // Create main verified result with platforms that have releases
+      // Only use images from verified platforms (those with releases)
+      const verifiedImageUrl = platformsWithReleases.find(p => p.latestRelease?.imageUrl)?.latestRelease?.imageUrl;
       const verifiedResult: AggregatedResult = {
         id: result.id,
         name: result.name,
         artist: result.artist,
         type: result.type,
-        imageUrl: platformsWithReleases.find(p => p.latestRelease?.imageUrl)?.latestRelease?.imageUrl || result.imageUrl,
+        imageUrl: verifiedImageUrl, // Don't fall back to potentially unverified image
         platforms: [...platformsWithReleases, ...platformsWithoutReleases.filter(p => !platformsExpectedToHaveReleases.has(p.sourceId))],
         matchConfidence: 'verified',
       };
