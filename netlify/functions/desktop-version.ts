@@ -2,9 +2,9 @@ import type { Handler } from '@netlify/functions';
 
 // Desktop app version info - update this when releasing new versions
 const VERSION_INFO = {
-  latestVersion: '1.0.0',
+  latestVersion: '1.1.0',
   downloadUrl: 'https://github.com/brandonlucasgreen/unstream/releases/latest',
-  releaseNotes: 'Initial release of Unstream for macOS',
+  releaseNotes: 'Introducing Unstream Plus with Saved Artists feature and iCloud sync',
 };
 
 export const handler: Handler = async (event) => {
