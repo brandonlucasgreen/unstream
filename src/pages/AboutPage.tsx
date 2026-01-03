@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import Markdown from 'react-markdown';
 import { Link } from 'react-router-dom';
@@ -109,7 +109,6 @@ const markdownComponents = {
 };
 
 export function AboutPage() {
-  const isMac = useMemo(() => navigator.platform.toUpperCase().includes('MAC'), []);
   const [parsedContent, setParsedContent] = useState<ParsedContent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -134,19 +133,8 @@ export function AboutPage() {
     <div className="min-h-screen">
       {/* Top navigation */}
       <nav className="absolute top-4 left-1/2 -translate-x-1/2 md:left-auto md:right-4 md:translate-x-0 flex items-center gap-3 text-sm text-text-secondary">
-        {isMac && (
-          <>
-            <a
-              href="https://github.com/brandonlucasgreen/unstream/releases/"
-              className="hover:text-text-primary transition-colors"
-            >
-              Download for macOS
-            </a>
-            <span className="text-text-muted/40 text-xs">&#x2022;</span>
-          </>
-        )}
-        <Link to="/about" className="hover:text-text-primary transition-colors">
-          About/FAQ
+        <Link to="/" className="hover:text-text-primary transition-colors">
+          Home
         </Link>
         <span className="text-text-muted/40 text-xs">&#x2022;</span>
         <a
