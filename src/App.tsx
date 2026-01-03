@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { SearchBar } from './components/SearchBar';
 import { ResultCard } from './components/ResultCard';
@@ -8,6 +8,7 @@ import './index.css';
 
 function App() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const isMac = useMemo(() => navigator.platform.toUpperCase().includes('MAC'), []);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,13 +71,17 @@ function App() {
     <div className="min-h-screen">
       {/* Top navigation */}
       <nav className="absolute top-4 left-1/2 -translate-x-1/2 md:left-auto md:right-4 md:translate-x-0 flex items-center gap-3 text-sm text-text-secondary">
-        <a
-          href="https://github.com/brandonlucasgreen/unstream/releases/download/macos/Unstream.zip"
-          className="hover:text-text-primary transition-colors"
-        >
-          Download for macOS
-        </a>
-        <span className="text-text-muted/40 text-xs">&#x2022;</span>
+        {isMac && (
+          <>
+            <a
+              href="https://github.com/brandonlucasgreen/unstream/releases/download/macos/Unstream.zip"
+              className="hover:text-text-primary transition-colors"
+            >
+              Download for macOS
+            </a>
+            <span className="text-text-muted/40 text-xs">&#x2022;</span>
+          </>
+        )}
         <Link to="/about" className="hover:text-text-primary transition-colors">
           About/FAQ
         </Link>
