@@ -69,36 +69,8 @@ function App() {
 
   return (
     <div className="min-h-screen">
-      {/* Top navigation */}
-      <nav className="absolute top-4 left-1/2 -translate-x-1/2 md:left-auto md:right-4 md:translate-x-0 flex items-center gap-3 text-sm text-text-secondary">
-        <a
-          href="https://unstream.featurebase.app/roadmap"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:text-text-primary transition-colors"
-        >
-          Roadmap
-        </a>
-        <span className="text-text-muted/40 text-xs">&#x2022;</span>
-        <a
-          href="mailto:support@unstream.stream"
-          className="hover:text-text-primary transition-colors"
-        >
-          Support
-        </a>
-        <span className="text-text-muted/40 text-xs">&#x2022;</span>
-        <a
-          href="https://liberapay.com/brandonlucasgreen/donate"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:text-text-primary transition-colors"
-        >
-          Donate
-        </a>
-      </nav>
-
       {/* Header */}
-      <header className="pt-16 pb-8 px-4">
+      <header className="pt-8 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
             <button
@@ -144,7 +116,7 @@ function App() {
           <SearchBar onSearch={handleSearch} isLoading={isLoading || isResolving} initialQuery={resolvedQuery} />
 
           {/* Tip text */}
-          <p className="text-center text-text-muted text-sm mt-4">
+          <p className="text-center text-text-secondary text-sm mt-4">
             Using an iOS device?{' '}
             <a
               href="https://www.icloud.com/shortcuts/73296296361e4f609087746e7f046d47"
@@ -246,8 +218,35 @@ function App() {
 
       {/* Footer */}
       <footer className="border-t border-border py-6 px-4">
-        <div className="max-w-4xl mx-auto text-center text-text-muted/70 text-sm">
-          Made with love in Massachusetts, USA
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-3 text-text-secondary text-sm">
+          <span>Made with love in Massachusetts, USA</span>
+          <span className="hidden md:inline text-text-muted/40">&#x2022;</span>
+          <nav className="flex items-center gap-3">
+            <a
+              href="https://unstream.featurebase.app/roadmap"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-text-primary transition-colors"
+            >
+              Roadmap
+            </a>
+            <span className="text-text-muted/40 text-xs">&#x2022;</span>
+            <a
+              href="mailto:support@unstream.stream"
+              className="hover:text-text-primary transition-colors"
+            >
+              Support
+            </a>
+            <span className="text-text-muted/40 text-xs">&#x2022;</span>
+            <a
+              href="https://liberapay.com/brandonlucasgreen/donate"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-text-primary transition-colors"
+            >
+              Donate
+            </a>
+          </nav>
         </div>
       </footer>
     </div>
