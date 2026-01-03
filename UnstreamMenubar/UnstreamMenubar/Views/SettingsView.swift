@@ -10,6 +10,9 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
+            Spacer()
+                .frame(height: 8)
+
             // Music Listening
             VStack(alignment: .leading, spacing: 4) {
                 Toggle("Music app listening", isOn: $musicListeningEnabled)
