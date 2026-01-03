@@ -110,14 +110,18 @@ async function resolveStreamingUrl(url: string): Promise<{ artistName: string; s
           return { artistName, source: 'apple' };
         }
       } else {
-        // Album/song page: title format is usually "Album/Song by Artist" or "Album by Artist on Apple Music"
+        // Album/song page: title format is usually "Song by Artist on Apple Music"
         const titleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i) ||
                           html.match(/<meta\s+content="([^"]+)"\s+property="og:title"/i);
         if (titleMatch) {
-          // Extract artist name, handling various formats
-          const byMatch = titleMatch[1].match(/^.+?\s+by\s+(.+?)(?:\s+on Apple Music|\s*[-–—]\s*Apple Music)?$/i);
+          // Extract artist name using greedy match, then strip suffixes
+          const byMatch = titleMatch[1].match(/^.+?\s+by\s+(.+)$/i);
           if (byMatch) {
-            return { artistName: byMatch[1].trim(), source: 'apple' };
+            const artistName = byMatch[1]
+              .replace(/\s+on Apple Music$/i, '')
+              .replace(/\s*[-–—]\s*Apple Music$/i, '')
+              .trim();
+            return { artistName, source: 'apple' };
           }
         }
 
