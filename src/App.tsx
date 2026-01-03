@@ -74,15 +74,29 @@ function App() {
           About/FAQ
         </Link>
         <span className="text-text-muted/40 text-xs">&#x2022;</span>
-        <Link to="/roadmap" className="hover:text-text-primary transition-colors">
+        <a
+          href="https://unstream.featurebase.app/roadmap"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-text-primary transition-colors"
+        >
           Roadmap
-        </Link>
+        </a>
         <span className="text-text-muted/40 text-xs">&#x2022;</span>
         <a
           href="mailto:unstream@bgreen.lol?subject=Unstream%20Support"
           className="hover:text-text-primary transition-colors"
         >
           Support
+        </a>
+        <span className="text-text-muted/40 text-xs">&#x2022;</span>
+        <a
+          href="https://liberapay.com/brandonlucasgreen/donate"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-text-primary transition-colors"
+        >
+          Donate
         </a>
       </nav>
 

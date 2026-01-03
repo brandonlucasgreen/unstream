@@ -3,8 +3,113 @@ import type { ReactNode } from 'react';
 import Markdown from 'react-markdown';
 import { Link } from 'react-router-dom';
 
+interface Section {
+  title: string;
+  content: string;
+}
+
+interface ParsedContent {
+  intro: string;
+  faqTitle: string;
+  sections: Section[];
+}
+
+function parseContent(text: string): ParsedContent {
+  // Split on H1 "# FAQ" to separate intro from FAQ
+  const faqMatch = text.match(/^# (.+)$/m);
+  const faqIndex = text.search(/^# /m);
+
+  const intro = faqIndex > -1 ? text.slice(0, faqIndex).trim() : text;
+  const faqTitle = faqMatch ? faqMatch[1] : 'FAQ';
+  const faqContent = faqIndex > -1 ? text.slice(faqIndex) : '';
+
+  // Split FAQ content by H3 headings
+  const sections: Section[] = [];
+  const h3Regex = /^### (.+)$/gm;
+  const matches = [...faqContent.matchAll(h3Regex)];
+
+  for (let i = 0; i < matches.length; i++) {
+    const match = matches[i];
+    const title = match[1];
+    const startIndex = match.index! + match[0].length;
+    const endIndex = matches[i + 1]?.index ?? faqContent.length;
+    const content = faqContent.slice(startIndex, endIndex).trim();
+    sections.push({ title, content });
+  }
+
+  return { intro, faqTitle, sections };
+}
+
+function CollapsibleSection({ title, content, defaultOpen = false }: {
+  title: string;
+  content: string;
+  defaultOpen?: boolean;
+}) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  return (
+    <div className="border-b border-border/50 last:border-b-0">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between py-4 text-left group"
+      >
+        <h3 className="font-display text-lg font-semibold text-text-primary pr-4 group-hover:text-accent-primary transition-colors">
+          {title}
+        </h3>
+        <svg
+          className={`w-5 h-5 text-text-muted flex-shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      <div className={`overflow-hidden transition-all duration-200 ${isOpen ? 'max-h-[2000px] opacity-100 pb-4' : 'max-h-0 opacity-0'}`}>
+        <div className="prose prose-invert prose-sm max-w-none">
+          <Markdown components={markdownComponents}>
+            {content}
+          </Markdown>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const markdownComponents = {
+  p: ({ children }: { children?: ReactNode }) => (
+    <p className="text-text-primary/90 leading-relaxed mb-3">
+      {children}
+    </p>
+  ),
+  a: ({ href, children }: { href?: string; children?: ReactNode }) => (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-accent-primary hover:text-accent-secondary transition-colors underline"
+    >
+      {children}
+    </a>
+  ),
+  ul: ({ children }: { children?: ReactNode }) => (
+    <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1 [&_ul]:mt-1 [&_ul]:mb-0">
+      {children}
+    </ul>
+  ),
+  li: ({ children }: { children?: ReactNode }) => (
+    <li className="text-text-primary/90">{children}</li>
+  ),
+  em: ({ children }: { children?: ReactNode }) => (
+    <em className="text-text-primary italic">{children}</em>
+  ),
+  strong: ({ children }: { children?: ReactNode }) => (
+    <strong className="text-text-primary font-semibold">{children}</strong>
+  ),
+};
+
 export function AboutPage() {
-  const [content, setContent] = useState<string>('');
+  const [parsedContent, setParsedContent] = useState<ParsedContent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,7 +120,7 @@ export function AboutPage() {
         return res.text();
       })
       .then(text => {
-        setContent(text);
+        setParsedContent(parseContent(text));
         setIsLoading(false);
       })
       .catch(err => {
@@ -32,15 +137,29 @@ export function AboutPage() {
           About/FAQ
         </Link>
         <span className="text-text-muted/40 text-xs">&#x2022;</span>
-        <Link to="/roadmap" className="hover:text-text-primary transition-colors">
+        <a
+          href="https://unstream.featurebase.app/roadmap"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-text-primary transition-colors"
+        >
           Roadmap
-        </Link>
+        </a>
         <span className="text-text-muted/40 text-xs">&#x2022;</span>
         <a
           href="mailto:unstream@bgreen.lol?subject=Unstream%20Support"
           className="hover:text-text-primary transition-colors"
         >
           Support
+        </a>
+        <span className="text-text-muted/40 text-xs">&#x2022;</span>
+        <a
+          href="https://liberapay.com/brandonlucasgreen/donate"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-text-primary transition-colors"
+        >
+          Donate
         </a>
       </nav>
 
@@ -69,65 +188,35 @@ export function AboutPage() {
             <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-center">
               {error}
             </div>
-          ) : (
-            <article className="prose prose-invert prose-lg max-w-none">
-              <Markdown
-                components={{
-                  // Style headings
-                  h1: ({ children }: { children?: ReactNode }) => (
-                    <h1 className="font-display text-3xl font-bold text-text-primary mt-8 mb-4">
-                      {children}
-                    </h1>
-                  ),
-                  h2: ({ children }: { children?: ReactNode }) => (
-                    <h2 className="font-display text-2xl font-semibold text-text-primary mt-8 mb-3">
-                      {children}
-                    </h2>
-                  ),
-                  h3: ({ children }: { children?: ReactNode }) => (
-                    <h3 className="font-display text-xl font-semibold text-text-primary mt-6 mb-2">
-                      {children}
-                    </h3>
-                  ),
-                  // Style paragraphs
-                  p: ({ children }: { children?: ReactNode }) => (
-                    <p className="text-text-primary/90 leading-relaxed mb-4">
-                      {children}
-                    </p>
-                  ),
-                  // Style links
-                  a: ({ href, children }: { href?: string; children?: ReactNode }) => (
-                    <a
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-accent-primary hover:text-accent-secondary transition-colors underline"
-                    >
-                      {children}
-                    </a>
-                  ),
-                  // Style lists
-                  ul: ({ children }: { children?: ReactNode }) => (
-                    <ul className="list-disc ml-5 text-text-primary/90 mb-4 space-y-1 [&_ul]:mt-1 [&_ul]:mb-0">
-                      {children}
-                    </ul>
-                  ),
-                  li: ({ children }: { children?: ReactNode }) => (
-                    <li className="text-text-primary/90">{children}</li>
-                  ),
-                  // Style emphasis
-                  em: ({ children }: { children?: ReactNode }) => (
-                    <em className="text-text-primary italic">{children}</em>
-                  ),
-                  strong: ({ children }: { children?: ReactNode }) => (
-                    <strong className="text-text-primary font-semibold">{children}</strong>
-                  ),
-                }}
-              >
-                {content}
-              </Markdown>
+          ) : parsedContent ? (
+            <article>
+              {/* Intro section */}
+              <div className="prose prose-invert prose-lg max-w-none mb-8">
+                <Markdown components={markdownComponents}>
+                  {parsedContent.intro}
+                </Markdown>
+              </div>
+
+              {/* FAQ section */}
+              {parsedContent.sections.length > 0 && (
+                <div className="mt-8">
+                  <h2 className="font-display text-2xl font-semibold text-text-primary mb-6">
+                    {parsedContent.faqTitle}
+                  </h2>
+                  <div className="bg-surface/50 rounded-xl border border-border/50 px-5">
+                    {parsedContent.sections.map((section, index) => (
+                      <CollapsibleSection
+                        key={index}
+                        title={section.title}
+                        content={section.content}
+                        defaultOpen={false}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </article>
-          )}
+          ) : null}
 
           {/* Back link */}
           <div className="mt-12 text-center">
