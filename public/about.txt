@@ -45,7 +45,7 @@ Hoopla and Freegal are services offered through public libraries in the US. To a
 **Do artists get paid when their music is listened to via one of these services? Unclear, and likely not.** However: you now have access to a vast back catalog of music without your money going to a giant tech conglomerate, and you’ve found one more way to support your local library.
 
 ### What are some of the other benefits of moving off a streaming service?
-Lots!
+Lots of them!
 - Save money
 - Curate your own music library and tastes
 - Discover new music through the recommendations of friends & tastemakers rather than an algorithm designed to keep you paying
@@ -55,16 +55,14 @@ Lots!
 ### What data does Unstream track?
 Virtually nothing. We track visit and visitor counts, by location and source (ie. where you came to Unstream from), but no personal data is captured.
 
-### I am ethically opposed to AI. Is AI at all used in Unstream?
-No AI is implemented in the Unstream app itself. I am staunchly opposed to the use of AI in the creation or recommending of art & music, and the app neither uses AI to recommend artists nor is intended to promote artists creating AI-generated music. 
-
-However, I did use AI, specifically Claude Code using the Opus 4.5 model, to help build Unstream under my direction. Read more about my stance on AI in music, culture & software development.
+### I am ethically opposed to AI in music. Is AI at all used in Unstream?
+No AI is implemented in the Unstream app. The app neither uses AI models to recommend artists nor is intended to promote artists creating AI-generated music. 
 
 ### I’d like to request a feature. How can I do that?
-You can [email me](mailto:hi@bgreen.lol)!
+Head over to the [Unstream feature board](https://unstream.featurebase.app) and share your idea! You can also upvote other people’s ideas.
 
 ### I’m having an issue using Unstream. How can I report it?
-Just [let me know via email](mailto:hi@bgreen.lol) and I’ll try and fix it asap. 
+If it’s urgent, just [let me know via email](mailto:support@unstream.stream) and I’ll try and fix it asap. 
 
 ### I love using Unstream, how can I best support the app?
 Unstream is totally free to use, but please consider a donation by [going here](https://liberapay.com/brandonlucasgreen)!
