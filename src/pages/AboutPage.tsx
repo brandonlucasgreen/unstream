@@ -137,7 +137,7 @@ export function AboutPage() {
         {isMac && (
           <>
             <a
-              href="https://github.com/brandonlucasgreen/unstream/releases/download/macos/Unstream.zip"
+              href="https://github.com/brandonlucasgreen/unstream/releases/"
               className="hover:text-text-primary transition-colors"
             >
               Download for macOS
