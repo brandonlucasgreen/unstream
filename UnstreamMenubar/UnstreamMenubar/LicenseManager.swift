@@ -19,8 +19,9 @@ class LicenseManager: ObservableObject {
     // Revalidation interval: 7 days
     private let revalidationInterval: TimeInterval = 7 * 24 * 60 * 60
 
-    // LemonSqueezy License API endpoint
-    private let licenseAPIURL = "https://api.lemonsqueezy.com/v1/licenses/validate"
+    // LemonSqueezy License API endpoints
+    private let activateAPIURL = "https://api.lemonsqueezy.com/v1/licenses/activate"
+    private let validateAPIURL = "https://api.lemonsqueezy.com/v1/licenses/validate"
 
     var isPro: Bool {
         // Must have a license key and it must be valid
@@ -63,9 +64,16 @@ class LicenseManager: ObservableObject {
         validationError = nil
 
         do {
-            let response = try await callLemonSqueezyAPI(licenseKey: trimmedKey)
+            // First try to activate the license (for new licenses)
+            var response = try await activateLicense(licenseKey: trimmedKey)
 
-            if response.valid,
+            // If activation says already activated or limit reached, try validate instead
+            if !response.isSuccess && (response.error?.contains("activated") == true || response.error?.contains("limit") == true) {
+                print("License already activated, trying validate...")
+                response = try await validateLicenseAPI(licenseKey: trimmedKey)
+            }
+
+            if response.isSuccess,
                let licenseInfo = response.licenseKey,
                let meta = response.meta {
 
@@ -77,19 +85,11 @@ class LicenseManager: ObservableObject {
                     return
                 }
 
-                // Check license status
-                guard licenseInfo.isActive else {
-                    validationError = "License is \(licenseInfo.status)"
-                    storedLicenseIsValid = false
-                    isValidating = false
-                    return
-                }
-
                 // Success! Store the validated license
                 licenseKey = trimmedKey
                 storedLicenseIsValid = true
                 licenseValidatedAt = Date().timeIntervalSince1970
-                licenseEmail = meta.customerEmail
+                licenseEmail = meta.customerEmail ?? ""
                 validationError = nil
 
             } else {
@@ -97,6 +97,15 @@ class LicenseManager: ObservableObject {
                 storedLicenseIsValid = false
             }
 
+        } catch let decodingError as DecodingError {
+            print("License JSON decoding error: \(decodingError)")
+            if case .keyNotFound(let key, let context) = decodingError {
+                print("Missing key: \(key.stringValue) at \(context.codingPath)")
+            }
+            if case .typeMismatch(let type, let context) = decodingError {
+                print("Type mismatch: expected \(type) at \(context.codingPath)")
+            }
+            validationError = "License validation failed. Please try again."
         } catch {
             print("License validation error: \(error)")
             // On network error, keep existing valid status if we have one
@@ -116,8 +125,8 @@ class LicenseManager: ObservableObject {
         validationError = nil
     }
 
-    private func callLemonSqueezyAPI(licenseKey: String) async throws -> LicenseResponse {
-        guard let url = URL(string: licenseAPIURL) else {
+    private func activateLicense(licenseKey: String) async throws -> LicenseResponse {
+        guard let url = URL(string: activateAPIURL) else {
             throw LicenseError.invalidURL
         }
 
@@ -126,8 +135,11 @@ class LicenseManager: ObservableObject {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
 
-        let body = "license_key=\(licenseKey)"
+        let encodedKey = licenseKey.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? licenseKey
+        let instanceName = Host.current().localizedName ?? "Mac"
+        let body = "license_key=\(encodedKey)&instance_name=\(instanceName)"
         request.httpBody = body.data(using: .utf8)
+        print("Activating license key: \(licenseKey.prefix(8))... on \(instanceName)")
 
         let (data, response) = try await URLSession.shared.data(for: request)
 
@@ -135,8 +147,46 @@ class LicenseManager: ObservableObject {
             throw LicenseError.requestFailed
         }
 
-        // LemonSqueezy returns 200 even for invalid keys, with valid=false in body
-        guard (200...299).contains(httpResponse.statusCode) else {
+        print("LemonSqueezy activate response status: \(httpResponse.statusCode)")
+        if let responseString = String(data: data, encoding: .utf8) {
+            print("LemonSqueezy activate response body: \(responseString)")
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) || httpResponse.statusCode == 400 || httpResponse.statusCode == 404 else {
+            throw LicenseError.requestFailed
+        }
+
+        let decoder = JSONDecoder()
+        return try decoder.decode(LicenseResponse.self, from: data)
+    }
+
+    private func validateLicenseAPI(licenseKey: String) async throws -> LicenseResponse {
+        guard let url = URL(string: validateAPIURL) else {
+            throw LicenseError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+
+        let encodedKey = licenseKey.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? licenseKey
+        let body = "license_key=\(encodedKey)"
+        request.httpBody = body.data(using: .utf8)
+        print("Validating license key: \(licenseKey.prefix(8))...")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw LicenseError.requestFailed
+        }
+
+        print("LemonSqueezy validate response status: \(httpResponse.statusCode)")
+        if let responseString = String(data: data, encoding: .utf8) {
+            print("LemonSqueezy validate response body: \(responseString)")
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) || httpResponse.statusCode == 404 else {
             throw LicenseError.requestFailed
         }
 

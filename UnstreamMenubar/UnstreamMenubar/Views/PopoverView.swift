@@ -168,10 +168,10 @@ struct TabButton: View {
                 if let badge = badge, badge > 0 {
                     Text("\(badge)")
                         .font(.system(size: 9, weight: .medium))
-                        .foregroundColor(.white)
+                        .foregroundColor(.secondary)
                         .padding(.horizontal, 5)
                         .padding(.vertical, 2)
-                        .background(Color.red)
+                        .background(Color.secondary.opacity(0.15))
                         .clipShape(Capsule())
                 }
             }

@@ -169,16 +169,9 @@ class MediaObserver: ObservableObject {
     private func getMusicAppNowPlaying() -> (artist: String?, title: String?, album: String?)? {
         // First check if Music is running using System Events
         let checkScript = "tell application \"System Events\" to return (exists process \"Music\")"
-        guard let result = runAppleScript(checkScript) else {
-            print("[MediaObserver] Failed to check if Music is running")
-            return nil
+        guard let result = runAppleScript(checkScript, silent: true), result == "true" else {
+            return nil // Music not running or can't check
         }
-
-        if result != "true" {
-            return nil // Music not running
-        }
-
-        print("[MediaObserver] Music.app is running, checking player state...")
 
         // Check if music is playing and get track info
         let infoScript = """
@@ -209,7 +202,7 @@ class MediaObserver: ObservableObject {
 
     private func getSpotifyNowPlaying() -> (artist: String?, title: String?, album: String?)? {
         let checkScript = "tell application \"System Events\" to return (exists process \"Spotify\")"
-        guard let result = runAppleScript(checkScript), result == "true" else {
+        guard let result = runAppleScript(checkScript, silent: true), result == "true" else {
             return nil
         }
 
@@ -233,9 +226,9 @@ class MediaObserver: ObservableObject {
         return parseTrackInfo(info)
     }
 
-    private func runAppleScript(_ source: String) -> String? {
+    private func runAppleScript(_ source: String, silent: Bool = false) -> String? {
         guard let script = NSAppleScript(source: source) else {
-            print("[MediaObserver] Failed to create script")
+            if !silent { print("[MediaObserver] Failed to create script") }
             return nil
         }
 
@@ -245,8 +238,8 @@ class MediaObserver: ObservableObject {
         if let error = errorDict {
             let errorNum = error["NSAppleScriptErrorNumber"] as? Int ?? 0
             let errorMsg = error["NSAppleScriptErrorMessage"] as? String ?? ""
-            // Only log non-trivial errors
-            if errorNum != 0 {
+            // Only log errors if not silent, and skip common "app not running" errors (-600)
+            if !silent && errorNum != 0 && errorNum != -600 {
                 print("[MediaObserver] Script error \(errorNum): \(errorMsg)")
             }
             return nil

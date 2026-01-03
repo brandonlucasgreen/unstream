@@ -3,14 +3,20 @@ import Foundation
 // MARK: - LemonSqueezy License API Response
 
 struct LicenseResponse: Codable {
-    let valid: Bool
+    let valid: Bool?       // From validate endpoint
+    let activated: Bool?   // From activate endpoint
     let error: String?
     let licenseKey: LicenseKeyInfo?
     let meta: LicenseMeta?
 
     enum CodingKeys: String, CodingKey {
-        case valid, error, meta
+        case valid, activated, error, meta
         case licenseKey = "license_key"
+    }
+
+    // Works for both activate (activated=true) and validate (valid=true) responses
+    var isSuccess: Bool {
+        (valid == true) || (activated == true)
     }
 }
 
@@ -38,14 +44,14 @@ struct LicenseKeyInfo: Codable {
 
 struct LicenseMeta: Codable {
     let storeId: Int
-    let orderId: Int
-    let orderItemId: Int
-    let productId: Int
-    let productName: String
-    let variantId: Int
-    let variantName: String
-    let customerName: String
-    let customerEmail: String
+    let orderId: Int?
+    let orderItemId: Int?
+    let productId: Int?
+    let productName: String?
+    let variantId: Int?
+    let variantName: String?
+    let customerName: String?
+    let customerEmail: String?
 
     enum CodingKeys: String, CodingKey {
         case storeId = "store_id"
