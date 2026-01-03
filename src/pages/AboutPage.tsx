@@ -147,7 +147,7 @@ export function AboutPage() {
         </a>
         <span className="text-text-muted/40 text-xs">&#x2022;</span>
         <a
-          href="mailto:unstream@bgreen.lol?subject=Unstream%20Support"
+          href="mailto:support@unstream.stream"
           className="hover:text-text-primary transition-colors"
         >
           Support
