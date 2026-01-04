@@ -228,14 +228,17 @@ async function getQobuzLatestRelease(artistUrl: string): Promise<LatestRelease |
     const html = await response.text();
 
     // Qobuz album URLs are in format: /us-en/album/{album-name-slug}/{id}
+    // Album IDs can be numeric or alphanumeric
     // Extract from the HTML using regex since page is client-rendered
-    const albumUrlMatch = html.match(/href="(\/us-en\/album\/([^/]+)\/(\d+))"/);
+    const albumUrlMatch = html.match(/href="(\/us-en\/album\/([^/]+)\/([a-zA-Z0-9]+))"/);
     if (!albumUrlMatch) return undefined;
 
-    const [, path, albumSlug, albumId] = albumUrlMatch;
+    const [, path, albumSlug] = albumUrlMatch;
 
     // Convert slug to readable title (replace hyphens with spaces, title case)
-    const title = albumSlug
+    // Qobuz slugs often end with artist name (e.g., "euphoric-recall-braids")
+    // Try to detect and remove the trailing artist name
+    let title = albumSlug
       .split('-')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
@@ -899,14 +902,22 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     }
   }
 
+  // Filter out results that only have search-only platforms (ampwall, kofi, buymeacoffee)
+  // These are just fuzzy search links added to any Bandcamp result, not real matches
+  const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee']);
+  const filtered = disambiguated.filter(result => {
+    const hasNonSearchOnlyPlatform = result.platforms.some(p => !searchOnlyPlatforms.has(p.sourceId));
+    return hasNonSearchOnlyPlatform;
+  });
+
   // Sort results: verified first, then by platform count
-  disambiguated.sort((a, b) => {
+  filtered.sort((a, b) => {
     if (a.matchConfidence === 'verified' && b.matchConfidence !== 'verified') return -1;
     if (a.matchConfidence !== 'verified' && b.matchConfidence === 'verified') return 1;
     return b.platforms.length - a.platforms.length;
   });
 
-  return disambiguated;
+  return filtered;
 }
 
 // Search a Bandcamp artist page for a specific album title
