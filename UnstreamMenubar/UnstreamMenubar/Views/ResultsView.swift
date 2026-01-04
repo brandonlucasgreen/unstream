@@ -101,6 +101,19 @@ struct ArtistResultView: View {
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.small)
+
+            // Report issue link
+            Button(action: { reportIssue(artist: artist) }) {
+                HStack(spacing: 4) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.system(size: 10))
+                    Text("Report an issue with this result")
+                        .font(.system(size: 11))
+                }
+                .foregroundColor(.secondary)
+            }
+            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity, alignment: .center)
         }
         .padding(10)
         .background(Color(NSColor.controlBackgroundColor))
@@ -110,6 +123,31 @@ struct ArtistResultView: View {
     private func openInUnstream(artist: String) {
         guard let encodedQuery = artist.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let url = URL(string: "https://unstream.stream/?search=\(encodedQuery)") else {
+            return
+        }
+        NSWorkspace.shared.open(url)
+    }
+
+    private func reportIssue(artist: ArtistResult) {
+        let platformList = artist.platforms.map { platform in
+            "- \(platform.sourceId): \(platform.url ?? "N/A")"
+        }.joined(separator: "\n")
+
+        let subject = "Issue Report: \(artist.name)"
+        let body = """
+        Artist/Result: \(artist.name)
+        Type: \(artist.type)
+
+        Platforms:
+        \(platformList)
+
+        Issue Description:
+        [Please describe what's wrong with this result]
+        """
+
+        guard let encodedSubject = subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let encodedBody = body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let url = URL(string: "mailto:support@unstream.stream?subject=\(encodedSubject)&body=\(encodedBody)") else {
             return
         }
         NSWorkspace.shared.open(url)
