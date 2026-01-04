@@ -35,6 +35,18 @@ export const sources: Record<SourceId, Source> = {
     searchOnly: true,
     homepageUrl: 'https://ampwall.com',
   },
+  sonica: {
+    id: 'sonica',
+    name: 'Sonica',
+    description: 'Artist-owned music platform',
+    color: '#10b981',
+    icon: '🎶',
+    category: 'marketplace',
+    hasEmbed: false,
+    searchUrlTemplate: 'https://sonica.music/search/{query}',
+    searchOnly: true,
+    homepageUrl: 'https://sonica.music',
+  },
   bandwagon: {
     id: 'bandwagon',
     name: 'Bandwagon',
@@ -131,7 +143,7 @@ export const sourceCategories = {
   marketplace: {
     name: 'Music Marketplaces',
     description: 'Buy music directly from artists',
-    sources: ['bandcamp', 'mirlo', 'ampwall', 'qobuz'] as SourceId[],
+    sources: ['bandcamp', 'mirlo', 'ampwall', 'sonica', 'qobuz'] as SourceId[],
   },
   patronage: {
     name: 'Patronage Platforms',

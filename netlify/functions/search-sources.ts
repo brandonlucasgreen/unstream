@@ -4,6 +4,7 @@ type SourceId =
   | 'bandcamp'
   | 'mirlo'
   | 'ampwall'
+  | 'sonica'
   | 'bandwagon'
   | 'faircamp'
   | 'patreon'
@@ -755,6 +756,10 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
           sourceId: 'buymeacoffee',
           url: 'https://buymeacoffee.com/explore-creators',
         });
+        result.platforms.push({
+          sourceId: 'sonica',
+          url: `https://sonica.music/search/${encodeURIComponent(result.name)}`,
+        });
       }
 
       const normalizedName = normalizeForComparison(result.name);
@@ -787,7 +792,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         });
       }
 
-      const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee']);
+      const searchOnlyPlatforms = new Set(['ampwall', 'sonica', 'kofi', 'buymeacoffee']);
       result.platforms.sort((a, b) => {
         const aIsSearchOnly = searchOnlyPlatforms.has(a.sourceId);
         const bIsSearchOnly = searchOnlyPlatforms.has(b.sourceId);
