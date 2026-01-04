@@ -27,3 +27,9 @@
   from = "/plus"
   to = "https://kidlightbulbs.lemonsqueezy.com/checkout/buy/d4e127a7-2cef-4013-80b8-5d0de691f332"
   status = 302
+
+# SPA catch-all: serve index.html for all routes (must be last)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
