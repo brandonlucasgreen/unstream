@@ -19,6 +19,8 @@ export function ResultCard({ result }: ResultCardProps) {
   const [embedLoading, setEmbedLoading] = useState(false);
   const [embedError, setEmbedError] = useState(false);
   const [showPlayer, setShowPlayer] = useState(false);
+  const [showReportForm, setShowReportForm] = useState(false);
+  const [reportText, setReportText] = useState('');
 
   // Separate verified matches from search-only links
   const verifiedPlatforms = result.platforms.filter(p => !sources[p.sourceId]?.searchOnly);
@@ -69,6 +71,22 @@ export function ResultCard({ result }: ResultCardProps) {
   };
 
   const searchOnlyPlatforms = result.platforms.filter(p => sources[p.sourceId]?.searchOnly);
+
+  const handleReportSubmit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const platformList = result.platforms.map(p => `- ${sources[p.sourceId]?.name}: ${p.url}`).join('\n');
+    const subject = encodeURIComponent(`Issue Report: ${result.name}`);
+    const body = encodeURIComponent(
+      `Artist/Result: ${result.name}\n` +
+      `Type: ${result.type}\n` +
+      `Match Confidence: ${result.matchConfidence || 'N/A'}\n\n` +
+      `Platforms:\n${platformList}\n\n` +
+      `Issue Description:\n${reportText}\n`
+    );
+    window.location.href = `mailto:support@unstream.stream?subject=${subject}&body=${body}`;
+    setShowReportForm(false);
+    setReportText('');
+  };
 
   // Group verified platforms by category
   const categorizedPlatforms = {
@@ -385,6 +403,50 @@ export function ResultCard({ result }: ResultCardProps) {
               ))}
             </div>
           )}
+
+          {/* Report issue section */}
+          <div className="pt-3 mt-3 border-t border-border/50">
+            {!showReportForm ? (
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowReportForm(true); }}
+                className="text-xs text-text-muted hover:text-text-secondary transition-colors flex items-center gap-1"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                Report an issue with this result
+              </button>
+            ) : (
+              <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
+                <label className="text-xs text-text-secondary block">
+                  What's wrong with this result?
+                </label>
+                <textarea
+                  value={reportText}
+                  onChange={(e) => setReportText(e.target.value)}
+                  placeholder="e.g., Wrong artist, mismatched platforms, broken link..."
+                  className="w-full px-3 py-2 text-sm bg-bg-secondary border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary/50 resize-none"
+                  rows={3}
+                  autoFocus
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleReportSubmit}
+                    disabled={!reportText.trim()}
+                    className="px-3 py-1.5 text-xs font-medium bg-accent-primary/10 text-accent-primary rounded-lg hover:bg-accent-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Send Report
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setShowReportForm(false); setReportText(''); }}
+                    className="px-3 py-1.5 text-xs text-text-muted hover:text-text-secondary transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
