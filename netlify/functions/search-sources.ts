@@ -41,6 +41,7 @@ interface AggregatedResult {
     sourceId: SourceId;
     url: string;
     latestRelease?: LatestRelease;
+    allReleaseTitles?: string[]; // For disambiguation - all release titles (normalized)
   }[];
   // Match confidence: 'verified' means releases match across platforms,
   // 'unverified' means name-only match (no release data to compare)
@@ -207,6 +208,42 @@ async function getBandcampLatestRelease(artistUrl: string): Promise<LatestReleas
   }
 }
 
+// Fetch all release titles from a Bandcamp artist page for disambiguation
+async function getBandcampReleaseTitles(artistUrl: string): Promise<string[]> {
+  try {
+    const baseUrl = artistUrl.replace(/\/(music|album|track).*$/, '');
+    const musicUrl = `${baseUrl}/music`;
+
+    const response = await fetchWithTimeout(musicUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    }, 3000);
+
+    if (!response.ok) return [];
+
+    const html = await response.text();
+    const root = parse(html);
+
+    const titles: string[] = [];
+    const musicGridItems = root.querySelectorAll('.music-grid-item');
+
+    for (const item of musicGridItems) {
+      const titleEl = item.querySelector('.title');
+      const title = titleEl?.textContent?.trim();
+      if (title) {
+        titles.push(normalizeForComparison(title));
+      }
+      // Limit to first 20 releases for performance
+      if (titles.length >= 20) break;
+    }
+
+    return titles;
+  } catch {
+    return [];
+  }
+}
+
 // Fetch latest release from a Qobuz artist page
 // Qobuz is client-side rendered, so we extract album info from URL patterns
 // Adding sortBy parameter ensures we get releases sorted by date (most recent first)
@@ -269,6 +306,43 @@ async function getQobuzLatestRelease(artistUrl: string): Promise<LatestRelease |
       console.error('Qobuz latest release fetch error:', err.message);
     }
     return undefined;
+  }
+}
+
+// Fetch all release titles from a Qobuz artist page for disambiguation
+async function getQobuzReleaseTitles(artistUrl: string): Promise<string[]> {
+  try {
+    const response = await fetchWithTimeout(artistUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    }, 3000);
+
+    if (!response.ok) return [];
+
+    const html = await response.text();
+    const titles: string[] = [];
+
+    // Extract all album slugs from the page
+    // Qobuz album URLs: /us-en/album/{album-name-slug}/{id}
+    const albumRegex = /href="\/us-en\/album\/([^/]+)\/[a-zA-Z0-9]+"/g;
+    let match;
+    const seen = new Set<string>();
+
+    while ((match = albumRegex.exec(html)) !== null && titles.length < 20) {
+      const slug = match[1];
+      if (seen.has(slug)) continue;
+      seen.add(slug);
+
+      // Convert slug to normalized title (remove hyphens, lowercase)
+      // The slug often includes artist name at the end, but we'll match on partial
+      const normalized = slug.replace(/-/g, '');
+      titles.push(normalized);
+    }
+
+    return titles;
+  } catch {
+    return [];
   }
 }
 
@@ -724,12 +798,13 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     }
   }
 
-  // Fetch latest releases for Bandcamp and Qobuz artist pages in parallel
+  // Fetch latest releases AND all release titles for Bandcamp and Qobuz artist pages in parallel
   const releasePromises: Promise<void>[] = [];
   for (const result of aggregated) {
     if (result.type === 'artist') {
       const bandcampPlatform = result.platforms.find(p => p.sourceId === 'bandcamp');
       if (bandcampPlatform) {
+        // Fetch latest release for display
         releasePromises.push(
           getBandcampLatestRelease(bandcampPlatform.url).then(release => {
             if (release) {
@@ -737,14 +812,31 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
             }
           })
         );
+        // Fetch all release titles for disambiguation
+        releasePromises.push(
+          getBandcampReleaseTitles(bandcampPlatform.url).then(titles => {
+            if (titles.length > 0) {
+              bandcampPlatform.allReleaseTitles = titles;
+            }
+          })
+        );
       }
 
       const qobuzPlatform = result.platforms.find(p => p.sourceId === 'qobuz');
       if (qobuzPlatform) {
+        // Fetch latest release for display
         releasePromises.push(
           getQobuzLatestRelease(qobuzPlatform.url).then(release => {
             if (release) {
               qobuzPlatform.latestRelease = release;
+            }
+          })
+        );
+        // Fetch all release titles for disambiguation
+        releasePromises.push(
+          getQobuzReleaseTitles(qobuzPlatform.url).then(titles => {
+            if (titles.length > 0) {
+              qobuzPlatform.allReleaseTitles = titles;
             }
           })
         );
@@ -826,7 +918,51 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
       continue;
     }
 
-    // Multiple platforms have releases - group by release title similarity
+    // Multiple platforms have releases - check if ANY release title matches across platforms
+    // This is the key fix: we compare ALL releases, not just the "latest" one
+    const platformsWithTitles = platformsWithReleases.filter(p =>
+      p.allReleaseTitles && p.allReleaseTitles.length > 0
+    );
+
+    // Helper to check if two platforms share any release title
+    const hasMatchingRelease = (titles1: string[], titles2: string[]): boolean => {
+      for (const t1 of titles1) {
+        for (const t2 of titles2) {
+          // Check for exact match or partial match (one contains the other)
+          if (t1 === t2 ||
+              (t1.length > 5 && t2.length > 5 && (t1.includes(t2) || t2.includes(t1)))) {
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+
+    // If we have release titles from multiple platforms, check for matches
+    if (platformsWithTitles.length >= 2) {
+      // Check if there's at least one matching release between any two platforms
+      let foundMatch = false;
+      for (let i = 0; i < platformsWithTitles.length && !foundMatch; i++) {
+        for (let j = i + 1; j < platformsWithTitles.length && !foundMatch; j++) {
+          if (hasMatchingRelease(
+            platformsWithTitles[i].allReleaseTitles!,
+            platformsWithTitles[j].allReleaseTitles!
+          )) {
+            foundMatch = true;
+            console.log(`[Disambiguation] "${result.name}": Found matching release between ${platformsWithTitles[i].sourceId} and ${platformsWithTitles[j].sourceId}`);
+          }
+        }
+      }
+
+      if (foundMatch) {
+        // At least one release matches - this is the same artist
+        result.matchConfidence = 'verified';
+        disambiguated.push(result);
+        continue;
+      }
+    }
+
+    // Fallback: compare just the latest release titles (for platforms without allReleaseTitles)
     const releaseGroups = new Map<string, typeof result.platforms>();
 
     for (const platform of platformsWithReleases) {
@@ -859,7 +995,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
       continue;
     }
 
-    // Multiple release groups = different artists with same name
+    // Multiple release groups with no matching titles = different artists with same name
     // Split into separate results
     console.log(`[Disambiguation] Splitting "${result.name}" into ${releaseGroups.size} separate artists based on different releases`);
 
