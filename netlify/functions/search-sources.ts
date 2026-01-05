@@ -972,6 +972,21 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     new Promise(resolve => setTimeout(resolve, 4000)),
   ]);
 
+  // Clean up dead Qobuz links: remove Qobuz platforms that have no releases
+  // These are placeholder/redirect pages that have no actual content
+  for (const result of aggregated) {
+    const validQobuzPlatforms = result.platforms.filter(p => {
+      if (p.sourceId !== 'qobuz') return true; // Keep non-Qobuz platforms
+      // Keep Qobuz if it has releases, remove if empty (dead link)
+      const hasReleases = p.latestRelease || (p.allReleaseTitles && p.allReleaseTitles.length > 0);
+      if (!hasReleases) {
+        console.log(`[Cleanup] Removing dead Qobuz link for "${result.name}": ${p.url}`);
+      }
+      return hasReleases;
+    });
+    result.platforms = validQobuzPlatforms;
+  }
+
   // Disambiguate artists by comparing releases across platforms
   // If releases don't match, split into separate results
   const disambiguated: AggregatedResult[] = [];
