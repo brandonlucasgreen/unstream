@@ -647,9 +647,15 @@ async function searchQobuz(query: string): Promise<Map<string, string>> {
       const [, path, slug] = match;
       const slugNormalized = slug.replace(/-/g, '');
 
-      if (slugNormalized === queryNormalized ||
-          slugNormalized.includes(queryNormalized) ||
-          queryNormalized.includes(slugNormalized)) {
+      // Strict matching: only allow exact match, query prefix, or numeric suffix variations
+      // This prevents "Mo-Rice" from matching "Morice El Blanco" or "Patrick Moriceau"
+      const isMatch = slugNormalized === queryNormalized ||
+          // Query is longer than slug (e.g., searching "morice" matches slug "mo")
+          queryNormalized.startsWith(slugNormalized) ||
+          // Slug is query + numeric suffix only (e.g., "morice" matches "morice2" but not "moriceelblanco")
+          (slugNormalized.startsWith(queryNormalized) && /^\d*$/.test(slugNormalized.slice(queryNormalized.length)));
+
+      if (isMatch) {
         const artistName = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
         const normalizedName = normalizeForComparison(artistName);
 
@@ -785,11 +791,19 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         });
       }
 
-      if (qobuzMatches.has(normalizedName)) {
-        result.platforms.push({
-          sourceId: 'qobuz',
-          url: qobuzMatches.get(normalizedName)!,
-        });
+      // Check for Qobuz matches - add ALL variations with numeric suffixes
+      // (e.g., "morice" should match "morice", "morice1", "morice2")
+      // We add all of them and let disambiguation sort out which ones match based on releases
+      for (const [qobuzName, qobuzUrl] of qobuzMatches) {
+        // Match if exact, or if qobuz name is base name + numbers
+        const isVariation = qobuzName === normalizedName ||
+            (qobuzName.startsWith(normalizedName) && /^\d+$/.test(qobuzName.slice(normalizedName.length)));
+        if (isVariation) {
+          result.platforms.push({
+            sourceId: 'qobuz',
+            url: qobuzUrl,
+          });
+        }
       }
 
       const searchOnlyPlatforms = new Set(['ampwall', 'sonica', 'kofi', 'buymeacoffee']);
@@ -809,9 +823,18 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   const usedBandwagonMatches = new Set<string>();
   const usedFaircampMatches = new Set<string>();
 
+  // Track base names of aggregated results for variation matching
+  const aggregatedBaseNames = new Set<string>();
   for (const result of aggregated) {
     const normalizedName = normalizeForComparison(result.name);
-    if (qobuzMatches.has(normalizedName)) usedQobuzMatches.add(normalizedName);
+    aggregatedBaseNames.add(normalizedName);
+
+    // Check for exact matches and variations
+    for (const [qobuzName] of qobuzMatches) {
+      const isVariation = qobuzName === normalizedName ||
+          (qobuzName.startsWith(normalizedName) && /^\d+$/.test(qobuzName.slice(normalizedName.length)));
+      if (isVariation) usedQobuzMatches.add(qobuzName);
+    }
     if (patreonMatches.has(normalizedName)) usedPatreonMatches.add(normalizedName);
     if (bandwagonMatches.has(normalizedName)) usedBandwagonMatches.add(normalizedName);
     if (faircampMatches.has(normalizedName)) usedFaircampMatches.add(normalizedName);
@@ -820,44 +843,49 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   // Create new results for Qobuz matches that weren't added to existing results
   // This handles artists who are on Qobuz but not on Bandcamp/Mirlo
   for (const [normalizedName, url] of qobuzMatches) {
-    if (!usedQobuzMatches.has(normalizedName)) {
-      // Extract display name from URL slug
-      const slugMatch = url.match(/\/interpreter\/([^/]+)\//);
-      const displayName = slugMatch
-        ? slugMatch[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
-        : normalizedName;
-
-      const newResult: AggregatedResult = {
-        id: `qobuz-${normalizedName}`,
-        name: displayName,
-        type: 'artist',
-        platforms: [
-          { sourceId: 'qobuz', url },
-          // Add search-only platforms for this artist
-          { sourceId: 'ampwall', url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(displayName)}` },
-          { sourceId: 'sonica', url: `https://sonica.music/search/${encodeURIComponent(displayName)}` },
-          { sourceId: 'kofi', url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(displayName)}` },
-          { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
-        ],
-      };
-
-      // Check if this Qobuz artist also has matches on other platforms
-      if (patreonMatches.has(normalizedName) && !usedPatreonMatches.has(normalizedName)) {
-        newResult.platforms.splice(1, 0, { sourceId: 'patreon', url: patreonMatches.get(normalizedName)! });
-        usedPatreonMatches.add(normalizedName);
-      }
-      if (bandwagonMatches.has(normalizedName) && !usedBandwagonMatches.has(normalizedName)) {
-        newResult.platforms.splice(1, 0, { sourceId: 'bandwagon', url: bandwagonMatches.get(normalizedName)! });
-        usedBandwagonMatches.add(normalizedName);
-      }
-      if (faircampMatches.has(normalizedName) && !usedFaircampMatches.has(normalizedName)) {
-        newResult.platforms.splice(1, 0, { sourceId: 'faircamp', url: faircampMatches.get(normalizedName)! });
-        usedFaircampMatches.add(normalizedName);
-      }
-
-      aggregated.push(newResult);
-      console.log(`[Qobuz-only] Created result for "${displayName}" from Qobuz match`);
+    // Skip if already used OR if this is a variation of an existing result
+    const baseNameWithoutNumbers = normalizedName.replace(/\d+$/, '');
+    const isVariationOfExisting = aggregatedBaseNames.has(baseNameWithoutNumbers);
+    if (usedQobuzMatches.has(normalizedName) || isVariationOfExisting) {
+      continue;
     }
+
+    // Extract display name from URL slug
+    const slugMatch = url.match(/\/interpreter\/([^/]+)\//);
+    const displayName = slugMatch
+      ? slugMatch[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+      : normalizedName;
+
+    const newResult: AggregatedResult = {
+      id: `qobuz-${normalizedName}`,
+      name: displayName,
+      type: 'artist',
+      platforms: [
+        { sourceId: 'qobuz', url },
+        // Add search-only platforms for this artist
+        { sourceId: 'ampwall', url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(displayName)}` },
+        { sourceId: 'sonica', url: `https://sonica.music/search/${encodeURIComponent(displayName)}` },
+        { sourceId: 'kofi', url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(displayName)}` },
+        { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
+      ],
+    };
+
+    // Check if this Qobuz artist also has matches on other platforms
+    if (patreonMatches.has(normalizedName) && !usedPatreonMatches.has(normalizedName)) {
+      newResult.platforms.splice(1, 0, { sourceId: 'patreon', url: patreonMatches.get(normalizedName)! });
+      usedPatreonMatches.add(normalizedName);
+    }
+    if (bandwagonMatches.has(normalizedName) && !usedBandwagonMatches.has(normalizedName)) {
+      newResult.platforms.splice(1, 0, { sourceId: 'bandwagon', url: bandwagonMatches.get(normalizedName)! });
+      usedBandwagonMatches.add(normalizedName);
+    }
+    if (faircampMatches.has(normalizedName) && !usedFaircampMatches.has(normalizedName)) {
+      newResult.platforms.splice(1, 0, { sourceId: 'faircamp', url: faircampMatches.get(normalizedName)! });
+      usedFaircampMatches.add(normalizedName);
+    }
+
+    aggregated.push(newResult);
+    console.log(`[Qobuz-only] Created result for "${displayName}" from Qobuz match`);
   }
 
   // Fetch latest releases AND all release titles for Bandcamp and Qobuz artist pages in parallel
