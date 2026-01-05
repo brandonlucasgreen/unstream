@@ -80,7 +80,7 @@ function App() {
             </button>
           </h1>
           <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto mb-6">
-            Find what's playing on alternative platforms, directly support the artists you love, and move off streaming.
+            Find your favorite music on alternative platforms, directly support the artists you love, and move off streaming.
           </p>
 
           {/* Action buttons */}
