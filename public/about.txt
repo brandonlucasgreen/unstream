@@ -1,15 +1,15 @@
-**Unstream is a simple app that helps you find music you love outside the streaming ecosystem.** It recommends platforms better suited to support the makers of that music, as well as free community alternatives to streaming apps provided by local libraries. 
+**Unstream is a simple app that helps you find music you love outside the streaming ecosystem.** It recommends platforms better suited to support the makers of that music, as well as free community alternatives to streaming apps provided by local libraries. You can use it in 3 ways (with more to come!):
 
-I was inspired to build it when exploring my own journey to reduce my usage of streaming services, both for movies and music. 
-
-While exploring Bandcamp specifically, I was struck by *just how many bands I knew and loved* had posted music for sale on Bandcamp - including longtime favorites like Radiohead and Fountains of Wayne. I started building Unstream and while testing it found even more artists I could directly support over time rather than contributing to the streaming ecosystem. 
+- Search any artist you like to find all the platforms they’re on where you can support them more directly
+- Check any artist you find in Spotify or Apple Music by sharing their artist profile URL using a special link (or [Shortcut](https://www.icloud.com/shortcuts/73296296361e4f609087746e7f046d47) if you’re on an Apple device)
+- [Install the macOS app](https://github.com/brandonlucasgreen/unstream/releases/latest/download/Unstream.zip) to get suggestions for supporting the artist you’re currently listening to in Spotify or Apple Music; upgrade to **Unstream Plus** *($2.99 one-time payment)* and save the artists you want to support later!
 
 # FAQ 
 
 ### Why did you build this?
 A few reasons! First, [I am a musician](https://kidlightbulbs.com) who’s grown disenchanted by the streaming ecosystem, and I ended up finding much more success building an audience on my own on Bandcamp. I ended up making over $2200 in two years, despite a tiny following online & having not performed live during that period at all. I’ve now seen the success of pursuing this path as an independent musician, and I want to encourage fellow artists explore these alternative platforms as homes for their music.
 
-As a consumer, I’ve paid for streaming services for over a decade, mostly Apple Music. But I’ve wanted to cancel it and build my own library of owned music – to rediscover the joy of finding new music myself, to give Apple less of my money, and to give more of that money to the artists whose music I love. In exploring this, I learned _just how many_ of my favorite artists post & sell their music on Bandcamp.
+As a consumer, I’ve paid for streaming services for over a decade, mostly Apple Music. But I’ve wanted to cancel it and build my own library of owned music – to rediscover the joy of finding new music myself, to give Apple less of my money, and to give more of that money to the artists whose music I love. In exploring this, I learned _just how many_ of my favorite artists post & sell their music on Bandcamp, as well as other platforms I learned about on my journey.
 
 I built Unstream to serve both of these purposes: help fellow listeners find better ways to support the artists they love more easily, build their own libraries, and ultimately reduce their dependency on streaming, while also encouraging fellow artists to trust & use these alternative models rather than relying on streaming as a conduit to success.
 
@@ -34,7 +34,7 @@ We also link to a number of alternative services that can help you reduce your d
 - **Buy Me a Coffee:** ~92% of sales or memberships [(source)](https://help.buymeacoffee.com/en/articles/8105744-how-to-calculate-charges-on-your-payment)
 - **Ko-fi:** ~97% of tips, ~92% of sales [(source)](https://help.ko-fi.com/hc/en-us/articles/360002506494-Does-Ko-fi-take-a-fee)
 
-*More details:* All online transactions involving a credit card transaction incur credit card fees, which are typically ~2.9% of the purchase price, plus an additional 30 cents. This is always applied on top of a platform’s fee, which is why the above percentage values vary a bit. 
+*More info:* All online transactions involving a credit card transaction incur credit card fees, which are typically ~2.9% of the purchase price, plus an additional 30 cents. This is always applied on top of a platform’s fee, which is why the above percentage values vary a bit. 
 
 ### Why can’t you link to Ko-fi, Ampwall, or Buy Me A Coffee profiles for the artists I search for?
 Basically, it’s a technical limitation. These platforms hide their searches from external sources, meaning we can’t link directly to an artist profile on these sites in an automated way.  The best alternative is to search those platforms manually, which Unstream offers in the results.
