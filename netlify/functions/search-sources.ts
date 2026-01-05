@@ -250,6 +250,12 @@ async function getBandcampReleaseTitles(artistUrl: string): Promise<string[]> {
 // Adding sortBy parameter ensures we get releases sorted by date (most recent first)
 async function getQobuzLatestRelease(artistUrl: string): Promise<LatestRelease | undefined> {
   try {
+    // Extract artist name from URL for validation
+    // URL format: /us-en/interpreter/{artist-slug}/{id}
+    const artistSlugMatch = artistUrl.match(/\/interpreter\/([^/]+)\//);
+    if (!artistSlugMatch) return undefined;
+    const artistSlug = artistSlugMatch[1].replace(/-/g, '').toLowerCase();
+
     // Add sort parameter to get releases sorted by date (most recent first)
     const sortedUrl = artistUrl.includes('?')
       ? `${artistUrl}&%5BsortBy%5D=main_catalog_date_desc`
@@ -268,21 +274,35 @@ async function getQobuzLatestRelease(artistUrl: string): Promise<LatestRelease |
     // Qobuz album URLs are in format: /us-en/album/{album-name-slug}/{id}
     // Album IDs can be numeric or alphanumeric
     // Extract from the HTML using regex since page is client-rendered
-    const albumUrlMatch = html.match(/href="(\/us-en\/album\/([^/]+)\/([a-zA-Z0-9]+))"/);
-    if (!albumUrlMatch) return undefined;
+    // Find ALL album URLs and pick the first one that belongs to this artist
+    const albumRegex = /href="(\/us-en\/album\/([^/]+)\/([a-zA-Z0-9]+))"/g;
+    let match;
+    let validAlbum: { path: string; slug: string } | undefined;
 
-    const [, path, albumSlug] = albumUrlMatch;
+    while ((match = albumRegex.exec(html)) !== null) {
+      const [, path, albumSlug] = match;
+      const normalizedSlug = albumSlug.replace(/-/g, '').toLowerCase();
+
+      // Validate: album slug should contain the artist name
+      // This filters out "trending" or "recommended" albums shown on empty artist pages
+      // Artist slug without numbers for matching (e.g., "morice1" -> "morice")
+      const artistBase = artistSlug.replace(/\d+$/, '');
+      if (normalizedSlug.includes(artistBase) || normalizedSlug.includes(artistSlug)) {
+        validAlbum = { path, slug: albumSlug };
+        break;
+      }
+    }
+
+    if (!validAlbum) return undefined;
 
     // Convert slug to readable title (replace hyphens with spaces, title case)
-    // Qobuz slugs often end with artist name (e.g., "euphoric-recall-braids")
-    // Try to detect and remove the trailing artist name
-    let title = albumSlug
+    const title = validAlbum.slug
       .split('-')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
 
     // Build full URL
-    const fullUrl = `https://www.qobuz.com${path}`;
+    const fullUrl = `https://www.qobuz.com${validAlbum.path}`;
 
     // Try to extract release date from the page
     let releaseDate: string | undefined;
@@ -313,6 +333,12 @@ async function getQobuzLatestRelease(artistUrl: string): Promise<LatestRelease |
 // Fetch all release titles from a Qobuz artist page for disambiguation
 async function getQobuzReleaseTitles(artistUrl: string): Promise<string[]> {
   try {
+    // Extract artist name from URL for validation
+    const artistSlugMatch = artistUrl.match(/\/interpreter\/([^/]+)\//);
+    if (!artistSlugMatch) return [];
+    const artistSlug = artistSlugMatch[1].replace(/-/g, '').toLowerCase();
+    const artistBase = artistSlug.replace(/\d+$/, ''); // Remove trailing numbers
+
     const response = await fetchWithTimeout(artistUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
@@ -336,8 +362,14 @@ async function getQobuzReleaseTitles(artistUrl: string): Promise<string[]> {
       seen.add(slug);
 
       // Convert slug to normalized title (remove hyphens, lowercase)
-      // The slug often includes artist name at the end, but we'll match on partial
-      const normalized = slug.replace(/-/g, '');
+      const normalized = slug.replace(/-/g, '').toLowerCase();
+
+      // Validate: album slug should contain the artist name
+      // This filters out "trending" or "recommended" albums shown on empty artist pages
+      if (!normalized.includes(artistBase) && !normalized.includes(artistSlug)) {
+        continue; // Skip albums that don't belong to this artist
+      }
+
       titles.push(normalized);
     }
 
