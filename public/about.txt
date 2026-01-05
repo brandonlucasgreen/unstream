@@ -36,6 +36,14 @@ We also link to a number of alternative services that can help you reduce your d
 
 *More info:* All online transactions involving a credit card transaction incur credit card fees, which are typically ~2.9% of the purchase price, plus an additional 30 cents. This is always applied on top of a platform’s fee, which is why the above percentage values vary a bit. 
 
+### What are some of the other benefits of moving off a streaming service?
+Lots of them!
+- Save money
+- Curate your own music library and tastes
+- Discover new music through the recommendations of friends & tastemakers rather than an algorithm designed to keep you paying
+- Support the artists you actually like, rather than the ones signed to the 3 major record labels
+- Support your local library
+
 ### Why can’t you link to Ko-fi, Ampwall, or Buy Me A Coffee profiles for the artists I search for?
 Basically, it’s a technical limitation. These platforms hide their searches from external sources, meaning we can’t link directly to an artist profile on these sites in an automated way.  The best alternative is to search those platforms manually, which Unstream offers in the results.
 
@@ -44,13 +52,8 @@ Hoopla and Freegal are services offered through public libraries in the US. To a
 
 **Do artists get paid when their music is listened to via one of these services? Unclear, and likely not.** However: you now have access to a vast back catalog of music without your money going to a giant tech conglomerate, and you’ve found one more way to support your local library.
 
-### What are some of the other benefits of moving off a streaming service?
-Lots of them!
-- Save money
-- Curate your own music library and tastes
-- Discover new music through the recommendations of friends & tastemakers rather than an algorithm designed to keep you paying
-- Support the artists you actually like, rather than the ones signed to the 3 major record labels
-- Support your local library
+### I have a Faircamp site but it’s not appearing in the results. Why?
+Unstream uses the [Faircamp Webring](http://faircamp.webr.ing) as a source for finding Faircamp sites for independent artists. If your Faircamp site isn’t appearing in the results, consider joining the webring [at this link](https://faircamp.webr.ing/#instructions). Or, you can [email me](mailto:support@unstream.stream) your Faircamp URL and I’ll have it added to the results.
 
 ### What data does Unstream track?
 Virtually nothing. We track visit and visitor counts, by location and source (ie. where you came to Unstream from), but no personal data is captured.
