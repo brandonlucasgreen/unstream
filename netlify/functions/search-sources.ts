@@ -803,6 +803,63 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     }
   }
 
+  // Track which platform matches were used so we can create entries for unmatched ones
+  const usedQobuzMatches = new Set<string>();
+  const usedPatreonMatches = new Set<string>();
+  const usedBandwagonMatches = new Set<string>();
+  const usedFaircampMatches = new Set<string>();
+
+  for (const result of aggregated) {
+    const normalizedName = normalizeForComparison(result.name);
+    if (qobuzMatches.has(normalizedName)) usedQobuzMatches.add(normalizedName);
+    if (patreonMatches.has(normalizedName)) usedPatreonMatches.add(normalizedName);
+    if (bandwagonMatches.has(normalizedName)) usedBandwagonMatches.add(normalizedName);
+    if (faircampMatches.has(normalizedName)) usedFaircampMatches.add(normalizedName);
+  }
+
+  // Create new results for Qobuz matches that weren't added to existing results
+  // This handles artists who are on Qobuz but not on Bandcamp/Mirlo
+  for (const [normalizedName, url] of qobuzMatches) {
+    if (!usedQobuzMatches.has(normalizedName)) {
+      // Extract display name from URL slug
+      const slugMatch = url.match(/\/interpreter\/([^/]+)\//);
+      const displayName = slugMatch
+        ? slugMatch[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+        : normalizedName;
+
+      const newResult: AggregatedResult = {
+        id: `qobuz-${normalizedName}`,
+        name: displayName,
+        type: 'artist',
+        platforms: [
+          { sourceId: 'qobuz', url },
+          // Add search-only platforms for this artist
+          { sourceId: 'ampwall', url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(displayName)}` },
+          { sourceId: 'sonica', url: `https://sonica.music/search/${encodeURIComponent(displayName)}` },
+          { sourceId: 'kofi', url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(displayName)}` },
+          { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
+        ],
+      };
+
+      // Check if this Qobuz artist also has matches on other platforms
+      if (patreonMatches.has(normalizedName) && !usedPatreonMatches.has(normalizedName)) {
+        newResult.platforms.splice(1, 0, { sourceId: 'patreon', url: patreonMatches.get(normalizedName)! });
+        usedPatreonMatches.add(normalizedName);
+      }
+      if (bandwagonMatches.has(normalizedName) && !usedBandwagonMatches.has(normalizedName)) {
+        newResult.platforms.splice(1, 0, { sourceId: 'bandwagon', url: bandwagonMatches.get(normalizedName)! });
+        usedBandwagonMatches.add(normalizedName);
+      }
+      if (faircampMatches.has(normalizedName) && !usedFaircampMatches.has(normalizedName)) {
+        newResult.platforms.splice(1, 0, { sourceId: 'faircamp', url: faircampMatches.get(normalizedName)! });
+        usedFaircampMatches.add(normalizedName);
+      }
+
+      aggregated.push(newResult);
+      console.log(`[Qobuz-only] Created result for "${displayName}" from Qobuz match`);
+    }
+  }
+
   // Fetch latest releases AND all release titles for Bandcamp and Qobuz artist pages in parallel
   const releasePromises: Promise<void>[] = [];
   for (const result of aggregated) {
