@@ -48,6 +48,7 @@ struct SavedPlatform: Codable, Identifiable {
             "hoopla": "Hoopla",
             "patreon": "Patreon",
             "ampwall": "Ampwall",
+            "sonica": "Sonica",
             "kofi": "Ko-fi",
             "buymeacoffee": "Buy Me a Coffee"
         ]
@@ -65,6 +66,7 @@ struct SavedPlatform: Codable, Identifiable {
             "hoopla": "books.vertical",
             "patreon": "heart",
             "ampwall": "waveform",
+            "sonica": "music.quarternote.3",
             "kofi": "cup.and.saucer",
             "buymeacoffee": "cup.and.saucer"
         ]
@@ -82,6 +84,7 @@ struct SavedPlatform: Codable, Identifiable {
             "hoopla": "#E31837",
             "patreon": "#FF424D",
             "ampwall": "#EF4444",
+            "sonica": "#10B981",
             "kofi": "#29ABE0",
             "buymeacoffee": "#FFDD00"
         ]
