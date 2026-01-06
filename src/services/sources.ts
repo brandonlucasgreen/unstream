@@ -148,6 +148,17 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: '',
     homepageUrl: '',
   },
+  officialstore: {
+    id: 'officialstore',
+    name: 'Official Store',
+    description: 'Artist\'s official music store',
+    color: '#71717a',
+    icon: '🛒',
+    category: 'official',
+    hasEmbed: false,
+    searchUrlTemplate: '',
+    homepageUrl: '',
+  },
 };
 
 export const sourceCategories = {
@@ -174,7 +185,7 @@ export const sourceCategories = {
   official: {
     name: 'Official',
     description: 'Artist websites and stores',
-    sources: ['officialsite'] as SourceId[],
+    sources: ['officialsite', 'officialstore'] as SourceId[],
   },
 };
 

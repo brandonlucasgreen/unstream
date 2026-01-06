@@ -13,7 +13,8 @@ type SourceId =
   | 'hoopla'
   | 'freegal'
   | 'qobuz'
-  | 'officialsite';
+  | 'officialsite'
+  | 'officialstore';
 
 interface LatestRelease {
   title: string;
@@ -440,7 +441,8 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 // MusicBrainz result interface for official website lookup
 interface MusicBrainzResult {
   artistName: string;
-  officialUrl?: string;
+  officialUrl?: string;  // From "official homepage" relation
+  storeUrl?: string;     // From "purchase for mail-order" or "purchase for download" relation
   hasPre2005Release: boolean;
 }
 
@@ -477,6 +479,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
     });
 
     let officialUrl: string | undefined;
+    let storeUrl: string | undefined;
 
     if (artistResponse.ok) {
       const artistData = await artistResponse.json() as {
@@ -488,6 +491,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
 
       const relations = artistData.relations || [];
 
+      // Look for official homepage
       for (const rel of relations) {
         if (rel.type === 'official homepage' && rel.url?.resource) {
           officialUrl = rel.url.resource;
@@ -495,12 +499,11 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
         }
       }
 
-      if (!officialUrl) {
-        for (const rel of relations) {
-          if ((rel.type === 'purchase for mail-order' || rel.type === 'purchase for download') && rel.url?.resource) {
-            officialUrl = rel.url.resource;
-            break;
-          }
+      // Look for purchase/store links separately
+      for (const rel of relations) {
+        if ((rel.type === 'purchase for mail-order' || rel.type === 'purchase for download') && rel.url?.resource) {
+          storeUrl = rel.url.resource;
+          break;
         }
       }
     }
@@ -536,6 +539,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
     return {
       artistName: artist.name,
       officialUrl,
+      storeUrl,
       hasPre2005Release,
     };
   } catch (error: unknown) {
@@ -895,12 +899,27 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         });
       }
 
-      // Sort platforms: verified first, then search-only, then official site last
+      // Add official store if MusicBrainz found one and it's different from homepage
+      if (musicbrainzData?.storeUrl && musicbrainzData.storeUrl !== musicbrainzData.officialUrl) {
+        result.platforms.push({
+          sourceId: 'officialstore',
+          url: musicbrainzData.storeUrl,
+        });
+      }
+
+      // Sort platforms: verified first, then search-only, then official site/store last
       const searchOnlyPlatforms = new Set(['ampwall', 'sonica', 'kofi', 'buymeacoffee']);
+      const officialPlatforms = new Set(['officialsite', 'officialstore']);
       result.platforms.sort((a, b) => {
-        // Official site always last
-        if (a.sourceId === 'officialsite') return 1;
-        if (b.sourceId === 'officialsite') return -1;
+        // Official site/store always last (site before store)
+        const aIsOfficial = officialPlatforms.has(a.sourceId);
+        const bIsOfficial = officialPlatforms.has(b.sourceId);
+        if (aIsOfficial && bIsOfficial) {
+          // officialsite before officialstore
+          return a.sourceId === 'officialsite' ? -1 : 1;
+        }
+        if (aIsOfficial) return 1;
+        if (bIsOfficial) return -1;
         // Search-only platforms near the end
         const aIsSearchOnly = searchOnlyPlatforms.has(a.sourceId);
         const bIsSearchOnly = searchOnlyPlatforms.has(b.sourceId);
@@ -993,6 +1012,14 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
       platforms.push({
         sourceId: 'officialsite',
         url: musicbrainzData.officialUrl,
+      });
+    }
+
+    // Add official store if MusicBrainz found one and it's different from homepage
+    if (musicbrainzData?.storeUrl && musicbrainzData.storeUrl !== musicbrainzData.officialUrl) {
+      platforms.push({
+        sourceId: 'officialstore',
+        url: musicbrainzData.storeUrl,
       });
     }
 

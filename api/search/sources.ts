@@ -12,7 +12,8 @@ type SourceId =
   | 'kofi'
   | 'hoopla'
   | 'qobuz'
-  | 'officialsite';
+  | 'officialsite'
+  | 'officialstore';
 
 interface PlatformResult {
   sourceId: SourceId;
@@ -174,7 +175,8 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 // MusicBrainz result interface for official website lookup
 interface MusicBrainzResult {
   artistName: string;
-  officialUrl?: string;
+  officialUrl?: string;  // From "official homepage" relation
+  storeUrl?: string;     // From "purchase for mail-order" or "purchase for download" relation
   hasPre2005Release: boolean;
 }
 
@@ -217,6 +219,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
     });
 
     let officialUrl: string | undefined;
+    let storeUrl: string | undefined;
 
     if (artistResponse.ok) {
       const artistData = await artistResponse.json() as {
@@ -226,10 +229,9 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
         }[];
       };
 
-      // Look for official homepage in relations
-      // Priority: "official homepage" > "purchase for mail-order" > "purchase for download"
       const relations = artistData.relations || [];
 
+      // Look for official homepage
       for (const rel of relations) {
         if (rel.type === 'official homepage' && rel.url?.resource) {
           officialUrl = rel.url.resource;
@@ -237,13 +239,11 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
         }
       }
 
-      // If no official homepage, try purchase links
-      if (!officialUrl) {
-        for (const rel of relations) {
-          if ((rel.type === 'purchase for mail-order' || rel.type === 'purchase for download') && rel.url?.resource) {
-            officialUrl = rel.url.resource;
-            break;
-          }
+      // Look for purchase/store links separately
+      for (const rel of relations) {
+        if ((rel.type === 'purchase for mail-order' || rel.type === 'purchase for download') && rel.url?.resource) {
+          storeUrl = rel.url.resource;
+          break;
         }
       }
     }
@@ -281,6 +281,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
     return {
       artistName: artist.name,
       officialUrl,
+      storeUrl,
       hasPre2005Release,
     };
   } catch (error: any) {
@@ -674,25 +675,42 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         });
       }
 
-      // Add official website if MusicBrainz found one and artist name matches
-      if (mbResult?.officialUrl) {
+      // Add official website and store if MusicBrainz found them and artist name matches
+      if (mbResult?.officialUrl || mbResult?.storeUrl) {
         const mbNormalizedName = normalizeForComparison(mbResult.artistName);
         if (normalizedName === mbNormalizedName ||
             normalizedName.includes(mbNormalizedName) ||
             mbNormalizedName.includes(normalizedName)) {
-          result.platforms.push({
-            sourceId: 'officialsite',
-            url: mbResult.officialUrl,
-          });
+          // Add official site if available
+          if (mbResult.officialUrl) {
+            result.platforms.push({
+              sourceId: 'officialsite',
+              url: mbResult.officialUrl,
+            });
+          }
+          // Add official store if available and different from homepage
+          if (mbResult.storeUrl && mbResult.storeUrl !== mbResult.officialUrl) {
+            result.platforms.push({
+              sourceId: 'officialstore',
+              url: mbResult.storeUrl,
+            });
+          }
         }
       }
 
-      // Sort platforms: verified matches first, search-only platforms in middle, official site last
+      // Sort platforms: verified matches first, search-only platforms in middle, official site/store last
       const searchOnlyPlatforms = new Set(['ampwall', 'kofi']);
+      const officialPlatforms = new Set(['officialsite', 'officialstore']);
       result.platforms.sort((a, b) => {
-        // Official site always last
-        if (a.sourceId === 'officialsite') return 1;
-        if (b.sourceId === 'officialsite') return -1;
+        // Official site/store always last (site before store)
+        const aIsOfficial = officialPlatforms.has(a.sourceId);
+        const bIsOfficial = officialPlatforms.has(b.sourceId);
+        if (aIsOfficial && bIsOfficial) {
+          // officialsite before officialstore
+          return a.sourceId === 'officialsite' ? -1 : 1;
+        }
+        if (aIsOfficial) return 1;
+        if (bIsOfficial) return -1;
         // Search-only platforms after verified matches
         const aIsSearchOnly = searchOnlyPlatforms.has(a.sourceId);
         const bIsSearchOnly = searchOnlyPlatforms.has(b.sourceId);

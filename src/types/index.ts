@@ -12,7 +12,8 @@ export type SourceId =
   | 'hoopla'
   | 'freegal'
   | 'qobuz'
-  | 'officialsite';
+  | 'officialsite'
+  | 'officialstore';
 
 export interface Source {
   id: SourceId;
