@@ -139,7 +139,7 @@ export const sources: Record<SourceId, Source> = {
   },
   officialsite: {
     id: 'officialsite',
-    name: 'Official Website',
+    name: 'Official Site',
     description: 'Artist\'s official website',
     color: '#71717a',
     icon: '🌐',

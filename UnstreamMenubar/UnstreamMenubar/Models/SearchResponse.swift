@@ -77,4 +77,6 @@ private let platformConfig: [String: PlatformConfig] = [
     "sonica": PlatformConfig(name: "Sonica", icon: "music.quarternote.3", color: "#10B981", searchOnly: true),
     "kofi": PlatformConfig(name: "Ko-fi", icon: "cup.and.saucer", color: "#29ABE0", searchOnly: true),
     "buymeacoffee": PlatformConfig(name: "Buy Me a Coffee", icon: "cup.and.saucer", color: "#FFDD00", searchOnly: true),
+    // Official
+    "officialsite": PlatformConfig(name: "Official Site", icon: "globe", color: "#71717A", searchOnly: false),
 ]
