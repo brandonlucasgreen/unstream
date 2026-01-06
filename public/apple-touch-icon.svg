@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Dark background -->
+  <rect width="32" height="32" rx="6" fill="#0d0d0d"/>
+
+  <!-- Devil horns hand - emoji style 🤘 (wider) -->
+
+  <!-- Hand base/palm -->
+  <path d="M6 14 L6 24 C6 26 9 28 14 28 L18 28 C23 28 26 26 26 24 L26 14"
+        fill="none" stroke="#ff6b35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Pinky finger (left, extended up) -->
+  <path d="M6 14 L6 6 C6 4 7 3 8.5 3 C10 3 11 4 11 6 L11 12"
+        fill="none" stroke="#ff6b35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Index finger (right, extended up) -->
+  <path d="M21 12 L21 6 C21 4 22 3 23.5 3 C25 3 26 4 26 6 L26 14"
+        fill="none" stroke="#ff6b35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Folded middle finger (left) -->
+  <path d="M12 16 L12 11 C12 9 13 9 14 9 C15 9 15 9 15 11 L15 16 Z"
+        fill="none" stroke="#ff6b35" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Folded ring finger (right) -->
+  <path d="M17 16 L17 11 C17 9 18 9 19 9 C20 9 20 9 20 11 L20 16 Z"
+        fill="none" stroke="#ff6b35" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Thumb across -->
+  <path d="M11 16 C13 18 15 18 16 17"
+        fill="none" stroke="#ff6b35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
