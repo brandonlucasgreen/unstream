@@ -1,4 +1,4 @@
-import type { Source, SourceId, SearchResponse } from '../types';
+import type { Source, SourceId, SearchResponse, SearchResult } from '../types';
 
 export const sources: Record<SourceId, Source> = {
   bandcamp: {
@@ -162,8 +162,87 @@ export const sourceCategories = {
   },
 };
 
-// Search all platforms via the unified API
-export async function searchPlatforms(query: string): Promise<SearchResponse> {
+/**
+ * Parse a query to extract multiple artist names from collaborative tracks.
+ * Handles patterns like:
+ * - "Mo-Rice and Babebee"
+ * - "Mo-Rice feat. Babebee"
+ * - "Mo-Rice, Babebee"
+ * - "Mo-Rice + Babebee"
+ * - "Kid Lightbulbs x ilyBBY"
+ *
+ * Returns an array of individual artist names. If no separators found, returns the original query.
+ */
+function parseMultiArtistQuery(query: string): string[] {
+  // Pattern matches common collaboration separators
+  // Note: " x " requires spaces to avoid splitting names like "The xx"
+  const separatorPattern = /\s+(?:and|&|feat\.?|featuring|,|\+|x)\s+/gi;
+
+  const parts = query.split(separatorPattern)
+    .map(part => part.trim())
+    .filter(part => part.length > 0);
+
+  return parts.length > 1 ? parts : [query];
+}
+
+/**
+ * Normalize a string for comparison (lowercase, alphanumeric only)
+ */
+function normalizeForComparison(str: string): string {
+  return str.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+/**
+ * Merge multiple search responses, deduplicating results by normalized name
+ */
+function mergeSearchResponses(responses: SearchResponse[], originalQuery: string): SearchResponse {
+  const resultMap = new Map<string, SearchResult>();
+
+  for (const response of responses) {
+    for (const result of response.results) {
+      // Generate a key for deduplication based on normalized name + artist
+      const key = normalizeForComparison(result.artist ? `${result.artist}-${result.name}` : result.name);
+
+      if (resultMap.has(key)) {
+        // Merge platforms from duplicate result
+        const existing = resultMap.get(key)!;
+        for (const platform of result.platforms) {
+          if (!existing.platforms.some(p => p.sourceId === platform.sourceId)) {
+            existing.platforms.push(platform);
+          }
+        }
+        // Use image if we don't have one
+        if (!existing.imageUrl && result.imageUrl) {
+          existing.imageUrl = result.imageUrl;
+        }
+        // Upgrade match confidence if verified
+        if (result.matchConfidence === 'verified') {
+          existing.matchConfidence = 'verified';
+        }
+      } else {
+        // Add new result (clone to avoid mutation)
+        resultMap.set(key, {
+          ...result,
+          platforms: [...result.platforms],
+        });
+      }
+    }
+  }
+
+  // Sort by number of platforms (most platforms first)
+  const mergedResults = Array.from(resultMap.values())
+    .sort((a, b) => b.platforms.length - a.platforms.length);
+
+  return {
+    query: originalQuery,
+    results: mergedResults,
+  };
+}
+
+/**
+ * Perform a single search API call
+ */
+async function searchSingle(query: string): Promise<SearchResponse> {
   const params = new URLSearchParams({ query });
 
   try {
@@ -179,6 +258,32 @@ export async function searchPlatforms(query: string): Promise<SearchResponse> {
       results: [],
     };
   }
+}
+
+// Search all platforms via the unified API
+// Handles multi-artist queries by searching each artist separately and merging results
+export async function searchPlatforms(query: string): Promise<SearchResponse> {
+  const artistQueries = parseMultiArtistQuery(query);
+
+  // If single artist (no separators found), do a simple search
+  if (artistQueries.length === 1) {
+    return searchSingle(query);
+  }
+
+  // Multi-artist query: search for the full query AND each individual artist
+  // This handles both "Artist1 feat. Artist2" collabs AND bands with conjunctions
+  // like "Daryl Hall & John Oates" (which should also return the full band name)
+  const allQueries = [query, ...artistQueries];
+
+  // Deduplicate queries (in case parsing produced the same string)
+  const uniqueQueries = [...new Set(allQueries.map(q => q.toLowerCase()))]
+    .map(lowerQ => allQueries.find(q => q.toLowerCase() === lowerQ)!);
+
+  // Search all queries in parallel
+  const responses = await Promise.all(uniqueQueries.map(q => searchSingle(q)));
+
+  // Merge and deduplicate results
+  return mergeSearchResponses(responses, query);
 }
 
 // Resolve artist name from a Spotify or Apple Music URL
