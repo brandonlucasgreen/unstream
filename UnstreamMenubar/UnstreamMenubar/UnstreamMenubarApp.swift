@@ -20,8 +20,7 @@ struct UnstreamMenubarApp: App {
                     }
                 }
         } label: {
-            // Vinyl record icon - filled when playing, outline when idle
-            Image(systemName: appState.isPlaying ? "opticaldisc.fill" : "opticaldisc")
+            Image("MenuBarIcon")
         }
         .menuBarExtraStyle(.window)
 
