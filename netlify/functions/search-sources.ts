@@ -441,10 +441,10 @@ interface MusicBrainzResult {
   artistName: string;
   officialUrl?: string;  // From "official homepage" relation
   discogsUrl?: string;   // From "discogs" relation
+  hasPre2005Release: boolean;
 }
 
-// Search MusicBrainz for artist info including official website and Discogs link
-// Optimized: only 2 API calls (search + URL relations), skips release history check
+// Search MusicBrainz for artist info including official website, Discogs, and release history
 async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | null> {
   try {
     const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=artist:${encodeURIComponent(query)}&fmt=json&limit=1`;
@@ -506,10 +506,40 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
       }
     }
 
+    await delay(1100);
+
+    // Check if artist has pre-2005 releases (for Hoopla/Freegal eligibility)
+    const releasesUrl = `https://musicbrainz.org/ws/2/release-group/?artist=${artist.id}&fmt=json&limit=20`;
+
+    const releasesResponse = await globalThis.fetch(releasesUrl, {
+      headers: {
+        'User-Agent': 'Unstream/1.0 (https://github.com/unstream - ethical music finder)',
+      },
+    });
+
+    let hasPre2005Release = false;
+
+    if (releasesResponse.ok) {
+      const releasesData = await releasesResponse.json() as { 'release-groups'?: { 'first-release-date'?: string }[] };
+      const releaseGroups = releasesData['release-groups'] || [];
+
+      for (const rg of releaseGroups) {
+        const firstReleaseDate = rg['first-release-date'];
+        if (firstReleaseDate) {
+          const year = parseInt(firstReleaseDate.substring(0, 4), 10);
+          if (year < 2005) {
+            hasPre2005Release = true;
+            break;
+          }
+        }
+      }
+    }
+
     return {
       artistName: artist.name,
       officialUrl,
       discogsUrl,
+      hasPre2005Release,
     };
   } catch (error: unknown) {
     const err = error as { name?: string; message?: string };
@@ -864,7 +894,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         });
       }
 
-      // Sort platforms: verified first, then search-only, then official/discogs last
+      // Sort platforms: verified first, then search-only, then official site/discogs last
       const searchOnlyPlatforms = new Set(['ampwall', 'sonica', 'kofi', 'buymeacoffee']);
       const officialPlatforms = new Set(['officialsite', 'discogs']);
       result.platforms.sort((a, b) => {

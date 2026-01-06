@@ -5,11 +5,14 @@ type SourceId =
   | 'bandcamp'
   | 'mirlo'
   | 'ampwall'
+  | 'sonica'
   | 'bandwagon'
   | 'faircamp'
   | 'patreon'
   | 'buymeacoffee'
   | 'kofi'
+  | 'hoopla'
+  | 'freegal'
   | 'qobuz'
   | 'officialsite'
   | 'discogs';
@@ -176,10 +179,10 @@ interface MusicBrainzResult {
   artistName: string;
   officialUrl?: string;  // From "official homepage" relation
   discogsUrl?: string;   // From "discogs" relation
+  hasPre2005Release: boolean;
 }
 
-// Search MusicBrainz for artist info including official website and Discogs link
-// Optimized: only 2 API calls (search + URL relations), skips release history check
+// Search MusicBrainz for artist info including official website, Discogs, and release history
 async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | null> {
   try {
     // Search for artist
@@ -247,10 +250,41 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
       }
     }
 
+    // Wait again before next request
+    await delay(1100);
+
+    // Check if artist has pre-2005 releases (for Hoopla/Freegal eligibility)
+    const releasesUrl = `https://musicbrainz.org/ws/2/release-group/?artist=${artist.id}&fmt=json&limit=20`;
+
+    const releasesResponse = await globalThis.fetch(releasesUrl, {
+      headers: {
+        'User-Agent': 'Unstream/1.0 (https://github.com/unstream - ethical music finder)',
+      },
+    });
+
+    let hasPre2005Release = false;
+
+    if (releasesResponse.ok) {
+      const releasesData = await releasesResponse.json() as { 'release-groups'?: { 'first-release-date'?: string }[] };
+      const releaseGroups = releasesData['release-groups'] || [];
+
+      for (const rg of releaseGroups) {
+        const firstReleaseDate = rg['first-release-date'];
+        if (firstReleaseDate) {
+          const year = parseInt(firstReleaseDate.substring(0, 4), 10);
+          if (year < 2005) {
+            hasPre2005Release = true;
+            break;
+          }
+        }
+      }
+    }
+
     return {
       artistName: artist.name,
       officialUrl,
       discogsUrl,
+      hasPre2005Release,
     };
   } catch (error: any) {
     console.error('MusicBrainz search error:', error.name, error.message);
@@ -550,6 +584,24 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   // Extract MusicBrainz data (official URL and Discogs)
   const mbResult = musicbrainzResult.status === 'fulfilled' ? musicbrainzResult.value : null;
 
+  // Add Hoopla and Freegal results if artist has pre-2005 releases
+  if (mbResult?.hasPre2005Release) {
+    const hooplaSearchUrl = `https://www.hoopladigital.com/search?q=${encodeURIComponent(mbResult.artistName)}&type=music`;
+    allResults.push({
+      sourceId: 'hoopla',
+      name: mbResult.artistName,
+      type: 'artist',
+      url: hooplaSearchUrl,
+    });
+    const freegalSearchUrl = `https://www.freegalmusic.com/search-page/${encodeURIComponent(mbResult.artistName)}`;
+    allResults.push({
+      sourceId: 'freegal',
+      name: mbResult.artistName,
+      type: 'artist',
+      url: freegalSearchUrl,
+    });
+  }
+
   // Get Bandwagon matches (returns Map of normalized artist name -> URL)
   const bandwagonMatches = bandwagonResults.status === 'fulfilled' ? bandwagonResults.value : new Map<string, string>();
 
@@ -639,8 +691,8 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         }
       }
 
-      // Sort platforms: verified matches first, search-only platforms in middle, official/discogs last
-      const searchOnlyPlatforms = new Set(['ampwall', 'kofi']);
+      // Sort platforms: verified matches first, search-only platforms in middle, official site/discogs last
+      const searchOnlyPlatforms = new Set(['ampwall', 'sonica', 'kofi']);
       const officialPlatforms = new Set(['officialsite', 'discogs']);
       result.platforms.sort((a, b) => {
         // Official site/discogs always last (site before discogs)
