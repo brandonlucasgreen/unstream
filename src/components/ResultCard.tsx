@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { SearchResult } from '../types';
 import { sources, sourceCategories } from '../services/sources';
 import { SourceBadge } from './SourceBadge';
+import { analytics } from '../services/analytics';
 
 interface ResultCardProps {
   result: SearchResult;
@@ -74,6 +75,7 @@ export function ResultCard({ result }: ResultCardProps) {
 
   const handleReportSubmit = (e: React.MouseEvent) => {
     e.stopPropagation();
+    analytics.trackReportIssue();
     const platformList = result.platforms.map(p => `- ${sources[p.sourceId]?.name}: ${p.url}`).join('\n');
     const subject = encodeURIComponent(`Issue Report: ${result.name}`);
     const body = encodeURIComponent(
@@ -267,7 +269,7 @@ export function ResultCard({ result }: ResultCardProps) {
                           backgroundColor: `${sources[platform.sourceId].color}20`,
                           color: sources[platform.sourceId].color,
                         }}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => { e.stopPropagation(); analytics.trackPlatformClick(sources[platform.sourceId].name); }}
                       >
                         <span>{sources[platform.sourceId].icon}</span>
                         <span>{sources[platform.sourceId].name}</span>

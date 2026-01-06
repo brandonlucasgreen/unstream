@@ -1,4 +1,5 @@
 import type { Source } from '../types';
+import { analytics } from '../services/analytics';
 
 interface SourceBadgeProps {
   source: Source;
@@ -17,6 +18,7 @@ export function SourceBadge({ source, url }: SourceBadgeProps) {
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1.5 px-2 py-1 text-sm text-text-secondary hover:text-text-primary transition-colors"
         title={`Search for this artist on ${source.name}`}
+        onClick={() => analytics.trackPlatformClick(source.name)}
       >
         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -41,6 +43,7 @@ export function SourceBadge({ source, url }: SourceBadgeProps) {
         color: source.color,
       }}
       title={`View on ${source.name}`}
+      onClick={() => analytics.trackPlatformClick(source.name)}
     >
       <span className="text-base">
         {source.icon}
