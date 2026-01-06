@@ -1,9 +1,9 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { SearchBar } from './components/SearchBar';
 import { ResultCard } from './components/ResultCard';
 import type { SearchResult } from './types';
-import { sources, sourceCategories, searchPlatforms, resolveArtistUrl } from './services/sources';
+import { sources, sourceCategories, searchPlatforms, resolveArtistUrl, fetchMusicBrainzData, mergeWithMusicBrainzData } from './services/sources';
 import { analytics } from './services/analytics';
 import './index.css';
 
@@ -11,10 +11,14 @@ function App() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isEnriching, setIsEnriching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [resolvedQuery, setResolvedQuery] = useState<string>('');
   const [isResolving, setIsResolving] = useState(false);
+
+  // Track current search to handle race conditions
+  const currentSearchRef = useRef<number>(0);
 
   // Handle URL parameter for deep-linked searches
   useEffect(() => {
@@ -44,20 +48,52 @@ function App() {
   }, [searchParams, isResolving, hasSearched, setSearchParams]);
 
   const handleSearch = useCallback(async (query: string) => {
+    // Generate unique ID for this search to handle race conditions
+    const searchId = Date.now();
+    currentSearchRef.current = searchId;
+
     setIsLoading(true);
+    setIsEnriching(false);
     setError(null);
     setHasSearched(true);
     analytics.trackSearch();
 
     try {
-      // Search all platforms in parallel
+      // Phase 1: Fast search (returns in ~1-2s without MusicBrainz)
       const response = await searchPlatforms(query);
+
+      // Check if this is still the current search
+      if (currentSearchRef.current !== searchId) return;
+
       setResults(response.results);
-    } catch (err) {
-      setError('Failed to search. Please try again.');
-      console.error(err);
-    } finally {
       setIsLoading(false);
+
+      // Phase 2: MusicBrainz enrichment (runs in background)
+      if (response.hasPendingEnrichment && response.results.length > 0) {
+        setIsEnriching(true);
+
+        try {
+          const mbData = await fetchMusicBrainzData(query);
+
+          // Check if this is still the current search before updating
+          if (currentSearchRef.current === searchId && mbData) {
+            setResults(prev => mergeWithMusicBrainzData(prev, mbData));
+          }
+        } catch (enrichErr) {
+          // Silent failure for enrichment - don't show error to user
+          console.error('MusicBrainz enrichment failed:', enrichErr);
+        } finally {
+          if (currentSearchRef.current === searchId) {
+            setIsEnriching(false);
+          }
+        }
+      }
+    } catch (err) {
+      if (currentSearchRef.current === searchId) {
+        setError('Failed to search. Please try again.');
+        setIsLoading(false);
+      }
+      console.error(err);
     }
   }, []);
 
@@ -66,6 +102,7 @@ function App() {
     setHasSearched(false);
     setError(null);
     setResolvedQuery('');
+    setIsEnriching(false);
   }, []);
 
   return (
@@ -154,9 +191,17 @@ function App() {
                 </div>
               ) : results.length > 0 ? (
                 <div className="space-y-4">
-                  <p className="text-text-muted text-sm">
-                    Found {results.length} result{results.length !== 1 ? 's' : ''}
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-text-muted text-sm">
+                      Found {results.length} result{results.length !== 1 ? 's' : ''}
+                    </p>
+                    {isEnriching && (
+                      <div className="flex items-center gap-2 text-text-muted text-sm">
+                        <div className="w-3 h-3 border-2 border-accent-secondary border-t-transparent rounded-full animate-spin"></div>
+                        <span>Loading more sources...</span>
+                      </div>
+                    )}
+                  </div>
                   {results.map((result) => (
                     <ResultCard key={result.id} result={result} />
                   ))}

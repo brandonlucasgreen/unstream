@@ -52,6 +52,7 @@ interface AggregatedResult {
 interface SearchResponse {
   query: string;
   results: AggregatedResult[];
+  hasPendingEnrichment?: boolean;
 }
 
 // Helper to fetch with timeout
@@ -790,14 +791,14 @@ function aggregateResults(allResults: PlatformResult[]): AggregatedResult[] {
 }
 
 async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
-  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, patreonResults, qobuzResults, musicbrainzResults] = await Promise.allSettled([
+  // Search all fast platforms in parallel (MusicBrainz is loaded separately for lazy loading)
+  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, patreonResults, qobuzResults] = await Promise.allSettled([
     searchBandcamp(query),
     searchBandwagon(query),
     searchMirlo(query),
     searchFaircamp(query),
     searchPatreon(query),
     searchQobuz(query),
-    searchMusicBrainz(query),
   ]);
 
   const allResults: PlatformResult[] = [];
@@ -808,9 +809,6 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   if (mirloResults.status === 'fulfilled') {
     allResults.push(...mirloResults.value.filter(r => r.type === 'artist'));
   }
-
-  // Extract MusicBrainz data for later use (official site, library services)
-  const musicbrainzData = musicbrainzResults.status === 'fulfilled' ? musicbrainzResults.value : null;
 
   const bandwagonMatches = bandwagonResults.status === 'fulfilled' ? bandwagonResults.value : new Map<string, string>();
   const faircampMatches = faircampResults.status === 'fulfilled' ? faircampResults.value : new Map<string, string>();
@@ -878,36 +876,10 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         }
       }
 
-      // Add official website if MusicBrainz found one
-      if (musicbrainzData?.officialUrl) {
-        result.platforms.push({
-          sourceId: 'officialsite',
-          url: musicbrainzData.officialUrl,
-        });
-      }
-
-      // Add Discogs if MusicBrainz found one
-      if (musicbrainzData?.discogsUrl) {
-        result.platforms.push({
-          sourceId: 'discogs',
-          url: musicbrainzData.discogsUrl,
-        });
-      }
-
-      // Sort platforms: verified first, then search-only, then official site/discogs last
+      // Sort platforms: verified first, then search-only last
+      // Note: officialsite, discogs, hoopla, freegal are added via MusicBrainz lazy loading
       const searchOnlyPlatforms = new Set(['ampwall', 'sonica', 'kofi', 'buymeacoffee']);
-      const officialPlatforms = new Set(['officialsite', 'discogs']);
       result.platforms.sort((a, b) => {
-        // Official site/discogs always last (site before discogs)
-        const aIsOfficial = officialPlatforms.has(a.sourceId);
-        const bIsOfficial = officialPlatforms.has(b.sourceId);
-        if (aIsOfficial && bIsOfficial) {
-          // officialsite before discogs
-          return a.sourceId === 'officialsite' ? -1 : 1;
-        }
-        if (aIsOfficial) return 1;
-        if (bIsOfficial) return -1;
-        // Search-only platforms near the end
         const aIsSearchOnly = searchOnlyPlatforms.has(a.sourceId);
         const bIsSearchOnly = searchOnlyPlatforms.has(b.sourceId);
         if (aIsSearchOnly && !bIsSearchOnly) return 1;
@@ -982,21 +954,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
       { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
     );
 
-    // Add official website if MusicBrainz found one (always last)
-    if (musicbrainzData?.officialUrl) {
-      platforms.push({
-        sourceId: 'officialsite',
-        url: musicbrainzData.officialUrl,
-      });
-    }
-
-    // Add Discogs if MusicBrainz found one
-    if (musicbrainzData?.discogsUrl) {
-      platforms.push({
-        sourceId: 'discogs',
-        url: musicbrainzData.discogsUrl,
-      });
-    }
+    // Note: officialsite, discogs, hoopla, freegal are added via MusicBrainz lazy loading
 
     const newResult: AggregatedResult = {
       id: `qobuz-${normalizedName}`,
@@ -1379,6 +1337,8 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     const response: SearchResponse = {
       query,
       results,
+      // Signal client to fetch MusicBrainz data for enrichment (Official Site, Discogs, Hoopla, Freegal)
+      hasPendingEnrichment: results.length > 0,
     };
 
     return {

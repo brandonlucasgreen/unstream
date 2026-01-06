@@ -61,6 +61,16 @@ export interface SearchResult {
 export interface SearchResponse {
   query: string;
   results: SearchResult[];
+  hasPendingEnrichment?: boolean; // True if MusicBrainz data should be fetched separately
+}
+
+// MusicBrainz enrichment data (fetched separately for lazy loading)
+export interface MusicBrainzData {
+  query: string;
+  artistName: string | null;
+  officialUrl: string | null;
+  discogsUrl: string | null;
+  hasPre2005Release: boolean;
 }
 
 // Search state

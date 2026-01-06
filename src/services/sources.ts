@@ -331,3 +331,94 @@ export async function resolveArtistUrl(url: string): Promise<ResolveResult | nul
     return null;
   }
 }
+
+// Fetch MusicBrainz data for lazy loading enrichment
+export async function fetchMusicBrainzData(query: string): Promise<import('../types').MusicBrainzData | null> {
+  try {
+    const response = await fetch(`/api/search/musicbrainz?query=${encodeURIComponent(query)}`);
+    if (!response.ok) {
+      return null;
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to fetch MusicBrainz data:', error);
+    return null;
+  }
+}
+
+// Merge MusicBrainz data with existing search results
+// Adds officialsite, discogs, hoopla, and freegal platforms to matching artist results
+export function mergeWithMusicBrainzData(
+  results: import('../types').SearchResult[],
+  mbData: import('../types').MusicBrainzData
+): import('../types').SearchResult[] {
+  if (!mbData.artistName) return results;
+
+  const mbNormalized = normalizeForComparison(mbData.artistName);
+
+  return results.map(result => {
+    // Only add to artist results
+    if (result.type !== 'artist') return result;
+
+    const resultNormalized = normalizeForComparison(result.name);
+
+    // Check if artist name matches (exact, contains, or is contained by)
+    const isMatch =
+      resultNormalized === mbNormalized ||
+      resultNormalized.includes(mbNormalized) ||
+      mbNormalized.includes(resultNormalized);
+
+    if (!isMatch) return result;
+
+    // Clone platforms array for immutable update
+    const newPlatforms = [...result.platforms];
+
+    // Add official site if available and not already present
+    if (mbData.officialUrl && !newPlatforms.some(p => p.sourceId === 'officialsite')) {
+      newPlatforms.push({ sourceId: 'officialsite', url: mbData.officialUrl });
+    }
+
+    // Add Discogs if available and not already present
+    if (mbData.discogsUrl && !newPlatforms.some(p => p.sourceId === 'discogs')) {
+      newPlatforms.push({ sourceId: 'discogs', url: mbData.discogsUrl });
+    }
+
+    // Add library services for artists with pre-2005 releases
+    if (mbData.hasPre2005Release) {
+      if (!newPlatforms.some(p => p.sourceId === 'hoopla')) {
+        newPlatforms.push({
+          sourceId: 'hoopla',
+          url: `https://www.hoopladigital.com/search?q=${encodeURIComponent(result.name)}&type=music`,
+        });
+      }
+      if (!newPlatforms.some(p => p.sourceId === 'freegal')) {
+        newPlatforms.push({
+          sourceId: 'freegal',
+          url: `https://www.freegalmusic.com/search-page/${encodeURIComponent(result.name)}`,
+        });
+      }
+    }
+
+    // Re-sort platforms: verified first, search-only in middle, official/library last
+    const searchOnlyPlatforms = new Set(['ampwall', 'sonica', 'kofi', 'buymeacoffee']);
+    const officialPlatforms = new Set(['officialsite', 'discogs', 'hoopla', 'freegal']);
+    newPlatforms.sort((a, b) => {
+      const aIsOfficial = officialPlatforms.has(a.sourceId);
+      const bIsOfficial = officialPlatforms.has(b.sourceId);
+      if (aIsOfficial && bIsOfficial) {
+        // Order: officialsite, discogs, hoopla, freegal
+        const order = ['officialsite', 'discogs', 'hoopla', 'freegal'];
+        return order.indexOf(a.sourceId) - order.indexOf(b.sourceId);
+      }
+      if (aIsOfficial) return 1;
+      if (bIsOfficial) return -1;
+      const aIsSearchOnly = searchOnlyPlatforms.has(a.sourceId);
+      const bIsSearchOnly = searchOnlyPlatforms.has(b.sourceId);
+      if (aIsSearchOnly && !bIsSearchOnly) return 1;
+      if (!aIsSearchOnly && bIsSearchOnly) return -1;
+      return 0;
+    });
+
+    return { ...result, platforms: newPlatforms };
+  });
+}

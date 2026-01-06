@@ -41,6 +41,7 @@ interface AggregatedResult {
 interface SearchResponse {
   query: string;
   results: AggregatedResult[];
+  hasPendingEnrichment?: boolean;
 }
 
 // Helper to fetch with timeout
@@ -560,15 +561,14 @@ function aggregateResults(allResults: PlatformResult[]): AggregatedResult[] {
 }
 
 async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
-  // Search all platforms in parallel with individual timeouts
-  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, patreonResults, qobuzResults, musicbrainzResult] = await Promise.allSettled([
+  // Search all fast platforms in parallel (MusicBrainz is loaded separately for lazy loading)
+  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, patreonResults, qobuzResults] = await Promise.allSettled([
     searchBandcamp(query),
     searchBandwagon(query),
     searchMirlo(query),
     searchFaircamp(query),
     searchPatreon(query),
     searchQobuz(query),
-    searchMusicBrainz(query),
   ]);
 
   const allResults: PlatformResult[] = [];
@@ -579,27 +579,6 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   }
   if (mirloResults.status === 'fulfilled') {
     allResults.push(...mirloResults.value.filter(r => r.type === 'artist'));
-  }
-
-  // Extract MusicBrainz data (official URL and Discogs)
-  const mbResult = musicbrainzResult.status === 'fulfilled' ? musicbrainzResult.value : null;
-
-  // Add Hoopla and Freegal results if artist has pre-2005 releases
-  if (mbResult?.hasPre2005Release) {
-    const hooplaSearchUrl = `https://www.hoopladigital.com/search?q=${encodeURIComponent(mbResult.artistName)}&type=music`;
-    allResults.push({
-      sourceId: 'hoopla',
-      name: mbResult.artistName,
-      type: 'artist',
-      url: hooplaSearchUrl,
-    });
-    const freegalSearchUrl = `https://www.freegalmusic.com/search-page/${encodeURIComponent(mbResult.artistName)}`;
-    allResults.push({
-      sourceId: 'freegal',
-      name: mbResult.artistName,
-      type: 'artist',
-      url: freegalSearchUrl,
-    });
   }
 
   // Get Bandwagon matches (returns Map of normalized artist name -> URL)
@@ -668,43 +647,10 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         });
       }
 
-      // Add official website and Discogs if MusicBrainz found them and artist name matches
-      if (mbResult?.officialUrl || mbResult?.discogsUrl) {
-        const mbNormalizedName = normalizeForComparison(mbResult.artistName);
-        if (normalizedName === mbNormalizedName ||
-            normalizedName.includes(mbNormalizedName) ||
-            mbNormalizedName.includes(normalizedName)) {
-          // Add official site if available
-          if (mbResult.officialUrl) {
-            result.platforms.push({
-              sourceId: 'officialsite',
-              url: mbResult.officialUrl,
-            });
-          }
-          // Add Discogs if available
-          if (mbResult.discogsUrl) {
-            result.platforms.push({
-              sourceId: 'discogs',
-              url: mbResult.discogsUrl,
-            });
-          }
-        }
-      }
-
-      // Sort platforms: verified matches first, search-only platforms in middle, official site/discogs last
+      // Sort platforms: verified matches first, search-only platforms last
+      // Note: officialsite, discogs, hoopla, freegal are added via MusicBrainz lazy loading
       const searchOnlyPlatforms = new Set(['ampwall', 'sonica', 'kofi']);
-      const officialPlatforms = new Set(['officialsite', 'discogs']);
       result.platforms.sort((a, b) => {
-        // Official site/discogs always last (site before discogs)
-        const aIsOfficial = officialPlatforms.has(a.sourceId);
-        const bIsOfficial = officialPlatforms.has(b.sourceId);
-        if (aIsOfficial && bIsOfficial) {
-          // officialsite before discogs
-          return a.sourceId === 'officialsite' ? -1 : 1;
-        }
-        if (aIsOfficial) return 1;
-        if (bIsOfficial) return -1;
-        // Search-only platforms after verified matches
         const aIsSearchOnly = searchOnlyPlatforms.has(a.sourceId);
         const bIsSearchOnly = searchOnlyPlatforms.has(b.sourceId);
         if (aIsSearchOnly && !bIsSearchOnly) return 1;
@@ -743,6 +689,8 @@ export default async function handler(
     const response: SearchResponse = {
       query,
       results,
+      // Signal client to fetch MusicBrainz data for enrichment (Official Site, Discogs, Hoopla, Freegal)
+      hasPendingEnrichment: results.length > 0,
     };
 
     res.status(200).json(response);
