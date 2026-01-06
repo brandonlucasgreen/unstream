@@ -104,6 +104,9 @@ export function ResultCard({ result }: ResultCardProps) {
     decentralized: verifiedPlatforms.filter(p =>
       sourceCategories.decentralized.sources.includes(p.sourceId)
     ),
+    official: verifiedPlatforms.filter(p =>
+      sourceCategories.official.sources.includes(p.sourceId)
+    ),
   };
 
   const typeIcon = {
@@ -382,6 +385,23 @@ export function ResultCard({ result }: ResultCardProps) {
               </h4>
               <div className="flex flex-wrap gap-2">
                 {categorizedPlatforms.library.map(platform => (
+                  <SourceBadge
+                    key={platform.sourceId}
+                    source={sources[platform.sourceId]}
+                    url={platform.url}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {categorizedPlatforms.official.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="text-xs font-medium text-text-muted uppercase tracking-wider">
+                Official
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {categorizedPlatforms.official.map(platform => (
                   <SourceBadge
                     key={platform.sourceId}
                     source={sources[platform.sourceId]}

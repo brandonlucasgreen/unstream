@@ -11,7 +11,8 @@ export type SourceId =
   | 'kofi'
   | 'hoopla'
   | 'freegal'
-  | 'qobuz';
+  | 'qobuz'
+  | 'officialsite';
 
 export interface Source {
   id: SourceId;
@@ -19,7 +20,7 @@ export interface Source {
   description: string;
   color: string;
   icon: string;
-  category: 'marketplace' | 'patronage' | 'library' | 'decentralized';
+  category: 'marketplace' | 'patronage' | 'library' | 'decentralized' | 'official';
   hasEmbed: boolean;
   searchUrlTemplate: string;
   searchOnly?: boolean; // True if we can't verify the artist exists (shows "Search X" instead)

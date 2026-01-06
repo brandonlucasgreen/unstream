@@ -137,6 +137,17 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: 'https://www.qobuz.com/us-en/search/artists/{query}',
     homepageUrl: 'https://www.qobuz.com',
   },
+  officialsite: {
+    id: 'officialsite',
+    name: 'Official Website',
+    description: 'Artist\'s official website',
+    color: '#71717a',
+    icon: '🌐',
+    category: 'official',
+    hasEmbed: false,
+    searchUrlTemplate: '',
+    homepageUrl: '',
+  },
 };
 
 export const sourceCategories = {
@@ -159,6 +170,11 @@ export const sourceCategories = {
     name: 'Decentralized',
     description: 'ActivityPub and self-hosted platforms',
     sources: ['bandwagon', 'faircamp'] as SourceId[],
+  },
+  official: {
+    name: 'Official',
+    description: 'Artist websites and stores',
+    sources: ['officialsite'] as SourceId[],
   },
 };
 

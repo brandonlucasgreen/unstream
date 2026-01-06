@@ -12,7 +12,8 @@ type SourceId =
   | 'kofi'
   | 'hoopla'
   | 'freegal'
-  | 'qobuz';
+  | 'qobuz'
+  | 'officialsite';
 
 interface LatestRelease {
   title: string;
@@ -436,10 +437,15 @@ async function searchBandwagon(query: string): Promise<Map<string, string>> {
 // Helper to delay execution (for rate limiting)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Search MusicBrainz for major artists and return results with Hoopla if they have pre-2005 releases
-async function searchMusicBrainz(query: string): Promise<PlatformResult[]> {
-  const results: PlatformResult[] = [];
+// MusicBrainz result interface for official website lookup
+interface MusicBrainzResult {
+  artistName: string;
+  officialUrl?: string;
+  hasPre2005Release: boolean;
+}
 
+// Search MusicBrainz for artist info including official website and release history
+async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | null> {
   try {
     const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=artist:${encodeURIComponent(query)}&fmt=json&limit=1`;
 
@@ -449,15 +455,55 @@ async function searchMusicBrainz(query: string): Promise<PlatformResult[]> {
       },
     });
 
-    if (!response.ok) return results;
+    if (!response.ok) return null;
 
     const data = await response.json() as { artists?: { id: string; name: string; score: number }[] };
     const artists = data.artists || [];
 
-    if (artists.length === 0) return results;
+    if (artists.length === 0) return null;
 
     const artist = artists[0];
-    if (artist.score < 95) return results;
+    if (artist.score < 95) return null;
+
+    await delay(1100);
+
+    // Fetch artist details with URL relations
+    const artistUrl = `https://musicbrainz.org/ws/2/artist/${artist.id}?inc=url-rels&fmt=json`;
+
+    const artistResponse = await globalThis.fetch(artistUrl, {
+      headers: {
+        'User-Agent': 'Unstream/1.0 (https://github.com/unstream - ethical music finder)',
+      },
+    });
+
+    let officialUrl: string | undefined;
+
+    if (artistResponse.ok) {
+      const artistData = await artistResponse.json() as {
+        relations?: {
+          type: string;
+          url?: { resource: string };
+        }[];
+      };
+
+      const relations = artistData.relations || [];
+
+      for (const rel of relations) {
+        if (rel.type === 'official homepage' && rel.url?.resource) {
+          officialUrl = rel.url.resource;
+          break;
+        }
+      }
+
+      if (!officialUrl) {
+        for (const rel of relations) {
+          if ((rel.type === 'purchase for mail-order' || rel.type === 'purchase for download') && rel.url?.resource) {
+            officialUrl = rel.url.resource;
+            break;
+          }
+        }
+      }
+    }
 
     await delay(1100);
 
@@ -469,43 +515,34 @@ async function searchMusicBrainz(query: string): Promise<PlatformResult[]> {
       },
     });
 
-    if (!releasesResponse.ok) return results;
+    let hasPre2005Release = false;
 
-    const releasesData = await releasesResponse.json() as { 'release-groups'?: { 'first-release-date'?: string }[] };
-    const releaseGroups = releasesData['release-groups'] || [];
+    if (releasesResponse.ok) {
+      const releasesData = await releasesResponse.json() as { 'release-groups'?: { 'first-release-date'?: string }[] };
+      const releaseGroups = releasesData['release-groups'] || [];
 
-    for (const rg of releaseGroups) {
-      const firstReleaseDate = rg['first-release-date'];
-      if (firstReleaseDate) {
-        const year = parseInt(firstReleaseDate.substring(0, 4), 10);
-        if (year < 2005) {
-          console.log('Adding Hoopla and Freegal for:', artist.name);
-          // Add Hoopla search link
-          const hooplaSearchUrl = `https://www.hoopladigital.com/search?q=${encodeURIComponent(artist.name)}&type=music`;
-          results.push({
-            sourceId: 'hoopla',
-            name: artist.name,
-            type: 'artist',
-            url: hooplaSearchUrl,
-          });
-          // Add Freegal direct artist link (Base64-encoded artist name)
-          const freegalArtistId = Buffer.from(artist.name).toString('base64');
-          results.push({
-            sourceId: 'freegal',
-            name: artist.name,
-            type: 'artist',
-            url: `https://www.freegalmusic.com/artist/${freegalArtistId}`,
-          });
-          break;
+      for (const rg of releaseGroups) {
+        const firstReleaseDate = rg['first-release-date'];
+        if (firstReleaseDate) {
+          const year = parseInt(firstReleaseDate.substring(0, 4), 10);
+          if (year < 2005) {
+            hasPre2005Release = true;
+            break;
+          }
         }
       }
     }
+
+    return {
+      artistName: artist.name,
+      officialUrl,
+      hasPre2005Release,
+    };
   } catch (error: unknown) {
     const err = error as { name?: string; message?: string };
     console.error('MusicBrainz search error:', err.name, err.message);
+    return null;
   }
-
-  return results;
 }
 
 // Search Mirlo by checking if artist page exists
@@ -768,9 +805,9 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   if (mirloResults.status === 'fulfilled') {
     allResults.push(...mirloResults.value.filter(r => r.type === 'artist'));
   }
-  if (musicbrainzResults.status === 'fulfilled') {
-    allResults.push(...musicbrainzResults.value.filter(r => r.type === 'artist'));
-  }
+
+  // Extract MusicBrainz data for later use (official site, library services)
+  const musicbrainzData = musicbrainzResults.status === 'fulfilled' ? musicbrainzResults.value : null;
 
   const bandwagonMatches = bandwagonResults.status === 'fulfilled' ? bandwagonResults.value : new Map<string, string>();
   const faircampMatches = faircampResults.status === 'fulfilled' ? faircampResults.value : new Map<string, string>();
@@ -797,6 +834,18 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         result.platforms.push({
           sourceId: 'sonica',
           url: `https://sonica.music/search/${encodeURIComponent(result.name)}`,
+        });
+      }
+
+      // Add library services if MusicBrainz indicates artist has pre-2005 releases
+      if (musicbrainzData?.hasPre2005Release) {
+        result.platforms.push({
+          sourceId: 'hoopla',
+          url: `https://www.hoopladigital.com/search?q=${encodeURIComponent(result.name)}&type=music`,
+        });
+        result.platforms.push({
+          sourceId: 'freegal',
+          url: `https://www.freegalmusic.com/search-page/${encodeURIComponent(result.name)}`,
         });
       }
 
@@ -838,8 +887,21 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         }
       }
 
+      // Add official website if MusicBrainz found one
+      if (musicbrainzData?.officialUrl) {
+        result.platforms.push({
+          sourceId: 'officialsite',
+          url: musicbrainzData.officialUrl,
+        });
+      }
+
+      // Sort platforms: verified first, then search-only, then official site last
       const searchOnlyPlatforms = new Set(['ampwall', 'sonica', 'kofi', 'buymeacoffee']);
       result.platforms.sort((a, b) => {
+        // Official site always last
+        if (a.sourceId === 'officialsite') return 1;
+        if (b.sourceId === 'officialsite') return -1;
+        // Search-only platforms near the end
         const aIsSearchOnly = searchOnlyPlatforms.has(a.sourceId);
         const bIsSearchOnly = searchOnlyPlatforms.has(b.sourceId);
         if (aIsSearchOnly && !bIsSearchOnly) return 1;
@@ -888,33 +950,58 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
       ? slugMatch[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
       : normalizedName;
 
+    const platforms: AggregatedResult['platforms'] = [
+      { sourceId: 'qobuz', url },
+    ];
+
+    // Check if this Qobuz artist also has matches on other platforms
+    if (patreonMatches.has(normalizedName) && !usedPatreonMatches.has(normalizedName)) {
+      platforms.push({ sourceId: 'patreon', url: patreonMatches.get(normalizedName)! });
+      usedPatreonMatches.add(normalizedName);
+    }
+    if (bandwagonMatches.has(normalizedName) && !usedBandwagonMatches.has(normalizedName)) {
+      platforms.push({ sourceId: 'bandwagon', url: bandwagonMatches.get(normalizedName)! });
+      usedBandwagonMatches.add(normalizedName);
+    }
+    if (faircampMatches.has(normalizedName) && !usedFaircampMatches.has(normalizedName)) {
+      platforms.push({ sourceId: 'faircamp', url: faircampMatches.get(normalizedName)! });
+      usedFaircampMatches.add(normalizedName);
+    }
+
+    // Add library services if MusicBrainz indicates artist has pre-2005 releases
+    if (musicbrainzData?.hasPre2005Release) {
+      platforms.push({
+        sourceId: 'hoopla',
+        url: `https://www.hoopladigital.com/search?q=${encodeURIComponent(displayName)}&type=music`,
+      });
+      platforms.push({
+        sourceId: 'freegal',
+        url: `https://www.freegalmusic.com/search-page/${encodeURIComponent(displayName)}`,
+      });
+    }
+
+    // Add search-only platforms
+    platforms.push(
+      { sourceId: 'ampwall', url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(displayName)}` },
+      { sourceId: 'sonica', url: `https://sonica.music/search/${encodeURIComponent(displayName)}` },
+      { sourceId: 'kofi', url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(displayName)}` },
+      { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
+    );
+
+    // Add official website if MusicBrainz found one (always last)
+    if (musicbrainzData?.officialUrl) {
+      platforms.push({
+        sourceId: 'officialsite',
+        url: musicbrainzData.officialUrl,
+      });
+    }
+
     const newResult: AggregatedResult = {
       id: `qobuz-${normalizedName}`,
       name: displayName,
       type: 'artist',
-      platforms: [
-        { sourceId: 'qobuz', url },
-        // Add search-only platforms for this artist
-        { sourceId: 'ampwall', url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(displayName)}` },
-        { sourceId: 'sonica', url: `https://sonica.music/search/${encodeURIComponent(displayName)}` },
-        { sourceId: 'kofi', url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(displayName)}` },
-        { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
-      ],
+      platforms,
     };
-
-    // Check if this Qobuz artist also has matches on other platforms
-    if (patreonMatches.has(normalizedName) && !usedPatreonMatches.has(normalizedName)) {
-      newResult.platforms.splice(1, 0, { sourceId: 'patreon', url: patreonMatches.get(normalizedName)! });
-      usedPatreonMatches.add(normalizedName);
-    }
-    if (bandwagonMatches.has(normalizedName) && !usedBandwagonMatches.has(normalizedName)) {
-      newResult.platforms.splice(1, 0, { sourceId: 'bandwagon', url: bandwagonMatches.get(normalizedName)! });
-      usedBandwagonMatches.add(normalizedName);
-    }
-    if (faircampMatches.has(normalizedName) && !usedFaircampMatches.has(normalizedName)) {
-      newResult.platforms.splice(1, 0, { sourceId: 'faircamp', url: faircampMatches.get(normalizedName)! });
-      usedFaircampMatches.add(normalizedName);
-    }
 
     aggregated.push(newResult);
     console.log(`[Qobuz-only] Created result for "${displayName}" from Qobuz match`);

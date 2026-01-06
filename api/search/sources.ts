@@ -11,7 +11,8 @@ type SourceId =
   | 'buymeacoffee'
   | 'kofi'
   | 'hoopla'
-  | 'qobuz';
+  | 'qobuz'
+  | 'officialsite';
 
 interface PlatformResult {
   sourceId: SourceId;
@@ -170,10 +171,15 @@ async function searchBandwagon(query: string): Promise<Map<string, string>> {
 // Helper to delay execution (for rate limiting)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Search MusicBrainz for major artists and return results with Hoopla if they have pre-2005 releases
-async function searchMusicBrainz(query: string): Promise<PlatformResult[]> {
-  const results: PlatformResult[] = [];
+// MusicBrainz result interface for official website lookup
+interface MusicBrainzResult {
+  artistName: string;
+  officialUrl?: string;
+  hasPre2005Release: boolean;
+}
 
+// Search MusicBrainz for artist info including official website and release history
+async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | null> {
   try {
     // Search for artist - use globalThis.fetch for compatibility
     const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=artist:${encodeURIComponent(query)}&fmt=json&limit=1`;
@@ -186,19 +192,63 @@ async function searchMusicBrainz(query: string): Promise<PlatformResult[]> {
 
     if (!response.ok) {
       console.log('MusicBrainz artist search failed:', response.status);
-      return results;
+      return null;
     }
 
     const data = await response.json() as { artists?: { id: string; name: string; score: number }[] };
     const artists = data.artists || [];
 
-    if (artists.length === 0) return results;
+    if (artists.length === 0) return null;
 
     const artist = artists[0];
     // Only consider exact/near-exact matches
-    if (artist.score < 95) return results;
+    if (artist.score < 95) return null;
 
     // Wait 1.1 seconds to respect MusicBrainz rate limit (1 req/sec)
+    await delay(1100);
+
+    // Fetch artist details with URL relations
+    const artistUrl = `https://musicbrainz.org/ws/2/artist/${artist.id}?inc=url-rels&fmt=json`;
+
+    const artistResponse = await globalThis.fetch(artistUrl, {
+      headers: {
+        'User-Agent': 'Unstream/1.0 (https://github.com/unstream - ethical music finder)',
+      },
+    });
+
+    let officialUrl: string | undefined;
+
+    if (artistResponse.ok) {
+      const artistData = await artistResponse.json() as {
+        relations?: {
+          type: string;
+          url?: { resource: string };
+        }[];
+      };
+
+      // Look for official homepage in relations
+      // Priority: "official homepage" > "purchase for mail-order" > "purchase for download"
+      const relations = artistData.relations || [];
+
+      for (const rel of relations) {
+        if (rel.type === 'official homepage' && rel.url?.resource) {
+          officialUrl = rel.url.resource;
+          break;
+        }
+      }
+
+      // If no official homepage, try purchase links
+      if (!officialUrl) {
+        for (const rel of relations) {
+          if ((rel.type === 'purchase for mail-order' || rel.type === 'purchase for download') && rel.url?.resource) {
+            officialUrl = rel.url.resource;
+            break;
+          }
+        }
+      }
+    }
+
+    // Wait again before next request
     await delay(1100);
 
     // Check if artist has pre-2005 releases
@@ -210,37 +260,33 @@ async function searchMusicBrainz(query: string): Promise<PlatformResult[]> {
       },
     });
 
-    if (!releasesResponse.ok) {
-      console.log('MusicBrainz releases search failed:', releasesResponse.status);
-      return results;
-    }
+    let hasPre2005Release = false;
 
-    const releasesData = await releasesResponse.json() as { 'release-groups'?: { 'first-release-date'?: string }[] };
-    const releaseGroups = releasesData['release-groups'] || [];
+    if (releasesResponse.ok) {
+      const releasesData = await releasesResponse.json() as { 'release-groups'?: { 'first-release-date'?: string }[] };
+      const releaseGroups = releasesData['release-groups'] || [];
 
-    for (const rg of releaseGroups) {
-      const firstReleaseDate = rg['first-release-date'];
-      if (firstReleaseDate) {
-        const year = parseInt(firstReleaseDate.substring(0, 4), 10);
-        if (year < 2005) {
-          // Found pre-2005 release - add Hoopla link
-          console.log('Adding Hoopla for:', artist.name);
-          const hooplaSearchUrl = `https://www.hoopladigital.com/search?q=${encodeURIComponent(artist.name)}&type=music`;
-          results.push({
-            sourceId: 'hoopla',
-            name: artist.name,
-            type: 'artist',
-            url: hooplaSearchUrl,
-          });
-          break;
+      for (const rg of releaseGroups) {
+        const firstReleaseDate = rg['first-release-date'];
+        if (firstReleaseDate) {
+          const year = parseInt(firstReleaseDate.substring(0, 4), 10);
+          if (year < 2005) {
+            hasPre2005Release = true;
+            break;
+          }
         }
       }
     }
+
+    return {
+      artistName: artist.name,
+      officialUrl,
+      hasPre2005Release,
+    };
   } catch (error: any) {
     console.error('MusicBrainz search error:', error.name, error.message);
+    return null;
   }
-
-  return results;
 }
 
 // Search Mirlo by checking if artist page exists (Mirlo is client-side rendered)
@@ -528,7 +574,7 @@ function aggregateResults(allResults: PlatformResult[]): AggregatedResult[] {
 
 async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   // Search all platforms in parallel with individual timeouts
-  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, patreonResults, qobuzResults, musicbrainzResults] = await Promise.allSettled([
+  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, patreonResults, qobuzResults, musicbrainzResult] = await Promise.allSettled([
     searchBandcamp(query),
     searchBandwagon(query),
     searchMirlo(query),
@@ -547,8 +593,19 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   if (mirloResults.status === 'fulfilled') {
     allResults.push(...mirloResults.value.filter(r => r.type === 'artist'));
   }
-  if (musicbrainzResults.status === 'fulfilled') {
-    allResults.push(...musicbrainzResults.value.filter(r => r.type === 'artist'));
+
+  // Extract MusicBrainz data (official URL and Hoopla eligibility)
+  const mbResult = musicbrainzResult.status === 'fulfilled' ? musicbrainzResult.value : null;
+
+  // Add Hoopla result if artist has pre-2005 releases
+  if (mbResult?.hasPre2005Release) {
+    const hooplaSearchUrl = `https://www.hoopladigital.com/search?q=${encodeURIComponent(mbResult.artistName)}&type=music`;
+    allResults.push({
+      sourceId: 'hoopla',
+      name: mbResult.artistName,
+      type: 'artist',
+      url: hooplaSearchUrl,
+    });
   }
 
   // Get Bandwagon matches (returns Map of normalized artist name -> URL)
@@ -617,9 +674,26 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         });
       }
 
-      // Sort platforms: verified matches first, search-only platforms last
+      // Add official website if MusicBrainz found one and artist name matches
+      if (mbResult?.officialUrl) {
+        const mbNormalizedName = normalizeForComparison(mbResult.artistName);
+        if (normalizedName === mbNormalizedName ||
+            normalizedName.includes(mbNormalizedName) ||
+            mbNormalizedName.includes(normalizedName)) {
+          result.platforms.push({
+            sourceId: 'officialsite',
+            url: mbResult.officialUrl,
+          });
+        }
+      }
+
+      // Sort platforms: verified matches first, search-only platforms in middle, official site last
       const searchOnlyPlatforms = new Set(['ampwall', 'kofi']);
       result.platforms.sort((a, b) => {
+        // Official site always last
+        if (a.sourceId === 'officialsite') return 1;
+        if (b.sourceId === 'officialsite') return -1;
+        // Search-only platforms after verified matches
         const aIsSearchOnly = searchOnlyPlatforms.has(a.sourceId);
         const bIsSearchOnly = searchOnlyPlatforms.has(b.sourceId);
         if (aIsSearchOnly && !bIsSearchOnly) return 1;
