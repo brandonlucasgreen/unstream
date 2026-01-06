@@ -1,27 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Devil horns hand - menubar template (black) -->
+  <!-- Devil horns hand - menubar template (black, wider) -->
 
   <!-- Hand base/palm -->
-  <path d="M8 14 L8 24 C8 26 10 28 14 28 L18 28 C22 28 24 26 24 24 L24 14"
+  <path d="M6 14 L6 24 C6 26 9 28 14 28 L18 28 C23 28 26 26 26 24 L26 14"
         fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 
   <!-- Pinky finger (left, extended up) -->
-  <path d="M8 14 L8 6 C8 4 9 3 10.5 3 C12 3 13 4 13 6 L13 12"
+  <path d="M6 14 L6 6 C6 4 7 3 8.5 3 C10 3 11 4 11 6 L11 12"
         fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 
   <!-- Index finger (right, extended up) -->
-  <path d="M19 12 L19 6 C19 4 20 3 21.5 3 C23 3 24 4 24 6 L24 14"
+  <path d="M21 12 L21 6 C21 4 22 3 23.5 3 C25 3 26 4 26 6 L26 14"
         fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 
   <!-- Folded middle fingers (as bumps) -->
-  <path d="M13 12 C13 15 14 16 16 16 C18 16 19 15 19 12"
+  <path d="M11 12 C11 15 13 16 16 16 C19 16 21 15 21 12"
         fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 
   <!-- Finger separation lines -->
-  <path d="M15 12 L15 15" fill="none" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/>
-  <path d="M17 12 L17 15" fill="none" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M14.5 12 L14.5 15" fill="none" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M17.5 12 L17.5 15" fill="none" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/>
 
   <!-- Thumb across -->
-  <path d="M13 16 C14 18 15 18 16 17"
+  <path d="M11 16 C13 18 15 18 16 17"
         fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
