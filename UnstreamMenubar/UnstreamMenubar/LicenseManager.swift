@@ -74,7 +74,7 @@ class LicenseManager: ObservableObject {
             }
 
             if response.isSuccess,
-               let licenseInfo = response.licenseKey,
+               let _ = response.licenseKey,
                let meta = response.meta {
 
                 // Security check: verify this license is for our store
