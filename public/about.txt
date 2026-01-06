@@ -52,6 +52,9 @@ Hoopla and Freegal are services offered through public libraries in the US. To a
 
 **Do artists get paid when their music is listened to via one of these services? Unclear, and likely not.** However: you now have access to a vast back catalog of music without your money going to a giant tech conglomerate, and you’ve found one more way to support your local library.
 
+### I have an official website but it’s not appearing in the results. Why?
+Unstream uses the [Musicbrainz](https://musicbrainz.org) database as a source to find an artist’s official website. If yours isn’t appearing, consider creating a Musicbrainz account, looking up your artist name, and filling out your details (it’s free and easy!).
+
 ### I have a Faircamp site but it’s not appearing in the results. Why?
 Unstream uses the [Faircamp Webring](http://faircamp.webr.ing) as a source for finding Faircamp sites for independent artists. If your Faircamp site isn’t appearing in the results, consider joining the webring [at this link](https://faircamp.webr.ing/#instructions). Or, you can [email me](mailto:support@unstream.stream) your Faircamp URL and I’ll have it added to the results.
 
