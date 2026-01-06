@@ -79,5 +79,5 @@ private let platformConfig: [String: PlatformConfig] = [
     "buymeacoffee": PlatformConfig(name: "Buy Me a Coffee", icon: "cup.and.saucer", color: "#FFDD00", searchOnly: true),
     // Official
     "officialsite": PlatformConfig(name: "Official Site", icon: "globe", color: "#71717A", searchOnly: false),
-    "officialstore": PlatformConfig(name: "Official Store", icon: "cart", color: "#71717A", searchOnly: false),
+    "discogs": PlatformConfig(name: "Discogs", icon: "opticaldisc", color: "#333333", searchOnly: false),
 ]

@@ -10,11 +10,9 @@ type SourceId =
   | 'patreon'
   | 'buymeacoffee'
   | 'kofi'
-  | 'hoopla'
-  | 'freegal'
   | 'qobuz'
   | 'officialsite'
-  | 'officialstore';
+  | 'discogs';
 
 interface LatestRelease {
   title: string;
@@ -438,15 +436,15 @@ async function searchBandwagon(query: string): Promise<Map<string, string>> {
 // Helper to delay execution (for rate limiting)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// MusicBrainz result interface for official website lookup
+// MusicBrainz result interface for official website and Discogs lookup
 interface MusicBrainzResult {
   artistName: string;
   officialUrl?: string;  // From "official homepage" relation
-  storeUrl?: string;     // From "purchase for mail-order" or "purchase for download" relation
-  hasPre2005Release: boolean;
+  discogsUrl?: string;   // From "discogs" relation
 }
 
-// Search MusicBrainz for artist info including official website and release history
+// Search MusicBrainz for artist info including official website and Discogs link
+// Optimized: only 2 API calls (search + URL relations), skips release history check
 async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | null> {
   try {
     const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=artist:${encodeURIComponent(query)}&fmt=json&limit=1`;
@@ -479,7 +477,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
     });
 
     let officialUrl: string | undefined;
-    let storeUrl: string | undefined;
+    let discogsUrl: string | undefined;
 
     if (artistResponse.ok) {
       const artistData = await artistResponse.json() as {
@@ -499,39 +497,11 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
         }
       }
 
-      // Look for purchase/store links separately
+      // Look for Discogs link
       for (const rel of relations) {
-        if ((rel.type === 'purchase for mail-order' || rel.type === 'purchase for download') && rel.url?.resource) {
-          storeUrl = rel.url.resource;
+        if (rel.type === 'discogs' && rel.url?.resource) {
+          discogsUrl = rel.url.resource;
           break;
-        }
-      }
-    }
-
-    await delay(1100);
-
-    const releasesUrl = `https://musicbrainz.org/ws/2/release-group/?artist=${artist.id}&fmt=json&limit=20`;
-
-    const releasesResponse = await globalThis.fetch(releasesUrl, {
-      headers: {
-        'User-Agent': 'Unstream/1.0 (https://github.com/unstream - ethical music finder)',
-      },
-    });
-
-    let hasPre2005Release = false;
-
-    if (releasesResponse.ok) {
-      const releasesData = await releasesResponse.json() as { 'release-groups'?: { 'first-release-date'?: string }[] };
-      const releaseGroups = releasesData['release-groups'] || [];
-
-      for (const rg of releaseGroups) {
-        const firstReleaseDate = rg['first-release-date'];
-        if (firstReleaseDate) {
-          const year = parseInt(firstReleaseDate.substring(0, 4), 10);
-          if (year < 2005) {
-            hasPre2005Release = true;
-            break;
-          }
         }
       }
     }
@@ -539,8 +509,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
     return {
       artistName: artist.name,
       officialUrl,
-      storeUrl,
-      hasPre2005Release,
+      discogsUrl,
     };
   } catch (error: unknown) {
     const err = error as { name?: string; message?: string };
@@ -841,18 +810,6 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         });
       }
 
-      // Add library services if MusicBrainz indicates artist has pre-2005 releases
-      if (musicbrainzData?.hasPre2005Release) {
-        result.platforms.push({
-          sourceId: 'hoopla',
-          url: `https://www.hoopladigital.com/search?q=${encodeURIComponent(result.name)}&type=music`,
-        });
-        result.platforms.push({
-          sourceId: 'freegal',
-          url: `https://www.freegalmusic.com/search-page/${encodeURIComponent(result.name)}`,
-        });
-      }
-
       const normalizedName = normalizeForComparison(result.name);
 
       if (bandwagonMatches.has(normalizedName)) {
@@ -899,23 +856,23 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         });
       }
 
-      // Add official store if MusicBrainz found one and it's different from homepage
-      if (musicbrainzData?.storeUrl && musicbrainzData.storeUrl !== musicbrainzData.officialUrl) {
+      // Add Discogs if MusicBrainz found one
+      if (musicbrainzData?.discogsUrl) {
         result.platforms.push({
-          sourceId: 'officialstore',
-          url: musicbrainzData.storeUrl,
+          sourceId: 'discogs',
+          url: musicbrainzData.discogsUrl,
         });
       }
 
-      // Sort platforms: verified first, then search-only, then official site/store last
+      // Sort platforms: verified first, then search-only, then official/discogs last
       const searchOnlyPlatforms = new Set(['ampwall', 'sonica', 'kofi', 'buymeacoffee']);
-      const officialPlatforms = new Set(['officialsite', 'officialstore']);
+      const officialPlatforms = new Set(['officialsite', 'discogs']);
       result.platforms.sort((a, b) => {
-        // Official site/store always last (site before store)
+        // Official site/discogs always last (site before discogs)
         const aIsOfficial = officialPlatforms.has(a.sourceId);
         const bIsOfficial = officialPlatforms.has(b.sourceId);
         if (aIsOfficial && bIsOfficial) {
-          // officialsite before officialstore
+          // officialsite before discogs
           return a.sourceId === 'officialsite' ? -1 : 1;
         }
         if (aIsOfficial) return 1;
@@ -987,18 +944,6 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
       usedFaircampMatches.add(normalizedName);
     }
 
-    // Add library services if MusicBrainz indicates artist has pre-2005 releases
-    if (musicbrainzData?.hasPre2005Release) {
-      platforms.push({
-        sourceId: 'hoopla',
-        url: `https://www.hoopladigital.com/search?q=${encodeURIComponent(displayName)}&type=music`,
-      });
-      platforms.push({
-        sourceId: 'freegal',
-        url: `https://www.freegalmusic.com/search-page/${encodeURIComponent(displayName)}`,
-      });
-    }
-
     // Add search-only platforms
     platforms.push(
       { sourceId: 'ampwall', url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(displayName)}` },
@@ -1015,11 +960,11 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
       });
     }
 
-    // Add official store if MusicBrainz found one and it's different from homepage
-    if (musicbrainzData?.storeUrl && musicbrainzData.storeUrl !== musicbrainzData.officialUrl) {
+    // Add Discogs if MusicBrainz found one
+    if (musicbrainzData?.discogsUrl) {
       platforms.push({
-        sourceId: 'officialstore',
-        url: musicbrainzData.storeUrl,
+        sourceId: 'discogs',
+        url: musicbrainzData.discogsUrl,
       });
     }
 

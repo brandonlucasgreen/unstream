@@ -148,16 +148,16 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: '',
     homepageUrl: '',
   },
-  officialstore: {
-    id: 'officialstore',
-    name: 'Official Store',
-    description: 'Artist\'s official music store',
-    color: '#71717a',
-    icon: '🛒',
+  discogs: {
+    id: 'discogs',
+    name: 'Discogs',
+    description: 'Music database and marketplace',
+    color: '#333333',
+    icon: '💿',
     category: 'official',
     hasEmbed: false,
-    searchUrlTemplate: '',
-    homepageUrl: '',
+    searchUrlTemplate: 'https://www.discogs.com/search/?q={query}&type=artist',
+    homepageUrl: 'https://www.discogs.com',
   },
 };
 
@@ -184,8 +184,8 @@ export const sourceCategories = {
   },
   official: {
     name: 'Official',
-    description: 'Artist websites and stores',
-    sources: ['officialsite', 'officialstore'] as SourceId[],
+    description: 'Artist websites and profiles',
+    sources: ['officialsite', 'discogs'] as SourceId[],
   },
 };
 

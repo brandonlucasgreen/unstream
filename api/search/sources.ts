@@ -10,10 +10,9 @@ type SourceId =
   | 'patreon'
   | 'buymeacoffee'
   | 'kofi'
-  | 'hoopla'
   | 'qobuz'
   | 'officialsite'
-  | 'officialstore';
+  | 'discogs';
 
 interface PlatformResult {
   sourceId: SourceId;
@@ -172,18 +171,18 @@ async function searchBandwagon(query: string): Promise<Map<string, string>> {
 // Helper to delay execution (for rate limiting)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// MusicBrainz result interface for official website lookup
+// MusicBrainz result interface for official website and Discogs lookup
 interface MusicBrainzResult {
   artistName: string;
   officialUrl?: string;  // From "official homepage" relation
-  storeUrl?: string;     // From "purchase for mail-order" or "purchase for download" relation
-  hasPre2005Release: boolean;
+  discogsUrl?: string;   // From "discogs" relation
 }
 
-// Search MusicBrainz for artist info including official website and release history
+// Search MusicBrainz for artist info including official website and Discogs link
+// Optimized: only 2 API calls (search + URL relations), skips release history check
 async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | null> {
   try {
-    // Search for artist - use globalThis.fetch for compatibility
+    // Search for artist
     const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=artist:${encodeURIComponent(query)}&fmt=json&limit=1`;
 
     const response = await globalThis.fetch(searchUrl, {
@@ -219,7 +218,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
     });
 
     let officialUrl: string | undefined;
-    let storeUrl: string | undefined;
+    let discogsUrl: string | undefined;
 
     if (artistResponse.ok) {
       const artistData = await artistResponse.json() as {
@@ -239,41 +238,11 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
         }
       }
 
-      // Look for purchase/store links separately
+      // Look for Discogs link
       for (const rel of relations) {
-        if ((rel.type === 'purchase for mail-order' || rel.type === 'purchase for download') && rel.url?.resource) {
-          storeUrl = rel.url.resource;
+        if (rel.type === 'discogs' && rel.url?.resource) {
+          discogsUrl = rel.url.resource;
           break;
-        }
-      }
-    }
-
-    // Wait again before next request
-    await delay(1100);
-
-    // Check if artist has pre-2005 releases
-    const releasesUrl = `https://musicbrainz.org/ws/2/release-group/?artist=${artist.id}&fmt=json&limit=20`;
-
-    const releasesResponse = await globalThis.fetch(releasesUrl, {
-      headers: {
-        'User-Agent': 'Unstream/1.0 (https://github.com/unstream - ethical music finder)',
-      },
-    });
-
-    let hasPre2005Release = false;
-
-    if (releasesResponse.ok) {
-      const releasesData = await releasesResponse.json() as { 'release-groups'?: { 'first-release-date'?: string }[] };
-      const releaseGroups = releasesData['release-groups'] || [];
-
-      for (const rg of releaseGroups) {
-        const firstReleaseDate = rg['first-release-date'];
-        if (firstReleaseDate) {
-          const year = parseInt(firstReleaseDate.substring(0, 4), 10);
-          if (year < 2005) {
-            hasPre2005Release = true;
-            break;
-          }
         }
       }
     }
@@ -281,8 +250,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
     return {
       artistName: artist.name,
       officialUrl,
-      storeUrl,
-      hasPre2005Release,
+      discogsUrl,
     };
   } catch (error: any) {
     console.error('MusicBrainz search error:', error.name, error.message);
@@ -387,22 +355,6 @@ async function searchFaircamp(query: string): Promise<Map<string, string>> {
   } catch (error: any) {
     console.error('Faircamp search error:', error.message);
   }
-
-  return results;
-}
-
-// Search Hoopla via their title search (best effort)
-async function searchHoopla(query: string): Promise<PlatformResult[]> {
-  const results: PlatformResult[] = [];
-
-  // Hoopla uses client-side rendering, so we can only provide a search link
-  // We'll add a result that links directly to their search
-  results.push({
-    sourceId: 'hoopla',
-    name: `Search "${query}" on Hoopla`,
-    type: 'artist',
-    url: `https://www.hoopladigital.com/search?q=${encodeURIComponent(query)}&type=music`,
-  });
 
   return results;
 }
@@ -595,19 +547,8 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     allResults.push(...mirloResults.value.filter(r => r.type === 'artist'));
   }
 
-  // Extract MusicBrainz data (official URL and Hoopla eligibility)
+  // Extract MusicBrainz data (official URL and Discogs)
   const mbResult = musicbrainzResult.status === 'fulfilled' ? musicbrainzResult.value : null;
-
-  // Add Hoopla result if artist has pre-2005 releases
-  if (mbResult?.hasPre2005Release) {
-    const hooplaSearchUrl = `https://www.hoopladigital.com/search?q=${encodeURIComponent(mbResult.artistName)}&type=music`;
-    allResults.push({
-      sourceId: 'hoopla',
-      name: mbResult.artistName,
-      type: 'artist',
-      url: hooplaSearchUrl,
-    });
-  }
 
   // Get Bandwagon matches (returns Map of normalized artist name -> URL)
   const bandwagonMatches = bandwagonResults.status === 'fulfilled' ? bandwagonResults.value : new Map<string, string>();
@@ -675,8 +616,8 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         });
       }
 
-      // Add official website and store if MusicBrainz found them and artist name matches
-      if (mbResult?.officialUrl || mbResult?.storeUrl) {
+      // Add official website and Discogs if MusicBrainz found them and artist name matches
+      if (mbResult?.officialUrl || mbResult?.discogsUrl) {
         const mbNormalizedName = normalizeForComparison(mbResult.artistName);
         if (normalizedName === mbNormalizedName ||
             normalizedName.includes(mbNormalizedName) ||
@@ -688,25 +629,25 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
               url: mbResult.officialUrl,
             });
           }
-          // Add official store if available and different from homepage
-          if (mbResult.storeUrl && mbResult.storeUrl !== mbResult.officialUrl) {
+          // Add Discogs if available
+          if (mbResult.discogsUrl) {
             result.platforms.push({
-              sourceId: 'officialstore',
-              url: mbResult.storeUrl,
+              sourceId: 'discogs',
+              url: mbResult.discogsUrl,
             });
           }
         }
       }
 
-      // Sort platforms: verified matches first, search-only platforms in middle, official site/store last
+      // Sort platforms: verified matches first, search-only platforms in middle, official/discogs last
       const searchOnlyPlatforms = new Set(['ampwall', 'kofi']);
-      const officialPlatforms = new Set(['officialsite', 'officialstore']);
+      const officialPlatforms = new Set(['officialsite', 'discogs']);
       result.platforms.sort((a, b) => {
-        // Official site/store always last (site before store)
+        // Official site/discogs always last (site before discogs)
         const aIsOfficial = officialPlatforms.has(a.sourceId);
         const bIsOfficial = officialPlatforms.has(b.sourceId);
         if (aIsOfficial && bIsOfficial) {
-          // officialsite before officialstore
+          // officialsite before discogs
           return a.sourceId === 'officialsite' ? -1 : 1;
         }
         if (aIsOfficial) return 1;

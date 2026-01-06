@@ -13,7 +13,7 @@ export type SourceId =
   | 'freegal'
   | 'qobuz'
   | 'officialsite'
-  | 'officialstore';
+  | 'discogs';
 
 export interface Source {
   id: SourceId;
