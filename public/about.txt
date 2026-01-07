@@ -64,8 +64,11 @@ Virtually nothing. We track visit and visitor counts, by location and source (ie
 ### I am ethically opposed to AI in music. Is AI at all used in Unstream?
 No AI is implemented in the Unstream app. The app neither uses AI models to recommend artists nor is intended to promote artists creating AI-generated music. 
 
-### I’d like to request a feature. How can I do that?
-Head over to the [Unstream feature board](https://unstream.featurebase.app) and share your idea! You can also upvote other people’s ideas.
+### Is there a Windows app / iOS app / Android app / Chrome extension / Firefox extension for Unstream?
+Not yet, but I may consider building any or all of these in the future! Feel free to suggest or up-vote any of these ideas on the [Unstream feedback board](https://unstream.featurebase.app).
+
+### I’d like to request a feature or improvement. How can I do that?
+Head over to the [Unstream feedback board](https://unstream.featurebase.app) and share your idea! You can also upvote other people’s ideas.
 
 ### I’m having an issue using Unstream. How can I report it?
 If it’s urgent, just [let me know via email](mailto:support@unstream.stream) and I’ll try and fix it asap. 
