@@ -9,6 +9,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/search/musicbrainz"
+  to = "/.netlify/functions/search-musicbrainz"
+  status = 200
+
+[[redirects]]
   from = "/api/embed/bandcamp"
   to = "/.netlify/functions/embed-bandcamp"
   status = 200
