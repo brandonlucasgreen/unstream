@@ -113,6 +113,15 @@ actor UnstreamAPI {
                 }
             }
 
+            // Add social links
+            if let socialLinks = mbData.socialLinks {
+                for social in socialLinks {
+                    if !newPlatforms.contains(where: { $0.sourceId == social.platform }) {
+                        newPlatforms.append(PlatformResult(sourceId: social.platform, url: social.url, latestRelease: nil))
+                    }
+                }
+            }
+
             return ArtistResult(id: result.id, name: result.name, type: result.type, imageUrl: result.imageUrl, platforms: newPlatforms)
         }
     }

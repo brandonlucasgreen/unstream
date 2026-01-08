@@ -6,12 +6,18 @@ struct SearchResponse: Codable {
     let hasPendingEnrichment: Bool?
 }
 
+struct SocialLink: Codable {
+    let platform: String
+    let url: String
+}
+
 struct MusicBrainzResponse: Codable {
     let query: String
     let artistName: String?
     let officialUrl: String?
     let discogsUrl: String?
     let hasPre2005Release: Bool?
+    let socialLinks: [SocialLink]?
 }
 
 struct ArtistResult: Codable, Identifiable {
