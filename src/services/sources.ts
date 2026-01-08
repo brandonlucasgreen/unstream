@@ -159,6 +159,84 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: 'https://www.discogs.com/search/?q={query}&type=artist',
     homepageUrl: 'https://www.discogs.com',
   },
+  // Social platforms
+  instagram: {
+    id: 'instagram',
+    name: 'Instagram',
+    description: 'Photo and video sharing',
+    color: '#E4405F',
+    icon: 'instagram',
+    category: 'social',
+    hasEmbed: false,
+    searchUrlTemplate: '',
+    homepageUrl: 'https://www.instagram.com',
+  },
+  facebook: {
+    id: 'facebook',
+    name: 'Facebook',
+    description: 'Social networking',
+    color: '#1877F2',
+    icon: 'facebook',
+    category: 'social',
+    hasEmbed: false,
+    searchUrlTemplate: '',
+    homepageUrl: 'https://www.facebook.com',
+  },
+  tiktok: {
+    id: 'tiktok',
+    name: 'TikTok',
+    description: 'Short-form video',
+    color: '#E0E0E0',
+    icon: 'tiktok',
+    category: 'social',
+    hasEmbed: false,
+    searchUrlTemplate: '',
+    homepageUrl: 'https://www.tiktok.com',
+  },
+  youtube: {
+    id: 'youtube',
+    name: 'YouTube',
+    description: 'Video platform',
+    color: '#FF0000',
+    icon: 'youtube',
+    category: 'social',
+    hasEmbed: false,
+    searchUrlTemplate: '',
+    homepageUrl: 'https://www.youtube.com',
+  },
+  threads: {
+    id: 'threads',
+    name: 'Threads',
+    description: 'Text-based social network',
+    color: '#E0E0E0',
+    icon: 'threads',
+    category: 'social',
+    hasEmbed: false,
+    searchUrlTemplate: '',
+    homepageUrl: 'https://www.threads.net',
+  },
+  bluesky: {
+    id: 'bluesky',
+    name: 'Bluesky',
+    description: 'Decentralized social network',
+    color: '#0085FF',
+    icon: 'bluesky',
+    category: 'social',
+    hasEmbed: false,
+    searchUrlTemplate: '',
+    homepageUrl: 'https://bsky.app',
+  },
+  twitter: {
+    id: 'twitter',
+    name: 'X',
+    description: 'Social network',
+    color: '#E0E0E0',
+    icon: 'twitter',
+    category: 'social',
+    hasEmbed: false,
+    searchUrlTemplate: '',
+    homepageUrl: 'https://x.com',
+  },
 };
 
 export const sourceCategories = {
@@ -186,6 +264,11 @@ export const sourceCategories = {
     name: 'Official',
     description: 'Artist websites and profiles',
     sources: ['officialsite', 'discogs'] as SourceId[],
+  },
+  social: {
+    name: 'Social',
+    description: 'Artist social media profiles',
+    sources: ['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'twitter'] as SourceId[],
   },
 };
 
@@ -399,10 +482,31 @@ export function mergeWithMusicBrainzData(
       }
     }
 
-    // Re-sort platforms: verified first, search-only in middle, official/library last
+    // Add social links if available
+    if (mbData.socialLinks && mbData.socialLinks.length > 0) {
+      for (const social of mbData.socialLinks) {
+        if (!newPlatforms.some(p => p.sourceId === social.platform)) {
+          newPlatforms.push({ sourceId: social.platform, url: social.url });
+        }
+      }
+    }
+
+    // Re-sort platforms: verified first, search-only in middle, official/library, then social last
     const searchOnlyPlatforms = new Set(['ampwall', 'sonica', 'kofi', 'buymeacoffee']);
     const officialPlatforms = new Set(['officialsite', 'discogs', 'hoopla', 'freegal']);
+    const socialPlatforms = new Set(['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'twitter']);
     newPlatforms.sort((a, b) => {
+      const aIsSocial = socialPlatforms.has(a.sourceId);
+      const bIsSocial = socialPlatforms.has(b.sourceId);
+      // Social platforms come last
+      if (aIsSocial && !bIsSocial) return 1;
+      if (!aIsSocial && bIsSocial) return -1;
+      if (aIsSocial && bIsSocial) {
+        // Order social platforms consistently
+        const order = ['instagram', 'tiktok', 'youtube', 'threads', 'bluesky', 'facebook', 'twitter'];
+        return order.indexOf(a.sourceId) - order.indexOf(b.sourceId);
+      }
+
       const aIsOfficial = officialPlatforms.has(a.sourceId);
       const bIsOfficial = officialPlatforms.has(b.sourceId);
       if (aIsOfficial && bIsOfficial) {

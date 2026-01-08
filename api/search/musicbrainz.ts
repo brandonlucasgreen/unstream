@@ -1,5 +1,13 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
+// Social platform types
+type SocialPlatform = 'instagram' | 'facebook' | 'tiktok' | 'youtube' | 'threads' | 'bluesky' | 'twitter';
+
+interface SocialLink {
+  platform: SocialPlatform;
+  url: string;
+}
+
 // MusicBrainz search response for lazy loading
 interface MusicBrainzSearchResponse {
   query: string;
@@ -7,12 +15,205 @@ interface MusicBrainzSearchResponse {
   officialUrl: string | null;
   discogsUrl: string | null;
   hasPre2005Release: boolean;
+  socialLinks: SocialLink[];
+}
+
+// Parse a URL to determine which social platform it belongs to
+function parseSocialUrl(url: string): SocialLink | null {
+  const urlLower = url.toLowerCase();
+
+  if (urlLower.includes('instagram.com')) {
+    return { platform: 'instagram', url };
+  }
+  if (urlLower.includes('facebook.com')) {
+    return { platform: 'facebook', url };
+  }
+  if (urlLower.includes('tiktok.com')) {
+    return { platform: 'tiktok', url };
+  }
+  if (urlLower.includes('youtube.com') || urlLower.includes('youtu.be')) {
+    return { platform: 'youtube', url };
+  }
+  if (urlLower.includes('threads.net') || urlLower.includes('threads.com')) {
+    return { platform: 'threads', url };
+  }
+  if (urlLower.includes('bsky.app') || urlLower.includes('bluesky')) {
+    return { platform: 'bluesky', url };
+  }
+  if (urlLower.includes('twitter.com') || urlLower.includes('x.com')) {
+    return { platform: 'twitter', url };
+  }
+
+  return null;
 }
 
 // Helper to delay execution (for rate limiting)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Search MusicBrainz for artist info including official website, Discogs, and release history
+// Extract Discogs artist ID from URL (e.g., https://www.discogs.com/artist/3840 -> 3840)
+function extractDiscogsArtistId(discogsUrl: string): string | null {
+  const match = discogsUrl.match(/\/artist\/(\d+)/);
+  return match ? match[1] : null;
+}
+
+// Fetch social links from Discogs API
+async function fetchDiscogsSocialLinks(discogsUrl: string): Promise<SocialLink[]> {
+  const socialLinks: SocialLink[] = [];
+  const artistId = extractDiscogsArtistId(discogsUrl);
+
+  if (!artistId) return socialLinks;
+
+  try {
+    const response = await globalThis.fetch(`https://api.discogs.com/artists/${artistId}`, {
+      headers: {
+        'User-Agent': 'Unstream/1.0 (https://unstream.stream - ethical music finder)',
+      },
+    });
+
+    if (!response.ok) {
+      console.log('Discogs API failed:', response.status);
+      return socialLinks;
+    }
+
+    const data = await response.json() as { urls?: string[] };
+    const urls = data.urls || [];
+
+    for (const url of urls) {
+      const socialLink = parseSocialUrl(url);
+      if (socialLink) {
+        socialLinks.push(socialLink);
+      }
+    }
+  } catch (error: any) {
+    console.error('Discogs fetch error:', error.message);
+  }
+
+  return socialLinks;
+}
+
+// Normalize artist name for Linktree URL guessing
+function normalizeForLinktree(name: string): string[] {
+  const base = name.toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '') // Remove special chars
+    .trim();
+
+  // Generate variations
+  const variations: string[] = [];
+
+  // No spaces
+  variations.push(base.replace(/\s+/g, ''));
+
+  // With underscores
+  variations.push(base.replace(/\s+/g, '_'));
+
+  // With dots
+  variations.push(base.replace(/\s+/g, '.'));
+
+  return [...new Set(variations)]; // Dedupe
+}
+
+// Fetch social links from Linktree (speculative lookup)
+async function fetchLinktreeSocialLinks(artistName: string): Promise<SocialLink[]> {
+  const socialLinks: SocialLink[] = [];
+  const variations = normalizeForLinktree(artistName);
+
+  for (const variation of variations) {
+    try {
+      const response = await globalThis.fetch(`https://linktr.ee/${variation}`, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        },
+      });
+
+      if (!response.ok) continue;
+
+      const html = await response.text();
+
+      // Check if it's a valid Linktree page (not a 404 page)
+      if (!html.includes('__NEXT_DATA__') || html.includes('Page not found')) continue;
+
+      // Extract URLs from the page JSON data
+      const urlMatches = html.matchAll(/"url":"(https?:\/\/[^"]+)"/g);
+
+      for (const match of urlMatches) {
+        const url = match[1].replace(/\\u0026/g, '&'); // Unescape
+        const socialLink = parseSocialUrl(url);
+        if (socialLink) {
+          socialLinks.push(socialLink);
+        }
+      }
+
+      // If we found links, don't try other variations
+      if (socialLinks.length > 0) break;
+
+    } catch (error: any) {
+      // Silently continue to next variation
+    }
+  }
+
+  return socialLinks;
+}
+
+// Fetch social links from an artist's official website
+async function fetchOfficialSiteSocialLinks(officialUrl: string): Promise<SocialLink[]> {
+  const socialLinks: SocialLink[] = [];
+  const seenPlatforms = new Set<SocialPlatform>();
+
+  try {
+    const response = await globalThis.fetch(officialUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+      signal: AbortSignal.timeout(5000),
+    });
+
+    if (!response.ok) {
+      console.log('Official site fetch failed:', response.status);
+      return socialLinks;
+    }
+
+    const html = await response.text();
+
+    // Extract all href attributes from the page
+    const hrefMatches = html.matchAll(/href=["']([^"']+)["']/gi);
+
+    for (const match of hrefMatches) {
+      const url = match[1];
+      // Skip relative URLs and non-http URLs
+      if (!url.startsWith('http')) continue;
+
+      const socialLink = parseSocialUrl(url);
+      // Only add one link per platform (first one wins)
+      if (socialLink && !seenPlatforms.has(socialLink.platform)) {
+        seenPlatforms.add(socialLink.platform);
+        socialLinks.push(socialLink);
+      }
+    }
+  } catch (error: any) {
+    console.error('Official site fetch error:', error.message);
+  }
+
+  return socialLinks;
+}
+
+// Merge social links from multiple sources, deduplicating by platform
+function mergeSocialLinks(...linkArrays: SocialLink[][]): SocialLink[] {
+  const seenPlatforms = new Set<SocialPlatform>();
+  const merged: SocialLink[] = [];
+
+  for (const links of linkArrays) {
+    for (const link of links) {
+      if (!seenPlatforms.has(link.platform)) {
+        seenPlatforms.add(link.platform);
+        merged.push(link);
+      }
+    }
+  }
+
+  return merged;
+}
+
+// Search MusicBrainz for artist info including official website, Discogs, social links, and release history
 async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchResponse> {
   const emptyResult: MusicBrainzSearchResponse = {
     query,
@@ -20,6 +221,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     officialUrl: null,
     discogsUrl: null,
     hasPre2005Release: false,
+    socialLinks: [],
   };
 
   try {
@@ -60,6 +262,8 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
 
     let officialUrl: string | null = null;
     let discogsUrl: string | null = null;
+    const socialLinks: SocialLink[] = [];
+    const seenPlatforms = new Set<SocialPlatform>();
 
     if (artistResponse.ok) {
       const artistData = await artistResponse.json() as {
@@ -84,6 +288,18 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
         if (rel.type === 'discogs' && rel.url?.resource) {
           discogsUrl = rel.url.resource;
           break;
+        }
+      }
+
+      // Extract social links from 'social network' and 'youtube' relation types
+      for (const rel of relations) {
+        if ((rel.type === 'social network' || rel.type === 'youtube') && rel.url?.resource) {
+          const socialLink = parseSocialUrl(rel.url.resource);
+          // Only add one link per platform (first one wins)
+          if (socialLink && !seenPlatforms.has(socialLink.platform)) {
+            seenPlatforms.add(socialLink.platform);
+            socialLinks.push(socialLink);
+          }
         }
       }
     }
@@ -118,12 +334,22 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       }
     }
 
+    // Fetch additional social links from Discogs and official site in parallel
+    const [discogsSocialLinks, officialSiteSocialLinks] = await Promise.all([
+      discogsUrl ? fetchDiscogsSocialLinks(discogsUrl) : Promise.resolve([]),
+      officialUrl ? fetchOfficialSiteSocialLinks(officialUrl) : Promise.resolve([]),
+    ]);
+
+    // Merge all social links (MusicBrainz first, then Discogs, then official site)
+    const allSocialLinks = mergeSocialLinks(socialLinks, discogsSocialLinks, officialSiteSocialLinks);
+
     return {
       query,
       artistName: artist.name,
       officialUrl,
       discogsUrl,
       hasPre2005Release,
+      socialLinks: allSocialLinks,
     };
   } catch (error: any) {
     console.error('MusicBrainz search error:', error.name, error.message);
@@ -163,6 +389,7 @@ export default async function handler(
       officialUrl: null,
       discogsUrl: null,
       hasPre2005Release: false,
+      socialLinks: [],
     });
   }
 }

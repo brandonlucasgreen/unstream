@@ -13,7 +13,14 @@ export type SourceId =
   | 'freegal'
   | 'qobuz'
   | 'officialsite'
-  | 'discogs';
+  | 'discogs'
+  | 'instagram'
+  | 'facebook'
+  | 'tiktok'
+  | 'youtube'
+  | 'threads'
+  | 'bluesky'
+  | 'twitter';
 
 export interface Source {
   id: SourceId;
@@ -21,7 +28,7 @@ export interface Source {
   description: string;
   color: string;
   icon: string;
-  category: 'marketplace' | 'patronage' | 'library' | 'decentralized' | 'official';
+  category: 'marketplace' | 'patronage' | 'library' | 'decentralized' | 'official' | 'social';
   hasEmbed: boolean;
   searchUrlTemplate: string;
   searchOnly?: boolean; // True if we can't verify the artist exists (shows "Search X" instead)
@@ -64,6 +71,12 @@ export interface SearchResponse {
   hasPendingEnrichment?: boolean; // True if MusicBrainz data should be fetched separately
 }
 
+// Social link from MusicBrainz
+export interface SocialLink {
+  platform: 'instagram' | 'facebook' | 'tiktok' | 'youtube' | 'threads' | 'bluesky' | 'twitter';
+  url: string;
+}
+
 // MusicBrainz enrichment data (fetched separately for lazy loading)
 export interface MusicBrainzData {
   query: string;
@@ -71,6 +84,7 @@ export interface MusicBrainzData {
   officialUrl: string | null;
   discogsUrl: string | null;
   hasPre2005Release: boolean;
+  socialLinks: SocialLink[];
 }
 
 // Search state
