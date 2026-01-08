@@ -199,11 +199,11 @@ export function ResultCard({ result }: ResultCardProps) {
               </span>
             </div>
           )}
-          {/* Latest Release Section with Preview */}
+          {/* Featured Release Section with Preview */}
           {latestRelease && platformsWithRelease.length > 0 && (
             <div className="space-y-2">
               <h4 className="text-xs font-medium text-accent-secondary uppercase tracking-wider">
-                Latest Release
+                Featured Release
               </h4>
               <p className="text-sm font-medium text-text-primary">
                 {latestRelease.title}
