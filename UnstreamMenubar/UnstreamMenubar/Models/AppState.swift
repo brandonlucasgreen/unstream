@@ -74,8 +74,19 @@ class AppState: ObservableObject {
         searchError = nil
 
         do {
-            let results = try await api.searchArtist(query)
+            // Phase 1: Get initial results
+            let (results, hasPendingEnrichment) = try await api.searchArtist(query)
             searchResults = results
+
+            // Phase 2: Fetch MusicBrainz enrichment if available
+            if hasPendingEnrichment {
+                if let mbData = try await api.fetchMusicBrainzData(query) {
+                    let enrichedResults = await api.mergeWithMusicBrainzData(results: results, mbData: mbData)
+                    searchResults = enrichedResults
+                    // Cache the enriched results
+                    await api.cacheResults(query: query, results: enrichedResults)
+                }
+            }
         } catch {
             searchError = "Failed to search. Please try again."
             print("Search error: \(error)")
@@ -121,11 +132,22 @@ class AppState: ObservableObject {
 
             do {
                 print("[AppState] Fetching platforms for: \(artist)")
-                let results = try await api.searchArtist(artist)
+                // Phase 1: Get initial results
+                let (results, hasPendingEnrichment) = try await api.searchArtist(artist)
                 nowPlayingResults = results
                 lastFetchedArtist = artist
                 lastFetchTime = Date()
                 print("[AppState] Got \(results.count) results for \(artist)")
+
+                // Phase 2: Fetch MusicBrainz enrichment if available
+                if hasPendingEnrichment {
+                    if let mbData = try await api.fetchMusicBrainzData(artist) {
+                        let enrichedResults = await api.mergeWithMusicBrainzData(results: results, mbData: mbData)
+                        nowPlayingResults = enrichedResults
+                        await api.cacheResults(query: artist, results: enrichedResults)
+                        print("[AppState] Enriched with MusicBrainz data")
+                    }
+                }
             } catch {
                 print("[AppState] Now playing search error: \(error)")
             }

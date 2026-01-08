@@ -3,6 +3,15 @@ import Foundation
 struct SearchResponse: Codable {
     let query: String
     let results: [ArtistResult]
+    let hasPendingEnrichment: Bool?
+}
+
+struct MusicBrainzResponse: Codable {
+    let query: String
+    let artistName: String?
+    let officialUrl: String?
+    let discogsUrl: String?
+    let hasPre2005Release: Bool?
 }
 
 struct ArtistResult: Codable, Identifiable {

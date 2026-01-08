@@ -4,6 +4,14 @@ import SwiftUI
 @MainActor
 class SupportListManager: ObservableObject {
     @Published private(set) var entries: [SupportEntry] = []
+    @Published var searchQuery: String = ""
+
+    var filteredEntries: [SupportEntry] {
+        guard !searchQuery.isEmpty else { return entries }
+        return entries.filter { entry in
+            entry.artistName.localizedCaseInsensitiveContains(searchQuery)
+        }
+    }
 
     private let storageKey = "supportList"
     private let iCloudStore = NSUbiquitousKeyValueStore.default
@@ -14,6 +22,10 @@ class SupportListManager: ObservableObject {
     }
 
     // MARK: - Public Methods
+
+    func clearSearch() {
+        searchQuery = ""
+    }
 
     func addArtist(_ artist: ArtistResult) {
         // Don't add duplicates (check by artist name, case-insensitive)

@@ -3,6 +3,21 @@ import SwiftUI
 struct SupportListView: View {
     @ObservedObject var supportListManager: SupportListManager
 
+    private var isSearching: Bool {
+        !supportListManager.searchQuery.isEmpty
+    }
+
+    private var countText: String {
+        let total = supportListManager.entries.count
+        let filtered = supportListManager.filteredEntries.count
+
+        if isSearching {
+            return "\(filtered) of \(total) artist\(total == 1 ? "" : "s")"
+        } else {
+            return "\(total) artist\(total == 1 ? "" : "s")"
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -13,9 +28,14 @@ struct SupportListView: View {
 
                 Spacer()
 
-                Text("\(supportListManager.entries.count) artist\(supportListManager.entries.count == 1 ? "" : "s")")
+                Text(countText)
                     .font(.caption)
                     .foregroundColor(.secondary)
+            }
+
+            // Search bar
+            if supportListManager.entries.count > 0 {
+                SavedArtistsSearchBar(supportListManager: supportListManager)
             }
 
             if supportListManager.entries.isEmpty {
@@ -33,8 +53,23 @@ struct SupportListView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.vertical, 20)
+            } else if supportListManager.filteredEntries.isEmpty {
+                VStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.title2)
+                        .foregroundColor(.secondary)
+                    Text("No matches found")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text("Try a different search term.")
+                        .font(.caption2)
+                        .foregroundColor(.secondary.opacity(0.7))
+                        .multilineTextAlignment(.center)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.vertical, 20)
             } else {
-                ForEach(supportListManager.entries) { entry in
+                ForEach(supportListManager.filteredEntries) { entry in
                     SupportEntryView(entry: entry) {
                         supportListManager.removeEntry(entry)
                     }
@@ -42,6 +77,37 @@ struct SupportListView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+struct SavedArtistsSearchBar: View {
+    @ObservedObject var supportListManager: SupportListManager
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.secondary)
+                .font(.system(size: 14))
+
+            TextField("Filter saved artists...", text: $supportListManager.searchQuery)
+                .textFieldStyle(.plain)
+                .font(.system(size: 14))
+
+            if !supportListManager.searchQuery.isEmpty {
+                Button(action: {
+                    supportListManager.clearSearch()
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.secondary)
+                        .font(.system(size: 14))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(Color(NSColor.textBackgroundColor))
+        .cornerRadius(8)
     }
 }
 
