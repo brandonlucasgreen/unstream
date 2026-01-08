@@ -21,14 +21,19 @@ struct ArtistResult: Codable, Identifiable {
     let imageUrl: String?
     let platforms: [PlatformResult]
 
-    /// Platforms that have verified artist presence
+    /// Platforms that have verified artist presence (excluding social)
     var verifiedPlatforms: [PlatformResult] {
-        platforms.filter { !$0.isSearchOnly }
+        platforms.filter { !$0.isSearchOnly && !$0.isSocial }
     }
 
     /// Platforms where we can only search (not verified)
     var searchOnlyPlatforms: [PlatformResult] {
         platforms.filter { $0.isSearchOnly }
+    }
+
+    /// Social media platforms
+    var socialPlatforms: [PlatformResult] {
+        platforms.filter { $0.isSocial }
     }
 }
 
@@ -53,6 +58,10 @@ struct PlatformResult: Codable, Identifiable {
 
     var isSearchOnly: Bool {
         platformConfig[sourceId]?.searchOnly ?? false
+    }
+
+    var isSocial: Bool {
+        socialPlatformIds.contains(sourceId)
     }
 }
 
@@ -89,4 +98,15 @@ private let platformConfig: [String: PlatformConfig] = [
     // Official
     "officialsite": PlatformConfig(name: "Official Site", icon: "globe", color: "#71717A", searchOnly: false),
     "discogs": PlatformConfig(name: "Discogs", icon: "opticaldisc", color: "#333333", searchOnly: false),
+    // Social platforms
+    "instagram": PlatformConfig(name: "Instagram", icon: "camera", color: "#E4405F", searchOnly: false),
+    "facebook": PlatformConfig(name: "Facebook", icon: "person.2", color: "#1877F2", searchOnly: false),
+    "tiktok": PlatformConfig(name: "TikTok", icon: "music.note", color: "#000000", searchOnly: false),
+    "youtube": PlatformConfig(name: "YouTube", icon: "play.rectangle", color: "#FF0000", searchOnly: false),
+    "threads": PlatformConfig(name: "Threads", icon: "at", color: "#000000", searchOnly: false),
+    "bluesky": PlatformConfig(name: "Bluesky", icon: "cloud", color: "#0085FF", searchOnly: false),
+    "twitter": PlatformConfig(name: "X", icon: "xmark", color: "#000000", searchOnly: false),
 ]
+
+// Social platform IDs for filtering
+let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "twitter"]

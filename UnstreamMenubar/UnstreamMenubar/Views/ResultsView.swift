@@ -90,6 +90,21 @@ struct ArtistResultView: View {
                 }
             }
 
+            // Social platforms section
+            if !artist.socialPlatforms.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Social:")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    HStack(spacing: 8) {
+                        ForEach(artist.socialPlatforms) { platform in
+                            SocialIconButton(result: platform)
+                        }
+                    }
+                }
+            }
+
             // Open in Unstream button
             Button(action: { openInUnstream(artist: artist.name) }) {
                 HStack {
