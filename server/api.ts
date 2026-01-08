@@ -101,69 +101,6 @@ async function fetchDiscogsSocialLinks(discogsUrl: string): Promise<SocialLink[]
   return socialLinks;
 }
 
-// Normalize artist name for Linktree URL guessing
-function normalizeForLinktree(name: string): string[] {
-  const base = name.toLowerCase()
-    .replace(/[^a-z0-9\s]/g, '') // Remove special chars
-    .trim();
-
-  // Generate variations
-  const variations: string[] = [];
-
-  // No spaces
-  variations.push(base.replace(/\s+/g, ''));
-
-  // With underscores
-  variations.push(base.replace(/\s+/g, '_'));
-
-  // With dots
-  variations.push(base.replace(/\s+/g, '.'));
-
-  return [...new Set(variations)]; // Dedupe
-}
-
-// Fetch social links from Linktree (speculative lookup)
-async function fetchLinktreeSocialLinks(artistName: string): Promise<SocialLink[]> {
-  const socialLinks: SocialLink[] = [];
-  const variations = normalizeForLinktree(artistName);
-
-  for (const variation of variations) {
-    try {
-      const response = await globalThis.fetch(`https://linktr.ee/${variation}`, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-        },
-      });
-
-      if (!response.ok) continue;
-
-      const html = await response.text();
-
-      // Check if it's a valid Linktree page (not a 404 page)
-      if (!html.includes('__NEXT_DATA__') || html.includes('Page not found')) continue;
-
-      // Extract URLs from the page JSON data
-      const urlMatches = html.matchAll(/"url":"(https?:\/\/[^"]+)"/g);
-
-      for (const match of urlMatches) {
-        const url = match[1].replace(/\\u0026/g, '&'); // Unescape
-        const socialLink = parseSocialUrl(url);
-        if (socialLink) {
-          socialLinks.push(socialLink);
-        }
-      }
-
-      // If we found links, don't try other variations
-      if (socialLinks.length > 0) break;
-
-    } catch (error: any) {
-      // Silently continue to next variation
-    }
-  }
-
-  return socialLinks;
-}
-
 // Fetch social links from an artist's official website
 async function fetchOfficialSiteSocialLinks(officialUrl: string): Promise<SocialLink[]> {
   const socialLinks: SocialLink[] = [];
