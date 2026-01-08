@@ -125,7 +125,7 @@ function App() {
           {/* Action buttons */}
           <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
             <a
-              href="https://github.com/brandonlucasgreen/unstream/releases/latest/download/Unstream.zip"
+              href="https://github.com/brandonlucasgreen/unstream/releases/latest/download/Unstream.dmg"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-accent-primary/10 text-accent-primary hover:bg-accent-primary/20 transition-colors font-medium"
               onClick={() => analytics.trackDownload()}
             >
