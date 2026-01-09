@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=400">
+  <title>Unstream</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <span class="logo-icon">🎵</span>
+        <span class="logo-text">Unstream</span>
+      </div>
+      <button id="settings-btn" class="icon-btn" title="Settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Now Playing Section -->
+    <section id="now-playing" class="section hidden">
+      <h2 class="section-title">Now Playing</h2>
+      <div class="now-playing-card">
+        <div class="track-info">
+          <div id="artist-name" class="artist-name"></div>
+          <div id="track-title" class="track-title"></div>
+        </div>
+        <div id="source-badge" class="source-badge"></div>
+      </div>
+    </section>
+
+    <!-- Idle State -->
+    <section id="idle-state" class="section">
+      <div class="empty-state">
+        <div class="empty-icon">🎧</div>
+        <p>Play music in Spotify, YouTube, or Apple Music to get started</p>
+      </div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="results-section" class="section hidden">
+      <h2 class="section-title">Listen Ethically</h2>
+      <div id="results-grid" class="results-grid"></div>
+    </section>
+
+    <!-- Social Links Section -->
+    <section id="social-section" class="section hidden">
+      <h2 class="section-title">Social</h2>
+      <div id="social-links" class="social-links"></div>
+    </section>
+
+    <!-- Save Artist Button -->
+    <section id="save-section" class="section hidden">
+      <button id="save-artist-btn" class="save-btn">
+        <span class="star">☆</span> Save Artist
+      </button>
+      <p id="pro-prompt" class="pro-prompt hidden">
+        <a href="#" id="upgrade-link">Upgrade to Pro</a> to save artists
+      </p>
+    </section>
+
+    <!-- Saved Artists Section -->
+    <section id="saved-section" class="section hidden">
+      <h2 class="section-title">Saved Artists</h2>
+      <div id="saved-artists" class="saved-artists"></div>
+    </section>
+
+    <!-- Settings Panel -->
+    <section id="settings-panel" class="section hidden">
+      <h2 class="section-title">Settings</h2>
+
+      <div class="setting-group">
+        <h3>License</h3>
+        <div id="license-status" class="license-status">
+          <span class="status-icon">○</span>
+          <span class="status-text">Free Plan</span>
+        </div>
+        <div class="license-input-group">
+          <input type="text" id="license-key" placeholder="Enter license key" />
+          <button id="activate-btn">Activate</button>
+        </div>
+        <p class="license-hint">
+          <a href="https://unstream.stream/pro" target="_blank">Get a license</a> to unlock saved artists and more
+        </p>
+      </div>
+
+      <div class="setting-group">
+        <h3>About</h3>
+        <p class="about-text">
+          Unstream helps you find ethical ways to listen to your favorite artists.
+          <br><br>
+          <a href="https://unstream.stream" target="_blank">unstream.stream</a>
+        </p>
+      </div>
+
+      <button id="back-btn" class="back-btn">← Back</button>
+    </section>
+
+    <!-- Manual Search -->
+    <section id="search-section" class="section">
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Search for an artist..." />
+        <button id="search-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

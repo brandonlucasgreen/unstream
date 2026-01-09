@@ -1,0 +1,444 @@
+/* Unstream Chrome Extension - Popup Styles */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #E5E7EB;
+  background: #1F2937;
+  width: 380px;
+  min-height: 200px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.container {
+  padding: 16px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #374151;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-icon {
+  font-size: 20px;
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #F9FAFB;
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  color: #9CA3AF;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.icon-btn:hover {
+  background: #374151;
+  color: #F9FAFB;
+}
+
+/* Sections */
+.section {
+  margin-bottom: 16px;
+}
+
+.section.hidden {
+  display: none;
+}
+
+.section-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #9CA3AF;
+  margin-bottom: 8px;
+}
+
+/* Now Playing Card */
+.now-playing-card {
+  background: #374151;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.track-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.artist-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #F9FAFB;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-title {
+  font-size: 13px;
+  color: #9CA3AF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.source-badge {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background: #4B5563;
+  color: #D1D5DB;
+  text-transform: capitalize;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  color: #9CA3AF;
+}
+
+.empty-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+/* Results Grid */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #374151;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #E5E7EB;
+  transition: all 0.2s;
+}
+
+.result-item:hover {
+  background: #4B5563;
+  transform: translateY(-1px);
+}
+
+.result-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.result-name {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Social Links */
+.social-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #374151;
+  color: #E5E7EB;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.social-link:hover {
+  background: #4B5563;
+  transform: scale(1.1);
+}
+
+.social-link svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Save Button */
+.save-btn {
+  width: 100%;
+  padding: 12px;
+  background: #374151;
+  border: 1px solid #4B5563;
+  border-radius: 8px;
+  color: #F9FAFB;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.save-btn:hover {
+  background: #4B5563;
+}
+
+.save-btn.saved {
+  background: #22C55E;
+  border-color: #22C55E;
+}
+
+.save-btn.saved .star {
+  color: #FEF08A;
+}
+
+.star {
+  font-size: 16px;
+}
+
+.pro-prompt {
+  text-align: center;
+  font-size: 12px;
+  color: #9CA3AF;
+  margin-top: 8px;
+}
+
+.pro-prompt a {
+  color: #60A5FA;
+  text-decoration: none;
+}
+
+.pro-prompt a:hover {
+  text-decoration: underline;
+}
+
+/* Saved Artists */
+.saved-artists {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.saved-artist {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #374151;
+  border-radius: 16px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.saved-artist:hover {
+  background: #4B5563;
+}
+
+.saved-artist .remove {
+  color: #9CA3AF;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.saved-artist .remove:hover {
+  color: #EF4444;
+}
+
+/* Search Box */
+.search-box {
+  display: flex;
+  gap: 8px;
+}
+
+#search-input {
+  flex: 1;
+  padding: 10px 12px;
+  background: #374151;
+  border: 1px solid #4B5563;
+  border-radius: 8px;
+  color: #F9FAFB;
+  font-size: 14px;
+}
+
+#search-input::placeholder {
+  color: #6B7280;
+}
+
+#search-input:focus {
+  outline: none;
+  border-color: #60A5FA;
+}
+
+#search-btn {
+  padding: 10px 14px;
+  background: #3B82F6;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#search-btn:hover {
+  background: #2563EB;
+}
+
+/* Settings Panel */
+.setting-group {
+  margin-bottom: 20px;
+}
+
+.setting-group h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #F9FAFB;
+  margin-bottom: 8px;
+}
+
+.license-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #374151;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.license-status.active .status-icon {
+  color: #22C55E;
+}
+
+.license-status .status-icon {
+  font-size: 16px;
+}
+
+.license-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+#license-key {
+  flex: 1;
+  padding: 8px 10px;
+  background: #1F2937;
+  border: 1px solid #4B5563;
+  border-radius: 6px;
+  color: #F9FAFB;
+  font-size: 13px;
+}
+
+#license-key:focus {
+  outline: none;
+  border-color: #60A5FA;
+}
+
+#activate-btn {
+  padding: 8px 14px;
+  background: #22C55E;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#activate-btn:hover {
+  background: #16A34A;
+}
+
+.license-hint {
+  font-size: 12px;
+  color: #9CA3AF;
+  margin-top: 8px;
+}
+
+.license-hint a {
+  color: #60A5FA;
+  text-decoration: none;
+}
+
+.license-hint a:hover {
+  text-decoration: underline;
+}
+
+.about-text {
+  font-size: 13px;
+  color: #D1D5DB;
+}
+
+.about-text a {
+  color: #60A5FA;
+  text-decoration: none;
+}
+
+.about-text a:hover {
+  text-decoration: underline;
+}
+
+.back-btn {
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  border: 1px solid #4B5563;
+  border-radius: 8px;
+  color: #D1D5DB;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.back-btn:hover {
+  background: #374151;
+}
+
+/* Loading state */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
