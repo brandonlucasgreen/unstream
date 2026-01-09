@@ -3,13 +3,18 @@
 // Source icons and names
 const SOURCE_CONFIG = {
   bandcamp: { icon: '🎵', name: 'Bandcamp' },
-  official: { icon: '💿', name: 'Artist Site' },
+  qobuz: { icon: '🎧', name: 'Qobuz' },
+  officialsite: { icon: '🌐', name: 'Official Site' },
   discogs: { icon: '📀', name: 'Discogs' },
+  mirlo: { icon: '🪺', name: 'Mirlo' },
+  faircamp: { icon: '⛺', name: 'Faircamp' },
+  bandwagon: { icon: '🚐', name: 'Bandwagon' },
+  patreon: { icon: '🎨', name: 'Patreon' },
+  kofi: { icon: '☕', name: 'Ko-fi' },
+  buymeacoffee: { icon: '☕', name: 'Buy Me a Coffee' },
+  ampwall: { icon: '🔊', name: 'Ampwall' },
+  sonica: { icon: '🎶', name: 'Sonica' },
   songkick: { icon: '🎤', name: 'Concerts' },
-  // Radio
-  somafm: { icon: '📻', name: 'SomaFM' },
-  kexp: { icon: '📻', name: 'KEXP' },
-  nts: { icon: '📻', name: 'NTS' },
   // Library
   hoopla: { icon: '📚', name: 'Hoopla' },
   freegal: { icon: '📚', name: 'Freegal' },
@@ -139,14 +144,14 @@ function updateLicenseUI() {
 
   if (isProUser) {
     statusIcon.textContent = '●';
-    statusText.textContent = 'Pro Plan Active';
+    statusText.textContent = 'Unstream Plus Active';
     elements.licenseStatus.classList.add('active');
     elements.proPrompt.classList.add('hidden');
   } else {
     statusIcon.textContent = '○';
     statusText.textContent = 'Free Plan';
     elements.licenseStatus.classList.remove('active');
-    elements.proPrompt.classList.remove('hidden');
+    // Don't show proPrompt here - only show it when user tries to save
   }
 }
 
@@ -154,7 +159,7 @@ function updateLicenseUI() {
 function showNowPlaying(track) {
   currentArtist = track.artist;
   elements.artistName.textContent = track.artist;
-  elements.trackTitle.textContent = track.title ? `"${track.title}"` : '';
+  elements.trackTitle.textContent = track.title || '';
   elements.sourceBadge.textContent = track.source;
 
   elements.nowPlaying.classList.remove('hidden');
@@ -194,20 +199,41 @@ async function loadResults(artist) {
 
 // Render results
 function renderResults(results) {
-  // Filter out social links (they go in social section)
-  const nonSocialResults = results.filter(r => !isSocialSource(r.id));
+  // Results are aggregated artist objects with platforms array
+  // Flatten all platforms from all matching artists
+  const allPlatforms = [];
+  for (const result of results) {
+    if (result.platforms && Array.isArray(result.platforms)) {
+      for (const platform of result.platforms) {
+        allPlatforms.push({
+          sourceId: platform.sourceId,
+          url: platform.url,
+        });
+      }
+    }
+  }
 
-  if (nonSocialResults.length === 0) {
-    elements.resultsGrid.innerHTML = '<div class="empty">No ethical sources found</div>';
+  // Filter out social links, search-only links, and duplicates
+  const seen = new Set();
+  const nonSocialPlatforms = allPlatforms.filter(p => {
+    if (isSocialSource(p.sourceId)) return false;
+    if (isSearchOnlySource(p.sourceId)) return false;
+    if (seen.has(p.sourceId)) return false;
+    seen.add(p.sourceId);
+    return true;
+  });
+
+  if (nonSocialPlatforms.length === 0) {
+    elements.resultsGrid.innerHTML = '<div class="empty">No alternative sources found</div>';
     return;
   }
 
-  elements.resultsGrid.innerHTML = nonSocialResults
+  elements.resultsGrid.innerHTML = nonSocialPlatforms
     .slice(0, 8) // Limit to 8 results
-    .map(result => {
-      const config = SOURCE_CONFIG[result.id] || { icon: '🔗', name: result.name };
+    .map(platform => {
+      const config = SOURCE_CONFIG[platform.sourceId] || { icon: '🔗', name: platform.sourceId };
       return `
-        <a href="${result.url}" target="_blank" class="result-item" title="${result.name}">
+        <a href="${platform.url}" target="_blank" class="result-item" title="${config.name}">
           <span class="result-icon">${config.icon}</span>
           <span class="result-name">${config.name}</span>
         </a>
@@ -219,6 +245,11 @@ function renderResults(results) {
 // Check if source is social
 function isSocialSource(id) {
   return ['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'twitter'].includes(id);
+}
+
+// Check if source is a manual search link (not a direct match)
+function isSearchOnlySource(id) {
+  return ['ampwall', 'sonica', 'kofi', 'buymeacoffee'].includes(id);
 }
 
 // Load enrichment (MusicBrainz data)
@@ -401,7 +432,7 @@ function setupEventListeners() {
   // Upgrade link
   document.getElementById('upgrade-link')?.addEventListener('click', (e) => {
     e.preventDefault();
-    chrome.tabs.create({ url: 'https://unstream.stream/pro' });
+    chrome.tabs.create({ url: 'https://unstream.stream/plus' });
   });
 }
 

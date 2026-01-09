@@ -220,6 +220,13 @@ export function AboutPage() {
               Support
             </a>
             <span className="text-text-muted/40 text-xs">&#x2022;</span>
+            <Link
+              to="/privacy-policy"
+              className="hover:text-text-primary transition-colors"
+            >
+              Privacy
+            </Link>
+            <span className="text-text-muted/40 text-xs">&#x2022;</span>
             <a
               href="https://liberapay.com/brandonlucasgreen/donate"
               target="_blank"

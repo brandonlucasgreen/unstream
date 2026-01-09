@@ -51,7 +51,8 @@ async function handleMusicDetection(data) {
 
   // Fetch results
   try {
-    const results = await searchArtist(artist);
+    const data = await searchArtist(artist);
+    const results = data.results || [];
 
     // Store results
     await chrome.storage.local.set({
@@ -59,7 +60,7 @@ async function handleMusicDetection(data) {
     });
 
     // Update badge based on results
-    if (results && results.length > 0) {
+    if (results.length > 0) {
       updateBadge('found', results.length);
     } else {
       updateBadge('none');
@@ -81,7 +82,7 @@ function handleMusicStopped() {
 
 // Search for artist via Unstream API
 async function searchArtist(artist) {
-  const url = `${API_BASE}/search/sources?q=${encodeURIComponent(artist)}`;
+  const url = `${API_BASE}/search/sources?query=${encodeURIComponent(artist)}`;
 
   const response = await fetch(url);
   if (!response.ok) {
@@ -105,7 +106,8 @@ async function getResults(artist) {
 
   // Fetch fresh
   try {
-    const results = await searchArtist(artist);
+    const data = await searchArtist(artist);
+    const results = data.results || [];
     await chrome.storage.local.set({
       [cacheKey]: { results, timestamp: Date.now() }
     });
