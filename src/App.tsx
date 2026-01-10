@@ -16,6 +16,7 @@ function App() {
   const [hasSearched, setHasSearched] = useState(false);
   const [resolvedQuery, setResolvedQuery] = useState<string>('');
   const [isResolving, setIsResolving] = useState(false);
+  const [isFromUrl, setIsFromUrl] = useState(false);
 
   // Track current search to handle race conditions
   const currentSearchRef = useRef<number>(0);
@@ -46,6 +47,7 @@ function App() {
       resolveArtistUrl(urlParam).then((result) => {
         if (result) {
           setResolvedQuery(result.artistName);
+          setIsFromUrl(true);
           // Update URL to use q param instead
           setSearchParams({ q: result.artistName }, { replace: true });
           // Trigger search with resolved artist name
@@ -64,6 +66,7 @@ function App() {
     // Handle direct query param (e.g., ?q=radiohead)
     else if (queryParam && !hasSearched && !isResolving) {
       setResolvedQuery(queryParam);
+      setIsFromUrl(true);
       handleSearch(queryParam);
     }
   }, [searchParams, isResolving, hasSearched, setSearchParams]);
@@ -128,6 +131,7 @@ function App() {
     setError(null);
     setResolvedQuery('');
     setIsEnriching(false);
+    setIsFromUrl(false);
     // Clear the URL params when going home
     setSearchParams({}, { replace: true });
   }, [setSearchParams]);
@@ -177,7 +181,17 @@ function App() {
       {/* Search */}
       <main className="px-4 pb-16">
         <div className="max-w-4xl mx-auto">
-          <SearchBar onSearch={handleSearch} isLoading={isLoading || isResolving} initialQuery={resolvedQuery} />
+          <div className="relative">
+            <SearchBar onSearch={handleSearch} isLoading={isLoading || isResolving} initialQuery={resolvedQuery} />
+            {hasSearched && (
+              <button
+                onClick={handleGoHome}
+                className="absolute right-0 -bottom-8 text-sm text-text-muted hover:text-text-secondary transition-colors"
+              >
+                Reset
+              </button>
+            )}
+          </div>
 
           {/* Tip text */}
           <p className="text-center text-text-secondary text-sm mt-4">
@@ -229,8 +243,12 @@ function App() {
                       </div>
                     )}
                   </div>
-                  {results.map((result) => (
-                    <ResultCard key={result.id} result={result} />
+                  {results.map((result, index) => (
+                    <ResultCard
+                      key={result.id}
+                      result={result}
+                      defaultExpanded={isFromUrl && index === 0}
+                    />
                   ))}
                 </div>
               ) : (

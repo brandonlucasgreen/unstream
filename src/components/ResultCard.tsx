@@ -65,6 +65,7 @@ function SocialIcon({ platform }: { platform: SourceId }) {
 
 interface ResultCardProps {
   result: SearchResult;
+  defaultExpanded?: boolean;
 }
 
 interface EmbedData {
@@ -72,9 +73,9 @@ interface EmbedData {
   title: string;
 }
 
-export function ResultCard({ result }: ResultCardProps) {
+export function ResultCard({ result, defaultExpanded = false }: ResultCardProps) {
   const [imageError, setImageError] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(defaultExpanded);
   const [embedData, setEmbedData] = useState<EmbedData | null>(null);
   const [embedLoading, setEmbedLoading] = useState(false);
   const [embedError, setEmbedError] = useState(false);

@@ -9,11 +9,9 @@ interface SearchBarProps {
 export function SearchBar({ onSearch, isLoading, initialQuery }: SearchBarProps) {
   const [query, setQuery] = useState(initialQuery || '');
 
-  // Update query when initialQuery changes (for URL resolution)
+  // Update query when initialQuery changes (for URL resolution or reset)
   useEffect(() => {
-    if (initialQuery) {
-      setQuery(initialQuery);
-    }
+    setQuery(initialQuery || '');
   }, [initialQuery]);
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
