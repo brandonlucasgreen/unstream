@@ -2,6 +2,11 @@
   command = "npm run build"
   publish = "dist"
   functions = "netlify/functions"
+  edge_functions = "netlify/edge-functions"
+
+[[edge_functions]]
+  path = "/"
+  function = "og-metadata"
 
 [[redirects]]
   from = "/api/search/sources"
