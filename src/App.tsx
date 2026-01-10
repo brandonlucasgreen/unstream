@@ -20,6 +20,8 @@ function App() {
 
   // Track current search to handle race conditions
   const currentSearchRef = useRef<number>(0);
+  // Track if we just went home to prevent re-triggering search from stale URL
+  const justWentHomeRef = useRef(false);
 
   // Default page title
   const defaultTitle = 'Unstream - Find music on alternative platforms';
@@ -36,6 +38,12 @@ function App() {
 
   // Handle URL parameters for deep-linked searches
   useEffect(() => {
+    // Skip if we just went home (prevents re-triggering from stale URL)
+    if (justWentHomeRef.current) {
+      justWentHomeRef.current = false;
+      return;
+    }
+
     const urlParam = searchParams.get('url');
     const queryParam = searchParams.get('q');
 
@@ -126,6 +134,8 @@ function App() {
   }, [setSearchParams]);
 
   const handleGoHome = useCallback(() => {
+    // Mark that we're going home to prevent useEffect from re-triggering
+    justWentHomeRef.current = true;
     setResults([]);
     setHasSearched(false);
     setError(null);
