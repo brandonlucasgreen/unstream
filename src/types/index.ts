@@ -35,6 +35,7 @@ export interface Source {
   searchUrlTemplate: string;
   searchOnly?: boolean; // True if we can't verify the artist exists (shows "Search X" instead)
   homepageUrl: string;
+  artistPayoutPercent?: string; // e.g., "80-85%" - artist's share of sales on this platform
 }
 
 // Latest release info

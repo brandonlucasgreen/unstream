@@ -11,6 +11,7 @@ export const sources: Record<SourceId, Source> = {
     hasEmbed: true,
     searchUrlTemplate: 'https://bandcamp.com/search?q={query}',
     homepageUrl: 'https://bandcamp.com',
+    artistPayoutPercent: '80-85%',
   },
   mirlo: {
     id: 'mirlo',
@@ -22,6 +23,7 @@ export const sources: Record<SourceId, Source> = {
     hasEmbed: false,
     searchUrlTemplate: 'https://mirlo.space/search?query={query}',
     homepageUrl: 'https://mirlo.space',
+    artistPayoutPercent: '86-90%',
   },
   ampwall: {
     id: 'ampwall',
@@ -34,6 +36,7 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: 'https://ampwall.com/explore?searchStyle=search&query={query}',
     searchOnly: true,
     homepageUrl: 'https://ampwall.com',
+    artistPayoutPercent: '92-95%',
   },
   sonica: {
     id: 'sonica',
@@ -68,6 +71,7 @@ export const sources: Record<SourceId, Source> = {
     hasEmbed: false,
     searchUrlTemplate: 'https://duckduckgo.com/?q=site:*.faircamp+{query}',
     homepageUrl: 'https://simonrepp.com/faircamp',
+    artistPayoutPercent: '90-97%',
   },
   patreon: {
     id: 'patreon',
@@ -79,6 +83,7 @@ export const sources: Record<SourceId, Source> = {
     hasEmbed: false,
     searchUrlTemplate: 'https://www.patreon.com/search?q={query}',
     homepageUrl: 'https://www.patreon.com',
+    artistPayoutPercent: '86-90%',
   },
   buymeacoffee: {
     id: 'buymeacoffee',
@@ -91,6 +96,7 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: 'https://buymeacoffee.com/explore-creators',
     searchOnly: true,
     homepageUrl: 'https://buymeacoffee.com',
+    artistPayoutPercent: '~92%',
   },
   kofi: {
     id: 'kofi',
@@ -103,6 +109,7 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: 'https://duckduckgo.com/?q=site:ko-fi.com+{query}',
     searchOnly: true,
     homepageUrl: 'https://ko-fi.com',
+    artistPayoutPercent: '92-97%',
   },
   hoopla: {
     id: 'hoopla',
@@ -136,6 +143,7 @@ export const sources: Record<SourceId, Source> = {
     hasEmbed: false,
     searchUrlTemplate: 'https://www.qobuz.com/us-en/search/artists/{query}',
     homepageUrl: 'https://www.qobuz.com',
+    artistPayoutPercent: '~70%',
   },
   jamcoop: {
     id: 'jamcoop',

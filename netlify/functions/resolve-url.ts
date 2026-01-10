@@ -97,16 +97,21 @@ async function resolveStreamingUrl(url: string): Promise<{ artistName: string; s
       const html = await response.text();
       const type = appleMatch[1];
 
+      // Helper to clean Apple Music suffixes from artist names
+      const cleanAppleMusicSuffix = (name: string): string => {
+        return name
+          .replace(/\s+on\s+Apple\s*Music.*$/i, '')
+          .replace(/\s*[-–—]\s*Apple\s*Music.*$/i, '')
+          .replace(/\s*\|\s*Apple\s*Music.*$/i, '')
+          .trim();
+      };
+
       if (type === 'artist') {
         // Artist page: og:title is the artist name
         const titleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i) ||
                           html.match(/<meta\s+content="([^"]+)"\s+property="og:title"/i);
         if (titleMatch) {
-          // Remove " - Apple Music" or " on Apple Music" suffix if present
-          const artistName = titleMatch[1]
-            .replace(/\s*[-–—]\s*Apple Music.*$/i, '')
-            .replace(/\s+on Apple Music.*$/i, '')
-            .trim();
+          const artistName = cleanAppleMusicSuffix(titleMatch[1]);
           return { artistName, source: 'apple' };
         }
       } else {
@@ -114,13 +119,12 @@ async function resolveStreamingUrl(url: string): Promise<{ artistName: string; s
         const titleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i) ||
                           html.match(/<meta\s+content="([^"]+)"\s+property="og:title"/i);
         if (titleMatch) {
-          // Extract artist name using greedy match, then strip suffixes
-          const byMatch = titleMatch[1].match(/^.+?\s+by\s+(.+)$/i);
+          // First clean any Apple Music suffix, then extract artist
+          const cleanedTitle = cleanAppleMusicSuffix(titleMatch[1]);
+          // Extract artist name from "Song by Artist" pattern
+          const byMatch = cleanedTitle.match(/^.+?\s+by\s+(.+)$/i);
           if (byMatch) {
-            const artistName = byMatch[1]
-              .replace(/\s+on Apple Music$/i, '')
-              .replace(/\s*[-–—]\s*Apple Music$/i, '')
-              .trim();
+            const artistName = cleanAppleMusicSuffix(byMatch[1]);
             return { artistName, source: 'apple' };
           }
         }
@@ -129,7 +133,7 @@ async function resolveStreamingUrl(url: string): Promise<{ artistName: string; s
         const artistMeta = html.match(/<meta\s+name="twitter:audio:artist_name"\s+content="([^"]+)"/i) ||
                           html.match(/<meta\s+content="([^"]+)"\s+name="twitter:audio:artist_name"/i);
         if (artistMeta) {
-          return { artistName: artistMeta[1], source: 'apple' };
+          return { artistName: cleanAppleMusicSuffix(artistMeta[1]), source: 'apple' };
         }
       }
 

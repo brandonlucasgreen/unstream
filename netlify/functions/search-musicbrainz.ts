@@ -91,6 +91,53 @@ function parseSocialUrl(url: string): SocialLink | null {
 // Helper to delay execution (for rate limiting)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+// Fetch and parse links from a Linktree page
+async function fetchLinktreeLinks(linktreeUrl: string): Promise<SocialLink[]> {
+  const socialLinks: SocialLink[] = [];
+  const seenPlatforms = new Set<SocialPlatform>();
+
+  try {
+    const response = await globalThis.fetch(linktreeUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+      signal: AbortSignal.timeout(5000),
+    });
+
+    if (!response.ok) {
+      console.log('Linktree fetch failed:', response.status);
+      return socialLinks;
+    }
+
+    const html = await response.text();
+
+    // Linktree uses data-testid="LinkButton" for link buttons
+    // The actual URLs are in anchor tags with href attributes
+    // Match pattern: <a ... href="https://..." ... data-testid="LinkButton" ...>
+    // or: <a ... data-testid="LinkButton" ... href="https://..." ...>
+    const linkMatches = html.matchAll(/<a\s+[^>]*href=["']([^"']+)["'][^>]*>/gi);
+
+    for (const match of linkMatches) {
+      const url = match[1];
+      // Skip Linktree internal links and non-http URLs
+      if (!url.startsWith('http') || url.includes('linktr.ee')) continue;
+
+      const socialLink = parseSocialUrl(url);
+      if (socialLink && !seenPlatforms.has(socialLink.platform)) {
+        seenPlatforms.add(socialLink.platform);
+        socialLinks.push(socialLink);
+      }
+    }
+
+    console.log(`[Linktree] Found ${socialLinks.length} social links from ${linktreeUrl}`);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    console.error('Linktree fetch error:', err.message);
+  }
+
+  return socialLinks;
+}
+
 // Extract Discogs artist ID from URL (e.g., https://www.discogs.com/artist/3840 -> 3840)
 function extractDiscogsArtistId(discogsUrl: string): string | null {
   const match = discogsUrl.match(/\/artist\/(\d+)/);
@@ -133,10 +180,17 @@ async function fetchDiscogsSocialLinks(discogsUrl: string): Promise<SocialLink[]
   return socialLinks;
 }
 
+// Result type for official site scraping (includes discovered Linktree URL)
+interface OfficialSiteResult {
+  socialLinks: SocialLink[];
+  linktreeUrl: string | null;
+}
+
 // Fetch social links from an artist's official website
-async function fetchOfficialSiteSocialLinks(officialUrl: string): Promise<SocialLink[]> {
+async function fetchOfficialSiteSocialLinks(officialUrl: string): Promise<OfficialSiteResult> {
   const socialLinks: SocialLink[] = [];
   const seenPlatforms = new Set<SocialPlatform>();
+  let linktreeUrl: string | null = null;
 
   try {
     const response = await globalThis.fetch(officialUrl, {
@@ -148,7 +202,7 @@ async function fetchOfficialSiteSocialLinks(officialUrl: string): Promise<Social
 
     if (!response.ok) {
       console.log('Official site fetch failed:', response.status);
-      return socialLinks;
+      return { socialLinks, linktreeUrl };
     }
 
     const html = await response.text();
@@ -187,6 +241,13 @@ async function fetchOfficialSiteSocialLinks(officialUrl: string): Promise<Social
       // Skip relative URLs and non-http URLs
       if (!url.startsWith('http')) continue;
 
+      // Check for Linktree URL (only capture first one found)
+      if (url.includes('linktr.ee') && !linktreeUrl) {
+        linktreeUrl = url;
+        console.log(`[Official Site] Found Linktree: ${linktreeUrl}`);
+        continue;
+      }
+
       const socialLink = parseSocialUrl(url);
       // Only add one link per platform (first one wins)
       if (socialLink && !seenPlatforms.has(socialLink.platform)) {
@@ -199,7 +260,7 @@ async function fetchOfficialSiteSocialLinks(officialUrl: string): Promise<Social
     console.error('Official site fetch error:', err.message);
   }
 
-  return socialLinks;
+  return { socialLinks, linktreeUrl };
 }
 
 // Merge social links from multiple sources, deduplicating by platform
@@ -281,6 +342,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
 
     let officialUrl: string | null = null;
     let discogsUrl: string | null = null;
+    let linktreeUrl: string | null = null;
     const socialLinks: SocialLink[] = [];
     const seenPlatforms = new Set<SocialPlatform>();
 
@@ -311,9 +373,19 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       }
 
       // Extract social links from 'social network' and 'youtube' relation types
+      // Also capture Linktree URLs for later scraping
       for (const rel of relations) {
         if ((rel.type === 'social network' || rel.type === 'youtube') && rel.url?.resource) {
-          const socialLink = parseSocialUrl(rel.url.resource);
+          const url = rel.url.resource;
+
+          // Check for Linktree URL
+          if (url.includes('linktr.ee') && !linktreeUrl) {
+            linktreeUrl = url;
+            console.log(`[MusicBrainz] Found Linktree: ${linktreeUrl}`);
+            continue;
+          }
+
+          const socialLink = parseSocialUrl(url);
           // Only add one link per platform (first one wins)
           if (socialLink && !seenPlatforms.has(socialLink.platform)) {
             seenPlatforms.add(socialLink.platform);
@@ -354,13 +426,21 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     }
 
     // Fetch additional social links from Discogs and official site in parallel
-    const [discogsSocialLinks, officialSiteSocialLinks] = await Promise.all([
+    const [discogsSocialLinks, officialSiteResult] = await Promise.all([
       discogsUrl ? fetchDiscogsSocialLinks(discogsUrl) : Promise.resolve([]),
-      officialUrl ? fetchOfficialSiteSocialLinks(officialUrl) : Promise.resolve([]),
+      officialUrl ? fetchOfficialSiteSocialLinks(officialUrl) : Promise.resolve({ socialLinks: [], linktreeUrl: null }),
     ]);
 
-    // Merge all social links (MusicBrainz first, then Discogs, then official site)
-    const allSocialLinks = mergeSocialLinks(socialLinks, discogsSocialLinks, officialSiteSocialLinks);
+    // If we found a Linktree URL from MusicBrainz or official site, scrape it for additional links
+    // Prefer MusicBrainz Linktree (more authoritative), fall back to official site
+    const finalLinktreeUrl = linktreeUrl || officialSiteResult.linktreeUrl;
+    let linktreeSocialLinks: SocialLink[] = [];
+    if (finalLinktreeUrl) {
+      linktreeSocialLinks = await fetchLinktreeLinks(finalLinktreeUrl);
+    }
+
+    // Merge all social links (MusicBrainz first, then Discogs, then official site, then Linktree)
+    const allSocialLinks = mergeSocialLinks(socialLinks, discogsSocialLinks, officialSiteResult.socialLinks, linktreeSocialLinks);
 
     return {
       query,
