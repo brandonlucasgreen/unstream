@@ -63,7 +63,20 @@ struct PlatformResult: Codable, Identifiable {
     }
 
     var isSearchOnly: Bool {
-        platformConfig[sourceId]?.searchOnly ?? false
+        // If platform is normally searchOnly, check if we have a direct link
+        let configSearchOnly = platformConfig[sourceId]?.searchOnly ?? false
+        if configSearchOnly, let urlString = url {
+            // Direct links should not be treated as searchOnly
+            return isSearchUrl(urlString)
+        }
+        return configSearchOnly
+    }
+
+    /// Check if URL is a search URL vs a direct link
+    private func isSearchUrl(_ urlString: String) -> Bool {
+        let lowercased = urlString.lowercased()
+        let searchPatterns = ["/search", "?q=", "?query=", "/explore", "duckduckgo.com"]
+        return searchPatterns.contains { lowercased.contains($0) }
     }
 
     var isSocial: Bool {
@@ -112,7 +125,8 @@ private let platformConfig: [String: PlatformConfig] = [
     "threads": PlatformConfig(name: "Threads", icon: "at", color: "#000000", searchOnly: false),
     "bluesky": PlatformConfig(name: "Bluesky", icon: "cloud", color: "#0085FF", searchOnly: false),
     "twitter": PlatformConfig(name: "X", icon: "xmark", color: "#000000", searchOnly: false),
+    "mastodon": PlatformConfig(name: "Mastodon", icon: "bubble.left.and.bubble.right", color: "#858AFA", searchOnly: false),
 ]
 
 // Social platform IDs for filtering
-let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "twitter"]
+let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "twitter", "mastodon"]
