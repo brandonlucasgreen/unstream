@@ -4,6 +4,7 @@
 const SOURCE_CONFIG = {
   bandcamp: { icon: '🎵', name: 'Bandcamp' },
   qobuz: { icon: '🎧', name: 'Qobuz' },
+  jamcoop: { icon: '🎸', name: 'Jam.coop' },
   officialsite: { icon: '🌐', name: 'Official Site' },
   discogs: { icon: '📀', name: 'Discogs' },
   mirlo: { icon: '🪺', name: 'Mirlo' },

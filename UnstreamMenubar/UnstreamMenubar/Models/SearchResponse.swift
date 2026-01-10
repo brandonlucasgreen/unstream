@@ -106,6 +106,7 @@ private let platformConfig: [String: PlatformConfig] = [
     "bandwagon": PlatformConfig(name: "Bandwagon", icon: "car", color: "#FF6B35", searchOnly: false),
     "faircamp": PlatformConfig(name: "Faircamp", icon: "tent", color: "#2D5A27", searchOnly: false),
     "qobuz": PlatformConfig(name: "Qobuz", icon: "hifispeaker", color: "#4169E1", searchOnly: false),
+    "jamcoop": PlatformConfig(name: "Jam.coop", icon: "guitars", color: "#E11D48", searchOnly: false),
     "freegal": PlatformConfig(name: "Freegal", icon: "building.columns", color: "#00A651", searchOnly: false),
     "hoopla": PlatformConfig(name: "Hoopla", icon: "books.vertical", color: "#E31837", searchOnly: false),
     "patreon": PlatformConfig(name: "Patreon", icon: "heart", color: "#FF424D", searchOnly: false),

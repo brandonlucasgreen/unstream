@@ -12,6 +12,7 @@ export type SourceId =
   | 'hoopla'
   | 'freegal'
   | 'qobuz'
+  | 'jamcoop'
   | 'officialsite'
   | 'discogs'
   | 'instagram'

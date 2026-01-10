@@ -7,6 +7,7 @@ type SourceId =
   | 'sonica'
   | 'bandwagon'
   | 'faircamp'
+  | 'jamcoop'
   | 'patreon'
   | 'buymeacoffee'
   | 'kofi'
@@ -641,6 +642,87 @@ async function searchFaircamp(query: string): Promise<Map<string, string>> {
   return results;
 }
 
+// Jam.coop artist directory cache
+let jamcoopDirectoryCache: Map<string, { name: string; url: string }> | null = null;
+let jamcoopCacheTime = 0;
+const JAMCOOP_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
+async function getJamcoopDirectory(): Promise<Map<string, { name: string; url: string }>> {
+  const now = Date.now();
+  if (jamcoopDirectoryCache && (now - jamcoopCacheTime) < JAMCOOP_CACHE_TTL) {
+    return jamcoopDirectoryCache;
+  }
+
+  try {
+    const response = await fetchWithTimeout('https://jam.coop/artists', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    }, 5000);
+
+    if (!response.ok) {
+      return jamcoopDirectoryCache || new Map();
+    }
+
+    const html = await response.text();
+    const root = parse(html);
+    const directory = new Map<string, { name: string; url: string }>();
+
+    // Find all artist links - they follow pattern /artists/[slug]
+    const artistLinks = root.querySelectorAll('a[href^="/artists/"]');
+
+    for (const link of artistLinks) {
+      const href = link.getAttribute('href');
+      if (!href || href === '/artists') continue;
+
+      // Get artist name from link text (may need to clean up whitespace)
+      const name = link.textContent?.trim();
+      if (!name) continue;
+
+      const normalizedName = normalizeForComparison(name);
+      if (normalizedName && !directory.has(normalizedName)) {
+        directory.set(normalizedName, {
+          name,
+          url: `https://jam.coop${href}`,
+        });
+      }
+    }
+
+    jamcoopDirectoryCache = directory;
+    jamcoopCacheTime = now;
+    console.log(`[Jam.coop] Cached ${directory.size} artists`);
+    return directory;
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    console.error('Jam.coop directory fetch error:', err.message);
+    return jamcoopDirectoryCache || new Map();
+  }
+}
+
+async function searchJamcoop(query: string): Promise<Map<string, string>> {
+  const results = new Map<string, string>();
+  const queryNormalized = normalizeForComparison(query);
+
+  try {
+    const directory = await getJamcoopDirectory();
+
+    for (const [normalizedName, artist] of directory) {
+      // Exact match or close match (query contains name or name contains query)
+      if (normalizedName === queryNormalized ||
+          normalizedName.includes(queryNormalized) ||
+          queryNormalized.includes(normalizedName)) {
+        results.set(normalizedName, artist.url);
+      }
+      if (results.size >= 10) break;
+    }
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    console.error('Jam.coop search error:', err.message);
+  }
+
+  return results;
+}
+
 async function searchPatreon(query: string): Promise<Map<string, string>> {
   const results = new Map<string, string>();
 
@@ -792,11 +874,12 @@ function aggregateResults(allResults: PlatformResult[]): AggregatedResult[] {
 
 async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   // Search all fast platforms in parallel (MusicBrainz is loaded separately for lazy loading)
-  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, patreonResults, qobuzResults] = await Promise.allSettled([
+  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, qobuzResults] = await Promise.allSettled([
     searchBandcamp(query),
     searchBandwagon(query),
     searchMirlo(query),
     searchFaircamp(query),
+    searchJamcoop(query),
     searchPatreon(query),
     searchQobuz(query),
   ]);
@@ -812,6 +895,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
 
   const bandwagonMatches = bandwagonResults.status === 'fulfilled' ? bandwagonResults.value : new Map<string, string>();
   const faircampMatches = faircampResults.status === 'fulfilled' ? faircampResults.value : new Map<string, string>();
+  const jamcoopMatches = jamcoopResults.status === 'fulfilled' ? jamcoopResults.value : new Map<string, string>();
   const patreonMatches = patreonResults.status === 'fulfilled' ? patreonResults.value : new Map<string, string>();
   const qobuzMatches = qobuzResults.status === 'fulfilled' ? qobuzResults.value : new Map<string, string>();
 
@@ -851,6 +935,13 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         result.platforms.push({
           sourceId: 'faircamp',
           url: faircampMatches.get(normalizedName)!,
+        });
+      }
+
+      if (jamcoopMatches.has(normalizedName)) {
+        result.platforms.push({
+          sourceId: 'jamcoop',
+          url: jamcoopMatches.get(normalizedName)!,
         });
       }
 
