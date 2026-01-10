@@ -4,10 +4,12 @@ import { analytics } from '../services/analytics';
 interface SourceBadgeProps {
   source: Source;
   url: string;
+  isDirectLink?: boolean; // Override searchOnly when we have a verified direct link
 }
 
-export function SourceBadge({ source, url }: SourceBadgeProps) {
-  const isSearchOnly = source.searchOnly ?? false;
+export function SourceBadge({ source, url, isDirectLink }: SourceBadgeProps) {
+  // If we have a direct link, show as verified even if source is normally searchOnly
+  const isSearchOnly = isDirectLink ? false : (source.searchOnly ?? false);
 
   if (isSearchOnly) {
     // Subtle but readable styling for search-only platforms

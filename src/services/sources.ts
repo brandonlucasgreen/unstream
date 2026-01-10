@@ -237,6 +237,17 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: '',
     homepageUrl: 'https://x.com',
   },
+  mastodon: {
+    id: 'mastodon',
+    name: 'Mastodon',
+    description: 'Decentralized social network',
+    color: '#6364FF',
+    icon: 'mastodon',
+    category: 'social',
+    hasEmbed: false,
+    searchUrlTemplate: '',
+    homepageUrl: 'https://joinmastodon.org',
+  },
 };
 
 export const sourceCategories = {
@@ -268,7 +279,7 @@ export const sourceCategories = {
   social: {
     name: 'Social',
     description: 'Artist social media profiles',
-    sources: ['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'twitter'] as SourceId[],
+    sources: ['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'twitter', 'mastodon'] as SourceId[],
   },
 };
 
@@ -483,10 +494,24 @@ export function mergeWithMusicBrainzData(
     }
 
     // Add social links if available
+    // These are direct links from official sites, so they should replace search URLs
     if (mbData.socialLinks && mbData.socialLinks.length > 0) {
       for (const social of mbData.socialLinks) {
-        if (!newPlatforms.some(p => p.sourceId === social.platform)) {
+        const existingIndex = newPlatforms.findIndex(p => p.sourceId === social.platform);
+        if (existingIndex === -1) {
+          // Platform doesn't exist yet, add it
           newPlatforms.push({ sourceId: social.platform, url: social.url });
+        } else {
+          // Platform exists - replace if existing URL is a search URL and new one is direct
+          const existingUrl = newPlatforms[existingIndex].url.toLowerCase();
+          const isExistingSearchUrl = existingUrl.includes('duckduckgo.com') ||
+            existingUrl.includes('/search') ||
+            existingUrl.includes('?q=') ||
+            existingUrl.includes('?query=') ||
+            existingUrl.includes('/explore');
+          if (isExistingSearchUrl) {
+            newPlatforms[existingIndex] = { sourceId: social.platform, url: social.url };
+          }
         }
       }
     }
@@ -494,7 +519,7 @@ export function mergeWithMusicBrainzData(
     // Re-sort platforms: verified first, search-only in middle, official/library, then social last
     const searchOnlyPlatforms = new Set(['ampwall', 'sonica', 'kofi', 'buymeacoffee']);
     const officialPlatforms = new Set(['officialsite', 'discogs', 'hoopla', 'freegal']);
-    const socialPlatforms = new Set(['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'twitter']);
+    const socialPlatforms = new Set(['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'twitter', 'mastodon']);
     newPlatforms.sort((a, b) => {
       const aIsSocial = socialPlatforms.has(a.sourceId);
       const bIsSocial = socialPlatforms.has(b.sourceId);
@@ -503,7 +528,7 @@ export function mergeWithMusicBrainzData(
       if (!aIsSocial && bIsSocial) return -1;
       if (aIsSocial && bIsSocial) {
         // Order social platforms consistently
-        const order = ['instagram', 'tiktok', 'youtube', 'threads', 'bluesky', 'facebook', 'twitter'];
+        const order = ['instagram', 'tiktok', 'youtube', 'threads', 'bluesky', 'mastodon', 'facebook', 'twitter'];
         return order.indexOf(a.sourceId) - order.indexOf(b.sourceId);
       }
 

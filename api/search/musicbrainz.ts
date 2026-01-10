@@ -1,7 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 // Social platform types
-type SocialPlatform = 'instagram' | 'facebook' | 'tiktok' | 'youtube' | 'threads' | 'bluesky' | 'twitter';
+type SocialPlatform =
+  | 'instagram' | 'facebook' | 'tiktok' | 'youtube'
+  | 'threads' | 'bluesky' | 'twitter'
+  | 'mastodon' | 'patreon' | 'kofi' | 'buymeacoffee';
 
 interface SocialLink {
   platform: SocialPlatform;
@@ -16,6 +19,30 @@ interface MusicBrainzSearchResponse {
   discogsUrl: string | null;
   hasPre2005Release: boolean;
   socialLinks: SocialLink[];
+}
+
+// Known Mastodon/Fediverse instances (non-exhaustive, but covers popular ones)
+const KNOWN_MASTODON_INSTANCES = [
+  'mastodon.social', 'mastodon.online', 'mastodon.art', 'mastodon.world',
+  'mstdn.social', 'mstdn.jp', 'fosstodon.org', 'hachyderm.io',
+  'plush.city', 'tech.lgbt', 'wandering.shop', 'musician.social',
+  'metalhead.club', 'social.coop', 'aus.social', 'infosec.exchange',
+  'sfba.social', 'universeodon.com', 'c.im', 'toot.cafe',
+];
+
+// Check if a URL belongs to a known Mastodon instance
+function isMastodonInstance(urlLower: string): boolean {
+  return KNOWN_MASTODON_INSTANCES.some(instance => urlLower.includes(instance));
+}
+
+// Convert a Mastodon handle (@user@server) to a URL
+function convertMastodonHandleToUrl(handle: string): string | null {
+  // Handle formats: "@username@server.tld" or "username@server.tld"
+  const match = handle.match(/@?([^@]+)@(.+)/);
+  if (match) {
+    return `https://${match[2]}/@${match[1]}`;
+  }
+  return null;
 }
 
 // Parse a URL to determine which social platform it belongs to
@@ -42,6 +69,22 @@ function parseSocialUrl(url: string): SocialLink | null {
   }
   if (urlLower.includes('twitter.com') || urlLower.includes('x.com')) {
     return { platform: 'twitter', url };
+  }
+
+  // Patronage platforms
+  if (urlLower.includes('patreon.com')) {
+    return { platform: 'patreon', url };
+  }
+  if (urlLower.includes('ko-fi.com')) {
+    return { platform: 'kofi', url };
+  }
+  if (urlLower.includes('buymeacoffee.com')) {
+    return { platform: 'buymeacoffee', url };
+  }
+
+  // Mastodon - check known instances (fediverse:creator meta tag handled separately)
+  if (isMastodonInstance(urlLower)) {
+    return { platform: 'mastodon', url };
   }
 
   return null;
@@ -111,7 +154,33 @@ async function fetchOfficialSiteSocialLinks(officialUrl: string): Promise<Social
 
     const html = await response.text();
 
-    // Extract all href attributes from the page
+    // 1. Parse fediverse:creator meta tag for Mastodon (most reliable method)
+    // Matches: <meta property="fediverse:creator" content="@user@server.tld">
+    const fediverseMatch = html.match(/<meta\s+[^>]*property=["']fediverse:creator["'][^>]*content=["']([^"']+)["']/i)
+      || html.match(/<meta\s+[^>]*content=["']([^"']+)["'][^>]*property=["']fediverse:creator["']/i);
+    if (fediverseMatch) {
+      const handle = fediverseMatch[1];
+      const mastodonUrl = convertMastodonHandleToUrl(handle);
+      if (mastodonUrl && !seenPlatforms.has('mastodon')) {
+        seenPlatforms.add('mastodon');
+        socialLinks.push({ platform: 'mastodon', url: mastodonUrl });
+      }
+    }
+
+    // 2. Parse rel="me" links (used for Mastodon verification)
+    // Matches: <link rel="me" href="https://mastodon.social/@user">
+    // Also matches <a rel="me" href="..."> which is common on personal sites
+    const relMeMatches = html.matchAll(/<(?:link|a)\s+[^>]*rel=["']me["'][^>]*href=["']([^"']+)["']/gi);
+    for (const match of relMeMatches) {
+      const url = match[1];
+      if (url.startsWith('http') && isMastodonInstance(url.toLowerCase()) && !seenPlatforms.has('mastodon')) {
+        seenPlatforms.add('mastodon');
+        socialLinks.push({ platform: 'mastodon', url });
+        break; // Only need one Mastodon link
+      }
+    }
+
+    // 3. Extract all href attributes from the page (existing logic, now with expanded platforms)
     const hrefMatches = html.matchAll(/href=["']([^"']+)["']/gi);
 
     for (const match of hrefMatches) {
