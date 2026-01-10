@@ -360,11 +360,11 @@ export function ResultCard({ result }: ResultCardProps) {
             </div>
           )}
 
-          {/* Artist Profiles - more compact when we have releases */}
+          {/* Music Marketplaces */}
           {categorizedPlatforms.marketplace.length > 0 && (
             <div className="space-y-2">
               <h4 className="text-xs font-medium text-text-muted uppercase tracking-wider">
-                {latestRelease ? 'Artist Profiles' : 'Music Marketplaces'}
+                Music Marketplaces
               </h4>
               {/* Preview button when no latest release but Bandcamp exists */}
               {!latestRelease && canPlay && (

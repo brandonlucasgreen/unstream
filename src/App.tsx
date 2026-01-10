@@ -242,7 +242,7 @@ function App() {
 
               <div className="grid md:grid-cols-2 gap-6">
                 {Object.entries(sourceCategories)
-                  .filter(([key]) => key !== 'social') // Social links are discovered per-artist, not a static source
+                  .filter(([key]) => key !== 'social' && key !== 'official') // Social links and official sites are discovered per-artist
                   .map(([key, category]) => (
                   <div key={key} className="source-card">
                     <h3 className="font-semibold text-text-primary mb-1">{category.name}</h3>
@@ -271,6 +271,10 @@ function App() {
                   </div>
                 ))}
               </div>
+
+              <p className="text-center text-text-muted text-sm">
+                ...plus official websites and social links
+              </p>
 
             </div>
           )}

@@ -154,7 +154,7 @@ export const sources: Record<SourceId, Source> = {
     description: 'Music database and marketplace',
     color: '#333333',
     icon: '💿',
-    category: 'official',
+    category: 'marketplace',
     hasEmbed: false,
     searchUrlTemplate: 'https://www.discogs.com/search/?q={query}&type=artist',
     homepageUrl: 'https://www.discogs.com',
@@ -254,7 +254,7 @@ export const sourceCategories = {
   marketplace: {
     name: 'Music Marketplaces',
     description: 'Buy music directly from artists',
-    sources: ['bandcamp', 'mirlo', 'ampwall', 'sonica', 'qobuz'] as SourceId[],
+    sources: ['bandcamp', 'mirlo', 'ampwall', 'sonica', 'qobuz', 'discogs'] as SourceId[],
   },
   patronage: {
     name: 'Patronage Platforms',
@@ -274,7 +274,7 @@ export const sourceCategories = {
   official: {
     name: 'Official',
     description: 'Artist websites and profiles',
-    sources: ['officialsite', 'discogs'] as SourceId[],
+    sources: ['officialsite'] as SourceId[],
   },
   social: {
     name: 'Social',
