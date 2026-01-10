@@ -254,6 +254,19 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     // Only consider exact/near-exact matches
     if (artist.score < 95) return emptyResult;
 
+    // Verify the returned artist name actually matches the query
+    // This prevents "Synthetic Ruby" from matching just "Ruby"
+    const queryNormalized = query.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const artistNormalized = artist.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const isNameMatch = queryNormalized === artistNormalized ||
+      queryNormalized.includes(artistNormalized) && artistNormalized.length > queryNormalized.length * 0.7 ||
+      artistNormalized.includes(queryNormalized) && queryNormalized.length > artistNormalized.length * 0.7;
+
+    if (!isNameMatch) {
+      console.log(`[MusicBrainz] Skipping "${artist.name}" - doesn't match query "${query}"`);
+      return emptyResult;
+    }
+
     // Wait 1.1 seconds to respect MusicBrainz rate limit (1 req/sec)
     await delay(1100);
 
