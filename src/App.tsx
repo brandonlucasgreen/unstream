@@ -20,6 +20,19 @@ function App() {
   // Track current search to handle race conditions
   const currentSearchRef = useRef<number>(0);
 
+  // Default page title
+  const defaultTitle = 'Unstream - Find music on alternative platforms';
+
+  // Update page title based on search query
+  useEffect(() => {
+    const query = searchParams.get('q');
+    if (query) {
+      document.title = `${query} on Unstream - Find music on alternative platforms`;
+    } else {
+      document.title = defaultTitle;
+    }
+  }, [searchParams]);
+
   // Handle URL parameters for deep-linked searches
   useEffect(() => {
     const urlParam = searchParams.get('url');
