@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -9,6 +9,7 @@ interface SearchBarProps {
 
 export function SearchBar({ onSearch, isLoading, initialQuery, onReset }: SearchBarProps) {
   const [query, setQuery] = useState(initialQuery || '');
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Update query when initialQuery changes (for URL resolution or reset)
   useEffect(() => {
@@ -22,11 +23,18 @@ export function SearchBar({ onSearch, isLoading, initialQuery, onReset }: Search
     }
   }, [query, onSearch]);
 
+  const handleReset = useCallback(() => {
+    setQuery('');
+    inputRef.current?.focus();
+    onReset?.();
+  }, [onReset]);
+
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-2xl mx-auto">
       <div className="flex gap-2">
         <div className="relative flex-1">
           <input
+            ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -37,7 +45,7 @@ export function SearchBar({ onSearch, isLoading, initialQuery, onReset }: Search
           {onReset && (
             <button
               type="button"
-              onClick={onReset}
+              onClick={handleReset}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-text-muted hover:text-text-secondary transition-colors"
             >
               Reset
