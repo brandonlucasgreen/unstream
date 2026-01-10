@@ -4,9 +4,10 @@ interface SearchBarProps {
   onSearch: (query: string) => void;
   isLoading: boolean;
   initialQuery?: string;
+  onReset?: () => void;
 }
 
-export function SearchBar({ onSearch, isLoading, initialQuery }: SearchBarProps) {
+export function SearchBar({ onSearch, isLoading, initialQuery, onReset }: SearchBarProps) {
   const [query, setQuery] = useState(initialQuery || '');
 
   // Update query when initialQuery changes (for URL resolution or reset)
@@ -24,14 +25,25 @@ export function SearchBar({ onSearch, isLoading, initialQuery }: SearchBarProps)
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-2xl mx-auto">
       <div className="flex gap-2">
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search for artists..."
-          className="search-input flex-1"
-          disabled={isLoading}
-        />
+        <div className="relative flex-1">
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search for artists..."
+            className="search-input w-full pr-16"
+            disabled={isLoading}
+          />
+          {onReset && (
+            <button
+              type="button"
+              onClick={onReset}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-text-muted hover:text-text-secondary transition-colors"
+            >
+              Reset
+            </button>
+          )}
+        </div>
         <button
           type="submit"
           disabled={isLoading || !query.trim()}

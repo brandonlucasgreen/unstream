@@ -181,17 +181,12 @@ function App() {
       {/* Search */}
       <main className="px-4 pb-16">
         <div className="max-w-4xl mx-auto">
-          <div className="relative">
-            <SearchBar onSearch={handleSearch} isLoading={isLoading || isResolving} initialQuery={resolvedQuery} />
-            {hasSearched && (
-              <button
-                onClick={handleGoHome}
-                className="absolute right-0 -bottom-8 text-sm text-text-muted hover:text-text-secondary transition-colors"
-              >
-                Reset
-              </button>
-            )}
-          </div>
+          <SearchBar
+            onSearch={handleSearch}
+            isLoading={isLoading || isResolving}
+            initialQuery={resolvedQuery}
+            onReset={hasSearched ? handleGoHome : undefined}
+          />
 
           {/* Tip text */}
           <p className="text-center text-text-secondary text-sm mt-4">

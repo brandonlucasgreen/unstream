@@ -1134,9 +1134,16 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   // Qobuz: client-side rendered, fetch failures common - don't treat as suspicious
   const platformsWithReliableReleaseFetching = new Set(['bandcamp']);
 
+  // Curated platforms where having a presence is strong evidence of artist identity
+  // These platforms have manual curation or verification, so matching = verified
+  const curatedPlatforms = new Set(['mirlo', 'faircamp', 'jamcoop']);
+
   for (const result of aggregated) {
     const platformsWithReleases = result.platforms.filter(p => p.latestRelease);
     const platformsWithoutReleases = result.platforms.filter(p => !p.latestRelease);
+
+    // Check if we have any curated platform matches (strong verification signal)
+    const hasCuratedPlatform = result.platforms.some(p => curatedPlatforms.has(p.sourceId));
 
     // Check for suspicious cases: platforms where we fetched releases but found none
     // (e.g., a Bandcamp page with no music is likely not the real artist)
@@ -1144,9 +1151,13 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
       p => platformsWithReliableReleaseFetching.has(p.sourceId)
     );
 
-    // If no platforms have releases, mark as unverified and keep as-is
+    // If no platforms have releases but we have a curated platform, mark as verified
     if (platformsWithReleases.length === 0) {
-      result.matchConfidence = 'unverified';
+      if (hasCuratedPlatform) {
+        result.matchConfidence = 'verified';
+      } else {
+        result.matchConfidence = 'unverified';
+      }
       disambiguated.push(result);
       continue;
     }
