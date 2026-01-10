@@ -20,9 +20,12 @@ function App() {
   // Track current search to handle race conditions
   const currentSearchRef = useRef<number>(0);
 
-  // Handle URL parameter for deep-linked searches
+  // Handle URL parameters for deep-linked searches
   useEffect(() => {
     const urlParam = searchParams.get('url');
+    const queryParam = searchParams.get('q');
+
+    // Handle streaming service URL resolution (e.g., ?url=spotify.com/artist/...)
     if (urlParam && !isResolving && !hasSearched) {
       setIsResolving(true);
       setError(null);
@@ -30,8 +33,8 @@ function App() {
       resolveArtistUrl(urlParam).then((result) => {
         if (result) {
           setResolvedQuery(result.artistName);
-          // Clear the URL param to prevent re-triggering
-          setSearchParams({}, { replace: true });
+          // Update URL to use q param instead
+          setSearchParams({ q: result.artistName }, { replace: true });
           // Trigger search with resolved artist name
           handleSearch(result.artistName);
         } else {
@@ -45,6 +48,11 @@ function App() {
         setIsResolving(false);
       });
     }
+    // Handle direct query param (e.g., ?q=radiohead)
+    else if (queryParam && !hasSearched && !isResolving) {
+      setResolvedQuery(queryParam);
+      handleSearch(queryParam);
+    }
   }, [searchParams, isResolving, hasSearched, setSearchParams]);
 
   const handleSearch = useCallback(async (query: string) => {
@@ -56,6 +64,10 @@ function App() {
     setIsEnriching(false);
     setError(null);
     setHasSearched(true);
+
+    // Update URL with search query for shareable links
+    setSearchParams({ q: query }, { replace: true });
+
     analytics.trackSearch();
 
     try {
@@ -95,7 +107,7 @@ function App() {
       }
       console.error(err);
     }
-  }, []);
+  }, [setSearchParams]);
 
   const handleGoHome = useCallback(() => {
     setResults([]);
@@ -103,7 +115,9 @@ function App() {
     setError(null);
     setResolvedQuery('');
     setIsEnriching(false);
-  }, []);
+    // Clear the URL params when going home
+    setSearchParams({}, { replace: true });
+  }, [setSearchParams]);
 
   return (
     <div className="min-h-screen">
