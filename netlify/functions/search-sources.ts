@@ -3,6 +3,7 @@ import { parse } from 'node-html-parser';
 type SourceId =
   | 'bandcamp'
   | 'mirlo'
+  | 'nina'
   | 'ampwall'
   | 'artcore'
   | 'bandwagon'
@@ -672,6 +673,65 @@ async function searchMirlo(query: string): Promise<PlatformResult[]> {
   return results;
 }
 
+// Search Nina Protocol by scraping search results
+// Nina is a Solana-based music platform with 100% revenue share for artists
+async function searchNina(query: string): Promise<Map<string, string>> {
+  const results = new Map<string, string>();
+  const searchUrl = `https://www.ninaprotocol.com/search?query=${encodeURIComponent(query)}&tab=users`;
+  const queryNormalized = normalizeForComparison(query);
+
+  try {
+    const response = await fetchWithTimeout(searchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    }, 5000);
+
+    if (!response.ok) return results;
+
+    const html = await response.text();
+
+    // Nina uses Next.js SSR with streaming - data is in __next_f.push script blocks
+    // Decode unicode escapes to parse the embedded JSON data
+    const decoded = html.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) =>
+      String.fromCharCode(parseInt(hex, 16))
+    ).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+
+    // Extract handle and displayName pairs for accounts (artists)
+    // Pattern matches: "displayName":"xxx","handle":"yyy"...,"type":"account"
+    const accountPattern = /"displayName":"([^"]+)","handle":"([^"]+)"[^}]*?"type":"account"/g;
+    let match;
+
+    while ((match = accountPattern.exec(decoded)) !== null) {
+      const [, displayName, handle] = match;
+      const normalizedHandle = normalizeForComparison(handle);
+      const normalizedDisplayName = normalizeForComparison(displayName);
+
+      // Check if query matches handle or display name
+      const isMatch = normalizedHandle === queryNormalized ||
+        normalizedDisplayName === queryNormalized ||
+        normalizedHandle.includes(queryNormalized) ||
+        normalizedDisplayName.includes(queryNormalized) ||
+        queryNormalized.includes(normalizedHandle) ||
+        queryNormalized.includes(normalizedDisplayName);
+
+      if (isMatch && !results.has(normalizedDisplayName)) {
+        results.set(normalizedDisplayName, `https://www.ninaprotocol.com/${handle}`);
+        console.log(`[Nina] Found: ${displayName} (@${handle})`);
+      }
+
+      if (results.size >= 5) break;
+    }
+  } catch (error: unknown) {
+    const err = error as { name?: string; message?: string };
+    if (err.name !== 'AbortError') {
+      console.error('Nina search error:', err.message);
+    }
+  }
+
+  return results;
+}
+
 // Faircamp webring directory cache
 let faircampDirectoryCache: Record<string, { title: string; artists: string[]; description: string }> | null = null;
 let faircampCacheTime = 0;
@@ -954,10 +1014,11 @@ function aggregateResults(allResults: PlatformResult[]): AggregatedResult[] {
 
 async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   // Search all fast platforms in parallel (MusicBrainz is loaded separately for lazy loading)
-  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, qobuzResults] = await Promise.allSettled([
+  const [bandcampResults, bandwagonResults, mirloResults, ninaResults, faircampResults, jamcoopResults, patreonResults, qobuzResults] = await Promise.allSettled([
     searchBandcamp(query),
     searchBandwagon(query),
     searchMirlo(query),
+    searchNina(query),
     searchFaircamp(query),
     searchJamcoop(query),
     searchPatreon(query),
@@ -974,6 +1035,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   }
 
   const bandwagonMatches = bandwagonResults.status === 'fulfilled' ? bandwagonResults.value : new Map<string, string>();
+  const ninaMatches = ninaResults.status === 'fulfilled' ? ninaResults.value : new Map<string, string>();
   const faircampMatches = faircampResults.status === 'fulfilled' ? faircampResults.value : new Map<string, string>();
   const jamcoopMatches = jamcoopResults.status === 'fulfilled' ? jamcoopResults.value : new Map<string, string>();
   const patreonMatches = patreonResults.status === 'fulfilled' ? patreonResults.value : new Map<string, string>();
@@ -1021,6 +1083,13 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         });
       }
 
+      if (ninaMatches.has(normalizedName)) {
+        result.platforms.push({
+          sourceId: 'nina',
+          url: ninaMatches.get(normalizedName)!,
+        });
+      }
+
       if (patreonMatches.has(normalizedName)) {
         result.platforms.push({
           sourceId: 'patreon',
@@ -1058,6 +1127,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
 
   // Track which platform matches were used so we can create entries for unmatched ones
   const usedQobuzMatches = new Set<string>();
+  const usedNinaMatches = new Set<string>();
   const usedPatreonMatches = new Set<string>();
   const usedBandwagonMatches = new Set<string>();
   const usedFaircampMatches = new Set<string>();
@@ -1074,6 +1144,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
           (qobuzName.startsWith(normalizedName) && /^\d+$/.test(qobuzName.slice(normalizedName.length)));
       if (isVariation) usedQobuzMatches.add(qobuzName);
     }
+    if (ninaMatches.has(normalizedName)) usedNinaMatches.add(normalizedName);
     if (patreonMatches.has(normalizedName)) usedPatreonMatches.add(normalizedName);
     if (bandwagonMatches.has(normalizedName)) usedBandwagonMatches.add(normalizedName);
     if (faircampMatches.has(normalizedName)) usedFaircampMatches.add(normalizedName);
@@ -1100,6 +1171,10 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     ];
 
     // Check if this Qobuz artist also has matches on other platforms
+    if (ninaMatches.has(normalizedName) && !usedNinaMatches.has(normalizedName)) {
+      platforms.push({ sourceId: 'nina', url: ninaMatches.get(normalizedName)! });
+      usedNinaMatches.add(normalizedName);
+    }
     if (patreonMatches.has(normalizedName) && !usedPatreonMatches.has(normalizedName)) {
       platforms.push({ sourceId: 'patreon', url: patreonMatches.get(normalizedName)! });
       usedPatreonMatches.add(normalizedName);
@@ -1131,6 +1206,52 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
 
     aggregated.push(newResult);
     console.log(`[Qobuz-only] Created result for "${displayName}" from Qobuz match`);
+  }
+
+  // Create new results for Nina matches that weren't added to existing results
+  // This handles artists who are on Nina but not on Bandcamp/Mirlo/Qobuz
+  for (const [normalizedName, url] of ninaMatches) {
+    if (usedNinaMatches.has(normalizedName)) continue;
+
+    // Extract display name from URL
+    const handleMatch = url.match(/ninaprotocol\.com\/([^/]+)/);
+    const handle = handleMatch ? handleMatch[1] : normalizedName;
+    const displayName = handle.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+    const platforms: AggregatedResult['platforms'] = [
+      { sourceId: 'nina', url },
+    ];
+
+    // Check if this Nina artist also has matches on other platforms
+    if (patreonMatches.has(normalizedName) && !usedPatreonMatches.has(normalizedName)) {
+      platforms.push({ sourceId: 'patreon', url: patreonMatches.get(normalizedName)! });
+      usedPatreonMatches.add(normalizedName);
+    }
+    if (bandwagonMatches.has(normalizedName) && !usedBandwagonMatches.has(normalizedName)) {
+      platforms.push({ sourceId: 'bandwagon', url: bandwagonMatches.get(normalizedName)! });
+      usedBandwagonMatches.add(normalizedName);
+    }
+    if (faircampMatches.has(normalizedName) && !usedFaircampMatches.has(normalizedName)) {
+      platforms.push({ sourceId: 'faircamp', url: faircampMatches.get(normalizedName)! });
+      usedFaircampMatches.add(normalizedName);
+    }
+
+    // Add search-only platforms
+    platforms.push(
+      { sourceId: 'ampwall', url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(displayName)}` },
+      { sourceId: 'kofi', url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(displayName)}` },
+      { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
+    );
+
+    const newResult: AggregatedResult = {
+      id: `nina-${normalizedName}`,
+      name: displayName,
+      type: 'artist',
+      platforms,
+    };
+
+    aggregated.push(newResult);
+    console.log(`[Nina-only] Created result for "${displayName}" from Nina match`);
   }
 
   // Fetch latest releases AND all release titles for Bandcamp and Qobuz artist pages in parallel
