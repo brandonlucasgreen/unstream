@@ -195,9 +195,10 @@ struct SavedPlatformBadge: View {
     let platform: SavedPlatform
 
     // Social platforms show only icons (no text) to reduce clutter
+    private let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon"]
+
     private var isSocialPlatform: Bool {
-        let socialIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon"]
-        return socialIds.contains(platform.sourceId)
+        socialPlatformIds.contains(platform.sourceId)
     }
 
     private var platformColor: Color {
@@ -212,12 +213,10 @@ struct SavedPlatformBadge: View {
     var body: some View {
         Button(action: openURL) {
             if isSocialPlatform {
-                // Social platforms: icon only
-                Image(systemName: platform.icon)
-                    .font(.system(size: 14))
+                // Social platforms: brand icon only (circular)
+                BrandIcon(platform: platform.sourceId, size: 14, color: platformColor)
                     .frame(width: 28, height: 28)
                     .background(platformColor.opacity(0.15))
-                    .foregroundColor(platformColor)
                     .cornerRadius(14)
             } else {
                 // Regular platforms: icon + text

@@ -3,23 +3,32 @@ import SwiftUI
 struct SocialIconButton: View {
     let result: PlatformResult
 
+    // Social platforms that have brand icons
+    private let brandIconPlatforms: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon"]
+
     var body: some View {
         Button(action: openPlatform) {
-            Image(systemName: result.icon)
-                .font(.system(size: 14))
-                .frame(width: 28, height: 28)
-                .background(iconColor.opacity(0.15))
-                .foregroundColor(iconColor)
-                .cornerRadius(14)
+            Group {
+                if brandIconPlatforms.contains(result.sourceId) {
+                    BrandIcon(platform: result.sourceId, size: 14, color: iconColor)
+                } else {
+                    Image(systemName: result.icon)
+                        .font(.system(size: 14))
+                        .foregroundColor(iconColor)
+                }
+            }
+            .frame(width: 28, height: 28)
+            .background(iconColor.opacity(0.15))
+            .cornerRadius(14)
         }
         .buttonStyle(.plain)
         .help("Open \(result.displayName)")
     }
 
     private var iconColor: Color {
-        // Use light gray for black icons (better visibility on dark backgrounds)
+        // Use light gray for black/dark icons (better visibility on dark backgrounds)
         let hex = result.color
-        if hex == "#000000" {
+        if hex == "#000000" || hex == "#E0E0E0" {
             return Color(white: 0.7)
         }
         return Color(hex: hex) ?? .blue
