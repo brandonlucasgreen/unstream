@@ -9,6 +9,14 @@ interface SocialLink {
   url: string;
 }
 
+// Discovered music platform types (found when scraping official websites)
+type DiscoveredPlatform = 'ampwall' | 'artcore';
+
+interface DiscoveredPlatformLink {
+  platform: DiscoveredPlatform;
+  url: string;
+}
+
 // MusicBrainz search response for lazy loading
 interface MusicBrainzSearchResponse {
   query: string;
@@ -17,6 +25,7 @@ interface MusicBrainzSearchResponse {
   discogsUrl: string | null;
   hasPre2005Release: boolean;
   socialLinks: SocialLink[];
+  discoveredPlatforms: DiscoveredPlatformLink[];
 }
 
 // Known Mastodon/Fediverse instances (non-exhaustive, but covers popular ones)
@@ -176,16 +185,19 @@ async function fetchDiscogsSocialLinks(discogsUrl: string): Promise<SocialLink[]
   return socialLinks;
 }
 
-// Result type for official site scraping (includes discovered Linktree URL)
+// Result type for official site scraping (includes discovered Linktree URL and music platforms)
 interface OfficialSiteResult {
   socialLinks: SocialLink[];
   linktreeUrl: string | null;
+  discoveredPlatforms: DiscoveredPlatformLink[];
 }
 
 // Fetch social links from an artist's official website
 async function fetchOfficialSiteSocialLinks(officialUrl: string): Promise<OfficialSiteResult> {
   const socialLinks: SocialLink[] = [];
   const seenPlatforms = new Set<SocialPlatform>();
+  const discoveredPlatforms: DiscoveredPlatformLink[] = [];
+  const seenDiscoveredPlatforms = new Set<DiscoveredPlatform>();
   let linktreeUrl: string | null = null;
 
   try {
@@ -198,7 +210,7 @@ async function fetchOfficialSiteSocialLinks(officialUrl: string): Promise<Offici
 
     if (!response.ok) {
       console.log('Official site fetch failed:', response.status);
-      return { socialLinks, linktreeUrl };
+      return { socialLinks, linktreeUrl, discoveredPlatforms };
     }
 
     const html = await response.text();
@@ -244,6 +256,22 @@ async function fetchOfficialSiteSocialLinks(officialUrl: string): Promise<Offici
         continue;
       }
 
+      // Check for Ampwall artist page
+      if (url.includes('ampwall.com') && !seenDiscoveredPlatforms.has('ampwall')) {
+        seenDiscoveredPlatforms.add('ampwall');
+        discoveredPlatforms.push({ platform: 'ampwall', url });
+        console.log(`[Official Site] Found Ampwall: ${url}`);
+        continue;
+      }
+
+      // Check for Artcore artist page
+      if (url.includes('artcore.com') && !seenDiscoveredPlatforms.has('artcore')) {
+        seenDiscoveredPlatforms.add('artcore');
+        discoveredPlatforms.push({ platform: 'artcore', url });
+        console.log(`[Official Site] Found Artcore: ${url}`);
+        continue;
+      }
+
       const socialLink = parseSocialUrl(url);
       // Only add one link per platform (first one wins)
       if (socialLink && !seenPlatforms.has(socialLink.platform)) {
@@ -256,7 +284,7 @@ async function fetchOfficialSiteSocialLinks(officialUrl: string): Promise<Offici
     console.error('Official site fetch error:', err.message);
   }
 
-  return { socialLinks, linktreeUrl };
+  return { socialLinks, linktreeUrl, discoveredPlatforms };
 }
 
 // Merge social links from multiple sources, deduplicating by platform
@@ -285,6 +313,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     discogsUrl: null,
     hasPre2005Release: false,
     socialLinks: [],
+    discoveredPlatforms: [],
   };
 
   try {
@@ -424,7 +453,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     // Fetch additional social links from Discogs and official site in parallel
     const [discogsSocialLinks, officialSiteResult] = await Promise.all([
       discogsUrl ? fetchDiscogsSocialLinks(discogsUrl) : Promise.resolve([]),
-      officialUrl ? fetchOfficialSiteSocialLinks(officialUrl) : Promise.resolve({ socialLinks: [], linktreeUrl: null }),
+      officialUrl ? fetchOfficialSiteSocialLinks(officialUrl) : Promise.resolve({ socialLinks: [], linktreeUrl: null, discoveredPlatforms: [] }),
     ]);
 
     // If we found a Linktree URL from MusicBrainz or official site, scrape it for additional links
@@ -445,6 +474,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       discogsUrl,
       hasPre2005Release,
       socialLinks: allSocialLinks,
+      discoveredPlatforms: officialSiteResult.discoveredPlatforms,
     };
   } catch (error: unknown) {
     const err = error as { name?: string; message?: string };
@@ -495,6 +525,7 @@ export async function handler(event: { queryStringParameters?: Record<string, st
         discogsUrl: null,
         hasPre2005Release: false,
         socialLinks: [],
+        discoveredPlatforms: [],
       }),
     };
   }

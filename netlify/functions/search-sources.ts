@@ -4,6 +4,7 @@ type SourceId =
   | 'bandcamp'
   | 'mirlo'
   | 'ampwall'
+  | 'artcore'
   | 'bandwagon'
   | 'faircamp'
   | 'jamcoop'
