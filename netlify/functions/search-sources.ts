@@ -1163,38 +1163,92 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     }
 
     // If we have releases from some platforms, but Bandcamp specifically has no releases,
-    // split Bandcamp out as unverified (Bandcamp scraping is reliable, so empty = suspicious)
+    // check if release titles match before splitting. Only split if we're confident they're different artists.
     // Qobuz without releases is NOT suspicious (client-rendered, fetch failures common)
     if (suspiciousPlatforms.length > 0 && platformsWithReleases.length > 0) {
-      console.log(`[Disambiguation] Splitting "${result.name}": ${suspiciousPlatforms.map(p => p.sourceId).join(', ')} have no releases`);
+      // Before splitting, check if any release titles match between platforms
+      // If releases match, keep together even if latestRelease is missing from one platform
+      const allReleaseTitlesFromVerified = new Set<string>();
+      for (const p of platformsWithReleases) {
+        if (p.allReleaseTitles) {
+          for (const title of p.allReleaseTitles) {
+            allReleaseTitlesFromVerified.add(title);
+          }
+        }
+        // Also add the latest release title if available
+        if (p.latestRelease?.title) {
+          allReleaseTitlesFromVerified.add(normalizeForComparison(p.latestRelease.title));
+        }
+      }
 
-      // Create main verified result with platforms that have releases + non-suspicious platforms
-      const verifiedImageUrl = platformsWithReleases.find(p => p.latestRelease?.imageUrl)?.latestRelease?.imageUrl;
-      const verifiedResult: AggregatedResult = {
-        id: result.id,
-        name: result.name,
-        artist: result.artist,
-        type: result.type,
-        imageUrl: verifiedImageUrl || result.imageUrl,
-        platforms: [...platformsWithReleases, ...platformsWithoutReleases.filter(p => !platformsWithReliableReleaseFetching.has(p.sourceId))],
-        matchConfidence: 'verified',
-      };
-      disambiguated.push(verifiedResult);
-
-      // Create separate unverified results for suspicious platforms (Bandcamp with no releases)
+      // Check suspicious platforms for matching releases
+      const trulyUnverified: typeof suspiciousPlatforms = [];
       for (const platform of suspiciousPlatforms) {
-        const unverifiedResult: AggregatedResult = {
-          id: `${result.id}-${platform.sourceId}`,
+        let hasMatchingRelease = false;
+
+        // Check allReleaseTitles from the suspicious platform
+        if (platform.allReleaseTitles && platform.allReleaseTitles.length > 0) {
+          for (const title of platform.allReleaseTitles) {
+            if (allReleaseTitlesFromVerified.has(title)) {
+              hasMatchingRelease = true;
+              console.log(`[Disambiguation] "${result.name}" - ${platform.sourceId} has matching release: ${title}`);
+              break;
+            }
+          }
+        }
+
+        if (hasMatchingRelease) {
+          // Releases match - add to verified platforms, don't split
+          platformsWithReleases.push(platform);
+        } else if (platform.allReleaseTitles && platform.allReleaseTitles.length > 0) {
+          // Has releases but none match - truly suspicious, split it
+          trulyUnverified.push(platform);
+        } else {
+          // No release data available - could be scraping failure, keep with verified
+          // (Name match is sufficient evidence when we can't compare releases)
+          console.log(`[Disambiguation] "${result.name}" - ${platform.sourceId} has no release data, keeping with verified result`);
+          platformsWithReleases.push(platform);
+        }
+      }
+
+      // Only split if we have truly unverified platforms (releases don't match)
+      if (trulyUnverified.length > 0) {
+        console.log(`[Disambiguation] Splitting "${result.name}": ${trulyUnverified.map(p => p.sourceId).join(', ')} have non-matching releases`);
+
+        // Create main verified result
+        const verifiedImageUrl = platformsWithReleases.find(p => p.latestRelease?.imageUrl)?.latestRelease?.imageUrl;
+        const verifiedResult: AggregatedResult = {
+          id: result.id,
           name: result.name,
           artist: result.artist,
           type: result.type,
-          imageUrl: result.imageUrl,
-          platforms: [platform],
-          matchConfidence: 'unverified',
+          imageUrl: verifiedImageUrl || result.imageUrl,
+          platforms: [...platformsWithReleases, ...platformsWithoutReleases.filter(p => !platformsWithReliableReleaseFetching.has(p.sourceId))],
+          matchConfidence: 'verified',
         };
-        disambiguated.push(unverifiedResult);
+        disambiguated.push(verifiedResult);
+
+        // Create separate unverified results for platforms with non-matching releases
+        for (const platform of trulyUnverified) {
+          const unverifiedResult: AggregatedResult = {
+            id: `${result.id}-${platform.sourceId}`,
+            name: result.name,
+            artist: result.artist,
+            type: result.type,
+            imageUrl: result.imageUrl,
+            platforms: [platform],
+            matchConfidence: 'unverified',
+          };
+          disambiguated.push(unverifiedResult);
+        }
+        continue;
+      } else {
+        // All suspicious platforms verified through release matching or kept due to no data
+        result.platforms = [...platformsWithReleases, ...platformsWithoutReleases.filter(p => !platformsWithReliableReleaseFetching.has(p.sourceId))];
+        result.matchConfidence = 'verified';
+        disambiguated.push(result);
+        continue;
       }
-      continue;
     }
 
     // If only one platform has releases and no suspicious platforms, keep as verified
