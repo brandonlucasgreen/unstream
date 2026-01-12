@@ -233,17 +233,6 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: '',
     homepageUrl: 'https://bsky.app',
   },
-  twitter: {
-    id: 'twitter',
-    name: 'X',
-    description: 'Social network',
-    color: '#E0E0E0',
-    icon: 'twitter',
-    category: 'social',
-    hasEmbed: false,
-    searchUrlTemplate: '',
-    homepageUrl: 'https://x.com',
-  },
   mastodon: {
     id: 'mastodon',
     name: 'Mastodon',
@@ -286,7 +275,7 @@ export const sourceCategories = {
   social: {
     name: 'Social',
     description: 'Artist social media profiles',
-    sources: ['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'twitter', 'mastodon'] as SourceId[],
+    sources: ['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'mastodon'] as SourceId[],
   },
 };
 
@@ -526,7 +515,7 @@ export function mergeWithMusicBrainzData(
     // Re-sort platforms: verified first, search-only in middle, official/library, then social last
     const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee']);
     const officialPlatforms = new Set(['officialsite', 'discogs', 'hoopla', 'freegal']);
-    const socialPlatforms = new Set(['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'twitter', 'mastodon']);
+    const socialPlatforms = new Set(['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'mastodon']);
     newPlatforms.sort((a, b) => {
       const aIsSocial = socialPlatforms.has(a.sourceId);
       const bIsSocial = socialPlatforms.has(b.sourceId);
@@ -535,7 +524,7 @@ export function mergeWithMusicBrainzData(
       if (!aIsSocial && bIsSocial) return -1;
       if (aIsSocial && bIsSocial) {
         // Order social platforms consistently
-        const order = ['instagram', 'tiktok', 'youtube', 'threads', 'bluesky', 'mastodon', 'facebook', 'twitter'];
+        const order = ['instagram', 'tiktok', 'youtube', 'threads', 'bluesky', 'mastodon', 'facebook'];
         return order.indexOf(a.sourceId) - order.indexOf(b.sourceId);
       }
 

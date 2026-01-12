@@ -75,7 +75,6 @@ struct SavedPlatform: Codable, Identifiable {
             "youtube": "YouTube",
             "threads": "Threads",
             "bluesky": "Bluesky",
-            "twitter": "X",
             "mastodon": "Mastodon"
         ]
         return names[sourceId] ?? sourceId.capitalized
@@ -104,7 +103,6 @@ struct SavedPlatform: Codable, Identifiable {
             "youtube": "play.rectangle.fill",
             "threads": "at",
             "bluesky": "cloud",
-            "twitter": "bird",
             "mastodon": "elephant"
         ]
         return icons[sourceId] ?? "music.note"
@@ -129,11 +127,10 @@ struct SavedPlatform: Codable, Identifiable {
             // Social platforms
             "instagram": "#E4405F",
             "facebook": "#1877F2",
-            "tiktok": "#000000",
+            "tiktok": "#E0E0E0",
             "youtube": "#FF0000",
-            "threads": "#000000",
+            "threads": "#E0E0E0",
             "bluesky": "#0085FF",
-            "twitter": "#000000",
             "mastodon": "#6364FF"
         ]
         return colors[sourceId] ?? "#888888"

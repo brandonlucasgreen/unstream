@@ -20,7 +20,6 @@ export type SourceId =
   | 'youtube'
   | 'threads'
   | 'bluesky'
-  | 'twitter'
   | 'mastodon';
 
 export interface Source {
@@ -75,7 +74,7 @@ export interface SearchResponse {
 
 // Social link from MusicBrainz
 export interface SocialLink {
-  platform: 'instagram' | 'facebook' | 'tiktok' | 'youtube' | 'threads' | 'bluesky' | 'twitter' | 'mastodon' | 'patreon' | 'kofi' | 'buymeacoffee';
+  platform: 'instagram' | 'facebook' | 'tiktok' | 'youtube' | 'threads' | 'bluesky' | 'mastodon' | 'patreon' | 'kofi' | 'buymeacoffee';
   url: string;
 }
 

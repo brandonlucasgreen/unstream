@@ -194,19 +194,45 @@ struct SupportEntryView: View {
 struct SavedPlatformBadge: View {
     let platform: SavedPlatform
 
+    // Social platforms show only icons (no text) to reduce clutter
+    private var isSocialPlatform: Bool {
+        let socialIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon"]
+        return socialIds.contains(platform.sourceId)
+    }
+
+    private var platformColor: Color {
+        // Use light gray for black/dark icons (better visibility on dark backgrounds)
+        let hex = platform.color
+        if hex == "#000000" || hex == "#E0E0E0" {
+            return Color(white: 0.7)
+        }
+        return Color(hex: hex) ?? .blue
+    }
+
     var body: some View {
         Button(action: openURL) {
-            HStack(spacing: 4) {
+            if isSocialPlatform {
+                // Social platforms: icon only
                 Image(systemName: platform.icon)
-                    .font(.system(size: 10))
-                Text(platform.displayName)
-                    .font(.system(size: 11, weight: .medium))
+                    .font(.system(size: 14))
+                    .frame(width: 28, height: 28)
+                    .background(platformColor.opacity(0.15))
+                    .foregroundColor(platformColor)
+                    .cornerRadius(14)
+            } else {
+                // Regular platforms: icon + text
+                HStack(spacing: 4) {
+                    Image(systemName: platform.icon)
+                        .font(.system(size: 10))
+                    Text(platform.displayName)
+                        .font(.system(size: 11, weight: .medium))
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(platformColor.opacity(0.15))
+                .foregroundColor(platformColor)
+                .cornerRadius(6)
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background((Color(hex: platform.color) ?? .blue).opacity(0.15))
-            .foregroundColor(Color(hex: platform.color) ?? .blue)
-            .cornerRadius(6)
         }
         .buttonStyle(.plain)
         .help("Open \(platform.displayName)")

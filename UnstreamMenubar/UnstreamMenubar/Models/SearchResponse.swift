@@ -120,13 +120,12 @@ private let platformConfig: [String: PlatformConfig] = [
     // Social platforms
     "instagram": PlatformConfig(name: "Instagram", icon: "camera", color: "#E4405F", searchOnly: false),
     "facebook": PlatformConfig(name: "Facebook", icon: "person.2", color: "#1877F2", searchOnly: false),
-    "tiktok": PlatformConfig(name: "TikTok", icon: "music.note", color: "#000000", searchOnly: false),
+    "tiktok": PlatformConfig(name: "TikTok", icon: "music.note", color: "#E0E0E0", searchOnly: false),
     "youtube": PlatformConfig(name: "YouTube", icon: "play.rectangle", color: "#FF0000", searchOnly: false),
-    "threads": PlatformConfig(name: "Threads", icon: "at", color: "#000000", searchOnly: false),
+    "threads": PlatformConfig(name: "Threads", icon: "at", color: "#E0E0E0", searchOnly: false),
     "bluesky": PlatformConfig(name: "Bluesky", icon: "cloud", color: "#0085FF", searchOnly: false),
-    "twitter": PlatformConfig(name: "X", icon: "xmark", color: "#000000", searchOnly: false),
     "mastodon": PlatformConfig(name: "Mastodon", icon: "bubble.left.and.bubble.right", color: "#858AFA", searchOnly: false),
 ]
 
 // Social platform IDs for filtering
-let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "twitter", "mastodon"]
+let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon"]

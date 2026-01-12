@@ -1,7 +1,7 @@
 // Social platform types
 type SocialPlatform =
   | 'instagram' | 'facebook' | 'tiktok' | 'youtube'
-  | 'threads' | 'bluesky' | 'twitter'
+  | 'threads' | 'bluesky'
   | 'mastodon' | 'patreon' | 'kofi' | 'buymeacoffee';
 
 interface SocialLink {
@@ -65,10 +65,6 @@ function parseSocialUrl(url: string): SocialLink | null {
   if (urlLower.includes('bsky.app') || urlLower.includes('bluesky')) {
     return { platform: 'bluesky', url };
   }
-  if (urlLower.includes('twitter.com') || urlLower.includes('x.com')) {
-    return { platform: 'twitter', url };
-  }
-
   // Patronage platforms
   if (urlLower.includes('patreon.com')) {
     return { platform: 'patreon', url };

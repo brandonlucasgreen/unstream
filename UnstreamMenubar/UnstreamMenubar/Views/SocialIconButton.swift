@@ -45,8 +45,8 @@ struct SocialIconButton: View {
             latestRelease: nil
         ))
         SocialIconButton(result: PlatformResult(
-            sourceId: "twitter",
-            url: "https://x.com/test",
+            sourceId: "tiktok",
+            url: "https://tiktok.com/@test",
             latestRelease: nil
         ))
     }
