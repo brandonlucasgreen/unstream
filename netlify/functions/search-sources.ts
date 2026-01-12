@@ -1190,6 +1190,29 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     new Promise(resolve => setTimeout(resolve, 4000)),
   ]);
 
+  // Prefer Bandcamp over Qobuz for featured release when both have the same release
+  // Bandcamp offers preview and better artist payouts
+  for (const result of aggregated) {
+    const bandcampPlatform = result.platforms.find(p => p.sourceId === 'bandcamp');
+    const qobuzPlatform = result.platforms.find(p => p.sourceId === 'qobuz');
+
+    if (bandcampPlatform?.latestRelease && qobuzPlatform?.latestRelease) {
+      const bandcampTitle = normalizeForComparison(bandcampPlatform.latestRelease.title);
+      const qobuzTitle = normalizeForComparison(qobuzPlatform.latestRelease.title);
+
+      // Check if releases match (exact or one contains the other for partial matches)
+      const releasesMatch = bandcampTitle === qobuzTitle ||
+        bandcampTitle.includes(qobuzTitle) ||
+        qobuzTitle.includes(bandcampTitle);
+
+      if (releasesMatch) {
+        // Clear Qobuz's latestRelease so Bandcamp is featured
+        console.log(`[Release Priority] Preferring Bandcamp over Qobuz for "${result.name}" - "${bandcampPlatform.latestRelease.title}"`);
+        delete qobuzPlatform.latestRelease;
+      }
+    }
+  }
+
   // Clean up dead Qobuz links: remove Qobuz platforms that have no releases
   // These are placeholder/redirect pages that have no actual content
   for (const result of aggregated) {
