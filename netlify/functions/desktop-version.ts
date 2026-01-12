@@ -2,9 +2,9 @@ import type { Handler } from '@netlify/functions';
 
 // Desktop app version info - update this when releasing new versions
 const VERSION_INFO = {
-  latestVersion: '1.3.0',
+  latestVersion: '1.4.0',
   downloadUrl: 'https://github.com/brandonlucasgreen/unstream/releases/latest',
-  releaseNotes: 'ListenBrainz scrobbling, refresh saved artists, UI improvements',
+  releaseNotes: 'Brand icons for social platforms, Jam.coop support, Mastodon direct links, improved artist disambiguation',
 };
 
 export const handler: Handler = async (event) => {
