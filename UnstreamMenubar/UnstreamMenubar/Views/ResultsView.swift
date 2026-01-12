@@ -73,6 +73,21 @@ struct ArtistResultView: View {
                 }
             }
 
+            // Social platforms section (show before "Also try")
+            if !artist.socialPlatforms.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Social:")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    HStack(spacing: 8) {
+                        ForEach(artist.socialPlatforms) { platform in
+                            SocialIconButton(result: platform)
+                        }
+                    }
+                }
+            }
+
             // Search-only platforms section
             if !artist.searchOnlyPlatforms.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
@@ -90,26 +105,11 @@ struct ArtistResultView: View {
                 }
             }
 
-            // Social platforms section
-            if !artist.socialPlatforms.isEmpty {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Social:")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-
-                    HStack(spacing: 8) {
-                        ForEach(artist.socialPlatforms) { platform in
-                            SocialIconButton(result: platform)
-                        }
-                    }
-                }
-            }
-
-            // Open in Unstream button
+            // Open in browser button
             Button(action: { openInUnstream(artist: artist.name) }) {
                 HStack {
                     Image(systemName: "arrow.up.right.square")
-                    Text("Open in Unstream")
+                    Text("Open in browser")
                 }
                 .font(.caption)
                 .frame(maxWidth: .infinity)
@@ -137,7 +137,7 @@ struct ArtistResultView: View {
 
     private func openInUnstream(artist: String) {
         guard let encodedQuery = artist.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "https://unstream.stream/?search=\(encodedQuery)") else {
+              let url = URL(string: "https://unstream.stream/?q=\(encodedQuery)") else {
             return
         }
         NSWorkspace.shared.open(url)

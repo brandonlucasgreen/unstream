@@ -22,6 +22,8 @@
 		A153FE6C2F0957B90075E5F9 /* ProUpgradeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A153FE652F0957B90075E5F9 /* ProUpgradeView.swift */; };
 		A153FE6D2F0957B90075E5F9 /* SupportEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A153FE662F0957B90075E5F9 /* SupportEntry.swift */; };
 		A153FE6E2F0957B90075E5F9 /* LicenseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A153FE642F0957B90075E5F9 /* LicenseManager.swift */; };
+		A198C09B2F133CA0002CFCCA /* ListenBrainzService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A198C0992F133CA0002CFCCA /* ListenBrainzService.swift */; };
+		A198C09C2F133CA0002CFCCA /* ScrobbleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A198C09A2F133CA0002CFCCA /* ScrobbleManager.swift */; };
 		A3D69F6D151B5BA91BCAD5AF /* NowPlayingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16FEC357D5AF596E6A3C9FF2 /* NowPlayingView.swift */; };
 		C0107F7F16CE5F7D50A0D8BA /* PlatformBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D9B657DD1234685545F8B9 /* PlatformBadge.swift */; };
 		D1A2B3C4E5F6071829304050 /* SocialIconButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2B3C4D5F6071829304050A1 /* SocialIconButton.swift */; };
@@ -47,15 +49,17 @@
 		A153FE662F0957B90075E5F9 /* SupportEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupportEntry.swift; path = UnstreamMenubar/Models/SupportEntry.swift; sourceTree = "<group>"; };
 		A153FE672F0957B90075E5F9 /* SupportListManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupportListManager.swift; path = UnstreamMenubar/SupportListManager.swift; sourceTree = "<group>"; };
 		A153FE682F0957B90075E5F9 /* SupportListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupportListView.swift; path = UnstreamMenubar/Views/SupportListView.swift; sourceTree = "<group>"; };
+		A198C0992F133CA0002CFCCA /* ListenBrainzService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenBrainzService.swift; sourceTree = "<group>"; };
+		A198C09A2F133CA0002CFCCA /* ScrobbleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrobbleManager.swift; sourceTree = "<group>"; };
 		A4D9D8A335FE3D07CE9851A3 /* UnstreamMenubar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = UnstreamMenubar.entitlements; sourceTree = "<group>"; };
 		ADC98F9EF3A0EFF8CE0F6094 /* NowPlaying.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlaying.swift; sourceTree = "<group>"; };
 		B3E0ED8CFD58286DB2B51054 /* ResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsView.swift; sourceTree = "<group>"; };
-		E2B3C4D5F6071829304050A1 /* SocialIconButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialIconButton.swift; sourceTree = "<group>"; };
 		C7D9B657DD1234685545F8B9 /* PlatformBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformBadge.swift; sourceTree = "<group>"; };
 		C878B05B34EE2C18FCEEB68A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		D30C5DE6E6DA5D1F45AC53F5 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		D337F593A52D74DDB206DFEB /* UnstreamAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnstreamAPI.swift; sourceTree = "<group>"; };
 		D70033B2F693E68D6CEC84B3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E2B3C4D5F6071829304050A1 /* SocialIconButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialIconButton.swift; sourceTree = "<group>"; };
 		F1D00195134C51491855D73C /* Unstream.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Unstream.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -63,6 +67,8 @@
 		256BC1D3A7EF454594FB982C = {
 			isa = PBXGroup;
 			children = (
+				A198C0992F133CA0002CFCCA /* ListenBrainzService.swift */,
+				A198C09A2F133CA0002CFCCA /* ScrobbleManager.swift */,
 				A153FE632F0957B90075E5F9 /* LicenseInfo.swift */,
 				A153FE642F0957B90075E5F9 /* LicenseManager.swift */,
 				A153FE652F0957B90075E5F9 /* ProUpgradeView.swift */,
@@ -214,6 +220,8 @@
 				6A9BDF2C38C66D877E876532 /* UnstreamAPI.swift in Sources */,
 				63F41D587072FABF9A3BCDE8 /* UnstreamMenubarApp.swift in Sources */,
 				6D765D2F8868E2D249B2F4D1 /* UpdateChecker.swift in Sources */,
+				A198C09B2F133CA0002CFCCA /* ListenBrainzService.swift in Sources */,
+				A198C09C2F133CA0002CFCCA /* ScrobbleManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

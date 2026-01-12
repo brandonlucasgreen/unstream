@@ -1,6 +1,7 @@
 import SwiftUI
 import Combine
 import AppKit
+import ServiceManagement
 
 // Welcome window launcher - shows ONLY on first launch, with multiple fallback mechanisms
 // to ensure 100% reliability
@@ -81,6 +82,17 @@ class WelcomeWindowLauncher {
     func dismiss() {
         // Mark as launched so it never shows again
         UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
+
+        // Enable launch at login by default for new users
+        if !UserDefaults.standard.bool(forKey: "hasSetLaunchAtLoginDefault") {
+            UserDefaults.standard.set(true, forKey: "hasSetLaunchAtLoginDefault")
+            do {
+                try SMAppService.mainApp.register()
+            } catch {
+                print("[WelcomeLauncher] Failed to enable launch at login: \(error)")
+            }
+        }
+
         window?.close()
         window = nil
     }
@@ -96,6 +108,9 @@ struct UnstreamMenubarApp: App {
     // Initialize welcome launcher - must keep reference to prevent deallocation
     private let welcomeLauncher = WelcomeWindowLauncher.shared
 
+    // Scrobble manager for ListenBrainz integration
+    private let scrobbleManager = ScrobbleManager.shared
+
     var body: some Scene {
         MenuBarExtra {
             PopoverView()
@@ -106,6 +121,8 @@ struct UnstreamMenubarApp: App {
                     Task {
                         await appState.updateNowPlaying(nowPlaying)
                     }
+                    // Notify scrobble manager of track changes
+                    scrobbleManager.trackChanged(to: nowPlaying)
                 }
         } label: {
             Image("MenuBarIcon")

@@ -5,6 +5,9 @@ import SwiftUI
 class SupportListManager: ObservableObject {
     @Published private(set) var entries: [SupportEntry] = []
     @Published var searchQuery: String = ""
+    @Published private(set) var refreshingEntryIds: Set<UUID> = []
+
+    private let api = UnstreamAPI()
 
     var filteredEntries: [SupportEntry] {
         guard !searchQuery.isEmpty else { return entries }
@@ -60,6 +63,74 @@ class SupportListManager: ObservableObject {
             entries.insert(entry, at: 0)
         }
         saveEntries()
+    }
+
+    func isRefreshing(_ entry: SupportEntry) -> Bool {
+        refreshingEntryIds.contains(entry.id)
+    }
+
+    func refreshEntry(_ entry: SupportEntry) async {
+        // Mark as refreshing
+        refreshingEntryIds.insert(entry.id)
+
+        do {
+            // Fetch fresh data from API
+            let (results, hasPendingEnrichment) = try await api.searchArtist(entry.artistName)
+
+            // Find the matching artist result
+            var matchingResult: ArtistResult? = results.first { result in
+                result.name.lowercased() == entry.artistName.lowercased()
+            }
+
+            // If no exact match, use the first artist result
+            if matchingResult == nil {
+                matchingResult = results.first { $0.type == "artist" }
+            }
+
+            // Enrich with MusicBrainz data if available
+            if hasPendingEnrichment, let mbData = try await api.fetchMusicBrainzData(entry.artistName) {
+                let enrichedResults = await api.mergeWithMusicBrainzData(results: results, mbData: mbData)
+                matchingResult = enrichedResults.first { result in
+                    result.name.lowercased() == entry.artistName.lowercased()
+                } ?? enrichedResults.first { $0.type == "artist" }
+            }
+
+            // Update the entry with new platforms
+            if let artistResult = matchingResult {
+                // Collect all platforms with URLs (verified + social)
+                var allPlatforms: [SavedPlatform] = []
+                for platform in artistResult.verifiedPlatforms {
+                    if let url = platform.url {
+                        allPlatforms.append(SavedPlatform(sourceId: platform.sourceId, url: url))
+                    }
+                }
+                for platform in artistResult.socialPlatforms {
+                    if let url = platform.url {
+                        allPlatforms.append(SavedPlatform(sourceId: platform.sourceId, url: url))
+                    }
+                }
+
+                let updatedEntry = SupportEntry(
+                    id: entry.id,
+                    artistName: entry.artistName,
+                    imageUrl: artistResult.imageUrl ?? entry.imageUrl,
+                    platforms: allPlatforms,
+                    dateAdded: entry.dateAdded
+                )
+
+                // Replace the entry in the array
+                if let index = entries.firstIndex(where: { $0.id == entry.id }) {
+                    entries[index] = updatedEntry
+                    saveEntries()
+                    print("[SupportListManager] Refreshed \(entry.artistName) with \(updatedEntry.platforms.count) platforms")
+                }
+            }
+        } catch {
+            print("[SupportListManager] Failed to refresh \(entry.artistName): \(error)")
+        }
+
+        // Remove from refreshing set
+        refreshingEntryIds.remove(entry.id)
     }
 
     // MARK: - Persistence

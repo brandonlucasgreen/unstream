@@ -132,10 +132,16 @@ export function PrivacyPolicyPage() {
 
       {/* Footer */}
       <footer className="border-t border-border py-6 px-4">
-        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-3 text-text-secondary text-sm">
+        <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-3 text-text-secondary text-sm">
           <span>Made with love in Massachusetts, USA</span>
-          <span className="hidden md:inline text-text-muted/40">&#x2022;</span>
-          <nav className="flex items-center gap-3">
+          <nav className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+            <Link
+              to="/about"
+              className="hover:text-text-primary transition-colors"
+            >
+              About
+            </Link>
+            <span className="text-text-muted/40 text-xs">&#x2022;</span>
             <a
               href="https://unstream.featurebase.app/roadmap"
               target="_blank"
@@ -152,12 +158,14 @@ export function PrivacyPolicyPage() {
               Support
             </a>
             <span className="text-text-muted/40 text-xs">&#x2022;</span>
-            <Link
-              to="/privacy-policy"
+            <a
+              href="https://unstream.goatcounter.com"
+              target="_blank"
+              rel="noopener noreferrer"
               className="hover:text-text-primary transition-colors"
             >
-              Privacy
-            </Link>
+              Metrics
+            </a>
             <span className="text-text-muted/40 text-xs">&#x2022;</span>
             <a
               href="https://liberapay.com/brandonlucasgreen/donate"
@@ -167,6 +175,13 @@ export function PrivacyPolicyPage() {
             >
               Donate
             </a>
+            <span className="text-text-muted/40 text-xs">&#x2022;</span>
+            <Link
+              to="/privacy-policy"
+              className="hover:text-text-primary transition-colors"
+            >
+              Privacy
+            </Link>
           </nav>
         </div>
       </footer>

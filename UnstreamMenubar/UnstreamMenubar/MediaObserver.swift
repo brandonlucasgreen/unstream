@@ -119,15 +119,15 @@ class MediaObserver: ObservableObject {
     private func fetchNowPlaying() {
         // Try Music.app first
         if let musicInfo = getMusicAppNowPlaying() {
-            print("[MediaObserver] Got Music.app info: \(musicInfo)")
-            updateTrack(musicInfo)
+            print("[MediaObserver] Got Music.app info: \(musicInfo.artist ?? "?") - \(musicInfo.title ?? "?") (\(musicInfo.duration ?? 0)s)")
+            updateTrack((musicInfo.artist, musicInfo.title, musicInfo.album, musicInfo.duration, .appleMusic))
             return
         }
 
         // Then try Spotify
         if let spotifyInfo = getSpotifyNowPlaying() {
-            print("[MediaObserver] Got Spotify info: \(spotifyInfo)")
-            updateTrack(spotifyInfo)
+            print("[MediaObserver] Got Spotify info: \(spotifyInfo.artist ?? "?") - \(spotifyInfo.title ?? "?") (\(spotifyInfo.duration ?? 0)s)")
+            updateTrack((spotifyInfo.artist, spotifyInfo.title, spotifyInfo.album, spotifyInfo.duration, .spotify))
             return
         }
 
@@ -140,12 +140,14 @@ class MediaObserver: ObservableObject {
         }
     }
 
-    private func updateTrack(_ info: (artist: String?, title: String?, album: String?)) {
+    private func updateTrack(_ info: (artist: String?, title: String?, album: String?, duration: Double?, source: PlaybackSource)) {
         let nowPlaying = NowPlaying(
             title: info.title,
             artist: info.artist,
             album: info.album,
-            artworkData: nil
+            artworkData: nil,
+            durationSeconds: info.duration,
+            source: info.source
         )
 
         guard nowPlaying.hasContent else { return }
@@ -166,21 +168,22 @@ class MediaObserver: ObservableObject {
         }
     }
 
-    private func getMusicAppNowPlaying() -> (artist: String?, title: String?, album: String?)? {
+    private func getMusicAppNowPlaying() -> (artist: String?, title: String?, album: String?, duration: Double?)? {
         // First check if Music is running using System Events
         let checkScript = "tell application \"System Events\" to return (exists process \"Music\")"
         guard let result = runAppleScript(checkScript, silent: true), result == "true" else {
             return nil // Music not running or can't check
         }
 
-        // Check if music is playing and get track info
+        // Check if music is playing and get track info including duration
         let infoScript = """
             tell application "Music"
                 if player state is playing then
                     set theArtist to artist of current track
                     set theTitle to name of current track
                     set theAlbum to album of current track
-                    return theArtist & "|||" & theTitle & "|||" & theAlbum
+                    set theDuration to duration of current track
+                    return theArtist & "|||" & theTitle & "|||" & theAlbum & "|||" & theDuration
                 else
                     return "not_playing"
                 end if
@@ -200,19 +203,21 @@ class MediaObserver: ObservableObject {
         return parseTrackInfo(info)
     }
 
-    private func getSpotifyNowPlaying() -> (artist: String?, title: String?, album: String?)? {
+    private func getSpotifyNowPlaying() -> (artist: String?, title: String?, album: String?, duration: Double?)? {
         let checkScript = "tell application \"System Events\" to return (exists process \"Spotify\")"
         guard let result = runAppleScript(checkScript, silent: true), result == "true" else {
             return nil
         }
 
+        // Spotify returns duration in milliseconds, so we convert to seconds
         let infoScript = """
             tell application "Spotify"
                 if player state is playing then
                     set theArtist to artist of current track
                     set theTitle to name of current track
                     set theAlbum to album of current track
-                    return theArtist & "|||" & theTitle & "|||" & theAlbum
+                    set theDuration to (duration of current track) / 1000
+                    return theArtist & "|||" & theTitle & "|||" & theAlbum & "|||" & theDuration
                 else
                     return "not_playing"
                 end if
@@ -248,7 +253,7 @@ class MediaObserver: ObservableObject {
         return result.stringValue
     }
 
-    private func parseTrackInfo(_ output: String?) -> (artist: String?, title: String?, album: String?)? {
+    private func parseTrackInfo(_ output: String?) -> (artist: String?, title: String?, album: String?, duration: Double?)? {
         guard let output = output, !output.isEmpty else {
             return nil
         }
@@ -258,10 +263,17 @@ class MediaObserver: ObservableObject {
             return nil
         }
 
+        // Parse duration if available (4th field)
+        var duration: Double? = nil
+        if parts.count >= 4, let durationValue = Double(parts[3].trimmingCharacters(in: .whitespaces)) {
+            duration = durationValue
+        }
+
         return (
             parts[0].isEmpty ? nil : parts[0],
             parts[1].isEmpty ? nil : parts[1],
-            parts[2].isEmpty ? nil : parts[2]
+            parts[2].isEmpty ? nil : parts[2],
+            duration
         )
     }
 }

@@ -21,10 +21,25 @@ struct SupportEntry: Codable, Identifiable {
         self.id = UUID()
         self.artistName = artist.name
         self.imageUrl = artist.imageUrl
-        self.platforms = artist.verifiedPlatforms.compactMap { platform in
-            guard let url = platform.url else { return nil }
-            return SavedPlatform(sourceId: platform.sourceId, url: url)
+
+        // Collect all platforms with URLs: verified + social
+        var allPlatforms: [SavedPlatform] = []
+
+        // Add verified platforms (including officialsite, discogs, etc.)
+        for platform in artist.verifiedPlatforms {
+            if let url = platform.url {
+                allPlatforms.append(SavedPlatform(sourceId: platform.sourceId, url: url))
+            }
         }
+
+        // Add social platforms
+        for platform in artist.socialPlatforms {
+            if let url = platform.url {
+                allPlatforms.append(SavedPlatform(sourceId: platform.sourceId, url: url))
+            }
+        }
+
+        self.platforms = allPlatforms
         self.dateAdded = Date()
     }
 }
@@ -48,9 +63,20 @@ struct SavedPlatform: Codable, Identifiable {
             "hoopla": "Hoopla",
             "patreon": "Patreon",
             "ampwall": "Ampwall",
-            "sonica": "Sonica",
             "kofi": "Ko-fi",
-            "buymeacoffee": "Buy Me a Coffee"
+            "buymeacoffee": "Buy Me a Coffee",
+            "officialsite": "Official Site",
+            "discogs": "Discogs",
+            "jamcoop": "Jam.coop",
+            // Social platforms
+            "instagram": "Instagram",
+            "facebook": "Facebook",
+            "tiktok": "TikTok",
+            "youtube": "YouTube",
+            "threads": "Threads",
+            "bluesky": "Bluesky",
+            "twitter": "X",
+            "mastodon": "Mastodon"
         ]
         return names[sourceId] ?? sourceId.capitalized
     }
@@ -66,9 +92,20 @@ struct SavedPlatform: Codable, Identifiable {
             "hoopla": "books.vertical",
             "patreon": "heart",
             "ampwall": "waveform",
-            "sonica": "music.quarternote.3",
             "kofi": "cup.and.saucer",
-            "buymeacoffee": "cup.and.saucer"
+            "buymeacoffee": "cup.and.saucer",
+            "officialsite": "globe",
+            "discogs": "opticaldisc",
+            "jamcoop": "guitars",
+            // Social platforms
+            "instagram": "camera",
+            "facebook": "person.2",
+            "tiktok": "play.rectangle",
+            "youtube": "play.rectangle.fill",
+            "threads": "at",
+            "bluesky": "cloud",
+            "twitter": "bird",
+            "mastodon": "elephant"
         ]
         return icons[sourceId] ?? "music.note"
     }
@@ -84,9 +121,20 @@ struct SavedPlatform: Codable, Identifiable {
             "hoopla": "#E31837",
             "patreon": "#FF424D",
             "ampwall": "#EF4444",
-            "sonica": "#10B981",
             "kofi": "#29ABE0",
-            "buymeacoffee": "#FFDD00"
+            "buymeacoffee": "#FFDD00",
+            "officialsite": "#71717A",
+            "discogs": "#333333",
+            "jamcoop": "#E11D48",
+            // Social platforms
+            "instagram": "#E4405F",
+            "facebook": "#1877F2",
+            "tiktok": "#000000",
+            "youtube": "#FF0000",
+            "threads": "#000000",
+            "bluesky": "#0085FF",
+            "twitter": "#000000",
+            "mastodon": "#6364FF"
         ]
         return colors[sourceId] ?? "#888888"
     }

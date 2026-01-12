@@ -267,50 +267,87 @@ function App() {
             </div>
           )}
 
-          {/* Initial state - source showcase */}
+          {/* Initial state - Mac app promo + source showcase */}
           {!hasSearched && (
             <div className="mt-16 space-y-12">
-              <div className="text-center">
-                <h2 className="font-display text-2xl font-semibold text-text-primary mb-2">
-                  Supported Sources
-                </h2>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                {Object.entries(sourceCategories)
-                  .filter(([key]) => key !== 'social' && key !== 'official') // Social links and official sites are discovered per-artist
-                  .map(([key, category]) => (
-                  <div key={key} className="source-card">
-                    <h3 className="font-semibold text-text-primary mb-1">{category.name}</h3>
-                    <p className="text-text-muted text-sm mb-4">{category.description}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {category.sources.map(sourceId => {
-                        const source = sources[sourceId];
-                        return (
-                          <a
-                            key={sourceId}
-                            href={source.homepageUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all hover:scale-105 hover:shadow-md"
-                            style={{
-                              backgroundColor: `${source.color}15`,
-                              color: source.color,
-                            }}
-                          >
-                            <span>{source.icon}</span>
-                            <span>{source.name}</span>
-                          </a>
-                        );
-                      })}
-                    </div>
+              {/* Mac App Promo */}
+              <div className="bg-surface-secondary rounded-2xl p-6 md:p-8 border border-border">
+                <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10">
+                  <div className="flex-1 text-center md:text-left">
+                    <h2 className="font-display text-2xl md:text-3xl font-semibold text-text-primary mb-3">
+                      Support the artist you're listening to right now
+                    </h2>
+                    <p className="text-text-secondary mb-4">
+                      Unstream for macOS detects what's playing in Spotify or Apple Music and shows the best ways to support that artist, right in your menu bar.
+                    </p>
+                    <p className="text-text-secondary mb-6">
+                      Upgrade to Unstream Plus ($2.99 one-time) to save artists to support later and more.
+                    </p>
+                    <a
+                      href="https://github.com/brandonlucasgreen/unstream/releases/latest/download/Unstream.dmg"
+                      className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-accent-primary text-white hover:bg-accent-primary/90 transition-colors font-medium shadow-lg shadow-accent-primary/20"
+                      onClick={() => analytics.trackDownload()}
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                      </svg>
+                      Download for macOS
+                    </a>
+                    <p className="text-text-muted text-sm mt-3">
+                      Browser extensions coming soon!
+                    </p>
                   </div>
-                ))}
+                  <div className="flex-shrink-0">
+                    <img
+                      src="/unstream-mac.png"
+                      alt="Unstream for macOS showing artist platforms in the menu bar"
+                      className="w-64 md:w-80 rounded-xl shadow-2xl border border-border"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <p className="text-center text-text-muted text-sm">
-                ...plus official websites and social links
-              </p>
+              <div className="bg-surface-secondary rounded-2xl p-6 md:p-8 border border-border">
+                <h2 className="font-display text-2xl md:text-3xl font-semibold text-text-primary mb-6 text-center md:text-left">
+                  Available sources
+                </h2>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  {Object.entries(sourceCategories)
+                    .filter(([key]) => key !== 'social' && key !== 'official') // Social links and official sites are discovered per-artist
+                    .map(([key, category]) => (
+                    <div key={key}>
+                      <h3 className="font-semibold text-text-primary mb-1">{category.name}</h3>
+                      <p className="text-text-muted text-sm mb-4">{category.description}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {category.sources.map(sourceId => {
+                          const source = sources[sourceId];
+                          return (
+                            <a
+                              key={sourceId}
+                              href={source.homepageUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all hover:scale-105 hover:shadow-md"
+                              style={{
+                                backgroundColor: `${source.color}15`,
+                                color: source.color,
+                              }}
+                            >
+                              <span>{source.icon}</span>
+                              <span>{source.name}</span>
+                            </a>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="text-center text-text-muted text-sm mt-6">
+                  ...plus official websites and social links
+                </p>
+              </div>
 
             </div>
           )}
@@ -319,10 +356,16 @@ function App() {
 
       {/* Footer */}
       <footer className="border-t border-border py-6 px-4">
-        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-3 text-text-secondary text-sm">
+        <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-3 text-text-secondary text-sm">
           <span>Made with love in Massachusetts, USA</span>
-          <span className="hidden md:inline text-text-muted/40">&#x2022;</span>
-          <nav className="flex items-center gap-3">
+          <nav className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+            <Link
+              to="/about"
+              className="hover:text-text-primary transition-colors"
+            >
+              About
+            </Link>
+            <span className="text-text-muted/40 text-xs">&#x2022;</span>
             <a
               href="https://unstream.featurebase.app/roadmap"
               target="_blank"
@@ -339,12 +382,14 @@ function App() {
               Support
             </a>
             <span className="text-text-muted/40 text-xs">&#x2022;</span>
-            <Link
-              to="/privacy-policy"
+            <a
+              href="https://unstream.goatcounter.com"
+              target="_blank"
+              rel="noopener noreferrer"
               className="hover:text-text-primary transition-colors"
             >
-              Privacy
-            </Link>
+              Metrics
+            </a>
             <span className="text-text-muted/40 text-xs">&#x2022;</span>
             <a
               href="https://liberapay.com/brandonlucasgreen/donate"
@@ -354,6 +399,13 @@ function App() {
             >
               Donate
             </a>
+            <span className="text-text-muted/40 text-xs">&#x2022;</span>
+            <Link
+              to="/privacy-policy"
+              className="hover:text-text-primary transition-colors"
+            >
+              Privacy
+            </Link>
           </nav>
         </div>
       </footer>

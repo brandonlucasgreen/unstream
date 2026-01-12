@@ -4,7 +4,6 @@ type SourceId =
   | 'bandcamp'
   | 'mirlo'
   | 'ampwall'
-  | 'sonica'
   | 'bandwagon'
   | 'faircamp'
   | 'jamcoop'
@@ -996,10 +995,6 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
           sourceId: 'buymeacoffee',
           url: 'https://buymeacoffee.com/explore-creators',
         });
-        result.platforms.push({
-          sourceId: 'sonica',
-          url: `https://sonica.music/search/${encodeURIComponent(result.name)}`,
-        });
       }
 
       const normalizedName = normalizeForComparison(result.name);
@@ -1049,7 +1044,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
 
       // Sort platforms: verified first, then search-only last
       // Note: officialsite, discogs, hoopla, freegal are added via MusicBrainz lazy loading
-      const searchOnlyPlatforms = new Set(['ampwall', 'sonica', 'kofi', 'buymeacoffee']);
+      const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee']);
       result.platforms.sort((a, b) => {
         const aIsSearchOnly = searchOnlyPlatforms.has(a.sourceId);
         const bIsSearchOnly = searchOnlyPlatforms.has(b.sourceId);
@@ -1120,7 +1115,6 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     // Add search-only platforms
     platforms.push(
       { sourceId: 'ampwall', url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(displayName)}` },
-      { sourceId: 'sonica', url: `https://sonica.music/search/${encodeURIComponent(displayName)}` },
       { sourceId: 'kofi', url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(displayName)}` },
       { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
     );

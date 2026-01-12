@@ -5,7 +5,6 @@ type SourceId =
   | 'bandcamp'
   | 'mirlo'
   | 'ampwall'
-  | 'sonica'
   | 'bandwagon'
   | 'faircamp'
   | 'patreon'
@@ -649,7 +648,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
 
       // Sort platforms: verified matches first, search-only platforms last
       // Note: officialsite, discogs, hoopla, freegal are added via MusicBrainz lazy loading
-      const searchOnlyPlatforms = new Set(['ampwall', 'sonica', 'kofi']);
+      const searchOnlyPlatforms = new Set(['ampwall', 'kofi']);
       result.platforms.sort((a, b) => {
         const aIsSearchOnly = searchOnlyPlatforms.has(a.sourceId);
         const bIsSearchOnly = searchOnlyPlatforms.has(b.sourceId);

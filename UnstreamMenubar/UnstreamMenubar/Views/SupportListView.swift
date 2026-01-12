@@ -1,41 +1,24 @@
 import SwiftUI
+import AppKit
 
 struct SupportListView: View {
     @ObservedObject var supportListManager: SupportListManager
 
-    private var isSearching: Bool {
-        !supportListManager.searchQuery.isEmpty
-    }
-
-    private var countText: String {
-        let total = supportListManager.entries.count
-        let filtered = supportListManager.filteredEntries.count
-
-        if isSearching {
-            return "\(filtered) of \(total) artist\(total == 1 ? "" : "s")"
-        } else {
-            return "\(total) artist\(total == 1 ? "" : "s")"
-        }
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Saved Artists")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .textCase(.uppercase)
-
-                Spacer()
-
-                Text(countText)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-
-            // Search bar
+            // Search bar with share button
             if supportListManager.entries.count > 0 {
-                SavedArtistsSearchBar(supportListManager: supportListManager)
+                HStack(spacing: 8) {
+                    SavedArtistsSearchBar(supportListManager: supportListManager)
+
+                    Button(action: shareArtistList) {
+                        Image(systemName: "square.and.arrow.up")
+                            .foregroundColor(.secondary)
+                            .font(.system(size: 14))
+                    }
+                    .buttonStyle(.plain)
+                    .help("Share saved artists")
+                }
             }
 
             if supportListManager.entries.isEmpty {
@@ -70,13 +53,47 @@ struct SupportListView: View {
                 .padding(.vertical, 20)
             } else {
                 ForEach(supportListManager.filteredEntries) { entry in
-                    SupportEntryView(entry: entry) {
-                        supportListManager.removeEntry(entry)
-                    }
+                    SupportEntryView(
+                        entry: entry,
+                        isRefreshing: supportListManager.isRefreshing(entry),
+                        onRemove: {
+                            supportListManager.removeEntry(entry)
+                        },
+                        onRefresh: {
+                            Task {
+                                await supportListManager.refreshEntry(entry)
+                            }
+                        }
+                    )
                 }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func shareArtistList() {
+        let shareText = generateShareText()
+
+        let picker = NSSharingServicePicker(items: [shareText])
+        if let window = NSApp.keyWindow,
+           let contentView = window.contentView {
+            // Show the picker near the top of the window
+            let rect = NSRect(x: contentView.bounds.midX, y: contentView.bounds.maxY - 50, width: 1, height: 1)
+            picker.show(relativeTo: rect, of: contentView, preferredEdge: .minY)
+        }
+    }
+
+    private func generateShareText() -> String {
+        var text = "My Saved Unstream Artists\n"
+
+        for entry in supportListManager.entries {
+            text += "\n\(entry.artistName)\n"
+            for platform in entry.platforms {
+                text += "- \(platform.displayName): \(platform.url)\n"
+            }
+        }
+
+        return text
     }
 }
 
@@ -113,7 +130,9 @@ struct SavedArtistsSearchBar: View {
 
 struct SupportEntryView: View {
     let entry: SupportEntry
+    let isRefreshing: Bool
     let onRemove: () -> Void
+    let onRefresh: () -> Void
 
     @State private var isHovering = false
 
@@ -124,6 +143,21 @@ struct SupportEntryView: View {
                     .font(.system(size: 14, weight: .semibold))
 
                 Spacer()
+
+                if isRefreshing {
+                    ProgressView()
+                        .scaleEffect(0.6)
+                        .frame(width: 14, height: 14)
+                } else {
+                    Button(action: onRefresh) {
+                        Image(systemName: "arrow.clockwise")
+                            .foregroundColor(.secondary)
+                            .font(.system(size: 12))
+                    }
+                    .buttonStyle(.plain)
+                    .opacity(isHovering ? 1 : 0.3)
+                    .help("Refresh platforms")
+                }
 
                 Button(action: onRemove) {
                     Image(systemName: "heart.fill")

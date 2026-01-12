@@ -14,7 +14,6 @@ const SOURCE_CONFIG = {
   kofi: { icon: '☕', name: 'Ko-fi' },
   buymeacoffee: { icon: '☕', name: 'Buy Me a Coffee' },
   ampwall: { icon: '🔊', name: 'Ampwall' },
-  sonica: { icon: '🎶', name: 'Sonica' },
   songkick: { icon: '🎤', name: 'Concerts' },
   // Library
   hoopla: { icon: '📚', name: 'Hoopla' },
@@ -260,7 +259,7 @@ function isSearchUrl(url) {
 // Check if source is a manual search link (not a direct match)
 // Now checks the actual URL to handle direct links from official sites
 function isSearchOnlySource(id, url) {
-  const searchOnlyIds = ['ampwall', 'sonica', 'kofi', 'buymeacoffee'];
+  const searchOnlyIds = ['ampwall', 'kofi', 'buymeacoffee'];
   if (!searchOnlyIds.includes(id)) return false;
   // If we have a direct link, it's not search-only
   return isSearchUrl(url);

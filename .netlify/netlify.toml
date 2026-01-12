@@ -5,6 +5,7 @@ plugins = []
 headers = []
 
 [build]
+edge_functions = "/Users/brandonlucasgreen/Development/unstream/netlify/edge-functions"
 publish = "/Users/brandonlucasgreen/Development/unstream/dist"
 publishOrigin = "config"
 commandOrigin = "config"
@@ -24,6 +25,10 @@ functions = "/Users/brandonlucasgreen/Development/unstream/netlify/functions"
 [build.processing.js]
 
 [build.services]
+
+[[edge_functions]]
+path = "/"
+function = "og-metadata"
 
 [functions]
 

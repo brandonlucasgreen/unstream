@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Unstream</key>
+	<array>
+		<dict>
+			<key>architectures</key>
+			<array>
+				<string>x86_64</string>
+				<string>arm64</string>
+			</array>
+			<key>buildNumber</key>
+			<string>11</string>
+			<key>certificate</key>
+			<dict>
+				<key>SHA1</key>
+				<string>9944541B1CFDCE2369239B32C8CE078CE94B43D9</string>
+				<key>dateExpires</key>
+				<string>2/1/27</string>
+				<key>type</key>
+				<string>Developer ID Application</string>
+			</dict>
+			<key>entitlements</key>
+			<dict>
+				<key>com.apple.security.app-sandbox</key>
+				<true/>
+				<key>com.apple.security.automation.apple-events</key>
+				<true/>
+				<key>com.apple.security.network.client</key>
+				<true/>
+				<key>com.apple.security.temporary-exception.apple-events</key>
+				<array>
+					<string>com.apple.Music</string>
+					<string>com.spotify.client</string>
+					<string>com.apple.systemevents</string>
+				</array>
+			</dict>
+			<key>name</key>
+			<string>Unstream.app</string>
+			<key>team</key>
+			<dict>
+				<key>id</key>
+				<string>CV926C8KS8</string>
+				<key>name</key>
+				<string></string>
+			</dict>
+			<key>versionNumber</key>
+			<string>1.3.0</string>
+		</dict>
+	</array>
+</dict>
+</plist>

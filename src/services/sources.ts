@@ -38,18 +38,6 @@ export const sources: Record<SourceId, Source> = {
     homepageUrl: 'https://ampwall.com',
     artistPayoutPercent: '92-95%',
   },
-  sonica: {
-    id: 'sonica',
-    name: 'Sonica',
-    description: 'Artist-owned music platform',
-    color: '#10b981',
-    icon: '🎶',
-    category: 'marketplace',
-    hasEmbed: false,
-    searchUrlTemplate: 'https://sonica.music/search/{query}',
-    searchOnly: true,
-    homepageUrl: 'https://sonica.music',
-  },
   bandwagon: {
     id: 'bandwagon',
     name: 'Bandwagon',
@@ -273,7 +261,7 @@ export const sourceCategories = {
   marketplace: {
     name: 'Music Marketplaces',
     description: 'Buy music directly from artists',
-    sources: ['bandcamp', 'mirlo', 'ampwall', 'sonica', 'qobuz', 'jamcoop', 'discogs'] as SourceId[],
+    sources: ['bandcamp', 'mirlo', 'ampwall', 'qobuz', 'jamcoop', 'discogs'] as SourceId[],
   },
   patronage: {
     name: 'Patronage Platforms',
@@ -536,7 +524,7 @@ export function mergeWithMusicBrainzData(
     }
 
     // Re-sort platforms: verified first, search-only in middle, official/library, then social last
-    const searchOnlyPlatforms = new Set(['ampwall', 'sonica', 'kofi', 'buymeacoffee']);
+    const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee']);
     const officialPlatforms = new Set(['officialsite', 'discogs', 'hoopla', 'freegal']);
     const socialPlatforms = new Set(['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'twitter', 'mastodon']);
     newPlatforms.sort((a, b) => {

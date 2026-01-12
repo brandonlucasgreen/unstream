@@ -6,12 +6,19 @@ struct SettingsView: View {
 
     @AppStorage("musicListeningEnabled") private var musicListeningEnabled = true
     @AppStorage("checkForUpdatesAutomatically") private var checkForUpdatesAutomatically = true
+    @AppStorage("listenBrainzEnabled") private var listenBrainzEnabled = false
     @State private var launchAtLogin = false
     @State private var updateStatus: String? = nil
     @State private var updateAvailable = false
     @State private var updateDownloadUrl: String? = nil
     @State private var isCheckingForUpdates = false
     @State private var licenseKeyInput: String = ""
+
+    // ListenBrainz state
+    @State private var listenBrainzToken: String = ""
+    @State private var listenBrainzUsername: String? = nil
+    @State private var isValidatingToken = false
+    @State private var tokenValidationError: String? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -86,6 +93,74 @@ struct SettingsView: View {
                     .foregroundColor(.secondary)
             }
 
+            Divider()
+
+            // ListenBrainz Scrobbling
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("Scrobbling")
+                        .font(.headline)
+                    if listenBrainzUsername != nil {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.caption)
+                    }
+                }
+
+                Toggle("Enable ListenBrainz scrobbling", isOn: $listenBrainzEnabled)
+                    .onChange(of: listenBrainzEnabled) { newValue in
+                        ListenBrainzService.shared.isEnabled = newValue
+                    }
+
+                Text("Submit your listening history to ListenBrainz")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                if listenBrainzEnabled {
+                    VStack(alignment: .leading, spacing: 8) {
+                        if let username = listenBrainzUsername {
+                            HStack {
+                                Text("Connected as: \(username)")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Button("Disconnect") {
+                                    disconnectListenBrainz()
+                                }
+                                .font(.caption)
+                                .foregroundColor(.red)
+                            }
+
+                            if ScrobbleManager.shared.scrobbleCount > 0 {
+                                Text("Scrobbles this session: \(ScrobbleManager.shared.scrobbleCount)")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        } else {
+                            HStack {
+                                SecureField("User token", text: $listenBrainzToken)
+                                    .textFieldStyle(.roundedBorder)
+                                    .frame(maxWidth: 180)
+
+                                Button(isValidatingToken ? "..." : "Connect") {
+                                    validateListenBrainzToken()
+                                }
+                                .disabled(listenBrainzToken.isEmpty || isValidatingToken)
+                            }
+
+                            if let error = tokenValidationError {
+                                Text(error)
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+                            }
+
+                            Link("Get your token from ListenBrainz", destination: URL(string: "https://listenbrainz.org/settings/")!)
+                                .font(.caption)
+                        }
+                    }
+                }
+            }
+
             // Launch at Login
             VStack(alignment: .leading, spacing: 4) {
                 Toggle("Start at login", isOn: $launchAtLogin)
@@ -155,11 +230,57 @@ struct SettingsView: View {
             Spacer()
         }
         .padding()
-        .frame(width: 320, height: 420)
+        .frame(width: 320, height: 520)
         .onAppear {
             launchAtLogin = getLaunchAtLoginStatus()
             licenseKeyInput = licenseManager.licenseKey
+            loadListenBrainzState()
         }
+    }
+
+    // MARK: - ListenBrainz Functions
+
+    private func loadListenBrainzState() {
+        listenBrainzToken = ListenBrainzService.shared.userToken ?? ""
+
+        // If we have a token, validate it to get the username
+        if !listenBrainzToken.isEmpty {
+            validateListenBrainzToken()
+        }
+    }
+
+    private func validateListenBrainzToken() {
+        isValidatingToken = true
+        tokenValidationError = nil
+
+        // Save the token first
+        ListenBrainzService.shared.userToken = listenBrainzToken
+
+        ListenBrainzService.shared.validateToken { result in
+            DispatchQueue.main.async {
+                isValidatingToken = false
+                switch result {
+                case .success(let username):
+                    listenBrainzUsername = username
+                    tokenValidationError = nil
+                case .failure(let error):
+                    listenBrainzUsername = nil
+                    tokenValidationError = error.localizedDescription
+                    // Clear invalid token
+                    if case ListenBrainzError.invalidToken = error {
+                        ListenBrainzService.shared.userToken = nil
+                    }
+                }
+            }
+        }
+    }
+
+    private func disconnectListenBrainz() {
+        ListenBrainzService.shared.userToken = nil
+        ListenBrainzService.shared.isEnabled = false
+        listenBrainzToken = ""
+        listenBrainzUsername = nil
+        listenBrainzEnabled = false
     }
 
     private func setLaunchAtLogin(_ enabled: Bool) {

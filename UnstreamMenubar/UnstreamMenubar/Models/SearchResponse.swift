@@ -112,7 +112,6 @@ private let platformConfig: [String: PlatformConfig] = [
     "patreon": PlatformConfig(name: "Patreon", icon: "heart", color: "#FF424D", searchOnly: false),
     // Search-only platforms
     "ampwall": PlatformConfig(name: "Ampwall", icon: "waveform", color: "#EF4444", searchOnly: true),
-    "sonica": PlatformConfig(name: "Sonica", icon: "music.quarternote.3", color: "#10B981", searchOnly: true),
     "kofi": PlatformConfig(name: "Ko-fi", icon: "cup.and.saucer", color: "#29ABE0", searchOnly: true),
     "buymeacoffee": PlatformConfig(name: "Buy Me a Coffee", icon: "cup.and.saucer", color: "#FFDD00", searchOnly: true),
     // Official
