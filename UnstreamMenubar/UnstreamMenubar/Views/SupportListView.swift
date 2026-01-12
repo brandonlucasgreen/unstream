@@ -193,9 +193,13 @@ struct SupportEntryView: View {
 
 struct SavedPlatformBadge: View {
     let platform: SavedPlatform
+    @Environment(\.colorScheme) var colorScheme
 
     // Social platforms show only icons (no text) to reduce clutter
     private let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon"]
+
+    // Platforms that have brand SVG icons
+    private let brandIconPlatforms: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "bandcamp"]
 
     private var isSocialPlatform: Bool {
         socialPlatformIds.contains(platform.sourceId)
@@ -213,16 +217,40 @@ struct SavedPlatformBadge: View {
     var body: some View {
         Button(action: openURL) {
             if isSocialPlatform {
-                // Social platforms: brand icon only (circular)
-                BrandIcon(platform: platform.sourceId, size: 14, color: platformColor)
-                    .frame(width: 28, height: 28)
-                    .background(platformColor.opacity(0.15))
-                    .cornerRadius(14)
+                // Social platforms: icon only (circular)
+                Group {
+                    if let url = Bundle.main.url(forResource: platform.sourceId, withExtension: "svg"),
+                       let nsImage = NSImage(contentsOf: url) {
+                        Image(nsImage: nsImage)
+                            .renderingMode(.template)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 14, height: 14)
+                            .foregroundColor(colorScheme == .dark ? .white : platformColor)
+                    } else {
+                        Image(systemName: platform.icon)
+                            .font(.system(size: 14))
+                            .foregroundColor(colorScheme == .dark ? .white : platformColor)
+                    }
+                }
+                .frame(width: 28, height: 28)
+                .background(platformColor.opacity(0.15))
+                .cornerRadius(14)
             } else {
                 // Regular platforms: icon + text
                 HStack(spacing: 4) {
-                    Image(systemName: platform.icon)
-                        .font(.system(size: 10))
+                    if brandIconPlatforms.contains(platform.sourceId),
+                       let url = Bundle.main.url(forResource: platform.sourceId, withExtension: "svg"),
+                       let nsImage = NSImage(contentsOf: url) {
+                        Image(nsImage: nsImage)
+                            .renderingMode(.template)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 10, height: 10)
+                    } else {
+                        Image(systemName: platform.icon)
+                            .font(.system(size: 10))
+                    }
                     Text(platform.displayName)
                         .font(.system(size: 11, weight: .medium))
                 }

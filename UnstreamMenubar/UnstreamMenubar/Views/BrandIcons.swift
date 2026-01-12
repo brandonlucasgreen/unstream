@@ -74,9 +74,9 @@ private func parseSVGPath(path svgPath: String, into path: inout Path, scale: CG
                 startX = currentX
                 startY = currentY
                 path.move(to: CGPoint(x: currentX * scale + xOffset, y: currentY * scale + yOffset))
-                i += 2
                 lastCommand = "L" // Subsequent coords are LineTo
             }
+            i += 2
         case "m":
             if i + 1 < tokens.count, let dx = Double(tokens[i]), let dy = Double(tokens[i + 1]) {
                 currentX += CGFloat(dx)
@@ -84,47 +84,47 @@ private func parseSVGPath(path svgPath: String, into path: inout Path, scale: CG
                 startX = currentX
                 startY = currentY
                 path.move(to: CGPoint(x: currentX * scale + xOffset, y: currentY * scale + yOffset))
-                i += 2
                 lastCommand = "l"
             }
+            i += 2
         case "L":
             if i + 1 < tokens.count, let x = Double(tokens[i]), let y = Double(tokens[i + 1]) {
                 currentX = CGFloat(x)
                 currentY = CGFloat(y)
                 path.addLine(to: CGPoint(x: currentX * scale + xOffset, y: currentY * scale + yOffset))
-                i += 2
             }
+            i += 2
         case "l":
             if i + 1 < tokens.count, let dx = Double(tokens[i]), let dy = Double(tokens[i + 1]) {
                 currentX += CGFloat(dx)
                 currentY += CGFloat(dy)
                 path.addLine(to: CGPoint(x: currentX * scale + xOffset, y: currentY * scale + yOffset))
-                i += 2
             }
+            i += 2
         case "H":
-            if let x = Double(tokens[i]) {
+            if i < tokens.count, let x = Double(tokens[i]) {
                 currentX = CGFloat(x)
                 path.addLine(to: CGPoint(x: currentX * scale + xOffset, y: currentY * scale + yOffset))
-                i += 1
             }
+            i += 1
         case "h":
-            if let dx = Double(tokens[i]) {
+            if i < tokens.count, let dx = Double(tokens[i]) {
                 currentX += CGFloat(dx)
                 path.addLine(to: CGPoint(x: currentX * scale + xOffset, y: currentY * scale + yOffset))
-                i += 1
             }
+            i += 1
         case "V":
-            if let y = Double(tokens[i]) {
+            if i < tokens.count, let y = Double(tokens[i]) {
                 currentY = CGFloat(y)
                 path.addLine(to: CGPoint(x: currentX * scale + xOffset, y: currentY * scale + yOffset))
-                i += 1
             }
+            i += 1
         case "v":
-            if let dy = Double(tokens[i]) {
+            if i < tokens.count, let dy = Double(tokens[i]) {
                 currentY += CGFloat(dy)
                 path.addLine(to: CGPoint(x: currentX * scale + xOffset, y: currentY * scale + yOffset))
-                i += 1
             }
+            i += 1
         case "C":
             if i + 5 < tokens.count,
                let x1 = Double(tokens[i]), let y1 = Double(tokens[i + 1]),
@@ -137,8 +137,8 @@ private func parseSVGPath(path svgPath: String, into path: inout Path, scale: CG
                 )
                 currentX = CGFloat(x)
                 currentY = CGFloat(y)
-                i += 6
             }
+            i += 6
         case "c":
             if i + 5 < tokens.count,
                let dx1 = Double(tokens[i]), let dy1 = Double(tokens[i + 1]),
@@ -157,8 +157,8 @@ private func parseSVGPath(path svgPath: String, into path: inout Path, scale: CG
                 )
                 currentX = x
                 currentY = y
-                i += 6
             }
+            i += 6
         case "S":
             if i + 3 < tokens.count,
                let x2 = Double(tokens[i]), let y2 = Double(tokens[i + 1]),
@@ -171,8 +171,8 @@ private func parseSVGPath(path svgPath: String, into path: inout Path, scale: CG
                 )
                 currentX = CGFloat(x)
                 currentY = CGFloat(y)
-                i += 4
             }
+            i += 4
         case "s":
             if i + 3 < tokens.count,
                let dx2 = Double(tokens[i]), let dy2 = Double(tokens[i + 1]),
@@ -188,8 +188,8 @@ private func parseSVGPath(path svgPath: String, into path: inout Path, scale: CG
                 )
                 currentX = x
                 currentY = y
-                i += 4
             }
+            i += 4
         case "Z", "z":
             path.closeSubpath()
             currentX = startX

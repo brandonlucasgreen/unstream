@@ -1,20 +1,29 @@
 import SwiftUI
+import AppKit
 
 struct SocialIconButton: View {
     let result: PlatformResult
+    @Environment(\.colorScheme) var colorScheme
 
-    // Social platforms that have brand icons
-    private let brandIconPlatforms: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon"]
+    // Platforms that have brand SVG icons
+    private let brandIconPlatforms: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "bandcamp"]
 
     var body: some View {
         Button(action: openPlatform) {
             Group {
-                if brandIconPlatforms.contains(result.sourceId) {
-                    BrandIcon(platform: result.sourceId, size: 14, color: iconColor)
+                if brandIconPlatforms.contains(result.sourceId),
+                   let url = Bundle.main.url(forResource: result.sourceId, withExtension: "svg"),
+                   let nsImage = NSImage(contentsOf: url) {
+                    Image(nsImage: nsImage)
+                        .renderingMode(.template)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 14, height: 14)
+                        .foregroundColor(colorScheme == .dark ? .white : iconColor)
                 } else {
                     Image(systemName: result.icon)
                         .font(.system(size: 14))
-                        .foregroundColor(iconColor)
+                        .foregroundColor(colorScheme == .dark ? .white : iconColor)
                 }
             }
             .frame(width: 28, height: 28)
