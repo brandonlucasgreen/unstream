@@ -247,9 +247,46 @@ async function getBandcampReleaseTitles(artistUrl: string): Promise<string[]> {
   }
 }
 
+// Fetch release date from a Qobuz album page
+async function getQobuzAlbumReleaseDate(albumUrl: string): Promise<string | undefined> {
+  try {
+    const response = await fetchWithTimeout(albumUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    }, 2000);
+
+    if (!response.ok) return undefined;
+
+    const html = await response.text();
+
+    // Look for release date in various formats
+    // Qobuz often has it in JSON-LD or meta tags
+    const dateMatch = html.match(/"releaseDate"[:\s]*"(\d{4}-\d{2}-\d{2})"/) ||
+                      html.match(/"release_date_original"[:\s]*"(\d{4}-\d{2}-\d{2})"/) ||
+                      html.match(/Release date[:\s]*<[^>]*>(\d{4}-\d{2}-\d{2})/i) ||
+                      html.match(/Released[:\s]*(\d{4}-\d{2}-\d{2})/i);
+
+    if (dateMatch) {
+      return dateMatch[1];
+    }
+
+    // Try to find year at least
+    const yearMatch = html.match(/"release_date_original"[:\s]*"(\d{4})/) ||
+                      html.match(/Released[:\s]*(\d{4})/i);
+    if (yearMatch) {
+      return `${yearMatch[1]}-01-01`; // Use Jan 1 as placeholder
+    }
+
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 // Fetch latest release from a Qobuz artist page
 // Qobuz is client-side rendered, so we extract album info from URL patterns
-// Adding sortBy parameter ensures we get releases sorted by date (most recent first)
+// We collect all albums and fetch their dates to find the chronologically most recent
 async function getQobuzLatestRelease(artistUrl: string): Promise<LatestRelease | undefined> {
   try {
     // Extract artist name from URL for validation
@@ -258,12 +295,7 @@ async function getQobuzLatestRelease(artistUrl: string): Promise<LatestRelease |
     if (!artistSlugMatch) return undefined;
     const artistSlug = artistSlugMatch[1].replace(/-/g, '').toLowerCase();
 
-    // Add sort parameter to get releases sorted by date (most recent first)
-    const sortedUrl = artistUrl.includes('?')
-      ? `${artistUrl}&%5BsortBy%5D=main_catalog_date_desc`
-      : `${artistUrl}?%5BsortBy%5D=main_catalog_date_desc`;
-
-    const response = await fetchWithTimeout(sortedUrl, {
+    const response = await fetchWithTimeout(artistUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
       },
@@ -275,53 +307,101 @@ async function getQobuzLatestRelease(artistUrl: string): Promise<LatestRelease |
 
     // Qobuz album URLs are in format: /us-en/album/{album-name-slug}/{id}
     // Album IDs can be numeric or alphanumeric
-    // Extract from the HTML using regex since page is client-rendered
-    // Find ALL album URLs and pick the first one that belongs to this artist
+    // Collect ALL valid albums from this artist
     const albumRegex = /href="(\/us-en\/album\/([^/]+)\/([a-zA-Z0-9]+))"/g;
     let match;
-    let validAlbum: { path: string; slug: string } | undefined;
+    const validAlbums: { path: string; slug: string; id: string }[] = [];
+    const seenPaths = new Set<string>();
+
+    // Artist slug without numbers for matching (e.g., "morice1" -> "morice")
+    const artistBase = artistSlug.replace(/\d+$/, '');
 
     while ((match = albumRegex.exec(html)) !== null) {
-      const [, path, albumSlug] = match;
+      const [, path, albumSlug, albumId] = match;
+
+      // Skip duplicates
+      if (seenPaths.has(path)) continue;
+      seenPaths.add(path);
+
       const normalizedSlug = albumSlug.replace(/-/g, '').toLowerCase();
 
       // Validate: album slug should contain the artist name
       // This filters out "trending" or "recommended" albums shown on empty artist pages
-      // Artist slug without numbers for matching (e.g., "morice1" -> "morice")
-      const artistBase = artistSlug.replace(/\d+$/, '');
       if (normalizedSlug.includes(artistBase) || normalizedSlug.includes(artistSlug)) {
-        validAlbum = { path, slug: albumSlug };
-        break;
+        validAlbums.push({ path, slug: albumSlug, id: albumId });
+      }
+
+      // Limit to first 10 albums to avoid too many requests
+      if (validAlbums.length >= 10) break;
+    }
+
+    if (validAlbums.length === 0) return undefined;
+
+    // If only one album, just return it
+    if (validAlbums.length === 1) {
+      const album = validAlbums[0];
+      const fullUrl = `https://www.qobuz.com${album.path}`;
+      const releaseDate = await getQobuzAlbumReleaseDate(fullUrl);
+
+      return {
+        title: album.slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+        type: 'album',
+        url: fullUrl,
+        imageUrl: undefined,
+        releaseDate,
+      };
+    }
+
+    // Fetch release dates for all albums in parallel (limit to 5 to be respectful)
+    const albumsToCheck = validAlbums.slice(0, 5);
+    const datePromises = albumsToCheck.map(async (album) => {
+      const fullUrl = `https://www.qobuz.com${album.path}`;
+      const releaseDate = await getQobuzAlbumReleaseDate(fullUrl);
+      return { album, fullUrl, releaseDate };
+    });
+
+    const results = await Promise.allSettled(datePromises);
+
+    // Find the album with the most recent release date
+    let latestAlbum: { album: typeof validAlbums[0]; fullUrl: string; releaseDate?: string } | undefined;
+    let latestDate: Date | undefined;
+
+    for (const result of results) {
+      if (result.status !== 'fulfilled') continue;
+      const { album, fullUrl, releaseDate } = result.value;
+
+      if (releaseDate) {
+        const date = new Date(releaseDate);
+        if (!isNaN(date.getTime())) {
+          if (!latestDate || date > latestDate) {
+            latestDate = date;
+            latestAlbum = { album, fullUrl, releaseDate };
+          }
+        }
+      } else if (!latestAlbum) {
+        // Keep first album as fallback if no dates found
+        latestAlbum = { album, fullUrl, releaseDate: undefined };
       }
     }
 
-    if (!validAlbum) return undefined;
-
-    // Convert slug to readable title (replace hyphens with spaces, title case)
-    const title = validAlbum.slug
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-
-    // Build full URL
-    const fullUrl = `https://www.qobuz.com${validAlbum.path}`;
-
-    // Try to extract release date from the page
-    let releaseDate: string | undefined;
-    // Look for date patterns in the HTML
-    const dateMatch = html.match(/"releaseDate"[:\s]*"(\d{4}-\d{2}-\d{2})"/) ||
-                      html.match(/(\d{4}-\d{2}-\d{2})/) ||
-                      html.match(/(\w+\s+\d{1,2},?\s+\d{4})/);
-    if (dateMatch) {
-      releaseDate = dateMatch[1];
+    if (!latestAlbum) {
+      // Fallback to first album if all date fetches failed
+      const album = validAlbums[0];
+      return {
+        title: album.slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+        type: 'album',
+        url: `https://www.qobuz.com${album.path}`,
+        imageUrl: undefined,
+        releaseDate: undefined,
+      };
     }
 
     return {
-      title,
+      title: latestAlbum.album.slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
       type: 'album',
-      url: fullUrl,
-      imageUrl: undefined, // Qobuz images require JS rendering
-      releaseDate,
+      url: latestAlbum.fullUrl,
+      imageUrl: undefined,
+      releaseDate: latestAlbum.releaseDate,
     };
   } catch (error: unknown) {
     const err = error as { name?: string; message?: string };
