@@ -1379,6 +1379,47 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     }
   }
 
+  // Deduplicate Qobuz URLs: if the same Qobuz profile is attached to multiple results,
+  // keep it only on the result with the best release match (most matching releases)
+  const qobuzUrlToResults = new Map<string, { result: AggregatedResult; matchCount: number }[]>();
+  for (const result of aggregated) {
+    const bandcampPlatform = result.platforms.find(p => p.sourceId === 'bandcamp');
+    const bandcampTitles = new Set(bandcampPlatform?.allReleaseTitles || []);
+
+    for (const platform of result.platforms) {
+      if (platform.sourceId === 'qobuz') {
+        const qobuzUrl = platform.url;
+        const qobuzTitles = platform.allReleaseTitles || [];
+
+        // Count matching releases
+        const matchCount = bandcampTitles.size > 0 && qobuzTitles.length > 0
+          ? qobuzTitles.filter(t => bandcampTitles.has(t)).length
+          : 0;
+
+        if (!qobuzUrlToResults.has(qobuzUrl)) {
+          qobuzUrlToResults.set(qobuzUrl, []);
+        }
+        qobuzUrlToResults.get(qobuzUrl)!.push({ result, matchCount });
+      }
+    }
+  }
+
+  // For each Qobuz URL that appears on multiple results, keep only on the best match
+  for (const [qobuzUrl, resultMatches] of qobuzUrlToResults) {
+    if (resultMatches.length > 1) {
+      // Sort by match count descending - best match first
+      resultMatches.sort((a, b) => b.matchCount - a.matchCount);
+
+      // Keep Qobuz on the first (best) result, remove from others
+      const bestResult = resultMatches[0].result;
+      for (let i = 1; i < resultMatches.length; i++) {
+        const otherResult = resultMatches[i].result;
+        console.log(`[Qobuz Dedup] Removing ${qobuzUrl} from "${otherResult.name}" (${resultMatches[i].matchCount} matches) - keeping on "${bestResult.name}" (${resultMatches[0].matchCount} matches)`);
+        otherResult.platforms = otherResult.platforms.filter(p => p.url !== qobuzUrl);
+      }
+    }
+  }
+
   // Track which Qobuz URLs are still attached to results
   const attachedQobuzUrls = new Set<string>();
   for (const result of aggregated) {
