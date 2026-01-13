@@ -73,6 +73,37 @@ async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutM
   }
 }
 
+// Check if two names are similar enough to be considered a match
+// Returns true if names match closely (same name, or one contains the other)
+function namesMatch(name1: string, name2: string): boolean {
+  const n1 = normalizeForComparison(name1);
+  const n2 = normalizeForComparison(name2);
+
+  // Exact match
+  if (n1 === n2) return true;
+
+  // One contains the other (e.g., "Kid Lightbulbs" matches "Kid Lightbulbs Music")
+  if (n1.includes(n2) || n2.includes(n1)) return true;
+
+  // Check if it's just a typo/variation (allow 1-2 char difference for short names)
+  if (n1.length <= 10 && n2.length <= 10) {
+    // For short names, require very close match
+    const minLen = Math.min(n1.length, n2.length);
+    const maxLen = Math.max(n1.length, n2.length);
+    if (maxLen - minLen > 2) return false;
+
+    // Count matching characters
+    let matches = 0;
+    for (let i = 0; i < minLen; i++) {
+      if (n1[i] === n2[i]) matches++;
+    }
+    // Require 80%+ character match
+    return matches >= minLen * 0.8;
+  }
+
+  return false;
+}
+
 // Search Bandcamp by scraping search results page (PRIMARY SOURCE)
 async function searchBandcamp(query: string): Promise<PlatformResult[]> {
   const results: PlatformResult[] = [];
@@ -111,6 +142,14 @@ async function searchBandcamp(query: string): Promise<PlatformResult[]> {
         let type: 'artist' | 'album' | 'track' = 'artist';
         if (resultType === 'album') type = 'album';
         else if (resultType === 'track') type = 'track';
+
+        // Filter: only include results where name matches the query
+        // This filters out Bandcamp's fuzzy matches (e.g., "Dory Miller" for "Cory Miller")
+        const nameToCheck = type === 'artist' ? name : (artist || name);
+        if (!namesMatch(nameToCheck, query)) {
+          console.log(`[Bandcamp] Filtering out fuzzy match: "${nameToCheck}" doesn't match query "${query}"`);
+          continue;
+        }
 
         results.push({
           sourceId: 'bandcamp',
@@ -915,28 +954,78 @@ function generateResultId(name: string, artist?: string): string {
   return normalized || Math.random().toString(36).substring(2);
 }
 
+// Extract the subdomain/identifier from a platform URL for uniqueness checking
+function extractPlatformIdentifier(url: string, sourceId: SourceId): string {
+  try {
+    const urlObj = new URL(url);
+    if (sourceId === 'bandcamp') {
+      // For Bandcamp, the subdomain is the unique identifier
+      // e.g., "corymiller" from "corymiller.bandcamp.com"
+      const match = urlObj.hostname.match(/^([^.]+)\.bandcamp\.com$/);
+      return match ? match[1] : urlObj.hostname;
+    }
+    if (sourceId === 'qobuz') {
+      // For Qobuz, the artist ID is the unique identifier
+      // e.g., "496181" from "/us-en/interpreter/cory-miller/496181"
+      const match = urlObj.pathname.match(/\/interpreter\/[^/]+\/(\d+)/);
+      return match ? match[1] : urlObj.pathname;
+    }
+    // For other platforms, use the full path
+    return urlObj.pathname;
+  } catch {
+    return url;
+  }
+}
+
 function aggregateResults(allResults: PlatformResult[]): AggregatedResult[] {
   const resultMap = new Map<string, AggregatedResult>();
 
   for (const result of allResults) {
     if (result.name.startsWith('Search "')) continue;
 
-    const key = generateResultId(result.name, result.artist);
+    const baseKey = generateResultId(result.name, result.artist);
+    const platformId = extractPlatformIdentifier(result.url, result.sourceId);
 
-    if (resultMap.has(key)) {
-      const existing = resultMap.get(key)!;
-      if (!existing.platforms.some(p => p.sourceId === result.sourceId)) {
+    if (resultMap.has(baseKey)) {
+      const existing = resultMap.get(baseKey)!;
+      const existingPlatform = existing.platforms.find(p => p.sourceId === result.sourceId);
+
+      if (!existingPlatform) {
+        // Different platform type, add to this result
         existing.platforms.push({
           sourceId: result.sourceId,
           url: result.url,
         });
+      } else {
+        // Same platform type - check if it's the same URL
+        const existingPlatformId = extractPlatformIdentifier(existingPlatform.url, existingPlatform.sourceId);
+        if (existingPlatformId !== platformId) {
+          // Different URL on same platform = likely different artist
+          // Create a new entry with a unique key
+          const uniqueKey = `${baseKey}-${result.sourceId}-${platformId}`;
+          if (!resultMap.has(uniqueKey)) {
+            resultMap.set(uniqueKey, {
+              id: uniqueKey,
+              name: result.name,
+              artist: result.artist,
+              type: result.type,
+              imageUrl: result.imageUrl,
+              platforms: [{
+                sourceId: result.sourceId,
+                url: result.url,
+              }],
+            });
+            console.log(`[Aggregation] Created separate entry for "${result.name}" - different ${result.sourceId} profile: ${platformId}`);
+          }
+        }
+        // else: same platform, same URL = duplicate, skip
       }
       if (!existing.imageUrl && result.imageUrl) {
         existing.imageUrl = result.imageUrl;
       }
     } else {
-      resultMap.set(key, {
-        id: key,
+      resultMap.set(baseKey, {
+        id: baseKey,
         name: result.name,
         artist: result.artist,
         type: result.type,
@@ -1227,6 +1316,94 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
       return hasReleases;
     });
     result.platforms = validQobuzPlatforms;
+  }
+
+  // Cross-platform release comparison: Remove Qobuz from results where releases don't match Bandcamp
+  // This handles cases where multiple artists have the same name but different catalogs
+  for (const result of aggregated) {
+    const bandcampPlatform = result.platforms.find(p => p.sourceId === 'bandcamp');
+    const qobuzPlatformIndices: number[] = [];
+    result.platforms.forEach((p, idx) => {
+      if (p.sourceId === 'qobuz') qobuzPlatformIndices.push(idx);
+    });
+
+    // Only check if we have both Bandcamp and Qobuz with release data
+    if (bandcampPlatform?.allReleaseTitles && bandcampPlatform.allReleaseTitles.length > 0 && qobuzPlatformIndices.length > 0) {
+      const bandcampTitles = new Set(bandcampPlatform.allReleaseTitles);
+
+      // Track which Qobuz platforms to remove (by index, to avoid reference issues)
+      const indicesToRemove: number[] = [];
+
+      for (const idx of qobuzPlatformIndices) {
+        const qobuzPlatform = result.platforms[idx];
+
+        if (qobuzPlatform.allReleaseTitles && qobuzPlatform.allReleaseTitles.length > 0) {
+          // Count how many release titles overlap
+          // Require at least 2 matches to avoid false positives from coincidental single-release matches
+          const matchingReleases = qobuzPlatform.allReleaseTitles.filter(title => bandcampTitles.has(title));
+          const matchCount = matchingReleases.length;
+
+          // Threshold: need at least 2 matching releases, OR 30% of the smaller catalog
+          const minCatalogSize = Math.min(bandcampTitles.size, qobuzPlatform.allReleaseTitles.length);
+          const matchThreshold = Math.max(2, Math.ceil(minCatalogSize * 0.3));
+          const hasEnoughMatches = matchCount >= matchThreshold;
+
+          if (!hasEnoughMatches) {
+            // Not enough matching releases - this Qobuz is likely a different artist
+            console.log(`[Cross-Platform] Removing Qobuz from "${result.name}" - only ${matchCount}/${matchThreshold} matching releases`);
+            indicesToRemove.push(idx);
+          }
+        }
+        // If no release data, keep Qobuz (benefit of the doubt)
+      }
+
+      // Remove platforms by filtering out the marked indices
+      if (indicesToRemove.length > 0) {
+        result.platforms = result.platforms.filter((_, idx) => !indicesToRemove.includes(idx));
+      }
+    }
+  }
+
+  // Track which Qobuz URLs are still attached to results
+  const attachedQobuzUrls = new Set<string>();
+  for (const result of aggregated) {
+    for (const p of result.platforms) {
+      if (p.sourceId === 'qobuz') {
+        attachedQobuzUrls.add(p.url);
+      }
+    }
+  }
+
+  // Create standalone results for Qobuz profiles that got removed from all results
+  // This ensures the Qobuz artist still appears, just not merged with unrelated Bandcamp profiles
+  for (const [qobuzName, qobuzUrl] of qobuzMatches) {
+    if (!attachedQobuzUrls.has(qobuzUrl)) {
+      // This Qobuz profile was removed from all results - create a standalone entry
+      const slugMatch = qobuzUrl.match(/\/interpreter\/([^/]+)\//);
+      const displayName = slugMatch
+        ? slugMatch[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+        : qobuzName;
+
+      const standaloneId = `qobuz-standalone-${qobuzName}`;
+
+      // Check if we already have this standalone entry
+      if (!aggregated.some(r => r.id === standaloneId)) {
+        console.log(`[Qobuz Standalone] Creating separate result for "${displayName}" - removed from all Bandcamp results`);
+
+        aggregated.push({
+          id: standaloneId,
+          name: displayName,
+          type: 'artist',
+          platforms: [
+            { sourceId: 'qobuz', url: qobuzUrl },
+            { sourceId: 'ampwall', url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(displayName)}` },
+            { sourceId: 'nina', url: `https://www.ninaprotocol.com/search?query=${encodeURIComponent(displayName)}` },
+            { sourceId: 'kofi', url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(displayName)}` },
+            { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
+          ],
+        });
+      }
+    }
   }
 
   // Disambiguate artists by comparing releases across platforms
