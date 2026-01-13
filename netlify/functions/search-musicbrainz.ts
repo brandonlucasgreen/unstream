@@ -10,7 +10,7 @@ interface SocialLink {
 }
 
 // Discovered music platform types (found when scraping official websites)
-type DiscoveredPlatform = 'ampwall' | 'artcore';
+type DiscoveredPlatform = 'ampwall' | 'artcore' | 'nina';
 
 interface DiscoveredPlatformLink {
   platform: DiscoveredPlatform;
@@ -269,6 +269,14 @@ async function fetchOfficialSiteSocialLinks(officialUrl: string): Promise<Offici
         seenDiscoveredPlatforms.add('artcore');
         discoveredPlatforms.push({ platform: 'artcore', url });
         console.log(`[Official Site] Found Artcore: ${url}`);
+        continue;
+      }
+
+      // Check for Nina Protocol profile page
+      if (url.includes('ninaprotocol.com') && !seenDiscoveredPlatforms.has('nina')) {
+        seenDiscoveredPlatforms.add('nina');
+        discoveredPlatforms.push({ platform: 'nina', url });
+        console.log(`[Official Site] Found Nina: ${url}`);
         continue;
       }
 
