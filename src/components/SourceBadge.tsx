@@ -4,7 +4,7 @@ import { analytics } from '../services/analytics';
 interface SourceBadgeProps {
   source: Source;
   url: string;
-  isDirectLink?: boolean; // Override searchOnly when we have a verified direct link
+  isDirectLink?: boolean;
 }
 
 export function SourceBadge({ source, url, isDirectLink }: SourceBadgeProps) {
@@ -46,7 +46,6 @@ export function SourceBadge({ source, url, isDirectLink }: SourceBadgeProps) {
         backgroundColor: `${source.color}20`,
         color: source.color,
       }}
-      title={`View on ${source.name}`}
       onClick={() => analytics.trackPlatformClick(source.name)}
     >
       <span className="text-base">
@@ -56,13 +55,15 @@ export function SourceBadge({ source, url, isDirectLink }: SourceBadgeProps) {
         {source.name}
         {hasPayoutPercent ? (
           <span
-            className="text-[10px] font-semibold px-1 py-0.5 rounded cursor-help"
+            className="payout-badge relative text-[10px] font-semibold px-1 py-0.5 rounded cursor-help"
             style={{
               backgroundColor: `${source.color}30`,
             }}
-            title="This is the approximate percentage of a sale the artist receives when you support them on this platform."
           >
             {source.artistPayoutPercent}
+            <span className="payout-tooltip">
+              This is the approximate percentage of a sale the artist receives on this platform.
+            </span>
           </span>
         ) : (
           <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
