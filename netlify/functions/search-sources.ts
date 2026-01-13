@@ -484,13 +484,17 @@ async function getQobuzReleaseTitles(artistUrl: string): Promise<string[]> {
       seen.add(slug);
 
       // Convert slug to normalized title (remove hyphens, lowercase)
-      const normalized = slug.replace(/-/g, '').toLowerCase();
+      let normalized = slug.replace(/-/g, '').toLowerCase();
 
       // Validate: album slug should contain the artist name
       // This filters out "trending" or "recommended" albums shown on empty artist pages
       if (!normalized.includes(artistBase) && !normalized.includes(artistSlug)) {
         continue; // Skip albums that don't belong to this artist
       }
+
+      // Strip artist name from the title for better cross-platform matching
+      // Qobuz slugs are like "ruined-castle-kid-lightbulbs" but Bandcamp titles are just "ruinedcastle"
+      normalized = normalized.replace(artistSlug, '').replace(artistBase, '');
 
       titles.push(normalized);
     }
@@ -1071,6 +1075,11 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
 
   const aggregated = aggregateResults(allResults);
 
+  // Track which platform URLs have been used to avoid adding the same URL to multiple results
+  // This is important for name-matched platforms (Patreon, Bandwagon, etc.) where we can't
+  // verify by release comparison - we only add each URL to ONE result
+  const usedPlatformUrls = new Set<string>();
+
   for (const result of aggregated) {
     if (result.type === 'artist') {
       if (result.platforms.some(p => p.sourceId === 'bandcamp')) {
@@ -1094,32 +1103,38 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
 
       const normalizedName = normalizeForComparison(result.name);
 
+      // For name-matched platforms without release data, only add to ONE result
+      // to avoid the same Patreon/Bandwagon appearing on multiple same-name artists
       if (bandwagonMatches.has(normalizedName)) {
-        result.platforms.push({
-          sourceId: 'bandwagon',
-          url: bandwagonMatches.get(normalizedName)!,
-        });
+        const url = bandwagonMatches.get(normalizedName)!;
+        if (!usedPlatformUrls.has(url)) {
+          result.platforms.push({ sourceId: 'bandwagon', url });
+          usedPlatformUrls.add(url);
+        }
       }
 
       if (faircampMatches.has(normalizedName)) {
-        result.platforms.push({
-          sourceId: 'faircamp',
-          url: faircampMatches.get(normalizedName)!,
-        });
+        const url = faircampMatches.get(normalizedName)!;
+        if (!usedPlatformUrls.has(url)) {
+          result.platforms.push({ sourceId: 'faircamp', url });
+          usedPlatformUrls.add(url);
+        }
       }
 
       if (jamcoopMatches.has(normalizedName)) {
-        result.platforms.push({
-          sourceId: 'jamcoop',
-          url: jamcoopMatches.get(normalizedName)!,
-        });
+        const url = jamcoopMatches.get(normalizedName)!;
+        if (!usedPlatformUrls.has(url)) {
+          result.platforms.push({ sourceId: 'jamcoop', url });
+          usedPlatformUrls.add(url);
+        }
       }
 
       if (patreonMatches.has(normalizedName)) {
-        result.platforms.push({
-          sourceId: 'patreon',
-          url: patreonMatches.get(normalizedName)!,
-        });
+        const url = patreonMatches.get(normalizedName)!;
+        if (!usedPlatformUrls.has(url)) {
+          result.platforms.push({ sourceId: 'patreon', url });
+          usedPlatformUrls.add(url);
+        }
       }
 
       // Check for Qobuz matches - add ALL variations with numeric suffixes
