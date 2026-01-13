@@ -135,13 +135,6 @@ export function PrivacyPolicyPage() {
         <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-3 text-text-secondary text-sm">
           <span>Made with love in Massachusetts, USA</span>
           <nav className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-            <Link
-              to="/about"
-              className="hover:text-text-primary transition-colors"
-            >
-              About
-            </Link>
-            <span className="text-text-muted/40 text-xs">&#x2022;</span>
             <a
               href="https://unstream.featurebase.app/roadmap"
               target="_blank"

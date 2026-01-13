@@ -93,7 +93,15 @@ export function ResultCard({ result, defaultExpanded = false }: ResultCardProps)
   );
 
   // Collect platforms that have latest release info
-  const platformsWithRelease = verifiedPlatforms.filter(p => p.latestRelease);
+  // Prioritize Bandcamp over other platforms for featured release display
+  const platformsWithRelease = verifiedPlatforms
+    .filter(p => p.latestRelease)
+    .sort((a, b) => {
+      // Bandcamp always comes first
+      if (a.sourceId === 'bandcamp' && b.sourceId !== 'bandcamp') return -1;
+      if (a.sourceId !== 'bandcamp' && b.sourceId === 'bandcamp') return 1;
+      return 0;
+    });
   const latestRelease = platformsWithRelease[0]?.latestRelease;
 
   // Only show preview if Bandcamp has the latest release

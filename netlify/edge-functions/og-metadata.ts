@@ -13,6 +13,16 @@ const CRAWLER_USER_AGENTS = [
   'Discordbot',
   'Applebot',
   'Googlebot',
+  'Mastodon',
+  'Pleroma',
+  'Misskey',
+  'Akkoma',
+  'Pixelfed',
+  'PeerTube',
+  'Lemmy',
+  'Bluesky',
+  'bsky.app',
+  'redditbot',
 ];
 
 // Check if request is from a social media crawler

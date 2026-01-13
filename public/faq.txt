@@ -1,11 +1,3 @@
-**Unstream is a simple app that helps you find music you love outside the streaming ecosystem.** It recommends platforms better suited to support the makers of that music, as well as free community alternatives to streaming apps provided by local libraries. You can use it in 3 ways (with more to come!):
-
-- Search any artist you like to find all the platforms they’re on where you can support them more directly
-- Check any artist you find in Spotify or Apple Music by sharing their artist profile URL using a special link (or [Shortcut](https://www.icloud.com/shortcuts/73296296361e4f609087746e7f046d47) if you’re on an Apple device)
-- [Install the macOS app](https://github.com/brandonlucasgreen/unstream/releases/latest/download/Unstream.zip) to get suggestions for supporting the artist you’re currently listening to in Spotify or Apple Music; upgrade to **Unstream Plus** *($2.99 one-time payment)* and save the artists you want to support later!
-
-# FAQ 
-
 ### Why did you build this?
 A few reasons! First, [I am a musician](https://kidlightbulbs.com) who’s grown disenchanted by the streaming ecosystem, and I ended up finding much more success building an audience on my own on Bandcamp. I ended up making over $2200 in two years, despite a tiny following online & having not performed live during that period at all. I’ve now seen the success of pursuing this path as an independent musician, and I want to encourage fellow artists explore these alternative platforms as homes for their music.
 
