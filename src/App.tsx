@@ -362,8 +362,11 @@ function App() {
                     <h2 className="font-display text-2xl md:text-3xl font-semibold text-text-primary mb-3">
                       Support the artist you're listening to right now
                     </h2>
+                    <p className="text-text-secondary mb-4">
+                      Unstream for macOS detects what's playing in Spotify or Apple Music and shows the best ways to support that artist, right in your menu bar.
+                    </p>
                     <p className="text-text-secondary mb-6">
-                      Unstream for macOS detects what's playing in Spotify or Apple Music and shows the best ways to support that artist, right in your menu bar. The browser extension does the same for any music playing in your browser (YouTube, Soundcloud, and more).
+                      The browser extension does the same for any music playing in your browser (YouTube, Soundcloud, and more).
                     </p>
                     <div className="flex flex-col sm:flex-row items-center gap-3 justify-center md:justify-start mb-2">
                       <a
@@ -387,8 +390,8 @@ function App() {
                         </svg>
                         Get Chrome extension
                       </a>
-                      <span className="text-text-muted text-sm">Firefox coming soon!</span>
                     </div>
+                    <p className="text-text-muted text-sm mt-2 text-center md:text-left">Firefox coming soon!</p>
                     <p className="text-text-secondary text-sm mt-4">
                       Upgrade to Unstream Plus ($2.99 one-time) to save artists to support later and more.
                     </p>
