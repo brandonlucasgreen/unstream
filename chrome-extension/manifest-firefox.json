@@ -4,11 +4,7 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "unstream@unstream.stream",
-      "strict_min_version": "121.0",
-      "data_collection_permissions": {
-        "required": ["technicalData"],
-        "description": "Unstream sends artist search queries to unstream.stream to find alternative music sources. No personal data is collected or stored."
-      }
+      "strict_min_version": "121.0"
     }
   },
   "description": "Find ethical alternatives for supporting your favorite artists. Bandcamp, Qobuz, artist websites, and decentralized platforms.",
