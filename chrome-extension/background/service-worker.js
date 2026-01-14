@@ -151,11 +151,28 @@ async function getEnrichment(artist) {
   const cached = await chrome.storage.local.get(enrichKey);
 
   if (cached[enrichKey]) {
-    return cached[enrichKey].data;
+    const { data, timestamp } = cached[enrichKey];
+    if (Date.now() - timestamp < CACHE_TTL) {
+      return data;
+    }
   }
 
-  // Trigger enrichment and return null (popup will poll)
-  enrichArtist(artist);
+  // Fetch enrichment and wait for it to complete
+  try {
+    const url = `${API_BASE}/search/musicbrainz?query=${encodeURIComponent(artist)}`;
+    const response = await fetch(url);
+
+    if (response.ok) {
+      const data = await response.json();
+      await chrome.storage.local.set({
+        [enrichKey]: { data, timestamp: Date.now() }
+      });
+      return data;
+    }
+  } catch (error) {
+    console.error('Enrichment error:', error);
+  }
+
   return null;
 }
 

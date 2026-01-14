@@ -262,7 +262,7 @@ function isSearchUrl(url) {
 // Check if source is a manual search link (not a direct match)
 // Now checks the actual URL to handle direct links from official sites
 function isSearchOnlySource(id, url) {
-  const searchOnlyIds = ['ampwall', 'kofi', 'buymeacoffee'];
+  const searchOnlyIds = ['ampwall', 'nina', 'kofi', 'buymeacoffee'];
   if (!searchOnlyIds.includes(id)) return false;
   // If we have a direct link, it's not search-only
   return isSearchUrl(url);
