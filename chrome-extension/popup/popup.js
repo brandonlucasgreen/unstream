@@ -184,7 +184,10 @@ function hideNowPlaying() {
 
 // Load results for artist
 async function loadResults(artist) {
-  elements.resultsGrid.innerHTML = '<div class="loading">Loading...</div>';
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = 'loading';
+  loadingDiv.textContent = 'Loading...';
+  elements.resultsGrid.replaceChildren(loadingDiv);
   elements.resultsSection.classList.remove('hidden');
 
   const response = await chrome.runtime.sendMessage({
@@ -193,7 +196,10 @@ async function loadResults(artist) {
   });
 
   if (response.error) {
-    elements.resultsGrid.innerHTML = '<div class="error">Failed to load results</div>';
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error';
+    errorDiv.textContent = 'Failed to load results';
+    elements.resultsGrid.replaceChildren(errorDiv);
     return;
   }
 
@@ -228,22 +234,35 @@ function renderResults(results) {
   });
 
   if (nonSocialPlatforms.length === 0) {
-    elements.resultsGrid.innerHTML = '<div class="empty">No alternative sources found</div>';
+    const emptyDiv = document.createElement('div');
+    emptyDiv.className = 'empty';
+    emptyDiv.textContent = 'No alternative sources found';
+    elements.resultsGrid.replaceChildren(emptyDiv);
     return;
   }
 
-  elements.resultsGrid.innerHTML = nonSocialPlatforms
-    .slice(0, 8) // Limit to 8 results
-    .map(platform => {
-      const config = SOURCE_CONFIG[platform.sourceId] || { icon: '🔗', name: platform.sourceId };
-      return `
-        <a href="${platform.url}" target="_blank" class="result-item" title="${config.name}">
-          <span class="result-icon">${config.icon}</span>
-          <span class="result-name">${config.name}</span>
-        </a>
-      `;
-    })
-    .join('');
+  const fragment = document.createDocumentFragment();
+  nonSocialPlatforms.slice(0, 8).forEach(platform => {
+    const config = SOURCE_CONFIG[platform.sourceId] || { icon: '🔗', name: platform.sourceId };
+    const link = document.createElement('a');
+    link.href = platform.url;
+    link.target = '_blank';
+    link.className = 'result-item';
+    link.title = config.name;
+
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'result-icon';
+    iconSpan.textContent = config.icon;
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'result-name';
+    nameSpan.textContent = config.name;
+
+    link.appendChild(iconSpan);
+    link.appendChild(nameSpan);
+    fragment.appendChild(link);
+  });
+  elements.resultsGrid.replaceChildren(fragment);
 }
 
 // Check if source is social
@@ -284,17 +303,28 @@ async function loadEnrichment(artist) {
 function renderSocialLinks(links) {
   if (links.length === 0) return;
 
-  elements.socialLinks.innerHTML = links
-    .map(link => {
-      const icon = SOCIAL_ICONS[link.platform] || '';
-      return `
-        <a href="${link.url}" target="_blank" class="social-link" title="${link.platform}">
-          ${icon}
-        </a>
-      `;
-    })
-    .join('');
+  const fragment = document.createDocumentFragment();
+  const parser = new DOMParser();
 
+  links.forEach(link => {
+    const anchor = document.createElement('a');
+    anchor.href = link.url;
+    anchor.target = '_blank';
+    anchor.className = 'social-link';
+    anchor.title = link.platform;
+
+    const iconSvg = SOCIAL_ICONS[link.platform];
+    if (iconSvg) {
+      const doc = parser.parseFromString(iconSvg, 'image/svg+xml');
+      const svg = doc.documentElement;
+      if (svg && svg.nodeName === 'svg') {
+        anchor.appendChild(svg);
+      }
+    }
+    fragment.appendChild(anchor);
+  });
+
+  elements.socialLinks.replaceChildren(fragment);
   elements.socialSection.classList.remove('hidden');
 }
 
@@ -305,11 +335,16 @@ async function updateSaveButton() {
   const { savedArtists = [] } = await chrome.storage.sync.get('savedArtists');
   const isSaved = savedArtists.includes(currentArtist);
 
+  const starSpan = document.createElement('span');
+  starSpan.className = 'star';
+
   if (isSaved) {
-    elements.saveArtistBtn.innerHTML = '<span class="star">★</span> Saved';
+    starSpan.textContent = '\u2605'; // ★
+    elements.saveArtistBtn.replaceChildren(starSpan, document.createTextNode(' Saved'));
     elements.saveArtistBtn.classList.add('saved');
   } else {
-    elements.saveArtistBtn.innerHTML = '<span class="star">☆</span> Save Artist';
+    starSpan.textContent = '\u2606'; // ☆
+    elements.saveArtistBtn.replaceChildren(starSpan, document.createTextNode(' Save Artist'));
     elements.saveArtistBtn.classList.remove('saved');
   }
 }
@@ -352,27 +387,33 @@ async function loadSavedArtists() {
     return;
   }
 
-  elements.savedArtists.innerHTML = savedArtists
-    .map(artist => `
-      <div class="saved-artist" data-artist="${artist}">
-        <span class="name">${artist}</span>
-        <span class="remove" title="Remove">×</span>
-      </div>
-    `)
-    .join('');
+  const fragment = document.createDocumentFragment();
+  savedArtists.forEach(artist => {
+    const div = document.createElement('div');
+    div.className = 'saved-artist';
+    div.dataset.artist = artist;
 
-  elements.savedSection.classList.remove('hidden');
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'name';
+    nameSpan.textContent = artist;
+    nameSpan.addEventListener('click', () => searchArtist(artist));
 
-  // Add click handlers
-  elements.savedArtists.querySelectorAll('.saved-artist').forEach(el => {
-    el.querySelector('.name').addEventListener('click', () => {
-      searchArtist(el.dataset.artist);
-    });
-    el.querySelector('.remove').addEventListener('click', async (e) => {
+    const removeSpan = document.createElement('span');
+    removeSpan.className = 'remove';
+    removeSpan.title = 'Remove';
+    removeSpan.textContent = '\u00D7';
+    removeSpan.addEventListener('click', async (e) => {
       e.stopPropagation();
-      await removeSavedArtist(el.dataset.artist);
+      await removeSavedArtist(artist);
     });
+
+    div.appendChild(nameSpan);
+    div.appendChild(removeSpan);
+    fragment.appendChild(div);
   });
+
+  elements.savedArtists.replaceChildren(fragment);
+  elements.savedSection.classList.remove('hidden');
 }
 
 // Remove saved artist

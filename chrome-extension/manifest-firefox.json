@@ -1,6 +1,15 @@
 {
   "manifest_version": 3,
   "name": "Unstream - Support Music Directly",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "unstream@unstream.stream",
+      "strict_min_version": "121.0",
+      "data_collection_permissions": {
+        "description": "Unstream does not collect any personal data. We only make API requests to unstream.stream to search for artist information."
+      }
+    }
+  },
   "description": "Find ethical alternatives for supporting your favorite artists. Bandcamp, Qobuz, artist websites, and decentralized platforms.",
   "version": "1.1.1",
   "icons": {
@@ -17,8 +26,7 @@
     "default_title": "Unstream"
   },
   "background": {
-    "service_worker": "background/service-worker.js",
-    "type": "module"
+    "scripts": ["background/service-worker.js"]
   },
   "content_scripts": [
     {
