@@ -479,7 +479,16 @@ function App() {
             <h2 className="font-display text-2xl md:text-3xl font-semibold text-text-primary mb-6 text-center md:text-left">
               Get in touch
             </h2>
-            <div data-letterbird-form="true"></div>
+            <div
+              ref={(el) => {
+                if (el && !el.querySelector('script')) {
+                  const script = document.createElement('script');
+                  script.src = 'https://letterbird.co/embed/v1.js';
+                  script.setAttribute('data-letterbirduser', 'hi-d2078591');
+                  el.appendChild(script);
+                }
+              }}
+            ></div>
           </div>
         </div>
       </section>
