@@ -4,7 +4,10 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "unstream@unstream.stream",
-      "strict_min_version": "121.0"
+      "strict_min_version": "121.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
     }
   },
   "description": "Find ethical alternatives for supporting your favorite artists. Bandcamp, Qobuz, artist websites, and decentralized platforms.",
