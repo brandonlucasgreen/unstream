@@ -6,6 +6,7 @@
       "id": "unstream@unstream.stream",
       "strict_min_version": "121.0",
       "data_collection_permissions": {
+        "required": false,
         "description": "Unstream does not collect any personal data. We only make API requests to unstream.stream to search for artist information."
       }
     }
