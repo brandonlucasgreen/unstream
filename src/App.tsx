@@ -472,6 +472,18 @@ function App() {
         </div>
       </main>
 
+      {/* Contact Form */}
+      <section className="px-4 pb-16">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-surface-secondary rounded-2xl p-6 md:p-8 border border-border">
+            <h2 className="font-display text-2xl md:text-3xl font-semibold text-text-primary mb-6 text-center md:text-left">
+              Get in touch
+            </h2>
+            <div data-letterbird-form="true"></div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="border-t border-border py-6 px-4">
         <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-3 text-text-secondary text-sm">
