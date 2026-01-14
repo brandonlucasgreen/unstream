@@ -476,9 +476,12 @@ function App() {
       <section className="px-4 pb-16">
         <div className="max-w-4xl mx-auto">
           <div className="bg-surface-secondary rounded-2xl p-6 md:p-8 border border-border">
-            <h2 className="font-display text-2xl md:text-3xl font-semibold text-text-primary mb-6 text-center md:text-left">
+            <h2 className="font-display text-2xl md:text-3xl font-semibold text-text-primary mb-3 text-center md:text-left">
               Get in touch
             </h2>
+            <p className="text-text-secondary mb-6 text-center md:text-left">
+              Can't find the artist you want to support? Have a feature idea? Reach out to help make Unstream better for you.
+            </p>
             <div
               ref={(el) => {
                 if (el && !el.querySelector('script')) {
