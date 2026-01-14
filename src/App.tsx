@@ -480,7 +480,7 @@ function App() {
               Get in touch
             </h2>
             <p className="text-text-secondary mb-6 text-center md:text-left">
-              Can't find the artist you want to support? Have a feature idea? Reach out to help make Unstream better for you.
+              Can't find the artist you want to support? Have a feature idea? Reach out below.
             </p>
             <div
               ref={(el) => {
