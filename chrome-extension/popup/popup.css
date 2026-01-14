@@ -203,21 +203,28 @@ body {
   height: 18px;
 }
 
+/* Actions Row */
+.actions-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
 /* Save Button */
 .save-btn {
-  width: 100%;
-  padding: 12px;
+  flex: 1;
+  padding: 10px 12px;
   background: #374151;
   border: 1px solid #4B5563;
   border-radius: 8px;
   color: #F9FAFB;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   transition: all 0.2s;
 }
 
@@ -235,14 +242,62 @@ body {
 }
 
 .star {
-  font-size: 16px;
+  font-size: 14px;
+}
+
+/* Open in Browser Button */
+.open-browser-btn {
+  flex: 1;
+  padding: 10px 12px;
+  background: #3B82F6;
+  border: none;
+  border-radius: 8px;
+  color: #F9FAFB;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.open-browser-btn:hover {
+  background: #2563EB;
+}
+
+.open-browser-btn svg {
+  flex-shrink: 0;
+}
+
+/* Report Issue Link */
+.report-issue-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #9CA3AF;
+  text-decoration: none;
+  padding: 6px 0;
+  transition: color 0.2s;
+}
+
+.report-issue-link:hover {
+  color: #D1D5DB;
+}
+
+.report-issue-link svg {
+  flex-shrink: 0;
 }
 
 .pro-prompt {
   text-align: center;
   font-size: 12px;
   color: #9CA3AF;
-  margin-top: 8px;
+  margin-top: 4px;
+  margin-bottom: 8px;
 }
 
 .pro-prompt a {

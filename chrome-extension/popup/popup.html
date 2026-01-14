@@ -54,14 +54,32 @@
       <div id="social-links" class="social-links"></div>
     </section>
 
-    <!-- Save Artist Button -->
-    <section id="save-section" class="section hidden">
-      <button id="save-artist-btn" class="save-btn">
-        <span class="star">☆</span> Save Artist
-      </button>
+    <!-- Actions Section -->
+    <section id="actions-section" class="section hidden">
+      <div class="actions-row">
+        <button id="save-artist-btn" class="save-btn">
+          <span class="star">☆</span> Save Artist
+        </button>
+        <button id="open-browser-btn" class="open-browser-btn" title="Open in browser">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+          Open in browser
+        </button>
+      </div>
       <p id="pro-prompt" class="pro-prompt hidden">
         <a href="#" id="upgrade-link">Upgrade to Unstream Plus</a> to save artists
       </p>
+      <a href="#" id="report-issue-link" class="report-issue-link">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        Report an issue with this result
+      </a>
     </section>
 
     <!-- Saved Artists Section -->

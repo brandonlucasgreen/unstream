@@ -10,15 +10,14 @@ const SOURCE_CONFIG = {
   mirlo: { icon: '🪺', name: 'Mirlo' },
   faircamp: { icon: '⛺', name: 'Faircamp' },
   bandwagon: { icon: '🚐', name: 'Bandwagon' },
+  nina: { icon: '🎵', name: 'Nina Protocol' },
   patreon: { icon: '🎨', name: 'Patreon' },
   kofi: { icon: '☕', name: 'Ko-fi' },
   buymeacoffee: { icon: '☕', name: 'Buy Me a Coffee' },
   ampwall: { icon: '🔊', name: 'Ampwall' },
-  songkick: { icon: '🎤', name: 'Concerts' },
   // Library
   hoopla: { icon: '📚', name: 'Hoopla' },
   freegal: { icon: '📚', name: 'Freegal' },
-  libby: { icon: '📚', name: 'Libby' },
 };
 
 // Social icons (SVG paths)
@@ -40,8 +39,10 @@ const elements = {
   resultsGrid: document.getElementById('results-grid'),
   socialSection: document.getElementById('social-section'),
   socialLinks: document.getElementById('social-links'),
-  saveSection: document.getElementById('save-section'),
+  actionsSection: document.getElementById('actions-section'),
   saveArtistBtn: document.getElementById('save-artist-btn'),
+  openBrowserBtn: document.getElementById('open-browser-btn'),
+  reportIssueLink: document.getElementById('report-issue-link'),
   proPrompt: document.getElementById('pro-prompt'),
   savedSection: document.getElementById('saved-section'),
   savedArtists: document.getElementById('saved-artists'),
@@ -60,6 +61,7 @@ const elements = {
 
 // State
 let currentArtist = null;
+let currentResults = null;
 let isProUser = false;
 
 // Initialize popup
@@ -164,7 +166,7 @@ function showNowPlaying(track) {
 
   elements.nowPlaying.classList.remove('hidden');
   elements.idleState.classList.add('hidden');
-  elements.saveSection.classList.remove('hidden');
+  elements.actionsSection.classList.remove('hidden');
 
   updateSaveButton();
 }
@@ -172,11 +174,12 @@ function showNowPlaying(track) {
 // Hide now playing
 function hideNowPlaying() {
   currentArtist = null;
+  currentResults = null;
   elements.nowPlaying.classList.add('hidden');
   elements.idleState.classList.remove('hidden');
   elements.resultsSection.classList.add('hidden');
   elements.socialSection.classList.add('hidden');
-  elements.saveSection.classList.add('hidden');
+  elements.actionsSection.classList.add('hidden');
 }
 
 // Load results for artist
@@ -194,7 +197,8 @@ async function loadResults(artist) {
     return;
   }
 
-  renderResults(response.results || []);
+  currentResults = response.results || [];
+  renderResults(currentResults);
 }
 
 // Render results
@@ -394,6 +398,46 @@ async function searchArtist(artist) {
   await loadEnrichment(artist);
 }
 
+// Open in browser
+function openInBrowser() {
+  if (!currentArtist) return;
+  const encodedQuery = encodeURIComponent(currentArtist);
+  chrome.tabs.create({ url: `https://unstream.stream/?q=${encodedQuery}` });
+}
+
+// Report issue
+function reportIssue(e) {
+  e.preventDefault();
+  if (!currentArtist) return;
+
+  // Build platform list from current results
+  let platformList = 'No platforms found';
+  if (currentResults && currentResults.length > 0) {
+    const platforms = [];
+    for (const result of currentResults) {
+      if (result.platforms && Array.isArray(result.platforms)) {
+        for (const platform of result.platforms) {
+          platforms.push(`- ${platform.sourceId}: ${platform.url || 'N/A'}`);
+        }
+      }
+    }
+    if (platforms.length > 0) {
+      platformList = platforms.join('\n');
+    }
+  }
+
+  const subject = encodeURIComponent(`Issue Report: ${currentArtist}`);
+  const body = encodeURIComponent(`Artist/Result: ${currentArtist}
+
+Platforms:
+${platformList}
+
+Issue Description:
+[Please describe what's wrong with this result]`);
+
+  chrome.tabs.create({ url: `mailto:support@unstream.stream?subject=${subject}&body=${body}` });
+}
+
 // Setup event listeners
 function setupEventListeners() {
   // Settings toggle
@@ -409,6 +453,12 @@ function setupEventListeners() {
 
   // Save artist
   elements.saveArtistBtn.addEventListener('click', toggleSaveArtist);
+
+  // Open in browser
+  elements.openBrowserBtn.addEventListener('click', openInBrowser);
+
+  // Report issue
+  elements.reportIssueLink.addEventListener('click', reportIssue);
 
   // License activation
   elements.activateBtn.addEventListener('click', async () => {
