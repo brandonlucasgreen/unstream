@@ -18,6 +18,7 @@ class ReleaseAlertManager: ObservableObject {
 
     private let bandcampChecker = BandcampReleaseChecker()
     private let faircampChecker = FaircampReleaseChecker()
+    private let mirloChecker = MirloReleaseChecker()
 
     private weak var supportListManager: SupportListManager?
     private weak var licenseManager: LicenseManager?
@@ -216,6 +217,22 @@ class ReleaseAlertManager: ObservableObject {
                     }
                 }
             }
+
+            // Check Mirlo
+            if let mirloUrl = entry.platforms.first(where: { $0.sourceId == "mirlo" })?.url {
+                if let release = await checkMirlo(url: mirloUrl, artistName: entry.artistName) {
+                    // If we already found a release for this artist, prefer Mirlo or the newer release
+                    if let existingIndex = foundNewReleases.firstIndex(where: { $0.artistName.lowercased() == entry.artistName.lowercased() }) {
+                        let existing = foundNewReleases[existingIndex]
+                        // Prefer Mirlo over Bandcamp, or the newer release
+                        if existing.platform == "bandcamp" || release.releaseDate >= existing.releaseDate {
+                            foundNewReleases[existingIndex] = release
+                        }
+                    } else {
+                        foundNewReleases.append(release)
+                    }
+                }
+            }
         }
 
         // Update state with new releases
@@ -307,6 +324,40 @@ class ReleaseAlertManager: ObservableObject {
             )
         } catch {
             print("Faircamp check failed for \(artistName): \(error)")
+            return nil
+        }
+    }
+
+    private func checkMirlo(url: String, artistName: String) async -> NewRelease? {
+        do {
+            guard let result = try await mirloChecker.fetchLatestRelease(mirloUrl: url) else {
+                return nil
+            }
+
+            // Check if this release is within the last 7 days (exclude future dates/preorders)
+            let daysSinceRelease = Date().timeIntervalSince(result.releaseDate) / (24 * 60 * 60)
+            guard daysSinceRelease >= 0 && daysSinceRelease <= 7 else { return nil }
+
+            // Check if we already know about this release
+            if checkState.isKnownRelease(result.releaseName, platform: "mirlo", for: artistName) {
+                return nil
+            }
+
+            // Mark as known
+            checkState.addKnownRelease(
+                KnownRelease(releaseName: result.releaseName, releaseDate: result.releaseDate, platform: "mirlo"),
+                for: artistName
+            )
+
+            return NewRelease(
+                artistName: artistName,
+                releaseName: result.releaseName,
+                releaseDate: result.releaseDate,
+                releaseUrl: result.releaseUrl,
+                platform: "mirlo"
+            )
+        } catch {
+            print("Mirlo check failed for \(artistName): \(error)")
             return nil
         }
     }

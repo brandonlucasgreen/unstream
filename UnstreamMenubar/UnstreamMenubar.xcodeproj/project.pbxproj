@@ -44,6 +44,7 @@
 		3B67015496CAB150AE39706A /* ReleaseAlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00D8954502F45060EC9E564F /* ReleaseAlertManager.swift */; };
 		F4D4E24FA67871C9F86CC43A /* BandcampReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 598B46B9DD1158F73D25B3D4 /* BandcampReleaseChecker.swift */; };
 		C0C4E11B966BECC1A96113B9 /* FaircampReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADFAF7146CA0E974CCBD3C2B /* FaircampReleaseChecker.swift */; };
+		M1RL0CHK1A2B3C4D5E6F7890 /* MirloReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = M1RL0REF1A2B3C4D5E6F7890 /* MirloReleaseChecker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -87,6 +88,7 @@
 		00D8954502F45060EC9E564F /* ReleaseAlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseAlertManager.swift; sourceTree = "<group>"; };
 		598B46B9DD1158F73D25B3D4 /* BandcampReleaseChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandcampReleaseChecker.swift; sourceTree = "<group>"; };
 		ADFAF7146CA0E974CCBD3C2B /* FaircampReleaseChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaircampReleaseChecker.swift; sourceTree = "<group>"; };
+		M1RL0REF1A2B3C4D5E6F7890 /* MirloReleaseChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MirloReleaseChecker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -172,6 +174,7 @@
 			children = (
 				598B46B9DD1158F73D25B3D4 /* BandcampReleaseChecker.swift */,
 				ADFAF7146CA0E974CCBD3C2B /* FaircampReleaseChecker.swift */,
+				M1RL0REF1A2B3C4D5E6F7890 /* MirloReleaseChecker.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -284,6 +287,7 @@
 				3B67015496CAB150AE39706A /* ReleaseAlertManager.swift in Sources */,
 				F4D4E24FA67871C9F86CC43A /* BandcampReleaseChecker.swift in Sources */,
 				C0C4E11B966BECC1A96113B9 /* FaircampReleaseChecker.swift in Sources */,
+				M1RL0CHK1A2B3C4D5E6F7890 /* MirloReleaseChecker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

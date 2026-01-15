@@ -7,7 +7,7 @@ struct NewRelease: Codable, Identifiable {
     let releaseName: String
     let releaseDate: Date
     let releaseUrl: String
-    let platform: String  // "bandcamp" or "faircamp"
+    let platform: String  // "bandcamp", "faircamp", or "mirlo"
     let detectedAt: Date
 
     /// Returns true if this release should still be displayed (within 7 days of detection)
