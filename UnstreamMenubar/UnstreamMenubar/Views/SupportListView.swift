@@ -3,6 +3,7 @@ import AppKit
 
 struct SupportListView: View {
     @ObservedObject var supportListManager: SupportListManager
+    @ObservedObject var releaseAlertManager: ReleaseAlertManager
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -56,6 +57,7 @@ struct SupportListView: View {
                     SupportEntryView(
                         entry: entry,
                         isRefreshing: supportListManager.isRefreshing(entry),
+                        newRelease: releaseAlertManager.newRelease(for: entry.artistName),
                         onRemove: {
                             supportListManager.removeEntry(entry)
                         },
@@ -131,6 +133,7 @@ struct SavedArtistsSearchBar: View {
 struct SupportEntryView: View {
     let entry: SupportEntry
     let isRefreshing: Bool
+    var newRelease: NewRelease?
     let onRemove: () -> Void
     let onRefresh: () -> Void
 
@@ -167,6 +170,11 @@ struct SupportEntryView: View {
                 .buttonStyle(.plain)
                 .opacity(isHovering ? 1 : 0.5)
                 .help("Remove from Saved Artists")
+            }
+
+            // New release indicator
+            if let release = newRelease {
+                NewReleaseBadge(release: release)
             }
 
             if !entry.platforms.isEmpty {
@@ -271,8 +279,48 @@ struct SavedPlatformBadge: View {
     }
 }
 
-#Preview {
-    SupportListView(supportListManager: SupportListManager())
+struct NewReleaseBadge: View {
+    let release: NewRelease
+
+    var body: some View {
+        Button(action: openRelease) {
+            HStack(spacing: 6) {
+                Image(systemName: "sparkles")
+                    .foregroundColor(.yellow)
+                Text("New release: \(release.releaseName)")
+                    .font(.system(size: 11, weight: .medium))
+                    .lineLimit(1)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(Color.yellow.opacity(0.15))
+            .foregroundColor(.primary)
+            .cornerRadius(6)
+        }
+        .buttonStyle(.plain)
+        .help("Open \(release.releaseName) on \(release.platform.capitalized)")
+    }
+
+    private func openRelease() {
+        guard let url = URL(string: release.releaseUrl) else { return }
+        NSWorkspace.shared.open(url)
+    }
+}
+
+private struct SupportListViewPreviewContainer: View {
+    @StateObject private var supportList = SupportListManager()
+    @StateObject private var license = LicenseManager()
+
+    var body: some View {
+        SupportListView(
+            supportListManager: supportList,
+            releaseAlertManager: ReleaseAlertManager(supportListManager: supportList, licenseManager: license)
+        )
         .padding()
         .frame(width: 300)
+    }
+}
+
+#Preview {
+    SupportListViewPreviewContainer()
 }

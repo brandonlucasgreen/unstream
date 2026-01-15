@@ -40,6 +40,10 @@
 		DE73245E609554051FD75041 /* PopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AFC8C5C2C45EA79D7152B06 /* PopoverView.swift */; };
 		F98DF5A620640DB76416589E /* MediaObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86E80A0C3502898585C7A7D2 /* MediaObserver.swift */; };
 		FEAC4B5A552639681B17EC47 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 777714ECD054AD86F93188F5 /* EmptyStateView.swift */; };
+		CBFCA1FE7AAC8BD19B0AC355 /* ReleaseAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAD5D85C58E50E0F1A7BD0C7 /* ReleaseAlert.swift */; };
+		3B67015496CAB150AE39706A /* ReleaseAlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00D8954502F45060EC9E564F /* ReleaseAlertManager.swift */; };
+		F4D4E24FA67871C9F86CC43A /* BandcampReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 598B46B9DD1158F73D25B3D4 /* BandcampReleaseChecker.swift */; };
+		C0C4E11B966BECC1A96113B9 /* FaircampReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADFAF7146CA0E974CCBD3C2B /* FaircampReleaseChecker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -79,6 +83,10 @@
 		E2B3C4D5F6071829304050A1 /* SocialIconButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialIconButton.swift; sourceTree = "<group>"; };
 		F1D00195134C51491855D73C /* Unstream.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Unstream.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F3B4C5D6E7081920A1B2C3D4 /* BrandIcons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandIcons.swift; sourceTree = "<group>"; };
+		FAD5D85C58E50E0F1A7BD0C7 /* ReleaseAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseAlert.swift; sourceTree = "<group>"; };
+		00D8954502F45060EC9E564F /* ReleaseAlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseAlertManager.swift; sourceTree = "<group>"; };
+		598B46B9DD1158F73D25B3D4 /* BandcampReleaseChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandcampReleaseChecker.swift; sourceTree = "<group>"; };
+		ADFAF7146CA0E974CCBD3C2B /* FaircampReleaseChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaircampReleaseChecker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -119,6 +127,7 @@
 			children = (
 				2B31DB9784DB0CFBF5F20949 /* AppState.swift */,
 				ADC98F9EF3A0EFF8CE0F6094 /* NowPlaying.swift */,
+				FAD5D85C58E50E0F1A7BD0C7 /* ReleaseAlert.swift */,
 				79AEF0735722A4FCDD838D05 /* SearchResponse.swift */,
 			);
 			path = Models;
@@ -130,11 +139,13 @@
 				D70033B2F693E68D6CEC84B3 /* Assets.xcassets */,
 				C878B05B34EE2C18FCEEB68A /* Info.plist */,
 				86E80A0C3502898585C7A7D2 /* MediaObserver.swift */,
+				00D8954502F45060EC9E564F /* ReleaseAlertManager.swift */,
 				D337F593A52D74DDB206DFEB /* UnstreamAPI.swift */,
 				A4D9D8A335FE3D07CE9851A3 /* UnstreamMenubar.entitlements */,
 				02ABFD2B0A6C8C9935BB9A4C /* UnstreamMenubarApp.swift */,
 				D30C5DE6E6DA5D1F45AC53F5 /* UpdateChecker.swift */,
 				89D3FDFC1D75CEA4C980F95F /* Models */,
+				92F157E0193D04E6ACFD9040 /* Services */,
 				E5476DDDEA59C1C594A978FE /* Views */,
 			);
 			path = UnstreamMenubar;
@@ -154,6 +165,15 @@
 				E2B3C4D5F6071829304050A1 /* SocialIconButton.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		92F157E0193D04E6ACFD9040 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				598B46B9DD1158F73D25B3D4 /* BandcampReleaseChecker.swift */,
+				ADFAF7146CA0E974CCBD3C2B /* FaircampReleaseChecker.swift */,
+			);
+			path = Services;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -260,6 +280,10 @@
 				6D765D2F8868E2D249B2F4D1 /* UpdateChecker.swift in Sources */,
 				A198C09B2F133CA0002CFCCA /* ListenBrainzService.swift in Sources */,
 				A198C09C2F133CA0002CFCCA /* ScrobbleManager.swift in Sources */,
+				CBFCA1FE7AAC8BD19B0AC355 /* ReleaseAlert.swift in Sources */,
+				3B67015496CAB150AE39706A /* ReleaseAlertManager.swift in Sources */,
+				F4D4E24FA67871C9F86CC43A /* BandcampReleaseChecker.swift in Sources */,
+				C0C4E11B966BECC1A96113B9 /* FaircampReleaseChecker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

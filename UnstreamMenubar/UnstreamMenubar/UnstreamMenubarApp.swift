@@ -2,9 +2,182 @@ import SwiftUI
 import Combine
 import AppKit
 import ServiceManagement
+import UserNotifications
 
-// Welcome window launcher - shows ONLY on first launch, with multiple fallback mechanisms
-// to ensure 100% reliability
+// MARK: - Shared State Container
+
+/// Holds all the shared state managers so they can be accessed by both AppDelegate and SwiftUI views
+@MainActor
+class AppStateContainer: ObservableObject {
+    static let shared = AppStateContainer()
+
+    let appState = AppState()
+    let mediaObserver = MediaObserver()
+    let licenseManager: LicenseManager
+    let supportListManager: SupportListManager
+    let releaseAlertManager: ReleaseAlertManager
+    let scrobbleManager = ScrobbleManager.shared
+
+    private var cancellables = Set<AnyCancellable>()
+
+    private init() {
+        let license = LicenseManager()
+        let supportList = SupportListManager()
+        let releaseAlert = ReleaseAlertManager(supportListManager: supportList, licenseManager: license)
+
+        self.licenseManager = license
+        self.supportListManager = supportList
+        self.releaseAlertManager = releaseAlert
+
+        // Set up media observer to update app state
+        mediaObserver.$currentTrack
+            .sink { [weak self] nowPlaying in
+                guard let self = self else { return }
+                Task {
+                    await self.appState.updateNowPlaying(nowPlaying)
+                }
+                self.scrobbleManager.trackChanged(to: nowPlaying)
+            }
+            .store(in: &cancellables)
+    }
+}
+
+// MARK: - App Delegate (Pure AppKit - no SwiftUI App)
+
+@MainActor
+class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
+    static var shared: AppDelegate?
+
+    // Static to ensure only ONE status item ever exists
+    private static var statusItem: NSStatusItem?
+    private static var hasCreatedStatusItem = false
+
+    private var popover: NSPopover!
+    private var eventMonitor: Any?
+    private var settingsWindow: NSWindow?
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        AppDelegate.shared = self
+
+        // Set notification delegate so we can handle clicks
+        UNUserNotificationCenter.current().delegate = self
+
+        // Create the status item ONLY ONCE ever (static check)
+        if !AppDelegate.hasCreatedStatusItem {
+            AppDelegate.hasCreatedStatusItem = true
+            AppDelegate.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+
+            if let button = AppDelegate.statusItem?.button {
+                button.image = NSImage(named: "MenuBarIcon")
+                button.action = #selector(togglePopover)
+                button.target = self
+            }
+        }
+
+        // Create the popover
+        popover = NSPopover()
+        popover.contentSize = NSSize(width: 320, height: 480)
+        popover.behavior = .transient
+        popover.animates = true
+
+        // Create the SwiftUI content view with all the environment objects
+        let container = AppStateContainer.shared
+        let contentView = PopoverView()
+            .environmentObject(container.appState)
+            .environmentObject(container.licenseManager)
+            .environmentObject(container.supportListManager)
+            .environmentObject(container.releaseAlertManager)
+
+        popover.contentViewController = NSHostingController(rootView: contentView)
+
+        // Set up event monitor to close popover when clicking outside
+        eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
+            if let popover = self?.popover, popover.isShown {
+                popover.performClose(nil)
+            }
+        }
+
+        // Initialize welcome launcher
+        _ = WelcomeWindowLauncher.shared
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        if let monitor = eventMonitor {
+            NSEvent.removeMonitor(monitor)
+        }
+    }
+
+    @objc func togglePopover() {
+        guard let button = AppDelegate.statusItem?.button else { return }
+
+        if popover.isShown {
+            popover.performClose(nil)
+        } else {
+            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            popover.contentViewController?.view.window?.makeKey()
+        }
+    }
+
+    // Handle notification when app is in foreground
+    nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .sound])
+    }
+
+    // Notification click - open URL directly, don't activate app
+    nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        // Open the URL
+        if let releaseUrl = response.notification.request.content.userInfo["releaseUrl"] as? String,
+           let url = URL(string: releaseUrl) {
+            NSWorkspace.shared.open(url)
+        }
+        completionHandler()
+    }
+
+    // Open settings window
+    func openSettings() {
+        if settingsWindow == nil {
+            let container = AppStateContainer.shared
+            let settingsView = SettingsView(
+                licenseManager: container.licenseManager,
+                releaseAlertManager: container.releaseAlertManager
+            )
+
+            let hostingController = NSHostingController(rootView: settingsView)
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 320, height: 400),
+                styleMask: [.titled, .closable],
+                backing: .buffered,
+                defer: false
+            )
+            window.title = "Unstream Settings"
+            window.contentViewController = hostingController
+            window.center()
+            window.isReleasedWhenClosed = false
+
+            settingsWindow = window
+        }
+
+        settingsWindow?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    // Prevent app reopen from creating duplicates
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        return false
+    }
+}
+
+// MARK: - Welcome Window Launcher
+
 class WelcomeWindowLauncher {
     static let shared = WelcomeWindowLauncher()
     private var window: NSWindow?
@@ -12,21 +185,17 @@ class WelcomeWindowLauncher {
     private var observers: [Any] = []
 
     init() {
-        // Only set up triggers on first launch
         guard !UserDefaults.standard.bool(forKey: "hasLaunchedBefore") else { return }
 
-        // Method 1: Timer on main run loop with .common mode (works during UI events)
         let timer = Timer(timeInterval: 1.0, repeats: false) { [weak self] _ in
             self?.showWelcomeWindow()
         }
         RunLoop.main.add(timer, forMode: .common)
 
-        // Method 2: DispatchQueue as backup
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
             self?.showWelcomeWindow()
         }
 
-        // Method 3: Listen for app activation as another fallback
         let observer = NotificationCenter.default.addObserver(
             forName: NSApplication.didBecomeActiveNotification,
             object: nil,
@@ -40,12 +209,10 @@ class WelcomeWindowLauncher {
     }
 
     func showWelcomeWindow() {
-        // Only show once, only on first launch
         guard !UserDefaults.standard.bool(forKey: "hasLaunchedBefore") else { return }
         guard !hasAttemptedShow else { return }
         hasAttemptedShow = true
 
-        // Clean up observers since we're showing now
         for observer in observers {
             NotificationCenter.default.removeObserver(observer)
         }
@@ -72,7 +239,6 @@ class WelcomeWindowLauncher {
 
         self.window = window
 
-        // Force the app and window to the front
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
         window.orderFrontRegardless()
@@ -80,10 +246,8 @@ class WelcomeWindowLauncher {
     }
 
     func dismiss() {
-        // Mark as launched so it never shows again
         UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
 
-        // Enable launch at login by default for new users
         if !UserDefaults.standard.bool(forKey: "hasSetLaunchAtLoginDefault") {
             UserDefaults.standard.set(true, forKey: "hasSetLaunchAtLoginDefault")
             do {
@@ -98,52 +262,27 @@ class WelcomeWindowLauncher {
     }
 }
 
+// MARK: - SwiftUI App (minimal - settings handled by AppDelegate)
+
 @main
 struct UnstreamMenubarApp: App {
-    @StateObject private var appState = AppState()
-    @StateObject private var mediaObserver = MediaObserver()
-    @StateObject private var licenseManager = LicenseManager()
-    @StateObject private var supportListManager = SupportListManager()
-
-    // Initialize welcome launcher - must keep reference to prevent deallocation
-    private let welcomeLauncher = WelcomeWindowLauncher.shared
-
-    // Scrobble manager for ListenBrainz integration
-    private let scrobbleManager = ScrobbleManager.shared
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        MenuBarExtra {
-            PopoverView()
-                .environmentObject(appState)
-                .environmentObject(licenseManager)
-                .environmentObject(supportListManager)
-                .onReceive(mediaObserver.$currentTrack) { nowPlaying in
-                    Task {
-                        await appState.updateNowPlaying(nowPlaying)
-                    }
-                    // Notify scrobble manager of track changes
-                    scrobbleManager.trackChanged(to: nowPlaying)
-                }
-        } label: {
-            Image("MenuBarIcon")
+        // Empty Settings scene - actual settings handled by AppDelegate.openSettings()
+        Settings {
+            EmptyView()
         }
-        .menuBarExtraStyle(.window)
-
-        // Standalone Settings window
-        Window("Unstream Settings", id: "settings") {
-            SettingsView(licenseManager: licenseManager)
-        }
-        .windowResizability(.contentSize)
-        .defaultPosition(.center)
     }
 }
+
+// MARK: - Welcome Content View
 
 struct WelcomeContentView: View {
     let onDismiss: () -> Void
 
     var body: some View {
         VStack(spacing: 20) {
-            // Use the high-res app icon instead of the small menu bar icon
             Image(nsImage: NSApp.applicationIconImage)
                 .resizable()
                 .frame(width: 64, height: 64)

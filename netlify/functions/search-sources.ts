@@ -1088,10 +1088,6 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
           url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(result.name)}`,
         });
         result.platforms.push({
-          sourceId: 'nina',
-          url: `https://www.ninaprotocol.com/search?query=${encodeURIComponent(result.name)}`,
-        });
-        result.platforms.push({
           sourceId: 'kofi',
           url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(result.name)}`,
         });
@@ -1154,7 +1150,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
 
       // Sort platforms: verified first, then search-only last
       // Note: officialsite, discogs, hoopla, freegal are added via MusicBrainz lazy loading
-      const searchOnlyPlatforms = new Set(['ampwall', 'nina', 'kofi', 'buymeacoffee']);
+      const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee']);
       result.platforms.sort((a, b) => {
         const aIsSearchOnly = searchOnlyPlatforms.has(a.sourceId);
         const bIsSearchOnly = searchOnlyPlatforms.has(b.sourceId);
@@ -1225,7 +1221,6 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     // Add search-only platforms
     platforms.push(
       { sourceId: 'ampwall', url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(displayName)}` },
-      { sourceId: 'nina', url: `https://www.ninaprotocol.com/search?query=${encodeURIComponent(displayName)}` },
       { sourceId: 'kofi', url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(displayName)}` },
       { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
     );
@@ -1453,7 +1448,6 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
           platforms: [
             { sourceId: 'qobuz', url: qobuzUrl },
             { sourceId: 'ampwall', url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(displayName)}` },
-            { sourceId: 'nina', url: `https://www.ninaprotocol.com/search?query=${encodeURIComponent(displayName)}` },
             { sourceId: 'kofi', url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(displayName)}` },
             { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
           ],
@@ -1605,7 +1599,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
 
   // Filter out results that only have search-only platforms (ampwall, kofi, buymeacoffee)
   // These are just fuzzy search links added to any Bandcamp result, not real matches
-  const searchOnlyPlatforms = new Set(['ampwall', 'nina', 'kofi', 'buymeacoffee']);
+  const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee']);
   const filtered = disambiguated.filter(result => {
     const hasNonSearchOnlyPlatform = result.platforms.some(p => !searchOnlyPlatforms.has(p.sourceId));
     return hasNonSearchOnlyPlatform;

@@ -3,6 +3,7 @@ import ServiceManagement
 
 struct SettingsView: View {
     @ObservedObject var licenseManager: LicenseManager
+    var releaseAlertManager: ReleaseAlertManager?
 
     @AppStorage("musicListeningEnabled") private var musicListeningEnabled = true
     @AppStorage("checkForUpdatesAutomatically") private var checkForUpdatesAutomatically = true
@@ -85,15 +86,92 @@ struct SettingsView: View {
 
             Divider()
 
-            // Music Listening
-            VStack(alignment: .leading, spacing: 4) {
-                Toggle("Music app listening", isOn: $musicListeningEnabled)
-                Text("Automatically detect what's playing in Music or Spotify")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
+            // Release Alerts (Pro feature)
+            if licenseManager.isPro, let alertManager = releaseAlertManager {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Release Alerts")
+                            .font(.headline)
+                        if alertManager.releaseAlertsEnabled {
+                            Image(systemName: "bell.fill")
+                                .foregroundColor(.yellow)
+                                .font(.caption)
+                        }
+                    }
 
-            Divider()
+                    Toggle("Check for new releases weekly", isOn: Binding(
+                        get: { alertManager.releaseAlertsEnabled },
+                        set: { alertManager.releaseAlertsEnabled = $0 }
+                    ))
+
+                    Text("Get notified when your saved artists release new music on Bandcamp or Faircamp.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    if let lastCheck = alertManager.lastCheckDate {
+                        Text("Last checked: \(lastCheck.formatted(.relative(presentation: .named)))")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    #if DEBUG
+                    // Debug controls for testing
+                    VStack(alignment: .leading, spacing: 8) {
+                        Divider()
+                            .padding(.vertical, 4)
+
+                        Text("Debug Controls")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.orange)
+
+                        HStack {
+                            Button("Check Now") {
+                                Task {
+                                    await alertManager.checkNow()
+                                }
+                            }
+                            .disabled(alertManager.isChecking)
+
+                            if alertManager.isChecking {
+                                ProgressView()
+                                    .scaleEffect(0.6)
+                            }
+                        }
+
+                        HStack(spacing: 8) {
+                            Button("Clear Known") {
+                                alertManager.clearKnownReleases()
+                            }
+                            .font(.caption)
+
+                            Button("Reset All") {
+                                alertManager.resetAllState()
+                            }
+                            .font(.caption)
+                            .foregroundColor(.red)
+                        }
+
+                        Button("Request Notification Permission") {
+                            alertManager.requestNotificationPermission()
+                        }
+                        .font(.caption)
+
+                        if !alertManager.newReleases.isEmpty {
+                            Text("\(alertManager.newReleases.count) new release(s) found")
+                                .font(.caption)
+                                .foregroundColor(.green)
+                        }
+
+                        Text("Check Now triggers immediate check. Clear Known allows re-detecting releases.")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                    #endif
+                }
+
+                Divider()
+            }
 
             // ListenBrainz Scrobbling
             VStack(alignment: .leading, spacing: 8) {
@@ -132,7 +210,7 @@ struct SettingsView: View {
                             }
 
                             if ScrobbleManager.shared.scrobbleCount > 0 {
-                                Text("Scrobbles this session: \(ScrobbleManager.shared.scrobbleCount)")
+                                Text("Scrobble count: \(ScrobbleManager.shared.scrobbleCount)")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
@@ -160,6 +238,18 @@ struct SettingsView: View {
                     }
                 }
             }
+
+            Divider()
+
+            // Music Listening
+            VStack(alignment: .leading, spacing: 4) {
+                Toggle("Music app listening", isOn: $musicListeningEnabled)
+                Text("Automatically detect what's playing in Music or Spotify")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Divider()
 
             // Launch at Login
             VStack(alignment: .leading, spacing: 4) {
@@ -230,7 +320,8 @@ struct SettingsView: View {
             Spacer()
         }
         .padding()
-        .frame(width: 320, height: 520)
+        .frame(width: 320)
+        .fixedSize(horizontal: false, vertical: true)
         .onAppear {
             launchAtLogin = getLaunchAtLoginStatus()
             licenseKeyInput = licenseManager.licenseKey

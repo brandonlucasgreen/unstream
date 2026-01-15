@@ -9,7 +9,7 @@ struct PopoverView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var licenseManager: LicenseManager
     @EnvironmentObject var supportListManager: SupportListManager
-    @Environment(\.openWindow) private var openWindow
+    @EnvironmentObject var releaseAlertManager: ReleaseAlertManager
 
     @State private var selectedTab: PopoverTab = .search
 
@@ -50,7 +50,10 @@ struct PopoverView: View {
                 VStack(spacing: 12) {
                     if selectedTab == .supportList {
                         if licenseManager.isPro {
-                            SupportListView(supportListManager: supportListManager)
+                            SupportListView(
+                                supportListManager: supportListManager,
+                                releaseAlertManager: releaseAlertManager
+                            )
                         } else {
                             ProUpgradeView()
                         }
@@ -109,8 +112,7 @@ struct PopoverView: View {
 
                 Menu {
                     Button(action: {
-                        openWindow(id: "settings")
-                        NSApplication.shared.activate(ignoringOtherApps: true)
+                        AppDelegate.shared?.openSettings()
                     }) {
                         Label("Settings", systemImage: "gearshape")
                     }
@@ -217,9 +219,20 @@ struct ErrorView: View {
     }
 }
 
+private struct PopoverViewPreviewContainer: View {
+    @StateObject private var supportList = SupportListManager()
+    @StateObject private var license = LicenseManager()
+    @StateObject private var appState = AppState()
+
+    var body: some View {
+        PopoverView()
+            .environmentObject(appState)
+            .environmentObject(license)
+            .environmentObject(supportList)
+            .environmentObject(ReleaseAlertManager(supportListManager: supportList, licenseManager: license))
+    }
+}
+
 #Preview {
-    PopoverView()
-        .environmentObject(AppState())
-        .environmentObject(LicenseManager())
-        .environmentObject(SupportListManager())
+    PopoverViewPreviewContainer()
 }
