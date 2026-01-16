@@ -46,6 +46,7 @@
 		C0C4E11B966BECC1A96113B9 /* FaircampReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADFAF7146CA0E974CCBD3C2B /* FaircampReleaseChecker.swift */; };
 		M1RL0CHK1A2B3C4D5E6F7890 /* MirloReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = M1RL0REF1A2B3C4D5E6F7890 /* MirloReleaseChecker.swift */; };
 		Q0BUZ0CHK1A2B3C4D5E6F7890 /* QobuzReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = Q0BUZ0REF1A2B3C4D5E6F7890 /* QobuzReleaseChecker.swift */; };
+		R3L3AS3CHK1A2B3C4D5E6F789 /* ReleaseCheckAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = R3L3AS3REF1A2B3C4D5E6F789 /* ReleaseCheckAPI.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -91,6 +92,7 @@
 		ADFAF7146CA0E974CCBD3C2B /* FaircampReleaseChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaircampReleaseChecker.swift; sourceTree = "<group>"; };
 		M1RL0REF1A2B3C4D5E6F7890 /* MirloReleaseChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MirloReleaseChecker.swift; sourceTree = "<group>"; };
 		Q0BUZ0REF1A2B3C4D5E6F7890 /* QobuzReleaseChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QobuzReleaseChecker.swift; sourceTree = "<group>"; };
+		R3L3AS3REF1A2B3C4D5E6F789 /* ReleaseCheckAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseCheckAPI.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -178,6 +180,7 @@
 				ADFAF7146CA0E974CCBD3C2B /* FaircampReleaseChecker.swift */,
 				M1RL0REF1A2B3C4D5E6F7890 /* MirloReleaseChecker.swift */,
 				Q0BUZ0REF1A2B3C4D5E6F7890 /* QobuzReleaseChecker.swift */,
+				R3L3AS3REF1A2B3C4D5E6F789 /* ReleaseCheckAPI.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -292,6 +295,7 @@
 				C0C4E11B966BECC1A96113B9 /* FaircampReleaseChecker.swift in Sources */,
 				M1RL0CHK1A2B3C4D5E6F7890 /* MirloReleaseChecker.swift in Sources */,
 				Q0BUZ0CHK1A2B3C4D5E6F7890 /* QobuzReleaseChecker.swift in Sources */,
+				R3L3AS3CHK1A2B3C4D5E6F789 /* ReleaseCheckAPI.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

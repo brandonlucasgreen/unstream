@@ -16,10 +16,7 @@ class ReleaseAlertManager: ObservableObject {
     private var checkTimer: Timer?
     private let storageKey = "releaseCheckState"
 
-    private let bandcampChecker = BandcampReleaseChecker()
-    private let faircampChecker = FaircampReleaseChecker()
-    private let mirloChecker = MirloReleaseChecker()
-    private let qobuzChecker = QobuzReleaseChecker()
+    private let releaseAPI = ReleaseCheckAPI()
 
     private weak var supportListManager: SupportListManager?
     private weak var licenseManager: LicenseManager?
@@ -196,53 +193,28 @@ class ReleaseAlertManager: ObservableObject {
         var foundNewReleases: [NewRelease] = []
 
         for entry in entries {
-            // Check Bandcamp
+            // Build platforms dictionary for API call
+            var platforms: [String: String] = [:]
+
             if let bandcampUrl = entry.platforms.first(where: { $0.sourceId == "bandcamp" })?.url {
-                if let release = await checkBandcamp(url: bandcampUrl, artistName: entry.artistName) {
-                    foundNewReleases.append(release)
-                }
+                platforms["bandcamp"] = bandcampUrl
             }
-
-            // Check Faircamp
             if let faircampUrl = entry.platforms.first(where: { $0.sourceId == "faircamp" })?.url {
-                if let release = await checkFaircamp(url: faircampUrl, artistName: entry.artistName) {
-                    // If we already found a Bandcamp release for this artist, prefer Faircamp
-                    if let existingIndex = foundNewReleases.firstIndex(where: { $0.artistName.lowercased() == entry.artistName.lowercased() }) {
-                        let existing = foundNewReleases[existingIndex]
-                        // Prefer Faircamp, or the newer release
-                        if release.releaseDate >= existing.releaseDate {
-                            foundNewReleases[existingIndex] = release
-                        }
-                    } else {
-                        foundNewReleases.append(release)
-                    }
-                }
+                platforms["faircamp"] = faircampUrl
             }
-
-            // Check Mirlo
             if let mirloUrl = entry.platforms.first(where: { $0.sourceId == "mirlo" })?.url {
-                if let release = await checkMirlo(url: mirloUrl, artistName: entry.artistName) {
-                    // If we already found a release for this artist, prefer Mirlo or the newer release
-                    if let existingIndex = foundNewReleases.firstIndex(where: { $0.artistName.lowercased() == entry.artistName.lowercased() }) {
-                        let existing = foundNewReleases[existingIndex]
-                        // Prefer Mirlo over Bandcamp, or the newer release
-                        if existing.platform == "bandcamp" || release.releaseDate >= existing.releaseDate {
-                            foundNewReleases[existingIndex] = release
-                        }
-                    } else {
-                        foundNewReleases.append(release)
-                    }
-                }
+                platforms["mirlo"] = mirloUrl
+            }
+            if let qobuzUrl = entry.platforms.first(where: { $0.sourceId == "qobuz" })?.url {
+                platforms["qobuz"] = qobuzUrl
             }
 
-            // Check Qobuz
-            if let qobuzUrl = entry.platforms.first(where: { $0.sourceId == "qobuz" })?.url {
-                if let release = await checkQobuz(url: qobuzUrl, artistName: entry.artistName) {
-                    // Qobuz is lowest priority - only add if no release found from other platforms
-                    if !foundNewReleases.contains(where: { $0.artistName.lowercased() == entry.artistName.lowercased() }) {
-                        foundNewReleases.append(release)
-                    }
-                }
+            // Skip if no supported platforms
+            guard !platforms.isEmpty else { continue }
+
+            // Call API to check for releases (API handles priority internally)
+            if let release = await checkViaAPI(artistName: entry.artistName, platforms: platforms) {
+                foundNewReleases.append(release)
             }
         }
 
@@ -271,15 +243,11 @@ class ReleaseAlertManager: ObservableObject {
         }
     }
 
-    private func checkBandcamp(url: String, artistName: String) async -> NewRelease? {
+    private func checkViaAPI(artistName: String, platforms: [String: String]) async -> NewRelease? {
         do {
-            guard let result = try await bandcampChecker.fetchLatestRelease(bandcampUrl: url) else {
+            guard let result = try await releaseAPI.checkReleases(artistName: artistName, platforms: platforms) else {
                 return nil
             }
-
-            // Check if this release is within the last 7 days (exclude future dates/preorders)
-            let daysSinceRelease = Date().timeIntervalSince(result.releaseDate) / (24 * 60 * 60)
-            guard daysSinceRelease >= 0 && daysSinceRelease <= 7 else { return nil }
 
             // Check if we already know about this release (on ANY platform)
             if checkState.isKnownReleaseByName(result.releaseName, for: artistName) {
@@ -288,7 +256,7 @@ class ReleaseAlertManager: ObservableObject {
 
             // Mark as known
             checkState.addKnownRelease(
-                KnownRelease(releaseName: result.releaseName, releaseDate: result.releaseDate, platform: "bandcamp"),
+                KnownRelease(releaseName: result.releaseName, releaseDate: result.releaseDate, platform: result.platform),
                 for: artistName
             )
 
@@ -297,112 +265,10 @@ class ReleaseAlertManager: ObservableObject {
                 releaseName: result.releaseName,
                 releaseDate: result.releaseDate,
                 releaseUrl: result.releaseUrl,
-                platform: "bandcamp"
+                platform: result.platform
             )
         } catch {
-            print("Bandcamp check failed for \(artistName): \(error)")
-            return nil
-        }
-    }
-
-    private func checkFaircamp(url: String, artistName: String) async -> NewRelease? {
-        do {
-            guard let result = try await faircampChecker.fetchLatestRelease(faircampUrl: url) else {
-                return nil
-            }
-
-            // Check if this release is within the last 7 days (exclude future dates/preorders)
-            let daysSinceRelease = Date().timeIntervalSince(result.releaseDate) / (24 * 60 * 60)
-            guard daysSinceRelease >= 0 && daysSinceRelease <= 7 else { return nil }
-
-            // Check if we already know about this release (on ANY platform)
-            if checkState.isKnownReleaseByName(result.releaseName, for: artistName) {
-                return nil
-            }
-
-            // Mark as known
-            checkState.addKnownRelease(
-                KnownRelease(releaseName: result.releaseName, releaseDate: result.releaseDate, platform: "faircamp"),
-                for: artistName
-            )
-
-            return NewRelease(
-                artistName: artistName,
-                releaseName: result.releaseName,
-                releaseDate: result.releaseDate,
-                releaseUrl: result.releaseUrl,
-                platform: "faircamp"
-            )
-        } catch {
-            print("Faircamp check failed for \(artistName): \(error)")
-            return nil
-        }
-    }
-
-    private func checkMirlo(url: String, artistName: String) async -> NewRelease? {
-        do {
-            guard let result = try await mirloChecker.fetchLatestRelease(mirloUrl: url) else {
-                return nil
-            }
-
-            // Check if this release is within the last 7 days (exclude future dates/preorders)
-            let daysSinceRelease = Date().timeIntervalSince(result.releaseDate) / (24 * 60 * 60)
-            guard daysSinceRelease >= 0 && daysSinceRelease <= 7 else { return nil }
-
-            // Check if we already know about this release (on ANY platform)
-            if checkState.isKnownReleaseByName(result.releaseName, for: artistName) {
-                return nil
-            }
-
-            // Mark as known
-            checkState.addKnownRelease(
-                KnownRelease(releaseName: result.releaseName, releaseDate: result.releaseDate, platform: "mirlo"),
-                for: artistName
-            )
-
-            return NewRelease(
-                artistName: artistName,
-                releaseName: result.releaseName,
-                releaseDate: result.releaseDate,
-                releaseUrl: result.releaseUrl,
-                platform: "mirlo"
-            )
-        } catch {
-            print("Mirlo check failed for \(artistName): \(error)")
-            return nil
-        }
-    }
-
-    private func checkQobuz(url: String, artistName: String) async -> NewRelease? {
-        do {
-            guard let result = try await qobuzChecker.fetchLatestRelease(qobuzUrl: url) else {
-                return nil
-            }
-
-            // Check if this release is within the last 7 days (exclude future dates/preorders)
-            let daysSinceRelease = Date().timeIntervalSince(result.releaseDate) / (24 * 60 * 60)
-            guard daysSinceRelease >= 0 && daysSinceRelease <= 7 else { return nil }
-
-            // Check if we already know about this release (on ANY platform)
-            if checkState.isKnownReleaseByName(result.releaseName, for: artistName) {
-                return nil
-            }
-
-            // Mark as known
-            checkState.addKnownRelease(
-                KnownRelease(releaseName: result.releaseName, releaseDate: result.releaseDate, platform: "qobuz"),
-                for: artistName
-            )
-
-            return NewRelease(
-                artistName: artistName,
-                releaseName: result.releaseName,
-                releaseDate: result.releaseDate,
-                releaseUrl: result.releaseUrl,
-                platform: "qobuz"
-            )
-        } catch {
-            print("Qobuz check failed for \(artistName): \(error)")
+            print("API check failed for \(artistName): \(error)")
             return nil
         }
     }
