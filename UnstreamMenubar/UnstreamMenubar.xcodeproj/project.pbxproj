@@ -45,6 +45,7 @@
 		F4D4E24FA67871C9F86CC43A /* BandcampReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 598B46B9DD1158F73D25B3D4 /* BandcampReleaseChecker.swift */; };
 		C0C4E11B966BECC1A96113B9 /* FaircampReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADFAF7146CA0E974CCBD3C2B /* FaircampReleaseChecker.swift */; };
 		M1RL0CHK1A2B3C4D5E6F7890 /* MirloReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = M1RL0REF1A2B3C4D5E6F7890 /* MirloReleaseChecker.swift */; };
+		Q0BUZ0CHK1A2B3C4D5E6F7890 /* QobuzReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = Q0BUZ0REF1A2B3C4D5E6F7890 /* QobuzReleaseChecker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -89,6 +90,7 @@
 		598B46B9DD1158F73D25B3D4 /* BandcampReleaseChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandcampReleaseChecker.swift; sourceTree = "<group>"; };
 		ADFAF7146CA0E974CCBD3C2B /* FaircampReleaseChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaircampReleaseChecker.swift; sourceTree = "<group>"; };
 		M1RL0REF1A2B3C4D5E6F7890 /* MirloReleaseChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MirloReleaseChecker.swift; sourceTree = "<group>"; };
+		Q0BUZ0REF1A2B3C4D5E6F7890 /* QobuzReleaseChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QobuzReleaseChecker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -175,6 +177,7 @@
 				598B46B9DD1158F73D25B3D4 /* BandcampReleaseChecker.swift */,
 				ADFAF7146CA0E974CCBD3C2B /* FaircampReleaseChecker.swift */,
 				M1RL0REF1A2B3C4D5E6F7890 /* MirloReleaseChecker.swift */,
+				Q0BUZ0REF1A2B3C4D5E6F7890 /* QobuzReleaseChecker.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -288,6 +291,7 @@
 				F4D4E24FA67871C9F86CC43A /* BandcampReleaseChecker.swift in Sources */,
 				C0C4E11B966BECC1A96113B9 /* FaircampReleaseChecker.swift in Sources */,
 				M1RL0CHK1A2B3C4D5E6F7890 /* MirloReleaseChecker.swift in Sources */,
+				Q0BUZ0CHK1A2B3C4D5E6F7890 /* QobuzReleaseChecker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

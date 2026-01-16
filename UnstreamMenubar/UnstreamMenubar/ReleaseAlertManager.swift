@@ -19,6 +19,7 @@ class ReleaseAlertManager: ObservableObject {
     private let bandcampChecker = BandcampReleaseChecker()
     private let faircampChecker = FaircampReleaseChecker()
     private let mirloChecker = MirloReleaseChecker()
+    private let qobuzChecker = QobuzReleaseChecker()
 
     private weak var supportListManager: SupportListManager?
     private weak var licenseManager: LicenseManager?
@@ -233,6 +234,16 @@ class ReleaseAlertManager: ObservableObject {
                     }
                 }
             }
+
+            // Check Qobuz
+            if let qobuzUrl = entry.platforms.first(where: { $0.sourceId == "qobuz" })?.url {
+                if let release = await checkQobuz(url: qobuzUrl, artistName: entry.artistName) {
+                    // Qobuz is lowest priority - only add if no release found from other platforms
+                    if !foundNewReleases.contains(where: { $0.artistName.lowercased() == entry.artistName.lowercased() }) {
+                        foundNewReleases.append(release)
+                    }
+                }
+            }
         }
 
         // Update state with new releases
@@ -358,6 +369,40 @@ class ReleaseAlertManager: ObservableObject {
             )
         } catch {
             print("Mirlo check failed for \(artistName): \(error)")
+            return nil
+        }
+    }
+
+    private func checkQobuz(url: String, artistName: String) async -> NewRelease? {
+        do {
+            guard let result = try await qobuzChecker.fetchLatestRelease(qobuzUrl: url) else {
+                return nil
+            }
+
+            // Check if this release is within the last 7 days (exclude future dates/preorders)
+            let daysSinceRelease = Date().timeIntervalSince(result.releaseDate) / (24 * 60 * 60)
+            guard daysSinceRelease >= 0 && daysSinceRelease <= 7 else { return nil }
+
+            // Check if we already know about this release
+            if checkState.isKnownRelease(result.releaseName, platform: "qobuz", for: artistName) {
+                return nil
+            }
+
+            // Mark as known
+            checkState.addKnownRelease(
+                KnownRelease(releaseName: result.releaseName, releaseDate: result.releaseDate, platform: "qobuz"),
+                for: artistName
+            )
+
+            return NewRelease(
+                artistName: artistName,
+                releaseName: result.releaseName,
+                releaseDate: result.releaseDate,
+                releaseUrl: result.releaseUrl,
+                platform: "qobuz"
+            )
+        } catch {
+            print("Qobuz check failed for \(artistName): \(error)")
             return nil
         }
     }
