@@ -69,11 +69,18 @@ struct ReleaseCheckState: Codable {
         }
     }
 
-    /// Check if a release is known for an artist
+    /// Check if a release is known for an artist on a specific platform
     func isKnownRelease(_ releaseName: String, platform: String, for artistName: String) -> Bool {
         let key = artistName.lowercased()
         guard let releases = knownReleases[key] else { return false }
         return releases.contains { $0.releaseName.lowercased() == releaseName.lowercased() && $0.platform == platform }
+    }
+
+    /// Check if a release is known for an artist on ANY platform (by name only)
+    func isKnownReleaseByName(_ releaseName: String, for artistName: String) -> Bool {
+        let key = artistName.lowercased()
+        guard let releases = knownReleases[key] else { return false }
+        return releases.contains { $0.releaseName.lowercased() == releaseName.lowercased() }
     }
 
     /// Remove expired new releases (older than 7 days)

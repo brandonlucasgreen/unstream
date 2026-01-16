@@ -281,8 +281,8 @@ class ReleaseAlertManager: ObservableObject {
             let daysSinceRelease = Date().timeIntervalSince(result.releaseDate) / (24 * 60 * 60)
             guard daysSinceRelease >= 0 && daysSinceRelease <= 7 else { return nil }
 
-            // Check if we already know about this release
-            if checkState.isKnownRelease(result.releaseName, platform: "bandcamp", for: artistName) {
+            // Check if we already know about this release (on ANY platform)
+            if checkState.isKnownReleaseByName(result.releaseName, for: artistName) {
                 return nil
             }
 
@@ -315,8 +315,8 @@ class ReleaseAlertManager: ObservableObject {
             let daysSinceRelease = Date().timeIntervalSince(result.releaseDate) / (24 * 60 * 60)
             guard daysSinceRelease >= 0 && daysSinceRelease <= 7 else { return nil }
 
-            // Check if we already know about this release
-            if checkState.isKnownRelease(result.releaseName, platform: "faircamp", for: artistName) {
+            // Check if we already know about this release (on ANY platform)
+            if checkState.isKnownReleaseByName(result.releaseName, for: artistName) {
                 return nil
             }
 
@@ -349,8 +349,8 @@ class ReleaseAlertManager: ObservableObject {
             let daysSinceRelease = Date().timeIntervalSince(result.releaseDate) / (24 * 60 * 60)
             guard daysSinceRelease >= 0 && daysSinceRelease <= 7 else { return nil }
 
-            // Check if we already know about this release
-            if checkState.isKnownRelease(result.releaseName, platform: "mirlo", for: artistName) {
+            // Check if we already know about this release (on ANY platform)
+            if checkState.isKnownReleaseByName(result.releaseName, for: artistName) {
                 return nil
             }
 
@@ -383,8 +383,8 @@ class ReleaseAlertManager: ObservableObject {
             let daysSinceRelease = Date().timeIntervalSince(result.releaseDate) / (24 * 60 * 60)
             guard daysSinceRelease >= 0 && daysSinceRelease <= 7 else { return nil }
 
-            // Check if we already know about this release
-            if checkState.isKnownRelease(result.releaseName, platform: "qobuz", for: artistName) {
+            // Check if we already know about this release (on ANY platform)
+            if checkState.isKnownReleaseByName(result.releaseName, for: artistName) {
                 return nil
             }
 
