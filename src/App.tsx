@@ -365,8 +365,11 @@ function App() {
                     <p className="text-text-secondary mb-4">
                       Unstream for macOS detects what's playing in Spotify or Apple Music and shows the best ways to support that artist, right in your menu bar.
                     </p>
-                    <p className="text-text-secondary mb-6">
+                    <p className="text-text-secondary mb-4">
                       The browser extension does the same for any music playing in your browser (YouTube, Soundcloud, and more).
+                    </p>
+                    <p className="text-text-secondary mb-6">
+                      Grab the <strong>Unstream Yearly Pass</strong> ($4.99/year) to unlock saved artist lists, new release alerts and more.
                     </p>
                     <div className="flex flex-col sm:flex-row items-center gap-3 justify-center md:justify-start mb-2">
                       <a
@@ -390,15 +393,23 @@ function App() {
                         </svg>
                         Install for Chrome
                       </a>
+                      <a
+                        href="https://addons.mozilla.org/en-US/firefox/addon/unstream/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-surface border border-border text-text-primary hover:bg-surface-secondary transition-colors font-medium"
+                      >
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8.824 7.287c.008 0 .004 0 0 0zm-2.8-1.4c.006 0 .003 0 0 0zm16.754 2.161c-.505-1.215-1.53-2.528-2.333-2.943.654 1.283 1.033 2.57 1.177 3.53l.002.02c-1.314-3.278-3.544-4.6-5.366-7.477-.091-.147-.184-.292-.273-.446a3.545 3.545 0 01-.13-.24 2.118 2.118 0 01-.172-.46.03.03 0 00-.027-.03.038.038 0 00-.021 0l-.006.001-.006.002-.006.002-.01.004-.018.008-.013.006c-2.038 1.198-2.726 3.406-2.787 4.515-.727.052-1.426.263-2.044.614a.742.742 0 00-.107-.07 4.315 4.315 0 01-.02-2.272 6.54 6.54 0 00-2.14 1.66c-.323-.4-.313-1.721-.291-1.997a1.472 1.472 0 00-.282.163c-.37.257-.71.548-1.018.869a6.63 6.63 0 00-.819 1.034 6.45 6.45 0 00-.787 1.541 6.528 6.528 0 00-.242.883 7.522 7.522 0 00-.16 1.403v.07a7.542 7.542 0 001.04 3.842l.003.004c.04.067.083.133.127.198a7.582 7.582 0 001.357 1.574 7.453 7.453 0 002.14 1.38c.163.075.328.145.496.21a7.397 7.397 0 002.187.489h.05a7.506 7.506 0 002.535-.154 7.56 7.56 0 003.048-1.49 7.506 7.506 0 002.61-4.453c.055-.321.092-.645.11-.97.004-.065.007-.13.01-.194a7.617 7.617 0 00-.39-2.882zM9.397 17.107c.044.02.088.04.132.059l.008.003-.14-.062zm5.385-6.326l-.005.002.002-.002h.003z"/>
+                        </svg>
+                        Install for Firefox
+                      </a>
                     </div>
-                    <p className="text-text-muted text-sm mt-2 text-center md:text-left">Firefox coming soon!</p>
-                    <p className="text-text-secondary text-sm mt-4">
-                      Upgrade to Unstream Plus ($2.99 one-time) to save artists to support later and more.
-                    </p>
+                    <p className="text-text-muted text-sm mt-2 text-center md:text-left">Safari extension coming soon!</p>
                   </div>
                   <div className="flex-shrink-0">
                     <img
-                      src="/unstream-mac.png"
+                      src="/unstream-mac-teaser.png"
                       alt="Unstream for macOS showing artist platforms in the menu bar"
                       className="w-64 md:w-80 rounded-xl shadow-2xl border border-border"
                     />
