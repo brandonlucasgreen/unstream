@@ -93,6 +93,17 @@ function parseSocialUrl(url: string): SocialLink | null {
   return null;
 }
 
+// Normalize accented characters to their ASCII equivalents
+// e.g., "Tanerélle" -> "Tanerelle", "Björk" -> "Bjork"
+function normalizeAccents(str: string): string {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+// Normalize a search query for API calls
+function normalizeSearchQuery(query: string): string {
+  return normalizeAccents(query);
+}
+
 // Helper to delay execution (for rate limiting)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -507,7 +518,9 @@ export async function handler(event: { queryStringParameters?: Record<string, st
   }
 
   try {
-    const result = await searchMusicBrainz(query);
+    // Normalize the query to handle accented characters (e.g., "Tanerélle" -> "Tanerelle")
+    const normalizedQuery = normalizeSearchQuery(query);
+    const result = await searchMusicBrainz(normalizedQuery);
 
     return {
       statusCode: 200,

@@ -57,6 +57,21 @@ interface SearchResponse {
   hasPendingEnrichment?: boolean;
 }
 
+// Normalize accented characters to their ASCII equivalents
+// e.g., "Tanerélle" -> "Tanerelle", "Björk" -> "Bjork"
+function normalizeAccents(str: string): string {
+  // Unicode NFD normalization decomposes accented characters
+  // e.g., "é" becomes "e" + combining acute accent
+  // Then we remove the combining diacritical marks (U+0300 to U+036F)
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+// Normalize a search query for API calls
+// Removes accents but preserves spaces and basic punctuation
+function normalizeSearchQuery(query: string): string {
+  return normalizeAccents(query);
+}
+
 // Helper to fetch with timeout
 async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs: number = 3000): Promise<Response> {
   const controller = new AbortController();
@@ -506,7 +521,8 @@ async function getQobuzReleaseTitles(artistUrl: string): Promise<string[]> {
 }
 
 function normalizeForComparison(str: string): string {
-  return str.toLowerCase().replace(/[^a-z0-9]/g, '');
+  // First normalize accents, then lowercase and remove non-alphanumeric
+  return normalizeAccents(str).toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
 // Search Bandwagon for artists by scraping search results
@@ -1707,10 +1723,12 @@ export async function handler(event: { queryStringParameters?: Record<string, st
   }
 
   try {
-    const results = await searchAllPlatforms(query);
+    // Normalize the query to handle accented characters (e.g., "Tanerélle" -> "Tanerelle")
+    const normalizedQuery = normalizeSearchQuery(query);
+    const results = await searchAllPlatforms(normalizedQuery);
 
     const response: SearchResponse = {
-      query,
+      query, // Return original query for display
       results,
       // Signal client to fetch MusicBrainz data for enrichment (Official Site, Discogs, Hoopla, Freegal)
       hasPendingEnrichment: results.length > 0,
