@@ -333,11 +333,10 @@ function App() {
                       </div>
                     )}
                   </div>
-                  {results.map((result, index) => (
+                  {results.map((result) => (
                     <ResultCard
                       key={result.id}
                       result={result}
-                      defaultExpanded={isFromUrl && index === 0}
                     />
                   ))}
                 </div>
