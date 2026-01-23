@@ -67,7 +67,7 @@ interface EmbedData {
   title: string;
 }
 
-export function ResultCard({ result, defaultExpanded = false }: ResultCardProps) {
+export function ResultCard({ result, defaultExpanded = true }: ResultCardProps) {
   const [imageError, setImageError] = useState(false);
   const [expanded, setExpanded] = useState(defaultExpanded);
   const [embedData, setEmbedData] = useState<EmbedData | null>(null);
@@ -247,11 +247,8 @@ export function ResultCard({ result, defaultExpanded = false }: ResultCardProps)
           )}
         </div>
 
-        {/* Platform count and expand arrow */}
-        <div className="flex-shrink-0 flex items-center gap-3 text-text-muted">
-          <span className="text-sm text-accent-secondary">
-            {verifiedPlatforms.length} platform{verifiedPlatforms.length !== 1 ? 's' : ''}
-          </span>
+        {/* Expand/collapse arrow */}
+        <div className="flex-shrink-0 flex items-center text-text-muted">
           <svg
             className={`w-5 h-5 transition-transform ${expanded ? 'rotate-180' : ''}`}
             fill="none"
