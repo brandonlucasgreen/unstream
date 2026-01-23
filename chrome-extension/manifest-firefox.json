@@ -8,6 +8,9 @@
       "data_collection_permissions": {
         "required": ["none"]
       }
+    },
+    "gecko_android": {
+      "strict_min_version": "120.0"
     }
   },
   "description": "Find ethical alternatives for supporting your favorite artists. Bandcamp, Qobuz, artist websites, and decentralized platforms.",
