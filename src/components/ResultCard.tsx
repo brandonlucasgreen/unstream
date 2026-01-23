@@ -94,7 +94,7 @@ export function ResultCard({ result, defaultExpanded = true }: ResultCardProps) 
 
   // Collect platforms that have latest release info
   // Prioritize Bandcamp over other platforms for featured release display
-  const platformsWithRelease = verifiedPlatforms
+  const allPlatformsWithRelease = verifiedPlatforms
     .filter(p => p.latestRelease)
     .sort((a, b) => {
       // Bandcamp always comes first
@@ -102,7 +102,20 @@ export function ResultCard({ result, defaultExpanded = true }: ResultCardProps) 
       if (a.sourceId !== 'bandcamp' && b.sourceId === 'bandcamp') return 1;
       return 0;
     });
-  const latestRelease = platformsWithRelease[0]?.latestRelease;
+  const latestRelease = allPlatformsWithRelease[0]?.latestRelease;
+
+  // Only show platforms that have the SAME release as the featured one
+  // This prevents showing Qobuz link for a different release than what's featured
+  const normalizeTitle = (title: string) => title.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const featuredTitle = latestRelease ? normalizeTitle(latestRelease.title) : '';
+  const platformsWithRelease = allPlatformsWithRelease.filter(p => {
+    if (!p.latestRelease || !featuredTitle) return false;
+    const platformTitle = normalizeTitle(p.latestRelease.title);
+    // Match if titles are the same or one contains the other
+    return platformTitle === featuredTitle ||
+      platformTitle.includes(featuredTitle) ||
+      featuredTitle.includes(platformTitle);
+  });
 
   // Only show preview if Bandcamp has the latest release
   // (Qobuz widget is unreliable, so we don't offer preview for Qobuz-only releases)
