@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@upstash/redis": "^1.36.1",
     "bandcamp-fetch": "^1.1.2",
     "node-html-parser": "^7.0.1",
     "react": "^19.2.0",

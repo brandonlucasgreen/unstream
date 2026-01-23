@@ -1,4 +1,5 @@
 import { parse } from 'node-html-parser';
+import { cacheGetOrFetch, artistCacheKey } from './cache';
 
 type SourceId =
   | 'bandcamp'
@@ -920,6 +921,51 @@ async function searchPatreon(query: string): Promise<Map<string, string>> {
   return results;
 }
 
+// Search Ampwall with Redis caching to minimize API load
+// Cache TTL: 30 minutes (1800 seconds)
+const AMPWALL_CACHE_TTL = 30 * 60;
+
+async function searchAmpwall(query: string): Promise<Map<string, string>> {
+  const cacheKey = artistCacheKey('ampwall', query);
+
+  const { data, cached } = await cacheGetOrFetch<[string, string][]>(
+    cacheKey,
+    async () => {
+      const results: [string, string][] = [];
+
+      // TODO: Replace this with actual Ampwall API call when available
+      // Expected API format TBD - placeholder implementation
+      //
+      // Example expected implementation:
+      // const apiUrl = `https://api.ampwall.com/search?q=${encodeURIComponent(query)}`;
+      // const response = await fetchWithTimeout(apiUrl, {
+      //   headers: {
+      //     'Authorization': `Bearer ${process.env.AMPWALL_API_KEY}`,
+      //     'Accept': 'application/json',
+      //   },
+      // }, 5000);
+      //
+      // if (response.ok) {
+      //   const data = await response.json();
+      //   for (const artist of data.artists || []) {
+      //     const normalizedName = normalizeForComparison(artist.name);
+      //     results.push([normalizedName, artist.url]);
+      //   }
+      // }
+
+      return results;
+    },
+    AMPWALL_CACHE_TTL
+  );
+
+  if (cached) {
+    console.log(`[Ampwall] Cache hit for "${query}"`);
+  }
+
+  // Convert array back to Map (Redis doesn't serialize Maps well)
+  return new Map(data);
+}
+
 async function searchQobuz(query: string): Promise<Map<string, string>> {
   const results = new Map<string, string>();
 
@@ -1064,7 +1110,7 @@ function aggregateResults(allResults: PlatformResult[]): AggregatedResult[] {
 
 async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   // Search all fast platforms in parallel (MusicBrainz is loaded separately for lazy loading)
-  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, qobuzResults] = await Promise.allSettled([
+  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, qobuzResults, ampwallResults] = await Promise.allSettled([
     searchBandcamp(query),
     searchBandwagon(query),
     searchMirlo(query),
@@ -1072,6 +1118,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     searchJamcoop(query),
     searchPatreon(query),
     searchQobuz(query),
+    searchAmpwall(query),
   ]);
 
   const allResults: PlatformResult[] = [];
@@ -1088,6 +1135,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   const jamcoopMatches = jamcoopResults.status === 'fulfilled' ? jamcoopResults.value : new Map<string, string>();
   const patreonMatches = patreonResults.status === 'fulfilled' ? patreonResults.value : new Map<string, string>();
   const qobuzMatches = qobuzResults.status === 'fulfilled' ? qobuzResults.value : new Map<string, string>();
+  const ampwallMatches = ampwallResults.status === 'fulfilled' ? ampwallResults.value : new Map<string, string>();
 
   const aggregated = aggregateResults(allResults);
 
@@ -1098,11 +1146,25 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
 
   for (const result of aggregated) {
     if (result.type === 'artist') {
-      if (result.platforms.some(p => p.sourceId === 'bandcamp')) {
+      const normalizedName = normalizeForComparison(result.name);
+
+      // Check for Ampwall API match first, fall back to search URL if no match
+      if (ampwallMatches.has(normalizedName)) {
+        const url = ampwallMatches.get(normalizedName)!;
+        if (!usedPlatformUrls.has(url)) {
+          result.platforms.push({ sourceId: 'ampwall', url });
+          usedPlatformUrls.add(url);
+        }
+      } else if (result.platforms.some(p => p.sourceId === 'bandcamp')) {
+        // Fallback: link to Ampwall search if artist has Bandcamp (likely on Ampwall too)
         result.platforms.push({
           sourceId: 'ampwall',
           url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(result.name)}`,
         });
+      }
+
+      // Add Ko-fi and BuyMeACoffee search links for Bandcamp artists
+      if (result.platforms.some(p => p.sourceId === 'bandcamp')) {
         result.platforms.push({
           sourceId: 'kofi',
           url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(result.name)}`,
@@ -1112,8 +1174,6 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
           url: 'https://buymeacoffee.com/explore-creators',
         });
       }
-
-      const normalizedName = normalizeForComparison(result.name);
 
       // For name-matched platforms without release data, only add to ONE result
       // to avoid the same Patreon/Bandwagon appearing on multiple same-name artists
@@ -1166,10 +1226,13 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
 
       // Sort platforms: verified first, then search-only last
       // Note: officialsite, discogs, hoopla, freegal are added via MusicBrainz lazy loading
-      const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee']);
+      const searchOnlyPlatforms = new Set(['kofi', 'buymeacoffee']);
       result.platforms.sort((a, b) => {
-        const aIsSearchOnly = searchOnlyPlatforms.has(a.sourceId);
-        const bIsSearchOnly = searchOnlyPlatforms.has(b.sourceId);
+        // Ampwall is search-only if it's a search URL, not if it's from API
+        const aIsSearchOnly = searchOnlyPlatforms.has(a.sourceId) ||
+          (a.sourceId === 'ampwall' && a.url.includes('explore?searchStyle=search'));
+        const bIsSearchOnly = searchOnlyPlatforms.has(b.sourceId) ||
+          (b.sourceId === 'ampwall' && b.url.includes('explore?searchStyle=search'));
         if (aIsSearchOnly && !bIsSearchOnly) return 1;
         if (!aIsSearchOnly && bIsSearchOnly) return -1;
         return 0;
@@ -1613,11 +1676,17 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     disambiguated.push(result);
   }
 
-  // Filter out results that only have search-only platforms (ampwall, kofi, buymeacoffee)
+  // Filter out results that only have search-only platforms (kofi, buymeacoffee, ampwall search links)
   // These are just fuzzy search links added to any Bandcamp result, not real matches
-  const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee']);
+  // Note: Ampwall API results (non-search URLs) count as real matches
+  const searchOnlyPlatforms = new Set(['kofi', 'buymeacoffee']);
   const filtered = disambiguated.filter(result => {
-    const hasNonSearchOnlyPlatform = result.platforms.some(p => !searchOnlyPlatforms.has(p.sourceId));
+    const hasNonSearchOnlyPlatform = result.platforms.some(p => {
+      if (searchOnlyPlatforms.has(p.sourceId)) return false;
+      // Ampwall search links are search-only, but API results are not
+      if (p.sourceId === 'ampwall' && p.url.includes('explore?searchStyle=search')) return false;
+      return true;
+    });
     return hasNonSearchOnlyPlatform;
   });
 
