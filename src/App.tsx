@@ -369,7 +369,7 @@ function App() {
                       The browser extension does the same for any music playing in your browser (YouTube, Soundcloud, and more).
                     </p>
                     <p className="text-text-secondary mb-6">
-                      Grab the <strong>Unstream Yearly Pass</strong> ($4.99/year) to unlock saved artist lists, new release alerts and more.
+                      Grab the <a href="https://bgreenlol.lemonsqueezy.com/checkout/buy/d4e127a7-2cef-4013-80b8-5d0de691f332" target="_blank" rel="noopener noreferrer" className="text-accent-primary hover:underline"><strong>Unstream Yearly Pass</strong></a> ($4.99/year) to unlock saved artist lists, new release alerts and more.
                     </p>
                     <div className="flex flex-col items-center gap-3 mb-2">
                       <a
