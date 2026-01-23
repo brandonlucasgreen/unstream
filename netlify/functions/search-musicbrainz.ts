@@ -93,6 +93,11 @@ function parseSocialUrl(url: string): SocialLink | null {
   return null;
 }
 
+import { cacheGetOrFetch, artistCacheKey } from './cache';
+
+// Cache TTL for MusicBrainz lookups (30 minutes)
+const MUSICBRAINZ_CACHE_TTL = 30 * 60;
+
 // Normalize accented characters to their ASCII equivalents
 // e.g., "Tanerélle" -> "Tanerelle", "Björk" -> "Bjork"
 function normalizeAccents(str: string): string {
@@ -520,7 +525,18 @@ export async function handler(event: { queryStringParameters?: Record<string, st
   try {
     // Normalize the query to handle accented characters (e.g., "Tanerélle" -> "Tanerelle")
     const normalizedQuery = normalizeSearchQuery(query);
-    const result = await searchMusicBrainz(normalizedQuery);
+
+    // Use Redis cache to avoid hitting MusicBrainz rate limits
+    const cacheKey = artistCacheKey('musicbrainz', normalizedQuery);
+    const { data: result, cached } = await cacheGetOrFetch<MusicBrainzSearchResponse>(
+      cacheKey,
+      () => searchMusicBrainz(normalizedQuery),
+      MUSICBRAINZ_CACHE_TTL
+    );
+
+    if (cached) {
+      console.log(`[MusicBrainz] Cache hit for "${normalizedQuery}"`);
+    }
 
     return {
       statusCode: 200,

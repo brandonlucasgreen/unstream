@@ -120,71 +120,84 @@ function namesMatch(name1: string, name2: string): boolean {
   return false;
 }
 
+// Cache TTL for platform searches (30 minutes)
+const PLATFORM_CACHE_TTL = 30 * 60;
+
 // Search Bandcamp by scraping search results page (PRIMARY SOURCE)
 async function searchBandcamp(query: string): Promise<PlatformResult[]> {
-  const results: PlatformResult[] = [];
-  const searchUrl = `https://bandcamp.com/search?q=${encodeURIComponent(query)}`;
+  const cacheKey = artistCacheKey('bandcamp', query);
 
-  try {
-    const response = await fetchWithTimeout(searchUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      },
-    }, 5000);
+  const { data } = await cacheGetOrFetch<PlatformResult[]>(
+    cacheKey,
+    async () => {
+      const results: PlatformResult[] = [];
+      const searchUrl = `https://bandcamp.com/search?q=${encodeURIComponent(query)}`;
 
-    if (!response.ok) return results;
+      try {
+        const response = await fetchWithTimeout(searchUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+          },
+        }, 5000);
 
-    const html = await response.text();
-    const root = parse(html);
-    const resultItems = root.querySelectorAll('.searchresult');
+        if (!response.ok) return results;
 
-    for (let i = 0; i < Math.min(10, resultItems.length); i++) {
-      const item = resultItems[i];
-      const resultType = item.querySelector('.result-info .itemtype')?.textContent?.trim().toLowerCase();
-      const heading = item.querySelector('.result-info .heading a');
-      const name = heading?.textContent?.trim();
-      const url = heading?.getAttribute('href')?.split('?')[0];
+        const html = await response.text();
+        const root = parse(html);
+        const resultItems = root.querySelectorAll('.searchresult');
 
-      const subhead = item.querySelector('.result-info .subhead')?.textContent?.trim();
-      let artist: string | undefined;
-      if (subhead && subhead.startsWith('by ')) {
-        artist = subhead.substring(3).trim();
-      }
+        for (let i = 0; i < Math.min(10, resultItems.length); i++) {
+          const item = resultItems[i];
+          const resultType = item.querySelector('.result-info .itemtype')?.textContent?.trim().toLowerCase();
+          const heading = item.querySelector('.result-info .heading a');
+          const name = heading?.textContent?.trim();
+          const url = heading?.getAttribute('href')?.split('?')[0];
 
-      const img = item.querySelector('.art img');
-      const imageUrl = img?.getAttribute('src');
+          const subhead = item.querySelector('.result-info .subhead')?.textContent?.trim();
+          let artist: string | undefined;
+          if (subhead && subhead.startsWith('by ')) {
+            artist = subhead.substring(3).trim();
+          }
 
-      if (name && url) {
-        let type: 'artist' | 'album' | 'track' = 'artist';
-        if (resultType === 'album') type = 'album';
-        else if (resultType === 'track') type = 'track';
+          const img = item.querySelector('.art img');
+          const imageUrl = img?.getAttribute('src');
 
-        // Filter: only include results where name matches the query
-        // This filters out Bandcamp's fuzzy matches (e.g., "Dory Miller" for "Cory Miller")
-        const nameToCheck = type === 'artist' ? name : (artist || name);
-        if (!namesMatch(nameToCheck, query)) {
-          console.log(`[Bandcamp] Filtering out fuzzy match: "${nameToCheck}" doesn't match query "${query}"`);
-          continue;
+          if (name && url) {
+            let type: 'artist' | 'album' | 'track' = 'artist';
+            if (resultType === 'album') type = 'album';
+            else if (resultType === 'track') type = 'track';
+
+            // Filter: only include results where name matches the query
+            // This filters out Bandcamp's fuzzy matches (e.g., "Dory Miller" for "Cory Miller")
+            const nameToCheck = type === 'artist' ? name : (artist || name);
+            if (!namesMatch(nameToCheck, query)) {
+              console.log(`[Bandcamp] Filtering out fuzzy match: "${nameToCheck}" doesn't match query "${query}"`);
+              continue;
+            }
+
+            results.push({
+              sourceId: 'bandcamp',
+              name,
+              artist,
+              type,
+              url,
+              imageUrl: imageUrl || undefined,
+            });
+          }
         }
-
-        results.push({
-          sourceId: 'bandcamp',
-          name,
-          artist,
-          type,
-          url,
-          imageUrl: imageUrl || undefined,
-        });
+      } catch (error: unknown) {
+        const err = error as { name?: string; message?: string };
+        if (err.name !== 'AbortError') {
+          console.error('Bandcamp search error:', err.message);
+        }
       }
-    }
-  } catch (error: unknown) {
-    const err = error as { name?: string; message?: string };
-    if (err.name !== 'AbortError') {
-      console.error('Bandcamp search error:', err.message);
-    }
-  }
 
-  return results;
+      return results;
+    },
+    PLATFORM_CACHE_TTL
+  );
+
+  return data;
 }
 
 // Fetch latest release from a Bandcamp artist page, then get release date from album page
@@ -865,60 +878,73 @@ async function searchJamcoop(query: string): Promise<Map<string, string>> {
 }
 
 async function searchPatreon(query: string): Promise<Map<string, string>> {
-  const results = new Map<string, string>();
+  const cacheKey = artistCacheKey('patreon', query);
 
-  try {
-    const searchUrl = `https://www.patreon.com/api/search?q=${encodeURIComponent(query)}`;
-    const response = await fetchWithTimeout(searchUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-        'Accept': 'application/json',
-      },
-    }, 5000);
+  const { data } = await cacheGetOrFetch<[string, string][]>(
+    cacheKey,
+    async () => {
+      const results: [string, string][] = [];
+      const seen = new Set<string>();
 
-    if (!response.ok) return results;
+      try {
+        const searchUrl = `https://www.patreon.com/api/search?q=${encodeURIComponent(query)}`;
+        const response = await fetchWithTimeout(searchUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+            'Accept': 'application/json',
+          },
+        }, 5000);
 
-    const data = await response.json() as {
-      data?: {
-        type: string;
-        attributes?: {
-          creator_name?: string;
-          url?: string;
+        if (!response.ok) return results;
+
+        const data = await response.json() as {
+          data?: {
+            type: string;
+            attributes?: {
+              creator_name?: string;
+              url?: string;
+            };
+          }[];
         };
-      }[];
-    };
 
-    const campaigns = data.data || [];
+        const campaigns = data.data || [];
 
-    for (const campaign of campaigns) {
-      if (campaign.type === 'campaign-document' && campaign.attributes) {
-        const creatorName = campaign.attributes.creator_name;
-        const url = campaign.attributes.url;
+        for (const campaign of campaigns) {
+          if (campaign.type === 'campaign-document' && campaign.attributes) {
+            const creatorName = campaign.attributes.creator_name;
+            const url = campaign.attributes.url;
 
-        if (creatorName && url) {
-          const normalizedName = normalizeForComparison(creatorName);
-          if (!results.has(normalizedName)) {
-            results.set(normalizedName, url);
-          }
-          const urlSlug = url.split('/').pop();
-          if (urlSlug) {
-            const normalizedSlug = normalizeForComparison(urlSlug);
-            if (!results.has(normalizedSlug)) {
-              results.set(normalizedSlug, url);
+            if (creatorName && url) {
+              const normalizedName = normalizeForComparison(creatorName);
+              if (!seen.has(normalizedName)) {
+                seen.add(normalizedName);
+                results.push([normalizedName, url]);
+              }
+              const urlSlug = url.split('/').pop();
+              if (urlSlug) {
+                const normalizedSlug = normalizeForComparison(urlSlug);
+                if (!seen.has(normalizedSlug)) {
+                  seen.add(normalizedSlug);
+                  results.push([normalizedSlug, url]);
+                }
+              }
             }
           }
+          if (results.length >= 20) break;
+        }
+      } catch (error: unknown) {
+        const err = error as { name?: string; message?: string };
+        if (err.name !== 'AbortError') {
+          console.error('Patreon search error:', err.message);
         }
       }
-      if (results.size >= 20) break;
-    }
-  } catch (error: unknown) {
-    const err = error as { name?: string; message?: string };
-    if (err.name !== 'AbortError') {
-      console.error('Patreon search error:', err.message);
-    }
-  }
 
-  return results;
+      return results;
+    },
+    PLATFORM_CACHE_TTL
+  );
+
+  return new Map(data);
 }
 
 // Search Ampwall with Redis caching to minimize API load
@@ -967,52 +993,64 @@ async function searchAmpwall(query: string): Promise<Map<string, string>> {
 }
 
 async function searchQobuz(query: string): Promise<Map<string, string>> {
-  const results = new Map<string, string>();
+  const cacheKey = artistCacheKey('qobuz', query);
 
-  try {
-    const searchUrl = `https://www.qobuz.com/us-en/search/artists/${encodeURIComponent(query)}`;
-    const response = await fetchWithTimeout(searchUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      },
-    }, 5000);
+  const { data } = await cacheGetOrFetch<[string, string][]>(
+    cacheKey,
+    async () => {
+      const results: [string, string][] = [];
 
-    if (!response.ok) return results;
+      try {
+        const searchUrl = `https://www.qobuz.com/us-en/search/artists/${encodeURIComponent(query)}`;
+        const response = await fetchWithTimeout(searchUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+          },
+        }, 5000);
 
-    const html = await response.text();
-    const interpreterRegex = /href="(\/us-en\/interpreter\/([^/]+)\/(\d+))"/g;
-    let match;
-    const queryNormalized = normalizeForComparison(query);
+        if (!response.ok) return results;
 
-    while ((match = interpreterRegex.exec(html)) !== null && results.size < 10) {
-      const [, path, slug] = match;
-      const slugNormalized = slug.replace(/-/g, '');
+        const html = await response.text();
+        const interpreterRegex = /href="(\/us-en\/interpreter\/([^/]+)\/(\d+))"/g;
+        let match;
+        const queryNormalized = normalizeForComparison(query);
+        const seen = new Set<string>();
 
-      // Strict matching: only allow exact match, query prefix, or numeric suffix variations
-      // This prevents "Mo-Rice" from matching "Morice El Blanco" or "Patrick Moriceau"
-      const isMatch = slugNormalized === queryNormalized ||
-          // Query is longer than slug (e.g., searching "morice" matches slug "mo")
-          queryNormalized.startsWith(slugNormalized) ||
-          // Slug is query + numeric suffix only (e.g., "morice" matches "morice2" but not "moriceelblanco")
-          (slugNormalized.startsWith(queryNormalized) && /^\d*$/.test(slugNormalized.slice(queryNormalized.length)));
+        while ((match = interpreterRegex.exec(html)) !== null && results.length < 10) {
+          const [, path, slug] = match;
+          const slugNormalized = slug.replace(/-/g, '');
 
-      if (isMatch) {
-        const artistName = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-        const normalizedName = normalizeForComparison(artistName);
+          // Strict matching: only allow exact match, query prefix, or numeric suffix variations
+          // This prevents "Mo-Rice" from matching "Morice El Blanco" or "Patrick Moriceau"
+          const isMatch = slugNormalized === queryNormalized ||
+              // Query is longer than slug (e.g., searching "morice" matches slug "mo")
+              queryNormalized.startsWith(slugNormalized) ||
+              // Slug is query + numeric suffix only (e.g., "morice" matches "morice2" but not "moriceelblanco")
+              (slugNormalized.startsWith(queryNormalized) && /^\d*$/.test(slugNormalized.slice(queryNormalized.length)));
 
-        if (!results.has(normalizedName)) {
-          results.set(normalizedName, `https://www.qobuz.com${path}`);
+          if (isMatch) {
+            const artistName = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            const normalizedName = normalizeForComparison(artistName);
+
+            if (!seen.has(normalizedName)) {
+              seen.add(normalizedName);
+              results.push([normalizedName, `https://www.qobuz.com${path}`]);
+            }
+          }
+        }
+      } catch (error: unknown) {
+        const err = error as { name?: string; message?: string };
+        if (err.name !== 'AbortError') {
+          console.error('Qobuz search error:', err.message);
         }
       }
-    }
-  } catch (error: unknown) {
-    const err = error as { name?: string; message?: string };
-    if (err.name !== 'AbortError') {
-      console.error('Qobuz search error:', err.message);
-    }
-  }
 
-  return results;
+      return results;
+    },
+    PLATFORM_CACHE_TTL
+  );
+
+  return new Map(data);
 }
 
 function generateResultId(name: string, artist?: string): string {
