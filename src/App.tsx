@@ -108,7 +108,7 @@ function App() {
   const [hasSearched, setHasSearched] = useState(false);
   const [resolvedQuery, setResolvedQuery] = useState<string>('');
   const [isResolving, setIsResolving] = useState(false);
-  const [isFromUrl, setIsFromUrl] = useState(false);
+  const [, setIsFromUrl] = useState(false);
   const [faqSections, setFaqSections] = useState<FAQSection[]>([]);
 
   // Track current search to handle race conditions
