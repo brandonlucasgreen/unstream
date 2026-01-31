@@ -79,13 +79,17 @@ struct PopoverView: View {
 
                         case .nowPlaying:
                             if let nowPlaying = appState.nowPlaying {
-                                NowPlayingView(nowPlaying: nowPlaying)
+                                NowPlayingView(
+                                    nowPlaying: nowPlaying,
+                                    artistImageUrl: appState.nowPlayingResults.first?.imageUrl
+                                )
                                 if appState.isLoadingNowPlaying {
                                     LoadingView()
                                 } else if !appState.nowPlayingResults.isEmpty {
                                     ResultsView(
                                         title: nil,
-                                        results: appState.nowPlayingResults
+                                        results: appState.nowPlayingResults,
+                                        showArtistPhoto: false
                                     )
                                 } else {
                                     Text("Searching for platforms...")

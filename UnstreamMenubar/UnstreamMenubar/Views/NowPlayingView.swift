@@ -2,6 +2,17 @@ import SwiftUI
 
 struct NowPlayingView: View {
     let nowPlaying: NowPlaying
+    var artistImageUrl: String? = nil
+
+    private var fallbackImage: some View {
+        RoundedRectangle(cornerRadius: 6)
+            .fill(Color.gray.opacity(0.2))
+            .frame(width: 50, height: 50)
+            .overlay(
+                Image(systemName: "music.note")
+                    .foregroundColor(.secondary)
+            )
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -11,8 +22,27 @@ struct NowPlayingView: View {
                 .textCase(.uppercase)
 
             HStack(spacing: 12) {
-                // Album artwork
-                if let artworkData = nowPlaying.artworkData,
+                // Artist photo (or fallback to album artwork if available, then placeholder)
+                if let imageUrl = artistImageUrl, let url = URL(string: imageUrl) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        case .failure(_):
+                            fallbackImage
+                        case .empty:
+                            ProgressView()
+                                .scaleEffect(0.6)
+                                .frame(width: 50, height: 50)
+                        @unknown default:
+                            fallbackImage
+                        }
+                    }
+                    .frame(width: 50, height: 50)
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                } else if let artworkData = nowPlaying.artworkData,
                    let nsImage = NSImage(data: artworkData) {
                     Image(nsImage: nsImage)
                         .resizable()
@@ -20,13 +50,7 @@ struct NowPlayingView: View {
                         .frame(width: 50, height: 50)
                         .cornerRadius(6)
                 } else {
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(width: 50, height: 50)
-                        .overlay(
-                            Image(systemName: "music.note")
-                                .foregroundColor(.secondary)
-                        )
+                    fallbackImage
                 }
 
                 // Track info

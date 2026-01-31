@@ -3,7 +3,7 @@ import Foundation
 /// Service to check for new releases via the Unstream API
 actor ReleaseCheckAPI {
     private let session: URLSession
-    private let baseURL = "https://unstream.dev/.netlify/functions/check-releases"
+    private let baseURL = "https://unstream.stream/.netlify/functions/check-releases"
 
     init() {
         let config = URLSessionConfiguration.default

@@ -141,7 +141,37 @@ struct SupportEntryView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
+            HStack(spacing: 10) {
+                // Artist photo
+                if let imageUrl = entry.imageUrl, let url = URL(string: imageUrl) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        case .failure(_):
+                            Image(systemName: "person.circle.fill")
+                                .resizable()
+                                .foregroundColor(.secondary.opacity(0.5))
+                        case .empty:
+                            ProgressView()
+                                .scaleEffect(0.5)
+                        @unknown default:
+                            Image(systemName: "person.circle.fill")
+                                .resizable()
+                                .foregroundColor(.secondary.opacity(0.5))
+                        }
+                    }
+                    .frame(width: 36, height: 36)
+                    .clipShape(Circle())
+                } else {
+                    Image(systemName: "person.circle.fill")
+                        .resizable()
+                        .foregroundColor(.secondary.opacity(0.5))
+                        .frame(width: 36, height: 36)
+                }
+
                 Text(entry.artistName)
                     .font(.system(size: 14, weight: .semibold))
 

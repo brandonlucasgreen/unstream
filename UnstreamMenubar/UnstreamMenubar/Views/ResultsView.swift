@@ -3,6 +3,7 @@ import SwiftUI
 struct ResultsView: View {
     let title: String?
     let results: [ArtistResult]
+    var showArtistPhoto: Bool = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -21,7 +22,7 @@ struct ResultsView: View {
                     .padding(.vertical, 8)
             } else {
                 ForEach(results) { artist in
-                    ArtistResultView(artist: artist)
+                    ArtistResultView(artist: artist, showPhoto: showArtistPhoto)
                 }
             }
         }
@@ -31,6 +32,7 @@ struct ResultsView: View {
 
 struct ArtistResultView: View {
     let artist: ArtistResult
+    var showPhoto: Bool = true
     @EnvironmentObject var licenseManager: LicenseManager
     @EnvironmentObject var supportListManager: SupportListManager
 
@@ -40,8 +42,40 @@ struct ArtistResultView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            // Artist name with save button
-            HStack {
+            // Artist name with photo and save button
+            HStack(spacing: 10) {
+                // Artist photo (conditionally shown)
+                if showPhoto {
+                    if let imageUrl = artist.imageUrl, let url = URL(string: imageUrl) {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                            case .failure(_):
+                                Image(systemName: "person.circle.fill")
+                                    .resizable()
+                                    .foregroundColor(.secondary.opacity(0.5))
+                            case .empty:
+                                ProgressView()
+                                    .scaleEffect(0.5)
+                            @unknown default:
+                                Image(systemName: "person.circle.fill")
+                                    .resizable()
+                                    .foregroundColor(.secondary.opacity(0.5))
+                            }
+                        }
+                        .frame(width: 40, height: 40)
+                        .clipShape(Circle())
+                    } else {
+                        Image(systemName: "person.circle.fill")
+                            .resizable()
+                            .foregroundColor(.secondary.opacity(0.5))
+                            .frame(width: 40, height: 40)
+                    }
+                }
+
                 Text(artist.name)
                     .font(.system(size: 14, weight: .semibold))
 

@@ -29,7 +29,7 @@ struct SettingsView: View {
             // Pro License Section
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text("Unstream Plus")
+                    Text("Unstream Yearly Pass")
                         .font(.headline)
                     if licenseManager.isPro {
                         Image(systemName: "checkmark.seal.fill")
@@ -108,10 +108,27 @@ struct SettingsView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
 
-                    if let lastCheck = alertManager.lastCheckDate {
-                        Text("Last checked: \(lastCheck.formatted(.relative(presentation: .named)))")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                    HStack {
+                        if let lastCheck = alertManager.lastCheckDate {
+                            Text("Last checked: \(lastCheck.formatted(.relative(presentation: .named)))")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+
+                        Spacer()
+
+                        Button("Check Now") {
+                            Task {
+                                await alertManager.checkNow()
+                            }
+                        }
+                        .font(.caption)
+                        .disabled(alertManager.isChecking)
+
+                        if alertManager.isChecking {
+                            ProgressView()
+                                .scaleEffect(0.6)
+                        }
                     }
 
                     #if DEBUG
@@ -124,20 +141,6 @@ struct SettingsView: View {
                             .font(.caption)
                             .fontWeight(.semibold)
                             .foregroundColor(.orange)
-
-                        HStack {
-                            Button("Check Now") {
-                                Task {
-                                    await alertManager.checkNow()
-                                }
-                            }
-                            .disabled(alertManager.isChecking)
-
-                            if alertManager.isChecking {
-                                ProgressView()
-                                    .scaleEffect(0.6)
-                            }
-                        }
 
                         HStack(spacing: 8) {
                             Button("Clear Known") {
@@ -163,7 +166,7 @@ struct SettingsView: View {
                                 .foregroundColor(.green)
                         }
 
-                        Text("Check Now triggers immediate check. Clear Known allows re-detecting releases.")
+                        Text("Clear Known allows re-detecting releases.")
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }

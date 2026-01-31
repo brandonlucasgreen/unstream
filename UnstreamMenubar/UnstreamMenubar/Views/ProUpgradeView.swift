@@ -9,7 +9,7 @@ struct ProUpgradeView: View {
                 .font(.system(size: 40))
                 .foregroundColor(.red)
 
-            Text("Unstream Plus")
+            Text("Unstream Yearly Pass")
                 .font(.headline)
 
             Text("Save artists you want to support and access them anytime. Your list syncs across all your Macs via iCloud.")
@@ -21,7 +21,7 @@ struct ProUpgradeView: View {
                 Link(destination: URL(string: "https://unstream.stream/plus")!) {
                     HStack {
                         Image(systemName: "cart")
-                        Text("Get Unstream Plus")
+                        Text("Get Yearly Pass")
                     }
                     .font(.system(size: 13, weight: .medium))
                     .frame(maxWidth: .infinity)

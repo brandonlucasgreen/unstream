@@ -14,7 +14,7 @@ body {
   background: #1F2937;
   width: 380px;
   min-height: 200px;
-  max-height: 500px;
+  max-height: 520px;
   overflow-y: auto;
 }
 
@@ -27,9 +27,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #374151;
+  margin-bottom: 12px;
 }
 
 .logo {
@@ -48,19 +46,49 @@ body {
   color: #F9FAFB;
 }
 
-.icon-btn {
+/* Tab Navigation */
+.tab-nav {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #374151;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 8px 12px;
   background: transparent;
   border: none;
-  color: #9CA3AF;
-  cursor: pointer;
-  padding: 6px;
   border-radius: 6px;
+  color: #9CA3AF;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
   transition: all 0.2s;
 }
 
-.icon-btn:hover {
+.tab-btn:hover {
   background: #374151;
+  color: #E5E7EB;
+}
+
+.tab-btn.active {
+  background: #3B82F6;
   color: #F9FAFB;
+}
+
+/* Tab Content */
+.tab-content {
+  min-height: 200px;
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
 }
 
 /* Sections */
@@ -188,7 +216,6 @@ body {
   height: 36px;
   border-radius: 50%;
   background: #374151;
-  color: #E5E7EB;
   text-decoration: none;
   transition: all 0.2s;
 }
@@ -201,6 +228,11 @@ body {
 .social-link svg {
   width: 18px;
   height: 18px;
+  fill: #E5E7EB;
+}
+
+.social-link:hover svg {
+  fill: #F9FAFB;
 }
 
 /* Actions Row */
@@ -309,37 +341,240 @@ body {
   text-decoration: underline;
 }
 
-/* Saved Artists */
-.saved-artists {
+/* New Releases */
+.new-releases {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 8px;
 }
 
-.saved-artist {
+.new-release-item {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  background: #374151;
-  border-radius: 16px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #374151 0%, #1F2937 100%);
+  border: 1px solid #FCD34D;
+  border-radius: 8px;
+}
+
+.release-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.release-artist {
+  font-size: 14px;
+  font-weight: 600;
+  color: #F9FAFB;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.release-title {
   font-size: 12px;
+  color: #FCD34D;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.release-platform {
+  font-size: 10px;
+  color: #9CA3AF;
+  text-transform: capitalize;
+}
+
+.release-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.release-open {
+  padding: 6px 12px;
+  background: #FCD34D;
+  border: none;
+  border-radius: 6px;
+  color: #1F2937;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.saved-artist:hover {
-  background: #4B5563;
+.release-open:hover {
+  background: #FBBF24;
 }
 
-.saved-artist .remove {
+.release-dismiss {
+  padding: 6px 10px;
+  background: transparent;
+  border: 1px solid #4B5563;
+  border-radius: 6px;
   color: #9CA3AF;
   font-size: 14px;
-  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.saved-artist .remove:hover {
+.release-dismiss:hover {
+  background: #374151;
   color: #EF4444;
+  border-color: #EF4444;
+}
+
+.sparkle {
+  color: #FCD34D;
+}
+
+/* Saved Artists List */
+.saved-artists-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.saved-artist-card {
+  background: #374151;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.saved-artist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.saved-artist-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #F9FAFB;
+  cursor: pointer;
+}
+
+.saved-artist-name:hover {
+  color: #60A5FA;
+}
+
+.saved-artist-remove {
+  background: none;
+  border: none;
+  color: #6B7280;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.saved-artist-remove:hover {
+  background: #4B5563;
+  color: #EF4444;
+}
+
+.saved-artist-platforms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.platform-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: #4B5563;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #D1D5DB;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.platform-link:hover {
+  background: #6B7280;
+  color: #F9FAFB;
+}
+
+.platform-icon {
+  font-size: 12px;
+}
+
+/* Saved Artist Social Links */
+.saved-artist-social {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #4B5563;
+}
+
+.social-link-small {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #4B5563;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.social-link-small:hover {
+  background: #6B7280;
+  transform: scale(1.1);
+}
+
+.social-link-small svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Pro Upgrade Card */
+.pro-upgrade-card {
+  background: linear-gradient(135deg, #1E3A5F 0%, #1F2937 100%);
+  border: 1px solid #3B82F6;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.pro-upgrade-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #F9FAFB;
+  margin-bottom: 8px;
+}
+
+.pro-upgrade-card p {
+  font-size: 13px;
+  color: #9CA3AF;
+  margin-bottom: 16px;
+}
+
+.upgrade-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background: #3B82F6;
+  border-radius: 8px;
+  color: #F9FAFB;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.upgrade-btn:hover {
+  background: #2563EB;
 }
 
 /* Search Box */
@@ -381,18 +616,7 @@ body {
   background: #2563EB;
 }
 
-/* Settings Panel */
-.setting-group {
-  margin-bottom: 20px;
-}
-
-.setting-group h3 {
-  font-size: 14px;
-  font-weight: 600;
-  color: #F9FAFB;
-  margin-bottom: 8px;
-}
-
+/* Settings */
 .license-status {
   display: flex;
   align-items: center;
@@ -462,6 +686,50 @@ body {
   text-decoration: underline;
 }
 
+.setting-description {
+  font-size: 13px;
+  color: #9CA3AF;
+  margin-bottom: 12px;
+}
+
+.check-now-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  background: #374151;
+  border: 1px solid #4B5563;
+  border-radius: 8px;
+  color: #F9FAFB;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.check-now-btn:hover {
+  background: #4B5563;
+}
+
+.check-now-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.check-now-btn.checking {
+  background: #3B82F6;
+  border-color: #3B82F6;
+}
+
+.last-check-time {
+  font-size: 11px;
+  color: #6B7280;
+  margin-top: 8px;
+  text-align: center;
+}
+
 .about-text {
   font-size: 13px;
   color: #D1D5DB;
@@ -474,22 +742,6 @@ body {
 
 .about-text a:hover {
   text-decoration: underline;
-}
-
-.back-btn {
-  width: 100%;
-  padding: 10px;
-  background: transparent;
-  border: 1px solid #4B5563;
-  border-radius: 8px;
-  color: #D1D5DB;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.back-btn:hover {
-  background: #374151;
 }
 
 /* Loading state */
