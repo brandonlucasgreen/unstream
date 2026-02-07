@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && tsx scripts/generate-sitemap.ts",
+    "generate:artists": "tsx scripts/generate-artist-list.ts",
+    "generate:data": "tsx scripts/generate-artist-data.ts",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -30,6 +32,7 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "tailwindcss": "^4.1.18",
+    "tsx": "^4.21.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4"

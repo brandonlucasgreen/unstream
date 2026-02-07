@@ -8,6 +8,10 @@
   path = "/"
   function = "og-metadata"
 
+[[edge_functions]]
+  path = "/artist/*"
+  function = "artist-page"
+
 [[redirects]]
   from = "/api/search/sources"
   to = "/.netlify/functions/search-sources"

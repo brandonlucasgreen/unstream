@@ -5,12 +5,14 @@ import './index.css'
 import App from './App.tsx'
 import { RoadmapPage } from './pages/RoadmapPage.tsx'
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage.tsx'
+import { ArtistPage } from './pages/ArtistPage.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />} />
+        <Route path="/artist/:slug" element={<ArtistPage />} />
         <Route path="/roadmap" element={<RoadmapPage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
       </Routes>
