@@ -1,0 +1,133 @@
+[
+  {
+    "id": "qobuz-erykahbadu",
+    "name": "Erykah Badu",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/erykah-badu/37926",
+        "allReleaseTitles": [
+          "nexttoyouthealchemist",
+          "mamasgun",
+          "baduizm",
+          "baduizmspecialedition",
+          "temptedjamespoyser",
+          "butyoucaintusemyphone",
+          "live",
+          "newamerykahparttworeturnoftheankh",
+          "newamerykahpartone4thworldwar",
+          "worldwideunderground",
+          "baglady",
+          "didntchaknow",
+          "onon",
+          "appletree",
+          "honeyremixessingle",
+          "danger",
+          "nextlifetime",
+          "afrobluemixeschrissimmondsrobertglasperexperiment"
+        ],
+        "latestRelease": {
+          "title": "Next To You Erykah Badu The Alchemist",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/next-to-you-erykah-badu-the-alchemist/xwd0j895req7a",
+          "releaseDate": "2025-06-20"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Erykah%20Badu"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Erykah%20Badu"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.erykahbadu.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/10995"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Erykah%20Badu&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Erykah%20Badu"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/erykahbadu/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/erykahbadu"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/erykahbadu"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "erykahbadujamespoyser",
+    "name": "Erykah Badu & James Poyser",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019403190_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://erykahbadujamespoyser.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Erykah%20Badu%20%26%20James%20Poyser"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Erykah%20Badu%20%26%20James%20Poyser"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.erykahbadu.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/10995"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Erykah%20Badu%20%26%20James%20Poyser&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Erykah%20Badu%20%26%20James%20Poyser"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/erykahbadu/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/erykahbadu"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/erykahbadu"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

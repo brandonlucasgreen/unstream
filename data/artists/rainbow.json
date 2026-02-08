@@ -1,0 +1,842 @@
+[
+  {
+    "id": "rainbowgirls",
+    "name": "Rainbow Girls",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037546018_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rainbowgirls.bandcamp.com",
+        "allReleaseTitles": [
+          "haunting",
+          "welcometowhatever",
+          "rollingdumpsterfireothersongs",
+          "givethepeoplewhattheywant",
+          "whilewewait",
+          "americandream"
+        ],
+        "latestRelease": {
+          "title": "HAUNTING",
+          "type": "album",
+          "url": "https://rainbowgirls.bandcamp.com/album/haunting",
+          "imageUrl": "https://f4.bcbits.com/img/a1426492145_2.jpg",
+          "releaseDate": "October 22, 2024"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/rainbowgirls"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rainbow%20Girls"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rainbow%20Girls"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/245648"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rainbow%20Girls&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rainbow%20Girls"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCgOBQxVfZhfr8A0i1r7-01w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Rainbow-189246591087656"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "rainbow",
+    "name": "Rainbow",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0007249084_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rainbow1981.bandcamp.com",
+        "allReleaseTitles": [
+          "boston1981",
+          "downtoearthtour1979live"
+        ],
+        "latestRelease": {
+          "title": "Boston 1981",
+          "type": "album",
+          "url": "https://rainbow1981.bandcamp.com/album/boston-1981",
+          "imageUrl": "https://f4.bcbits.com/img/a2562485828_16.jpg",
+          "releaseDate": "April 19, 2016"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/RainbowGay"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rainbow"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rainbow"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/245648"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rainbow&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rainbow"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCgOBQxVfZhfr8A0i1r7-01w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Rainbow-189246591087656"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "blackmothsuperrainbow",
+    "name": "Black Moth Super Rainbow",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0005196247_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://blackmothsuperrainbow.bandcamp.com",
+        "allReleaseTitles": [
+          "softnewmagicdream",
+          "startapeopleexpandedtracks",
+          "panicfades",
+          "panicblooms",
+          "seefulilacep",
+          "cobrajuicyinstrumentals",
+          "cobrajuicy",
+          "psychiclovedamageep",
+          "windshieldsmashermaxisingle",
+          "extraflavordandeliongumerasessionsep",
+          "eatingus",
+          "dontyouwanttobeinacult",
+          "drippersep",
+          "bonusdrippersep",
+          "zodiacgirls",
+          "dandeliongum",
+          "lostpickingflowersinthewoodsep",
+          "startapeople",
+          "fallingthroughafield"
+        ],
+        "latestRelease": {
+          "title": "Soft New Magic Dream",
+          "type": "album",
+          "url": "https://blackmothsuperrainbow.bandcamp.com/album/soft-new-magic-dream",
+          "imageUrl": "https://f4.bcbits.com/img/a0439400561_2.jpg",
+          "releaseDate": "June 6, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Black%20Moth%20Super%20Rainbow"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Black%20Moth%20Super%20Rainbow"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/245648"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Black%20Moth%20Super%20Rainbow&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Black%20Moth%20Super%20Rainbow"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCgOBQxVfZhfr8A0i1r7-01w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Rainbow-189246591087656"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "baberainbow",
+    "name": "Babe Rainbow",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0005205540_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thebaberainbow.bandcamp.com",
+        "allReleaseTitles": [
+          "levitationsessions",
+          "changingcoloursbaberainbow",
+          "today",
+          "doublerainbow",
+          "thebaberainbowep"
+        ],
+        "latestRelease": {
+          "title": "Levitation Sessions",
+          "type": "album",
+          "url": "https://thebaberainbow.bandcamp.com/album/levitation-sessions",
+          "imageUrl": "https://f4.bcbits.com/img/a4107942395_2.jpg",
+          "releaseDate": "April 15, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Babe%20Rainbow"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Babe%20Rainbow"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/245648"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Babe%20Rainbow&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Babe%20Rainbow"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCgOBQxVfZhfr8A0i1r7-01w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Rainbow-189246591087656"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "rainbowbridge",
+    "name": "Rainbow Bridge",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0004417626_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rainbowbridge.bandcamp.com",
+        "allReleaseTitles": [
+          "seriousatalltimesmasscommboarjml",
+          "horsejustinmarclloyd",
+          "robbedwreckedterroristfinancing",
+          "coredumpdiariesvol34justinmarclloyd",
+          "healtendometriumcuntplow",
+          "highcube229",
+          "bipolarmolassespregnantbed",
+          "internationalexportsandthereasonspossetpregnantspore",
+          "potpourriofandrewvariousartists",
+          "handslooklikeeyessomnaphoninappropriatekinglive",
+          "journeyto0004rendering2justinmarclloydpregnantspore",
+          "promisesweepersjmarcloid",
+          "hasbeenremixedbydeveloperjml",
+          "completewithbeastskingraft",
+          "anxietyloopstheothers",
+          "enablerlonglivethehomebreakdancingronaldreagan"
+        ],
+        "latestRelease": {
+          "title": "Serious At All Times\n                \n                \n\n                Mass Comm ☹ Boar ☹ JML",
+          "type": "album",
+          "url": "https://rainbowbridge.bandcamp.com/album/serious-at-all-times",
+          "imageUrl": "https://f4.bcbits.com/img/a0240575345_2.jpg",
+          "releaseDate": "January 16, 2015"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rainbow%20Bridge"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rainbow%20Bridge"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/245648"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rainbow%20Bridge&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rainbow%20Bridge"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCgOBQxVfZhfr8A0i1r7-01w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Rainbow-189246591087656"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "rainbowblonderecords",
+    "name": "Rainbow Blonde Records",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0017537379_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rainbowblonde.bandcamp.com",
+        "allReleaseTitles": [
+          "facingeastthemusicofjohncoltranejosejames",
+          "1978revengeofthedragonjosejames",
+          "amsterdam2024liveatparadisojosejames",
+          "saturdaynightlouievegaremixesjosejames",
+          "sometimeslateatnightjharisyokley",
+          "1978josejames",
+          "taalitaali",
+          "ononjosejames",
+          "whendidtheworldstartendingtaali",
+          "josejamesnewyork2020livejosejames",
+          "blackmagic10thanniversaryeditionjosejames",
+          "highroadpt2natashadiggsianwallaceremixbenwilliams",
+          "softagekoolkojakremixbrightguilty",
+          "brightguiltymentalsbrightguilty",
+          "iamherementalstaali",
+          "iamamanmentalsbenwilliams"
+        ],
+        "latestRelease": {
+          "title": "Facing East: The Music of John Coltrane\n                \n                \n\n                José James",
+          "type": "album",
+          "url": "https://josejames.bandcamp.com/album/facing-east-the-music-of-john-coltrane-2?label=2555200657&tab=music",
+          "imageUrl": "https://f4.bcbits.com/img/a1025569247_2.jpg",
+          "releaseDate": "January 16, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rainbow%20Blonde%20Records"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rainbow%20Blonde%20Records"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/245648"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rainbow%20Blonde%20Records&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rainbow%20Blonde%20Records"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCgOBQxVfZhfr8A0i1r7-01w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Rainbow-189246591087656"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "whiterainbow",
+    "name": "WHITE RAINBOW",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032630067_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://whiterainbow.bandcamp.com",
+        "allReleaseTitles": [
+          "drpizzasspectralretreatandeventcenter",
+          "seathru",
+          "thruu",
+          "newclouds",
+          "prismofeternalnow",
+          "sunshifts",
+          "thecontemplator",
+          "boringguitarmusic",
+          "pottedfern",
+          "trickshot",
+          "escapadesliveinbrooklynoct2010",
+          "sandqualityeveryanswer",
+          "laystheboogiedown",
+          "gis",
+          "blackbox",
+          "humidifierplaza"
+        ],
+        "latestRelease": {
+          "title": "DR PIZZA'S SPECTRAL RETREAT AND EVENT CENTER",
+          "type": "album",
+          "url": "https://whiterainbow.bandcamp.com/album/dr-pizzas-spectral-retreat-and-event-center",
+          "imageUrl": "https://f4.bcbits.com/img/a1957793216_2.jpg",
+          "releaseDate": "December 29, 2010"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=WHITE%20RAINBOW"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+WHITE%20RAINBOW"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/245648"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=WHITE%20RAINBOW&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/WHITE%20RAINBOW"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCgOBQxVfZhfr8A0i1r7-01w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Rainbow-189246591087656"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "jrainbow",
+    "name": "J Rainbow",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039225325_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jrainbow.bandcamp.com",
+        "allReleaseTitles": [
+          "ambergroovetoxichijackmixjrainbow2026edit",
+          "eaglespreyemersonremixjrainbowedit",
+          "bombthebassyouseemein3dpengeditjrainbowvsboizomashup",
+          "itsamomentintimejrainbow2026edit",
+          "suenolatinojrainbow2026breaksedit",
+          "nushoriginalmixjrainbowedit",
+          "ruhehumatemixjrainbowbreaksedit",
+          "songoflifejrainbowedit",
+          "wherelovelivesjrainbowbreaksedit",
+          "collapsemylovejrainbowacidhouseedit",
+          "stonerosesfoolsgoldjrainbowvsjlaidbackedit",
+          "bgprinceofraptakecontrolofthepartyjrainbow2025edit",
+          "gmasterflashwhitelinesjrainbowremix",
+          "capricorntastejrainbowthebestthingedit",
+          "jacoshowsomelovejrainbowshowsomejawelectrodub",
+          "littlebulletjrainbowelectroedit"
+        ],
+        "latestRelease": {
+          "title": "Amber Groove (Toxic Hijack Mix) J. Rainbow 2026 Edit",
+          "type": "track",
+          "url": "https://jrainbow.bandcamp.com/track/amber-groove-toxic-hijack-mix-j-rainbow-2026-edit",
+          "imageUrl": "https://f4.bcbits.com/img/a0731249292_2.jpg",
+          "releaseDate": "February 6, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=J%20Rainbow"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+J%20Rainbow"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/245648"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=J%20Rainbow&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/J%20Rainbow"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCgOBQxVfZhfr8A0i1r7-01w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Rainbow-189246591087656"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "rainbowpyramid",
+    "name": "rainbow pyramid",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018032604_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rainbowcult.bandcamp.com",
+        "allReleaseTitles": [
+          "easytraveltootherplanetsshadowsofvibrate",
+          "ofwavesmatthewbarlow",
+          "realliferockrollandrewweathers",
+          "anchorstoreanchorstore",
+          "temperateworldsmetamora",
+          "azaleasjoshuadumasbwcreationviazaleasjoshuadumascreationvi",
+          "spiritofloveasinfinitelifecloudsound",
+          "wavetemplesheatsureenswavetemplesheatsureens",
+          "pawpawpandelindiopawpawpandelindio",
+          "ds10demonstrationsynthesis",
+          "gardenmusicinnertravels",
+          "outsidemywindowwhileidreamepbabexo",
+          "returntothepalmoasiskoasasa",
+          "selvaprimariaoliwa",
+          "lastparadigmastralplanesdriftersos",
+          "cosmologicalhorizonjeffbrown"
+        ],
+        "latestRelease": {
+          "title": "Easy Travel to Other Planets\n                \n                \n\n                Shadows of Vibrate",
+          "type": "album",
+          "url": "https://rainbowcult.bandcamp.com/album/easy-travel-to-other-planets",
+          "imageUrl": "https://f4.bcbits.com/img/a0391933394_2.jpg",
+          "releaseDate": "December 22, 2015"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=rainbow%20pyramid"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+rainbow%20pyramid"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/245648"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=rainbow%20pyramid&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/rainbow%20pyramid"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCgOBQxVfZhfr8A0i1r7-01w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Rainbow-189246591087656"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "rainbowkittensurprise",
+    "name": "Rainbow Kitten Surprise",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0004180867_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rainbowkittensurprise.bandcamp.com",
+        "allReleaseTitles": [
+          "rainbowkittensurpriseaudiotreelive",
+          "seven",
+          "fail",
+          "mary"
+        ],
+        "latestRelease": {
+          "title": "Rainbow Kitten Surprise - Audiotree Live",
+          "type": "album",
+          "url": "https://rainbowkittensurprise.bandcamp.com/album/rainbow-kitten-surprise-audiotree-live",
+          "imageUrl": "https://f4.bcbits.com/img/a1234328277_16.jpg",
+          "releaseDate": "February 9, 2017"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rainbow%20Kitten%20Surprise"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rainbow%20Kitten%20Surprise"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/245648"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rainbow%20Kitten%20Surprise&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rainbow%20Kitten%20Surprise"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCgOBQxVfZhfr8A0i1r7-01w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Rainbow-189246591087656"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-rainbow",
+    "name": "Rainbow",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rainbow/71880"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rainbow"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rainbow"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/245648"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rainbow&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rainbow"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCgOBQxVfZhfr8A0i1r7-01w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Rainbow-189246591087656"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-rainbow8",
+    "name": "Rainbow 8",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rainbow-8/22627723"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rainbow%208"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rainbow%208"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/245648"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rainbow%208&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rainbow%208"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCgOBQxVfZhfr8A0i1r7-01w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Rainbow-189246591087656"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-rainbow2",
+    "name": "Rainbow 2",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rainbow-2/6489534"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rainbow%202"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rainbow%202"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/245648"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rainbow%202&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rainbow%202"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCgOBQxVfZhfr8A0i1r7-01w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Rainbow-189246591087656"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-rainbow9021",
+    "name": "Rainbow9021",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rainbow9021/11474763"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rainbow9021"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rainbow9021"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/245648"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rainbow9021&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rainbow9021"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCgOBQxVfZhfr8A0i1r7-01w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Rainbow-189246591087656"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

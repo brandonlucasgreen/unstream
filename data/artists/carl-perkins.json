@@ -1,0 +1,55 @@
+[
+  {
+    "id": "carlperkins",
+    "name": "Carl Perkins",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026884785_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://carlperkins.bandcamp.com",
+        "allReleaseTitles": [
+          "somethingsneverchange",
+          "turnaround",
+          "thekingofrockabillysunrecords70thremastered2022",
+          "canecreekglorychurch",
+          "bluesuedeshoes",
+          "originalgoldenhits",
+          "thedancealbum"
+        ],
+        "latestRelease": {
+          "title": "Some Things Never Change",
+          "type": "album",
+          "url": "https://carlperkins.bandcamp.com/album/some-things-never-change",
+          "imageUrl": "https://f4.bcbits.com/img/a2850282051_2.jpg",
+          "releaseDate": "October 24, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Carl%20Perkins"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Carl%20Perkins"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/251877"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Carl%20Perkins&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Carl%20Perkins"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "id": "qobuz-kingsofleon",
+    "name": "Kings Of Leon",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/kings-of-leon/200740",
+        "allReleaseTitles": [
+          "ep2",
+          "canwepleasehavefun",
+          "onlybythenight",
+          "ahashakeheartbreak",
+          "walls",
+          "boweryfeatzachbryan",
+          "whenyouseeyourself",
+          "mechanicalbullexpandededition",
+          "wereontosomethingfeatzachbryan",
+          "mustang",
+          "splitscreen",
+          "nothingtodo",
+          "mtelevision",
+          "comearoundsundownexpandededition",
+          "becauseofthetimes",
+          "youthandyoungmanhood",
+          "talihinasky",
+          "dayoldbelgianblues"
+        ],
+        "latestRelease": {
+          "title": "Ep 2 Kings Of Leon",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/ep-2-kings-of-leon/ojcrbivwu1hma",
+          "releaseDate": "2025-11-07"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kings%20Of%20Leon"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kings%20Of%20Leon"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://kingsofleon.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/236094"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Kings%20Of%20Leon&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Kings%20Of%20Leon"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kingsofleon/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC09rjW-THj6e3WgMKSc5Bvg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/KingsOfLeon"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

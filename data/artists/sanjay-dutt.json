@@ -1,0 +1,45 @@
+[
+  {
+    "id": "qobuz-sanjaydutt",
+    "name": "Sanjay Dutt",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sanjay-dutt/658491",
+        "allReleaseTitles": [
+          "kdteaserthememusicfromkdarjunjanyaravishnakarkraanthikumar",
+          "kdteaserthememusicfromkdmalayalamversionravishnakararjunjanyakraanthikumar",
+          "kdteaserthememusicfromkdteluguversionravishnakararjunjanyakraanthikumar",
+          "kdteaserthememusicfromkdtamilversionravishnakararjunjanyakraanthikumar",
+          "kdteaserthememusicfromkdhindiversionravishnakararjunjanyakraanthikumar",
+          "vaastavdialogues",
+          "ganeshaarti"
+        ],
+        "latestRelease": {
+          "title": "Kd Teaser Theme Music From Kd Arjun Janya Ravishnakar Sanjay Dutt Kraanthi Kumar",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/kd-teaser-theme-music-from-kd-arjun-janya-ravishnakar-sanjay-dutt-kraanthi-kumar/whf9nd7be4fjc",
+          "releaseDate": "2025-07-10"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sanjay%20Dutt"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sanjay%20Dutt"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1852134"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

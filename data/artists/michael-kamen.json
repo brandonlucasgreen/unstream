@@ -1,0 +1,109 @@
+[
+  {
+    "id": "qobuz-michaelkamen",
+    "name": "Michael Kamen",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/michael-kamen/11626",
+        "allReleaseTitles": [
+          "licencetokilljamesbond007originalmotionpicturesoundtrackgladysknightcomposedconductedby",
+          "thedeadzoneoriginalmotionpicturesoundtrack",
+          "theirongiant",
+          "lastactionherooriginalmotionpicturescore",
+          "openrange",
+          "diehard2dieharder",
+          "backtogayaoriginalmotionpicturesoundtrack",
+          "101dalmatians",
+          "xmenthelaallstarorchestra",
+          "mrhollandsopusoriginalmotionpicturesoundtrackseattlesymphonyorchestra",
+          "adventuresinbabysitting"
+        ],
+        "latestRelease": {
+          "title": "The Dead Zone Original Motion Picture Soundtrack Michael Kamen",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-dead-zone-original-motion-picture-soundtrack-michael-kamen/ajz58uiqm3bva",
+          "releaseDate": "2009-07-21"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Michael%20Kamen"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Michael%20Kamen"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.michaelkamen.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/106802"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Michael%20Kamen&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Michael%20Kamen"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/watch?v=tKlhhOBdozQ&list=OLAK5uy_lYgjmlXTzK-jpYkAtBTTEhj3ASQGUk2w4&index=3"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-michaelkame",
+    "name": "Michael Kame",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/michael-kame/30102587"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Michael%20Kame"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Michael%20Kame"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.michaelkamen.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/106802"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Michael%20Kame&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Michael%20Kame"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/watch?v=tKlhhOBdozQ&list=OLAK5uy_lYgjmlXTzK-jpYkAtBTTEhj3ASQGUk2w4&index=3"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

@@ -1,0 +1,76 @@
+[
+  {
+    "id": "qobuz-helenefischer",
+    "name": "Helene Fischer",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/helene-fischer/130695",
+        "allReleaseTitles": [
+          "",
+          "farbenspiel",
+          "dieshowmeineschonstenmomentevol1",
+          "bestofdasultimative",
+          "vamosamarteluisfonsi",
+          "rausch",
+          "sowieichbin",
+          "vonhierbisunendlich",
+          "fureinentag",
+          "zaubermond",
+          "sonahwiedu",
+          "vollekraftvoraus",
+          "nullauf100ep",
+          "liebeisteintanzblitz",
+          "wennallesdurchdreht",
+          "nullauf100",
+          "babysharkottowaalkes",
+          "bestof"
+        ],
+        "latestRelease": {
+          "title": "Best Of Das Ultimative Helene Fischer",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/best-of-das-ultimative-helene-fischer/mqr54eub7vt1a",
+          "releaseDate": "2023-05-12"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Helene%20Fischer"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Helene%20Fischer"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.helene-fischer.de/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1158421"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/helenefischer/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@helenefischer"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCn3yU2bHX_8HMCfXOBTkXCg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/helenefischer.official"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

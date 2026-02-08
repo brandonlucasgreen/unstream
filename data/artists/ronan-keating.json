@@ -1,0 +1,83 @@
+[
+  {
+    "id": "qobuz-ronankeating",
+    "name": "Ronan Keating",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ronan-keating/60504",
+        "allReleaseTitles": [
+          "timeofmylife",
+          "twentytwenty",
+          "songsfromhome",
+          "foreverandeveramenshaniatwain",
+          "littlethingcalledlove",
+          "theoneninanesbitt",
+          "lovewillremain",
+          "whenyousaynothingatall",
+          "ronan",
+          "destination",
+          "live2013attheo2arenalondon",
+          "lovineachday",
+          "songsformymother",
+          "10yearsofhits",
+          "wintersongs",
+          "whenronanmetburtburtbacharach",
+          "thewayyoumakemefeelbryanadams"
+        ],
+        "latestRelease": {
+          "title": "Songs From Home Ronan Keating",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/songs-from-home-ronan-keating/jqk0sjeph5gzb",
+          "releaseDate": "2021-11-19"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ronan%20Keating"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ronan%20Keating"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.ronankeating.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/219334"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ronan%20Keating&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ronan%20Keating"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rokeating/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@ronankeatingofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/ronankeatingofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ronankeatingofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

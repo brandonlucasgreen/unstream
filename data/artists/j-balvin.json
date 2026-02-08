@@ -1,0 +1,78 @@
+[
+  {
+    "id": "qobuz-jbalvin1",
+    "name": "J Balvin 1",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/j-balvin-1/900069",
+        "allReleaseTitles": [
+          "indagettoskrillex",
+          "noventadjsnake",
+          "nomeconocejhaycobadbunny",
+          "xnickyjamfeatmalumaozuna",
+          "mixteip",
+          "rio",
+          "amremixniogarciabadbunny",
+          "iadoreyoutopicelliegouldingarashhugeldaecolm",
+          "sigueforevermyloveedsheeran",
+          "bzrpmusicsessionsvol6266bizarrapjbalvin",
+          "klkomega",
+          "glowkittyelboguetoanduzielitomixfeaturingelmalillayerimuaanddjrockwelmx",
+          "ritmobadboysforlifeblackeyedpeasx",
+          "ponlervssianfarruko",
+          "pobladocrissinkarolgnatanshandernickyjamtotoyelfrio",
+          "letsgowilliam",
+          "perversapedrosampaiotakeadaytrip",
+          "voodoobadshahtainy",
+          "locationkarolganuelaa",
+          "touchdownbeeniemanbountykillermichaelbruntasan"
+        ],
+        "latestRelease": {
+          "title": "Mixteip J Balvin",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/mixteip-j-balvin/q7fff4768lfla",
+          "releaseDate": "2025-07-18"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=J%20Balvin%201"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+J%20Balvin%201"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://jbalvin.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/14833576"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jbalvin/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@jbalvin"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCrHL_BF5lHyK43BxLU8-vBQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JBalvinOficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

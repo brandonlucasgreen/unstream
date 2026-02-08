@@ -1,0 +1,35 @@
+[
+  {
+    "id": "qobuz-rhysifans",
+    "name": "Rhys Ifans",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rhys-ifans/1493417",
+        "allReleaseTitles": [
+          "sdwnshsionedjoneswilliams"
+        ],
+        "latestRelease": {
+          "title": "Sdwnsh Rhys Ifans Sioned Jones Williams",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/sdwnsh-rhys-ifans-sioned-jones-williams/iy0w4olr9cryb",
+          "releaseDate": "1991-12-06"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rhys%20Ifans"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rhys%20Ifans"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,148 @@
+[
+  {
+    "id": "gojira",
+    "name": "Gojira_",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032071507_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/gojira/82320",
+        "allReleaseTitles": [
+          "fortitude",
+          "magma",
+          "meaculpaahcairavictorlemasnemarinaviotti",
+          "thewayofallflesh",
+          "frommarstosirius",
+          "lenfantsauvage",
+          "thelink",
+          "ourtimeisnow",
+          "amazonia",
+          "terraincognita",
+          "anotherworld",
+          "intothestorm",
+          "bornforonething",
+          "thechant",
+          "lesenfantssauvages",
+          "thelinkalive",
+          "liveathellfest2016"
+        ],
+        "latestRelease": {
+          "title": "Mea Culpa Ah Ca Ira Victor Le Masne Gojira Marina Viotti",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/mea-culpa-ah-ca-ira-victor-le-masne-gojira-marina-viotti/egu2dblb373ib",
+          "releaseDate": "2024-08-30"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://gojira-uz.bandcamp.com"
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/aproximativgojira"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Gojira_"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Gojira_"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.gojira-music.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/395130"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Gojira_&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Gojira_"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/gojiraofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@gojiraband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC34wpCgr3l9cG0RtFdTTS-Q"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/GojiraMusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-gojira1954",
+    "name": "Gojira1954",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/gojira1954/27491940"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Gojira1954"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Gojira1954"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.gojira-music.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/395130"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Gojira1954&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Gojira1954"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/gojiraofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@gojiraband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC34wpCgr3l9cG0RtFdTTS-Q"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/GojiraMusic"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

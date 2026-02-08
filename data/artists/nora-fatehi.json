@@ -1,0 +1,43 @@
+[
+  {
+    "id": "qobuz-norafatehi",
+    "name": "Nora Fatehi",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/nora-fatehi/3028976",
+        "allReleaseTitles": [
+          "snakejasonderulo",
+          "dirtylittlesecretzackknight",
+          "nora",
+          "ohmamatetemarayvannyvishalmishrashreyaghoshalsanjoytheplugzeurope",
+          "norasglobalgrooves",
+          "dilbararabicfnaire",
+          "ultimatedancehitsof",
+          "sultanafrombehappyharshupadhyaysunidhichauhan",
+          "serenity"
+        ],
+        "latestRelease": {
+          "title": "Oh Mama Tetema Rayvanny Nora Fatehi Vishal Mishra Shreya Ghoshal Sanjoy The Plugz Europe",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/oh-mama-tetema-rayvanny-nora-fatehi-vishal-mishra-shreya-ghoshal-sanjoy-the-plugz-europe/nhxue5n0kz05a",
+          "releaseDate": "2025-08-09"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Nora%20Fatehi"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Nora%20Fatehi"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

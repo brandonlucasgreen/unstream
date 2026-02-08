@@ -1,0 +1,87 @@
+[
+  {
+    "id": "alejandrosanz",
+    "name": "Alejandro Sanz",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0006925541_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/alejandro-sanz/167529",
+        "allReleaseTitles": [
+          "yahoraque",
+          "elvinodetubocacarinleon",
+          "besameshakira",
+          "corazonpartiokarlocorkidi",
+          "sanz",
+          "hoynomesientobiengrupofrontera",
+          "muerokanygarcia",
+          "lejosconmigogreeicy",
+          "palmeraseneljardin",
+          "nometiresfloresrelsb",
+          "unbesoenmadridtini",
+          "comoseriamanuelturizo",
+          "milmotivoscarinleon",
+          "maresdemiel",
+          "elveranoquevivimos",
+          "rimowaelenarose",
+          "lacitaemilia",
+          "mamaafricanajavierlimon",
+          "bio",
+          "colecciondefinitiva"
+        ],
+        "latestRelease": {
+          "title": "Y Ahora Que Alejandro Sanz",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/y-ahora-que-alejandro-sanz/vu5rlmar1zhua",
+          "releaseDate": "2025-11-21"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://alejandrosanz.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Alejandro%20Sanz"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Alejandro%20Sanz"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.alejandrosanz.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2123735"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Alejandro%20Sanz&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Alejandro%20Sanz"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/alejandrosanz/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCCEZY5vEQBsQN5i3ceiLo7g"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ASanzOficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

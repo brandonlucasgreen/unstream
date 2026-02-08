@@ -1,0 +1,77 @@
+[
+  {
+    "id": "andrewfletcher",
+    "name": "Andrew Fletcher",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024189600_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://andrwfltchr.bandcamp.com",
+        "allReleaseTitles": [
+          "letthelightin",
+          "doyoueverfeelnothingatall",
+          "peaceinhiding",
+          "vices",
+          "mess",
+          "onmyfloor",
+          "anxiety",
+          "dissociating",
+          "hologram"
+        ],
+        "latestRelease": {
+          "title": "LET THE LIGHT IN",
+          "type": "album",
+          "url": "https://andrwfltchr.bandcamp.com/album/let-the-light-in",
+          "imageUrl": "https://f4.bcbits.com/img/a3121148474_2.jpg",
+          "releaseDate": "May 21, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/andrew-fletcher/2233864",
+        "allReleaseTitles": [
+          "slowdrive",
+          "anewheaven1000yearsofsacredchoralmusic",
+          "dissociating",
+          "hologram",
+          "mess",
+          "summertime",
+          "selamat",
+          "fomo",
+          "gaze",
+          "violentlyhappyfeatbadreputation",
+          "headingdownunder",
+          "messfeatsonshine",
+          "onmyfloor",
+          "thisplace",
+          "itookthefall",
+          "talk",
+          "skylarking",
+          "constellations",
+          "runaway",
+          "idontneedit"
+        ],
+        "latestRelease": {
+          "title": "Mess Andrew Fletcher",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/mess-andrew-fletcher/wc0a4of7vq4bc",
+          "releaseDate": "2019-12-06"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Andrew%20Fletcher"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Andrew%20Fletcher"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

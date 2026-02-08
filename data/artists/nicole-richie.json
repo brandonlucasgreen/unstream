@@ -1,0 +1,60 @@
+[
+  {
+    "id": "qobuz-nicolerichie",
+    "name": "Nicole Richie",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/nicole-richie/6996931",
+        "allReleaseTitles": [
+          "tangledcolorsinmyhead"
+        ],
+        "latestRelease": {
+          "title": "Tangled Colors In My Head Nicole Richie",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/tangled-colors-in-my-head-nicole-richie/feupnmsdab2m8",
+          "releaseDate": "2026-02-06"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Nicole%20Richie"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Nicole%20Richie"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "nicolerichiesucksex",
+    "name": "________________NICOLE RICHIE/ SUCK SEX",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3488930506_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://53242736197435432.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=________________NICOLE%20RICHIE%2F%20SUCK%20SEX"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+________________NICOLE%20RICHIE%2F%20SUCK%20SEX"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

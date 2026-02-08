@@ -1,0 +1,209 @@
+[
+  {
+    "id": "qobuz-rza",
+    "name": "Rza",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rza/47473",
+        "allReleaseTitles": [
+          "waxonwaxoffawichaapferglupefiasco",
+          "aballetthroughmudcoloradosymphonyandchristopherdragon",
+          "saturdayafternoonkungfutheaterdjscratch",
+          "butchershopawichaapferg",
+          "presentsbobbydigitalandthepitofsnakesbobbydigital",
+          "quentintarantinoflatbushzombies",
+          "belikewaterinspiredbytheespn30for30bewater",
+          "fateoftheworlddjscratch",
+          "tomorrowjeromehadey",
+          "asbobbydigital",
+          "themanwiththeironfists2originalmotionpicturesoundtrackhowarddrossin",
+          "iseescrollsaroundmeilluminaticongoamp",
+          "birthofaprince",
+          "afrosamurairesurrectionthe",
+          "biochemicalequationwutangclanmfdoom",
+          "biochemicalequationwutangclanmfdoomand",
+          "theartoflisteningwithtry",
+          "plugaddictsflatbushzombies",
+          "cutthroatcityoriginalmotionpicturesoundtrackand36chambers",
+          "likechildrenincandystoresjeromehadey"
+        ],
+        "latestRelease": {
+          "title": "Wax On Wax Off Awich Aap Ferg Lupe Fiasco Rza ",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/wax-on-wax-off-awich-aap-ferg-lupe-fiasco-rza-/lv6lp7k6neoqa",
+          "releaseDate": "2025-06-18"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rza"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rza"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://bobbydigital.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/168601"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rza&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rza"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rza/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@rza"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCGyl-mppglI0ZACJ-7oszbg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/RZAWU"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-rza4",
+    "name": "Rza 4",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rza-4/12743684",
+        "allReleaseTitles": [
+          "wanitaterindah",
+          "maaftakbahagia"
+        ],
+        "latestRelease": {
+          "title": "Maaf Tak Bahagia Rza",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/maaf-tak-bahagia-rza/oa9ygwyqy07kc",
+          "releaseDate": "2022-02-28"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rza%204"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rza%204"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://bobbydigital.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/168601"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rza%204&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rza%204"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rza/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@rza"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCGyl-mppglI0ZACJ-7oszbg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/RZAWU"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "rzadjscratch",
+    "name": "RZA & Dj Scratch",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027981468_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rzadjscratch.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=RZA%20%26%20Dj%20Scratch"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+RZA%20%26%20Dj%20Scratch"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://bobbydigital.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/168601"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=RZA%20%26%20Dj%20Scratch&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/RZA%20%26%20Dj%20Scratch"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rza/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@rza"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCGyl-mppglI0ZACJ-7oszbg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/RZAWU"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

@@ -1,0 +1,85 @@
+[
+  {
+    "id": "qobuz-billytalent",
+    "name": "Billy Talent",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/billy-talent/312512",
+        "allReleaseTitles": [
+          "crisisoffaith",
+          "deadsilence",
+          "ii",
+          "",
+          "recklessparadise",
+          "ibegtodifferthiswillgetbetter",
+          "iii",
+          "afraidofheights",
+          "afraidofheightsdeluxeversion",
+          "hits",
+          "10thanniversaryrarities",
+          "apassagetobangkok",
+          "10thanniversaryedition",
+          "fallenleaves",
+          "redflag",
+          "devilinamidnightmass",
+          "forgivenessiii",
+          "theex",
+          "tryhonesty"
+        ],
+        "latestRelease": {
+          "title": "Crisis Of Faith Billy Talent",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/crisis-of-faith-billy-talent/j7h0st11j15mb",
+          "releaseDate": "2022-01-21"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Billy%20Talent"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Billy%20Talent"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.billytalent.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/287592"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Billy%20Talent&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Billy%20Talent"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/billytalentband/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@billytalent"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCIVROfF-b3Wjpk-G1-_ulFw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/billytalent"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

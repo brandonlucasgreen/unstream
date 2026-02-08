@@ -1,0 +1,144 @@
+[
+  {
+    "id": "jasonmraz",
+    "name": "Jason Mraz",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032743636_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jason-mraz/46487",
+        "allReleaseTitles": [
+          "loveisafourletterword",
+          "wesingwedancewestealthingswedeluxeedition",
+          "know",
+          "mysticalmagicalrhythmicalradicalride",
+          "yes",
+          "lookforthegood",
+          "lalalalovesongs",
+          "thesongtv",
+          "loveisingridmichaelson",
+          "pancakesbutter",
+          "luckyjasonsfirstdraft",
+          "detailsinthefabricdemo",
+          "kickinwithyou",
+          "iknowwhatloveisbecauseofyoukeithgoodwinzacbrownandkttunstall",
+          "youmightlikeit",
+          "haveitall",
+          "wesingwedancewestealthings"
+        ],
+        "latestRelease": {
+          "title": "Mystical Magical Rhythmical Radical Ride Jason Mraz",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/mystical-magical-rhythmical-radical-ride-jason-mraz/u92mueuxn4vq0",
+          "releaseDate": "2023-06-23"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jasonmraz.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jason%20Mraz"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jason%20Mraz"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://jasonmraz.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/334681"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jason%20Mraz&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jason%20Mraz"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jason_mraz/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@jason_mraz"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC8ey1FYCmgHPa9f5KxWb0mw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JasonMraz"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-jasonmraz9",
+    "name": "Jason Mraz 9",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jason-mraz-9/20241359"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jason%20Mraz%209"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jason%20Mraz%209"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://jasonmraz.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/334681"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jason%20Mraz%209&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jason%20Mraz%209"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jason_mraz/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@jason_mraz"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC8ey1FYCmgHPa9f5KxWb0mw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JasonMraz"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

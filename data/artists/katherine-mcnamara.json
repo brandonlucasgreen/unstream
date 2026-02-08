@@ -1,0 +1,52 @@
+[
+  {
+    "id": "katherinemcnamara",
+    "name": "Katherine McNamara",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/katherine-mcnamara/1602554",
+        "allReleaseTitles": [
+          "ember",
+          "justlikejames"
+        ],
+        "latestRelease": {
+          "title": "Just Like James Katherine Mcnamara",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/just-like-james-katherine-mcnamara/v3vlowj8bf7qb",
+          "releaseDate": "2020-04-08"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bandcamp.com/kathyblue"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Katherine%20McNamara"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Katherine%20McNamara"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://katmcnamara.com/"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kitkatsmeow/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/OfficialKatherineMcNamara"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

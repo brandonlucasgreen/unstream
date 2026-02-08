@@ -1,0 +1,35 @@
+[
+  {
+    "id": "qobuz-jackalbertson",
+    "name": "Jack Albertson",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jack-albertson/395693",
+        "allReleaseTitles": [
+          "songsfromtomsawyer"
+        ],
+        "latestRelease": {
+          "title": "Songs From Tom Sawyer Jack Albertson",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/songs-from-tom-sawyer-jack-albertson/pqpylvznhav5b",
+          "releaseDate": "2025-06-06"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jack%20Albertson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jack%20Albertson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

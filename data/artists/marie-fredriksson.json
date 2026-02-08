@@ -1,0 +1,59 @@
+[
+  {
+    "id": "qobuz-mariefredriksson",
+    "name": "Marie Fredriksson",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/marie-fredriksson/118588",
+        "allReleaseTitles": [
+          "livefrancirkus",
+          "atableinthesun",
+          "darduandas",
+          "singmeasong",
+          "seaoflove",
+          "stay",
+          "iwanttogo",
+          "2ndchance",
+          "ingenkommerundanpolitiken"
+        ],
+        "latestRelease": {
+          "title": "Live Fran Cirkus Marie Fredriksson",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/live-fran-cirkus-marie-fredriksson/ulo5o5aj41i6a",
+          "releaseDate": "2024-12-06"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Marie%20Fredriksson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Marie%20Fredriksson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.mariefredriksson.se/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/281602"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Marie%20Fredriksson&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Marie%20Fredriksson"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

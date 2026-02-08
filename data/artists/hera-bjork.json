@@ -1,0 +1,41 @@
+[
+  {
+    "id": "qobuz-herabjork",
+    "name": "Hera Bjork",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/hera-bjork/320511",
+        "allReleaseTitles": [
+          "scaredofheights",
+          "ilmurafjolum",
+          "",
+          "someday",
+          "queenofeffingeverything",
+          "christmassongandchiarasiracusa",
+          "frelsisvorgissurpallgissurarson"
+        ],
+        "latestRelease": {
+          "title": "Scared Of Heights Hera Bjork",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/scared-of-heights-hera-bjork/vg3ca41h79fgc",
+          "releaseDate": "2024-02-27"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Hera%20Bjork"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Hera%20Bjork"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

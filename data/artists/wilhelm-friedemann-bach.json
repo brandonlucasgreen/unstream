@@ -1,0 +1,53 @@
+[
+  {
+    "id": "qobuz-wilhelmfriedemannbach",
+    "name": "Wilhelm Friedemann Bach",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/wilhelm-friedemann-bach/22",
+        "allReleaseTitles": [
+          "concertospourclavecinetcordesmaudegrattonilconvito",
+          "fantaisiessonatesfuguespolonaisesmaudegrattonclavecin",
+          "concertospourclavecinintegrale",
+          "oeuvrespourclaviermaudegratton",
+          "cembalokonzerteguypensonricercarconsortilfondamento",
+          "editionvariousartists",
+          "bachwfchambermusicf47485152hazelzetmoonenlindenogg"
+        ],
+        "latestRelease": {
+          "title": "Wilhelm Friedemann Bach Concertos Pour Clavecin Et Cordes Maude Gratton Il Convito",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/wilhelm-friedemann-bach-concertos-pour-clavecin-et-cordes-maude-gratton-il-convito/3760127221623",
+          "releaseDate": "2015-10-02"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Wilhelm%20Friedemann%20Bach"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Wilhelm%20Friedemann%20Bach"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/891601"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Wilhelm%20Friedemann%20Bach&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Wilhelm%20Friedemann%20Bach"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

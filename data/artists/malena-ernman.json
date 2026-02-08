@@ -1,0 +1,77 @@
+[
+  {
+    "id": "qobuz-malenaernman",
+    "name": "Malena Ernman",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/malena-ernman/241811",
+        "allReleaseTitles": [
+          "terramaterlarpeggiatachristinapluhar",
+          "sanktaklaraklockahelensjoholm",
+          "ahbeznatureboylarpeggiatachristinapluhar",
+          "torrisonrosignololarpeggiatachristinapluhar",
+          "idecembertid",
+          "operadifiori",
+          "sverige",
+          "advent",
+          "enriktigtgodjulsarahdawnfiner",
+          "minplatspajorden",
+          "hallmitthjarta",
+          "sanctaluciastralandehelgonfe",
+          "valsforlivettinaahlinorsaspelman",
+          "svenskaromanservol2olleperssonbengtakelundinand",
+          "youllneverwalkalone",
+          "alltjagbryrmigomijul",
+          "sdsgustafsjokvistkammarkorgustafsjokvistmusicavitae",
+          "idetfria",
+          "szenenausdemherzenunserlebenfurdasklimagretathunbergsvantethunberg"
+        ],
+        "latestRelease": {
+          "title": "Terra Mater Malena Ernman Larpeggiata Christina Pluhar",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/terra-mater-malena-ernman-larpeggiata-christina-pluhar/x3mayi796zbxb",
+          "releaseDate": "2025-01-31"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Malena%20Ernman"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Malena%20Ernman"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.malenaernman.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1442113"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Malena%20Ernman&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Malena%20Ernman"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/malena_ernman/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/malenaernman"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

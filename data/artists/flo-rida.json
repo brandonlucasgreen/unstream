@@ -1,0 +1,79 @@
+[
+  {
+    "id": "qobuz-florida",
+    "name": "Flo Rida",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/flo-rida/104596",
+        "latestRelease": {
+          "title": "Bad Idea Feat That Mexican Ot Flo Rida That Mexican Ot",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/bad-idea-feat-that-mexican-ot-flo-rida-that-mexican-ot/h6cyyey8bvk4a",
+          "releaseDate": "2025-04-25"
+        },
+        "allReleaseTitles": [
+          "myhouse",
+          "badideafeatthatmexicanotthatmexicanot",
+          "lowfeattpain",
+          "confessionsfeatheeseungjakeofenhypenxpaulrussellenhypenpaulrussell",
+          "summersnotreadyfeatinnaandtimmytrumpet",
+          "whenigrowupandalanwalker",
+          "carryingtheclubshaylen",
+          "whenigrowup",
+          "borrachoylocoiamchinopitbull",
+          "omgfeatsagethegeminiandsagethegemini",
+          "badideafeatthatmexicanotvionkonger",
+          "lowgangspeedremix71digitsx",
+          "highheelsfeatwalkerhayes",
+          "symphonyofbrotherhoodrisefeatmlkmiribenariandmartinlutherkingjrfeaturingerikesmoothhicks",
+          "dosido",
+          "highheelspartydownunderwalkerhayesandsamfeldt",
+          "highheelsandwalkerhayes"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Flo%20Rida"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Flo%20Rida"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.officialflo.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1255330"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/official_flo/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@official_flo"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCBRFlde39a2U4nAkmGqJwAQ"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@official_flo"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialflo"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

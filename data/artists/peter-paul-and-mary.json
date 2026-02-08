@@ -1,0 +1,71 @@
+[
+  {
+    "id": "qobuz-peterpaulandmary",
+    "name": "Peter Paul And Mary",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/peter-paul-and-mary/306259",
+        "allReleaseTitles": [
+          "theverybestof",
+          "",
+          "moving",
+          "inthewind",
+          "album1700",
+          "aroundthecampfire",
+          "inconcert",
+          "album",
+          "aholidaycelebrationwiththenewyorkchoralsociety",
+          "peterpaulandmommy",
+          "debutalbumplus",
+          "seewhattomorrowbrings",
+          "reunion",
+          "asongwillrise",
+          "noeasywalktofreedom",
+          "lateagain",
+          "liveinjapan1967"
+        ],
+        "latestRelease": {
+          "title": "Album 1700 Peter Paul And Mary",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/album-1700-peter-paul-and-mary/0075992716864",
+          "releaseDate": "2008-12-23"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Peter%20Paul%20And%20Mary"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Peter%20Paul%20And%20Mary"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.peterpaulandmary.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/327360"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Peter%20Paul%20And%20Mary&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Peter%20Paul%20And%20Mary"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/peterpaulandmary"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

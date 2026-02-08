@@ -1,0 +1,157 @@
+[
+  {
+    "id": "arttatum",
+    "name": "Art Tatum",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0035082760_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/art-tatum/24659",
+        "allReleaseTitles": [
+          "jewelsinthetreasureboxthechicagobluenotejazzrecordingslive",
+          "blueskies",
+          "pianostartshere",
+          "thetatumgroupmasterpiecesvolume8benwebsterbilldouglassredcallender",
+          "thetatumgroupmasterpiecesvol1",
+          "thebestofthepablogroupmasterpieces",
+          "genenormanpresentsanconcert",
+          "tatumgroupmasterpiecesvol2alvinstollerjohnsimmonsroyeldridge",
+          "thecompletecapitolrecordingsof",
+          "thebestof",
+          "thebestofthecompletepablosolomasterpieces",
+          "thesolomasterpiecesvol1originaljazzclassicsremasters",
+          "pianostartshereliveattheshrinezenphreperformance",
+          "thedefinitive",
+          "thesolomasterpiecesvolume1",
+          "thetatumgroupmasterpiecesvol6",
+          "thesolomasterpiecesvol7",
+          "thetatumgroupmasterpiecesvol3",
+          "20thcenturypianogenius",
+          "thesolomasterpiecesvol3"
+        ],
+        "latestRelease": {
+          "title": "Blue Skies Art Tatum",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/blue-skies-art-tatum/bfft2x5yfafqb",
+          "releaseDate": "2025-06-16"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://arttatumresonance.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Art%20Tatum"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Art%20Tatum"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/265634"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Art%20Tatum&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Art%20Tatum"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/arttatum"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "arttatum-bandcamp-arttatum",
+    "name": "Art Tatum",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033382810_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://arttatum.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Art%20Tatum"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Art%20Tatum"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/265634"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Art%20Tatum&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Art%20Tatum"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/arttatum"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "arttatum-bandcamp-arttatumblueskies",
+    "name": "Art Tatum",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036540011_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://arttatumblueskies.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Art%20Tatum"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Art%20Tatum"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/265634"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Art%20Tatum&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Art%20Tatum"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/arttatum"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

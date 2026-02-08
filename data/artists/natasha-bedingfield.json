@@ -1,0 +1,80 @@
+[
+  {
+    "id": "qobuz-natashabedingfield",
+    "name": "Natasha Bedingfield",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/natasha-bedingfield/66745",
+        "allReleaseTitles": [
+          "unwrittenacoustic",
+          "unwrittenthe2019remix",
+          "bruisedwaterchicanevs",
+          "kickitradioedit",
+          "everybodycometogetherftangelhaze",
+          "lovelookslikearthouse",
+          "unwritten",
+          "pocketfulofsunshine",
+          "thesewordsbadger",
+          "alibifeatrudimentalellahendersonx",
+          "soulmate",
+          "nb",
+          "shakeupchristmas2011officialcocacolachristmassong",
+          "rollwithme"
+        ],
+        "latestRelease": {
+          "title": "Unwritten Acoustic Natasha Bedingfield",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/unwritten-acoustic-natasha-bedingfield/kernc14doof0a",
+          "releaseDate": "2022-05-20"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Natasha%20Bedingfield"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Natasha%20Bedingfield"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.natashabedingfield.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/192149"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Natasha%20Bedingfield&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Natasha%20Bedingfield"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/natashabedingfield/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@natashabedingfield"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCGyeamaAa4XbEZo7OBy2nnA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/natashabedingfield"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

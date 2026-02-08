@@ -1,0 +1,41 @@
+[
+  {
+    "id": "qobuz-jonathangroff",
+    "name": "Jonathan Groff",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jonathan-groff/1084282",
+        "allReleaseTitles": [
+          "justintimeoriginalbroadwaycastofjustintime",
+          "thiscouldbethestartofsomethingbigoriginalbroadwaycastofjustintime",
+          "splishsplashoriginalbroadwaycastofjustintime"
+        ],
+        "latestRelease": {
+          "title": "Just In Time Jonathan Groff Original Broadway Cast Of Just In Time",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/just-in-time-jonathan-groff-original-broadway-cast-of-just-in-time/nwaylquru2fvc",
+          "releaseDate": "2025-08-15"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jonathan%20Groff"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jonathan%20Groff"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1831665"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

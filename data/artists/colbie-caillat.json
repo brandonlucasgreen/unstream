@@ -1,0 +1,73 @@
+[
+  {
+    "id": "qobuz-colbiecaillat",
+    "name": "Colbie Caillat",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/colbie-caillat/126003",
+        "latestRelease": {
+          "title": "This Time Around Colbie Caillat",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/this-time-around-colbie-caillat/kacid41b2w6fb",
+          "releaseDate": "2025-09-26"
+        },
+        "allReleaseTitles": [
+          "coco",
+          "thistimearound",
+          "alongtheway",
+          "iris",
+          "livewithoutmaddietae",
+          "gypsyheart",
+          "letitsnowgavindegraw",
+          "themalibusessions",
+          "illbeheresherylcrow",
+          "worthit",
+          "ifyoulovemeletmegorusselldickerson",
+          "kindasingleleebrice",
+          "wideopen",
+          "christmasinthesand",
+          "cocosummersessions",
+          "bubbly",
+          "iftheresnotasongaboutitgarybarlow",
+          "youschiller",
+          "cantsaynoryanhurd"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Colbie%20Caillat"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Colbie%20Caillat"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.colbiecaillatmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1014225"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/colbiecaillat/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/colbiechannel"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/cakhiacomtv/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

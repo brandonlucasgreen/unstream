@@ -1,0 +1,58 @@
+[
+  {
+    "id": "qobuz-carolchanning",
+    "name": "Carol Channing",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/carol-channing/33606",
+        "allReleaseTitles": [
+          "forheavenssake",
+          "jazzbaby",
+          "cwwebbpierce",
+          "howilovethemoldsongs",
+          "imgoinghomemamasgonnafixthebabyswagon",
+          "andhercountryfriendsoriginalcountrycast",
+          "truetotheredwhiteblue",
+          "entertains"
+        ],
+        "latestRelease": {
+          "title": "For Heavens Sake Carol Channing",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/for-heavens-sake-carol-channing/q93t483hxck3a",
+          "releaseDate": "2010-01-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Carol%20Channing"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Carol%20Channing"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.carolchanning.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/336579"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Carol%20Channing&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Carol%20Channing"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,224 @@
+[
+  {
+    "id": "qobuz-linmanuelmiranda",
+    "name": "Lin Manuel Miranda",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/lin-manuel-miranda/810059",
+        "latestRelease": {
+          "title": "Encanto Germaine Franco Lin Manuel Miranda Encanto Cast",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/encanto-germaine-franco-lin-manuel-miranda-encanto-cast/iy61v1tr5yfvb",
+          "releaseDate": "2021-11-19"
+        },
+        "allReleaseTitles": [
+          "encantogermainefrancoencantocast",
+          "moanadisneymarkmancina",
+          "intheheights",
+          "intheheightsoriginalmotionpicturesoundtrack",
+          "warriorseisadavis",
+          "hamiltonthegermanep",
+          "vivooriginalmotionpicturesoundtrackalexlacamoire",
+          "checksandbalancesfromthenetflixserieswethepeoplekristenandersonlopezdaveeddiggsbrittanyhowardrobertlopez",
+          "96000",
+          "esperandopelitosfromthenetflixseriesbigmouthbigmouthcast",
+          "hamilton",
+          "mufasathelionkingdisneylebom",
+          "thehamiltonmixtape",
+          "hamildropsthecompletecollection"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lin%20Manuel%20Miranda"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lin%20Manuel%20Miranda"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://linmanuel.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2062276"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UChwAKuNBC2Bc0G26tlZBI4w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Lin-Manuel-Miranda-156195014444203"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-linmanuelmiranda1",
+    "name": "Lin Manuel Miranda 1",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/lin-manuel-miranda-1/2936324"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lin%20Manuel%20Miranda%201"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lin%20Manuel%20Miranda%201"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://linmanuel.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2062276"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UChwAKuNBC2Bc0G26tlZBI4w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Lin-Manuel-Miranda-156195014444203"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-linmanuelmiranda5",
+    "name": "Lin Manuel Miranda 5",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/lin-manuel-miranda-5/15390907"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lin%20Manuel%20Miranda%205"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lin%20Manuel%20Miranda%205"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://linmanuel.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2062276"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UChwAKuNBC2Bc0G26tlZBI4w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Lin-Manuel-Miranda-156195014444203"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-linmanuelmiranda3",
+    "name": "Lin Manuel Miranda 3",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/lin-manuel-miranda-3/11921586"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lin%20Manuel%20Miranda%203"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lin%20Manuel%20Miranda%203"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://linmanuel.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2062276"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UChwAKuNBC2Bc0G26tlZBI4w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Lin-Manuel-Miranda-156195014444203"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-linmanuelmiranda2",
+    "name": "Lin Manuel Miranda 2",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/lin-manuel-miranda-2/10078162"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lin%20Manuel%20Miranda%202"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lin%20Manuel%20Miranda%202"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://linmanuel.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2062276"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UChwAKuNBC2Bc0G26tlZBI4w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Lin-Manuel-Miranda-156195014444203"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

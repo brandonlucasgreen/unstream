@@ -1,0 +1,85 @@
+[
+  {
+    "id": "jimcummings",
+    "name": "Jim Cummings",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0006942912_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jim-cummings/203802",
+        "latestRelease": {
+          "title": "Aladdin Storyette Jim Cummings",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/aladdin-storyette-jim-cummings/hsgbpry2z0kxa",
+          "releaseDate": "2020-10-09"
+        },
+        "allReleaseTitles": [
+          "aladdinstoryette",
+          "lostsoulssaloon",
+          "twilightride",
+          "wheredoyourun",
+          "dontletmefall"
+        ]
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bandcamp.com/jimcummings"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jim%20Cummings"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jim%20Cummings"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/310225"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jimjcummings/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "jimcumming",
+    "name": "Jim Cumming",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022967498_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bandcamp.com/millport"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jim%20Cumming"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jim%20Cumming"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/310225"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jimjcummings/"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

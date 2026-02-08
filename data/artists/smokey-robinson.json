@@ -1,0 +1,136 @@
+[
+  {
+    "id": "qobuz-smokeyrobinson",
+    "name": "Smokey Robinson",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/smokey-robinson/46859",
+        "allReleaseTitles": [
+          "wheretheressmoke",
+          "beingwithyou",
+          "smokeyfriends",
+          "yesitsyoulady",
+          "touchthesky",
+          "christmaseveryday",
+          "thedefinitivecollection",
+          "aquietstorm",
+          "whattheworldneedsnow",
+          "gasms",
+          "pleasedonttakeyourlovesantana",
+          "20thcenturymastersthemillenniumcollectionbestof",
+          "mamayouremydaddytoo",
+          "puresmokey"
+        ],
+        "latestRelease": {
+          "title": "Smokey Friends Smokey Robinson",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/smokey-friends-smokey-robinson/l1jz0lv1ao6ga",
+          "releaseDate": "2014-09-08"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Smokey%20Robinson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Smokey%20Robinson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.smokeyrobinson.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/646741"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Smokey%20Robinson&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Smokey%20Robinson"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/smokeyrobinson/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@smokeyrobinson"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCW8_krLUqX1EVR_vXD1ml4g"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thesmokeyrobinson"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-smokeyrobinson5",
+    "name": "Smokey Robinson 5",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/smokey-robinson-5/12471170"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Smokey%20Robinson%205"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Smokey%20Robinson%205"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.smokeyrobinson.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/646741"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Smokey%20Robinson%205&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Smokey%20Robinson%205"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/smokeyrobinson/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@smokeyrobinson"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCW8_krLUqX1EVR_vXD1ml4g"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thesmokeyrobinson"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

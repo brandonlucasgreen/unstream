@@ -1,0 +1,74 @@
+[
+  {
+    "id": "lewiscapaldi",
+    "name": "Lewis Capaldi",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032428741_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/lewis-capaldi/3023213",
+        "allReleaseTitles": [
+          "divinelyuninspiredtoahellishextent",
+          "survive",
+          "brokenbydesiretobeheavenlysent",
+          "surviveep",
+          "somethingintheheavens",
+          "forgetme",
+          "wishyouthebest",
+          "beforeyougo",
+          "lovethehelloutofyou",
+          "pointless",
+          "totellthetruthicantbelievewegotthisfarep"
+        ],
+        "latestRelease": {
+          "title": "Survive Lewis Capaldi",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/survive-lewis-capaldi/ba1h7emj5tkmc",
+          "releaseDate": "2025-06-27"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bbdtbhs.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lewis%20Capaldi"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lewis%20Capaldi"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.lewiscapaldi.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/6212054"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/lewiscapaldi/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@lewiscapaldi?lang=en"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCveFkLdSOUsGwMJEgedO9dQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/lewiscapaldi"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

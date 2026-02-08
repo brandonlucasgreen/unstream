@@ -1,0 +1,35 @@
+[
+  {
+    "id": "qobuz-sarahhyland",
+    "name": "Sarah Hyland",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sarah-hyland/3097255",
+        "allReleaseTitles": [
+          "dontthinktwiceitsalrightjquintonjohnson"
+        ],
+        "latestRelease": {
+          "title": "Dont Think Twice Its Alright J Quinton Johnson Sarah Hyland",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/dont-think-twice-its-alright-j-quinton-johnson-sarah-hyland/j2j64lgbmtg5a",
+          "releaseDate": "2017-05-05"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sarah%20Hyland"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sarah%20Hyland"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

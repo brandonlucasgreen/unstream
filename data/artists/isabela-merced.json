@@ -1,0 +1,62 @@
+[
+  {
+    "id": "qobuz-isabelamerced",
+    "name": "Isabela Merced",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/isabela-merced/5758486",
+        "allReleaseTitles": [
+          "apocalipsistonysuccar",
+          "thebetterhalfofme",
+          "papi",
+          "dontgodannapaola",
+          "cuffingseason",
+          "nadasoytonysuccar",
+          "agoniakayfex",
+          "calientenavidad",
+          "fearlessvalienteduetfromspirituntamedeizagonzalez",
+          "myonlyonenohaynadiemassebastianyatra",
+          "listadeesperamatthunter",
+          "illstay"
+        ],
+        "latestRelease": {
+          "title": "Apocalipsis Isabela Merced Tony Succar",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/apocalipsis-isabela-merced-tony-succar/jukmbv1codzsa",
+          "releaseDate": "2025-08-15"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Isabela%20Merced"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Isabela%20Merced"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.isabelamerced.com/"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/isabelamerced/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCVwGIQMTao-7DVidoyBvpDw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/theofficialisabelamoner"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

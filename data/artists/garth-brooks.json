@@ -1,0 +1,65 @@
+[
+  {
+    "id": "qobuz-garthbrooks",
+    "name": "Garth Brooks",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/garth-brooks/129875",
+        "allReleaseTitles": [
+          "merrychristmasvalentinetrishayearwood",
+          "shallowtrishayearwood",
+          "liveingermany1995"
+        ],
+        "latestRelease": {
+          "title": "Merry Christmas Valentine Trisha Yearwood Garth Brooks",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/merry-christmas-valentine-trisha-yearwood-garth-brooks/yyw3jv0ik9lyb",
+          "releaseDate": "2025-11-05"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Garth%20Brooks"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Garth%20Brooks"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://garthbrooks.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/288409"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Garth%20Brooks&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Garth%20Brooks"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/garthbrooks/"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@garthbrooks"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/GarthBrooks"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

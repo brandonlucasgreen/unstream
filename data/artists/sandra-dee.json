@@ -1,0 +1,37 @@
+[
+  {
+    "id": "qobuz-sandradee",
+    "name": "Sandra Dee",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sandra-dee/1244992",
+        "allReleaseTitles": [
+          "bestmoviethemes",
+          "visionsofpain",
+          "nobodyelse"
+        ],
+        "latestRelease": {
+          "title": "Nobody Else Sandra Dee",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/nobody-else-sandra-dee/z630v31clrvqb",
+          "releaseDate": "2024-03-29"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sandra%20Dee"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sandra%20Dee"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "qobuz-seanlennon",
+    "name": "Sean Lennon",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sean-lennon/69679",
+        "allReleaseTitles": [
+          "zelenskythemanwiththeironballslesclaypoolampeugenehutzampstewartcopelandampampsergeyryabtsevampbillystrings",
+          "arikanamudmusic",
+          "preoccupiedtwohands",
+          "ali"
+        ],
+        "latestRelease": {
+          "title": "Preoccupied Two Hands Sean Lennon",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/preoccupied-two-hands-sean-lennon/sb2qjjeimd4nc",
+          "releaseDate": "2025-02-12"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sean%20Lennon"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sean%20Lennon"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

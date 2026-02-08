@@ -1,0 +1,878 @@
+[
+  {
+    "id": "rushhourmusic",
+    "name": "Rush Hour Music",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0010231432_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rushhourmusic.bandcamp.com",
+        "allReleaseTitles": [
+          "animaltoddsonic33",
+          "therecoveryboowilliams",
+          "thenassauexcursionfrancoiskevorkiandimitrifromparis",
+          "alphaomegaeparpfriquetheperpetualsingers",
+          "acidreactionrudefutures",
+          "viberidehuvibrational",
+          "saveyoursouljoeclaussellsacredrhythmpraiseversionremixarpfriquetheperpetualsingers",
+          "liftoffrontrent",
+          "thegospelofjesamyarpfriquetheperpetualsingers",
+          "messagesfromthestarstherahband",
+          "bestof2024variousartists",
+          "llseriescompilationvariousartists",
+          "newdawncompilationvarious",
+          "sichuangigitesta",
+          "mameladanielmonaco",
+          "fatherfatherelenatheperpetualsingers"
+        ],
+        "latestRelease": {
+          "title": "Animal\n                \n                \n\n                Toddsonic33",
+          "type": "album",
+          "url": "https://rushhourmusic.bandcamp.com/album/animal-2",
+          "imageUrl": "https://f4.bcbits.com/img/a1427232207_2.jpg"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rush%20Hour%20Music"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rush%20Hour%20Music"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.rush.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/61800"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rush%20Hour%20Music&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rush%20Hour%20Music"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rush/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC5C-Asy_myoWCkLEtZR72SA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/rushtheband"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "rushjet1",
+    "name": "RushJet1",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3758785815_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rushjet1.bandcamp.com",
+        "allReleaseTitles": [
+          "megawave",
+          "holyavenger",
+          "alwaslegacy",
+          "flappyskies",
+          "rikkivikkifmedition",
+          "superjunounreleased",
+          "megamanvremade",
+          "pewdiepiebitchlasagna8bitversion",
+          "rikkivikki",
+          "straynotes",
+          "megamaniiiremade",
+          "knightterrors",
+          "cavestoryfamitracks",
+          "barebones",
+          "witchemup",
+          "adventuresofthe2a03"
+        ],
+        "latestRelease": {
+          "title": "MegaWave",
+          "type": "album",
+          "url": "https://rushjet1.bandcamp.com/album/megawave",
+          "imageUrl": "https://f4.bcbits.com/img/a3758785815_2.jpg",
+          "releaseDate": "August 25, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=RushJet1"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+RushJet1"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.rush.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/61800"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=RushJet1&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/RushJet1"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rush/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC5C-Asy_myoWCkLEtZR72SA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/rushtheband"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "janarush",
+    "name": "Jana Rush",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024426307_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jaru.bandcamp.com",
+        "allReleaseTitles": [
+          "daphnejanarushremix",
+          "darkhumor",
+          "painfulenlightenment",
+          "pariah",
+          "mpc7635"
+        ],
+        "latestRelease": {
+          "title": "Daphne (Jana Rush Remix)",
+          "type": "album",
+          "url": "https://jaru.bandcamp.com/album/daphne-jana-rush-remix",
+          "imageUrl": "https://f4.bcbits.com/img/a1284408275_2.jpg",
+          "releaseDate": "February 16, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jana%20Rush"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jana%20Rush"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.rush.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/61800"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jana%20Rush&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jana%20Rush"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rush/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC5C-Asy_myoWCkLEtZR72SA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/rushtheband"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "rushcoil",
+    "name": "Rush Coil",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0000031990_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rushcoil.bandcamp.com",
+        "allReleaseTitles": [
+          "sonicthehedgehoggreenhillzone",
+          "toomanycooksrushcoilnescover",
+          "8bitchristmas",
+          "xmascompilation2010variousartists",
+          "shelfep",
+          "perfectserviceost"
+        ],
+        "latestRelease": {
+          "title": "Sonic the Hedgehog - Green Hill Zone",
+          "type": "track",
+          "url": "https://rushcoil.bandcamp.com/track/sonic-the-hedgehog-green-hill-zone",
+          "imageUrl": "https://f4.bcbits.com/img/a1732461177_2.jpg",
+          "releaseDate": "November 27, 2019"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rush%20Coil"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rush%20Coil"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.rush.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/61800"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rush%20Coil&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rush%20Coil"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rush/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC5C-Asy_myoWCkLEtZR72SA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/rushtheband"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "dasharush",
+    "name": "Dasha Rush",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030353808_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://dasharush.bandcamp.com",
+        "allReleaseTitles": [
+          "wanteddeadincludinggamesoundtrack",
+          "darkfilthysg2192represscominginfebruary2026",
+          "oceanshyreissue",
+          "acidsketch",
+          "aintnogodnorkingsg1780",
+          "interceptionofarts",
+          "sonicstatesg1038",
+          "formsaintformats",
+          "backinstockirunironirunironic",
+          "unspokenep",
+          "relativismisg1150",
+          "approach",
+          "fullpanda001",
+          "untitledhungerh2c001",
+          "tinyvoiceagainstthewar",
+          "firstexpiriencedasharushmario1998versiondasharushmarioeugeneignnashev",
+          "irunironirunironic"
+        ],
+        "latestRelease": {
+          "title": "Wanted Dead (including game soundtrack)",
+          "type": "album",
+          "url": "https://dasharush.bandcamp.com/album/wanted-dead-including-game-soundtrack",
+          "imageUrl": "https://f4.bcbits.com/img/a3770974090_2.jpg",
+          "releaseDate": "October 20, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Dasha%20Rush"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Dasha%20Rush"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.rush.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/61800"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Dasha%20Rush&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Dasha%20Rush"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rush/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC5C-Asy_myoWCkLEtZR72SA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/rushtheband"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qrush",
+    "name": "Q-Rush",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030575485_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://qtotherush.bandcamp.com",
+        "allReleaseTitles": [
+          "wherethesungoesdown",
+          "balconynights",
+          "maracanaqrush",
+          "lockdownqrushremix",
+          "areyouthatsomebodyqsukgflip",
+          "qlect"
+        ],
+        "latestRelease": {
+          "title": "Where The Sun Goes Down",
+          "type": "album",
+          "url": "https://qtotherush.bandcamp.com/album/where-the-sun-goes-down",
+          "imageUrl": "https://f4.bcbits.com/img/a0315972919_2.jpg",
+          "releaseDate": "September 1, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Q-Rush"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Q-Rush"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.rush.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/61800"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Q-Rush&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Q-Rush"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rush/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC5C-Asy_myoWCkLEtZR72SA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/rushtheband"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "rudenhsnedrush",
+    "name": "RUDENHS/Ned Rush",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0023932138_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rudenhs.bandcamp.com",
+        "allReleaseTitles": [
+          "phaseissuesnedrush",
+          "nedssubatomicbassbinnedrush",
+          "mrloadoutrudenhs",
+          "theplundererexpressesnedrush",
+          "modeiirudenhs",
+          "hyperrealbreaksnedrush",
+          "oldtracksfrom18yearsagotocelebrate10yearsofmyyoutubechannel",
+          "6millionrudeboyepnedrush",
+          "unsubscribenedrush",
+          "orcorcorc",
+          "welcometotheparty",
+          "moderejectfreedownload",
+          "zeroesrudenhsfeaturingnedrush",
+          "publichard",
+          "flocksofpigeonsmakingnoisesthatsoundlikeoldwomenagreeingwitheachothershammycokepeep",
+          "hookatheadtime"
+        ],
+        "latestRelease": {
+          "title": "Phase Issues\n                \n                \n\n                Ned Rush",
+          "type": "album",
+          "url": "https://rudenhs.bandcamp.com/album/phase-issues",
+          "imageUrl": "https://f4.bcbits.com/img/a3476913030_2.jpg",
+          "releaseDate": "October 3, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=RUDENHS%2FNed%20Rush"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+RUDENHS%2FNed%20Rush"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.rush.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/61800"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=RUDENHS%2FNed%20Rush&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/RUDENHS%2FNed%20Rush"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rush/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC5C-Asy_myoWCkLEtZR72SA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/rushtheband"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "themmooserush",
+    "name": "Them Moose Rush",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0005884518_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://themmooserush.bandcamp.com",
+        "allReleaseTitles": [
+          "zepaxia",
+          "dancingmaze",
+          "dontpickyournoise",
+          "threetwo",
+          "threeone",
+          "tofuturemisssunshine",
+          "untitled"
+        ],
+        "latestRelease": {
+          "title": "Zepaxia",
+          "type": "album",
+          "url": "https://themmooserush.bandcamp.com/album/zepaxia",
+          "imageUrl": "https://f4.bcbits.com/img/a2685081278_2.jpg",
+          "releaseDate": "February 2, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Them%20Moose%20Rush"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Them%20Moose%20Rush"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.rush.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/61800"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Them%20Moose%20Rush&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Them%20Moose%20Rush"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rush/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC5C-Asy_myoWCkLEtZR72SA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/rushtheband"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "headrushent",
+    "name": "Head Rush ENT.",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0016581892_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://headrushent.bandcamp.com",
+        "allReleaseTitles": [
+          "mooneeloopremixesmisun",
+          "dallaselectricaldtyrone",
+          "slippydisksdjchrysalis",
+          "shmlwdjchrysalis",
+          "bodyadmindjchrysalis",
+          "untitlededenburns",
+          "stretchedenburns"
+        ],
+        "latestRelease": {
+          "title": "Moonee Loop + Remixes\n                \n                \n\n                Mi Sun",
+          "type": "album",
+          "url": "https://headrushent.bandcamp.com/album/moonee-loop-remixes",
+          "imageUrl": "https://f4.bcbits.com/img/a1082018222_2.jpg",
+          "releaseDate": "May 16, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Head%20Rush%20ENT."
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Head%20Rush%20ENT."
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.rush.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/61800"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Head%20Rush%20ENT.&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Head%20Rush%20ENT."
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rush/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC5C-Asy_myoWCkLEtZR72SA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/rushtheband"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "rushfalknor",
+    "name": "Rush Falknor",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026281648_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rushfalknor.bandcamp.com",
+        "allReleaseTitles": [
+          "rfvprushfalknorvanityproductions",
+          "nimbnimb",
+          "gordianthread",
+          "burstfireangelwave",
+          "extendedmusikauditorydissection",
+          "improvisedcombattribetapesvolumefour",
+          "newplasticmusicklstijl",
+          "splitwithpainchain",
+          "forrudy",
+          "retrospective",
+          "shotbulbs",
+          "hellofromthelover",
+          "naturaldisasterssplitwithculled",
+          "100vyvanse",
+          "movementforhiroyasukogamylegsareboundforposture",
+          "strikewithgrace"
+        ],
+        "latestRelease": {
+          "title": "RF + VP\n                \n                \n\n                Rush Falknor & Vanity Productions",
+          "type": "album",
+          "url": "https://rushfalknor.bandcamp.com/album/rf-vp",
+          "imageUrl": "https://f4.bcbits.com/img/a4208265567_2.jpg",
+          "releaseDate": "July 6, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rush%20Falknor"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rush%20Falknor"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.rush.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/61800"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rush%20Falknor&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rush%20Falknor"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rush/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC5C-Asy_myoWCkLEtZR72SA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/rushtheband"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-rush",
+    "name": "Rush",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rush/71886",
+        "allReleaseTitles": [
+          "movingpictures",
+          "2112",
+          "afarewelltokings",
+          "permanentwaves",
+          "50",
+          "hemispheres",
+          "powerwindows",
+          "signals",
+          "flybynight",
+          "graceunderpressure"
+        ],
+        "latestRelease": {
+          "title": "Moving Pictures Rush",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/moving-pictures-rush/0060254724385",
+          "releaseDate": "1981-02-12"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rush"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rush"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.rush.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/61800"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rush&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rush"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rush/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC5C-Asy_myoWCkLEtZR72SA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/rushtheband"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-rush10",
+    "name": "Rush 10",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rush-10/12063399",
+        "allReleaseTitles": [
+          "politicin",
+          "blackborderbrothersrichthefactor",
+          "blackborderbrothers3richthefactor",
+          "blackborderbrothers4richthefactor",
+          "blackborderbrothers2richthefactor",
+          "voicesinmyhead",
+          "goingunder",
+          "famefeatfresh",
+          "desire",
+          "poundtown",
+          "tripledouble",
+          "milifefeatlilstashderi2masterjhonyb",
+          "liquortalkinfeatcalikkomidimcfly",
+          "mealticketdinobrownfresh",
+          "anemiahydro"
+        ],
+        "latestRelease": {
+          "title": "Politicin Rush",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/politicin-rush/rly0ndyjn99ba",
+          "releaseDate": "2021-08-06"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rush%2010"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rush%2010"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.rush.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/61800"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rush%2010&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rush%2010"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rush/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC5C-Asy_myoWCkLEtZR72SA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/rushtheband"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

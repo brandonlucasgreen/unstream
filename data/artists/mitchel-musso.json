@@ -1,0 +1,51 @@
+[
+  {
+    "id": "qobuz-mitchelmusso",
+    "name": "Mitchel Musso",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/mitchel-musso/130257",
+        "latestRelease": {
+          "title": "Like Me Mitchel Musso",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/like-me-mitchel-musso/vsn0nwbm98quc",
+          "releaseDate": "2023-10-13"
+        },
+        "allReleaseTitles": [
+          "",
+          "replaceable",
+          "hotgirls",
+          "likeme",
+          "drank",
+          "ghost",
+          "volcanofeatmarcmusso",
+          "experiencefeatmarcmusso",
+          "crystalballfeatkylee"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mitchel%20Musso"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mitchel%20Musso"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.mitchel-musso.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1626699"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

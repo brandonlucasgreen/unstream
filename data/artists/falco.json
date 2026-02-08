@@ -1,0 +1,511 @@
+[
+  {
+    "id": "falco",
+    "name": "FALCO",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0034763109_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/falco/72163",
+        "allReleaseTitles": [
+          "ultimatehitsanewexperience",
+          "3",
+          "einzelhaft",
+          "rockmeamadeus30thanniversary",
+          "rockmeamadeusep",
+          "jungeroemerhelnweinedition",
+          "jungeroemer",
+          "viennacallingep",
+          "sterbenumzuleben",
+          "60",
+          "solasolitudine",
+          "timida",
+          "greatesthits",
+          "emotional",
+          "kannesliebeseinep",
+          "thatsceneganzwienep",
+          "symphonic",
+          "donauinsellive",
+          "rockmeamadeus",
+          "withoutyou"
+        ],
+        "latestRelease": {
+          "title": "Ultimate Hits A New Experience Falco",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/ultimate-hits-a-new-experience-falco/zyjo748y68ppc",
+          "releaseDate": "2025-02-07"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://falco2.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=FALCO"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+FALCO"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.falco.at/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/26912"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=FALCO&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/FALCO"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/Falcoprivatstiftung"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@falcogoesschool"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "http://www.youtube.com/channel/UC1c0V-F901ZPvw1imefX6EA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialfalco/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "jamesfalco",
+    "name": "James Falco",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018986397_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jamesfalcoo.bandcamp.com",
+        "allReleaseTitles": [
+          "springeditsvol2",
+          "springedits",
+          "diyvibes"
+        ],
+        "latestRelease": {
+          "title": "Spring Edits vol. 2",
+          "type": "album",
+          "url": "https://jamesfalcoo.bandcamp.com/album/spring-edits-vol-2",
+          "imageUrl": "https://f4.bcbits.com/img/a2932108140_2.jpg",
+          "releaseDate": "November 11, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=James%20Falco"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+James%20Falco"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.falco.at/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/26912"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=James%20Falco&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/James%20Falco"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/Falcoprivatstiftung"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@falcogoesschool"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "http://www.youtube.com/channel/UC1c0V-F901ZPvw1imefX6EA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialfalco/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "michaelfalco",
+    "name": "Michael Falco",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018061127_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://michaelfalco.bandcamp.com",
+        "allReleaseTitles": [
+          "audienceofonemichaelangelofalco",
+          "michaelangelofalco3michaelangelofalco",
+          "americabatteredandbeautiful",
+          "awakenings",
+          "archangels"
+        ],
+        "latestRelease": {
+          "title": "Audience of One\n                \n                \n\n                Michael Angelo Falco",
+          "type": "album",
+          "url": "https://michaelfalco.bandcamp.com/album/audience-of-one",
+          "imageUrl": "https://f4.bcbits.com/img/a1177660150_2.jpg",
+          "releaseDate": "June 8, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Michael%20Falco"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Michael%20Falco"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.falco.at/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/26912"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Michael%20Falco&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Michael%20Falco"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/Falcoprivatstiftung"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@falcogoesschool"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "http://www.youtube.com/channel/UC1c0V-F901ZPvw1imefX6EA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialfalco/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "andyfalco",
+    "name": "Andy Falco",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0001042864_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://andyfalco.bandcamp.com",
+        "allReleaseTitles": [
+          "wethreekings",
+          "sentencedtolifewiththeblues",
+          "homehomeandlazorsdigital45",
+          "whilemyguitargentlyweepsremixtributetogeorgeharrison"
+        ],
+        "latestRelease": {
+          "title": "We Three Kings",
+          "type": "track",
+          "url": "https://andyfalco.bandcamp.com/track/we-three-kings",
+          "imageUrl": "https://f4.bcbits.com/img/a2952572264_16.jpg",
+          "releaseDate": "December 23, 2018"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Andy%20Falco"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Andy%20Falco"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.falco.at/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/26912"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Andy%20Falco&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Andy%20Falco"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/Falcoprivatstiftung"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@falcogoesschool"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "http://www.youtube.com/channel/UC1c0V-F901ZPvw1imefX6EA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialfalco/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "falcobenz",
+    "name": "Falco Benz",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014906091_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://falcobenz.bandcamp.com",
+        "allReleaseTitles": [
+          "confiturisme",
+          "oneonenine",
+          "maydays",
+          "hattricks",
+          "clapmachines"
+        ],
+        "latestRelease": {
+          "title": "Confiturisme",
+          "type": "album",
+          "url": "https://falcobenz.bandcamp.com/album/confiturisme",
+          "imageUrl": "https://f4.bcbits.com/img/a1980368130_2.jpg",
+          "releaseDate": "November 11, 2016"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Falco%20Benz"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Falco%20Benz"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.falco.at/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/26912"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Falco%20Benz&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Falco%20Benz"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/Falcoprivatstiftung"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@falcogoesschool"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "http://www.youtube.com/channel/UC1c0V-F901ZPvw1imefX6EA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialfalco/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "defalco",
+    "name": "DeFalco",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011878771_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://defalco.bandcamp.com",
+        "allReleaseTitles": [
+          "gentlewingsguidinglight",
+          "fallawaywillallthisstartover",
+          "onstarlightwingsdoyoustilltakeflight",
+          "mercuryborrowedtime",
+          "myeyesblinkandthereyougo",
+          "2222",
+          "afterall",
+          "thereaper",
+          "in2stardust",
+          "2hearts",
+          "tellmewhyfeatkaala",
+          "allineed",
+          "everything2me",
+          "speedofsoundwithshoopashy",
+          "starfall",
+          "fallbacktolife"
+        ],
+        "latestRelease": {
+          "title": "gentle wings (guiding light)",
+          "type": "album",
+          "url": "https://defalco.bandcamp.com/album/gentle-wings-guiding-light",
+          "imageUrl": "https://f4.bcbits.com/img/a3950100747_2.jpg",
+          "releaseDate": "December 31, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=DeFalco"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+DeFalco"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.falco.at/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/26912"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=DeFalco&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/DeFalco"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/Falcoprivatstiftung"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@falcogoesschool"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "http://www.youtube.com/channel/UC1c0V-F901ZPvw1imefX6EA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialfalco/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "tavfalcospantherburns",
+    "name": "Tav Falco's Panther Burns",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0009951902_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tavfalcospantherburns.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tav%20Falco's%20Panther%20Burns"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tav%20Falco's%20Panther%20Burns"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.falco.at/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/26912"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Tav%20Falco's%20Panther%20Burns&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Tav%20Falco's%20Panther%20Burns"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/Falcoprivatstiftung"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@falcogoesschool"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "http://www.youtube.com/channel/UC1c0V-F901ZPvw1imefX6EA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialfalco/"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

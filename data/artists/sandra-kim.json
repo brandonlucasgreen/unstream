@@ -1,0 +1,81 @@
+[
+  {
+    "id": "qobuz-sandrakim",
+    "name": "Sandra Kim",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sandra-kim/378506",
+        "allReleaseTitles": [
+          "innerherocelienhermans",
+          "jaimelavie",
+          "bestof",
+          "slowmoirockmoibelmeschrijfme",
+          "takemeasiam",
+          "thebestof",
+          "jaimemonpays",
+          "malaguena",
+          "biendansmapeau",
+          "balancetoutmetopenogen",
+          "lessixties",
+          "ipiugrandisuccessidi",
+          "gravity"
+        ],
+        "latestRelease": {
+          "title": "Inner Hero Celien Hermans Sandra Kim",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/inner-hero-celien-hermans-sandra-kim/vfi0zdwp3hsyb",
+          "releaseDate": "2025-05-09"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sandra%20Kim"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sandra%20Kim"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-sandrakim1",
+    "name": "Sandra Kim 1",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sandra-kim-1/22979996",
+        "allReleaseTitles": [
+          "likeafirstloveonthebeach",
+          "theemotionsoftravel"
+        ],
+        "latestRelease": {
+          "title": "Like A First Love On The Beach Sandra Kim",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/like-a-first-love-on-the-beach-sandra-kim/tj08m2kysaqwc",
+          "releaseDate": "2024-09-04"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sandra%20Kim%201"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sandra%20Kim%201"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

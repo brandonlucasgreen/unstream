@@ -1,0 +1,127 @@
+[
+  {
+    "id": "qobuz-portishead",
+    "name": "Portishead",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/portishead/41259",
+        "allReleaseTitles": [
+          "dummy",
+          "roselandnyclive25",
+          "",
+          "third",
+          "chasethetear",
+          "numb",
+          "glorybox",
+          "sourtimes",
+          "allmine",
+          "over",
+          "therip",
+          "onlyyou",
+          "roselandnyclive"
+        ],
+        "latestRelease": {
+          "title": "Third Portishead",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/third-portishead/ojbugfkweyo7a",
+          "releaseDate": "2008-01-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Portishead"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Portishead"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://web.archive.org/web/19961105112827/http://www.godiscs.co.uk/porthead.html"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2774"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Portishead&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Portishead"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://www.instagram.com/portisheadofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC243a5RnwmItLvwhl0YOxbg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/portishead"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-portishead2",
+    "name": "Portishead 2",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/portishead-2/28062364"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Portishead%202"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Portishead%202"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://web.archive.org/web/19961105112827/http://www.godiscs.co.uk/porthead.html"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2774"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Portishead%202&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Portishead%202"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://www.instagram.com/portisheadofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC243a5RnwmItLvwhl0YOxbg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/portishead"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

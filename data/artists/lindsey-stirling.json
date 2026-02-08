@@ -1,0 +1,162 @@
+[
+  {
+    "id": "lindseystirling-bandcamp-lindseystirlingmusic",
+    "name": "Lindsey Stirling",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038629841_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://lindseystirlingmusic.bandcamp.com",
+        "allReleaseTitles": [
+          "duality",
+          "eviltwin",
+          "eyeoftheuntoldher",
+          "snowwaltz",
+          "artemis",
+          "warmerinthewinter",
+          "braveenough",
+          "shattermedeluxe",
+          "lindseystirling"
+        ],
+        "latestRelease": {
+          "title": "Duality",
+          "type": "album",
+          "url": "https://lindseystirlingmusic.bandcamp.com/album/duality",
+          "imageUrl": "https://f4.bcbits.com/img/a0721989657_2.jpg",
+          "releaseDate": "June 14, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/lindsey-stirling/1052591",
+        "allReleaseTitles": [
+          "duality",
+          "warmerinthewinter",
+          "shattermedeluxe",
+          "artemis",
+          "snowwaltz",
+          "kashmir",
+          "unfoldingrachelplatten",
+          "eviltwinshuba",
+          "longwayhomewalkofftheearth",
+          "carolofthebells",
+          "whatchildisthisdariusrucker",
+          "joytotheworld",
+          "loseyounowmako"
+        ],
+        "latestRelease": {
+          "title": "Shatter Me Deluxe Lindsey Stirling",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/shatter-me-deluxe-lindsey-stirling/grrvuddhrexha",
+          "releaseDate": "2025-09-26"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lindsey%20Stirling"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lindsey%20Stirling"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.lindseystirling.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2945428"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/lindseystirling/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@lindseystirling"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCWTD3EHR2SWV4D8WplDWFVg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/lindseystirlingmusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "lindseystirling",
+    "name": "Lindsey Stirling",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0029621092_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://lindseystirling.bandcamp.com",
+        "allReleaseTitles": [
+          "dualitydeluxe",
+          "eviltwinfeatshuba",
+          "unfolding",
+          "snowwaltzdeluxeedition",
+          "duality",
+          "carolofthebellslivefromsummertour2023",
+          "joytotheworldspedup",
+          "snowwaltz",
+          "warmerinthewinterdeluxeedition",
+          "warmerinthewinterdeluxeeditionoptimizedfordigitalinternationalversion"
+        ],
+        "latestRelease": {
+          "title": "Duality (Deluxe)",
+          "type": "album",
+          "url": "https://lindseystirling.bandcamp.com/album/duality-deluxe",
+          "imageUrl": "https://f4.bcbits.com/img/a1032764054_2.jpg",
+          "releaseDate": "August 15, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lindsey%20Stirling"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lindsey%20Stirling"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.lindseystirling.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2945428"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/lindseystirling/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@lindseystirling"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCWTD3EHR2SWV4D8WplDWFVg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/lindseystirlingmusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

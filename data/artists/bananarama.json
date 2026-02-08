@@ -1,0 +1,165 @@
+[
+  {
+    "id": "bananarama-bandcamp-scribblemations",
+    "name": "banana_rama",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025460547_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/bananarama/150052",
+        "allReleaseTitles": [
+          "glorioustheultimatecollection",
+          "glorious",
+          "babyitschristmas",
+          "masquerade",
+          "cruelsummer",
+          "instereo",
+          "onlyyourlovepreachermanreallysayingsomething",
+          "favourite",
+          "stufflikethat",
+          "foreveryoung",
+          "thegreatesthitscollection",
+          "",
+          "wow",
+          "trueconfessions",
+          "helplananeeneenoonoo",
+          "ultraviolet",
+          "venusboysnoize",
+          "deepseaskiving",
+          "drama"
+        ],
+        "latestRelease": {
+          "title": "Glorious Bananarama",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/glorious-bananarama/upfzevgn353oa",
+          "releaseDate": "2025-05-09"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://scribblemations.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=banana_rama"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+banana_rama"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.bananarama.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/10389"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=banana_rama&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/banana_rama"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/bananarama_official/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@bananaramaofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCEvj-7nTkDpZeDQBm8i2Bdg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Bananarama"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "bananarama",
+    "name": "Bananarama",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028301259_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bananarama.bandcamp.com",
+        "allReleaseTitles": [
+          "glorioustheultimatecollection",
+          "robertdeniroswaitingthereflexvelvetlieslukemillionbananaramathereflexlukemillion",
+          "thegreatesthitscollection",
+          "pleaseyourselfcollectorsedition",
+          "poplifecollectorsedition",
+          "wowcollectorsedition",
+          "trueconfessionscollectorsedition",
+          "bananaramacollectorsedition",
+          "deepseaskivingcollectorsedition"
+        ],
+        "latestRelease": {
+          "title": "Glorious - The Ultimate Collection",
+          "type": "album",
+          "url": "https://bananarama.bandcamp.com/album/glorious-the-ultimate-collection",
+          "imageUrl": "https://f4.bcbits.com/img/a4126506775_2.jpg",
+          "releaseDate": "March 8, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bananarama"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bananarama"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.bananarama.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/10389"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Bananarama&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Bananarama"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/bananarama_official/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@bananaramaofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCEvj-7nTkDpZeDQBm8i2Bdg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Bananarama"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

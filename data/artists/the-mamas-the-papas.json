@@ -1,0 +1,70 @@
+[
+  {
+    "id": "qobuz-themamasthepapas",
+    "name": "The Mamas The Papas",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-mamas-the-papas/51303",
+        "allReleaseTitles": [
+          "greatesthits",
+          "ifyoucanbelieveyoureyesears",
+          "thepapasthemamas",
+          "deliver",
+          "",
+          "peoplelikeus",
+          "liveatthemontereyinternationalpopfestival",
+          "gold",
+          "alltheleavesarebrownthegoldeneracollection",
+          "20thcenturymastersthebestofthemillenniumcollection",
+          "californiadreamin",
+          "agatheringofflowerstheanthologyof",
+          "dedicatedtotheoneilove",
+          "inconcert",
+          "twelvethirty",
+          "mondaymonday"
+        ],
+        "latestRelease": {
+          "title": "Greatest Hits The Mamas The Papas The Mamas The Papas",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/greatest-hits-the-mamas-the-papas-the-mamas-the-papas/tboce0zvew7aa",
+          "releaseDate": "1998-03-10"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Mamas%20The%20Papas"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Mamas%20The%20Papas"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/230387"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Mamas%20The%20Papas&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Mamas%20The%20Papas"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/MamasPapasMusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/mamasandthepapas"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

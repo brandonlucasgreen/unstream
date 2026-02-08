@@ -1,0 +1,54 @@
+[
+  {
+    "id": "qobuz-saramontiel",
+    "name": "Sara Montiel",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sara-montiel/121396",
+        "allReleaseTitles": [
+          "asifuemismejorescanciones",
+          "besosdefuego",
+          "unplacer",
+          "anocheconsara",
+          "smokingiwaitremixpaskmanand",
+          "thebestof",
+          "lavioletera",
+          "tapametapame"
+        ],
+        "latestRelease": {
+          "title": "Besos De Fuego Sara Montiel",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/besos-de-fuego-sara-montiel/i99s3xqpj9g0a",
+          "releaseDate": "2024-10-03"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sara%20Montiel"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sara%20Montiel"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/986018"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sara%20Montiel&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sara%20Montiel"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

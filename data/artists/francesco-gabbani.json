@@ -1,0 +1,67 @@
+[
+  {
+    "id": "qobuz-francescogabbani",
+    "name": "Francesco Gabbani",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/francesco-gabbani/76647",
+        "allReleaseTitles": [
+          "vivalavita",
+          "spaziotempo",
+          "volevamosoloesserefelici",
+          "dallamiaparte",
+          "fruttamalinconia",
+          "labitudine",
+          "larete",
+          "nataletantovale",
+          "dallatuaparte",
+          "vengoafidarmidite",
+          "occidentaliskarma",
+          "magellano",
+          "viceversa"
+        ],
+        "latestRelease": {
+          "title": "Dalla Mia Parte Francesco Gabbani",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/dalla-mia-parte-francesco-gabbani/u0tywhpnvvb8q",
+          "releaseDate": "2025-09-02"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Francesco%20Gabbani"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Francesco%20Gabbani"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://francescogabbani.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2315155"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/francescogabbani/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCjvWQUDUP2qaXZndN9eNKKQ/%20"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/francescogabbaniofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

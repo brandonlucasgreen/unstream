@@ -1,0 +1,52 @@
+[
+  {
+    "id": "qobuz-niamhkavanagh",
+    "name": "Niamh Kavanagh",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/niamh-kavanagh/269195",
+        "allReleaseTitles": [
+          "flyingblind",
+          "togetheralonegerrycarney"
+        ],
+        "latestRelease": {
+          "title": "Together Alone Niamh Kavanagh Gerry Carney",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/together-alone-niamh-kavanagh-gerry-carney/x8ocngdbpd8pb",
+          "releaseDate": "2011-11-25"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Niamh%20Kavanagh"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Niamh%20Kavanagh"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.webwrite.net/niamh.htm"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/527918"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Niamh%20Kavanagh&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Niamh%20Kavanagh"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

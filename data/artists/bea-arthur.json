@@ -1,0 +1,27 @@
+[
+  {
+    "id": "beaarthurundead",
+    "name": "Bea Arthur Undead",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a1848314787_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://beaarthurundead.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bea%20Arthur%20Undead"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bea%20Arthur%20Undead"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

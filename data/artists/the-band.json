@@ -1,0 +1,336 @@
+[
+  {
+    "id": "maththeband",
+    "name": "Math the Band",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0021364077_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://maththeband.bandcamp.com",
+        "allReleaseTitles": [
+          "maththebandthebandthealbum",
+          "stupidandweird",
+          "getreal",
+          "dontworry",
+          "bestswishesthanksadunks",
+          "duelofthedeer",
+          "wetcement",
+          "nowthatswhaticallragtime",
+          "maththebandbannedthemath",
+          "nothing",
+          "nature",
+          "hair",
+          "teeth",
+          "shoes"
+        ],
+        "latestRelease": {
+          "title": "Math the Band the Band - The Album",
+          "type": "album",
+          "url": "https://maththeband.bandcamp.com/album/math-the-band-the-band-the-album",
+          "imageUrl": "https://f4.bcbits.com/img/a4206875851_2.jpg",
+          "releaseDate": "October 1, 2015"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Math%20the%20Band"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Math%20the%20Band"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "grindlinetheband",
+    "name": "Grindline The Band",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0004960894_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://grindlinetheband.bandcamp.com",
+        "allReleaseTitles": [
+          "ripridedie",
+          "oldgtbacousticswithcliffbratenrealyoldphonemessagerapcrap",
+          "diggingditchesandburningbridgesmix",
+          "fast"
+        ],
+        "latestRelease": {
+          "title": "Rip Ride Die",
+          "type": "album",
+          "url": "https://grindlinetheband.bandcamp.com/album/rip-ride-die",
+          "imageUrl": "https://f4.bcbits.com/img/a2106326571_16.jpg",
+          "releaseDate": "July 23, 2016"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Grindline%20The%20Band"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Grindline%20The%20Band"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "thebandroyale",
+    "name": "The Band Royale",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0002655813_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thebandroyale.bandcamp.com",
+        "allReleaseTitles": [
+          "thebandroyale",
+          "looselipssinkships",
+          "delusionsofgrandeur",
+          "impostersyndrome",
+          "dyingincalifornia",
+          "strangerthingshavehappened",
+          "gardentapes",
+          "aslongasthemoneylasted",
+          "inlandsea",
+          "idlovetobutyouplaytoorough",
+          "cosmonautromance",
+          "81"
+        ],
+        "latestRelease": {
+          "title": "The Band Royale",
+          "type": "album",
+          "url": "https://thebandroyale.bandcamp.com/album/the-band-royale",
+          "imageUrl": "https://f4.bcbits.com/img/a1787701976_2.jpg",
+          "releaseDate": "January 1, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Band%20Royale"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Band%20Royale"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "stantheband",
+    "name": "STAN the BAND",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0009535683_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://stan.bandcamp.com",
+        "allReleaseTitles": [
+          "love",
+          "onenightstanlivealbum",
+          "cominghome",
+          "thesearethedays",
+          "intothesun",
+          "believe",
+          "midnightangel"
+        ],
+        "latestRelease": {
+          "title": "Love",
+          "type": "album",
+          "url": "https://stan.bandcamp.com/album/love",
+          "imageUrl": "https://f4.bcbits.com/img/a1401452873_2.jpg",
+          "releaseDate": "November 27, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=STAN%20the%20BAND"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+STAN%20the%20BAND"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "arttheband",
+    "name": "ART the Band",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0006733321_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://arttheband.bandcamp.com",
+        "allReleaseTitles": [
+          "bringyourownchains",
+          "arttheband",
+          "imaginary",
+          "wellpricedvictorian",
+          "finnaskedaddle",
+          "snacksep",
+          "bigtrack",
+          "boostunavailable",
+          "sebastiantstociaep",
+          "arttest"
+        ],
+        "latestRelease": {
+          "title": "Bring Your Own Chains",
+          "type": "album",
+          "url": "https://arttheband.bandcamp.com/album/bring-your-own-chains",
+          "imageUrl": "https://f4.bcbits.com/img/a0140065432_2.jpg",
+          "releaseDate": "April 23, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=ART%20the%20Band"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+ART%20the%20Band"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "horsetheband",
+    "name": "HORSE the Band",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020142223_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://horsetheband.bandcamp.com",
+        "allReleaseTitles": [
+          "anaturaldeath",
+          "pizza",
+          "themechanicalhand"
+        ],
+        "latestRelease": {
+          "title": "A Natural Death",
+          "type": "album",
+          "url": "https://horsetheband.bandcamp.com/album/a-natural-death",
+          "imageUrl": "https://f4.bcbits.com/img/a2903587464_2.jpg",
+          "releaseDate": "August 28, 2007"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=HORSE%20the%20Band"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+HORSE%20the%20Band"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "walthamtheband",
+    "name": "WALTHAM the BAND",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030896735_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://walthamtheband.bandcamp.com",
+        "allReleaseTitles": [
+          "heartofthunder",
+          "wickedwaltham5songep",
+          "summernights"
+        ],
+        "latestRelease": {
+          "title": "Heart Of Thunder",
+          "type": "track",
+          "url": "https://walthamtheband.bandcamp.com/track/heart-of-thunder",
+          "imageUrl": "https://f4.bcbits.com/img/a3730018660_2.jpg",
+          "releaseDate": "July 18, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=WALTHAM%20the%20BAND"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+WALTHAM%20the%20BAND"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-theband2",
+    "name": "The Band 2",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-band-2/5503584",
+        "allReleaseTitles": [
+          "theband",
+          "musicfrombigpink",
+          "thelastwaltz",
+          "beforethefloodbobdylan",
+          "thebasementtapesbobdylan",
+          "northernlightssoutherncross",
+          "thebasementtapescompletethebootlegseriesvol11bobdylan",
+          "rockofages",
+          "musicfrombigpinkdeluxeeditionremixed2018",
+          "stagefright",
+          "moondogmatinee"
+        ],
+        "latestRelease": {
+          "title": "The Band The Band",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-band-the-band/ww6eyyryxynic",
+          "releaseDate": "1969-09-22"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Band%202"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Band%202"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

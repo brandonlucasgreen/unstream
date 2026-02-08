@@ -1,0 +1,51 @@
+[
+  {
+    "id": "qobuz-salvatoreadamo5",
+    "name": "Salvatore Adamo 5",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/salvatore-adamo-5/24826549",
+        "allReleaseTitles": [
+          "infrenchplease",
+          "lamournajamaistorthires",
+          "cesttoujourslematincali",
+          "sinmalicia",
+          "20chansonsdor",
+          "sesplusbelleschansons",
+          "adamoallthebest",
+          "singlesfacesb19671969",
+          "imieisuccessi",
+          "platinumcollection",
+          "triplebestof",
+          "19621975",
+          "adamovolume2studio2",
+          "adamostudio1",
+          "adamochantebecaud",
+          "originalhits",
+          "lamournajamaistort"
+        ],
+        "latestRelease": {
+          "title": "Cest Toujours Le Matin Cali Salvatore Adamo",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/cest-toujours-le-matin-cali-salvatore-adamo/ewv3a967kuhua",
+          "releaseDate": "2024-03-15"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Salvatore%20Adamo%205"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Salvatore%20Adamo%205"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

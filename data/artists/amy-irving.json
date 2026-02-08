@@ -1,0 +1,50 @@
+[
+  {
+    "id": "amyirving",
+    "name": "Amy Irving",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038515611_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://amyirving.bandcamp.com",
+        "allReleaseTitles": [
+          "alwayswillbe",
+          "borninatrunk"
+        ],
+        "latestRelease": {
+          "title": "Always Will Be",
+          "type": "album",
+          "url": "https://amyirving.bandcamp.com/album/always-will-be",
+          "imageUrl": "https://f4.bcbits.com/img/a0287586534_16.jpg",
+          "releaseDate": "April 25, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/amy-irving/173488",
+        "allReleaseTitles": [
+          "borninatrunk",
+          "alwayswillbegoolis",
+          "alwayswillbe",
+          "iwishididntloveyouso",
+          "ifyouwantmetoloveyouiwill",
+          "musefeatgoolis"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Amy%20Irving"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Amy%20Irving"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,187 @@
+[
+  {
+    "id": "bob21savage",
+    "name": "Bob 21savage",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031239948_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bob21savage.bandcamp.com",
+        "allReleaseTitles": [
+          "getinmyflstudioeditingclub",
+          "takingyoutothebass",
+          "deepbassfrombob",
+          "trancetakentobassslidemaze",
+          "chillbob21savage32albumendlesstempowaitingforeverusercanpublishstartmakingyourself",
+          "chillbob21savage33albumpleasemakeanewbeatlikethisnoonehasthoughtofshareorenjoy",
+          "chillbob21savage34albumihavelivedonearthforawhilethisisforsurelikethisshareorenjoy",
+          "chillbob21savage35albumhowhardcanthinklearnmorefromfrommehttpsyoutubeqvbos4cdjz4itwasme",
+          "chillbob21savage31albumwaitingforallmylifeheremasteringstuffcompletedarknessme"
+        ],
+        "latestRelease": {
+          "title": "GET IN MY FL STUDIO EDITING CLUB",
+          "type": "track",
+          "url": "https://bob21savage.bandcamp.com/track/get-in-my-fl-studio-editing-club",
+          "imageUrl": "https://f4.bcbits.com/img/a1740834488_2.jpg",
+          "releaseDate": "February 10, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bob%2021savage"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bob%2021savage"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.21savage.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3259639"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/21savage/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@21savage"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCOjEHmBKwdS7joWpW0VrXkg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/21Savage"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-21savage",
+    "name": "21 Savage",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/21-savage/2766992",
+        "latestRelease": {
+          "title": "What Happened To The Streets 21 Savage",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/what-happened-to-the-streets-21-savage/lyfvqvb7jnb5f",
+          "releaseDate": "2025-12-12"
+        },
+        "allReleaseTitles": [
+          "whathappenedtothestreets",
+          "savagemodeiimetroboomin",
+          "americandream",
+          "herlossdrake",
+          "gbpcentralcee",
+          "immortal",
+          "callmerevenged4vd",
+          "runygtygabia",
+          "spiralfromthebookofsawsoundtrack",
+          "outfitlilbaby",
+          "dontplaythatkingvon",
+          "nookiepuy21lilharoldfeatsexyyred",
+          "spiral"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=21%20Savage"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+21%20Savage"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.21savage.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3259639"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/21savage/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@21savage"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCOjEHmBKwdS7joWpW0VrXkg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/21Savage"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "21savagegarden",
+    "name": "21 Savage Garden",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0015602018_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://21savagegarden.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=21%20Savage%20Garden"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+21%20Savage%20Garden"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.21savage.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3259639"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/21savage/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@21savage"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCOjEHmBKwdS7joWpW0VrXkg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/21Savage"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

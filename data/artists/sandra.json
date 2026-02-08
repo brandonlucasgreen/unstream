@@ -1,0 +1,644 @@
+[
+  {
+    "id": "sandra",
+    "name": "Sandra",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0034793388_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sandramusic.bandcamp.com",
+        "allReleaseTitles": [
+          "theverybestof",
+          "fadingshades",
+          "reflections"
+        ],
+        "latestRelease": {
+          "title": "The Very Best Of",
+          "type": "album",
+          "url": "https://sandramusic.bandcamp.com/album/the-very-best-of",
+          "imageUrl": "https://f4.bcbits.com/img/a1599382859_2.jpg",
+          "releaseDate": "February 20, 2024"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/gotathingforthings"
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sandra/47147",
+        "allReleaseTitles": [
+          "18greatesthits",
+          "flaschenpostbianca",
+          "thelongplay",
+          "intoasecretland",
+          "so80spresentscuratedbyblankjones",
+          "theverybestof",
+          "paintingsinyellow",
+          "mirrors",
+          "closetoseven",
+          "thewheeloftime",
+          "myfavourites",
+          "fadingshades",
+          "reflectionsthereproducedhitsspecialedition",
+          "tenononethesingles",
+          "iclosemyeyes",
+          "secretsoflovedjbobo",
+          "infinitekiss",
+          "intheheatofthenight2007remixesep"
+        ],
+        "latestRelease": {
+          "title": "Flaschenpost Sandra Bianca",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/flaschenpost-sandra-bianca/nmour3mqb4crc",
+          "releaseDate": "2023-11-10"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sandra"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sandra"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sandranet.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1594671"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sandra&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sandra"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sandra.lauer.cretu.official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCefMqcCMiUxvMxdBtIFd6uw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sandra.lauer.cretu.official"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "sandraswedding",
+    "name": "Sandra's Wedding",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0040711406_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sandraswedding.bandcamp.com",
+        "allReleaseTitles": [
+          "arturusrex",
+          "thehopefulboyreplacementservice",
+          "anotherrugbyleaguetown",
+          "givenrain",
+          "onehorsetown",
+          "northernpowerhousedeluxeedition",
+          "pleasuregrounds",
+          "arethafranklinsingle",
+          "iloveyou",
+          "bananabread",
+          "ohoneforohfive",
+          "frameyourself",
+          "lipservice",
+          "whatdidyoudointhewar",
+          "goodmorningbadblood",
+          "spitechristmas",
+          "northernpowerhouse"
+        ],
+        "latestRelease": {
+          "title": "Arturus Rex",
+          "type": "album",
+          "url": "https://sandraswedding.bandcamp.com/album/arturus-rex",
+          "imageUrl": "https://f4.bcbits.com/img/a0500619769_2.jpg",
+          "releaseDate": "October 10, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sandra's%20Wedding"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sandra's%20Wedding"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sandranet.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1594671"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sandra's%20Wedding&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sandra's%20Wedding"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sandra.lauer.cretu.official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCefMqcCMiUxvMxdBtIFd6uw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sandra.lauer.cretu.official"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "sandramccracken",
+    "name": "Sandra McCracken",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0004825087_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sandramccracken.bandcamp.com",
+        "allReleaseTitles": [
+          "thestillpointvoliisandramccrackenandbenshive",
+          "songsfromthevalley",
+          "thestillpointsandramccrackenbenshive",
+          "godshighway",
+          "psalms"
+        ],
+        "latestRelease": {
+          "title": "The Still Point, Vol. II\n                \n                \n\n                Sandra McCracken and Ben Shive",
+          "type": "album",
+          "url": "https://sandramccracken.bandcamp.com/album/the-still-point-vol-ii",
+          "imageUrl": "https://f4.bcbits.com/img/a1895760603_2.jpg",
+          "releaseDate": "December 1, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sandra%20McCracken"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sandra%20McCracken"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sandranet.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1594671"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sandra%20McCracken&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sandra%20McCracken"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sandra.lauer.cretu.official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCefMqcCMiUxvMxdBtIFd6uw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sandra.lauer.cretu.official"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "sandrastvictor",
+    "name": "Sandra St. Victor",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033091548_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sandrastvictor.bandcamp.com",
+        "allReleaseTitles": [
+          "youareherefromthehammervault",
+          "resetmefreejnichs432hzsandrastvictormarcusmachadoduo",
+          "geminibothsidesthejnichremaster2021",
+          "eternally",
+          "geminibothsides",
+          "oyasdaughter",
+          "slow",
+          "sanctuary",
+          "ghettoheavenmixnrematch",
+          "100000000",
+          "flowersintherain",
+          "mackdivasavestheworld"
+        ],
+        "latestRelease": {
+          "title": "You Are Here - from the Hammer vault",
+          "type": "track",
+          "url": "https://sandrastvictor.bandcamp.com/track/you-are-here-from-the-hammer-vault",
+          "imageUrl": "https://f4.bcbits.com/img/a4143707746_2.jpg",
+          "releaseDate": "July 31, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sandra%20St.%20Victor"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sandra%20St.%20Victor"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sandranet.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1594671"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sandra%20St.%20Victor&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sandra%20St.%20Victor"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sandra.lauer.cretu.official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCefMqcCMiUxvMxdBtIFd6uw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sandra.lauer.cretu.official"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "sandracross",
+    "name": "Sandra Cross",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024374331_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sandracross.bandcamp.com",
+        "latestRelease": {
+          "title": "Sandra Dubshowcase",
+          "type": "album",
+          "url": "https://sandracross.bandcamp.com/album/sandra-dubshowcase",
+          "imageUrl": "https://f4.bcbits.com/img/a1982009777_2.jpg",
+          "releaseDate": "August 9, 2023"
+        },
+        "allReleaseTitles": [
+          "sandradubshowcase",
+          "canttouchthesoul",
+          "beauty",
+          "loversinterlude",
+          "countrylivingthewildbunchfeatsandracross",
+          "100loversrock",
+          "countrylife",
+          "steppingindubwisecountry",
+          "foundationoflove",
+          "thisissandracross",
+          "cometinthesky"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sandra%20Cross"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sandra%20Cross"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sandranet.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1594671"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sandra%20Cross&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sandra%20Cross"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sandra.lauer.cretu.official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCefMqcCMiUxvMxdBtIFd6uw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sandra.lauer.cretu.official"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "sandrabell",
+    "name": "Sandra Bell",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a0798247289_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sandrabell.bandcamp.com",
+        "allReleaseTitles": [
+          "lastmessagefromkatrack",
+          "sweetestmaytrack",
+          "aureolecompilation",
+          "ampelmannsingle",
+          "cavemantrack",
+          "whitenightsalbum",
+          "cityofsorrowsalbum",
+          "angel7",
+          "chord2x7",
+          "redleavestrack",
+          "netalbum",
+          "timebombtrack",
+          "seasofthemoontrack",
+          "dreamsoffallingalbum",
+          "blackbirdsep"
+        ],
+        "latestRelease": {
+          "title": "Last Message From Ka (Track)",
+          "type": "track",
+          "url": "https://sandrabell.bandcamp.com/track/last-message-from-ka-track",
+          "imageUrl": "https://f4.bcbits.com/img/a0798247289_2.jpg",
+          "releaseDate": "November 19, 2019"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sandra%20Bell"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sandra%20Bell"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sandranet.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1594671"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sandra%20Bell&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sandra%20Bell"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sandra.lauer.cretu.official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCefMqcCMiUxvMxdBtIFd6uw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sandra.lauer.cretu.official"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "sandraboss",
+    "name": "Sandra Boss",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0006995345_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sandraboss.bandcamp.com",
+        "latestRelease": {
+          "title": "Tuning the Ear",
+          "type": "album",
+          "url": "https://sandraboss.bandcamp.com/album/tuning-the-ear",
+          "imageUrl": "https://f4.bcbits.com/img/a0263180467_2.jpg",
+          "releaseDate": "April 29, 2022"
+        },
+        "allReleaseTitles": [
+          "tuningtheear",
+          "tonniclairekosmiskeambitionertonniclaire",
+          "theacousticappraiser",
+          "sekskompositioner",
+          "perfekttermisksoldout",
+          "bandvrk"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sandra%20Boss"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sandra%20Boss"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sandranet.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1594671"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sandra%20Boss&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sandra%20Boss"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sandra.lauer.cretu.official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCefMqcCMiUxvMxdBtIFd6uw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sandra.lauer.cretu.official"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "sandrakerrandjohnfaulkner",
+    "name": "Sandra Kerr and John Faulkner",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014023784_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bagpuss.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sandra%20Kerr%20and%20John%20Faulkner"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sandra%20Kerr%20and%20John%20Faulkner"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sandranet.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1594671"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sandra%20Kerr%20and%20John%20Faulkner&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sandra%20Kerr%20and%20John%20Faulkner"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sandra.lauer.cretu.official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCefMqcCMiUxvMxdBtIFd6uw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sandra.lauer.cretu.official"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-sandra8",
+    "name": "Sandra 8",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sandra-8/20896076"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sandra%208"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sandra%208"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sandranet.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1594671"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sandra%208&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sandra%208"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sandra.lauer.cretu.official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCefMqcCMiUxvMxdBtIFd6uw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sandra.lauer.cretu.official"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

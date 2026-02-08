@@ -1,0 +1,85 @@
+[
+  {
+    "id": "kengage",
+    "name": "Ken Gage",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019551620_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://brainblister.bandcamp.com",
+        "allReleaseTitles": [
+          "yb1",
+          "haunted",
+          "sunrise",
+          "theoriesofcausation",
+          "birdsville",
+          "frikimusic",
+          "baphometrics",
+          "waze",
+          "liminaldreampool",
+          "gibbous",
+          "traveller",
+          "amagicdoorwaytomars",
+          "bluepulsar",
+          "theradiowavesareinsideyou",
+          "galaxydisc",
+          "electrichellthebestofkengage"
+        ],
+        "latestRelease": {
+          "title": "YB1",
+          "type": "album",
+          "url": "https://brainblister.bandcamp.com/album/yb1",
+          "imageUrl": "https://f4.bcbits.com/img/a3784488503_2.jpg",
+          "releaseDate": "December 28, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ken%20Gage"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ken%20Gage"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-kenpage",
+    "name": "Ken Page",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ken-page/38797",
+        "allReleaseTitles": [
+          "pagebypage"
+        ],
+        "latestRelease": {
+          "title": "Page By Page Ken Page",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/page-by-page-ken-page/0191018069087",
+          "releaseDate": "2008-02-12"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ken%20Page"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ken%20Page"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

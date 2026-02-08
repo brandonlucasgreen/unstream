@@ -1,0 +1,38 @@
+[
+  {
+    "id": "qobuz-standalone-florencewelch",
+    "name": "Florence Welch",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/florence-welch/350632"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Florence%20Welch"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Florence%20Welch"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1145403"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/florence/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@florence"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

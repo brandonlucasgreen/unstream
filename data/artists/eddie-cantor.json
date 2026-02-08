@@ -1,0 +1,74 @@
+[
+  {
+    "id": "qobuz-eddiecantor",
+    "name": "Eddie Cantor",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/eddie-cantor/24757",
+        "allReleaseTitles": [
+          "thecolumbiayears19221940",
+          "alabamybound",
+          "presenting",
+          "makinwhoopeethegoldenyearsof",
+          "essentialrecordings",
+          "theultimateradioshows",
+          "theverybestof",
+          "yoohooprosperitythefiveyearplan",
+          "youaintheardnothingyet",
+          "antiquetracks",
+          "doodledoodoo",
+          "ifyouknewsusie",
+          "margie",
+          "ohisshedumb",
+          "onawindydaywaydowninwaikiki",
+          "caughtshortasagaofwailingwallstreet",
+          "ohgee",
+          "charleymyboy",
+          "illhavevanilla",
+          "mandy"
+        ],
+        "latestRelease": {
+          "title": "Makin Whoopee The Golden Years Of Eddie Cantor Eddie Cantor",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/makin-whoopee-the-golden-years-of-eddie-cantor-eddie-cantor/afc2dntsnxe7b",
+          "releaseDate": "2025-07-04"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Eddie%20Cantor"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Eddie%20Cantor"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.eddiecantor.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/651406"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Eddie%20Cantor&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Eddie%20Cantor"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "http://www.facebook.com/group.php?gid=18680587469&amp;ref=ts"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

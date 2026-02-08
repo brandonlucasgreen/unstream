@@ -1,0 +1,142 @@
+[
+  {
+    "id": "junecartercash",
+    "name": "June Carter Cash",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0007475527_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://junecartercash.bandcamp.com",
+        "allReleaseTitles": [
+          "wildwoodflower",
+          "presson"
+        ],
+        "latestRelease": {
+          "title": "Wildwood Flower",
+          "type": "album",
+          "url": "https://junecartercash.bandcamp.com/album/wildwood-flower",
+          "imageUrl": "https://f4.bcbits.com/img/a0341850762_16.jpg",
+          "releaseDate": "September 9, 2003"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/june-carter-cash/158588",
+        "allReleaseTitles": [
+          "carryinonwithjohnnycashandjunecarterjohnnycash",
+          "wildwoodflower",
+          "appalachianpride",
+          "presson",
+          "keeponthesunnysideherlifeinmusic",
+          "ringoffirethebestof",
+          "churchinthewildwood"
+        ],
+        "latestRelease": {
+          "title": "Press On June Carter Cash",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/press-on-june-carter-cash/dr3e31cgtlunb",
+          "releaseDate": "2010-12-21"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=June%20Carter%20Cash"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+June%20Carter%20Cash"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/274754"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=June%20Carter%20Cash&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/June%20Carter%20Cash"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/junecartercash/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCczoCOkxznEoGCTp22tDssQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/junecartercashofficial/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "cashthemusicofjohnnycashandjunecartercash",
+    "name": "CASH: The Music of Johnny Cash And June Carter Cash",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0006695708_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://johnnyandjune.bandcamp.com",
+        "allReleaseTitles": [
+          "deliasgone",
+          "istillmisssomeone",
+          "jackson"
+        ],
+        "latestRelease": {
+          "title": "Delia's Gone",
+          "type": "track",
+          "url": "https://johnnyandjune.bandcamp.com/track/delias-gone",
+          "imageUrl": "https://f4.bcbits.com/img/a1523528340_2.jpg",
+          "releaseDate": "January 20, 2016"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=CASH%3A%20The%20Music%20of%20Johnny%20Cash%20And%20June%20Carter%20Cash"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+CASH%3A%20The%20Music%20of%20Johnny%20Cash%20And%20June%20Carter%20Cash"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/274754"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=CASH%3A%20The%20Music%20of%20Johnny%20Cash%20And%20June%20Carter%20Cash&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/CASH%3A%20The%20Music%20of%20Johnny%20Cash%20And%20June%20Carter%20Cash"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/junecartercash/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCczoCOkxznEoGCTp22tDssQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/junecartercashofficial/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

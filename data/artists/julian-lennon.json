@@ -1,0 +1,47 @@
+[
+  {
+    "id": "qobuz-julianlennon",
+    "name": "Julian Lennon",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/julian-lennon/62537",
+        "allReleaseTitles": [
+          "because",
+          "jude",
+          "imaginefeatnunobettencourt",
+          "imaginenunobettencourt",
+          "luckyones",
+          "change",
+          "everylittlemoment",
+          "lovedontletmedown",
+          "saveme",
+          "saltwater25",
+          "ihope",
+          "valotte",
+          "photographsmile"
+        ],
+        "latestRelease": {
+          "title": "Because Julian Lennon",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/because-julian-lennon/zkdl2w1s18g8a",
+          "releaseDate": "2025-10-24"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Julian%20Lennon"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Julian%20Lennon"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

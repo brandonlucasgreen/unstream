@@ -1,0 +1,84 @@
+[
+  {
+    "id": "kitaro",
+    "name": "Kitaro",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0005993922_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kitaro.bandcamp.com",
+        "allReleaseTitles": [
+          "anenchantedeveninglive2025deluxeeditionremaster",
+          "thelightofthespirit2025remaster",
+          "kukai1250liveinzentsuji",
+          "zenliveinkatsuyamadeluxeedition",
+          "silkroadlive",
+          "theepiccollection",
+          "sixmusicalportraits",
+          "sacredjourneyofkukaidigitalboxsetvolumes1to5",
+          "sayake",
+          "celestialscenerycollection",
+          "americanindianstorytellerkitarodennisbanks",
+          "sacredjourneyofkukaivolume5",
+          "modulations19791992",
+          "tenkuremastered",
+          "asiancafe",
+          "dream"
+        ],
+        "latestRelease": {
+          "title": "An Enchanted Evening (Live) [2025 Deluxe Edition Remaster)",
+          "type": "album",
+          "url": "https://kitaro.bandcamp.com/album/an-enchanted-evening-live-2025-deluxe-edition-remaster",
+          "imageUrl": "https://f4.bcbits.com/img/a2442376424_2.jpg",
+          "releaseDate": "June 20, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kitaro"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kitaro"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4226848"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-kitaro",
+    "name": "Kitaro",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/kitaro/53311"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kitaro"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kitaro"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4226848"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

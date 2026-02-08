@@ -1,0 +1,85 @@
+[
+  {
+    "id": "qobuz-tizianoferro",
+    "name": "Tiziano Ferro",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/tiziano-ferro/68487",
+        "allReleaseTitles": [
+          "vamosabailarpaolachiaragabryponte",
+          "111anniversaryedition",
+          "rossorelativoanniversaryedition",
+          "tznthebestof",
+          "ilmestieredellavita",
+          "allamiaeta",
+          "aceptomilagrosanaguerra",
+          "buenamalasuerte",
+          "miofratello",
+          "111cientoonce",
+          "nessunoesolo",
+          "111centoundici",
+          "accettomiracoli",
+          "rojorelativo",
+          "rossorelativo",
+          "elamoresunacosasimple",
+          "nadieestasolo",
+          "aceptomilagros",
+          "eloficiodelavida"
+        ],
+        "latestRelease": {
+          "title": "111 Anniversary Edition Tiziano Ferro",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/111-anniversary-edition-tiziano-ferro/z80dj2oy2w1jc",
+          "releaseDate": "2023-11-07"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tiziano%20Ferro"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tiziano%20Ferro"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.tizianoferro.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/286825"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Tiziano%20Ferro&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Tiziano%20Ferro"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/tizianoferro/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@tizianoferro"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCKyMo95rgpADh-NTaUr5dQw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/tizianoferro"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

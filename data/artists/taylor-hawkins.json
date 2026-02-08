@@ -1,0 +1,37 @@
+[
+  {
+    "id": "qobuz-taylorhawkins",
+    "name": "Taylor Hawkins",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/taylor-hawkins/204726",
+        "allReleaseTitles": [
+          "holymanhawkinsmaytaylorwilsonversiondenniswilsonbrianmayrogertaylor",
+          "kota",
+          "turnovertheworldperryfarrellstarcrawler"
+        ],
+        "latestRelease": {
+          "title": "Turn Over The World Perry Farrell Taylor Hawkins Starcrawler",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/turn-over-the-world-perry-farrell-taylor-hawkins-starcrawler/xy5a5goc4swvb",
+          "releaseDate": "2023-07-28"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Taylor%20Hawkins"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Taylor%20Hawkins"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

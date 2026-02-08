@@ -1,0 +1,39 @@
+[
+  {
+    "id": "qobuz-jemaineclement",
+    "name": "Jemaine Clement",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jemaine-clement/567947",
+        "allReleaseTitles": [
+          "thelmatheunicornbrittanyhowardfredarmisenjohnpowell"
+        ],
+        "latestRelease": {
+          "title": "Thelma The Unicorn Brittany Howard Fred Armisen Jemaine Clement John Powell",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/thelma-the-unicorn-brittany-howard-fred-armisen-jemaine-clement-john-powell/stvs989kgkbma",
+          "releaseDate": "2024-05-17"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jemaine%20Clement"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jemaine%20Clement"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1050721"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

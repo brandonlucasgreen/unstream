@@ -1,0 +1,88 @@
+[
+  {
+    "id": "burlives",
+    "name": "Burl Ives",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031951657_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://burl-ives.bandcamp.com",
+        "allReleaseTitles": [
+          "bigrockcandymountain",
+          "burliveslive",
+          "singshisgreatesthits",
+          "time"
+        ],
+        "latestRelease": {
+          "title": "Big Rock Candy Mountain",
+          "type": "album",
+          "url": "https://burl-ives.bandcamp.com/album/big-rock-candy-mountain",
+          "imageUrl": "https://f4.bcbits.com/img/a0852808276_16.jpg",
+          "releaseDate": "January 1, 1979"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Burl%20Ives"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Burl%20Ives"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/310187"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Burl%20Ives&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Burl%20Ives"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-burlives",
+    "name": "Burl Ives",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/burl-ives/62548"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Burl%20Ives"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Burl%20Ives"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/310187"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Burl%20Ives&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Burl%20Ives"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

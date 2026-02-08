@@ -1,0 +1,79 @@
+[
+  {
+    "id": "qobuz-thinlizzy",
+    "name": "Thin Lizzy",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/thin-lizzy/47389",
+        "allReleaseTitles": [
+          "theacousticsessions",
+          "nightlifefighting",
+          "vagabondsofthewesternworld",
+          "chinatown",
+          "blackrosearocklegend",
+          "1976",
+          "liveanddangerous",
+          "thunderandlightning",
+          "jailbreak",
+          "whiskeyinthejar",
+          "life",
+          "theacousticep",
+          "shadesofablueorphanage",
+          "rememberingpt2newday",
+          "dublin",
+          "eire",
+          "slowblues"
+        ],
+        "latestRelease": {
+          "title": "Night Life Fighting Thin Lizzy",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/night-life-fighting-thin-lizzy/t4raklw88dcsa",
+          "releaseDate": "2025-09-19"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Thin%20Lizzy"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Thin%20Lizzy"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.thinlizzyonline.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/136188"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Thin%20Lizzy&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Thin%20Lizzy"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thinlizzy/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/ThinLizzyChannel"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ThinLizzyOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,61 @@
+[
+  {
+    "id": "qobuz-alissawhitegluz",
+    "name": "Alissa White Gluz",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/alissa-white-gluz/667471",
+        "allReleaseTitles": [
+          "theroomwhereshedied",
+          "thewolfyoufeednitastrauss",
+          "breathingcolerolland",
+          "demonsinyoutarjawith",
+          "demonsareagirlsbestfriend",
+          "asongtosaveusall",
+          "dreamratsfeatnojoy"
+        ],
+        "latestRelease": {
+          "title": "Breathing Cole Rolland Alissa White Gluz",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/breathing-cole-rolland-alissa-white-gluz/odc5ywsvn5alc",
+          "releaseDate": "2026-01-30"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/AlissaWhiteGluz"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Alissa%20White%20Gluz"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Alissa%20White%20Gluz"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1081118"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/alissawhitegluz/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UClv9Un4KGvyDNrmi_Q7nKmw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/AlissaWhiteGluzFans"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

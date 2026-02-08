@@ -1,0 +1,171 @@
+[
+  {
+    "id": "whitespace",
+    "name": "Whitespace",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0042518306_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://whitespaceaudio.net",
+        "allReleaseTitles": [
+          "microvistawebinar",
+          "highwaysyokohama",
+          "televisionafterlife",
+          "signalinternationaltelecomandvictoryoverdeath",
+          "mallwalkermalltalkcollective",
+          "executiveviewsmidnightpremierefloridarains",
+          "manhattancosmiccycler",
+          "newhorizonwaterfrontdining",
+          "casanova",
+          "forgottenpassionsvhs",
+          "blueimmersiontraveller",
+          "virtualaquariumtourromancepackage",
+          "ensoleillementcanal",
+          "twilightzoneyokohamamidnightpremiere",
+          "vacuum",
+          "usgolf95usgolf95"
+        ],
+        "latestRelease": {
+          "title": "MicroVista\n                \n                \n\n                Webinar™",
+          "type": "album",
+          "url": "https://whitespaceaudio.net/album/microvista",
+          "imageUrl": "https://f4.bcbits.com/img/a1601701831_2.jpg",
+          "releaseDate": "January 25, 2026"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/WhiteSpaceBot"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Whitespace"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Whitespace"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "whiteshape",
+    "name": "WHITE SHAPE",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037563975_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://whiteshape.bandcamp.com",
+        "allReleaseTitles": [
+          "throughthelupine",
+          "knivesdown",
+          "keepuswilddemo",
+          "perfectdark",
+          "chromesthesia",
+          "thewhiteshapeep"
+        ],
+        "latestRelease": {
+          "title": "Through The Lupine",
+          "type": "album",
+          "url": "https://whiteshape.bandcamp.com/album/through-the-lupine",
+          "imageUrl": "https://f4.bcbits.com/img/a1699458264_2.jpg",
+          "releaseDate": "October 25, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=WHITE%20SHAPE"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+WHITE%20SHAPE"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-whitesnake",
+    "name": "Whitesnake",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/whitesnake/93230",
+        "allReleaseTitles": [
+          "",
+          "greatesthits",
+          "liveatdonington1990",
+          "stillgoodtobebad",
+          "thepurpletour",
+          "unzipped",
+          "slideitin",
+          "slipofthetongue",
+          "restlessheart",
+          "thebluesalbum",
+          "therockalbum",
+          "lovesongs",
+          "fleshblood",
+          "liveintheshadowoftheblues",
+          "lovehunter"
+        ],
+        "latestRelease": {
+          "title": "Live At Donington 1990 Whitesnake",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/live-at-donington-1990-whitesnake/k3gw9n1hvqnaq",
+          "releaseDate": "2008-07-04"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Whitesnake"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Whitesnake"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.whitesnake.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/139982"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Whitesnake&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Whitesnake"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/whitesnake/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/WhitesnakeTV"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Whitesnake.official"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "qobuz-jodibenson",
+    "name": "Jodi Benson",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jodi-benson/46844",
+        "allReleaseTitles": [
+          "singssongsfromthebeginnersbible",
+          "windowontheworldtheafricanchildrenschoir",
+          "guidepostjunction",
+          "songsfromthebeginnersbible"
+        ],
+        "latestRelease": {
+          "title": "Window On The World Jodi Benson The African Childrens Choir",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/window-on-the-world-jodi-benson-the-african-childrens-choir/b4mbhr0tdpv4b",
+          "releaseDate": "2003-09-02"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jodi%20Benson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jodi%20Benson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

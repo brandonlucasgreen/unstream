@@ -1,0 +1,82 @@
+[
+  {
+    "id": "qobuz-roxymusic",
+    "name": "Roxy Music",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/roxy-music/38330",
+        "allReleaseTitles": [
+          "avalon",
+          "foryourpleasure",
+          "thebestof",
+          "countrylife",
+          "siren",
+          "stranded",
+          "",
+          "fleshandblood",
+          "streetlife20greatesthitsbryanferry",
+          "manifesto",
+          "live2001",
+          "viva",
+          "loveisthedrug",
+          "heartstillbeating",
+          "loveisthedrugavalon",
+          "remixesblue",
+          "deluxeedition",
+          "remixes",
+          "denver1979",
+          "collection"
+        ],
+        "latestRelease": {
+          "title": "The Best Of Roxy Music Roxy Music",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-best-of-roxy-music-roxy-music/0724381039557",
+          "releaseDate": "2001-01-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Roxy%20Music"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Roxy%20Music"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.roxymusic.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/56621"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Roxy%20Music&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Roxy%20Music"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/bryanferry_roxymusic"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/OfficialRoxyMusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/roxymusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,60 @@
+[
+  {
+    "id": "qobuz-kygo",
+    "name": "Kygo",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/kygo/1650880",
+        "latestRelease": {
+          "title": "Chasing Paradise Kygo Onerepublic",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/chasing-paradise-kygo-onerepublic/qvx8uikgrb0oc",
+          "releaseDate": "2025-01-23"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kygo"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kygo"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.kygomusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3892706"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kygomusic/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@kygomusic"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCCFJeI-2sT_cWgz-QJRgbCw"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://threads.net/@kygomusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/kygoofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,234 @@
+[
+  {
+    "id": "spiritsburningmichaelmoorcock",
+    "name": "Spirits Burning & Michael Moorcock",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022396933_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://spiritsburningmichaelmoorcock.bandcamp.com",
+        "allReleaseTitles": [
+          "theendofallsongspart2",
+          "theendofallsongs",
+          "thehollowlands"
+        ],
+        "latestRelease": {
+          "title": "The End Of All Songs - Part 2",
+          "type": "album",
+          "url": "https://spiritsburningmichaelmoorcock.bandcamp.com/album/the-end-of-all-songs-part-2",
+          "imageUrl": "https://f4.bcbits.com/img/a3311365918_2.jpg",
+          "releaseDate": "August 29, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Spirits%20Burning%20%26%20Michael%20Moorcock"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Spirits%20Burning%20%26%20Michael%20Moorcock"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.multiverse.org/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/329787"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/joinmultiverse"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@joinmultiverse"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/c/multiverse1"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/joinmultiverse"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "michaelmoorcockthedeepfix",
+    "name": "Michael Moorcock & The Deep Fix",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0017280624_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://michaelmoorcockthedeepfix.bandcamp.com",
+        "allReleaseTitles": [
+          "thehollowlands",
+          "liveattheterminalcafe"
+        ],
+        "latestRelease": {
+          "title": "The Hollow Lands",
+          "type": "album",
+          "url": "https://michaelmoorcockthedeepfix.bandcamp.com/album/the-hollow-lands",
+          "imageUrl": "https://f4.bcbits.com/img/a1294724824_16.jpg",
+          "releaseDate": "December 4, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Michael%20Moorcock%20%26%20The%20Deep%20Fix"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Michael%20Moorcock%20%26%20The%20Deep%20Fix"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.multiverse.org/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/329787"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/joinmultiverse"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@joinmultiverse"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/c/multiverse1"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/joinmultiverse"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-michaelmoorcock",
+    "name": "Michael Moorcock",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/michael-moorcock/161830",
+        "allReleaseTitles": [
+          "theendofallsongsspiritsburning",
+          "thehollowlandsspiritsburning",
+          "analienheatspiritsburning",
+          "theendofallsongspt2spiritsburning",
+          "whenwillwehearspiritsburning",
+          "rollercoasterholidaythedeepfix"
+        ],
+        "latestRelease": {
+          "title": "The End Of All Songs Pt 2 Spirits Burning Michael Moorcock",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-end-of-all-songs-pt-2-spirits-burning-michael-moorcock/l3doa4extofwb",
+          "releaseDate": "2025-08-29"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Michael%20Moorcock"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Michael%20Moorcock"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.multiverse.org/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/329787"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/joinmultiverse"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@joinmultiverse"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/c/multiverse1"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/joinmultiverse"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "michaelmoorcockthedeepfix-bandcamp-michaelmoorcockandthedeepfix",
+    "name": "Michael Moorcock & The Deep Fix",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024636286_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://michaelmoorcockandthedeepfix.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Michael%20Moorcock%20%26%20The%20Deep%20Fix"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Michael%20Moorcock%20%26%20The%20Deep%20Fix"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.multiverse.org/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/329787"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/joinmultiverse"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@joinmultiverse"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/c/multiverse1"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/joinmultiverse"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

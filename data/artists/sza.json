@@ -1,0 +1,156 @@
+[
+  {
+    "id": "szaza",
+    "name": "SzaZa",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0002045089_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://szaza.bandcamp.com",
+        "allReleaseTitles": [
+          "basensoundtrack",
+          "shorts",
+          "beforenoonbeforedustpaweszamburskipatrykzakrocki"
+        ],
+        "latestRelease": {
+          "title": "Basen soundtrack",
+          "type": "album",
+          "url": "https://szaza.bandcamp.com/album/basen-soundtrack",
+          "imageUrl": "https://f4.bcbits.com/img/a3514631983_2.jpg",
+          "releaseDate": "January 1, 2015"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=SzaZa"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+SzaZa"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3272791"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sza/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCO5IQ70V7l-XpHW40HwaGsw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/justsza"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-sza",
+    "name": "Sza",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sza/1617224",
+        "allReleaseTitles": [
+          "blackpantherthealbummusicfromandinspiredbyexplicitkendricklamar",
+          "sosdeluxelana",
+          "ctrldeluxe",
+          "girlgetupdoechii",
+          "sos",
+          "ctrl",
+          "persuasivedoechii",
+          "gooddays",
+          "hitdifferent",
+          "saturn",
+          "ihateu",
+          "snoozeacousticfeatjustinbieber",
+          "nolovecardibsummerwalker"
+        ],
+        "latestRelease": {
+          "title": "Sos Deluxe Lana Sza",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/sos-deluxe-lana-sza/h4gvv3ksw94ka",
+          "releaseDate": "2024-12-20"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sza"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sza"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3272791"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sza/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCO5IQ70V7l-XpHW40HwaGsw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/justsza"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-sza1",
+    "name": "Sza 1",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sza-1/18910303"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sza%201"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sza%201"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3272791"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sza/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCO5IQ70V7l-XpHW40HwaGsw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/justsza"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

@@ -1,0 +1,76 @@
+[
+  {
+    "id": "qobuz-christinamilian",
+    "name": "Christina Milian",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/christina-milian/71526",
+        "allReleaseTitles": [
+          "",
+          "dipitlow",
+          "itsabouttime",
+          "soamazin",
+          "amtopmremixes",
+          "rebel",
+          "sayi",
+          "yourstoryterrencegreen",
+          "weaintworried",
+          "doit",
+          "amtopm",
+          "saturdaychinzaflyremixdarko",
+          "saturdaydarkotrapremixdarko",
+          "saturdaydarko"
+        ],
+        "latestRelease": {
+          "title": "So Amazin Christina Milian",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/so-amazin-christina-milian/0060249878036",
+          "releaseDate": "2006-01-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Christina%20Milian"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Christina%20Milian"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.christinamilian.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/49187"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Christina%20Milian&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Christina%20Milian"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/christinamilian/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCbPkNEaVjdD6UpqktaD8WgQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ChristinaMilian"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

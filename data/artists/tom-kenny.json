@@ -1,0 +1,42 @@
+[
+  {
+    "id": "qobuz-tomkenny",
+    "name": "Tom Kenny",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/tom-kenny/259571",
+        "allReleaseTitles": [
+          "upallnightandrevealedrecordings",
+          "byyourself",
+          "comebackhomefeatmarcluwasted",
+          "dontstop",
+          "yourlovejordangracerimbano",
+          "compromise",
+          "septemberfeatkeepmysecrets",
+          "missyouagainrickfazzari"
+        ],
+        "latestRelease": {
+          "title": "Your Love Jordan Grace Rimbano Tom Kenny",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/your-love-jordan-grace-rimbano-tom-kenny/lir3fkz5dytmb",
+          "releaseDate": "2023-04-07"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tom%20Kenny"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tom%20Kenny"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

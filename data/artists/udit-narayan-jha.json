@@ -1,0 +1,70 @@
+[
+  {
+    "id": "qobuz-uditnarayanjha",
+    "name": "Udit Narayan Jha",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/udit-narayan-jha/1840480",
+        "allReleaseTitles": [
+          "nausayakholafattemanrajbhandaritaradevirubijoshi",
+          "kahabhetiyelaanjupantapiyani",
+          "merobhokharayosadhanasargam",
+          "epremasarigalaki",
+          "sararasararafrommanmamaya",
+          "megharemeghaananyasritamnanda",
+          "rupwatohargoribhadokeanjoriya",
+          "sathimatimrooriginalsoundtrack",
+          "timilaisunakharibhanerabolaukirachanagc",
+          "holilemerorangaayonayacholiombikrambistaprakashshresthadeepanarayanjhapoornimashrestha",
+          "kinakinameromamn",
+          "isharalenabhujnefromsantandeepajha",
+          "katikheramannma",
+          "aankhabharisapanapremdhojpradhanrameshdhital",
+          "kematimrohoinaraanjupant",
+          "janmabhumioriginalmotionpicturesoundtracksadhanasargamabhijeetdeepajha",
+          "tapasyaoriginalmotionpicturesoundtracksadhanasargamkabitakrishnamurtiramamandal",
+          "kusumerumaloriginalmotionpicturesoundtrackdeepajhashrawanghimirebharatigajmer",
+          "behulioriginalmotionpicturesoundtrackdeepajha",
+          "chadaniko"
+        ],
+        "latestRelease": {
+          "title": "Sarara Sarara From Manma Maya Udit Narayan Jha",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/sarara-sarara-from-manma-maya-udit-narayan-jha/om942lv1wvtca",
+          "releaseDate": "2025-01-09"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Udit%20Narayan%20Jha"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Udit%20Narayan%20Jha"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/356612"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Udit%20Narayan%20Jha&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Udit%20Narayan%20Jha"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/UditnarayanOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

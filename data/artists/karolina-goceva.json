@@ -1,0 +1,49 @@
+[
+  {
+    "id": "qobuz-karolinagoceva",
+    "name": "Karolina Goceva",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/karolina-goceva/2681487",
+        "allReleaseTitles": [
+          "izvor",
+          "pesnizaljubovikopnez",
+          "tribojezvuka",
+          "tisimojmac2023vladimirdanilovic",
+          "hipokrit",
+          "feniks",
+          "krvdanisestorifeatpijanslavejdukebojadziev",
+          "dajnasunce",
+          "",
+          "tisimoj",
+          "mogzivotadioxvisesenevracas",
+          "srescemoseopet",
+          "mogzivotadio",
+          "visesenevracas",
+          "kraj"
+        ],
+        "latestRelease": {
+          "title": "Hipokrit Karolina Goceva",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/hipokrit-karolina-goceva/obq90jyp9262a",
+          "releaseDate": "2025-05-12"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Karolina%20Goceva"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Karolina%20Goceva"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

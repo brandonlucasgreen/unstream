@@ -1,0 +1,63 @@
+[
+  {
+    "id": "qobuz-jakezyrus",
+    "name": "Jake Zyrus",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jake-zyrus/3200318",
+        "allReleaseTitles": [
+          "evolution",
+          "roots",
+          "hiling",
+          "loveevenif",
+          "fixme",
+          "dnm",
+          "diamond",
+          "illbethere",
+          "missyouinthemoonlight"
+        ],
+        "latestRelease": {
+          "title": "Roots Jake Zyrus",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/roots-jake-zyrus/nvd92vtc39sqc",
+          "releaseDate": "2025-11-21"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jake%20Zyrus"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jake%20Zyrus"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.charicemusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/10677061"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jakezyrusmusic/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCW1HoanLHp1ZtT2FB5fIF0A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/teamjakezyrus"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

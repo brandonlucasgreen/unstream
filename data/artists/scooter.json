@@ -1,0 +1,503 @@
+[
+  {
+    "id": "meanmotorscooter",
+    "name": "Mean Motor Scooter",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0029487059_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://meanmotorscootersounds.bandcamp.com",
+        "allReleaseTitles": [
+          "mrsophistication",
+          "tvbaby",
+          "hinduflyingmachine",
+          "nakedbrunchsuchaseducer"
+        ],
+        "latestRelease": {
+          "title": "Mr. Sophistication",
+          "type": "album",
+          "url": "https://meanmotorscootersounds.bandcamp.com/album/mr-sophistication",
+          "imageUrl": "https://f4.bcbits.com/img/a3606723598_16.jpg",
+          "releaseDate": "May 1, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mean%20Motor%20Scooter"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mean%20Motor%20Scooter"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://scootertechno.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/11769"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Mean%20Motor%20Scooter&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Mean%20Motor%20Scooter"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://www.instagram.com/scooterofficial"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/search?q=scooter%20official&#038;t=1686907519170"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/scooter"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/scooterofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "scooterrogers",
+    "name": "Scooter Rogers",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020374117_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://scooterrogers.bandcamp.com",
+        "allReleaseTitles": [
+          "joy2theworld",
+          "makinachangefeatprolificandmikebars",
+          "joy"
+        ],
+        "latestRelease": {
+          "title": "J.O.Y. 2: The World",
+          "type": "album",
+          "url": "https://scooterrogers.bandcamp.com/album/j-o-y-2-the-world",
+          "imageUrl": "https://f4.bcbits.com/img/a1206189692_2.jpg",
+          "releaseDate": "January 28, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Scooter%20Rogers"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Scooter%20Rogers"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://scootertechno.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/11769"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Scooter%20Rogers&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Scooter%20Rogers"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://www.instagram.com/scooterofficial"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/search?q=scooter%20official&#038;t=1686907519170"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/scooter"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/scooterofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "scooterjay",
+    "name": "Scooter Jay",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036979589_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://scooterjay.bandcamp.com",
+        "latestRelease": {
+          "title": "Blues Ocean Event",
+          "type": "album",
+          "url": "https://scooterjay.bandcamp.com/album/blues-ocean-event",
+          "imageUrl": "https://f4.bcbits.com/img/a0788602559_16.jpg",
+          "releaseDate": "October 23, 2025"
+        },
+        "allReleaseTitles": [
+          "bluesoceanevent",
+          "punkfloydandthemoralfaggots",
+          "jaywalking",
+          "whokilledscooterjay"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Scooter%20Jay"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Scooter%20Jay"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://scootertechno.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/11769"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Scooter%20Jay&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Scooter%20Jay"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://www.instagram.com/scooterofficial"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/search?q=scooter%20official&#038;t=1686907519170"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/scooter"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/scooterofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "scooterbrown",
+    "name": "Scooter Brown",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022926567_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://scooterbrown.bandcamp.com",
+        "allReleaseTitles": [
+          "thelovebelowrevisited",
+          "goodnewsvol1",
+          "acknowledgement",
+          "thachristmastape",
+          "sentiment",
+          "match",
+          "snoopysinterludemajordjustment"
+        ],
+        "latestRelease": {
+          "title": "The Love Below (Revisited)",
+          "type": "album",
+          "url": "https://scooterbrown.bandcamp.com/album/the-love-below-revisited",
+          "imageUrl": "https://f4.bcbits.com/img/a2380965521_2.jpg",
+          "releaseDate": "September 23, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Scooter%20Brown"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Scooter%20Brown"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://scootertechno.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/11769"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Scooter%20Brown&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Scooter%20Brown"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://www.instagram.com/scooterofficial"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/search?q=scooter%20official&#038;t=1686907519170"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/scooter"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/scooterofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "funkscooter",
+    "name": "FunkScooter",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0009957605_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://funkscooter.bandcamp.com",
+        "allReleaseTitles": [
+          "sunsetnnightfunkscooter",
+          "birthofalllifefunkscooter",
+          "stayinthegroovefunkscooter",
+          "weovercome",
+          "eworldselectedtracksfunkscooter"
+        ],
+        "latestRelease": {
+          "title": "Sunset n Night\n                \n                \n\n                funk scooter",
+          "type": "album",
+          "url": "https://funkscooter.bandcamp.com/album/sunset-n-night",
+          "imageUrl": "https://f4.bcbits.com/img/a0109218032_2.jpg",
+          "releaseDate": "January 2, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=FunkScooter"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+FunkScooter"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://scootertechno.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/11769"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=FunkScooter&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/FunkScooter"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://www.instagram.com/scooterofficial"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/search?q=scooter%20official&#038;t=1686907519170"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/scooter"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/scooterofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "murderbyscooter",
+    "name": "Murder By Scooter",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0000918715_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://murderbyscooter.bandcamp.com",
+        "latestRelease": {
+          "title": "Overzealous!",
+          "type": "album",
+          "url": "https://murderbyscooter.bandcamp.com/album/overzealous",
+          "imageUrl": "https://f4.bcbits.com/img/a1568704090_2.jpg",
+          "releaseDate": "May 11, 2013"
+        },
+        "allReleaseTitles": [
+          "overzealous",
+          "sallyssong",
+          "missiletoast2songsforchristmas"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Murder%20By%20Scooter"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Murder%20By%20Scooter"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://scootertechno.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/11769"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Murder%20By%20Scooter&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Murder%20By%20Scooter"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://www.instagram.com/scooterofficial"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/search?q=scooter%20official&#038;t=1686907519170"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/scooter"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/scooterofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-scooter",
+    "name": "Scooter",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/scooter/50279",
+        "allReleaseTitles": [
+          "luvumorepaulelstakjoost",
+          "openyourmindandyourtrousers",
+          "heartattackxblasterjaxxxceres",
+          "gimmethatnoiseharrisfordshibui",
+          "hyperhypergiuseppeottaviani",
+          "forthoseabouttoravetimmytrumpet",
+          "technoisbackharrisford",
+          "neverbelonelyjaxjones",
+          "berlinerluft",
+          "ikeephearingbingo",
+          "stufftheturkey",
+          "letsdoitagain",
+          "forthoseabouttorave",
+          "raveshoutharrisford",
+          "constellations"
+        ],
+        "latestRelease": {
+          "title": "Luv U More Scooter Paul Elstak Joost",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/luv-u-more-scooter-paul-elstak-joost/j0iqo3kaqpdhb",
+          "releaseDate": "2025-08-08"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Scooter"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Scooter"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://scootertechno.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/11769"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Scooter&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Scooter"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://www.instagram.com/scooterofficial"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/search?q=scooter%20official&#038;t=1686907519170"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/scooter"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/scooterofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

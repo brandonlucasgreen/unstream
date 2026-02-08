@@ -1,0 +1,47 @@
+[
+  {
+    "id": "qobuz-jeromekern",
+    "name": "Jerome Kern",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jerome-kern/977",
+        "latestRelease": {
+          "title": "Jerome Kern All The Things You Are Amy Harman And Tom Poster",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/jerome-kern-all-the-things-you-are-amy-harman-and-tom-poster/y8x0pyjlq302a",
+          "releaseDate": "2026-01-09"
+        },
+        "allReleaseTitles": [
+          "allthethingsyouareamyharmanandtomposter"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jerome%20Kern"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jerome%20Kern"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/166685"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jerome%20Kern&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jerome%20Kern"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

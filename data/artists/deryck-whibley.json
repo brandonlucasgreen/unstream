@@ -1,0 +1,38 @@
+[
+  {
+    "id": "qobuz-standalone-deryckwhibley",
+    "name": "Deryck Whibley",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/deryck-whibley/222269"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Deryck%20Whibley"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Deryck%20Whibley"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://deryckwhibley.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/517029"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/deryckwhibley/"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

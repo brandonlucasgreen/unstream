@@ -1,0 +1,241 @@
+[
+  {
+    "id": "napalmdeath",
+    "name": "Napalm Death",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0001822057_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/napalm-death/556081",
+        "allReleaseTitles": [
+          "resentmentisalwaysseismicafinalthrowofthroes",
+          "logicravagedbybruteforce",
+          "utopiabanished",
+          "harmonycorruption",
+          "fearemptinessdepair",
+          "smearcampaign",
+          "timewaitsfornoslave",
+          "scum",
+          "utilitarian",
+          "throesofjoyinthejawsofdefeatism",
+          "apexpredatoreasymeat",
+          "noiseformusicssake",
+          "diatribes",
+          "wordsfromtheexitwound",
+          "thecodeisredlonglivethecode",
+          "codedsmearsandmoreuncommonslurs",
+          "punishmentincapitals",
+          "orderoftheleech",
+          "deathbymanipulation"
+        ],
+        "latestRelease": {
+          "title": "Resentment Is Always Seismic A Final Throw Of Throes Napalm Death",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/resentment-is-always-seismic-a-final-throw-of-throes-napalm-death/igdroluu86xta",
+          "releaseDate": "2022-02-11"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://napalm-death.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Napalm%20Death"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Napalm%20Death"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.napalmdeath.org/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/11614"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Napalm%20Death&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Napalm%20Death"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/theofficialnapalmdeath/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@official_napalmdeath"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCrgjtdl0Bnp-0CenQHqLadw"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@theofficialnapalmdeath"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialnapalmdeath"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "napalmdeath-bandcamp-napalmdeath",
+    "name": "Napalm Death",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0007302596_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://napalmdeath.bandcamp.com",
+        "allReleaseTitles": [
+          "liveatrockcity",
+          "theearachepeelsessions",
+          "thebestofnapalmdeath",
+          "noiseformusicssake",
+          "wordsfromtheexitwound",
+          "bootleggedinjapan",
+          "breedtobreathe",
+          "insidethetornapart",
+          "intongueswespeaknapalmdeathcoalesce",
+          "diatribes",
+          "greedkilling",
+          "fearemptinessdespair",
+          "theworldkeepsturningep",
+          "livecorruption",
+          "utopiabanishedremastered",
+          "utopiabanished"
+        ],
+        "latestRelease": {
+          "title": "Live at Rock City",
+          "type": "album",
+          "url": "https://napalmdeath.bandcamp.com/album/live-at-rock-city",
+          "imageUrl": "https://f4.bcbits.com/img/a3468816514_2.jpg",
+          "releaseDate": "April 25, 2019"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Napalm%20Death"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Napalm%20Death"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.napalmdeath.org/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/11614"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Napalm%20Death&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Napalm%20Death"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/theofficialnapalmdeath/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@official_napalmdeath"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCrgjtdl0Bnp-0CenQHqLadw"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@theofficialnapalmdeath"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialnapalmdeath"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "goatsoundnapalmdeathscumreinterpretationalbumvolume3",
+    "name": "Goatsound Napalm Death \"Scum\" Reinterpretation album Volume 3",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013367887_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://goatsoundnapalmdeathscumreinterpretationalbumvolume2.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Goatsound%20Napalm%20Death%20%22Scum%22%20Reinterpretation%20album%20Volume%203"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Goatsound%20Napalm%20Death%20%22Scum%22%20Reinterpretation%20album%20Volume%203"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.napalmdeath.org/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/11614"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Goatsound%20Napalm%20Death%20%22Scum%22%20Reinterpretation%20album%20Volume%203&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Goatsound%20Napalm%20Death%20%22Scum%22%20Reinterpretation%20album%20Volume%203"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/theofficialnapalmdeath/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@official_napalmdeath"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCrgjtdl0Bnp-0CenQHqLadw"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@theofficialnapalmdeath"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialnapalmdeath"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

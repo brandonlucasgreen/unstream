@@ -1,0 +1,105 @@
+[
+  {
+    "id": "aliciawitt",
+    "name": "Alicia Witt",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037849959_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://aliciawitt.bandcamp.com",
+        "allReleaseTitles": [
+          "ithinkimspendingchristmaswithyou",
+          "witness",
+          "theconduit",
+          "downshegoes",
+          "chasingshadows",
+          "talktoyou",
+          "whychristmas",
+          "more",
+          "christmasmiracle",
+          "15000days",
+          "loveanyway",
+          "revisionaryhistory",
+          "santababy",
+          "fightingforcrumbs",
+          "imnotreadyforchristmas",
+          "imnotreadyforchristmasclean",
+          "liveatrockwood",
+          "aliciawittep"
+        ],
+        "latestRelease": {
+          "title": "I Think I’m Spending Christmas With You",
+          "type": "album",
+          "url": "https://aliciawitt.bandcamp.com/album/i-think-i-m-spending-christmas-with-you",
+          "imageUrl": "https://f4.bcbits.com/img/a1716753643_2.jpg",
+          "releaseDate": "November 8, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/alicia-witt/2879073",
+        "allReleaseTitles": [
+          "ithinkimspendingchristmaswithyou",
+          "picture",
+          "theconduit",
+          "witness",
+          "revisionaryhistory",
+          "15000days",
+          "christmasmiracle",
+          "liveatrockwood",
+          "changeyourplans",
+          "satellite",
+          "clevermind",
+          "imnotreadyforchristmas",
+          "someonetowritemeasong",
+          "imnotreadyforchristmasclean",
+          "more",
+          "talktoyou",
+          "doit",
+          "downshegoes",
+          "chasingshadows",
+          "younger"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Alicia%20Witt"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Alicia%20Witt"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "benfoldsaliciawitt",
+    "name": "Ben Folds & Alicia Witt",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a0314263698_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://benfoldsaliciawitt.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ben%20Folds%20%26%20Alicia%20Witt"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ben%20Folds%20%26%20Alicia%20Witt"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

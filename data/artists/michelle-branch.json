@@ -1,0 +1,73 @@
+[
+  {
+    "id": "qobuz-michellebranch",
+    "name": "Michelle Branch",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/michelle-branch/239008",
+        "allReleaseTitles": [
+          "thespiritroom20thanniversaryedition",
+          "hopelessromantic",
+          "thetroublewithfever",
+          "hotelpaper",
+          "thespiritroom",
+          "theloudmusichitsep",
+          "everythingcomesandgoes",
+          "breathe",
+          "imaman",
+          "yougetme20thanniversaryedition",
+          "sweetmisery20thanniversaryedition"
+        ],
+        "latestRelease": {
+          "title": "The Trouble With Fever Michelle Branch",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-trouble-with-fever-michelle-branch/nwqelahews7oa",
+          "releaseDate": "2022-09-16"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Michelle%20Branch"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Michelle%20Branch"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.michellebranch.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/142529"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Michelle%20Branch&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Michelle%20Branch"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/michellebranch/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/michellebranchtv"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/michellebranch"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

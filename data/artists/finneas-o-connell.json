@@ -1,0 +1,90 @@
+[
+  {
+    "id": "qobuz-finneasoconnell",
+    "name": "Finneas O Connell",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/finneas-o-connell/2867336",
+        "allReleaseTitles": [
+          "disclaimer",
+          "turningred4townfromdisneyandpixarsturningredludwiggoransson",
+          "thefalloutoriginalmotionpicturesoundtrack",
+          "vengeanceoriginalmotionpicturesoundtrack",
+          "sadaintbadblueminder",
+          "nobodylikeu4townfromdisneyandpixarsturningredgraysonvillanuevajordanfisherjoshlevitopherngo",
+          "fistscallofdutyrmodernwarfareiigunfightmusicoriginalgamesoundtrackdavidmarinelli",
+          "vengeance"
+        ],
+        "latestRelease": {
+          "title": "Disclaimer Finneas Oconnell",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/disclaimer-finneas-oconnell/dwuez6r51zrbc",
+          "releaseDate": "2024-11-08"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Finneas%20O%20Connell"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Finneas%20O%20Connell"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-finneasoconnell3",
+    "name": "Finneas Oconnell 3",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/finneas-oconnell-3/13210764"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Finneas%20Oconnell%203"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Finneas%20Oconnell%203"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-finneasoconnel",
+    "name": "Finneas Oconnel",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/finneas-oconnel/6755260"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Finneas%20Oconnel"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Finneas%20Oconnel"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

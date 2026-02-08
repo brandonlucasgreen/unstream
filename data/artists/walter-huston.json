@@ -1,0 +1,47 @@
+[
+  {
+    "id": "qobuz-walterhuston",
+    "name": "Walter Huston",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/walter-huston/142632",
+        "allReleaseTitles": [
+          "babbittbysinclairlewis"
+        ],
+        "latestRelease": {
+          "title": "Babbitt By Sinclair Lewis Walter Huston",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/babbitt-by-sinclair-lewis-walter-huston/mq443hklqfx0a",
+          "releaseDate": "2010-04-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Walter%20Huston"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Walter%20Huston"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/651405"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Walter%20Huston&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Walter%20Huston"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

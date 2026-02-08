@@ -1,0 +1,37 @@
+[
+  {
+    "id": "qobuz-marielaforet",
+    "name": "Marie Laforet",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/marie-laforet/40122",
+        "allReleaseTitles": [
+          "sainttropezblues",
+          "lesvendangesdelamour",
+          "tumbleweed"
+        ],
+        "latestRelease": {
+          "title": "Saint Tropez Blues Marie Laforet",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/saint-tropez-blues-marie-laforet/n01nmhlegdqcb",
+          "releaseDate": "2023-05-22"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Marie%20Laforet"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Marie%20Laforet"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

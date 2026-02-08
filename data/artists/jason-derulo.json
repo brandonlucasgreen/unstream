@@ -1,0 +1,75 @@
+[
+  {
+    "id": "qobuz-jasonderulo",
+    "name": "Jason Derulo",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jason-derulo/296908",
+        "allReleaseTitles": [
+          "platinumhits",
+          "acapulco",
+          "takeyoudancing",
+          "swallafeatnickiminajtydollaign",
+          "spicymargaritafeatmariabecerramichaelbuble",
+          "spicymargaritamichaelbuble",
+          "gladucame",
+          "tonightdiyajaxjonesjoelcorry",
+          "everythingis4",
+          "jalebibabytesher",
+          "fromtheislandskompapasionfrozytomo",
+          "whenlovesucksfeatdido",
+          "morningwithgalantischeatcodesdelaghetto",
+          "colorsmaluma",
+          "whenlovesucksfeatdidospedupnightcore",
+          "jalebibabytesherdallask",
+          "spicymargaritaa7sremixmichaelbuble"
+        ],
+        "latestRelease": {
+          "title": "Acapulco Jason Derulo",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/acapulco-jason-derulo/v5e7mwtdt8iga",
+          "releaseDate": "2021-09-03"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jason%20Derulo"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jason%20Derulo"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.jasonderulo.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1178339"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jasonderulo/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@jasonderulo"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCA7oqkXUZIlT8QXhxaIR4RA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/jasonderulo"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

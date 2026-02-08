@@ -1,0 +1,40 @@
+[
+  {
+    "id": "dominicwest",
+    "name": "dominic_west",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/dominicwest-10003330295/3330295",
+        "allReleaseTitles": [
+          "reminiscence",
+          "cartasparaeharryshearermaisjovensdominicwest"
+        ],
+        "latestRelease": {
+          "title": "Reminiscence Dominic West",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/reminiscence-dominic-west/ta8jkg5m6t9sa",
+          "releaseDate": "2024-06-06"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bandcamp.com/dominic_west"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=dominic_west"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+dominic_west"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

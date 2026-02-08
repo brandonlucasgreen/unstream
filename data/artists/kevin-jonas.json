@@ -1,0 +1,39 @@
+[
+  {
+    "id": "qobuz-kevinjonas",
+    "name": "Kevin Jonas",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/kevin-jonas/327873",
+        "allReleaseTitles": [
+          "greetingsfromyourhometownjoejonasjonasbrothersnickjonas",
+          "notimetotalkjoejonasjonasbrothersnickjonas",
+          "icantlosejoejonasjonasbrothersnickjonas",
+          "livefromtheo2londonjoejonasjonasbrothersnickjonas",
+          "changing"
+        ],
+        "latestRelease": {
+          "title": "Greetings From Your Hometown Joe Jonas Jonas Brothers Kevin Jonas Nick Jonas",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/greetings-from-your-hometown-joe-jonas-jonas-brothers-kevin-jonas-nick-jonas/nnetx7dzxz8na",
+          "releaseDate": "2025-08-08"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kevin%20Jonas"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kevin%20Jonas"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

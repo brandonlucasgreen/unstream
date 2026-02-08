@@ -1,0 +1,162 @@
+[
+  {
+    "id": "hyunayouna",
+    "name": "HyunA YouNa",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3424741910_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://hyunayouna.bandcamp.com",
+        "allReleaseTitles": [
+          "heartshakerhyunayouna",
+          "heartshakerhyunayounainst"
+        ],
+        "latestRelease": {
+          "title": "Heart Shaker - HyunA YouNa",
+          "type": "track",
+          "url": "https://hyunayouna.bandcamp.com/track/heart-shaker-hyuna-youna",
+          "imageUrl": "https://f4.bcbits.com/img/a3424741910_16.jpg",
+          "releaseDate": "January 13, 2018"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=HyunA%20YouNa"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+HyunA%20YouNa"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2481199"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/hyunah_aa/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC0uTcuuOtUFwtn9aKUVGjXg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/hyunaofficial.pnation"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-hyuna",
+    "name": "Hyuna",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/hyuna/1055384",
+        "allReleaseTitles": [
+          "nabillera",
+          "liphip",
+          "bubblepop",
+          "mrsnail",
+          "attitude",
+          "imnotcool",
+          "atalk",
+          "awesome",
+          "a",
+          "following",
+          "change",
+          "melting",
+          "flowershower",
+          "2016unitedcubeprojectpart1janghyunseungbtobrohjihoonclcpentagon",
+          "onejokwonbtobclcpentagonyooseonhogidle",
+          "originaltelevisionsoundtrackjacob",
+          "abitterday",
+          "2012sbsgayodaejeonthecolorofkpopdazzlingredthispersonhyolynjunhyoseongnicolenana",
+          "loveparadeparkyunhwa"
+        ],
+        "latestRelease": {
+          "title": "Mrs Nail Hyuna",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/mrs-nail-hyuna/f2376ua676xvb",
+          "releaseDate": "2025-04-30"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Hyuna"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Hyuna"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2481199"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/hyunah_aa/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC0uTcuuOtUFwtn9aKUVGjXg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/hyunaofficial.pnation"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "hyunapark",
+    "name": "Hyuna Park",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0015873708_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://groovyhyuna.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Hyuna%20Park"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Hyuna%20Park"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2481199"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/hyunah_aa/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC0uTcuuOtUFwtn9aKUVGjXg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/hyunaofficial.pnation"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

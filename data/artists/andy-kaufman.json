@@ -1,0 +1,35 @@
+[
+  {
+    "id": "qobuz-andykaufman",
+    "name": "Andy Kaufman",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/andy-kaufman/434455",
+        "allReleaseTitles": [
+          "liliebirdloveabysarakaufman"
+        ],
+        "latestRelease": {
+          "title": "Lilie Bird Love A By Andy Kaufman Sara Kaufman",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/lilie-bird-love-a-by-andy-kaufman-sara-kaufman/eicx0vegiafzb",
+          "releaseDate": "2022-12-25"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Andy%20Kaufman"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Andy%20Kaufman"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,113 @@
+[
+  {
+    "id": "thejohnpauljones",
+    "name": "The John/Paul Jones",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a0668602195_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thejohnpauljones.bandcamp.com",
+        "allReleaseTitles": [
+          "untitleddemosthusfar",
+          "wintertimesingle",
+          "creepysouvenir"
+        ],
+        "latestRelease": {
+          "title": "Untitled (demos thus far)",
+          "type": "album",
+          "url": "https://thejohnpauljones.bandcamp.com/album/untitled-demos-thus-far",
+          "imageUrl": "https://f4.bcbits.com/img/a0668602195_2.jpg",
+          "releaseDate": "July 31, 2013"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20John%2FPaul%20Jones"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20John%2FPaul%20Jones"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-johnpauljones",
+    "name": "John Paul Jones",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/john-paul-jones/11479",
+        "allReleaseTitles": [
+          "zooma",
+          "",
+          "theverybestofjimmypageandjohnbonhamjimmypagejohnbonham",
+          "beginningajourneywithjesuschrist",
+          "thinkitoverepjimmypage",
+          "shinyeyes",
+          "weofferforyouepsusannahelgesten"
+        ],
+        "latestRelease": {
+          "title": "Zooma John Paul Jones",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/zooma-john-paul-jones/ns20z5ya6u3mc",
+          "releaseDate": "2014-02-26"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=John%20Paul%20Jones"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+John%20Paul%20Jones"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-johnpauljones3",
+    "name": "John Paul Jones 3",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/john-paul-jones-3/6282566",
+        "allReleaseTitles": [
+          "altrockanthemsandpatrickmurdoch",
+          "brighttimesandtomgarradcole",
+          "madeinnashvilleandrewnicholasloveand"
+        ],
+        "latestRelease": {
+          "title": "Made In Nashville Andrew Nicholas Love And John Paul Jones",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/made-in-nashville-andrew-nicholas-love-and-john-paul-jones/e8q4fd99798ia",
+          "releaseDate": "2016-11-04"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=John%20Paul%20Jones%203"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+John%20Paul%20Jones%203"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

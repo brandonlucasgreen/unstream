@@ -1,0 +1,38 @@
+[
+  {
+    "id": "qobuz-juneallyson",
+    "name": "June Allyson",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/june-allyson/227373",
+        "allReleaseTitles": [
+          "thevintageradioshows",
+          "thouswellmedley",
+          "justimaginemedley",
+          "goodnewsmedley"
+        ],
+        "latestRelease": {
+          "title": "Thou Swell Medley June Allyson",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/thou-swell-medley-june-allyson/hm7f2vd8k1j1a",
+          "releaseDate": "2021-11-26"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=June%20Allyson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+June%20Allyson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

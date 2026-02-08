@@ -1,0 +1,52 @@
+[
+  {
+    "id": "qobuz-nayarivera",
+    "name": "Naya Rivera",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/naya-rivera/1327091",
+        "allReleaseTitles": [
+          "prayerforthebrokenwithfriendsfromglee",
+          "sorryfeatbigsean"
+        ],
+        "latestRelease": {
+          "title": "Prayer For The Broken With Friends From Glee Naya Rivera",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/prayer-for-the-broken-with-friends-from-glee-naya-rivera/d39w2oqqvahvb",
+          "releaseDate": "2023-12-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Naya%20Rivera"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Naya%20Rivera"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.nayarivera.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1831666"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/nayarivera/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Naya"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

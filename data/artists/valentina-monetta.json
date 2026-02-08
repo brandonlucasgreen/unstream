@@ -1,0 +1,55 @@
+[
+  {
+    "id": "qobuz-valentinamonetta",
+    "name": "Valentina Monetta",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/valentina-monetta/779364",
+        "allReleaseTitles": [
+          "sensibilitasensibility"
+        ],
+        "latestRelease": {
+          "title": "Sensibilita Sensibility Valentina Monetta",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/sensibilita-sensibility-valentina-monetta/0886444698757",
+          "releaseDate": "2014-07-11"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Valentina%20Monetta"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Valentina%20Monetta"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.valentinamonetta.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2670616"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/valentinamonettaofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/ValentinaMonetta"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/valentinamonettaofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,71 @@
+[
+  {
+    "id": "qobuz-skylargrey",
+    "name": "Skylar Grey",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/skylar-grey/551307",
+        "allReleaseTitles": [
+          "nirvana",
+          "fromtheashesillenium",
+          "makemeforgetaudienx",
+          "motivation",
+          "soberyoumakemewannabe",
+          "fuckingcrazyremixvanicand",
+          "walkingonfireth3rdstream",
+          "roomforhappinessv3kaskadeand",
+          "standbyme",
+          "",
+          "numbtommeeprofitt",
+          "gloriouspt2",
+          "darkthoughts",
+          "cannonballxambassadors",
+          "invisible",
+          "theburiedsessionsof",
+          "maitaistrain"
+        ],
+        "latestRelease": {
+          "title": "Motivation Skylar Grey",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/motivation-skylar-grey/iwa8iioegqwjj",
+          "releaseDate": "2026-01-16"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Skylar%20Grey"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Skylar%20Grey"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.hollybrookmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2044778"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/SkylarGrey/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC8YY0LE8bFu4aMCXGjz027A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/SkylarGrey"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

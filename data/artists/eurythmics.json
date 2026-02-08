@@ -1,0 +1,129 @@
+[
+  {
+    "id": "qobuz-eurythmics",
+    "name": "Eurythmics",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/eurythmics/158318",
+        "allReleaseTitles": [
+          "sweetdreamsannielennoxdavestewart",
+          "beyourselftonightannielennoxdavestewart",
+          "touchannielennoxdavestewart",
+          "revengeannielennoxdavestewart",
+          "peace2018remasteredannielennoxdavestewart",
+          "wetooareoneannielennoxdavestewart",
+          "inthegarden2018remasteredannielennoxdavestewart",
+          "savageannielennoxdavestewart",
+          "ultimatecollectionannielennoxdavestewart",
+          "greatesthitsannielennoxdavestewart",
+          "live19831989annielennoxdavestewart",
+          "sweetdreamsaremadeofthisannielennoxdavestewart",
+          "ivegotalifesweetdreamsremixannielennoxdavestewart",
+          "touchdanceannielennoxdavestewart",
+          "touchreissuedeluxeeditionannielennoxdavestewart"
+        ],
+        "latestRelease": {
+          "title": "Revenge Eurythmics Annie Lennox Dave Stewart",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/revenge-eurythmics-annie-lennox-dave-stewart/l7fsqxhl2dilc",
+          "releaseDate": "2018-07-06"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Eurythmics"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Eurythmics"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.eurythmics.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/13911"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Eurythmics&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Eurythmics"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/eurythmicsmusic/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/Eurythmicstv"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/eurythmics"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-eurythmics4",
+    "name": "Eurythmics 4",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/eurythmics-4/21508466"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Eurythmics%204"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Eurythmics%204"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.eurythmics.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/13911"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Eurythmics%204&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Eurythmics%204"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/eurythmicsmusic/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/Eurythmicstv"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/eurythmics"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

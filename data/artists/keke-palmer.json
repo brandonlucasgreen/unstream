@@ -1,0 +1,68 @@
+[
+  {
+    "id": "kekepalmer",
+    "name": "Keke Palmer",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0015345429_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kekepalmerr.bandcamp.com",
+        "allReleaseTitles": [
+          "awakenreloaded",
+          "kekepalmer"
+        ],
+        "latestRelease": {
+          "title": "Awaken: Reloaded",
+          "type": "album",
+          "url": "https://kekepalmerr.bandcamp.com/album/awaken-reloaded",
+          "imageUrl": "https://f4.bcbits.com/img/a0532957809_16.jpg",
+          "releaseDate": "January 22, 2019"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/keke-palmer/513098",
+        "latestRelease": {
+          "title": "Christmas Kisses Adam Blackstone Keke Palmer",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/christmas-kisses-adam-blackstone-keke-palmer/gzblsw9qypohc",
+          "releaseDate": "2023-11-03"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Keke%20Palmer"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Keke%20Palmer"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://kekepalmer.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1642599"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/keke/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCG7azEZJY5PCsjcUCOdvOPw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/kekepalmer"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,61 @@
+[
+  {
+    "id": "qobuz-sezenaksu",
+    "name": "Sezen Aksu",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sezen-aksu/129589",
+        "allReleaseTitles": [
+          "birvurgunbusevda",
+          "bircocuksevdimmengene",
+          "begonvil",
+          "kucukbiraskmasaliozdemirerdogan",
+          "benannemiisterimatillauraland",
+          "yavrucanimsertaberener",
+          "lescontesdhoffmannbarcarollearrbybulentyazicibulentyazicienderbilge",
+          "ninni",
+          "denizvemehtaplesmouettesdemykonosbulentyazicienderbilgeguneygencolozgurdeveci",
+          "ihtimalki",
+          "heyamolaalikocatepecoskundemir"
+        ],
+        "latestRelease": {
+          "title": "Bir Cocuk Sevdim Mengene Sezen Aksu",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/bir-cocuk-sevdim-mengene-sezen-aksu/kahzuhxysyqtc",
+          "releaseDate": "2025-01-31"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sezen%20Aksu"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sezen%20Aksu"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sezenaksu.com.tr/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/97253"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sezen%20Aksu&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sezen%20Aksu"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

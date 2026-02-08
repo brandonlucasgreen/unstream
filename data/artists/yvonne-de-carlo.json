@@ -1,0 +1,36 @@
+[
+  {
+    "id": "qobuz-yvonnedecarlo",
+    "name": "Yvonne De Carlo",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/yvonne-de-carlo/62265",
+        "latestRelease": {
+          "title": "Essential Masters Yvonne De Carlo",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/essential-masters-yvonne-de-carlo/h93zi6pd6jstc",
+          "releaseDate": "2012-07-01"
+        },
+        "allReleaseTitles": [
+          "essentialmasters",
+          "sings1957"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Yvonne%20De%20Carlo"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Yvonne%20De%20Carlo"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

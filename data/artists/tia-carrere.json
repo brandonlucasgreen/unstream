@@ -1,0 +1,95 @@
+[
+  {
+    "id": "tiacarrera",
+    "name": "Tia Carrera",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0009800439_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tiacarrera.bandcamp.com",
+        "allReleaseTitles": [
+          "viralsessions",
+          "laidbackfrontsiderocknroll"
+        ],
+        "latestRelease": {
+          "title": "Viral Sessions",
+          "type": "album",
+          "url": "https://tiacarrera.bandcamp.com/album/viral-sessions",
+          "imageUrl": "https://f4.bcbits.com/img/a2327747991_16.jpg",
+          "releaseDate": "February 5, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tia%20Carrera"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tia%20Carrera"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-tiacarrere",
+    "name": "Tia Carrere",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/tia-carrere/307315",
+        "allReleaseTitles": [
+          "imstillhere"
+        ],
+        "latestRelease": {
+          "title": "Im Still Here Tia Carrere",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/im-still-here-tia-carrere/q5n7ivqlmf0tb",
+          "releaseDate": "2023-02-24"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tia%20Carrere"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tia%20Carrere"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.tiacarrere.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/63364"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Tia%20Carrere&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Tia%20Carrere"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/tiacarrere/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/tiacarrere/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

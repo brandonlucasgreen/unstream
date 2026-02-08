@@ -1,0 +1,30 @@
+[
+  {
+    "id": "qobuz-standalone-salvatorrosa",
+    "name": "Salvator Rosa",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/salvator-rosa/737252"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Salvator%20Rosa"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Salvator%20Rosa"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2361743"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

@@ -1,0 +1,51 @@
+[
+  {
+    "id": "phillamarre",
+    "name": "Phil Lamarre",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0016617733_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bandcamp.com/wick1977"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Phil%20Lamarre"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Phil%20Lamarre"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.phillamarr.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5715076"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/phillamarr/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@phillamarr"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://youtu.be/9DUfFHaUpxg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/phillamarr1"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

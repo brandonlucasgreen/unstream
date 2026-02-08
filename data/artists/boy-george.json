@@ -1,0 +1,141 @@
+[
+  {
+    "id": "noirboygeorge",
+    "name": "noir boy george",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0003578632_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://noirboygeorge.bandcamp.com",
+        "allReleaseTitles": [
+          "gloireasatan",
+          "noirboygeorgemaxi45t",
+          "methadonemixtape",
+          "metznoire"
+        ],
+        "latestRelease": {
+          "title": "gloire à satan",
+          "type": "album",
+          "url": "https://noirboygeorge.bandcamp.com/album/gloire-satan",
+          "imageUrl": "https://f4.bcbits.com/img/a0701234362_16.jpg",
+          "releaseDate": "June 23, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=noir%20boy%20george"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+noir%20boy%20george"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "rudeboygeorge",
+    "name": "Rude Boy George",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020286798_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rudeboygeorge.bandcamp.com",
+        "allReleaseTitles": [
+          "liesandalibisep",
+          "lovemywayep",
+          "loveanddancing",
+          "confessions",
+          "takeone"
+        ],
+        "latestRelease": {
+          "title": "Lies and Alibis EP",
+          "type": "album",
+          "url": "https://rudeboygeorge.bandcamp.com/album/lies-and-alibis-ep",
+          "imageUrl": "https://f4.bcbits.com/img/a0954262880_2.jpg",
+          "releaseDate": "June 16, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rude%20Boy%20George"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rude%20Boy%20George"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "boygeorge",
+    "name": "Boy George",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025722737_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://boygeorge.bandcamp.com",
+        "allReleaseTitles": [
+          "swoonbestthingsinceslicedbread",
+          "goodintentions",
+          "clouds",
+          "isolation"
+        ],
+        "latestRelease": {
+          "title": "Swoon/Best Thing Since Sliced Bread",
+          "type": "album",
+          "url": "https://boygeorge.bandcamp.com/album/swoon-best-thing-since-sliced-bread",
+          "imageUrl": "https://f4.bcbits.com/img/a3282948680_16.jpg",
+          "releaseDate": "August 6, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Boy%20George"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Boy%20George"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-boygeorge",
+    "name": "Boy George",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/boy-george/45971"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Boy%20George"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Boy%20George"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

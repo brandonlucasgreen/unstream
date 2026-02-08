@@ -1,0 +1,552 @@
+[
+  {
+    "id": "boissondivine",
+    "name": "boisson divine",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030512134_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://boissondivine.bandcamp.com",
+        "allReleaseTitles": [
+          "lahalhaboissondivine",
+          "volentat",
+          "enradigats",
+          "centcopsdebastou",
+          "lahilhedoucure"
+        ],
+        "latestRelease": {
+          "title": "La Halha\n                \n                \n\n                Boisson Divine",
+          "type": "album",
+          "url": "https://boissondivine.bandcamp.com/album/la-halha",
+          "imageUrl": "https://f4.bcbits.com/img/a3964968451_2.jpg",
+          "releaseDate": "May 27, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=boisson%20divine"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+boisson%20divine"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "thesheiladivine",
+    "name": "The Sheila Divine",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018148250_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thesheiladivine.bandcamp.com",
+        "allReleaseTitles": [
+          "kimdealornodeal",
+          "iamthedarknesswearethelight",
+          "whathaveibecome",
+          "darkaction",
+          "nothingtoescape",
+          "undone",
+          "iamtherapture",
+          "rivalryreadythebravesingle",
+          "truthinthegutter",
+          "lordofthesea",
+          "danger",
+          "dontsayit",
+          "whatswrongtheworld",
+          "replaced",
+          "santaclausiscomingtotown",
+          "littledevil"
+        ],
+        "latestRelease": {
+          "title": "Kim Deal or No Deal",
+          "type": "track",
+          "url": "https://thesheiladivine.bandcamp.com/track/kim-deal-or-no-deal",
+          "imageUrl": "https://f4.bcbits.com/img/a0417486834_2.jpg",
+          "releaseDate": "April 2, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Sheila%20Divine"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Sheila%20Divine"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "divineearth",
+    "name": "Divine Earth",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039579349_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://divineearth.bandcamp.com",
+        "allReleaseTitles": [
+          "lavender",
+          "morelightfeatprincessnokia",
+          "alignwithnaturesintelligence",
+          "highhaganremix",
+          "high",
+          "divineascension",
+          "affirmation"
+        ],
+        "latestRelease": {
+          "title": "LAVENDER",
+          "type": "album",
+          "url": "https://divineearth.bandcamp.com/album/lavender",
+          "imageUrl": "https://f4.bcbits.com/img/a3454796923_2.jpg",
+          "releaseDate": "August 22, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Divine%20Earth"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Divine%20Earth"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "chaosdivine",
+    "name": "Chaos Divine",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0021164410_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://chaosdivine.bandcamp.com",
+        "allReleaseTitles": [
+          "thelivingyears",
+          "hazard",
+          "thehumanconnectionliveatbadlands",
+          "legacies",
+          "falseflags",
+          "unspoken",
+          "collidingskies",
+          "soldiers",
+          "africaatributetototo",
+          "thehumanconnection",
+          "avalon",
+          "ratio"
+        ],
+        "latestRelease": {
+          "title": "The Living Years",
+          "type": "track",
+          "url": "https://chaosdivine.bandcamp.com/track/the-living-years",
+          "imageUrl": "https://f4.bcbits.com/img/a0025180833_2.jpg",
+          "releaseDate": "January 7, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Chaos%20Divine"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Chaos%20Divine"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "divinechaos",
+    "name": "DIVINE CHAOS",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018413021_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://divinechaos.bandcamp.com",
+        "allReleaseTitles": [
+          "oblivionunleashed",
+          "thewaytooblivion",
+          "upontheshrine",
+          "serpentswords",
+          "decivilise",
+          "anewdawnintheageofwar",
+          "everyempireshallfall"
+        ],
+        "latestRelease": {
+          "title": "OBLIVION UNLEASHED",
+          "type": "album",
+          "url": "https://divinechaos.bandcamp.com/album/oblivion-unleashed",
+          "imageUrl": "https://f4.bcbits.com/img/a1051932598_2.jpg",
+          "releaseDate": "November 3, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=DIVINE%20CHAOS"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+DIVINE%20CHAOS"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "kingidivine",
+    "name": "King I Divine",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0000004610_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kingidivine.bandcamp.com",
+        "allReleaseTitles": [
+          "airsign",
+          "sunsethaze",
+          "alofichristmas",
+          "howweplay",
+          "fasho",
+          "flippedscienzeedition",
+          "whereyouatgirl",
+          "coastline",
+          "spliffs",
+          "seeyousoon",
+          "journey",
+          "strayvol3",
+          "strayvol2",
+          "strayvol1",
+          "triad",
+          "flyfire"
+        ],
+        "latestRelease": {
+          "title": "Air Sign",
+          "type": "track",
+          "url": "https://kingidivine.bandcamp.com/track/air-sign",
+          "imageUrl": "https://f4.bcbits.com/img/a3241635403_2.jpg",
+          "releaseDate": "February 15, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=King%20I%20Divine"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+King%20I%20Divine"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "divineratio",
+    "name": "Divine Ratio",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0008080039_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://divine-ratio.bandcamp.com",
+        "allReleaseTitles": [
+          "drenched",
+          "splitbyunity"
+        ],
+        "latestRelease": {
+          "title": "Drenched",
+          "type": "track",
+          "url": "https://divine-ratio.bandcamp.com/track/drenched",
+          "imageUrl": "https://f4.bcbits.com/img/a0885976115_16.jpg",
+          "releaseDate": "August 8, 2016"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Divine%20Ratio"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Divine%20Ratio"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "divineschism",
+    "name": "Divine Schism",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018158329_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://divineschism.bandcamp.com",
+        "allReleaseTitles": [
+          "feelingsexploreriiilucyleave",
+          "themumblesbookofhellmumbles",
+          "mountainviewtheplan",
+          "buildingacaselouterry",
+          "fogodreamphone",
+          "inthepocketofbigsadmumbles",
+          "koneonekone",
+          "dreamphonedreamphone",
+          "strutdreamphone",
+          "hashaditsalvationbill",
+          "stackofboneslucyleave",
+          "minordeathsslowdownmolasses",
+          "peacostumereimaginedlucyleavedespicablezeejustemmavalentineteamdrum",
+          "communitydivineschism",
+          "selectedshortstoriesgaynorjenkins",
+          "everyoneisdoingsowelllucyleave"
+        ],
+        "latestRelease": {
+          "title": "Feelings Explorer I & II\n                \n                \n\n                Lucy Leave",
+          "type": "album",
+          "url": "https://lucyleave.bandcamp.com/album/feelings-explorer-i-ii?label=1574878143&tab=music",
+          "imageUrl": "https://f4.bcbits.com/img/a3853789295_2.jpg"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Divine%20Schism"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Divine%20Schism"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "divineagency",
+    "name": "Divine Agency",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026855601_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://divinerecords.bandcamp.com",
+        "allReleaseTitles": [
+          "theeventualwindowrobertstorey",
+          "comeupandhearmyetchingsrobertstorey",
+          "socratesgardenkamuraobscura",
+          "singesflorenceraynaud",
+          "croquemadame",
+          "kamuraobscuraatsukokamura",
+          "dipyourtoeinthecsiders",
+          "nobodiescupofteathenobodies",
+          "iamakamuraatsukokamura",
+          "murphynogeisha",
+          "thegabgiftorcursetheplainpeopleofengland",
+          "adriftthemurphyloveexperience",
+          "theminersofbanal",
+          "smutorchestremurphy",
+          "bogtrottingorchestremurphy",
+          "frankincenseorchestremurphy",
+          "metamurphosisthemurphyworkingstiffs",
+          "upmurphystreet",
+          "12minutesatthehotclubmurphy"
+        ],
+        "latestRelease": {
+          "title": "The Eventual Window\n                \n                \n\n                Robert Storey",
+          "type": "album",
+          "url": "https://divinerecords.bandcamp.com/album/the-eventual-window",
+          "imageUrl": "https://f4.bcbits.com/img/a3071208044_2.jpg",
+          "releaseDate": "November 26, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Divine%20Agency"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Divine%20Agency"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "divineinterventionrecords",
+    "name": "Divine Intervention Records",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026705060_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://divineinterventionrecords.bandcamp.com",
+        "allReleaseTitles": [
+          "tearsfrommyeyesdivine024apicon",
+          "resurgencedivine23laski",
+          "neongenesisdivine022raremamba",
+          "operationnoisiadivine022hrfnxnewhedonism",
+          "undergroundravingdivine0200000kintsugi",
+          "aznarracrequiemxbadpacttrinidaddivine019",
+          "essenceofgodva",
+          "burneverythingdivine018tmpst",
+          "gremlinsdivine017krugeruk",
+          "lustdivine016ravesyndicate",
+          "circuitcrasherdivine015clamorincltorreremix",
+          "cursedsubstancedivine014luca",
+          "bassispumpingdivine013tkglmsam",
+          "redemptionva",
+          "whatwereyouthinkingdivine012tonaltheory",
+          "ifnooneremembersdivine011kthonos"
+        ],
+        "latestRelease": {
+          "title": "Tears From My Eyes [DIVINE024]\n                \n                \n\n                APICON",
+          "type": "album",
+          "url": "https://divineinterventionrecords.bandcamp.com/album/tears-from-my-eyes-divine024",
+          "imageUrl": "https://f4.bcbits.com/img/a2969047838_2.jpg",
+          "releaseDate": "June 28, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Divine%20Intervention%20Records"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Divine%20Intervention%20Records"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-divine",
+    "name": "Divine",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/divine/61606",
+        "allReleaseTitles": [
+          "streetdreamskaranaujla",
+          "insideofmeanderblast",
+          "chornisidhumoosewala",
+          "meregullymein",
+          "youthatiwant",
+          "yaestardemianelementodl",
+          "isleofdreams",
+          "angelbladevip",
+          "readytohealfmanandfunkerman",
+          "naiburivibes",
+          "atravesdemivictormagan",
+          "rhodestojack",
+          "outofthisworldiccmenst20worldcup2024officialanthemseanpaulkes",
+          "accidentprone",
+          "invasiontendencies",
+          "longlivethrashmetal",
+          "hauntyou",
+          "digitalinfection"
+        ],
+        "latestRelease": {
+          "title": "Street Dreams Divine Karan Aujla",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/street-dreams-divine-karan-aujla/bwezsmu8xdx8a",
+          "releaseDate": "2024-02-16"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Divine"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Divine"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-divine11",
+    "name": "Divine 11",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/divine-11/27617814",
+        "allReleaseTitles": [
+          "nativelove",
+          "shoutitout",
+          "essentialdivine",
+          "youthinkyoureaman2024clubremix",
+          "the12collection",
+          "walklikeaman",
+          "nativelovestepbystep",
+          "myfirstalbum",
+          "greatesthits",
+          "youthinkyoureaman",
+          "borntobecheap",
+          "imsobeautiful",
+          "theoriginals"
+        ],
+        "latestRelease": {
+          "title": "Shout It Out Divine",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/shout-it-out-divine/glmf4jcvnwpja",
+          "releaseDate": "2025-01-13"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Divine%2011"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Divine%2011"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

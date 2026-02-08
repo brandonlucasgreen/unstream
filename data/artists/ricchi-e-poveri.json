@@ -1,0 +1,182 @@
+[
+  {
+    "id": "ricchiepoveri",
+    "name": "Ricchi e Poveri",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0005118469_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ricchiepoveri.bandcamp.com",
+        "allReleaseTitles": [
+          "amoreodio",
+          "parlacolcuore"
+        ],
+        "latestRelease": {
+          "title": "Amore Odio",
+          "type": "album",
+          "url": "https://ricchiepoveri.bandcamp.com/album/amore-odio",
+          "imageUrl": "https://f4.bcbits.com/img/a0619169068_16.jpg",
+          "releaseDate": "July 7, 2013"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ricchi%20e%20Poveri"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ricchi%20e%20Poveri"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.ricchiepoveri.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/310136"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ricchi%20e%20Poveri&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ricchi%20e%20Poveri"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/ricchiepoveriofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@ricchiepoveriofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UClRkb3W1CiDtx5M-3dN5pig"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/1702110430080435"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-ricchiepoveri",
+    "name": "Ricchi E Poveri",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ricchi-e-poveri/66848"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ricchi%20E%20Poveri"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ricchi%20E%20Poveri"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.ricchiepoveri.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/310136"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ricchi%20E%20Poveri&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ricchi%20E%20Poveri"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/ricchiepoveriofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@ricchiepoveriofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UClRkb3W1CiDtx5M-3dN5pig"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/1702110430080435"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-ricchiepoveri3",
+    "name": "Ricchi E Poveri 3",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ricchi-e-poveri-3/18655973"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ricchi%20E%20Poveri%203"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ricchi%20E%20Poveri%203"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.ricchiepoveri.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/310136"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ricchi%20E%20Poveri%203&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ricchi%20E%20Poveri%203"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/ricchiepoveriofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@ricchiepoveriofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UClRkb3W1CiDtx5M-3dN5pig"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/1702110430080435"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

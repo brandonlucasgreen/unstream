@@ -1,0 +1,44 @@
+[
+  {
+    "id": "emilybrowning",
+    "name": "Emily Browning",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0009488324_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/emily-browning/566878",
+        "allReleaseTitles": [
+          "sweetdreamspodvalcapellaremixandpodvalcapella"
+        ],
+        "latestRelease": {
+          "title": "Sweetdreams Podval Capella Remix Emily Browning And Podval Capella",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/sweetdreams-podval-capella-remix-emily-browning-and-podval-capella/pzle8wfj7102b",
+          "releaseDate": "2021-08-12"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bandcamp.com/emilybrowning"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Emily%20Browning"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Emily%20Browning"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2208099"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

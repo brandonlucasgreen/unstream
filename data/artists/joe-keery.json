@@ -1,0 +1,114 @@
+[
+  {
+    "id": "joedeery",
+    "name": "Joe Deery",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0029538617_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://joedeery.bandcamp.com",
+        "allReleaseTitles": [
+          "theholycity",
+          "matchstalkmenandmatchstalkcatsanddogs",
+          "angels",
+          "dannyboy",
+          "andthebandplayedwaltzingmatilda",
+          "onlyyou"
+        ],
+        "latestRelease": {
+          "title": "The Holy City",
+          "type": "track",
+          "url": "https://joedeery.bandcamp.com/track/the-holy-city",
+          "imageUrl": "https://f4.bcbits.com/img/a1089811372_2.jpg",
+          "releaseDate": "December 23, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Joe%20Deery"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Joe%20Deery"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-joekeery",
+    "name": "Joe Keery",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/joe-keery/4685442"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Joe%20Keery"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Joe%20Keery"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5188663"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/uncle_jezzy/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/mrkirby9"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-joekeery1",
+    "name": "Joe Keery 1",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/joe-keery-1/25337055"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Joe%20Keery%201"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Joe%20Keery%201"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5188663"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/uncle_jezzy/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/mrkirby9"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

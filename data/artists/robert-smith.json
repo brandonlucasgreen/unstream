@@ -1,0 +1,91 @@
+[
+  {
+    "id": "qobuz-robertsmith",
+    "name": "Robert Smith",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/robert-smith/19534",
+        "allReleaseTitles": [
+          "fridayiminlovejustlikeheavenlivefromglastonburyoliviarodrigo",
+          "buxtehudecompletechambermusicpieterjanbelderriekimurafantasticus",
+          "telemanntriosonatasforrecorderandvioladagambaerikbosgraaflucileboulangeralessandropianu",
+          "hownottodrownchvrches",
+          "theexcellencyofhandenglishvioladagambaduospaolopandolfo",
+          "tartiniveraciniviolinsonatasriekimuraguillermobrachetta",
+          "sonataindmajorbwv1028ivallegrofrancescocorti",
+          "seenthelight",
+          "vision2020",
+          "musicallyrics",
+          "themushroommuzicinstrumentals",
+          "thewordsout",
+          "musicalconquest2022",
+          "herecomesclimatechange",
+          "jsbachsonatasforvioladagambaharpsichordfrancescocorti",
+          "mitfriedundfreudichfahrdahinbuxwv76bklagliedaltmaartenengeltjesprjctamsterdamalonportalasakouedaedoardovalorz",
+          "tickletheminikin17thcenturylyraviolmusic",
+          "acidcutsfranciajazzlineorchestra",
+          "faithfulfriend",
+          "selfharmer"
+        ],
+        "latestRelease": {
+          "title": "Friday Im In Love Just Like Heaven Live From Glastonbury Olivia Rodrigo Robert Smith",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/friday-im-in-love-just-like-heaven-live-from-glastonbury-olivia-rodrigo-robert-smith/qqumixciyjndc",
+          "releaseDate": "2025-09-08"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/commoncoresheets"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Robert%20Smith"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Robert%20Smith"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-robertsmith6",
+    "name": "Robert Smith 6",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/robert-smith-6/12063433",
+        "allReleaseTitles": [
+          "aliveandfree"
+        ],
+        "latestRelease": {
+          "title": "Alive And Free Robert Smith",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/alive-and-free-robert-smith/j5xcqayxa4c5b",
+          "releaseDate": "2016-02-04"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Robert%20Smith%206"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Robert%20Smith%206"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

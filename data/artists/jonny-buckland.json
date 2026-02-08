@@ -1,0 +1,30 @@
+[
+  {
+    "id": "qobuz-standalone-jonnybuckland",
+    "name": "Jonny Buckland",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jonny-buckland/96614"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jonny%20Buckland"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jonny%20Buckland"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/530747"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

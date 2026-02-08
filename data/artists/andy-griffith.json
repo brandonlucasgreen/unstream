@@ -1,0 +1,58 @@
+[
+  {
+    "id": "qobuz-andygriffith",
+    "name": "Andy Griffith",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/andy-griffith/169698",
+        "latestRelease": {
+          "title": "Bound For The Promised Land Andy Griffith",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/bound-for-the-promised-land-andy-griffith/0724359880457",
+          "releaseDate": "2005-01-01"
+        },
+        "allReleaseTitles": [
+          "themesandlaughsfromtheshow",
+          "americanoriginals",
+          "boundforthepromisedland",
+          "lovetotellstory25hymns",
+          "whatitisis",
+          "thechristmasguest",
+          "justasiam",
+          "somebodybiggerthanyouandi",
+          "avonproject",
+          "back2backcomedyhitsdonknotts",
+          "whatitwaswasfootball",
+          "viewpoint1959"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Andy%20Griffith"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Andy%20Griffith"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/836333"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Andy%20Griffith&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Andy%20Griffith"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

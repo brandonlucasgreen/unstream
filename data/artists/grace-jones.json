@@ -1,0 +1,74 @@
+[
+  {
+    "id": "qobuz-gracejones",
+    "name": "Grace Jones",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/grace-jones/41828",
+        "allReleaseTitles": [
+          "nightclubbing",
+          "warmleatherette",
+          "portfolio",
+          "slavetotherhythm",
+          "fame",
+          "muse",
+          "hurricaneversiondubremixeparivorguest",
+          "livingmylife",
+          "insidestory",
+          "20thcenturymastersthemillenniumcollectionbestof",
+          "hurricane",
+          "islandlife"
+        ],
+        "latestRelease": {
+          "title": "Nightclubbing Grace Jones",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/nightclubbing-grace-jones/zwnz2n9977uub",
+          "releaseDate": "1981-05-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Grace%20Jones"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Grace%20Jones"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.gracejones.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/13932"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Grace%20Jones&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Grace%20Jones"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/gracejonesofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UClG7eupJZC6QFiT7743DMQg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/GraceJonesOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

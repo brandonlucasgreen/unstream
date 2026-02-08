@@ -1,0 +1,62 @@
+[
+  {
+    "id": "qobuz-diahanncarroll",
+    "name": "Diahann Carroll",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/diahann-carroll/173543",
+        "allReleaseTitles": [
+          "porgyandbessandreprevin",
+          "theandreprevintrio",
+          "nobodyseesmecry",
+          "thepersianroompresents",
+          "funlife",
+          "humdrumblues",
+          "nostrings",
+          "ithadtobeyou",
+          "loadsoflove",
+          "lovewalkedin",
+          "atthecrossroads",
+          "elusivebutterfly"
+        ],
+        "latestRelease": {
+          "title": "The Andre Previn Trio Diahann Carroll",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-andre-previn-trio-diahann-carroll/0060255724682",
+          "releaseDate": "2004-01-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Diahann%20Carroll"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Diahann%20Carroll"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.diahanncarroll.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/421956"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Diahann%20Carroll&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Diahann%20Carroll"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

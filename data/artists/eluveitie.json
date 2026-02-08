@@ -1,0 +1,85 @@
+[
+  {
+    "id": "qobuz-eluveitie",
+    "name": "Eluveitie",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/eluveitie/555792",
+        "allReleaseTitles": [
+          "anv",
+          "ategnatos",
+          "origins",
+          "evocationiipantheon",
+          "liveatmastersofrock2019",
+          "thecallofthemountainsambiramusinrussian",
+          "premonition",
+          "rebirth",
+          "helvetios",
+          "evocationithearcanedominion",
+          "theearlyyears",
+          "slania",
+          "everythingremains",
+          "exileofthegods",
+          "gwydionfaun",
+          "slania10years",
+          "slaniatouredition",
+          "aidus",
+          "liveontour2012"
+        ],
+        "latestRelease": {
+          "title": "Anv Eluveitie",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/anv-eluveitie/lsdvsmtfjqsda",
+          "releaseDate": "2025-04-25"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Eluveitie"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Eluveitie"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://eluveitie.ch/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/508784"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Eluveitie&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Eluveitie"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/eluveitie_official/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@eluveitie_official"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UClV0x3k5Oxm7vREoLEOPeGg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/eluveitie"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

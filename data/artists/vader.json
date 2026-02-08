@@ -1,0 +1,239 @@
+[
+  {
+    "id": "vader",
+    "name": "Vader",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0007302844_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://vader-band.bandcamp.com",
+        "allReleaseTitles": [
+          "humanihility",
+          "deprofundis",
+          "solitudeinmadness",
+          "shockandawe",
+          "thymessenger",
+          "theempire",
+          "irontimesep",
+          "tibietigni",
+          "welcometothemorbidreich",
+          "necropolis",
+          "blacktotheblindremastered2024",
+          "sothis",
+          "theultimateincantation"
+        ],
+        "latestRelease": {
+          "title": "Humanihility",
+          "type": "album",
+          "url": "https://vader-band.bandcamp.com/album/humanihility",
+          "imageUrl": "https://f4.bcbits.com/img/a2541987909_2.jpg",
+          "releaseDate": "May 30, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/vader/555801",
+        "allReleaseTitles": [
+          "humanihility",
+          "deprofundis",
+          "blacktotheblind",
+          "theempire",
+          "irontimes",
+          "thymessenger",
+          "experimentoconcerto",
+          "litany",
+          "welcometothemorbidreich",
+          "tibietigni",
+          "necropolis",
+          "solitudeinmadness",
+          "revelations",
+          "morbidreich",
+          "futureofthepast",
+          "futureofthepastiihellintheeast",
+          "reborninchaos",
+          "comeandseemysacrifice",
+          "unbending",
+          "darkagepiotrwiwczarek"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Vader"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Vader"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://vader-store.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/254323"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Vader&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Vader"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/Vader_Band_Official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCfsUPHDUxALBgo0kutfO0RA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/vader"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "vader-bandcamp-vader",
+    "name": "Vader",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0004687730_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://vader.bandcamp.com",
+        "allReleaseTitles": [
+          "liveindecayvader",
+          "morbidreichvader",
+          "necrolustvader"
+        ],
+        "latestRelease": {
+          "title": "Live In Decay\n                \n                \n\n                VADER",
+          "type": "album",
+          "url": "https://vader.bandcamp.com/album/live-in-decay",
+          "imageUrl": "https://f4.bcbits.com/img/a4034746934_2.jpg",
+          "releaseDate": "April 3, 2015"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Vader"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Vader"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://vader-store.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/254323"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Vader&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Vader"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/Vader_Band_Official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCfsUPHDUxALBgo0kutfO0RA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/vader"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "vader-bandcamp-vader81",
+    "name": "Vader",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0029160480_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://vader81.bandcamp.com",
+        "allReleaseTitles": [
+          "heretostayvaderxspookybizzle",
+          "5rawsfreestyle",
+          "nothingbutvades20",
+          "ihearallthat",
+          "betternotbitter",
+          "vaderchivesfromtheharddrive",
+          "vadercammyriddimfreestyleproducedbyblayvision",
+          "anymore",
+          "timelessteachingsvaderdubztabeats"
+        ],
+        "latestRelease": {
+          "title": "Here To Stay\n                \n                \n\n                Vader X Spooky Bizzle",
+          "type": "album",
+          "url": "https://vader81.bandcamp.com/album/here-to-stay",
+          "imageUrl": "https://f4.bcbits.com/img/a2561604448_2.jpg",
+          "releaseDate": "January 30, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Vader"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Vader"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://vader-store.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/254323"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Vader&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Vader"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/Vader_Band_Official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCfsUPHDUxALBgo0kutfO0RA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/vader"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

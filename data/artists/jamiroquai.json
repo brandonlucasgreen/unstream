@@ -1,0 +1,82 @@
+[
+  {
+    "id": "qobuz-jamiroquai",
+    "name": "Jamiroquai",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jamiroquai/111444",
+        "allReleaseTitles": [
+          "automatonhiresversion",
+          "automaton",
+          "hightimessingles19922006",
+          "travellingwithoutmoving",
+          "afunkodyssey",
+          "dynamite",
+          "cannedheatdimitrifromparisremixes",
+          "synkronized",
+          "thereturnofthespacecowboy",
+          "virtualinsanity",
+          "emergencyonplanetearth",
+          "cosmicgirldimitrifromparisremixes",
+          "cloud9",
+          "rockdustlightstar",
+          "spacecowboymichaelgraysgoodvibezone",
+          "littlel"
+        ],
+        "latestRelease": {
+          "title": "Automaton Hi Res Version Jamiroquai",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/automaton-hi-res-version-jamiroquai/0060255761657",
+          "releaseDate": "2017-03-31"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jamiroquai"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jamiroquai"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.jamiroquai.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/8029"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jamiroquai&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jamiroquai"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jamiroquaihq/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "http://www.tiktok.com/@jamiroquai_hq"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCd8wWXk6fSa8b8WaZbpWgvg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JamiroquaiOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,35 @@
+[
+  {
+    "id": "qobuz-brigittenielsen",
+    "name": "Brigitte Nielsen",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/brigitte-nielsen/1733483",
+        "allReleaseTitles": [
+          "everybodytellsastory"
+        ],
+        "latestRelease": {
+          "title": "Every Body Tells A Story Brigitte Nielsen",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/every-body-tells-a-story-brigitte-nielsen/xl0h4ay9ksn9a",
+          "releaseDate": "1987-09-25"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Brigitte%20Nielsen"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Brigitte%20Nielsen"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

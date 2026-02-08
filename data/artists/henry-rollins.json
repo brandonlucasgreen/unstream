@@ -1,0 +1,82 @@
+[
+  {
+    "id": "qobuz-henryrollins",
+    "name": "Henry Rollins",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/henry-rollins/310947",
+        "latestRelease": {
+          "title": "Keep Talking Pal Henry Rollins",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/keep-talking-pal-henry-rollins/e3mrpmvrqoo4a",
+          "releaseDate": "2019-02-15"
+        },
+        "allReleaseTitles": [
+          "getsomegoagainsessionsmothersuperior",
+          "keeptalkingpal",
+          "spokenwordguy110308alexandriava",
+          "getinthevan",
+          "theboxedlifedoublelengthliveperformance",
+          "blackcoffeeblues",
+          "talkischeapvol3",
+          "talkischeapvol2",
+          "biguglymouthshortwalkonalongpier",
+          "sweatbox",
+          "humanbutt",
+          "liveatthewestbeththeater",
+          "spokenwordguy2101307annarbormi",
+          "everything",
+          "thinktank",
+          "talkischeapvol4",
+          "talkischeapvol1",
+          "ericthepilot",
+          "arollinsinthewry",
+          "liveatmccabes"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Henry%20Rollins"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Henry%20Rollins"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://henryrollins.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/18844"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Henry%20Rollins&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Henry%20Rollins"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/henryandheidi/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCNRQe02DvtLhOfDzocDHFvQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialhenryrollins"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,93 @@
+[
+  {
+    "id": "qobuz-bobbyfarrell",
+    "name": "Bobby Farrell",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/bobby-farrell/85877",
+        "allReleaseTitles": [
+          "riverofbabylon",
+          "marysboychild",
+          "whenachildisborn",
+          "mycherieamor",
+          "littledrummerboy",
+          "imbornagain",
+          "heartofgold",
+          "thebestremixes",
+          "boneymperformedbythebestremixes",
+          "remixes",
+          "boneymby",
+          "70sdiscorareinstrumentals",
+          "boneym",
+          "thebestofboneymperformed",
+          "",
+          "rasputin",
+          "tiktokasiandancersdiscomusic",
+          "thebestofboneymperformedby",
+          "sunny"
+        ],
+        "latestRelease": {
+          "title": "River Of Babylon Bobby Farrell",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/river-of-babylon-bobby-farrell/g7t3zc59uyolc",
+          "releaseDate": "2024-10-02"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bobby%20Farrell"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bobby%20Farrell"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.bobbyfarrell.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/199591"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-bobbyfarrel",
+    "name": "Bobby Farrel",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/bobby-farrel/1014429"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bobby%20Farrel"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bobby%20Farrel"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.bobbyfarrell.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/199591"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

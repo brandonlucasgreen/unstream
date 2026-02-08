@@ -1,0 +1,877 @@
+[
+  {
+    "id": "melanie",
+    "name": "Melanie",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0007908782_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://melaniesafka.bandcamp.com",
+        "allReleaseTitles": [
+          "ifmyheartshouldloseitsway",
+          "melanieschristmastreasury",
+          "thereshouldhavebeenarainbowthenyfolksessions19631965",
+          "maideninjapan",
+          "behindthecurtain",
+          "carnegierehearsals1978",
+          "layyourhandsacrossthesixstrings",
+          "anywaythatyouwantme",
+          "gatheredinthe1971gathermesessions",
+          "somewhereundertherainbow",
+          "unitedkingdomlive",
+          "wowandflutter",
+          "rightaboutnow",
+          "takemehomeliveatthetroubadour1969",
+          "lullabiesfromheavenmelanieschildrensalbum",
+          "returntocarnegie"
+        ],
+        "latestRelease": {
+          "title": "If my heart should lose it's way",
+          "type": "track",
+          "url": "https://melaniesafka.bandcamp.com/track/if-my-heart-should-lose-its-way",
+          "imageUrl": "https://f4.bcbits.com/img/a0290900141_2.jpg"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/moofmag"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Melanie"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Melanie"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.melaniesafkamusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2346038"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Melanie&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Melanie"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/melaniesafka11/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCRk3uJG-FRzn-sasozxx0kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/therealmelaniesafka"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "melaniecharles",
+    "name": "Melanie Charles",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022928008_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://melaniecharles.bandcamp.com",
+        "allReleaseTitles": [
+          "beonmysideddustversion",
+          "thedilemmalive",
+          "thegirlwiththegreenshoes",
+          "beonmyside",
+          "geminifeatraydarellisxphaseonemelaniecharlesakadflowerproducedbyjordanpetersakacommissionerwallace",
+          "driftingtomomelaniecharlesandthejourney"
+        ],
+        "latestRelease": {
+          "title": "Be On My Side [ddust version]",
+          "type": "track",
+          "url": "https://melaniecharles.bandcamp.com/track/be-on-my-side-ddust-version-2",
+          "imageUrl": "https://f4.bcbits.com/img/a2634437341_2.jpg",
+          "releaseDate": "September 22, 2022"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/MelanieSafka"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Melanie%20Charles"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Melanie%20Charles"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.melaniesafkamusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2346038"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Melanie%20Charles&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Melanie%20Charles"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/melaniesafka11/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCRk3uJG-FRzn-sasozxx0kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/therealmelaniesafka"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "melaniedebiasio",
+    "name": "Melanie De Biasio",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0007523060_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://melaniedebiasio.bandcamp.com",
+        "allReleaseTitles": [
+          "lilies",
+          "blackenedcities",
+          "gillespetersonpresentsmelaniedebiasionodealremixed",
+          "nodeal"
+        ],
+        "latestRelease": {
+          "title": "Lilies",
+          "type": "album",
+          "url": "https://melaniedebiasio.bandcamp.com/album/lilies",
+          "imageUrl": "https://f4.bcbits.com/img/a3097566889_16.jpg",
+          "releaseDate": "October 6, 2017"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/MelanieSafka"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Melanie%20De%20Biasio"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Melanie%20De%20Biasio"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.melaniesafkamusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2346038"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Melanie%20De%20Biasio&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Melanie%20De%20Biasio"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/melaniesafka11/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCRk3uJG-FRzn-sasozxx0kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/therealmelaniesafka"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "melaniehorsnell",
+    "name": "Melanie Horsnell",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0015215051_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://melaniehorsnell.bandcamp.com",
+        "allReleaseTitles": [
+          "littlethingsmelaniehorsnellfeatshanenicholson",
+          "cometomesweet",
+          "asthetreeshavealwaysknown",
+          "turnoffthenewsbuildagarden",
+          "trobairitzalbum",
+          "someonelikeyousinglemelaniehorsnellsteveappel",
+          "songtosingonasaturdaynightalbum",
+          "quatrecheminsalbum",
+          "danslameraussiilyadesetoilesalbum",
+          "thecloudappreciationsocietyalbum",
+          "complicatedsweetheartalbum",
+          "theadventuresofalbum",
+          "excelsiordaysalbum",
+          "marymaryep",
+          "kissyouagainep",
+          "bluestblueepantonhughesmelaniehorsnell"
+        ],
+        "latestRelease": {
+          "title": "Little Things\n                \n                \n\n                Melanie Horsnell feat. Shane Nicholson",
+          "type": "track",
+          "url": "https://melaniehorsnell.bandcamp.com/track/little-things",
+          "imageUrl": "https://f4.bcbits.com/img/a2796822589_2.jpg",
+          "releaseDate": "April 11, 2025"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/MelanieSafka"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Melanie%20Horsnell"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Melanie%20Horsnell"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.melaniesafkamusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2346038"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Melanie%20Horsnell&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Melanie%20Horsnell"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/melaniesafka11/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCRk3uJG-FRzn-sasozxx0kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/therealmelaniesafka"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "melanievelarde",
+    "name": "Melanie Velarde",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0003663357_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://000001.bandcamp.com",
+        "allReleaseTitles": [
+          "bez",
+          "parcel",
+          "alleysoup",
+          "bb",
+          "amelanievelarde",
+          "ooo",
+          "some",
+          "irmelanievelarde",
+          "las",
+          "deepcircles",
+          "melanievelarde",
+          "",
+          "gransassolaboratory",
+          "sum"
+        ],
+        "latestRelease": {
+          "title": "Bez",
+          "type": "album",
+          "url": "https://000001.bandcamp.com/album/bez",
+          "imageUrl": "https://f4.bcbits.com/img/a0313838893_2.jpg",
+          "releaseDate": "December 6, 2019"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/MelanieSafka"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Melanie%20Velarde"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Melanie%20Velarde"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.melaniesafkamusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2346038"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Melanie%20Velarde&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Melanie%20Velarde"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/melaniesafka11/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCRk3uJG-FRzn-sasozxx0kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/therealmelaniesafka"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "melanie-bandcamp-melanie-for-fun",
+    "name": "Melanie",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024987338_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://melanie-for-fun.bandcamp.com",
+        "allReleaseTitles": [
+          "accidentemergency",
+          "abcd",
+          "42losers",
+          "melonep"
+        ],
+        "latestRelease": {
+          "title": "Accident, Emergency",
+          "type": "track",
+          "url": "https://melanie-for-fun.bandcamp.com/track/accident-emergency",
+          "imageUrl": "https://f4.bcbits.com/img/a3280513448_16.jpg",
+          "releaseDate": "February 24, 2023"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/MelanieSafka"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Melanie"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Melanie"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.melaniesafkamusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2346038"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Melanie&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Melanie"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/melaniesafka11/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCRk3uJG-FRzn-sasozxx0kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/therealmelaniesafka"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "melaniebaker",
+    "name": "Melanie Baker",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041748889_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://melaniebaker.bandcamp.com",
+        "allReleaseTitles": [
+          "somebodyhelpmeimbeingspontaneous",
+          "sadclown",
+          "burnoutbaby"
+        ],
+        "latestRelease": {
+          "title": "Somebody Help Me, I’m Being Spontaneous!",
+          "type": "album",
+          "url": "https://melaniebaker.bandcamp.com/album/somebody-help-me-i-m-being-spontaneous",
+          "imageUrl": "https://f4.bcbits.com/img/a2353068782_2.jpg"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/MelanieSafka"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Melanie%20Baker"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Melanie%20Baker"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.melaniesafkamusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2346038"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Melanie%20Baker&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Melanie%20Baker"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/melaniesafka11/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCRk3uJG-FRzn-sasozxx0kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/therealmelaniesafka"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "melaniemonsour",
+    "name": "Melanie Monsour",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038927644_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://melaniemonsour.bandcamp.com",
+        "allReleaseTitles": [
+          "hoperises",
+          "symphgroove",
+          "enneagraminspired",
+          "whenyoufindit",
+          "shecrossedthegreatwater",
+          "asiwaswalking",
+          "equinox25",
+          "nothinginmind",
+          "bythelightfromwithin",
+          "allegrasballet",
+          "aflyinthetemple",
+          "meliontherocks",
+          "bridgetotheunseen",
+          "2019tracks23and4",
+          "lamentanddance",
+          "evolvingatmosphere"
+        ],
+        "latestRelease": {
+          "title": "Hope Rises",
+          "type": "track",
+          "url": "https://melaniemonsour.bandcamp.com/track/hope-rises",
+          "imageUrl": "https://f4.bcbits.com/img/a1450466044_2.jpg",
+          "releaseDate": "January 3, 2021"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/MelanieSafka"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Melanie%20Monsour"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Melanie%20Monsour"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.melaniesafkamusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2346038"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Melanie%20Monsour&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Melanie%20Monsour"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/melaniesafka11/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCRk3uJG-FRzn-sasozxx0kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/therealmelaniesafka"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "melaniemaumartinschnella",
+    "name": "Melanie Mau & Martin Schnella",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0034325455_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://melaniemaumartinschnella.bandcamp.com",
+        "allReleaseTitles": [
+          "keeperofthescriptureshuterinderschriftenspecialeditionflamingrow",
+          "keeperofthescriptureshuterinderschriftenstandardeditionflamingrow",
+          "nitathekeeperdiehuterinnitavideoversionenglishgermanflamingrow",
+          "rainbowdemonuriahheepacousticcover2025version",
+          "einstummerschrei2024version",
+          "peacemustcomebypaulmetsers",
+          "therainbowtree",
+          "therainbowtreebonustracks",
+          "invoketheghosts",
+          "thespireandtheoldbridge2021version",
+          "crowdlesssessionsaudio",
+          "throughthedecades",
+          "indieserzeit",
+          "flamingrowthepureshine",
+          "piecestoremember",
+          "theobliviontalesbonustracks",
+          "theobliviontales",
+          "graymattersliveinconcert",
+          "graymatters"
+        ],
+        "latestRelease": {
+          "title": "Keeper Of The Scriptures (Hüterin Der Schriften) - SPECIAL EDITION\n                \n                \n\n                Flaming Row",
+          "type": "album",
+          "url": "https://melaniemaumartinschnella.bandcamp.com/album/keeper-of-the-scriptures-h-terin-der-schriften-special-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a0178584284_2.jpg",
+          "releaseDate": "October 25, 2025"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/MelanieSafka"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Melanie%20Mau%20%26%20Martin%20Schnella"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Melanie%20Mau%20%26%20Martin%20Schnella"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.melaniesafkamusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2346038"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Melanie%20Mau%20%26%20Martin%20Schnella&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Melanie%20Mau%20%26%20Martin%20Schnella"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/melaniesafka11/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCRk3uJG-FRzn-sasozxx0kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/therealmelaniesafka"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "melaniedoane",
+    "name": "Melanie Doane",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0000068274_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://melaniedoane.bandcamp.com",
+        "allReleaseTitles": [
+          "uptothelight",
+          "theemeraldcity",
+          "athousandnights",
+          "youarewhatyoulove",
+          "melvinlive",
+          "adamsrib",
+          "shakespeareanfish"
+        ],
+        "latestRelease": {
+          "title": "Up to the Light",
+          "type": "track",
+          "url": "https://melaniedoane.bandcamp.com/track/up-to-the-light",
+          "imageUrl": "https://f4.bcbits.com/img/a1584387413_2.jpg",
+          "releaseDate": "April 7, 2015"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/MelanieSafka"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Melanie%20Doane"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Melanie%20Doane"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.melaniesafkamusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2346038"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Melanie%20Doane&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Melanie%20Doane"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/melaniesafka11/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCRk3uJG-FRzn-sasozxx0kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/therealmelaniesafka"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-melanie",
+    "name": "Melanie",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/melanie/47635"
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/MelanieSafka"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Melanie"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Melanie"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.melaniesafkamusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2346038"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Melanie&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Melanie"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/melaniesafka11/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCRk3uJG-FRzn-sasozxx0kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/therealmelaniesafka"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-melanie3",
+    "name": "Melanie 3",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/melanie-3/3255836"
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/MelanieSafka"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Melanie%203"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Melanie%203"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.melaniesafkamusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2346038"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Melanie%203&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Melanie%203"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/melaniesafka11/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCRk3uJG-FRzn-sasozxx0kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/therealmelaniesafka"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

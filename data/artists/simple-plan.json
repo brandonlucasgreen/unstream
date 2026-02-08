@@ -1,0 +1,79 @@
+[
+  {
+    "id": "qobuz-simpleplan",
+    "name": "Simple Plan",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/simple-plan/149589",
+        "allReleaseTitles": [
+          "whatsnewscoobydoo",
+          "harderthanitlooks",
+          "stillnotgettingany",
+          "takingonefortheteam",
+          "thekidsinthecrowdmusicfromthedocumentarysoundtrack",
+          "iconicfeatjax",
+          "getyourheartonthesecondcoming",
+          "nopadsnohelmetsjustballs",
+          "",
+          "getyourhearton",
+          "christmaseveryday",
+          "summerparadisefeatseanpaul",
+          "summerparadisefeatmkto"
+        ],
+        "latestRelease": {
+          "title": "The Kids In The Crowd Music From The Documentary Soundtrack Simple Plan",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-kids-in-the-crowd-music-from-the-documentary-soundtrack-simple-plan/vlo1zitb54nqa",
+          "releaseDate": "2025-07-08"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Simple%20Plan"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Simple%20Plan"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://officialsimpleplan.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/293335"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Simple%20Plan&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Simple%20Plan"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/simpleplan/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://analytics.tiktok.com"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCKI33Zd-b17rDIcPSv9E_-w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/simpleplan"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

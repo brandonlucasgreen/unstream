@@ -1,0 +1,53 @@
+[
+  {
+    "id": "qobuz-annavissi",
+    "name": "Anna Vissi",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/anna-vissi/111975",
+        "allReleaseTitles": [
+          "lekes",
+          "protimo24",
+          "50years",
+          "seperiptosipou",
+          "olagiaola",
+          "sandre",
+          "protimo",
+          "exairesi",
+          "xrysopsara",
+          "kalokairinesdiakopes",
+          "agapiineesi",
+          "kravgi",
+          "klimatropiko",
+          "thegoldenyears",
+          "naheskardia",
+          "nylon",
+          "hotelermoulive20152018",
+          "apagorevmeno",
+          "synentefxi"
+        ],
+        "latestRelease": {
+          "title": "Ola Gia Ola Anna Vissi",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/ola-gia-ola-anna-vissi/yp6gibvr2cpcc",
+          "releaseDate": "2025-04-04"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Anna%20Vissi"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Anna%20Vissi"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

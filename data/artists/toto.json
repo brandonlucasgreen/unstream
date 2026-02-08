@@ -1,0 +1,652 @@
+[
+  {
+    "id": "totochiavetta",
+    "name": "Toto Chiavetta",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020113441_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://totochiavetta.bandcamp.com",
+        "latestRelease": {
+          "title": "My Eyes Are Failing",
+          "type": "album",
+          "url": "https://totochiavetta.bandcamp.com/album/my-eyes-are-failing",
+          "imageUrl": "https://f4.bcbits.com/img/a1813169791_2.jpg",
+          "releaseDate": "June 6, 2024"
+        },
+        "allReleaseTitles": [
+          "myeyesarefailing",
+          "randomtoolsgenerator",
+          "rationalutopia",
+          "settingofaceremony",
+          "uaederlezitotochiavettafeatseadajazensembleoriginaledition",
+          "soundsbetweencoloursep",
+          "instituteofpeace",
+          "harmonysomewhereep",
+          "undergroundmentalresurrection",
+          "silencehascomeep"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Toto%20Chiavetta"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Toto%20Chiavetta"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.totoofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/68693"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Toto%20Chiavetta&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Toto%20Chiavetta"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC05o3YC_kuha3KcPdssU-kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Toto99com"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "toto",
+    "name": "Totò",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a4292517627_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://totomusic4.bandcamp.com",
+        "allReleaseTitles": [
+          "bobsinclarworldholdonhotswingclubremixbobsinclarhotswingsteveedwards",
+          "discoslapsignorinaciaociaoedit",
+          "willyilprincipedibelairedoardonevoladiscoslapremixdiscoslap",
+          "inandoutofloveeditswinghotarminvanbuurensharondenadel",
+          "maxromeochasethedevilhotswingedit",
+          "freddiemercurylivingonmyownhotswingedithotswing",
+          "gracejoneslibertangohotswingedithotswing",
+          "caroemeraldbackitupalleneditallen",
+          "senzagiaccaecravattahotswingremixhotswing",
+          "estelleamericanboyhotswingklatikeditvinyl12inchlimitednumberededitiononly100copies",
+          "essentialgroove001discoslapcandistatontotosistersledgebobsinclarrobbiewilliams",
+          "essentialgroove002nugeneasupertrampjuanluisguerrajarabedepalolaflacadiscoslap",
+          "tulliodepiscopoandamentolentohotallenedit",
+          "boasorteallenedit",
+          "bustarhymeshotswingedit"
+        ],
+        "latestRelease": {
+          "title": "Bob Sinclar - World, Hold On (Hotswing Club Remix)\n                \n                \n\n                Bob Sinclar - Hotswing - Steve Edwards",
+          "type": "track",
+          "url": "https://totomusic4.bandcamp.com/track/bob-sinclar-world-hold-on-hotswing-club-remix",
+          "imageUrl": "https://f4.bcbits.com/img/a4292517627_2.jpg",
+          "releaseDate": "December 30, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tot%C3%B2"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tot%C3%B2"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.totoofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/68693"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Tot%C3%B2&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Tot%C3%B2"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC05o3YC_kuha3KcPdssU-kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Toto99com"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "totolamomposina",
+    "name": "Totó la Momposina",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0016339836_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://totolamomposina.bandcamp.com",
+        "allReleaseTitles": [
+          "arondeliveatwomad2015fundraisingtrack",
+          "tanguita",
+          "oyemanitathisversioncurrentlyoutofstock",
+          "fuego",
+          "laverdolagaoutofstock",
+          "labodega"
+        ],
+        "latestRelease": {
+          "title": "Aronde (live at WOMAD 2015) - Fundraising Track",
+          "type": "track",
+          "url": "https://totolamomposina.bandcamp.com/track/aronde-live-at-womad-2015-fundraising-track",
+          "imageUrl": "https://f4.bcbits.com/img/a0484501296_2.jpg"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tot%C3%B3%20la%20Momposina"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tot%C3%B3%20la%20Momposina"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "totorobyn",
+    "name": "TotoRobyn",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031553205_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://totorobyn.bandcamp.com",
+        "allReleaseTitles": [
+          "divergentcrossroads",
+          "fromdaybreaktonightfall",
+          "fromdarknesslightwillshine",
+          "journeysversusdestinations",
+          "fracturedinstability",
+          "echoesofdreamscapes",
+          "waitingforhermoment",
+          "herbattlecry",
+          "myreturntoutopia",
+          "amomentofyearning",
+          "takeprideinyourlove",
+          "industry8"
+        ],
+        "latestRelease": {
+          "title": "Divergent Crossroads",
+          "type": "album",
+          "url": "https://totorobyn.bandcamp.com/album/divergent-crossroads",
+          "imageUrl": "https://f4.bcbits.com/img/a3109189223_2.jpg",
+          "releaseDate": "August 29, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=TotoRobyn"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+TotoRobyn"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.totoofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/68693"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=TotoRobyn&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/TotoRobyn"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC05o3YC_kuha3KcPdssU-kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Toto99com"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "totobonalokua",
+    "name": "Toto Bona Lokua",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020663713_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://totobonalokua.bandcamp.com",
+        "allReleaseTitles": [
+          "youwilehaganremix",
+          "bondeko",
+          "totobonalokua"
+        ],
+        "latestRelease": {
+          "title": "Youwilé (Hagan Remix)",
+          "type": "album",
+          "url": "https://totobonalokua.bandcamp.com/album/youwil-hagan-remix",
+          "imageUrl": "https://f4.bcbits.com/img/a1909657352_2.jpg",
+          "releaseDate": "April 17, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Toto%20Bona%20Lokua"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Toto%20Bona%20Lokua"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.totoofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/68693"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Toto%20Bona%20Lokua&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Toto%20Bona%20Lokua"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC05o3YC_kuha3KcPdssU-kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Toto99com"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "totoposto",
+    "name": "Toto Posto",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0010494594_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://totoposto.bandcamp.com",
+        "allReleaseTitles": [
+          "electricspaghettitotopostobarillasisters",
+          "electricspaghettiep",
+          "terradamore"
+        ],
+        "latestRelease": {
+          "title": "Electric Spaghetti\n                \n                \n\n                Toto Posto & Barilla Sisters",
+          "type": "album",
+          "url": "https://totoposto.bandcamp.com/album/electric-spaghetti-2",
+          "imageUrl": "https://f4.bcbits.com/img/a2792665946_2.jpg",
+          "releaseDate": "November 3, 2016"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Toto%20Posto"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Toto%20Posto"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.totoofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/68693"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Toto%20Posto&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Toto%20Posto"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC05o3YC_kuha3KcPdssU-kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Toto99com"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "geraldtoto",
+    "name": "Gérald Toto",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028778692_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://geraldtotonof.bandcamp.com",
+        "allReleaseTitles": [
+          "eponmyown",
+          "epderive",
+          "sway"
+        ],
+        "latestRelease": {
+          "title": "EP - On My Own",
+          "type": "album",
+          "url": "https://geraldtotonof.bandcamp.com/album/ep-on-my-own-2",
+          "imageUrl": "https://f4.bcbits.com/img/a3157627533_2.jpg",
+          "releaseDate": "November 25, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=G%C3%A9rald%20Toto"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+G%C3%A9rald%20Toto"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.totoofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/68693"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=G%C3%A9rald%20Toto&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/G%C3%A9rald%20Toto"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC05o3YC_kuha3KcPdssU-kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Toto99com"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "totofriedlaender",
+    "name": "Toto Friedlaender",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0015573494_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://totofriedlaender.bandcamp.com",
+        "allReleaseTitles": [
+          "raversquadtfried",
+          "dataexpressionismiiimigrationflowsbinaural",
+          "dpc017asangrefriatfried",
+          "ranasanguila",
+          "999bpmdronefrancisco",
+          "noeditados20072019anguila",
+          "perrosdefuegotfried",
+          "tfriedliveactmoonloopinvierno2017scltfried",
+          "verelmundocaersentadoenelinternettfried",
+          "anightinthecaveanguila",
+          "tfriedliveactdivingmiradoraleman2016tfried",
+          "daskickeptfried",
+          "crashrawdeepandaceeedeptfried",
+          "trashtoolkititfried",
+          "anguilaepanguila"
+        ],
+        "latestRelease": {
+          "title": "Raver Squad\n                \n                \n\n                TFried",
+          "type": "track",
+          "url": "https://totofriedlaender.bandcamp.com/track/raver-squad",
+          "imageUrl": "https://f4.bcbits.com/img/a2102639060_2.jpg",
+          "releaseDate": "March 7, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Toto%20Friedlaender"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Toto%20Friedlaender"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.totoofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/68693"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Toto%20Friedlaender&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Toto%20Friedlaender"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC05o3YC_kuha3KcPdssU-kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Toto99com"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-toto",
+    "name": "Toto",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/toto/118770"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Toto"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Toto"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.totoofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/68693"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Toto&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Toto"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC05o3YC_kuha3KcPdssU-kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Toto99com"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-toto2",
+    "name": "Toto 2",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/toto-2/583579"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Toto%202"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Toto%202"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.totoofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/68693"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Toto%202&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Toto%202"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC05o3YC_kuha3KcPdssU-kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Toto99com"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-toto13",
+    "name": "Toto 13",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/toto-13/27792557"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Toto%2013"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Toto%2013"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.totoofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/68693"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Toto%2013&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Toto%2013"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC05o3YC_kuha3KcPdssU-kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Toto99com"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

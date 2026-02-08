@@ -1,0 +1,48 @@
+[
+  {
+    "id": "qobuz-arrigoboito",
+    "name": "Arrigo Boito",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/arrigo-boito/828",
+        "allReleaseTitles": [
+          "mefistofeledomingotreiglecaballejuliusrudel",
+          "mefistofele"
+        ],
+        "latestRelease": {
+          "title": "Arrigo Boito Mefistofele Domingo Treigle Caballe Julius Rudel",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/arrigo-boito-mefistofele-domingo-treigle-caballe-julius-rudel/0724356650152",
+          "releaseDate": "2011-10-10"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Arrigo%20Boito"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Arrigo%20Boito"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/852703"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Arrigo%20Boito&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Arrigo%20Boito"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

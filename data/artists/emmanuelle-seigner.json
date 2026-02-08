@@ -1,0 +1,45 @@
+[
+  {
+    "id": "qobuz-emmanuelleseigner",
+    "name": "Emmanuelle Seigner",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/emmanuelle-seigner/148339",
+        "allReleaseTitles": [
+          "lesmotssimplesbrettanderson",
+          "dingue",
+          "aloneabarcelone"
+        ],
+        "latestRelease": {
+          "title": "Alone A Barcelone Emmanuelle Seigner",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/alone-a-barcelone-emmanuelle-seigner/0884977738742",
+          "releaseDate": "2010-08-23"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Emmanuelle%20Seigner"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Emmanuelle%20Seigner"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/736078"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/emmanuelle.seigner/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

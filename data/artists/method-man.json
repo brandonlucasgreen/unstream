@@ -1,0 +1,148 @@
+[
+  {
+    "id": "qobuz-methodman",
+    "name": "Method Man",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/method-man/41228",
+        "allReleaseTitles": [
+          "methlabseason3therehab",
+          "muggsyboguesmarloncraftamp",
+          "pairofhammersghostfacekillah",
+          "blackoutredman",
+          "dbzyourolddrooganddenzelcurryfeaturingmadlib",
+          "butterflyeffectfeatrjpayne",
+          "thelast2minutesfeatironmicironmic",
+          "livefromthemethlab",
+          "dayonesjonesinkand",
+          "nextchamberfeatraekwonwilliethekidpeterrosenberg",
+          "tonighttamikascott",
+          "allfirehanzon",
+          "methlabseason2thelithium",
+          "tical",
+          "blackout2redman",
+          "tical0theprequel",
+          "tical2000judgementday"
+        ],
+        "latestRelease": {
+          "title": "Pair Of Hammers Ghostface Killah Method Man",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/pair-of-hammers-ghostface-killah-method-man/i1kojyx7xlpsb",
+          "releaseDate": "2024-05-09"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Method%20Man"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Method%20Man"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://smithgarrproductions.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/17587"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Method%20Man&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Method%20Man"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/methodmanofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@methodmanofficial1"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCc1r7FILg1s6rXuE4quij5Q"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@methodmanofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/methodman"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "method",
+    "name": "Method",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014553553_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://man-myth-method.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Method"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Method"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://smithgarrproductions.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/17587"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Method&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Method"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/methodmanofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@methodmanofficial1"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCc1r7FILg1s6rXuE4quij5Q"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@methodmanofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/methodman"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

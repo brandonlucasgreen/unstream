@@ -1,0 +1,607 @@
+[
+  {
+    "id": "qobuz-cream",
+    "name": "Cream",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/cream/35989",
+        "allReleaseTitles": [
+          "disraeligears",
+          "wheelsoffire",
+          "fresh",
+          "goodbye",
+          "live",
+          "livevolume2",
+          "thebestii",
+          "loveparty",
+          "royalalberthalllondonmay23562005",
+          "4day"
+        ],
+        "latestRelease": {
+          "title": "Wheels Of Fire Cream",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/wheels-of-fire-cream/umv2yacw5nscb",
+          "releaseDate": "1968-01-01"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/Creamys"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Cream"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Cream"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/229621"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Cream&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Cream"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "creamdreamrecords",
+    "name": "Cream Dream Records",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036422816_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://creamdreamrecords.bandcamp.com",
+        "allReleaseTitles": [
+          "goodgriefheavythebluebird",
+          "fonkheavythebluebird",
+          "revengeofthetigercalvinvalentinelawzspoken",
+          "trucktalkftillajcalvinvalentinelawzspoken",
+          "thebongsinthefreezercalvinvalentine",
+          "malibusundaycalvinvalentine",
+          "drivingsobercalvinvalentine",
+          "godbreathekingkhary",
+          "imrickjamesbitchbwjerrymanelakimboombaptist",
+          "imrickjamesbitchbwjerrymanelakimboombaptist",
+          "weedisawesomecalvinvalentine",
+          "ninesixcalvinvalentine",
+          "groovecalvinvalentine",
+          "mayobenzcalvinvalentine",
+          "drankensteinthegreatestdripsvol1birdpeterson",
+          "komfortfoodboombaptist"
+        ],
+        "latestRelease": {
+          "title": "Good Grief\n                \n                \n\n                Heavy the Bluebird",
+          "type": "album",
+          "url": "https://creamdreamrecords.bandcamp.com/album/good-grief",
+          "imageUrl": "https://f4.bcbits.com/img/a2971437703_2.jpg",
+          "releaseDate": "December 15, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Cream%20Dream%20Records"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Cream%20Dream%20Records"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/229621"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Cream%20Dream%20Records&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Cream%20Dream%20Records"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "meltedicecream",
+    "name": "Melted Ice Cream",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0007558508_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://meltedicecream.bandcamp.com",
+        "allReleaseTitles": [
+          "swanfazedonapony",
+          "theasceticvirtueshuman22",
+          "martinizzgornjebelemartinsagadin",
+          "straightliningavondads",
+          "everythingwillneverhappenagaintransistors",
+          "inbrokenbreathpaloalto",
+          "singsballadsandbluesunclequentin",
+          "pushupbigscout",
+          "seeingepwelcometoconcrete",
+          "greyeyesgreylynnjimnothing",
+          "thehollowhuskoffeelingbestbets",
+          "itmustbehardseeingmelikethisjoesampson",
+          "industrialconsistencyadmiraldrowsy",
+          "thegiantslawnwurldseries",
+          "hornhorn",
+          "passingtidesenica"
+        ],
+        "latestRelease": {
+          "title": "swan\n                \n                \n\n                Fazed on a Pony",
+          "type": "album",
+          "url": "https://fazedonapony.bandcamp.com/album/swan?label=608885224&tab=music",
+          "imageUrl": "https://f4.bcbits.com/img/a2072719334_2.jpg",
+          "releaseDate": "January 23, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Melted%20Ice%20Cream"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Melted%20Ice%20Cream"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/229621"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Melted%20Ice%20Cream&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Melted%20Ice%20Cream"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "africancreammusic",
+    "name": "African Cream Music",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0016130089_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://africancream.bandcamp.com",
+        "allReleaseTitles": [
+          "playmeatunemrdjvarious",
+          "musicfromparadise",
+          "brightfuture",
+          "grabthebeatthathisighubuvarious",
+          "afrochillzonevarious",
+          "jazzsoundsplashvarious",
+          "zamoatlastzamo",
+          "singabantuskippershabalala",
+          "freshlygroundfreshlyground",
+          "thewindsofchangevariousartists",
+          "theessentialsouthafricanhousetripvarious",
+          "unmappedafricanloungecollective",
+          "theafricangrooveexperiencesphabembefeaturingjamshack",
+          "theafricangrooveexperiencevol2variousartists",
+          "theafricanloungeexperienceafronaut",
+          "mpembaeffectpresentsambientafriqueafronauts"
+        ],
+        "latestRelease": {
+          "title": "Play Me a Tune Mr DJ\n                \n                \n\n                Various",
+          "type": "album",
+          "url": "https://africancream.bandcamp.com/album/play-me-a-tune-mr-dj",
+          "imageUrl": "https://f4.bcbits.com/img/a2124158597_2.jpg",
+          "releaseDate": "October 26, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=African%20Cream%20Music"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+African%20Cream%20Music"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/229621"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=African%20Cream%20Music&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/African%20Cream%20Music"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "stonecream",
+    "name": "Stone Cream",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038708494_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://stonecream.bandcamp.com",
+        "allReleaseTitles": [
+          "stonifiedblues",
+          "bonesnblues",
+          "slavesofdoom",
+          "rust"
+        ],
+        "latestRelease": {
+          "title": "Stonified Blues",
+          "type": "album",
+          "url": "https://stonecream.bandcamp.com/album/stonified-blues",
+          "imageUrl": "https://f4.bcbits.com/img/a1020131723_16.jpg",
+          "releaseDate": "February 15, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Stone%20Cream"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Stone%20Cream"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/229621"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Stone%20Cream&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Stone%20Cream"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "emperoroficecream",
+    "name": "Emperor of Ice Cream",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026903659_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://emperoroficecream.bandcamp.com",
+        "allReleaseTitles": [
+          "winterpages",
+          "iseeyoueverywhere",
+          "weathervanesingle",
+          "nosoundeverdiesdebutalbum",
+          "theepcollection9394limitededition",
+          "overflowep",
+          "williamep",
+          "lambenteyessingle",
+          "everyonelookssofinesingle"
+        ],
+        "latestRelease": {
+          "title": "Winter Pages",
+          "type": "track",
+          "url": "https://emperoroficecream.bandcamp.com/track/winter-pages",
+          "imageUrl": "https://f4.bcbits.com/img/a0543178898_2.jpg",
+          "releaseDate": "November 11, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Emperor%20of%20Ice%20Cream"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Emperor%20of%20Ice%20Cream"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/229621"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Emperor%20of%20Ice%20Cream&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Emperor%20of%20Ice%20Cream"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "creamsoda",
+    "name": "Crêam Söda",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018269294_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://creamsodacrust.bandcamp.com",
+        "allReleaseTitles": [
+          "fiction",
+          "mangelsyrup",
+          "smallshowlivedemo"
+        ],
+        "latestRelease": {
+          "title": "Fiction",
+          "type": "album",
+          "url": "https://creamsodacrust.bandcamp.com/album/fiction",
+          "imageUrl": "https://f4.bcbits.com/img/a2908913302_2.jpg",
+          "releaseDate": "July 5, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Cr%C3%AAam%20S%C3%B6da"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Cr%C3%AAam%20S%C3%B6da"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "icecream",
+    "name": "Ice Cream",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0017324902_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://icecreeeammm.bandcamp.com",
+        "allReleaseTitles": [
+          "fedup",
+          "dovescry",
+          "modernlife",
+          "peanutbutter",
+          "dialtonemymindbutme",
+          "loveicecream"
+        ],
+        "latestRelease": {
+          "title": "FED UP",
+          "type": "album",
+          "url": "https://icecreeeammm.bandcamp.com/album/fed-up",
+          "imageUrl": "https://f4.bcbits.com/img/a0368335748_2.jpg",
+          "releaseDate": "November 15, 2019"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ice%20Cream"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ice%20Cream"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/229621"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ice%20Cream&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ice%20Cream"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "americancreamband",
+    "name": "American Cream Band",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026281613_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://realamericancream.bandcamp.com",
+        "allReleaseTitles": [
+          "presents",
+          "darkhemisphere",
+          "plasticflame",
+          "embraceyoumillions",
+          "live20152016",
+          "weareworld",
+          "ridehardformyth",
+          "nathan"
+        ],
+        "latestRelease": {
+          "title": "Presents",
+          "type": "album",
+          "url": "https://realamericancream.bandcamp.com/album/presents-3",
+          "imageUrl": "https://f4.bcbits.com/img/a4282922055_2.jpg",
+          "releaseDate": "September 15, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=American%20Cream%20Band"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+American%20Cream%20Band"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/229621"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=American%20Cream%20Band&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/American%20Cream%20Band"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "lipcream",
+    "name": "Lip Cream",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041492700_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://lipcream.bandcamp.com",
+        "allReleaseTitles": [
+          "lonelyrock",
+          "nightridermorethanfight",
+          "bigfootcassette",
+          "killuglypop",
+          "9shocksterror",
+          "closetotheedge",
+          "sin",
+          "thrashtildeath"
+        ],
+        "latestRelease": {
+          "title": "Lonely Rock",
+          "type": "album",
+          "url": "https://lipcream.bandcamp.com/album/lonely-rock",
+          "imageUrl": "https://f4.bcbits.com/img/a0932556618_2.jpg",
+          "releaseDate": "January 1, 1984"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lip%20Cream"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lip%20Cream"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/229621"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Lip%20Cream&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Lip%20Cream"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-cream2",
+    "name": "Cream 2",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/cream-2/535083",
+        "allReleaseTitles": [
+          "tevreau",
+          "staywithme",
+          "ghettofamous",
+          "forabetterlife",
+          "banishnepenthe",
+          "raccoon",
+          "pergilah",
+          "variousartists",
+          "cantturndown",
+          "astept",
+          "canndy",
+          "gauteng",
+          "bigman",
+          "andale",
+          "staystrong"
+        ],
+        "latestRelease": {
+          "title": "For A Better Life Cream",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/for-a-better-life-cream/s6at8qrdkc82b",
+          "releaseDate": "2021-05-14"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Cream%202"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Cream%202"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/229621"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Cream%202&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Cream%202"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

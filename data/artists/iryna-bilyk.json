@@ -1,0 +1,37 @@
+[
+  {
+    "id": "qobuz-irynabilyk",
+    "name": "Iryna Bilyk",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/iryna-bilyk/1076519",
+        "allReleaseTitles": [
+          "",
+          "bilyk",
+          "silnee"
+        ],
+        "latestRelease": {
+          "title": " Iryna Bilyk",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/-iryna-bilyk/dx7t7sja2bk1b",
+          "releaseDate": "2024-12-13"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Iryna%20Bilyk"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Iryna%20Bilyk"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

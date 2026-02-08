@@ -1,0 +1,27 @@
+[
+  {
+    "id": "trecoolfish",
+    "name": "tre cool fish",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025800641_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://trecoolfish.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=tre%20cool%20fish"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+tre%20cool%20fish"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

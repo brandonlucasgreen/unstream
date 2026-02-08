@@ -1,0 +1,76 @@
+[
+  {
+    "id": "chrishardwick",
+    "name": "Chris Hardwick",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0008609986_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/chris-hardwick/450103",
+        "allReleaseTitles": [
+          "funcomfortabledeluxeedition",
+          "funcomfortable",
+          "mandroid",
+          "adriankellowthemotherearthsessionsproducedby",
+          "windmillsatsea",
+          "aparadise",
+          "waittilthesummer",
+          "oasisofpeace",
+          "whatisreality"
+        ],
+        "latestRelease": {
+          "title": "Funcomfortable Deluxe Edition Chris Hardwick",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/funcomfortable-deluxe-edition-chris-hardwick/xkadt1ec1tthb",
+          "releaseDate": "2016-05-02"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bandcamp.com/hardwick"
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/ChrisHardwick"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Chris%20Hardwick"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Chris%20Hardwick"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.nerdist.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/983813"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/hardwick/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@nerdist"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/nerdist"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/hardwick"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

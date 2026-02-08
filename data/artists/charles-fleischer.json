@@ -1,0 +1,41 @@
+[
+  {
+    "id": "qobuz-charlesfleischer",
+    "name": "Charles Fleischer",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/charles-fleischer/514050",
+        "latestRelease": {
+          "title": "Everythings Connected Charles Fleischer",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/everythings-connected-charles-fleischer/hwzjwlclafgvc",
+          "releaseDate": "2025-01-30"
+        },
+        "allReleaseTitles": [
+          "mindseye",
+          "everythingsconnected",
+          "itcouldbeyou"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Charles%20Fleischer"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Charles%20Fleischer"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/390627"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,54 @@
+[
+  {
+    "id": "qobuz-haifawehbe",
+    "name": "Haifa Wehbe",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/haifa-wehbe/320573",
+        "allReleaseTitles": [
+          "hawwa",
+          "oppaoppa",
+          "babyhaifa",
+          "megahaifa2",
+          "malikatjamalalkawen",
+          "woseltelha",
+          "lawkontakramhosny",
+          "megahaifa",
+          "yanahla",
+          "walad",
+          "80millionehsas",
+          "tawaamhayati",
+          "entatani",
+          "eemelsharefromthemovieramsisparis",
+          "mabadaafsh",
+          "tamallinag7a",
+          "iwillsurvive",
+          "tigi",
+          "shaghlakolennas",
+          "farhana"
+        ],
+        "latestRelease": {
+          "title": "Mega Haifa 2 Haifa Wehbe",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/mega-haifa-2-haifa-wehbe/mjqeq74qi9orw",
+          "releaseDate": "2025-12-29"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Haifa%20Wehbe"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Haifa%20Wehbe"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

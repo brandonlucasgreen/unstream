@@ -1,0 +1,97 @@
+[
+  {
+    "id": "floorjansen",
+    "name": "Floor Jansen",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025407496_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://floorjansen.bandcamp.com",
+        "allReleaseTitles": [
+          "agape",
+          "intotheunknown",
+          "dangerousgamefloorjansenhenkpoort",
+          "oblivion",
+          "letitgo"
+        ],
+        "latestRelease": {
+          "title": "Agape",
+          "type": "track",
+          "url": "https://floorjansen.bandcamp.com/track/agape",
+          "imageUrl": "https://f4.bcbits.com/img/a2129817966_2.jpg",
+          "releaseDate": "August 27, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/floor-jansen/889185",
+        "allReleaseTitles": [
+          "oblivion",
+          "euphoria",
+          "letitgo",
+          "fire",
+          "agape",
+          "liveinamsterdam",
+          "prisonofdesirethealbumexpandedafterforeversharondenadel",
+          "invisiblecirclesthealbumexpandedafterforever",
+          "decipherthealbumexpandedafterforever",
+          "remaginethealbumexpandedafterforever",
+          "exordiumthealbumthesessionsafterforever",
+          "prisonofdesirethesessionsafterforever",
+          "invisiblecirclesthesessionsafterforever",
+          "decipherthesessionsafterforever",
+          "remaginethesessionsafterforever",
+          "dangerousgamefeathenkpoort",
+          "myparagon",
+          "daydream",
+          "invincible",
+          "mewithoutyou"
+        ],
+        "latestRelease": {
+          "title": "Fire Floor Jansen",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/fire-floor-jansen/b7ie71qg43gcb",
+          "releaseDate": "2024-10-18"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Floor%20Jansen"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Floor%20Jansen"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.floorjansen.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/309347"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/floor_jansen_official/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@floorjansen.official"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCi4E-YBuPhcGdsP_D2Hh4fA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Floor-Jansen-158034060928796"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

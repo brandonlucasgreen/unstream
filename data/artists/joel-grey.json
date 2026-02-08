@@ -1,0 +1,67 @@
+[
+  {
+    "id": "qobuz-joelgrey",
+    "name": "Joel Grey",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/joel-grey/163541",
+        "allReleaseTitles": [
+          "60sdancepartydiscothequetitomartinez",
+          "onlythebeginningblacksheepboy",
+          "whenimsixtyfour",
+          "honeybun"
+        ],
+        "latestRelease": {
+          "title": "When Im Sixty Four Joel Grey",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/when-im-sixty-four-joel-grey/tzbdymgfg7mka",
+          "releaseDate": "2023-06-25"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/harnessingchaos"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Joel%20Grey"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Joel%20Grey"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "joelgray",
+    "name": "Joel Gray",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a2992679679_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://joelgray.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Joel%20Gray"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Joel%20Gray"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

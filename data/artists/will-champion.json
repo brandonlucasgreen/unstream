@@ -1,0 +1,76 @@
+[
+  {
+    "id": "willchampion",
+    "name": "Will champion",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014325487_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://willchampion.bandcamp.com",
+        "allReleaseTitles": [
+          "laoposicion",
+          "mentiras",
+          "seraxvos",
+          "unmundo",
+          "voyaganar",
+          "lomejorparami",
+          "sinvos",
+          "nuestroamor",
+          "pleamar",
+          "sitevas",
+          "sigueahi",
+          "soyyo",
+          "surinamtalvez",
+          "unrecuerdo",
+          "murraydarling",
+          "yose",
+          "nina"
+        ],
+        "latestRelease": {
+          "title": "la oposicion",
+          "type": "track",
+          "url": "https://willchampion.bandcamp.com/track/la-oposicion",
+          "imageUrl": "https://f4.bcbits.com/img/a4256934950_2.jpg"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Will%20champion"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Will%20champion"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-willchampion",
+    "name": "Will Champion",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/will-champion/96615"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Will%20Champion"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Will%20Champion"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

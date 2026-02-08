@@ -1,0 +1,94 @@
+[
+  {
+    "id": "craigdavid",
+    "name": "Craig David",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0008406285_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/craig-david/53659",
+        "allReleaseTitles": [
+          "commitment",
+          "abracadabrapt2featwesnelsonand",
+          "thetimeisnow",
+          "whoyouaremnek",
+          "commitmentrainvibesmaryannalexander",
+          "abracadabrafeatwesnelsonand",
+          "borntodoit",
+          "followingmyintuition",
+          "22",
+          "dnagalantis",
+          "commitmentpt2tiwasavagemerveille",
+          "sos",
+          "dnapt2galantis",
+          "inyourhands",
+          "summertimekuruptfm",
+          "myheartsbeenwaitingforyouduvall"
+        ],
+        "latestRelease": {
+          "title": "Commitment Rain Vibes Craig David Mary Ann Alexander",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/commitment-rain-vibes-craig-david-mary-ann-alexander/l7eftffyfdu2a",
+          "releaseDate": "2025-08-22"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://craigdavid.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Craig%20David"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Craig%20David"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "craigdavidparr",
+    "name": "CRAIG DAVID PARR",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014833235_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://craigdavidparr.bandcamp.com",
+        "allReleaseTitles": [
+          "ghoststories",
+          "satanicalgardens",
+          "uponasnowymidriffcraigdoeschristmas",
+          "austeritytropical",
+          "holiday"
+        ],
+        "latestRelease": {
+          "title": "ghost stories",
+          "type": "album",
+          "url": "https://craigdavidparr.bandcamp.com/album/ghost-stories",
+          "imageUrl": "https://f4.bcbits.com/img/a3632008631_2.jpg",
+          "releaseDate": "October 15, 2019"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=CRAIG%20DAVID%20PARR"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+CRAIG%20DAVID%20PARR"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

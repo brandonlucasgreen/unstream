@@ -1,0 +1,35 @@
+[
+  {
+    "id": "qobuz-alexborstein",
+    "name": "Alex Borstein",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/alex-borstein/20092464",
+        "allReleaseTitles": [
+          "achristmasworthcelebratingcutatreetheamstergang"
+        ],
+        "latestRelease": {
+          "title": "A Christmas Worth Celebrating Cut A Tree Alex Borstein The Amstergang",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/a-christmas-worth-celebrating-cut-a-tree-alex-borstein-the-amstergang/zqb1faw3anpzb",
+          "releaseDate": "2023-12-15"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Alex%20Borstein"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Alex%20Borstein"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

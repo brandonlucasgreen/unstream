@@ -1,0 +1,67 @@
+[
+  {
+    "id": "qobuz-maiteperroni",
+    "name": "Maite Perroni",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/maite-perroni/270227",
+        "allReleaseTitles": [
+          "locafeatcaliyeldandee",
+          "adicta",
+          "comoyotequierofeatalexisfido",
+          "vasaquerervolver",
+          "eclipsedeluna",
+          "asisoythegreatestshowmanensemble",
+          "tuyyo",
+          "sintiaxelmunizjuanmagan",
+          "romafeatmrrain",
+          "love",
+          "locafeatcaliyeldandeedelaghetto",
+          "soltera",
+          "bumbumdaledalereykon"
+        ],
+        "latestRelease": {
+          "title": "Como Yo Te Quiero Feat Alexis Fido Maite Perroni",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/como-yo-te-quiero-feat-alexis-fido-maite-perroni/zxu23ei0stugc",
+          "releaseDate": "2018-01-19"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Maite%20Perroni"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Maite%20Perroni"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://maiteperroni.world/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2286295"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/maiteperroni/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCU720aZHx6_8ABYWvBHbWUQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MaitePerroniPaginaOficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

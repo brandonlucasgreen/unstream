@@ -1,0 +1,80 @@
+[
+  {
+    "id": "qobuz-llcoolj",
+    "name": "Ll Cool J",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ll-cool-j/67130",
+        "allReleaseTitles": [
+          "saturdaynightspecialfatjoerickross",
+          "proclivitiessaweetie",
+          "passion",
+          "authentic",
+          "biggeranddeffer",
+          "mamasaidknockyouout",
+          "allworld",
+          "mrsmith",
+          "thedefinition",
+          "radio",
+          "phenomenon",
+          "walkingwithapanther",
+          "10",
+          "allworld2"
+        ],
+        "latestRelease": {
+          "title": "Proclivities Ll Cool J Saweetie",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/proclivities-ll-cool-j-saweetie/ze6m59ex1lfbb",
+          "releaseDate": "2024-08-09"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ll%20Cool%20J"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ll%20Cool%20J"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://llcoolj.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/206948"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ll%20Cool%20J&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ll%20Cool%20J"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/llcoolj/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@llcoolj"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/llcooljofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/llcoolj"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

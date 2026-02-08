@@ -1,0 +1,74 @@
+[
+  {
+    "id": "alexilaiho00",
+    "name": "alexi_laiho00",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bandcamp.com/alexi_laiho00"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=alexi_laiho00"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+alexi_laiho00"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/411228"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/alexilaiho.official/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/AlexiLaihoOfficial"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-alexilaiho",
+    "name": "Alexi Laiho",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/alexi-laiho/146904"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Alexi%20Laiho"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Alexi%20Laiho"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/411228"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/alexilaiho.official/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/AlexiLaihoOfficial"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

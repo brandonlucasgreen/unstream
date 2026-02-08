@@ -1,0 +1,699 @@
+[
+  {
+    "id": "robyn",
+    "name": "Robyn",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0042296808_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://robynkonichiwa.bandcamp.com",
+        "allReleaseTitles": [
+          "sexistential",
+          "sexistentialarcastakerobynarca",
+          "dopaminemarlonhoffstadtremixrobynmarlonhoffstadt",
+          "dopaminejamiexxremixrobynjamiexx",
+          "dopamine"
+        ],
+        "latestRelease": {
+          "title": "Sexistential",
+          "type": "album",
+          "url": "https://robynkonichiwa.bandcamp.com/album/sexistential",
+          "imageUrl": "https://f4.bcbits.com/img/a3422378299_2.jpg"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/robynwraith"
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/robyn/189290",
+        "allReleaseTitles": [
+          "dopamine",
+          "doitagainroyksopp",
+          "honey",
+          "sexistential",
+          "bodytalk",
+          "sexistentialtalktome",
+          "dopaminejamiexx",
+          "dopaminemarlonhoffstadt",
+          "lifejamiexx",
+          "sexistentialarca",
+          "monumentroyksopp",
+          "impactchanneltressglewis",
+          "buffalostancemapeinenehcherry",
+          "saltlicoricewiththomasgoldremixjonsi"
+        ],
+        "latestRelease": {
+          "title": "Dopamine Robyn",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/dopamine-robyn/y4vuae0yyoaja",
+          "releaseDate": "2025-11-12"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Robyn"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Robyn"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://robyn.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/37028"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Robyn&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Robyn"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/robynkonichiwa/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@robynkonichiwa"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCC_JSfQlhrKeA_jNeqhLAiA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/6084842529"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "robynhitchcock",
+    "name": "Robyn Hitchcock",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0023950742_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://robynhitchcockofficial.bandcamp.com",
+        "allReleaseTitles": [
+          "globeoffrogs2026remasterrobynhitchcockandtheegyptians",
+          "invisiblehitchcockouttakesanddemos",
+          "1967vacationsinthepast",
+          "lifeafterinfinity",
+          "shufflemania",
+          "thepresident2020version",
+          "themandownstairsdemosrarities",
+          "sundaynevercomestakeoffyourbandages",
+          "themanupstairs",
+          "lovefromlondon",
+          "tromskaptein",
+          "propellortimerobynhitchcockthevenus3",
+          "goodnightoslorobynhitchcockthevenus3",
+          "oletarantularobynhitchcockthevenus3",
+          "spooked",
+          "luxor"
+        ],
+        "latestRelease": {
+          "title": "Globe of Frogs (2026 REMASTER)\n                \n                \n\n                Robyn Hitchcock and the Egyptians",
+          "type": "album",
+          "url": "https://robynhitchcockofficial.bandcamp.com/album/globe-of-frogs-2026-remaster",
+          "imageUrl": "https://f4.bcbits.com/img/a0617660655_2.jpg",
+          "releaseDate": "January 9, 2026"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/robynhitchcock"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Robyn%20Hitchcock"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Robyn%20Hitchcock"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://robyn.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/37028"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Robyn%20Hitchcock&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Robyn%20Hitchcock"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/robynkonichiwa/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@robynkonichiwa"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCC_JSfQlhrKeA_jNeqhLAiA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/6084842529"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "robynadeleanderson",
+    "name": "Robyn Adele Anderson",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0008590572_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://robynadeleanderson.bandcamp.com",
+        "allReleaseTitles": [
+          "coughsyrupyoungthegiant",
+          "honeysucklerose",
+          "lovejazzstandard",
+          "bluedabadeeeiffel65",
+          "thankunextarianagrande",
+          "floatonmodestmouse",
+          "blueskiescover",
+          "haveyourselfamerrylittlechristmasholidaycover",
+          "headstrongtrapt",
+          "dontgetaroundmuchanymorejazzstandard",
+          "aloneheart",
+          "helenamychemicalromance",
+          "aerialssystemofadown",
+          "geturfreakonmissyelliott",
+          "aintmisbehavin",
+          "livinlavidalocarickymartin"
+        ],
+        "latestRelease": {
+          "title": "“Cough Syrup” (Young The Giant)",
+          "type": "track",
+          "url": "https://robynadeleanderson.bandcamp.com/track/cough-syrup-young-the-giant",
+          "imageUrl": "https://f4.bcbits.com/img/a1866665006_2.jpg",
+          "releaseDate": "March 19, 2019"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/robynadele"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Robyn%20Adele%20Anderson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Robyn%20Adele%20Anderson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://robyn.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/37028"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Robyn%20Adele%20Anderson&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Robyn%20Adele%20Anderson"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/robynkonichiwa/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@robynkonichiwa"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCC_JSfQlhrKeA_jNeqhLAiA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/6084842529"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "robynhitchcock-bandcamp-robynhitchcock",
+    "name": "Robyn Hitchcock",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011509029_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://robynhitchcock.bandcamp.com",
+        "allReleaseTitles": [
+          "liveatyeproc15robynhitchcock",
+          "robynhitchcock",
+          "themanupstairs",
+          "lovefromlondon",
+          "chronolologytheverybestofrobynhitchcock",
+          "ioftendreamoftrainsinnewyork",
+          "sexfooddeathandtarantulas",
+          "oletarantula",
+          "spooked",
+          "eye",
+          "gottaletthishenout",
+          "elementoflight",
+          "fegmania",
+          "ioftendreamoftrains",
+          "groovydecay",
+          "blacksnakediamondrole"
+        ],
+        "latestRelease": {
+          "title": "Live at Yep Roc 15: Robyn Hitchcock",
+          "type": "album",
+          "url": "https://robynhitchcock.bandcamp.com/album/live-at-yep-roc-15-robyn-hitchcock",
+          "imageUrl": "https://f4.bcbits.com/img/a2644519961_2.jpg",
+          "releaseDate": "June 5, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Robyn%20Hitchcock"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Robyn%20Hitchcock"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://robyn.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/37028"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Robyn%20Hitchcock&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Robyn%20Hitchcock"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/robynkonichiwa/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@robynkonichiwa"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCC_JSfQlhrKeA_jNeqhLAiA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/6084842529"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "robynmiller",
+    "name": "Robyn Miller",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030403121_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://robynmiller.bandcamp.com",
+        "allReleaseTitles": [
+          "rivenoriginalgamesoundtrackremastered2024",
+          "losttrackspartiii",
+          "losttrackspartii",
+          "losttracksptimyst",
+          "obductionoriginalgamesoundtrack"
+        ],
+        "latestRelease": {
+          "title": "Riven (Original Game Soundtrack) [Remastered 2024]",
+          "type": "album",
+          "url": "https://robynmiller.bandcamp.com/album/riven-original-game-soundtrack-remastered-2024",
+          "imageUrl": "https://f4.bcbits.com/img/a2909950352_2.jpg",
+          "releaseDate": "July 12, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Robyn%20Miller"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Robyn%20Miller"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://robyn.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/37028"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Robyn%20Miller&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Robyn%20Miller"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/robynkonichiwa/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@robynkonichiwa"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCC_JSfQlhrKeA_jNeqhLAiA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/6084842529"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "robyngshiels",
+    "name": "Robyn G Shiels",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027347278_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://robyngshiels.bandcamp.com",
+        "allReleaseTitles": [
+          "constantreminderdemorobyngshiels",
+          "orionsteltdemoforbigtickle",
+          "ringoffirergeekoverjcashrobyngshiels",
+          "songforsomeoneornoone",
+          "wanderinstarreworkingoftheleemarvinclassikrobyngshiels",
+          "deathoftheshadows",
+          "deathoftheshadowsremixes",
+          "thebloodoftheinnocents",
+          "alifetimeofmidnights",
+          "renderthemharmlessrobyngshiels",
+          "howfoolishwasirobyngshiels",
+          "toeachatlasttheirownkowboysupper",
+          "hellodeath",
+          "jumpbyvanhalendonejazzyishstoned",
+          "youshookmeallnightlongacdckoverrobyngshielsacdc",
+          "5demonsfromwaybackwhen"
+        ],
+        "latestRelease": {
+          "title": "constant reminder : demo\n                \n                \n\n                robyn g shiels",
+          "type": "track",
+          "url": "https://robyngshiels.bandcamp.com/track/constant-reminder-demo",
+          "imageUrl": "https://f4.bcbits.com/img/a3815337984_2.jpg",
+          "releaseDate": "January 13, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Robyn%20G%20Shiels"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Robyn%20G%20Shiels"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://robyn.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/37028"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Robyn%20G%20Shiels&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Robyn%20G%20Shiels"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/robynkonichiwa/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@robynkonichiwa"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCC_JSfQlhrKeA_jNeqhLAiA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/6084842529"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "totorobyn",
+    "name": "TotoRobyn",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031553205_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://totorobyn.bandcamp.com",
+        "allReleaseTitles": [
+          "divergentcrossroads",
+          "fromdaybreaktonightfall",
+          "fromdarknesslightwillshine",
+          "journeysversusdestinations",
+          "fracturedinstability",
+          "echoesofdreamscapes",
+          "waitingforhermoment",
+          "herbattlecry",
+          "myreturntoutopia",
+          "amomentofyearning",
+          "takeprideinyourlove",
+          "industry8"
+        ],
+        "latestRelease": {
+          "title": "Divergent Crossroads",
+          "type": "album",
+          "url": "https://totorobyn.bandcamp.com/album/divergent-crossroads",
+          "imageUrl": "https://f4.bcbits.com/img/a3109189223_2.jpg",
+          "releaseDate": "August 29, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=TotoRobyn"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+TotoRobyn"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://robyn.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/37028"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=TotoRobyn&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/TotoRobyn"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/robynkonichiwa/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@robynkonichiwa"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCC_JSfQlhrKeA_jNeqhLAiA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/6084842529"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-robyn3",
+    "name": "Robyn 3",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/robyn-3/20899744"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Robyn%203"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Robyn%203"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://robyn.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/37028"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Robyn%203&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Robyn%203"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/robynkonichiwa/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@robynkonichiwa"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCC_JSfQlhrKeA_jNeqhLAiA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/6084842529"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-robyn210",
+    "name": "Robyn210",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/robyn210/25931314"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Robyn210"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Robyn210"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://robyn.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/37028"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Robyn210&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Robyn210"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/robynkonichiwa/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@robynkonichiwa"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCC_JSfQlhrKeA_jNeqhLAiA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/6084842529"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

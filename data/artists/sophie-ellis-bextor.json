@@ -1,0 +1,136 @@
+[
+  {
+    "id": "qobuz-sophieellisbextor",
+    "name": "Sophie Ellis Bextor",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sophie-ellis-bextor/129566",
+        "allReleaseTitles": [
+          "perimenopop",
+          "murderonthedancefloorpnau",
+          "murderonthedancefloordavidguetta",
+          "vertigo",
+          "taste",
+          "relentlesslove",
+          "freedomofthenight",
+          "hana",
+          "dolcevita",
+          "freedomofthenightclaptone",
+          "songsfromthekitchendiscosgreatesthits",
+          "stayonme",
+          "murderonthedancefloorthemba",
+          "thesongdiaries"
+        ],
+        "latestRelease": {
+          "title": "Perimenopop Sophie Ellis Bextor",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/perimenopop-sophie-ellis-bextor/z2nzwmhafi2oa",
+          "releaseDate": "2025-09-12"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sophie%20Ellis%20Bextor"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sophie%20Ellis%20Bextor"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://sophieellisbextor.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/37594"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sophie%20Ellis%20Bextor&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sophie%20Ellis%20Bextor"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sophieellisbextor/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@sophieebtiktok"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/sophieebofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/SophieEllisBextor"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-sophieellisbextor5",
+    "name": "Sophie Ellis Bextor 5",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sophie-ellis-bextor-5/21999562"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sophie%20Ellis%20Bextor%205"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sophie%20Ellis%20Bextor%205"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://sophieellisbextor.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/37594"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sophie%20Ellis%20Bextor%205&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sophie%20Ellis%20Bextor%205"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sophieellisbextor/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@sophieebtiktok"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/sophieebofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/SophieEllisBextor"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

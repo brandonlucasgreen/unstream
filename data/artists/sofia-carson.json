@@ -1,0 +1,73 @@
+[
+  {
+    "id": "qobuz-sofiacarson",
+    "name": "Sofia Carson",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sofia-carson/2325858",
+        "allReleaseTitles": [
+          "ifiknewmatteobocelli",
+          "differentworldalanwalkerk391featcorsak",
+          "whitechristmasandreabocelli",
+          "glowinupmylittlepony",
+          "foolsgoldtiesto",
+          "",
+          "jokesonme",
+          "purplehearts",
+          "loveisthenamejbalvin",
+          "comebackhome",
+          "backtobeautiful",
+          "ihopeyouknow",
+          "loveisthename",
+          "feelthebeatmusicfromthenetflixfilmkyliediehl",
+          "iluvur3hab",
+          "missumorethanuknowr3hab",
+          "imyourgirl",
+          "holdontome",
+          "goodtobebaddovecameronbooboostewartcameronboycejadahmarieannacathcart"
+        ],
+        "latestRelease": {
+          "title": "White Christmas Andrea Bocelli Sofia Carson",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/white-christmas-andrea-bocelli-sofia-carson/zklxyludz7ppa",
+          "releaseDate": "2024-11-15"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sofia%20Carson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sofia%20Carson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://sofiacarson.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4998819"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sofiacarson/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCa9-24DvBWhLElDKYUmyzCQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sofiacarson"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

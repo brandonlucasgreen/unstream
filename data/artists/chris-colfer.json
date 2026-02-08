@@ -1,0 +1,45 @@
+[
+  {
+    "id": "qobuz-chriscolfer",
+    "name": "Chris Colfer",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/chris-colfer/4327695",
+        "allReleaseTitles": [
+          "landofstoriesdasmagischelanddiesuchenachdemwunschzauber",
+          "einegeheimeakademietaleofmagicdielegendedermagieband1",
+          "derkampfderweltenlandofstoriesband6",
+          "eingefahrlicherpakttaleofmagicdielegendedermagieband3",
+          "dieruckkehrderzauberinlandofstoriesdasmagischeland2",
+          "dasmagischelandeinedusterewarnungband3landofstories",
+          "einedunkleverschworungtaleofmagicdielegendedermagieband2",
+          "einkonigreichingefahrlandofstoriesband4",
+          "diemachtdergeschichtenlandofstoriesdasmagischeland5",
+          "roswelljohnsonrettetdieweltroswelljohnsonband1",
+          "dasmagischelandeineschatztruheklassischermarchenlandofstories"
+        ],
+        "latestRelease": {
+          "title": "Ein Gefahrlicher Pakt Tale Of Magic Die Legende Der Magie Band 3 Chris Colfer",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/ein-gefahrlicher-pakt-tale-of-magic-die-legende-der-magie-band-3-chris-colfer/q2df4wktbdkvc",
+          "releaseDate": "2022-02-23"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Chris%20Colfer"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Chris%20Colfer"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

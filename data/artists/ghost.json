@@ -1,0 +1,886 @@
+[
+  {
+    "id": "ghost",
+    "name": "Ghost",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027514820_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ghost.bandcamp.com",
+        "allReleaseTitles": [
+          "itsasin",
+          "skeleta",
+          "peacefield",
+          "ritehereritenoworiginalmotionpicturesoundtrack",
+          "stayfeatpatrickwilsoninsidiousversion",
+          "phantomime",
+          "ifyouhaveghost",
+          "spillwaysghostdefleppard",
+          "maryonacrossslowedreverbhires",
+          "impera",
+          "huntersmoon",
+          "seveninchesofsatanicpanic",
+          "prequelle",
+          "ceremonyanddevotion",
+          "meliora",
+          "infestissumam"
+        ],
+        "latestRelease": {
+          "title": "It's A Sin",
+          "type": "album",
+          "url": "https://ghost.bandcamp.com/album/its-a-sin",
+          "imageUrl": "https://f4.bcbits.com/img/a1733221691_2.jpg",
+          "releaseDate": "January 16, 2026"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ghost-37/25274827",
+        "latestRelease": {
+          "title": "Skeleta Ghost",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/skeleta-ghost/c0q7h65r6efua",
+          "releaseDate": "2025-04-25"
+        },
+        "allReleaseTitles": [
+          "skeleta",
+          "seveninchesofsatanicpanic",
+          "impera",
+          "prequellebc",
+          "opuseponymous",
+          "phantomime",
+          "meliorabc",
+          "staypatrickwilson",
+          "ritehereritenow",
+          "itsasin",
+          "maryonacross",
+          "ritehereritenow",
+          "ifyouhaveghostswedishband",
+          "spillwaysjoeelliott"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ghost"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ghost"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://ghost-official.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1966143"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thebandghost/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@thebandghost"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCAOiVaJJlH0Oduv48NN0mMA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thebandghost"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "spaceghost",
+    "name": "Space Ghost",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036809678_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://space-ghost.bandcamp.com",
+        "latestRelease": {
+          "title": "Majestic Fantasies (Instrumentals)",
+          "type": "album",
+          "url": "https://space-ghost.bandcamp.com/album/majestic-fantasies-instrumentals",
+          "imageUrl": "https://f4.bcbits.com/img/a3362100841_2.jpg",
+          "releaseDate": "October 3, 2025"
+        },
+        "allReleaseTitles": [
+          "majesticfantasiesinstrumentals",
+          "majesticfantasiesspaceghostteddybryant",
+          "dreamtool",
+          "newworldenergyambientmix",
+          "aquariumnightclubreworks",
+          "4am",
+          "privateparadiselimitedcassette",
+          "danceplanetremixes",
+          "heavensentspaceghostfeatteddybryant",
+          "danceplanet",
+          "pacificspiritno61",
+          "afterworld",
+          "timetodance",
+          "betweenworlds",
+          "free2b",
+          "aquariumnightclub",
+          "endlesslight",
+          "teamwork"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Space%20Ghost"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Space%20Ghost"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://ghost-official.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1966143"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thebandghost/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@thebandghost"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCAOiVaJJlH0Oduv48NN0mMA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thebandghost"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "ghostdata",
+    "name": "GHOST DATA",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018372019_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ghostdata.bandcamp.com",
+        "allReleaseTitles": [
+          "fluoritefault",
+          "gardenofeyes",
+          "symphonyoftheshepherdess",
+          "voidwalker",
+          "cruelchoreography",
+          "crystalcathedral",
+          "magicalmetamorphosis",
+          "simulatedsensations",
+          "theshepherdessrebirth",
+          "theocculusoccult",
+          "girlslove",
+          "oishiisymphony",
+          "dreameaterfeatymirghostdataymir",
+          "thewoundedhealerghostdatakindridretiredorphanaisurin",
+          "thebeachepisode",
+          "projektmelodyfeatalce"
+        ],
+        "latestRelease": {
+          "title": "Fluorite Fault",
+          "type": "track",
+          "url": "https://ghostdata.bandcamp.com/track/fluorite-fault",
+          "imageUrl": "https://f4.bcbits.com/img/a1074683926_2.jpg",
+          "releaseDate": "November 13, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=GHOST%20DATA"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+GHOST%20DATA"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://ghost-official.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1966143"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thebandghost/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@thebandghost"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCAOiVaJJlH0Oduv48NN0mMA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thebandghost"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "ghostdiamond",
+    "name": "Ghost Diamond",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0010899376_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ghostdiamond.bandcamp.com",
+        "allReleaseTitles": [
+          "thelunarcurtainiideathsdynamicshroud",
+          "keystothegatedeathsdynamicshroud",
+          "midnighttangerinedeathsdynamicshroud",
+          "transcendencebotdeathsdynamicshroud",
+          "afterangeldeathsdynamicshroud",
+          "genomodsdeathsdynamicshroudwmv",
+          "rabbitcradleultimatemixhcmj",
+          "thelunarcurtaindeathsdynamicshroud",
+          "faithinpersonadeathsdynamicshroud",
+          "monumenttothearchitectdeathsdynamicshroudwmv",
+          "poisondeathsdynamicshroudwmv",
+          "xoxotechhonors",
+          "memoirsvol1rebeccapeake",
+          "seawrld2deathsdynamicshroudwmv",
+          "livefromjapandeathsdynamicshroud",
+          "populousromantiquedinosauronfire"
+        ],
+        "latestRelease": {
+          "title": "The Lunar Curtain II\n                \n                \n\n                death's dynamic shroud",
+          "type": "album",
+          "url": "https://deathsdynamicshroud.bandcamp.com/album/the-lunar-curtain-ii?label=2541277624&tab=music",
+          "imageUrl": "https://f4.bcbits.com/img/a4010382774_2.jpg",
+          "releaseDate": "September 12, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ghost%20Diamond"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ghost%20Diamond"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://ghost-official.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1966143"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thebandghost/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@thebandghost"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCAOiVaJJlH0Oduv48NN0mMA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thebandghost"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "tinyghostrecords",
+    "name": "Tiny Ghost Records",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0021121888_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tinyghostrecords.bandcamp.com",
+        "allReleaseTitles": [
+          "globeoffrogs2026remasterrobynhitchcockandtheegyptians",
+          "invisiblehitchcockouttakesanddemosrobynhitchcock",
+          "theresurrectiongameemmaswift",
+          "underwatermoonlight45thanniversaryremasterthesoftboys",
+          "1967vacationsinthepastrobynhitchcock",
+          "nextdoorlandthesoftboys",
+          "lifeafterinfinityrobynhitchcock",
+          "shufflemaniarobynhitchcock",
+          "thepresident2020versionrobynhitchcock",
+          "blondeonthetracksemmaswift",
+          "themandownstairsdemosraritiesrobynhitchcock",
+          "sundaynevercomestakeoffyourbandagesrobynhitchcock",
+          "loveisadragrobynhitchcockemmaswift",
+          "themanupstairsrobynhitchcock",
+          "lovefromlondonrobynhitchcock",
+          "tromskapteinrobynhitchcock"
+        ],
+        "latestRelease": {
+          "title": "Globe of Frogs (2026 REMASTER)\n                \n                \n\n                Robyn Hitchcock and the Egyptians",
+          "type": "album",
+          "url": "https://robynhitchcockofficial.bandcamp.com/album/globe-of-frogs-2026-remaster?label=2325313115&tab=music",
+          "imageUrl": "https://f4.bcbits.com/img/a0617660655_2.jpg",
+          "releaseDate": "January 9, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tiny%20Ghost%20Records"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tiny%20Ghost%20Records"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://ghost-official.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1966143"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thebandghost/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@thebandghost"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCAOiVaJJlH0Oduv48NN0mMA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thebandghost"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "ghostnote",
+    "name": "Ghost-Note",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0034728477_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ghost-note.bandcamp.com",
+        "allReleaseTitles": [
+          "mustardnonions",
+          "swagism",
+          "fortified"
+        ],
+        "latestRelease": {
+          "title": "Mustard n'Onions",
+          "type": "album",
+          "url": "https://ghost-note.bandcamp.com/album/mustard-nonions",
+          "imageUrl": "https://f4.bcbits.com/img/a4220533798_2.jpg",
+          "releaseDate": "April 19, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ghost-Note"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ghost-Note"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://ghost-official.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1966143"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thebandghost/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@thebandghost"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCAOiVaJJlH0Oduv48NN0mMA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thebandghost"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "inlovewithaghost",
+    "name": "In Love With A Ghost",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014849690_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://inlovewithaghost.bandcamp.com",
+        "allReleaseTitles": [
+          "dematerialized",
+          "playfulspirits",
+          "heartofthewoodsendingtheme",
+          "gaystory",
+          "interdimensionalportalleadingtoacuteplaceftsnailshousesingle",
+          "healing",
+          "letsgo",
+          "discography2016",
+          "discography2015",
+          "ordinarymagicep",
+          "diary20122014"
+        ],
+        "latestRelease": {
+          "title": "Dematerialized",
+          "type": "album",
+          "url": "https://inlovewithaghost.bandcamp.com/album/dematerialized",
+          "imageUrl": "https://f4.bcbits.com/img/a0620571274_2.jpg",
+          "releaseDate": "January 13, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=In%20Love%20With%20A%20Ghost"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+In%20Love%20With%20A%20Ghost"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://ghost-official.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1966143"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thebandghost/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@thebandghost"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCAOiVaJJlH0Oduv48NN0mMA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thebandghost"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "ghost-bandcamp-ghostandpals",
+    "name": "GHOST",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0029144335_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ghostandpals.bandcamp.com",
+        "allReleaseTitles": [
+          "pathologicalfacade",
+          "gonefishing",
+          "endworldnormopathy",
+          "deathbody",
+          "scapegat",
+          "ihadtodietosurvive",
+          "spideronthewall2022ver",
+          "uncanny",
+          "chelovek",
+          "recklessbatteryburns",
+          "aura",
+          "entomologists",
+          "honeyimhome",
+          "hyperdontiacreeppandghost",
+          "thechatteringlackofcommonsense",
+          "thosewhocarriedon"
+        ],
+        "latestRelease": {
+          "title": "Pathological Facade",
+          "type": "album",
+          "url": "https://ghostandpals.bandcamp.com/album/pathological-facade",
+          "imageUrl": "https://f4.bcbits.com/img/a3860291035_2.jpg",
+          "releaseDate": "July 3, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=GHOST"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+GHOST"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://ghost-official.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1966143"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thebandghost/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@thebandghost"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCAOiVaJJlH0Oduv48NN0mMA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thebandghost"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "ghostbath",
+    "name": "Ghost Bath",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0042165644_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ghostbath.bandcamp.com",
+        "allReleaseTitles": [
+          "rosethornnecklace",
+          "selfloather",
+          "starmourner",
+          "moonlover",
+          "funeral",
+          "ghostbathep"
+        ],
+        "latestRelease": {
+          "title": "Rose Thorn Necklace",
+          "type": "album",
+          "url": "https://ghostbath.bandcamp.com/album/rose-thorn-necklace",
+          "imageUrl": "https://f4.bcbits.com/img/a2860494328_2.jpg",
+          "releaseDate": "May 9, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ghost%20Bath"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ghost%20Bath"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://ghost-official.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1966143"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thebandghost/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@thebandghost"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCAOiVaJJlH0Oduv48NN0mMA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thebandghost"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "bigghostlimited",
+    "name": "BigGhostLimited",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014768626_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bigghostlimited.bandcamp.com",
+        "allReleaseTitles": [
+          "blacksheepmickeydiamond",
+          "wolfticketsmickeydiamond",
+          "albizusrevengeufofev",
+          "ghostrumentalsvol1instrumentalsfromtherecordinggriseldaghost",
+          "guccigambinosmickeydiamond",
+          "bazukocrimeapple",
+          "lastexittocrooklyneddiekaine",
+          "guccighost4mickeydiamond",
+          "guccighost3mickeydiamond",
+          "thelosttapesdeluxeeditionghostfacekillahbigghostltd",
+          "theghronicspeshalmachinery38speshconwaythemachine",
+          "noirorneverchenoir",
+          "wasntbuiltinadayromestreetz",
+          "guccighost2mickeydiamond",
+          "guccighostmickeydiamond",
+          "paytheghostmilanoconstantine"
+        ],
+        "latestRelease": {
+          "title": "Black Sheep\n                \n                \n\n                Mickey Diamond",
+          "type": "album",
+          "url": "https://bigghostlimited.bandcamp.com/album/black-sheep",
+          "imageUrl": "https://f4.bcbits.com/img/a2474771603_2.jpg",
+          "releaseDate": "February 3, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=BigGhostLimited"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+BigGhostLimited"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://ghost-official.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1966143"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thebandghost/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@thebandghost"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCAOiVaJJlH0Oduv48NN0mMA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thebandghost"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-ghost2",
+    "name": "Ghost 2",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ghost-2/2522434"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ghost%202"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ghost%202"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://ghost-official.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1966143"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thebandghost/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@thebandghost"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCAOiVaJJlH0Oduv48NN0mMA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thebandghost"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-ghost",
+    "name": "Ghost",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ghost/67254"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ghost"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ghost"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://ghost-official.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1966143"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thebandghost/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@thebandghost"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCAOiVaJJlH0Oduv48NN0mMA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thebandghost"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-ghost25",
+    "name": "Ghost 25",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ghost-25/18455125"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ghost%2025"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ghost%2025"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://ghost-official.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1966143"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thebandghost/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@thebandghost"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCAOiVaJJlH0Oduv48NN0mMA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thebandghost"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

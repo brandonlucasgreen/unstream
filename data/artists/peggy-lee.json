@@ -1,0 +1,319 @@
+[
+  {
+    "id": "peggylee",
+    "name": "Peggy Lee",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0012748945_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://peggylee1.bandcamp.com",
+        "allReleaseTitles": [
+          "birdsofaustraliaryanwilliamspeggyleedylanvanderschyff",
+          "oldcountrynewcountrypaulwilliamsonpeggyleedylanvanderschyff",
+          "agivingway",
+          "thenaturalworldrobinholcomb",
+          "echopainting",
+          "telltalefilminmusic",
+          "invitationthepeggyleeband",
+          "beautifultoolmarymargaretohara",
+          "newcodethepeggyleeband",
+          "worldsapartthepeggyleeband",
+          "soundsfromthebighousethepeggyleeband",
+          "intentionsjohnbutcherphildurrantandpeggylee",
+          "thepeggyleebandthepeggyleeband",
+          "westernfront1996peggyleecarloszingaro"
+        ],
+        "latestRelease": {
+          "title": "Birds of Australia\n                \n                \n\n                Ryan Williams, Peggy Lee, Dylan van der Schyff",
+          "type": "album",
+          "url": "https://peggylee1.bandcamp.com/album/birds-of-australia-2",
+          "imageUrl": "https://f4.bcbits.com/img/a2953785754_2.jpg",
+          "releaseDate": "January 31, 2026"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/peggy-lee/24285",
+        "latestRelease": {
+          "title": "Im A Woman Peggy Lee",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/im-a-woman-peggy-lee/ozjarug8f87lc",
+          "releaseDate": "1963-01-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Peggy%20Lee"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Peggy%20Lee"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://peggylee.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/79742"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Peggy%20Lee&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Peggy%20Lee"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/peggyleeofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@peggylee"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCWfdzpDGBCOOWxWVR0fLVNw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/misspeggylee"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "peggylee-bandcamp-peggylee",
+    "name": "Peggy Lee",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011078144_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://peggylee.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Peggy%20Lee"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Peggy%20Lee"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://peggylee.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/79742"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Peggy%20Lee&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Peggy%20Lee"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/peggyleeofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@peggylee"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCWfdzpDGBCOOWxWVR0fLVNw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/misspeggylee"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "peggyleecooper",
+    "name": "Peggy Lee Cooper",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014525668_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://peggyleecooper.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Peggy%20Lee%20Cooper"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Peggy%20Lee%20Cooper"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://peggylee.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/79742"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Peggy%20Lee%20Cooper&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Peggy%20Lee%20Cooper"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/peggyleeofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@peggylee"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCWfdzpDGBCOOWxWVR0fLVNw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/misspeggylee"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "peggyleecoleschmidt",
+    "name": "Peggy Lee & Cole Schmidt",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037172508_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://peggyleecoleschmidt.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Peggy%20Lee%20%26%20Cole%20Schmidt"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Peggy%20Lee%20%26%20Cole%20Schmidt"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://peggylee.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/79742"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Peggy%20Lee%20%26%20Cole%20Schmidt&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Peggy%20Lee%20%26%20Cole%20Schmidt"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/peggyleeofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@peggylee"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCWfdzpDGBCOOWxWVR0fLVNw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/misspeggylee"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-peggylee9",
+    "name": "Peggy Lee 9",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/peggy-lee-9/13189528"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Peggy%20Lee%209"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Peggy%20Lee%209"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://peggylee.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/79742"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Peggy%20Lee%209&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Peggy%20Lee%209"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/peggyleeofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@peggylee"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCWfdzpDGBCOOWxWVR0fLVNw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/misspeggylee"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

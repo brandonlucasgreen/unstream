@@ -1,0 +1,77 @@
+[
+  {
+    "id": "qobuz-nickdrake",
+    "name": "Nick Drake",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/nick-drake/43247",
+        "latestRelease": {
+          "title": "The Making Of Five Leaves Left Nick Drake",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-making-of-five-leaves-left-nick-drake/w7xndm07shbaa",
+          "releaseDate": "2025-07-25"
+        },
+        "allReleaseTitles": [
+          "fiveleavesleft",
+          "pinkmoon",
+          "themakingoffiveleavesleft",
+          "bryterlayter",
+          "theendlesscolouredwaysthesongsof",
+          "thejohnpeelsession",
+          "fruittreedemiandorelli",
+          "atreasury",
+          "digitalboxset",
+          "madetolovemagic",
+          "strangeface",
+          "timehastoldme",
+          "fruittree",
+          "riverman"
+        ]
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/NickDrake"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Nick%20Drake"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Nick%20Drake"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "nickdrakeandthesadbeads",
+    "name": "Nick Drake and the Sad Beads",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033272365_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://nickdrakeandthesadbeads.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Nick%20Drake%20and%20the%20Sad%20Beads"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Nick%20Drake%20and%20the%20Sad%20Beads"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

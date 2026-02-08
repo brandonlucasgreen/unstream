@@ -1,0 +1,86 @@
+[
+  {
+    "id": "qobuz-ericburdon",
+    "name": "Eric Burdon",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/eric-burdon/82054",
+        "allReleaseTitles": [
+          "theverybestofwarwar",
+          "spillthewinewar",
+          "spillthewineuneditedremixwar",
+          "tilyourriverrunsdry",
+          "houseoftherisingsun",
+          "declareswarwar",
+          "theblackmansburdonwar",
+          "thegreenhornesthegreenhornes",
+          "loveisallaroundwar",
+          "thebestofwarwar",
+          "mysecretlife",
+          "soulofaman",
+          "blackwhitebluesjimmywitherspoon",
+          "singstheanimalsgreatesthits",
+          "iusedtobeananimal",
+          "sanfranciscannights",
+          "ericonhisownthedavecashcollection",
+          "",
+          "theofficiallivebootleg2000thenewanimals",
+          "soledadbluesjimmywitherspoon"
+        ],
+        "latestRelease": {
+          "title": "The Very Best Of Eric Burdon War Eric Burdon War",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-very-best-of-eric-burdon-war-eric-burdon-war/qyptmnti8uu1b",
+          "releaseDate": "2025-12-05"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Eric%20Burdon"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Eric%20Burdon"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://ericburdon.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/188393"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Eric%20Burdon&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Eric%20Burdon"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/OfficialEricBurdon/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/@ericburdon"
+      },
+      {
+        "sourceId": "mastodon",
+        "url": "https://siteassets.parastorage.com/pages/pages/thunderbolt?appDefinitionIdToSiteRevision=%7B%2214271d6f-ba62-d045-549b-ab972ae1f70e%22%3A%2225%22%7D&beckyExperiments=.DatePickerPortal%2C.DisableDocumentScrollWhenLightBoxOpen%2C.EnableCustomCSSVarsForLoginSocialBar%2C.FreemiumBannerOdeditor%2C.LoginBarEnableLoggingInStateInSSR%2C.TextInputAutoFillFix%2C.UseLoginSocialBarCustomMenu%2C.UseNewLoginSocialBarCustomMenuPositioning%2C.UseNewLoginSocialBarElementStructure%2C.UseNewLoginSocialBarMemberInitialsAvatar%2C.VerticalMenu_uiType_NativeMapper%2C.WixFreeSiteBannerDesktop%2C.WixFreeSiteBannerMobile%2C.buttonUdp%2C.calculateCollapsibleTextLineHeightByFont%2C.disableBuilderWixComponents%2C.dom_store%2C.dynamicSlots%2C.fiveGridLineStudioSkins%2C.imageEncodingAVIF%2C.isClassNameToRootEnabled%2C.motionTimeAnimationsCSS%2C.propsCarmiMappersMigration1%2C.propsCarmiMappersMigration4%2C.propsCarmiMappersMigration5%2C.shouldUseResponsiveImages%2C.svgResolver_2%2C.takeAppDependenciesFromCSM%2C.updateRichTextSemanticClassNamesOnCorvid%2C.useClassnameInResponsiveAppWidget%2C.useImageAvifFormatInNativeProGallery%2C.useResponsiveImgClassicFixed%2C.useSvgLoaderFeature%2C.useSvgLoaderFeatureOnBuilderComps&blocksBuilderManifestGeneratorVersion=1.129.0&commonConfig=%7B%22siteRevision%22%3A%224%22%2C%22branchId%22%3A%22c9cc6039-29ce-44b4-898e-c3d6eed6d618%22%7D&contentType=application%2Fjson&deviceType=Desktop&dfCk=6&dfVersion=1.5263.0&disableStaticPagesUrlHierarchy=false&editorName=Unknown&experiments=dm_bgScrubToMotionFixer%2Cdm_masterPageVariablesQueryFixer%2Cdm_migrateOldHoverBoxToNewFixer&externalBaseUrl=https%3A%2F%2Fwww.ericburdon.com&fileId=831606ee.bundle.min&formFactor=desktop&hasTPAWorkerOnSite=false&hasUserDomainMedia=false&isBuilderComponentModel=false&isClientSdkOnSite=true&isHttps=true&isInSeo=false&isMultilingualEnabled=false&isPremiumDomain=true&isTrackClicksAnalyticsEnabled=false&isUrlMigrated=true&isWixCodeOnPage=false&isWixCodeOnSite=false&language=en&languageResolutionMethod=QueryParam&metaSiteId=d2c56bd5-d63e-4d6e-8d55-19d7bd0b2b31&module=thunderbolt-features&oneDocEnabled=true&originalLanguage=en&pageId=b90e0b_ae308b52d859165cdf53c6a712a2c5de_3.json&pilerExperiments=specs.piler.useEditorReactComponents&quickActionsMenuEnabled=false&registryLibrariesTopology=%5B%7B%22artifactId%22%3A%22editor-elements%22%2C%22namespace%22%3A%22wixui%22%2C%22url%22%3A%22https%3A%2F%2Fstatic.parastorage.com%2Fservices%2Feditor-elements%2F1.14878.0%22%7D%2C%7B%22artifactId%22%3A%22editor-elements%22%2C%22namespace%22%3A%22dsgnsys%22%2C%22url%22%3A%22https%3A%2F%2Fstatic.parastorage.com%2Fservices%2Feditor-elements%2F1.14878.0%22%7D%5D&remoteWidgetStructureBuilderVersion=1.251.0&siteId=b709312f-c6f5-49dc-b424-3388b6a1baf0&siteRevision=4&staticHTMLComponentUrl=https%3A%2F%2Fwww-ericburdon-com.filesusr.com%2F&useSandboxInHTMLComp=false&viewMode=desktop"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/OfficialEricBurdon"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,341 @@
+[
+  {
+    "id": "annemariesanderson",
+    "name": "Anne-Marie Sanderson",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0034973945_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://annemariesanderson.bandcamp.com",
+        "allReleaseTitles": [
+          "brightair",
+          "oldlight",
+          "if",
+          "turningoftheyear",
+          "booksongsvol1",
+          "shadowssparks",
+          "eloquence",
+          "silentnight"
+        ],
+        "latestRelease": {
+          "title": "Bright Air",
+          "type": "track",
+          "url": "https://annemariesanderson.bandcamp.com/track/bright-air",
+          "imageUrl": "https://f4.bcbits.com/img/a2176751894_2.jpg",
+          "releaseDate": "December 15, 2024"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/annemariesanderson"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Anne-Marie%20Sanderson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Anne-Marie%20Sanderson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://iamannemarie.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/238549"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/annemarie/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@annemarie"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCBL7ZxVX4GvW4CFiES_-0YA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/iamannemarie"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "annemariehelder",
+    "name": "Anne-Marie Helder",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0004415264_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://annemariehelder.bandcamp.com",
+        "allReleaseTitles": [
+          "coventrycarol",
+          "january",
+          "thefall",
+          "annemarieheldersololive",
+          "fieldsofgold",
+          "thecontact"
+        ],
+        "latestRelease": {
+          "title": "Coventry Carol",
+          "type": "track",
+          "url": "https://annemariehelder.bandcamp.com/track/coventry-carol",
+          "imageUrl": "https://f4.bcbits.com/img/a3151868948_2.jpg",
+          "releaseDate": "December 19, 2017"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Anne-Marie%20Helder"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Anne-Marie%20Helder"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://iamannemarie.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/238549"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/annemarie/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@annemarie"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCBL7ZxVX4GvW4CFiES_-0YA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/iamannemarie"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "annemarie",
+    "name": "Anne Marie",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027203645_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://annemariehoward.bandcamp.com",
+        "allReleaseTitles": [
+          "illusionstates",
+          "indeepwaters"
+        ],
+        "latestRelease": {
+          "title": "Illusion States",
+          "type": "album",
+          "url": "https://annemariehoward.bandcamp.com/album/illusion-states",
+          "imageUrl": "https://f4.bcbits.com/img/a0525783411_16.jpg",
+          "releaseDate": "December 4, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Anne%20Marie"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Anne%20Marie"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://iamannemarie.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/238549"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/annemarie/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@annemarie"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCBL7ZxVX4GvW4CFiES_-0YA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/iamannemarie"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "annemariegrage",
+    "name": "Anne-Marie Grage",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039092559_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://anne-marie-grage.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Anne-Marie%20Grage"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Anne-Marie%20Grage"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://iamannemarie.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/238549"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/annemarie/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@annemarie"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCBL7ZxVX4GvW4CFiES_-0YA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/iamannemarie"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-annemarie1",
+    "name": "Anne Marie 1",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/anne-marie-1/1976307"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Anne%20Marie%201"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Anne%20Marie%201"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://iamannemarie.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/238549"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/annemarie/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@annemarie"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCBL7ZxVX4GvW4CFiES_-0YA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/iamannemarie"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-annemarie5",
+    "name": "Anne Marie 5",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/anne-marie-5/28116317"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Anne%20Marie%205"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Anne%20Marie%205"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://iamannemarie.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/238549"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/annemarie/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@annemarie"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCBL7ZxVX4GvW4CFiES_-0YA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/iamannemarie"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

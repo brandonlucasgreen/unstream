@@ -1,0 +1,124 @@
+[
+  {
+    "id": "gordonlightfoot",
+    "name": "Gordon Lightfoot",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0010722549_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/gordon-lightfoot/153979",
+        "allReleaseTitles": [
+          "sundown",
+          "ifyoucouldreadmymind",
+          "gordsgold",
+          "summertimedream",
+          "solo",
+          "plansofmyown",
+          "rhinohifive",
+          "donquixote",
+          "didshementionmyname",
+          "gordsgoldvolii",
+          "backhereonearth",
+          "alllive",
+          "lightfoot",
+          "thewayifeel",
+          "olddansrecords",
+          "sundayconcert",
+          "songbook",
+          "summersideoflife",
+          "bestof",
+          "atroyalalberthall"
+        ],
+        "latestRelease": {
+          "title": "Solo Gordon Lightfoot",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/solo-gordon-lightfoot/c5o6txqebmjzb",
+          "releaseDate": "2020-03-20"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://gordanlightfoot.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Gordon%20Lightfoot"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Gordon%20Lightfoot"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/306305"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Gordon%20Lightfoot&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Gordon%20Lightfoot"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCbm7b2I8BKWzZ9Xtdfyh4Bw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Gordon-Lightfoot/240847505940393"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "gordonlightfoot-bandcamp-gordonlightfoot",
+    "name": "Gordon Lightfoot",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033384704_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://gordonlightfoot.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Gordon%20Lightfoot"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Gordon%20Lightfoot"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/306305"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Gordon%20Lightfoot&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Gordon%20Lightfoot"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCbm7b2I8BKWzZ9Xtdfyh4Bw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Gordon-Lightfoot/240847505940393"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

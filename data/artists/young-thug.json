@@ -1,0 +1,73 @@
+[
+  {
+    "id": "youngthug",
+    "name": "Young Thug",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0009608983_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/young-thug/1402278",
+        "allReleaseTitles": [
+          "uyscuti",
+          "barter6",
+          "dumdumbanddumberfuturelilbaby",
+          "slimeseason2",
+          "scaredfredagain",
+          "somuchfun",
+          "slimeseason",
+          "slimeseason3",
+          "businessisbusinessmetrosversion",
+          "uyscutisupernovaedition",
+          "hotremixfeatgunnaandtravisscott",
+          "mywristyeat",
+          "kissesmakesurestrickjamesblakeand",
+          "slimebchrisbrown",
+          "businessisbusiness",
+          "imup",
+          "badboyjuicewrld",
+          "potioncalvinharrisdualipa"
+        ],
+        "latestRelease": {
+          "title": "Scared Fred Again Young Thug",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/scared-fred-again-young-thug/b0govnfzbsqia",
+          "releaseDate": "2026-01-23"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thuggerthugger1.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Young%20Thug"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Young%20Thug"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3243777"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thuggerthugger1/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCuwdplPbuTFZj_64d03tSBA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/youngthugmusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,168 @@
+[
+  {
+    "id": "qobuz-opeth",
+    "name": "Opeth",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/opeth/243654",
+        "allReleaseTitles": [
+          "thelastwillandtestament",
+          "blackwaterpark",
+          "sorceress",
+          "ghostreveries",
+          "palecommunion",
+          "stillliferemastered",
+          "myarmsyourhearse",
+          "incaudavenenumswedishversion",
+          "incaudavenenum",
+          "damnation",
+          "morningrise",
+          "orchid",
+          "deliverance",
+          "deliverancedamnationremixed",
+          "deliverancedamnation",
+          "incaudavenenumextendededition",
+          "heritage",
+          "watershed",
+          "lamentations",
+          "gardenofthetitansliveatredrocksamphitheatre"
+        ],
+        "latestRelease": {
+          "title": "The Last Will And Testament Opeth",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-last-will-and-testament-opeth/yywvgp45z2nmc",
+          "releaseDate": "2024-10-11"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Opeth"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Opeth"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.opeth.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/245797"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Opeth&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Opeth"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/officialopeth/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@opethofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCmQSJTFZaXN85gYk6W3XbdQ"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@officialopeth"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Opeth"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-opet",
+    "name": "Opet",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/opet/195264",
+        "allReleaseTitles": [
+          "caressofrain",
+          "thelonewalker",
+          "dontlookatme",
+          "shesmygirl",
+          "idontcareanymore",
+          "tays",
+          "spiritofgangga",
+          "theskysthelimit",
+          "dissociation",
+          "kupukupugmg"
+        ],
+        "latestRelease": {
+          "title": "Dont Look At Me Opet",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/dont-look-at-me-opet/isrl8v6siufv7",
+          "releaseDate": "2026-01-16"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Opet"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Opet"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.opeth.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/245797"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Opet&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Opet"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/officialopeth/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@opethofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCmQSJTFZaXN85gYk6W3XbdQ"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@officialopeth"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Opeth"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

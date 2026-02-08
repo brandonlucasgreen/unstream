@@ -1,0 +1,77 @@
+[
+  {
+    "id": "qobuz-josefeliciano",
+    "name": "Jose Feliciano",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jose-feliciano/53290",
+        "allReleaseTitles": [
+          "feliznavidad",
+          "californiadreaming",
+          "behindthisguitar",
+          "sweetsoulmusic",
+          "angela",
+          "enmiviejosanjuan",
+          "asyouseemenowjoolsholland",
+          "thevoiceandguitarof",
+          "live1967",
+          "lovechristmas",
+          "lightmyfirerevisited",
+          "feliznavidadadamirigoyenbertinosbornebigrichcncoeldasaemmanuelfrankiejgloriagaynorgordbamfordindiaisabelamercedisabellacastillojasonmrazjencarlosjesusmolinajonsecadajulioiglesiasjrleodanlinmanuelm",
+          "eaglewhenshefliesdollyparton",
+          "vivalanavidad",
+          "laborinquena",
+          "margueritathatwoman",
+          "lightmyfiretheverybestof",
+          "cancionesdeamor",
+          "athisbest"
+        ],
+        "latestRelease": {
+          "title": "California Dreaming Jose Feliciano",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/california-dreaming-jose-feliciano/esbxbs4rzwh0b",
+          "releaseDate": "2021-08-13"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jose%20Feliciano"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jose%20Feliciano"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-josefeliciano12",
+    "name": "Jose Feliciano 12",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jose-feliciano-12/29880017"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jose%20Feliciano%2012"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jose%20Feliciano%2012"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

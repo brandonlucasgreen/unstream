@@ -1,0 +1,74 @@
+[
+  {
+    "id": "qobuz-dimashqudaibergen",
+    "name": "Dimash Qudaibergen",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/dimash-qudaibergen/6880429",
+        "allReleaseTitles": [
+          "requiemthestoryofonesky",
+          "bizetlespecheursdeperlesact1aufonddutemplesaintplacidodomingotiborboganyipannonphilharmonicorchestra",
+          "omir",
+          "whenivegotyou",
+          "smoke",
+          "zhalyn",
+          "together",
+          "lovesnotoveryet",
+          "aqquym",
+          "tauishinde",
+          "kielimeken",
+          "rizamyntagdirga",
+          "flyaway",
+          "bewithme",
+          "weekendburakyeter",
+          "golden"
+        ],
+        "latestRelease": {
+          "title": "Bizet Les Pecheurs De Perles Act 1 Au Fond Du Temple Saint Placido Domingo Dimash Qudaibergen Tibor Boganyi Pannon Philharmonic Orchestra",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/bizet-les-pecheurs-de-perles-act-1-au-fond-du-temple-saint-placido-domingo-dimash-qudaibergen-tibor-boganyi-pannon-philharmonic-orchestra/xpups3c4zv8zb",
+          "releaseDate": "2024-05-30"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Dimash%20Qudaibergen"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Dimash%20Qudaibergen"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.dimashnews.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7434220"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kudaibergenov.dimash/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@dimash_official_dq"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/@DimashQudaibergen_official"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/dimash.official.dq"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

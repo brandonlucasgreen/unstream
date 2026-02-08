@@ -1,0 +1,87 @@
+[
+  {
+    "id": "qobuz-bringmethehorizon",
+    "name": "Bring Me The Horizon",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/bring-me-the-horizon/333314",
+        "allReleaseTitles": [
+          "thatsthespirit",
+          "posthumannexgen",
+          "sempiternal",
+          "lofiles",
+          "posthumansurvivalhorror",
+          "amo",
+          "liveattheroyalalberthall",
+          "happierolisykesyungblud",
+          "badlifesigrid",
+          "amenfeatliluzivertdarylpalumboglassjaw",
+          "falloutmaskedwolf",
+          "thereisahellbelievemeiveseenitthereisaheavenletskeepitasecret",
+          "suicideseason",
+          "lost",
+          "musictolistentodancetoblazetopraytofeedtosleeptotalktogrindtotriptobreathetohelptohurttoscrolltorolltolovetohatetolearntooplottoplaytobetofeeltobreedtosweattodreamtohidetolivetodietogoto",
+          "vampiric3peakolisykes",
+          "badlifesigrid"
+        ],
+        "latestRelease": {
+          "title": "Lo Files Bring Me The Horizon",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/lo-files-bring-me-the-horizon/av14otnnbay1b",
+          "releaseDate": "2025-07-11"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bring%20Me%20The%20Horizon"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bring%20Me%20The%20Horizon"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.bmthofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1253307"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Bring%20Me%20The%20Horizon&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Bring%20Me%20The%20Horizon"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/bringmethehorizon/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@officialbmth"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCAayZDDj3uom0QpSJiwLoUw"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@bringmethehorizon"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/bmthofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

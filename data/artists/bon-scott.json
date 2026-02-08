@@ -1,0 +1,37 @@
+[
+  {
+    "id": "qobuz-bonscott",
+    "name": "Bon Scott",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/bon-scott/85271",
+        "allReleaseTitles": [
+          "roundandroundandroundpeterhead",
+          "roundandroundandround",
+          "livestockbrucehowedougashdownfraternityjimstewartjohnbissetjohnrobinsonmickjurdnealejohnssamsee"
+        ],
+        "latestRelease": {
+          "title": "Round And Round And Round Bon Scott Peter Head",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/round-and-round-and-round-bon-scott-peter-head/w98gzev4ckf3b",
+          "releaseDate": "2012-08-22"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bon%20Scott"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bon%20Scott"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

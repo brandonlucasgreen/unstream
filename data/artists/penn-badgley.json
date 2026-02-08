@@ -1,0 +1,35 @@
+[
+  {
+    "id": "pennbadgley",
+    "name": "Penn Badgley",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030524574_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bandcamp.com/successhunter"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Penn%20Badgley"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Penn%20Badgley"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/pennbadgley/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@iampennbadgley"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

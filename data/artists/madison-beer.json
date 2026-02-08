@@ -1,0 +1,118 @@
+[
+  {
+    "id": "madisonbeer",
+    "name": "Madison Beer",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020596564_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://madisonbeer.bandcamp.com",
+        "allReleaseTitles": [
+          "lifesupport",
+          "asshepleases"
+        ],
+        "latestRelease": {
+          "title": "Life Support",
+          "type": "album",
+          "url": "https://madisonbeer.bandcamp.com/album/life-support",
+          "imageUrl": "https://f4.bcbits.com/img/a0134879139_16.jpg",
+          "releaseDate": "June 12, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Madison%20Beer"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Madison%20Beer"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.madisonbeer.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4223409"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/madisonbeer/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@madisonbeer"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCniqtXw3nZho_0HEO5IBqvg"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@madisonbeer"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MadisonElleBeer"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-madisonbeer",
+    "name": "Madison Beer",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/madison-beer/1305854"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Madison%20Beer"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Madison%20Beer"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.madisonbeer.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4223409"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/madisonbeer/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@madisonbeer"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCniqtXw3nZho_0HEO5IBqvg"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@madisonbeer"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MadisonElleBeer"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

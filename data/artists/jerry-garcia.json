@@ -1,0 +1,187 @@
+[
+  {
+    "id": "qobuz-jerrygarcia",
+    "name": "Jerry Garcia",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jerry-garcia/56553",
+        "allReleaseTitles": [
+          "garcia",
+          "barebonesvol1theduorecordingsdavidgrisman",
+          "barebonesvol2theduorecordingsdavidgrisman",
+          "mightaswellaroundrecordsretrospective",
+          "notforkidsonlydavidgrisman",
+          "barebonesvol3theduorecordingsdavidgrisman",
+          "runfortheroses",
+          "garciagrismandavidgrisman",
+          "sidetripsvolumeonehowardwales",
+          "shenandoahdavidgrisman",
+          "imtroubled1davidgrisman",
+          "thereaintnobugsonmedavidgrisman",
+          "reflectionsexpanded",
+          "thepizzatapesextralargeeditiondavidgrismanandtonyrice",
+          "shadygroveanddavidgrisman",
+          "keystonecompanionsthecomplete1973fantasyrecordingsmerlsaunders",
+          "garciacomplimentsexpanded",
+          "hooteroll2",
+          "garciaexpanded",
+          "liveatkeystonevolume2merlsaundersjohnkahnbillvitt"
+        ],
+        "latestRelease": {
+          "title": "Not For Kids Only Jerry Garcia David Grisman",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/not-for-kids-only-jerry-garcia-david-grisman/b4wftgct7l7df",
+          "releaseDate": "2025-11-21"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jerry%20Garcia"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jerry%20Garcia"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://jerrygarcia.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/259913"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jerry%20Garcia&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jerry%20Garcia"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jerrygarcia"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCavTlRz3J9lVxpcq8j3LD3g"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/jerrygarciaofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "billcutlerjerrygarcia",
+    "name": "Bill Cutler, Jerry Garcia",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0015247212_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://billcutler.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bill%20Cutler%2C%20Jerry%20Garcia"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bill%20Cutler%2C%20Jerry%20Garcia"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://jerrygarcia.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/259913"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Bill%20Cutler%2C%20Jerry%20Garcia&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Bill%20Cutler%2C%20Jerry%20Garcia"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jerrygarcia"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCavTlRz3J9lVxpcq8j3LD3g"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/jerrygarciaofficial"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-jerrygarcia2",
+    "name": "Jerry Garcia 2",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jerry-garcia-2/17505747"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jerry%20Garcia%202"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jerry%20Garcia%202"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://jerrygarcia.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/259913"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jerry%20Garcia%202&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jerry%20Garcia%202"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jerrygarcia"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCavTlRz3J9lVxpcq8j3LD3g"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/jerrygarciaofficial"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

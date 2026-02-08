@@ -1,0 +1,65 @@
+[
+  {
+    "id": "qobuz-tylerposey",
+    "name": "Tyler Posey",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/tyler-posey/5363889",
+        "latestRelease": {
+          "title": "Unravel Tyler Posey",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/unravel-tyler-posey/se5im2tvkt7ea",
+          "releaseDate": "2023-05-26"
+        },
+        "allReleaseTitles": [
+          "unravel",
+          "lemon",
+          "drugs",
+          "scumbag",
+          "shutupfeatphemtravisbarkerphemfeattravisbarker",
+          "happy",
+          "thismess",
+          "pastlife",
+          "sameoldstory",
+          "idontevencareaboutit",
+          "runnin",
+          "dontmindme",
+          "trippylistenings",
+          "gravity",
+          "teenwolftheme"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tyler%20Posey"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tyler%20Posey"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/11430185"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/tylerposey58/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/TylerPoseyMusic/featured"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/TylerEffingPosey"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

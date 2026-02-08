@@ -1,0 +1,82 @@
+[
+  {
+    "id": "qobuz-geneautry",
+    "name": "Gene Autry",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/gene-autry/29733",
+        "allReleaseTitles": [
+          "rudolphtherednosedreindeerandotherchristmasclassics",
+          "hischristmasalbum",
+          "christmasspedslowed",
+          "frostythesnowman",
+          "hisgreatesthits",
+          "silverbells",
+          "uponthehousetop",
+          "theoriginalsingsrudolphtherednosedreindeerotherchristmasfavorites",
+          "playlisttheverybestof",
+          "hischristmasalbumneedsnointroduction",
+          "completecolumbiachristmassongs",
+          "theessential",
+          "achristmas",
+          "amelodyranchchristmasmultiinterpretes",
+          "herecomessantaclaus",
+          "20greatestmoviehits",
+          "alwaysyourpal",
+          "christmasclassics",
+          "bestoftheearlyyears",
+          "thesingingcowboychapterone"
+        ],
+        "latestRelease": {
+          "title": "Christmas Sped Slowed Gene Autry",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/christmas-sped-slowed-gene-autry/vb3j4dluodpma",
+          "releaseDate": "2023-02-12"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Gene%20Autry"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Gene%20Autry"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.geneautry.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/352665"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Gene%20Autry&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Gene%20Autry"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/geneautryofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/GeneAutryOfficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/GeneAutryOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

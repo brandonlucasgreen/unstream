@@ -1,0 +1,69 @@
+[
+  {
+    "id": "qobuz-aleshadixon",
+    "name": "Alesha Dixon",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/alesha-dixon/73292",
+        "allReleaseTitles": [
+          "chargiefeattommoutchifeattommoutchi",
+          "thewayweare",
+          "thealeshashow",
+          "tallestgirl",
+          "stopfeatwretch32featuringwretch32",
+          "doitourwayplay",
+          "firedup",
+          "doitforlove",
+          "ransom",
+          "chargiezedbiasfeattommoutchi",
+          "war",
+          "chargiefeattommoutchijessbaysfeattommoutchi",
+          "chargielarizzlefeattommoutchi",
+          "theboydoesnothing",
+          "everylittlepartofme"
+        ],
+        "latestRelease": {
+          "title": "Chargie Feat Tom Moutchi Alesha Dixon Feat Tom Moutchi",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/chargie-feat-tom-moutchi-alesha-dixon-feat-tom-moutchi/gszyoa3fierxb",
+          "releaseDate": "2025-06-13"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Alesha%20Dixon"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Alesha%20Dixon"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.aleshamusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2323499"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/aleshaofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/aleshadixonofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/aleshadixonofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

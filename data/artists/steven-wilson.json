@@ -1,0 +1,89 @@
+[
+  {
+    "id": "qobuz-stevenwilson",
+    "name": "Steven Wilson",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/steven-wilson/133149",
+        "allReleaseTitles": [
+          "theoverview",
+          "theharmonycodex",
+          "tothebone",
+          "theraventhatrefusedtosingandotherstoriesdeluxeedition",
+          "handcannoterase",
+          "insurgentes2016remaster",
+          "theraventhatrefusedtosingandotherstories",
+          "homeinvasioninconcertattheroyalalberthall",
+          "thefuturebites",
+          "handcannoterasesuperdeluxe",
+          "transience",
+          "theoldpeacemariuszduda",
+          "decemberskies",
+          "thebsidescollection",
+          "happinessiii"
+        ],
+        "latestRelease": {
+          "title": "The Overview Steven Wilson",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-overview-steven-wilson/dpouqqarso9zb",
+          "releaseDate": "2025-03-14"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Steven%20Wilson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Steven%20Wilson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://stevenwilsonhq.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/227943"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Steven%20Wilson&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Steven%20Wilson"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/stevenwilsonhq/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@stevenwilsonhq"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC-9mlH6az1Q_XUP3fw1N4Fg"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@stevenwilsonhq"
+      },
+      {
+        "sourceId": "bluesky",
+        "url": "https://bsky.app/profile/stevenwilsonhq.bsky.social"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/StevenWilsonHQ"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

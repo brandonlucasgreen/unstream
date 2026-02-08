@@ -1,0 +1,31 @@
+[
+  {
+    "id": "fetalalcoholjamiedornan",
+    "name": "Fetal Alcohol Jamie Dornan",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a1552148719_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://fetalalcoholjamiedornan.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Fetal%20Alcohol%20Jamie%20Dornan"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Fetal%20Alcohol%20Jamie%20Dornan"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jamiedornan/"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

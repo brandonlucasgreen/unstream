@@ -1,0 +1,82 @@
+[
+  {
+    "id": "qobuz-stratovarius",
+    "name": "Stratovarius",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/stratovarius/176628",
+        "allReleaseTitles": [
+          "survive",
+          "enigmaintermissionii",
+          "eternal",
+          "polaris",
+          "nemesis",
+          "heroes",
+          "worldonfire",
+          "unbreakable",
+          "frozenintime",
+          "oblivion",
+          "firefly",
+          "visions",
+          "destinyreissue2016",
+          "episode",
+          "infinite",
+          "frightnight",
+          "twilighttime",
+          "elementspt12completeedition",
+          "bestof",
+          "fourthdimension"
+        ],
+        "latestRelease": {
+          "title": "Survive Stratovarius",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/survive-stratovarius/ihn2tnwlt6wub",
+          "releaseDate": "2022-09-23"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Stratovarius"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Stratovarius"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://stratovarius.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/324356"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Stratovarius&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Stratovarius"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/stratovariusofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/StratovariusChannel"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/stratovarius"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,53 @@
+[
+  {
+    "id": "qobuz-anselelgort",
+    "name": "Ansel Elgort",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ansel-elgort/2035110",
+        "allReleaseTitles": [
+          "supernova",
+          "thief",
+          "allithinkaboutisyou",
+          "homealone",
+          "guestroom",
+          "youcancountonmelogic",
+          "balconyscenetonightrachelzegler"
+        ],
+        "latestRelease": {
+          "title": "Guestroom Ansel Elgort",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/guestroom-ansel-elgort/i5loksd0a0ejb",
+          "releaseDate": "2024-07-16"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ansel%20Elgort"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ansel%20Elgort"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5731803"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/anselelgort/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/AnselElgort"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,218 @@
+[
+  {
+    "id": "sarahconnor",
+    "name": "Sarahconnor",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0012594737_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sarah-connor/200697",
+        "allReleaseTitles": [
+          "freigeistin",
+          "herzkraftwerke",
+          "heutistallesgut",
+          "ficka",
+          "herzkraftwerkelive",
+          "notsosilentnight",
+          "christmastrain",
+          "wildenachte",
+          "christmasinmyheart",
+          "vincentallefarben",
+          "terrorismsurvive"
+        ],
+        "latestRelease": {
+          "title": "Freigeistin Sarah Connor",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/freigeistin-sarah-connor/xc7g8zl54ofsc",
+          "releaseDate": "2025-05-22"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sarah-connor.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sarahconnor"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sarahconnor"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sarah-connor.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/119349"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sarahconnor&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sarahconnor"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sarahconnor/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@sarahconnor"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCR8jtJnKWWUGGTRQ2MEKDeA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sarahconnor"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "killsarahconnor",
+    "name": "Kill Sarah Connor",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026205118_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://killsarahconnor.bandcamp.com",
+        "allReleaseTitles": [
+          "lyfe",
+          "parkinglaser"
+        ],
+        "latestRelease": {
+          "title": "Lyfe",
+          "type": "album",
+          "url": "https://killsarahconnor.bandcamp.com/album/lyfe",
+          "imageUrl": "https://f4.bcbits.com/img/a1713583312_16.jpg",
+          "releaseDate": "September 8, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kill%20Sarah%20Connor"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kill%20Sarah%20Connor"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sarah-connor.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/119349"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Kill%20Sarah%20Connor&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Kill%20Sarah%20Connor"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sarahconnor/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@sarahconnor"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCR8jtJnKWWUGGTRQ2MEKDeA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sarahconnor"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "sarahconnor-bandcamp-sarahconnor",
+    "name": "SARAH CONNOR",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a4130711801_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sarahconnor.bandcamp.com",
+        "allReleaseTitles": [
+          "sarahconnor",
+          "singed"
+        ],
+        "latestRelease": {
+          "title": "Sarah Connor",
+          "type": "album",
+          "url": "https://sarahconnor.bandcamp.com/album/sarah-connor",
+          "imageUrl": "https://f4.bcbits.com/img/a4130711801_16.jpg",
+          "releaseDate": "August 25, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=SARAH%20CONNOR"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+SARAH%20CONNOR"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sarah-connor.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/119349"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=SARAH%20CONNOR&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/SARAH%20CONNOR"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sarahconnor/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@sarahconnor"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCR8jtJnKWWUGGTRQ2MEKDeA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sarahconnor"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

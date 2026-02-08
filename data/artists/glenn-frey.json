@@ -1,0 +1,59 @@
+[
+  {
+    "id": "qobuz-glennfrey",
+    "name": "Glenn Frey",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/glenn-frey/81118",
+        "allReleaseTitles": [
+          "afterhours",
+          "nofunaloud",
+          "theallnighter",
+          "soulsearchin",
+          "strangeweather",
+          "live",
+          "withtheeaglesandwithout",
+          "one",
+          "partofmepartofyou",
+          "takeiteasyliveremastered",
+          "opentheatereasttokyo1986"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Glenn%20Frey"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Glenn%20Frey"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://glennfreyafterhours.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/102333"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Glenn%20Frey&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Glenn%20Frey"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/GlennFreyOfficial"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

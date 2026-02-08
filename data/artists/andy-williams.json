@@ -1,0 +1,123 @@
+[
+  {
+    "id": "qobuz-andywilliams",
+    "name": "Andy Williams",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/andy-williams/62299",
+        "allReleaseTitles": [
+          "thechristmasalbum",
+          "merrychristmas",
+          "bornfree",
+          "christmasspedslowed",
+          "theessential",
+          "lovestory",
+          "40christmasclassics",
+          "weneedalittlechristmas",
+          "moonrivertheverybestof",
+          "thewonderfulworldof",
+          "greatesthitsvolumeii",
+          "christmaspresent",
+          "moonriverandothergreatmoviethemes",
+          "theclassicchristmasalbum",
+          "personalchristmascollection",
+          "loveandy",
+          "16mostrequestedsongs"
+        ],
+        "latestRelease": {
+          "title": "The Andy Williams Christmas Album Andy Williams",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-andy-williams-christmas-album-andy-williams/0827969271223",
+          "releaseDate": "2019-02-19"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/andydotxyz"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Andy%20Williams"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Andy%20Williams"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/164570"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Andy%20Williams&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Andy%20Williams"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/andywilliams"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-andywilliam",
+    "name": "Andy William",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/andy-william/2208016",
+        "allReleaseTitles": [
+          "conloquecrecilatradicioncubanaelnebraskaallstars",
+          "delahavanaaalabamaalabamaallstars",
+          "popurridenavidadthenebraskaallstars",
+          "velvettfktofukidand"
+        ],
+        "latestRelease": {
+          "title": "Con Lo Que Creci La Tradicion Cubana Andy William El Nebraska All Stars",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/con-lo-que-creci-la-tradicion-cubana-andy-william-el-nebraska-all-stars/f43tsjn7tc6wc",
+          "releaseDate": "2025-05-25"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Andy%20William"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Andy%20William"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/164570"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Andy%20William&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Andy%20William"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/andywilliams"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

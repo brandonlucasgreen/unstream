@@ -1,0 +1,62 @@
+[
+  {
+    "id": "lennybruce",
+    "name": "Lenny Bruce",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0012348425_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://lennyxbruce.bandcamp.com",
+        "allReleaseTitles": [
+          "dyinginside",
+          "losthometapei"
+        ],
+        "latestRelease": {
+          "title": "Dying Inside",
+          "type": "album",
+          "url": "https://lennyxbruce.bandcamp.com/album/dying-inside",
+          "imageUrl": "https://f4.bcbits.com/img/a0261664486_16.jpg",
+          "releaseDate": "July 31, 2019"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lenny%20Bruce"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lenny%20Bruce"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-lennybruce",
+    "name": "Lenny Bruce",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/lenny-bruce/65838"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lenny%20Bruce"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lenny%20Bruce"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

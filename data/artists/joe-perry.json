@@ -1,0 +1,86 @@
+[
+  {
+    "id": "qobuz-joeperry",
+    "name": "Joe Perry",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/joe-perry/45119",
+        "latestRelease": {
+          "title": "Sweetzerland Manifesto Mkii Joe Perry",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/sweetzerland-manifesto-mkii-joe-perry/fc63p8jhgqxaa",
+          "releaseDate": "2023-05-26"
+        },
+        "allReleaseTitles": [
+          "sweetzerlandmanifestomkii",
+          "ayeayeaye",
+          "",
+          "fortunateone",
+          "smerrychristmas",
+          "getmeoutcomfortzone",
+          "handwritten",
+          "renewalsongswithhealingrays",
+          "quake",
+          "shakinmycage",
+          "thetoastheavypand",
+          "whiskeyandwineheavypand",
+          "rainydays",
+          "couldshefeatjacobsavill",
+          "seekingyou",
+          "takemeback",
+          "cosmicsantalpheavypand"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Joe%20Perry"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Joe%20Perry"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-joeperry66",
+    "name": "Joe Perry 66",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/joe-perry-66/21960793",
+        "allReleaseTitles": [
+          "happydayfeatmichaeljohnson",
+          "13roads",
+          "theroad"
+        ],
+        "latestRelease": {
+          "title": "Happy Day Feat Michael Johnson Joe Perry 66",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/happy-day-feat-michael-johnson-joe-perry-66/kbq2hnj7kz17b",
+          "releaseDate": "2024-12-15"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Joe%20Perry%2066"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Joe%20Perry%2066"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

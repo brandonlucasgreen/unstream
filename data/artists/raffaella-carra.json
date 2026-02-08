@@ -1,0 +1,78 @@
+[
+  {
+    "id": "qobuz-raffaellacarra",
+    "name": "Raffaella Carra",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/raffaella-carra/223948",
+        "allReleaseTitles": [
+          "pedrojaxomyxagatinoromerox",
+          "sensationalhits",
+          "raffaella1978",
+          "fiestaitalianedition",
+          "joy",
+          "forteforteforte",
+          "felicitatata",
+          "bolero",
+          "balloballo",
+          "luca",
+          "rumoremarlonhoffstadtmarkronsonandrewwyatt",
+          "applauso",
+          "scatolaasorpresa",
+          "raffaellasenzarespiro",
+          "rainbowmegamixgetfar",
+          "",
+          "lepiubellecanzoni",
+          "farlamorebobsinclar",
+          "fatalita",
+          "raffaella1988"
+        ],
+        "latestRelease": {
+          "title": "Raffaella Carra Sensational Hits Raffaella Carra",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/raffaella-carra-sensational-hits-raffaella-carra/xdl9lhp5de49a",
+          "releaseDate": "2024-06-20"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Raffaella%20Carra"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Raffaella%20Carra"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/302018"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Raffaella%20Carra&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Raffaella%20Carra"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/raffaellacarraufficiale/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC4EXKt41Q1GP5r2A5uGYyrg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/raffcarra"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

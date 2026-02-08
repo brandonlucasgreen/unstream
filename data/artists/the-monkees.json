@@ -1,0 +1,79 @@
+[
+  {
+    "id": "qobuz-themonkees",
+    "name": "The Monkees",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-monkees/301492",
+        "allReleaseTitles": [
+          "headquarters",
+          "imabelieverimnotyoursteppinstone",
+          "greatesthits",
+          "piscesaquariuscapricornjonesltd",
+          "moreofeditionstudiomasters",
+          "daydreambelievergoindown",
+          "theasthebs",
+          "thebirdsthebees",
+          "thelasttraintoclarksvilletakeagiantstep",
+          "",
+          "goodtimes",
+          "christmasparty",
+          "pleasantvalleysundaywords",
+          "present",
+          "live1967",
+          "dwwashburnitsnicetobewithyou",
+          "goodcleanfunmommyanddaddy"
+        ],
+        "latestRelease": {
+          "title": "Headquarters The Monkees",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/headquarters-the-monkees/0603497908813",
+          "releaseDate": "2008-10-24"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Monkees"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Monkees"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.monkees.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/132927"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Monkees&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Monkees"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/themonkees"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/TheMonkeesArchive"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MonkeesRock"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

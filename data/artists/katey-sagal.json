@@ -1,0 +1,59 @@
+[
+  {
+    "id": "qobuz-kateysagal",
+    "name": "Katey Sagal",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/katey-sagal/716696",
+        "allReleaseTitles": [
+          "covered",
+          "strangefruittheforestrangersblakemills",
+          "blackisblacktheforestrangers",
+          "room",
+          "freefallin"
+        ],
+        "latestRelease": {
+          "title": "Black Is Black Katey Sagal The Forest Rangers",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/black-is-black-katey-sagal-the-forest-rangers/tclaz60kqi5ob",
+          "releaseDate": "2019-09-27"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Katey%20Sagal"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Katey%20Sagal"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/372361"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Katey%20Sagal&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Katey%20Sagal"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kateysagal/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/KateyLSagal"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,672 @@
+[
+  {
+    "id": "momaready",
+    "name": "MoMA Ready",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019908062_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://momaready.bandcamp.com",
+        "allReleaseTitles": [
+          "amixtape",
+          "body25",
+          "realities",
+          "mr004",
+          "mr003",
+          "mr002",
+          "mr001",
+          "glamorousedit",
+          "body24",
+          "problemrumppunch",
+          "hoa023momareadysofthardbodyremastered",
+          "decadence",
+          "body23",
+          "restructureii",
+          "hoa022turnandlook",
+          "headlock"
+        ],
+        "latestRelease": {
+          "title": "A Mixtape",
+          "type": "album",
+          "url": "https://momaready.bandcamp.com/album/a-mixtape",
+          "imageUrl": "https://f4.bcbits.com/img/a1642728651_2.jpg",
+          "releaseDate": "February 6, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=MoMA%20Ready"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+MoMA%20Ready"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.momomoyouth.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1883733"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/momomoyouth/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCtGsfvj155zp8maBFng9hHg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MOMOMOYOUTH"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "mofunkrecords",
+    "name": "MoFunk Records",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a4175449096_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mofunkrecords.com",
+        "allReleaseTitles": [
+          "wompinmyspiritmoniquea",
+          "howeveryouaremoniquea",
+          "tokyolovesongvol3djnotoya",
+          "tokyolovesongvol2kaistar",
+          "tokyolovesongvol1xlmiddleton",
+          "wompinmyspiritmoniqueafeatxlmiddleton",
+          "heymfphonehomezackeyforcefunkxlmiddleton",
+          "fortherosexlmiddleton",
+          "squabbleupxlmiddletons92backyardboogieremixxlmiddleton",
+          "thejapancollection20062018xlmiddleton",
+          "seriouskazzeyxlmiddleton",
+          "tapwateriixlmiddleton",
+          "wagamamarisoxlmiddletonremixmilktalk",
+          "redlightmoniquea",
+          "mofunktapebundle",
+          "theiitightepxlmiddleton"
+        ],
+        "latestRelease": {
+          "title": "Womp In My Spirit\n                \n                \n\n                Moniquea",
+          "type": "album",
+          "url": "https://mofunkrecords.com/album/womp-in-my-spirit-2",
+          "imageUrl": "https://f4.bcbits.com/img/a4175449096_2.jpg",
+          "releaseDate": "December 5, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=MoFunk%20Records"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+MoFunk%20Records"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.momomoyouth.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1883733"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/momomoyouth/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCtGsfvj155zp8maBFng9hHg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MOMOMOYOUTH"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "acemo",
+    "name": "AceMo",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031037646_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://acemo.bandcamp.com",
+        "allReleaseTitles": [
+          "clubgroovegroovemcdoodle",
+          "acemoeditsvol1",
+          "forestcity",
+          "intertransit",
+          "moblu",
+          "savetheworld",
+          "unreleasedtraxvol3",
+          "unreleasedtraxvol2",
+          "unreleasedtraxvol1",
+          "",
+          "wannaplayhouse",
+          "acemolivenowadays",
+          "systemoverride",
+          "castleofmana",
+          "allmylife2",
+          "redshift"
+        ],
+        "latestRelease": {
+          "title": "Club Groove (Groove McDoodle)",
+          "type": "track",
+          "url": "https://acemo.bandcamp.com/track/club-groove-groove-mcdoodle",
+          "imageUrl": "https://f4.bcbits.com/img/a3881536252_2.jpg",
+          "releaseDate": "February 6, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=AceMo"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+AceMo"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.momomoyouth.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1883733"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/momomoyouth/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCtGsfvj155zp8maBFng9hHg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MOMOMOYOUTH"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "ri7mo",
+    "name": "RI7MO",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033932427_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ri7mo.bandcamp.com",
+        "allReleaseTitles": [
+          "lanochelucassosaar",
+          "moodswingsplugtrax",
+          "loosefityoikol",
+          "tranzasdelswingvol11variousartists",
+          "greentalesbmod",
+          "umbragroovechaostrail",
+          "unitedgoalspres",
+          "tranzasdelswingvol10variousartists",
+          "skepsisessence",
+          "dynamicapproachdelolmo",
+          "ninetiesreboundkaydee",
+          "tranzasdelswingvol9variousartists",
+          "boxingdayhder",
+          "diefragevictoriamussi",
+          "tranzasdelswingvol8variousartists",
+          "speakerrulesvilchezz"
+        ],
+        "latestRelease": {
+          "title": "La Noche\n                \n                \n\n                Lucas Sosa (AR)",
+          "type": "album",
+          "url": "https://ri7mo.bandcamp.com/album/la-noche",
+          "imageUrl": "https://f4.bcbits.com/img/a0335230059_2.jpg"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=RI7MO"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+RI7MO"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.momomoyouth.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1883733"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/momomoyouth/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCtGsfvj155zp8maBFng9hHg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MOMOMOYOUTH"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "mokolours",
+    "name": "Mo Kolours",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033586449_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mokolours.bandcamp.com",
+        "allReleaseTitles": [
+          "originalflow",
+          "originalflowchaptertwo",
+          "originalflowchapterone",
+          "innersymbols",
+          "versionlikesun",
+          "texturelikesun",
+          "howirhythmloveaffair",
+          "mikeblackjohnwizardsremix",
+          "mokolours",
+          "ep3tuskdance",
+          "bravedreddmusic",
+          "ep2bananawine",
+          "ep1drumtalking",
+          "biddies"
+        ],
+        "latestRelease": {
+          "title": "Original Flow",
+          "type": "album",
+          "url": "https://mokolours.bandcamp.com/album/original-flow-3",
+          "imageUrl": "https://f4.bcbits.com/img/a0572780616_2.jpg",
+          "releaseDate": "March 15, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mo%20Kolours"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mo%20Kolours"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.momomoyouth.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1883733"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/momomoyouth/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCtGsfvj155zp8maBFng9hHg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MOMOMOYOUTH"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "moblackrecords",
+    "name": "MoBlack Records",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033858307_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://moblack.bandcamp.com",
+        "allReleaseTitles": [
+          "thelegacyalltimebestsellersvol4",
+          "itsallgonethembamoishvasiliskalimija",
+          "amerikarobyteksimonpagliari",
+          "clubbizarreklementbonelli",
+          "mbalivelafrogetfarlennymendyminervfeattashiewamz",
+          "sonkolondecoremixfatoumatadiawara",
+          "djombenidakanmrraoulkkwakumelaahmedsosso",
+          "thelegacyalltimebestsellersvol3",
+          "amillooriginalmixafroturamanooiddaziz",
+          "tamiditineepmaziritissilawenfnxomaralextwin",
+          "ificouldstopthesunsetremixesjuanyarinroyrosenfelddavidmackay",
+          "discoballavonasso",
+          "thelegacyalltimebestsellersvol2",
+          "margaritamikesteva",
+          "familydispatchpeaty",
+          "ninardonz"
+        ],
+        "latestRelease": {
+          "title": "The Legacy - All Time Best Sellers Vol.4",
+          "type": "album",
+          "url": "https://moblack.bandcamp.com/album/the-legacy-all-time-best-sellers-vol-4",
+          "imageUrl": "https://f4.bcbits.com/img/a1422838013_2.jpg",
+          "releaseDate": "February 7, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=MoBlack%20Records"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+MoBlack%20Records"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.momomoyouth.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1883733"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/momomoyouth/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCtGsfvj155zp8maBFng9hHg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MOMOMOYOUTH"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "acemoma",
+    "name": "AceMoMA",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022569545_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://acemomabk.bandcamp.com",
+        "latestRelease": {
+          "title": "A Future",
+          "type": "album",
+          "url": "https://acemomabk.bandcamp.com/album/a-future-2",
+          "imageUrl": "https://f4.bcbits.com/img/a1711974190_2.jpg",
+          "releaseDate": "March 29, 2021"
+        },
+        "allReleaseTitles": [
+          "afuture",
+          "ep3",
+          "ep2",
+          "anewdawnhoa007",
+          "ontopthemountainsingle",
+          "wedontdothisshit4freesingle"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=AceMoMA"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+AceMoMA"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.momomoyouth.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1883733"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/momomoyouth/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCtGsfvj155zp8maBFng9hHg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MOMOMOYOUTH"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "mohorizons",
+    "name": "Mo' Horizons",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0004438903_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mohorizons-agogo.bandcamp.com",
+        "allReleaseTitles": [
+          "lovejoy",
+          "havananews",
+          "mango",
+          "mangowomanfeatgyedublayambolley",
+          "huelequehuele",
+          "ellasbloodlines",
+          "wagabungadancar",
+          "rhythmisadancer",
+          "musicsunlove",
+          "yougottaknowit",
+          "cominghome",
+          "thebananaremixes",
+          "mohorizonsandthebananasoundsystem",
+          "10yearsofmohorizons",
+          "sunshinetoday",
+          "andthenewbohemianfreedom"
+        ],
+        "latestRelease": {
+          "title": "Love & Joy",
+          "type": "album",
+          "url": "https://mohorizons-agogo.bandcamp.com/album/love-joy",
+          "imageUrl": "https://f4.bcbits.com/img/a3003570985_2.jpg",
+          "releaseDate": "April 25, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mo'%20Horizons"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mo'%20Horizons"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.momomoyouth.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1883733"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/momomoyouth/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCtGsfvj155zp8maBFng9hHg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MOMOMOYOUTH"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "motroper",
+    "name": "Mo Troper",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041342583_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://motroper.bandcamp.com",
+        "allReleaseTitles": [
+          "thebestseatinthehouse",
+          "whenshesaysmyname",
+          "svengali",
+          "tropersingsbrion",
+          "foryoutosing",
+          "mtv",
+          "dilettante",
+          "naturalbeauty",
+          "exposureresponse",
+          "beloved"
+        ],
+        "latestRelease": {
+          "title": "The Best Seat In The House",
+          "type": "album",
+          "url": "https://motroper.bandcamp.com/album/the-best-seat-in-the-house",
+          "imageUrl": "https://f4.bcbits.com/img/a2968868231_2.jpg",
+          "releaseDate": "October 23, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mo%20Troper"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mo%20Troper"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.momomoyouth.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1883733"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/momomoyouth/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCtGsfvj155zp8maBFng9hHg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MOMOMOYOUTH"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "moynoq",
+    "name": "Mo'ynoq",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0029879319_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://moynoq.bandcamp.com",
+        "allReleaseTitles": [
+          "moynoqxurocyonsplit2025",
+          "aplaceforash",
+          "dreaminginadeadlanguage",
+          "bardo",
+          "anguishandatonement"
+        ],
+        "latestRelease": {
+          "title": "Mo'ynoq X Urocyon Split 2025",
+          "type": "album",
+          "url": "https://moynoq.bandcamp.com/album/moynoq-x-urocyon-split-2025",
+          "imageUrl": "https://f4.bcbits.com/img/a3670781792_2.jpg",
+          "releaseDate": "April 18, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mo'ynoq"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mo'ynoq"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.momomoyouth.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1883733"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/momomoyouth/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCtGsfvj155zp8maBFng9hHg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MOMOMOYOUTH"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

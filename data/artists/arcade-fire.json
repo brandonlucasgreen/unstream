@@ -1,0 +1,85 @@
+[
+  {
+    "id": "qobuz-arcadefire",
+    "name": "Arcade Fire",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/arcade-fire/374619",
+        "allReleaseTitles": [
+          "pinkelephant",
+          "reflektor",
+          "we",
+          "funeral",
+          "everythingnow",
+          "thesuburbs",
+          "thesuburbsdeluxe",
+          "igiveyoupowerfeatmavisstaples",
+          "neonbible",
+          "signsoflife",
+          "heroriginalscoreowenpallett",
+          "creaturecomfort",
+          "electricblue",
+          "reflektordeluxe",
+          "babymine",
+          "ep",
+          "everythingnowtodoyaremixporbombaestereo",
+          "putyourmoneyonme",
+          "peterpanfeatbobbyblackbird"
+        ],
+        "latestRelease": {
+          "title": "Pink Elephant Arcade Fire",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/pink-elephant-arcade-fire/db8nz2sb8fplb",
+          "releaseDate": "2025-05-09"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Arcade%20Fire"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Arcade%20Fire"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://arcadefire.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/281232"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Arcade%20Fire&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Arcade%20Fire"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/arcadefire/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@arcadefire"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCIIGxQ6BA9MwIJXBu47SyZQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/arcadefire"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,41 @@
+[
+  {
+    "id": "qobuz-elenagheorghe",
+    "name": "Elena Gheorghe",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/elena-gheorghe/1974742",
+        "allReleaseTitles": [
+          "lunaalba",
+          "sufletul",
+          "maria",
+          "yarnanayarnane",
+          "liliceavrearieigicacoada",
+          "polulnordbrrrrradicristescu",
+          "clopotelulmagiccantecepentrucopiibunadimineatalamosajuncristiannistorsmileybodoproconsul"
+        ],
+        "latestRelease": {
+          "title": "Maria Elena Gheorghe",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/maria-elena-gheorghe/p0c7k30luwa5a",
+          "releaseDate": "2024-04-18"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Elena%20Gheorghe"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Elena%20Gheorghe"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

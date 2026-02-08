@@ -1,0 +1,60 @@
+[
+  {
+    "id": "qobuz-thesupremes",
+    "name": "The Supremes",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-supremes/51432",
+        "latestRelease": {
+          "title": "Supremes A Go Go The Supremes",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/supremes-a-go-go-the-supremes/bim0mx3e41mab",
+          "releaseDate": "1966-08-01"
+        },
+        "allReleaseTitles": [
+          "wheredidourlovego",
+          "merrychristmas",
+          "supremesagogo",
+          "morehitsby",
+          "meet",
+          "singhollanddozierholland",
+          "the1sdianaross",
+          "thedefinitivecollectiondianaross",
+          "dianarossjointhetemptationsdianaross",
+          "anthologydianaross"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Supremes"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Supremes"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/17966"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Supremes&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Supremes"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCDPKhKv0q7x0ZbEnKBkP44g"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

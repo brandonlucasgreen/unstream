@@ -1,0 +1,51 @@
+[
+  {
+    "id": "theedwardfurlongs",
+    "name": "The Edward Furlongs",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0005879737_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://theedwardfurlongs.bandcamp.com",
+        "allReleaseTitles": [
+          "kellyanne",
+          "cool",
+          "theedwardfurlongs"
+        ],
+        "latestRelease": {
+          "title": "Kellyanne",
+          "type": "track",
+          "url": "https://theedwardfurlongs.bandcamp.com/track/kellyanne",
+          "imageUrl": "https://f4.bcbits.com/img/a1878908568_2.jpg",
+          "releaseDate": "July 14, 2017"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Edward%20Furlongs"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Edward%20Furlongs"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/937392"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Edward%20Furlongs&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Edward%20Furlongs"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

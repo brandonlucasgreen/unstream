@@ -1,0 +1,37 @@
+[
+  {
+    "id": "qobuz-rosieodonnell",
+    "name": "Rosie O Donnell",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rosie-o-donnell/208638",
+        "allReleaseTitles": [
+          "arosiechristmas",
+          "anotherrosiechristmas",
+          "pairofjokersbillengvallbillengvalland"
+        ],
+        "latestRelease": {
+          "title": "Pair Of Jokers Bill Engvall Rosie Odonnell Bill Engvall And Rosie Odonnell",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/pair-of-jokers-bill-engvall-rosie-odonnell-bill-engvall-and-rosie-odonnell/et1iqctpojl2a",
+          "releaseDate": "2021-08-10"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rosie%20O%20Donnell"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rosie%20O%20Donnell"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

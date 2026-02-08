@@ -1,0 +1,145 @@
+[
+  {
+    "id": "brianjohnson",
+    "name": "Brian Johnson",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0005057909_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://therealbrianjohnson.bandcamp.com",
+        "latestRelease": {
+          "title": "Open Hands EP",
+          "type": "album",
+          "url": "https://therealbrianjohnson.bandcamp.com/album/open-hands-ep",
+          "imageUrl": "https://f4.bcbits.com/img/a1668172189_2.jpg",
+          "releaseDate": "May 6, 2016"
+        },
+        "allReleaseTitles": [
+          "openhandsep",
+          "wheniwasyoung2016demosteaser",
+          "haveievertoldyouep",
+          "bloodonthedrumlivetheilliniunionbloodonthedrum",
+          "thelonelybedroomconcert",
+          "earlycollegedemos"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Brian%20Johnson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Brian%20Johnson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "brianjohnson-bandcamp-eastcoastmillitia",
+    "name": "Brian Johnson",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013194525_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://eastcoastmillitia.bandcamp.com",
+        "allReleaseTitles": [
+          "whyruremix",
+          "irrelevantbrianjohnsonmiguelmontaefeatvaughnhayesblokbosses",
+          "passinmebybrianjohnsonmiguelmontaemarquiesehannah",
+          "heretostaybrianjohnsonmiguelmontaealexjackson"
+        ],
+        "latestRelease": {
+          "title": "Why R U Remix",
+          "type": "track",
+          "url": "https://eastcoastmillitia.bandcamp.com/track/why-r-u-remix",
+          "imageUrl": "https://f4.bcbits.com/img/a3193824128_16.jpg",
+          "releaseDate": "January 30, 2012"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Brian%20Johnson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Brian%20Johnson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "brianjohnson-bandcamp-brianjohnson1",
+    "name": "Brian Johnson",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020391118_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://brianjohnson1.bandcamp.com",
+        "allReleaseTitles": [
+          "whatdyouendthesentencewithaprepositionfor",
+          "champythechampettesiloveyoumom",
+          "bornonathursday",
+          "keyriver",
+          "starspangledbrucebanner",
+          "mykidswhitetrashhair",
+          "tiger07"
+        ],
+        "latestRelease": {
+          "title": "What’d You End the Sentence with a Preposition For?",
+          "type": "track",
+          "url": "https://brianjohnson1.bandcamp.com/track/what-d-you-end-the-sentence-with-a-preposition-for",
+          "imageUrl": "https://f4.bcbits.com/img/a0346165122_2.jpg",
+          "releaseDate": "May 20, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Brian%20Johnson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Brian%20Johnson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-brianjohnson",
+    "name": "Brian Johnson",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/brian-johnson/40343"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Brian%20Johnson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Brian%20Johnson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

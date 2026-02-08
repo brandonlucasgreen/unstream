@@ -1,0 +1,161 @@
+[
+  {
+    "id": "devaepica",
+    "name": "Deva Epica",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038495000_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://devaepica.bandcamp.com",
+        "allReleaseTitles": [
+          "adastraashaneendevaepica",
+          "explorerashaneendevaepica",
+          "discovererashaneendevaepica",
+          "voyagerdevaepicaashaneen",
+          "timelessfuturetheanthem",
+          "freedomthealbum",
+          "messagefromthesoul",
+          "freeyourselfep",
+          "anewadventurebeginsfollowtheheartep"
+        ],
+        "latestRelease": {
+          "title": "Ad Astra\n                \n                \n\n                Ashaneen, Deva Epica",
+          "type": "album",
+          "url": "https://devaepica.bandcamp.com/album/ad-astra",
+          "imageUrl": "https://f4.bcbits.com/img/a0408003319_2.jpg",
+          "releaseDate": "September 28, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Deva%20Epica"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Deva%20Epica"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.epica.nl/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/302225"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Deva%20Epica&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Deva%20Epica"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/epicaofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@epicaofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC82lIgiaLTBkzhEebHWoazA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/epica"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-epica",
+    "name": "Epica",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/epica/541435",
+        "allReleaseTitles": [
+          "aspiral",
+          "omega",
+          "theholographicprinciple",
+          "thequantumenigma",
+          "arcana",
+          "thesolacesystem",
+          "designyouruniverse",
+          "thealchemyproject",
+          "riseagainapocalyptica",
+          "liveattheafaslive",
+          "omegaalive",
+          "thephantomagony",
+          "avatarthefinalincarnation",
+          "thedivineconspiracy",
+          "liveatparadiso",
+          "consigntooblivion",
+          "kingdomofheavenpart3theantediluvianuniverseomegaalive",
+          "rivers",
+          "beyondthematrix",
+          "abyssoftimecountdowntosingularity"
+        ],
+        "latestRelease": {
+          "title": "Aspiral Epica",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/aspiral-epica/fkgb0zo003exb",
+          "releaseDate": "2025-03-21"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Epica"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Epica"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.epica.nl/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/302225"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Epica&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Epica"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/epicaofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@epicaofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC82lIgiaLTBkzhEebHWoazA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/epica"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

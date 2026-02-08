@@ -1,0 +1,56 @@
+[
+  {
+    "id": "qobuz-iwanrheon",
+    "name": "Iwan Rheon",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/iwan-rheon/1986314",
+        "allReleaseTitles": [
+          "ijustwishidnevergonetospace",
+          "hashtag",
+          "dinard",
+          "changingtimes",
+          "tonguetied",
+          "forwardmotion"
+        ],
+        "latestRelease": {
+          "title": "I Just Wish Id Never Gone To Space Iwan Rheon",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/i-just-wish-id-never-gone-to-space-iwan-rheon/jclbc5uafjecc",
+          "releaseDate": "2025-07-03"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Iwan%20Rheon"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Iwan%20Rheon"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2468815"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://instagram.com/_iwanrheon"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "http://youtube.com/IwanRheonOfficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/iwanrheon"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

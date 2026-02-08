@@ -1,0 +1,85 @@
+[
+  {
+    "id": "qobuz-massiveattack1",
+    "name": "Massive Attack 1",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/massive-attack-1/53293",
+        "allReleaseTitles": [
+          "bluelines",
+          "mezzanine",
+          "mezzanine20thanniversarydeluxeedition",
+          "ritualspirit",
+          "spoilscomenearme",
+          "protection",
+          "heligolandbonusedition",
+          "100thwindow",
+          "collecteddeluxeedition",
+          "heligoland",
+          "iagainstimosdef",
+          "noprotection",
+          "splittingtheatom",
+          "falseflags",
+          "atlasairep",
+          "livewithmeterrycallier",
+          "angel",
+          "daydreamingsharanelsontricky",
+          "epmassiveattack"
+        ],
+        "latestRelease": {
+          "title": "Spoils Come Near Me Massive Attack",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/spoils-come-near-me-massive-attack/tcv4i6764uwya",
+          "releaseDate": "2016-07-29"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Massive%20Attack%201"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Massive%20Attack%201"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://web.archive.org/web/19970131155102/http://www.vmg.co.uk/massive/index.html"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4480"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Massive%20Attack%201&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Massive%20Attack%201"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/massiveattackofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCLqMjQtlnOkknN-FvrtQ0WQ"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@massiveattackofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/massiveattack"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

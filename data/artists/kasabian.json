@@ -1,0 +1,222 @@
+[
+  {
+    "id": "zenkasabian",
+    "name": "Zen Kasabian",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036022346_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://zenkasabian.bandcamp.com",
+        "allReleaseTitles": [
+          "neurosketch",
+          "fracturedmind",
+          "precisionsingle",
+          "distortedreality",
+          "numb3rs"
+        ],
+        "latestRelease": {
+          "title": "Neuro-Sketch",
+          "type": "track",
+          "url": "https://zenkasabian.bandcamp.com/track/neuro-sketch",
+          "imageUrl": "https://f4.bcbits.com/img/a0541914828_2.jpg",
+          "releaseDate": "June 9, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Zen%20Kasabian"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Zen%20Kasabian"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.kasabian.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/235133"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Zen%20Kasabian&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Zen%20Kasabian"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kasabianofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@kasabianofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC_niYTRmUdRvVNdGYIA1vcg"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@kasabianofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/kasabian"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-kasabian",
+    "name": "Kasabian",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/kasabian/167598",
+        "allReleaseTitles": [
+          "",
+          "happenings",
+          "velociraptor",
+          "westryderpauperlunaticasylum",
+          "hippiesunshine",
+          "thealchemistseuphoria",
+          "empire",
+          "goatxcristale",
+          "forcryingoutlouddeluxe",
+          "algorithms",
+          "alygatyr",
+          "releasethepressurecalvinharris",
+          "forcryingoutloud",
+          "rocketfuelxtheprodigy",
+          "4813",
+          "lsf"
+        ],
+        "latestRelease": {
+          "title": "Hippie Sunshine Kasabian",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/hippie-sunshine-kasabian/oowe9xebnkqyc",
+          "releaseDate": "2025-09-22"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kasabian"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kasabian"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.kasabian.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/235133"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Kasabian&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Kasabian"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kasabianofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@kasabianofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC_niYTRmUdRvVNdGYIA1vcg"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@kasabianofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/kasabian"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "motherkasabian",
+    "name": "Mother Kasabian",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0003307302_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://motherkasabian.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mother%20Kasabian"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mother%20Kasabian"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.kasabian.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/235133"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Mother%20Kasabian&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Mother%20Kasabian"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kasabianofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@kasabianofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC_niYTRmUdRvVNdGYIA1vcg"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@kasabianofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/kasabian"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

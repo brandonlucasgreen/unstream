@@ -1,0 +1,473 @@
+[
+  {
+    "id": "shaggysample",
+    "name": "Shaggy Sample",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0003420515_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://shaggysample.bandcamp.com",
+        "latestRelease": {
+          "title": "#2 Record",
+          "type": "album",
+          "url": "https://shaggysample.bandcamp.com/album/2-record",
+          "imageUrl": "https://f4.bcbits.com/img/a1142059083_16.jpg",
+          "releaseDate": "September 16, 2015"
+        },
+        "allReleaseTitles": [
+          "2record",
+          "myothercaris"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Shaggy%20Sample"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Shaggy%20Sample"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://shaggyonline.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/386759"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Shaggy%20Sample&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Shaggy%20Sample"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/direalshaggy"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@direalshaggy?"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCBtln7sL3FYAY6ePguz9sNg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Shaggy"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "shaggysweet",
+    "name": "Shaggy Sweet",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0006006856_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://shaggysweet.bandcamp.com",
+        "allReleaseTitles": [
+          "howthestorygoes",
+          "lighttheway",
+          "shaggysweet"
+        ],
+        "latestRelease": {
+          "title": "How The Story Goes",
+          "type": "album",
+          "url": "https://shaggysweet.bandcamp.com/album/how-the-story-goes",
+          "imageUrl": "https://f4.bcbits.com/img/a1570351452_2.jpg",
+          "releaseDate": "July 15, 2016"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Shaggy%20Sweet"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Shaggy%20Sweet"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://shaggyonline.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/386759"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Shaggy%20Sweet&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Shaggy%20Sweet"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/direalshaggy"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@direalshaggy?"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCBtln7sL3FYAY6ePguz9sNg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Shaggy"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "shaggydogs",
+    "name": "Shaggy Dogs",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027873775_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://shaggydogs.bandcamp.com",
+        "allReleaseTitles": [
+          "sorryforthedelay",
+          "picturediscallinclusive",
+          "facebookfury",
+          "bluessteady",
+          "cdallinclusive",
+          "newyorkcity",
+          "nosecondround",
+          "watchout",
+          "cdbababoomba",
+          "fiestabluesnroll",
+          "fairyqueen",
+          "leedorsey",
+          "cdrenegadeparty",
+          "hotnight",
+          "moneyhoney",
+          "voodooking",
+          "cdwholettheshaggydogsout",
+          "theygetwhattheywant",
+          "whyshouldiwait",
+          "communicationrules"
+        ],
+        "latestRelease": {
+          "title": "SORRY FOR THE DELAY",
+          "type": "album",
+          "url": "https://shaggydogs.bandcamp.com/album/sorry-for-the-delay",
+          "imageUrl": "https://f4.bcbits.com/img/a3348375414_2.jpg",
+          "releaseDate": "June 3, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Shaggy%20Dogs"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Shaggy%20Dogs"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://shaggyonline.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/386759"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Shaggy%20Dogs&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Shaggy%20Dogs"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/direalshaggy"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@direalshaggy?"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCBtln7sL3FYAY6ePguz9sNg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Shaggy"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "shaggymolasses",
+    "name": "Shaggy Molasses",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041322517_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://shaggymolasses.bandcamp.com",
+        "allReleaseTitles": [
+          "trynottoscream",
+          "underneaththewatersweight"
+        ],
+        "latestRelease": {
+          "title": "Try Not to Scream",
+          "type": "album",
+          "url": "https://shaggymolasses.bandcamp.com/album/try-not-to-scream",
+          "imageUrl": "https://f4.bcbits.com/img/a0203731488_16.jpg",
+          "releaseDate": "October 8, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Shaggy%20Molasses"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Shaggy%20Molasses"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://shaggyonline.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/386759"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Shaggy%20Molasses&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Shaggy%20Molasses"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/direalshaggy"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@direalshaggy?"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCBtln7sL3FYAY6ePguz9sNg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Shaggy"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "shaggy",
+    "name": "Shaggy",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026364024_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://shaggy.bandcamp.com",
+        "allReleaseTitles": [
+          "bricksbedroom",
+          "midwestmanic"
+        ],
+        "latestRelease": {
+          "title": "Brick's Bedroom",
+          "type": "album",
+          "url": "https://shaggy.bandcamp.com/album/bricks-bedroom",
+          "imageUrl": "https://f4.bcbits.com/img/a2405088932_16.jpg",
+          "releaseDate": "November 12, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Shaggy"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Shaggy"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://shaggyonline.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/386759"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Shaggy&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Shaggy"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/direalshaggy"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@direalshaggy?"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCBtln7sL3FYAY6ePguz9sNg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Shaggy"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-shaggy",
+    "name": "Shaggy",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/shaggy/36552"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Shaggy"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Shaggy"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://shaggyonline.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/386759"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Shaggy&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Shaggy"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/direalshaggy"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@direalshaggy?"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCBtln7sL3FYAY6ePguz9sNg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Shaggy"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-shaggy87",
+    "name": "Shaggy87",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/shaggy87/21679639"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Shaggy87"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Shaggy87"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://shaggyonline.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/386759"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Shaggy87&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Shaggy87"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/direalshaggy"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@direalshaggy?"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCBtln7sL3FYAY6ePguz9sNg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Shaggy"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

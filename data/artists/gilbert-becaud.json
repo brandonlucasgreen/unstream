@@ -1,0 +1,53 @@
+[
+  {
+    "id": "qobuz-gilbertbecaud",
+    "name": "Gilbert Becaud",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/gilbert-becaud/3656",
+        "allReleaseTitles": [
+          "20chansonsdor",
+          "196419662011remastereddeluxeversion",
+          "etmaintenant",
+          "19chansonsindeutsch",
+          "197719812011remastereddeluxeversion",
+          "bestof",
+          "triplebestof",
+          "eternel",
+          "spectacledelolympia97",
+          "edition60eanniversaire",
+          "196819702011remastereddeluxeversion",
+          "starsdelegendvol1",
+          "19581960les45toursraretes",
+          "198419992011remastereddeluxeversion",
+          "197519762011remastereddeluxeversion",
+          "whatnowmylove",
+          "18exitosenespanol",
+          "uneviecommeunroman",
+          "voyagesurmonetoile"
+        ],
+        "latestRelease": {
+          "title": "19 Chansons In Deutsch Gilbert Becaud",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/19-chansons-in-deutsch-gilbert-becaud/5099995844954",
+          "releaseDate": "2011-11-16"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Gilbert%20Becaud"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Gilbert%20Becaud"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

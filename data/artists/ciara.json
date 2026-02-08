@@ -1,0 +1,452 @@
+[
+  {
+    "id": "qobuz-ciara",
+    "name": "Ciara",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ciara/53658",
+        "allReleaseTitles": [
+          "cici",
+          "paintitblack",
+          "ecstasy",
+          "cicideluxe",
+          "",
+          "levelupfeatmissyelliottfatmanscoop",
+          "slowjacksonwang",
+          "ecstasyremixfeatteyanataylornormani",
+          "evaporaizamajorlazer",
+          "nicensweetfeatmoliyoxlade",
+          "beautymarks",
+          "jackie",
+          "howwerollchrisbrown",
+          "betterthangssummerwalker",
+          "thinkinboutyou"
+        ],
+        "latestRelease": {
+          "title": "Cici Deluxe Ciara",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/cici-deluxe-ciara/e7nhs7flh7nva",
+          "releaseDate": "2025-11-14"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/ciara"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ciara"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ciara"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.ciaraworld.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/232451"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ciara&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ciara"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/ciara/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UClc5Eis2-L2JCcN62jmD21w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ciaramusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "ciaraleah",
+    "name": "Ciara Leah",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030585604_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ciaraleahmusic.bandcamp.com",
+        "allReleaseTitles": [
+          "27liveatkensingtonsound",
+          "thedreamliveatkensingtonsound",
+          "onedaysingleversion",
+          "lovemoney12inch",
+          "lovemoney",
+          "27singleversion",
+          "eyeneedspace",
+          "vibedjjazzyjeffkonichiwabeat"
+        ],
+        "latestRelease": {
+          "title": "27 (Live at Kensington Sound)",
+          "type": "track",
+          "url": "https://ciaraleahmusic.bandcamp.com/track/27-live-at-kensington-sound",
+          "imageUrl": "https://f4.bcbits.com/img/a3759118289_2.jpg",
+          "releaseDate": "May 3, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ciara%20Leah"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ciara%20Leah"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.ciaraworld.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/232451"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ciara%20Leah&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ciara%20Leah"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/ciara/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UClc5Eis2-L2JCcN62jmD21w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ciaramusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "ciaracatalla",
+    "name": "Ciara Catalla",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0003716238_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ciaracatalla.bandcamp.com",
+        "allReleaseTitles": [
+          "lifecouldbeadream",
+          "hometome",
+          "closertohomeep"
+        ],
+        "latestRelease": {
+          "title": "Life Could Be A Dream",
+          "type": "track",
+          "url": "https://ciaracatalla.bandcamp.com/track/life-could-be-a-dream",
+          "imageUrl": "https://f4.bcbits.com/img/a3183223751_2.jpg"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ciara%20Catalla"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ciara%20Catalla"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.ciaraworld.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/232451"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ciara%20Catalla&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ciara%20Catalla"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/ciara/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UClc5Eis2-L2JCcN62jmD21w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ciaramusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "ciaradalton",
+    "name": "Ciara Dalton",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030281158_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ciaradalton.bandcamp.com",
+        "allReleaseTitles": [
+          "rodeo",
+          "dancersdreamers",
+          "hekilledmybestfriend"
+        ],
+        "latestRelease": {
+          "title": "Rodeo",
+          "type": "track",
+          "url": "https://ciaradalton.bandcamp.com/track/rodeo",
+          "imageUrl": "https://f4.bcbits.com/img/a1648101244_2.jpg",
+          "releaseDate": "June 6, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ciara%20Dalton"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ciara%20Dalton"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.ciaraworld.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/232451"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ciara%20Dalton&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ciara%20Dalton"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/ciara/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UClc5Eis2-L2JCcN62jmD21w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ciaramusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "ciaramcallister",
+    "name": "Ciara McAllister",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024397836_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ciaramcallister.bandcamp.com",
+        "allReleaseTitles": [
+          "toshimmeringlight",
+          "justhangon",
+          "offthehook",
+          "fairytale"
+        ],
+        "latestRelease": {
+          "title": "To Shimmering Light",
+          "type": "album",
+          "url": "https://ciaramcallister.bandcamp.com/album/to-shimmering-light",
+          "imageUrl": "https://f4.bcbits.com/img/a1643539848_16.jpg",
+          "releaseDate": "May 7, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ciara%20McAllister"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ciara%20McAllister"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.ciaraworld.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/232451"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ciara%20McAllister&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ciara%20McAllister"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/ciara/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UClc5Eis2-L2JCcN62jmD21w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ciaramusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "ciaramcelholm",
+    "name": "Ciara McElholm",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022891114_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ciaramcelholm.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ciara%20McElholm"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ciara%20McElholm"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.ciaraworld.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/232451"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ciara%20McElholm&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ciara%20McElholm"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/ciara/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UClc5Eis2-L2JCcN62jmD21w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ciaramusic"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "ciaraosullivan",
+    "name": "Ciara O'Sullivan",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028378597_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ciaraosullivan.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ciara%20O'Sullivan"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ciara%20O'Sullivan"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.ciaraworld.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/232451"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ciara%20O'Sullivan&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ciara%20O'Sullivan"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/ciara/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UClc5Eis2-L2JCcN62jmD21w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ciaramusic"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

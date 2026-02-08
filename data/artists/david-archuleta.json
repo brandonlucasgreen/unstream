@@ -1,0 +1,71 @@
+[
+  {
+    "id": "qobuz-davidarchuleta",
+    "name": "David Archuleta",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/david-archuleta/112904",
+        "allReleaseTitles": [
+          "cremebrulee",
+          "earthlydelights",
+          "helltogether",
+          "canicallyou",
+          "freedom",
+          "myonlywish",
+          "imyours",
+          "mylittleprayer",
+          "up",
+          "idontunderstandwithcg5",
+          "cremebruleeesteman",
+          "dulceamor",
+          "therapysessions",
+          "whatawonderfulwaytoendacrazyyear",
+          "christmasincalifornia",
+          "perfectnathanpachecoamp",
+          "ratherbelonely"
+        ],
+        "latestRelease": {
+          "title": "Earthly Delights David Archuleta",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/earthly-delights-david-archuleta/gig4ao3x8szac",
+          "releaseDate": "2025-09-12"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=David%20Archuleta"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+David%20Archuleta"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.davidarchuleta.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1425103"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/davidarchie/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/davidarchuletaVEVO"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/davidarchuleta"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "qobuz-johnnylogan",
+    "name": "Johnny Logan",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/johnny-logan/180449",
+        "allReleaseTitles": [
+          "savethischristmasforme",
+          "irishmaninamerica",
+          "natureoflove",
+          "itiswhatitis",
+          "reachforme",
+          "theirishconnectionvol2theirishsoul",
+          "weallneedlove",
+          "dancingwithmyfather",
+          "reachout",
+          "wenckesweihnachtenwenckemyhreguntergabriel",
+          "justonelookjannike",
+          "prayin"
+        ],
+        "latestRelease": {
+          "title": "It Is What It Is Johnny Logan",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/it-is-what-it-is-johnny-logan/0403467751287",
+          "releaseDate": "2017-05-05"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Johnny%20Logan"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Johnny%20Logan"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.johnnylogan.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/273276"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Johnny%20Logan&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Johnny%20Logan"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/johnnylogan_official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCeZMl26vxh4Wh1DnqWCJXOg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Johnny-Logan-357680357679853"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

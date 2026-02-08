@@ -1,0 +1,77 @@
+[
+  {
+    "id": "qobuz-monstax",
+    "name": "Monsta X",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/monsta-x/904996",
+        "allReleaseTitles": [
+          "thex",
+          "thedreaming",
+          "ifwithu",
+          "swingplaynskillzliljon",
+          "theconnectdejavu",
+          "thecode",
+          "followfindyou",
+          "fantasiax",
+          "kissordeath",
+          "lonelychristmas",
+          "breatheforyou",
+          "latenightfeelsownbossremixsamfeldt",
+          "oneday",
+          "reckless",
+          "latenightfeelsjonasuremixsamfeldt",
+          "allaboutluv",
+          "dowhatiwant",
+          "whodoulovefeatfrenchmontana",
+          "tasteofkorearainbravegirlsateez"
+        ],
+        "latestRelease": {
+          "title": "The X Monsta X",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-x-monsta-x/pb589r0jazuvc",
+          "releaseDate": "2025-09-05"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Monsta%20X"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Monsta%20X"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://cafe.daum.net/monsta-x"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5044509"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/official_monsta_x/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@monsta_x_514"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCZvCP6sWj75MwpUP4LVtpNw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/OfficialMonstaX"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

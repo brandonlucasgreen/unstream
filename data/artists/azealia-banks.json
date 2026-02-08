@@ -1,0 +1,74 @@
+[
+  {
+    "id": "qobuz-azealiabanks",
+    "name": "Azealia Banks",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/azealia-banks/769782",
+        "allReleaseTitles": [
+          "surprisememallratand",
+          "hypnoticremixespauloakenfold",
+          "brokewithexpensivetaste",
+          "countcontessalone",
+          "annawintour",
+          "thebigbigbeat",
+          "fuckhimallnight",
+          "icycolorschange",
+          "treasureisland",
+          "fantasea",
+          "tarantula",
+          "salchicon",
+          "nirvana",
+          "dilemma",
+          "movinonupcocossonglovebeatsrhymes",
+          "1800nuchecks",
+          "sixflagsslimdollars",
+          "slowhands",
+          "pyrexprincess",
+          "misscamaraderie"
+        ],
+        "latestRelease": {
+          "title": "Surprise Me Mallrat And Azealia Banks",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/surprise-me-mallrat-and-azealia-banks/nyx9ed73u5joc",
+          "releaseDate": "2022-04-14"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Azealia%20Banks"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Azealia%20Banks"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.azealiabanks.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1926684"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/azealiabanks/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCD4UMQ7oryQQq5gqZStJQ6g"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/azealiabanksmusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

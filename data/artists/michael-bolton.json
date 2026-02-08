@@ -1,0 +1,90 @@
+[
+  {
+    "id": "michaelbolton",
+    "name": "Michael Bolton",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a0961018838_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/michael-bolton/46701",
+        "allReleaseTitles": [
+          "asymphonyofhits",
+          "tiltheendofforever",
+          "boltonswingssinatra",
+          "christmastime",
+          "sparkoflight",
+          "vintage",
+          "christmasisntchristmasandmickeyguyton",
+          "beautifulworldandjustinjesso",
+          "whatevershewants",
+          "beautifulworld",
+          "justthebeginning",
+          "theweightfromthecomedycentraloriginalseriesbdwongandscottadsit",
+          "theessential",
+          "greatesthits19851995",
+          "fathersanddaughtersoriginalmotionpicturesoundtrackpaolobuonvinorichardclayderman",
+          "soulprovider",
+          "timelesstheclassics",
+          "allthatmatters",
+          "songsofcinema"
+        ],
+        "latestRelease": {
+          "title": "Spark Of Light Michael Bolton",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/spark-of-light-michael-bolton/vwhj8zgytcvfc",
+          "releaseDate": "2024-08-23"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://michaelbolton.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Michael%20Bolton"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Michael%20Bolton"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.michaelbolton.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/274209"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Michael%20Bolton&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Michael%20Bolton"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/michaelboltonpics/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@michaelbolton?lang=en"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCJj7pGCNrd2ww5L_Vhnko-A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MBsings"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,45 @@
+[
+  {
+    "id": "qobuz-sharondenadel",
+    "name": "Sharon Den Adel",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sharon-den-adel/167828",
+        "allReleaseTitles": [
+          "inandoutoflovearminvanbuurenfeat",
+          "liefdevoormuziek",
+          "theroseuitliefdevoormuziek"
+        ],
+        "latestRelease": {
+          "title": "Liefde Voor Muziek Sharon Den Adel",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/liefde-voor-muziek-sharon-den-adel/f7tkn58e3jiwa",
+          "releaseDate": "2018-05-28"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sharon%20Den%20Adel"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sharon%20Den%20Adel"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/254737"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/OfficialSharondenAdel"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

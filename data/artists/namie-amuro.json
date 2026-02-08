@@ -1,0 +1,35 @@
+[
+  {
+    "id": "qobuz-namieamuro",
+    "name": "Namie Amuro",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/namie-amuro/2299771",
+        "latestRelease": {
+          "title": "Uncontrolled Namie Amuro",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/uncontrolled-namie-amuro/jpysfbdred1ag",
+          "releaseDate": "2012-06-25"
+        },
+        "allReleaseTitles": [
+          "uncontrolled"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Namie%20Amuro"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Namie%20Amuro"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

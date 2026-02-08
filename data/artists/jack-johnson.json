@@ -1,0 +1,240 @@
+[
+  {
+    "id": "jackjohnson",
+    "name": "Jack Johnson",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0010826770_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jack-johnson/42544",
+        "allReleaseTitles": [
+          "inbetweendreams",
+          "onandon",
+          "holdontothelighthermanosgutierrez",
+          "brushfirefairytales",
+          "andfriendssingalongsandlullabiesforthefilmcuriousgeorge",
+          "allthelightaboveittoo",
+          "meetthemoonlight",
+          "sleepthroughthestatic",
+          "fromheretonowtoyou",
+          "tothesea",
+          "homestickfigure",
+          "inbetweendub",
+          "enconcert",
+          "ifeverpaulafugabenharper",
+          "sunsetsforsomebodyelsebigsurroge"
+        ],
+        "latestRelease": {
+          "title": "Hold On To The Light Hermanos Gutierrez Jack Johnson",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/hold-on-to-the-light-hermanos-gutierrez-jack-johnson/nz242ngvytk2a",
+          "releaseDate": "2025-11-07"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://brushfirefairytales.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jack%20Johnson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jack%20Johnson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://jackjohnsonmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/167366"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jack%20Johnson&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jack%20Johnson"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jackjohnson/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/jackjohnsonmusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/jackjohnson"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "jackjohnson-bandcamp-jack-johnson",
+    "name": "Jack Johnson",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0009925476_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jack-johnson.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jack%20Johnson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jack%20Johnson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://jackjohnsonmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/167366"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jack%20Johnson&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jack%20Johnson"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jackjohnson/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/jackjohnsonmusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/jackjohnson"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "jackjohnsonroundone",
+    "name": "Jack Johnson Round One",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013163111_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jackjohnsonroundone.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jack%20Johnson%20Round%20One"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jack%20Johnson%20Round%20One"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://jackjohnsonmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/167366"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jack%20Johnson%20Round%20One&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jack%20Johnson%20Round%20One"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jackjohnson/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/jackjohnsonmusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/jackjohnson"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-jackjohnso",
+    "name": "Jack Johnso",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jack-johnso/26040266"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jack%20Johnso"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jack%20Johnso"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://jackjohnsonmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/167366"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jack%20Johnso&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jack%20Johnso"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jackjohnson/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/jackjohnsonmusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/jackjohnson"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

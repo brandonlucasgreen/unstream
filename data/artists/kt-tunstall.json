@@ -1,0 +1,214 @@
+[
+  {
+    "id": "kttunstall",
+    "name": "KT Tunstall",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028838380_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/kt-tunstall/111982",
+        "allReleaseTitles": [
+          "nut",
+          "facetofacesuziquatro",
+          "fivemoresecondsseafretand",
+          "thestargazerep",
+          "eyetothetelescopefeatshabakashabaka",
+          "scluelessmixtape",
+          "littlelifefrankturner",
+          "littlesaintnickchrisleonardandyburrows",
+          "goldenstateep",
+          "iknowwhatloveisbecauseofyoukeithgoodwinzacbrownjasonmrazand",
+          "privateeyes",
+          "canyons",
+          "cancerian",
+          "eyetothetelescope",
+          "drasticfantastic",
+          "facetofacesuziquatro",
+          "eyetothetelescopestargazeredition",
+          "invisibleempirecrescentmoon",
+          "caledoniaalancumming"
+        ],
+        "latestRelease": {
+          "title": "The Stargazer Ep Kt Tunstall",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-stargazer-ep-kt-tunstall/oyyvjby8bwoqk",
+          "releaseDate": "2025-10-24"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kttunstall.bandcamp.com"
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/KTTunstall"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=KT%20Tunstall"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+KT%20Tunstall"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://kttunstall.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/311543"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=KT%20Tunstall&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/KT%20Tunstall"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kttunstall/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/kttunstallofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/kttunstall"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "kttunstall-bandcamp-kttunstalllhn",
+    "name": "KT Tunstall",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039577149_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kttunstalllhn.bandcamp.com",
+        "allReleaseTitles": [
+          "kttunstallliveedinburghusherhall",
+          "kttunstallliveatthebarrowland2019"
+        ],
+        "latestRelease": {
+          "title": "KT Tunstall - Live @Edinburgh Usher Hall",
+          "type": "album",
+          "url": "https://kttunstalllhn.bandcamp.com/album/kt-tunstall-live-edinburgh-usher-hall",
+          "imageUrl": "https://f4.bcbits.com/img/a0065159517_16.jpg",
+          "releaseDate": "September 24, 2025"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/KTTunstall"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=KT%20Tunstall"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+KT%20Tunstall"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://kttunstall.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/311543"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=KT%20Tunstall&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/KT%20Tunstall"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kttunstall/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/kttunstallofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/kttunstall"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-kttunstall1",
+    "name": "K T Tunstall 1",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/k-t-tunstall-1/455182"
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/KTTunstall"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=K%20T%20Tunstall%201"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+K%20T%20Tunstall%201"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://kttunstall.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/311543"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=K%20T%20Tunstall%201&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/K%20T%20Tunstall%201"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kttunstall/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/kttunstallofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/kttunstall"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

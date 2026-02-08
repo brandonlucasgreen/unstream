@@ -1,0 +1,43 @@
+[
+  {
+    "id": "yasiinbey",
+    "name": "yasiin bey",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038048664_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://yasiinbey.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=yasiin%20bey"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+yasiin%20bey"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2538994"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=yasiin%20bey&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/yasiin%20bey"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/yasiinbey"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

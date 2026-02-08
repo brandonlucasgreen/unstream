@@ -1,0 +1,39 @@
+[
+  {
+    "id": "qobuz-eddiealbert",
+    "name": "Eddie Albert",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/eddie-albert/165673",
+        "allReleaseTitles": [
+          "thealbum",
+          "readingofthecreation",
+          "onegodthewaysweworshiphimtheuniversityinterfaithchorale",
+          "nevermarryanactoradancermargoalbert",
+          "septembersong"
+        ],
+        "latestRelease": {
+          "title": "September Song Eddie Albert",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/september-song-eddie-albert/to3m66bjb6mpa",
+          "releaseDate": "2022-11-03"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Eddie%20Albert"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Eddie%20Albert"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

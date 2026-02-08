@@ -1,0 +1,72 @@
+[
+  {
+    "id": "qobuz-ericsaade",
+    "name": "Eric Saade",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/eric-saade/574401",
+        "allReleaseTitles": [
+          "girlfromsweden",
+          "samycketbattre2017tolkningarna",
+          "wideawakefilatovkarasfeatgustafnoren",
+          "saadevol1",
+          "wideawakefeatgustafnorenfilatovkarasfeatfilatovkarasgustafnoren",
+          "masquerade",
+          "popular",
+          "hotterthanfirefeatdev",
+          "saadevol2",
+          "sting",
+          "anotherweekaevionremix",
+          "forgiveme",
+          "cominghome",
+          "colors",
+          "withoutyouimnothing",
+          "cominghomeep",
+          "stilllovingit",
+          "anotherweekjoakimmolitorremix"
+        ],
+        "latestRelease": {
+          "title": "Sa Mycket Battre 2017 Tolkningarna Eric Saade",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/sa-mycket-battre-2017-tolkningarna-eric-saade/7332181084870",
+          "releaseDate": "2017-12-29"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Eric%20Saade"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Eric%20Saade"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.ericsaade.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1772417"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/ericsaadeofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCvRA2qEeaIri7qrU2TX-Feg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/146609397115"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

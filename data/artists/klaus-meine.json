@@ -1,0 +1,30 @@
+[
+  {
+    "id": "qobuz-standalone-klausmeine",
+    "name": "Klaus Meine",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/klaus-meine/14476"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Klaus%20Meine"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Klaus%20Meine"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/361209"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

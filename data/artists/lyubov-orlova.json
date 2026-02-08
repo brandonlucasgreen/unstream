@@ -1,0 +1,52 @@
+[
+  {
+    "id": "lyubovorlova",
+    "name": "Lyubov Orlova",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0004640363_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://lyubovorlova.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lyubov%20Orlova"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lyubov%20Orlova"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "lyubovorlova-bandcamp-sslyubovorlova",
+    "name": "Lyubov Orlova",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0006941403_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sslyubovorlova.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lyubov%20Orlova"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lyubov%20Orlova"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

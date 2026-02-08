@@ -1,0 +1,49 @@
+[
+  {
+    "id": "qobuz-nickhornby",
+    "name": "Nick Hornby",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/nick-hornby/404650",
+        "allReleaseTitles": [
+          "lonelyavenuebenfolds",
+          "dickensundprinceunvergleichlichegenies",
+          "missblackpoolunddasswinginglondonlitcolognelive"
+        ],
+        "latestRelease": {
+          "title": "Dickens Und Prince Unvergleichliche Genies Nick Hornby",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/dickens-und-prince-unvergleichliche-genies-nick-hornby/fzv6g66ahwfia",
+          "releaseDate": "2023-05-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Nick%20Hornby"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Nick%20Hornby"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/659573"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Nick%20Hornby&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Nick%20Hornby"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

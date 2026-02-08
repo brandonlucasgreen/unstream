@@ -1,0 +1,142 @@
+[
+  {
+    "id": "qobuz-kaiserchiefs",
+    "name": "Kaiser Chiefs",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/kaiser-chiefs/53366",
+        "allReleaseTitles": [
+          "zombieprom",
+          "holeinmysoul",
+          "how2dance",
+          "feelingalright",
+          "beautifulgirl",
+          "jealousy",
+          "employment",
+          "easyeighthalbum",
+          "yourstrulyangrymob",
+          "duck",
+          "souvenirthesingles20042012",
+          "staytogether",
+          "nevermissabeat",
+          "offwiththeirheads",
+          "educationeducationeducationwar",
+          "employment20",
+          "thefutureismedieval",
+          "ipredictariot"
+        ],
+        "latestRelease": {
+          "title": "Beautiful Girl Kaiser Chiefs",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/beautiful-girl-kaiser-chiefs/zf8u8zuqde1ga",
+          "releaseDate": "2024-02-14"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kaiser%20Chiefs"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kaiser%20Chiefs"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.kaiserchiefs.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/289775"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Kaiser%20Chiefs&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Kaiser%20Chiefs"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kaiserchiefs"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCnFROBOMsmkb_-3B7lPH_Ag"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/kaiserchiefs"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-kaiserchief",
+    "name": "Kaiser Chief",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/kaiser-chief/556870",
+        "allReleaseTitles": [
+          "mentalduranium",
+          "desanneesapres"
+        ],
+        "latestRelease": {
+          "title": "Des Annees Apres Kaiser Chief",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/des-annees-apres-kaiser-chief/ce4jdxcsmvznb",
+          "releaseDate": "2020-07-31"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kaiser%20Chief"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kaiser%20Chief"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.kaiserchiefs.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/289775"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Kaiser%20Chief&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Kaiser%20Chief"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kaiserchiefs"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCnFROBOMsmkb_-3B7lPH_Ag"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/kaiserchiefs"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

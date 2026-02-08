@@ -1,0 +1,67 @@
+[
+  {
+    "id": "qobuz-captainbeefheart",
+    "name": "Captain Beefheart",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/captain-beefheart/43819",
+        "allReleaseTitles": [
+          "bongofuryfrankzappathemothers",
+          "shinybeastbatchainpullerandthemagicband",
+          "bongofury50thanniversaryfrankzappathemothers",
+          "sunzoomspark1970to1972",
+          "clearspotandthemagicband",
+          "thespotlightkid",
+          "safeasmilkhismagicband",
+          "bluejeansmoonbeamshismagicband",
+          "themirrormansessionshismagicband",
+          "lickmydecalsoffbabyandthemagicband",
+          "docattheradarstation",
+          "icecreamforcrowhismagicband",
+          "thelegendaryamsessionshismagicband"
+        ],
+        "latestRelease": {
+          "title": "Bongo Fury 50th Anniversary Frank Zappa Captain Beefheart The Mothers",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/bongo-fury-50th-anniversary-frank-zappa-captain-beefheart-the-mothers/qwny1vcwqnut8",
+          "releaseDate": "2026-03-20"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Captain%20Beefheart"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Captain%20Beefheart"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.beefheart.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/119009"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Captain%20Beefheart&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Captain%20Beefheart"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/CaptainBeefheartOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

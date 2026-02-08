@@ -1,0 +1,66 @@
+[
+  {
+    "id": "qobuz-aljolson",
+    "name": "Al Jolson",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/al-jolson/11466",
+        "allReleaseTitles": [
+          "publicdomainclassicsplusafewraresurprises",
+          "20thcenturymastersthemillenniumcollectionbestof",
+          "thestar",
+          "insongshemadefamous",
+          "rainbowroundmyshoulder",
+          "presenting",
+          "souveniralbum",
+          "formeandmygal",
+          "kingofbroadwayrareperformancescuratedbychipdeffaa",
+          "frombroadwaytohollywood",
+          "showtunesofthe1920svol1variousartistsbroxsisters",
+          "stephenfostersongs",
+          "jolsonsingsagain",
+          "sbroadway",
+          "sentimentalmelodies",
+          "rediscovereddynamicpublicdomainperformancescuratedbychipdeffaa",
+          "thathauntingmelody",
+          "collection",
+          "letmesingandimhappyjazzagecharmforthenewyear",
+          "jolsonalvol119111914"
+        ],
+        "latestRelease": {
+          "title": "Al Jolson Public Domain Classics Plus A Few Rare Surprises Al Jolson",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/al-jolson-public-domain-classics-plus-a-few-rare-surprises-al-jolson/u5wv8n9wvk12a",
+          "releaseDate": "2025-10-07"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Al%20Jolson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Al%20Jolson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/258519"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Al%20Jolson&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Al%20Jolson"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

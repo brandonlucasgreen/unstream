@@ -1,0 +1,34 @@
+[
+  {
+    "id": "qobuz-standalone-braddelson",
+    "name": "Brad Delson",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/brad-delson/308717"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Brad%20Delson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Brad%20Delson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/462077"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/braddelson"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

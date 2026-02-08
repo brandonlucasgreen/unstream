@@ -1,0 +1,110 @@
+[
+  {
+    "id": "qobuz-stefanraab",
+    "name": "Stefan Raab",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/stefan-raab/211770",
+        "allReleaseTitles": [
+          "bittelassdaslichtanausdaskanudesmanitumaxmutzke",
+          "ichhabeeinenringummeineeier",
+          "getready"
+        ],
+        "latestRelease": {
+          "title": "Bitte Lass Das Licht An Aus Das Kanu Des Manitu Stefan Raab Max Mutzke",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/bitte-lass-das-licht-an-aus-das-kanu-des-manitu-stefan-raab-max-mutzke/n0pstwcx51pnc",
+          "releaseDate": "2025-08-14"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Stefan%20Raab"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Stefan%20Raab"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/170872"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Stefan%20Raab&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Stefan%20Raab"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/therealstefanraab/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@therealstefanraab"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/234159256625893"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "stefanraabe",
+    "name": "Stefan Raabe",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0004800837_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bandcamp.com/stefanraabe"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Stefan%20Raabe"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Stefan%20Raabe"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/170872"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Stefan%20Raabe&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Stefan%20Raabe"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/therealstefanraab/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@therealstefanraab"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/234159256625893"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

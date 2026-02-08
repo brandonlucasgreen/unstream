@@ -1,0 +1,36 @@
+[
+  {
+    "id": "qobuz-serhiyzhadan",
+    "name": "Serhiy Zhadan",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/serhiy-zhadan/2607897",
+        "latestRelease": {
+          "title": "Skovorodance Serhiy Zhadan Yuriy Gurzhy",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/skovorodance-serhiy-zhadan-yuriy-gurzhy/nq8d60ao9mjma",
+          "releaseDate": "2023-10-12"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/serhiyzhadan"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Serhiy%20Zhadan"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Serhiy%20Zhadan"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

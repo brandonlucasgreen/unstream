@@ -1,0 +1,52 @@
+[
+  {
+    "id": "qobuz-rachelzegler",
+    "name": "Rachel Zegler",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rachel-zegler/12047163",
+        "allReleaseTitles": [
+          "dontcryformeargentinafromevitaandrewlloydwebber",
+          "evitaandrewlloydwebber",
+          "thehungergamestheballadofsongbirdssnakesflatlandcavalryoliviarodrigo",
+          "thehangingtree",
+          "rainbowhighfromevitaandrewlloydwebber",
+          "onemoredaywatskyampamptommydesigner",
+          "waitingonawishdisney",
+          "manofthehouse",
+          "theoldtherebeforeacapella",
+          "balconyscenetonightanselelgort"
+        ],
+        "latestRelease": {
+          "title": "Evita Andrew Lloyd Webber Rachel Zegler",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/evita-andrew-lloyd-webber-rachel-zegler/g4iupo9fn1lmc",
+          "releaseDate": "2025-10-24"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rachel%20Zegler"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rachel%20Zegler"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rachelzegler/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC5CpvBm5CdvMzLixwPjex6w"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,122 @@
+[
+  {
+    "id": "chevychasestolemywife",
+    "name": "Chevy Chase Stole My Wife",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026737333_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://chevychasestolemywife.bandcamp.com",
+        "allReleaseTitles": [
+          "frenchexit",
+          "allthehandsomemenaredead",
+          "howssheilasglass",
+          "beammeupsoftboi",
+          "giveusasmile",
+          "anxiousteeth",
+          "swayed",
+          "haitianhoneymoon",
+          "chevychasestolemywifeep2",
+          "chevychasestolemywifeep1"
+        ],
+        "latestRelease": {
+          "title": "French Exit",
+          "type": "album",
+          "url": "https://chevychasestolemywife.bandcamp.com/album/french-exit",
+          "imageUrl": "https://f4.bcbits.com/img/a0732553189_2.jpg",
+          "releaseDate": "September 5, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Chevy%20Chase%20Stole%20My%20Wife"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Chevy%20Chase%20Stole%20My%20Wife"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/807083"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Chevy%20Chase%20Stole%20My%20Wife&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Chevy%20Chase%20Stole%20My%20Wife"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-chevychase",
+    "name": "Chevy Chase",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/chevy-chase/1880122",
+        "allReleaseTitles": [
+          "nationallampoonlemmings",
+          "goldturkeynationallampoonradiohourgreatesthits",
+          "nationallampoonradiohourepisode6christmasspecial",
+          "nationallampoonradiohourepisode28",
+          "nationallampoonradiohourepisode9",
+          "nationallampoonradiohourepisode8",
+          "nationallampoonofficialstereotestanddemonstrationrecord",
+          "",
+          "nationallampoonradiodinner",
+          "bestofnationallampoonradiohourvol4",
+          "bestofnationallampoonradiohourvol1",
+          "nationallampoonthatsnotfunnythatssick",
+          "bestofnationallampoonradiohourvol3",
+          "nationallampoonradiohourepisode10",
+          "nationallampoonradiohourepisode15",
+          "nationallampoonradiohourepisode7",
+          "nationallampoonradiohourepisode25",
+          "nationallampoonmissingwhitehousetapes",
+          "nationallampoonsrulesoftheroadgreatesttrucksongsofalltime",
+          "nationallampoonwhitealbum"
+        ],
+        "latestRelease": {
+          "title": "National Lampoon Lemmings Chevy Chase",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/national-lampoon-lemmings-chevy-chase/bsfou5f9sjzmc",
+          "releaseDate": "2016-09-23"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Chevy%20Chase"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Chevy%20Chase"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/807083"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Chevy%20Chase&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Chevy%20Chase"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

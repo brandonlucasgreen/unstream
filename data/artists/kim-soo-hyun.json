@@ -1,0 +1,122 @@
+[
+  {
+    "id": "kimseohyun",
+    "name": "Kim Seo Hyun",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032517527_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://seohyun.bandcamp.com",
+        "allReleaseTitles": [
+          "pinksweetmintblackhat",
+          "maybeitstimetosayiloveyou",
+          "bluenote",
+          ""
+        ],
+        "latestRelease": {
+          "title": "Pink, Sweet, Mint, Black Hat",
+          "type": "album",
+          "url": "https://seohyun.bandcamp.com/album/pink-sweet-mint-black-hat",
+          "imageUrl": "https://f4.bcbits.com/img/a1533136091_16.jpg",
+          "releaseDate": "December 13, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kim%20Seo%20Hyun"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kim%20Seo%20Hyun"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-kimsoohyun2",
+    "name": "Kim Soo Hyun 2",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/kim-soo-hyun-2/15703539",
+        "allReleaseTitles": [
+          "queenoftearsoriginaltelevisionsoundtrackspecialtrack",
+          "mylovefromthestaroriginalsoundtrackpart8",
+          "mylovefromthestaroriginalsoundtrackspecialpromise",
+          "dreamingfromshowmusicaldreamhighisaachong"
+        ],
+        "latestRelease": {
+          "title": "Dreaming From Show Musical Dream High Kim Soo Hyun Isaac Hong",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/dreaming-from-show-musical-dream-high-kim-soo-hyun-isaac-hong/uf4maw3v806sa",
+          "releaseDate": "2025-03-08"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kim%20Soo%20Hyun%202"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kim%20Soo%20Hyun%202"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-kimsoohyun",
+    "name": "Kim Soohyun",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/kim-soohyun/2014689",
+        "allReleaseTitles": [
+          "amomenttorestinlove",
+          "justletmestay",
+          "popintomymind",
+          "myeverglow",
+          "",
+          "jazz",
+          "allthingssleeping",
+          "afterglow",
+          "focusedrest",
+          "acoustic",
+          "rock",
+          "stillhere",
+          "letitbeaday",
+          "againitsyou"
+        ],
+        "latestRelease": {
+          "title": "A Moment To Rest In Love Kim Soohyun",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/a-moment-to-rest-in-love-kim-soohyun/zku9p7wzoqk8k",
+          "releaseDate": "2025-12-09"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kim%20Soohyun"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kim%20Soohyun"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

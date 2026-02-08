@@ -1,0 +1,78 @@
+[
+  {
+    "id": "qobuz-electriclightorchestra",
+    "name": "Electric Light Orchestra",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/electric-light-orchestra/122906",
+        "allReleaseTitles": [
+          "outoftheblue",
+          "discovery",
+          "anewworldrecord",
+          "time",
+          "eldorado",
+          "facethemusic",
+          "secretmessages",
+          "onthethirdday",
+          "allovertheworldtheverybestofelo",
+          "balanceofpower",
+          "thecollection",
+          "ii",
+          "noanswer",
+          "flashback",
+          "mrblueskytheverybestof",
+          "zoom"
+        ],
+        "latestRelease": {
+          "title": "Out Of The Blue Electric Light Orchestra",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/out-of-the-blue-electric-light-orchestra/0886445593945",
+          "releaseDate": "2015-11-13"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Electric%20Light%20Orchestra"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Electric%20Light%20Orchestra"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://jefflynneselo.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/112154"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Electric%20Light%20Orchestra&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Electric%20Light%20Orchestra"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jefflynneselo/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCnN3zukXBgI86ao_epE9ZZg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ElectricLightOrchestra"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

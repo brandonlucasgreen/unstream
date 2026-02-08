@@ -1,0 +1,132 @@
+[
+  {
+    "id": "qobuz-jjcale",
+    "name": "J J Cale",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/j-j-cale/35992",
+        "allReleaseTitles": [
+          "stayaround",
+          "totulsaandback",
+          "guitarman",
+          "live",
+          "closertoyou",
+          "naturally",
+          "theroadtoescondidoericclapton",
+          "troubadour",
+          "rollon",
+          "5",
+          "okie",
+          "shades",
+          "theverybestof",
+          "really",
+          "grasshopper",
+          "carryonbest",
+          "travellog",
+          "number10"
+        ],
+        "latestRelease": {
+          "title": "Stay Around Jj Cale",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/stay-around-jj-cale/ug85god9zuvdc",
+          "releaseDate": "2019-04-26"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=J%20J%20Cale"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+J%20J%20Cale"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.jjcale.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/290587"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=J%20J%20Cale&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/J%20J%20Cale"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jjcaleofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCHY-LYY6ufZvd_40Ag9NMcA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://facebook.com/JJCaleOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-jjcale5",
+    "name": "Jj Cale 5",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jj-cale-5/30446314"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jj%20Cale%205"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jj%20Cale%205"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.jjcale.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/290587"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jj%20Cale%205&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jj%20Cale%205"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jjcaleofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCHY-LYY6ufZvd_40Ag9NMcA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://facebook.com/JJCaleOfficial"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

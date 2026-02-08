@@ -1,0 +1,40 @@
+[
+  {
+    "id": "qobuz-amrdiab",
+    "name": "Amr Diab",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/amr-diab/68506",
+        "allReleaseTitles": [
+          "",
+          "featjanadiab",
+          "",
+          "lealynahary",
+          "wayah",
+          "ellilady"
+        ],
+        "latestRelease": {
+          "title": "Amr Diab",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/amr-diab/ip0r0t6y4pvgc",
+          "releaseDate": "2025-07-03"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Amr%20Diab"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Amr%20Diab"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,31 @@
+[
+  {
+    "id": "andylau",
+    "name": "Andy Lau",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0009510137_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bandcamp.com/nd_lau"
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/wavetraderandy1"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Andy%20Lau"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Andy%20Lau"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

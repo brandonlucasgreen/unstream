@@ -1,0 +1,81 @@
+[
+  {
+    "id": "qobuz-outkast",
+    "name": "Outkast",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/outkast/148799",
+        "allReleaseTitles": [
+          "stankonia",
+          "aquemini",
+          "atliens25thanniversarydeluxeedition",
+          "stankonia20thanniversaryeditiondeluxe",
+          "speakerboxxxthelovebelow",
+          "stankonia25thanniversary",
+          "playersball",
+          "southernplayalisticadillacmuzik",
+          "bigboidrepresent",
+          "atliens",
+          "thewayyoumoveheyya",
+          "heyyaspedupslowedspedupslowed",
+          "idlewild",
+          "msjacksonspedupslowedspedupslowed",
+          "landofamilliondrums"
+        ],
+        "latestRelease": {
+          "title": "Atliens 25th Anniversary Deluxe Edition Outkast",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/atliens-25th-anniversary-deluxe-edition-outkast/j13aqj66ivj2a",
+          "releaseDate": "2021-08-27"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Outkast"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Outkast"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.outkast.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/38561"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Outkast&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Outkast"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/outkast/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@outkast"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/outkastvideovault"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/outkast"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

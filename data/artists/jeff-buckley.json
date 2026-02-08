@@ -1,0 +1,183 @@
+[
+  {
+    "id": "qobuz-jeffbuckley",
+    "name": "Jeff Buckley",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jeff-buckley/46866",
+        "allReleaseTitles": [
+          "grace",
+          "youandiextendededition",
+          "liveatsinelegacyedition",
+          "dreambrotherzedd",
+          "sketchesformysweetheartthedrunkexpandededition",
+          "gracelegacyedition",
+          "livealolympia",
+          "youandiexpandededition",
+          "hallelujah",
+          "liveatcolumbiarecordsradiohour",
+          "sorealsongsfromexpandededition",
+          "mysterywhiteboyexpandededition",
+          "skyblueskin",
+          "livefromseattlewamay71995",
+          "gracearoundtheworld",
+          "lastgoodbyeep",
+          "livefromthebataclanep",
+          "liveatwetlandsnewyorkny81694",
+          "sketchesformysweetheartthedrunk",
+          "mysterywhiteboy"
+        ],
+        "latestRelease": {
+          "title": "Dream Brother Jeff Buckley Zedd",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/dream-brother-jeff-buckley-zedd/w6qxkzohvom7a",
+          "releaseDate": "2024-10-25"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jeff%20Buckley"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jeff%20Buckley"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.jeffbuckley.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/159169"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jeff%20Buckley&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jeff%20Buckley"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC6-5nnEs4B8kNobtBKzOyaA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JeffBuckley"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-jeffbuckle",
+    "name": "Jeff Buckle",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jeff-buckle/6775973",
+        "allReleaseTitles": [
+          "number1softhe90s"
+        ],
+        "latestRelease": {
+          "title": "Number 1s Of The 90s Jeff Buckle",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/number-1s-of-the-90s-jeff-buckle/ruywg6tj5b1wb",
+          "releaseDate": "2020-02-28"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jeff%20Buckle"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jeff%20Buckle"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.jeffbuckley.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/159169"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jeff%20Buckle&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jeff%20Buckle"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC6-5nnEs4B8kNobtBKzOyaA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JeffBuckley"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-jeffbuckley2",
+    "name": "Jeff Buckley 2",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jeff-buckley-2/6223807"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jeff%20Buckley%202"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jeff%20Buckley%202"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.jeffbuckley.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/159169"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jeff%20Buckley%202&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jeff%20Buckley%202"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC6-5nnEs4B8kNobtBKzOyaA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JeffBuckley"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

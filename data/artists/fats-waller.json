@@ -1,0 +1,65 @@
+[
+  {
+    "id": "qobuz-fatswaller",
+    "name": "Fats Waller",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/fats-waller/21652",
+        "allReleaseTitles": [
+          "aintmisbehavin",
+          "iadoreyou",
+          "onthesunnysideofthestreet",
+          "ifyougottoaskyouaintgotit",
+          "thecentennialcollection",
+          "theessential",
+          "atthepianobluebirdsbestseries",
+          "finearabianstuff",
+          "theverybestof",
+          "ahandfulofkeys",
+          "wallerfatsahandfuloffatsclassichits19291942",
+          "thereal",
+          "lasttestamenthisfinalrecordings",
+          "legendaryradiobroadcastscabcalloway",
+          "ultimatejazzcollectionsvol14",
+          "aintmisbehavin1995londoncastrecording",
+          "swingmusicman",
+          "aintmisbehavin",
+          "jazzarchivespresentsheretis"
+        ],
+        "latestRelease": {
+          "title": "I Adore You Fats Waller",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/i-adore-you-fats-waller/xbinorddmrmvy",
+          "releaseDate": "2026-01-26"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Fats%20Waller"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Fats%20Waller"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/253482"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Fats%20Waller&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Fats%20Waller"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,254 @@
+[
+  {
+    "id": "qobuz-fugees",
+    "name": "Fugees",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/fugees/156493",
+        "allReleaseTitles": [
+          "thescorerefugeecamp",
+          "thescore",
+          "bluntedonreality",
+          "greatesthits",
+          "bootlegversionsrefugeecamp",
+          "takeiteasy",
+          "playlisttheverybestof"
+        ],
+        "latestRelease": {
+          "title": "Greatest Hits Fugees",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/greatest-hits-fugees/0884977735857",
+          "releaseDate": "2003-04-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Fugees"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Fugees"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.thefugees.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/18231"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Fugees&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Fugees"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/fugeesworldwide/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCKEBHtM14rUaNpWVpX_vkHw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/We-Love-The-Fugees-188874781291059"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-fugee",
+    "name": "Fugee",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/fugee/8224999",
+        "allReleaseTitles": [
+          "dybbukeevee",
+          "cherryblossomdisruptivelofi",
+          "mirthmayhem",
+          "oceanofthoughtsdisruptivelofi",
+          "wrongchoicesdisruptivelofi",
+          "backhomedisruptivelofi",
+          "takayama5amtosso",
+          "wishitoldyou",
+          "wellermanseashanty",
+          "despairnarutoshippuden",
+          "sakuraserenade",
+          "downbytheriver",
+          "pordosol",
+          "whenimwithutosso",
+          "silhouette",
+          "sleepyhollow",
+          "paperwings",
+          "freshairchilledcattosso",
+          "snowflakesandgoodbyes",
+          "santasworkshop"
+        ],
+        "latestRelease": {
+          "title": "Dybbuk Eevee Fugee",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/dybbuk-eevee-fugee/v94v0ubdeh8ab",
+          "releaseDate": "2025-09-15"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Fugee"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Fugee"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.thefugees.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/18231"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Fugee&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Fugee"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/fugeesworldwide/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCKEBHtM14rUaNpWVpX_vkHw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/We-Love-The-Fugees-188874781291059"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "therefugees",
+    "name": "The Re-Fugees",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0029546520_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://there-fugees.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Re-Fugees"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Re-Fugees"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.thefugees.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/18231"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Re-Fugees&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Re-Fugees"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/fugeesworldwide/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCKEBHtM14rUaNpWVpX_vkHw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/We-Love-The-Fugees-188874781291059"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-fugees1",
+    "name": "Fugees 1",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/fugees-1/21762919"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Fugees%201"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Fugees%201"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.thefugees.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/18231"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Fugees%201&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Fugees%201"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/fugeesworldwide/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCKEBHtM14rUaNpWVpX_vkHw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/We-Love-The-Fugees-188874781291059"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

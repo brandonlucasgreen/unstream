@@ -1,0 +1,121 @@
+[
+  {
+    "id": "laurieanderson",
+    "name": "Laurie Anderson",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036485843_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://laurieanderson.bandcamp.com",
+        "allReleaseTitles": [
+          "amelia",
+          "bigsciencearcaremixlaurieandersonarca",
+          "sweaterssamgendelremixlaurieandersonsamgendel",
+          "bigscience"
+        ],
+        "latestRelease": {
+          "title": "Amelia",
+          "type": "album",
+          "url": "https://laurieanderson.bandcamp.com/album/amelia",
+          "imageUrl": "https://f4.bcbits.com/img/a1400788421_16.jpg",
+          "releaseDate": "August 30, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Laurie%20Anderson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Laurie%20Anderson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.laurieanderson.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/26050"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Laurie%20Anderson&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Laurie%20Anderson"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/laurieandersonofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC_VDnmv6HjIo9xYndATGfgw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/LaurieAnderson"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "laurieandersontenzinchoegyaljesseparissmith",
+    "name": "Laurie Anderson, Tenzin Choegyal, Jesse Paris Smith",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0016920345_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://songsfromthebardo.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Laurie%20Anderson%2C%20Tenzin%20Choegyal%2C%20Jesse%20Paris%20Smith"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Laurie%20Anderson%2C%20Tenzin%20Choegyal%2C%20Jesse%20Paris%20Smith"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.laurieanderson.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/26050"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Laurie%20Anderson%2C%20Tenzin%20Choegyal%2C%20Jesse%20Paris%20Smith&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Laurie%20Anderson%2C%20Tenzin%20Choegyal%2C%20Jesse%20Paris%20Smith"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/laurieandersonofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC_VDnmv6HjIo9xYndATGfgw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/LaurieAnderson"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

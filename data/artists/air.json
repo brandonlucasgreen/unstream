@@ -1,0 +1,867 @@
+[
+  {
+    "id": "airvinyls",
+    "name": "Air Vinyls",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0016821068_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://airvinyls.bandcamp.com",
+        "allReleaseTitles": [
+          "sacredpsalmselcaminox38spesh"
+        ],
+        "latestRelease": {
+          "title": "Sacred Psalms\n                \n                \n\n                Elcamino x 38 Spesh",
+          "type": "album",
+          "url": "https://elcaminoairvinyls.bandcamp.com/album/sacred-psalms?label=1348789758&tab=music",
+          "imageUrl": "https://f4.bcbits.com/img/a0517239545_2.jpg",
+          "releaseDate": "November 27, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Air%20Vinyls"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Air%20Vinyls"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.airfrenchband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Air%20Vinyls&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Air%20Vinyls"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/airfrenchband/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@airfrenchband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCjXmNnJm9jwtGg094LRoFOw"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.net/@airfrenchband"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/7530846195"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "glassairrecords",
+    "name": "Glass Air Records",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0008788613_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://glassairrecords.com",
+        "allReleaseTitles": [
+          "ctrlaltrealitytheglitchmob",
+          "revisionstheglitchmob",
+          "drinktheseaambientversiontheglitchmobsuperposition",
+          "drinkthesea10yearanniversarydeluxeeditiontheglitchmob",
+          "unfolding29palms",
+          "nobodyhorizonep29palms",
+          "chemicalseptheglitchmob",
+          "momentarylapsetheglitchmobx1788l",
+          "lazervisiontheglitchmobxzekebeats",
+          "systembleedtheglitchmobxlick",
+          "seewithouteyesdeluxetheglitchmob",
+          "imagineramdassboreta",
+          "seewithouteyestheglitchmob",
+          "clearboretaremixchristopherwillits",
+          "thecloudsbreatheforyouchristopherwillitsremixtheglitchmob",
+          "cryingoverprosfornoreasondeluxeeditionedit"
+        ],
+        "latestRelease": {
+          "title": "Ctrl Alt Reality\n                \n                \n\n                The Glitch Mob",
+          "type": "album",
+          "url": "https://theglitchmob.bandcamp.com/album/ctrl-alt-reality?label=4081840040&tab=music",
+          "imageUrl": "https://f4.bcbits.com/img/a1385123966_2.jpg",
+          "releaseDate": "November 18, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Glass%20Air%20Records"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Glass%20Air%20Records"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.airfrenchband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Glass%20Air%20Records&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Glass%20Air%20Records"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/airfrenchband/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@airfrenchband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCjXmNnJm9jwtGg094LRoFOw"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.net/@airfrenchband"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/7530846195"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "airtexture",
+    "name": "Air Texture",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a2806086304_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://airtexture.bandcamp.com",
+        "allReleaseTitles": [
+          "placeswitzerlandplace",
+          "hardwiredcuratedbyjakojakoairtexture",
+          "placeirelandplace",
+          "placemoroccoplace",
+          "placetorontoplace",
+          "placeegyptplace",
+          "iykyk4amnycvarsha",
+          "placechileplace",
+          "placetunisiaplace",
+          "airtextureviiianthonynaplesdjpython",
+          "placefranceplace",
+          "placenairobiplace",
+          "placeecuadorplace",
+          "placevancouverplace",
+          "airtextureviirrosesilentservant",
+          "placethenetherlandsplace"
+        ],
+        "latestRelease": {
+          "title": "Place: Switzerland\n                \n                \n\n                Place:",
+          "type": "album",
+          "url": "https://musicandactivism.bandcamp.com/album/place-switzerland?label=982157783&tab=music",
+          "imageUrl": "https://f4.bcbits.com/img/a3104883804_2.jpg",
+          "releaseDate": "August 1, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Air%20Texture"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Air%20Texture"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.airfrenchband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Air%20Texture&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Air%20Texture"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/airfrenchband/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@airfrenchband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCjXmNnJm9jwtGg094LRoFOw"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.net/@airfrenchband"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/7530846195"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "air",
+    "name": "Air",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031269149_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://airmusik.bandcamp.com",
+        "allReleaseTitles": [
+          "airthecompletecollection",
+          "airvjeuxdangereux",
+          "airivelleadushell",
+          "airiiisecretheritagegivespaceatrance",
+          "airiitravellingwithoutmoving2023remaster",
+          "airiyou2021remaster"
+        ],
+        "latestRelease": {
+          "title": "Air • The Complete Collection",
+          "type": "album",
+          "url": "https://airmusik.bandcamp.com/album/air-the-complete-collection",
+          "imageUrl": "https://f4.bcbits.com/img/a3873685434_2.jpg",
+          "releaseDate": "May 5, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Air"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Air"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.airfrenchband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Air&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Air"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/airfrenchband/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@airfrenchband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCjXmNnJm9jwtGg094LRoFOw"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.net/@airfrenchband"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/7530846195"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "airmiles",
+    "name": "air miles",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022838453_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://airmilesrec.bandcamp.com",
+        "allReleaseTitles": [
+          "thanksallepam009bragacircuitbragacircuit",
+          "breakitdownbragacircuit",
+          "fallepam008bragacircuit",
+          "figepam007jeigo",
+          "ceruleanepam006jeigo",
+          "beingepam005supreems",
+          "bodyofwaterepam004latticeftckcentral",
+          "gondwanaatnoonepam003remotifftnathanmicaymollyjeigo",
+          "fluerellaepam002jeigofttomvruruluexterrestrial",
+          "anodetomidnightam001jeigo"
+        ],
+        "latestRelease": {
+          "title": "Thanks All [EP AM009] | Braga Circuit\n                \n                \n\n                Braga Circuit",
+          "type": "album",
+          "url": "https://airmilesrec.bandcamp.com/album/thanks-all-ep-am009-braga-circuit",
+          "imageUrl": "https://f4.bcbits.com/img/a1128456021_2.jpg",
+          "releaseDate": "February 6, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=air%20miles"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+air%20miles"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.airfrenchband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=air%20miles&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/air%20miles"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/airfrenchband/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@airfrenchband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCjXmNnJm9jwtGg094LRoFOw"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.net/@airfrenchband"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/7530846195"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "airtycoon",
+    "name": "Air Tycoon",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a0160924493_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://air-tycoon.bandcamp.com",
+        "allReleaseTitles": [
+          "autumndriftep",
+          "landlockedsingle",
+          "winterpurple",
+          "losangelessingle",
+          "fuckeverythingimgod"
+        ],
+        "latestRelease": {
+          "title": "Autumn Drift EP",
+          "type": "album",
+          "url": "https://air-tycoon.bandcamp.com/album/autumn-drift-ep",
+          "imageUrl": "https://f4.bcbits.com/img/a0160924493_2.jpg",
+          "releaseDate": "November 5, 2012"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Air%20Tycoon"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Air%20Tycoon"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.airfrenchband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Air%20Tycoon&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Air%20Tycoon"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/airfrenchband/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@airfrenchband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCjXmNnJm9jwtGg094LRoFOw"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.net/@airfrenchband"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/7530846195"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "deadair",
+    "name": "deadAir",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030485280_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://deadairrecords.bandcamp.com",
+        "allReleaseTitles": [
+          "censusdesignatedjaneremover",
+          "frailtyjaneremover"
+        ],
+        "latestRelease": {
+          "title": "Census Designated\n                \n                \n\n                Jane Remover",
+          "type": "album",
+          "url": "https://janeremover.bandcamp.com/album/census-designated?label=2582371320&tab=music",
+          "imageUrl": "https://f4.bcbits.com/img/a0306773275_16.jpg",
+          "releaseDate": "October 20, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=deadAir"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+deadAir"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.airfrenchband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=deadAir&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/deadAir"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/airfrenchband/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@airfrenchband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCjXmNnJm9jwtGg094LRoFOw"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.net/@airfrenchband"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/7530846195"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "midairthief",
+    "name": "공중도둑 (Mid-Air Thief)",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014014266_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://midairthief.bandcamp.com",
+        "allReleaseTitles": [
+          "flashbirdseyethief",
+          "floodformatbirdseyebatang",
+          "crumbling",
+          "gongjoongdoduk",
+          "gongjoongdoduk"
+        ],
+        "latestRelease": {
+          "title": "Flash\n                \n                \n\n                새눈도둑 Bird's Eye Thief",
+          "type": "album",
+          "url": "https://midairthief.bandcamp.com/album/flash",
+          "imageUrl": "https://f4.bcbits.com/img/a0327478197_2.jpg",
+          "releaseDate": "October 22, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=%EA%B3%B5%EC%A4%91%EB%8F%84%EB%91%91%20(Mid-Air%20Thief)"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+%EA%B3%B5%EC%A4%91%EB%8F%84%EB%91%91%20(Mid-Air%20Thief)"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.airfrenchband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=%EA%B3%B5%EC%A4%91%EB%8F%84%EB%91%91%20(Mid-Air%20Thief)&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/%EA%B3%B5%EC%A4%91%EB%8F%84%EB%91%91%20(Mid-Air%20Thief)"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/airfrenchband/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@airfrenchband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCjXmNnJm9jwtGg094LRoFOw"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.net/@airfrenchband"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/7530846195"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "etrandelair",
+    "name": "Etran de L'Aïr",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036419989_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://etrandelair.bandcamp.com",
+        "allReleaseTitles": [
+          "agadez",
+          "100saharaguitar",
+          "liveinseattleetrandelair",
+          "agadez",
+          "no1"
+        ],
+        "latestRelease": {
+          "title": "Agadez",
+          "type": "track",
+          "url": "https://etrandelair.bandcamp.com/track/agadez",
+          "imageUrl": "https://f4.bcbits.com/img/a0186689836_2.jpg",
+          "releaseDate": "April 4, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Etran%20de%20L'A%C3%AFr"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Etran%20de%20L'A%C3%AFr"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "airmax97",
+    "name": "Air Max '97",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037732301_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://airmax97.bandcamp.com",
+        "allReleaseTitles": [
+          "am97edits20152025",
+          "productiondossier",
+          "foru",
+          "ridefeatmulalo",
+          "crowtimefeatsevycoprodatro",
+          "onmygrindfeattbreezy",
+          "enthusiast",
+          "coriolis",
+          "psylliumeattherich",
+          "icebridgebruxis",
+          "fallingnotwalking",
+          "nacre",
+          "vessel",
+          "hpe",
+          "coreworkexpenditure"
+        ],
+        "latestRelease": {
+          "title": "AM97 Edits 2015-2025",
+          "type": "album",
+          "url": "https://airmax97.bandcamp.com/album/am97-edits-2015-2025",
+          "imageUrl": "https://f4.bcbits.com/img/a3392919316_2.jpg",
+          "releaseDate": "November 21, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Air%20Max%20'97"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Air%20Max%20'97"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.airfrenchband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Air%20Max%20'97&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Air%20Max%20'97"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/airfrenchband/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@airfrenchband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCjXmNnJm9jwtGg094LRoFOw"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.net/@airfrenchband"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/7530846195"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-air",
+    "name": "Air",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/air/36500"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Air"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Air"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.airfrenchband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Air&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Air"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/airfrenchband/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@airfrenchband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCjXmNnJm9jwtGg094LRoFOw"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.net/@airfrenchband"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/7530846195"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-air11",
+    "name": "Air 11",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/air-11/11623811"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Air%2011"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Air%2011"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.airfrenchband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Air%2011&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Air%2011"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/airfrenchband/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@airfrenchband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCjXmNnJm9jwtGg094LRoFOw"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.net/@airfrenchband"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/7530846195"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

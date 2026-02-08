@@ -1,0 +1,36 @@
+[
+  {
+    "id": "qobuz-gregoryhines",
+    "name": "Gregory Hines",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/gregory-hines/170341",
+        "latestRelease": {
+          "title": "Jazz My Way Gregory Hines",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/jazz-my-way-gregory-hines/uhaplx9nk461a",
+          "releaseDate": "2014-10-01"
+        },
+        "allReleaseTitles": [
+          "",
+          "jazzmyway"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Gregory%20Hines"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Gregory%20Hines"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

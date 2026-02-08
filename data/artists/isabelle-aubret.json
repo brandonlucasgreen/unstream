@@ -1,0 +1,110 @@
+[
+  {
+    "id": "qobuz-isabelleaubret",
+    "name": "Isabelle Aubret",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/isabelle-aubret/54263",
+        "allReleaseTitles": [
+          "ellevousaime",
+          "unjourmonprinceviendrachansonsdesfilmsdewaltdisneyetjacquesdemy",
+          "aragon",
+          "cestbeaulavie",
+          "parisabelle",
+          "dernierrendezvousalolympia",
+          "leparadisdesmusiciens",
+          "vaguealhomme",
+          "bobino2001",
+          "2006",
+          "allezallezlavieenpublicalolympia",
+          "allonsenfants",
+          "cestlebonheur",
+          "changerlemonde",
+          "larchedenoel",
+          "chanteferrathourra",
+          "chantebrel",
+          "inlove",
+          "chansonnettesetchansons",
+          "unpremieramour"
+        ],
+        "latestRelease": {
+          "title": "Parisabelle Isabelle Aubret",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/parisabelle-isabelle-aubret/3467687448124",
+          "releaseDate": "1999-10-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Isabelle%20Aubret"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Isabelle%20Aubret"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.isabelle-aubret.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/175489"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Isabelle%20Aubret&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Isabelle%20Aubret"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-isabelleaubre",
+    "name": "Isabelle Aubre",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/isabelle-aubre/5207720"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Isabelle%20Aubre"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Isabelle%20Aubre"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.isabelle-aubret.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/175489"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Isabelle%20Aubre&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Isabelle%20Aubre"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

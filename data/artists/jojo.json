@@ -1,0 +1,393 @@
+[
+  {
+    "id": "jojo",
+    "name": "JoJo",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a4111040720_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jojo/42566",
+        "allReleaseTitles": [
+          "ngl",
+          "",
+          "tryingnottothinkaboutit",
+          "goodtoknow",
+          "madlove",
+          "thehighroad",
+          "decemberbaby",
+          "toomuchtosay",
+          "porcelain",
+          "disaster",
+          "porcelainreimagined",
+          "worstiassume",
+          "man",
+          "demonstrate",
+          "joanna",
+          "whatuneed",
+          "creatureofhabit"
+        ],
+        "latestRelease": {
+          "title": "Ngl Jojo",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/ngl-jojo/x8eoc7baf8f41",
+          "releaseDate": "2025-01-24"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rap-up.bandcamp.com"
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/LinkeUniverse"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=JoJo"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+JoJo"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://iamjojoofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/306427"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=JoJo&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/JoJo"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/iamjojo/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@iamjojoofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC98saSu1w3i9w-PG8Tsfi3Q"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JoJo"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "jojoworthington",
+    "name": "JoJo Worthington",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028297761_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jojoworthington.bandcamp.com",
+        "allReleaseTitles": [
+          "baptizedi",
+          "birthday",
+          "thedivide",
+          "palingenesia",
+          "tcyk",
+          "smallencounters",
+          "stabilize",
+          "",
+          "7",
+          "ochristmasayuletidecollection",
+          "soon"
+        ],
+        "latestRelease": {
+          "title": "BAPTIZED I",
+          "type": "album",
+          "url": "https://jojoworthington.bandcamp.com/album/baptized-i",
+          "imageUrl": "https://f4.bcbits.com/img/a4133207666_2.jpg",
+          "releaseDate": "July 28, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=JoJo%20Worthington"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+JoJo%20Worthington"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://iamjojoofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/306427"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=JoJo%20Worthington&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/JoJo%20Worthington"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/iamjojo/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@iamjojoofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC98saSu1w3i9w-PG8Tsfi3Q"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JoJo"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-jojo6",
+    "name": "Jojo 6",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jojo-6/9593854"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jojo%206"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jojo%206"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://iamjojoofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/306427"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jojo%206&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jojo%206"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/iamjojo/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@iamjojoofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC98saSu1w3i9w-PG8Tsfi3Q"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JoJo"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-jojo12",
+    "name": "Jojo 12",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jojo-12/16539237"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jojo%2012"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jojo%2012"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://iamjojoofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/306427"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jojo%2012&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jojo%2012"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/iamjojo/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@iamjojoofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC98saSu1w3i9w-PG8Tsfi3Q"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JoJo"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-jojo24",
+    "name": "Jojo 24",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jojo-24/28215395"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jojo%2024"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jojo%2024"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://iamjojoofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/306427"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jojo%2024&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jojo%2024"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/iamjojo/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@iamjojoofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC98saSu1w3i9w-PG8Tsfi3Q"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JoJo"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-jojo165",
+    "name": "Jojo165",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jojo165/28751333"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jojo165"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jojo165"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://iamjojoofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/306427"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jojo165&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jojo165"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/iamjojo/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@iamjojoofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC98saSu1w3i9w-PG8Tsfi3Q"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JoJo"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

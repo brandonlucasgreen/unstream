@@ -1,0 +1,194 @@
+[
+  {
+    "id": "camillefeist",
+    "name": "Camille Feist",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031016272_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://camillefeist.bandcamp.com",
+        "allReleaseTitles": [
+          "chansonsataime",
+          "avectoi",
+          "eclipse",
+          "pasassez"
+        ],
+        "latestRelease": {
+          "title": "Chansons à t'aime",
+          "type": "album",
+          "url": "https://camillefeist.bandcamp.com/album/chansons-taime",
+          "imageUrl": "https://f4.bcbits.com/img/a0046480042_16.jpg",
+          "releaseDate": "October 19, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Camille%20Feist"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Camille%20Feist"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.listentofeist.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/19828"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Camille%20Feist&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Camille%20Feist"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/feistmusic/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCmZIr7Mf7kek8tFQOddI5DA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/feist"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-feist",
+    "name": "Feist",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/feist/44719",
+        "allReleaseTitles": [
+          "multitudes",
+          "pleasure",
+          "metals",
+          "itsagoodlifeifyoudontweakenthetragicallyhip",
+          "heythatsnowaytosaygoodbye",
+          "thereminderdeluxeedition",
+          "thereminder",
+          "letitdie",
+          "openseason",
+          "mymoonmyman",
+          "howcomeyounevergothere",
+          "sealion",
+          "mushaboom"
+        ],
+        "latestRelease": {
+          "title": "Multitudes Feist",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/multitudes-feist/ttywh9dg0heqb",
+          "releaseDate": "2023-04-14"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Feist"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Feist"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.listentofeist.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/19828"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Feist&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Feist"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/feistmusic/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCmZIr7Mf7kek8tFQOddI5DA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/feist"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "srivastavafeist",
+    "name": "Srivastava & Feist",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014742850_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://srivastava-feist.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Srivastava%20%26%20Feist"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Srivastava%20%26%20Feist"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.listentofeist.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/19828"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Srivastava%20%26%20Feist&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Srivastava%20%26%20Feist"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/feistmusic/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCmZIr7Mf7kek8tFQOddI5DA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/feist"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

@@ -1,0 +1,36 @@
+[
+  {
+    "id": "qobuz-davemurray",
+    "name": "Dave Murray",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/dave-murray/172272",
+        "allReleaseTitles": [
+          "titanicthelosangelessingersorchestra",
+          "shutyourgobsbairns"
+        ],
+        "latestRelease": {
+          "title": "Shut Your Gobs Bairns Dave Murray",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/shut-your-gobs-bairns-dave-murray/sacypclxsul1a",
+          "releaseDate": "2024-03-11"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Dave%20Murray"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Dave%20Murray"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

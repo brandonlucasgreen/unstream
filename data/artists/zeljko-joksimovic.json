@@ -1,0 +1,73 @@
+[
+  {
+    "id": "qobuz-zeljkojoksimovic",
+    "name": "Zeljko Joksimovic",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/zeljko-joksimovic/777775",
+        "allReleaseTitles": [
+          "ponoc",
+          "nistavilosasamatic",
+          "mozdajetoljubav",
+          "viseodsrecececa",
+          "milimetar",
+          "ludakkaoja",
+          "menjajpesmu",
+          "dvasvetakoncertsavacentar",
+          "natasmajdanu",
+          "ponocpesmaizfilmatomaacopejovicandsuzanabrankovic",
+          "zlatnakolekcija",
+          "lanemojegoodbye",
+          "theplatinumcollection",
+          "najlepsebalade",
+          "nijeljubavstvar"
+        ],
+        "latestRelease": {
+          "title": "Nistavilo Sasa Matic Zeljko Joksimovic",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/nistavilo-sasa-matic-zeljko-joksimovic/d0e4k44adhgrn",
+          "releaseDate": "2025-12-22"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Zeljko%20Joksimovic"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Zeljko%20Joksimovic"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.zeljkojoksimovic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/473482"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Zeljko%20Joksimovic&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Zeljko%20Joksimovic"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/ZeljkoJoksimovicTV"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/joksimoviczeljko"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

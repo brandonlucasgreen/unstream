@@ -1,0 +1,70 @@
+[
+  {
+    "id": "qobuz-jeremyzucker",
+    "name": "Jeremy Zucker",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jeremy-zucker/3131928",
+        "allReleaseTitles": [
+          "brentiiichelseacutler",
+          "brentchelseacutler",
+          "brentiichelseacutler",
+          "gardenstate",
+          "thatwaytatemcrae",
+          "hometown",
+          "supercuts",
+          "cozyalexander23lauv",
+          "isnothingsacred",
+          "backyardboyclairerosinkranz",
+          "aframechelseacutler",
+          "loveisnotdying",
+          "crusher",
+          "imsohappybenee",
+          "youweregoodtomechelseacutler",
+          "brentlivefromtheinternetchelseacutler"
+        ],
+        "latestRelease": {
+          "title": "Garden State Jeremy Zucker",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/garden-state-jeremy-zucker/gjdszf9aq8lwa",
+          "releaseDate": "2025-08-22"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jeremy%20Zucker"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jeremy%20Zucker"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.jeremyzuckermusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5708379"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jeremyzucker/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCNwwzAlMbHAJUNoJe0h3nBw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/jeremyzuckermusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

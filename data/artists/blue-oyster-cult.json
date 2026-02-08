@@ -1,0 +1,44 @@
+[
+  {
+    "id": "qobuz-blueoystercult",
+    "name": "Blue Oyster Cult",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/blue-oyster-cult/81842",
+        "latestRelease": {
+          "title": "Fire Of Unknown Origin Blue Oyster Cult",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/fire-of-unknown-origin-blue-oyster-cult/x7lhvxrfg6erc",
+          "releaseDate": "1981-06-01"
+        },
+        "allReleaseTitles": [
+          "agentsoffortune",
+          "fireofunknownorigin",
+          "secrettreaties",
+          "",
+          "tyrannyandmutation",
+          "spectres",
+          "50thanniversarylivefirstnight",
+          "dontfearthereaperthebestof",
+          "cultosauruserectus",
+          "onyourfeetoronyourknees"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Blue%20Oyster%20Cult"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Blue%20Oyster%20Cult"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

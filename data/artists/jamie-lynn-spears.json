@@ -1,0 +1,58 @@
+[
+  {
+    "id": "qobuz-jamielynnspears",
+    "name": "Jamie Lynn Spears",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jamie-lynn-spears/1647850",
+        "allReleaseTitles": [
+          "followmezoey101chanteljeffries",
+          "howcouldiwantmore",
+          "thejourney",
+          "sleepover"
+        ],
+        "latestRelease": {
+          "title": "Follow Me Zoey 101 Jamie Lynn Spears Chantel Jeffries",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/follow-me-zoey-101-jamie-lynn-spears-chantel-jeffries/bqu32ln9qxvzb",
+          "releaseDate": "2020-10-22"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jamie%20Lynn%20Spears"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jamie%20Lynn%20Spears"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.jamielynnspears.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3568485"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jamielynnspears/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCFL61G6cRb0LW8ezyrryzOA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/jamielynnspears"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

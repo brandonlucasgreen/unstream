@@ -1,0 +1,186 @@
+[
+  {
+    "id": "qobuz-earthwindfire",
+    "name": "Earth Wind Fire",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/earth-wind-fire/61717",
+        "allReleaseTitles": [
+          "iam",
+          "thebestofvol1",
+          "gratitude",
+          "allnall",
+          "thatsthewayoftheworld",
+          "raise",
+          "spirit",
+          "faces2011remaster",
+          "headtothesky",
+          "powerlight",
+          "greatesthits",
+          "openoureyes",
+          "september",
+          "lastdaysandtime",
+          "electricuniverseexpandededition",
+          "youwantmyloveluckydaye",
+          "touchtheworld",
+          "heritage",
+          "holiday",
+          "septemberspedupslowedspedupslowed"
+        ],
+        "latestRelease": {
+          "title": "I Am Earth Wind Fire",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/i-am-earth-wind-fire/0886443461536",
+          "releaseDate": "1979-06-09"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Earth%20Wind%20Fire"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Earth%20Wind%20Fire"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.earthwindandfire.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/22164"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Earth%20Wind%20Fire&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Earth%20Wind%20Fire"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/earthwindandfire/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCztiH7D-fHwsMyUF8r15vsQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/EarthWindandFire"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-earthwindfire1",
+    "name": "Earth Wind  Fire 1",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/earth-wind--fire-1/25525844"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Earth%20Wind%20%20Fire%201"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Earth%20Wind%20%20Fire%201"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.earthwindandfire.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/22164"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Earth%20Wind%20%20Fire%201&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Earth%20Wind%20%20Fire%201"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/earthwindandfire/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCztiH7D-fHwsMyUF8r15vsQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/EarthWindandFire"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-earthwindfire5",
+    "name": "Earth Wind Fire 5",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/earth-wind-fire-5/15767047"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Earth%20Wind%20Fire%205"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Earth%20Wind%20Fire%205"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.earthwindandfire.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/22164"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Earth%20Wind%20Fire%205&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Earth%20Wind%20Fire%205"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/earthwindandfire/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCztiH7D-fHwsMyUF8r15vsQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/EarthWindandFire"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

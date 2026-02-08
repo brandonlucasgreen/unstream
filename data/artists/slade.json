@@ -1,0 +1,409 @@
+[
+  {
+    "id": "bslade",
+    "name": "B.Slade",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041544095_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bslade.bandcamp.com",
+        "allReleaseTitles": [
+          "bsladesvocalsenseimasterysystemvol1",
+          "nervous",
+          "bslade",
+          "bsladecleanversion"
+        ],
+        "latestRelease": {
+          "title": "B.Slade's Vocal Sensei Mastery System Vol.1",
+          "type": "album",
+          "url": "https://bslade.bandcamp.com/album/b-slades-vocal-sensei-mastery-system-vol-1",
+          "imageUrl": "https://f4.bcbits.com/img/a0556322569_16.jpg",
+          "releaseDate": "June 1, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=B.Slade"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+B.Slade"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://users.swing.be/amazingslade/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/124534"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=B.Slade&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/B.Slade"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JimLeaMusic/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "natalieslade",
+    "name": "Natalie Slade",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019748561_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://natalie-slade.bandcamp.com",
+        "allReleaseTitles": [
+          "molasses",
+          "telephone",
+          "unquenchablecraving",
+          "controlremixes",
+          "control"
+        ],
+        "latestRelease": {
+          "title": "Molasses",
+          "type": "album",
+          "url": "https://natalie-slade.bandcamp.com/album/molasses",
+          "imageUrl": "https://f4.bcbits.com/img/a3990712775_2.jpg",
+          "releaseDate": "August 8, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Natalie%20Slade"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Natalie%20Slade"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://users.swing.be/amazingslade/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/124534"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Natalie%20Slade&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Natalie%20Slade"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JimLeaMusic/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "amberraeslade",
+    "name": "Amber Rae Slade",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033100145_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://amberraeslade.bandcamp.com",
+        "allReleaseTitles": [
+          "everythingsmorebeautifulbecauseweredoomed",
+          "joyjoyjoy",
+          "withabulletbetweenmyteeth"
+        ],
+        "latestRelease": {
+          "title": "Everything’s More Beautiful Because We’re Doomed",
+          "type": "track",
+          "url": "https://amberraeslade.bandcamp.com/track/everything-s-more-beautiful-because-we-re-doomed",
+          "imageUrl": "https://f4.bcbits.com/img/a1477670593_2.jpg",
+          "releaseDate": "April 8, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Amber%20Rae%20Slade"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Amber%20Rae%20Slade"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://users.swing.be/amazingslade/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/124534"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Amber%20Rae%20Slade&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Amber%20Rae%20Slade"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JimLeaMusic/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "adamslade",
+    "name": "Adam Slade",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025375294_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://adamslade.bandcamp.com",
+        "allReleaseTitles": [
+          "ariseshine",
+          "pouredout",
+          "onlyhuman"
+        ],
+        "latestRelease": {
+          "title": "Arise, Shine",
+          "type": "track",
+          "url": "https://adamslade.bandcamp.com/track/arise-shine",
+          "imageUrl": "https://f4.bcbits.com/img/a0911028267_2.jpg",
+          "releaseDate": "July 1, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Adam%20Slade"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Adam%20Slade"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://users.swing.be/amazingslade/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/124534"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Adam%20Slade&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Adam%20Slade"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JimLeaMusic/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-slade",
+    "name": "Slade",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/slade/62546",
+        "allReleaseTitles": [
+          "cumonfeelthehitz",
+          "gzfromthebankhennyxzinnymasse",
+          "chancewithyoujkinglisi",
+          "ontherecord",
+          "alive",
+          "slayed",
+          "merryxmaseverybody",
+          "inflame",
+          "youboyzmakebignoize",
+          "beginningsplayitloud",
+          "tilldeafdouspart",
+          "roguesgallery",
+          "theno1s",
+          "whateverhappenedto",
+          "12of",
+          "st"
+        ],
+        "latestRelease": {
+          "title": "Chance With You Jking Lisi Slade",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/chance-with-you-jking-lisi-slade/f163gkkfqrhjc",
+          "releaseDate": "2023-04-28"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Slade"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Slade"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://users.swing.be/amazingslade/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/124534"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Slade&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Slade"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JimLeaMusic/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-slade3",
+    "name": "Slade 3",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/slade-3/13179728",
+        "allReleaseTitles": [
+          "revenge"
+        ],
+        "latestRelease": {
+          "title": "Revenge Slade",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/revenge-slade/sv7szeibaxxua",
+          "releaseDate": "2005-01-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Slade%203"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Slade%203"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://users.swing.be/amazingslade/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/124534"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Slade%203&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Slade%203"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JimLeaMusic/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-slade2",
+    "name": "Slade 2",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/slade-2/7847927",
+        "allReleaseTitles": [
+          "sludgebucket",
+          "mixedmessages",
+          "mississippiallstarsvibe"
+        ],
+        "latestRelease": {
+          "title": "Mississippi Allstars Vibe Slade",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/mississippi-allstars-vibe-slade/iqlo8j6k7y49p",
+          "releaseDate": "2025-12-15"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Slade%202"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Slade%202"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://users.swing.be/amazingslade/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/124534"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Slade%202&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Slade%202"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JimLeaMusic/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

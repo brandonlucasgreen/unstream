@@ -1,0 +1,718 @@
+[
+  {
+    "id": "enigma",
+    "name": "Enigma",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0007957201_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://enigmametal.bandcamp.com",
+        "allReleaseTitles": [
+          "starsmisalignedep",
+          "starsmisalignedeptheinstrumentals"
+        ],
+        "latestRelease": {
+          "title": "Stars Misaligned EP",
+          "type": "album",
+          "url": "https://enigmametal.bandcamp.com/album/stars-misaligned-ep",
+          "imageUrl": "https://f4.bcbits.com/img/a3875501238_16.jpg",
+          "releaseDate": "July 22, 2016"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/enigma2015"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Enigma"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Enigma"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.enigmaspace.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7717"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Enigma&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Enigma"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC8XZBbAN0qyfOjghG89236A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Enigma"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "enigma-bandcamp-enigmamusic",
+    "name": "Enigma",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036941433_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://enigmamusic.bandcamp.com",
+        "allReleaseTitles": [
+          "thefallofarebelangel",
+          "sadenesspartiitheremixes",
+          "sevenlivesmanyfaces",
+          "aposterioriprivateloungeremix",
+          "aposteriori",
+          "voyageur",
+          "lovesensualitydevotionthegreatesthits",
+          "lovesensualitydevotiontheremixcollection",
+          "turnaround",
+          "pushthelimits",
+          "thescreenbehindthemirror",
+          "gravityoflove",
+          "leroiestmortviveleroi",
+          "beyondtheinvisible",
+          "returntoinnocence",
+          "thecrossofchanges"
+        ],
+        "latestRelease": {
+          "title": "The Fall Of A Rebel Angel",
+          "type": "album",
+          "url": "https://enigmamusic.bandcamp.com/album/the-fall-of-a-rebel-angel",
+          "imageUrl": "https://f4.bcbits.com/img/a0292051381_2.jpg",
+          "releaseDate": "November 11, 2016"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/enigma/44276",
+        "allReleaseTitles": [
+          "mcmxcad",
+          "thecrossofchanges",
+          "sadeness",
+          "leroiestmortviveleroi",
+          "sevenlivesmanyfaces",
+          "theplatinumcollection",
+          "returntoinnocence",
+          "voyageur",
+          "meaculpa",
+          "thefallofarebelangel",
+          "thescreenbehindthemirror",
+          "aposteriori",
+          "theriversofbelief",
+          "principlesoflust",
+          "outfromthedeep",
+          "lovesensualitydevotionthegreatesthits",
+          "lovesensualitydevotiontheremixcollection",
+          "theeyesoftruth",
+          "tntforthebrain"
+        ],
+        "latestRelease": {
+          "title": "Seven Lives Many Faces Enigma",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/seven-lives-many-faces-enigma/5099922712455",
+          "releaseDate": "2008-01-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Enigma"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Enigma"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.enigmaspace.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7717"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Enigma&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Enigma"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC8XZBbAN0qyfOjghG89236A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Enigma"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "yourenigma",
+    "name": "YourEnigma",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0021073149_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://yourenigma.bandcamp.com",
+        "allReleaseTitles": [
+          "headspacecowboy",
+          "plasticsmile",
+          "maybeinmichiganftsprocket",
+          "moodswing",
+          "oursisanodyssey",
+          "unity",
+          "nohorseplay",
+          "strongerthanyouyourenigmaminiremix",
+          "uptownfunkmarkronsonyourenigmaremix",
+          "city17makingoodtimeenigmaticbootleg",
+          "taviandscratchthecall",
+          "redialfeatleafrunnerandnowacking",
+          "wishmakeawishremix",
+          "happypharrellwilliamsyourenigmaremix",
+          "electrobabble",
+          "taviandscratchtherelationship"
+        ],
+        "latestRelease": {
+          "title": "Headspace Cowboy",
+          "type": "album",
+          "url": "https://yourenigma.bandcamp.com/album/headspace-cowboy",
+          "imageUrl": "https://f4.bcbits.com/img/a0214809678_2.jpg",
+          "releaseDate": "January 14, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=YourEnigma"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+YourEnigma"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.enigmaspace.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7717"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=YourEnigma&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/YourEnigma"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC8XZBbAN0qyfOjghG89236A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Enigma"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "theenigmatng",
+    "name": "The Enigma TNG",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039416438_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://theenigmatng.bandcamp.com",
+        "allReleaseTitles": [
+          "deadfallnoir1979",
+          "zombiemetal",
+          "lettinggo",
+          "dreamingutopiav2",
+          "danceofthedarkqueen",
+          "futurefantasyii",
+          "memoriesoftomorrow",
+          "parasocialpsychopath",
+          "doomhammer666k",
+          "3088",
+          "magethadonthecarnivalofnightmaressoundtrack",
+          "alicegiger",
+          "obscurity",
+          "paralleluniverse",
+          "zthemes02",
+          "zthemes"
+        ],
+        "latestRelease": {
+          "title": "Deadfall Noir 1979",
+          "type": "album",
+          "url": "https://theenigmatng.bandcamp.com/album/deadfall-noir-1979",
+          "imageUrl": "https://f4.bcbits.com/img/a2255563251_2.jpg",
+          "releaseDate": "September 30, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Enigma%20TNG"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Enigma%20TNG"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.enigmaspace.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7717"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Enigma%20TNG&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Enigma%20TNG"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC8XZBbAN0qyfOjghG89236A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Enigma"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "enigmastate",
+    "name": "Enigma State",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0034177847_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://enigmastate.bandcamp.com",
+        "allReleaseTitles": [
+          "oftheessence",
+          "legion",
+          "sacredartstateofmind",
+          "lunarsthemeestateremix",
+          "lunarstheme",
+          "transolar",
+          "inmyfantasyenigmatic",
+          "voicesenigmastateremix"
+        ],
+        "latestRelease": {
+          "title": "Of the Essence",
+          "type": "album",
+          "url": "https://enigmastate.bandcamp.com/album/of-the-essence",
+          "imageUrl": "https://f4.bcbits.com/img/a2633950247_2.jpg",
+          "releaseDate": "May 2, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Enigma%20State"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Enigma%20State"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.enigmaspace.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7717"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Enigma%20State&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Enigma%20State"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC8XZBbAN0qyfOjghG89236A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Enigma"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "enigmadubz",
+    "name": "ENiGMA Dubz",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038525718_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://enigmadubzofficial.bandcamp.com",
+        "allReleaseTitles": [
+          "youarenotabadmanenigmavipenigmadubzhyphopav4n",
+          "incontrolvibesedit",
+          "charliesaysenigmadubzneumonic",
+          "wantingyouvipdrsenigmadubz",
+          "wormhole",
+          "1shotenigmadubznikad",
+          "timeenigmadubzremixcorteseenigmadubz",
+          "incontrol",
+          "wantingyouenigmadubzdrs",
+          "wannabreatheenigmadubzremixabstraktsonance",
+          "skiesfall",
+          "nawtyenigmadubzremixneumonicsakawahboys",
+          "lowrider",
+          "walkawayvip",
+          "vibesremixed",
+          "loco"
+        ],
+        "latestRelease": {
+          "title": "You Are Not a Badman (ENiGMA VIP)\n                \n                \n\n                ENiGMA Dubz, Hypho, PAV4N",
+          "type": "track",
+          "url": "https://enigmadubzofficial.bandcamp.com/track/you-are-not-a-badman-enigma-vip",
+          "imageUrl": "https://f4.bcbits.com/img/a4280611881_2.jpg",
+          "releaseDate": "December 29, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=ENiGMA%20Dubz"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+ENiGMA%20Dubz"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.enigmaspace.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7717"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=ENiGMA%20Dubz&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/ENiGMA%20Dubz"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC8XZBbAN0qyfOjghG89236A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Enigma"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "enigmabeats",
+    "name": "EnigmaBeats",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031063462_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://enigmabeats.bandcamp.com",
+        "allReleaseTitles": [
+          "guidingsteps",
+          "mukatila",
+          "buriedinthelight",
+          "luciddreamshyamamakalinikunjanumatikjadesanchezenigmabeatsremix",
+          "chopsuey",
+          "elritmo",
+          "",
+          "innersanctuary",
+          "visionsinmymind"
+        ],
+        "latestRelease": {
+          "title": "Guiding Steps",
+          "type": "track",
+          "url": "https://enigmabeats.bandcamp.com/track/guiding-steps",
+          "imageUrl": "https://f4.bcbits.com/img/a4092756346_2.jpg",
+          "releaseDate": "February 6, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=EnigmaBeats"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+EnigmaBeats"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.enigmaspace.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7717"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=EnigmaBeats&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/EnigmaBeats"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC8XZBbAN0qyfOjghG89236A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Enigma"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-enigma73",
+    "name": "Enigma 73",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/enigma-73/11437896"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Enigma%2073"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Enigma%2073"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.enigmaspace.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7717"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Enigma%2073&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Enigma%2073"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC8XZBbAN0qyfOjghG89236A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Enigma"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-enigma4",
+    "name": "Enigma 4",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/enigma-4/24679114"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Enigma%204"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Enigma%204"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.enigmaspace.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7717"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Enigma%204&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Enigma%204"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC8XZBbAN0qyfOjghG89236A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Enigma"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-enigma2",
+    "name": "Enigma 2",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/enigma-2/22234272"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Enigma%202"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Enigma%202"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.enigmaspace.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7717"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Enigma%202&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Enigma%202"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC8XZBbAN0qyfOjghG89236A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Enigma"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-enigma37",
+    "name": "Enigma37",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/enigma37/17220160"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Enigma37"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Enigma37"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.enigmaspace.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7717"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Enigma37&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Enigma37"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC8XZBbAN0qyfOjghG89236A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Enigma"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

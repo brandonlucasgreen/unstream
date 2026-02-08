@@ -1,0 +1,77 @@
+[
+  {
+    "id": "qobuz-jefffoxworthy",
+    "name": "Jeff Foxworthy",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jeff-foxworthy/414962",
+        "allReleaseTitles": [
+          "gamesrednecksplay",
+          "redneck12daysofchristmas",
+          "wevebeenthinkingamplarrythecableguy",
+          "greatestbits",
+          "soldout",
+          "totallycommitted",
+          "youmightbearedneckif",
+          "therednecktest",
+          "bigfunny",
+          "theoriginal",
+          "live",
+          "thebestofdoublewidesingleminded",
+          "redneckstomp",
+          "redneckgames",
+          "partyallnight"
+        ],
+        "latestRelease": {
+          "title": "Weve Been Thinking Jeff Foxworthy Amp Larry The Cable Guy",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/weve-been-thinking-jeff-foxworthy-amp-larry-the-cable-guy/mym5hlltnt1ga",
+          "releaseDate": "2017-09-29"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jeff%20Foxworthy"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jeff%20Foxworthy"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.jefffoxworthy.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/431758"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jeff%20Foxworthy&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jeff%20Foxworthy"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/realjefffoxworthy/?hl=en"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/@JeffFoxworthyofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/iamjefffoxworthy"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

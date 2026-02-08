@@ -1,0 +1,77 @@
+[
+  {
+    "id": "qobuz-ronniewood",
+    "name": "Ronnie Wood",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ronnie-wood/64961",
+        "latestRelease": {
+          "title": "Mother Of Pearl Ronnie Wood",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/mother-of-pearl-ronnie-wood/btbh8dqz6pve6",
+          "releaseDate": "2025-08-14"
+        },
+        "allReleaseTitles": [
+          "idontwanttotalkaboutitstaywithmefeatkenneyjonesrodstewart",
+          "motherofpearl",
+          "mrluckatributetojimmyreedliveattheroyalalberthalltheband",
+          "mrluckatributetojimmyreedliveattheroyalalberthall",
+          "madladalivetributetochuckberryhiswildfive",
+          "youresofine",
+          "liveatelectricladyland",
+          "fearlessep",
+          "hissseafoamgreen",
+          "1234",
+          "ifeellikeplaying",
+          "nowlook",
+          "slideonthis",
+          "notforbeginners",
+          "justforamomentronnielane"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ronnie%20Wood"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ronnie%20Wood"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.ronniewood.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/271311"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ronnie%20Wood&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ronnie%20Wood"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/ronniewood/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/RonnieWoodOfficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/theronniewoodshow"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

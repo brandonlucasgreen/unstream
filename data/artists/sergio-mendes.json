@@ -1,0 +1,59 @@
+[
+  {
+    "id": "sergiomendes",
+    "name": "Sérgio Mendes",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a0248114024_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sergio-mendes/14531",
+        "allReleaseTitles": [
+          "vintage74",
+          "masquenadaoliverheldensianasherand",
+          "inthekeyofjoy",
+          "theswingerfromrio",
+          "brasileiro",
+          "inthebrazilianbag",
+          "bestofandbrasil65",
+          "timeless",
+          "",
+          "brasil88",
+          "thenewbrazil77",
+          "akaibelieve",
+          "thegreatarrival",
+          "confetti",
+          "thebeatofbrazil",
+          "lovemusic",
+          "funkybahia",
+          "favoritethings",
+          "bomtempo",
+          "lookaroundbrasil66"
+        ],
+        "latestRelease": {
+          "title": "Mas Que Nada Oliver Heldens Ian Asher And Sergio Mendes",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/mas-que-nada-oliver-heldens-ian-asher-and-sergio-mendes/lvvljt0iqovha",
+          "releaseDate": "2024-01-12"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sergiomendes.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=S%C3%A9rgio%20Mendes"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+S%C3%A9rgio%20Mendes"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

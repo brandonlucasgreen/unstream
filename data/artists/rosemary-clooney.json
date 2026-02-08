@@ -1,0 +1,75 @@
+[
+  {
+    "id": "rosemaryclooney",
+    "name": "Rosemary Clooney",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037331658_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rosemary-clooney/46775",
+        "latestRelease": {
+          "title": "Hey There This Ole House Rerecorded Version Rosemary Clooney",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/hey-there-this-ole-house-rerecorded-version-rosemary-clooney/frqw1l7c6nweb",
+          "releaseDate": "2024-08-27"
+        },
+        "allReleaseTitles": [
+          "howthewestwaswonoriginalsoundtrackrecordingbingcrosbyand",
+          "ifeelasongcomingonlostradiorecordings",
+          "heytherethisolehousererecordedversion",
+          "theessential",
+          "bluerosewithdukeellingtonhisorchestra",
+          "bluerosedukeellingtonhisorchestra",
+          "rosiesolvestheswingingriddle",
+          "singsballads",
+          "irvingberlinswhitechristmas",
+          "braziljohnpizzarelli",
+          "whitechristmas",
+          "doyoumissnewyork",
+          "girlsinger",
+          "singsthemusicofcoleporter",
+          "tenderlyep",
+          "withlove",
+          "fancymeetingyouherebingcrosbyand",
+          "singsthelyricsofjohnnymercer",
+          "singsarlenberlin",
+          "singssongsfromwhitechristmasandotheryuletidefavorites"
+        ]
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rosemary-clooney.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rosemary%20Clooney"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rosemary%20Clooney"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.rosemaryclooney.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/235447"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rosemary%20Clooney&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rosemary%20Clooney"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

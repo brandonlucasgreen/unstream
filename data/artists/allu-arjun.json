@@ -1,0 +1,64 @@
+[
+  {
+    "id": "qobuz-alluarjun",
+    "name": "Allu Arjun",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/allu-arjun/3209900",
+        "allReleaseTitles": [
+          "happynewyear2025fahadhfaasilrashmikamandannadhanunjayraorameshsunilanasuyabharadwajajayghosh",
+          "rashmikamandannasuperhitsongsfahadhfaasilrashmikamandannadhanunjayraorameshsunilanasuyabharadwajajayghosh",
+          "celebrationsofwomensdayfahadhfaasilrashmikamandannadhanunjayraorameshsunilanasuyabharadwajajayghosh",
+          "powerhouse",
+          "zaazrampwalkmusic",
+          "dammuntepattukorafrompushpa2therule",
+          "sankranthisambaralufahadhfaasilrashmikamandannadhanunjayraorameshsunilanasuyabharadwajajayghosh",
+          "kollywoodsensationalhitsfahadhfaasilrashmikamandannadhanunjayraorameshsunilanasuyabharadwajajayghosh",
+          "glamourqueenrashmikamandannasuperhitsfahadhfaasilrashmikamandannadhanunjayraorameshsunilanasuyabharadwajajayghosh",
+          "thevoiceofmagicshreyaghoshalfahadhfaasilrashmikamandannadhanunjayraorameshsunilanasuyabharadwajajayghosh",
+          "allaboutdivinefahadhfaasilrashmikamandannadhanunjayraorameshsunilanasuyabharadwajajayghosh",
+          "chicaatractivamenorfloydevisriprasad",
+          "malayalammonsoonhitsfahadhfaasilrashmikamandannadhanunjayraorameshsunilanasuyabharadwajajayghosh",
+          "jimoutrelaxingmusic",
+          "nabidujahanamar",
+          "stepituptop10dancehitsfahadhfaasilrashmikamandannadhanunjayraorameshsunilanasuyabharadwajajayghosh",
+          "deepawalicelebrationskannadasuperhitsfahadhfaasilrashmikamandannadhanunjayraorameshsunilanasuyabharadwajajayghosh",
+          "kaveriteeradalilovehitsfahadhfaasilrashmikamandannadhanunjayraorameshsunilanasuyabharadwajajayghosh"
+        ],
+        "latestRelease": {
+          "title": "Celebrations Of Womens Day Allu Arjun Fahadh Faasil Rashmika Mandanna Dhanunjay Rao Ramesh Sunil Anasuya Bharadwaj Ajay Ghosh",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/celebrations-of-womens-day-allu-arjun-fahadh-faasil-rashmika-mandanna-dhanunjay-rao-ramesh-sunil-anasuya-bharadwaj-ajay-ghosh/kkh4urctdeeoa",
+          "releaseDate": "2025-03-08"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Allu%20Arjun"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Allu%20Arjun"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/alluarjunonline/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/watch?v=OOQlCD5qMPY"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/AlluArjun"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

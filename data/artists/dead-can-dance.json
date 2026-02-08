@@ -1,0 +1,82 @@
+[
+  {
+    "id": "qobuz-deadcandance",
+    "name": "Dead Can Dance",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/dead-can-dance/226573",
+        "allReleaseTitles": [
+          "anastasis",
+          "inconcert",
+          "intothelabyrinth",
+          "theserpentsegg",
+          "mushin",
+          "withintherealmofadyingsun",
+          "aion",
+          "spleenandideal",
+          "",
+          "spiritchaser",
+          "wake",
+          "towardthewithin",
+          "apassageintime",
+          "dionysus",
+          "gardenofthearcanedelightspeelsessions",
+          "livefrompaleisvoorschonekunstenbrusselsbelgiummarch17th2005",
+          "livefrombarbicantheatrelondonapril6th2005",
+          "livefrommunchnerphilharmonikermunichgermanymarch27th2005",
+          "livefromauditoriumtheatrechicagoiloctober12th2005",
+          "livefromprinswillemalexanderzaalthehaguenetherlandsmarch12th2005"
+        ],
+        "latestRelease": {
+          "title": "Mushin Dead Can Dance",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/mushin-dead-can-dance/e2u38u9uyn0hc",
+          "releaseDate": "2021-06-04"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Dead%20Can%20Dance"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Dead%20Can%20Dance"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.deadcandance.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/12368"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Dead%20Can%20Dance&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Dead%20Can%20Dance"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/dcdofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCZn4_LiKXOu-ArkS4sJTG5w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/DeadCanDanceOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

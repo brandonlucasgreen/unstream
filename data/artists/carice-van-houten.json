@@ -1,0 +1,36 @@
+[
+  {
+    "id": "qobuz-caricevanhouten",
+    "name": "Carice Van Houten",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/carice-van-houten/901626",
+        "allReleaseTitles": [
+          "seeyouontheice",
+          "nosurrenderkaneand"
+        ],
+        "latestRelease": {
+          "title": "See You On The Ice Carice Van Houten",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/see-you-on-the-ice-carice-van-houten/5099997822455",
+          "releaseDate": "2012-01-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Carice%20Van%20Houten"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Carice%20Van%20Houten"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

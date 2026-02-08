@@ -1,0 +1,72 @@
+[
+  {
+    "id": "qobuz-micheltelo",
+    "name": "Michel Telo",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/michel-telo/194061",
+        "allReleaseTitles": [
+          "churrascodotelovol2",
+          "nabalada",
+          "bemsertanejooshow",
+          "baladasertaneja",
+          "praouvirnofone",
+          "bailedotelo",
+          "sunset",
+          "churrascodoteloepquintal",
+          "bemsertanejo1atemporadaep",
+          "sertanejinhodotelo",
+          "pipocaeedredomdomcaetanoerafael",
+          "mariaversoesdead",
+          "mariaversoesdeek",
+          "mariaversoesdeln",
+          "portrasdamaquiagem",
+          "mariaversoesdepz",
+          "ificatchyou",
+          "nosanosafeateurodacer"
+        ],
+        "latestRelease": {
+          "title": "Pra Ouvir No Fone Michel Telo",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/pra-ouvir-no-fone-michel-telo/rw8cvy1v0qmtc",
+          "releaseDate": "2020-12-04"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Michel%20Telo"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Michel%20Telo"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.micheltelo.com.br/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2576399"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/MichelTelo"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/MichelTelo11"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MichelTelo"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,122 @@
+[
+  {
+    "id": "qobuz-megantheestallion10003553030",
+    "name": "Megantheestallion 10003553030",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/megantheestallion-10003553030/3553030",
+        "latestRelease": {
+          "title": "Lover Girl Megan Thee Stallion",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/lover-girl-megan-thee-stallion/s1a7nqkuvrmlc",
+          "releaseDate": "2025-10-24"
+        },
+        "allReleaseTitles": [
+          "meganactii",
+          "meganactiitwiceeditionaltcover",
+          "lovergirl",
+          "whenever",
+          "wapfeatexplicitcardib",
+          "traumazine",
+          "goodnews",
+          "sweetestpiedualipa",
+          "notmyfaultreneerapp",
+          "somethingfortheehotties",
+          "thotshit",
+          "megan",
+          "lickshenseea",
+          "butterremixbtsmegantheestallion",
+          "flaminhottie",
+          "wannabeglorilla"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Megantheestallion%2010003553030"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Megantheestallion%2010003553030"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.megantheestallion.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7153956"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/theestallion/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@theestallion"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCKrdjiuS66yXOdEZ_cOD_TA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MeganTheeStallion"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-megantheestallion",
+    "name": "Megan Thee Stallion",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/megan-thee-stallion/21328956"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Megan%20Thee%20Stallion"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Megan%20Thee%20Stallion"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.megantheestallion.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7153956"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/theestallion/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@theestallion"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCKrdjiuS66yXOdEZ_cOD_TA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MeganTheeStallion"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

@@ -1,0 +1,92 @@
+[
+  {
+    "id": "markjonathandavis",
+    "name": "Mark Jonathan Davis",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027743701_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://markjonathandavis.bandcamp.com",
+        "allReleaseTitles": [
+          "theparodysongsthatdestroyedearth2020",
+          "parodysongsforabettertomorrow2021markjonathandavisrobicemanizenberg",
+          "sulusgreatesthits2020",
+          "thisisbobthebestofmjdasbobhopeonkroq2008"
+        ],
+        "latestRelease": {
+          "title": "\"The Parody Songs That Destroyed Earth\" (2020)",
+          "type": "album",
+          "url": "https://markjonathandavis.bandcamp.com/album/the-parody-songs-that-destroyed-earth-2020",
+          "imageUrl": "https://f4.bcbits.com/img/a0133170069_16.jpg",
+          "releaseDate": "October 10, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mark%20Jonathan%20Davis"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mark%20Jonathan%20Davis"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-jonathandavis",
+    "name": "Jonathan Davis",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jonathan-davis/160762",
+        "allReleaseTitles": [
+          "seventythornskimdracula",
+          "blacklabyrinth",
+          "queenofthedamnedthescorealbumrichardgibbsand",
+          "photosynthesisgrowth",
+          "waydownwhitaker",
+          "basicneedsrockcut",
+          "asaxychristmasbrianlenairpresentsfeatmiriammwrightbrianlenair",
+          "arbre",
+          "whatitiscountryversion",
+          "afterthedarkthephilosophersnicholasotoole",
+          "dropagearanddisappear",
+          "trescool",
+          "computerdustexperiment2",
+          "calmmorningimprov",
+          "organicgesture",
+          "computerdustexperiment1",
+          "fixmefeatalejandrorios",
+          "klaxon",
+          "howiputmycattosleepimprov",
+          "shopsessionsacoustic"
+        ],
+        "latestRelease": {
+          "title": "Way Down Whitaker Jonathan Davis",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/way-down-whitaker-jonathan-davis/wf9430gy4nkba",
+          "releaseDate": "2024-05-31"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jonathan%20Davis"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jonathan%20Davis"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

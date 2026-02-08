@@ -1,0 +1,30 @@
+[
+  {
+    "id": "qobuz-standalone-guyberryman",
+    "name": "Guy Berryman",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/guy-berryman/96613"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Guy%20Berryman"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Guy%20Berryman"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/530745"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

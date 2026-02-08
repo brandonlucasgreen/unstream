@@ -1,0 +1,50 @@
+[
+  {
+    "id": "qobuz-jelenakarleusa",
+    "name": "Jelena Karleusa",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jelena-karleusa/993016",
+        "allReleaseTitles": [
+          "alpha",
+          "thediamondcollection",
+          "revolution",
+          "thebestofcollection",
+          "zlatnakolekcija",
+          "grandproduction",
+          "benga",
+          "vesticevile",
+          "diva",
+          "",
+          "magija",
+          "bankina",
+          "omega",
+          "lajk",
+          "zlajabandzlajabandjelenakarleusazlajaband",
+          "ostavljamte"
+        ],
+        "latestRelease": {
+          "title": "Zlatna Kolekcija Jelena Karleusa",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/zlatna-kolekcija-jelena-karleusa/udifzjh05k7yb",
+          "releaseDate": "2025-06-10"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jelena%20Karleusa"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jelena%20Karleusa"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

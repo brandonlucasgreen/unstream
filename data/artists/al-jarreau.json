@@ -1,0 +1,151 @@
+[
+  {
+    "id": "aljarreau",
+    "name": "Al Jarreau",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037157818_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/al-jarreau-5/330259",
+        "latestRelease": {
+          "title": "Al Jarreau Al Jarreau",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/al-jarreau-al-jarreau/y9c9e1obi6s5a",
+          "releaseDate": "2025-02-07"
+        },
+        "allReleaseTitles": [
+          "aljarreau",
+          "ellingtonndrbigband",
+          "myoldfriendcelebratinggeorgeduke",
+          "wowliveatthechildeharold",
+          "takefiveliveatthechildeharoldaugust1976",
+          "wegotbyliveatthechildeharoldaugust1976",
+          "breakinaway",
+          "jarreau",
+          "lisforlover",
+          "theverybestofanexcellentadventure",
+          "tenderness",
+          "thistime",
+          "wegotby",
+          "looktotherainbowliveineurope",
+          "liveatmontreux1993",
+          "liveinlondon",
+          "christmas",
+          "glow",
+          "accentuatethepositive"
+        ]
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://aljarreaulive.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Al%20Jarreau"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Al%20Jarreau"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.aljarreau.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/63628"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Al%20Jarreau&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Al%20Jarreau"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/aljarreaumusic/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCTxAeC9CBE-mwM-YTfSqTeA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/AlJarreauOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "aljarreau-bandcamp-aljarreau",
+    "name": "Al Jarreau",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0023516114_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://aljarreau.bandcamp.com",
+        "allReleaseTitles": [
+          "singsbillwithers",
+          "myoldfriendcelebratinggeorgeduke",
+          "singsalgreencallme"
+        ],
+        "latestRelease": {
+          "title": "Sings Bill Withers",
+          "type": "album",
+          "url": "https://aljarreau.bandcamp.com/album/sings-bill-withers",
+          "imageUrl": "https://f4.bcbits.com/img/a1702868427_2.jpg",
+          "releaseDate": "February 3, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Al%20Jarreau"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Al%20Jarreau"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.aljarreau.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/63628"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Al%20Jarreau&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Al%20Jarreau"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/aljarreaumusic/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCTxAeC9CBE-mwM-YTfSqTeA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/AlJarreauOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,75 @@
+[
+  {
+    "id": "qobuz-damiim",
+    "name": "Dami Im",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/dami-im/1443239",
+        "latestRelease": {
+          "title": "In Between Dami Im",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/in-between-dami-im/et7y8ycvryrtb",
+          "releaseDate": "2023-05-18"
+        },
+        "allReleaseTitles": [
+          "joleneacoustic",
+          "soundofsilence",
+          "inbetween",
+          "soundofsilenceremixes",
+          "",
+          "classiccarpenters",
+          "myreality",
+          "heartbeats",
+          "livesessionsbluesfestbyronbay",
+          "smile",
+          "fightingforlove",
+          "dancinginthedarkkaiakamp",
+          "paperdragon",
+          "cryingunderwater",
+          "santaclausiscomingtotown",
+          "lonelycactus",
+          "paperdragonlive"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Dami%20Im"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Dami%20Im"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.damiim.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3697617"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/Damiim/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@dami.im"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/damiim"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/damijazz"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

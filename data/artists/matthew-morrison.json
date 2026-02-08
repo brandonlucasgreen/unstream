@@ -1,0 +1,82 @@
+[
+  {
+    "id": "matthewmorrison-bandcamp-bandcamp.com",
+    "name": "Matthew Morrison",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0001564951_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/matthew-morrison/172903",
+        "allReleaseTitles": [
+          "",
+          "disneydreaminwith",
+          "whereitallbegan",
+          "whenyourfeetdonttouchtheground",
+          "aclassicchristmas",
+          "letgodarisethechoirofstjohnscollegeoxfordgavinmilmer",
+          "somewhereovertherainbowaolsessions"
+        ],
+        "latestRelease": {
+          "title": "Disney Dreamin With Matthew Morrison Matthew Morrison",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/disney-dreamin-with-matthew-morrison-matthew-morrison/g06ho1p3imf8a",
+          "releaseDate": "2020-03-06"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bandcamp.com/matthewmorrison"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Matthew%20Morrison"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Matthew%20Morrison"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "matthewmorrison",
+    "name": "Matthew Morrison",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0003465589_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://matthewmorrison.bandcamp.com",
+        "allReleaseTitles": [
+          "beautifullove",
+          "thelightofchristmasep"
+        ],
+        "latestRelease": {
+          "title": "Beautiful Love",
+          "type": "album",
+          "url": "https://matthewmorrison.bandcamp.com/album/beautiful-love",
+          "imageUrl": "https://f4.bcbits.com/img/a0275535655_16.jpg",
+          "releaseDate": "July 31, 2011"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Matthew%20Morrison"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Matthew%20Morrison"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

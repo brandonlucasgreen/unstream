@@ -1,0 +1,72 @@
+[
+  {
+    "id": "qobuz-stephensondheim",
+    "name": "Stephen Sondheim",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/stephen-sondheim/19638",
+        "latestRelease": {
+          "title": "Gypsy Starring Audra Mcdonald 2024 Broadway Cast Recording Audra Mcdonald Danny Burstein Joy Woods Stephen Sondheim Jule Styne Gypsy 2024 Broadway Company",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/gypsy-starring-audra-mcdonald-2024-broadway-cast-recording-audra-mcdonald-danny-burstein-joy-woods-stephen-sondheim-jule-styne-gypsy-2024-broadway-company/ipz4jql6jzxfa",
+          "releaseDate": "2025-04-25"
+        },
+        "allReleaseTitles": [
+          "gypsystarringaudramcdonald2024broadwaycastrecordingaudramcdonalddannybursteinjoywoodsjulestynegypsy2024broadwaycompany",
+          "hereweare",
+          "sweeneytoddthedemonbarberoffleetstreetthemotionpicturesoundtrack",
+          "sweeneytoddthedemonbarberoffleetstreet2023broadwaycastrecordingsweeneytoddthedemonbarberoffleetstreet2023broadwaycastannaleighashfordjoshgroban",
+          "intothewoodssarabareillesintothewoods2022broadwaycast",
+          "company2018londoncastrecording",
+          "jasonrobertbrownandliveinconcertjasonrobertbrown",
+          "sundayintheparkwithgeorge2017broadwaycastrecording",
+          "sondheiminthecitymelissaerrico",
+          "soldfriendsacelebrationliveatthesondheimtheatre",
+          "follies2018nationaltheatrecastrecording",
+          "theworstpiesinlondon2023broadwaycastrecordingjoshgrobanannaleighashford",
+          "assassinsthe2022offbroadwaycastrecording",
+          "companyantoniobanderas",
+          "epiphany2023broadwaycastrecordingjoshgrobanannaleighashford",
+          "johannaact2sequence2023broadwaycastrecordingjoshgrobanannaleighashford",
+          "notwhileimaround2023broadwaycastrecordingjoshgrobanannaleighashford",
+          "losingmymindasondheimdiscofeverdream"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Stephen%20Sondheim"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Stephen%20Sondheim"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sondheim.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/566541"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Stephen%20Sondheim&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Stephen%20Sondheim"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/stephensondheim"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

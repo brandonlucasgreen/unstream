@@ -1,0 +1,566 @@
+[
+  {
+    "id": "qobuz-jewel",
+    "name": "Jewel",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jewel/41679",
+        "allReleaseTitles": [
+          "spirit",
+          "freewheelinwoman",
+          "thesongtv",
+          "pickingupthepieces",
+          "queenofhearts",
+          "longwayround",
+          "livingwithyourmemory",
+          "yumegayumejanakunaruhimade",
+          "eenymeenyminymoe",
+          "whatchagonnado",
+          "yokohamamemories",
+          "piecesofyou",
+          "greatesthits",
+          "thisway",
+          "joyaholidaycollection",
+          "goodbyealiceinwonderland",
+          "thegreatesthitsremixed",
+          "myfathersdaughterdollyparton"
+        ],
+        "latestRelease": {
+          "title": "Jewel Jewel The Song Tv",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/jewel-jewel-the-song-tv/hg0901s86087o",
+          "releaseDate": "2025-07-25"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/truthinaspectastrology"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jewel"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jewel"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.jeweljk.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/106201"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jewel&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jewel"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/Jewel/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/jeweljkblog"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/jeweljk"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "nitejewel",
+    "name": "Nite Jewel",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013528626_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://nitejewel.bandcamp.com",
+        "allReleaseTitles": [
+          "skinnydipper",
+          "nosun",
+          "puisquebeledamemeime",
+          "onyourownthejokesonyouep",
+          "reallowbsides",
+          "realhigh",
+          "obsessionep",
+          "liquidcool",
+          "alliwantforchristmasisyousadversion",
+          "amirealep",
+          "goodevening"
+        ],
+        "latestRelease": {
+          "title": "Skinny Dipper",
+          "type": "album",
+          "url": "https://nitejewel.bandcamp.com/album/skinny-dipper",
+          "imageUrl": "https://f4.bcbits.com/img/a4278677520_2.jpg",
+          "releaseDate": "October 31, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Nite%20Jewel"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Nite%20Jewel"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.jeweljk.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/106201"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Nite%20Jewel&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Nite%20Jewel"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/Jewel/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/jeweljkblog"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/jeweljk"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "thejewelgarden",
+    "name": "The Jewel Garden",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032186751_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thejewelgarden.bandcamp.com",
+        "allReleaseTitles": [
+          "fieldstudiesvolume1variousartists",
+          "emagostoluizsereu",
+          "thedeflatingwetbear",
+          "hauntedyhouseostboneset",
+          "drawingbuildingdrawingsbuildingbuildings",
+          "thearchaeologyofairthestarlessoracle",
+          "lastyearsoceancharlatan",
+          "envelopespectrumqndfk",
+          "theblongowetbear",
+          "scarcityscarsthenorthsea",
+          "digitalforestcharlatan",
+          "lonelinessmitseliy",
+          "eelcavetheriseandfallwetbear",
+          "thewanderingcodexthestarlessoracle",
+          "recursiveshadowsbraderose",
+          "daylightcirclecodaylightcircleco"
+        ],
+        "latestRelease": {
+          "title": "Field Studies, Volume 1\n                \n                \n\n                Various Artists",
+          "type": "album",
+          "url": "https://thejewelgarden.bandcamp.com/album/field-studies-volume-1",
+          "imageUrl": "https://f4.bcbits.com/img/a2911008464_2.jpg",
+          "releaseDate": "January 26, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Jewel%20Garden"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Jewel%20Garden"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.jeweljk.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/106201"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Jewel%20Garden&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Jewel%20Garden"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/Jewel/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/jeweljkblog"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/jeweljk"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "ebonyjewel",
+    "name": "Ebony Jewel",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020398585_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thedjewelmusic.bandcamp.com",
+        "allReleaseTitles": [
+          "gone",
+          "free"
+        ],
+        "latestRelease": {
+          "title": "GONE",
+          "type": "track",
+          "url": "https://thedjewelmusic.bandcamp.com/track/gone-2",
+          "imageUrl": "https://f4.bcbits.com/img/a0442348992_16.jpg",
+          "releaseDate": "June 19, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ebony%20Jewel"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ebony%20Jewel"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.jeweljk.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/106201"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ebony%20Jewel&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ebony%20Jewel"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/Jewel/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/jeweljkblog"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/jeweljk"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "rovingjewel",
+    "name": "Roving Jewel",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022497413_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rovingjewel.bandcamp.com",
+        "allReleaseTitles": [
+          "themath",
+          "hitmanforhire",
+          "thesoftglowbeforedawn",
+          "rollingsatori",
+          "the38thexpansion",
+          "auditoryhallucinations"
+        ],
+        "latestRelease": {
+          "title": "The Math",
+          "type": "track",
+          "url": "https://rovingjewel.bandcamp.com/track/the-math",
+          "imageUrl": "https://f4.bcbits.com/img/a1928789978_2.jpg",
+          "releaseDate": "September 12, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Roving%20Jewel"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Roving%20Jewel"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.jeweljk.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/106201"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Roving%20Jewel&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Roving%20Jewel"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/Jewel/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/jeweljkblog"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/jeweljk"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "johnnyjewel",
+    "name": "Johnny Jewel",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0005683145_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://johnnyjewel.bandcamp.com",
+        "allReleaseTitles": [
+          "themesfortelevision",
+          "windswept"
+        ],
+        "latestRelease": {
+          "title": "Themes For Television",
+          "type": "album",
+          "url": "https://johnnyjewel.bandcamp.com/album/themes-for-television",
+          "imageUrl": "https://f4.bcbits.com/img/a1543985810_16.jpg",
+          "releaseDate": "May 21, 2018"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Johnny%20Jewel"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Johnny%20Jewel"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.jeweljk.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/106201"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Johnny%20Jewel&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Johnny%20Jewel"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/Jewel/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/jeweljkblog"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/jeweljk"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "brownjewel",
+    "name": "Brown Jewel",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033172435_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://brownjewel.bandcamp.com",
+        "allReleaseTitles": [
+          "badbunnymonacojewelflip",
+          "jewelflipsvol5",
+          "jewelflipsvol4",
+          "theparablesii",
+          "jewelflipsvol3",
+          "jewelflipsvol2",
+          "vanillathearomaticsedition",
+          "jewelflipsvol1",
+          "theparables"
+        ],
+        "latestRelease": {
+          "title": "BAD BUNNY - MONACO (JEWEL FLIP)",
+          "type": "track",
+          "url": "https://brownjewel.bandcamp.com/track/bad-bunny-monaco-jewel-flip",
+          "imageUrl": "https://f4.bcbits.com/img/a1074620709_2.jpg",
+          "releaseDate": "December 5, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Brown%20Jewel"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Brown%20Jewel"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.jeweljk.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/106201"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Brown%20Jewel&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Brown%20Jewel"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/Jewel/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/jeweljkblog"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/jeweljk"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-jewel4",
+    "name": "Jewel 4",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jewel-4/11023243",
+        "allReleaseTitles": [
+          "lofitunes",
+          "playing",
+          "hardthrill",
+          "businessday"
+        ],
+        "latestRelease": {
+          "title": "Playing Jewel",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/playing-jewel/onrhml2pjrtga",
+          "releaseDate": "2021-09-28"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jewel%204"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jewel%204"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.jeweljk.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/106201"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jewel%204&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jewel%204"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/Jewel/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/jeweljkblog"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/jeweljk"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

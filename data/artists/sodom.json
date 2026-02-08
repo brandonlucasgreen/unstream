@@ -1,0 +1,300 @@
+[
+  {
+    "id": "sodom",
+    "name": "Sodom",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039263144_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sodomofficial.bandcamp.com",
+        "allReleaseTitles": [
+          "thearsonist",
+          "1982ep",
+          "40yearsatwarthegreatesthellofsodom",
+          "bombenhagel",
+          "genesisxix",
+          "outofthefrontlinetrench",
+          "partisan",
+          "decisionday"
+        ],
+        "latestRelease": {
+          "title": "The Arsonist",
+          "type": "album",
+          "url": "https://sodomofficial.bandcamp.com/album/the-arsonist",
+          "imageUrl": "https://f4.bcbits.com/img/a3650135645_2.jpg",
+          "releaseDate": "June 27, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sodom/216397",
+        "allReleaseTitles": [
+          "thearsonist",
+          "genesisxix",
+          "tappingthevein",
+          "triggerdiscipline",
+          "taphephobia",
+          "outofthefrontlinetrench",
+          "gomorrah",
+          "indoctrination",
+          "getwhatyoudeserve",
+          "downonyourknees",
+          "friendlyfire",
+          "agentorange",
+          "persecutionmania",
+          "codered",
+          "inwarandpieces",
+          "betteroffdead"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sodom"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sodom"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sodomized.info/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/251657"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sodom&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sodom"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sodom_band_official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCDDMuLWqsc36rhWi7aa0v7A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sodomized"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "sodom-bandcamp-sodom",
+    "name": "Sodom",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0034119202_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sodom.bandcamp.com",
+        "allReleaseTitles": [
+          "genesisxix",
+          "outofthefrontlinetrench"
+        ],
+        "latestRelease": {
+          "title": "Genesis XIX",
+          "type": "album",
+          "url": "https://sodom.bandcamp.com/album/genesis-xix",
+          "imageUrl": "https://f4.bcbits.com/img/a0427150944_16.jpg",
+          "releaseDate": "November 27, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sodom"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sodom"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sodomized.info/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/251657"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sodom&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sodom"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sodom_band_official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCDDMuLWqsc36rhWi7aa0v7A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sodomized"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "benightedinsodom",
+    "name": "Benighted in Sodom",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0005604449_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://benightedinsodom.bandcamp.com",
+        "allReleaseTitles": [
+          "laurapalmermmxxiv",
+          "monstrouslybeautifulsorrowmmxxiii",
+          "darkalleysessions",
+          "purgatorydrive",
+          "oneirogen",
+          "donotgogentlyintothatgoodnightmmxxii",
+          "loathebehold",
+          "elysianbirthdefects",
+          "deathinspacegenesisinflux",
+          "apremonitionofmiraclesundone",
+          "satanicpleasantmelody",
+          "donotgogentlyintothatgoodnight",
+          "aresplendentstarlessdarkness",
+          "thehierophantcosmismdeluxeedition",
+          "dismaletherealitystellarcelestialvoid",
+          "antidepressive"
+        ],
+        "latestRelease": {
+          "title": "Laura Palmer MMXXIV",
+          "type": "album",
+          "url": "https://benightedinsodom.bandcamp.com/album/laura-palmer-mmxxiv",
+          "imageUrl": "https://f4.bcbits.com/img/a3787892342_2.jpg",
+          "releaseDate": "July 11, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Benighted%20in%20Sodom"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Benighted%20in%20Sodom"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sodomized.info/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/251657"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Benighted%20in%20Sodom&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Benighted%20in%20Sodom"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sodom_band_official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCDDMuLWqsc36rhWi7aa0v7A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sodomized"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "scarsofsodom",
+    "name": "Scars Of Sodom",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018788771_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://scarsofsodom.bandcamp.com",
+        "allReleaseTitles": [
+          "annihilationofsouls",
+          "retributionofthewicked"
+        ],
+        "latestRelease": {
+          "title": "Annihilation Of Souls",
+          "type": "album",
+          "url": "https://scarsofsodom.bandcamp.com/album/annihilation-of-souls-2",
+          "imageUrl": "https://f4.bcbits.com/img/a1462615284_16.jpg",
+          "releaseDate": "February 27, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Scars%20Of%20Sodom"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Scars%20Of%20Sodom"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sodomized.info/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/251657"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Scars%20Of%20Sodom&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Scars%20Of%20Sodom"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sodom_band_official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCDDMuLWqsc36rhWi7aa0v7A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sodomized"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

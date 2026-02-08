@@ -1,0 +1,462 @@
+[
+  {
+    "id": "qobuz-rm",
+    "name": "Rm",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rm/534122",
+        "allReleaseTitles": [
+          "stoptheraintabloxtablo",
+          "1life",
+          "murdasidemazzal20pistolpo",
+          "housewaing",
+          "10shots",
+          "smoke",
+          "crossroads",
+          "thetruth",
+          "darling",
+          "jdzspitfiretempajdzmedia",
+          "onthespotfreestyle",
+          "goku",
+          "actors",
+          "nettalk",
+          "offtherecord2",
+          "ineedyou",
+          "bbcfreestyle",
+          "bandsfreestyle",
+          "goodtometeedee",
+          "2025freestyle"
+        ],
+        "latestRelease": {
+          "title": "1 Life Rm",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/1-life-rm/gph5ja6qjsc2b",
+          "releaseDate": "2025-10-10"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/RMYoutube"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rm"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rm"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5570616"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rkive/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "rmhubbert",
+    "name": "RM Hubbert",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0009656605_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rmhubbert.bandcamp.com",
+        "allReleaseTitles": [
+          "ampersandextras",
+          "tellingthetrees",
+          "breaksbone",
+          "thirteenlostfound",
+          "firstlast"
+        ],
+        "latestRelease": {
+          "title": "Ampersand Extras",
+          "type": "album",
+          "url": "https://rmhubbert.bandcamp.com/album/ampersand-extras",
+          "imageUrl": "https://f4.bcbits.com/img/a4004246828_2.jpg",
+          "releaseDate": "March 1, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=RM%20Hubbert"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+RM%20Hubbert"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5570616"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rkive/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "mrm",
+    "name": "M!R!M",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027991972_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://m-r-m.bandcamp.com",
+        "allReleaseTitles": [
+          "timetraitor",
+          "thevisionary",
+          "iuvenis",
+          "heaven",
+          "sdhtalkindreamsmrmremix",
+          "mrmvsfearing",
+          "fascinationmrmremix",
+          "thevisionaryremixes",
+          "matildevelvetdress",
+          "avoid",
+          "reelremixes",
+          "reelflowersinbloom",
+          "buzzaldrin",
+          "lostboysacidblanknothing"
+        ],
+        "latestRelease": {
+          "title": "Time Traitor",
+          "type": "album",
+          "url": "https://m-r-m.bandcamp.com/album/time-traitor",
+          "imageUrl": "https://f4.bcbits.com/img/a1047519130_2.jpg",
+          "releaseDate": "April 22, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=M!R!M"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+M!R!M"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5570616"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rkive/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "gloworm",
+    "name": "gloworm",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a2096402036_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://gl0w0rm.bandcamp.com",
+        "allReleaseTitles": [
+          "gloworm2020",
+          "glowiththefloooo"
+        ],
+        "latestRelease": {
+          "title": "gloworm2020",
+          "type": "album",
+          "url": "https://gl0w0rm.bandcamp.com/album/gloworm2020",
+          "imageUrl": "https://f4.bcbits.com/img/a2096402036_16.jpg",
+          "releaseDate": "September 4, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=gloworm"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+gloworm"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5570616"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rkive/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "aidanmoffatandrmhubbert",
+    "name": "Aidan Moffat and RM Hubbert",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018999276_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://aidanmoffatandrmhubbert.bandcamp.com",
+        "allReleaseTitles": [
+          "cuttoblack",
+          "cuttoblacksongonsong",
+          "ghoststoriesforchristmas",
+          "hereliesthebody"
+        ],
+        "latestRelease": {
+          "title": "Cut To Black",
+          "type": "album",
+          "url": "https://aidanmoffatandrmhubbert.bandcamp.com/album/cut-to-black",
+          "imageUrl": "https://f4.bcbits.com/img/a0509940790_16.jpg",
+          "releaseDate": "August 16, 2019"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Aidan%20Moffat%20and%20RM%20Hubbert"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Aidan%20Moffat%20and%20RM%20Hubbert"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5570616"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rkive/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "solarstorm",
+    "name": "Solar Storm",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0010617610_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://solarst0rm.bandcamp.com",
+        "allReleaseTitles": [
+          "neodarkage",
+          "theprocedure",
+          "solx",
+          "dasha",
+          "cosmicwonders",
+          "dreamhacker",
+          "exodus"
+        ],
+        "latestRelease": {
+          "title": "Neo Dark Age",
+          "type": "album",
+          "url": "https://solarst0rm.bandcamp.com/album/neo-dark-age",
+          "imageUrl": "https://f4.bcbits.com/img/a0342916686_2.jpg",
+          "releaseDate": "October 8, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Solar%20Storm"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Solar%20Storm"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5570616"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rkive/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-rm47",
+    "name": "Rm47",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rm47/9684212",
+        "allReleaseTitles": [
+          "cybeaadraleigh",
+          "lefixmaadraleigh",
+          "fyfmaadraleigh",
+          "neededumaadandraleigh",
+          "runningbackmaadandraleigh",
+          "stuckwithyoubutilikeitinstrumentalmaadandraleigh",
+          "stuckwithyoubutilikeitmaadandraleigh",
+          "underwateaadraleigh",
+          "grabaplatealunafarrahfawx",
+          "bussitmaadandraleigh",
+          "lefixaqutieremixaqutie",
+          "hotlinemaadandraleigh",
+          "gimmedatmaadandraleigh",
+          "bussitontheradaramp",
+          "lmkpt1richtannerrremixrichtanneraadandraleigh",
+          "eod8toremix8to",
+          "tellmevmixmaadandraleigh",
+          "neededuremixesmaadandraleigh",
+          "strutremixmaadandraleighfeaturingchaneljole",
+          "beetgozondjkwamzyamapianoremixanddjkwamzyfeaturingprinceafricanchild"
+        ],
+        "latestRelease": {
+          "title": "Cyber Rm47 Maad Raleigh",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/cyber-rm47-maad-raleigh/znowmkkd9eqga",
+          "releaseDate": "2025-08-15"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rm47"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rm47"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5570616"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rkive/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-rm21",
+    "name": "Rm 21",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rm-21/24847450",
+        "allReleaseTitles": [
+          "nevaplayfeatofbtsmegantheestallion",
+          "rightplacewrongperson",
+          "indigo",
+          "mono",
+          "oldtownroadfeatofbtslilnasxfeatrmofbts",
+          "comebacktome",
+          "comebacktomeradioedit",
+          "bicycle"
+        ],
+        "latestRelease": {
+          "title": "Neva Play Feat Rm Of Bts Megan Thee Stallion",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/neva-play-feat-rm-of-bts-megan-thee-stallion/segqyl3dyw42a",
+          "releaseDate": "2024-09-06"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rm%2021"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rm%2021"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5570616"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rkive/"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-rm16",
+    "name": "Rm 16",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rm-16/23751655",
+        "allReleaseTitles": [
+          "lemeilleurdevolume2rm",
+          "act",
+          "lemeilleurdevolume1rm",
+          "sanguechoroesuor",
+          "spacecold",
+          "speedyourlovetome"
+        ],
+        "latestRelease": {
+          "title": "Sangue Choro E Suor Rm",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/sangue-choro-e-suor-rm/t3wejn4hlfz7b",
+          "releaseDate": "2024-06-14"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rm%2016"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rm%2016"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5570616"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rkive/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

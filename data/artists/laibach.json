@@ -1,0 +1,115 @@
+[
+  {
+    "id": "laibach",
+    "name": "Laibach",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027726405_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://laibach.bandcamp.com",
+        "allReleaseTitles": [
+          "diekanonefeatbijelodugme",
+          "alamut",
+          "iwanttoknowwhatloveis",
+          "opusdeirevisited",
+          "laibachsilencewhitechristmaslaibachsilence",
+          "strangefruit",
+          "opusdeiremastereddeluxeedition",
+          "ironskythecomingrace",
+          "sketchesofthereddistricts",
+          "theengineofsurvival",
+          "loveisstillalive",
+          "thefuture",
+          "wirsinddasvolk",
+          "revisited",
+          "partysongs",
+          "weforgethefutureliveatreinasofia"
+        ],
+        "latestRelease": {
+          "title": "Die Kanone (feat. Bijelo Dugme)",
+          "type": "album",
+          "url": "https://laibach.bandcamp.com/album/die-kanone-feat-bijelo-dugme",
+          "imageUrl": "https://f4.bcbits.com/img/a0433579384_2.jpg",
+          "releaseDate": "July 29, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/laibach/69577",
+        "allReleaseTitles": [
+          "opusdeirevisited",
+          "alamut",
+          "strangefruit",
+          "loveisstillalive",
+          "yomkippur",
+          "opusdei",
+          "wirsinddasvolkeinmusicalausdeutschlandnachtextenvonheinermuller",
+          "diekanonefeatbijelodugme",
+          "thefuturefeatdonnamarinamartensson",
+          "otriglavmojdom",
+          "partysongs",
+          "iwanttoknowwhatloveis",
+          "whitechristmassilence",
+          "war",
+          "fedayeenfeatrtvsloveniasymphonyorchestragallinavocalgroupnavidgohari",
+          "lebenheisstleben",
+          "opusdeilive19871989pt3",
+          "geburteinernation",
+          "opusdeilive19871989pt1"
+        ],
+        "latestRelease": {
+          "title": "Yom Kippur Laibach",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/yom-kippur-laibach/ybq2bheninilc",
+          "releaseDate": "2025-10-23"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Laibach"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Laibach"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://mute.com/artists/laibach"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/25404"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Laibach&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Laibach"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/laibachofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@muterecords"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/laibach"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Laibach"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

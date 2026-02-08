@@ -1,0 +1,39 @@
+[
+  {
+    "id": "qobuz-gdragon1",
+    "name": "G Dragon 1",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/g-dragon-1/1315195",
+        "allReleaseTitles": [
+          "ubermensch",
+          "homesweethomefeattaeyangdaesungtaeyangdaesung",
+          "power",
+          "toobadalanwalkerremixandersonpaakalanwalker",
+          "goodday2025telepathybythemoonlightwindowhwangjungmindefconnhongjinkyungjeonghyungdonchosaehokian84anhsungjaetaeyangjunghaeinhwangkwangheeyimsiwanleesoohyukdaesungcodekunstclkimgoeunday6bssseventeenaespa"
+        ],
+        "latestRelease": {
+          "title": "Too Bad Alan Walker Remix G Dragon Anderson Paak Alan Walker",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/too-bad-alan-walker-remix-g-dragon-anderson-paak-alan-walker/o16oc2n3aoip5",
+          "releaseDate": "2025-12-20"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=G%20Dragon%201"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+G%20Dragon%201"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

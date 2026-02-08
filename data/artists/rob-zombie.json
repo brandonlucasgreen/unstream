@@ -1,0 +1,86 @@
+[
+  {
+    "id": "qobuz-robzombie",
+    "name": "Rob Zombie",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rob-zombie/47431",
+        "allReleaseTitles": [
+          "thelunarinjectionkoolaideclipseconspiracy",
+          "hellbillydeluxe",
+          "venomousratregenerationvendor",
+          "punksanddemons",
+          "thegreatsatan",
+          "spookshowinternationallive",
+          "thetriumphofkingfreakacryptofpreservationandsuperstition",
+          "educatedhorses",
+          "hellbillydeluxe2",
+          "thesinisterurge",
+          "helterskelterfeatmarilynmanson",
+          "pastpresentfuture",
+          "heathendays",
+          "theelectricwarlockacidwitchsatanicorgycelebrationdispenser",
+          "americanmademusictostripby",
+          "zombielive"
+        ],
+        "latestRelease": {
+          "title": "The Great Satan Rob Zombie",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-great-satan-rob-zombie/u3sy19fdf0v2b",
+          "releaseDate": "2026-02-27"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rob%20Zombie"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rob%20Zombie"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://robzombie.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/40026"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rob%20Zombie&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rob%20Zombie"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/robzombieofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@robzombie"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/robzombie"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@robzombieofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/RobZombie"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

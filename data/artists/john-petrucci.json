@@ -1,0 +1,69 @@
+[
+  {
+    "id": "qobuz-johnpetrucci",
+    "name": "John Petrucci",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/john-petrucci/238431",
+        "allReleaseTitles": [
+          "terminalvelocity",
+          "aneveningwithjordanrudessandjordanrudess",
+          "suspendedanimation"
+        ],
+        "latestRelease": {
+          "title": "Terminal Velocity John Petrucci",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/terminal-velocity-john-petrucci/y81l2dj5fg3ic",
+          "releaseDate": "2020-08-07"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=John%20Petrucci"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+John%20Petrucci"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://johnpetrucci.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/273938"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=John%20Petrucci&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/John%20Petrucci"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/johnpetrucciofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@johnpetrucciofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCBiULqAxCXbKcqv45bdXROw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/johnpetrucciFB"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

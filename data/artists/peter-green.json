@@ -1,0 +1,98 @@
+[
+  {
+    "id": "petergreen",
+    "name": "Peter Green,",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033538909_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/peter-green/83345",
+        "allReleaseTitles": [
+          "intheskies",
+          "supernaturalananthology",
+          "raritiesbobhalldannykirwanbobbrunningmickfleetwoodjoannkellydavekelly",
+          "thebestofsplintergroup",
+          "littledreamer",
+          "kolors",
+          "reachingthecold100",
+          "twogreensmakeabluesmickgreentheenemywithin",
+          "whatchagonnado",
+          "whitesky",
+          "troubleinmind",
+          "itsabouttimebrucebonnellandrewpelletierand",
+          "luxx",
+          "soulbird",
+          "souvenirschambermusicforflutehornpianobrucebonnellvieribottazziniand",
+          "veganuary",
+          "columnsofetheria"
+        ],
+        "latestRelease": {
+          "title": "Supernatural An Anthology Peter Green",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/supernatural-an-anthology-peter-green/tgtz9fxouiczb",
+          "releaseDate": "2007-04-16"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://petergreen.bandcamp.com"
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/PeterReads"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Peter%20Green%2C"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Peter%20Green%2C"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "soulbirdpetergreen",
+    "name": "Soulbird/Peter Green",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0021755618_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://soulbirdpetergreen.bandcamp.com",
+        "allReleaseTitles": [
+          "dyland",
+          "acushlaelectra",
+          "velvetbluespetergreensoulbird",
+          "sparkledust"
+        ],
+        "latestRelease": {
+          "title": "Dylan'd",
+          "type": "album",
+          "url": "https://soulbirdpetergreen.bandcamp.com/album/dyland",
+          "imageUrl": "https://f4.bcbits.com/img/a3142781863_16.jpg",
+          "releaseDate": "October 1, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Soulbird%2FPeter%20Green"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Soulbird%2FPeter%20Green"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

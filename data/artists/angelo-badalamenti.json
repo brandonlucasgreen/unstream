@@ -1,0 +1,118 @@
+[
+  {
+    "id": "qobuz-angelobadalamenti",
+    "name": "Angelo Badalamenti",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/angelo-badalamenti/3179",
+        "latestRelease": {
+          "title": "The Wicker Man Original Motion Picture Soundtrack Angelo Badalamenti",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-wicker-man-original-motion-picture-soundtrack-angelo-badalamenti/jugf7oa8byccc",
+          "releaseDate": "2008-09-12"
+        },
+        "allReleaseTitles": [
+          "soundtrackfromtwinpeaks",
+          "bluevelvet",
+          "twinpeaksseasontwomusicandmoredavidlynch",
+          "thewickermanoriginalmotionpicturesoundtrack",
+          "thestraightstoryoriginalmotionpicturesoundtrack",
+          "secretaryoriginalmotionpicturesoundtrack",
+          "anightmareonelmstreet3dreamwarriorsoriginalmotionpicturesoundtrack",
+          "musicforfilmandtelevisionbrusselsphilharmonictheorchestraofflandersdirkbrosse",
+          "boothandthebadangeltimbooth",
+          "averylongengagement",
+          "thechair",
+          "thecomfortofstrangers",
+          "heartbreaking",
+          "stalingradoriginalmotionpicturesoundtrack",
+          "beachedorbital",
+          "cousinsoriginalmotionpicturesoundtrack",
+          "alatequartetlequatuorbrentanostringquartet",
+          "darkwater",
+          "arlingtonroadsoundtrackfromthemotionpicture",
+          "44inchchest"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Angelo%20Badalamenti"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Angelo%20Badalamenti"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.angelo-badalamenti.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/10785"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Angelo%20Badalamenti&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Angelo%20Badalamenti"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/angelo.badalamenti.79"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-angelobadalament",
+    "name": "Angelo Badalament",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/angelo-badalament/21370177"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Angelo%20Badalament"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Angelo%20Badalament"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.angelo-badalamenti.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/10785"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Angelo%20Badalament&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Angelo%20Badalament"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/angelo.badalamenti.79"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

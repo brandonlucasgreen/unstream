@@ -1,0 +1,426 @@
+[
+  {
+    "id": "creed",
+    "name": "Creed",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030116006_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://creed.bandcamp.com",
+        "allReleaseTitles": [
+          "thebestofcreedremastered2025",
+          "onelastbreathatliensremixatliens",
+          "onelastbreathjojolorenzoremix",
+          "greatesthits",
+          "weathered",
+          "fullcircle",
+          "humanclay",
+          "myownprison"
+        ],
+        "latestRelease": {
+          "title": "The Best Of Creed (Remastered 2025)",
+          "type": "album",
+          "url": "https://creed.bandcamp.com/album/the-best-of-creed-remastered-2025",
+          "imageUrl": "https://f4.bcbits.com/img/a3537834332_2.jpg",
+          "releaseDate": "September 23, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Creed"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Creed"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.creed.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/261665"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Creed&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Creed"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/officialcreedpage/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@creedband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/CreedVEVO"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Creed"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "balefulcreed",
+    "name": "Baleful Creed",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0000231471_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://balefulcreed.bandcamp.com",
+        "allReleaseTitles": [
+          "thelowdown",
+          "seismicshifter",
+          "balefulcreed",
+          "iiiep",
+          "buriedbeneathep",
+          "killingtimeep"
+        ],
+        "latestRelease": {
+          "title": "The Lowdown",
+          "type": "album",
+          "url": "https://balefulcreed.bandcamp.com/album/the-lowdown",
+          "imageUrl": "https://f4.bcbits.com/img/a1341265670_2.jpg",
+          "releaseDate": "May 1, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Baleful%20Creed"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Baleful%20Creed"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.creed.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/261665"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Baleful%20Creed&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Baleful%20Creed"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/officialcreedpage/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@creedband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/CreedVEVO"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Creed"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "assassinscreedvalhalla",
+    "name": "Assassin's Creed Valhalla",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020882088_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://assassinscreedvalhalla.bandcamp.com",
+        "allReleaseTitles": [
+          "assassinscreedvalhallabloodfiretearsdawnofragnarokoriginalgamesoundtrackeinarselvik",
+          "assassinscreedvalhalladawnofragnarokoriginalgamesoundtrackstephanieeconomou",
+          "assassinscreedvalhalladawnofragnarokoriginalgamesoundtrackpreviewstephanieeconomou",
+          "assassinscreedvalhallathesiegeofparisoriginalgamesoundtrackstephanieeconomou",
+          "assassinscreedvalhallawrathofthedruidsoriginalgamesoundtrackmaxarujeinarselvik",
+          "assassinscreedvalhallasonsofthegreatnorthjesperkyd",
+          "assassinscreedvalhallatwilightofthegodssarahschachner",
+          "assassinscreedvalhallathewaveofgiantseinarselvik",
+          "assassinscreedvalhallaoriginalgamesoundtrackjesperkydsarahschachnereinarselvik",
+          "assassinscreedvalhallatheravenssagaoriginalsoundtrack",
+          "soulofamanffmremixkoda",
+          "rattleandrunvalhallaremix2wei",
+          "assassinscreedvalhallaoutofthenorthoriginalsoundtrack"
+        ],
+        "latestRelease": {
+          "title": "Assassin’s Creed Valhalla : Blood, Fire, Tears (Dawn of Ragnarök Original Game Soundtrack)\n                \n                \n\n                Einar Selvik",
+          "type": "album",
+          "url": "https://assassinscreedvalhalla.bandcamp.com/album/assassin-s-creed-valhalla-blood-fire-tears-dawn-of-ragnar-k-original-game-soundtrack",
+          "imageUrl": "https://f4.bcbits.com/img/a1845862922_2.jpg",
+          "releaseDate": "March 15, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Assassin's%20Creed%20Valhalla"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Assassin's%20Creed%20Valhalla"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.creed.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/261665"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Assassin's%20Creed%20Valhalla&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Assassin's%20Creed%20Valhalla"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/officialcreedpage/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@creedband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/CreedVEVO"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Creed"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "witcherscreed",
+    "name": "Witchers Creed",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0016012466_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://witcherscreed.bandcamp.com",
+        "allReleaseTitles": [
+          "awakenedfromthetomb2019",
+          "salemresurrection2018single",
+          "depthsoftheblackvoiddemo2017",
+          "witcherscreeddemo2017"
+        ],
+        "latestRelease": {
+          "title": "Awakened from the tomb... (2019)",
+          "type": "album",
+          "url": "https://witcherscreed.bandcamp.com/album/awakened-from-the-tomb-2019",
+          "imageUrl": "https://f4.bcbits.com/img/a0357646743_16.jpg",
+          "releaseDate": "February 22, 2019"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Witchers%20Creed"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Witchers%20Creed"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.creed.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/261665"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Witchers%20Creed&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Witchers%20Creed"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/officialcreedpage/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@creedband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/CreedVEVO"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Creed"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "martincreed",
+    "name": "Martin Creed",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0009536409_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://martincreed.bandcamp.com",
+        "allReleaseTitles": [
+          "allthesoundsonadrummachine",
+          "difficultthoughts",
+          "whatthefuckamidoing",
+          "blowandsuck",
+          "thoughtslinedup",
+          "mindtrap",
+          "lovetoyou"
+        ],
+        "latestRelease": {
+          "title": "All The Sounds On A Drum Machine",
+          "type": "album",
+          "url": "https://martincreed.bandcamp.com/album/all-the-sounds-on-a-drum-machine",
+          "imageUrl": "https://f4.bcbits.com/img/a3548915304_2.jpg",
+          "releaseDate": "January 30, 2019"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Martin%20Creed"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Martin%20Creed"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.creed.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/261665"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Martin%20Creed&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Martin%20Creed"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/officialcreedpage/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@creedband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/CreedVEVO"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Creed"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-creed",
+    "name": "Creed",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/creed/130720"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Creed"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Creed"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.creed.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/261665"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Creed&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Creed"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/officialcreedpage/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@creedband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/CreedVEVO"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Creed"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

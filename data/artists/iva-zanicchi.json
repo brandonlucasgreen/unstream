@@ -1,0 +1,86 @@
+[
+  {
+    "id": "qobuz-ivazanicchi",
+    "name": "Iva Zanicchi",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/iva-zanicchi/211570",
+        "allReleaseTitles": [
+          "caroaznavouriva",
+          "italianclassicscollectionvol1",
+          "remasters19661968",
+          "confessioni",
+          "italianclassicscollectionvol2",
+          "dontlooknoworiginalfilmsoundtrackpinodonaggio",
+          "ivasenzatempo",
+          "franoi",
+          "dolcefarnienteaclarkvinny",
+          "italianclassicswomensessantacaterinacaselliandmina",
+          "20secretosdeamor",
+          "iotipropongo",
+          "carotheodorakisiva",
+          "gargana",
+          "legiornatedellamore",
+          "coloridamore",
+          "",
+          "imieisuccessi",
+          "recitalatthefestivalthegoldenorpheus76accompanimentchildrenofthesunliveinbulgaria",
+          "rarities19631969"
+        ],
+        "latestRelease": {
+          "title": "Italian Classics Iva Zanicchi Collection Vol 1 Iva Zanicchi",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/italian-classics-iva-zanicchi-collection-vol-1-iva-zanicchi/ye5rr80a5betc",
+          "releaseDate": "2010-01-09"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Iva%20Zanicchi"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Iva%20Zanicchi"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.ivazanicchi.it/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/949064"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Iva%20Zanicchi&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Iva%20Zanicchi"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/ivazanicchireal/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@ivazanicchi"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCAOq26n7s4BuSD_phuaXNpw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sharer.php?u=https%3A%2F%2Fwww.ilgiornale.it%2Fnews%2Fspettacoli%2Fzanicchi-trattare-putin-manderei-merkel-2014790.html"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

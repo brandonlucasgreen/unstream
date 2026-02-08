@@ -1,0 +1,721 @@
+[
+  {
+    "id": "immortal",
+    "name": "Immortal",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030441054_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://immortal.bandcamp.com",
+        "allReleaseTitles": [
+          "waragainstall",
+          "northernchaosgods",
+          "theseventhdateofblashyrkh",
+          "allshallfall",
+          "sonsofnortherndarkness"
+        ],
+        "latestRelease": {
+          "title": "War Against All",
+          "type": "album",
+          "url": "https://immortal.bandcamp.com/album/war-against-all",
+          "imageUrl": "https://f4.bcbits.com/img/a2174810538_2.jpg",
+          "releaseDate": "May 26, 2023"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/ClashRecruiter"
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/immortal/146908",
+        "allReleaseTitles": [
+          "waragainstall",
+          "attheheartofwinter",
+          "northernchaosgods",
+          "sonsofnortherndarkness",
+          "damnedinblack",
+          "pureholocaust",
+          "battlesinthenorth",
+          "allshallfall",
+          "blizzardbeasts",
+          "theseventhdateofblashyrkh",
+          "nogoingback",
+          "blindbirds",
+          "maverickflexer",
+          "flowersonfire",
+          "goodmorningparanormalactividadorigamidragonsand",
+          "salutat",
+          "diamond",
+          "tooeasy",
+          "summernights",
+          "kickbass"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Immortal"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Immortal"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.immortalofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/206770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Immortal&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Immortal"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/immortalofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/immortal"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/immortalofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "immortalbird",
+    "name": "Immortal Bird",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0035765697_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://immortalbird.bandcamp.com",
+        "latestRelease": {
+          "title": "Live at Migration",
+          "type": "album",
+          "url": "https://immortalbird.bandcamp.com/album/live-at-migration",
+          "imageUrl": "https://f4.bcbits.com/img/a3996810585_2.jpg",
+          "releaseDate": "August 21, 2018"
+        },
+        "allReleaseTitles": [
+          "liveatmigration",
+          "empressabscess",
+          "akrasia"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Immortal%20Bird"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Immortal%20Bird"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.immortalofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/206770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Immortal%20Bird&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Immortal%20Bird"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/immortalofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/immortal"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/immortalofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "immortalonion",
+    "name": "Immortal Onion",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038951176_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://immortalonion.bandcamp.com",
+        "allReleaseTitles": [
+          "technaturalism",
+          "onionallaturca",
+          "thinium",
+          "screensmichajanximmortalonion",
+          "ausfahrtxd",
+          "xdexperiencedesign",
+          "ocelotofsalvationliveinsopot",
+          "agonysingleversion",
+          "ocelotofsalvation",
+          "bugaboo"
+        ],
+        "latestRelease": {
+          "title": "TECHNATURALISM",
+          "type": "album",
+          "url": "https://immortalonion.bandcamp.com/album/technaturalism-2",
+          "imageUrl": "https://f4.bcbits.com/img/a0152232921_2.jpg",
+          "releaseDate": "April 19, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Immortal%20Onion"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Immortal%20Onion"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.immortalofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/206770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Immortal%20Onion&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Immortal%20Onion"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/immortalofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/immortal"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/immortalofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "immortalfrostproductions",
+    "name": "Immortal Frost Productions",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013285555_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://digital.immortalfrostproductions.com",
+        "allReleaseTitles": [
+          "onrustdrawnintodescent",
+          "maleficnecropolissidious",
+          "vampyricwarinbloodbloedmaan",
+          "kletvathestone",
+          "theaphoticvortexasphagor",
+          "astimeretreatsfrostmooneclipse",
+          "swordofvengeancemara",
+          "nihilistmyrkvid",
+          "drowninginthedistortedlightthronumvrondor",
+          "arevelationofintoxicationantikvlt",
+          "purocarboncryfemal",
+          "undyingsplendouratravetosus",
+          "anotherfaceofhellalternateversionfrostmooneclipse",
+          "ofmourningpsychonaut4",
+          "thelurkingshadowofdeatharsveneficium",
+          "deadandforevergonealternateversionfrostmooneclipse"
+        ],
+        "latestRelease": {
+          "title": "Onrust\n                \n                \n\n                Drawn Into Descent",
+          "type": "album",
+          "url": "https://digital.immortalfrostproductions.com/album/onrust",
+          "imageUrl": "https://f4.bcbits.com/img/a2068318802_2.jpg"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Immortal%20Frost%20Productions"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Immortal%20Frost%20Productions"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.immortalofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/206770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Immortal%20Frost%20Productions&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Immortal%20Frost%20Productions"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/immortalofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/immortal"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/immortalofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "immortalguardian",
+    "name": "Immortal Guardian",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019058508_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://immortalguardian.bandcamp.com",
+        "allReleaseTitles": [
+          "uniteandconquer",
+          "riseofthephoenix",
+          "rootsrundeepfeatralphscheepers",
+          "perfectperson",
+          "southernrain",
+          "echoes",
+          "ozona",
+          "psychosomatic",
+          "ageofrevolution",
+          "revolutionpartiep",
+          "supermetaleditionzep"
+        ],
+        "latestRelease": {
+          "title": "Unite and Conquer",
+          "type": "album",
+          "url": "https://immortalguardian.bandcamp.com/album/unite-and-conquer",
+          "imageUrl": "https://f4.bcbits.com/img/a4023172980_2.jpg",
+          "releaseDate": "October 27, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Immortal%20Guardian"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Immortal%20Guardian"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.immortalofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/206770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Immortal%20Guardian&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Immortal%20Guardian"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/immortalofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/immortal"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/immortalofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "immortalgirlfriend",
+    "name": "Immortal Girlfriend",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036996210_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://immortalgirlfriend.bandcamp.com",
+        "allReleaseTitles": [
+          "finalbattlemonteasyimmortalgirlfriend",
+          "sojourner",
+          "moment",
+          "beamsiknowyouloveme",
+          "beyondtheblue",
+          "others",
+          "seeker",
+          "fridaynightfthaileyorionanddeeziebrownimmortalgirlfriendhaileyoriondeeziebrown",
+          "rideep",
+          "inmotion",
+          "ride",
+          "phantasm",
+          "summerdream",
+          "daybreakep"
+        ],
+        "latestRelease": {
+          "title": "Final Battle\n                \n                \n\n                Monteasy, Immortal Girlfriend",
+          "type": "track",
+          "url": "https://immortalgirlfriend.bandcamp.com/track/final-battle",
+          "imageUrl": "https://f4.bcbits.com/img/a1109558056_2.jpg",
+          "releaseDate": "December 20, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Immortal%20Girlfriend"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Immortal%20Girlfriend"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.immortalofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/206770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Immortal%20Girlfriend&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Immortal%20Girlfriend"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/immortalofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/immortal"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/immortalofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "immortalnightbody",
+    "name": "immortal nightbody",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036955775_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://immortalnightbody.bandcamp.com",
+        "allReleaseTitles": [
+          "ghostridethechariotimmortalnightbody",
+          "passionscale",
+          "blackonblackonblack",
+          "allfoursflexi",
+          "painispower",
+          "convictionark",
+          "nightlord",
+          "nightfool",
+          "tohatelikethisistobehappyforever",
+          "sublimeobjects",
+          "pastelpills",
+          "brownrecluse",
+          "realdemonhours"
+        ],
+        "latestRelease": {
+          "title": "GHOST RIDE THE CHARIOT\n                \n                \n\n                Immortal Nightbody",
+          "type": "album",
+          "url": "https://immortalnightbody.bandcamp.com/album/ghost-ride-the-chariot",
+          "imageUrl": "https://f4.bcbits.com/img/a3459754842_2.jpg",
+          "releaseDate": "August 24, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=immortal%20nightbody"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+immortal%20nightbody"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.immortalofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/206770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=immortal%20nightbody&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/immortal%20nightbody"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/immortalofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/immortal"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/immortalofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "thisimmortalcoil",
+    "name": "This Immortal Coil",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030039804_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thisimmortalcoil.bandcamp.com",
+        "allReleaseTitles": [
+          "thedarkageoflove",
+          "theworldendedalongtimeago",
+          "twistedbylovebonusalbum"
+        ],
+        "latestRelease": {
+          "title": "The Dark Age Of Love",
+          "type": "album",
+          "url": "https://thisimmortalcoil.bandcamp.com/album/the-dark-age-of-love",
+          "imageUrl": "https://f4.bcbits.com/img/a2431534689_2.jpg",
+          "releaseDate": "December 9, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=This%20Immortal%20Coil"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+This%20Immortal%20Coil"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.immortalofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/206770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=This%20Immortal%20Coil&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/This%20Immortal%20Coil"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/immortalofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/immortal"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/immortalofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "immortalsuffering",
+    "name": "Immortal Suffering",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033004046_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://immortalsuffering.bandcamp.com",
+        "allReleaseTitles": [
+          "extremetorture",
+          "conceivedinacrackhousesingle",
+          "preyedupon",
+          "asylum",
+          "imagesofhorror2020mastered"
+        ],
+        "latestRelease": {
+          "title": "Extreme Torture",
+          "type": "album",
+          "url": "https://immortalsuffering.bandcamp.com/album/extreme-torture",
+          "imageUrl": "https://f4.bcbits.com/img/a4006175534_2.jpg",
+          "releaseDate": "July 21, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Immortal%20Suffering"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Immortal%20Suffering"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.immortalofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/206770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Immortal%20Suffering&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Immortal%20Suffering"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/immortalofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/immortal"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/immortalofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-immortal3",
+    "name": "Immortal 3",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/immortal-3/12816710"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Immortal%203"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Immortal%203"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.immortalofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/206770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Immortal%203&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Immortal%203"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/immortalofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/immortal"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/immortalofficial"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

@@ -1,0 +1,187 @@
+[
+  {
+    "id": "qobuz-giorgiomoroder",
+    "name": "Giorgio Moroder",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/giorgio-moroder/15053",
+        "latestRelease": {
+          "title": "Mb Disco Archives Giorgio Moroders Iconic Era Vol 1 Giorgio Moroder",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/mb-disco-archives-giorgio-moroders-iconic-era-vol-1-giorgio-moroder/azsujrsdynyja",
+          "releaseDate": "2024-11-15"
+        },
+        "allReleaseTitles": [
+          "scarfaceexpandedmotionpicturesoundtrack",
+          "righthererightnow",
+          "mbdiscoarchivessiconiceravol1",
+          "queenofthesouthoriginalseriessoundtrackraneyshockne",
+          "innovisions",
+          "mbdiscopresents",
+          "extendedversions2025",
+          "mbdiscoarchivessiconiceravol2",
+          "iwannarockyou",
+          "fromheretoeternity",
+          "iwannarockyoujamielewisfarleyjackmasterfunkand",
+          "midnightexpress",
+          "catpeople",
+          "theneverendingstoryklausdoldinger",
+          "fromheretoeternityandback",
+          "knightsinwhitesatin",
+          "tomsdiner",
+          "righthererightnowfeatkylieminogue",
+          "philipoakeyphilipoakey",
+          "dejavudeluxe"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Giorgio%20Moroder"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Giorgio%20Moroder"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.giorgiomoroder.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4205"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Giorgio%20Moroder&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Giorgio%20Moroder"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/giorgiomoroder/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCKyprH9nHK8gUNMJK2ulnRQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/GiorgioMoroderOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "giorgiomoroderraneyshockne",
+    "name": "Giorgio Moroder & Raney Shockne",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013836762_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://giorgiomoroder-raneyshockne.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Giorgio%20Moroder%20%26%20Raney%20Shockne"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Giorgio%20Moroder%20%26%20Raney%20Shockne"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.giorgiomoroder.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4205"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Giorgio%20Moroder%20%26%20Raney%20Shockne&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Giorgio%20Moroder%20%26%20Raney%20Shockne"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/giorgiomoroder/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCKyprH9nHK8gUNMJK2ulnRQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/GiorgioMoroderOfficial"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-giorgiomoroder1",
+    "name": "Giorgiomoroder 1",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/giorgiomoroder-1/10914362"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Giorgiomoroder%201"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Giorgiomoroder%201"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.giorgiomoroder.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4205"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Giorgiomoroder%201&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Giorgiomoroder%201"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/giorgiomoroder/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCKyprH9nHK8gUNMJK2ulnRQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/GiorgioMoroderOfficial"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

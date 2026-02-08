@@ -1,0 +1,411 @@
+[
+  {
+    "id": "duffy",
+    "name": "Duffy",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0034012902_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/duffy/40156",
+        "allReleaseTitles": [
+          "staydown",
+          "catinthebag016midnightdubs",
+          "5guys",
+          "pesosintheduffledeluxeotmbluepesos",
+          "vault",
+          "chosen",
+          "passatudo",
+          "peopleselbowbluepesos",
+          "rockferry",
+          "justincaseyoureinterested",
+          "rockferrydeluxeep",
+          "mercythegame",
+          "hallucinations",
+          "2hoesketchyflowotmbluepesos",
+          "wipemedownfreestyle",
+          "comeandgobluepesos",
+          "droughtmademe",
+          "water"
+        ],
+        "latestRelease": {
+          "title": "Cat In The Bag 016 Duffy Midnight Dubs",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/cat-in-the-bag-016-duffy-midnight-dubs/iktopfgi69axk",
+          "releaseDate": "2026-01-09"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://1duffy.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Duffy"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Duffy"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.iamduffy.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/79081"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Duffy&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Duffy"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/duffy/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/iamduffytv"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Duffy"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "grainneduffy",
+    "name": "Grainne Duffy",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031360457_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://grainne-duffy.bandcamp.com",
+        "allReleaseTitles": [
+          "dirtwomanblues",
+          "voodooblues"
+        ],
+        "latestRelease": {
+          "title": "Dirt Woman Blues",
+          "type": "album",
+          "url": "https://grainne-duffy.bandcamp.com/album/dirt-woman-blues",
+          "imageUrl": "https://f4.bcbits.com/img/a3248925587_16.jpg",
+          "releaseDate": "May 19, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Grainne%20Duffy"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Grainne%20Duffy"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.iamduffy.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/79081"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Grainne%20Duffy&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Grainne%20Duffy"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/duffy/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/iamduffytv"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Duffy"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "nickduffy",
+    "name": "Nick Duffy",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0023260366_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://nickduffy.bandcamp.com",
+        "allReleaseTitles": [
+          "theradiohamversion",
+          "fateandferret",
+          "alibifornightie",
+          "frass",
+          "beanpolesuit",
+          "vespermouse",
+          "fishstory",
+          "teldra",
+          "pipecleaner",
+          "persimmoncowboy",
+          "shinbark",
+          "batonrompus",
+          "theradioham",
+          "addenda",
+          "originalsupermango",
+          "sapphirestylusnickduffythelilactime",
+          "thetreemuseum",
+          "thedaddyotrilogynickduffyangelinemorrison",
+          "simulacrasideonetheep",
+          "legsakimbo"
+        ],
+        "latestRelease": {
+          "title": "The Radio Ham - version",
+          "type": "track",
+          "url": "https://nickduffy.bandcamp.com/track/the-radio-ham-version",
+          "imageUrl": "https://f4.bcbits.com/img/a2991647596_2.jpg",
+          "releaseDate": "December 11, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Nick%20Duffy"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Nick%20Duffy"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.iamduffy.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/79081"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Nick%20Duffy&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Nick%20Duffy"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/duffy/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/iamduffytv"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Duffy"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "aidanduffy",
+    "name": "Aidan Duffy",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0042352829_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://aidanduffy.bandcamp.com",
+        "allReleaseTitles": [
+          "partii",
+          "west",
+          "holdingon",
+          "nature",
+          "plutosaloonearlyversion",
+          "thevoicefeatshannyandrobcarlile",
+          "feel",
+          "theroad",
+          "lookaidanduffyemmetoconnorandshannondoyle",
+          "tryaidanduffyandemmetoconnor",
+          "theoptimist",
+          "words",
+          "solidgold"
+        ],
+        "latestRelease": {
+          "title": "Part II",
+          "type": "album",
+          "url": "https://aidanduffy.bandcamp.com/album/part-ii",
+          "imageUrl": "https://f4.bcbits.com/img/a3234582994_2.jpg",
+          "releaseDate": "January 30, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Aidan%20Duffy"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Aidan%20Duffy"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.iamduffy.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/79081"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Aidan%20Duffy&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Aidan%20Duffy"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/duffy/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/iamduffytv"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Duffy"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "duffyxuhlmann",
+    "name": "Duffy x Uhlmann",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032247582_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://duffyuhlmann.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Duffy%20x%20Uhlmann"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Duffy%20x%20Uhlmann"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.iamduffy.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/79081"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Duffy%20x%20Uhlmann&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Duffy%20x%20Uhlmann"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/duffy/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/iamduffytv"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Duffy"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-duffy5",
+    "name": "Duffy 5",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/duffy-5/23832236"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Duffy%205"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Duffy%205"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.iamduffy.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/79081"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Duffy%205&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Duffy%205"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/duffy/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/iamduffytv"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Duffy"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

@@ -1,0 +1,83 @@
+[
+  {
+    "id": "qobuz-markronson2",
+    "name": "Mark Ronson 2",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/mark-ronson-2/678492",
+        "allReleaseTitles": [
+          "suzanneraye",
+          "uptownspecial",
+          "nothingbreakslikeaheartfeatmileycyrus",
+          "espressosabrinacarpenter",
+          "latenightfeelings",
+          "uptownfunk",
+          "barbiescorefromtheoriginalmotionpicturesoundtrackandrewwyatt",
+          "feelright",
+          "imjustkenryangosling",
+          "birdcallingdamonalbarnwale",
+          "daffodils",
+          "rumoreraffaellacarramarlonhoffstadtandrewwyatt",
+          "version",
+          "uptownfunkremixesfeatbrunomars",
+          "kentheepryangosling",
+          "toomuchfeatluckydaye",
+          "oohweeinternetsingle"
+        ],
+        "latestRelease": {
+          "title": "Suzanne Mark Ronson Raye",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/suzanne-mark-ronson-raye/wqw1xi3m5u4kb",
+          "releaseDate": "2025-07-11"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mark%20Ronson%202"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mark%20Ronson%202"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.markronson.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/151634"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Mark%20Ronson%202&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Mark%20Ronson%202"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/iammarkronson/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@markronson"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCmfFGTSsfJVu6CGvL8r75qg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/20253701872"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

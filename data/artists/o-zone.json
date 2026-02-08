@@ -1,0 +1,412 @@
+[
+  {
+    "id": "ozonethedon",
+    "name": "O-Zone The Don",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011656778_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ozonethedon.bandcamp.com",
+        "allReleaseTitles": [
+          "thestreetalbum",
+          "painistemporary",
+          "notgonebutforgotten2underrated",
+          "waterballoongamesvol1",
+          "portraitofamusicanozonejmillion",
+          "revengeofthecrackepidemic",
+          "ozonethemauryshowhostedbydjcosthekid"
+        ],
+        "latestRelease": {
+          "title": "The Street Album",
+          "type": "album",
+          "url": "https://ozonethedon.bandcamp.com/album/the-street-album-2",
+          "imageUrl": "https://f4.bcbits.com/img/a2909779199_2.jpg",
+          "releaseDate": "September 16, 2016"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=O-Zone%20The%20Don"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+O-Zone%20The%20Don"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.o-zone.go.ro/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/156977"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=O-Zone%20The%20Don&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/O-Zone%20The%20Don"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCMLsQRDF0nC-i7fJib5QNjA"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-ozone",
+    "name": "O Zone",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/o-zone/223077",
+        "allReleaseTitles": [
+          "disc",
+          "dragosteadintei",
+          "number1reedit",
+          "mayahidragosteadintei",
+          "bestofwhattheydidlastsummer",
+          "sarbatoareanoptilordevara"
+        ],
+        "latestRelease": {
+          "title": "Dragostea Din Tei O Zone",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/dragostea-din-tei-o-zone/kboi31jxoo5vb",
+          "releaseDate": "2024-03-08"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=O%20Zone"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+O%20Zone"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.o-zone.go.ro/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/156977"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=O%20Zone&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/O%20Zone"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCMLsQRDF0nC-i7fJib5QNjA"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-ozone3",
+    "name": "Ozone 3",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ozone-3/6374895",
+        "allReleaseTitles": [
+          "koloncarlyjayskee"
+        ],
+        "latestRelease": {
+          "title": "Kolon Ozone Carly Jay Skee",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/kolon-ozone-carly-jay-skee/e8bkmv9xheksc",
+          "releaseDate": "2019-03-29"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ozone%203"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ozone%203"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.o-zone.go.ro/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/156977"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ozone%203&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ozone%203"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCMLsQRDF0nC-i7fJib5QNjA"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-ozone5",
+    "name": "Ozone 5",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ozone-5/19436611",
+        "allReleaseTitles": [
+          "unf",
+          "diaryofadrippykid",
+          "baller",
+          "songwarsr1",
+          "go",
+          "rangers",
+          "gottago",
+          "flexlikeme",
+          "zooweemama",
+          "punchyflow",
+          "getrichordiepluggin",
+          "swervedit",
+          "430",
+          "tandard",
+          "e30",
+          "lemon",
+          "workthemlegs",
+          "alwaysunf",
+          "00hitman",
+          "bigwyam"
+        ],
+        "latestRelease": {
+          "title": "Unf Ozone",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/unf-ozone/zlz7e5ygp5024",
+          "releaseDate": "2026-01-09"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ozone%205"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ozone%205"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.o-zone.go.ro/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/156977"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ozone%205&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ozone%205"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCMLsQRDF0nC-i7fJib5QNjA"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-ozone815",
+    "name": "Ozone815",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ozone815/9463364",
+        "allReleaseTitles": [
+          "hallucinaterollupthedope",
+          "actinright",
+          "actinrightremixfeatkinglouieradioedit",
+          "actinrightfeatkinglouieremix",
+          "815comeup",
+          "actinrightradioedit",
+          "zonedout",
+          "whenudroppin",
+          "badepmcpaulbrouampampthedeviator",
+          "whenyoudroppin2",
+          "crookedcrownii",
+          "trufflefriesfeatdflowflore",
+          "zonedoutdeluxe",
+          "idkfeatmcpaulbrou",
+          "cruisecontrol",
+          "upnotdown"
+        ],
+        "latestRelease": {
+          "title": "Actin Right Remix Feat King Louie Radio Edit Ozone815",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/actin-right-remix-feat-king-louie-radio-edit-ozone815/utvwbm0sfxlra",
+          "releaseDate": "2022-07-07"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ozone815"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ozone815"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.o-zone.go.ro/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/156977"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ozone815&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ozone815"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCMLsQRDF0nC-i7fJib5QNjA"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-ozone09",
+    "name": "Ozone 09",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ozone-09/28037445",
+        "allReleaseTitles": [
+          "samaj",
+          "kamremaiband"
+        ],
+        "latestRelease": {
+          "title": "Samaj Ozone 09",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/samaj-ozone-09/odukdvm3ysieb",
+          "releaseDate": "2025-09-12"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ozone%2009"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ozone%2009"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.o-zone.go.ro/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/156977"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ozone%2009&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ozone%2009"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCMLsQRDF0nC-i7fJib5QNjA"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-ozone6",
+    "name": "Ozone 6",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ozone-6/29725604"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ozone%206"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ozone%206"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.o-zone.go.ro/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/156977"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ozone%206&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ozone%206"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCMLsQRDF0nC-i7fJib5QNjA"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

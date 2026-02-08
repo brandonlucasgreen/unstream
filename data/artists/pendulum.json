@@ -1,0 +1,538 @@
+[
+  {
+    "id": "silentpendulumrecords",
+    "name": "Silent Pendulum Records",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033630111_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://silentpendulumrecords.bandcamp.com",
+        "allReleaseTitles": [
+          "legaciesofhumanfrailtywoe",
+          "quantotsapaguisyberia",
+          "unfathomablemutagenicabominationsinfestuous",
+          "pastfuturestoothless",
+          "thecurseofcareknowsuffer",
+          "feralbore",
+          "proxysolshade",
+          "sonderlossbecomes",
+          "athinlinebetweenheavenandheremybitterend",
+          "nostalgicsentiments",
+          "genesisoferrorcryptodira",
+          "damageddreamheavyhalo",
+          "healismusaeternuscrossbringer",
+          "bottomfeedercyborgoctopus",
+          "thehivemindchroniclespartiparasiticaexuvial",
+          "toclaspafallenwishwithbrokenfingerssohideous"
+        ],
+        "latestRelease": {
+          "title": "Legacies of Human Frailty\n                \n                \n\n                Woe",
+          "type": "album",
+          "url": "https://silentpendulumrecords.bandcamp.com/album/legacies-of-human-frailty",
+          "imageUrl": "https://f4.bcbits.com/img/a2561683639_2.jpg",
+          "releaseDate": "January 1, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Silent%20Pendulum%20Records"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Silent%20Pendulum%20Records"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.pendulum.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/134038"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Silent%20Pendulum%20Records&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Silent%20Pendulum%20Records"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/pendulum/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCP2uxfZ9lfeqY2nkUkoPtvg"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@pendulum"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pendulum"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "rawpendulum",
+    "name": "Raw Pendulum",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031418190_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rawpendulum.bandcamp.com",
+        "allReleaseTitles": [
+          "eclipseandreariffo",
+          "worrymenowroax",
+          "bodyshadowhder",
+          "rpva003variousartists",
+          "crossingthelinejaspe",
+          "midnightsuninnexen",
+          "maskbajo",
+          "dustbrnk",
+          "farawayakz",
+          "functionpapeer",
+          "rpva002variousartists",
+          "resonancevivez",
+          "irreversiblebondarukjaspe",
+          "fusionheliosphere",
+          "allclearian",
+          "maasaikrow"
+        ],
+        "latestRelease": {
+          "title": "Eclipse\n                \n                \n\n                Andrea Riffo",
+          "type": "album",
+          "url": "https://rawpendulum.bandcamp.com/album/eclipse",
+          "imageUrl": "https://f4.bcbits.com/img/a2564636980_2.jpg",
+          "releaseDate": "October 16, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Raw%20Pendulum"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Raw%20Pendulum"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.pendulum.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/134038"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Raw%20Pendulum&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Raw%20Pendulum"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/pendulum/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCP2uxfZ9lfeqY2nkUkoPtvg"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@pendulum"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pendulum"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "pendulumindonesia",
+    "name": "Pendulum (Indonesia)",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0005268197_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://pendulum.bandcamp.com",
+        "allReleaseTitles": [
+          "dialogturikaliandraearlpramudjie",
+          "hypnotize",
+          "progpaganda1turiikaliandramichaellaquaisrizkinawawirizdhaniakhirin",
+          "progpaganda2",
+          "legenda",
+          "childhoodturikaliandra"
+        ],
+        "latestRelease": {
+          "title": "DIALOG\n                \n                \n\n                TURI KALIANDRA & EARL PRAMUDJIE",
+          "type": "track",
+          "url": "https://pendulum.bandcamp.com/track/dialog",
+          "imageUrl": "https://f4.bcbits.com/img/a1816416957_2.jpg",
+          "releaseDate": "May 7, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Pendulum%20(Indonesia)"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Pendulum%20(Indonesia)"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.pendulum.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/134038"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Pendulum%20(Indonesia)&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Pendulum%20(Indonesia)"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/pendulum/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCP2uxfZ9lfeqY2nkUkoPtvg"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@pendulum"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pendulum"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "eccentricpendulum",
+    "name": "Eccentric Pendulum",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036213470_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://eccentricpendulum.bandcamp.com",
+        "allReleaseTitles": [
+          "liveatprogencounters3livebootleg2025",
+          "perspectivainvertalis",
+          "tellurianconcepts",
+          "resistinganotherequationeccentricpendulum",
+          "windingswrlivebootleg2012",
+          "windingtheoptics",
+          "thesculptorofnegativeemotions"
+        ],
+        "latestRelease": {
+          "title": "Live at Prog Encounters 3 [LIVE BOOTLEG 2025]",
+          "type": "album",
+          "url": "https://eccentricpendulum.bandcamp.com/album/live-at-prog-encounters-3-live-bootleg-2025",
+          "imageUrl": "https://f4.bcbits.com/img/a3813611356_2.jpg",
+          "releaseDate": "April 20, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Eccentric%20Pendulum"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Eccentric%20Pendulum"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.pendulum.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/134038"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Eccentric%20Pendulum&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Eccentric%20Pendulum"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/pendulum/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCP2uxfZ9lfeqY2nkUkoPtvg"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@pendulum"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pendulum"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "pendulumrecordings",
+    "name": "Pendulum Recordings",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027681471_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://pendulumrecordings.bandcamp.com",
+        "allReleaseTitles": [
+          "abysselixirzoemcpherson",
+          "stasisciarrablack"
+        ],
+        "latestRelease": {
+          "title": "Abyss Elixir\n                \n                \n\n                Zoë Mc Pherson",
+          "type": "album",
+          "url": "https://pendulumrecordings.bandcamp.com/album/abyss-elixir",
+          "imageUrl": "https://f4.bcbits.com/img/a2987150025_16.jpg",
+          "releaseDate": "March 15, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Pendulum%20Recordings"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Pendulum%20Recordings"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.pendulum.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/134038"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Pendulum%20Recordings&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Pendulum%20Recordings"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/pendulum/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCP2uxfZ9lfeqY2nkUkoPtvg"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@pendulum"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pendulum"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "pendulummanconcerts",
+    "name": "Pendulum Man Concerts",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3743318939_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://pendulummanconcerts.bandcamp.com",
+        "allReleaseTitles": [
+          "younglighttheelectriccircus27thnovember2013",
+          "gigarchivefieldheadasunamissanowwakestheseabansheelabyrinth27thapril2013",
+          "gigarchivememorydrawingschristenztalvihorrosbansheelabyrinth10thfebruary2013",
+          "gigarchivematthewcollingssplinteredinstrumentsalbumlaunchtalvihorroshivaoasolosetweeredbar24thnovember2012",
+          "gigarchivefieldheadanakanaktheapplesofenergythethirddoor20thoctober2012",
+          "gigarchiveaunthisquietarmyblackislecorpushivaoaacousticbansheelabyrinth14thoctober2012",
+          "gigarchivehivaoaalbumlaunchadamstaffordkyleeevansmotoinspace22ndseptember2012",
+          "gigarchiveamusementparksonfirenightmareairconvexmancavesneakypetes2ndseptember2012",
+          "gigarchivemichaelfeerickamusementparksonfirenowwakestheseafuzzystarconvexmancavebansheelabyrinth11thjuly2012",
+          "gigarchivetherustleofthestarsjaspertxmatthewcollingsweeredbar11thapril2012",
+          "gigarchivethejapanesewarefforttenconvexmancavebansheelabyrinth7thapril2012",
+          "gigarchiverobstjohnhivaoacheerbansheelabyrinth18thfebruary2012",
+          "gigarchivetheboatsgraveyardtapeschristenzatbansheelabyrinth27thoctober2011",
+          "gigarchivemichaelfeerickamusementparksonfirematthewcollingsdebutantweeredbar16thoctober2011"
+        ],
+        "latestRelease": {
+          "title": "YOUNG LIGHT - The Electric Circus, 27th November 2013",
+          "type": "album",
+          "url": "https://pendulummanconcerts.bandcamp.com/album/young-light-the-electric-circus-27th-november-2013",
+          "imageUrl": "https://f4.bcbits.com/img/a3743318939_2.jpg",
+          "releaseDate": "October 21, 2013"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Pendulum%20Man%20Concerts"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Pendulum%20Man%20Concerts"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.pendulum.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/134038"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Pendulum%20Man%20Concerts&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Pendulum%20Man%20Concerts"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/pendulum/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCP2uxfZ9lfeqY2nkUkoPtvg"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@pendulum"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pendulum"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-pendulum",
+    "name": "Pendulum",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/pendulum/328458",
+        "allReleaseTitles": [
+          "inertia",
+          "soundofyouarminvanbuurenrobswire",
+          "immersion",
+          "insilico",
+          "holdyourcolour",
+          "elemental",
+          "anima",
+          "antihero",
+          "napalmjoeyvalencebrae",
+          "halobulletformyvalentine",
+          "thereworks",
+          "cannibalwargasmuk",
+          "halobulletformyvalentineurbandawn",
+          "colourfast",
+          "guidinglightsawolnation"
+        ],
+        "latestRelease": {
+          "title": "Inertia Pendulum",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/inertia-pendulum/po3u20ecymhca",
+          "releaseDate": "2025-08-22"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Pendulum"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Pendulum"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.pendulum.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/134038"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Pendulum&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Pendulum"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/pendulum/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCP2uxfZ9lfeqY2nkUkoPtvg"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@pendulum"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pendulum"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

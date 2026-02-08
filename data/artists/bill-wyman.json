@@ -1,0 +1,77 @@
+[
+  {
+    "id": "qobuz-billwyman",
+    "name": "Bill Wyman",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/bill-wyman/71495",
+        "allReleaseTitles": [
+          "drivemycar",
+          "demos",
+          "backtobasics",
+          "",
+          "sisijesuisunrockstarthebestofsrhythmkingsbillwymanbillwymansrhythmkingswillieandthepoorboys",
+          "greatest",
+          "whitelightninthesoloboxaudioversion",
+          "monkeygripdeluxe",
+          "stonealonedeluxeedition",
+          "monkeygrip",
+          "stonealone",
+          "deluxeedition",
+          "greenice",
+          "stuff",
+          "stuffdeluxeedition"
+        ],
+        "latestRelease": {
+          "title": "Demos Bill Wyman",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/demos-bill-wyman/aab0c4kg6leub",
+          "releaseDate": "2025-12-12"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bill%20Wyman"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bill%20Wyman"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://billwyman.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/272814"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Bill%20Wyman&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Bill%20Wyman"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/bill_wyman_official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCqkxW2NrqitGvLC4MlT2RuA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/BillWymanOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

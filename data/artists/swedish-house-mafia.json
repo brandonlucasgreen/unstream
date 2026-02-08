@@ -1,0 +1,76 @@
+[
+  {
+    "id": "qobuz-swedishhousemafia",
+    "name": "Swedish House Mafia",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/swedish-house-mafia/353519",
+        "allReleaseTitles": [
+          "waitsolongwhydoihaveto",
+          "paradiseagain",
+          "mothtoaflametheweeknd",
+          "turnonthelightsagainfeatfuturefredagainx",
+          "finallyaliciakeys",
+          "dontyouworrychildjohnmartin",
+          "lionessnikithedove",
+          "paradiseagainthelivealbum",
+          "heaventakesyouhomeconnieconstance",
+          "rayofsolar",
+          "mothtoaflameadriatiquetheweeknd",
+          "mothtoaflametheweekndmoojo",
+          "lionessfrancismerciernikithedove",
+          "mothtoaflametheweekndchrislake",
+          "heaventakesyouhomeconnieconstance",
+          "waitsolongwhydoihavetoremindremix",
+          "onesymphonyjacobmuhlrad",
+          "canufeelit"
+        ],
+        "latestRelease": {
+          "title": "Wait So Long Why Do I Have To Swedish House Mafia",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/wait-so-long-why-do-i-have-to-swedish-house-mafia/lxj0m7hec521a",
+          "releaseDate": "2025-06-20"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Swedish%20House%20Mafia"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Swedish%20House%20Mafia"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.swedishhousemafia.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1801598"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/swedishhousemafia/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@swedishhousemafia"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC5HEq5U--O5nn134mizyCcw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/swedishhousemafia"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "qobuz-khatiabuniatishvili",
+    "name": "Khatia Buniatishvili",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/khatia-buniatishvili/584974",
+        "allReleaseTitles": [
+          "labyrinth",
+          "mozartpianoconcertosnos2023academyofstmartininthefields",
+          "rachmaninoffpianoconcertono2incminorop18pianoconcertono3indminorop30",
+          "chopinworksforpiano",
+          "schubert",
+          "kaleidoscopemussorgskyravelstravinsky",
+          "labyrinthephemera",
+          "franckviolinsonatafwv8dvorakromanticpiecesop75renaudcapucon",
+          "deborahsthemefromonceuponatimeinamerica",
+          "bachpreludeinbminorbwv855aarrbyalexandersiloti",
+          "thedeparturemaintitlethemefromtheleftoversmusicfromthehboseries",
+          "rachmaninoffpreludeingsharpminorop32no12",
+          "tchaikovskyvalsesentimentale",
+          "chopinnocturneop27no2",
+          "kinderszenenop15viitraumerei",
+          "motherland",
+          "franzliszt",
+          "liszt",
+          "kissinetchaikovskypianotriosgidonkremergiedredirvanauskaite",
+          "ivrygitlisinverbieritamargolanivrygitlismarthaargerich"
+        ],
+        "latestRelease": {
+          "title": "Mozart Piano Concertos Nos 20 23 Khatia Buniatishvili Academy Of St Martin In The Fields",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/mozart-piano-concertos-nos-20-23-khatia-buniatishvili-academy-of-st-martin-in-the-fields/hbjzxlctl3wgb",
+          "releaseDate": "2024-10-25"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Khatia%20Buniatishvili"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Khatia%20Buniatishvili"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.khatiabuniatishvili.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2272449"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Khatia%20Buniatishvili&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Khatia%20Buniatishvili"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/khatiabuniatishvili/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/@KhatiaBuniatishVEVO"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/khatia.buniatishvili"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

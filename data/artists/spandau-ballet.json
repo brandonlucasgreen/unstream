@@ -1,0 +1,81 @@
+[
+  {
+    "id": "qobuz-spandauballet",
+    "name": "Spandau Ballet",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/spandau-ballet/67336",
+        "allReleaseTitles": [
+          "true",
+          "gold",
+          "everythingisnowvol119781982",
+          "illflyforyou",
+          "communication",
+          "throughthebarricades",
+          "atliveaid",
+          "lifeline",
+          "highlystrung",
+          "glow",
+          "goldthebestof",
+          "onlywhenyouleave",
+          "thefreeze",
+          "chantno1idontneedthispressureon",
+          "thealbums198084",
+          "parade",
+          "journeystoglory",
+          "diamond",
+          "heartlikeasky"
+        ],
+        "latestRelease": {
+          "title": "Everything Is Now Vol 1 1978 1982 Spandau Ballet",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/everything-is-now-vol-1-1978-1982-spandau-ballet/ej09wnpcex5lb",
+          "releaseDate": "2025-10-10"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Spandau%20Ballet"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Spandau%20Ballet"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.spandauballet.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/66253"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Spandau%20Ballet&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Spandau%20Ballet"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/spandauballet/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/OfficialSpandau"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/spandauballet"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

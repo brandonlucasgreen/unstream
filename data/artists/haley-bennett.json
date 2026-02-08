@@ -1,0 +1,40 @@
+[
+  {
+    "id": "haleybennett",
+    "name": "Haley Bennett",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013623908_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/haley-bennett/513539",
+        "allReleaseTitles": [
+          "someonetosayaarondessnerbrycedessnerlondoncontemporaryorchestravikingurolafsson"
+        ],
+        "latestRelease": {
+          "title": "Someone To Say Aaron Dessner Bryce Dessner Haley Bennett London Contemporary Orchestra Vikingur Olafsson",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/someone-to-say-aaron-dessner-bryce-dessner-haley-bennett-london-contemporary-orchestra-vikingur-olafsson/dn1a2oi5hu2db",
+          "releaseDate": "2021-10-08"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bandcamp.com/hbenn55"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Haley%20Bennett"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Haley%20Bennett"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

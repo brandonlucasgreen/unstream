@@ -1,0 +1,79 @@
+[
+  {
+    "id": "qobuz-ti3",
+    "name": "T I 3",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/t-i-3/458047",
+        "allReleaseTitles": [
+          "letemknow",
+          "paperwork",
+          "thelibra",
+          "apemodefeatdagreatape",
+          "theydontnastyc",
+          "mundaontherisedannyzeealizafarand",
+          "solsceeptip",
+          "abip",
+          "urbanlegend",
+          "papertrail",
+          "king",
+          "trapmuzik",
+          "troublemanheavyisthehead",
+          "memoriesbackthenfeatbobkendricklamarandkrisstephens",
+          "imserious",
+          "offsetyoungthug",
+          "thankgodfeatyoungdrokirkfranklinsundayservicechoir"
+        ],
+        "latestRelease": {
+          "title": "Let Em Know Ti",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/let-em-know-ti/rsb39zmnuc1k0",
+          "releaseDate": "2026-01-18"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=T%20I%203"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+T%20I%203"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.trapmuzik.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/180140"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=T%20I%203&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/T%20I%203"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/troubleman31/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCq2QQO2WR5wz2IfLwt3SYfw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/TI"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

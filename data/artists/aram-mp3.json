@@ -1,0 +1,70 @@
+[
+  {
+    "id": "qobuz-arammp3",
+    "name": "Aram Mp3",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/aram-mp3/1703568",
+        "latestRelease": {
+          "title": "Lsir Aram Mp3",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/lsir-aram-mp3/c60wz2vem916b",
+          "releaseDate": "2023-02-11"
+        },
+        "allReleaseTitles": [
+          "kochari",
+          "khamozem",
+          "lsir",
+          "kuzes",
+          "hanina",
+          "heriqeghav",
+          "sirohasak",
+          "veruvar",
+          "asa",
+          "alabalanica",
+          "arevsarotovmasyan",
+          "shatapresyerevan",
+          "amareyerevanumgarikmartirosyan",
+          "youremysunshine",
+          "requiemforsh",
+          "shine",
+          "herostgherqaramemihrantsarukyanaraboispiryanmkrticharzumanyanarsensafaryan",
+          "help",
+          "ifitried",
+          "sksumenq"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Aram%20Mp3"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Aram%20Mp3"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3800925"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/aram_mp3/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC8NGHNySIDxX2RD80PRl7aQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/AramMp3Official"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

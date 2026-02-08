@@ -1,0 +1,39 @@
+[
+  {
+    "id": "qobuz-fayewong",
+    "name": "Faye Wong",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/faye-wong/129887",
+        "allReleaseTitles": [
+          "goldgoldgateyenshaokangoscarlamalsonliewjoshuafungchloehoo",
+          "fayebest",
+          "asyouplease",
+          "moreshirley",
+          ""
+        ],
+        "latestRelease": {
+          "title": "Gold Gold Faye Wong Gate Yen Shao Kang Oscar Lam Alson Liew Joshua Fung Chloe Hoo ",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/gold-gold-faye-wong-gate-yen-shao-kang-oscar-lam-alson-liew-joshua-fung-chloe-hoo-/gxbs3vkz7ni2b",
+          "releaseDate": "2024-01-19"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Faye%20Wong"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Faye%20Wong"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

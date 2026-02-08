@@ -1,0 +1,59 @@
+[
+  {
+    "id": "evarivas",
+    "name": "eva rivas",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/eva-rivas/320491",
+        "allReleaseTitles": [
+          "barcrsarer"
+        ],
+        "latestRelease": {
+          "title": "Barcr Sarer Eva Rivas",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/barcr-sarer-eva-rivas/malx84vbycjsb",
+          "releaseDate": "2024-12-06"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bandcamp.com/ajovenegas"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=eva%20rivas"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+eva%20rivas"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.evarivas.am/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1818645"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/evarivasofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCgsDXq1KKMYFgW7vCMGW9OQ/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/EvaRivasOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

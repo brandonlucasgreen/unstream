@@ -1,0 +1,39 @@
+[
+  {
+    "id": "qobuz-rajeshkhanna",
+    "name": "Rajesh Khanna",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rajesh-khanna/1267830",
+        "allReleaseTitles": [
+          "iravupadaganoriginalmotionpicturesoundtrack"
+        ],
+        "latestRelease": {
+          "title": "Iravu Padagan Original Motion Picture Soundtrack Rajesh Khanna",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/iravu-padagan-original-motion-picture-soundtrack-rajesh-khanna/g84rs9hko2xob",
+          "releaseDate": "2024-04-09"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rajesh%20Khanna"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rajesh%20Khanna"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2709678"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

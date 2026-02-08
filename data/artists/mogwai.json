@@ -1,0 +1,224 @@
+[
+  {
+    "id": "mogwai",
+    "name": "Mogwai",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037197641_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mogwai.bandcamp.com",
+        "allReleaseTitles": [
+          "thebombingofpanam103",
+          "thebadfire",
+          "godgetsyouback",
+          "comeondieyoung",
+          "mogwaiyoungteamremastered",
+          "blackbird",
+          "boltfor",
+          "ritchiesacramentoothertworemix",
+          "takesides",
+          "earthdivisionep",
+          "midnightflitidlesmiddaystillatitremix",
+          "fuckoffmoneyalessandrocortinirework",
+          "asthelovecontinues",
+          "2018",
+          "zerozerozero",
+          "kin"
+        ],
+        "latestRelease": {
+          "title": "The Bombing of Pan Am 103",
+          "type": "album",
+          "url": "https://mogwai.bandcamp.com/album/the-bombing-of-pan-am-103",
+          "imageUrl": "https://f4.bcbits.com/img/a4245027865_2.jpg",
+          "releaseDate": "May 18, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/mogwai/189401",
+        "allReleaseTitles": [
+          "thebadfire",
+          "thebombingofpanam103",
+          "youngteam",
+          "asthelovecontinues",
+          "ravetapes",
+          "everycountryssun",
+          "comeondieyoungdeluxeedition",
+          "blackbird",
+          "lesrevenants",
+          "tenrapidcollectedrecordings19961997",
+          "zerozerozero",
+          "kin",
+          "comeondieyoung",
+          "dryfantasy",
+          "partyinthedark",
+          "godgetsyouback",
+          "boltfor",
+          "fanzinemadeofflesh",
+          "wolvesdiscoandboogalooremixeslloydcole",
+          "takesides"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mogwai"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mogwai"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.mogwai.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2813"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Mogwai&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Mogwai"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/mogwaiband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/mogwaiTV"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/mogwai"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "mogwaitribute",
+    "name": "Mogwai Tribute",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028065287_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mogwaitribute.bandcamp.com",
+        "allReleaseTitles": [
+          "furtherdowntheroad",
+          "takemesomewhereniceatributetomogwai",
+          "takemesomewherenicecompaniontracks"
+        ],
+        "latestRelease": {
+          "title": "Further Down the Road",
+          "type": "album",
+          "url": "https://mogwaitribute.bandcamp.com/album/further-down-the-road",
+          "imageUrl": "https://f4.bcbits.com/img/a0245854573_2.jpg",
+          "releaseDate": "April 7, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mogwai%20Tribute"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mogwai%20Tribute"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.mogwai.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2813"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Mogwai%20Tribute&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Mogwai%20Tribute"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/mogwaiband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/mogwaiTV"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/mogwai"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "trentreznoratticusrossgustavosantaolallamogwai",
+    "name": "Trent Reznor & Atticus Ross + Gustavo Santaolalla + Mogwai",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013192566_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://beforethefloodsoundtrack.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Trent%20Reznor%20%26%20Atticus%20Ross%20%2B%20Gustavo%20Santaolalla%20%2B%20Mogwai"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Trent%20Reznor%20%26%20Atticus%20Ross%20%2B%20Gustavo%20Santaolalla%20%2B%20Mogwai"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.mogwai.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2813"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Trent%20Reznor%20%26%20Atticus%20Ross%20%2B%20Gustavo%20Santaolalla%20%2B%20Mogwai&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Trent%20Reznor%20%26%20Atticus%20Ross%20%2B%20Gustavo%20Santaolalla%20%2B%20Mogwai"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/mogwaiband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/mogwaiTV"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/mogwai"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

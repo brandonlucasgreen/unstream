@@ -1,0 +1,105 @@
+[
+  {
+    "id": "johnfogerty",
+    "name": "John Fogerty",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039863205_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://johnfogerty.bandcamp.com",
+        "allReleaseTitles": [
+          "legacythecreedenceclearwaterrevivalyearsjohnsversion",
+          "weepinginthepromisedland",
+          "fogertysfactoryexpanded",
+          "wroteasongforeveryone",
+          "theblueridgerangersridesagain",
+          "revival",
+          "thelongroadhometheultimatejohnfogertycreedencecollection",
+          "dejavualloveragain",
+          "premonitionliveatwarnerbrosstudiosburbankcadecember12131997",
+          "bluemoonswamp",
+          "eyeofthezombie",
+          "centerfield25thanniversary",
+          "johnfogerty",
+          "theblueridgerangers"
+        ],
+        "latestRelease": {
+          "title": "Legacy: the Creedence Clearwater Revival years (John’s Version)",
+          "type": "album",
+          "url": "https://johnfogerty.bandcamp.com/album/legacy-the-creedence-clearwater-revival-years-john-s-version",
+          "imageUrl": "https://f4.bcbits.com/img/a2727179039_2.jpg",
+          "releaseDate": "August 22, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/john-fogerty/46959",
+        "allReleaseTitles": [
+          "legacythecreedenceclearwaterrevivalyearsjohnsversion",
+          "haveyoueverseentherainoutlierscreedenceclearwaterrevival",
+          "fogertysfactory",
+          "50yeartripliveatredrocks",
+          "50yeartrip",
+          "joyofmylife",
+          "centerfield",
+          "bluemoonswamp",
+          "revival",
+          "uparoundthebendjohnsversion",
+          "wroteasongforeveryone",
+          "theblueridgerangers",
+          "",
+          "thelongroadhometheultimatecreedencecollection",
+          "premonition",
+          "dejavualloveragain",
+          "travelinbandjohnsversion"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=John%20Fogerty"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+John%20Fogerty"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.johnfogerty.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/260458"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=John%20Fogerty&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/John%20Fogerty"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/johnfogerty"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "http://tiktok.com/@johnfogerty"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "http://youtube.com/johnfogerty"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/johnfogerty"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

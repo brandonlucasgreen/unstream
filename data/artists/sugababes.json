@@ -1,0 +1,102 @@
+[
+  {
+    "id": "sugababes",
+    "name": "Sugababes",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028073472_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sugababes.bandcamp.com",
+        "allReleaseTitles": [
+          "soulsoundremixes",
+          "runforcover",
+          "newyear",
+          "onetouch",
+          "overload"
+        ],
+        "latestRelease": {
+          "title": "Soul Sound (Remixes)",
+          "type": "album",
+          "url": "https://sugababes.bandcamp.com/album/soul-sound-remixes",
+          "imageUrl": "https://f4.bcbits.com/img/a1410319358_2.jpg",
+          "releaseDate": "May 12, 2022"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sugababes/46854",
+        "latestRelease": {
+          "title": "Shook Sugababes",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/shook-sugababes/npggapafxey9b",
+          "releaseDate": "2025-07-09"
+        },
+        "allReleaseTitles": [
+          "jungle",
+          "weeds",
+          "shook",
+          "situationalittlesound",
+          "joypushthebuttonjoyanonymous",
+          "onetouch",
+          "whentheraincomes",
+          "roundtwoshell",
+          "thelosttapes",
+          "thelosttapesdeluxeedition",
+          "angelswithdirtyfaces",
+          "sweet7",
+          "tallerinmoreways",
+          "newyear",
+          "toolostinyou",
+          "overload",
+          "three"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sugababes"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sugababes"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.sugababes.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/21994"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sugababes&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sugababes"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sugababes/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@sugababes"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/sugababesmusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/OfficialSugababes"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

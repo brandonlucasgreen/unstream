@@ -1,0 +1,82 @@
+[
+  {
+    "id": "qobuz-thechemicalbrothers",
+    "name": "The Chemical Brothers",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-chemical-brothers/38332",
+        "allReleaseTitles": [
+          "forthatbeautifulfeeling",
+          "galvanizechrislake",
+          "exitplanetdust",
+          "pushthebutton",
+          "digyourownhole",
+          "heyboyheygirl",
+          "thedarknessthatyoufear",
+          "surrender",
+          "allofasudden",
+          "noreason",
+          "skippinglikeastonebeck",
+          "elektrobank",
+          "outofcontrol",
+          "goodbye",
+          "liveagainhalomaud",
+          "liveagainhalomaud"
+        ],
+        "latestRelease": {
+          "title": "For That Beautiful Feeling The Chemical Brothers",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/for-that-beautiful-feeling-the-chemical-brothers/r865vjjxjbtvc",
+          "releaseDate": "2023-09-08"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Chemical%20Brothers"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Chemical%20Brothers"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://web.archive.org/web/19970117120254/http://raft.vmg.co.uk/chemicalbros/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2290"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Chemical%20Brothers&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Chemical%20Brothers"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thechemicalbrothers/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@chemicalbrothersofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCFhSm5HFBvZkldbOxeVoidQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/100044389360795"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

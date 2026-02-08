@@ -1,0 +1,71 @@
+[
+  {
+    "id": "qobuz-ivetamukuchyan",
+    "name": "Iveta Mukuchyan",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/iveta-mukuchyan/1071049",
+        "allReleaseTitles": [
+          "serkaerknqumyerevani",
+          "ariugna",
+          "oderov",
+          "inyoursleeplatteo",
+          "qomijpity",
+          "serani",
+          "ayayay",
+          "sirumem",
+          "kinoipesarkadidumikyan",
+          "espatrastem",
+          "hayastanjan",
+          "sirtremix",
+          "ayeta",
+          "kenatsdkhmemarnirockkizombaremix",
+          "margarit",
+          "turpatjar",
+          "shalakho"
+        ],
+        "latestRelease": {
+          "title": "Oderov Iveta Mukuchyan",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/oderov-iveta-mukuchyan/x6vifepzyy1ub",
+          "releaseDate": "2025-07-13"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Iveta%20Mukuchyan"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Iveta%20Mukuchyan"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.ivetamukuchyan.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4032198"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/iveta.mukuchyan/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/c/ivetamukuchyan"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/IvetaMukuchyan"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,105 @@
+[
+  {
+    "id": "qobuz-sammydavisjr",
+    "name": "Sammy Davis Jr",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sammy-davis-jr/35925",
+        "latestRelease": {
+          "title": "Sammy Swings Sammy Davis Jr",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/sammy-swings-sammy-davis-jr/toqed2tntlg2p",
+          "releaseDate": "2011-10-09"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sammy%20Davis%20Jr"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sammy%20Davis%20Jr"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sammydavis-jr.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/44133"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sammy%20Davis%20Jr&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sammy%20Davis%20Jr"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/officialsammydavisjr/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Sammy-Davis-Jr/112867505394454"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "sammydavisjrmafia",
+    "name": "Sammy Davis Jr. Mafia",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0001070436_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sammydavisjrmafia.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sammy%20Davis%20Jr.%20Mafia"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sammy%20Davis%20Jr.%20Mafia"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sammydavis-jr.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/44133"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sammy%20Davis%20Jr.%20Mafia&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sammy%20Davis%20Jr.%20Mafia"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/officialsammydavisjr/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Sammy-Davis-Jr/112867505394454"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

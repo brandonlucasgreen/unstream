@@ -1,0 +1,143 @@
+[
+  {
+    "id": "qobuz-darkthrone",
+    "name": "Darkthrone",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/darkthrone/605993",
+        "allReleaseTitles": [
+          "ablazeinthenorthernsky",
+          "oldstar",
+          "caravanofbrokenghosts",
+          "astralfortress",
+          "arcticthunder",
+          "transilvanianhunger",
+          "underafuneralmoon",
+          "panzerfaust",
+          "totaldeath",
+          "itbeckonsusall",
+          "ravishinggrimness",
+          "foad",
+          "soulsidejourney",
+          "eternalhails",
+          "hatethem",
+          "thecultisalive",
+          "circlethewagons",
+          "plagueweilder",
+          "goatlord",
+          "preparingforwardeluxe"
+        ],
+        "latestRelease": {
+          "title": "Astral Fortress Darkthrone",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/astral-fortress-darkthrone/hvez2qnprrtaa",
+          "releaseDate": "2022-10-28"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Darkthrone"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Darkthrone"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.darkthrone.no/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/252211"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Darkthrone&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Darkthrone"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/darkthroneofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCH5nfSr3NLCpBAHwsLfMO0g"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@darkthroneofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Darkthrone/101075189934422"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "usbmtributetodarkthrone",
+    "name": "USBM Tribute To Darkthrone",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025321269_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://usbmtributetodarkthrone.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=USBM%20Tribute%20To%20Darkthrone"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+USBM%20Tribute%20To%20Darkthrone"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.darkthrone.no/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/252211"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=USBM%20Tribute%20To%20Darkthrone&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/USBM%20Tribute%20To%20Darkthrone"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/darkthroneofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCH5nfSr3NLCpBAHwsLfMO0g"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@darkthroneofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Darkthrone/101075189934422"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

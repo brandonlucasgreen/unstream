@@ -1,0 +1,65 @@
+[
+  {
+    "id": "qobuz-jamesgunn",
+    "name": "James Gunn",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/james-gunn/3093531",
+        "allReleaseTitles": [
+          "havoc",
+          "faraway",
+          "paiddos",
+          "selftitled",
+          "openwound",
+          "gunnvol1",
+          "2ndhalf"
+        ],
+        "latestRelease": {
+          "title": "Open Wound James Gunn",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/open-wound-james-gunn/o9ke81s2851ur",
+          "releaseDate": "2025-12-31"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=James%20Gunn"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+James%20Gunn"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-jamesgunn2",
+    "name": "James Gunn 2",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/james-gunn-2/27174208"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=James%20Gunn%202"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+James%20Gunn%202"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

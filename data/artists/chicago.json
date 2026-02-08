@@ -1,0 +1,845 @@
+[
+  {
+    "id": "chicagoresearch",
+    "name": "Chicago Research",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024384220_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://chicagoresearch.bandcamp.com",
+        "allReleaseTitles": [
+          "moriryrenacerconjuntoprimitivo",
+          "realizingrequisitesdaliborcruz",
+          "imminentdecaydjvalentimes",
+          "joyoussoundsvariousartists",
+          "settlementsciviccenter",
+          "orientationmatrixbravaislattice",
+          "untitledseasonoflife",
+          "emeraldreposebravaislattice",
+          "devianceepdaliborcruz",
+          "peaceatlastseasonoflife",
+          "heavenstetherbrigitteg",
+          "universalhealingcodethearno",
+          "withoutsightwithoutsoundunderstudy",
+          "immersionintothetruelightoro",
+          "lastritesbreastmilk",
+          "aquaglistenbravaislattice"
+        ],
+        "latestRelease": {
+          "title": "Morir y Renacer\n                \n                \n\n                Conjunto Primitivo",
+          "type": "album",
+          "url": "https://chicagoresearch.bandcamp.com/album/morir-y-renacer",
+          "imageUrl": "https://f4.bcbits.com/img/a2987248849_2.jpg",
+          "releaseDate": "August 12, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Chicago%20Research"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Chicago%20Research"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://chicagotheband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/114483"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Chicago%20Research&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Chicago%20Research"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/chicagotheband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCK0TuNeYqg9oYGSksX-jNkg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Chicago.Official"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "dechicago",
+    "name": "D&E Chicago",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039472470_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://dandechicago.bandcamp.com",
+        "allReleaseTitles": [
+          "milkandhoneyderemixdavemazespikerebel",
+          "musicforthepeopledavemazespikerebel",
+          "letsdancetonightlothariospikerebeldavemaze",
+          "ekaneeditsvol5deekaneedits",
+          "imanifaithdavemazespikerebel",
+          "yamsof2025everydediscoeditsof2025",
+          "7soundsofkwanzaakuumbadavemazespikerebel",
+          "7soundsofkwanzzaniadavemazespikerebel",
+          "7soundsofkwanzaaujamaadavemazespikerebel",
+          "7soundsofkwanzaaujimadavemazespikerebel",
+          "7soundsofkwanzaakujichaguliadavemazespikerebel",
+          "7soundsofkwanzaaumoja1davemazespikerebel",
+          "discoessential8",
+          "yamsforyouhotstuff",
+          "milkandhoneydavemazespikerebel",
+          "cosmicdiscodavemazespikerebelglennundergroundcvo"
+        ],
+        "latestRelease": {
+          "title": "Milk and Honey D&e remix\n                \n                \n\n                Dave Maze | Spike Rebel",
+          "type": "album",
+          "url": "https://dandechicago.bandcamp.com/album/milk-and-honey-d-e-remix",
+          "imageUrl": "https://f4.bcbits.com/img/a2654475523_2.jpg",
+          "releaseDate": "February 6, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=D%26E%20Chicago"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+D%26E%20Chicago"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://chicagotheband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/114483"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=D%26E%20Chicago&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/D%26E%20Chicago"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/chicagotheband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCK0TuNeYqg9oYGSksX-jNkg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Chicago.Official"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "birdsofchicago",
+    "name": "Birds of Chicago",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0012744452_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://birdsofchicago.bandcamp.com",
+        "allReleaseTitles": [
+          "loveinwartime",
+          "americanflowers"
+        ],
+        "latestRelease": {
+          "title": "Love in Wartime",
+          "type": "album",
+          "url": "https://birdsofchicago.bandcamp.com/album/love-in-wartime",
+          "imageUrl": "https://f4.bcbits.com/img/a0345302836_16.jpg",
+          "releaseDate": "May 4, 2018"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Birds%20of%20Chicago"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Birds%20of%20Chicago"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://chicagotheband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/114483"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Birds%20of%20Chicago&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Birds%20of%20Chicago"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/chicagotheband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCK0TuNeYqg9oYGSksX-jNkg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Chicago.Official"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "croissantchicago",
+    "name": "CroissantChicago",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014588529_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://croissantchicago.bandcamp.com",
+        "allReleaseTitles": [
+          "azureorca",
+          "crankshaft",
+          "jiraidenshi",
+          "mono",
+          "monospecialedition",
+          "yurerulicareli",
+          "shespoonyautomatatetola",
+          "cozyviews",
+          "tokyoballet",
+          "swimmylib",
+          "people",
+          "morningact",
+          "lostmemories"
+        ],
+        "latestRelease": {
+          "title": "Azure Orca\n                \n                \n\n                クロワッサンシカゴ",
+          "type": "album",
+          "url": "https://croissantchicago.bandcamp.com/album/azure-orca",
+          "imageUrl": "https://f4.bcbits.com/img/a0216222981_2.jpg",
+          "releaseDate": "July 1, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=CroissantChicago"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+CroissantChicago"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://chicagotheband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/114483"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=CroissantChicago&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/CroissantChicago"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/chicagotheband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCK0TuNeYqg9oYGSksX-jNkg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Chicago.Official"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "chicagojaxxx",
+    "name": "Chicago Jaxxx",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013290408_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://chicagojaxxxtechno.bandcamp.com",
+        "allReleaseTitles": [
+          "punchoutsteelgrooves",
+          "templeofboommicrodot",
+          "demoncorerons",
+          "evolutionofsoundfrankievegabradlee",
+          "zappedoutsteelgrooves",
+          "theusualsuspectsstructuresbradlee",
+          "mkultrajonperx",
+          "nexteddieriot",
+          "neckwoundsslobodan",
+          "dotherightthingangelalanismariagoetz",
+          "thesectorfrankievega",
+          "shyofspectacularbdcbrandondecarlo",
+          "advancedtherapyangelalanis",
+          "rotorepangelalanismariagoetz",
+          "rightwrongwarehousz",
+          "yourmindaftr"
+        ],
+        "latestRelease": {
+          "title": "Punch Out\n                \n                \n\n                Steel Grooves",
+          "type": "album",
+          "url": "https://chicagojaxxxtechno.bandcamp.com/album/punch-out",
+          "imageUrl": "https://f4.bcbits.com/img/a1994880457_2.jpg",
+          "releaseDate": "November 25, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Chicago%20Jaxxx"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Chicago%20Jaxxx"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://chicagotheband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/114483"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Chicago%20Jaxxx&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Chicago%20Jaxxx"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/chicagotheband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCK0TuNeYqg9oYGSksX-jNkg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Chicago.Official"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "artensembleofchicago",
+    "name": "Art Ensemble of Chicago",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0015829364_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://artensembleofchicago.bandcamp.com",
+        "allReleaseTitles": [
+          "weareontheedge",
+          "weareontheedgea50thanniversarycelebration",
+          "noncognitiveaspectsofthecityliveatiridium",
+          "siriuscalling",
+          "themeeting"
+        ],
+        "latestRelease": {
+          "title": "We Are On The Edge",
+          "type": "album",
+          "url": "https://artensembleofchicago.bandcamp.com/album/we-are-on-the-edge",
+          "imageUrl": "https://f4.bcbits.com/img/a3394813115_2.jpg",
+          "releaseDate": "July 26, 2019"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Art%20Ensemble%20of%20Chicago"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Art%20Ensemble%20of%20Chicago"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://chicagotheband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/114483"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Art%20Ensemble%20of%20Chicago&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Art%20Ensemble%20of%20Chicago"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/chicagotheband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCK0TuNeYqg9oYGSksX-jNkg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Chicago.Official"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "areamanchicago",
+    "name": "Areaman Chicago",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032989748_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://areamanchicago.bandcamp.com",
+        "allReleaseTitles": [
+          "sinceermeecem",
+          "hotashelljeremiahmeece"
+        ],
+        "latestRelease": {
+          "title": "Sinceer & Meece\n                \n                \n\n                $&M",
+          "type": "album",
+          "url": "https://areamanchicago.bandcamp.com/album/sinceer-meece",
+          "imageUrl": "https://f4.bcbits.com/img/a3065319723_16.jpg",
+          "releaseDate": "October 21, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Areaman%20Chicago"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Areaman%20Chicago"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://chicagotheband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/114483"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Areaman%20Chicago&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Areaman%20Chicago"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/chicagotheband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCK0TuNeYqg9oYGSksX-jNkg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Chicago.Official"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "mobcorechicagorecords",
+    "name": "MOBCORE CHICAGO RECORDS",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018361491_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mobcorechicagorecords.bandcamp.com",
+        "allReleaseTitles": [
+          "shimodacyberneticsampleassaultmcr090shimoda",
+          "nevermindnapalmedmorningmcr089nevermind",
+          "roarshoktest8mcr088roarshok",
+          "sirvixxmobcoremegamixmcr012sirvixx",
+          "m5khitplayfornoisemcr087m5k",
+          "maladroitsharingaroomwithacorpsemcr086maladroit",
+          "slagseed777mcr085slagseed",
+          "ollyjunglisttransformationmcr084ollyjunglist",
+          "sirvixxforgottenmcr083sirvixx",
+          "unstabletonechaoticnostalgiamcr082unstabletone",
+          "distonnvirtualrealitypupilsmcr081distonn",
+          "zederotemesmokeseshepmcr080zederoteme",
+          "sirvixxbrokenbitsofmemcr079sirvixx",
+          "sirvixxdreamingofaneonafterlifemcr078sirvixx",
+          "frontcoreevenmoremcr077frontcore",
+          "autononlivingliesmcr076autonon"
+        ],
+        "latestRelease": {
+          "title": "Shimoda-Cybernetic Sample Assault-MCR-090\n                \n                \n\n                Shimoda",
+          "type": "album",
+          "url": "https://mobcorechicagorecords.bandcamp.com/album/shimoda-cybernetic-sample-assault-mcr-090",
+          "imageUrl": "https://f4.bcbits.com/img/a3723715134_2.jpg",
+          "releaseDate": "December 1, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=MOBCORE%20CHICAGO%20RECORDS"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+MOBCORE%20CHICAGO%20RECORDS"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://chicagotheband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/114483"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=MOBCORE%20CHICAGO%20RECORDS&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/MOBCORE%20CHICAGO%20RECORDS"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/chicagotheband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCK0TuNeYqg9oYGSksX-jNkg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Chicago.Official"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "staticchicago",
+    "name": "Static (Chicago)",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018386162_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://stvtic.bandcamp.com",
+        "allReleaseTitles": [
+          "guiadesentimentos",
+          "phfantasygirl2020static",
+          "jukeaintdeadvol4",
+          "girlbeforeyouwrongstatic",
+          "jukeaintdeadvol3static",
+          "jukeaintdeadvol2",
+          "jukeaintdeadvol1static"
+        ],
+        "latestRelease": {
+          "title": "GUIA DE SENTIMENTOS",
+          "type": "album",
+          "url": "https://stvtic.bandcamp.com/album/guia-de-sentimentos",
+          "imageUrl": "https://f4.bcbits.com/img/a0959044701_2.jpg",
+          "releaseDate": "May 6, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Static%20(Chicago)"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Static%20(Chicago)"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://chicagotheband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/114483"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Static%20(Chicago)&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Static%20(Chicago)"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/chicagotheband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCK0TuNeYqg9oYGSksX-jNkg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Chicago.Official"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-chicago",
+    "name": "Chicago",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/chicago/118769",
+        "allReleaseTitles": [
+          "transitauthority",
+          "ii",
+          "17",
+          "16",
+          "iihiresversion",
+          "v",
+          "lovesongs",
+          "x",
+          "atthejohnfkennedycenterfortheperformingartswashingtondc9161971",
+          "18hiresversion",
+          "viii",
+          "theverybestofonlythebeginning",
+          "atcarnegiehallcomplete",
+          "liveat55",
+          "13",
+          "christmaswhatsitgonnabesanta",
+          "greatestchristmashits",
+          "xiv"
+        ],
+        "latestRelease": {
+          "title": "Chicago Transit Authority Chicago",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/chicago-transit-authority-chicago/0603497923465",
+          "releaseDate": "2013-04-15"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Chicago"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Chicago"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://chicagotheband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/114483"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Chicago&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Chicago"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/chicagotheband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCK0TuNeYqg9oYGSksX-jNkg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Chicago.Official"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-chicago4",
+    "name": "Chicago 4",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/chicago-4/19011938",
+        "allReleaseTitles": [
+          "transitauthoritychicago"
+        ],
+        "latestRelease": {
+          "title": "Chicago Transit Authority Chicago",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/chicago-transit-authority-chicago/0603497923465",
+          "releaseDate": "2013-04-15"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Chicago%204"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Chicago%204"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://chicagotheband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/114483"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Chicago%204&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Chicago%204"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/chicagotheband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCK0TuNeYqg9oYGSksX-jNkg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Chicago.Official"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "chicagoundergroundquartet",
+    "name": "Chicago Underground Quartet",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018463155_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://astralcuq.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Chicago%20Underground%20Quartet"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Chicago%20Underground%20Quartet"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://chicagotheband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/114483"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Chicago%20Underground%20Quartet&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Chicago%20Underground%20Quartet"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/chicagotheband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCK0TuNeYqg9oYGSksX-jNkg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Chicago.Official"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

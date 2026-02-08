@@ -1,0 +1,220 @@
+[
+  {
+    "id": "sirushood",
+    "name": "Sirus Hood",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0023182020_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sirushood.bandcamp.com",
+        "allReleaseTitles": [
+          "moodeditssamplepackvol4stemsloops",
+          "moodeditssamplepackvol1stemsloops",
+          "homosapiensepattitudesbonussirushoodmalikk"
+        ],
+        "latestRelease": {
+          "title": "Mood Edits Sample Pack Vol. 4 + stems (loops)",
+          "type": "album",
+          "url": "https://sirushood.bandcamp.com/album/mood-edits-sample-pack-vol-4-stems-loops",
+          "imageUrl": "https://f4.bcbits.com/img/a0180380468_2.jpg",
+          "releaseDate": "May 4, 2024"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/sirushood"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sirus%20Hood"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sirus%20Hood"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://sirusho.am/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1126827"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sirus%20Hood&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sirus%20Hood"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@sirushoofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/sirushomusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sirusho"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "sirus",
+    "name": "SIRUS",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0035328674_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sirus-official.bandcamp.com",
+        "allReleaseTitles": [
+          "citizensofamazon",
+          "axioms",
+          "saveandsuffocate",
+          "thebookofgates",
+          "singularities",
+          "apocrypha",
+          "satelliteempire",
+          "brokenempire",
+          "singularity",
+          "brokenheartscorporatemindsthefinalcut",
+          "neondominion",
+          "fullscalerevolt",
+          "loic"
+        ],
+        "latestRelease": {
+          "title": "Citizens Of Amazon",
+          "type": "album",
+          "url": "https://sirus-official.bandcamp.com/album/citizens-of-amazon",
+          "imageUrl": "https://f4.bcbits.com/img/a0666417308_2.jpg",
+          "releaseDate": "May 3, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=SIRUS"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+SIRUS"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://sirusho.am/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1126827"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=SIRUS&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/SIRUS"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@sirushoofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/sirushomusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sirusho"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-sirusho",
+    "name": "Sirusho",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sirusho/777717",
+        "allReleaseTitles": [
+          "sirt",
+          "zomazoma",
+          "comeback",
+          "mybad",
+          "donik",
+          "batserknqitak",
+          "indzanicavelfeatvictorespinola",
+          "seeremixandsakisrouvas",
+          "oile",
+          "yaremardunyarakuta",
+          "esudu",
+          "indzanicavel",
+          "letitoutandredone",
+          "zomazomaarnirockremix"
+        ],
+        "latestRelease": {
+          "title": "Sirt Sirusho",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/sirt-sirusho/ekpm3aq83jyta",
+          "releaseDate": "2025-09-06"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sirusho"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sirusho"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://sirusho.am/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1126827"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sirusho&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sirusho"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@sirushoofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/sirushomusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sirusho"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

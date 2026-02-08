@@ -1,0 +1,52 @@
+[
+  {
+    "id": "qobuz-toseproeski",
+    "name": "Tose Proeski",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/tose-proeski/993659",
+        "allReleaseTitles": [
+          "kadvolis",
+          "collection",
+          "thebestof",
+          "zlatnakolekcija",
+          "igrabezgranica",
+          "pratimte",
+          "najlepsebalade",
+          "theultimatecollection",
+          "topmix2000vol2",
+          "akomepogledasuoci",
+          "sljubavljuodtoseta",
+          "theplatinumcollection",
+          "danzanas",
+          "livecollectionbeogradskaarena",
+          "hitovi",
+          "saoroma",
+          "kazudavremelecisve",
+          "bozilakrainbow"
+        ],
+        "latestRelease": {
+          "title": "Zlatna Kolekcija Tose Proeski",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/zlatna-kolekcija-tose-proeski/kf2g7s4hr0jeb",
+          "releaseDate": "2025-06-23"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tose%20Proeski"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tose%20Proeski"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

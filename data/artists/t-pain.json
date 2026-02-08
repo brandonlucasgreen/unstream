@@ -1,0 +1,150 @@
+[
+  {
+    "id": "qobuz-tpain4",
+    "name": "T Pain 4",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/t-pain-4/551279",
+        "allReleaseTitles": [
+          "clubhusband",
+          "believeinyayaejiandgirltalk",
+          "ontopofthecoverslivefromthesunrose",
+          "dyinflamefeattaylerholder",
+          "beforeidietraethatruth",
+          "hatemejoynerlucas",
+          "untilthedayalexcissnowthaproduct",
+          "imbluewithsoftesthardandtpain",
+          "untilthedayalexcis",
+          "whateveriwant",
+          "lotteryrenegadekcamp",
+          "happyhourthegreatesthits",
+          "babygotbraphert",
+          "revolver",
+          "ilikedatkehlani",
+          "saywhatyouwantriffraffdjpaul",
+          "epiphany",
+          "ontopofthecovers",
+          "threeringzthr33ringz"
+        ],
+        "latestRelease": {
+          "title": "Club Husband T Pain",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/club-husband-t-pain/otmweklg235ra",
+          "releaseDate": "2025-10-17"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=T%20Pain%204"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+T%20Pain%204"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://tpain.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1119694"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/tpain/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@tpain"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCwff7OoSHp3el6GqnSwcSdA"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.net/@tpain"
+      },
+      {
+        "sourceId": "bluesky",
+        "url": "https://bsky.app/profile/t-pain.bsky.social"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/t-pain"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-tpain",
+    "name": "Tpain",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/tpain/5270471",
+        "allReleaseTitles": [
+          "drinksallaroundchoochooyunge"
+        ],
+        "latestRelease": {
+          "title": "Drinks All Around Choo Choo Yung E Tpain",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/drinks-all-around-choo-choo-yung-e-tpain/lzhc5vvnb3dyc",
+          "releaseDate": "2015-11-24"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tpain"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tpain"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://tpain.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1119694"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/tpain/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@tpain"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCwff7OoSHp3el6GqnSwcSdA"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.net/@tpain"
+      },
+      {
+        "sourceId": "bluesky",
+        "url": "https://bsky.app/profile/t-pain.bsky.social"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/t-pain"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

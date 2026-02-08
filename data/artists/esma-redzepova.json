@@ -1,0 +1,45 @@
+[
+  {
+    "id": "qobuz-esmaredzepova",
+    "name": "Esma Redzepova",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/esma-redzepova/551987",
+        "allReleaseTitles": [
+          "grandproduction",
+          "cajesukarije18izvornihsnimaka1961",
+          "ciganskepjesmeikola",
+          "songsofamacedoniangypsyusnijajasarova",
+          "legendsofgypsymusicfrommacedoniakingferusmustafovandteodosievska",
+          "tumedujdzene",
+          "zostosimemajkorodila",
+          "esma",
+          "gypsycarpet",
+          "authenticbellydancemusicansamblteodosievski",
+          "cajesukarijeremakejehonasopi"
+        ],
+        "latestRelease": {
+          "title": "Esma Redzepova Esma Redzepova Grand Production",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/esma-redzepova-esma-redzepova-grand-production/z1nyto1zkv96b",
+          "releaseDate": "2018-02-08"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Esma%20Redzepova"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Esma%20Redzepova"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

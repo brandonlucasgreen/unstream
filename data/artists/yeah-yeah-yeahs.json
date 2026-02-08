@@ -1,0 +1,177 @@
+[
+  {
+    "id": "yeahyeahyeahs",
+    "name": "Yeah Yeah Yeahs",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028842925_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://yeahyeahyeahs.bandcamp.com",
+        "allReleaseTitles": [
+          "lovebombadultremix",
+          "spittingofftheedgeoftheworldtryremix",
+          "spittingofftheedgeoftheworldlushversion",
+          "wolfboyharsherremix",
+          "wolfsextileremix",
+          "wolfboysnoizeremix",
+          "coolitdown",
+          "yeahyeahyeahs",
+          "machine"
+        ],
+        "latestRelease": {
+          "title": "Lovebomb ADULT. Remix",
+          "type": "track",
+          "url": "https://yeahyeahyeahs.bandcamp.com/track/lovebomb-adult-remix",
+          "imageUrl": "https://f4.bcbits.com/img/a3067720325_2.jpg",
+          "releaseDate": "September 27, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Yeah%20Yeah%20Yeahs"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Yeah%20Yeah%20Yeahs"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.yeahyeahyeahs.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/95405"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Yeah%20Yeah%20Yeahs&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Yeah%20Yeah%20Yeahs"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://instagram.com/yeahyeahyeahs"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCmwY729s-CuQ-h_3GsVWWnQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/yeahyeahyeahs"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-yeahyeahyeahs",
+    "name": "Yeah Yeah Yeahs",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/yeah-yeah-yeahs/56461"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Yeah%20Yeah%20Yeahs"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Yeah%20Yeah%20Yeahs"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.yeahyeahyeahs.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/95405"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Yeah%20Yeah%20Yeahs&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Yeah%20Yeah%20Yeahs"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://instagram.com/yeahyeahyeahs"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCmwY729s-CuQ-h_3GsVWWnQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/yeahyeahyeahs"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-yeahyeahyeahs2",
+    "name": "Yeah Yeah Yeahs 2",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/yeah-yeah-yeahs-2/24508305"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Yeah%20Yeah%20Yeahs%202"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Yeah%20Yeah%20Yeahs%202"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.yeahyeahyeahs.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/95405"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Yeah%20Yeah%20Yeahs%202&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Yeah%20Yeah%20Yeahs%202"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://instagram.com/yeahyeahyeahs"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCmwY729s-CuQ-h_3GsVWWnQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/yeahyeahyeahs"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

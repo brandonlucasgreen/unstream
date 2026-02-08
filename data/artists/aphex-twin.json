@@ -1,0 +1,201 @@
+[
+  {
+    "id": "aphextwin",
+    "name": "Aphex Twin",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036351072_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://aphextwin.bandcamp.com",
+        "allReleaseTitles": [
+          "surfingonsinewavesexpandededition",
+          "musicfromthemerchdesk20162023",
+          "selectedambientworksvolumeiiexpandededition",
+          "19",
+          "blackboxliferecorder21finaroom7f760",
+          "peelsession2",
+          "collapseep",
+          "cheetahep",
+          "umil2501afx",
+          "orphaneddeejayselek20062008afx",
+          "marchromt30aedit2b96",
+          "computercontrolledacousticinstrumentspt2ep",
+          "syro",
+          "hangableautobulbafx",
+          "drukqs",
+          "windowlicker"
+        ],
+        "latestRelease": {
+          "title": "Surfing On Sine Waves (Expanded Edition)",
+          "type": "album",
+          "url": "https://aphextwin.bandcamp.com/album/surfing-on-sine-waves-expanded-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a0325383450_2.jpg",
+          "releaseDate": "September 26, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/aphex-twin/53267",
+        "allReleaseTitles": [
+          "selectedambientworks8592",
+          "selectedambientworksvolumeii",
+          "syro",
+          "musicfromthemerchdesk20162023",
+          "windowlicker",
+          "icarebecauseyoudo",
+          "drukqs",
+          "richarddjamesalbum",
+          "blackboxliferecorder21finaroom7f760",
+          "19",
+          "peelsession2",
+          "marchromt30aedit2b96",
+          "cometodaddy",
+          "computercontrolledacousticinstrumentspt2ep",
+          "th1evnslower",
+          "3rhubarborc1953rev",
+          "blackboxliferecorder21f"
+        ],
+        "latestRelease": {
+          "title": "Music From The Merch Desk 2016 2023 Aphex Twin",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/music-from-the-merch-desk-2016-2023-aphex-twin/jpaaac2cvbxkc",
+          "releaseDate": "2024-12-17"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Aphex%20Twin"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Aphex%20Twin"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/45"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Aphex%20Twin&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Aphex%20Twin"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/aphextwin.afx/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC4hfA78X-lqiRERBZLTnLBw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/aphextwinafx"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-aphextwin3",
+    "name": "Aphex Twin 3",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/aphex-twin-3/23972441"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Aphex%20Twin%203"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Aphex%20Twin%203"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/45"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Aphex%20Twin%203&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Aphex%20Twin%203"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/aphextwin.afx/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC4hfA78X-lqiRERBZLTnLBw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/aphextwinafx"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-aphextwin4",
+    "name": "Aphex Twin 4",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/aphex-twin-4/24888668"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Aphex%20Twin%204"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Aphex%20Twin%204"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/45"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Aphex%20Twin%204&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Aphex%20Twin%204"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/aphextwin.afx/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC4hfA78X-lqiRERBZLTnLBw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/aphextwinafx"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

@@ -1,0 +1,227 @@
+[
+  {
+    "id": "djbobo1",
+    "name": "dj bobo1",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0034174838_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://djbobo1.bandcamp.com",
+        "allReleaseTitles": [
+          "moonbouncer",
+          "mimi"
+        ],
+        "latestRelease": {
+          "title": "MoonBouncer",
+          "type": "album",
+          "url": "https://djbobo1.bandcamp.com/album/moonbouncer",
+          "imageUrl": "https://f4.bcbits.com/img/a3743878519_16.jpg",
+          "releaseDate": "February 22, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=dj%20bobo1"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+dj%20bobo1"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.djbobo.ch/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7694"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=dj%20bobo1&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/dj%20bobo1"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/djboboofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@djboboofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCPFfofjefJ7yzRLpabzgLbQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/DJBoBo.de"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-djbobo",
+    "name": "Dj Bobo",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/dj-bobo/131527",
+        "allReleaseTitles": [
+          "25yearsgreatesthits",
+          "greatesthitsnewversions",
+          "thegreatadventure",
+          "greatesthits",
+          "youaremylife",
+          "freedom",
+          "letthedreamcometrue",
+          "sombrero",
+          "evolut30ninstrumentals",
+          "thereisaparty",
+          "bestof",
+          "chihuahua",
+          "worldinmotion",
+          "reloaded",
+          "celebration",
+          "greatesthitsmegamix",
+          "visions",
+          "everybody",
+          "dj"
+        ],
+        "latestRelease": {
+          "title": "The Great Adventure Dj Bobo",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-great-adventure-dj-bobo/dh82iwpdko0ab",
+          "releaseDate": "2026-01-16"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Dj%20Bobo"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Dj%20Bobo"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.djbobo.ch/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7694"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Dj%20Bobo&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Dj%20Bobo"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/djboboofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@djboboofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCPFfofjefJ7yzRLpabzgLbQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/DJBoBo.de"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-djbob",
+    "name": "Dj Bob",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/dj-bob/956471",
+        "allReleaseTitles": [
+          "machinefeatseetone",
+          "shebadfeatjermaneeandfabobeatzfeatjermanee",
+          "lepabon",
+          "tousstmatt",
+          "howwedofeattommygunzfeattommygunz",
+          "tdbtipay",
+          "lavilla",
+          "championbrandonpalaxa",
+          "boukanaz",
+          "zotlambiance"
+        ],
+        "latestRelease": {
+          "title": "Machine Dj Bob Feat Seetone",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/machine-dj-bob-feat-seetone/fuh5a7k88h9kc",
+          "releaseDate": "2023-08-11"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Dj%20Bob"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Dj%20Bob"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.djbobo.ch/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7694"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Dj%20Bob&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Dj%20Bob"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/djboboofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@djboboofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCPFfofjefJ7yzRLpabzgLbQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/DJBoBo.de"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

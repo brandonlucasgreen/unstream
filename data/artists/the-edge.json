@@ -1,0 +1,210 @@
+[
+  {
+    "id": "attheedge",
+    "name": "At The Edge",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0001388732_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://atexband.bandcamp.com",
+        "allReleaseTitles": [
+          "iknowillbeokay",
+          "smalltownep",
+          "bwwsingle"
+        ],
+        "latestRelease": {
+          "title": "I Know I'll Be Okay",
+          "type": "album",
+          "url": "https://atexband.bandcamp.com/album/i-know-ill-be-okay",
+          "imageUrl": "https://f4.bcbits.com/img/a3610117532_2.jpg",
+          "releaseDate": "December 10, 2013"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=At%20The%20Edge"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+At%20The%20Edge"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "theedgeeffect",
+    "name": "The Edge Effect",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0002037033_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://theedgeeffect.bandcamp.com",
+        "allReleaseTitles": [
+          "uncovered",
+          "alphabetradio",
+          "doyouhearwhatwehear"
+        ],
+        "latestRelease": {
+          "title": "Uncovered",
+          "type": "album",
+          "url": "https://theedgeeffect.bandcamp.com/album/uncovered",
+          "imageUrl": "https://f4.bcbits.com/img/a0692497152_2.jpg",
+          "releaseDate": "December 20, 2014"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Edge%20Effect"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Edge%20Effect"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "cowsattheedgeoftheearth",
+    "name": "Cows at the Edge of the Earth",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020155766_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://cowsattheedgeoftheearth.bandcamp.com",
+        "allReleaseTitles": [
+          "seawrackpoppypatica",
+          "halfadoublelife",
+          "goingstrongsecretsibling",
+          "marquetanthologetvol1demosouttakesetc20162020",
+          "samandlouisesamandlouisesullivan",
+          "reannstaddievogt",
+          "yuymarket",
+          "tellingpatternbrokeneveryangle",
+          "mostofmyheroesaregoodfriendsofminestephenbeckerabehollowmarket",
+          "littlebooeybluebooeyvortex",
+          "goodjobdecadeasongaweekcelebrationvariousartists",
+          "23market",
+          "sossomeoscillationssuckjordanmartin",
+          "notgoodatspendingtimealoneakacleanlinessmarket"
+        ],
+        "latestRelease": {
+          "title": "Sea Wrack\n                \n                \n\n                Poppy Patica",
+          "type": "album",
+          "url": "https://cowsattheedgeoftheearth.bandcamp.com/album/sea-wrack",
+          "imageUrl": "https://f4.bcbits.com/img/a3140370682_2.jpg",
+          "releaseDate": "May 3, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Cows%20at%20the%20Edge%20of%20the%20Earth"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Cows%20at%20the%20Edge%20of%20the%20Earth"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-theedge",
+    "name": "The Edge",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-edge/118808",
+        "latestRelease": {
+          "title": "Haunted Rhythms The Edge",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/haunted-rhythms-the-edge/y3n1wot2hmrpw",
+          "releaseDate": "2024-07-27"
+        },
+        "allReleaseTitles": [
+          "hauntedrhythms",
+          "manulay",
+          "modulairreset",
+          "captiveoriginalsoundtrack",
+          "paradisequitorymer",
+          "tuneofinfinityep",
+          "lost",
+          "ilikethat",
+          "sattthwarr",
+          "ep",
+          "thefinalcall",
+          "sunshine",
+          "pure",
+          "thefreakyportrait",
+          "inpursuitofphatness",
+          "slavetothesystem",
+          "doyadirt",
+          "mistyinthemoonlight",
+          "squaresygus",
+          "fromthemiddleofnowhere"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Edge"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Edge"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-theedge1984",
+    "name": "The Edge 1984",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-edge-1984/29515189",
+        "allReleaseTitles": [
+          "theorchardsessions",
+          "climbingthewalls"
+        ],
+        "latestRelease": {
+          "title": "Climbing The Walls The Edge 1984",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/climbing-the-walls-the-edge-1984/irpknnkbruy21",
+          "releaseDate": "2025-12-08"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Edge%201984"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Edge%201984"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

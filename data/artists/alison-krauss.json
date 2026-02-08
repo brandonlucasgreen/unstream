@@ -1,0 +1,180 @@
+[
+  {
+    "id": "alisonkrauss",
+    "name": "Alison Krauss",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025527426_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://alisonkrauss.bandcamp.com",
+        "allReleaseTitles": [
+          "arcadia",
+          "raisetheroofrobertplantalisonkrauss",
+          "raisingsandrobertplantalisonkrauss",
+          "ahundredmilesormoreacollection",
+          "lonelyrunsbothways",
+          "livealisonkraussunionstation",
+          "newfavorite",
+          "forgetaboutit",
+          "solongsowrong",
+          "nowthativefoundyouacollection",
+          "toolatetocry"
+        ],
+        "latestRelease": {
+          "title": "Arcadia",
+          "type": "album",
+          "url": "https://alisonkrauss.bandcamp.com/album/arcadia",
+          "imageUrl": "https://f4.bcbits.com/img/a1632204736_2.jpg",
+          "releaseDate": "March 28, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Alison%20Krauss"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Alison%20Krauss"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://alisonkrauss.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/333360"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Alison%20Krauss&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Alison%20Krauss"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/alisonkrauss/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCEJaFmo1xFljXrCFEPEbhXg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Alison-krauss/247262371980250"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "robertplantalisonkrauss",
+    "name": "Robert Plant & Alison Krauss",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026868243_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://robertplantmusic.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Robert%20Plant%20%26%20Alison%20Krauss"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Robert%20Plant%20%26%20Alison%20Krauss"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://alisonkrauss.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/333360"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Robert%20Plant%20%26%20Alison%20Krauss&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Robert%20Plant%20%26%20Alison%20Krauss"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/alisonkrauss/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCEJaFmo1xFljXrCFEPEbhXg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Alison-krauss/247262371980250"
+      }
+    ],
+    "matchConfidence": "unverified"
+  },
+  {
+    "id": "qobuz-standalone-alisonkrauss",
+    "name": "Alison Krauss",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/alison-krauss/35158"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Alison%20Krauss"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Alison%20Krauss"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://alisonkrauss.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/333360"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Alison%20Krauss&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Alison%20Krauss"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/alisonkrauss/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCEJaFmo1xFljXrCFEPEbhXg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Alison-krauss/247262371980250"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

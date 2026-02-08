@@ -1,0 +1,75 @@
+[
+  {
+    "id": "qobuz-irenedunne",
+    "name": "Irene Dunne",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/irene-dunne/24702",
+        "latestRelease": {
+          "title": "Six Songs From The Pen Of Jerome Kern Irene Dunne Jerome Kern Otto Harbach Victor Young And His Orchestra Oscar Hammerstein Ii Schuyler Greene Herbert Reynolds",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/six-songs-from-the-pen-of-jerome-kern-irene-dunne-jerome-kern-otto-harbach-victor-young-and-his-orchestra-oscar-hammerstein-ii-schuyler-greene-herbert-reynolds/v5xjfg0cj0wib",
+          "releaseDate": "2021-01-13"
+        },
+        "allReleaseTitles": [
+          "sixsongsfromthepenofjeromekernjeromekernottoharbachvictoryoungandhisorchestraoscarhammersteiniischuylergreeneherbertreynolds"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Irene%20Dunne"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Irene%20Dunne"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Irene%20Dunne&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Irene%20Dunne"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-standalone-irenedunn",
+    "name": "Irene Dunn",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/irene-dunn/834468"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Irene%20Dunn"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Irene%20Dunn"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Irene%20Dunn&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Irene%20Dunn"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

@@ -1,0 +1,126 @@
+[
+  {
+    "id": "qobuz-simonesimons",
+    "name": "Simone Simons",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/simone-simons/1067623",
+        "allReleaseTitles": [
+          "vermillion",
+          "aeterna",
+          "inlovewerust",
+          "red"
+        ],
+        "latestRelease": {
+          "title": "Vermillion Simone Simons",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/vermillion-simone-simons/yjp1ehxob7v2b",
+          "releaseDate": "2024-07-18"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/simonesimons"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Simone%20Simons"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Simone%20Simons"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-simone",
+    "name": "Simone",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/simone/24960",
+        "allReleaseTitles": [
+          "50aovivo",
+          "dasistliebe",
+          "50",
+          "amigoecasaspecialeditionzeliaduncan",
+          "inmyeyes",
+          "foralittlewhileampvictoriaspandow",
+          "cantyousee",
+          "sorryseemstobethehardestword",
+          "superman",
+          "wirsindalleuber40jojoremixcharlybrunnerfelixgauder",
+          "myfamilydependsonme",
+          "endlichwiedersommer",
+          "tooloudandreyazizov",
+          "itiswhatitis",
+          "lovergirllane",
+          "manhattan",
+          "testthewaters",
+          "amar",
+          "separacao"
+        ],
+        "latestRelease": {
+          "title": "Das Ist Liebe Simone",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/das-ist-liebe-simone/dtq2pxjcal7pn",
+          "releaseDate": "2025-09-19"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Simone"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Simone"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "qobuz-simonesimon",
+    "name": "Simone Simon",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/simone-simon/26195",
+        "allReleaseTitles": [
+          "gameboy"
+        ],
+        "latestRelease": {
+          "title": "Game Boy Simone Simon",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/game-boy-simone-simon/iouu6x5t5ixdb",
+          "releaseDate": "2008-10-22"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Simone%20Simon"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Simone%20Simon"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

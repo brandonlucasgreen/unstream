@@ -1,0 +1,50 @@
+[
+  {
+    "id": "qobuz-johannchristophfriedrichbach",
+    "name": "Johann Christoph Friedrich Bach",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/johann-christoph-friedrich-bach/3143",
+        "allReleaseTitles": [
+          "worksforkeyboardsolojermainesprosse",
+          "sonataspourtraversoclavecinmarievanrhijnayumisunazaki",
+          "symphoniesnos14kolnerkammerorchesterhelmutmullerbruhl",
+          "symphoniesnos61020kolnerkammerorchesterhelmutmullerbruhl"
+        ],
+        "latestRelease": {
+          "title": "Johann Christoph Friedrich Bach Works For Keyboard Solo Jermaine Sprosse",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/johann-christoph-friedrich-bach-works-for-keyboard-solo-jermaine-sprosse/w6gvrz8sryevc",
+          "releaseDate": "2023-08-25"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Johann%20Christoph%20Friedrich%20Bach"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Johann%20Christoph%20Friedrich%20Bach"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/891597"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Johann%20Christoph%20Friedrich%20Bach&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Johann%20Christoph%20Friedrich%20Bach"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

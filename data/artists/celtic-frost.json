@@ -1,0 +1,125 @@
+[
+  {
+    "id": "qobuz-celticfrost",
+    "name": "Celtic Frost",
+    "type": "artist",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/celtic-frost/71521",
+        "allReleaseTitles": [
+          "tomegatherion",
+          "morbidtales",
+          "emperorsreturnep",
+          "tragicserenades",
+          "monotheist",
+          "intothepandemonium",
+          "innocenceandwrath",
+          "vanitynemesis",
+          "parchedwiththirstamianddying",
+          "visualaggression"
+        ],
+        "latestRelease": {
+          "title": "To Mega Therion Celtic Frost",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/to-mega-therion-celtic-frost/l392nntevx4ho",
+          "releaseDate": "1985-10-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Celtic%20Frost"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Celtic%20Frost"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.celticfrost.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/251679"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Celtic%20Frost&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Celtic%20Frost"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/celticfrostofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/celticfrostofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/CelticFrostOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  },
+  {
+    "id": "atributetocelticfrost",
+    "name": "A tribute to Celtic Frost",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033686188_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://atriburetocelticfrost.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=A%20tribute%20to%20Celtic%20Frost"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+A%20tribute%20to%20Celtic%20Frost"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.celticfrost.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/251679"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=A%20tribute%20to%20Celtic%20Frost&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/A%20tribute%20to%20Celtic%20Frost"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/celticfrostofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/celticfrostofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/CelticFrostOfficial"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]
