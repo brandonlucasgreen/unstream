@@ -1,0 +1,42 @@
+[
+  {
+    "id": "fun",
+    "name": "Fun",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0016130858_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://fun-noise-rock.bandcamp.com",
+        "allReleaseTitles": [
+          "deathstar",
+          "13",
+          "new13",
+          "zupa",
+          "szklarskaporeba",
+          "ep"
+        ],
+        "latestRelease": {
+          "title": "Death Star",
+          "type": "album",
+          "url": "https://fun-noise-rock.bandcamp.com/album/death-star",
+          "imageUrl": "https://f4.bcbits.com/img/a0442035927_2.jpg",
+          "releaseDate": "April 26, 2019"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Fun"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Fun"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

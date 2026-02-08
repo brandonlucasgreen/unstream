@@ -1,0 +1,90 @@
+[
+  {
+    "id": "piercetheveil",
+    "name": "Pierce The Veil",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039618707_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://piercetheveil.bandcamp.com",
+        "allReleaseTitles": [
+          "thejawsoflifedeluxe",
+          "karmapolice",
+          "thejawsoflifeextendedversion",
+          "thejawsoflife",
+          "passthenirvana",
+          "todayisawthewholeworldep",
+          "misadventures",
+          "collidewiththesky"
+        ],
+        "latestRelease": {
+          "title": "The Jaws Of Life (Deluxe)",
+          "type": "album",
+          "url": "https://piercetheveil.bandcamp.com/album/the-jaws-of-life-deluxe",
+          "imageUrl": "https://f4.bcbits.com/img/a3849007352_2.jpg",
+          "releaseDate": "May 9, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/pierce-the-veil/1963650",
+        "allReleaseTitles": [
+          "selfishmachinesreissue",
+          "collidewiththesky",
+          "thejawsoflife",
+          "kissmenow",
+          "karmapolice",
+          "passthenirvana",
+          "irishgoodbyefeatvicfuentesofkflayand",
+          "misadventures",
+          "todayisawthewholeworldep",
+          "kingforaday"
+        ],
+        "latestRelease": {
+          "title": "Kiss Me Now Pierce The Veil",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/kiss-me-now-pierce-the-veil/pf8iqyf4pwzic",
+          "releaseDate": "2025-05-06"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Pierce%20The%20Veil"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Pierce%20The%20Veil"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://piercetheveil.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1055467"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/piercetheveil/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@piercetheveil"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCyipvkWkNpmEQPGovalDjFA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/PierceTheVeil"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

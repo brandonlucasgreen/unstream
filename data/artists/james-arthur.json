@@ -1,0 +1,27 @@
+[
+  {
+    "id": "jamesarthur",
+    "name": "James Arthur",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0009092779_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://james-arthur.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=James%20Arthur"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+James%20Arthur"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

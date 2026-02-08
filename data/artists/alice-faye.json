@@ -1,0 +1,50 @@
+[
+  {
+    "id": "alicefaye",
+    "name": "Alice Faye",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031810995_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://alicefaye.bandcamp.com",
+        "allReleaseTitles": [
+          "sillylittlefoolep",
+          "songsformysisters",
+          "deadbeat"
+        ],
+        "latestRelease": {
+          "title": "Silly Little Fool EP",
+          "type": "album",
+          "url": "https://alicefaye.bandcamp.com/album/silly-little-fool-ep",
+          "imageUrl": "https://f4.bcbits.com/img/a4167066304_2.jpg"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Alice%20Faye"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Alice%20Faye"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/444098"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Alice%20Faye&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Alice%20Faye"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

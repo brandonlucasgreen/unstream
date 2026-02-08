@@ -1,0 +1,79 @@
+[
+  {
+    "id": "teddypendergrass",
+    "name": "Teddy Pendergrass",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025654603_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/teddy-pendergrass/212802",
+        "allReleaseTitles": [
+          "themoreigetthemoreiwantthemartinezbrothersremixthemartinezbrothers",
+          "mixmagpresentstheremixesep",
+          "lovetkobudapestsymphonyorchestra",
+          "philadelphiainternationalrecordsdimitrifromparisremixesharoldmelvinthebluenotesanddimitrifromparis",
+          "teddyexpandededition",
+          "johnmoralespresentsthevoiceremixedwithphillylovejohnmorales",
+          "tp",
+          "lifeisasongworthsingingexpandededition",
+          "theessential",
+          "",
+          "itstimeforlove",
+          "themoreigetthemoreiwantdniceremixxdnice",
+          "thischristmasidratherhavelove",
+          "joy",
+          "happykwanzaa",
+          "lovelanguage",
+          "duetslovesoul",
+          "thebestof",
+          "americanlegend",
+          "greatesthitslovetko"
+        ],
+        "latestRelease": {
+          "title": "Love Tko Teddy Pendergrass Budapest Symphony Orchestra",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/love-tko-teddy-pendergrass-budapest-symphony-orchestra/v3lz5bxoxdykc",
+          "releaseDate": "2022-11-03"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://teddypendergrass.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Teddy%20Pendergrass"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Teddy%20Pendergrass"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://teddypendergrass.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/41105"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Teddy%20Pendergrass&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Teddy%20Pendergrass"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/TeddyPendergrassMusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

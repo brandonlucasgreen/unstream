@@ -1,0 +1,39 @@
+[
+  {
+    "id": "lexbarker",
+    "name": "Lex Barker",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0010380894_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://lexbarker.bandcamp.com",
+        "allReleaseTitles": [
+          "tvojedzungle",
+          "slepedotmy",
+          "lexbarkerep"
+        ],
+        "latestRelease": {
+          "title": "Tvoje džungle",
+          "type": "album",
+          "url": "https://lexbarker.bandcamp.com/album/tvoje-d-ungle",
+          "imageUrl": "https://f4.bcbits.com/img/a2926795150_2.jpg",
+          "releaseDate": "May 22, 2017"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lex%20Barker"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lex%20Barker"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

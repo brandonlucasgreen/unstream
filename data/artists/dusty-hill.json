@@ -1,0 +1,58 @@
+[
+  {
+    "id": "dustyhill",
+    "name": "Dusty Hill",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036084035_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://dustyhill.bandcamp.com",
+        "allReleaseTitles": [
+          "someday",
+          "broken",
+          "goodtime",
+          "intotheblackmountains",
+          "live2022"
+        ],
+        "latestRelease": {
+          "title": "Someday",
+          "type": "track",
+          "url": "https://dustyhill.bandcamp.com/track/someday",
+          "imageUrl": "https://f4.bcbits.com/img/a3747250457_2.jpg",
+          "releaseDate": "May 21, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/dusty-hill/131034",
+        "allReleaseTitles": [
+          "live2022teatrogabrielamistral",
+          "ii",
+          "intotheblackmountainsdemo",
+          "someday",
+          "broken"
+        ],
+        "latestRelease": {
+          "title": "Ii Dusty Hill",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/ii-dusty-hill/h7knl6tzog4vb",
+          "releaseDate": "2025-11-05"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Dusty%20Hill"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Dusty%20Hill"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

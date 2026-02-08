@@ -1,0 +1,98 @@
+[
+  {
+    "id": "anoushkashankar",
+    "name": "Anoushka Shankar",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038390602_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://anoushkashankar.bandcamp.com",
+        "allReleaseTitles": [
+          "chapteriiiwereturntolight",
+          "chapteriihowdarkitisbeforedawn",
+          "chapteriforeverfornow",
+          "inhername",
+          "betweenus"
+        ],
+        "latestRelease": {
+          "title": "Chapter III: We Return to Light",
+          "type": "album",
+          "url": "https://anoushkashankar.bandcamp.com/album/chapter-iii-we-return-to-light",
+          "imageUrl": "https://f4.bcbits.com/img/a0133317113_2.jpg",
+          "releaseDate": "March 14, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/anoushka-shankar/166871",
+        "allReleaseTitles": [
+          "chapteriiiwereturntolight",
+          "chapteriihowdarkitisbeforedawn",
+          "chapteriforeverfornow",
+          "shankarsymphonydavidmurphylondonphilharmonicorchestra",
+          "landofgold",
+          "lovelettersps",
+          "loveletters",
+          "tracesofyounorahjones",
+          "home",
+          "thosewordsshilparaoayannawitterjohnson",
+          "newdawn",
+          "inhername",
+          "intheend",
+          "brighteyesinthismouthalevlenz",
+          "brighteyesalevlenz",
+          "lovableibeyi",
+          "tracesofyou",
+          "rise",
+          "betweenusfeatmanudelagometropoleorkestjulesbuckley"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Anoushka%20Shankar"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Anoushka%20Shankar"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.anoushkashankar.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/239658"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Anoushka%20Shankar&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Anoushka%20Shankar"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/anoushkashankarofficial/?hl=pt"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@anoushkashankarsitar"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/watch?v=t5G3SRm9BP8"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "http://facebook.com/AnoushkaShankar"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

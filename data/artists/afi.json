@@ -1,0 +1,87 @@
+[
+  {
+    "id": "afi",
+    "name": "AFI",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0021131298_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/afi/108658",
+        "allReleaseTitles": [
+          "decemberunderground",
+          "silverbleedstheblacksun",
+          "allhallowsep",
+          "thebloodalbum",
+          "singthesorrow",
+          "blacksailsinthesunset",
+          "bodies",
+          "theartofdrowning",
+          "burials",
+          "crashlove",
+          "fallenlikethesky",
+          "veryproudofya",
+          "shutyourmouthandopenyoureyes",
+          "answerthatandstayfashionable",
+          "themissingman",
+          "caught"
+        ],
+        "latestRelease": {
+          "title": "Silver Bleeds The Black Sun Afi",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/silver-bleeds-the-black-sun-afi/h303t7ysn87lc",
+          "releaseDate": "2025-10-03"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://afiofficial.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=AFI"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+AFI"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://afireinside.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/253322"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=AFI&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/AFI"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/afireinside/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@afireinside"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCWhd8smWZSFEjbnl9Bxt01Q"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/afireinside"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

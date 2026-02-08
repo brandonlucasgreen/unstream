@@ -1,0 +1,104 @@
+[
+  {
+    "id": "pod",
+    "name": "P.O.D.",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0034772193_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://payableondeath.bandcamp.com",
+        "allReleaseTitles": [
+          "veritas",
+          "whenangelsserpentsdance2022remixedremastered",
+          "circles"
+        ],
+        "latestRelease": {
+          "title": "Veritas",
+          "type": "album",
+          "url": "https://payableondeath.bandcamp.com/album/veritas",
+          "imageUrl": "https://f4.bcbits.com/img/a2509641832_2.jpg",
+          "releaseDate": "May 3, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/p-o-d/139126",
+        "allReleaseTitles": [
+          "satellite",
+          "veritas",
+          "theawakening",
+          "dontletmedown",
+          "whenangelsserpentsdance",
+          "socalsessions",
+          "iwontbowdownfeatandresgimenezfromanimalandanimal",
+          "circles",
+          "afraidtodie",
+          "dropfeatrandyblythefeaturingrandyblythe",
+          "iwontbowdown",
+          "lieswetellourselves",
+          "boomthecrystalmethodremix",
+          "greatesthitstheatlanticyears",
+          "testify",
+          "payableondeath",
+          "murderedlove"
+        ],
+        "latestRelease": {
+          "title": "Dont Let Me Down Pod",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/dont-let-me-down-pod/q3sy6xq61j7lb",
+          "releaseDate": "2025-09-25"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=P.O.D."
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+P.O.D."
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://payableondeath.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/41449"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=P.O.D.&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/P.O.D."
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/POD/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@officialpod"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/thepodchannel"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@pod"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/POD"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

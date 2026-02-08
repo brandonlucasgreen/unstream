@@ -1,0 +1,48 @@
+[
+  {
+    "id": "rebeccasugar",
+    "name": "Rebecca Sugar",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039957978_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rebeccasugar.bandcamp.com",
+        "allReleaseTitles": [
+          "lonelymagic",
+          "spiralbound"
+        ],
+        "latestRelease": {
+          "title": "Lonely Magic",
+          "type": "album",
+          "url": "https://rebeccasugar.bandcamp.com/album/lonely-magic",
+          "imageUrl": "https://f4.bcbits.com/img/a3901868134_16.jpg",
+          "releaseDate": "August 29, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rebecca-sugar/4655360",
+        "allReleaseTitles": [
+          "lonelymagic",
+          "spiralbound",
+          "hilltodieon",
+          "adventuretime"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rebecca%20Sugar"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rebecca%20Sugar"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

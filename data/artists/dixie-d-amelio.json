@@ -1,0 +1,61 @@
+[
+  {
+    "id": "dixiedamelio",
+    "name": "Dixie D'Amelio",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020752061_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://dixiedamelio.bandcamp.com",
+        "allReleaseTitles": [
+          "alettertome",
+          "wild",
+          "shouldaknownbetter",
+          "psycho",
+          "fuckboy",
+          "roommates",
+          "behappydillonfrancisremix",
+          "behappy",
+          "behappy"
+        ],
+        "latestRelease": {
+          "title": "a letter to me",
+          "type": "album",
+          "url": "https://dixiedamelio.bandcamp.com/album/a-letter-to-me",
+          "imageUrl": "https://f4.bcbits.com/img/a1362240811_2.jpg",
+          "releaseDate": "June 10, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Dixie%20D'Amelio"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Dixie%20D'Amelio"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/8023967"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/dixiedamelio/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCLOEGprmycLLbyzBj2jozLg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "Facebook - https://www.facebook.com/DixieDamelioOfficial/?ref=page_internal"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,70 @@
+[
+  {
+    "id": "dnce",
+    "name": "DNCE",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0017736347_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/dnce/2404038",
+        "allReleaseTitles": [
+          "",
+          "move",
+          "gotmegood",
+          "musicforpeoplewhobelieveinjoejonas",
+          "kissingstrangersnickiminaj",
+          "cakebytheocean",
+          "peopletopeople",
+          "dance",
+          "santaclausiscomingtotowncharlieputhhaileesteinfelddayafifthharmonyritaoratinashesabrinacarpenterjakemiller",
+          "kissingstrangersluisfonsinickiminaj",
+          "goodday"
+        ],
+        "latestRelease": {
+          "title": "Music For People Who Believe In Dnce Dnce Joe Jonas",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/music-for-people-who-believe-in-dnce-dnce-joe-jonas/uksn44hlnkxzb",
+          "releaseDate": "2024-09-20"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://dnce.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=DNCE"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+DNCE"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://dnce.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4684647"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/DNCE/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC73Vs9KZ2ugM5pX6ng_4v2w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/DNCEmusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

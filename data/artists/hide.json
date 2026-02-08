@@ -1,0 +1,86 @@
+[
+  {
+    "id": "hide",
+    "name": "HIDE",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0004766637_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://hide3.bandcamp.com",
+        "allReleaseTitles": [
+          "spitorswalloweverysoulwilltastedeath",
+          "deeperthandeathhereonearthidestroy",
+          "thewheelspinsonwardparadiselockedbehindagatehideestoc",
+          "ilickthebladeclean",
+          "suffer",
+          "hideliveatrensden81324",
+          "interiorterror",
+          "iwoulddie4u",
+          "withlovehideremixspecialinterest",
+          "mansbestfriend",
+          "liveatcafecleopatre",
+          "killyourhead",
+          "hellishere",
+          "girlongirl",
+          "castrationanxiety",
+          "hidefilmscores",
+          "blackflameep",
+          "resurrectionforcefed"
+        ],
+        "latestRelease": {
+          "title": "SPIT OR SWALLOW EVERY SOUL WILL TASTE DEATH",
+          "type": "album",
+          "url": "https://hide3.bandcamp.com/album/spit-or-swallow-every-soul-will-taste-death",
+          "imageUrl": "https://f4.bcbits.com/img/a0165777260_2.jpg",
+          "releaseDate": "September 11, 2025"
+        }
+      },
+      {
+        "sourceId": "mirlo",
+        "url": "https://mirlo.space/hide"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=HIDE"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+HIDE"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.hide-city.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/141627"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=HIDE&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/HIDE"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/hide_official_byheadwax/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/officialhide"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Official.hide"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

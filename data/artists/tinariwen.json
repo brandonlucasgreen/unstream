@@ -1,0 +1,107 @@
+[
+  {
+    "id": "tinariwen",
+    "name": "Tinariwen",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031729956_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tinariwen.bandcamp.com",
+        "allReleaseTitles": [
+          "hoggar",
+          "adalan",
+          "idrachetracesofthepast",
+          "azawad",
+          "amatssoudeluxe",
+          "amatssou",
+          "keltinariwen",
+          "arawandeenaabdelwahedremix",
+          "imidiwarenkmruremix",
+          "amassakoulremastered",
+          "theradiotisdassessionsremastered",
+          "alkhardessoufzeidhamdanremix",
+          "liveinparis",
+          "amadjar",
+          "elwan",
+          "insideoutside"
+        ],
+        "latestRelease": {
+          "title": "Hoggar",
+          "type": "album",
+          "url": "https://tinariwen.bandcamp.com/album/hoggar",
+          "imageUrl": "https://f4.bcbits.com/img/a3805357979_2.jpg"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/tinariwen/62590",
+        "allReleaseTitles": [
+          "idrachetracesofthepast",
+          "amadjar",
+          "elwan",
+          "amatssou",
+          "liveinparis",
+          "tassili",
+          "theradiotisdassessions",
+          "kel",
+          "insideoutsidejoshuatreeacousticsessions",
+          "wartilladancareywarrenellisstephenomalley",
+          "remixed",
+          "amassakoul",
+          "emmaar",
+          "sagheratassanisulafaelyas",
+          "adalan",
+          "arawan"
+        ],
+        "latestRelease": {
+          "title": "Idrache Traces Of The Past Tinariwen",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/idrache-traces-of-the-past-tinariwen/h4vg86mc48doa",
+          "releaseDate": "2024-11-15"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tinariwen"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tinariwen"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://tinariwen.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/369298"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Tinariwen&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Tinariwen"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/tinariwen/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/Tinariwen"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/tinariwenmusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

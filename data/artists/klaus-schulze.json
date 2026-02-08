@@ -1,0 +1,91 @@
+[
+  {
+    "id": "klausschulze",
+    "name": "Klaus Schulze",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028051675_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://klausschulze.bandcamp.com",
+        "allReleaseTitles": [
+          "bonvoyageliveaudimaxhamburg1981",
+          "101milkyway",
+          "deusarrakis",
+          "silhouettes",
+          "shadowlands",
+          "biginjapanliveintokyo2010",
+          "dziekujebardzovielendank",
+          "rheingoldliveattheloreley",
+          "farscape",
+          "kontinuum",
+          "moonlake",
+          "dosburgonline",
+          "areyousequenced"
+        ],
+        "latestRelease": {
+          "title": "Bon Voyage (Live Audimax Hamburg 1981)",
+          "type": "album",
+          "url": "https://klausschulze.bandcamp.com/album/bon-voyage-live-audimax-hamburg-1981",
+          "imageUrl": "https://f4.bcbits.com/img/a4192599233_2.jpg",
+          "releaseDate": "April 25, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/klaus-schulze/18997",
+        "allReleaseTitles": [
+          "101milkyway",
+          "deusarrakis",
+          "bonvoyageliveaudimaxhamburg1981",
+          "silhouettes",
+          "timewind",
+          "richardwahnfriedstonwelle",
+          "androgyn",
+          "kontinuum",
+          "vanityofsounds",
+          "richardwahnfriedsmiditation",
+          "beyondrecall",
+          "ballett34",
+          "thecrimeofsuspense",
+          "cocooning",
+          "virtualoutback",
+          "easylistening",
+          "richardwahnfriedstranceappael",
+          "biginjapanliveintokyo2010",
+          "transferstationbluemichaelshrieveandkevinshrieve",
+          "eternalthe70thbirthdayedition"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Klaus%20Schulze"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Klaus%20Schulze"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.klaus-schulze.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/10360"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Klaus%20Schulze&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Klaus%20Schulze"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

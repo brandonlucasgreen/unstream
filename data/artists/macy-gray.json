@@ -1,0 +1,68 @@
+[
+  {
+    "id": "macygray",
+    "name": "Macy Gray",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0010951525_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://macygray.bandcamp.com",
+        "allReleaseTitles": [
+          "strippedhires96khz24bit",
+          "hidethehurt",
+          "ruby",
+          "stripped"
+        ],
+        "latestRelease": {
+          "title": "Stripped (Hi-Res) 96kHz - 24bit",
+          "type": "album",
+          "url": "https://macygray.bandcamp.com/album/stripped-hi-res-96khz-24bit",
+          "imageUrl": "https://f4.bcbits.com/img/a2107878162_16.jpg",
+          "releaseDate": "November 15, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Macy%20Gray"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Macy%20Gray"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://macygrayofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/21787"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Macy%20Gray&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Macy%20Gray"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/macygray/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC-vfCyibell_51GCZAd_60A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/176046896552"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

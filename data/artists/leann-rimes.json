@@ -1,0 +1,59 @@
+[
+  {
+    "id": "leannrimes",
+    "name": "LeAnn Rimes",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0009363459_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/leann-rimes/62523",
+        "allReleaseTitles": [
+          "cantfightthemoonlightanddaveaude",
+          "howdoilive",
+          "godswork",
+          "alliwantforchristmasisyou",
+          "greatesthitschristmas",
+          "chantthehumantheholy",
+          "todayischristmasholidaythemefornbcstoday",
+          "rimes",
+          "cantfightthemoonlightdaveaudemixanddaveaude",
+          "remnants",
+          "portlandmainedonovanwoods",
+          "whatmatteredmosttyherndon",
+          "celebratemehome",
+          "lovelineremixes",
+          "jealousofmyselfdaveauderemixtenilleartsanddaveaude",
+          "thebestof",
+          "ineedyou",
+          "blue",
+          "alltimegreatesthits",
+          "youlightupmylife"
+        ],
+        "latestRelease": {
+          "title": "Greatest Hits Christmas Leann Rimes",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/greatest-hits-christmas-leann-rimes/ym7vey7bg63aa",
+          "releaseDate": "2025-11-07"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://leannrimesworld.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=LeAnn%20Rimes"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+LeAnn%20Rimes"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

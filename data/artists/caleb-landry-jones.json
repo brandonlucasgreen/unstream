@@ -1,0 +1,81 @@
+[
+  {
+    "id": "caleblandryjones",
+    "name": "Caleb Landry Jones",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0035077862_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://caleblandryjones.bandcamp.com",
+        "allReleaseTitles": [
+          "teasedwithafork",
+          "ruthmcwilliam",
+          "bagofrabbits",
+          "salmontoes",
+          "heygaryheydawndigitaldeluxe",
+          "heygaryheydawn",
+          "gadzooksvol2",
+          "gadzooksvol1",
+          "imontopoftheworld",
+          "themotherstone"
+        ],
+        "latestRelease": {
+          "title": "Teased With A Fork",
+          "type": "album",
+          "url": "https://caleblandryjones.bandcamp.com/album/teased-with-a-fork",
+          "imageUrl": "https://f4.bcbits.com/img/a0811498443_2.jpg",
+          "releaseDate": "December 6, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/caleb-landry-jones/6581890",
+        "allReleaseTitles": [
+          "heygaryheydawn",
+          "themotherstone",
+          "crockillers2",
+          "gadzooksvol2",
+          "ruthmcwilliam",
+          "gadzooksvol1",
+          "salmontoes",
+          "bagofrabbits",
+          "idigyourdog",
+          "teasedwithaforkeatthemoviewatchthechinesefood",
+          "cornmine",
+          "touchdownyolk",
+          "alliaminyouthebigworm",
+          "heydawn",
+          "imontopoftheworld",
+          "yesterdaywillcome",
+          "flagdaythemotherstone",
+          "bogie",
+          "theloon"
+        ],
+        "latestRelease": {
+          "title": "Ruth Mcwilliam Caleb Landry Jones",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/ruth-mcwilliam-caleb-landry-jones/u5836qx4iooba",
+          "releaseDate": "2024-12-06"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Caleb%20Landry%20Jones"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Caleb%20Landry%20Jones"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7290660"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

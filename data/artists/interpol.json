@@ -1,0 +1,102 @@
+[
+  {
+    "id": "interpol",
+    "name": "Interpol",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028231954_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://interpol.bandcamp.com",
+        "allReleaseTitles": [
+          "liveatthirdmanrecords",
+          "anticsthetwentiethanniversaryedition",
+          "somethingchangedwaterfromyoureyesinterpolationinterpolwaterfromyoureyes",
+          "tonijesuinterpolationinterpoljesu",
+          "passengerjeffparkerinterpolationinterpoljeffparker",
+          "bigshotcitymakayamccraveninterpolationinterpolmakayamccraven",
+          "theblackep",
+          "theothersideofmakebelieve",
+          "afinemess",
+          "marauder",
+          "elpintor",
+          "interpol",
+          "ourlovetoadmire",
+          "antics",
+          "turnonthebrightlights"
+        ],
+        "latestRelease": {
+          "title": "Live at Third Man Records",
+          "type": "album",
+          "url": "https://interpol.bandcamp.com/album/live-at-third-man-records",
+          "imageUrl": "https://f4.bcbits.com/img/a4266830349_2.jpg",
+          "releaseDate": "December 6, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/interpol/111978",
+        "allReleaseTitles": [
+          "theothersideofmakebelieve",
+          "turnonthebrightlights",
+          "marauder",
+          "liveatthirdmanrecords",
+          "bigshotcitymakayamccraven",
+          "greenwichdanielavery",
+          "somethingchangedwaterfromyoureyes",
+          "tonijesu",
+          "antics",
+          "passengerjeffparker",
+          "toni",
+          "somethingchanged",
+          "fables",
+          "granhotel",
+          "justathingandin2pol",
+          "ourlovetoadmire",
+          "elpintor"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Interpol"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Interpol"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.interpolnyc.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/71725"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Interpol&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Interpol"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/interpol/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCoZTVNXGrbWMo-zH1seGMFg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/interpol"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

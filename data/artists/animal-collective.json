@@ -1,0 +1,112 @@
+[
+  {
+    "id": "animalcollective",
+    "name": "Animal Collective",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020714410_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://anmlcollectve.bandcamp.com",
+        "allReleaseTitles": [
+          "jettyoriginalmotionpicturesoundtrack",
+          "feelslive0405",
+          "feels20thanniversary",
+          "loveonthebigscreenbuddiesontheblackboard",
+          "sungtongsliveatthetheatreatacehotel",
+          "isntitnow",
+          "defeat",
+          "spirittheyregonespirittheyvevanishedremastered2023",
+          "cherokeedennisbovellremix",
+          "timeskiffs",
+          "liveatmusicboxvillage",
+          "crestoneoriginalscore",
+          "bridgetoquiet",
+          "2nights",
+          "balletslippers",
+          "balladofreverendwarcharactersilverjewscover"
+        ],
+        "latestRelease": {
+          "title": "Jetty (Original Motion Picture Soundtrack)",
+          "type": "album",
+          "url": "https://anmlcollectve.bandcamp.com/album/jetty-original-motion-picture-soundtrack",
+          "imageUrl": "https://f4.bcbits.com/img/a1412821470_2.jpg",
+          "releaseDate": "November 17, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/animal-collective/403996",
+        "allReleaseTitles": [
+          "timeskiffs",
+          "isntitnow",
+          "feels",
+          "jetty",
+          "spirittheyregonespirittheyvevanished",
+          "centipedehz",
+          "loveonthebigscreen",
+          "feelslive0405",
+          "paintingwith",
+          "loveonthebigscreenbuddiesontheblackboard",
+          "meetingofthewaters",
+          "balletslipperslive",
+          "applesauce",
+          "theinspection",
+          "sungtongs",
+          "tangerinereef",
+          "thepainters",
+          "crestone",
+          "presterjohn",
+          "bridgetoquiet"
+        ],
+        "latestRelease": {
+          "title": "Jetty Animal Collective",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/jetty-animal-collective/zbl6y8vjtxrnb",
+          "releaseDate": "2025-11-17"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Animal%20Collective"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Animal%20Collective"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.dominorecordco.com/artists/animal-collective/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/207958"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Animal%20Collective&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Animal%20Collective"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/anmlcollective/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC6uxJO3pLbSpfop3ilockVg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/anmlcollective"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

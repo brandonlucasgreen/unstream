@@ -1,0 +1,50 @@
+[
+  {
+    "id": "johnnynash",
+    "name": "Johnny Nash",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3949494345_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://johnnynash.bandcamp.com",
+        "allReleaseTitles": [
+          "heavylightbonustracks",
+          "heavylight"
+        ],
+        "latestRelease": {
+          "title": "Heavy Light Bonus Tracks",
+          "type": "album",
+          "url": "https://johnnynash.bandcamp.com/album/heavy-light-bonus-tracks",
+          "imageUrl": "https://f4.bcbits.com/img/a3949494345_16.jpg",
+          "releaseDate": "October 8, 2014"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Johnny%20Nash"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Johnny%20Nash"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/254128"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Johnny%20Nash&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Johnny%20Nash"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

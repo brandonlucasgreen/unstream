@@ -1,0 +1,87 @@
+[
+  {
+    "id": "thexx",
+    "name": "The xx",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041731446_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thexx.bandcamp.com",
+        "allReleaseTitles": [
+          "xxdeluxe",
+          "coexistdeluxeedition",
+          "iseeyoudeluxe",
+          "iseeyou",
+          "jamiexxedits",
+          "coexist",
+          "xx"
+        ],
+        "latestRelease": {
+          "title": "xx (Deluxe)",
+          "type": "album",
+          "url": "https://thexx.bandcamp.com/album/xx-deluxe",
+          "imageUrl": "https://f4.bcbits.com/img/a3845231524_2.jpg",
+          "releaseDate": "November 19, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-xx/138965",
+        "allReleaseTitles": [
+          "xx",
+          "iseeyou",
+          "aviolentnoise",
+          "shelterjamiexx",
+          "strangerinaroomoliversim",
+          "coexist",
+          "jamiexxedits",
+          "vcrep",
+          "fictionep",
+          "crystalised",
+          "hivernremixes",
+          "basicspace"
+        ],
+        "latestRelease": {
+          "title": "I See You The Xx",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/i-see-you-the-xx/f6wto8xtm0rla",
+          "releaseDate": "2017-01-13"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20xx"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20xx"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://thexx.info/home/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1416238"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thexx/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCD53U3HUF8CJW2cRdLzQexQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thexx"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

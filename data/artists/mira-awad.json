@@ -1,0 +1,42 @@
+[
+  {
+    "id": "miraawad",
+    "name": "Mira Awad",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0004205231_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://miraawad.bandcamp.com",
+        "allReleaseTitles": [
+          "thinkofothers",
+          "miraawadritasinglemiraawadshayalon",
+          "miraawadyousefsinglemiraawadshayalon",
+          "miraawadmothersinglemiraawadshayalon",
+          "writedownsoundtrackmiraawadshayalon",
+          "bahlawanacrobat"
+        ],
+        "latestRelease": {
+          "title": "Think of others",
+          "type": "track",
+          "url": "https://miraawad.bandcamp.com/track/think-of-others",
+          "imageUrl": "https://f4.bcbits.com/img/a2683558932_2.jpg",
+          "releaseDate": "July 24, 2016"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mira%20Awad"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mira%20Awad"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

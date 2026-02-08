@@ -1,0 +1,93 @@
+[
+  {
+    "id": "mydyingbride",
+    "name": "My Dying Bride",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0035035874_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mydyingbrideofficial.bandcamp.com",
+        "allReleaseTitles": [
+          "amortalbinding",
+          "macabrecabaret",
+          "theghostoforion"
+        ],
+        "latestRelease": {
+          "title": "A Mortal Binding",
+          "type": "album",
+          "url": "https://mydyingbrideofficial.bandcamp.com/album/a-mortal-binding",
+          "imageUrl": "https://f4.bcbits.com/img/a1371520317_2.jpg",
+          "releaseDate": "April 19, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/my-dying-bride/605995",
+        "allReleaseTitles": [
+          "amortalbinding",
+          "theghostoforion",
+          "theangelthedarkriver",
+          "feelthemisery",
+          "34788complete",
+          "songsofdarknesswordsoflight",
+          "likegodsofthesun",
+          "turnloosetheswans",
+          "astheflowerswithers",
+          "trinity",
+          "amapofallourfailuresdeluxeedition",
+          "deeperdown",
+          "thedreadfulhours",
+          "alineofdeathlesskings",
+          "evinta",
+          "introducing",
+          "bringmevictory",
+          "thevoiceofthewretched",
+          "thebarghestowhitby",
+          "themanuscriptep"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=My%20Dying%20Bride"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+My%20Dying%20Bride"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://mydyingbride.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/252208"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=My%20Dying%20Bride&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/My%20Dying%20Bride"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/mydyingbride_official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCSEroJF10p_BjaVVkI45M1Q"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MyDyingBrideOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

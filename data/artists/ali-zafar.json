@@ -1,0 +1,68 @@
+[
+  {
+    "id": "alizafar",
+    "name": "Ali Zafar",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0042087532_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://alizafarpk.bandcamp.com",
+        "allReleaseTitles": [
+          "roshni",
+          "zalimnazronsealihaider",
+          "noorekhudamuhammadpbuh",
+          "karaykarayalizafarsalmanparas",
+          "qaseedaburdashareef",
+          "yaardiakh",
+          "balobatiyanfeatattaullahkhanesakhelviftattaullahkhanesakhelvi",
+          "mainnahihoon",
+          "mazaayafeathashimnawazfthashimnawaz",
+          "sushiwooferpaardealizafardannyzeefeatmykkomontana",
+          "husn",
+          "rockstarstudioversion",
+          "chaldilmerelofimix",
+          "faslonkotakalluf",
+          "raatichannalizafarxbuggsozzy",
+          "raatdinalizafarxdannyzee"
+        ],
+        "latestRelease": {
+          "title": "Roshni",
+          "type": "album",
+          "url": "https://alizafarpk.bandcamp.com/album/roshni",
+          "imageUrl": "https://f4.bcbits.com/img/a0879542834_2.jpg",
+          "releaseDate": "December 20, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ali%20Zafar"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ali%20Zafar"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3540732"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ali%20Zafar&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ali%20Zafar"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/aly.zafar/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

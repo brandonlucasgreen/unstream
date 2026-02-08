@@ -1,0 +1,91 @@
+[
+  {
+    "id": "the1975",
+    "name": "The 1975",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039072558_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://the1975.bandcamp.com",
+        "allReleaseTitles": [
+          "stillattheirverybestlivefromtheaoarenamanchester170224",
+          "beingfunnyinaforeignlanguage",
+          "notesonaconditionalform",
+          "abriefinquiryintoonlinerelationships",
+          "ilikeitwhenyousleepforyouaresobeautifulyetsounawareofit",
+          "the1975"
+        ],
+        "latestRelease": {
+          "title": "Still At Their Very Best (Live From The AO Arena, Manchester, 17.02.24)",
+          "type": "album",
+          "url": "https://the1975.bandcamp.com/album/still-at-their-very-best-live-from-the-ao-arena-manchester-170224",
+          "imageUrl": "https://f4.bcbits.com/img/a2757080263_2.jpg",
+          "releaseDate": "March 7, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-1975/882677",
+        "allReleaseTitles": [
+          "ilikeitwhenyousleepforyouaresobeautifulyetsounawareofit",
+          "notesonaconditionalform",
+          "stillatirverybestlivefromtheaoarenamanchester170224",
+          "ifyouretooshyletmeknow",
+          "jesuschrist2005godblessamerica",
+          "birthdayparty",
+          "guys",
+          "atirverybest",
+          "spinningwithcharlixcxnoromecharlixcx1975",
+          "beingfunnyinaforeignlanguage",
+          "medicine",
+          "abriefinquiryintoonlinerelationships",
+          "1975",
+          "livefromgorilla",
+          "livefromrealworldstudios",
+          "spinningagcookremixesnoromecharlixcx",
+          "milk",
+          "byyourside",
+          "iminlovewithyou"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%201975"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%201975"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://the1975.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3231113"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/the1975/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@the1975"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/The1975music"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/the1975"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

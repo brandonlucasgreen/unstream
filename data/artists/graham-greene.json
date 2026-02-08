@@ -1,0 +1,83 @@
+[
+  {
+    "id": "grahamgreene",
+    "name": "Graham Greene",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028134802_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://grahamgreene1.bandcamp.com",
+        "allReleaseTitles": [
+          "blackiethe6",
+          "funkthisshipblueonblack",
+          "symphonicasuite",
+          "symphonicapart2",
+          "symphonicapart1",
+          "redux",
+          "rageoftheinnocents",
+          "theguitarvincicode",
+          "thedanse",
+          "downdevilsroad"
+        ],
+        "latestRelease": {
+          "title": "Blackie & The 6",
+          "type": "track",
+          "url": "https://grahamgreene1.bandcamp.com/track/blackie-the-6",
+          "imageUrl": "https://f4.bcbits.com/img/a0260842957_2.jpg",
+          "releaseDate": "April 5, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/graham-greene/824680",
+        "allReleaseTitles": [
+          "brotherbear",
+          "theguitarvincicode",
+          "symphonicapt1",
+          "symphonicapt2",
+          "clubvoodoo",
+          "gaiarisingtalesofelectricromance",
+          "leapofface",
+          "waltzingmatilda",
+          "downdevilsroad",
+          "eltercerhombreabridged",
+          "thethirdman",
+          "rageoftheinnocents",
+          "thegatesofbalawat"
+        ],
+        "latestRelease": {
+          "title": "Symphonica Pt 2 Graham Greene",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/symphonica-pt-2-graham-greene/m5ivjwt8qvsjc",
+          "releaseDate": "2021-11-15"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Graham%20Greene"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Graham%20Greene"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.grahamgreenebt.org/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/812243"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/groups/46190670711"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,98 @@
+[
+  {
+    "id": "clintmansell",
+    "name": "Clint Mansell",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013200490_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://clintmansell.bandcamp.com",
+        "allReleaseTitles": [
+          "doomoriginalmotionpicturesoundtrackdeluxeedition",
+          "sharpersoundtrackfromtheappleoriginalfilm",
+          "blackmirrorsanjuniperooriginalscore"
+        ],
+        "latestRelease": {
+          "title": "Doom (Original Motion Picture Soundtrack) [Deluxe Edition]",
+          "type": "album",
+          "url": "https://clintmansell.bandcamp.com/album/doom-original-motion-picture-soundtrack-deluxe-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a4187490634_2.jpg",
+          "releaseDate": "May 3, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/clint-mansell/14008",
+        "allReleaseTitles": [
+          "loveliesbleeding",
+          "lovingvincentoriginalsoundtrackalbum",
+          "shewill",
+          "thefountainostkronosquartet",
+          "peacemakersoundtrackfromthehbormaxoriginalserieskevinkiner",
+          "outofblueoriginalmotionpicturesoundtrack",
+          "doompatrolseason1originaltelevisionsoundtrackkevinkiner",
+          "doom",
+          "berlinclintwalsh",
+          "happynewyearcolinbursteadoriginalmotionpicturesoundtrack",
+          "doompatrolseason3originaltelevisionsoundtrackkevinkiner",
+          "sharpersoundtrackfromtheappleoriginalfilm",
+          "requiemforadreamostfeaturingkronosquartet",
+          "moon",
+          "blackswan",
+          "definitelymaybeoriginalmotionpicturescore",
+          "blackmirrorsanjuniperooriginalscore",
+          "lastnightoriginalmotionpicturesoundtrack",
+          "intheearthoriginalmusic"
+        ],
+        "latestRelease": {
+          "title": "Love Lies Bleeding Clint Mansell",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/love-lies-bleeding-clint-mansell/o7w2rw707un5b",
+          "releaseDate": "2024-03-15"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Clint%20Mansell"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Clint%20Mansell"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.clintmansell.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/11140"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Clint%20Mansell&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Clint%20Mansell"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/i_was_a_teenage_clint_mansell/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/ClintMansell"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/clintmansell"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

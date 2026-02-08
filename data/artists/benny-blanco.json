@@ -1,0 +1,73 @@
+[
+  {
+    "id": "bennyblanco",
+    "name": "Benny Blanco",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0001768657_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/benny-blanco/287415",
+        "allReleaseTitles": [
+          "isaidiloveyoufirstselenagomez",
+          "callmewhenyoubreakupgracieabramsselenagomez",
+          "isaidiloveyoufirstandyousaiditbackselenagomez",
+          "lonelyjustinbieber",
+          "lonelyjustinbieber",
+          "unlearngracieabrams",
+          "baddecisionsbtssnoopdogg",
+          "realshitjuicewrld",
+          "friendskeepsecrets2",
+          "youmarshmellovancejoy"
+        ],
+        "latestRelease": {
+          "title": "I Said I Love You First And You Said It Back Benny Blanco Selena Gomez",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/i-said-i-love-you-first-and-you-said-it-back-benny-blanco-selena-gomez/s3t2cjp63a5lb",
+          "releaseDate": "2025-05-02"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bennyblancovisionz.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Benny%20Blanco"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Benny%20Blanco"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://benny-blanco.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1388566"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/itsbennyblanco/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@itsbennyblanco"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCqrBKQHQVEvD2Q9FP0DCP2g"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/itsbennyblanco"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

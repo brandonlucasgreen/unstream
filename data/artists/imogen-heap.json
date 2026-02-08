@@ -1,0 +1,77 @@
+[
+  {
+    "id": "imogenheap",
+    "name": "Imogen Heap",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019106901_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://imogenheap.bandcamp.com",
+        "allReleaseTitles": [
+          "lastnightofanempire",
+          "phaseandflow",
+          "thequiet",
+          "magicme",
+          "thehappysong",
+          "tinyhuman",
+          "speakforyourselfdeluxeversion",
+          "speakforyourselfstandardversion",
+          "speakforyourselfinstrumentalversion"
+        ],
+        "latestRelease": {
+          "title": "Last Night Of An Empire",
+          "type": "album",
+          "url": "https://imogenheap.bandcamp.com/album/last-night-of-an-empire",
+          "imageUrl": "https://f4.bcbits.com/img/a0964208732_2.jpg",
+          "releaseDate": "December 11, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Imogen%20Heap"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Imogen%20Heap"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://imogenheap.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/82224"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Imogen%20Heap&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Imogen%20Heap"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/imogenheap/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@imogenheap"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC07ZTiBUTi6qMu74EGZY8DA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/imogenheap"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

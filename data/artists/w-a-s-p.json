@@ -1,0 +1,111 @@
+[
+  {
+    "id": "wasp",
+    "name": "W.A.S.P.",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011745138_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://wasp.bandcamp.com",
+        "allReleaseTitles": [
+          "reidolizedthesoundtracktothecrimsonidol",
+          "babylon",
+          "dominator",
+          "golgotha"
+        ],
+        "latestRelease": {
+          "title": "ReIdolized (The Soundtrack to the Crimson Idol)",
+          "type": "album",
+          "url": "https://wasp.bandcamp.com/album/reidolized-the-soundtrack-to-the-crimson-idol",
+          "imageUrl": "https://f4.bcbits.com/img/a0236720346_16.jpg",
+          "releaseDate": "February 2, 2018"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/w-a-s-p/605971",
+        "allReleaseTitles": [
+          "bonustracksandbsides",
+          "",
+          "thecrimsonidol",
+          "insidetheelectriccircus",
+          "reidolizedthesoundtracktothecrimsonidol",
+          "thebestofthebest",
+          "thelastcommand",
+          "golgotha",
+          "unholyterror",
+          "babylon",
+          "thesting",
+          "talesofstingsandarrows",
+          "dominator",
+          "liveintheraw",
+          "dyingfortheworld",
+          "theneongod",
+          "theneongodpt1therise",
+          "firstbloodlastcuts",
+          "theneongodthedemisept2"
+        ],
+        "latestRelease": {
+          "title": "Bonus Tracks And B Sides Wasp",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/bonus-tracks-and-b-sides-wasp/zbm3gqpbj5uic",
+          "releaseDate": "2025-02-14"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=W.A.S.P."
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+W.A.S.P."
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.waspnation.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/267066"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=W.A.S.P.&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/W.A.S.P."
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/waspnationofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@waspnationofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/WASPNationOfficial"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@waspnationofficial"
+      },
+      {
+        "sourceId": "mastodon",
+        "url": "https://siteassets.parastorage.com/pages/pages/thunderbolt?appDefinitionIdToSiteRevision=%7B%2214bcded7-0066-7c35-14d7-466cb3f09103%22%3A%221335%22%2C%2214271d6f-ba62-d045-549b-ab972ae1f70e%22%3A%2225%22%7D&beckyExperiments=.DatePickerPortal%2C.DisableDocumentScrollWhenLightBoxOpen%2C.EnableCustomCSSVarsForLoginSocialBar%2C.FreemiumBannerOdeditor%2C.LoginBarEnableLoggingInStateInSSR%2C.TextInputAutoFillFix%2C.UseLoginSocialBarCustomMenu%2C.UseNewLoginSocialBarCustomMenuPositioning%2C.UseNewLoginSocialBarElementStructure%2C.UseNewLoginSocialBarMemberInitialsAvatar%2C.VerticalMenu_uiType_NativeMapper%2C.WixFreeSiteBannerDesktop%2C.WixFreeSiteBannerMobile%2C.buttonUdp%2C.calculateCollapsibleTextLineHeightByFont%2C.disableBuilderWixComponents%2C.dom_store%2C.dynamicSlots%2C.fiveGridLineStudioSkins%2C.imageEncodingAVIF%2C.isClassNameToRootEnabled%2C.motionTimeAnimationsCSS%2C.propsCarmiMappersMigration1%2C.propsCarmiMappersMigration4%2C.propsCarmiMappersMigration5%2C.shouldUseResponsiveImages%2C.svgResolver_2%2C.takeAppDependenciesFromCSM%2C.updateRichTextSemanticClassNamesOnCorvid%2C.useClassnameInResponsiveAppWidget%2C.useImageAvifFormatInNativeProGallery%2C.useResponsiveImgClassicFixed%2C.useSvgLoaderFeature%2C.useSvgLoaderFeatureOnBuilderComps&blocksBuilderManifestGeneratorVersion=1.129.0&contentType=application%2Fjson&deviceType=Desktop&dfCk=6&dfVersion=1.5263.0&disableStaticPagesUrlHierarchy=false&editorName=Unknown&experiments=dm_bgScrubToMotionFixer%2Cdm_masterPageVariablesQueryFixer%2Cdm_migrateOldHoverBoxToNewFixer&externalBaseUrl=https%3A%2F%2Fwww.waspnation.com&fileId=62b974ff.bundle.min&formFactor=desktop&hasTPAWorkerOnSite=false&hasUserDomainMedia=false&isBuilderComponentModel=false&isHttps=true&isInSeo=false&isMultilingualEnabled=false&isPremiumDomain=true&isTrackClicksAnalyticsEnabled=false&isUrlMigrated=true&isWixCodeOnPage=false&isWixCodeOnSite=false&language=en&languageResolutionMethod=QueryParam&metaSiteId=1ec5205a-c43c-45bf-99df-61f13db3eb87&module=thunderbolt-features&oneDocEnabled=true&originalLanguage=en&pageId=6af7da_38b43ee8af641a859950bf1fe4c3b3ce_440.json&pilerExperiments=specs.piler.useEditorReactComponents&quickActionsMenuEnabled=false&registryLibrariesTopology=%5B%7B%22artifactId%22%3A%22editor-elements%22%2C%22namespace%22%3A%22wixui%22%2C%22url%22%3A%22https%3A%2F%2Fstatic.parastorage.com%2Fservices%2Feditor-elements%2F1.14878.0%22%7D%2C%7B%22artifactId%22%3A%22editor-elements%22%2C%22namespace%22%3A%22dsgnsys%22%2C%22url%22%3A%22https%3A%2F%2Fstatic.parastorage.com%2Fservices%2Feditor-elements%2F1.14878.0%22%7D%5D&remoteWidgetStructureBuilderVersion=1.251.0&siteId=f57b81a9-690c-440b-9fbe-805941facd85&siteRevision=440&staticHTMLComponentUrl=https%3A%2F%2Fwww-waspnation-com.filesusr.com%2F&useSandboxInHTMLComp=false&viewMode=desktop"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/W.A.S.P.Nation"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

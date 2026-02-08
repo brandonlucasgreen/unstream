@@ -1,0 +1,97 @@
+[
+  {
+    "id": "pulp",
+    "name": "Pulp",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039274534_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://pulpmusic.bandcamp.com",
+        "allReleaseTitles": [
+          "themancomesaround",
+          "more",
+          "dogsareeverywhereep",
+          "freaks",
+          "it",
+          "separations"
+        ],
+        "latestRelease": {
+          "title": "The Man Comes Around",
+          "type": "track",
+          "url": "https://pulpmusic.bandcamp.com/track/the-man-comes-around",
+          "imageUrl": "https://f4.bcbits.com/img/a0038734502_2.jpg",
+          "releaseDate": "November 24, 2025"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/pulpradioshow"
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/pulp/51294",
+        "allReleaseTitles": [
+          "more",
+          "spikeisland",
+          "differentclass",
+          "gottohavelove",
+          "themancomesaround",
+          "differentclassdeluxeedition",
+          "hisnhers",
+          "separations",
+          "afteryou",
+          "thisishardcore",
+          "introthegiftrecordings",
+          "freaks",
+          "it",
+          "welovelife",
+          "hits"
+        ],
+        "latestRelease": {
+          "title": "More Pulp",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/more-pulp/h20z9j8aootqa",
+          "releaseDate": "2025-06-06"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Pulp"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Pulp"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://web.archive.org/web/19970715205045/http://www.rise.co.uk/pulp/homepage.html"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2811"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Pulp&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Pulp"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/PulpVEVO"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pulppeople"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

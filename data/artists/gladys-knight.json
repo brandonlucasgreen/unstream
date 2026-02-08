@@ -1,0 +1,73 @@
+[
+  {
+    "id": "gladysknight",
+    "name": "Gladys Knight",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024522854_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://gladysknight.bandcamp.com",
+        "allReleaseTitles": [
+          "iwantthatkindoflove",
+          "themaxxsingles",
+          "letterfulloftearsgladysknightthepips",
+          "gladysknightthepipsgladysknightthepips",
+          "stopandgetaholdofmyselfwhoknowsgladysknightthepips",
+          "tellheryouremineifishouldeverfallinlovegladysknightthepips",
+          "eitherwayilosegoawaystayawaygladysknightthepips",
+          "givingupmaybemaybebabygladysknightthepips",
+          "loversalwaysforgiveanotherlovegladysknightthepips"
+        ],
+        "latestRelease": {
+          "title": "I Want That Kind Of Love",
+          "type": "album",
+          "url": "https://gladysknight.bandcamp.com/album/i-want-that-kind-of-love",
+          "imageUrl": "https://f4.bcbits.com/img/a1201044479_2.jpg",
+          "releaseDate": "December 11, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Gladys%20Knight"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Gladys%20Knight"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://gladysknight.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/135244"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Gladys%20Knight&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Gladys%20Knight"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/msgladysknight"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC5TQdoadyzC48CUDc95m0iw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/msgladysknight"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

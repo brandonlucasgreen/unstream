@@ -1,0 +1,105 @@
+[
+  {
+    "id": "deedeebridgewater",
+    "name": "Dee Dee Bridgewater",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039571449_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://deedeebridgewater.bandcamp.com",
+        "allReleaseTitles": [
+          "elementaldeedeebridgewaterandbillcharlap",
+          "midnightsun",
+          "keepingtradition",
+          "liveinparis",
+          "jaideuxamours",
+          "eleanorafagan19151959tobilliewithlovefromdeedeebridgewater",
+          "redearthamalianjourney",
+          "victimoflove",
+          "thisisnew",
+          "loveandpeaceatributetohoracesilver",
+          "inmontreux",
+          "liveatyoshis",
+          "dearella"
+        ],
+        "latestRelease": {
+          "title": "Elemental\n                \n                \n\n                Dee Dee Bridgewater and Bill Charlap",
+          "type": "album",
+          "url": "https://deedeebridgewater.bandcamp.com/album/elemental",
+          "imageUrl": "https://f4.bcbits.com/img/a1058856810_2.jpg",
+          "releaseDate": "June 13, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/dee-dee-bridgewater/51249",
+        "allReleaseTitles": [
+          "elementalbillcharlap",
+          "memphisyesimready",
+          "preludetoakissthedukeellingtonalbumhollywoodbowlorchestrajohnmauceri",
+          "deedeesfeathersirvinmayfieldtheneworleansjazzorchestra",
+          "hounddog",
+          "icantstandtherain",
+          "whyamitreatedsobad",
+          "afroblue",
+          "liveatyoshis",
+          "jaideuxamours",
+          "dearella",
+          "redearth",
+          "thisisnew",
+          "justfamily",
+          "",
+          "loveandpeaceatributetohoracesilver"
+        ],
+        "latestRelease": {
+          "title": "Elemental Dee Dee Bridgewater Bill Charlap",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/elemental-dee-dee-bridgewater-bill-charlap/j2oll9wha5j9a",
+          "releaseDate": "2025-06-13"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Dee%20Dee%20Bridgewater"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Dee%20Dee%20Bridgewater"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.deedeebridgewater.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/33528"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Dee%20Dee%20Bridgewater&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Dee%20Dee%20Bridgewater"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/deedeebridgewater/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/DDBPRODS"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/deedeebridgewater"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

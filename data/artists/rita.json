@@ -1,0 +1,43 @@
+[
+  {
+    "id": "rita",
+    "name": "Rita",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0010200607_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ritanj.bandcamp.com",
+        "allReleaseTitles": [
+          "penpalseriesbeverlytenderrita",
+          "spiltmilk",
+          "youaremakingmedopesickdemo"
+        ],
+        "latestRelease": {
+          "title": "Pen Pal Series: Beverly Tender / Rita",
+          "type": "album",
+          "url": "https://ritanj.bandcamp.com/album/pen-pal-series-beverly-tender-rita",
+          "imageUrl": "https://f4.bcbits.com/img/a3282983826_2.jpg",
+          "releaseDate": "March 18, 2016"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/u52030581"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rita"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rita"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

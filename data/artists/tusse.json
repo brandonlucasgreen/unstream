@@ -1,0 +1,75 @@
+[
+  {
+    "id": "tusse",
+    "name": "Tusse",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0015218028_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/tusse/4485733",
+        "allReleaseTitles": [
+          "iwannabesomeonewhosloved",
+          "motherlandtoussaintchizathandachoir",
+          "voices",
+          "dreamofgold",
+          "thisisourchristmassong",
+          "happinessbeforeloveep",
+          "happinessbeforelove",
+          "iwontspendchristmasonmyownaprilsnow",
+          "grow",
+          "home",
+          "gottoriseup",
+          "innandugar"
+        ],
+        "latestRelease": {
+          "title": "Motherland Toussaint Chiza Tusse Thanda Choir",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/motherland-toussaint-chiza-tusse-thanda-choir/fjszqbanut66b",
+          "releaseDate": "2026-01-09"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tusse.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tusse"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tusse"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://tusseofc.wixsite.com/home"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7506932"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/tusseofc/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCt-paOPr5gupnyxZ3G286rA"
+      },
+      {
+        "sourceId": "mastodon",
+        "url": "https://siteassets.parastorage.com/pages/pages/thunderbolt?appDefinitionIdToSiteRevision=%7B%2214bcded7-0066-7c35-14d7-466cb3f09103%22%3A%221335%22%7D&beckyExperiments=.DatePickerPortal%2C.DisableDocumentScrollWhenLightBoxOpen%2C.EnableCustomCSSVarsForLoginSocialBar%2C.FreemiumBannerOdeditor%2C.LoginBarEnableLoggingInStateInSSR%2C.TextInputAutoFillFix%2C.UseLoginSocialBarCustomMenu%2C.UseNewLoginSocialBarCustomMenuPositioning%2C.UseNewLoginSocialBarElementStructure%2C.UseNewLoginSocialBarMemberInitialsAvatar%2C.VerticalMenu_uiType_NativeMapper%2C.WixFreeSiteBannerDesktop%2C.WixFreeSiteBannerMobile%2C.buttonUdp%2C.calculateCollapsibleTextLineHeightByFont%2C.disableBuilderWixComponents%2C.dom_store%2C.dynamicSlots%2C.fiveGridLineStudioSkins%2C.imageEncodingAVIF%2C.isClassNameToRootEnabled%2C.motionTimeAnimationsCSS%2C.propsCarmiMappersMigration1%2C.propsCarmiMappersMigration4%2C.propsCarmiMappersMigration5%2C.shouldUseResponsiveImages%2C.svgResolver_2%2C.takeAppDependenciesFromCSM%2C.updateRichTextSemanticClassNamesOnCorvid%2C.useClassnameInResponsiveAppWidget%2C.useImageAvifFormatInNativeProGallery%2C.useResponsiveImgClassicFixed%2C.useSvgLoaderFeature%2C.useSvgLoaderFeatureOnBuilderComps&blocksBuilderManifestGeneratorVersion=1.129.0&commonConfig=%7B%22siteRevision%22%3A%224%22%2C%22branchId%22%3A%222c04300b-f102-4a50-bacd-38e9bcbe2aa5%22%7D&contentType=application%2Fjson&deviceType=Other&dfCk=6&dfVersion=1.5263.0&disableStaticPagesUrlHierarchy=false&editorName=Unknown&experiments=dm_bgScrubToMotionFixer%2Cdm_masterPageVariablesQueryFixer%2Cdm_migrateOldHoverBoxToNewFixer&externalBaseUrl=https%3A%2F%2Ftusseofc.wixsite.com%2Fhome&fileId=62b974ff.bundle.min&formFactor=desktop&freemiumBanner=true&hasTPAWorkerOnSite=false&hasUserDomainMedia=false&isBuilderComponentModel=false&isHttps=true&isInSeo=false&isMultilingualEnabled=false&isTrackClicksAnalyticsEnabled=false&isUrlMigrated=true&isWixCodeOnPage=false&isWixCodeOnSite=false&language=sv&languageResolutionMethod=QueryParam&metaSiteId=5e5f0ccb-4092-469a-afbb-41d34a9ce4f0&module=thunderbolt-features&oneDocEnabled=true&originalLanguage=sv&pageId=2cf449_ca14b9a3563871db000f1d91f30e21c7_3.json&pilerExperiments=specs.piler.useEditorReactComponents&quickActionsMenuEnabled=false&registryLibrariesTopology=%5B%7B%22artifactId%22%3A%22editor-elements%22%2C%22namespace%22%3A%22wixui%22%2C%22url%22%3A%22https%3A%2F%2Fstatic.parastorage.com%2Fservices%2Feditor-elements%2F1.14878.0%22%7D%2C%7B%22artifactId%22%3A%22editor-elements%22%2C%22namespace%22%3A%22dsgnsys%22%2C%22url%22%3A%22https%3A%2F%2Fstatic.parastorage.com%2Fservices%2Feditor-elements%2F1.14878.0%22%7D%5D&remoteWidgetStructureBuilderVersion=1.251.0&siteId=a1677b55-3c8c-420d-be6a-311fc8739e8b&siteRevision=4&staticHTMLComponentUrl=https%3A%2F%2Ftusseofc-wixsite-com.filesusr.com%2F&useSandboxInHTMLComp=true&viewMode=desktop"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/TUSSEOFFICIAL/?ref=br_rs"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,85 @@
+[
+  {
+    "id": "raekwon",
+    "name": "RAEKWON",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a0255671175_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/raekwon/114668",
+        "allReleaseTitles": [
+          "theemperorsnewclothes",
+          "onlybuilt4cubanlinx",
+          "hitdifferentswervestricklandampampmonteasy",
+          "theomertanas",
+          "nextchamberfeatmethodmanwilliethekidpeterrosenberg",
+          "ithanksthelordfeatkrossjoeymajorsscramjones",
+          "walkinnygrafhvado",
+          "epicenterugodinspectahdeck",
+          "alleylarksfeatankhlejohnbanecapitalampampkonceptjackon",
+          "onlybuilt4cubanlinx2",
+          "immobilarity",
+          "thisiswhatitcomestooremixfeatghostfacekillah",
+          "thewild",
+          "shaolinvswutang"
+        ],
+        "latestRelease": {
+          "title": "Hit Different Swerve Strickland Amp Raekwon Amp Monteasy",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/hit-different-swerve-strickland-amp-raekwon-amp-monteasy/pm2mt4lbodfk0",
+          "releaseDate": "2025-12-10"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://raekwon13.bandcamp.com"
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/raekwon"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=RAEKWON"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+RAEKWON"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.officialraekwon.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/100558"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=RAEKWON&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/RAEKWON"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/raekwon/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCE7CGq5CJQGA7V287kvs-aw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Raekwonmusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

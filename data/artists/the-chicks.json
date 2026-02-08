@@ -1,0 +1,80 @@
+[
+  {
+    "id": "thechicks",
+    "name": "The Chicks",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019738920_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-chicks-1/7453880",
+        "latestRelease": {
+          "title": "Taking The Long Way The Chicks",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/taking-the-long-way-the-chicks/0888880636034",
+          "releaseDate": "2006-04-07"
+        },
+        "allReleaseTitles": [
+          "fly",
+          "takingthelongway",
+          "home",
+          "theessentialthechicks",
+          "wideopenspaces",
+          "gaslighter",
+          "thesoundofmonothechicks",
+          "theclassicalbumscollection",
+          "topoftheworldtourlive",
+          "dcxmmxvilive",
+          "marchmarch",
+          "playlisttheverybestofthechicks",
+          "juliannacalmdown"
+        ]
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thechicksnz.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Chicks"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Chicks"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://thechicks.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/299586"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Chicks&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Chicks"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thechicks/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCCiF68IcKFzbQmQaittzMKg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thechicks"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

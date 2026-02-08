@@ -1,0 +1,31 @@
+[
+  {
+    "id": "jukkanevalainen",
+    "name": "Jukka Nevalainen",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038216756_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jukkanevalainen.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jukka%20Nevalainen"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jukka%20Nevalainen"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/450410"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

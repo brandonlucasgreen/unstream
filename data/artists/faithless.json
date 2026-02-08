@@ -1,0 +1,70 @@
+[
+  {
+    "id": "faithless",
+    "name": "Faithless",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025708723_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://faithlessnyhc.bandcamp.com",
+        "allReleaseTitles": [
+          "thefinalhour",
+          "demo"
+        ],
+        "latestRelease": {
+          "title": "The Final Hour",
+          "type": "album",
+          "url": "https://faithlessnyhc.bandcamp.com/album/the-final-hour",
+          "imageUrl": "https://f4.bcbits.com/img/a0799365826_16.jpg",
+          "releaseDate": "August 5, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Faithless"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Faithless"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.faithless.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4118"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Faithless&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Faithless"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/faithlessofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@faithlessofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/faithlesssound"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Faithless"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,69 @@
+[
+  {
+    "id": "gabriellacilmi",
+    "name": "Gabriella Cilmi",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024694083_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/gabriella-cilmi/56576",
+        "allReleaseTitles": [
+          "lessonstobelearned",
+          "thesting",
+          "thewaterep",
+          "onamission",
+          "symmetry",
+          "keeponkeeping",
+          "ruins",
+          "dannynedelko",
+          "thewater",
+          "sanctuary"
+        ],
+        "latestRelease": {
+          "title": "The Water Ep Gabriella Cilmi",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-water-ep-gabriella-cilmi/ilhg6jnvs74ob",
+          "releaseDate": "2019-11-01"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://gabriellacilmi.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Gabriella%20Cilmi"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Gabriella%20Cilmi"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.gabriellacilmi.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1010025"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://instagram.com/gabriellacilmi"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/Gabriellacilmi"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/gabriellacilmiofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

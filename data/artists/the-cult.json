@@ -1,0 +1,109 @@
+[
+  {
+    "id": "thecult",
+    "name": "The Cult",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027599488_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thecult.bandcamp.com",
+        "allReleaseTitles": [
+          "paradiselivedeathcult",
+          "hiddencity",
+          "choiceofweapon",
+          "loveexpandededition",
+          "bestofrarecult",
+          "purecult",
+          "livecultmarqueelondonmcmxci",
+          "thecult",
+          "electric",
+          "sonictemple",
+          "dreamtime",
+          "ceremony",
+          "sonictemple30thanniversary",
+          "love",
+          "ghostdance",
+          "thesoutherndeathcult"
+        ],
+        "latestRelease": {
+          "title": "Paradise Live\n                \n                \n\n                Death Cult",
+          "type": "album",
+          "url": "https://thecult.bandcamp.com/album/paradise-live",
+          "imageUrl": "https://f4.bcbits.com/img/a0976575976_2.jpg",
+          "releaseDate": "January 16, 2026"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-cult/384525",
+        "allReleaseTitles": [
+          "dreamtime",
+          "underthemidnightsun",
+          "deathcult8323",
+          "love",
+          "sonictemple",
+          "electric",
+          "hinterland",
+          "purecult",
+          "shesellssanctuary",
+          "resurrectionjoe",
+          "loveremovalmachine",
+          "ceremony",
+          "livecultmarqueelondonmcmxci",
+          "firewoman",
+          "rain",
+          "wildflower",
+          "beyondgoodandevil"
+        ],
+        "latestRelease": {
+          "title": "Death Cult 8323 The Cult",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/death-cult-8323-the-cult/idap29fpg0jqa",
+          "releaseDate": "2023-12-13"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Cult"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Cult"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.thecult.us/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/15266"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Cult&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Cult"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/officialcult/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/TheCULTofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialcult"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

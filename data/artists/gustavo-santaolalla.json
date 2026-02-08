@@ -1,0 +1,62 @@
+[
+  {
+    "id": "gustavosantaolalla",
+    "name": "Gustavo Santaolalla",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0021741530_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://gustavosantaolalla.bandcamp.com",
+        "allReleaseTitles": [
+          "finchsoundtrackfromtheappleoriginalfilm",
+          "monsterlandoriginalseriessoundtrack"
+        ],
+        "latestRelease": {
+          "title": "Finch (Soundtrack From The Apple Original Film)",
+          "type": "album",
+          "url": "https://gustavosantaolalla.bandcamp.com/album/finch-soundtrack-from-the-apple-original-film",
+          "imageUrl": "https://f4.bcbits.com/img/a0236407706_16.jpg",
+          "releaseDate": "October 21, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Gustavo%20Santaolalla"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Gustavo%20Santaolalla"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/205272"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Gustavo%20Santaolalla&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Gustavo%20Santaolalla"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/gustavosantaolalla/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCa38HkuUiibKmC4LwoBO8Ag"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/gustavosantaolalla"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

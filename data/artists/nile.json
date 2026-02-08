@@ -1,0 +1,98 @@
+[
+  {
+    "id": "nile",
+    "name": "NILE",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036154616_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://nile.bandcamp.com",
+        "allReleaseTitles": [
+          "theunderworldawaitsusall",
+          "legacyofthecatacombs",
+          "annihilationofthewicked",
+          "intheirdarkenedshrines",
+          "blackseedsofvengeance",
+          "amongstthecatacombsofnephrenka",
+          "ramsesbringerofwar",
+          "festivalsofatonement"
+        ],
+        "latestRelease": {
+          "title": "The Underworld Awaits Us All",
+          "type": "album",
+          "url": "https://nile.bandcamp.com/album/the-underworld-awaits-us-all",
+          "imageUrl": "https://f4.bcbits.com/img/a1266838029_2.jpg",
+          "releaseDate": "August 23, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/nile/555803",
+        "allReleaseTitles": [
+          "theunderworldawaitsusall",
+          "vileniloticrites",
+          "whatshouldnotbeunearthed",
+          "violetdream",
+          "makeyousmile",
+          "qwerty",
+          "thosewhomthegodsdetest",
+          "ithyphallic",
+          "annihilationofthewicked",
+          "atthegateofsethu",
+          "amongstthecatacombsofnephrenka",
+          "intheirdarkenedshrines",
+          "blackseedsofvengence",
+          "legacyofthecatacombs",
+          "worshiptheanimal",
+          "chapterfornotbeinghungupsidedownonastakeintheunderworldandmadetoeatfecesbythefourapes",
+          "worshiptheanimal1994thelostrecordings",
+          "runegrungmarksmanjavdon",
+          "underthecurseoftheonegod",
+          "tostrikewithsecretfang"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=NILE"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+NILE"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.nile-catacombs.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/37220"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=NILE&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/NILE"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/nile_official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/nile"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/nilecatacombs"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

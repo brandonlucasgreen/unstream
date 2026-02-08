@@ -1,0 +1,55 @@
+[
+  {
+    "id": "pauldianno",
+    "name": "Paul DiAnno",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0029356401_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://pauldianno.bandcamp.com",
+        "allReleaseTitles": [
+          "talesfromthebeastdeluxeedition",
+          "wrathchildtheanthology",
+          "talesfromthebeast"
+        ],
+        "latestRelease": {
+          "title": "Tales From The Beast - Deluxe Edition",
+          "type": "album",
+          "url": "https://pauldianno.bandcamp.com/album/tales-from-the-beast-deluxe-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a3288346103_2.jpg",
+          "releaseDate": "December 26, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Paul%20DiAnno"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Paul%20DiAnno"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.pauldianno.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/397979"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Paul%20DiAnno&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Paul%20DiAnno"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

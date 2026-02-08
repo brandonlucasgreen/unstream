@@ -1,0 +1,67 @@
+[
+  {
+    "id": "maksim",
+    "name": "Maksim",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018899424_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://maksim1.bandcamp.com",
+        "allReleaseTitles": [
+          "sandstorm",
+          "lunarmax",
+          "earlyspring"
+        ],
+        "latestRelease": {
+          "title": "Sandstorm",
+          "type": "track",
+          "url": "https://maksim1.bandcamp.com/track/sandstorm",
+          "imageUrl": "https://f4.bcbits.com/img/a0973787838_2.jpg",
+          "releaseDate": "May 6, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Maksim"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Maksim"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.maksim.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/699054"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Maksim&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Maksim"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://instagram.com/maksimmrvicaofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://youtube.com/@pianistmaksim?si=lXBqkq7eZGReD0NK"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/share/xaooRyeoA4h8rQne/?mibextid=LQQJ4d"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

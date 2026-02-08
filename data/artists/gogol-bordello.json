@@ -1,0 +1,98 @@
+[
+  {
+    "id": "gogolbordello",
+    "name": "Gogol Bordello",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041721096_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://gogolbordello.bandcamp.com",
+        "allReleaseTitles": [
+          "wemeanitman",
+          "supertaranta15yearanniversaryedition",
+          "solidaritine",
+          "forcesofvictory",
+          "teroborona",
+          "seekersandfinders",
+          "eastinfection",
+          "multikontracultivsirony",
+          "voilaintruder"
+        ],
+        "latestRelease": {
+          "title": "We Mean It, Man!",
+          "type": "album",
+          "url": "https://gogolbordello.bandcamp.com/album/we-mean-it-man",
+          "imageUrl": "https://f4.bcbits.com/img/a2841942266_2.jpg"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/gogol-bordello/299899",
+        "allReleaseTitles": [
+          "solidaritine",
+          "seekersandfinders",
+          "takeonlywhatyoucancarry",
+          "takeonlywhatyoucancarryfeatkazka",
+          "forcesofvictory",
+          "forcesofvictorykazkaserhiyzhadan",
+          "haterliquidator",
+          "wemeanitman",
+          "ignition",
+          "focuscoin",
+          "teroborona",
+          "raveneugenehutz",
+          "walkingontheburningcoal",
+          "saboteurblues"
+        ],
+        "latestRelease": {
+          "title": "Solidaritine Gogol Bordello",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/solidaritine-gogol-bordello/y53cjx30p49ab",
+          "releaseDate": "2022-09-16"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Gogol%20Bordello"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Gogol%20Bordello"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.gogolbordello.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/192610"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Gogol%20Bordello&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Gogol%20Bordello"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/gogolbordello/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCMIR3hEDm2gMtN8DfgvS-yQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/gogolbordello"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

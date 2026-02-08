@@ -1,0 +1,66 @@
+[
+  {
+    "id": "eimearquinn",
+    "name": "Eimear Quinn",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041716962_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://eimearquinn.bandcamp.com",
+        "allReleaseTitles": [
+          "eriu",
+          "songsofwinterdreaming"
+        ],
+        "latestRelease": {
+          "title": "Ériu",
+          "type": "album",
+          "url": "https://eimearquinn.bandcamp.com/album/riu",
+          "imageUrl": "https://f4.bcbits.com/img/a0678451586_16.jpg",
+          "releaseDate": "November 26, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/eimear-quinn/575595",
+        "allReleaseTitles": [
+          "eriu",
+          "thevoiceacapella",
+          "naiadesofnymphessarahclass",
+          "gatherings",
+          "wintersolstice",
+          "oholynight",
+          "songsofwinterdreaming",
+          "throughthelensofatear",
+          "avemaria",
+          "thevoice2020",
+          "breathupontheflamebreathupontheflameampampwilliampalmer",
+          "songofwinterdreaming",
+          "thewatchman",
+          "peaceuponthislandfeatgavanringbreathupontheflameampampwilliampalmer",
+          "winterfireandsnow",
+          "themother"
+        ],
+        "latestRelease": {
+          "title": "Naiades Of Nymphes Sarah Class Eimear Quinn",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/naiades-of-nymphes-sarah-class-eimear-quinn/dz9x4bfz1tnyb",
+          "releaseDate": "2022-07-22"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Eimear%20Quinn"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Eimear%20Quinn"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

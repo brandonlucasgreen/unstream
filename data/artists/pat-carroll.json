@@ -1,0 +1,95 @@
+[
+  {
+    "id": "patcarroll",
+    "name": "Pat Carroll",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030987204_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://patcarroll.bandcamp.com",
+        "allReleaseTitles": [
+          "timevialspart3",
+          "timevialspart2",
+          "timevialspart1",
+          "todreamofsubstance",
+          "plight",
+          "isyoursismineremixes",
+          "isyoursismine",
+          "earthseabountyhill",
+          "placesweleave",
+          "thosethatfollow",
+          "humblenewskin",
+          "acycleoffateandmemory",
+          "grips",
+          "sustenance",
+          "themason",
+          "211129211203bountyhill"
+        ],
+        "latestRelease": {
+          "title": "Time Vials: Part 3",
+          "type": "album",
+          "url": "https://patcarroll.bandcamp.com/album/time-vials-part-3",
+          "imageUrl": "https://f4.bcbits.com/img/a0248873100_2.jpg",
+          "releaseDate": "January 16, 2026"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/pat-carroll/38793",
+        "allReleaseTitles": [
+          "timevialspt3",
+          "placesweleave",
+          "plight",
+          "211129211203bountyhilland",
+          "todreamofsubstance",
+          "themason",
+          "earthseabountyhilland",
+          "remixesfromtheothersidept2charlesoliverand",
+          "hope",
+          "thatbewilderingenergy",
+          "fantasia2000thesorcerersapprenticenoahsark",
+          "branching",
+          "windsalight",
+          "timevialspart1",
+          "timevialspart2",
+          "augur",
+          "throneremixcollettobiancoamp",
+          "plateau",
+          "conditions"
+        ],
+        "latestRelease": {
+          "title": "Time Vials Pt 3 Pat Carroll",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/time-vials-pt-3-pat-carroll/m1pswd91p51c7",
+          "releaseDate": "2026-01-16"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Pat%20Carroll"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Pat%20Carroll"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2692833"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Pat%20Carroll&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Pat%20Carroll"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

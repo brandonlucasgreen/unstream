@@ -1,0 +1,92 @@
+[
+  {
+    "id": "maryhopkin",
+    "name": "Mary Hopkin",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027121600_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://maryhopkin.bandcamp.com",
+        "allReleaseTitles": [
+          "doodling",
+          "twoheartsmaryhopkinandjessicaleemorgan",
+          "pieces",
+          "anotherroad"
+        ],
+        "latestRelease": {
+          "title": "Doodling",
+          "type": "album",
+          "url": "https://maryhopkin.bandcamp.com/album/doodling",
+          "imageUrl": "https://f4.bcbits.com/img/a3709618183_16.jpg",
+          "releaseDate": "January 3, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/mary-hopkin/135753",
+        "latestRelease": {
+          "title": "Those Were The Days Mary Hopkin",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/those-were-the-days-mary-hopkin/vao75fav5se0a",
+          "releaseDate": "2024-12-09"
+        },
+        "allReleaseTitles": [
+          "postcard",
+          "earthsongoceansong",
+          "thosewerethedays",
+          "millionairesdaughterdennislocorriere",
+          "liveattheroyalfestivalhall1972",
+          "achristmaschorale",
+          "doodling",
+          "anotherroad",
+          "liveatosakaexpo70",
+          "pieces",
+          "twoheartsandjessicaleemorgan",
+          "youlookfamiliarandmorganvisconti",
+          "goodbye",
+          "loveisthesweetestthing",
+          "thosewerethedaysbandarabdulmajeed",
+          "whenwilliseeyouagain"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mary%20Hopkin"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mary%20Hopkin"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.maryhopkin.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/297346"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Mary%20Hopkin&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Mary%20Hopkin"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCTzRoSNh3xOVv_tRG-1n7oA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/maryhopkin"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

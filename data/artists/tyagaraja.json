@@ -1,0 +1,44 @@
+[
+  {
+    "id": "tyagaraja",
+    "name": "Tyagaraja",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0000013280_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tyagaraja.bandcamp.com",
+        "allReleaseTitles": [
+          "silentnight",
+          "themeaningoflife",
+          "asis",
+          "openbook"
+        ],
+        "latestRelease": {
+          "title": "Silent Night",
+          "type": "track",
+          "url": "https://tyagaraja.bandcamp.com/track/silent-night",
+          "imageUrl": "https://f4.bcbits.com/img/a2543831397_16.jpg",
+          "releaseDate": "December 23, 2017"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tyagaraja"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tyagaraja"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5808011"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,70 @@
+[
+  {
+    "id": "mistinguett",
+    "name": "Mistinguett",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028489584_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/mistinguett/25355",
+        "allReleaseTitles": [
+          "lareinedumusichall",
+          "sesgrandssuccesvol1",
+          "lavedette",
+          "bestofheritagesongs",
+          "grandssucces",
+          "thebestofparis",
+          "cacestparis",
+          "monhomme",
+          "succesetraretes19201931mistinguett",
+          "parisapresminuitshiddenworld",
+          "lavedettedumusichall19211931vol1",
+          "lavedettedumusichall19211931vol2",
+          "19261942",
+          "ilmavunue",
+          "sesgrandssuccesvol2",
+          "ichiban",
+          "mongangster",
+          "jechercheunmillionaire",
+          "flat"
+        ],
+        "latestRelease": {
+          "title": "La Reine Du Music Hall Mistinguett",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/la-reine-du-music-hall-mistinguett/oe5ahmevaapsc",
+          "releaseDate": "2019-08-09"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mistinguettfrance.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mistinguett"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mistinguett"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1329872"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Mistinguett&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Mistinguett"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

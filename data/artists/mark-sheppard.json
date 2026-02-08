@@ -1,0 +1,73 @@
+[
+  {
+    "id": "marksheppard",
+    "name": "Mark Sheppard",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032666738_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://marksheppard.bandcamp.com",
+        "allReleaseTitles": [
+          "ambientdnbjunglesketches",
+          "ambientchillwavesketches",
+          "constant",
+          "filbert",
+          "stayingin",
+          "repeatunique",
+          "theshoreline",
+          "thosethings",
+          "mint",
+          "anticipation",
+          "fallondays",
+          "thedome",
+          "middleharbor"
+        ],
+        "latestRelease": {
+          "title": "AMBIENT DNB/JUNGLE SKETCHES",
+          "type": "album",
+          "url": "https://marksheppard.bandcamp.com/album/ambient-dnb-jungle-sketches",
+          "imageUrl": "https://f4.bcbits.com/img/a1934493551_2.jpg",
+          "releaseDate": "June 14, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/mark-sheppard/2045690",
+        "allReleaseTitles": [
+          "shift",
+          "stayingin",
+          "thedome",
+          "filbert",
+          "mint",
+          "middleharbor",
+          "anticipation",
+          "thosethings",
+          "repeatunique",
+          "fallondays",
+          "theshoreline",
+          "constant"
+        ],
+        "latestRelease": {
+          "title": "Shift Mark Sheppard",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/shift-mark-sheppard/or4redps46fbc",
+          "releaseDate": "2021-03-09"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mark%20Sheppard"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mark%20Sheppard"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "bobbydarin",
+    "name": "Bobby Darin",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022206294_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bobbydarin.bandcamp.com",
+        "allReleaseTitles": [
+          "ifiwereacarpenter",
+          "commitment"
+        ],
+        "latestRelease": {
+          "title": "If I Were a Carpenter",
+          "type": "album",
+          "url": "https://bobbydarin.bandcamp.com/album/if-i-were-a-carpenter",
+          "imageUrl": "https://f4.bcbits.com/img/a1845745827_16.jpg",
+          "releaseDate": "March 24, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/bobby-darin/43815",
+        "allReleaseTitles": [
+          "inabroadwaybag",
+          "ifiwereacarpenter",
+          "commitment",
+          "insideout",
+          "thatsall",
+          "theultimate",
+          "earthy",
+          "fromhellodollytogoodbyecharlie",
+          "thelegendary",
+          "18yellowroses",
+          "songsfrombigsur",
+          "capitolcollectorsseries",
+          "greatesthits",
+          "rhinohifive",
+          "singswingwith",
+          "definitivepop",
+          "the25thdayofdecemberwith",
+          "",
+          "theswingingsideof",
+          "loveswings"
+        ],
+        "latestRelease": {
+          "title": "Commitment Bobby Darin",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/commitment-bobby-darin/gfm35pj7sinib",
+          "releaseDate": "1969-01-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bobby%20Darin"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bobby%20Darin"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.bobbydarin.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4272214"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Bobby%20Darin&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Bobby%20Darin"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Bobby-Darin/689385574446896"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,66 @@
+[
+  {
+    "id": "stefania",
+    "name": "Stefania",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0004812600_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://stefania.bandcamp.com",
+        "allReleaseTitles": [
+          "desertchic",
+          "threedollarharlot"
+        ],
+        "latestRelease": {
+          "title": "Desert Chic",
+          "type": "track",
+          "url": "https://stefania.bandcamp.com/track/desert-chic",
+          "imageUrl": "https://f4.bcbits.com/img/a3076736664_16.jpg",
+          "releaseDate": "March 30, 2015"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/Stefbianchii"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Stefania"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Stefania"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://stefaniamusic.eu/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/9368068"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/stefania_/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@stefania_"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCvmlXxxVNtR0KzCB4Hk2wtA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/1916301941935110"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

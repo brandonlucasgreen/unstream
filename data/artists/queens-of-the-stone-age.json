@@ -1,0 +1,96 @@
+[
+  {
+    "id": "queensofthestoneage",
+    "name": "Queens of the Stone Age",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032348393_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://qotsa.bandcamp.com",
+        "allReleaseTitles": [
+          "aliveinthecatacombs",
+          "intimesnewroman",
+          "intimesnewroman24bit",
+          "villains24bit",
+          "queensofthestoneage",
+          "queensofthestoneage1998version",
+          "likeclockwork",
+          "villains"
+        ],
+        "latestRelease": {
+          "title": "Alive in the Catacombs",
+          "type": "album",
+          "url": "https://qotsa.bandcamp.com/album/alive-in-the-catacombs",
+          "imageUrl": "https://f4.bcbits.com/img/a1251561009_2.jpg",
+          "releaseDate": "June 13, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/queens-of-the-stone-age/148265",
+        "allReleaseTitles": [
+          "aliveinthecatacombs",
+          "villains",
+          "intimesnewroman",
+          "likeclockwork",
+          "songsforthedeaf",
+          "eravulgaris",
+          "",
+          "ratedrdeluxeedition",
+          "carnavoyeur",
+          "emotionsickness",
+          "papermachete",
+          "lullabiestoparalyze",
+          "ratedr",
+          "makeitwitchu"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Queens%20of%20the%20Stone%20Age"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Queens%20of%20the%20Stone%20Age"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://qotsa.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/56168"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Queens%20of%20the%20Stone%20Age&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Queens%20of%20the%20Stone%20Age"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/queensofthestoneage/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@qotsa"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCAqa6dDmCH4XwipdfxoMo4Q"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/QOTSA"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

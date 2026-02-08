@@ -3,9 +3,15 @@
  * Fetches from the deployed production API, merges with MusicBrainz data,
  * and saves per-artist JSON files + a manifest index.
  *
+ * Quality filtering:
+ *   - Only saves artists with a verified presence on Bandcamp, Faircamp,
+ *     Mirlo, or Patreon (non-search-only direct links).
+ *   - Only saves if exactly ONE artist-type result matches the searched name,
+ *     ensuring the page represents the right artist without ambiguity.
+ *
  * Output:
- *   data/artists/{slug}.json      - Full SearchResult[] for each artist
- *   data/artists-manifest.json    - Index with metadata for all artists
+ *   data/artists/{slug}.json      - Single matching SearchResult (as array) for each artist
+ *   data/artists-manifest.json    - Index with metadata for all qualifying artists
  *
  * Usage: npx tsx scripts/generate-artist-data.ts [--limit N] [--force]
  *
@@ -28,6 +34,9 @@ const API_BASE = 'https://unstream.stream';
 const CONCURRENCY = 3;
 const MB_DELAY_MS = 1100; // MusicBrainz rate limit: 1 req/sec
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days - skip if data is newer
+
+// Artist must have a verified (non-search-only) link on at least one of these
+const QUALIFYING_PLATFORMS = new Set(['bandcamp', 'faircamp', 'mirlo']);
 
 interface ArtistEntry {
   name: string;
@@ -203,6 +212,51 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+/**
+ * Check if a result has a verified (non-search-only) link on a qualifying platform.
+ * Search-only URLs (duckduckgo, /search, ?q=, etc.) don't count.
+ * For Bandcamp, fan profiles (bandcamp.com/username) don't count —
+ * only artist pages ([artist].bandcamp.com) qualify.
+ */
+function hasQualifyingPlatform(result: SearchResult): boolean {
+  return result.platforms.some(p => {
+    if (!QUALIFYING_PLATFORMS.has(p.sourceId)) return false;
+    // Exclude search-only URLs — these aren't verified artist presences
+    const url = p.url.toLowerCase();
+    const isSearchUrl = url.includes('duckduckgo.com') ||
+      url.includes('/search') ||
+      url.includes('?q=') ||
+      url.includes('?query=') ||
+      url.includes('/explore');
+    if (isSearchUrl) return false;
+
+    // For Bandcamp, only count artist pages (subdomain), not fan profiles (path)
+    // Artist page: https://artist.bandcamp.com
+    // Fan profile: https://bandcamp.com/username
+    if (p.sourceId === 'bandcamp') {
+      try {
+        const parsed = new URL(url);
+        if (parsed.hostname === 'bandcamp.com' || parsed.hostname === 'www.bandcamp.com') {
+          return false; // Fan profile, not an artist page
+        }
+      } catch {
+        return false;
+      }
+    }
+
+    return true;
+  });
+}
+
+/**
+ * Check if a result's name matches the artist we're looking for.
+ * Uses exact normalized match only — no substring matching,
+ * to avoid "Chevy Chase" matching "Chevy Chase Stole My Wife".
+ */
+function isNameMatch(resultName: string, artistName: string): boolean {
+  return normalizeForComparison(resultName) === normalizeForComparison(artistName);
+}
+
 async function processArtist(artist: ArtistEntry, force: boolean): Promise<ManifestEntry | null> {
   const outputPath = join(ARTISTS_DIR, `${artist.slug}.json`);
 
@@ -214,14 +268,16 @@ async function processArtist(artist: ArtistEntry, force: boolean): Promise<Manif
       // Read existing data for manifest
       try {
         const existing: SearchResult[] = JSON.parse(readFileSync(outputPath, 'utf-8'));
-        const firstArtist = existing.find(r => r.type === 'artist');
-        return {
-          name: artist.name,
-          slug: artist.slug,
-          imageUrl: firstArtist?.imageUrl || null,
-          platformCount: firstArtist?.platforms.length || 0,
-          lastUpdated: stat.mtime.toISOString(),
-        };
+        const match = existing.find(r => r.type === 'artist');
+        if (match) {
+          return {
+            name: artist.name,
+            slug: artist.slug,
+            imageUrl: match.imageUrl || null,
+            platformCount: match.platforms.length || 0,
+            lastUpdated: stat.mtime.toISOString(),
+          };
+        }
       } catch {
         // Corrupted file, re-fetch
       }
@@ -240,17 +296,31 @@ async function processArtist(artist: ArtistEntry, force: boolean): Promise<Manif
       results = mergeWithMusicBrainzData(results, mbData);
     }
 
-    // Save results
-    writeFileSync(outputPath, JSON.stringify(results, null, 2));
+    // Filter: only artist-type results whose name matches the searched artist
+    const matchingArtists = results.filter(r =>
+      r.type === 'artist' && isNameMatch(r.name, artist.name)
+    );
 
-    const firstArtist = results.find(r => r.type === 'artist');
+    // Filter: must have a qualifying platform (Bandcamp/Faircamp/Mirlo/Patreon)
+    const qualifyingArtists = matchingArtists.filter(hasQualifyingPlatform);
+
+    // Only save if exactly one qualifying artist — avoids ambiguity
+    if (qualifyingArtists.length !== 1) {
+      return null;
+    }
+
+    const theArtist = qualifyingArtists[0];
+
+    // Save only this single artist result (as an array for compatibility)
+    writeFileSync(outputPath, JSON.stringify([theArtist], null, 2));
+
     const now = new Date().toISOString();
 
     return {
       name: artist.name,
       slug: artist.slug,
-      imageUrl: firstArtist?.imageUrl || null,
-      platformCount: firstArtist?.platforms.length || 0,
+      imageUrl: theArtist.imageUrl || null,
+      platformCount: theArtist.platforms.length || 0,
       lastUpdated: now,
     };
   } catch (error) {
@@ -309,8 +379,14 @@ async function main() {
 
   const manifest = await processInBatches(artists, force, CONCURRENCY);
 
+  const skipped = artists.length - manifest.length;
+
   // Write manifest
   writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2));
+  console.log(`\nResults:`);
+  console.log(`  Processed: ${artists.length}`);
+  console.log(`  Qualified: ${manifest.length} (have Bandcamp/Faircamp/Mirlo/Patreon + unique match)`);
+  console.log(`  Skipped:   ${skipped} (no qualifying platform, ambiguous, or failed)`);
   console.log(`\nWrote manifest with ${manifest.length} entries to ${MANIFEST_PATH}`);
   console.log('Done!');
 }

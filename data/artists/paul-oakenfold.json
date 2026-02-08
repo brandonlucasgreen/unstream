@@ -1,0 +1,84 @@
+[
+  {
+    "id": "pauloakenfold",
+    "name": "Paul Oakenfold",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027108519_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://pauloakenfold.bandcamp.com",
+        "allReleaseTitles": [
+          "thehouseofhouseextendedmixpauloakenfoldgoomgum",
+          "pauloakenfoldminimixextendedversions",
+          "bangbangpauloakenfoldjessicasweetman",
+          "southernsunwillatkinsonextendedremix",
+          "resurectioncallmeextendedmixpauloakenfoldplanetperfectoknightsbe",
+          "novacainemixes",
+          "resurectionpauloakenfoldplanetperfectoknightskimmic",
+          "londontobuenosairesextendedmixpauloakenfoldhernancattaneo",
+          "readysteadygorenelaviceremix",
+          "southernsunanunnakisremix",
+          "bunkkaremastered",
+          "summerofloveoldskoolacidhouseravebalearicpauloakenfold",
+          "southernsuntiestogabrieldresdenremixes",
+          "pauloakenfoldmounteverestbasecampmix",
+          "pauloakenfoldgenerationsthreedecadesofdance",
+          "pauloakenfoldgreatesthitsremixes"
+        ],
+        "latestRelease": {
+          "title": "The House Of House (Extended Mix)\n                \n                \n\n                Paul Oakenfold & Goom Gum",
+          "type": "track",
+          "url": "https://pauloakenfold.bandcamp.com/track/the-house-of-house-extended-mix",
+          "imageUrl": "https://f4.bcbits.com/img/a3680490436_2.jpg",
+          "releaseDate": "September 12, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Paul%20Oakenfold"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Paul%20Oakenfold"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://pauloakenfold.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/67218"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Paul%20Oakenfold&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Paul%20Oakenfold"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/pauloakenfold/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@paul.oakenfold"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/pauloakenfold"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Oakenfold"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,84 @@
+[
+  {
+    "id": "shkodraelektronike",
+    "name": "Shkodra Elektronike",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031951339_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://shkodraelektronike.bandcamp.com",
+        "allReleaseTitles": [
+          "vajsikenkabadynjaja",
+          "syninsiqershia",
+          "kuegjetavedin",
+          "rudolfstambollanjenatenedeteshkodraelektronikeremix"
+        ],
+        "latestRelease": {
+          "title": "Vaj si kenka ba dynjaja",
+          "type": "track",
+          "url": "https://shkodraelektronike.bandcamp.com/track/vaj-si-kenka-ba-dynjaja",
+          "imageUrl": "https://f4.bcbits.com/img/a2958676439_16.jpg",
+          "releaseDate": "March 16, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/shkodra-elektronike/6455140",
+        "allReleaseTitles": [
+          "turtulleshe",
+          "fosforon",
+          "shndrit",
+          "zjerm",
+          "vajsikenkabadynjajafeatfanfaratirana",
+          "syninsiqershia",
+          "kuegjetavedin",
+          "liveuzina"
+        ],
+        "latestRelease": {
+          "title": "Fosforon Shkodra Elektronike",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/fosforon-shkodra-elektronike/cvmffkbjon4ja",
+          "releaseDate": "2025-12-19"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Shkodra%20Elektronike"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Shkodra%20Elektronike"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.shkodraelektronike.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/10939901"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/shkodraelektronike/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCmmCtfQ3wuegXYtNHh-HwUw"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@shkodraelektronike"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/shkodraelektronike"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

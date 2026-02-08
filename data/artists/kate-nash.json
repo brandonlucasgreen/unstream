@@ -1,0 +1,100 @@
+[
+  {
+    "id": "katenash",
+    "name": "Kate Nash",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0042060074_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://katenashmusic.bandcamp.com",
+        "allReleaseTitles": [
+          "germremixep",
+          "germ",
+          "9sadsymphonies",
+          "change"
+        ],
+        "latestRelease": {
+          "title": "GERM Remix EP",
+          "type": "album",
+          "url": "https://katenashmusic.bandcamp.com/album/germ-remix-ep",
+          "imageUrl": "https://f4.bcbits.com/img/a2817141347_16.jpg",
+          "releaseDate": "November 18, 2025"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/katenash"
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/kate-nash/35223",
+        "latestRelease": {
+          "title": "Germ Germ Germ Kate Nash Peaches",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/germ-germ-germ-kate-nash-peaches/kog36rewwz6hb",
+          "releaseDate": "2025-11-18"
+        },
+        "allReleaseTitles": [
+          "germ",
+          "9sadsymphonies",
+          "germgermgermpeaches",
+          "germremixep",
+          "mybile",
+          "millionsofheartbeats",
+          "misery",
+          "germcharlieeeee",
+          "wasteman",
+          "germboomvision",
+          "germjaguar",
+          "horsie",
+          "madeofbricks",
+          "girltalk",
+          "goodsummer",
+          "imperfect",
+          "telephobiababydaveand",
+          "mybestfriendisyou",
+          "havefaithwiththischristmasep",
+          "foundations"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kate%20Nash"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kate%20Nash"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.katenash.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/798521"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/katenash/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@katenashyeah"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCcA6sKBFLbN4Xo4jfqs40zw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/katenash"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,55 @@
+[
+  {
+    "id": "lukeblack",
+    "name": "Luke Black",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037632297_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://lukeblackmusic.bandcamp.com",
+        "allReleaseTitles": [
+          "parasite",
+          "alchemyftmoodkiller",
+          "vomit",
+          "batshit",
+          "winterdahliaglacialversion",
+          "chainsawsinparadisealbum",
+          "drinkingjackwithdaddy",
+          "winterdahlia",
+          "chainsawsinparadisesingle",
+          "godstoocool",
+          "imsohappy",
+          "imsohappyradioeditcleanversion",
+          "batshitradioedit",
+          "chainsawsinparadisesingeradioedit",
+          "f238",
+          "frankensteined",
+          "rosesintheconcrete",
+          "onceuponadecember",
+          "samomisespavaremixes"
+        ],
+        "latestRelease": {
+          "title": "PARASITE",
+          "type": "track",
+          "url": "https://lukeblackmusic.bandcamp.com/track/parasite",
+          "imageUrl": "https://f4.bcbits.com/img/a0957503352_2.jpg",
+          "releaseDate": "January 30, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Luke%20Black"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Luke%20Black"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

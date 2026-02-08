@@ -1,0 +1,103 @@
+[
+  {
+    "id": "mariamena",
+    "name": "Maria Mena",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011794862_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mariamena.bandcamp.com",
+        "allReleaseTitles": [
+          "anotherphase",
+          "apparentlyunaffected",
+          "causeandeffect",
+          "growingpains",
+          "weaponinmind"
+        ],
+        "latestRelease": {
+          "title": "Another Phase",
+          "type": "album",
+          "url": "https://mariamena.bandcamp.com/album/another-phase",
+          "imageUrl": "https://f4.bcbits.com/img/a3287759159_2.jpg",
+          "releaseDate": "November 13, 2017"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/maria-mena/181139",
+        "allReleaseTitles": [
+          "andthencameyou",
+          "theyneverleavetheirwives",
+          "julahjemmefeattrygveskaug",
+          "mittlilleland",
+          "idontwannaseeyouwithher",
+          "weaponinmind",
+          "growingpains",
+          "ghettoparasittfeathkeemsisi",
+          "itwaslove",
+          "cantlethimwinmollyhammar",
+          "notok",
+          "mepongoflamenca",
+          "yanomefio",
+          "callejerodavidjimenezreyesgarcia",
+          "ninobonito",
+          "causeandeffect",
+          "viktoria",
+          "apparentlyunaffected"
+        ],
+        "latestRelease": {
+          "title": "And Then Came You Maria Mena",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/and-then-came-you-maria-mena/rwc5izayzkxsb",
+          "releaseDate": "2023-09-15"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Maria%20Mena"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Maria%20Mena"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://mariamena.no/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/320902"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Maria%20Mena&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Maria%20Mena"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/mariamena_official/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@mariamena_official"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/MariaMenaVEVO"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/mariamenaofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

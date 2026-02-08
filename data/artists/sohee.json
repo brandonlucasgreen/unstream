@@ -1,0 +1,43 @@
+[
+  {
+    "id": "sohee",
+    "name": "sohee",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0012799846_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sohee.bandcamp.com",
+        "allReleaseTitles": [
+          "withfriends",
+          "verycoolcat",
+          ""
+        ],
+        "latestRelease": {
+          "title": "with friends",
+          "type": "album",
+          "url": "https://sohee.bandcamp.com/album/with-friends",
+          "imageUrl": "https://f4.bcbits.com/img/a3723571438_2.jpg",
+          "releaseDate": "January 23, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=sohee"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+sohee"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5603498"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

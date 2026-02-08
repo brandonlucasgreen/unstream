@@ -1,0 +1,87 @@
+[
+  {
+    "id": "fivefingerdeathpunch",
+    "name": "Five Finger Death Punch",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027318719_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://fivefingerdeathpunch.bandcamp.com",
+        "allReleaseTitles": [
+          "bestofvolume1",
+          "afterlifedeluxe",
+          "afterlife",
+          "f8"
+        ],
+        "latestRelease": {
+          "title": "BEST OF (Volume 1)",
+          "type": "album",
+          "url": "https://fivefingerdeathpunch.bandcamp.com/album/best-of-volume-1",
+          "imageUrl": "https://f4.bcbits.com/img/a3274487607_16.jpg",
+          "releaseDate": "July 18, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/five-finger-death-punch/202917",
+        "allReleaseTitles": [
+          "bestof",
+          "afterlife",
+          "f8",
+          "gotyoursix",
+          "thewrongsideofheavenvolume12",
+          "andjusticefornone",
+          "thewrongsideofheavenandtherighteoussideofhellvol1",
+          "adecadeofdestruction",
+          "blueonblack",
+          "thewrongsideofheavenandtherighteoussideofhellvol2",
+          "burnmf"
+        ],
+        "latestRelease": {
+          "title": "Best Of Five Finger Death Punch",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/best-of-five-finger-death-punch/l9b4bu563dahb",
+          "releaseDate": "2025-10-24"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Five%20Finger%20Death%20Punch"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Five%20Finger%20Death%20Punch"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.fivefingerdeathpunch.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1502727"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/5fdp/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@fivefingerdeathpunch"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/5fdp"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/fivefingerdeathpunch"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

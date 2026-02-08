@@ -1,0 +1,109 @@
+[
+  {
+    "id": "thenational",
+    "name": "The National",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0021361257_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thenational.bandcamp.com",
+        "allReleaseTitles": [
+          "romefullconcert",
+          "rome",
+          "laughtrack",
+          "alphabetcity",
+          "spaceinvader",
+          "firsttwopagesoffrankenstein",
+          "weirdgoodbyesthenationalfeatboniver",
+          "cherrytree2021remaster",
+          "sadsongsfordirtylovers2021remaster",
+          "iameasytofind",
+          "sleepwellbeast",
+          "troublewillfindme",
+          "highviolet",
+          "askinanightthevirginiaep",
+          "boxer",
+          "alligator",
+          "cherrytreeep",
+          "sadsongsfordirtylovers",
+          "thenational",
+          "thenational2021remaster"
+        ],
+        "latestRelease": {
+          "title": "Rome (Full Concert)",
+          "type": "album",
+          "url": "https://thenational.bandcamp.com/album/rome-full-concert",
+          "imageUrl": "https://f4.bcbits.com/img/a3883912110_2.jpg",
+          "releaseDate": "December 13, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-national/384546",
+        "latestRelease": {
+          "title": "Rome The National",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/rome-the-national/y7zsqju6za06b",
+          "releaseDate": "2024-12-13"
+        },
+        "allReleaseTitles": [
+          "troublewillfindme",
+          "rome",
+          "sleepwellbeast",
+          "firsttwopagesoffrankenstein",
+          "iameasytofind",
+          "laughtrack",
+          "sadsongsfordirtylovers",
+          "cherrytree",
+          "",
+          "boxer",
+          "weirdgoodbyesfeatboniverfeatboniver",
+          "heaven",
+          "boxerliveinbrussels"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20National"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20National"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://americanmary.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/261537"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20National&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20National"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thenational/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCeiRyLo_Q9q4tlv9aaQJF5w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thenationalofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

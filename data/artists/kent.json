@@ -1,0 +1,66 @@
+[
+  {
+    "id": "kent",
+    "name": "Kent",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019898595_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kent2.bandcamp.com",
+        "latestRelease": {
+          "title": "Shipyard Shuffle",
+          "type": "album",
+          "url": "https://kent2.bandcamp.com/album/shipyard-shuffle",
+          "imageUrl": "https://f4.bcbits.com/img/a1371489880_16.jpg",
+          "releaseDate": "May 5, 2020"
+        },
+        "allReleaseTitles": [
+          "shipyardshuffle",
+          "hotchickensandwich"
+        ]
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/kentnu"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kent"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kent"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://kent.nu/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/90653"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Kent&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Kent"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/kentchannel"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Kent.nu"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

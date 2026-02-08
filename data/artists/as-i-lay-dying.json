@@ -1,0 +1,108 @@
+[
+  {
+    "id": "asilaydying",
+    "name": "As I Lay Dying",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041272463_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://asilaydying.bandcamp.com",
+        "allReleaseTitles": [
+          "ififall",
+          "echoes",
+          "throughstormsahead",
+          "thecavewefeartoenter",
+          "burden",
+          "destructionorstrength",
+          "awakened",
+          "decas",
+          "thepowerlessrise",
+          "thisiswhoweare",
+          "anoceanbetweenus",
+          "alongmarchthefirstrecordings",
+          "shadowsaresecurity",
+          "frailwordscollapse"
+        ],
+        "latestRelease": {
+          "title": "If I Fall",
+          "type": "track",
+          "url": "https://asilaydying.bandcamp.com/track/if-i-fall",
+          "imageUrl": "https://f4.bcbits.com/img/a1137333928_2.jpg",
+          "releaseDate": "November 19, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/as-i-lay-dying/824857",
+        "allReleaseTitles": [
+          "echoes",
+          "shapedbyfire",
+          "throughstormsahead",
+          "shapedbyfiredeluxeversion",
+          "ififall",
+          "whitewashedtomb",
+          "burden",
+          "thecavewefeartoenter",
+          "wearethedead",
+          "thevoidwithin",
+          "anoceanbetweenus",
+          "shadowsaresecurity",
+          "awakened",
+          "thepowerlessrise",
+          "frailwordscollapse",
+          "alongmarchthefirstrecordings",
+          "decas",
+          "thisiswhoweare",
+          "cauterizesingle",
+          "talktime"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=As%20I%20Lay%20Dying"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+As%20I%20Lay%20Dying"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://asilaydying.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/318222"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=As%20I%20Lay%20Dying&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/As%20I%20Lay%20Dying"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/asilaydying/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@asilaydyingofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC05WaqA-0OLM5Y7NmmHq1hw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/asilaydying"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

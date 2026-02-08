@@ -1,0 +1,52 @@
+[
+  {
+    "id": "sophie",
+    "name": "SOPHIE",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0005798296_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sophie-6/23740224",
+        "allReleaseTitles": [
+          "oilofeverypearlsuninsides",
+          "product",
+          "sophie",
+          "oilofeverypearlsuninsidesnonstopremixalbum",
+          "bipp",
+          "faceshopping",
+          "lemonade",
+          "vyzee",
+          "hard",
+          "justlikeweneversaidgoodbye",
+          "msmsmsm",
+          "metaljimmyedgarand",
+          "lemonadehard"
+        ],
+        "latestRelease": {
+          "title": "Product Sophie",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/product-sophie/xpz9h9mojcxta",
+          "releaseDate": "2025-06-18"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sophiemsmsmsm.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=SOPHIE"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+SOPHIE"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

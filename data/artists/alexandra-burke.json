@@ -1,0 +1,55 @@
+[
+  {
+    "id": "alexandraburke",
+    "name": "Alexandra Burke",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013009705_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://alexandraburke.bandcamp.com",
+        "allReleaseTitles": [
+          "thetruthis",
+          "heartbreakonholddeluxeversion",
+          "overcomedeluxeversion"
+        ],
+        "latestRelease": {
+          "title": "The Truth Is",
+          "type": "album",
+          "url": "https://alexandraburke.bandcamp.com/album/the-truth-is",
+          "imageUrl": "https://f4.bcbits.com/img/a1307833336_2.jpg",
+          "releaseDate": "March 29, 2018"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Alexandra%20Burke"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Alexandra%20Burke"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://alexandraburkeofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1345337"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/alexandraburke/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/alexandraburke"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

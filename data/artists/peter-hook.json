@@ -1,0 +1,38 @@
+[
+  {
+    "id": "peterhook",
+    "name": "Peter Hook",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011193013_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://peterhookmusic.bandcamp.com",
+        "allReleaseTitles": [
+          "closerlivetour2011liveinmachestervol1physicalcopyonlypeterhookpeterhookthelight",
+          "dancingmadlybackwardsmanrayremix"
+        ],
+        "latestRelease": {
+          "title": "Closer Live Tour 2011 - Live In Machester Vol. 1 (Physical Copy Only)\n                \n                \n\n                Peter Hook, Peter Hook & The Light",
+          "type": "album",
+          "url": "https://peterhookmusic.bandcamp.com/album/closer-live-tour-2011-live-in-machester-vol-1-physical-copy-only",
+          "imageUrl": "https://f4.bcbits.com/img/a0759081416_16.jpg",
+          "releaseDate": "July 17, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Peter%20Hook"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Peter%20Hook"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

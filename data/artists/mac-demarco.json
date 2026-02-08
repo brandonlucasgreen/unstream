@@ -1,0 +1,101 @@
+[
+  {
+    "id": "macdemarco",
+    "name": "Mac DeMarco",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032021157_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://macdemarco.bandcamp.com",
+        "allReleaseTitles": [
+          "guitar",
+          "anotherone10thanniversaryedition",
+          "saladdays10thanniversaryedition",
+          "someotherones",
+          "onewayneg",
+          "fiveeasyhotdogs",
+          "210thanniversaryedition",
+          "otherherecomesthecowboydemos",
+          "herecomesthecowboydemos",
+          "herecomesthecowboy",
+          "olddogdemos",
+          "thisolddog",
+          "anotherdemoone",
+          "anotherone",
+          "demosvolume1",
+          "2demos",
+          "saladdaysdemos",
+          "saladdays",
+          "2",
+          "rockandrollnightclub"
+        ],
+        "latestRelease": {
+          "title": "Guitar",
+          "type": "album",
+          "url": "https://macdemarco.bandcamp.com/album/guitar",
+          "imageUrl": "https://f4.bcbits.com/img/a3832052500_2.jpg",
+          "releaseDate": "August 22, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/mac-demarco/1448077",
+        "allReleaseTitles": [
+          "guitar",
+          "herecomesthecowboy",
+          "home",
+          "fiveeasyhotdogs",
+          "holy",
+          "nobody",
+          "onewayneg",
+          "otherherecomesthecowboydemos",
+          "someotherones",
+          "anotherdemoone",
+          "herecomesthecowboydemos",
+          "simplyparadiseryanparis",
+          "bokuwachottoharuomihosono",
+          "allofouryesterdays",
+          "phantom",
+          "onthesquare",
+          "saladdays",
+          "thisolddog",
+          "2"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mac%20DeMarco"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mac%20DeMarco"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.mac-demarco.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2568722"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/macdemarco/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCqnMk5GA1spXDiHYFcPN-eA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MacDeMarco"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

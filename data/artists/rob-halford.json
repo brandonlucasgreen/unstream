@@ -1,0 +1,42 @@
+[
+  {
+    "id": "robhalford",
+    "name": "Rob Halford",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3599299576_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://robhalford.bandcamp.com",
+        "allReleaseTitles": [
+          "robnickiweddingchristmas2016robnickihalford",
+          "fiddleep"
+        ],
+        "latestRelease": {
+          "title": "Rob+Nicki Wedding & Christmas 2016\n                \n                \n\n                Rob & Nicki Halford",
+          "type": "album",
+          "url": "https://robhalford.bandcamp.com/album/rob-nicki-wedding-christmas-2016",
+          "imageUrl": "https://f4.bcbits.com/img/a3599299576_16.jpg",
+          "releaseDate": "January 7, 2017"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/RobHalford"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rob%20Halford"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rob%20Halford"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

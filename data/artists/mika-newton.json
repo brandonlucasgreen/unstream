@@ -1,0 +1,43 @@
+[
+  {
+    "id": "mikanewton",
+    "name": "Mika Newton",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0000197201_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/mika-newton/574412",
+        "allReleaseTitles": [
+          "sametattoo",
+          "dontdumbmedown",
+          "comeoutandplay",
+          "dontdumbmedownremixes"
+        ],
+        "latestRelease": {
+          "title": "Same Tattoo Mika Newton",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/same-tattoo-mika-newton/h028dfycl5tua",
+          "releaseDate": "2023-05-12"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mikanewton.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mika%20Newton"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mika%20Newton"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,58 @@
+[
+  {
+    "id": "vinceclarke",
+    "name": "Vince Clarke",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033319758_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://vinceclarke.bandcamp.com",
+        "allReleaseTitles": [
+          "songsofsilence",
+          "ssssvcmg"
+        ],
+        "latestRelease": {
+          "title": "Songs of Silence",
+          "type": "album",
+          "url": "https://vinceclarke.bandcamp.com/album/songs-of-silence",
+          "imageUrl": "https://f4.bcbits.com/img/a0942159169_16.jpg",
+          "releaseDate": "November 17, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Vince%20Clarke"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Vince%20Clarke"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.vinceclarkemusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/37365"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Vince%20Clarke&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Vince%20Clarke"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Vince-Clarke/68282337914"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

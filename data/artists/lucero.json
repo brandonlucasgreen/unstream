@@ -1,0 +1,71 @@
+[
+  {
+    "id": "lucero",
+    "name": "Lucero",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041192607_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://lucero.bandcamp.com",
+        "allReleaseTitles": [
+          "rebelsroguesswornbrothers",
+          "nobodysdarlings",
+          "livefromredrocks",
+          "nobodysdarlingslivefrommemphis",
+          "livefromatlanta",
+          "lucero",
+          "theattictapes"
+        ],
+        "latestRelease": {
+          "title": "Rebels, Rogues & Sworn Brothers",
+          "type": "album",
+          "url": "https://lucero.bandcamp.com/album/rebels-rogues-sworn-brothers",
+          "imageUrl": "https://f4.bcbits.com/img/a0104140261_2.jpg",
+          "releaseDate": "October 3, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lucero"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lucero"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.luceromusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/317913"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Lucero&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Lucero"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/luceromusic/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC-K3mQctkhpZyQlFpqDdWtA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "http://www.facebook.com/Lucero"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

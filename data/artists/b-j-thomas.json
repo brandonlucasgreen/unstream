@@ -1,0 +1,59 @@
+[
+  {
+    "id": "bjthomas",
+    "name": "B.J. Thomas",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025225389_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/b-j-thomas-2/296740",
+        "latestRelease": {
+          "title": "Hooked On A Feeling The Eyes Of A New York Woman Rerecorded Version Bj Thomas",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/hooked-on-a-feeling-the-eyes-of-a-new-york-woman-rerecorded-version-bj-thomas/cy45pthhww53a",
+          "releaseDate": "2024-08-07"
+        },
+        "allReleaseTitles": [
+          "greatesthitsrerecordedversion",
+          "raindropskeepfallinonmyheadrerecordedspedup",
+          "hookedonafeelingtheeyesofanewyorkwomanrerecordedversion",
+          "raindropskeepfallinonmyhead",
+          "theverybestofbjthomas",
+          "bjthomas",
+          "reunion",
+          "dontworrybaby",
+          "raindropskeepfallinonmyheadijustcanthelpbelievingrerecordedversion",
+          "hookedonafeeling",
+          "athisbestbjthomas",
+          "goldenlegendsbjthomas",
+          "midnightminute",
+          "theverybestof",
+          "thecompletecolumbiasingles",
+          "bestof",
+          "greatestlatest",
+          "thebestofbjthomas",
+          "goldencollection",
+          "songs"
+        ]
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bjthomas.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=B.J.%20Thomas"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+B.J.%20Thomas"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

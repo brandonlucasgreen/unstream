@@ -1,0 +1,72 @@
+[
+  {
+    "id": "tinakarol",
+    "name": "Tina Karol",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011165672_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tinakarol.bandcamp.com",
+        "allReleaseTitles": [
+          "lostintherain",
+          "sweetlove",
+          "stepbystep",
+          "allofme",
+          "blindfold"
+        ],
+        "latestRelease": {
+          "title": "Lost in the rain",
+          "type": "track",
+          "url": "https://tinakarol.bandcamp.com/track/lost-in-the-rain",
+          "imageUrl": "https://f4.bcbits.com/img/a3091255192_2.jpg"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/tinakarol"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tina%20Karol"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tina%20Karol"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.tinakarol.com.ua/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1123040"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/tina_karol/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@tinakarol"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCoV61u5mQvubNi7hJibZh5w"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@tina_karol"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/tina.karol"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

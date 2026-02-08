@@ -1,0 +1,74 @@
+[
+  {
+    "id": "xaviercugat",
+    "name": "Xavier Cugat",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a1387558531_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/xavier-cugat/24664",
+        "allReleaseTitles": [
+          "toallmyfriendsorchestra",
+          "lascancionesde",
+          "16mostrequestedsongs",
+          "coleccion20exitosdemusicalatinathedevilstheharmonygroup",
+          "lasmejoresorquestasdelmundo",
+          "theoriginallatindanceking",
+          "thedancebeatof",
+          "topclassics",
+          "30exitos",
+          "classicsfromthemastertapesaudiophileedition",
+          "musicaparabailar",
+          "soundtrackmasters",
+          "vsperezpradoperezprado",
+          "toallmyfriendsorchestraorchestraxaviercugat",
+          "cugatsfavorites",
+          "continentalhits",
+          "recordandoa",
+          "more194445spanishdance",
+          "perezpradoyvol2perezprado"
+        ],
+        "latestRelease": {
+          "title": "To All My Friends Xavier Cugat Xavier Cugat Orchestra",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/to-all-my-friends-xavier-cugat-xavier-cugat-orchestra/n749xihh8mq0a",
+          "releaseDate": "2021-10-01"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://xaviercugat.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Xavier%20Cugat"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Xavier%20Cugat"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.xaviercugat.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/83813"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Xavier%20Cugat&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Xavier%20Cugat"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

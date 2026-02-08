@@ -1,0 +1,84 @@
+[
+  {
+    "id": "stevelukather",
+    "name": "Steve Lukather",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032045309_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://stevelukather.bandcamp.com",
+        "allReleaseTitles": [
+          "bridges",
+          "ifoundthesunagain",
+          "transition",
+          "allswellthatendswell"
+        ],
+        "latestRelease": {
+          "title": "Bridges",
+          "type": "album",
+          "url": "https://stevelukather.bandcamp.com/album/bridges",
+          "imageUrl": "https://f4.bcbits.com/img/a0406860287_16.jpg",
+          "releaseDate": "June 16, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/steve-lukather/125283",
+        "allReleaseTitles": [
+          "bridges",
+          "ifoundthesunagain",
+          "wheniseeyouagainfeaturingdavidpaichandjosephwilliams",
+          "nosubstitutionsliveinosakalarrycarltonand",
+          "transition",
+          "allswellthatendswell",
+          "liveatnorthseajazzfestivaledgarwinter",
+          "someone",
+          "timetalk",
+          "runtomefeaturingringostarrandjosephwilliams"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Steve%20Lukather"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Steve%20Lukather"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.stevelukather.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/272796"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Steve%20Lukather&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Steve%20Lukather"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/stevelukatherofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCpag6gGwV_9ly4Wyrs85K0Q"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/SteveLukather"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

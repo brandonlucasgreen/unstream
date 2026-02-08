@@ -1,0 +1,76 @@
+[
+  {
+    "id": "tlc",
+    "name": "TLC",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027621388_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tlcmany.bandcamp.com",
+        "allReleaseTitles": [
+          "zestyorganisms",
+          "civilenlightenment",
+          "selfhood",
+          "nonstopbrokenstep",
+          "lasciviousangels",
+          "xennialstech",
+          "throughthegreattreehole",
+          "justkeepgoing",
+          "whirlwind",
+          "inverseconstellation",
+          "qualitativediagnosis",
+          "violentcrescents",
+          "circumambulantbloodlines",
+          "kittysleap",
+          "youngmavericks",
+          "cryogeniccircuits"
+        ],
+        "latestRelease": {
+          "title": "Zesty Organisms",
+          "type": "album",
+          "url": "https://tlcmany.bandcamp.com/album/zesty-organisms",
+          "imageUrl": "https://f4.bcbits.com/img/a1825046762_2.jpg",
+          "releaseDate": "January 3, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=TLC"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+TLC"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/77859"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=TLC&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/TLC"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/officialtlc/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/@officialTLC"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/OfficialTLC"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

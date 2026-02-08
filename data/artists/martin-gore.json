@@ -1,0 +1,63 @@
+[
+  {
+    "id": "martingore",
+    "name": "Martin Gore",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022446087_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://martingore.bandcamp.com",
+        "allReleaseTitles": [
+          "thethirdchimpanzeeremixed",
+          "thethirdchimpanzeeep",
+          "mgep",
+          "mg",
+          "ssssvcmg"
+        ],
+        "latestRelease": {
+          "title": "The Third Chimpanzee Remixed",
+          "type": "album",
+          "url": "https://martingore.bandcamp.com/album/the-third-chimpanzee-remixed",
+          "imageUrl": "https://f4.bcbits.com/img/a2458238910_2.jpg",
+          "releaseDate": "August 20, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/martin-gore/49873",
+        "allReleaseTitles": [
+          "thethirdchimpanzeeep",
+          "thethirdchimpanzeeremixed",
+          "brutalismtake2jeanmicheljarrex",
+          "howler",
+          "mgep",
+          "mg",
+          "capuchin",
+          "mandrill",
+          "vervet",
+          "iwantyounowzippykidruslantroknyukand"
+        ],
+        "latestRelease": {
+          "title": "Brutalism Take 2 Jean Michel Jarre X Martin Gore",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/brutalism-take-2-jean-michel-jarre-x-martin-gore/mzrrkaw7cn44a",
+          "releaseDate": "2022-09-09"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Martin%20Gore"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Martin%20Gore"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

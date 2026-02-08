@@ -1,0 +1,40 @@
+[
+  {
+    "id": "eugenelevy",
+    "name": "Eugene Levy",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022585801_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://eugenelevy.bandcamp.com",
+        "allReleaseTitles": [
+          "anightin",
+          "prometheuswouldbestoked",
+          "everybandneedsarivasonefiguresalary",
+          "herestosomeone"
+        ],
+        "latestRelease": {
+          "title": "A Night In",
+          "type": "album",
+          "url": "https://eugenelevy.bandcamp.com/album/a-night-in",
+          "imageUrl": "https://f4.bcbits.com/img/a1785875173_16.jpg",
+          "releaseDate": "January 10, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Eugene%20Levy"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Eugene%20Levy"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,87 @@
+[
+  {
+    "id": "buckethead",
+    "name": "Buckethead",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3281837555_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/buckethead/161160",
+        "allReleaseTitles": [
+          "dancingsoul",
+          "livefeathers",
+          "smeltingofores",
+          "warmyourancestors",
+          "500alchemicalexperiments",
+          "thankyoutaylor",
+          "theatticthatdrippedblood",
+          "thefairyandthedevil",
+          "hourglassofvisions",
+          "divinespark",
+          "vincentpriceshrunkenheadapplesculpture",
+          "smilethatglowstheskyspavillion",
+          "furnacefollies",
+          "garyfukamotomychildhoodbestfriendthanksforallthetimesweplayedtogether",
+          "a3",
+          "gloworms",
+          "dreamsremembered",
+          "decorating",
+          "echoingeyes",
+          "skywriting"
+        ],
+        "latestRelease": {
+          "title": "Smelting Of Ores Buckethead",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/smelting-of-ores-buckethead/fhwq1yzyy7rha",
+          "releaseDate": "2025-03-14"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://buckethead.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Buckethead"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Buckethead"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.bucketheadland.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/53527"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Buckethead&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Buckethead"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/bucketdead/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCuA3IbLtd-mMVPH5gm16tWQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/BucketheadNews"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

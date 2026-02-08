@@ -1,0 +1,115 @@
+[
+  {
+    "id": "wilco",
+    "name": "Wilco",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011047560_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://wilcohq.bandcamp.com",
+        "allReleaseTitles": [
+          "aghostisbornexpandededition",
+          "aghostisborn",
+          "aghostisborndeluxeedition9cdboxset",
+          "aghostisborndeluxeedition9lp4cdboxset",
+          "hotsuncoolshroud",
+          "cousin",
+          "cruelcountry",
+          "yankeehotelfoxtrotdeluxeedition",
+          "yankeehotelfoxtrotexpandededition",
+          "yankeehotelfoxtrotremasterededition",
+          "yankeehotelfoxtrotsuperdeluxeedition",
+          "tellyourfriends",
+          "odetojoy",
+          "alllivesyousay",
+          "schmilco",
+          "starwars"
+        ],
+        "latestRelease": {
+          "title": "A Ghost Is Born (Expanded Edition)",
+          "type": "album",
+          "url": "https://wilcohq.bandcamp.com/album/a-ghost-is-born-expanded-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a4023047934_2.jpg",
+          "releaseDate": "April 7, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/wilco/133340",
+        "allReleaseTitles": [
+          "aghostisborn",
+          "yankeehotelfoxtrot",
+          "skybluesky",
+          "summerteeth",
+          "hotsuncoolshroud",
+          "thewholeloveexpanded",
+          "cousin",
+          "beingthere",
+          "starwars",
+          "thealbum",
+          "whatsyour20essentialtracks19942014",
+          "schmilco",
+          "beingtheredeluxeedition",
+          "am",
+          "amdeluxeedition",
+          "alphamikefoxtrotraretracks19942014",
+          "handshakedrugs",
+          "amagazinecalledsunset",
+          "kamera"
+        ],
+        "latestRelease": {
+          "title": "A Ghost Is Born Wilco",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/a-ghost-is-born-wilco/qtizqwjrcj7na",
+          "releaseDate": "2025-02-07"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Wilco"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Wilco"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://wilcoworld.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/102984"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Wilco&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Wilco"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/wilco/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC2DdJ1uZwRvD9SNjp0TArkw"
+      },
+      {
+        "sourceId": "bluesky",
+        "url": "https://wilcoskybluesky.com/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/wilcohq"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

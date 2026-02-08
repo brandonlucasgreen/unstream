@@ -1,0 +1,74 @@
+[
+  {
+    "id": "thefray",
+    "name": "The F.Ray",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0015087145_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://the-f-ray.bandcamp.com",
+        "allReleaseTitles": [
+          "aquelesilencio",
+          "lostwavs",
+          "walkingaround",
+          "purge",
+          "bugboo",
+          "paralnoiduniverse"
+        ],
+        "latestRelease": {
+          "title": "Aquele silêncio",
+          "type": "track",
+          "url": "https://the-f-ray.bandcamp.com/track/aquele-sil-ncio",
+          "imageUrl": "https://f4.bcbits.com/img/a0087678306_2.jpg",
+          "releaseDate": "May 1, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20F.Ray"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20F.Ray"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.thefray.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/616311"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20F.Ray&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20F.Ray"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "Instagram - https://www.instagram.com/thefray/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@thefray"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/thefraySME"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/TheFray"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

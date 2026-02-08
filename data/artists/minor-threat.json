@@ -1,0 +1,71 @@
+[
+  {
+    "id": "minorthreat",
+    "name": "Minor Threat",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0007953821_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://minorthreat.bandcamp.com",
+        "allReleaseTitles": [
+          "1st7",
+          "outofstepouttakes",
+          "firstdemotape",
+          "saladdays",
+          "firsttwo7s",
+          "outofstep"
+        ],
+        "latestRelease": {
+          "title": "1st 7\"",
+          "type": "album",
+          "url": "https://minorthreat.bandcamp.com/album/1st-7",
+          "imageUrl": "https://f4.bcbits.com/img/a3023242528_2.jpg",
+          "releaseDate": "November 20, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/minor-threat/415039",
+        "allReleaseTitles": [
+          "outofstepouttakes",
+          "firsttwoseveninches",
+          "outofstep",
+          "saladdays",
+          "firstdemotape"
+        ],
+        "latestRelease": {
+          "title": "Out Of Step Outtakes Minor Threat",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/out-of-step-outtakes-minor-threat/gasak21lebzsb",
+          "releaseDate": "2023-12-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Minor%20Threat"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Minor%20Threat"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/252202"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Minor%20Threat&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Minor%20Threat"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

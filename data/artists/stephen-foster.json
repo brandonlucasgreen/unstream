@@ -1,0 +1,52 @@
+[
+  {
+    "id": "stephenfoster",
+    "name": "Stephen Foster",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041333286_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://stephenfoster1.bandcamp.com",
+        "allReleaseTitles": [
+          "lassombrasdescansanhomedemo",
+          "mientrasmayasuenahomedemo",
+          "suntoriseep",
+          "sharingperils"
+        ],
+        "latestRelease": {
+          "title": "Las sombras descansan (home demo)",
+          "type": "track",
+          "url": "https://stephenfoster1.bandcamp.com/track/las-sombras-descansan-home-demo",
+          "imageUrl": "https://f4.bcbits.com/img/a4177337821_16.jpg",
+          "releaseDate": "October 11, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Stephen%20Foster"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Stephen%20Foster"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/615543"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Stephen%20Foster&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Stephen%20Foster"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

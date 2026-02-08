@@ -1,0 +1,56 @@
+[
+  {
+    "id": "polog",
+    "name": "Polo G",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022392300_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/polo-g/4174229",
+        "allReleaseTitles": [
+          "betterdaysmaemullerneiked",
+          "hoodpoetblackheartedition",
+          "wayoutthehoodiililtjay",
+          "shootitoff",
+          "hoodpoet",
+          "headshotliltjayfivioforeign",
+          "barelyholdinon",
+          "sorrysferraris",
+          "notimewastedfeatfuture",
+          "movewrongvonoff1700",
+          "angelsinthesky",
+          "thugmemorials",
+          "qualityoverquantity",
+          "sip",
+          "chinatownpt2",
+          "chances",
+          "hightolerance"
+        ],
+        "latestRelease": {
+          "title": "Shoot It Off Polo G",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/shoot-it-off-polo-g/w16l0tvcymo1b",
+          "releaseDate": "2025-09-10"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://polog1.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Polo%20G"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Polo%20G"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

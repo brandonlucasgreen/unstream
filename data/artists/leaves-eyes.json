@@ -1,0 +1,111 @@
+[
+  {
+    "id": "leaveseyes",
+    "name": "Leaves' Eyes",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0012528705_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://leaveseyes.bandcamp.com",
+        "allReleaseTitles": [
+          "symphoniesofthenight",
+          "meredead",
+          "atheavensend",
+          "mydestiny",
+          "njord",
+          "ensagaibelgia",
+          "legendland",
+          "vinlandsaga",
+          "elegy",
+          "lovelorn",
+          "intoyourlight"
+        ],
+        "latestRelease": {
+          "title": "Symphonies of the Night",
+          "type": "album",
+          "url": "https://leaveseyes.bandcamp.com/album/symphonies-of-the-night",
+          "imageUrl": "https://f4.bcbits.com/img/a4191056063_2.jpg",
+          "releaseDate": "November 13, 2013"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/leaves-eyes/1062615",
+        "allReleaseTitles": [
+          "mythsoffate",
+          "signofthedragonhead",
+          "thelastviking",
+          "songofdarkness",
+          "darkloveempress",
+          "vinlandsaga",
+          "symphoniesofthenight",
+          "njord",
+          "lovelorn",
+          "elegy",
+          "atheavensend",
+          "mydestiny",
+          "meredead",
+          "kingofkings",
+          "legendland",
+          "vikingspirit",
+          "intoyourlight",
+          "ensagaibelgia",
+          "melusine",
+          "ineternity"
+        ],
+        "latestRelease": {
+          "title": "Song Of Darkness Leaves Eyes",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/song-of-darkness-leaves-eyes/plebeg9nyf42b",
+          "releaseDate": "2025-12-09"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Leaves'%20Eyes"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Leaves'%20Eyes"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://leaveseyes.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/278878"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Leaves'%20Eyes&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Leaves'%20Eyes"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/leaveseyesofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@leaveseyes_official"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCTZatOEymq3-XKG05NEluKQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/leaveseyesofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

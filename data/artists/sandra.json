@@ -1,0 +1,101 @@
+[
+  {
+    "id": "sandra",
+    "name": "Sandra",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0034793388_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sandramusic.bandcamp.com",
+        "allReleaseTitles": [
+          "theverybestof",
+          "fadingshades",
+          "reflections"
+        ],
+        "latestRelease": {
+          "title": "The Very Best Of",
+          "type": "album",
+          "url": "https://sandramusic.bandcamp.com/album/the-very-best-of",
+          "imageUrl": "https://f4.bcbits.com/img/a1599382859_2.jpg",
+          "releaseDate": "February 20, 2024"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/gotathingforthings"
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sandra/47147",
+        "allReleaseTitles": [
+          "18greatesthits",
+          "flaschenpostbianca",
+          "thelongplay",
+          "intoasecretland",
+          "so80spresentscuratedbyblankjones",
+          "theverybestof",
+          "paintingsinyellow",
+          "mirrors",
+          "closetoseven",
+          "thewheeloftime",
+          "myfavourites",
+          "fadingshades",
+          "reflectionsthereproducedhitsspecialedition",
+          "tenononethesingles",
+          "iclosemyeyes",
+          "secretsoflovedjbobo",
+          "infinitekiss",
+          "intheheatofthenight2007remixesep"
+        ],
+        "latestRelease": {
+          "title": "Flaschenpost Sandra Bianca",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/flaschenpost-sandra-bianca/nmour3mqb4crc",
+          "releaseDate": "2023-11-10"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sandra"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sandra"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sandranet.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1594671"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sandra&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sandra"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sandra.lauer.cretu.official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCefMqcCMiUxvMxdBtIFd6uw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sandra.lauer.cretu.official"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

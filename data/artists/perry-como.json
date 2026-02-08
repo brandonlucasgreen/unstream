@@ -1,0 +1,75 @@
+[
+  {
+    "id": "perrycomo",
+    "name": "Perry Como",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0007504414_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/perry-como/24804",
+        "allReleaseTitles": [
+          "andiloveyouso",
+          "looktoyourheartexpandededition",
+          "itsimpossible",
+          "initaly",
+          "thecompletercachristmascollection",
+          "seasonsgreetings",
+          "greatestchristmassongs",
+          "theclassicchristmasalbum",
+          "saturdaynightwithmrc",
+          "justoutofreachraritiesfromnashville",
+          "thesongsilove",
+          "byrequest",
+          "thescenechanges",
+          "sosmooth",
+          "inpersonattheinternationalhotellasvegas",
+          "comoswings",
+          "seattle",
+          "greatestgospelsongs",
+          "achristmas",
+          "theessential"
+        ],
+        "latestRelease": {
+          "title": "The Complete Rca Christmas Collection Perry Como",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-complete-rca-christmas-collection-perry-como/0886444355223",
+          "releaseDate": "2012-11-06"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://perrycomo.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Perry%20Como"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Perry%20Como"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/27516"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Perry%20Como&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Perry%20Como"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Perry-Como/83970222872"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

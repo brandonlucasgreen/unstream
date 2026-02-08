@@ -1,0 +1,114 @@
+[
+  {
+    "id": "deathcabforcutie",
+    "name": "Death Cab for Cutie",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0042490570_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://deathcabforcutie.bandcamp.com",
+        "allReleaseTitles": [
+          "anarrowinthewall",
+          "asphaltmeadowsacoustic",
+          "asphaltmeadows",
+          "thegeorgiaep",
+          "theblueep",
+          "thankyoufortoday",
+          "firstshowacousticatthepacerhousebellinghamwa112297",
+          "kintsugi",
+          "transatlanticism10thanniversaryedition",
+          "transatlanticismdemos",
+          "codesandkeys",
+          "theopendoorep",
+          "narrowstairs",
+          "plans",
+          "christmasbabypleasecomehome",
+          "transatlanticism"
+        ],
+        "latestRelease": {
+          "title": "An Arrow In The Wall",
+          "type": "album",
+          "url": "https://deathcabforcutie.bandcamp.com/album/an-arrow-in-the-wall",
+          "imageUrl": "https://f4.bcbits.com/img/a1629079699_2.jpg",
+          "releaseDate": "August 16, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/death-cab-for-cutie/239099",
+        "allReleaseTitles": [
+          "transatlanticism",
+          "plans",
+          "asphaltmeadows",
+          "codesandkeys",
+          "kintsugi",
+          "narrowstairs",
+          "asphaltmeadowsacoustic",
+          "thankyoufortoday",
+          "thegeorgiaep",
+          "theblueep",
+          "thephotoalbum",
+          "northernlights",
+          "waitingforthesunrise",
+          "transatlanticismdemos",
+          "heretoforever",
+          "pepperacoustic",
+          "totheground",
+          "thestabilityep"
+        ],
+        "latestRelease": {
+          "title": "Asphalt Meadows Death Cab For Cutie",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/asphalt-meadows-death-cab-for-cutie/d1nom6wmkjgpa",
+          "releaseDate": "2022-09-16"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Death%20Cab%20for%20Cutie"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Death%20Cab%20for%20Cutie"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.deathcabforcutie.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/280098"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Death%20Cab%20for%20Cutie&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Death%20Cab%20for%20Cutie"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/deathcabforcutie/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@deathcabforcutie"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/DCFCtv"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/deathcabforcutie"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,27 @@
+[
+  {
+    "id": "michaelpitt",
+    "name": "Michael Pitt",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032603479_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://michaelpitt.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Michael%20Pitt"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Michael%20Pitt"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

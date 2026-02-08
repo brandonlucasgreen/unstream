@@ -1,0 +1,63 @@
+[
+  {
+    "id": "bennygolson",
+    "name": "Benny Golson",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026908463_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bennygolson.bandcamp.com",
+        "allReleaseTitles": [
+          "goldenstandardsvol2",
+          "goldenstandardsvol1",
+          "onedayforeverwithshirleyhorn",
+          "themanymoodsofbennygolson",
+          "tenorlegacy",
+          "upjumpedbenny",
+          "thatsfunkybennygolsonfunkyquintet"
+        ],
+        "latestRelease": {
+          "title": "Golden Standards Vol. 2",
+          "type": "album",
+          "url": "https://bennygolson.bandcamp.com/album/golden-standards-vol-2",
+          "imageUrl": "https://f4.bcbits.com/img/a0510488927_2.jpg",
+          "releaseDate": "October 30, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Benny%20Golson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Benny%20Golson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.bennygolson.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/185752"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Benny%20Golson&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Benny%20Golson"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/watch?time_continue=127&v=YHE8mDiZwo8&feature=emb_logo"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

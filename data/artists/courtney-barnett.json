@@ -1,0 +1,69 @@
+[
+  {
+    "id": "courtneybarnett",
+    "name": "courtney barnett",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0042444827_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://courtneybarnett.bandcamp.com",
+        "allReleaseTitles": [
+          "creatureofhabit",
+          "differentnowcourtneybarnett",
+          "endofthedaymusicfromthefilmanonymousclub",
+          "thingstaketimetaketime",
+          "mtvunplugged",
+          "everybodyherehatesyousmalltalk",
+          "tellmehowyoureallyfeel",
+          "sometimesisitandthinkandsometimesijustsit",
+          "thedoubleepaseaofsplitpeas",
+          "liveatelectricladystudios",
+          "thirdmanrecordsblueseries",
+          "kimscaravansingle",
+          "ep2howtocarveacarrotintoarose",
+          "ep1ivegotafriendcalledemilyferris"
+        ],
+        "latestRelease": {
+          "title": "Creature of Habit",
+          "type": "album",
+          "url": "https://courtneybarnett.bandcamp.com/album/creature-of-habit",
+          "imageUrl": "https://f4.bcbits.com/img/a2961271000_2.jpg"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=courtney%20barnett"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+courtney%20barnett"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://courtneybarnett.com.au/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2788950"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/courtneymelba/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC4zONxF4rPkPZE6klaIoFpw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/courtneybarnettmusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

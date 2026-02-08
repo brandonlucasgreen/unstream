@@ -1,0 +1,40 @@
+[
+  {
+    "id": "emmy",
+    "name": "EMMY",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0002458063_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://emmy.bandcamp.com",
+        "allReleaseTitles": [
+          "river",
+          "illfollowthesun",
+          "greatescapeep",
+          "lovesomebodymashup"
+        ],
+        "latestRelease": {
+          "title": "River",
+          "type": "album",
+          "url": "https://emmy.bandcamp.com/album/river",
+          "imageUrl": "https://f4.bcbits.com/img/a0748103248_16.jpg",
+          "releaseDate": "November 25, 2014"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=EMMY"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+EMMY"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

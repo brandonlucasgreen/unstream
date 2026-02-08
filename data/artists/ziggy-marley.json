@@ -1,0 +1,83 @@
+[
+  {
+    "id": "ziggymarley",
+    "name": "Ziggy Marley",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0021689950_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ziggy-marley/42565",
+        "allReleaseTitles": [
+          "rebellionrises",
+          "wearethepeopletour",
+          "loveismyreligion20live",
+          "beachinhawaiijustus",
+          "circleofpeace",
+          "rebellionrisessingle",
+          "roadtorebellionvolume2",
+          "personalrevolution",
+          "theluckyone",
+          "roadtorebellionvolume1",
+          "liftourspiritsraiseourvoice",
+          "manymournforbob",
+          "pajammingaudiotrailerfromziggysnewkidsbook",
+          "iwillbegladlive",
+          "monsvaticanus",
+          "lighthouseep",
+          "seedemfakeleaders",
+          "bobmarley75thcelebrationpt1",
+          "homemathieukoss",
+          "lionbeat"
+        ],
+        "latestRelease": {
+          "title": "Beach In Hawaii Ziggy Marley Just Us",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/beach-in-hawaii-ziggy-marley-just-us/sn5532gdzyyda",
+          "releaseDate": "2020-07-31"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ziggymarley.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ziggy%20Marley"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ziggy%20Marley"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://ziggymarley.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/249758"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ziggy%20Marley&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ziggy%20Marley"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/ziggymarleycom"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ZiggyMarley"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

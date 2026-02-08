@@ -1,0 +1,69 @@
+[
+  {
+    "id": "gammaray",
+    "name": "Gamma Ray",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038065889_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://gammaray.bandcamp.com",
+        "allReleaseTitles": [
+          "gammaray",
+          "teethin",
+          "justlikeyou",
+          "burymefirst",
+          "alwayson"
+        ],
+        "latestRelease": {
+          "title": "GAMMA RAY",
+          "type": "album",
+          "url": "https://gammaray.bandcamp.com/album/gamma-ray",
+          "imageUrl": "https://f4.bcbits.com/img/a1981287505_2.jpg",
+          "releaseDate": "April 6, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Gamma%20Ray"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Gamma%20Ray"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.gammaray.org/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/253729"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Gamma%20Ray&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Gamma%20Ray"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/gammaray_official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC34yDJRgqZZFJ25BjEvvCQQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/gammarayofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

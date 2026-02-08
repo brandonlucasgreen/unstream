@@ -1,0 +1,76 @@
+[
+  {
+    "id": "tomodell",
+    "name": "TomOdell",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3356483970_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/tom-odell/945398",
+        "latestRelease": {
+          "title": "A Wonderful Life Tom Odell",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/a-wonderful-life-tom-odell/bbrjipgtlqobb",
+          "releaseDate": "2025-09-05"
+        },
+        "allReleaseTitles": [
+          "awonderfullife",
+          "anotherlove",
+          "dontletmego",
+          "jubileeroad",
+          "dontcryputyourheadonmyshoulder",
+          "wrongcrowd",
+          "truecolours",
+          "wheniclosemyeyesfromartesoundslikeart",
+          "oversydneyrose",
+          "blackfridayprettylikethesunlostfrequencies",
+          "monsters",
+          "numb",
+          "oldfriendzahodesagazan",
+          "somehow",
+          "butterfliesfeatauroraaurora",
+          "longwaydowndeluxe",
+          "blackfriday"
+        ]
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tomodellofficial.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=TomOdell"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+TomOdell"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.tomodell.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3034712"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/tompeterodell/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCDxabaoNKAm4ufDv5ktM9mw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/TomOdellmusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

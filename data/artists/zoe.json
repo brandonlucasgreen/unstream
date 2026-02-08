@@ -1,0 +1,38 @@
+[
+  {
+    "id": "zoe-bandcamp-zoestonerrock",
+    "name": "ZOE",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0023685451_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://zoestonerrock.bandcamp.com",
+        "allReleaseTitles": [
+          "backintothelightlxbrennusmusic",
+          "raisetheveillxbrennusmusic"
+        ],
+        "latestRelease": {
+          "title": "\"Back Into The Light\" (LX/Brennus Music)",
+          "type": "album",
+          "url": "https://zoestonerrock.bandcamp.com/album/back-into-the-light-lx-brennus-music",
+          "imageUrl": "https://f4.bcbits.com/img/a1417197794_16.jpg",
+          "releaseDate": "September 29, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=ZOE"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+ZOE"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

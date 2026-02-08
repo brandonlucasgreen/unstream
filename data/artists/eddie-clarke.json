@@ -1,0 +1,39 @@
+[
+  {
+    "id": "eddieclarke",
+    "name": "Eddie Clarke",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022502294_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://eddieclarke.bandcamp.com",
+        "allReleaseTitles": [
+          "atowncalledliberty",
+          "bubblegumyouth",
+          "staroftheseabobbylennox"
+        ],
+        "latestRelease": {
+          "title": "A Town Called Liberty",
+          "type": "track",
+          "url": "https://eddieclarke.bandcamp.com/track/a-town-called-liberty",
+          "imageUrl": "https://f4.bcbits.com/img/a4076378045_2.jpg",
+          "releaseDate": "December 5, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Eddie%20Clarke"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Eddie%20Clarke"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

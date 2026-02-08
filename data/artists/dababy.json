@@ -1,0 +1,81 @@
+[
+  {
+    "id": "dababy",
+    "name": "dababy",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020601023_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/dababy-10003761514/3761514",
+        "latestRelease": {
+          "title": "Be More Grateful Dababy",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/be-more-grateful-dababy/i0kywckc790bl",
+          "releaseDate": "2026-01-30"
+        },
+        "allReleaseTitles": [
+          "levitatingfeatdualipa",
+          "kirk",
+          "bemoregrateful",
+          "redlightgreenlight",
+          "blameitonbabyexplicit",
+          "blameitonbaby",
+          "babylilbabyqualitycontrol",
+          "backonmybabyjesusshtagain",
+          "dontinsultmefttwin",
+          "nan",
+          "howtfisthisamixtape",
+          "ballifiwantto",
+          "oprahsbankaccountdrakelilyachty",
+          "betterthanyouyoungboyneverbrokeagain",
+          "calldafireman",
+          "masterpiece",
+          "babyonbaby2",
+          "blameitonbabyclean"
+        ]
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://dababy.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=dababy"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+dababy"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.officialdababy.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/6619834"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/dababy/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@dababy"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC2CCXzC56k0b8L49R_iW-Yw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/babyjesus704"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,47 @@
+[
+  {
+    "id": "mirandajuly",
+    "name": "Miranda July",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0004127916_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mirandajuly.bandcamp.com",
+        "allReleaseTitles": [
+          "thebinetsimontest",
+          "10millionhoursamile",
+          "margieruskiestopstimemirandajulywiththeneed"
+        ],
+        "latestRelease": {
+          "title": "The Binet-Simon Test",
+          "type": "album",
+          "url": "https://mirandajuly.bandcamp.com/album/the-binet-simon-test",
+          "imageUrl": "https://f4.bcbits.com/img/a4238317674_2.jpg",
+          "releaseDate": "May 1, 1998"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/miranda-july/2305306",
+        "allReleaseTitles": [
+          "10millionhoursamile",
+          "thebinetsimontest"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Miranda%20July"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Miranda%20July"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

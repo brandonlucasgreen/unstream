@@ -1,0 +1,40 @@
+[
+  {
+    "id": "boygeorge",
+    "name": "Boy George",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025722737_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://boygeorge.bandcamp.com",
+        "allReleaseTitles": [
+          "swoonbestthingsinceslicedbread",
+          "goodintentions",
+          "clouds",
+          "isolation"
+        ],
+        "latestRelease": {
+          "title": "Swoon/Best Thing Since Sliced Bread",
+          "type": "album",
+          "url": "https://boygeorge.bandcamp.com/album/swoon-best-thing-since-sliced-bread",
+          "imageUrl": "https://f4.bcbits.com/img/a3282948680_16.jpg",
+          "releaseDate": "August 6, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Boy%20George"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Boy%20George"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,105 @@
+[
+  {
+    "id": "tommorello",
+    "name": "Tom Morello",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026766930_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tommorello.bandcamp.com",
+        "allReleaseTitles": [
+          "everythingburnsfeatbeartooth",
+          "pretendyourememberme",
+          "theatlasundergroundflood",
+          "theatlasundergroundfire",
+          "youbelongtome",
+          "marchingonferguson"
+        ],
+        "latestRelease": {
+          "title": "Everything Burns (feat. Beartooth)",
+          "type": "album",
+          "url": "https://tommorello.bandcamp.com/album/everything-burns-feat-beartooth",
+          "imageUrl": "https://f4.bcbits.com/img/a3875778817_2.jpg",
+          "releaseDate": "December 17, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/tom-morello/155704",
+        "allReleaseTitles": [
+          "theatlasundergroundfire",
+          "onelastdancefromvenomthelastdancegrandsonandromanmorello",
+          "theatlasundergroundflood",
+          "thefabledcitythenightwatchmanand",
+          "theatlasunderground",
+          "theatlasundergroundinstrumentals",
+          "comandante",
+          "onemanrevolutionthenightwatchmanand",
+          "standupsheadiamonddanreynoldsthebloodybeetroots",
+          "pretendyourememberme",
+          "highwaytohellfeatbrucespringsteeneddievedderfeaturingbrucespringsteenandeddievedder",
+          "battlesirensknifeparty",
+          "cantstopthebleedingfeatgaryclarkjrgramatik",
+          "letsgetthepartystartedfeatbringmethehorizonfeaturingbringmethehorizon",
+          "thewarinsidefeatchrisstapletonfeaturingchrisstapleton",
+          "metalibabymetal",
+          "rabbitsrevengebassnectarbigboifeatkillermike",
+          "naturalsnotinitserjtankian",
+          "drivingtotexasfeatphantogramfeaturingphantogram"
+        ],
+        "latestRelease": {
+          "title": "One Last Dance From Venom The Last Dance Tom Morello Grandson And Roman Morello",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/one-last-dance-from-venom-the-last-dance-tom-morello-grandson-and-roman-morello/nv34es5h5peec",
+          "releaseDate": "2024-10-25"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tom%20Morello"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tom%20Morello"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://tommorello.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/6952"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/tommorello/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@tommorello"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCsObT2rCuM4f9ABCmHCEVBw"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@tommorello"
+      },
+      {
+        "sourceId": "bluesky",
+        "url": "https://bsky.app/profile/tommorelloofficial.bsky.social"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/TomMorello"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

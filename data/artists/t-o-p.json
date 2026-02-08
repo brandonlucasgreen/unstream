@@ -1,0 +1,39 @@
+[
+  {
+    "id": "top",
+    "name": "T.O.P",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0042354081_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://topmusic6.bandcamp.com",
+        "allReleaseTitles": [
+          "calminthedarktoptheorderofpeople",
+          "iwentforawalkandhadathink",
+          "grownup"
+        ],
+        "latestRelease": {
+          "title": "Calm In The Dark\n                \n                \n\n                T.O.P (The Order of People)",
+          "type": "album",
+          "url": "https://topmusic6.bandcamp.com/album/calm-in-the-dark",
+          "imageUrl": "https://f4.bcbits.com/img/a0730838000_2.jpg",
+          "releaseDate": "January 31, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=T.O.P"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+T.O.P"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

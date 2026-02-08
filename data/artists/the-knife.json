@@ -1,0 +1,112 @@
+[
+  {
+    "id": "theknife",
+    "name": "The Knife",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0021303595_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://theknife.bandcamp.com",
+        "allReleaseTitles": [
+          "handymanremixes",
+          "manhood",
+          "birdafraidofyou",
+          "passthison20057rip",
+          "forallanamnviintefaranvandaeuropaeuropatheme",
+          "liveatterminal5",
+          "shakenupversions",
+          "withoutyoumylifewouldbeboringremixes",
+          "readytolosestayouthereremixes",
+          "letstalkaboutgenderbabyletstalkaboutyouandmeplanningtorockreworkremixes",
+          "atoothforaneyeremixes",
+          "shakingthehabitual",
+          "seedsftmtsimsremixes",
+          "tomorrowinayearftmtsimsplanningtorock",
+          "silentshoutanaudiovisualexperience",
+          "likeapenremixes"
+        ],
+        "latestRelease": {
+          "title": "Handy-Man Remixes",
+          "type": "album",
+          "url": "https://theknife.bandcamp.com/album/handy-man-remixes",
+          "imageUrl": "https://f4.bcbits.com/img/a2632425408_2.jpg",
+          "releaseDate": "August 14, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-knife/118514",
+        "allReleaseTitles": [
+          "readytolosestayouthere",
+          "letstalkaboutgenderbabyletstalkaboutyouandmeplanningtorockrework",
+          "atoothforaneye",
+          "deepcuts",
+          "silentshout",
+          "shakingthehabitual",
+          "silentshoutanaudiovisualexperience",
+          "tomorrowinayear",
+          "",
+          "shakenupversions",
+          "heartbeats",
+          "weshareourmothershealth",
+          "hannahmedhsoundtrack",
+          "passthison",
+          "liveatterminal5",
+          "marblehouse",
+          "forallanamnviintefaranvandaeuropaeuropatheme",
+          "manhood",
+          "likeapen",
+          "withoutyoumylifewouldbeboring"
+        ],
+        "latestRelease": {
+          "title": "Ready To Lose Stay Out Here The Knife",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/ready-to-lose-stay-out-here-the-knife/k46yw4wjja43a",
+          "releaseDate": "2014-09-23"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Knife"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Knife"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://theknife.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/87717"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Knife&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Knife"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/theknife/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/TheKnifeMusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/theknifemusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

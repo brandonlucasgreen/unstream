@@ -1,0 +1,39 @@
+[
+  {
+    "id": "goa",
+    "name": "Go-A",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0002361255_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://go-a.bandcamp.com",
+        "allReleaseTitles": [
+          "thesun",
+          "oiupoli",
+          "tanula"
+        ],
+        "latestRelease": {
+          "title": "Сонце (The Sun)",
+          "type": "track",
+          "url": "https://go-a.bandcamp.com/track/the-sun",
+          "imageUrl": "https://f4.bcbits.com/img/a2062678392_2.jpg",
+          "releaseDate": "February 27, 2014"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Go-A"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Go-A"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

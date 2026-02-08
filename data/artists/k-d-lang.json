@@ -1,0 +1,99 @@
+[
+  {
+    "id": "kdlang",
+    "name": "k.d. lang",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0021555591_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kdlang.bandcamp.com",
+        "allReleaseTitles": [
+          "constantcravingfashionablylateremixkdlangtracyyoung",
+          "misschatelaineironhoofremixkdlangorvillepeck",
+          "makeover",
+          "watershed"
+        ],
+        "latestRelease": {
+          "title": "Constant Craving (Fashionably Late Remix)\n                \n                \n\n                k.d. lang, Tracy Young",
+          "type": "album",
+          "url": "https://kdlang.bandcamp.com/album/constant-craving-fashionably-late-remix",
+          "imageUrl": "https://f4.bcbits.com/img/a3434605278_16.jpg",
+          "releaseDate": "September 17, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/k-d-lang/51247",
+        "allReleaseTitles": [
+          "ingenue25thanniversaryedition",
+          "hymnsofthe49thparallel",
+          "invinciblesummer",
+          "misschatelaineorvillepeck",
+          "memrsjonesfeatchrissiehynde",
+          "constantcravingtracyyoung",
+          "becauseofyou",
+          "sleepingalone",
+          "allyoucaneat",
+          "hallelujahep",
+          "recollection",
+          "makeover",
+          "absolutetorchandtwangandthereclines",
+          "singitloudandthesissboombang",
+          "livebyrequest",
+          "awonderfulworldtonybennett",
+          "drag",
+          "shadowland",
+          "watershed"
+        ],
+        "latestRelease": {
+          "title": "Hymns Of The 49th Parallel Kd Lang",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/hymns-of-the-49th-parallel-kd-lang/0075597944211",
+          "releaseDate": "2004-07-21"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=k.d.%20lang"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+k.d.%20lang"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.kdlang.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/110570"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=k.d.%20lang&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/k.d.%20lang"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kdlang/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCiUBDePZrwHlQd_louwtTWA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/kdlang"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

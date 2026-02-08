@@ -1,0 +1,81 @@
+[
+  {
+    "id": "litaford",
+    "name": "Lita Ford",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0015412765_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/lita-ford/106815",
+        "allReleaseTitles": [
+          "lita",
+          "platinumgoldcollection",
+          "outforblood",
+          "dangerouscurves",
+          "livinglikearunaway",
+          "dontleavemeinthedarkrickywarwick",
+          "timecapsule",
+          "black",
+          "dancinontheedge",
+          "greatesthitslive",
+          "inconcert",
+          "youknowiwouldgaryhoeyand",
+          "intimatediscussion",
+          "livedeadly"
+        ],
+        "latestRelease": {
+          "title": "Living Like A Runaway Lita Ford",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/living-like-a-runaway-lita-ford/ch81992sskam1",
+          "releaseDate": "2012-05-28"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://litaford.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lita%20Ford"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lita%20Ford"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.litafordonline.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/293870"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Lita%20Ford&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Lita%20Ford"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/litafordofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/LitaFordVEVO"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/litaofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

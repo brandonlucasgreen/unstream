@@ -1,0 +1,63 @@
+[
+  {
+    "id": "salifkeita",
+    "name": "Salif Keita",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037988392_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://salifkeita.bandcamp.com",
+        "allReleaseTitles": [
+          "yamoreacoustic",
+          "sokono",
+          "kantemanfila"
+        ],
+        "latestRelease": {
+          "title": "Yamore (Acoustic)",
+          "type": "track",
+          "url": "https://salifkeita.bandcamp.com/track/yamore-acoustic",
+          "imageUrl": "https://f4.bcbits.com/img/a0358333355_2.jpg",
+          "releaseDate": "September 17, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Salif%20Keita"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Salif%20Keita"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://salifkeita.artistes.universalmusic.fr/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/10377"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Salif%20Keita&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Salif%20Keita"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/salifkeitaofficiel"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Salif-Keita-Official-Fan-Page/107119345998817"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,81 @@
+[
+  {
+    "id": "poison",
+    "name": "Poison",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018767809_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/poison/64659",
+        "allReleaseTitles": [
+          "openupandsayahh",
+          "lookwhatthecatdraggedin",
+          "nativetongue",
+          "crackasmileandmore",
+          "odoyewu",
+          "tictacfeaturingraggia",
+          "fleshblood",
+          "openupandsayahh",
+          "doubledoseultimatehits",
+          "sgreatesthits19861996",
+          "d",
+          "thebestof20yearsofrock",
+          "lookwhatthecatdraggedin20thanniversaryedition",
+          "lovesongs"
+        ],
+        "latestRelease": {
+          "title": "Native Tongue Poison",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/native-tongue-poison/a79p1pgmiz4yb",
+          "releaseDate": "1993-02-16"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://poison1989.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Poison"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Poison"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.poisonweb.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/255292"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Poison&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Poison"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/poison/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCZGcHLEZkIQfW9Dvp84ta4g"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Poison"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

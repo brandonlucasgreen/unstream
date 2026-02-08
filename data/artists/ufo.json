@@ -1,0 +1,72 @@
+[
+  {
+    "id": "ufo",
+    "name": "UFO",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011336963_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ufoofficial.bandcamp.com",
+        "allReleaseTitles": [
+          "obsession2024remasterdeluxeedition",
+          "sevendeadly",
+          "thehanoversessions",
+          "moggsmotelphilmogg",
+          "youarehere",
+          "showtime",
+          "soulshiftervinniemoore",
+          "doubleexposurevinniemoore",
+          "aerialvisionsvinniemoore",
+          "thevisitor",
+          "themonkeypuzzle",
+          "atributetoufovariousartists",
+          "earlyflight1972",
+          "rockbottomincincinnati1995",
+          "landinginstlouislive1982",
+          "liveattheoxfordapollo1985"
+        ],
+        "latestRelease": {
+          "title": "Obsession (2024 Remaster - Deluxe Edition)",
+          "type": "album",
+          "url": "https://ufoofficial.bandcamp.com/album/obsession-2024-remaster-deluxe-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a1076535774_2.jpg",
+          "releaseDate": "November 22, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=UFO"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+UFO"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.ufo-music.info/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/153677"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=UFO&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/UFO"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/UFOofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "id": "stayc",
+    "name": "StayC",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0040864713_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/stayc-1/6839010",
+        "latestRelease": {
+          "title": "Stayc Special Single I Want It Stayc",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/stayc-special-single-i-want-it-stayc/akc4gwykuff4b",
+          "releaseDate": "2025-07-23"
+        },
+        "allReleaseTitles": [
+          "s",
+          "specialsingleiwantitstayc",
+          "l",
+          "startoayoungculture",
+          "youngluvcom",
+          "metamorphic",
+          "teddybear",
+          "teenfresh",
+          "weneedlove",
+          "poppykoreanver",
+          "meowcheekyicythangjapaneseversion",
+          "staydom",
+          "overugoodbyeseeunxj",
+          "stereotype",
+          "supernova",
+          "stillhere",
+          "typing"
+        ]
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://stayc.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=StayC"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+StayC"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://cafe.daum.net/STAYC"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/8399658"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/stayc_highup/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@stayc_official"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCod5V2dpnpJLklGvVOv5FcQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/STAYC201112"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

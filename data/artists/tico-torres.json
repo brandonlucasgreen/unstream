@@ -1,0 +1,42 @@
+[
+  {
+    "id": "ticotorres",
+    "name": "tico torres",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0005881359_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ticotorres.bandcamp.com",
+        "allReleaseTitles": [
+          "accessbass",
+          "proudtorres"
+        ],
+        "latestRelease": {
+          "title": "access bass",
+          "type": "track",
+          "url": "https://ticotorres.bandcamp.com/track/access-bass",
+          "imageUrl": "https://f4.bcbits.com/img/a1162875425_16.jpg",
+          "releaseDate": "March 5, 2017"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=tico%20torres"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+tico%20torres"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/299753"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

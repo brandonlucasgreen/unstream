@@ -1,0 +1,42 @@
+[
+  {
+    "id": "andriuspojavis",
+    "name": "Andrius Pojavis",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026948777_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://andriuspojavis.bandcamp.com",
+        "allReleaseTitles": [
+          "singmeahugandriuspojavis",
+          "airoftheplace"
+        ],
+        "latestRelease": {
+          "title": "Sing me a hug\n                \n                \n\n                andrius pojavis",
+          "type": "track",
+          "url": "https://andriuspojavis.bandcamp.com/track/sing-me-a-hug",
+          "imageUrl": "https://f4.bcbits.com/img/a4120586419_16.jpg",
+          "releaseDate": "October 14, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Andrius%20Pojavis"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Andrius%20Pojavis"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3267871"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

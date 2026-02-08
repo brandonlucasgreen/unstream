@@ -1,0 +1,107 @@
+[
+  {
+    "id": "katatonia",
+    "name": "Katatonia",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039254808_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://katatonia.bandcamp.com",
+        "allReleaseTitles": [
+          "aworldwithoutheroes",
+          "nightmaresasextensionsofthewakingstate",
+          "skyvoidofstars"
+        ],
+        "latestRelease": {
+          "title": "A World Without Heroes",
+          "type": "album",
+          "url": "https://katatonia.bandcamp.com/album/a-world-without-heroes",
+          "imageUrl": "https://f4.bcbits.com/img/a1380441028_2.jpg",
+          "releaseDate": "November 11, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/katatonia/600666",
+        "allReleaseTitles": [
+          "nightmaresasextensionsofthewakingstate",
+          "skyvoidofstars",
+          "cityburials",
+          "thegreatcolddistanceliveinbulgariawiththeorchestraofstateopera",
+          "deadair",
+          "aworldwithoutheroes",
+          "windofnochange",
+          "lilac",
+          "temporal",
+          "atrium",
+          "birds",
+          "lacquer",
+          "austerity",
+          "behindtheblood",
+          "thewinterofourpassing",
+          "behindtheblooddeadairsession",
+          "thegreatcolddistance",
+          "vivaemptiness10thanniversaryedition",
+          "bravemurderday",
+          "nightisthenewdayspecialtouredition"
+        ],
+        "latestRelease": {
+          "title": "Nightmares As Extensions Of The Waking State Katatonia",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/nightmares-as-extensions-of-the-waking-state-katatonia/hi66f16c5bphc",
+          "releaseDate": "2025-06-06"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Katatonia"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Katatonia"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://katatonia.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/160074"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Katatonia&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Katatonia"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/katatoniaband/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@katatoniaofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCoe-mXCnuAlAxeDtAsYlCNg"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@katatoniaband"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/katatonia"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

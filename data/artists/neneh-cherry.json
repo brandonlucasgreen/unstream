@@ -1,0 +1,72 @@
+[
+  {
+    "id": "nenehcherry",
+    "name": "Neneh Cherry",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014174138_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://nenehcherry.bandcamp.com",
+        "allReleaseTitles": [
+          "brokenpoliticsremixes",
+          "brokenpolitics",
+          "brokenpoliticsautographedvinyllp",
+          "blankproject",
+          "blankprojectremixes",
+          "thecherrythingremixesnenehcherrythething",
+          "thecherrythingnenehcherrythething",
+          "ivegotyouundermyskinremixes"
+        ],
+        "latestRelease": {
+          "title": "Broken Politics Remixes",
+          "type": "album",
+          "url": "https://nenehcherry.bandcamp.com/album/broken-politics-remixes-3",
+          "imageUrl": "https://f4.bcbits.com/img/a1585600782_2.jpg",
+          "releaseDate": "September 4, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Neneh%20Cherry"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Neneh%20Cherry"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://nenehcherry.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/11449"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Neneh%20Cherry&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Neneh%20Cherry"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/nenehcherryofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCggR9IhR1o8Y52rmI_AFByw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/nenehcherryofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

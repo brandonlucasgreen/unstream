@@ -1,0 +1,70 @@
+[
+  {
+    "id": "jamestaylor",
+    "name": "James Taylor",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025826466_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jamestaylor.bandcamp.com",
+        "allReleaseTitles": [
+          "americanstandard",
+          "liveatthetroubadourcarolekingjamestaylor",
+          "1967",
+          "beforethisworld",
+          "onemanband",
+          "covers"
+        ],
+        "latestRelease": {
+          "title": "American Standard",
+          "type": "album",
+          "url": "https://jamestaylor.bandcamp.com/album/american-standard",
+          "imageUrl": "https://f4.bcbits.com/img/a1652473508_2.jpg",
+          "releaseDate": "February 28, 2020"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/james-taylor/39414",
+        "allReleaseTitles": [
+          "sgreatesthits",
+          "liveatthetroubadourcaroleking",
+          "sweetbabyjames",
+          "thewarnerbrosalbums19701976",
+          "americanstandard",
+          "mudslideslimandthebluehorizon",
+          "beforethisworld",
+          "onemanband",
+          "gorilla",
+          "overtherainbowtheamericanstandardep",
+          "hourglass",
+          "onemandog",
+          "inthepocket2019remaster",
+          "walkingman",
+          "inthepocket",
+          "haydndiejahreszeitentheseasonsenochzuguttenbergklangverwaltungorchestrachorgemeinschaftneubeuernmiriammeyerandralflukas"
+        ],
+        "latestRelease": {
+          "title": "James Taylors Greatest Hits James Taylor",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/james-taylors-greatest-hits-james-taylor/xgqy0pl43wmwa",
+          "releaseDate": "2020-03-27"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=James%20Taylor"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+James%20Taylor"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

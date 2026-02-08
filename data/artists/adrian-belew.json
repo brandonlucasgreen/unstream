@@ -1,0 +1,103 @@
+[
+  {
+    "id": "adrianbelew",
+    "name": "Adrian Belew",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018772497_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://adrianbelew.bandcamp.com",
+        "allReleaseTitles": [
+          "atoeintheocean",
+          "elevator",
+          "lonerhino",
+          "twangbarking",
+          "desirecaughtbythetail",
+          "mrmusichead",
+          "younglions",
+          "innerrevolution",
+          "desireoftherhinoking",
+          "theacousticadrianbelew",
+          "here",
+          "theexperimentalguitarseriesvol1theguitarasorchestra",
+          "opzoptoowah",
+          "belewprints",
+          "saladdays",
+          "comingattractions"
+        ],
+        "latestRelease": {
+          "title": "A toe in the ocean",
+          "type": "album",
+          "url": "https://adrianbelew.bandcamp.com/album/a-toe-in-the-ocean",
+          "imageUrl": "https://f4.bcbits.com/img/a3260587387_2.jpg",
+          "releaseDate": "December 9, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/adrian-belew/125329",
+        "allReleaseTitles": [
+          "lonerhino",
+          "sideone",
+          "desireoftherhinoking",
+          "twangbarking",
+          "innerrevolutionusinternetrelease",
+          "sidethree",
+          "sidetwo",
+          "piper",
+          "saladdays",
+          "popsided",
+          "a13",
+          "liveatrockpalastforumleverkusengermany3rdnovember2008",
+          "comingattractions",
+          "liveattheparadisetheaterbostonmajuly18th1989",
+          "desirecaughtbythetail"
+        ],
+        "latestRelease": {
+          "title": "Side One Adrian Belew",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/side-one-adrian-belew/evc3zxtk2lkxf",
+          "releaseDate": "2005-01-25"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Adrian%20Belew"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Adrian%20Belew"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://adrianbelew.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/55902"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Adrian%20Belew&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Adrian%20Belew"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/theadrianbelew/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/AdrianBelew"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

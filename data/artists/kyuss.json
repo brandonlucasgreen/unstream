@@ -1,0 +1,57 @@
+[
+  {
+    "id": "kyuss",
+    "name": "Kyuss",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0035338301_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://enviaudio.bandcamp.com",
+        "allReleaseTitles": [
+          "reflection",
+          "electronicep",
+          "settled",
+          "djentblackeneddemo",
+          "eclipse",
+          "continuum",
+          "drown",
+          "slopedemo",
+          "warmthep"
+        ],
+        "latestRelease": {
+          "title": "Reflection",
+          "type": "track",
+          "url": "https://enviaudio.bandcamp.com/track/reflection",
+          "imageUrl": "https://f4.bcbits.com/img/a2060457570_2.jpg",
+          "releaseDate": "October 27, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kyuss"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kyuss"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/105732"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Kyuss&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Kyuss"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

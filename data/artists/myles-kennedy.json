@@ -1,0 +1,79 @@
+[
+  {
+    "id": "myleskennedy",
+    "name": "Myles Kennedy",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036282592_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://myleskennedy.bandcamp.com",
+        "allReleaseTitles": [
+          "theartoflettinggo",
+          "theidesofmarch",
+          "yearofthetiger"
+        ],
+        "latestRelease": {
+          "title": "The Art Of Letting Go",
+          "type": "album",
+          "url": "https://myleskennedy.bandcamp.com/album/the-art-of-letting-go",
+          "imageUrl": "https://f4.bcbits.com/img/a2389577300_2.jpg",
+          "releaseDate": "October 11, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/myles-kennedy/153753",
+        "allReleaseTitles": [
+          "theartoflettinggo",
+          "theidesofmarch",
+          "saywhatyouwill",
+          "loveraindown",
+          "instride",
+          "missyouwhenyouregone",
+          "whenlovecomestotownjoebonamassaslashshemekiacopeland",
+          "getalong",
+          "yearofthetiger",
+          "savingface",
+          "nothingmoretogain",
+          "lovecanonlyheal",
+          "devilonthewall",
+          "hauntedbydesign"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Myles%20Kennedy"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Myles%20Kennedy"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://myleskennedy.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/713240"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/myleskennedyofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/c/MylesKennedyofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/OfficialMylesKennedy"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

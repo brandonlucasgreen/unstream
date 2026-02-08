@@ -1,0 +1,67 @@
+[
+  {
+    "id": "miltonnascimento",
+    "name": "Milton Nascimento",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0017843574_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://miltonnascimento.bandcamp.com",
+        "allReleaseTitles": [
+          "ultimotrem",
+          "mariamaria",
+          "mariamariaultimotrem"
+        ],
+        "latestRelease": {
+          "title": "Último Trem",
+          "type": "album",
+          "url": "https://miltonnascimento.bandcamp.com/album/ltimo-trem",
+          "imageUrl": "https://f4.bcbits.com/img/a4039051548_2.jpg",
+          "releaseDate": "April 18, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Milton%20Nascimento"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Milton%20Nascimento"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.miltonnascimento.com.br/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/83723"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Milton%20Nascimento&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Milton%20Nascimento"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/miltonbitucanascimento/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/tvmiltonnascimento"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/miltonbitucanascimento"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

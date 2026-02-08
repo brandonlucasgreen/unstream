@@ -1,0 +1,43 @@
+[
+  {
+    "id": "jj",
+    "name": "JJ",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027595514_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jackjutson.bandcamp.com",
+        "allReleaseTitles": [
+          "lookingforwardtoyou",
+          "motherofficialvolii",
+          "motherofficialvoli"
+        ],
+        "latestRelease": {
+          "title": "Looking Forward to You",
+          "type": "album",
+          "url": "https://jackjutson.bandcamp.com/album/looking-forward-to-you",
+          "imageUrl": "https://f4.bcbits.com/img/a4129529762_2.jpg",
+          "releaseDate": "August 18, 2014"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/jjmccullough"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=JJ"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+JJ"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

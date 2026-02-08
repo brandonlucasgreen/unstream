@@ -1,0 +1,103 @@
+[
+  {
+    "id": "montaigne",
+    "name": "Montaigne",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037422994_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://montaigne.bandcamp.com",
+        "allReleaseTitles": [
+          "itshardtobeafish",
+          "beyondtheglass",
+          "itsallaboutthemoney",
+          "swimback",
+          "everybodyelse",
+          "talkingshit",
+          "breadandroses"
+        ],
+        "latestRelease": {
+          "title": "it's hard to be a fish",
+          "type": "album",
+          "url": "https://montaigne.bandcamp.com/album/its-hard-to-be-a-fish",
+          "imageUrl": "https://f4.bcbits.com/img/a0303385864_2.jpg",
+          "releaseDate": "June 19, 2025"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/Montaigne"
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/montaigne/694111",
+        "allReleaseTitles": [
+          "makingit",
+          "gloriousheights",
+          "becauseiloveyou",
+          "makemefeelsofeatdadifreyr",
+          "talkingshit",
+          "alwaysbeyoudavidbyrne",
+          "nowinspace",
+          "everybodyelse",
+          "simancongozapapayasonpalenquekspr",
+          "itshardtobeafish",
+          "mylifeisbetterwithyou",
+          "complex",
+          "technicolour",
+          "lifeof",
+          "meloampmamenampomed",
+          "swimback",
+          "alwysburemixeddavidbyrne",
+          "dontbreakme",
+          "itsallaboutthemoney",
+          "beyondtheglass"
+        ],
+        "latestRelease": {
+          "title": "Talking Shit Montaigne",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/talking-shit-montaigne/zybb4y2qtd89b",
+          "releaseDate": "2024-10-10"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Montaigne"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Montaigne"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.montaignemusic.com.au/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4725574"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/actualmontaigne/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@actualmontaigne?lang=en"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/MontaigneMusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/montaignemusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

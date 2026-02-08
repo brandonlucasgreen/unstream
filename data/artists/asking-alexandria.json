@@ -1,0 +1,95 @@
+[
+  {
+    "id": "askingalexandria",
+    "name": "Asking Alexandria",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0035089295_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://askingalexandria.bandcamp.com",
+        "allReleaseTitles": [
+          "wheredowegofromheretheremixesep",
+          "darkvoidep",
+          "wheredowegofromhere",
+          "seewhatsontheinsidedeluxe",
+          "nevergonnalearnep",
+          "seewhatsontheinside",
+          "aloneagain",
+          "recklessandrelentless",
+          "steppedupandscratched",
+          "lifegonewildep",
+          "standupandscream"
+        ],
+        "latestRelease": {
+          "title": "Where Do We Go From Here? The Remixes EP",
+          "type": "album",
+          "url": "https://askingalexandria.bandcamp.com/album/where-do-we-go-from-here-the-remixes-ep",
+          "imageUrl": "https://f4.bcbits.com/img/a1852956048_2.jpg"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/asking-alexandria/978957",
+        "allReleaseTitles": [
+          "seewhatsontheinside",
+          "wheredowegofromhere",
+          "fadedoutfeatwithintemptationandwithintemptation",
+          "theretaliatorstheme21bulletsfeatmotleycrueiceninekillsfromashestonewtheretaliatorsandfeaturingiceninekillsandfromashestonew",
+          "wheredowegofromheretheremixesep",
+          "antisocialistunplugged",
+          "likeahouseonfire",
+          "psycho",
+          "nevergonnalearnep",
+          "darkvoid",
+          "whosthatplayingontheradiofeatdannyworsnopofandmickmarsofmotleycruehyrotheheromotleycrueand",
+          "theydontwantwhatwewantandtheydontcare",
+          "houseonfire",
+          "downtohell",
+          "antisocialist",
+          "recklessandrelentless",
+          "standupandscream",
+          "fromdeathtodestiny",
+          ""
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Asking%20Alexandria"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Asking%20Alexandria"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.askingalexandria.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2021935"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/askingalexandria/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@askingalexandria_band"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/AlexandriaPlace"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/askingalexandria"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

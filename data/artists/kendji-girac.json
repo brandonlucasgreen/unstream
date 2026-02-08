@@ -1,0 +1,58 @@
+[
+  {
+    "id": "kendjigirac",
+    "name": "kendji girac",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0008381068_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kendjigirac.bandcamp.com",
+        "allReleaseTitles": [
+          "letmeloveyoudeluxesingle",
+          "closer"
+        ],
+        "latestRelease": {
+          "title": "Let Me Love You (Deluxe Single)",
+          "type": "track",
+          "url": "https://kendjigirac.bandcamp.com/track/let-me-love-you-deluxe-single",
+          "imageUrl": "https://f4.bcbits.com/img/a1691780543_16.jpg",
+          "releaseDate": "September 26, 2016"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=kendji%20girac"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+kendji%20girac"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://kendji.fr/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4043918"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kendji/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCgtt_xijZ03e0THlKDvPauw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/kendjioff"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

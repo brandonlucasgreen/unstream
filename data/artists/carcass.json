@@ -1,0 +1,100 @@
+[
+  {
+    "id": "carcass",
+    "name": "Carcass",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0007296753_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://carcass.bandcamp.com",
+        "allReleaseTitles": [
+          "tornarteries",
+          "despicable",
+          "underthescalpelblade",
+          "surgicalsteelcompleteedition",
+          "surgicalremissionsurplussteel",
+          "surgicalsteel",
+          "theearachepeelsessions",
+          "thebestofcarcass",
+          "choicecuts",
+          "wakeupandsmellthecarcass",
+          "swansongfulldynamicrangeedition",
+          "swansong",
+          "theheartworkep",
+          "heartworkfulldynamicrangeedition",
+          "heartworkspecialedition",
+          "heartwork"
+        ],
+        "latestRelease": {
+          "title": "Torn Arteries",
+          "type": "album",
+          "url": "https://carcass.bandcamp.com/album/torn-arteries",
+          "imageUrl": "https://f4.bcbits.com/img/a0442805256_2.jpg",
+          "releaseDate": "September 17, 2021"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/gosuevolved"
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/carcass/576066",
+        "allReleaseTitles": [
+          "tornarteries",
+          "despicable",
+          "underthescalpelblade",
+          "heartwork",
+          "swansong",
+          "surgicalsteelcompleteedition",
+          "necroticismdescantingtheinsalubrious",
+          "symphoniesofsickness",
+          "surgicalsteel",
+          "theearachepeelsessions",
+          "reekofputrefaction",
+          "thebestof",
+          "wakeupandsmellthe",
+          "choicecuts"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Carcass"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Carcass"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/23843"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Carcass&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Carcass"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/carcassband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCmfXIVCxJgWVViBov53_3Gg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/OfficialCarcass"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

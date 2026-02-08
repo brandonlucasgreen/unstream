@@ -1,0 +1,67 @@
+[
+  {
+    "id": "aha",
+    "name": "$A$HA",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031540140_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sashabeats.bandcamp.com",
+        "allReleaseTitles": [
+          "baybladeprodaha",
+          "nakeprodaha",
+          "shinratenseiprodaha"
+        ],
+        "latestRelease": {
+          "title": "Bayblade Prod. $A$HA",
+          "type": "track",
+          "url": "https://sashabeats.bandcamp.com/track/bayblade-prod-a-ha",
+          "imageUrl": "https://f4.bcbits.com/img/a3156563586_2.jpg",
+          "releaseDate": "February 25, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=%24A%24HA"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+%24A%24HA"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://a-ha.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/37757"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=%24A%24HA&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/%24A%24HA"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/officialaha/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCeEi1My3KTXHT0SG1JkR9gA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialaha"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

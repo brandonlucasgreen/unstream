@@ -1,0 +1,54 @@
+[
+  {
+    "id": "reginevelasquez",
+    "name": "Regine Velasquez",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032950098_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://reginevelasquez.bandcamp.com",
+        "allReleaseTitles": [
+          "myloveemotion",
+          "listenwithoutprejudice",
+          "reasonenough",
+          "tagalatalaga",
+          "nineteen90",
+          "regine"
+        ],
+        "latestRelease": {
+          "title": "My Love Emotion",
+          "type": "album",
+          "url": "https://reginevelasquez.bandcamp.com/album/my-love-emotion",
+          "imageUrl": "https://f4.bcbits.com/img/a3261549041_2.jpg",
+          "releaseDate": "October 14, 1995"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Regine%20Velasquez"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Regine%20Velasquez"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/307806"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Regine%20Velasquez&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Regine%20Velasquez"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

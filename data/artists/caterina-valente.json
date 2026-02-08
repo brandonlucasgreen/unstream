@@ -1,0 +1,83 @@
+[
+  {
+    "id": "caterinavalente",
+    "name": "Caterina Valente",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026472936_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/caterina-valente/27087",
+        "allReleaseTitles": [
+          "thejazzsinger",
+          "presenting",
+          "deutscheevergreensheinzkiesslingsilviofrancesco",
+          "injapan",
+          "inholland",
+          "nothingbutacesedmundorosedmundoroshisorchestra",
+          "innewyork",
+          "live1968",
+          "bouquetderevessambadiunanotaaquellosojosverdesandmorehits",
+          "theworldof",
+          "goldenselection",
+          "abrigliosciolta",
+          "fantastica",
+          "bongochachacha",
+          "bestofganzparistraumtvonderliebe",
+          "justyoujustmechetbaker",
+          "olecaterinasilviofrancesco",
+          "cosmopolitanlady",
+          "bonjourcatherine",
+          "caterinacherie"
+        ],
+        "latestRelease": {
+          "title": "Caterina Valente In Japan Caterina Valente",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/caterina-valente-in-japan-caterina-valente/yjjkc8uznbdvb",
+          "releaseDate": "2025-05-01"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://caterinavalente.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Caterina%20Valente"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Caterina%20Valente"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://caterinavalente.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/294306"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Caterina%20Valente&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Caterina%20Valente"
+      },
+      {
+        "sourceId": "bluesky",
+        "url": "https://caterinavalente.com/2025/03/11/private-caterina-valente-the-definite-career-resume/?share=bluesky"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/caterina.valente.official"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

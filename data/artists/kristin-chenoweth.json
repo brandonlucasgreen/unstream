@@ -1,0 +1,100 @@
+[
+  {
+    "id": "kristinchenoweth",
+    "name": "Kristin Chenoweth",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028363550_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kristinchenoweth.bandcamp.com",
+        "allReleaseTitles": [
+          "happinessischristmas",
+          "forthegirls",
+          "theartofelegance",
+          "cominghomeliveatthebrokenarrowperformingartscenterbrokenarrowok"
+        ],
+        "latestRelease": {
+          "title": "HAPPINESS is…Christmas!",
+          "type": "album",
+          "url": "https://kristinchenoweth.bandcamp.com/album/happiness-is-christmas",
+          "imageUrl": "https://f4.bcbits.com/img/a3088892039_16.jpg",
+          "releaseDate": "October 22, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/kristin-chenoweth/166866",
+        "allReleaseTitles": [
+          "happinessischristmas",
+          "livelikethatfromthekingofkingssoundtrack",
+          "whitechristmasstevetyrell",
+          "caviardreamsfromthequeenofversaillesoriginalbroadwaycastrecordingoriginalbroadwaycastofthequeenofversailles",
+          "theartofelegance",
+          "forthegirls",
+          "alovelywaytospendchristmas",
+          "asiam",
+          "cominghome",
+          "letyourselfgo",
+          "somelessonslearned",
+          "orphansofgodtyherndon",
+          "icouldhavedancedallnight",
+          "prayerofstfrancis",
+          "jesustakethewheel",
+          "morefromsomelessonslearned"
+        ],
+        "latestRelease": {
+          "title": "Caviar Dreams From The Queen Of Versailles Original Broadway Cast Recording Kristin Chenoweth Original Broadway Cast Of The Queen Of Versailles",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/caviar-dreams-from-the-queen-of-versailles-original-broadway-cast-recording-kristin-chenoweth-original-broadway-cast-of-the-queen-of-versailles/qr2nc8g012k6a",
+          "releaseDate": "2025-09-17"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kristin%20Chenoweth"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kristin%20Chenoweth"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.officialkristinchenoweth.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/540396"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Kristin%20Chenoweth&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Kristin%20Chenoweth"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kchenoweth/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@kristinchenoweth"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCKF498ZN6GRvUD19tzTvYJQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/kristinchenoweth"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

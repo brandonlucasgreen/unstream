@@ -1,0 +1,39 @@
+[
+  {
+    "id": "mississippijohnhurt",
+    "name": "Mississippi John Hurt",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025523767_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mrhurtgoestowashington.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mississippi%20John%20Hurt"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mississippi%20John%20Hurt"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/307249"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Mississippi%20John%20Hurt&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Mississippi%20John%20Hurt"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

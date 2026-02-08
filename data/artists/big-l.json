@@ -1,0 +1,59 @@
+[
+  {
+    "id": "bigl",
+    "name": "Big L",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a0823315446_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/big-l/71480",
+        "allReleaseTitles": [
+          "harlemsfinestreturnoftheking",
+          "uaintgottachancenas",
+          "casualtiesofadicegame",
+          "nowornever",
+          "lifestylezovdapoordangerous",
+          "thebigpicture",
+          "devilssonepfromthevaults",
+          "deadlycombination2pac",
+          "thedangerzone",
+          "classics",
+          "cartiervisions",
+          "give",
+          "stannsmithamp",
+          "fromtheeastsidewithlove",
+          "horrorstoryampdaledakid",
+          "conformisme",
+          "programminfeatagbon",
+          "tana",
+          "camisa7mlkidd",
+          "himnotthem"
+        ],
+        "latestRelease": {
+          "title": "Harlems Finest Return Of The King Big L",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/harlems-finest-return-of-the-king-big-l/x5azyd06pcd0b",
+          "releaseDate": "2025-10-31"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://onebigl.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Big%20L"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Big%20L"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,86 @@
+[
+  {
+    "id": "bigmamathornton",
+    "name": "Big Mama Thornton",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022102678_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bigmamathornton.bandcamp.com",
+        "allReleaseTitles": [
+          "ineurope",
+          "ballnchain",
+          "bigmamathorntonwiththemuddywatersbluesband1966"
+        ],
+        "latestRelease": {
+          "title": "In Europe",
+          "type": "album",
+          "url": "https://bigmamathornton.bandcamp.com/album/in-europe",
+          "imageUrl": "https://f4.bcbits.com/img/a2991075218_2.jpg",
+          "releaseDate": "January 1, 2005"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/big-mama-thornton/51859",
+        "allReleaseTitles": [
+          "sassymamaliveattherisingsuncelebrityjazzclub",
+          "sassymama",
+          "hounddog",
+          "ballnchain",
+          "withthemuddywatersbluesband1966muddywatersbluesband",
+          "hounddogthepeacockrecordings",
+          "jail",
+          "ismellarat",
+          "ineurope",
+          "strongerthandirt",
+          "thecompletevanguardrecordings",
+          "partnershipblues",
+          "vanguardvisionaries",
+          "thewayitis",
+          "hounddogtheessentialcollection",
+          "rootsofrockroll",
+          "hounddogwilliemae",
+          "earlyonemorninblues",
+          "sweetlittleangel3oclockinthemornin"
+        ],
+        "latestRelease": {
+          "title": "Sassy Mama Live At The Rising Sun Celebrity Jazz Club Big Mama Thornton",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/sassy-mama-live-at-the-rising-sun-celebrity-jazz-club-big-mama-thornton/a6lgx03ypn1pb",
+          "releaseDate": "2022-02-04"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Big%20Mama%20Thornton"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Big%20Mama%20Thornton"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/283284"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Big%20Mama%20Thornton&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Big%20Mama%20Thornton"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Big-Mama-Thornton/104112189624796"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

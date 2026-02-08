@@ -1,0 +1,76 @@
+[
+  {
+    "id": "curdepirate",
+    "name": "Cœur de pirate",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037916293_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://musique.coeurdepirate.com",
+        "allReleaseTitles": [
+          "chateaudesablepianoedit",
+          "cavale",
+          "cetaitsalementromantiquereprise",
+          "parfaitnoel",
+          "clou",
+          "impossibleaaimer",
+          "planatrois",
+          "perseides",
+          "tesbelle",
+          "nemappellepas",
+          "encasdetempetecejardinseraferme",
+          "somnambule",
+          "premonition",
+          "chansonstristespournoel",
+          "roses",
+          "carryon"
+        ],
+        "latestRelease": {
+          "title": "Château de sable (piano edit)",
+          "type": "track",
+          "url": "https://musique.coeurdepirate.com/track/ch-teau-de-sable-piano-edit",
+          "imageUrl": "https://f4.bcbits.com/img/a3674169636_2.jpg",
+          "releaseDate": "November 28, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=C%C5%93ur%20de%20pirate"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+C%C5%93ur%20de%20pirate"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.coeurdepirate.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1432103"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/beatricepirate/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@beatricepirate"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCGxwVJnQ0Nlh8FDAACJbyqg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/coeurdepirate.officiel"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

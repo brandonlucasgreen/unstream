@@ -1,0 +1,83 @@
+[
+  {
+    "id": "brandicarlile",
+    "name": "Brandi Carlile",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0008787748_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/brandi-carlile/148898",
+        "allReleaseTitles": [
+          "whobelievesinangelseltonjohn",
+          "returningtomyself",
+          "bythewayiforgiveyou",
+          "inthesesilentdays",
+          "swingforthefenceseltonjohn",
+          "nevertoolateeltonjohn",
+          "thestory",
+          "inthesesilentdaysdeluxeeditioninthecanyonhaze",
+          "wandering",
+          "thefirewatchersdaughter",
+          "takemehomecountryroads",
+          "rightontime"
+        ],
+        "latestRelease": {
+          "title": "Returning To Myself Brandi Carlile",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/returning-to-myself-brandi-carlile/r8nx9cretutcb",
+          "releaseDate": "2025-09-03"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://brandicarlile.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Brandi%20Carlile"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Brandi%20Carlile"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://brandicarlile.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/502784"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Brandi%20Carlile&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Brandi%20Carlile"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/brandicarlile/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@brandicarlile"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCxrOSjIQ1MbK1hUohxZNwpA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/100044177181955"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

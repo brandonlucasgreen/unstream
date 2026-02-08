@@ -1,0 +1,38 @@
+[
+  {
+    "id": "peternalitch",
+    "name": "Peter Nalitch",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a1144646771_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://peternalitch1.bandcamp.com",
+        "allReleaseTitles": [
+          "thereflectionsinpuddles",
+          "thenorthernodyssey"
+        ],
+        "latestRelease": {
+          "title": "The Reflections in Puddles",
+          "type": "album",
+          "url": "https://peternalitch1.bandcamp.com/album/the-reflections-in-puddles",
+          "imageUrl": "https://f4.bcbits.com/img/a1144646771_16.jpg",
+          "releaseDate": "November 28, 2018"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Peter%20Nalitch"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Peter%20Nalitch"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

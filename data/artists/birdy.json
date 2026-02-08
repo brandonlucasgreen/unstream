@@ -1,0 +1,66 @@
+[
+  {
+    "id": "birdy",
+    "name": "Birdy",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a1264844761_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://birdy.bandcamp.com",
+        "allReleaseTitles": [
+          "limey",
+          "whydotheheathenrageftjahsonites"
+        ],
+        "latestRelease": {
+          "title": "Limey",
+          "type": "track",
+          "url": "https://birdy.bandcamp.com/track/limey",
+          "imageUrl": "https://f4.bcbits.com/img/a1264844761_16.jpg",
+          "releaseDate": "August 1, 2013"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/birdysart"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Birdy"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Birdy"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.officialbirdy.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2341709"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/birdyinstagram/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@birdy"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCk3NOb_PipJJwzMuaBhEfQg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/BirdyMusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

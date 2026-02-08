@@ -1,0 +1,94 @@
+[
+  {
+    "id": "thedarkness",
+    "name": "The Darkness",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038317566_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://theactualdarkness.bandcamp.com",
+        "allReleaseTitles": [
+          "dreamsontoastliveedition",
+          "dreamsontoastmembersedition",
+          "dreamsontoast",
+          "motorheart",
+          "easteriscancelleddeluxe",
+          "liveathammersmith",
+          "pinewoodsmiledeluxe"
+        ],
+        "latestRelease": {
+          "title": "Dreams on Toast (Live Edition)",
+          "type": "album",
+          "url": "https://theactualdarkness.bandcamp.com/album/dreams-on-toast-live-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a3743001593_2.jpg",
+          "releaseDate": "August 15, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-darkness/363145",
+        "allReleaseTitles": [
+          "dreamsontoast",
+          "mistletoeandwine",
+          "lastofourkind",
+          "permissiontoland",
+          "motorheart",
+          "onewaytickettohellandback",
+          "easteriscancelled",
+          "pinewoodsmile",
+          "pinewoodsmiledeluxe",
+          "permissiontolandagain",
+          "liveathammersmith"
+        ],
+        "latestRelease": {
+          "title": "Mistletoe And Wine The Darkness",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/mistletoe-and-wine-the-darkness/kebchym0pmxfc",
+          "releaseDate": "2025-12-05"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Darkness"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Darkness"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.thedarknesslive.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/154624"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Darkness&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Darkness"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/theactualdarkness/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/TheActualDarkness"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thedarknessofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

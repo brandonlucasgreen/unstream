@@ -1,0 +1,63 @@
+[
+  {
+    "id": "paulweller",
+    "name": "Paul Weller",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026250427_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://paulweller.bandcamp.com",
+        "allReleaseTitles": [
+          "sonikkicks",
+          "catchflame",
+          "asisnow"
+        ],
+        "latestRelease": {
+          "title": "Sonik Kicks",
+          "type": "album",
+          "url": "https://paulweller.bandcamp.com/album/sonik-kicks",
+          "imageUrl": "https://f4.bcbits.com/img/a3714865183_2.jpg",
+          "releaseDate": "March 27, 2012"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Paul%20Weller"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Paul%20Weller"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://web.archive.org/web/19961105165928/http://www.godiscs.co.uk/pweller.html"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/14906"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Paul%20Weller&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Paul%20Weller"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/paulwellertv"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/paulwellerofficial/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

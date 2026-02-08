@@ -1,0 +1,89 @@
+[
+  {
+    "id": "maruv",
+    "name": "MARUV",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0015731931_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://maruvofficial.bandcamp.com",
+        "latestRelease": {
+          "title": "Siren Song",
+          "type": "track",
+          "url": "https://maruvofficial.bandcamp.com/track/siren-song",
+          "imageUrl": "https://f4.bcbits.com/img/a4061090934_16.jpg",
+          "releaseDate": "February 13, 2019"
+        },
+        "allReleaseTitles": [
+          "sirensong",
+          "blackwater"
+        ]
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/maruv-10003462006/3462006",
+        "allReleaseTitles": [
+          "dearsanta",
+          "dirtythoughts",
+          "takbolit",
+          "trickortreat",
+          "darkromance",
+          "needtoparty",
+          "drunkgrooveboosin",
+          "sirensong",
+          "monamourmosimann",
+          "blackwater",
+          "noname",
+          "sadsong",
+          "hellcatstory",
+          "ladiosadeamor",
+          "cash",
+          "iwantyouboosin",
+          "",
+          "foryoufaruksabanci",
+          "mezhdunami"
+        ],
+        "latestRelease": {
+          "title": "Dark Romance Maruv",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/dark-romance-maruv/t23nmks0nygrs",
+          "releaseDate": "2026-01-30"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=MARUV"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+MARUV"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://maruvofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/6312884"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/maruvofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCG2hAzA2G40on_viIrPVz9g?view_as=public"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MaruvOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,87 @@
+[
+  {
+    "id": "koolthegang",
+    "name": "Kool & the Gang",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025861946_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/kool-the-gang/35275",
+        "allReleaseTitles": [
+          "celebrate",
+          "theverybestof",
+          "asone",
+          "wildandpeaceful",
+          "peoplejustwannahavefun",
+          "perfectunion",
+          "getdownonityoungfranco",
+          "letspartyfeatshashajones",
+          "wearetheparty",
+          "letspartyfeatnolay",
+          "pursuitofhappiness",
+          "vipfeatamimiller",
+          "koolandthegang",
+          "lightofworlds",
+          "opensesame",
+          "somethingspecial",
+          "spiritoftheboogie",
+          "kooljazz",
+          "ladiesnight",
+          "celebrationthebestof19791987"
+        ],
+        "latestRelease": {
+          "title": "People Just Wanna Have Fun Kool The Gang",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/people-just-wanna-have-fun-kool-the-gang/ura5zxmiasmoc",
+          "releaseDate": "2023-07-14"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://koolandthegang.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kool%20%26%20the%20Gang"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kool%20%26%20the%20Gang"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://koolandthegang.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/48865"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Kool%20%26%20the%20Gang&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Kool%20%26%20the%20Gang"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://www.instagram.com/koolandthegang"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCX8pxyrMe7tJDhpM2DRgHvw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/koolandthegang"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

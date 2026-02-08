@@ -1,0 +1,84 @@
+[
+  {
+    "id": "nemo",
+    "name": "Nemo",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020103205_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://nemo1.bandcamp.com",
+        "allReleaseTitles": [
+          "jeanpierrelouveton1994202424bits48khz",
+          "livedasrind2010",
+          "liveprogfarm2008",
+          "lesnouveauxmondes2022hr",
+          "presageshr20182022remaster",
+          "presages2018",
+          "leverdanslefruitlive",
+          "piecesdecollection",
+          "coma",
+          "leverdanslefruit",
+          "rvoluion",
+          "lamachinearemonterletempslive",
+          "barbares",
+          "silive",
+          "sipartie2lhommeideal",
+          "sipartie1",
+          "immersionpubliquelive",
+          "preludealaruine",
+          "eveetlegeniedumalep",
+          "lesnouveauxmondes"
+        ],
+        "latestRelease": {
+          "title": "Jean Pierre Louveton - 1994 / 2024 (24 Bits - 48Khz)",
+          "type": "album",
+          "url": "https://nemo1.bandcamp.com/album/jean-pierre-louveton-1994-2024-24-bits-48khz",
+          "imageUrl": "https://f4.bcbits.com/img/a1191788976_2.jpg",
+          "releaseDate": "December 10, 2023"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/nemothemormon"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Nemo"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Nemo"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.nemo-world.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2586245"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Nemo&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Nemo"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCnUZlWCpZH46oiZqCUnvp_w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/profile.php?id=100051783651342"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

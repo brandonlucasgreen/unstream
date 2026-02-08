@@ -1,0 +1,40 @@
+[
+  {
+    "id": "jessicajung",
+    "name": "Jessica Jung",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a0200298732_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jessicajung.bandcamp.com",
+        "allReleaseTitles": [
+          "everybodysfavoriteginger",
+          "profanity",
+          "toys",
+          "trophywives"
+        ],
+        "latestRelease": {
+          "title": "Everybody's Favorite Ginger",
+          "type": "track",
+          "url": "https://jessicajung.bandcamp.com/track/everybodys-favorite-ginger",
+          "imageUrl": "https://f4.bcbits.com/img/a0200298732_16.jpg",
+          "releaseDate": "June 9, 2011"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jessica%20Jung"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jessica%20Jung"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

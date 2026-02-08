@@ -1,0 +1,86 @@
+[
+  {
+    "id": "deesnider",
+    "name": "Dee Snider",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025016456_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://deesnider.bandcamp.com",
+        "allReleaseTitles": [
+          "leaveascar",
+          "fortheloveofmetallive",
+          "fortheloveofmetal"
+        ],
+        "latestRelease": {
+          "title": "Leave A Scar",
+          "type": "album",
+          "url": "https://deesnider.bandcamp.com/album/leave-a-scar",
+          "imageUrl": "https://f4.bcbits.com/img/a1960417970_2.jpg",
+          "releaseDate": "July 30, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/dee-snider/106817",
+        "allReleaseTitles": [
+          "themagicofchristmasdaylzzyhale",
+          "fortheloveofmetal",
+          "leaveascar",
+          "neverletthebastardswearyoudown",
+          "wearetheones",
+          "werenotgonnatakeit",
+          "fortheloveofmetallive",
+          "beyondtherush",
+          "ruletheworld",
+          "iamthehurricane",
+          "becomethestorm",
+          "tomorrowsnoconcern",
+          "vanhelsingscurseoculusinfernum"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Dee%20Snider"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Dee%20Snider"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.deesnider.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/437563"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Dee%20Snider&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Dee%20Snider"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/deesnider"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCmVqUKitxpa3e56tcRoU9Mg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/facedeesnider"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

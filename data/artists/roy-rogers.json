@@ -1,0 +1,92 @@
+[
+  {
+    "id": "royrogers",
+    "name": "Roy Rogers",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024111629_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://royrogers1.bandcamp.com",
+        "allReleaseTitles": [
+          "stringshotstringshot",
+          "intothewildblue",
+          "twistedtalesraymanzarekroyrogers",
+          "translucentbluesraymanzarekroyrogers",
+          "everybodysangelroyrogersshanamorrison",
+          "splitdecision",
+          "balladsbeforetherainraymanzarekroyrogers",
+          "crossingreidarlarsenroyrogers",
+          "rootsofournaturenortonbuffaloroyrogers",
+          "chopsnotchaps"
+        ],
+        "latestRelease": {
+          "title": "Stringshot\n                \n                \n\n                Stringshot",
+          "type": "album",
+          "url": "https://royrogers1.bandcamp.com/album/stringshot",
+          "imageUrl": "https://f4.bcbits.com/img/a0453694641_2.jpg",
+          "releaseDate": "August 17, 2018"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/roy-rogers/112246",
+        "allReleaseTitles": [
+          "homeontherange",
+          "balladsbeforetherainraymanzarekand",
+          "slidewinder",
+          "30greatestcowboysongs",
+          "alongthenavajotrail",
+          "translucentbluesraymanzarekand",
+          "bluesontherange",
+          "rootsofournaturenortonbuffaloand",
+          "presenting",
+          "16greatsongsoftheoldwestdaleevans",
+          "chopsnotchaps",
+          "twistedtalesraymanzarekand",
+          "splitdecision",
+          "everybodysangelandshanamorrison",
+          "intothewildblue",
+          "thecountrymusichalloffame",
+          "thecountrysideof",
+          "crossingreidarlarsen"
+        ],
+        "latestRelease": {
+          "title": "Along The Navajo Trail Roy Rogers",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/along-the-navajo-trail-roy-rogers/0811868951386",
+          "releaseDate": "2016-02-27"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Roy%20Rogers"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Roy%20Rogers"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.royrogers.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/801110"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Roy%20Rogers&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Roy%20Rogers"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

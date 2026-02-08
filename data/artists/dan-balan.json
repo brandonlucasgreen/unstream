@@ -1,0 +1,58 @@
+[
+  {
+    "id": "danbalan",
+    "name": "Dan Balan",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027753831_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://danbalan.bandcamp.com",
+        "allReleaseTitles": [
+          "crazyloopmmmamacrazyloop",
+          "johannashutupcrazyloop"
+        ],
+        "latestRelease": {
+          "title": "Crazy Loop (Mm-Ma-Ma)\n                \n                \n\n                Crazy Loop",
+          "type": "track",
+          "url": "https://danbalan.bandcamp.com/track/crazy-loop-mm-ma-ma",
+          "imageUrl": "https://f4.bcbits.com/img/a1238156105_16.jpg",
+          "releaseDate": "October 17, 2007"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Dan%20Balan"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Dan%20Balan"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://danbalan.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1163211"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/danbalan_official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/officialdanbalan"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialdanbalan"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

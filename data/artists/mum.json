@@ -1,0 +1,75 @@
+[
+  {
+    "id": "mum",
+    "name": "múm",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0040011876_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mumband.bandcamp.com",
+        "allReleaseTitles": [
+          "historyofsilence",
+          "smilewound",
+          "yesterdaywasdramatictodayisok20thanniversaryedition",
+          "randomsummersplitsinglehauschkamum",
+          "smellmemorysplitsinglekronosquartetmum",
+          "menschenamsonntagliveinberlin",
+          "whengirlscollidejonsiremix",
+          "whengirlscollide",
+          "toothwheels",
+          "earlybirds",
+          "gleilegjol",
+          "propheciesreversedmemories",
+          "singalongtosongsyoudontknow",
+          "yesterdaywasdramatictodayisok",
+          "pleasesmilemynoisebleed"
+        ],
+        "latestRelease": {
+          "title": "History of Silence",
+          "type": "album",
+          "url": "https://mumband.bandcamp.com/album/history-of-silence",
+          "imageUrl": "https://f4.bcbits.com/img/a0243799475_2.jpg",
+          "releaseDate": "September 19, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/mum/424575",
+        "allReleaseTitles": [
+          "historyofsilence",
+          "yesterdaywasdramatictodayisok",
+          "mildatheart",
+          "onlysongbirdshaveasweettooth",
+          "killthelight",
+          "menschenamsonntag",
+          "whengirlscollide",
+          "finallywearenoone",
+          "smilewound",
+          "summermakegood",
+          "whengirlscollidejonsiremix",
+          "singalongtosongsyoudontknow",
+          "pleasesmilemynoisebleed",
+          "earlybirds",
+          "thepeelsession",
+          "theszabotnik15mission",
+          "",
+          "smellmemorykronosquartet"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=m%C3%BAm"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+m%C3%BAm"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,59 @@
+[
+  {
+    "id": "tabhunter",
+    "name": "Tab Hunter",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0015621266_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/tab-hunter/42540",
+        "allReleaseTitles": [
+          "rfd",
+          "whenifallinlove",
+          "",
+          "funnycandylove"
+        ],
+        "latestRelease": {
+          "title": "Funny Candy Love Tab Hunter",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/funny-candy-love-tab-hunter/kn052ugxwj5ka",
+          "releaseDate": "2024-08-02"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tabhunter.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tab%20Hunter"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tab%20Hunter"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.tabhunter.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/364536"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Tab%20Hunter&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Tab%20Hunter"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

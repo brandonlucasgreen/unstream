@@ -1,0 +1,72 @@
+[
+  {
+    "id": "christophercross",
+    "name": "Christopher Cross",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036229546_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://christophercross.bandcamp.com",
+        "allReleaseTitles": [
+          "christophercross",
+          "thecafecarlylesessions",
+          "doctorfaith",
+          "takemeasiam",
+          "secretladder",
+          "window",
+          "achristophercrosschristmas",
+          "rendezvous"
+        ],
+        "latestRelease": {
+          "title": "Christopher Cross",
+          "type": "album",
+          "url": "https://christophercross.bandcamp.com/album/christopher-cross",
+          "imageUrl": "https://f4.bcbits.com/img/a3446385326_2.jpg",
+          "releaseDate": "October 8, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Christopher%20Cross"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Christopher%20Cross"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.christophercross.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/48512"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Christopher%20Cross&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Christopher%20Cross"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/itsmrcross/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCLDGBEnOxxcSBWbe3km6zOA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ChristopherCrossOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "id": "hoagycarmichael",
+    "name": "Hoagy Carmichael",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036546703_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/hoagy-carmichael/852",
+        "allReleaseTitles": [
+          "hoagysingscarmichaelwiththepacificjazzmenarrangedconductedbyjohnnymandel",
+          "thestardustroad",
+          "stardustmelody",
+          "stardustmuchmore",
+          "tohaveandhavenot",
+          "olebuttermilksky",
+          "carmichaelhoagyriverboatshuffle19271938",
+          "havinaparty",
+          "casanovacricketamancouldbeawonderfulthing",
+          "easylivingjazzinwithhoagy",
+          "roguerivervalley",
+          "stardust",
+          "stardustdreamsasongbookby",
+          "oldpianorollbluessinglebettyhuttonand",
+          "theoldmusicmaster",
+          "rockinchair",
+          "amiblue"
+        ],
+        "latestRelease": {
+          "title": "To Have And Have Not Hoagy Carmichael",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/to-have-and-have-not-hoagy-carmichael/j92pd0xurbpxa",
+          "releaseDate": "2011-05-01"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://hoagycarmichael.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Hoagy%20Carmichael"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Hoagy%20Carmichael"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.hoagy.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/301368"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Hoagy%20Carmichael&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Hoagy%20Carmichael"
+      },
+      {
+        "sourceId": "mastodon",
+        "url": "https://siteassets.parastorage.com/pages/pages/thunderbolt?appDefinitionIdToSiteRevision=%7B%2214bcded7-0066-7c35-14d7-466cb3f09103%22%3A%221335%22%7D&beckyExperiments=.DatePickerPortal%2C.DisableDocumentScrollWhenLightBoxOpen%2C.EnableCustomCSSVarsForLoginSocialBar%2C.FreemiumBannerOdeditor%2C.LoginBarEnableLoggingInStateInSSR%2C.TextInputAutoFillFix%2C.UseLoginSocialBarCustomMenu%2C.UseNewLoginSocialBarCustomMenuPositioning%2C.UseNewLoginSocialBarElementStructure%2C.UseNewLoginSocialBarMemberInitialsAvatar%2C.VerticalMenu_uiType_NativeMapper%2C.WixFreeSiteBannerDesktop%2C.WixFreeSiteBannerMobile%2C.buttonUdp%2C.calculateCollapsibleTextLineHeightByFont%2C.disableBuilderWixComponents%2C.dom_store%2C.dynamicSlots%2C.fiveGridLineStudioSkins%2C.imageEncodingAVIF%2C.isClassNameToRootEnabled%2C.motionTimeAnimationsCSS%2C.propsCarmiMappersMigration1%2C.propsCarmiMappersMigration4%2C.propsCarmiMappersMigration5%2C.shouldUseResponsiveImages%2C.svgResolver_2%2C.updateRichTextSemanticClassNamesOnCorvid%2C.useClassnameInResponsiveAppWidget%2C.useImageAvifFormatInNativeProGallery%2C.useResponsiveImgClassicFixed%2C.useSvgLoaderFeature%2C.useSvgLoaderFeatureOnBuilderComps&blocksBuilderManifestGeneratorVersion=1.129.0&contentType=application%2Fjson&deviceType=Desktop&dfCk=6&dfVersion=1.5258.0&disableStaticPagesUrlHierarchy=false&editorName=Unknown&experiments=dm_bgScrubToMotionFixer%2Cdm_masterPageVariablesQueryFixer%2Cdm_migrateOldHoverBoxToNewFixer&externalBaseUrl=https%3A%2F%2Fwww.hoagy.com&fileId=47ef9b92.bundle.min&formFactor=desktop&hasTPAWorkerOnSite=false&hasUserDomainMedia=false&isBuilderComponentModel=false&isHttps=true&isInSeo=false&isMultilingualEnabled=false&isPremiumDomain=true&isTrackClicksAnalyticsEnabled=false&isUrlMigrated=true&isWixCodeOnPage=false&isWixCodeOnSite=false&language=en&languageResolutionMethod=QueryParam&metaSiteId=90cdc9da-1496-42e1-aefe-6ff2b1dca11e&module=thunderbolt-features&oneDocEnabled=true&originalLanguage=en&pageId=fb7bf3_19f09a6262fd65f5e669e8494c668efa_320.json&pilerExperiments=specs.piler.useEditorReactComponents&quickActionsMenuEnabled=false&registryLibrariesTopology=%5B%7B%22artifactId%22%3A%22editor-elements%22%2C%22namespace%22%3A%22wixui%22%2C%22url%22%3A%22https%3A%2F%2Fstatic.parastorage.com%2Fservices%2Feditor-elements%2F1.14868.0%22%7D%2C%7B%22artifactId%22%3A%22editor-elements%22%2C%22namespace%22%3A%22dsgnsys%22%2C%22url%22%3A%22https%3A%2F%2Fstatic.parastorage.com%2Fservices%2Feditor-elements%2F1.14868.0%22%7D%5D&remoteWidgetStructureBuilderVersion=1.251.0&siteId=42beb2ff-9d73-488f-9e89-2e59caa21f3a&siteRevision=320&staticHTMLComponentUrl=https%3A%2F%2Fwww-hoagy-com.filesusr.com%2F&useSandboxInHTMLComp=false&viewMode=desktop"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/HoagyCarmichaelOfficial/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

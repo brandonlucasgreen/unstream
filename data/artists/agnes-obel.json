@@ -1,0 +1,84 @@
+[
+  {
+    "id": "agnesobel",
+    "name": "Agnes Obel",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013363301_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://agnesobel.bandcamp.com",
+        "allReleaseTitles": [
+          "citizenofglass",
+          "aventine",
+          "philharmonics"
+        ],
+        "latestRelease": {
+          "title": "Citizen Of Glass",
+          "type": "album",
+          "url": "https://agnesobel.bandcamp.com/album/citizen-of-glass",
+          "imageUrl": "https://f4.bcbits.com/img/a0520733939_2.jpg",
+          "releaseDate": "October 21, 2016"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/agnes-obel/551325",
+        "allReleaseTitles": [
+          "aventine",
+          "myopia",
+          "citizenofglass",
+          "aventinebonustrackversion",
+          "philharmonics",
+          "livefrombrooklyn",
+          "live2022vol1",
+          "live2022vol2",
+          "cantberone",
+          "foeoriginalmotionpicturescoreparkjihaolivercoates",
+          "islandofdoom",
+          "thecurse",
+          "latenighttales"
+        ],
+        "latestRelease": {
+          "title": "Myopia Agnes Obel",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/myopia-agnes-obel/mbqv9mfq1rmoa",
+          "releaseDate": "2020-02-21"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Agnes%20Obel"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Agnes%20Obel"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.agnesobel.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1679804"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/agnesobel/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC23qupoDRn9YOAVzeoxjOQA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/agnesobelofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

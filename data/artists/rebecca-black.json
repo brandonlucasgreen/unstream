@@ -1,0 +1,27 @@
+[
+  {
+    "id": "rebeccablack",
+    "name": "Rebecca Black",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a2692633242_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rebeccablackmetal.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rebecca%20Black"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rebecca%20Black"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

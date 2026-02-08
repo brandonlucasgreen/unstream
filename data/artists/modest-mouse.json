@@ -1,0 +1,112 @@
+[
+  {
+    "id": "modestmouse",
+    "name": "Modest Mouse",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0023168867_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://modestmouse.bandcamp.com",
+        "allReleaseTitles": [
+          "thegoldencasket",
+          "noonesfirstandyourenext",
+          "everywhereandhisnastyparlourtricks",
+          "nightonthesun",
+          "strangerstoourselves",
+          "toomanyfiestasforruebencowboydan",
+          "whiteliesyellowteeth",
+          "weweredeadbeforetheshipevensank",
+          "goodnewsforpeoplewholovebadnews",
+          "sadsappysucker",
+          "themoonantarctica",
+          "buildingnothingoutofsomething",
+          "thelonesomecrowdedwest",
+          "thefruitthatateitself",
+          "interstate8",
+          "thisisalongdriveforsomeonewithnothingtothinkabout"
+        ],
+        "latestRelease": {
+          "title": "The Golden Casket",
+          "type": "album",
+          "url": "https://modestmouse.bandcamp.com/album/the-golden-casket",
+          "imageUrl": "https://f4.bcbits.com/img/a3634344763_2.jpg",
+          "releaseDate": "June 25, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/modest-mouse/154454",
+        "allReleaseTitles": [
+          "goodnewsforpeoplewholovebadnews20thanniversaryexpandededition",
+          "thegoldencasket",
+          "strangerstoourselves",
+          "goodnewsforpeoplewholovebadnews",
+          "themoonantarctica",
+          "thelonesomecrowdedwest",
+          "weweredeadbeforetheshipevensank",
+          "thisisalongdriveforsomeonewithnothingtothinkabout",
+          "buildingnothingoutofsomething",
+          "noonesfirstandyourenext",
+          "interstate8",
+          "everywhereandhisnastyparlourtricks",
+          "sadsappysucker",
+          "nightonthesun",
+          "thefruitthatateitself",
+          "icecreamparty",
+          "baronvonbullshitridesagain",
+          "poisonthewell",
+          "whiteliesyellowteethbuttonstopushthebuttons",
+          "toomanyfiestasforruebencowboydan"
+        ],
+        "latestRelease": {
+          "title": "Good News For People Who Love Bad News 20th Anniversary Expanded Edition Modest Mouse",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/good-news-for-people-who-love-bad-news-20th-anniversary-expanded-edition-modest-mouse/fbtz7raw7sgdc",
+          "releaseDate": "2024-04-05"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Modest%20Mouse"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Modest%20Mouse"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.modestmouse.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/187919"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Modest%20Mouse&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Modest%20Mouse"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/modestmouse?igsh=MTl2empidDRwMWJhZA=="
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/MODESTMOUSE"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ModestMouse"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

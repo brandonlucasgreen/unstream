@@ -1,0 +1,60 @@
+[
+  {
+    "id": "malicemizer",
+    "name": "Malice Mizer",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3364649492_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://malicemizer.bandcamp.com",
+        "allReleaseTitles": [
+          "premieramour",
+          "apresmidi",
+          "aegean",
+          "sadness"
+        ],
+        "latestRelease": {
+          "title": "Premier amour",
+          "type": "track",
+          "url": "https://malicemizer.bandcamp.com/track/premier-amour",
+          "imageUrl": "https://f4.bcbits.com/img/a3364649492_16.jpg",
+          "releaseDate": "January 31, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Malice%20Mizer"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Malice%20Mizer"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.malice-mizer.co.jp/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/231908"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Malice%20Mizer&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Malice%20Mizer"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/moimememoitieofficial/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

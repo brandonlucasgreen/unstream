@@ -1,0 +1,90 @@
+[
+  {
+    "id": "zakkwylde",
+    "name": "Zakk Wylde",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014805527_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://zakkwylde.bandcamp.com",
+        "allReleaseTitles": [
+          "prideglory",
+          "bookofshadowsii",
+          "bookofshadows"
+        ],
+        "latestRelease": {
+          "title": "Pride & Glory",
+          "type": "album",
+          "url": "https://zakkwylde.bandcamp.com/album/pride-glory",
+          "imageUrl": "https://f4.bcbits.com/img/a4210536124_2.jpg",
+          "releaseDate": "October 25, 2019"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/zakk-wylde/153265",
+        "allReleaseTitles": [
+          "nameinbloodblacklabelsociety",
+          "bookofshadowsiibonustrackedition",
+          "bookofshadowsii",
+          "lostprayer",
+          "tearsofdecember",
+          "bookofshadows",
+          "sleepingdogs"
+        ],
+        "latestRelease": {
+          "title": "Name In Blood Black Label Society Zakk Wylde",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/name-in-blood-black-label-society-zakk-wylde/vam8scfww577j",
+          "releaseDate": "2026-01-14"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Zakk%20Wylde"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Zakk%20Wylde"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://zakkwylde.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/299759"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Zakk%20Wylde&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Zakk%20Wylde"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/zakkwyldebls/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@zakkwyldebls"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/zakkwyldetv"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/zakkwylde"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

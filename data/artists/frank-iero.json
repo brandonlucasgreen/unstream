@@ -1,0 +1,50 @@
+[
+  {
+    "id": "frankiero",
+    "name": "Frank Iero",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018635631_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://frankiero.bandcamp.com",
+        "allReleaseTitles": [
+          "heavenisaplacethisisaplace",
+          "barriers"
+        ],
+        "latestRelease": {
+          "title": "Heaven is a Place, This is a Place",
+          "type": "album",
+          "url": "https://frankiero.bandcamp.com/album/heaven-is-a-place-this-is-a-place",
+          "imageUrl": "https://f4.bcbits.com/img/a4064404476_16.jpg",
+          "releaseDate": "January 15, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Frank%20Iero"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Frank%20Iero"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3971017"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/frankieromustdie/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/frankieromusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

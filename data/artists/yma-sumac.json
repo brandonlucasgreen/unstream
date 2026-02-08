@@ -1,0 +1,72 @@
+[
+  {
+    "id": "ymasumac",
+    "name": "Yma Sumac",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0009030606_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/yma-sumac/23960",
+        "allReleaseTitles": [
+          "theultimatecollection",
+          "incataquimoisesvivanco",
+          "voiceofthextabay",
+          "mambo",
+          "legendofthesunvirgin",
+          "thebestof",
+          "fuegodelande",
+          "legendofthejivaro",
+          "ymarocks",
+          "unamor",
+          "recital",
+          "kontiki",
+          "jungla",
+          "goombaboomba",
+          "flahooleysammyfain",
+          "gopher",
+          "alegendcalledthehollywoodsinkaprincessbolshoisymphonyorchestra"
+        ],
+        "latestRelease": {
+          "title": "Inca Taqui Yma Sumac Moises Vivanco",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/inca-taqui-yma-sumac-moises-vivanco/icrkhyooaisja",
+          "releaseDate": "2013-06-05"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ymasumac.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Yma%20Sumac"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Yma%20Sumac"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sunvirgin.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/36867"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Yma%20Sumac&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Yma%20Sumac"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

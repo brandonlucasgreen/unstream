@@ -1,0 +1,78 @@
+[
+  {
+    "id": "ziferblat",
+    "name": "Ziferblat",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039660287_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ziferblat.bandcamp.com",
+        "allReleaseTitles": [
+          "ofus",
+          ""
+        ],
+        "latestRelease": {
+          "title": "Of Us",
+          "type": "album",
+          "url": "https://ziferblat.bandcamp.com/album/of-us",
+          "imageUrl": "https://f4.bcbits.com/img/a1629309578_16.jpg",
+          "releaseDate": "May 2, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ziferblat/19586609",
+        "allReleaseTitles": [
+          "birdofpray",
+          "",
+          "",
+          "temberblanche",
+          "",
+          "ofus",
+          "artempivovarovthe",
+          "placeicallhome"
+        ],
+        "latestRelease": {
+          "title": "Bird Of Pray Ziferblat",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/bird-of-pray-ziferblat/qa2csagabbtia",
+          "releaseDate": "2025-01-24"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ziferblat"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ziferblat"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/ziferblat_band/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@ziferblat_band"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC2C2PEuAMqZmxlNKemT9png"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@ziferblat_band"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/100063739414532"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

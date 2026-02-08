@@ -1,8 +1,11 @@
 /**
- * Generate a list of ~1000 popular artists via Wikidata SPARQL query.
- * Artists are ranked by Wikipedia sitelink count and filtered to those
- * with a MusicBrainz ID (Wikidata property P434).
+ * Generate a list of ~1000 mid-tier popular artists via Wikidata SPARQL query.
  *
+ * Skips the top ~1000 mega-famous artists (who attract impersonators and don't
+ * need indie music discovery) and takes the next 1000 — artists popular enough
+ * to be searched but who actually benefit from being found on alternative platforms.
+ *
+ * Uses wikibase:sitelinks for fast ranking instead of counting sitelinks manually.
  * Runs multiple smaller queries to avoid Wikidata timeouts, then merges results.
  *
  * Output: data/artist-list.json
@@ -15,6 +18,9 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUTPUT_PATH = join(__dirname, '..', 'data', 'artist-list.json');
+
+const SKIP_TOP = 1000;  // Skip the top N mega-famous artists
+const TAKE_COUNT = 3000; // Take the next N after skipping
 
 interface ArtistEntry {
   name: string;
@@ -38,69 +44,66 @@ function slugify(name: string): string {
     .replace(/^-|-$/g, '');
 }
 
-// Split into separate queries to avoid Wikidata timeouts
+// Fetch a large pool so we can skip the top 1000 and still have 3000+ left.
+// Lower sitelink thresholds to reach deeper into the mid/long-tail.
 const QUERIES: { label: string; sparql: string }[] = [
   {
     label: 'musical groups/bands',
     sparql: `
-SELECT ?artist ?artistLabel ?mbid (COUNT(DISTINCT ?sitelink) AS ?sites) WHERE {
-  ?artist wdt:P31 wd:Q215380 .     # instance of: musical group
-  ?artist wdt:P434 ?mbid .         # has MusicBrainz ID
-  ?sitelink schema:about ?artist .
+SELECT ?artist ?artistLabel ?mbid ?sites WHERE {
+  ?artist wdt:P31 wd:Q215380 .       # instance of: musical group
+  ?artist wdt:P434 ?mbid .           # has MusicBrainz ID
+  ?artist wikibase:sitelinks ?sites .
+  FILTER(?sites > 5)
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en" . }
 }
-GROUP BY ?artist ?artistLabel ?mbid
-HAVING (COUNT(DISTINCT ?sitelink) > 15)
 ORDER BY DESC(?sites)
-LIMIT 600
+LIMIT 3000
 `,
   },
   {
     label: 'singers',
     sparql: `
-SELECT ?artist ?artistLabel ?mbid (COUNT(DISTINCT ?sitelink) AS ?sites) WHERE {
-  ?artist wdt:P31 wd:Q5 .          # human
-  ?artist wdt:P106 wd:Q177220 .    # occupation: singer
-  ?artist wdt:P434 ?mbid .         # has MusicBrainz ID
-  ?sitelink schema:about ?artist .
+SELECT ?artist ?artistLabel ?mbid ?sites WHERE {
+  ?artist wdt:P31 wd:Q5 .            # human
+  ?artist wdt:P106 wd:Q177220 .      # occupation: singer
+  ?artist wdt:P434 ?mbid .           # has MusicBrainz ID
+  ?artist wikibase:sitelinks ?sites .
+  FILTER(?sites > 10)
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en" . }
 }
-GROUP BY ?artist ?artistLabel ?mbid
-HAVING (COUNT(DISTINCT ?sitelink) > 30)
 ORDER BY DESC(?sites)
-LIMIT 500
+LIMIT 3000
 `,
   },
   {
     label: 'musicians',
     sparql: `
-SELECT ?artist ?artistLabel ?mbid (COUNT(DISTINCT ?sitelink) AS ?sites) WHERE {
-  ?artist wdt:P31 wd:Q5 .          # human
-  ?artist wdt:P106 wd:Q639669 .    # occupation: musician
-  ?artist wdt:P434 ?mbid .         # has MusicBrainz ID
-  ?sitelink schema:about ?artist .
+SELECT ?artist ?artistLabel ?mbid ?sites WHERE {
+  ?artist wdt:P31 wd:Q5 .            # human
+  ?artist wdt:P106 wd:Q639669 .      # occupation: musician
+  ?artist wdt:P434 ?mbid .           # has MusicBrainz ID
+  ?artist wikibase:sitelinks ?sites .
+  FILTER(?sites > 10)
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en" . }
 }
-GROUP BY ?artist ?artistLabel ?mbid
-HAVING (COUNT(DISTINCT ?sitelink) > 30)
 ORDER BY DESC(?sites)
-LIMIT 500
+LIMIT 3000
 `,
   },
   {
     label: 'songwriters',
     sparql: `
-SELECT ?artist ?artistLabel ?mbid (COUNT(DISTINCT ?sitelink) AS ?sites) WHERE {
-  ?artist wdt:P31 wd:Q5 .          # human
-  ?artist wdt:P106 wd:Q753110 .    # occupation: songwriter
-  ?artist wdt:P434 ?mbid .         # has MusicBrainz ID
-  ?sitelink schema:about ?artist .
+SELECT ?artist ?artistLabel ?mbid ?sites WHERE {
+  ?artist wdt:P31 wd:Q5 .            # human
+  ?artist wdt:P106 wd:Q753110 .      # occupation: songwriter
+  ?artist wdt:P434 ?mbid .           # has MusicBrainz ID
+  ?artist wikibase:sitelinks ?sites .
+  FILTER(?sites > 10)
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en" . }
 }
-GROUP BY ?artist ?artistLabel ?mbid
-HAVING (COUNT(DISTINCT ?sitelink) > 30)
 ORDER BY DESC(?sites)
-LIMIT 500
+LIMIT 3000
 `,
   },
 ];
@@ -128,8 +131,9 @@ async function runQuery(sparql: string, label: string, attempt = 1): Promise<Wik
 
   if (!response.ok) {
     if (attempt < 3) {
-      console.log(`  Got ${response.status}, retrying in 10s...`);
-      await sleep(10000);
+      const wait = attempt * 15000;
+      console.log(`  Got ${response.status}, retrying in ${wait / 1000}s...`);
+      await sleep(wait);
       return runQuery(sparql, label, attempt + 1);
     }
     throw new Error(`Wikidata query failed for "${label}": ${response.status} ${response.statusText}`);
@@ -143,7 +147,7 @@ async function runQuery(sparql: string, label: string, attempt = 1): Promise<Wik
 
 async function main() {
   try {
-    console.log('Fetching popular artists from Wikidata...\n');
+    console.log('Fetching artists from Wikidata (targeting mid-tier popularity)...\n');
 
     const allBindings: WikidataBinding[] = [];
 
@@ -151,7 +155,7 @@ async function main() {
       const bindings = await runQuery(query.sparql, query.label);
       allBindings.push(...bindings);
       // Pause between queries to be nice to Wikidata
-      await sleep(2000);
+      await sleep(3000);
     }
 
     console.log(`\nTotal raw results: ${allBindings.length}`);
@@ -166,6 +170,9 @@ async function main() {
 
       if (!name || !mbid) continue;
 
+      // Skip entries where Wikidata returned a QID instead of a label
+      if (/^Q\d+$/.test(name)) continue;
+
       const slug = slugify(name);
       if (!slug) continue;
 
@@ -175,19 +182,31 @@ async function main() {
       }
     }
 
-    // Sort by sitelink count (most popular first) and take top ~1000
-    const artists: ArtistEntry[] = Array.from(artistMap.values())
-      .sort((a, b) => b.sites - a.sites)
-      .slice(0, 1000)
-      .map(({ name, slug, musicbrainzId }) => ({ name, slug, musicbrainzId }));
+    // Sort by sitelink count, skip the top mega-famous artists, take the next batch
+    const sorted = Array.from(artistMap.values()).sort((a, b) => b.sites - a.sites);
 
-    console.log(`Deduplicated to ${artists.length} unique artists`);
+    console.log(`Deduplicated to ${sorted.length} unique artists total`);
+    console.log(`Skipping top ${SKIP_TOP}, taking next ${TAKE_COUNT}`);
+
+    if (sorted.length > SKIP_TOP) {
+      console.log(`  Top artist skipped: "${sorted[0].name}" (${sorted[0].sites} sitelinks)`);
+      console.log(`  Last artist skipped: "${sorted[Math.min(SKIP_TOP - 1, sorted.length - 1)].name}" (${sorted[Math.min(SKIP_TOP - 1, sorted.length - 1)].sites} sitelinks)`);
+    }
+
+    const selected = sorted.slice(SKIP_TOP, SKIP_TOP + TAKE_COUNT);
+
+    if (selected.length > 0) {
+      console.log(`  First selected: "${selected[0].name}" (${selected[0].sites} sitelinks)`);
+      console.log(`  Last selected: "${selected[selected.length - 1].name}" (${selected[selected.length - 1].sites} sitelinks)`);
+    }
+
+    const artists: ArtistEntry[] = selected.map(({ name, slug, musicbrainzId }) => ({ name, slug, musicbrainzId }));
 
     // Ensure output directory exists
     mkdirSync(dirname(OUTPUT_PATH), { recursive: true });
 
     writeFileSync(OUTPUT_PATH, JSON.stringify(artists, null, 2));
-    console.log(`Wrote ${artists.length} artists to ${OUTPUT_PATH}`);
+    console.log(`\nWrote ${artists.length} artists to ${OUTPUT_PATH}`);
   } catch (error) {
     console.error('Failed to generate artist list:', error);
     process.exit(1);

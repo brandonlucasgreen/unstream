@@ -1,0 +1,105 @@
+[
+  {
+    "id": "boniver",
+    "name": "Bon Iver",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038663714_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://boniver.bandcamp.com",
+        "allReleaseTitles": [
+          "naeemcantyouhearcryinglivefromlaprimaestatefestivallidodicamaioreitalyjune172023",
+          "sablefable",
+          "sable",
+          "boniver10thanniversaryedition",
+          "auatc",
+          "pdlif",
+          "bloodbank10thanniversaryedition",
+          "ii",
+          "heyma",
+          "umanlike",
+          "22amillion",
+          "2210",
+          "boniver",
+          "bloodbank",
+          "foremmaforeverago"
+        ],
+        "latestRelease": {
+          "title": "\"Naeem (Can’t You Hear Crying)” (Live from La Prima Estate Festival, Lido di Camaiore, Italy. June 17 2023)",
+          "type": "track",
+          "url": "https://boniver.bandcamp.com/track/naeem-can-t-you-hear-crying-live-from-la-prima-estate-festival-lido-di-camaiore-italy-june-17-2023",
+          "imageUrl": "https://f4.bcbits.com/img/a3191697423_2.jpg",
+          "releaseDate": "January 30, 2026"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/bon-iver-2/600112",
+        "allReleaseTitles": [
+          "sablefable",
+          "ii",
+          "foremmaforeverago",
+          "boniverboniver",
+          "tieyoudownhaim",
+          "22amillion",
+          "auatc",
+          "heartofgoldwithilsey",
+          "floodglowduasaleh",
+          "bloodbank",
+          "bloodbankep",
+          "2210",
+          "pdlif",
+          "sounimportantethangruska"
+        ],
+        "latestRelease": {
+          "title": "Tie You Down Haim Bon Iver",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/tie-you-down-haim-bon-iver/c8x16gkaw99oa",
+          "releaseDate": "2025-10-10"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bon%20Iver"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bon%20Iver"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://boniver.org/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1042739"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/boniver/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@boniver"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCci2c90HJbY0VAS3_eLF3Wg"
+      },
+      {
+        "sourceId": "bluesky",
+        "url": "https://bsky.app/profile/boniverwi.bsky.social"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/boniverwi"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

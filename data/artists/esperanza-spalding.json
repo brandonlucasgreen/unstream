@@ -1,0 +1,86 @@
+[
+  {
+    "id": "esperanzaspalding",
+    "name": "esperanza spalding",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024148906_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://esperanzaspalding.bandcamp.com",
+        "allReleaseTitles": [
+          "miltonesperanzamiltonnascimentoesperanzaspalding",
+          "naoaomarcotemporal",
+          "naoaomarcotemporalextendedversion",
+          "songwrightsapothecarylab",
+          "emilysdevolution",
+          "radiomusicsociety",
+          "chambermusicsociety",
+          "esperanza"
+        ],
+        "latestRelease": {
+          "title": "Milton + esperanza\n                \n                \n\n                Milton Nascimento & Esperanza Spalding",
+          "type": "album",
+          "url": "https://esperanzaspalding.bandcamp.com/album/milton-esperanza",
+          "imageUrl": "https://f4.bcbits.com/img/a1397561396_2.jpg",
+          "releaseDate": "August 9, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/esperanza-spalding/23346",
+        "latestRelease": {
+          "title": "Milton Esperanza Esperanza Spalding Milton Nascimento",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/milton-esperanza-esperanza-spalding-milton-nascimento/l2xbjlj72e1mb",
+          "releaseDate": "2024-08-09"
+        },
+        "allReleaseTitles": [
+          "miltonesperanzamiltonnascimento",
+          "radiomusicsociety",
+          "12littlespells",
+          "emilysdevolution",
+          "aliveatthevillagevanguardfredhersch",
+          "liveatthedetroitjazzfestivalwayneshorterterrilynecarringtonfeatleogenovese",
+          "songwrightsapothecarylab",
+          "drummerssongwayneshorterterrilynecarringtonfeatleogenovese",
+          "naoaomarcotemporal",
+          "butnotformefredhersch",
+          "lorofredhersch",
+          "anotherstorygystere",
+          "esperanza",
+          "junjo"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=esperanza%20spalding"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+esperanza%20spalding"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.esperanzaspalding.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/414901"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/esperanzaspalding/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/EsperanzaSpalding"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

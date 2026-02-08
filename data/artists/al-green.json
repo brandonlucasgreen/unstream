@@ -1,0 +1,114 @@
+[
+  {
+    "id": "algreen",
+    "name": "Al Green",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037816130_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://algreen.bandcamp.com",
+        "allReleaseTitles": [
+          "tolovesomebodyep",
+          "everybodyhurts",
+          "perfectday",
+          "greatesthits",
+          "letsstaytogether",
+          "imstillinlovewithyou",
+          "givememorelovetheorchestralgreatesthits",
+          "getsnexttoyou",
+          "callme",
+          "thehirecordssingles",
+          "beforethenextteardropfalls",
+          "exploresyourmind",
+          "haveagoodtime",
+          "islove",
+          "livinforyou",
+          "loveritual",
+          "thebellealbum",
+          "thelovesongscollection"
+        ],
+        "latestRelease": {
+          "title": "To Love Somebody EP",
+          "type": "album",
+          "url": "https://algreen.bandcamp.com/album/to-love-somebody-ep",
+          "imageUrl": "https://f4.bcbits.com/img/a3268172142_2.jpg",
+          "releaseDate": "January 16, 2026"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/al-green/36673",
+        "allReleaseTitles": [
+          "imstillinlovewithyou",
+          "greatesthits",
+          "tolovesomebody",
+          "letsstaytogether",
+          "thehirecordssinglescollection",
+          "everybodyhurts",
+          "givememorelove",
+          "perfectday",
+          "beforethenextteardropfalls",
+          "soulsurvivor",
+          "greatesthitsthebestof",
+          "getsnexttoyou",
+          "callme",
+          "islove",
+          "isblues",
+          "thelovesongscollection",
+          "livinforyou",
+          "haveagoodtime",
+          "tokyolive",
+          "preciouslord"
+        ],
+        "latestRelease": {
+          "title": "To Love Somebody Al Green",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/to-love-somebody-al-green/ftf812dig8re2",
+          "releaseDate": "2026-01-16"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Al%20Green"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Al%20Green"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.algreenmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/25261"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Al%20Green&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Al%20Green"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/algreen/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/c/AlGreen"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/algreen"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,67 @@
+[
+  {
+    "id": "owlcity",
+    "name": "Owl City",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031831522_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://owlcityofficial.bandcamp.com",
+        "allReleaseTitles": [
+          "adamcheckpleaseupnorthversion",
+          "dinosaurparkinstrumental",
+          "thetornadoinstrumental",
+          "underthecircuslightslive",
+          "cartrouble",
+          "boston",
+          "cocomoon"
+        ],
+        "latestRelease": {
+          "title": "Adam, Check Please (Up North Version)",
+          "type": "track",
+          "url": "https://owlcityofficial.bandcamp.com/track/adam-check-please-up-north-version",
+          "imageUrl": "https://f4.bcbits.com/img/a2215945290_2.jpg",
+          "releaseDate": "March 22, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Owl%20City"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Owl%20City"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.owlcitymusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1494847"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/owlcityofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@owlcitymusic"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCV-UW3I3mXakSoqV8SpF1sg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/owlcity"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

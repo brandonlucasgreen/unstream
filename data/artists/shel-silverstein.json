@@ -1,0 +1,58 @@
+[
+  {
+    "id": "shelsilverstein",
+    "name": "Shel Silverstein",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3196183559_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://shelsilverstein.bandcamp.com",
+        "allReleaseTitles": [
+          "drainmybrain",
+          "crouchinontheoutside"
+        ],
+        "latestRelease": {
+          "title": "Drain My Brain",
+          "type": "album",
+          "url": "https://shelsilverstein.bandcamp.com/album/drain-my-brain",
+          "imageUrl": "https://f4.bcbits.com/img/a3196183559_16.jpg",
+          "releaseDate": "March 19, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Shel%20Silverstein"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Shel%20Silverstein"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.shelsilverstein.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/679432"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Shel%20Silverstein&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Shel%20Silverstein"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ShelSilverstein/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

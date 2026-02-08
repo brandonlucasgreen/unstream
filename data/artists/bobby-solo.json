@@ -1,0 +1,80 @@
+[
+  {
+    "id": "bobbysolo",
+    "name": "Bobby Solo",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0021737063_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/bobby-solo/75878",
+        "allReleaseTitles": [
+          "imieiprimi80anni",
+          "80vogliadi",
+          "sweethomechicago",
+          "babypleasedontgo",
+          "earrivatonatale",
+          "igrandisuccessi",
+          "",
+          "solomusicaitalianaanni60vol1camaleontiedoardovianello",
+          "cantanapolimassimofaraotrio",
+          "cantaitalia",
+          "musicaincucinalamigliormusicanapoletanapercucinarelapizzamassimofaraotrio",
+          "napolimassimofaraotrio",
+          "thecroonerandthepianomanmassimofaraotrio",
+          "100massimofaraotrio",
+          "thatsamore",
+          "thesongsofjohnleehooker",
+          "thebest"
+        ],
+        "latestRelease": {
+          "title": "Sweet Home Chicago Bobby Solo",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/sweet-home-chicago-bobby-solo/pp6kn5kzohquc",
+          "releaseDate": "2025-07-30"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bobbysolo-ams.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bobby%20Solo"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bobby%20Solo"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.bobbysolo.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/409131"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Bobby%20Solo&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Bobby%20Solo"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/BobbySoloChannel"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/official.bobbysolo"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

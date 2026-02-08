@@ -1,0 +1,65 @@
+[
+  {
+    "id": "amberrose",
+    "name": "Amber Rose",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0029422631_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://amberrose.bandcamp.com",
+        "allReleaseTitles": [
+          "limelight",
+          "intime",
+          "stain"
+        ],
+        "latestRelease": {
+          "title": "Limelight",
+          "type": "track",
+          "url": "https://amberrose.bandcamp.com/track/limelight",
+          "imageUrl": "https://f4.bcbits.com/img/a2079642567_2.jpg",
+          "releaseDate": "August 20, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/amber-rose/959418",
+        "allReleaseTitles": [
+          "limelight",
+          "forthebest",
+          "countryrockinsongsbyjimburnevikmichaellusk",
+          "surpriseme",
+          "intime",
+          "openup",
+          "okayimissyou",
+          "stain",
+          "gyho",
+          "surprisemecleanradioedit",
+          "outoftime",
+          "monster",
+          "tightropefeatjackreeves",
+          "howhighfeatjackreeves",
+          "freakshow",
+          "withjackreevesthe",
+          "thereisapartofme",
+          "shootingarrows",
+          "",
+          "solacehomedemos"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Amber%20Rose"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Amber%20Rose"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

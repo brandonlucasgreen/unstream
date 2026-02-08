@@ -1,0 +1,68 @@
+[
+  {
+    "id": "roisinmurphy",
+    "name": "Róisín Murphy",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033488250_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://roisinmurphy.bandcamp.com",
+        "allReleaseTitles": [
+          "hitparaderemixes",
+          "whatnottodomoodymannremix",
+          "youknewremixes",
+          "coocool",
+          "flashoflightliveinberlin",
+          "takeheruptomonto",
+          "hairlesstoys"
+        ],
+        "latestRelease": {
+          "title": "Hit Parade Remixes",
+          "type": "album",
+          "url": "https://roisinmurphy.bandcamp.com/album/hit-parade-remixes",
+          "imageUrl": "https://f4.bcbits.com/img/a0481849969_2.jpg",
+          "releaseDate": "May 24, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/roisin-murphy/39028",
+        "allReleaseTitles": [
+          "hitparade",
+          "hairlesstoys",
+          "takeheruptomonto",
+          "hitparaderemixes",
+          "roisinmachine",
+          "flashoflight",
+          "youknew",
+          "fader",
+          "freakmenowjessieware",
+          "coocool",
+          "theuniverse",
+          "tenmileshigh",
+          "mastermind",
+          "romanticcomedy",
+          "overpowered",
+          "rubyblue",
+          "crookedmachine",
+          "dearmiami",
+          "misenti"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=R%C3%B3is%C3%ADn%20Murphy"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+R%C3%B3is%C3%ADn%20Murphy"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

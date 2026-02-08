@@ -1,0 +1,65 @@
+[
+  {
+    "id": "huskerdu",
+    "name": "Hüsker Dü",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011247649_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://huskerdu.bandcamp.com",
+        "allReleaseTitles": [
+          "1985themiracleyear",
+          "savageyoungdu",
+          "extracircus"
+        ],
+        "latestRelease": {
+          "title": "1985: The Miracle Year",
+          "type": "album",
+          "url": "https://huskerdu.bandcamp.com/album/1985-the-miracle-year",
+          "imageUrl": "https://f4.bcbits.com/img/a1419210194_2.jpg",
+          "releaseDate": "November 7, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/husker-du/82893",
+        "allReleaseTitles": [
+          "1985themiracleyear",
+          "jan30firstavept1",
+          "zenarcade",
+          "nov3saltlakecity",
+          "newdayrising",
+          "extracircus",
+          "tonitelonghorn",
+          "metalcircusep",
+          "candyapplegrey",
+          "flipyourwig",
+          "everythingfallsapart",
+          "jan30firstavept2",
+          "warehousesongsandstories",
+          "eightmileshighmakesnosenseatallsingle",
+          "savageyoungdu",
+          "landspeedrecord",
+          "sept1719theurope",
+          "jan30firstavept3",
+          "thelivingend",
+          "euphoria"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=H%C3%BCsker%20D%C3%BC"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+H%C3%BCsker%20D%C3%BC"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

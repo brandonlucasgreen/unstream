@@ -1,0 +1,52 @@
+[
+  {
+    "id": "sonnychiba",
+    "name": "Sonny Chiba",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a1515013338_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sonnychiba.bandcamp.com",
+        "allReleaseTitles": [
+          "heaveho",
+          "passthosepigs",
+          "water",
+          "square",
+          "lambsbreath",
+          "djam",
+          "myfavoritethings",
+          "cuzthisis",
+          "chewyfunkwithacrunchycoating",
+          "somemusic",
+          "spiritriseunfinished",
+          "watersequence",
+          "bumadig",
+          "santanajustranovermaroon5inasemiimprov",
+          "thetriplewidejamimprov",
+          "ironlionsbreath"
+        ],
+        "latestRelease": {
+          "title": "Heave, Ho!",
+          "type": "track",
+          "url": "https://sonnychiba.bandcamp.com/track/heave-ho",
+          "imageUrl": "https://f4.bcbits.com/img/a1515013338_2.jpg",
+          "releaseDate": "February 25, 2010"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sonny%20Chiba"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sonny%20Chiba"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

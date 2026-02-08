@@ -1,0 +1,75 @@
+[
+  {
+    "id": "common",
+    "name": "Common",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025844558_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://officialcommon.bandcamp.com",
+        "allReleaseTitles": [
+          "theauditoriumvol1",
+          "wiseupcommonpeterock",
+          "abeautifulrevolutionpt2",
+          "imagine",
+          "whatdoyousaymoveitbabydamianjrgongmarleyremix",
+          "abeautifulrevolutionpart1",
+          "letlove"
+        ],
+        "latestRelease": {
+          "title": "The Auditorium Vol. 1",
+          "type": "album",
+          "url": "https://officialcommon.bandcamp.com/album/the-auditorium-vol-1",
+          "imageUrl": "https://f4.bcbits.com/img/a2711715711_2.jpg",
+          "releaseDate": "July 12, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Common"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Common"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.common-music.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/14014"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Common&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Common"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://instagram.com/common"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@common"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/thinkcommon"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thinkcommon"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

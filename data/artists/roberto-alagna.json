@@ -1,0 +1,66 @@
+[
+  {
+    "id": "robertoalagna",
+    "name": "Roberto Alagna",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0035400442_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://robertoalagna.bandcamp.com",
+        "allReleaseTitles": [
+          "robertoalagna60robertoalagnamorphingchamberorchestragiorgiocroci",
+          "seigneurrobertoalagnajeanfelixlalannemarekruszczynski"
+        ],
+        "latestRelease": {
+          "title": "Roberto Alagna 60\n                \n                \n\n                Roberto Alagna, Morphing Chamber Orchestra, Giorgio Croci",
+          "type": "album",
+          "url": "https://robertoalagna.bandcamp.com/album/roberto-alagna-60",
+          "imageUrl": "https://f4.bcbits.com/img/a1671605076_16.jpg",
+          "releaseDate": "September 20, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Roberto%20Alagna"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Roberto%20Alagna"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.robertoalagna.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/959409"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Roberto%20Alagna&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Roberto%20Alagna"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/robertoalagna.tenor/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/RobertoAlagnaOfficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/RobertoAlagna.Tenor"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

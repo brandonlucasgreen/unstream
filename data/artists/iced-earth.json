@@ -1,0 +1,67 @@
+[
+  {
+    "id": "icedearth",
+    "name": "Iced Earth",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a4266366785_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://roar-icedearth.bandcamp.com",
+        "allReleaseTitles": [
+          "hellriderfeattimripperowens",
+          "hellrideriwalkamongyou",
+          "iwalkamongyoufeatmattbarlow"
+        ],
+        "latestRelease": {
+          "title": "Hellrider (feat. Tim \"Ripper\" Owens)",
+          "type": "album",
+          "url": "https://roar-icedearth.bandcamp.com/album/hellrider-feat-tim-ripper-owens",
+          "imageUrl": "https://f4.bcbits.com/img/a4266366785_2.jpg",
+          "releaseDate": "April 28, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Iced%20Earth"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Iced%20Earth"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.icedearth.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/261489"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Iced%20Earth&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Iced%20Earth"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/icedearth_official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/OfficialIcedEarth"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/OfficialIcedEarth"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

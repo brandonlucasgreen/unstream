@@ -1,0 +1,76 @@
+[
+  {
+    "id": "can",
+    "name": "CAN",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024939273_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://canofficial.bandcamp.com",
+        "allReleaseTitles": [
+          "liveinkeele1977",
+          "liveinaston1977",
+          "liveinparis1973",
+          "liveincuxhaven1976",
+          "liveinbrighton1975",
+          "liveinstuttgart1975",
+          "thesingles",
+          "thelosttapes",
+          "tagomago40thanniversaryedition",
+          "sacrilege",
+          "anthology",
+          "ritetime",
+          "delay1968",
+          "can",
+          "outofreach",
+          "sawdelight"
+        ],
+        "latestRelease": {
+          "title": "LIVE IN KEELE 1977",
+          "type": "album",
+          "url": "https://canofficial.bandcamp.com/album/live-in-keele-1977",
+          "imageUrl": "https://f4.bcbits.com/img/a1730516827_2.jpg",
+          "releaseDate": "November 22, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=CAN"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+CAN"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.spoonrecords.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/17203"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=CAN&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/CAN"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/watch?v=su0v4IW4trUp"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialCan"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

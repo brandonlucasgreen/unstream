@@ -1,0 +1,71 @@
+[
+  {
+    "id": "godspeedyoublackemperor",
+    "name": "Godspeed You! Black Emperor",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0008410173_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://godspeedyoublackemperor.bandcamp.com",
+        "allReleaseTitles": [
+          "notitleasof13february202428340dead",
+          "gdspeeatstatesend",
+          "alllightsfuckedonthehairyampdroolinggodspeedyoublackemperor",
+          "luciferiantowers",
+          "asundersweetandotherdistress",
+          "allelujahdontbendascend",
+          "yanquiuxo",
+          "liftyourskinnyfistslikeantennastoheavengodspeedyoublackemperor",
+          "slowriotfornewzerokanadagodspeedyoublackemperor",
+          "fagodspeedyoublackemperor",
+          "falpversiongodspeedyoublackemperor"
+        ],
+        "latestRelease": {
+          "title": "\"NO TITLE AS OF 13 FEBRUARY 2024 28,340 DEAD\"",
+          "type": "album",
+          "url": "https://godspeedyoublackemperor.bandcamp.com/album/no-title-as-of-13-february-2024-28340-dead",
+          "imageUrl": "https://f4.bcbits.com/img/a2589762612_2.jpg",
+          "releaseDate": "October 4, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Godspeed%20You!%20Black%20Emperor"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Godspeed%20You!%20Black%20Emperor"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://brainwashed.com/godspeed/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/280442"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Godspeed%20You!%20Black%20Emperor&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Godspeed%20You!%20Black%20Emperor"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCDhKhucVT-9sNQExgHPcabg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Godspeed-You-Black-Emperor-8421198748"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

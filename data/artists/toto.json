@@ -1,0 +1,75 @@
+[
+  {
+    "id": "toto",
+    "name": "Totò",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a4292517627_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://totomusic4.bandcamp.com",
+        "allReleaseTitles": [
+          "bobsinclarworldholdonhotswingclubremixbobsinclarhotswingsteveedwards",
+          "discoslapsignorinaciaociaoedit",
+          "willyilprincipedibelairedoardonevoladiscoslapremixdiscoslap",
+          "inandoutofloveeditswinghotarminvanbuurensharondenadel",
+          "maxromeochasethedevilhotswingedit",
+          "freddiemercurylivingonmyownhotswingedithotswing",
+          "gracejoneslibertangohotswingedithotswing",
+          "caroemeraldbackitupalleneditallen",
+          "senzagiaccaecravattahotswingremixhotswing",
+          "estelleamericanboyhotswingklatikeditvinyl12inchlimitednumberededitiononly100copies",
+          "essentialgroove001discoslapcandistatontotosistersledgebobsinclarrobbiewilliams",
+          "essentialgroove002nugeneasupertrampjuanluisguerrajarabedepalolaflacadiscoslap",
+          "tulliodepiscopoandamentolentohotallenedit",
+          "boasorteallenedit",
+          "bustarhymeshotswingedit"
+        ],
+        "latestRelease": {
+          "title": "Bob Sinclar - World, Hold On (Hotswing Club Remix)\n                \n                \n\n                Bob Sinclar - Hotswing - Steve Edwards",
+          "type": "track",
+          "url": "https://totomusic4.bandcamp.com/track/bob-sinclar-world-hold-on-hotswing-club-remix",
+          "imageUrl": "https://f4.bcbits.com/img/a4292517627_2.jpg",
+          "releaseDate": "December 30, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tot%C3%B2"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tot%C3%B2"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.totoofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/68693"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Tot%C3%B2&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Tot%C3%B2"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC05o3YC_kuha3KcPdssU-kA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Toto99com"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,78 @@
+[
+  {
+    "id": "bucksfizz",
+    "name": "Bucks Fizz",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a1629318670_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/bucks-fizz/192501",
+        "allReleaseTitles": [
+          "",
+          "upuntilnowthe30thanniversaryhitscollection",
+          "thelandofmakebelieveextendedandalternativemixes",
+          "areyouready",
+          "theverybestof",
+          "thebestof",
+          "iheartalk",
+          "thelandofmakebelieve",
+          "makingyourmindupbestof",
+          "makingyourmindup",
+          "elmundodeilusion",
+          "handcut",
+          "easytrouble",
+          "thegreatesthits",
+          "makingyourminduporiginalrhythmbackingtrack",
+          "pieceoftheaction",
+          "newbeginningmambaseyra",
+          "londontown",
+          "ifyoucantstandtheheat"
+        ],
+        "latestRelease": {
+          "title": "The Land Of Make Believe Extended And Alternative Mixes Bucks Fizz",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-land-of-make-believe-extended-and-alternative-mixes-bucks-fizz/n90zn0hmyxdd8",
+          "releaseDate": "2023-11-17"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bucksfizz.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bucks%20Fizz"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bucks%20Fizz"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://bucksfizzofficial.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/172408"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Bucks%20Fizz&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Bucks%20Fizz"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UChHIRkSTp-4elmlEeyTnbBA"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

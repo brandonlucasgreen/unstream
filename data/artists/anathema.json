@@ -1,0 +1,103 @@
+[
+  {
+    "id": "anathema",
+    "name": "Anathema",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038684257_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://anathema.bandcamp.com",
+        "allReleaseTitles": [
+          "internallandscapesbestof20082018",
+          "theoptimist",
+          "asortofhomecominglive",
+          "distantsatellitestouredition",
+          "distantsatellites",
+          "universal",
+          "weathersystems",
+          "fallingdeeper",
+          "wereherebecausewerehere",
+          "hindsight"
+        ],
+        "latestRelease": {
+          "title": "Internal Landscapes (Best of 2008-2018)",
+          "type": "album",
+          "url": "https://anathema.bandcamp.com/album/internal-landscapes-best-of-2008-2018",
+          "imageUrl": "https://f4.bcbits.com/img/a0899218338_2.jpg",
+          "releaseDate": "October 26, 2018"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/anathema"
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/anathema/243650",
+        "allReleaseTitles": [
+          "theoptimist",
+          "weathersystems",
+          "internallandscapesbestof20082018",
+          "alternative4",
+          "judgement",
+          "asortofhomecoming",
+          "distantsatellites",
+          "hindsight",
+          "eternity",
+          "anaturaldisaster",
+          "universal",
+          "thesilentenigma",
+          "serenades",
+          "wereherebecausewerehere",
+          "fallingdeeper",
+          "avisionofadyingembrace",
+          "thelostsongpt3",
+          "afinedaytoexit",
+          "distantsatellitestouredition"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Anathema"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Anathema"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.anathemamusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/100137"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Anathema&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Anathema"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/anathemamusic/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCD_YQdIsW1phqp5AqQwmKhg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/anathemamusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

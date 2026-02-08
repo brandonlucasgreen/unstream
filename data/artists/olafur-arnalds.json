@@ -1,0 +1,70 @@
+[
+  {
+    "id": "olafurarnalds",
+    "name": "Ólafur Arnalds",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026003860_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://olafurarnalds.bandcamp.com",
+        "allReleaseTitles": [
+          "happinessdoesnotwait2021version",
+          "eulogyforevolution2017remastered10thanniversaryedition",
+          "twosongsfordance",
+          "anotherhappydayoriginalmotionpicturesoundtrack",
+          "livingroomsongs",
+          "andtheyhaveescapedtheweightofdarkness",
+          "dyad1909",
+          "foundsongs",
+          "variationsofstatic",
+          "eulogyforevolution"
+        ],
+        "latestRelease": {
+          "title": "Happiness Does Not Wait (2021 Version)",
+          "type": "album",
+          "url": "https://olafurarnalds.bandcamp.com/album/happiness-does-not-wait-2021-version",
+          "imageUrl": "https://f4.bcbits.com/img/a3232572891_2.jpg",
+          "releaseDate": "August 27, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=%C3%93lafur%20Arnalds"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+%C3%93lafur%20Arnalds"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://olafurarnalds.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/986636"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/olafurarnalds/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@olafurarnalds_official"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC9XfDqYSm6ezuw0y_u3t_4A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/olafurarnalds"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

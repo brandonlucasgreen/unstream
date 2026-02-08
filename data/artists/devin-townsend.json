@@ -1,0 +1,92 @@
+[
+  {
+    "id": "devintownsend",
+    "name": "Devin Townsend",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022535380_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://devintownsend.bandcamp.com",
+        "allReleaseTitles": [
+          "powernerd24bithdaudio",
+          "powernerdcommentaryversion24bithdaudio",
+          "infinityremastered2023",
+          "devolutionseries3empathliveinamerica24bithdaudio",
+          "epiclouder",
+          "lightworkdeluxeedition",
+          "dreampiece",
+          "devolutionseries2galacticquarantine",
+          "devolutionseries1acousticallyinclinedliveinleeds24bithdaudio",
+          "silentnight",
+          "empathdeluxeedition",
+          "oceanmachineliveattheancientromantheatreplovdiv24bithdaudio",
+          "transcendencedeluxeedition",
+          "zdeluxeedition",
+          "theretinalcircus",
+          "epicloud"
+        ],
+        "latestRelease": {
+          "title": "PowerNerd (24-bit HD audio)",
+          "type": "album",
+          "url": "https://devintownsend.bandcamp.com/album/powernerd-24-bit-hd-audio",
+          "imageUrl": "https://f4.bcbits.com/img/a2712238017_2.jpg",
+          "releaseDate": "October 25, 2024"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/DevinTownsend"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Devin%20Townsend"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Devin%20Townsend"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://hevydevy.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/251249"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Devin%20Townsend&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Devin%20Townsend"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/dvntownsend/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@dvntownsend"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC8KIhclVaK0Des9uMrJlt1w"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@dvntownsend"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/dvntownsend"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

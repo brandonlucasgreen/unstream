@@ -1,0 +1,86 @@
+[
+  {
+    "id": "francislai",
+    "name": "Francis Lai",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a2432488919_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/francis-lai/12623",
+        "allReleaseTitles": [
+          "laleconparticuliere",
+          "vivrepourvivrebandeoriginaledufilm",
+          "lesunsetlesautresbandeoriginaledufilmmichellegrand",
+          "storyfrancislaiorchestra",
+          "13joursaujaponorchestra",
+          "laleconparticuliereorchestra",
+          "lamodificationbandeoriginaledufilm",
+          "symphonic",
+          "ithinkofyou",
+          "paris",
+          "levoyoumavieetmoi",
+          "laleconparticulierelavern",
+          "playitlikefrancis",
+          "concertopourlafindunamour",
+          "labonneanneebandeoriginaledufilmmireillemathieu",
+          "sognavoamoremiomilva",
+          "robertetrobert",
+          "plusfortquenouslamourest",
+          "lamaisondetoutoudapreslemissionteleviseedegeorgescroses"
+        ],
+        "latestRelease": {
+          "title": "La Lecon Particuliere Francis Lai",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/la-lecon-particuliere-francis-lai/jar4op7p1apla",
+          "releaseDate": "2023-04-07"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://francislai.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Francis%20Lai"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Francis%20Lai"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://francislai.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/135912"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Francis%20Lai&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Francis%20Lai"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/francislaiofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/watch?v=IA_LWa93SrM"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/FrancisLaiOfficiel"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

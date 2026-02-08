@@ -1,0 +1,98 @@
+[
+  {
+    "id": "mitski",
+    "name": "Mitski",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0042400479_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mitski.bandcamp.com",
+        "allReleaseTitles": [
+          "nothingsabouttohappentome",
+          "thelandisinhospitableandsoarewe",
+          "laurelhell",
+          "bethecowboy",
+          "puberty2",
+          "mitskiaudiotreelive",
+          "burymeatmakeoutcreek",
+          "retiredfromsadnewcareerinbusiness",
+          "lush"
+        ],
+        "latestRelease": {
+          "title": "Nothing's About to Happen to Me",
+          "type": "album",
+          "url": "https://mitski.bandcamp.com/album/nothings-about-to-happen-to-me",
+          "imageUrl": "https://f4.bcbits.com/img/a2846043416_2.jpg"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/mitski/2380061",
+        "allReleaseTitles": [
+          "thelandisinhospitableandsoarewe",
+          "bethecowboy",
+          "laurelhell",
+          "wheresmyphone",
+          "copcar",
+          "illchangeforyou",
+          "glide",
+          "nothingsabouttohappentome",
+          "burymeatmakeoutcreek",
+          "lovememoreclark",
+          "lush",
+          "retiredfromsadnewcareerinbusiness",
+          "puberty2",
+          "onaudiotreeliveandaudiotree"
+        ],
+        "latestRelease": {
+          "title": "Wheres My Phone Mitski",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/wheres-my-phone-mitski/chxqxhigrd4ka",
+          "releaseDate": "2026-01-16"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mitski"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mitski"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.mitski.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4110740"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/mitskileaks/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@mitskileaks"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC-GjYlrAWIHgwNDnbFHZ77g"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.net/@mitskileaks"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/342831672408874"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

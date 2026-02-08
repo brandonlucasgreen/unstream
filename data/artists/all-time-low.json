@@ -1,0 +1,73 @@
+[
+  {
+    "id": "alltimelow",
+    "name": "All Time Low",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019023324_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://alltimelow.bandcamp.com",
+        "allReleaseTitles": [
+          "futurehearts",
+          "futureheartsbsides",
+          "dontpanic",
+          "nothingpersonal",
+          "sowrongitsright"
+        ],
+        "latestRelease": {
+          "title": "Future Hearts",
+          "type": "album",
+          "url": "https://alltimelow.bandcamp.com/album/future-hearts",
+          "imageUrl": "https://f4.bcbits.com/img/a3386460511_2.jpg",
+          "releaseDate": "April 7, 2015"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=All%20Time%20Low"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+All%20Time%20Low"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.alltimelow.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1004520"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=All%20Time%20Low&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/All%20Time%20Low"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/alltimelow/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@alltimelow"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCSLQKylf_bibeVwMnBO1MRg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/alltimelow"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

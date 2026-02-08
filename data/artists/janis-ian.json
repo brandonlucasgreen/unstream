@@ -1,0 +1,68 @@
+[
+  {
+    "id": "janisian",
+    "name": "Janis Ian",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026458752_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://janisian.bandcamp.com",
+        "allReleaseTitles": [
+          "thelightattheendoftheline",
+          "bettertimeswillcome",
+          "resist",
+          "imstillstanding"
+        ],
+        "latestRelease": {
+          "title": "The Light at the End of the Line",
+          "type": "album",
+          "url": "https://janisian.bandcamp.com/album/the-light-at-the-end-of-the-line",
+          "imageUrl": "https://f4.bcbits.com/img/a3058234901_16.jpg",
+          "releaseDate": "January 21, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Janis%20Ian"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Janis%20Ian"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.janisian.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/98825"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Janis%20Ian&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Janis%20Ian"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/therealjanisian/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/janisianchannel"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/janisianpage"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

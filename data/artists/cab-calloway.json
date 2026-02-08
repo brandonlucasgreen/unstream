@@ -1,0 +1,70 @@
+[
+  {
+    "id": "cabcalloway",
+    "name": "Cab Calloway",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033383260_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/cab-calloway/29966",
+        "allReleaseTitles": [
+          "gershwinporgyandbesslivewilliamwarfieldleontynepriceriasunterhaltungsorchesteralexandersmallens",
+          "chronologicalcallowayvol1193233",
+          "wethecatsshallhepyou",
+          "jumpinjiveman",
+          "areyouheptothejive",
+          "presenting",
+          "bestofthebigbands",
+          "hidehoman",
+          "minniethemoocherjimmycarroll",
+          "lartvocal19301939vol6",
+          "legendaryradiobroadcastsfatswaller",
+          "letsswing",
+          "featuringchuberry",
+          "thechudizzyyears",
+          "broadwaysurpriseparty",
+          "electronicevolutionterrafractylfreestandingpickles",
+          "minniethemoocher",
+          "thatoldblackmagic",
+          "clubzanzibarbroadcasts"
+        ],
+        "latestRelease": {
+          "title": "Jumpin Jive Man Cab Calloway",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/jumpin-jive-man-cab-calloway/tez4qqfdq41dn",
+          "releaseDate": "2025-12-01"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://cabcalloway.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Cab%20Calloway"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Cab%20Calloway"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/253474"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Cab%20Calloway&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Cab%20Calloway"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

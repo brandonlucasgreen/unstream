@@ -1,0 +1,97 @@
+[
+  {
+    "id": "angiestone",
+    "name": "Angie Stone",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027918899_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://angiestone.bandcamp.com",
+        "allReleaseTitles": [
+          "unexpected",
+          "theartoflovewar"
+        ],
+        "latestRelease": {
+          "title": "Unexpected",
+          "type": "album",
+          "url": "https://angiestone.bandcamp.com/album/unexpected",
+          "imageUrl": "https://f4.bcbits.com/img/a0635868387_16.jpg",
+          "releaseDate": "November 23, 2009"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/angie-stone/50302",
+        "allReleaseTitles": [
+          "mahoganysoul",
+          "blackdiamond",
+          "wishididntmissyourerecordedacapellasingle",
+          "fullcircle",
+          "dancevaultmixesiwasntkidding",
+          "coveredinsoul",
+          "lovelanguage",
+          "lifestory",
+          "dancevaultmixesiwannathankya",
+          "everyday",
+          "iwannathankyafeatsnoopdogg",
+          "nomoreraininthiscloud",
+          "dancevaultremixesbottlescans",
+          "theartoflovewar",
+          "stonelove",
+          "iwasntkidding",
+          "unexpected",
+          "dream",
+          "kissyou"
+        ],
+        "latestRelease": {
+          "title": "Wish I Didnt Miss You Re Recorded Acapella Single Angie Stone",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/wish-i-didnt-miss-you-re-recorded-acapella-single-angie-stone/pfebcb67tgobc",
+          "releaseDate": "2023-06-13"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Angie%20Stone"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Angie%20Stone"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.theangiestone.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1916149"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Angie%20Stone&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Angie%20Stone"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/theangiestone/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/@therealangiestone"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/theangiestone"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

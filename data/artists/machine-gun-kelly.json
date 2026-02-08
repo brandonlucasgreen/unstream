@@ -1,0 +1,43 @@
+[
+  {
+    "id": "machinegunkelly",
+    "name": "MachineGunKelly",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013307541_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://machinegunkellysince2000.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=MachineGunKelly"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+MachineGunKelly"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/10412575"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/machinegunkelly_hardrock/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/MachineGunChannel"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MgkSv"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

@@ -1,0 +1,63 @@
+[
+  {
+    "id": "garou",
+    "name": "Garou",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0008733672_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://garou0.bandcamp.com",
+        "allReleaseTitles": [
+          "entunombre",
+          "lavozdelsilencio",
+          "frecuenciacero"
+        ],
+        "latestRelease": {
+          "title": "En tu nombre...",
+          "type": "album",
+          "url": "https://garou0.bandcamp.com/album/en-tu-nombre",
+          "imageUrl": "https://f4.bcbits.com/img/a0783295252_2.jpg",
+          "releaseDate": "November 9, 2015"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Garou"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Garou"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.garouland.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/290083"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Garou&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Garou"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/garouofficiel"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Garou.official"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

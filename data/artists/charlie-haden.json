@@ -1,0 +1,78 @@
+[
+  {
+    "id": "charliehaden",
+    "name": "Charlie Haden",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0006750105_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/charlie-haden/37598",
+        "allReleaseTitles": [
+          "jasminekeithjarrett",
+          "lastdancekeithjarrett",
+          "magicoegbertogismontijangarbarek",
+          "oldandnewdreamsdeweyredmandoncherryedblackwell",
+          "rejoicingpatmethenywithbillyhiggins",
+          "hamburg72keithjarrettpaulmotian",
+          "magicocartadeamoregbertogismontijangarbarek",
+          "standardsplusonepaulmotianjoelovanoandbillfrisell",
+          "beyondthemissouriskypatmetheny",
+          "heartplayandantonioforcione",
+          "theprivatecollection",
+          "nightfallthecalartssessions",
+          "nonebutthelonelyheart",
+          "timelifesongforthewhalesandotherbeingsliberationmusicorchestra",
+          "liveatbirdlandleekonitzbradmehldaupaulmotian"
+        ],
+        "latestRelease": {
+          "title": "Old And New Dreams Charlie Haden Dewey Redman Don Cherry Ed Blackwell",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/old-and-new-dreams-charlie-haden-dewey-redman-don-cherry-ed-blackwell/rzvvsktd5s73b",
+          "releaseDate": "2025-12-20"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://charliehaden.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Charlie%20Haden"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Charlie%20Haden"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.charliehadenmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/253592"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Charlie%20Haden&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Charlie%20Haden"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/charliehadenmusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/CharlieHadenMusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

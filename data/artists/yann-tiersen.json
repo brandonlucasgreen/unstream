@@ -1,0 +1,119 @@
+[
+  {
+    "id": "yanntiersen",
+    "name": "Yann Tiersen",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037968096_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://yann-tiersen.bandcamp.com",
+        "allReleaseTitles": [
+          "harmonyyanntiersenodezenne",
+          "rathlinfromadistancetheliquidhour",
+          "theliquidhourrathlinfromadistance",
+          "kerbersolopiano",
+          "kerberremixesextended",
+          "kerallochfourways",
+          "kerberremixes",
+          "avantlachute",
+          "115182518",
+          "kerallochbeatricedillonremix",
+          "kerber",
+          "lagniappesession",
+          "portrait",
+          "all",
+          "hent",
+          "thelostnotebookeusa"
+        ],
+        "latestRelease": {
+          "title": "Harmony\n                \n                \n\n                Yann Tiersen | Odezenne",
+          "type": "album",
+          "url": "https://yann-tiersen.bandcamp.com/album/harmony",
+          "imageUrl": "https://f4.bcbits.com/img/a1272548090_2.jpg",
+          "releaseDate": "January 20, 2026"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/yann-tiersen/28731",
+        "allReleaseTitles": [
+          "rathlinfromadistanceltheliquidhour",
+          "eusa",
+          "kerber",
+          "all",
+          "portrait",
+          "arnefeatquinquis",
+          "caledoniancanal",
+          "115182518",
+          "harmonyodezenne",
+          "ameliesworld",
+          "theliquidhourlrathlinfromadistance",
+          "ninnogatsearathlinfromadistance",
+          "kerberremixes",
+          "rathlinfromadistanceninnogatsea",
+          "nivlenn",
+          "allsingles",
+          "keryegu",
+          "armanerkozh",
+          "monochromeintroductorymovement"
+        ],
+        "latestRelease": {
+          "title": "Rathlin From A Distance L The Liquid Hour Yann Tiersen",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/rathlin-from-a-distance-l-the-liquid-hour-yann-tiersen/rfv7rp30e1rhc",
+          "releaseDate": "2025-04-04"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Yann%20Tiersen"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Yann%20Tiersen"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.yanntiersen.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/67007"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Yann%20Tiersen&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Yann%20Tiersen"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/yanntiersen/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@yanntiersenofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC3P4lFEy3sntNGolrPxwU_g"
+      },
+      {
+        "sourceId": "bluesky",
+        "url": "https://bsky.app/profile/yanntiersenmusic.bsky.social"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/yanntiersen.official"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,27 @@
+[
+  {
+    "id": "emilyarmstrong",
+    "name": "Emily Armstrong",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a1102586653_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://emilyarmstrong.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Emily%20Armstrong"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Emily%20Armstrong"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

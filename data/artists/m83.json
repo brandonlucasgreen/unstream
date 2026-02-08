@@ -1,0 +1,112 @@
+[
+  {
+    "id": "m83",
+    "name": "M83",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031033471_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ilovem83.bandcamp.com",
+        "allReleaseTitles": [
+          "fantasydeluxe",
+          "earthtosearemixes",
+          "fantasyremixes",
+          "mirror",
+          "fantasy",
+          "dsvii",
+          "knifeheart",
+          "junk",
+          "youandthenight",
+          "hurryupweredreaming",
+          "saturdaysyouth",
+          "digitalshadesvol1",
+          "beforethedawnhealsus",
+          "deadcitiesredseaslostghosts",
+          "m83"
+        ],
+        "latestRelease": {
+          "title": "Fantasy (Deluxe)",
+          "type": "album",
+          "url": "https://ilovem83.bandcamp.com/album/fantasy-deluxe",
+          "imageUrl": "https://f4.bcbits.com/img/a1698569183_2.jpg",
+          "releaseDate": "May 31, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/m83/38992",
+        "allReleaseTitles": [
+          "hurryupweredreaing",
+          "resurrection",
+          "anecessaryescape",
+          "fantasy",
+          "junk",
+          "oblivionoriginalotionpicturesoundtrack",
+          "solitudefelsanntiley",
+          "anecessaryescapepart2",
+          "gloryjeanicheljarre",
+          "earthtosea",
+          "fantasyreixes",
+          "beforethedawnhealsus",
+          "saturdaysyouth",
+          "deadcitiesredseaslostghosts",
+          "idnightcity",
+          "dsvii",
+          "83"
+        ],
+        "latestRelease": {
+          "title": "Resurrection M83",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/resurrection-m83/n8n5b7g8yps3a",
+          "releaseDate": "2025-12-12"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=M83"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+M83"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://ilovem83.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/33591"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=M83&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/M83"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/m83music/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@m83music"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC8WbdD3m5dP9giOU9XtAGWQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/19342919816"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

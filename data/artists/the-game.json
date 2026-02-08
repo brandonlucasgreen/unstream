@@ -1,0 +1,80 @@
+[
+  {
+    "id": "thegame",
+    "name": "The Game",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025811607_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thegame2.bandcamp.com",
+        "allReleaseTitles": [
+          "fireremixesoctober2025",
+          "godhasalwaysstoodbymyside",
+          "ifonlyyouknewhouseremixes",
+          "somechurch2025gospelhouseremixes",
+          "thegoodnessofgodthegoodnessmix",
+          "tracks4ya2025",
+          "trustmethemixes",
+          "wordsoriginaldemomix",
+          "gospelhousemixes2023",
+          "thechurchsoundalbum2023",
+          "tinastunesdjcorey",
+          "easyonme",
+          "praisetime",
+          "gospelhouseworshipexperienceunreleasedremixes",
+          "rbremixesvol2",
+          "rbhouseremixesvol1"
+        ],
+        "latestRelease": {
+          "title": "Fire Remixes (October 2025)",
+          "type": "album",
+          "url": "https://thegame2.bandcamp.com/album/fire-remixes-october-2025",
+          "imageUrl": "https://f4.bcbits.com/img/a3769339381_2.jpg",
+          "releaseDate": "October 18, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Game"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Game"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.comptongame.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/209748"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Game&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Game"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/losangelesconfidential/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCCFs35_Ey5FXLh5L8eN08hg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thegame"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

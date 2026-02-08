@@ -1,0 +1,38 @@
+[
+  {
+    "id": "ashokkumar",
+    "name": "ashok kumar",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014112846_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ashokkumar1.bandcamp.com",
+        "allReleaseTitles": [
+          "ilostyou",
+          "epicmusic"
+        ],
+        "latestRelease": {
+          "title": "i lost you",
+          "type": "track",
+          "url": "https://ashokkumar1.bandcamp.com/track/i-lost-you",
+          "imageUrl": "https://f4.bcbits.com/img/a1671610493_16.jpg",
+          "releaseDate": "August 22, 2018"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=ashok%20kumar"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+ashok%20kumar"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

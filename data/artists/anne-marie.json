@@ -1,0 +1,62 @@
+[
+  {
+    "id": "annemarie",
+    "name": "Anne Marie",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027203645_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://annemariehoward.bandcamp.com",
+        "allReleaseTitles": [
+          "illusionstates",
+          "indeepwaters"
+        ],
+        "latestRelease": {
+          "title": "Illusion States",
+          "type": "album",
+          "url": "https://annemariehoward.bandcamp.com/album/illusion-states",
+          "imageUrl": "https://f4.bcbits.com/img/a0525783411_16.jpg",
+          "releaseDate": "December 4, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Anne%20Marie"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Anne%20Marie"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://iamannemarie.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/238549"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/annemarie/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@annemarie"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCBL7ZxVX4GvW4CFiES_-0YA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/iamannemarie"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

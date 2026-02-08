@@ -1,0 +1,85 @@
+[
+  {
+    "id": "duffy",
+    "name": "Duffy",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0034012902_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/duffy/40156",
+        "allReleaseTitles": [
+          "staydown",
+          "catinthebag016midnightdubs",
+          "5guys",
+          "pesosintheduffledeluxeotmbluepesos",
+          "vault",
+          "chosen",
+          "passatudo",
+          "peopleselbowbluepesos",
+          "rockferry",
+          "justincaseyoureinterested",
+          "rockferrydeluxeep",
+          "mercythegame",
+          "hallucinations",
+          "2hoesketchyflowotmbluepesos",
+          "wipemedownfreestyle",
+          "comeandgobluepesos",
+          "droughtmademe",
+          "water"
+        ],
+        "latestRelease": {
+          "title": "Cat In The Bag 016 Duffy Midnight Dubs",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/cat-in-the-bag-016-duffy-midnight-dubs/iktopfgi69axk",
+          "releaseDate": "2026-01-09"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://1duffy.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Duffy"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Duffy"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.iamduffy.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/79081"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Duffy&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Duffy"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/duffy/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/iamduffytv"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Duffy"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

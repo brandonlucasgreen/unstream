@@ -1,0 +1,112 @@
+[
+  {
+    "id": "enslaved",
+    "name": "Enslaved",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018148365_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://enslaved.bandcamp.com",
+        "allReleaseTitles": [
+          "heimdaldeluxe",
+          "sequencelivefromtheotherworldlybigbandexperience",
+          "heimdal",
+          "caravanstotheouterworldslivefromtheotherworldlybigbandexperience",
+          "kingdom",
+          "vikingligrveldi",
+          "boundedbyallegiancelivefromtheotherworldlybigbandexperience",
+          "belowthelights",
+          "caravanstotheouterworlds",
+          "belowthelightscinematictour2020",
+          "chroniclesofthenorthboundcinematictour2020",
+          "theriseofymirverftetonlinefestival2020",
+          "utgardthejourneywithincinematictour2020",
+          "utgard",
+          "homebound",
+          "axiomaethicaodini"
+        ],
+        "latestRelease": {
+          "title": "Heimdal (Deluxe)",
+          "type": "album",
+          "url": "https://enslaved.bandcamp.com/album/heimdal-deluxe",
+          "imageUrl": "https://f4.bcbits.com/img/a1413133989_2.jpg",
+          "releaseDate": "March 1, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/enslaved/114068",
+        "latestRelease": {
+          "title": "Heimdal Enslaved",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/heimdal-enslaved/w8etgdm1oin0a",
+          "releaseDate": "2024-03-01"
+        },
+        "allReleaseTitles": [
+          "intimes",
+          "e",
+          "heimdal",
+          "utgard",
+          "chroniclesofthenorthbound",
+          "roadburnlive",
+          "hordanesland",
+          "caravanstotheouterworlds",
+          "homebound",
+          "kingdom",
+          "forestdweller",
+          "frost",
+          "belowthelights",
+          "isa",
+          "vikingligrveldi",
+          "vertebrae",
+          "ruun",
+          "axiomaethicaodini",
+          "mardraum",
+          "eld"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Enslaved"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Enslaved"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://enslaved.no/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/254850"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Enslaved&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Enslaved"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/enslavedofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCpiAJxyAbGPC2FngeSzlrzQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/enslaved"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

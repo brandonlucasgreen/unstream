@@ -1,0 +1,40 @@
+[
+  {
+    "id": "davidellefson",
+    "name": "David Ellefson",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0023990413_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ellefsonmusic.bandcamp.com",
+        "allReleaseTitles": [
+          "swordsandtequila",
+          "overnow",
+          "nocover",
+          "simpletruthepellefson"
+        ],
+        "latestRelease": {
+          "title": "Swords and Tequila",
+          "type": "track",
+          "url": "https://ellefsonmusic.bandcamp.com/track/swords-and-tequila",
+          "imageUrl": "https://f4.bcbits.com/img/a1618752660_16.jpg",
+          "releaseDate": "March 20, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=David%20Ellefson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+David%20Ellefson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

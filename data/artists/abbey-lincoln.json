@@ -1,0 +1,82 @@
+[
+  {
+    "id": "abbeylincoln",
+    "name": "Abbey Lincoln",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028893116_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://abbeylincoln.bandcamp.com",
+        "allReleaseTitles": [
+          "straightaheadremastered",
+          "abbeyisblue",
+          "itsmagic"
+        ],
+        "latestRelease": {
+          "title": "Straight Ahead (Remastered)",
+          "type": "album",
+          "url": "https://abbeylincoln.bandcamp.com/album/straight-ahead-remastered",
+          "imageUrl": "https://f4.bcbits.com/img/a0762787815_2.jpg",
+          "releaseDate": "April 15, 2022"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/abbey-lincoln/34618",
+        "allReleaseTitles": [
+          "abbeyisblue",
+          "straightahead",
+          "sophisticatedabbey",
+          "itsmagic",
+          "abbeysingsabbey",
+          "thatshimkeepnewscollection",
+          "yougottapaytheband",
+          "whollyearth",
+          "thatshim",
+          "paintedlady",
+          "whousedtodance",
+          "aturtlesdream",
+          "saffairastoryofagirlinlove",
+          "overtheyears",
+          "whenthereislovehankjones",
+          "theworldisfallingdown",
+          "goldenlady",
+          "thejazzqueen",
+          "itsme"
+        ],
+        "latestRelease": {
+          "title": "Abbey Is Blue Abbey Lincoln",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/abbey-is-blue-abbey-lincoln/v9bbko67jon7b",
+          "releaseDate": "2018-08-24"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Abbey%20Lincoln"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Abbey%20Lincoln"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/271898"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Abbey%20Lincoln&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Abbey%20Lincoln"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

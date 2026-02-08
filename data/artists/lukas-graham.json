@@ -1,0 +1,83 @@
+[
+  {
+    "id": "lukasgraham",
+    "name": "Lukas Graham",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031145682_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/lukas-graham/920796",
+        "allReleaseTitles": [
+          "happyforyou",
+          "sevenyearslgmalique",
+          "3thepurplealbum",
+          "callmyname",
+          "hereforchristmas",
+          "lastchristmas",
+          "wishyouwereherefeatkhalid",
+          "7yearslater",
+          "mostpeopleepr3hab",
+          "lovesomeone",
+          "allofitall",
+          "mostpeopler3hab",
+          "lie",
+          "lovesongs",
+          "homemoviesmickeyguyton",
+          "homemovies",
+          "scars",
+          "cheatcode",
+          "whereimfromfeatwizkhalifa",
+          "sharethatlove"
+        ],
+        "latestRelease": {
+          "title": "Seven Years Lg Malique Lukas Graham",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/seven-years-lg-malique-lukas-graham/r08lvtex8hxaa",
+          "releaseDate": "2024-09-27"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://lukasgraham.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lukas%20Graham"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lukas%20Graham"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.lukasgraham.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2791034"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/lukasinstagraham/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@lukasgraham?lang=en"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCs8ynQgjoKZblUXosXoeOEQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/LukasGraham"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

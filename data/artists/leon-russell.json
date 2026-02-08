@@ -1,0 +1,72 @@
+[
+  {
+    "id": "leonrussell",
+    "name": "Leon Russell",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022306017_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/leon-russell/94963",
+        "latestRelease": {
+          "title": "Tedeschi Trucks Band And Leon Russell Present Mad Dogs Englishmen Revisited Live At Lockn Leon Russell Tedeschi Trucks Band",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/tedeschi-trucks-band-and-leon-russell-present-mad-dogs-englishmen-revisited-live-at-lockn-leon-russell-tedeschi-trucks-band/uxra2f6vt586b",
+          "releaseDate": "2025-09-12"
+        },
+        "allReleaseTitles": [
+          "tedeschitrucksbandandpresentmaddogsenglishmenrevisitedliveatlockntedeschitrucksband",
+          "carney",
+          "theunioneltonjohn",
+          "",
+          "andtheshelterpeople",
+          "willothewisp",
+          "lifejourney",
+          "onadistantshore",
+          "hankwilsonsback",
+          "thelettersusantedeschitedeschitrucksband",
+          "thismasqueradeorvillepeck",
+          "lifelove",
+          "retrospective"
+        ]
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://leonrussell.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Leon%20Russell"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Leon%20Russell"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.leonrussellrecords.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/255183"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Leon%20Russell&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Leon%20Russell"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/LeonRussellMusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

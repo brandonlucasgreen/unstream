@@ -1,0 +1,101 @@
+[
+  {
+    "id": "kelis",
+    "name": "Kelis",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0003768477_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kelisfood.bandcamp.com",
+        "allReleaseTitles": [
+          "changerunninforeverberemixes",
+          "jerkribs",
+          "fridayfishfry",
+          "rumble",
+          "food"
+        ],
+        "latestRelease": {
+          "title": "Change / Runnin' / Forever Be - Remixes",
+          "type": "album",
+          "url": "https://kelisfood.bandcamp.com/album/change-runnin-forever-be-remixes",
+          "imageUrl": "https://f4.bcbits.com/img/a1985325393_2.jpg",
+          "releaseDate": "April 13, 2015"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/kelis/190125",
+        "allReleaseTitles": [
+          "food",
+          "milkshake20alexwann",
+          "changerunninforeverberemixes",
+          "milkshakeversion",
+          "fridayfishfry",
+          "jerkribs",
+          "dealwithitfeatashnikko",
+          "watchyourstepdisclosure",
+          "rumbleactresssixiniumbootlegmix",
+          "kaleidoscope",
+          "tasty",
+          "midnightsnacks"
+        ],
+        "latestRelease": {
+          "title": "Milkshake Kelis Version Kelis",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/milkshake-kelis-version-kelis/mt15j40gfp6yb",
+          "releaseDate": "2025-10-10"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kelis"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kelis"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.iamkelis.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/202726"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Kelis&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Kelis"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kelis/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@kelis"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCB_SEzbn0RC3UnetPdJdNkg"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@kelis"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/i.am.kelis"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

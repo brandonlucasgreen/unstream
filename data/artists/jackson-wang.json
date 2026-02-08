@@ -1,0 +1,54 @@
+[
+  {
+    "id": "jacksonwang",
+    "name": "Jackson Wang",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011912441_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jacksonwang.bandcamp.com",
+        "allReleaseTitles": [
+          "okay",
+          "papillon"
+        ],
+        "latestRelease": {
+          "title": "OKAY",
+          "type": "album",
+          "url": "https://jacksonwang.bandcamp.com/album/okay",
+          "imageUrl": "https://f4.bcbits.com/img/a0326604013_16.jpg",
+          "releaseDate": "November 30, 2017"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jackson%20Wang"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jackson%20Wang"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7219015"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jacksonwang852g7/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC7t63tTu19rKtTgd1EgXvrg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/jacksonwang852g7/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,75 @@
+[
+  {
+    "id": "luckydube",
+    "name": "Lucky Dube",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020810536_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/lucky-dube/358671",
+        "allReleaseTitles": [
+          "houseofexileremastered2012",
+          "prisonerremastered2012",
+          "seriousreggaebusiness",
+          "togetherasone",
+          "houseofexile",
+          "victimsremastered2012",
+          "prisoner",
+          "slave",
+          "kukuwe",
+          "respect",
+          "taxmanremastered2012",
+          "thewayitis",
+          "slaveremastered2012",
+          "theotherside",
+          "trinityremastered2012",
+          "lovesongs",
+          "soultaker",
+          "liveinuganda",
+          "capturedlive",
+          "taxman"
+        ],
+        "latestRelease": {
+          "title": "Serious Reggae Business Lucky Dube",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/serious-reggae-business-lucky-dube/tcq2bue9fd94a",
+          "releaseDate": "1996-10-16"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://luckydube.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lucky%20Dube"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lucky%20Dube"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/396515"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Lucky%20Dube&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Lucky%20Dube"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://fr-fr.facebook.com/LuckyDubeTheKingOfReggae/?ref=page_internal"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

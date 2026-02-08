@@ -1,0 +1,78 @@
+[
+  {
+    "id": "kingdiamond",
+    "name": "King Diamond",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0008750823_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kingdiamond.bandcamp.com",
+        "allReleaseTitles": [
+          "spiderlilly",
+          "masqueradeofmadness",
+          "songsforthedeadliveatgraspopmetalmeeting",
+          "songsforthedeadliveatthefillmoreinphiladelphia",
+          "dreamsofhorror",
+          "givemeyoursoulplease",
+          "deadlylullabyeslive",
+          "thepuppetmaster",
+          "20yearsagoanightofrehearsal",
+          "abigailiitherevenge",
+          "houseofgod",
+          "voodoo",
+          "thegraveyard",
+          "thespiderslullabye",
+          "inconcert1987abigail",
+          "theeye"
+        ],
+        "latestRelease": {
+          "title": "Spider Lilly",
+          "type": "track",
+          "url": "https://kingdiamond.bandcamp.com/track/spider-lilly",
+          "imageUrl": "https://f4.bcbits.com/img/a2071142111_2.jpg",
+          "releaseDate": "December 17, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/king-diamond/146945",
+        "allReleaseTitles": [
+          "spiderlilly",
+          "abigail",
+          "theeye",
+          "thedarksides",
+          "abigailiitherevenge",
+          "dreamsofhorror",
+          "thegraveyard",
+          "thegraveyardreissue",
+          "them",
+          "conspiracy",
+          "houseofgod",
+          "houseofgodreissue",
+          "givemeyoursoulplease",
+          "voodooreissue",
+          "deadlylullabyeslive",
+          "fatalportrait",
+          "inconcert1987abigail",
+          "thepuppetmaster",
+          "thespiderslullabye",
+          "songsforthedeadliveatgraspopmetalmeeting"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=King%20Diamond"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+King%20Diamond"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

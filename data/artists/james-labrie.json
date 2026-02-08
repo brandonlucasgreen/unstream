@@ -1,0 +1,63 @@
+[
+  {
+    "id": "jameslabrie",
+    "name": "James LaBrie",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013068511_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jameslabrie.bandcamp.com",
+        "allReleaseTitles": [
+          "primecuts",
+          "2",
+          "keepittoyourself"
+        ],
+        "latestRelease": {
+          "title": "Prime Cuts",
+          "type": "album",
+          "url": "https://jameslabrie.bandcamp.com/album/prime-cuts",
+          "imageUrl": "https://f4.bcbits.com/img/a3040064555_2.jpg",
+          "releaseDate": "June 24, 2008"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=James%20LaBrie"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+James%20LaBrie"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.jameslabrie.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/277596"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jameslabrie.dt/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCTZ07R-7pWmHzQ9vrxETLwQ"
+      },
+      {
+        "sourceId": "mastodon",
+        "url": "https://siteassets.parastorage.com/pages/pages/thunderbolt?appDefinitionIdToSiteRevision=%7B%2214271d6f-ba62-d045-549b-ab972ae1f70e%22%3A%2225%22%2C%2213d21c63-b5ec-5912-8397-c3a5ddb27a97%22%3A%22440%22%7D&beckyExperiments=.DatePickerPortal%2C.DisableDocumentScrollWhenLightBoxOpen%2C.EnableCustomCSSVarsForLoginSocialBar%2C.FreemiumBannerOdeditor%2C.LoginBarEnableLoggingInStateInSSR%2C.TextInputAutoFillFix%2C.UseLoginSocialBarCustomMenu%2C.UseNewLoginSocialBarCustomMenuPositioning%2C.UseNewLoginSocialBarElementStructure%2C.UseNewLoginSocialBarMemberInitialsAvatar%2C.VerticalMenu_uiType_NativeMapper%2C.WixFreeSiteBannerDesktop%2C.WixFreeSiteBannerMobile%2C.buttonUdp%2C.calculateCollapsibleTextLineHeightByFont%2C.disableBuilderWixComponents%2C.dom_store%2C.dynamicSlots%2C.fiveGridLineStudioSkins%2C.imageEncodingAVIF%2C.isClassNameToRootEnabled%2C.motionTimeAnimationsCSS%2C.propsCarmiMappersMigration1%2C.propsCarmiMappersMigration4%2C.propsCarmiMappersMigration5%2C.shouldUseResponsiveImages%2C.svgResolver_2%2C.takeAppDependenciesFromCSM%2C.updateRichTextSemanticClassNamesOnCorvid%2C.useClassnameInResponsiveAppWidget%2C.useImageAvifFormatInNativeProGallery%2C.useResponsiveImgClassicFixed%2C.useSvgLoaderFeature%2C.useSvgLoaderFeatureOnBuilderComps&blocksBuilderManifestGeneratorVersion=1.129.0&commonConfig=%7B%22siteRevision%22%3A%224%22%2C%22branchId%22%3A%227d4631fc-507c-4730-99ce-5c875794b10a%22%7D&contentType=application%2Fjson&deviceType=Desktop&dfCk=6&dfVersion=1.5263.0&disableStaticPagesUrlHierarchy=false&editorName=Unknown&experiments=dm_bgScrubToMotionFixer%2Cdm_masterPageVariablesQueryFixer%2Cdm_migrateOldHoverBoxToNewFixer&externalBaseUrl=https%3A%2F%2Fwww.jameslabrie.com&fileId=831606ee.bundle.min&formFactor=desktop&hasTPAWorkerOnSite=false&hasUserDomainMedia=false&isBuilderComponentModel=false&isHttps=true&isInSeo=false&isMultilingualEnabled=false&isPremiumDomain=true&isTrackClicksAnalyticsEnabled=false&isUrlMigrated=true&isWixCodeOnPage=false&isWixCodeOnSite=false&language=en&languageResolutionMethod=QueryParam&metaSiteId=fec4e10e-f14b-4542-aed2-2f7a810923de&module=thunderbolt-features&oneDocEnabled=true&originalLanguage=en&pageId=4e7219_fd1ca831840a1ba4660ce7a3b937ec2b_3.json&pilerExperiments=specs.piler.useEditorReactComponents&quickActionsMenuEnabled=false&registryLibrariesTopology=%5B%7B%22artifactId%22%3A%22editor-elements%22%2C%22namespace%22%3A%22wixui%22%2C%22url%22%3A%22https%3A%2F%2Fstatic.parastorage.com%2Fservices%2Feditor-elements%2F1.14878.0%22%7D%2C%7B%22artifactId%22%3A%22editor-elements%22%2C%22namespace%22%3A%22dsgnsys%22%2C%22url%22%3A%22https%3A%2F%2Fstatic.parastorage.com%2Fservices%2Feditor-elements%2F1.14878.0%22%7D%5D&remoteWidgetStructureBuilderVersion=1.251.0&siteId=54862fe6-88aa-4649-9494-6094f59963f6&siteRevision=4&staticHTMLComponentUrl=https%3A%2F%2Fwww-jameslabrie-com.filesusr.com%2F&useSandboxInHTMLComp=false&viewMode=desktop"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialjameslabrie"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

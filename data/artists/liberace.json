@@ -1,0 +1,75 @@
+[
+  {
+    "id": "liberace",
+    "name": "Liberace",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033612020_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/liberace/160416",
+        "allReleaseTitles": [
+          "cancionesquemeensenomimadre",
+          "thebestof",
+          "sgreatesthits",
+          "16biggesthits",
+          "atthehollywoodbowlthecompleteconcert",
+          "achristmas",
+          "concertfavorites",
+          "16mostrequestedsongs",
+          "presenting",
+          "pianomoodsrogerwilliams",
+          "averyclassicalchristmasvol1deluxeeditionmantovanithehollywoodbowlsymphonyorchestra",
+          "superhits",
+          "abrandnewme",
+          "twasthenightbeforechristmas",
+          "lovemusicfestival",
+          "astimegoesby",
+          "merrychristmaswith",
+          "lookingbackvolumesiiiiv",
+          "achristmascelebration",
+          "conciertodevarsovia"
+        ],
+        "latestRelease": {
+          "title": "16 Biggest Hits Liberace",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/16-biggest-hits-liberace/0074646355220",
+          "releaseDate": "2000-06-27"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://liberace.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Liberace"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Liberace"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/97399"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Liberace&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Liberace"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC8hLfjM5LCE-uq2yVBASEIw"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

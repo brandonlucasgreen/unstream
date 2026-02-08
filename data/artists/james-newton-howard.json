@@ -1,0 +1,80 @@
+[
+  {
+    "id": "jamesnewtonhoward",
+    "name": "James Newton Howard",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011232455_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jamesnewtonhoward.bandcamp.com",
+        "allReleaseTitles": [
+          "redsparroworiginalmotionpicturesoundtrack",
+          "fantasticbeastsandwheretofindthemoriginalmotionpicturesoundtrackdeluxeedition",
+          "thehuntsmanwinterswaroriginalmotionpicturesoundtrack",
+          "concussionoriginalmotionpicturesoundtrack",
+          "thehungergamesmockingjaypt2originalmotionpicturesoundtrack",
+          "thehungergamesmockingjaypt1originalmotionpicturescore",
+          "maleficentoriginalmotionpicturesoundtrack",
+          "afterearthoriginalmotionpicturesoundtrack",
+          "thehungergamescatchingfireoriginalmotionpicturescore",
+          "thebournelegacyoriginalmotionpicturesoundtrack",
+          "snowwhitethehuntsmanoriginalmotionpicturesoundtrack",
+          "thehungergamesoriginalmotionpicturescore",
+          "greenlanternoriginalmotionpicturesoundtrack",
+          "waterforelephantsoriginalmotionpicturesoundtrack",
+          "defiancemusicfromthemotionpicutre",
+          "thetouristoriginalmotionpicturesoundtrack"
+        ],
+        "latestRelease": {
+          "title": "Red Sparrow (Original Motion Picture Soundtrack)",
+          "type": "album",
+          "url": "https://jamesnewtonhoward.bandcamp.com/album/red-sparrow-original-motion-picture-soundtrack",
+          "imageUrl": "https://f4.bcbits.com/img/a3549613803_2.jpg",
+          "releaseDate": "March 9, 2018"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=James%20Newton%20Howard"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+James%20Newton%20Howard"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://jamesnewtonhoward.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/239054"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=James%20Newton%20Howard&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/James%20Newton%20Howard"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/james_newtonhoward/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC-37BJOAtN0gq1m8L-QNQxA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/1365559120125073"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

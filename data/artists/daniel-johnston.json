@@ -1,0 +1,84 @@
+[
+  {
+    "id": "danieljohnston",
+    "name": "Daniel Johnston",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033314369_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://danieljohnston.bandcamp.com",
+        "allReleaseTitles": [
+          "lostrecordingsv19801983",
+          "lostrecordingsiv19801983",
+          "lostrecordingsiii1980",
+          "aliveinnewyorkcity",
+          "spaceduckssoundtrack2012",
+          "beammeup2010danieljohnstonandbeamorchestra",
+          "isandalwayswas2009",
+          "welcometomyworld2006",
+          "lostandfound2006",
+          "thelategreatdanieljohnstondiscoveredcovered2004",
+          "whitemagic2004",
+          "fearyourself2003",
+          "rejectedunknown2001",
+          "whyme2000",
+          "frankensteinlove1998",
+          "artisticvice1991"
+        ],
+        "latestRelease": {
+          "title": "Lost Recordings V (1980-1983)",
+          "type": "album",
+          "url": "https://danieljohnston.bandcamp.com/album/lost-recordings-v-1980-1983",
+          "imageUrl": "https://f4.bcbits.com/img/a3922217481_2.jpg",
+          "releaseDate": "December 18, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Daniel%20Johnston"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Daniel%20Johnston"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.hihowareyou.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/108050"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Daniel%20Johnston&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Daniel%20Johnston"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/hihowareyouofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://tiktok.com/@danieljohnstonofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/@DanielJohnstonOfficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/danieldalejohnston"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

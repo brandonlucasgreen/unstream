@@ -1,0 +1,84 @@
+[
+  {
+    "id": "suziquatro",
+    "name": "Suzi Quatro",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0029633429_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/suzi-quatro/39229",
+        "allReleaseTitles": [
+          "therockbox19731979thecompleterecordings",
+          "canthecan",
+          "facetofacekttunstall",
+          "thewildonethegreatesthits",
+          "nocontrol",
+          "freedom",
+          "stumblininchrisnorman",
+          "facetofacekttunstall",
+          "theverybestof",
+          "ifyouknewsuzi",
+          "",
+          "legendthebestof",
+          "quatro",
+          "suziandotherfourletterwords",
+          "unreleasedemotion",
+          "asbsandrarities",
+          "liveandkickin"
+        ],
+        "latestRelease": {
+          "title": "Face To Face Suzi Quatro Kt Tunstall",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/face-to-face-suzi-quatro-kt-tunstall/f6nhkscfxz1fb",
+          "releaseDate": "2023-07-14"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://suziquatro.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Suzi%20Quatro"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Suzi%20Quatro"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.suziquatro.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/227475"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Suzi%20Quatro&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Suzi%20Quatro"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/suziquatroreal/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCutQebYflgcV6kCiNKKtbxg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/SUZI-QUATRO-OFFICIAL-FAN-CLUB-106218856068295"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

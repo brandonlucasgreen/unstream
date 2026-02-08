@@ -1,0 +1,83 @@
+[
+  {
+    "id": "primalscream",
+    "name": "Primal Scream",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037712011_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/primal-scream/148798",
+        "allReleaseTitles": [
+          "innocentmoney",
+          "comeaheadtheremixesvol1",
+          "comeahead",
+          "reverberationstravellingintime",
+          "comeaheadtheremixesvol2",
+          "loveaintenoughreadytogohome",
+          "chaosmosis",
+          "liveatlevitation",
+          "readytogohome",
+          "asone",
+          "loveinsurrection",
+          "morelight",
+          "screamadelica",
+          "giveoutbutdontgiveup",
+          "beautifulfuture",
+          "vanishingpoint"
+        ],
+        "latestRelease": {
+          "title": "Come Ahead The Remixes Vol 1 Primal Scream",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/come-ahead-the-remixes-vol-1-primal-scream/i2re7mq2a1c2w",
+          "releaseDate": "2025-03-28"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://primalscreamband.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Primal%20Scream"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Primal%20Scream"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://web.archive.org/web/19970112101044/http://www.sony.com/Music/ArtistInfo/PrimalScream.html"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3852"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Primal%20Scream&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Primal%20Scream"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://instagram.com/primalscreamofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "http://www.youtube.com/primalscreamofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/primalscreamofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

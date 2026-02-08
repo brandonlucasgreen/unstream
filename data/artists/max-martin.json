@@ -1,0 +1,40 @@
+[
+  {
+    "id": "maxmartin",
+    "name": "Max Martin",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0016891589_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/max-martin/152762",
+        "allReleaseTitles": [
+          "aikhardrockowesieweraik1891"
+        ],
+        "latestRelease": {
+          "title": "Aik Hardrock Max Martin Owe Siewer Aik 1891",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/aik-hardrock-max-martin-owe-siewer-aik-1891/lrryyp8ww9z8b",
+          "releaseDate": "2021-10-08"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://maxmartin.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Max%20Martin"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Max%20Martin"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

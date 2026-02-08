@@ -1,0 +1,109 @@
+[
+  {
+    "id": "powerwolf",
+    "name": "Powerwolf",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041529439_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://powerwolf.bandcamp.com",
+        "allReleaseTitles": [
+          "wildliveliveatolympiahalle",
+          "wildliveliveatolympiahalledeluxealbum",
+          "stossgebetliveatolympiahalle",
+          "wakeupthewicked",
+          "wakeupthewickeddeluxeversion",
+          "barkatthemoon",
+          "interludium",
+          "interludiumdeluxeversion",
+          "noprayeratmidnight",
+          "poison",
+          "missacantoremii",
+          "mywillbedone",
+          "callofthewildfeathansikursch",
+          "hallowedbetheholygroundliveatwacken2019",
+          "themonumentalmassacinematicmetalevent",
+          "saintedbythestorm"
+        ],
+        "latestRelease": {
+          "title": "Wildlive (Live at Olympiahalle)",
+          "type": "album",
+          "url": "https://powerwolf.bandcamp.com/album/wildlive-live-at-olympiahalle",
+          "imageUrl": "https://f4.bcbits.com/img/a1823392678_2.jpg"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/powerwolf/820254",
+        "allReleaseTitles": [
+          "wakeupthewicked",
+          "callofthewild",
+          "themonumentalmassacinematicmetalevent",
+          "bestoftheblesseddeluxeversion",
+          "poison",
+          "hallowedbetheholygroundliveatwacken2019",
+          "barkatthemoon",
+          "1589",
+          "bestoftheblessed",
+          "missacantoremii",
+          "mywillbedone",
+          "noprayeratmidnight",
+          "dancingwiththedead",
+          "sinnersofthesevenseas",
+          "missacantoremi",
+          "beastofgevaudan",
+          "aliveorundead",
+          "stossgebet"
+        ],
+        "latestRelease": {
+          "title": "Wake Up The Wicked Powerwolf",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/wake-up-the-wicked-powerwolf/gw2k1iq1gj7la",
+          "releaseDate": "2024-07-26"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Powerwolf"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Powerwolf"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.powerwolf.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/816855"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/officialpowerwolf/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@powerwolfmetal"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/Powerwolfmetal"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@officialpowerwolf"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/powerwolfmetal"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,79 @@
+[
+  {
+    "id": "iananderson",
+    "name": "Ian Anderson",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041999749_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ian-anderson/45977",
+        "allReleaseTitles": [
+          "playminstrelplayblackmoresnight",
+          "deville",
+          "walkintolight",
+          "thickasabrickjethrotull",
+          "thickasabrick",
+          "rupisdance",
+          "thickasabrick2",
+          "thesecretlanguageofbirds",
+          "divinitiestwelvedanceswithgod",
+          "homoerraticus",
+          "sportsrock",
+          "wesaythankyoumandokisoulmates",
+          "ineveryroomperformancetracks",
+          "thickasabrickliveiniceland",
+          "sexydancyvibesshaelynrolf",
+          "reggaetoolkit"
+        ],
+        "latestRelease": {
+          "title": "Deville Ian Anderson",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/deville-ian-anderson/ki2n1mixkhi6k",
+          "releaseDate": "2025-12-19"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ianandersonmusic.bandcamp.com"
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/CCDG"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ian%20Anderson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ian%20Anderson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.iananderson.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/85485"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ian%20Anderson&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ian%20Anderson"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC920MdLghXzI3oXHhlp7N1w"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

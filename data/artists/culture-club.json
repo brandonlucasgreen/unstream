@@ -1,0 +1,80 @@
+[
+  {
+    "id": "cultureclub",
+    "name": "Culture Club",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011866951_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/culture-club/41398",
+        "allReleaseTitles": [
+          "lettingthingsgothenextthingwillbeamazingboygeorge",
+          "lifeboygeorge",
+          "lifeboygeorge",
+          "liveatwembleyworldtour2016",
+          "mindyourownexistencedarkglobeboygeorge",
+          "letsomebodyloveyouboygeorge",
+          "greatesthits",
+          "colourbynumbers",
+          "kissingtobeclever",
+          "greatestmoments",
+          "wakingupwiththehouseonfire",
+          "spindazzlethebestofboygeorgeand",
+          "doyoureallywanttohurtme",
+          "",
+          "thebestof",
+          "theremixcollection",
+          "allthebest"
+        ],
+        "latestRelease": {
+          "title": "Mind Your Own Existence Dark Globe Boy George Culture Club",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/mind-your-own-existence-dark-globe-boy-george-culture-club/cbpde2yof524b",
+          "releaseDate": "2025-01-31"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://cultureclub.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Culture%20Club"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Culture%20Club"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.culture-club.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/9706"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Culture%20Club&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Culture%20Club"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCdfnMLE8x991WuXK-3SRgNQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Culture-Club/142000592526792"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

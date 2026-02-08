@@ -1,0 +1,38 @@
+[
+  {
+    "id": "bebe",
+    "name": "bebe",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0005947299_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bebeangel.bandcamp.com",
+        "allReleaseTitles": [
+          "lungs",
+          "buttermilkhill"
+        ],
+        "latestRelease": {
+          "title": "lungs",
+          "type": "track",
+          "url": "https://bebeangel.bandcamp.com/track/lungs",
+          "imageUrl": "https://f4.bcbits.com/img/a3601995342_16.jpg",
+          "releaseDate": "October 10, 2015"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=bebe"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+bebe"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,71 @@
+[
+  {
+    "id": "gustavocerati",
+    "name": "Gustavo Cerati",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024458504_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://gustavocerati.bandcamp.com",
+        "allReleaseTitles": [
+          "saliparaver",
+          "studiosession",
+          "ceratidemos"
+        ],
+        "latestRelease": {
+          "title": "Sali para ver",
+          "type": "track",
+          "url": "https://gustavocerati.bandcamp.com/track/sali-para-ver",
+          "imageUrl": "https://f4.bcbits.com/img/a0488291265_2.jpg",
+          "releaseDate": "March 5, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Gustavo%20Cerati"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Gustavo%20Cerati"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.cerati.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/170488"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Gustavo%20Cerati&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Gustavo%20Cerati"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://instagram.com/cerati"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "http://tiktok.com/@cerati"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCfuBqPzLzbNWTXwqAil9kjA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/gustavocerati"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

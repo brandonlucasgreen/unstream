@@ -1,0 +1,62 @@
+[
+  {
+    "id": "keithemerson",
+    "name": "Keith Emerson",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031879553_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://keithemerson.bandcamp.com",
+        "allReleaseTitles": [
+          "darioargentoinfernooriginalmotionpicturesoundtrackhorrormoviesoundtrack",
+          "murderrockdancingdeathuccideapassodidanzaoriginalsoundtrackmysterythriller"
+        ],
+        "latestRelease": {
+          "title": "Dario Argento - Inferno (Original Motion Picture Soundtrack) Horror Movie Soundtrack",
+          "type": "album",
+          "url": "https://keithemerson.bandcamp.com/album/dario-argento-inferno-original-motion-picture-soundtrack-horror-movie-soundtrack",
+          "imageUrl": "https://f4.bcbits.com/img/a3400879448_16.jpg",
+          "releaseDate": "October 22, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Keith%20Emerson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Keith%20Emerson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.keithemerson.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/252850"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Keith%20Emerson&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Keith%20Emerson"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCDWcQ6cYm60CfN8CVlfNqig"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/KEITH.EMERSON.OFFICIALPAGE"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

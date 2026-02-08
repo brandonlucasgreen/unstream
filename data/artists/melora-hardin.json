@@ -1,0 +1,58 @@
+[
+  {
+    "id": "melorahardin",
+    "name": "Melora Hardin",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018991968_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/melora-hardin/2254914",
+        "allReleaseTitles": [
+          "purr",
+          "allthewaytomars",
+          "themeloradrama"
+        ],
+        "latestRelease": {
+          "title": "All The Way To Mars Melora Hardin",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/all-the-way-to-mars-melora-hardin/ib99yb6o1g4ha",
+          "releaseDate": "2010-02-09"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://melorahardin.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Melora%20Hardin"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Melora%20Hardin"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.melora.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1543767"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/meloradhardin/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/meloradhardin/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

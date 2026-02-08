@@ -1,0 +1,76 @@
+[
+  {
+    "id": "creed",
+    "name": "Creed",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030116006_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://creed.bandcamp.com",
+        "allReleaseTitles": [
+          "thebestofcreedremastered2025",
+          "onelastbreathatliensremixatliens",
+          "onelastbreathjojolorenzoremix",
+          "greatesthits",
+          "weathered",
+          "fullcircle",
+          "humanclay",
+          "myownprison"
+        ],
+        "latestRelease": {
+          "title": "The Best Of Creed (Remastered 2025)",
+          "type": "album",
+          "url": "https://creed.bandcamp.com/album/the-best-of-creed-remastered-2025",
+          "imageUrl": "https://f4.bcbits.com/img/a3537834332_2.jpg",
+          "releaseDate": "September 23, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Creed"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Creed"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.creed.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/261665"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Creed&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Creed"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/officialcreedpage/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@creedband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/CreedVEVO"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Creed"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

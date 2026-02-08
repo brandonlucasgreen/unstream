@@ -1,0 +1,58 @@
+[
+  {
+    "id": "icet",
+    "name": "ICE T",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0000203393_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://icet1.bandcamp.com",
+        "allReleaseTitles": [
+          "actofwartheantimixtapecheckcoverforartistlistleakedabout3yrsago",
+          "smgrepossessionsmgsmoothedahustlericettriggerthegamblerover10yrsold"
+        ],
+        "latestRelease": {
+          "title": "Act Of War\n                \n                \n\n                The 'Anti Mixtape' [Check cover for artist list] Leaked about 3yrs ago.",
+          "type": "album",
+          "url": "https://icet1.bandcamp.com/album/act-of-war",
+          "imageUrl": "https://f4.bcbits.com/img/a3262153032_16.jpg",
+          "releaseDate": "May 20, 2012"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=ICE%20T"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+ICE%20T"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://icet.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/66147"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=ICE%20T&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/ICE%20T"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/icet/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

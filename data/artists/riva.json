@@ -1,0 +1,64 @@
+[
+  {
+    "id": "riva",
+    "name": "RIVA",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0001137258_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/riva/89857",
+        "allReleaseTitles": [
+          "lamanteinfelice",
+          "pensierostupendouniversale",
+          "someonetolovetakibranodvalor",
+          "diva",
+          "lamerica",
+          "semmedoderebolar",
+          "kacisinizyokarven",
+          "morningdust",
+          "whodoyoulovenowstringerfeatdanniiminogue",
+          "timeisthehealer",
+          "thebestofcollection",
+          "stringermistral",
+          "timeisthehealerhypatonchocolatepuma"
+        ],
+        "latestRelease": {
+          "title": "Lamante Infelice Riva",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/lamante-infelice-riva/mol17wbu3aetb",
+          "releaseDate": "2025-11-28"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://riva.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=RIVA"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+RIVA"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/9759"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=RIVA&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/RIVA"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

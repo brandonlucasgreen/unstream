@@ -1,0 +1,60 @@
+[
+  {
+    "id": "lhasadesela",
+    "name": "Lhasa de Sela",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011683058_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://lhasadesela.bandcamp.com",
+        "allReleaseTitles": [
+          "firstrecordingslhasadeselaetyvesdesrosiers",
+          "lhasaliveinreykjavik",
+          "lhasa",
+          "thelivingroad",
+          "lallorona"
+        ],
+        "latestRelease": {
+          "title": "First Recordings\n                \n                \n\n                Lhasa de Sela et Yves Desrosiers",
+          "type": "album",
+          "url": "https://lhasadesela.bandcamp.com/album/first-recordings",
+          "imageUrl": "https://f4.bcbits.com/img/a1244608531_2.jpg",
+          "releaseDate": "September 27, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/lhasa-de-sela/369170",
+        "latestRelease": {
+          "title": "First Recordings Lhasa De Sela Yves Desrosiers",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/first-recordings-lhasa-de-sela-yves-desrosiers/gvaiwppoj47pc",
+          "releaseDate": "2024-09-27"
+        },
+        "allReleaseTitles": [
+          "firstrecordingsyvesdesrosiers",
+          "lallorona",
+          "lhasa",
+          "feveryvesdesrosiers",
+          "thelivingroad",
+          "elcosecheroyvesdesrosiers",
+          "contodapalabra"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lhasa%20de%20Sela"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lhasa%20de%20Sela"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

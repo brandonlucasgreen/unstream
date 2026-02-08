@@ -1,0 +1,72 @@
+[
+  {
+    "id": "skillet",
+    "name": "Skillet",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3177445493_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://skilletmusic.bandcamp.com",
+        "allReleaseTitles": [
+          "tyfriendscreekrevivalsetlist",
+          "friedaliveatthegeorgiatheatre",
+          "daddyshome",
+          "29centsteak"
+        ],
+        "latestRelease": {
+          "title": "TY & FRIENDS CREEK REVIVAL SET LIST",
+          "type": "album",
+          "url": "https://skilletmusic.bandcamp.com/album/ty-friends-creek-revival-set-list",
+          "imageUrl": "https://f4.bcbits.com/img/a3177445493_16.jpg",
+          "releaseDate": "July 2, 2013"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/Skillet"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Skillet"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Skillet"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.skillet.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/309893"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Skillet&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Skillet"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/skilletmusic/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/skilletband"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/skillet"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

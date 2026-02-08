@@ -1,0 +1,104 @@
+[
+  {
+    "id": "killswitchengage",
+    "name": "Killswitch Engage",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037829588_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://killswitchengage.bandcamp.com",
+        "allReleaseTitles": [
+          "thisconsequence",
+          "liveatthepalladium",
+          "atonementiibsidesforcharity",
+          "atonement"
+        ],
+        "latestRelease": {
+          "title": "This Consequence",
+          "type": "album",
+          "url": "https://killswitchengage.bandcamp.com/album/this-consequence",
+          "imageUrl": "https://f4.bcbits.com/img/a0709801093_16.jpg",
+          "releaseDate": "February 21, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/killswitch-engage/333683",
+        "allReleaseTitles": [
+          "thisconsequence",
+          "asdaylightdies",
+          "bloodupontheashes",
+          "incarnate",
+          "ibelieve",
+          "theendofheartache",
+          "foreveraligned",
+          "ibelievealternateedit",
+          "atonementiibsidesforcharity",
+          "liveatthepalladium",
+          "knowyourenemylive",
+          "disarmthedescent",
+          "aliveorjustbreathing",
+          "atonement",
+          "setthisworldablaze",
+          ""
+        ],
+        "latestRelease": {
+          "title": "Blood Upon The Ashes Killswitch Engage",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/blood-upon-the-ashes-killswitch-engage/gp8cyuhqkw52b",
+          "releaseDate": "2025-06-04"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Killswitch%20Engage"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Killswitch%20Engage"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.killswitchengage.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/184947"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Killswitch%20Engage&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Killswitch%20Engage"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/killswitchengage/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@killswitchengageofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/killswitchengagetv"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@killswitchengage"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/killswitchengage"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

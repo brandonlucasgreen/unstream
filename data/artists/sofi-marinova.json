@@ -1,0 +1,40 @@
+[
+  {
+    "id": "sofimarinova",
+    "name": "Софи Маринова (Sofi Marinova)",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a2642362520_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sofimarinova.bandcamp.com",
+        "allReleaseTitles": [
+          "vipviput",
+          "obicham",
+          "vremespri",
+          "ostani"
+        ],
+        "latestRelease": {
+          "title": "VIPът (VIPut)",
+          "type": "album",
+          "url": "https://sofimarinova.bandcamp.com/album/vip-viput",
+          "imageUrl": "https://f4.bcbits.com/img/a2642362520_16.jpg",
+          "releaseDate": "July 7, 2009"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=%D0%A1%D0%BE%D1%84%D0%B8%20%D0%9C%D0%B0%D1%80%D0%B8%D0%BD%D0%BE%D0%B2%D0%B0%20(Sofi%20Marinova)"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+%D0%A1%D0%BE%D1%84%D0%B8%20%D0%9C%D0%B0%D1%80%D0%B8%D0%BD%D0%BE%D0%B2%D0%B0%20(Sofi%20Marinova)"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,69 @@
+[
+  {
+    "id": "rycooder",
+    "name": "Ry Cooder",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019876999_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rycooder.bandcamp.com",
+        "allReleaseTitles": [
+          "getonboardtajmahalrycooder",
+          "tencommandmentsofvietnam",
+          "undermythumb",
+          "chavezravineremasteredversion",
+          "theprodigalson"
+        ],
+        "latestRelease": {
+          "title": "GET ON BOARD\n                \n                \n\n                Taj Mahal & Ry Cooder",
+          "type": "album",
+          "url": "https://rycooder.bandcamp.com/album/get-on-board",
+          "imageUrl": "https://f4.bcbits.com/img/a0464276499_2.jpg",
+          "releaseDate": "April 22, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ry%20Cooder"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ry%20Cooder"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://rycooder.nl/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/55080"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ry%20Cooder&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ry%20Cooder"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rycooderofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCYJF7KEj65hjmihTwtL93Sw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Ry-Cooder/112074215470376"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

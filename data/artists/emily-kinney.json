@@ -1,0 +1,57 @@
+[
+  {
+    "id": "emilykinney",
+    "name": "Emily Kinney",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032000048_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/emily-kinney/1045033",
+        "allReleaseTitles": [
+          "swimteam",
+          "thisiswar",
+          "expiredlove",
+          "ohjonathan",
+          "thesupportingcharacter",
+          "bluetoothbrush",
+          "holdingyourhandinnashville",
+          "mermaidsong",
+          "uponthehousetop",
+          "easy",
+          "omahahotel",
+          "outofthisworld",
+          "fifteenminutes",
+          "theturtleandthemonkey",
+          "lastchancesingle",
+          "jaminthevanlivesessiontempletonca2023jaminthevan",
+          "boybandhero",
+          "jaminthevanjaminthevan"
+        ],
+        "latestRelease": {
+          "title": "Swimteam Emily Kinney",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/swimteam-emily-kinney/swds2vv3aumwc",
+          "releaseDate": "2023-09-22"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://emilykinney.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Emily%20Kinney"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Emily%20Kinney"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

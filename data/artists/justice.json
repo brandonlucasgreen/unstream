@@ -1,0 +1,112 @@
+[
+  {
+    "id": "justice",
+    "name": "Justice",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0035807360_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://etjusticepourtous.bandcamp.com",
+        "allReleaseTitles": [
+          "mannequinloveremixesjusticetheflints",
+          "afterimageremixesjusticerimon",
+          "neverenderremixesjusticetameimpala",
+          "hyperdrama",
+          "anniversaryedition",
+          "dancelogicreprisejusticelogic",
+          "planisphere",
+          "womanworldwide",
+          "woman",
+          "accessallarenas",
+          "audiovideodisco",
+          "acrosstheuniverse",
+          "justice",
+          "pleasurelive",
+          "helix",
+          "newlands"
+        ],
+        "latestRelease": {
+          "title": "Mannequin Love (Remixes)\n                \n                \n\n                Justice, The Flints",
+          "type": "album",
+          "url": "https://etjusticepourtous.bandcamp.com/album/mannequin-love-remixes",
+          "imageUrl": "https://f4.bcbits.com/img/a0555693879_2.jpg",
+          "releaseDate": "July 16, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/justice/41883",
+        "allReleaseTitles": [
+          "hyperdrama",
+          "",
+          "woman",
+          "womanworldwide",
+          "neverendertameimpala",
+          "",
+          "audiovideodisco",
+          "mannequinlovetheflints",
+          "afterimagerimon",
+          "planisphere",
+          "onenightallnightgenerator",
+          "pleasurelive",
+          "acrosstheuniverse",
+          "dance",
+          "accessallarenaslive",
+          "phantomep",
+          "helix",
+          "onnon",
+          "civilizationep",
+          "watersofnazareth"
+        ],
+        "latestRelease": {
+          "title": "Neverender Justice Tame Impala",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/neverender-justice-tame-impala/s4ofl6y8tcceb",
+          "releaseDate": "2024-09-27"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Justice"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Justice"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.justice.church/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/52758"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Justice&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Justice"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/etjusticepourtous/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCQ5Ssrs48yJBfOesfDqXUeA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/etjusticepourtous"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

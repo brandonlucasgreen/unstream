@@ -1,0 +1,99 @@
+[
+  {
+    "id": "destruction",
+    "name": "Destruction",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037771542_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://destruction.bandcamp.com",
+        "allReleaseTitles": [
+          "birthofmalice",
+          "nokingsnomasters",
+          "diabolical",
+          "stateofapathy",
+          "liveattack"
+        ],
+        "latestRelease": {
+          "title": "Birth Of Malice",
+          "type": "album",
+          "url": "https://destruction.bandcamp.com/album/birth-of-malice",
+          "imageUrl": "https://f4.bcbits.com/img/a3044970729_2.jpg",
+          "releaseDate": "March 7, 2025"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/Destruction_"
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/destruction/551943",
+        "allReleaseTitles": [
+          "birthofmalice",
+          "diabolical",
+          "borntoperish",
+          "borntothrash",
+          "fastasashark",
+          "scumbaghumanrace",
+          "angst",
+          "",
+          "stateofapathy",
+          "eternaldevastation",
+          "infernaloverkill",
+          "theantichrist",
+          "crackedbrain",
+          "thrashanthems",
+          "releasefromagony",
+          "dayofreckoning",
+          "sentenceofdeath",
+          "underattack",
+          "allhellbreaksloose",
+          "devolution"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Destruction"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Destruction"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.destruction.de/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/260864"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Destruction&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Destruction"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/destruction_official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/DestructionDE"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/destruction"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

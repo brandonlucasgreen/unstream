@@ -1,0 +1,83 @@
+[
+  {
+    "id": "janesaddiction",
+    "name": "Jane’s Addiction",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0010957896_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jane-s-addiction/61993",
+        "latestRelease": {
+          "title": "True Love Janes Addiction",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/true-love-janes-addiction/p1fthmbmw7zxa",
+          "releaseDate": "2024-09-18"
+        },
+        "allReleaseTitles": [
+          "nothingsshocking",
+          "truelove",
+          "imminentredemption",
+          "ritualdelohabitual",
+          "liveinnyc",
+          "strays",
+          "upfromthecatacombsthebestof",
+          "thegreatescapeartist",
+          "kettlewhistle",
+          "live",
+          "acabinetofcuriosities",
+          "aliveattwentyfiveritualdelohabituallive",
+          "sowhatep",
+          "irresistibleforce",
+          "talk",
+          "lollapalooza1991"
+        ]
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://janesaddictionlive.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jane%E2%80%99s%20Addiction"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jane%E2%80%99s%20Addiction"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.janesaddiction.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/35740"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jane%E2%80%99s%20Addiction&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jane%E2%80%99s%20Addiction"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/janesaddiction/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCS7Z__UPeaTzF6uB49zY6Cw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JanesAddiction"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

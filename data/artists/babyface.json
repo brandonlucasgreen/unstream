@@ -1,0 +1,74 @@
+[
+  {
+    "id": "babyface",
+    "name": "Babyface",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0029572104_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://babyfacetrackz.bandcamp.com",
+        "allReleaseTitles": [
+          "1011nextuphomelessrefix",
+          "dontgodub"
+        ],
+        "latestRelease": {
+          "title": "1011-next up [homeless refix]",
+          "type": "track",
+          "url": "https://babyfacetrackz.bandcamp.com/track/1011-next-up-homeless-refix",
+          "imageUrl": "https://f4.bcbits.com/img/a0471264858_16.jpg",
+          "releaseDate": "April 8, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Babyface"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Babyface"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.babyfacemusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/50703"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Babyface&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Babyface"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/babyface/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@babyface"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC5l1M5BAyUNyGiy2fdn9UKA"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.net/@babyface"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Babyface"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

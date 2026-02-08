@@ -1,0 +1,79 @@
+[
+  {
+    "id": "thestooges",
+    "name": "The Stooges",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020957198_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-stooges/40220",
+        "allReleaseTitles": [
+          "50thanniversarydeluxeedition",
+          "funhouse",
+          "liveatgooselakeaugust8th1970",
+          "afireoflife",
+          "tveyeradioedit",
+          "funhouse",
+          "",
+          "heavyliquidthealbum",
+          "morepower",
+          "theweirdness",
+          "youdontwantmynameyouwantmyaction1971themissinglink",
+          "moveassbabyiggypopand",
+          "mygirlhatesmyheroin",
+          "louielouieiggypop",
+          "1970thecompletefunhousesessions",
+          "theatreofcrueltyiggyand",
+          "iwannabeyourdogiggypop",
+          "heavyliquid",
+          "highlightsfromthefunhousesessions",
+          "londonsession1972iggy"
+        ],
+        "latestRelease": {
+          "title": "A Fire Of Life The Stooges",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/a-fire-of-life-the-stooges/wk7tjvagcgiwc",
+          "releaseDate": "2022-07-22"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thestooges.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Stooges"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Stooges"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://iggyandthestoogesmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/39770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Stooges&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Stooges"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/iggyandthestooges"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

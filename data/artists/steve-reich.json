@@ -1,0 +1,61 @@
+[
+  {
+    "id": "stevereich",
+    "name": "Steve Reich",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028123320_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://stevereich.bandcamp.com",
+        "allReleaseTitles": [
+          "jacobsladdertravelersprayer",
+          "stevereichrunnermusicforensembleandorchestra",
+          "reichrichterstevereichensembleintercontemporain",
+          "musicfor18musicians",
+          "differenttrainselectriccounterpoint"
+        ],
+        "latestRelease": {
+          "title": "Jacob's Ladder / Traveler's Prayer",
+          "type": "album",
+          "url": "https://stevereich.bandcamp.com/album/jacobs-ladder-travelers-prayer",
+          "imageUrl": "https://f4.bcbits.com/img/a0404305625_2.jpg",
+          "releaseDate": "March 14, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Steve%20Reich"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Steve%20Reich"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.stevereich.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/22946"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Steve%20Reich&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Steve%20Reich"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/SteveReichMusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

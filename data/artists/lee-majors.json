@@ -1,0 +1,54 @@
+[
+  {
+    "id": "leemajors",
+    "name": "Lee Majors",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0008341699_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://leemajors.bandcamp.com",
+        "allReleaseTitles": [
+          "blowinginthewind",
+          "cosmic",
+          "overcome",
+          "allthethingsinyourhead",
+          "partingways",
+          "coasttocoast",
+          "timewilltell",
+          "hearthebellsyouonly",
+          "95",
+          "watchtheflowers"
+        ],
+        "latestRelease": {
+          "title": "Blowing in the Wind",
+          "type": "track",
+          "url": "https://leemajors.bandcamp.com/track/blowing-in-the-wind",
+          "imageUrl": "https://f4.bcbits.com/img/a2995413774_2.jpg",
+          "releaseDate": "September 22, 2016"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lee%20Majors"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lee%20Majors"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/835118"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/leemajors510/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

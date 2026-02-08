@@ -1,0 +1,61 @@
+[
+  {
+    "id": "hozier",
+    "name": "Hozier",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0004406887_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/hozier/1283440",
+        "latestRelease": {
+          "title": "Rubber Band Man With Hozier Mumford Sons Hozier",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/rubber-band-man-with-hozier-mumford-sons-hozier/xpwf7jnsxp4ab",
+          "releaseDate": "2025-10-24"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://hoziermusic.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Hozier"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Hozier"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://hozier.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3853178"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/hozier/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@hozierofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCwAam3W_VLfb6mEKPW2nDFg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/hoziermusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

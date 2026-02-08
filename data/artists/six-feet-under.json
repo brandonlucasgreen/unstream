@@ -1,0 +1,106 @@
+[
+  {
+    "id": "sixfeetunder",
+    "name": "Six Feet Under",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0035376657_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sixfeetunder.bandcamp.com",
+        "allReleaseTitles": [
+          "killingforrevenge",
+          "nightmaresofthedecomposed",
+          "unburied",
+          "torment",
+          "graveyardclassicsivthenumberofthepriest",
+          "cryptofthedevil",
+          "unborn",
+          "undead",
+          "wakethenightliveingermany",
+          "graveyardclassics3",
+          "deathrituals",
+          "commandment",
+          "13",
+          "livewithfullforce",
+          "bringerofblood",
+          "doubledeadredux"
+        ],
+        "latestRelease": {
+          "title": "Killing for Revenge",
+          "type": "album",
+          "url": "https://sixfeetunder.bandcamp.com/album/killing-for-revenge",
+          "imageUrl": "https://f4.bcbits.com/img/a0318650032_2.jpg",
+          "releaseDate": "May 10, 2024"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/SixFeetUnderSims"
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/six-feet-under/556069",
+        "allReleaseTitles": [
+          "killingforrevenge",
+          "nightmaresofthedecomposed",
+          "thebestof",
+          "bringerofblood",
+          "haunted",
+          "graveyardclassics",
+          "maximumviolence",
+          "warpath",
+          "truecarnage",
+          "livewithfullforce",
+          "deathrituals",
+          "wakethenight",
+          "commandment",
+          "13",
+          "graveyardclassics3",
+          "torment",
+          "unborn",
+          "unburied",
+          "cryptofthedevil",
+          "graveyardclassicsivthenumberofthepriest"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Six%20Feet%20Under"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Six%20Feet%20Under"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sfu420.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/251797"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Six%20Feet%20Under&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Six%20Feet%20Under"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/SiXfEeTuNdEr"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sixfeetunder"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

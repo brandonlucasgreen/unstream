@@ -1,0 +1,47 @@
+[
+  {
+    "id": "duncanjames",
+    "name": "Duncan James",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011771187_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/duncan-james/226670",
+        "allReleaseTitles": [
+          "futurepast",
+          "ibelievemyheartandkeedie",
+          "thatswhatfriendsarefordenisevanouten",
+          "soonerorlater",
+          "doinenoughtracyyoung",
+          "loveisadogfromhell",
+          "thespeedoflife",
+          "amazed"
+        ],
+        "latestRelease": {
+          "title": "Thats What Friends Are For Denise Van Outen Duncan James",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/thats-what-friends-are-for-denise-van-outen-duncan-james/hb2jk7mudkpfa",
+          "releaseDate": "2023-09-01"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://duncanjamesmusic.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Duncan%20James"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Duncan%20James"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "michaelparks",
+    "name": "Michael Parks",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0002958009_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/michael-parks/607903",
+        "allReleaseTitles": [
+          "longlonesomehighway",
+          "mountainhigh",
+          "watchtheworld"
+        ],
+        "latestRelease": {
+          "title": "Mountain High Michael Parks",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/mountain-high-michael-parks/p9cxv3bnkeicc",
+          "releaseDate": "2021-11-26"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://michaelparksmusic.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Michael%20Parks"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Michael%20Parks"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

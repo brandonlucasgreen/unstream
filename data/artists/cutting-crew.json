@@ -1,0 +1,87 @@
+[
+  {
+    "id": "cuttingcrew",
+    "name": "Cutting Crew",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020888949_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://cuttingcrew.bandcamp.com",
+        "allReleaseTitles": [
+          "everythingbutmypride",
+          "ransomedhealedrestoredforgiven",
+          "ijustdiedinyourarms"
+        ],
+        "latestRelease": {
+          "title": "Everything But My Pride",
+          "type": "album",
+          "url": "https://cuttingcrew.bandcamp.com/album/everything-but-my-pride",
+          "imageUrl": "https://f4.bcbits.com/img/a3245519118_2.jpg",
+          "releaseDate": "September 17, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/cutting-crew/73604",
+        "allReleaseTitles": [
+          "broadcast",
+          "ijustdiedinyourarms",
+          "thebestof",
+          "mixesextendedlive",
+          "thescattering",
+          "compusmentus",
+          "ransomedhealedrestoredforgiven",
+          "addtofavourites",
+          "grinningsouls",
+          "tillthemoneyrunsout",
+          "everythingbutmypride",
+          "lookingforafriendradioedit"
+        ],
+        "latestRelease": {
+          "title": "Mixes Extended Live Cutting Crew",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/mixes-extended-live-cutting-crew/zem1mmhjnkm1b",
+          "releaseDate": "2022-04-22"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Cutting%20Crew"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Cutting%20Crew"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.cuttingcrew.biz/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/201658"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Cutting%20Crew&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Cutting%20Crew"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC3pQprxYRAezQae-og8U0VA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/CuttingCrewMusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

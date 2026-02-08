@@ -1,0 +1,97 @@
+[
+  {
+    "id": "obituary",
+    "name": "Obituary",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030430940_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://obituary.bandcamp.com",
+        "allReleaseTitles": [
+          "dyingofeverything",
+          "causeofdeathliveinfection",
+          "slowlywerotliveandrotting",
+          "obituary",
+          "inkedinblooddeluxeversion",
+          "tenthousandwaystodie",
+          "adyingworldsingle"
+        ],
+        "latestRelease": {
+          "title": "Dying of Everything",
+          "type": "album",
+          "url": "https://obituary.bandcamp.com/album/dying-of-everything",
+          "imageUrl": "https://f4.bcbits.com/img/a3273700339_2.jpg",
+          "releaseDate": "January 13, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/obituary/478491",
+        "allReleaseTitles": [
+          "",
+          "dyingofeverything",
+          "inkedinblooddeluxeversion",
+          "causeofdeathliveinfection",
+          "tenthousandwaystodie",
+          "slowlywerotliveandrotting",
+          "causeofdeathreissue",
+          "slowlywerotreissue",
+          "frozenintime",
+          "backfromthedead",
+          "worlddemisereissue",
+          "frozenintimespecialedition",
+          "thecompleteroadrunnercollection19892005",
+          "nosingle",
+          "theendcompletereissue",
+          "dead",
+          "anthology",
+          "thebestof",
+          "mywilltolive",
+          "adyingworld"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Obituary"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Obituary"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.obituary.cc/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/12531211"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Obituary&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Obituary"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/obituaryband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCOnhgPNvWPmUmNdtPkamLIQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ObituaryBand"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

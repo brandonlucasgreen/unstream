@@ -1,0 +1,87 @@
+[
+  {
+    "id": "tonibraxton",
+    "name": "Toni Braxton",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0021395819_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/toni-braxton/147585",
+        "allReleaseTitles": [
+          "lovemarriagedivorcebabyface",
+          "dancedjgozzi",
+          "doit",
+          "sexcigarettes",
+          "spellmyname",
+          "dance",
+          "secrets",
+          "",
+          "theessential",
+          "coping",
+          "theheat",
+          "haveyourselfamerrylittlechristmasbabyface",
+          "makemyheartremixespart1",
+          "makemyheartdjspenthemuthafunkazmixes",
+          "yesterday",
+          "snowflakes"
+        ],
+        "latestRelease": {
+          "title": "Dance Toni Braxton Dj Gozzi",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/dance-toni-braxton-dj-gozzi/l3l85fxek6vsb",
+          "releaseDate": "2020-10-16"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tonibraxton.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Toni%20Braxton"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Toni%20Braxton"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.tonibraxton.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/13936"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Toni%20Braxton&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Toni%20Braxton"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/tonibraxton/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@tonibraxton"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCWNM-V1rS3vBRk4nR007E6A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/tonibraxton"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

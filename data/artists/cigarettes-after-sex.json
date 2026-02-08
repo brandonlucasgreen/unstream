@@ -1,0 +1,101 @@
+[
+  {
+    "id": "cigarettesaftersex",
+    "name": "Cigarettes After Sex",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0035228813_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://cigarettesaftersex.bandcamp.com",
+        "allReleaseTitles": [
+          "annakarenina",
+          "xs",
+          "motionpicturesoundtrack",
+          "bubblegum",
+          "pistol",
+          "yourealliwant",
+          "cry",
+          "neonmoon",
+          "crush",
+          "cigarettesaftersex",
+          "eachtimeyoufallinlove",
+          "apocalypse",
+          "k",
+          "affection",
+          "i"
+        ],
+        "latestRelease": {
+          "title": "Anna Karenina",
+          "type": "album",
+          "url": "https://cigarettesaftersex.bandcamp.com/album/anna-karenina",
+          "imageUrl": "https://f4.bcbits.com/img/a0544928698_2.jpg",
+          "releaseDate": "October 28, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/cigarettes-after-sex/2855721",
+        "allReleaseTitles": [
+          "",
+          "cry",
+          "xs",
+          "crush",
+          "i",
+          "bubblegum",
+          "neonmoon",
+          "pistol",
+          "motionpicturesoundtrack",
+          "k",
+          "affection",
+          "annakarenina",
+          "yourealliwant",
+          "apocalypse"
+        ],
+        "latestRelease": {
+          "title": "Xs Cigarettes After Sex",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/xs-cigarettes-after-sex/hc8azitb92k8a",
+          "releaseDate": "2024-07-12"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Cigarettes%20After%20Sex"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Cigarettes%20After%20Sex"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.cigarettesaftersex.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3426328"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/cigsaftersex/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@cigarettesaftersex"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCqNxhPZoLJ81i5QaK4nqn8A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/CigarettesAfterSex"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

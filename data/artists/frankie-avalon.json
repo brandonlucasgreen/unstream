@@ -1,0 +1,106 @@
+[
+  {
+    "id": "frankieavalon",
+    "name": "Frankie Avalon",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036546621_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://frankieavalon.bandcamp.com",
+        "latestRelease": {
+          "title": "You're My Life",
+          "type": "album",
+          "url": "https://frankieavalon.bandcamp.com/album/youre-my-life",
+          "imageUrl": "https://f4.bcbits.com/img/a0337099827_2.jpg",
+          "releaseDate": "July 1, 1977"
+        },
+        "allReleaseTitles": [
+          "youremylife",
+          "iwantyounearme",
+          "awholelottafrankie"
+        ]
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/frankie-avalon/53731",
+        "allReleaseTitles": [
+          "whyswinginonarainbow",
+          "balladofthealamo",
+          "epsongs",
+          "gingerbread",
+          "greatesthits",
+          "25alltimegreatesthits",
+          "venus",
+          "justaskyourheart",
+          "musclebeachpartyandothermotionpicturesongs",
+          "theessentialsoundof",
+          "themythof",
+          "youremylife",
+          "iwantyounearme",
+          "springbreakreuniontherockinera",
+          "beachblanketbingotommycono",
+          "thekidwonder",
+          "twofoolsjustaskyourheart",
+          "comeonbacktomebabyempty",
+          "why"
+        ],
+        "latestRelease": {
+          "title": "Ballad Of The Alamo Frankie Avalon",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/ballad-of-the-alamo-frankie-avalon/lz6ki792uk97b",
+          "releaseDate": "2023-06-21"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Frankie%20Avalon"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Frankie%20Avalon"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.frankieavalon.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/91643"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Frankie%20Avalon&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Frankie%20Avalon"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/officialfrankieavalon"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@frankieavalonofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/@FrankieAvalonPodcast"
+      },
+      {
+        "sourceId": "mastodon",
+        "url": "https://siteassets.parastorage.com/pages/pages/thunderbolt?appDefinitionIdToSiteRevision=%7B%2214271d6f-ba62-d045-549b-ab972ae1f70e%22%3A%2225%22%2C%22b976560c-3122-4351-878f-453f337b7245%22%3A%221291%22%2C%2214bcded7-0066-7c35-14d7-466cb3f09103%22%3A%221335%22%2C%227479d596-137c-4fa3-89cd-d7091042ba61%22%3A%22132%22%2C%22a0c68605-c2e7-4c8d-9ea1-767f9770e087%22%3A%226855%22%2C%22deb18ef1-e0c6-4668-a7bc-4a13785eb5b7%22%3A%22634%22%7D&appDefinitionIdsWithCustomCss=%5B%22a0c68605-c2e7-4c8d-9ea1-767f9770e087%22%5D&beckyExperiments=.DatePickerPortal%2C.DisableDocumentScrollWhenLightBoxOpen%2C.EnableCustomCSSVarsForLoginSocialBar%2C.FreemiumBannerOdeditor%2C.LoginBarEnableLoggingInStateInSSR%2C.TextInputAutoFillFix%2C.UseLoginSocialBarCustomMenu%2C.UseNewLoginSocialBarCustomMenuPositioning%2C.UseNewLoginSocialBarElementStructure%2C.UseNewLoginSocialBarMemberInitialsAvatar%2C.VerticalMenu_uiType_NativeMapper%2C.WixFreeSiteBannerDesktop%2C.WixFreeSiteBannerMobile%2C.buttonUdp%2C.calculateCollapsibleTextLineHeightByFont%2C.disableBuilderWixComponents%2C.dom_store%2C.dynamicSlots%2C.fiveGridLineStudioSkins%2C.imageEncodingAVIF%2C.isClassNameToRootEnabled%2C.motionTimeAnimationsCSS%2C.propsCarmiMappersMigration1%2C.propsCarmiMappersMigration4%2C.propsCarmiMappersMigration5%2C.shouldUseResponsiveImages%2C.svgResolver_2%2C.takeAppDependenciesFromCSM%2C.updateRichTextSemanticClassNamesOnCorvid%2C.useClassnameInResponsiveAppWidget%2C.useImageAvifFormatInNativeProGallery%2C.useResponsiveImgClassicFixed%2C.useSvgLoaderFeature%2C.useSvgLoaderFeatureOnBuilderComps&blocksBuilderManifestGeneratorVersion=1.129.0&contentType=application%2Fjson&deviceType=Desktop&dfCk=6&dfVersion=1.5263.0&disableStaticPagesUrlHierarchy=false&editorName=Studio&experiments=dm_bgScrubToMotionFixer%2Cdm_masterPageVariablesQueryFixer%2Cdm_migrateOldHoverBoxToNewFixer&externalBaseUrl=https%3A%2F%2Fwww.frankieavalon.com&fileId=62b974ff.bundle.min&formFactor=desktop&hasTPAWorkerOnSite=false&hasUserDomainMedia=false&isBuilderComponentModel=false&isHttps=true&isInSeo=false&isMultilingualEnabled=false&isPremiumDomain=true&isResponsive=true&isTrackClicksAnalyticsEnabled=true&isUrlMigrated=true&isWixCodeOnPage=false&isWixCodeOnSite=false&language=en&languageResolutionMethod=QueryParam&metaSiteId=c1c76dc0-bbe6-41f0-b71d-403844ecd6a4&module=thunderbolt-features&oneDocEnabled=true&originalLanguage=en&pageId=2e45b8_fa9affc4cb54d8e01af726cb0c6b9050_1154.json&pilerExperiments=specs.piler.useEditorReactComponents&quickActionsMenuEnabled=false&registryLibrariesTopology=%5B%7B%22artifactId%22%3A%22editor-elements%22%2C%22namespace%22%3A%22wixui%22%2C%22url%22%3A%22https%3A%2F%2Fstatic.parastorage.com%2Fservices%2Feditor-elements%2F1.14878.0%22%7D%2C%7B%22artifactId%22%3A%22editor-elements%22%2C%22namespace%22%3A%22dsgnsys%22%2C%22url%22%3A%22https%3A%2F%2Fstatic.parastorage.com%2Fservices%2Feditor-elements%2F1.14878.0%22%7D%5D&remoteWidgetStructureBuilderVersion=1.251.0&siteId=fad64880-8bc2-4719-8d11-724a31efe631&siteRevision=1154&staticHTMLComponentUrl=https%3A%2F%2Fwww-frankieavalon-com.filesusr.com%2F&useSandboxInHTMLComp=false&viewMode=desktop"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/frankieavalonvenus"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

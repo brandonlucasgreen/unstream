@@ -1,0 +1,97 @@
+[
+  {
+    "id": "slowdive",
+    "name": "Slowdive",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032714254_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://slowdive.bandcamp.com",
+        "allReleaseTitles": [
+          "kisseselectronicversion3",
+          "everythingisalive",
+          "slowdive",
+          "sugarforthepillavalonemersonsgildedescalation",
+          "starroving"
+        ],
+        "latestRelease": {
+          "title": "kisses - electronic version 3",
+          "type": "track",
+          "url": "https://slowdive.bandcamp.com/track/kisses-electronic-version-3",
+          "imageUrl": "https://f4.bcbits.com/img/a0806615094_2.jpg",
+          "releaseDate": "October 4, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/slowdive/180690",
+        "allReleaseTitles": [
+          "everythingisalive",
+          "",
+          "souvlaki",
+          "kissesremixes",
+          "starroving",
+          "kissesdanielaveryremixbwkissesskyii",
+          "pygmalion",
+          "justforaday"
+        ],
+        "latestRelease": {
+          "title": "Kisses Remixes Slowdive",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/kisses-remixes-slowdive/b3fztkoo7402a",
+          "releaseDate": "2024-10-04"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Slowdive"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Slowdive"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://slowdiveofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/26494"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Slowdive&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Slowdive"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/slowdiveofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@slowdiveofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCRtImc_wHGDEoBrBMmNcZHg"
+      },
+      {
+        "sourceId": "bluesky",
+        "url": "https://bsky.app/profile/slowdiveofficial.bsky.social"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Slowdive"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

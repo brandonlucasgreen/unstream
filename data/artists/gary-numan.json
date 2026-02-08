@@ -1,0 +1,111 @@
+[
+  {
+    "id": "garynuman",
+    "name": "Gary Numan",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020879054_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://garynuman.bandcamp.com",
+        "allReleaseTitles": [
+          "telekon45thanniversaryexpandededition",
+          "bbcradiosessions",
+          "thepleasureprincipleexpandededition",
+          "replicasredux",
+          "livingornaments81",
+          "premierhits",
+          "theplan",
+          "warriors",
+          "iassassin",
+          "dance",
+          "livingornaments79live",
+          "livingornaments80",
+          "telekon",
+          "thepleasureprinciple",
+          "thepleasureprinciplethefirstrecordings",
+          "tubewayarmytubewayarmy",
+          "replicas",
+          "replicasthefirstrecordings"
+        ],
+        "latestRelease": {
+          "title": "Telekon (45th Anniversary Expanded Edition)",
+          "type": "album",
+          "url": "https://garynuman.bandcamp.com/album/telekon-45th-anniversary-expanded-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a1421893295_2.jpg",
+          "releaseDate": "December 12, 2025"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/garynuman"
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/gary-numan/68370",
+        "allReleaseTitles": [
+          "thepleasureprinciple",
+          "aperfectcircle",
+          "telekon",
+          "intruder",
+          "berserker",
+          "machinesoul",
+          "1000liveattheelectricballroom",
+          "thefury",
+          "strangecharm",
+          "bbcradiosessions",
+          "savagesongsfromabrokenworld",
+          "whentheskycamedowntheskaparisorchestra",
+          "dance"
+        ],
+        "latestRelease": {
+          "title": "Telekon Gary Numan",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/telekon-gary-numan/ihijby5jrhpyc",
+          "releaseDate": "2025-12-12"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Gary%20Numan"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Gary%20Numan"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.numan.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/12588"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Gary%20Numan&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Gary%20Numan"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/garynuman/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCUxV8b_z4xI8Qbo1tsOTABg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/GaryNumanOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

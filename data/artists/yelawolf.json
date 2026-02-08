@@ -1,0 +1,57 @@
+[
+  {
+    "id": "yelawolf",
+    "name": "Yelawolf",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0015954132_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/yelawolf/496026",
+        "latestRelease": {
+          "title": "Whiskey Roses Yelawolf J Michael Phillips",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/whiskey-roses-yelawolf-j-michael-phillips/rb8krw7qjwkfb",
+          "releaseDate": "2025-07-11"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://yelawolf.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Yelawolf"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Yelawolf"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.yelawolf.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1207395"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/yelawolf/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCeWSsy6hPAxThTS6QSAVwAA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/yelawolf"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

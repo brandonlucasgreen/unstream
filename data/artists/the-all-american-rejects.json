@@ -1,0 +1,97 @@
+[
+  {
+    "id": "theallamericanrejects",
+    "name": "The All-American Rejects",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027252627_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://therejects.bandcamp.com",
+        "allReleaseTitles": [
+          "flagpolesitta",
+          "kidsinthestreetlimitedtouredition",
+          "whentheworldcomesdown",
+          "movealong",
+          "sierrassong",
+          "staydemocompilationtrack"
+        ],
+        "latestRelease": {
+          "title": "Flagpole Sitta",
+          "type": "album",
+          "url": "https://therejects.bandcamp.com/album/flagpole-sitta",
+          "imageUrl": "https://f4.bcbits.com/img/a1374911194_2.jpg",
+          "releaseDate": "December 6, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-all-american-rejects/67937",
+        "allReleaseTitles": [
+          "movealong",
+          "eggshelltapdancer",
+          "easycomeeasygo",
+          "searchparty",
+          "sendhertoheaven",
+          "getthis",
+          "sierrassong",
+          "whentheworldcomesdown",
+          "",
+          "flagpolesitta",
+          "kidsinthestreet",
+          "flatlineep",
+          "sweat",
+          "dirtylittlesecret",
+          "theresaplace"
+        ],
+        "latestRelease": {
+          "title": "Eggshell Tap Dancer The All American Rejects",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/eggshell-tap-dancer-the-all-american-rejects/wdkkmz0i1coma",
+          "releaseDate": "2025-10-24"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20All-American%20Rejects"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20All-American%20Rejects"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.allamericanrejects.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/354092"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20All-American%20Rejects&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20All-American%20Rejects"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/therejects/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/allamericanrejects1"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/AllAmericanRejects"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

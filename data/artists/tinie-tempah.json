@@ -1,0 +1,79 @@
+[
+  {
+    "id": "tinietempah",
+    "name": "Tinie Tempah",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a2554295791_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/tinie-tempah/291160",
+        "latestRelease": {
+          "title": "Closer Tinie Tempah Abi Flynn",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/closer-tinie-tempah-abi-flynn/c2icyzsvjx2fb",
+          "releaseDate": "2025-09-26"
+        },
+        "allReleaseTitles": [
+          "diamondsmartingarrixjulianjordanand",
+          "eatitupskepsiscarlamonroe",
+          "closerabiflynn",
+          "morelifefeatldevinetorrenfoot",
+          "blazinfeatenisatimmytrumpet",
+          "leaderdimitrivegaslikemikesunneryjamesryanmarciano",
+          "energyalexmills",
+          "picklenervoparishilton",
+          "lethimgodenonreedbugzymaloneandcru2",
+          "junkfood",
+          "girlslikefeatzaralarsson",
+          "childrenofthesun",
+          "youth",
+          "writteninthestarsfeatericturner",
+          "discovery",
+          "demonstration"
+        ]
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tinietempah.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tinie%20Tempah"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tinie%20Tempah"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://tinietempah.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/534451"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/tiniegram/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@tinietempah?lang=en-GB"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/Milkand2SugarsTV"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/tinietempahofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

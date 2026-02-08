@@ -1,0 +1,74 @@
+[
+  {
+    "id": "belleandsebastian",
+    "name": "Belle and Sebastian",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027902117_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://belleandsebastian.bandcamp.com",
+        "allReleaseTitles": [
+          "whathappenedtoyouson",
+          "latedevelopers",
+          "latedevelopers24bit",
+          "abitofprevious",
+          "abitofprevious",
+          "abitofprevious24bit",
+          "whattolookforinsummer24bit",
+          "daysofthebagnoldsummer",
+          "howtosolveourhumanproblemsparts13",
+          "girlsinpeacetimewanttodance"
+        ],
+        "latestRelease": {
+          "title": "What Happened to You, Son?",
+          "type": "track",
+          "url": "https://belleandsebastian.bandcamp.com/track/what-happened-to-you-son",
+          "imageUrl": "https://f4.bcbits.com/img/a1944598479_2.jpg",
+          "releaseDate": "April 16, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Belle%20and%20Sebastian"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Belle%20and%20Sebastian"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://belleandsebastian.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/252864"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Belle%20and%20Sebastian&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Belle%20and%20Sebastian"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/bellesglasgow/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCIS-RzDIUQcYGL0aSLA67hw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/belleandsebastian"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

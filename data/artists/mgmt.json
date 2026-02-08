@@ -1,0 +1,96 @@
+[
+  {
+    "id": "mgmt",
+    "name": "MGMT",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0034008879_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mgmt.bandcamp.com",
+        "allReleaseTitles": [
+          "lossoflife",
+          "111111",
+          "intheafternoon"
+        ],
+        "latestRelease": {
+          "title": "Loss Of Life",
+          "type": "album",
+          "url": "https://mgmt.bandcamp.com/album/loss-of-life",
+          "imageUrl": "https://f4.bcbits.com/img/a0615845406_2.jpg",
+          "releaseDate": "February 23, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/mgmt/118680",
+        "allReleaseTitles": [
+          "littledarkage",
+          "oracularspectacular",
+          "lossoflife",
+          "",
+          "congratulations",
+          "bonbonandrewvanwyngardenremixfcukersandrewvanwyngardenand",
+          "bubblegumdog",
+          "mothernature",
+          "11o11o11",
+          "kids",
+          "nothingtodeclare",
+          "dancinginbabylonfeatchristineandthequeensfeaturingchristineandthequeens",
+          "yourlifeisalie",
+          "electricfeel",
+          "metanoia",
+          "latenighttales",
+          "kidsthodoristriantafilloumangataprojekt",
+          "intheafternoon",
+          "congratulationsremixes"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=MGMT"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+MGMT"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://whoismgmt.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/985480"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=MGMT&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/MGMT"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/whoismgmt/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@whoismgmt"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCC2i4uIWWjx5L5V5Q5k7eiQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/mgmt"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

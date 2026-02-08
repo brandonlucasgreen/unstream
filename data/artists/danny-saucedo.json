@@ -1,0 +1,72 @@
+[
+  {
+    "id": "dannysaucedo",
+    "name": "Danny Saucedo",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013249521_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://dannysaucedo.bandcamp.com",
+        "allReleaseTitles": [
+          "missioncontrol",
+          "wishthetimeaway",
+          "gradschoolofhardknocksayearofepssampler",
+          "kingkongyearofeps12",
+          "experimentsinsoutherndiscomfortyearofeps11",
+          "galapagosyearofeps10",
+          "ragnarockyearofeps9",
+          "applebaseballsuiteyearofeps8",
+          "thinkbigfeelgoodyearofeps7",
+          "manvsmachineyearofeps6",
+          "thecubeyearofeps5",
+          "thankyoujennyyearofeps4",
+          "travelogueyearofeps3",
+          "kemoneyignhayearofeps2",
+          "eatyourvegetablesyearofeps1",
+          "monthsofyesyearofsummer"
+        ],
+        "latestRelease": {
+          "title": "Mission Control",
+          "type": "album",
+          "url": "https://dannysaucedo.bandcamp.com/album/mission-control",
+          "imageUrl": "https://f4.bcbits.com/img/a2356130470_2.jpg",
+          "releaseDate": "July 3, 2018"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Danny%20Saucedo"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Danny%20Saucedo"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://dannysaucedo.se/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/753953"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/dannysaucedo/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCWOkol2FbqGYfZ4M9n5XnMA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/35624488780"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

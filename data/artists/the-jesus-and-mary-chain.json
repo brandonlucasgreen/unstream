@@ -1,0 +1,96 @@
+[
+  {
+    "id": "thejesusandmarychain",
+    "name": "The Jesus And Mary Chain",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027308189_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thejesusandmarychain.bandcamp.com",
+        "allReleaseTitles": [
+          "popseeds",
+          "glasgoweyes",
+          "munki",
+          "sunset666",
+          "damageandjoy",
+          "liveatbarrowland"
+        ],
+        "latestRelease": {
+          "title": "Pop Seeds",
+          "type": "track",
+          "url": "https://thejesusandmarychain.bandcamp.com/track/pop-seeds",
+          "imageUrl": "https://f4.bcbits.com/img/a4253726485_2.jpg",
+          "releaseDate": "September 4, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-jesus-and-mary-chain/458148",
+        "allReleaseTitles": [
+          "glasgoweyes",
+          "darklands",
+          "justlikehoney2021elinocenteversion",
+          "popseeds",
+          "chemicalanimal",
+          "girl71",
+          "psychocandy",
+          "automatic",
+          "automaticdmd",
+          "stonedanddethroned",
+          "upsidedown1984ep",
+          "neverunderstand3trackep",
+          "somecandytalkingep",
+          "sidewalking",
+          "youtripmeupep",
+          "damageandjoy"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Jesus%20And%20Mary%20Chain"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Jesus%20And%20Mary%20Chain"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://themarychain.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/243280"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Jesus%20And%20Mary%20Chain&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Jesus%20And%20Mary%20Chain"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jesusandmarychain/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@themarychainofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCAlP0LcJ_RVqLvNr78w8MmA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JesusAndMaryChain"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,73 @@
+[
+  {
+    "id": "sisterrosettatharpe",
+    "name": "Sister Rosetta Tharpe",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019462249_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sister-rosetta-tharpe/31122",
+        "allReleaseTitles": [
+          "liveinfrancethe1966concertinlimogeslive",
+          "gospeltrain",
+          "thedeccasinglesvol3",
+          "thegospeloftheblues",
+          "theauthorizedcollection",
+          "thegospeltruthallnewhergreatestgospelhits",
+          "thedeccasinglesvol1",
+          "livein1960",
+          "downbytheriversidelive",
+          "thedeccasinglesvol4",
+          "presenting",
+          "thegoldenstarcollection",
+          "thedeccasinglesvol5",
+          "thesensationalfromcarnegiehalltoantibes",
+          "shoutsistershout",
+          "didntitrainlive",
+          "",
+          "thedeccasinglesvol2"
+        ],
+        "latestRelease": {
+          "title": "Live In France The 1966 Concert In Limoges Live Sister Rosetta Tharpe",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/live-in-france-the-1966-concert-in-limoges-live-sister-rosetta-tharpe/qenupvpe3r3ha",
+          "releaseDate": "2024-04-19"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sisterrosettatharpe.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sister%20Rosetta%20Tharpe"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sister%20Rosetta%20Tharpe"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/322295"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sister%20Rosetta%20Tharpe&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sister%20Rosetta%20Tharpe"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCM8MNT2OAyMhnnZWJHkE69Q"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

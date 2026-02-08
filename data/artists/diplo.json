@@ -1,0 +1,88 @@
+[
+  {
+    "id": "diplo",
+    "name": "Diplo",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027915856_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://diplo.bandcamp.com",
+        "allReleaseTitles": [
+          "berighttheresleepytomsdecademixdiplosleepytom",
+          "heavenornotamemeremixextendeddiplorivastarrfeatkareenlomaxkareenlomax",
+          "onmymindsidepiecevipextendeddiplosidepiece",
+          "wishfallonremixextendeddiplofeattrippieredd",
+          "heavenornotextendeddiplorivastarrfeatkareenlomax",
+          "anthemextendeddiplosharamfeatpony",
+          "stayhighremixesextendeddiplohugelfeatjuliachurchjuliachurch",
+          "stayhighzerbremixextendeddiplohugelfeatjuliachurch",
+          "stayhighextendeddiplohugelfeatjuliachurch",
+          "favelajointdiplokura",
+          "diamondtherapydiplowalkerroycefeatchanneltres",
+          "diamondtherapyextendeddiplowalkerroycefeatchanneltres",
+          "expressyourselfmochakkremixdiplonickydab",
+          "diplopresentshigherground3yearslpextended",
+          "wishspedup",
+          "diplolifeanddeathremixesextended"
+        ],
+        "latestRelease": {
+          "title": "Be Right There (Sleepy Tom's Decade Mix)\n                \n                \n\n                Diplo & Sleepy Tom",
+          "type": "album",
+          "url": "https://diplo.bandcamp.com/album/be-right-there-sleepy-toms-decade-mix",
+          "imageUrl": "https://f4.bcbits.com/img/a2114153084_2.jpg",
+          "releaseDate": "December 19, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Diplo"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Diplo"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.diplo.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/191242"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Diplo&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Diplo"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/diplo/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@diplo"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCKp7UVaoVuiW1qtyPLPVFMQ"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@diplo"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/diplo"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "deanedwards",
+    "name": "Dean Edwards",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a1456545366_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://deanedwards.bandcamp.com",
+        "allReleaseTitles": [
+          "comewithme",
+          "fracture"
+        ],
+        "latestRelease": {
+          "title": "Come With Me",
+          "type": "track",
+          "url": "https://deanedwards.bandcamp.com/track/come-with-me",
+          "imageUrl": "https://f4.bcbits.com/img/a1456545366_16.jpg",
+          "releaseDate": "October 12, 2010"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Dean%20Edwards"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Dean%20Edwards"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,76 @@
+[
+  {
+    "id": "tommyemmanuel",
+    "name": "Tommy Emmanuel",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0035026412_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tommyemmanuel.bandcamp.com",
+        "allReleaseTitles": [
+          "accomplicetwo",
+          "livefromthebalboatheatre",
+          "thebestoftommysongs",
+          "livechristmastime",
+          "heartsongs",
+          "pickin",
+          "christmasmemories",
+          "theguitarmasteryoftommyemmanuel"
+        ],
+        "latestRelease": {
+          "title": "Accomplice Two",
+          "type": "album",
+          "url": "https://tommyemmanuel.bandcamp.com/album/accomplice-two",
+          "imageUrl": "https://f4.bcbits.com/img/a3247553394_2.jpg",
+          "releaseDate": "April 28, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tommy%20Emmanuel"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tommy%20Emmanuel"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://tommyemmanuel.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/532805"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Tommy%20Emmanuel&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Tommy%20Emmanuel"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/tommyemmanuelcgp/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@tommyemmanuelcgp"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCL-0gAth4u6Wp-9_98XU3nA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/tommyemmanuel"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

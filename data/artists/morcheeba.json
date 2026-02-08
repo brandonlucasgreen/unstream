@@ -1,0 +1,78 @@
+[
+  {
+    "id": "morcheeba",
+    "name": "Morcheeba",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038431602_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://morcheeba.bandcamp.com",
+        "allReleaseTitles": [
+          "remixthechaosvolume1",
+          "weliveanddiepaulataperemixmorcheebapaulatape",
+          "elephantcloudstrancewaxremixmorcheebatrancewax",
+          "escapethechaos",
+          "blackestbluetheremixes",
+          "cutmyheartoutjazzanovaremix",
+          "themoonvoyouremix",
+          "soundsofblueguiborattoremixes",
+          "namasteorbitalremix",
+          "theedgeoftheworlddefsetremix",
+          "soundofbluevokagentleremix",
+          "killedourloveboyocaremix",
+          "blackestblue",
+          "blazeawaytheremixes",
+          "blazeaway"
+        ],
+        "latestRelease": {
+          "title": "Remix The Chaos (Volume 1)",
+          "type": "album",
+          "url": "https://morcheeba.bandcamp.com/album/remix-the-chaos-volume-1",
+          "imageUrl": "https://f4.bcbits.com/img/a4135400563_2.jpg"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Morcheeba"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Morcheeba"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.morcheeba.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/10398"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Morcheeba&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Morcheeba"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/morcheebaband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCf3-TfXpRX8jDxePsfhvXNQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MorcheebaBand"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

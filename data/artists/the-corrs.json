@@ -1,0 +1,80 @@
+[
+  {
+    "id": "thecorrs",
+    "name": "The Corrs",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011766481_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-corrs/205787",
+        "allReleaseTitles": [
+          "bestof",
+          "whitelight",
+          "jupitercalling",
+          "unplugged",
+          "breathless",
+          "littlelies",
+          "inblue",
+          "forgivennotforgotten",
+          "talkoncorners",
+          "vh1presentsliveindublin",
+          "dreamstheultimatecorrscollection",
+          "home",
+          "songbird"
+        ],
+        "latestRelease": {
+          "title": "Jupiter Calling The Corrs",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/jupiter-calling-the-corrs/0190295733803",
+          "releaseDate": "2017-11-10"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thecorrs.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Corrs"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Corrs"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.thecorrswebsite.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/108483"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Corrs&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Corrs"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thecorrsofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/thecorrsmultimedia"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thecorrsofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

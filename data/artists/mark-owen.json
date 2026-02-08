@@ -1,0 +1,54 @@
+[
+  {
+    "id": "markowen",
+    "name": "Mark Owen",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0000203528_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://markowen.bandcamp.com",
+        "allReleaseTitles": [
+          "memoriesoftimesweneverknew",
+          "artificialgrass"
+        ],
+        "latestRelease": {
+          "title": "Memories of times we never knew",
+          "type": "album",
+          "url": "https://markowen.bandcamp.com/album/memories-of-times-we-never-knew",
+          "imageUrl": "https://f4.bcbits.com/img/a3069395201_16.jpg",
+          "releaseDate": "June 1, 2012"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mark%20Owen"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mark%20Owen"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.markowenofficial.com/markOwen.php"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/301244"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Mark%20Owen&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Mark%20Owen"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

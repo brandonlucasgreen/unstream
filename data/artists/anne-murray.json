@@ -1,0 +1,78 @@
+[
+  {
+    "id": "annemurray",
+    "name": "Anne Murray",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022189751_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/anne-murray/52796",
+        "allReleaseTitles": [
+          "hereyouare",
+          "sgreatesthits",
+          "country",
+          "newkindoffeeling",
+          "letskeepitthatway",
+          "christmaswishes",
+          "resteasyinmylove",
+          "thebestofsofar20greatesthits",
+          "countrycroonin",
+          "whatawonderfulworld",
+          "theultimatecollection",
+          "illbeseeingyou",
+          "whataboutme",
+          "duetsfriendslegends",
+          "croonin"
+        ],
+        "latestRelease": {
+          "title": "Here You Are Anne Murray",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/here-you-are-anne-murray/opx9c3kjxa0ec",
+          "releaseDate": "2025-09-05"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://annemurray.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Anne%20Murray"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Anne%20Murray"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.annemurray.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/364535"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Anne%20Murray&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Anne%20Murray"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCqpi7u3KdKQf391DyUPoAYw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Anne-Murray/186977014688350"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

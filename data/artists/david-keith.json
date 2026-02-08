@@ -1,0 +1,27 @@
+[
+  {
+    "id": "davidkeith",
+    "name": "David Keith",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018672024_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://davidkeith.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=David%20Keith"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+David%20Keith"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "unverified"
+  }
+]

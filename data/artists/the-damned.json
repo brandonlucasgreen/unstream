@@ -1,0 +1,75 @@
+[
+  {
+    "id": "thedamned",
+    "name": "The Damned",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0009208574_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thedamnedmusic.bandcamp.com",
+        "allReleaseTitles": [
+          "tikinightmareliveinlondonphysicalcopyonly",
+          "neatneatneat",
+          "shadowedtalesfrommulhouse",
+          "fiendishshadows",
+          "punkodditiesraretracks19771982",
+          "fiendishshadows",
+          "punkgenerationbestofthedamnedodditiesversions"
+        ],
+        "latestRelease": {
+          "title": "Tiki Nightmare: Live In London (Physical Copy Only)",
+          "type": "album",
+          "url": "https://thedamnedmusic.bandcamp.com/album/tiki-nightmare-live-in-london-physical-copy-only",
+          "imageUrl": "https://f4.bcbits.com/img/a0972703316_2.jpg",
+          "releaseDate": "January 23, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Damned"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Damned"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.officialdamned.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/152965"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Damned&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Damned"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/eternally_damned/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@thedamnedofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCzutsHtxpt5NlFFF_vQUHpQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/OfficialDamned"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

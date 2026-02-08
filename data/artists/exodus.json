@@ -1,0 +1,99 @@
+[
+  {
+    "id": "exodus",
+    "name": "Exodus",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0042463914_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://exodus.bandcamp.com",
+        "allReleaseTitles": [
+          "goliath",
+          "hesawomanshesaman"
+        ],
+        "latestRelease": {
+          "title": "Goliath",
+          "type": "album",
+          "url": "https://exodus.bandcamp.com/album/goliath",
+          "imageUrl": "https://f4.bcbits.com/img/a2453555077_16.jpg"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/Exodus_cl"
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/exodus/290773",
+        "allReleaseTitles": [
+          "personanongrata",
+          "hesawomanshesaman",
+          "britishdisasterthebattleof89",
+          "3111",
+          "goliath",
+          "nevermore",
+          "bulletintheback",
+          "bondedbyblood",
+          "tempoofthedamned",
+          "fabulousdisaster",
+          "bloodinbloodout",
+          "shovelheadedkillmachine",
+          "beatingaroundthebush",
+          "impactisimminent",
+          "theatrocityexhibitionexhibita",
+          "pleasuresoftheflesh",
+          "forceofhabit",
+          "exhibitbthehumancondition",
+          "lettherebeblood",
+          "shovelheadedtourmachineliveatwackenandotherassortedatrocities"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Exodus"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Exodus"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://exodusattack.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/261365"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Exodus&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Exodus"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/exodusbandofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@exodusattack"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCu-HD6pfH1GqUUe-BWvfhNw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/exodusattack"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

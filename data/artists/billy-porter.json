@@ -1,0 +1,56 @@
+[
+  {
+    "id": "billyporter",
+    "name": "Billy Porter",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a1927793974_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/billy-porter/208647",
+        "allReleaseTitles": [
+          "blackmonalisavol2thecookoutsessions",
+          "blackmonalisa",
+          "presentsthesoulofrichardrodgers",
+          "leapsgtslick",
+          "children",
+          "babywasadancer",
+          "childrenwhattimeitisladyblackbird",
+          "loveyourself",
+          "billysbackonbroadway",
+          "loveyourselftheremixes",
+          "haveyourselfamerrylittlechristmas",
+          "forwhatitsworthfeatstephenstills",
+          "strangerthings",
+          "alwaysbemymanlukeevans",
+          "fashion",
+          "brokeasweat",
+          "leapdalemove"
+        ],
+        "latestRelease": {
+          "title": "Black Mona Lisa Vol 2 The Cookout Sessions Billy Porter",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/black-mona-lisa-vol-2-the-cookout-sessions-billy-porter/plmrzd77twr9a",
+          "releaseDate": "2024-09-06"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://billyporter.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Billy%20Porter"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Billy%20Porter"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

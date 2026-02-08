@@ -1,0 +1,83 @@
+[
+  {
+    "id": "elmerbernstein",
+    "name": "Elmer Bernstein",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039424333_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/elmer-bernstein/49",
+        "allReleaseTitles": [
+          "slipstreamoriginalmotionpicturesoundtrack",
+          "tokillamockingbird",
+          "thesilencerssoundtrack",
+          "walkonthewildside",
+          "ghostbustersoriginalmotionpicturescore",
+          "torncurtaintheroyalphilharmonicorchestra",
+          "sweetsmellofsuccesschicohamilton",
+          "capefear",
+          "theghostandmrsmuir",
+          "stripesoriginalmotionpicturesoundtrack",
+          "nationalgeographicthemeanzerozman",
+          "wutheringheights",
+          "themanwiththegoldenarm",
+          "themagnificentseven",
+          "letempsdelinnocencetheageofinnocence1993",
+          "farfromheaven",
+          "byelmerbernsteintheroyalphilharmonicpopsorchestra",
+          "tokillamockingbirdroyalscottishnationalorchestra",
+          "truegritutahsymphony",
+          "cecilbdemillesthetencommandments"
+        ],
+        "latestRelease": {
+          "title": "Slipstream Original Motion Picture Soundtrack Elmer Bernstein",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/slipstream-original-motion-picture-soundtrack-elmer-bernstein/cs5qqk5nqd8eb",
+          "releaseDate": "2025-02-13"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://elmerbernstein.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Elmer%20Bernstein"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Elmer%20Bernstein"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.elmerbernstein.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/36868"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Elmer%20Bernstein&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Elmer%20Bernstein"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/results?search_query=elmer+bernstein+interview"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Elmer-Bernstein-16755596762"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

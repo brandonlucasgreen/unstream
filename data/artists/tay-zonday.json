@@ -1,0 +1,71 @@
+[
+  {
+    "id": "tayzonday",
+    "name": "Tay Zonday",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026539509_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/tay-zonday/7450267",
+        "allReleaseTitles": [
+          "alienchristmas",
+          "gottacatchemallpokemonthemesong",
+          "mamaeconomytheeconomyexplainedfeatlindseystirling",
+          "fiatfire"
+        ],
+        "latestRelease": {
+          "title": "Fiat Fire Tay Zonday",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/fiat-fire-tay-zonday/judew4dbwgacc",
+          "releaseDate": "2023-05-18"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://zonday.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tay%20Zonday"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tay%20Zonday"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.tayzonday.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1813880"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://instagram.com/tayzonday"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@tayzonday"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/tayzonday"
+      },
+      {
+        "sourceId": "bluesky",
+        "url": "https://bsky.app/profile/tayzonday.com"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/tayzonday"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

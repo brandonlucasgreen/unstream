@@ -1,0 +1,87 @@
+[
+  {
+    "id": "catpower",
+    "name": "Cat Power",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013885833_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/cat-power/34526",
+        "allReleaseTitles": [
+          "singsdylanthe1966royalalberthallconcert",
+          "wanderer",
+          "redux",
+          "covers",
+          "thegreatestslipcaseedition",
+          "thegreatest",
+          "darkendofthestreet",
+          "whattheworldneedsnow",
+          "tryme",
+          "shebelongstomeballadofathinman",
+          "moonpix",
+          "flagdayeddievedderglenhansard",
+          "flagdayeddievedderglenhansard",
+          "woman",
+          "tooptoopatributetozdarm",
+          "mrtambourinemanlikearollingstone",
+          "badreligionapairofbrowneyes",
+          "stay",
+          "unhateillbeseeingyou",
+          "yougotthesilver"
+        ],
+        "latestRelease": {
+          "title": "Redux Cat Power",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/redux-cat-power/fsbai5gtqqt9a",
+          "releaseDate": "2026-01-23"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://catpower.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Cat%20Power"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Cat%20Power"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.catpowermusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/103195"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Cat%20Power&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Cat%20Power"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/catpowerofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/CatPowerVEVO"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/CatPowerSun"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

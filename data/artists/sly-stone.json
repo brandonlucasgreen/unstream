@@ -1,0 +1,38 @@
+[
+  {
+    "id": "slystone",
+    "name": "Sly Stone",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0006659416_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://slystonemusic.bandcamp.com",
+        "allReleaseTitles": [
+          "familyaffairtheverybestof",
+          "imbackfamilyfriends"
+        ],
+        "latestRelease": {
+          "title": "Family Affair The Very Best Of",
+          "type": "album",
+          "url": "https://slystonemusic.bandcamp.com/album/family-affair-the-very-best-of",
+          "imageUrl": "https://f4.bcbits.com/img/a0478114994_16.jpg",
+          "releaseDate": "July 6, 2016"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sly%20Stone"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sly%20Stone"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

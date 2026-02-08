@@ -1,0 +1,79 @@
+[
+  {
+    "id": "lacrimosa",
+    "name": "lacrimosa.",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0040286599_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://lacrimosami.bandcamp.com",
+        "allReleaseTitles": [
+          "thewitchofendor",
+          "therelief",
+          "yougetusedtoit",
+          "rot",
+          "letterofintent",
+          "antichoralmass",
+          "lacrimosa"
+        ],
+        "latestRelease": {
+          "title": "The Witch of Endor",
+          "type": "album",
+          "url": "https://lacrimosami.bandcamp.com/album/the-witch-of-endor",
+          "imageUrl": "https://f4.bcbits.com/img/a1483501442_2.jpg",
+          "releaseDate": "July 18, 2025"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/LacrimosaALT"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=lacrimosa."
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+lacrimosa."
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.lacrimosa.ch/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/93828"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=lacrimosa.&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/lacrimosa."
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://www.instagram.com/lacrimosa_official"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "http://www.tiktok.com/@lacrimosatilowolff"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/LACRIMOSAofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/LacrimosaOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,59 @@
+[
+  {
+    "id": "tomlehrer",
+    "name": "Tom Lehrer",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032126061_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tomlehrer.bandcamp.com",
+        "allReleaseTitles": [
+          "thatwastheyearthatwas",
+          "revisited",
+          "aneveningwastedwithtomlehrer",
+          "moreoftomlehrer",
+          "songsbytomlehrer",
+          "theconductedtomlehrer",
+          "thatsmathematicsbwigotitfromagnes"
+        ],
+        "latestRelease": {
+          "title": "That Was the Year That Was",
+          "type": "album",
+          "url": "https://tomlehrer.bandcamp.com/album/that-was-the-year-that-was",
+          "imageUrl": "https://f4.bcbits.com/img/a0426794207_2.jpg",
+          "releaseDate": "January 1, 1965"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tom%20Lehrer"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tom%20Lehrer"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://tomlehrersongs.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/457354"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Tom%20Lehrer&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Tom%20Lehrer"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

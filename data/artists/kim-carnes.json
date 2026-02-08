@@ -1,0 +1,91 @@
+[
+  {
+    "id": "kimcarnes",
+    "name": "Kim Carnes",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027276975_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/kim-carnes/154087",
+        "allReleaseTitles": [
+          "bettedaviseyes",
+          "mistakenidentity",
+          "gypsyhoneymoonthebestof",
+          "essential",
+          "chasinwildtrains",
+          "bettedaviseyesedmremix",
+          "barkingatairplanes",
+          "caferacers",
+          "voyeur",
+          "viewfromthehouse",
+          "romancedance",
+          "lighthouse",
+          "",
+          "stvincentscourt",
+          "sailin",
+          "restonmeremastered",
+          "restonme",
+          "sweetloveofmysoul",
+          "ifiwasanangel",
+          "undermythumb"
+        ],
+        "latestRelease": {
+          "title": "Bette Davis Eyes Kim Carnes",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/bette-davis-eyes-kim-carnes/o9obaegp9rpaa",
+          "releaseDate": "2024-04-19"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kimcarnes.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kim%20Carnes"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kim%20Carnes"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.kimcarnes.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/110283"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Kim%20Carnes&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Kim%20Carnes"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thekimcarnes/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@kimcarnesofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCGrMkiKEhZp6fK-J97PLKLg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/OfficialKimCarnes"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,104 @@
+[
+  {
+    "id": "acefrehley",
+    "name": "Ace Frehley",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014732527_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://acefrehley.bandcamp.com",
+        "allReleaseTitles": [
+          "10000volts",
+          "originsvol2",
+          "spaceman",
+          "bronxboy",
+          "anomalydeluxeedition",
+          "originsvol1",
+          "spaceinvader"
+        ],
+        "latestRelease": {
+          "title": "10,000 Volts",
+          "type": "album",
+          "url": "https://acefrehley.bandcamp.com/album/10000-volts",
+          "imageUrl": "https://f4.bcbits.com/img/a1784374900_2.jpg",
+          "releaseDate": "February 23, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ace-frehley/71403",
+        "allReleaseTitles": [
+          "kiss",
+          "kiss",
+          "10000volts",
+          "originsvol1",
+          "spaceinvaderdeluxeedition",
+          "originsvol2",
+          "spaceinvader",
+          "cherrymedicine",
+          "gimmeafeelin",
+          "troublewalkin",
+          "frehleyscomet",
+          "anomalydeluxeedition",
+          "spaceman",
+          "kissbestofsoloalbumsgenesimmonspaulstanleypetercriss",
+          "spacetruckin",
+          "imdown",
+          "walkinonthemoon",
+          "parasitefeatjohn5",
+          "newyorkgroove"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ace%20Frehley"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ace%20Frehley"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://ace-frehley.square.site/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1758424"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ace%20Frehley&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ace%20Frehley"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/acefrehleyofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@acefrehley_official"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCDCu0bwocqWVSnh5Gh-4TkQ"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@acefrehleyofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/56216285377"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

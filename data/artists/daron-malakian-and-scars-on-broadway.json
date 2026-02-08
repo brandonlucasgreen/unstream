@@ -1,0 +1,81 @@
+[
+  {
+    "id": "daronmalakianandscarsonbroadway",
+    "name": "Daron Malakian And Scars On Broadway",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0040352724_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://daronmalakianandscarsonbroadway.bandcamp.com",
+        "allReleaseTitles": [
+          "addictedtotheviolence",
+          "dictator",
+          "scarsonbroadway"
+        ],
+        "latestRelease": {
+          "title": "Addicted To The Violence",
+          "type": "album",
+          "url": "https://daronmalakianandscarsonbroadway.bandcamp.com/album/addicted-to-the-violence",
+          "imageUrl": "https://f4.bcbits.com/img/a1975495985_2.jpg",
+          "releaseDate": "July 19, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/daronmalakianandscarsonbroadway-10003631566/3631566",
+        "allReleaseTitles": [
+          "addictedtotheviolence",
+          "warforreligion",
+          "scarsonbroadway",
+          "dictator",
+          "fuckingshotgun",
+          "killingspree",
+          "lives",
+          "destroythepower"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Daron%20Malakian%20And%20Scars%20On%20Broadway"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Daron%20Malakian%20And%20Scars%20On%20Broadway"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.scarsonbroadway.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1203596"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Daron%20Malakian%20And%20Scars%20On%20Broadway&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Daron%20Malakian%20And%20Scars%20On%20Broadway"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/scarsonbroadway/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/scarsonbroadwayvideo"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/scarsonbroadway"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

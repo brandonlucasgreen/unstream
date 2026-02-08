@@ -1,0 +1,83 @@
+[
+  {
+    "id": "pattiaustin",
+    "name": "Patti Austin",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0006685098_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/patti-austin/39344",
+        "allReleaseTitles": [
+          "ellaandlouisjamesmorrisonmelbournesymphonyorchestra",
+          "loveisgonnagetcha",
+          "babycometomeotherhits",
+          "",
+          "forella2",
+          "inoutoflove",
+          "eveofdestruction",
+          "everyhomeshouldhaveone",
+          "thatsecretplace",
+          "thebestof",
+          "therealme",
+          "forella",
+          "gettinawaywithmurder",
+          "endofarainbow",
+          "havanacandy",
+          "avantgershwin",
+          "bodylanguage",
+          "onthewaytolove",
+          "live",
+          "carryon"
+        ],
+        "latestRelease": {
+          "title": "For Ella 2 Patti Austin",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/for-ella-2-patti-austin/qmexe60c1x3fa",
+          "releaseDate": "2023-04-21"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://pattiaustin.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Patti%20Austin"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Patti%20Austin"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://pattiaustin.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/25284"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Patti%20Austin&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Patti%20Austin"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCRynza9IXB5ke6CjHqEjc1g"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/PattiAustinMusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

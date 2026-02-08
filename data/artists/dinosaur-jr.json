@@ -1,0 +1,111 @@
+[
+  {
+    "id": "dinosaurjr",
+    "name": "Dinosaur Jr.",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0023819975_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://dinosaurjr.bandcamp.com",
+        "allReleaseTitles": [
+          "farm15thanniversaryedition",
+          "emptinessatthesinclair",
+          "sweepitintospace",
+          "handitover",
+          "withoutasound",
+          "whereyoubeen",
+          "greenmind",
+          "liveinthemiddleeast",
+          "giveaglimpseofwhatyernot",
+          "ibetonsky",
+          "farm",
+          "beyond",
+          "bug",
+          "yourelivingalloverme",
+          "dinosaur"
+        ],
+        "latestRelease": {
+          "title": "Farm (15th Anniversary Edition)",
+          "type": "album",
+          "url": "https://dinosaurjr.bandcamp.com/album/farm-15th-anniversary-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a1695119081_2.jpg",
+          "releaseDate": "August 16, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/dinosaur-jr/160043",
+        "allReleaseTitles": [
+          "withoutasound",
+          "whereyoubeen",
+          "greenmind",
+          "giveaglimpseofwhatyernot",
+          "pukecrythesireyears19901997",
+          "sweepitintospace",
+          "handitover",
+          "wheneveryoureready",
+          "yourelivingalloverme",
+          "bug",
+          "farm",
+          "beyond",
+          "emptinessatthesinclair",
+          "whateverscoolwithme",
+          "chocomeldaze",
+          "piecesbwhouses"
+        ],
+        "latestRelease": {
+          "title": "Puke Cry The Sire Years 1990 1997 Dinosaur Jr",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/puke-cry-the-sire-years-1990-1997-dinosaur-jr/pji0r59o8y1oc",
+          "releaseDate": "2023-01-27"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Dinosaur%20Jr."
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Dinosaur%20Jr."
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.dinosaurjr.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/55965"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Dinosaur%20Jr.&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Dinosaur%20Jr."
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/dinosaurjr/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@officialdinosaurjr"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCfo74Lcf9bcQJd2MMq-XBzw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/DinosaurJr"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

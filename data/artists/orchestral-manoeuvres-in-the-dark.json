@@ -1,0 +1,97 @@
+[
+  {
+    "id": "orchestralmanoeuvresinthedark",
+    "name": "Orchestral Manoeuvres in the Dark",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030397338_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://omdbandofficial.bandcamp.com",
+        "allReleaseTitles": [
+          "bauhausstaircasethecompleteedition",
+          "bauhausstaircase",
+          "thepunishmentofluxury",
+          "historyofmodern"
+        ],
+        "latestRelease": {
+          "title": "Bauhaus Staircase (The Complete Edition)",
+          "type": "album",
+          "url": "https://omdbandofficial.bandcamp.com/album/bauhaus-staircase-the-complete-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a3595575953_16.jpg",
+          "releaseDate": "May 14, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/orchestral-manoeuvres-in-the-dark/38352",
+        "allReleaseTitles": [
+          "bauhausstaircase",
+          "junkculture",
+          "thepunishmentofluxury",
+          "architectureandmorality",
+          "atmosphericsgreatesthits",
+          "crush",
+          "liveatthehammersmithapollo",
+          "liveattheliverpoolempire",
+          "thepunishmentofluxuryremixes",
+          "whathavewedone",
+          "theviewfromhere",
+          "lamitrailleuse",
+          "organisation",
+          "theomdsingles",
+          "",
+          "englishelectric",
+          "dazzleships"
+        ],
+        "latestRelease": {
+          "title": "Bauhaus Staircase Orchestral Manoeuvres In The Dark",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/bauhaus-staircase-orchestral-manoeuvres-in-the-dark/l2u8xuw8wsaob",
+          "releaseDate": "2023-10-27"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Orchestral%20Manoeuvres%20in%20the%20Dark"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Orchestral%20Manoeuvres%20in%20the%20Dark"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.omd.uk.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/9462"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Orchestral%20Manoeuvres%20in%20the%20Dark&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Orchestral%20Manoeuvres%20in%20the%20Dark"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/omdhq/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "http://www.youtube.com/@OMDOfficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/omdofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,43 @@
+[
+  {
+    "id": "valerielemercier",
+    "name": "Valérie Lemercier",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036554235_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/valerie-lemercier/59851",
+        "allReleaseTitles": [
+          "chante",
+          "pierreetleloupetautrespiecesrusses",
+          "prokofievpierreetleloupetautrepiecesrussestugansokhievorchestrenationalducapitoledetoulouse",
+          "jaiunmaripascaleboreland"
+        ],
+        "latestRelease": {
+          "title": "Pierre Et Le Loup Et Autres Pieces Russes Valerie Lemercier",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/pierre-et-le-loup-et-autres-pieces-russes-valerie-lemercier/0822189005542",
+          "releaseDate": "2007-10-30"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://valerielemercier.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Val%C3%A9rie%20Lemercier"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Val%C3%A9rie%20Lemercier"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

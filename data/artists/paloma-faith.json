@@ -1,0 +1,71 @@
+[
+  {
+    "id": "palomafaith",
+    "name": "Paloma Faith",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0035105611_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/paloma-faith/148538",
+        "latestRelease": {
+          "title": "Bad Woman Paloma Faith",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/bad-woman-paloma-faith/fk8gk3xev5ura",
+          "releaseDate": "2025-06-13"
+        },
+        "allReleaseTitles": [
+          "onlylovecanhurtlikethisteddyswims",
+          "mistakesjonasblue",
+          "badwoman",
+          "infinitethings",
+          "onlylovecanhurtlikethisspedupslowed",
+          "worldinunion",
+          "christmasprayergregoryporter",
+          "thearchitectdeluxe",
+          "thearchitectzeitgeistedition",
+          "theglorificationofsadness",
+          "lullabysigala",
+          "makeyourownkindofmusic"
+        ]
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://glorificationofsadness.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Paloma%20Faith"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Paloma%20Faith"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.palomafaith.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1371221"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/palomafaith"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/PalomaFaith"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/palomafaith"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

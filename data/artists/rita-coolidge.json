@@ -1,0 +1,79 @@
+[
+  {
+    "id": "ritacoolidge",
+    "name": "Rita Coolidge",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022318789_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rita-coolidge/53674",
+        "allReleaseTitles": [
+          "anytimeanywhere",
+          "theladysnotforsale",
+          "naturalactkriskristofferson",
+          "fullmoonkriskristofferson",
+          "breakaway",
+          "satisfied",
+          "",
+          "lovemeagain",
+          "beautifuleveningliveinjapan",
+          "itsonlylove",
+          "20thcenturymastersthemillenniumcollectionthebestof",
+          "fallintospring",
+          "nicefeelin",
+          "safeinthearmsoftime",
+          "heartbreakradio",
+          "neverletyougo"
+        ],
+        "latestRelease": {
+          "title": "Natural Act Kris Kristofferson Rita Coolidge",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/natural-act-kris-kristofferson-rita-coolidge/wpzgysr3fwt1a",
+          "releaseDate": "1978-12-01"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ritacoolidge.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rita%20Coolidge"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rita%20Coolidge"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.ritacoolidge.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/135243"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rita%20Coolidge&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rita%20Coolidge"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/ritacoolidge/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/DeltaLadyRitaCoolidge"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

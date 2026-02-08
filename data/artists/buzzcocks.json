@@ -1,0 +1,90 @@
+[
+  {
+    "id": "buzzcocks",
+    "name": "Buzzcocks",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0029149615_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://buzzcocks.bandcamp.com",
+        "allReleaseTitles": [
+          "attitudeadjustment",
+          "sonicsinthesoul"
+        ],
+        "latestRelease": {
+          "title": "Attitude Adjustment",
+          "type": "album",
+          "url": "https://buzzcocks.bandcamp.com/album/attitude-adjustment",
+          "imageUrl": "https://f4.bcbits.com/img/a2888057852_16.jpg",
+          "releaseDate": "January 30, 2026"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/buzzcocks/71785",
+        "allReleaseTitles": [
+          "singlesgoingsteady",
+          "anothermusicinadifferentkitchen",
+          "lovebites",
+          "adifferentkindoftension",
+          "attitudeadjustment",
+          "spiralscratch",
+          "sonicsinthesoul",
+          "inventory",
+          "timesup",
+          "sensesoutofcontrolep",
+          "queenofthescene",
+          "poeticmachinegun",
+          "idontmind",
+          "manchesterrain",
+          "johnpeelsession",
+          "operatorsmanualbest",
+          "",
+          "tradetesttransmission"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Buzzcocks"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Buzzcocks"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://web.archive.org/web/19980203220629/http://www.buzzcocks.demon.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/40332"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Buzzcocks&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Buzzcocks"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/the_official_buzzcocks/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCBkWN-TrMTbV4kd5vaD9NWA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/buzzcocksofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

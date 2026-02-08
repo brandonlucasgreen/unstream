@@ -1,0 +1,62 @@
+[
+  {
+    "id": "thewanted",
+    "name": "The Wanted",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022657362_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thewanted3.bandcamp.com",
+        "allReleaseTitles": [
+          "strangeflight",
+          "thewanted"
+        ],
+        "latestRelease": {
+          "title": "Strange Flight",
+          "type": "album",
+          "url": "https://thewanted3.bandcamp.com/album/strange-flight",
+          "imageUrl": "https://f4.bcbits.com/img/a2658201615_16.jpg",
+          "releaseDate": "March 26, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Wanted"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Wanted"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.thewantedmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1893084"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thewantedmusic/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://tiktok.com/@thewantedmusic"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/thewantedmusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/TheWanted"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

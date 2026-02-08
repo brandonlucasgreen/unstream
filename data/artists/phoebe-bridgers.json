@@ -1,0 +1,98 @@
+[
+  {
+    "id": "phoebebridgers",
+    "name": "Phoebe Bridgers",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0010823805_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://phoebebridgers.bandcamp.com",
+        "allReleaseTitles": [
+          "somuchwine",
+          "sidelines",
+          "dayaftertomorrow",
+          "waitingroom",
+          "thatfunnyfeeling",
+          "christmassong",
+          "haveyourselfamerrylittlechristmas",
+          "killerthesoundphoebebridgersnoahabbygundersen",
+          "strangerinthealps",
+          "punisher",
+          "kyotobarteesstrangeremix",
+          "kyotoglitchgumremix",
+          "kyotothemariasremix",
+          "ifwemakeitthroughdecember",
+          "copycatkiller",
+          "gardensong",
+          "7oclocknewssilentnightfeatfionaappleandmattberninger"
+        ],
+        "latestRelease": {
+          "title": "So Much Wine",
+          "type": "track",
+          "url": "https://phoebebridgers.bandcamp.com/track/so-much-wine",
+          "imageUrl": "https://f4.bcbits.com/img/a0128821953_2.jpg",
+          "releaseDate": "November 17, 2022"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/phoebe-bridgers/1799114",
+        "allReleaseTitles": [
+          "punisher",
+          "somuchwine",
+          "sidelines",
+          "strangerinthealps",
+          "thatfunnyfeeling",
+          "goodbyetolove",
+          "chinesesatellite",
+          "dayaftertomorrow",
+          "iseeyou",
+          "haveyourselfamerrylittlechristmas",
+          "7oclocknewssilentnight",
+          "copycatkiller",
+          "killerthesoundnoahgundersenabbygundersen",
+          "georgialeetomwaitstribute",
+          "ifwemakeitthroughdecember",
+          "christmassong",
+          "kyotoglitchgumremixglitchgum",
+          "funeral",
+          "motionsickness"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Phoebe%20Bridgers"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Phoebe%20Bridgers"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.phoebefuckingbridgers.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4138698"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/phoebebridgers/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCh4PO1W9tVmHujIPZnfK8TQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/phoebebridgers"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,45 @@
+[
+  {
+    "id": "ramboamadeus",
+    "name": "Rambo Amadeus",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0004048164_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rambo-amadeus/779345",
+        "allReleaseTitles": [
+          "tribojezvukafeaturingfivewinnetousandonemore",
+          "hocemogusle"
+        ],
+        "latestRelease": {
+          "title": "Tri Boje Zvuka Rambo Amadeus Featuring Five Winnetous And One More",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/tri-boje-zvuka-rambo-amadeus-featuring-five-winnetous-and-one-more/y0k1xdh6vg7aa",
+          "releaseDate": "2024-04-09"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ramboamadeus.bandcamp.com"
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/ramboamadeus"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rambo%20Amadeus"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rambo%20Amadeus"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,95 @@
+[
+  {
+    "id": "grimes",
+    "name": "Grimes",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0002128378_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://grimesmusic.bandcamp.com",
+        "allReleaseTitles": [
+          "darkbloom",
+          "halfaxa",
+          "geidiprimes"
+        ],
+        "latestRelease": {
+          "title": "Darkbloom",
+          "type": "album",
+          "url": "https://grimesmusic.bandcamp.com/album/darkbloom",
+          "imageUrl": "https://f4.bcbits.com/img/a4057291810_2.jpg",
+          "releaseDate": "May 20, 2016"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/grimes/83085",
+        "allReleaseTitles": [
+          "missanthropocene",
+          "artangels",
+          "artificialangels",
+          "shinigamieyes",
+          "imagemagdalenabayand",
+          "visions",
+          "playerofgames",
+          "geidiprimes",
+          "halfaxa",
+          "entwinedsubfocus",
+          "darkbloom",
+          "cryfeatashnikko",
+          "idgaf",
+          "iwannabesoftwareandillangelo",
+          "prettydark",
+          "realiti"
+        ],
+        "latestRelease": {
+          "title": "Artificial Angels Grimes",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/artificial-angels-grimes/egc2knknrcprc",
+          "releaseDate": "2025-10-17"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Grimes"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Grimes"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.clairedelune.io/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1993487"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/grimes/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@grimes"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCj2Oon8A9kybzZrwPJJJ1pg"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@grimes"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Grimes"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "suicidaltendencies",
+    "name": "Suicidal Tendencies",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0007143429_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/suicidal-tendencies/156148",
+        "allReleaseTitles": [
+          "adrenalineaddict",
+          "",
+          "howwillilaughtomorrowwhenicantevensmiletoday",
+          "lightscamerarevolution",
+          "theartofrebellion",
+          "jointhearmy",
+          "primecuts",
+          "controlledbyhatredfeellikeshitdejavu",
+          "stillcycoafteralltheseyears",
+          "worldgonemad",
+          "stillcycopunkafteralltheseyears",
+          "freeyoursoulandsavemymind",
+          "playlisttheverybestof",
+          "getyourfighton",
+          "nothingtolose"
+        ],
+        "latestRelease": {
+          "title": "Adrenaline Addict Suicidal Tendencies",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/adrenaline-addict-suicidal-tendencies/cv36kd1ea2eja",
+          "releaseDate": "2025-04-18"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://frontierrecords-suicidaltendencies.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Suicidal%20Tendencies"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Suicidal%20Tendencies"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.suicidaltendencies.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/137127"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Suicidal%20Tendencies&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Suicidal%20Tendencies"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/suicidaltendencies/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/suicidaltendencies"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/suicidaltendencies"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

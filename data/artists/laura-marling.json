@@ -1,0 +1,86 @@
+[
+  {
+    "id": "lauramarling",
+    "name": "Laura Marling",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0021051878_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://lauramarling.bandcamp.com",
+        "allReleaseTitles": [
+          "patternsinrepeat",
+          "songforourdaughter"
+        ],
+        "latestRelease": {
+          "title": "Patterns in Repeat",
+          "type": "album",
+          "url": "https://lauramarling.bandcamp.com/album/patterns-in-repeat",
+          "imageUrl": "https://f4.bcbits.com/img/a1092021461_16.jpg",
+          "releaseDate": "October 25, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/laura-marling/224912",
+        "allReleaseTitles": [
+          "patternsinrepeat",
+          "semperfemina",
+          "songforourdaughter",
+          "animallumpmikelindsay",
+          "ispeakbecauseican",
+          "ahardrainsagonnafall",
+          "childofmine",
+          "soothing",
+          "patterns",
+          "lumpcurseofthecontemporarymikelindsay",
+          "lumplatetotheflightmikelindsay",
+          "noonesgonnaloveyoulikeican",
+          "wildfire",
+          "helddown",
+          "climbeverywalllumpmikelindsay",
+          "nexttime",
+          "wecannotresistlumpmikelindsay",
+          "gammaraylumpmikelindsay"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Laura%20Marling"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Laura%20Marling"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.lauramarling.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/683433"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/lauramarling/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@lauramarling?lang=en"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC_ad9Wo0m69uyquvyNCazDg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/lauramarling"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,72 @@
+[
+  {
+    "id": "sunmi",
+    "name": "Sunmi",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3341628915_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sunmi/3154963",
+        "allReleaseTitles": [
+          "blue",
+          "heartmaid",
+          "heartburn",
+          "ballooninlove",
+          "stranger",
+          "16",
+          "ohsorryya",
+          "crossroad",
+          "billionmusicprojectvol1beo",
+          "specialeditiongashina",
+          "heroine",
+          "fullmoon",
+          "24hours",
+          "whenwediscojypark",
+          "tail",
+          "goorstop",
+          "newfestaepisode10sojeongdannykookimjaehwan"
+        ],
+        "latestRelease": {
+          "title": "Heart Maid Sunmi",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/heart-maid-sunmi/b7u03pj0gwb4a",
+          "releaseDate": "2025-11-05"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sunmimimi.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sunmi"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sunmi"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4365219"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/miyayeah/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCsVpgRB8YHLWA0ZrkhtHvTA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialsunmi"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

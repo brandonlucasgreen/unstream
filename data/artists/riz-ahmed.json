@@ -1,0 +1,75 @@
+[
+  {
+    "id": "rizahmed",
+    "name": "Riz Ahmed",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018859912_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rizahmed.bandcamp.com",
+        "allReleaseTitles": [
+          "oncekings",
+          "thelonggoodbye"
+        ],
+        "latestRelease": {
+          "title": "Once Kings",
+          "type": "track",
+          "url": "https://rizahmed.bandcamp.com/track/once-kings",
+          "imageUrl": "https://f4.bcbits.com/img/a3759169383_16.jpg",
+          "releaseDate": "October 29, 2020"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/riz-ahmed/1132166",
+        "allReleaseTitles": [
+          "oncekings",
+          "cashmereswetshopboysandheems",
+          "sufilaswetshopboysandheems",
+          "thelonggoodbye",
+          "mogambo",
+          "t5swetshopboysandheems",
+          "tigerhologramswetshopboysandheems",
+          "thasmygirlswetshopboysandheems",
+          "zaynmalikswetshopboysandheems",
+          "zombieswetshopboysandheems",
+          "thelonggoodbyevoicemails"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Riz%20Ahmed"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Riz%20Ahmed"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.rizmc.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/8195056"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rizwanahmed/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCRrGWkxkpHxzCr33bUZJXTA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/rizmc"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,58 @@
+[
+  {
+    "id": "andreprevin",
+    "name": "André Previn",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022189358_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/andre-previn/17113",
+        "latestRelease": {
+          "title": "Holst The Planets Op 32 Andre Previn",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/holst-the-planets-op-32-andre-previn/w0qcczcgszmab",
+          "releaseDate": "2019-05-10"
+        },
+        "allReleaseTitles": [
+          "rachmaninovpianoconcertosnos14rhapsodyonathemeofpaganinivladimirashkenazylso",
+          "holsttheplanetsop32",
+          "tchaikovskyswanlake2011remaster",
+          "tchaikovsky1812overtureromeoandjulietmarcheslave",
+          "rachmaninovsymphonyno2op27",
+          "holsttheplanetsop32royalphilharmonicorchestra",
+          "tchaikovskythesleepingbeautyop66",
+          "rachmaninovsymphonyno1op13",
+          "chopinpianoconcertono1mariajoaopiresroyalphilharmonicorchestra",
+          "mozartwapianotrios",
+          "rachmaninovtheisleofthedeadop29symphonicdancesop45",
+          "rachmaninovsymphonyno3op44excerptsfromaleko",
+          "swanlaketchaikovskytheballetmaster",
+          "westsidestoryshellymanneredmitchell",
+          "mozartconcertofortwopianosk365pianoconcertono20k466radulupulondonsymphonyorchestra",
+          "shostakovichpianoconcertono1op35poulencconcertofortwopianosandorchestraindminorfp61",
+          "smusicnight2",
+          "smusicnight",
+          "honeyandruekathleenbattleorchestraofstlukes"
+        ]
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://andreprevin.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Andr%C3%A9%20Previn"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Andr%C3%A9%20Previn"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

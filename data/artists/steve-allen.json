@@ -1,0 +1,59 @@
+[
+  {
+    "id": "steveallen",
+    "name": "Steve Allen",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0009884428_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/steve-allen/118037",
+        "allReleaseTitles": [
+          "soulfulbrass2",
+          "letterfrommyheart",
+          "soulfulbrassolivernelson",
+          "messageoflove",
+          "timeforcalmvol1rileylee",
+          "variegates",
+          "ineedyou",
+          "shipfablessilmgaillardaljazzbocollinsraymantillaand",
+          "ophiuchus",
+          "timeforcalmvol2williambarton",
+          "timeforcalmvol3davidpereira",
+          "gravywaltz11currenthits",
+          "thismomentfeatlinneaschossow",
+          "abouttime",
+          "hopeagainsthope",
+          "giveroflight",
+          "nothingisimpossibledanielefilaretti",
+          "laststarintheskyrenfaye",
+          "plural",
+          "echo"
+        ],
+        "latestRelease": {
+          "title": "Letter From My Heart Steve Allen",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/letter-from-my-heart-steve-allen/us2lnelu50hvc",
+          "releaseDate": "2018-07-26"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://wrecktheplace.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Steve%20Allen"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Steve%20Allen"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

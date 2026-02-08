@@ -1,0 +1,83 @@
+[
+  {
+    "id": "raphael",
+    "name": "Raphael",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026205543_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://raphael4.bandcamp.com",
+        "allReleaseTitles": [
+          "fantasmicosmici",
+          "corpoelettrico",
+          "dfpt",
+          "rotazionedelprototipo",
+          "triangoloamorosofantasma",
+          "raphaelpresentslavorazionedeifertilizzantipretendingtomakemusicwjpernicelli",
+          "sessionidispiraledamore",
+          "amoreestivo",
+          "profumocosmico",
+          "canzonidicharlie",
+          "gelatinadeliziosa",
+          "forjustin",
+          "iragnicererali",
+          "occhistregati",
+          "macchiebianche",
+          "lacrimedisaturno"
+        ],
+        "latestRelease": {
+          "title": "Fantasmi Cosmici",
+          "type": "track",
+          "url": "https://raphael4.bandcamp.com/track/fantasmi-cosmici",
+          "imageUrl": "https://f4.bcbits.com/img/a4135805209_2.jpg"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Raphael"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Raphael"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.raphaelnet.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/133327"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Raphael&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Raphael"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/raphaelartista/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@raphaelartista/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/RAPHAELartista"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/raphaelartista/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "newyorkdolls",
+    "name": "New York Dolls",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0012687675_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/new-york-dolls/226976",
+        "allReleaseTitles": [
+          "",
+          "intoomuchtoosoon",
+          "causeisezso",
+          "dancingbackwardinhighheels",
+          "dawnofthedolls",
+          "rocknroll",
+          "onedayitwillpleaseustoremembereventhis",
+          "ahardnightsday",
+          "morrisseypresentsthereturnofthe",
+          "morrisseypresentsthereturnofthelivefromroyalfestivalhall2004",
+          "thereturnofthethe",
+          "frenchkiss74actressbirthofthe",
+          "livefromthebowery",
+          "lipstickkillers",
+          "personalitycrisis"
+        ],
+        "latestRelease": {
+          "title": "In Too Much Too Soon New York Dolls",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/in-too-much-too-soon-new-york-dolls/l3u1r6fx8w9yc",
+          "releaseDate": "1974-01-01"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://newyorkdolls.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=New%20York%20Dolls"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+New%20York%20Dolls"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://nydolls.org/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/242613"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=New%20York%20Dolls&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/New%20York%20Dolls"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/nydolls"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

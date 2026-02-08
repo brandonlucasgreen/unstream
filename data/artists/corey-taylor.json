@@ -1,0 +1,56 @@
+[
+  {
+    "id": "coreytaylor",
+    "name": "Corey Taylor",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a1909344416_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/corey-taylor/176252",
+        "allReleaseTitles": [
+          "70deadwargasmuk",
+          "dustinthewindfromqueenoftheringmusicfromthemotionpicturefeatbadomensaarongilhuis",
+          "cmf2bornot2b",
+          "cmfbsides",
+          "blackeyesblue",
+          "samanthasgone",
+          "cmft",
+          "talksick",
+          "onthedarkside",
+          "posttraumaticblues",
+          "wearetherest",
+          "cmf2",
+          "thekidspartymarch",
+          "level4chillyfestivities",
+          "trinity",
+          "whowantstobean80sstaroriginalscore",
+          "subtletransmission"
+        ],
+        "latestRelease": {
+          "title": "Dust In The Wind From Queen Of The Ring Music From The Motion Picture Corey Taylor Feat Bad Omens Aaron Gilhuis",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/dust-in-the-wind-from-queen-of-the-ring-music-from-the-motion-picture-corey-taylor-feat-bad-omens-aaron-gilhuis/gabt2kpco0f7a",
+          "releaseDate": "2025-02-26"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://coreytaylor.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Corey%20Taylor"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Corey%20Taylor"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

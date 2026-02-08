@@ -1,0 +1,47 @@
+[
+  {
+    "id": "robertwilson",
+    "name": "Robert Wilson",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0000213499_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://robertwilson.bandcamp.com",
+        "allReleaseTitles": [
+          "gentleworld2020",
+          "loversonehaterszero",
+          "bemyhabit",
+          "thinman",
+          "aliverecord",
+          "freedownloads",
+          "yourhandinmineingridjensenandrobertwilson"
+        ],
+        "latestRelease": {
+          "title": "Gentle World 2020",
+          "type": "track",
+          "url": "https://robertwilson.bandcamp.com/track/gentle-world-2020",
+          "imageUrl": "https://f4.bcbits.com/img/a2089094560_2.jpg",
+          "releaseDate": "March 23, 2020"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/u3317150"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Robert%20Wilson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Robert%20Wilson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

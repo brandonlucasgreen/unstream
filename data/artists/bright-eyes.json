@@ -1,0 +1,106 @@
+[
+  {
+    "id": "brighteyes",
+    "name": "Bright Eyes",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0040792507_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://brighteyes.bandcamp.com",
+        "allReleaseTitles": [
+          "kidstable",
+          "1stworldblues",
+          "asongtopassthetime2025",
+          "recluseidonthavetolovebrighteyescursive",
+          "fivediceallthrees",
+          "achristmasalbum",
+          "panandbroomevemaretremix",
+          "cassadaga2016reissue",
+          "cassadagaacompanion",
+          "noisefloorrarities19982005",
+          "noiseflooracompanion",
+          "thepeopleskey2016reissue",
+          "thepeopleskeyacompanion",
+          "digitalashinadigitalurn2016reissue",
+          "digitalashinadigitalurnacompanion",
+          "imwideawakeitsmorning2016reissue"
+        ],
+        "latestRelease": {
+          "title": "Kids Table",
+          "type": "album",
+          "url": "https://brighteyes.bandcamp.com/album/kids-table",
+          "imageUrl": "https://f4.bcbits.com/img/a1006409802_2.jpg",
+          "releaseDate": "September 26, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/bright-eyes/61739",
+        "allReleaseTitles": [
+          "kidstable",
+          "imwideawakeitsmorning",
+          "fivediceallthrees",
+          "cassadaga",
+          "downintheweedswheretheworldoncewas",
+          "liftedorthestoryisinthesoilkeepyoureartotheground",
+          "digitalashinadigitalurn",
+          "1stworldblues",
+          "digitalashinadigitalurnacompanion",
+          "acollectionofsongswrittenandrecorded19951997acompanion",
+          "liftedorthestoryisinthesoilkeepyoureartothegroundacompanion",
+          "thepeopleskey",
+          "feversandmirrorsacompanion",
+          "imwideawakeitsmorningacompanion",
+          "lettingoffthehappinessacompanion",
+          "cassadagaacompanion",
+          "thepeopleskeyacompanion",
+          "dyslexicpalindrome",
+          "miracleoflife",
+          "flirtedwithyouallmylife"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bright%20Eyes"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bright%20Eyes"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.thisisbrighteyes.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/83606"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Bright%20Eyes&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Bright%20Eyes"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/brighteyesofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCTuFY_OJRPTiBAGr5jiLNEg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/BrightEyes"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

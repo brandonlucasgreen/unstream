@@ -1,0 +1,71 @@
+[
+  {
+    "id": "deicide",
+    "name": "Deicide",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011831399_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://deicide.bandcamp.com",
+        "allReleaseTitles": [
+          "doomsdaylalive",
+          "liveinnottingham",
+          "whenlondonburnslive",
+          "thebestofdeicide",
+          "tilldeathdouspart",
+          "thestenchofredemption",
+          "scarsofthecrucifix"
+        ],
+        "latestRelease": {
+          "title": "Doomsday L.A. (Live)",
+          "type": "album",
+          "url": "https://deicide.bandcamp.com/album/doomsday-l-a-live",
+          "imageUrl": "https://f4.bcbits.com/img/a0825898170_2.jpg",
+          "releaseDate": "April 19, 2019"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/DEICIDE_"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Deicide"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Deicide"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/251933"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Deicide&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Deicide"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/deicideofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCLlcSXKe_5hfPwDUIlp0z4w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/OfficialDeicide"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

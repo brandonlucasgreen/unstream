@@ -1,0 +1,78 @@
+[
+  {
+    "id": "air",
+    "name": "Air",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031269149_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://airmusik.bandcamp.com",
+        "allReleaseTitles": [
+          "airthecompletecollection",
+          "airvjeuxdangereux",
+          "airivelleadushell",
+          "airiiisecretheritagegivespaceatrance",
+          "airiitravellingwithoutmoving2023remaster",
+          "airiyou2021remaster"
+        ],
+        "latestRelease": {
+          "title": "Air • The Complete Collection",
+          "type": "album",
+          "url": "https://airmusik.bandcamp.com/album/air-the-complete-collection",
+          "imageUrl": "https://f4.bcbits.com/img/a3873685434_2.jpg",
+          "releaseDate": "May 5, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Air"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Air"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.airfrenchband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Air&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Air"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/airfrenchband/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@airfrenchband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCjXmNnJm9jwtGg094LRoFOw"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.net/@airfrenchband"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/7530846195"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]
