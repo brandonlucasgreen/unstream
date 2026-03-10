@@ -16,12 +16,34 @@ dist-ssr
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-# Netlify local development artifacts
+
+# OS files
+.DS_Store
+**/.DS_Store
+
+# Netlify build artifacts
+.netlify/edge-functions-dist/
+.netlify/edge-functions-import-map.json
+.netlify/edge-functions-serve/
+.netlify/functions/*.zip
+.netlify/functions/manifest.json
 .netlify/functions-serve/
 .netlify/state.json
+.netlify/netlify.toml
+
+# Xcode build artifacts and user state
+UnstreamMenubar/build/
+UnstreamMenubar/.netlify/
+UnstreamMenubar/**/*.xcuserstate
+UnstreamMenubar/**/xcuserdata/
+
+# Extension release zips (build artifacts)
+*.zip
+
+# Conductor
+.conductor/
