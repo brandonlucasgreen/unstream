@@ -310,6 +310,17 @@ function normalizeForComparison(str: string): string {
 }
 
 /**
+ * Score how well a result name matches the query (higher = better)
+ */
+function textMatchScore(name: string, normQuery: string): number {
+  const normName = normalizeForComparison(name);
+  if (normName === normQuery) return 3;
+  if (normName.startsWith(normQuery)) return 2;
+  if (normName.includes(normQuery)) return 1;
+  return 0;
+}
+
+/**
  * Merge multiple search responses, deduplicating results by normalized name
  */
 function mergeSearchResponses(responses: SearchResponse[], originalQuery: string): SearchResponse {
@@ -346,9 +357,15 @@ function mergeSearchResponses(responses: SearchResponse[], originalQuery: string
     }
   }
 
-  // Sort by number of platforms (most platforms first)
+  // Sort by text match relevance first, then by platform count
+  const normQuery = normalizeForComparison(originalQuery);
   const mergedResults = Array.from(resultMap.values())
-    .sort((a, b) => b.platforms.length - a.platforms.length);
+    .sort((a, b) => {
+      const scoreA = textMatchScore(a.name, normQuery);
+      const scoreB = textMatchScore(b.name, normQuery);
+      if (scoreA !== scoreB) return scoreB - scoreA;
+      return b.platforms.length - a.platforms.length;
+    });
 
   return {
     query: originalQuery,
