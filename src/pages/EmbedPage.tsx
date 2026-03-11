@@ -231,10 +231,37 @@ export function EmbedPage() {
             </Link>
             <span className="text-text-muted/40 text-xs">&#x2022;</span>
             <a
+              href="https://unstream.featurebase.app/roadmap"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-text-primary transition-colors"
+            >
+              Roadmap
+            </a>
+            <span className="text-text-muted/40 text-xs">&#x2022;</span>
+            <a
               href="mailto:support@unstream.stream"
               className="hover:text-text-primary transition-colors"
             >
               Support
+            </a>
+            <span className="text-text-muted/40 text-xs">&#x2022;</span>
+            <a
+              href="https://unstream.goatcounter.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-text-primary transition-colors"
+            >
+              Metrics
+            </a>
+            <span className="text-text-muted/40 text-xs">&#x2022;</span>
+            <a
+              href="https://liberapay.com/brandonlucasgreen/donate"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-text-primary transition-colors"
+            >
+              Donate
             </a>
             <span className="text-text-muted/40 text-xs">&#x2022;</span>
             <Link

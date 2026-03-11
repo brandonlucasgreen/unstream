@@ -36,6 +36,9 @@
     threads: { name: 'Threads', color: '#000000', icon: '🧵' },
     bluesky: { name: 'Bluesky', color: '#0085ff', icon: '🦋' },
     mastodon: { name: 'Mastodon', color: '#6364FF', icon: '🦣' },
+    hoopla: { name: 'Hoopla', color: '#e86c2e', icon: '📚' },
+    freegal: { name: 'Freegal', color: '#4caf50', icon: '🎶' },
+    jamcoop: { name: 'Jam.coop', color: '#e91e63', icon: '🎸' },
   };
 
   // Categories to prioritize (non-social first)
@@ -43,6 +46,7 @@
     'bandcamp', 'mirlo', 'ampwall', 'qobuz', 'faircamp', 'bandwagon',
     'patreon', 'kofi', 'buymeacoffee', 'officialsite',
     'funkwhale', 'internetarchive', 'discogs',
+    'hoopla', 'freegal', 'jamcoop',
   ];
 
   function sortPlatforms(links) {
@@ -127,22 +131,90 @@
         renderWidget(root, data[0], maxLinks, slug);
       })
       .catch(function () {
-        // Fallback: try search API
+        // Fallback: try search API + MusicBrainz enrichment
         var searchUrl = BASE_URL + '/api/search/sources?query=' + encodeURIComponent(artist);
-        fetch(searchUrl)
-          .then(function (res) { return res.json(); })
-          .then(function (data) {
-            if (data.results && data.results.length > 0) {
-              var artistResult = data.results.find(function (r) { return r.type === 'artist'; }) || data.results[0];
-              renderWidget(root, artistResult, maxLinks, slug);
-            } else {
+        var mbUrl = BASE_URL + '/api/search/musicbrainz?query=' + encodeURIComponent(artist);
+
+        Promise.all([
+          fetch(searchUrl).then(function (res) { return res.json(); }),
+          fetch(mbUrl).then(function (res) { return res.ok ? res.json() : null; }).catch(function () { return null; }),
+        ])
+          .then(function (responses) {
+            var data = responses[0];
+            var mbData = responses[1];
+
+            if (!data.results || data.results.length === 0) {
               root.innerHTML = '<div class="uw-error">Artist not found. <a class="uw-more" href="' + BASE_URL + '/?q=' + encodeURIComponent(artist) + '" target="_blank" rel="noopener">Search on Unstream</a></div>';
+              return;
             }
+
+            var artistResult = data.results.find(function (r) { return r.type === 'artist'; }) || data.results[0];
+
+            // Merge MusicBrainz enrichment data if available
+            if (mbData && mbData.artistName) {
+              artistResult = enrichWithMusicBrainz(artistResult, mbData);
+            }
+
+            renderWidget(root, artistResult, maxLinks, slug);
           })
           .catch(function () {
             root.innerHTML = '<div class="uw-error">Could not load artist data.</div>';
           });
       });
+  }
+
+  // Merge MusicBrainz enrichment data into an artist result
+  function enrichWithMusicBrainz(artist, mbData) {
+    var newPlatforms = artist.platforms.slice();
+    var existing = {};
+    newPlatforms.forEach(function (p) { existing[p.sourceId] = true; });
+
+    // Add official site
+    if (mbData.officialUrl && !existing['officialsite']) {
+      newPlatforms.push({ sourceId: 'officialsite', url: mbData.officialUrl });
+      existing['officialsite'] = true;
+    }
+
+    // Add Discogs
+    if (mbData.discogsUrl && !existing['discogs']) {
+      newPlatforms.push({ sourceId: 'discogs', url: mbData.discogsUrl });
+      existing['discogs'] = true;
+    }
+
+    // Add library services for pre-2005 artists
+    if (mbData.hasPre2005Release) {
+      if (!existing['hoopla']) {
+        newPlatforms.push({ sourceId: 'hoopla', url: 'https://www.hoopladigital.com/search?q=' + encodeURIComponent(artist.name) + '&type=music' });
+        existing['hoopla'] = true;
+      }
+      if (!existing['freegal']) {
+        newPlatforms.push({ sourceId: 'freegal', url: 'https://www.freegalmusic.com/search-page/' + encodeURIComponent(artist.name) });
+        existing['freegal'] = true;
+      }
+    }
+
+    // Add social links and discovered platforms
+    var socialLinks = (mbData.socialLinks || []).concat(mbData.discoveredPlatforms || []);
+    socialLinks.forEach(function (link) {
+      var id = link.platform;
+      if (!existing[id]) {
+        newPlatforms.push({ sourceId: id, url: link.url });
+        existing[id] = true;
+      } else {
+        // Replace search-only URLs with direct links
+        for (var i = 0; i < newPlatforms.length; i++) {
+          if (newPlatforms[i].sourceId === id) {
+            var url = newPlatforms[i].url.toLowerCase();
+            if (url.indexOf('duckduckgo.com') !== -1 || url.indexOf('/search') !== -1 || url.indexOf('?q=') !== -1 || url.indexOf('explore-creators') !== -1) {
+              newPlatforms[i] = { sourceId: id, url: link.url };
+            }
+            break;
+          }
+        }
+      }
+    });
+
+    return { name: artist.name, type: artist.type, imageUrl: artist.imageUrl, platforms: newPlatforms, matchConfidence: artist.matchConfidence };
   }
 
   function renderWidget(root, artist, maxLinks, slug) {
