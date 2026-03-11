@@ -920,7 +920,16 @@ function generateResultId(name: string, artist?: string): string {
   return normalized || Math.random().toString(36).substring(2);
 }
 
-function aggregateResults(allResults: PlatformResult[]): AggregatedResult[] {
+function textMatchScore(name: string, query: string): number {
+  const normName = normalizeForComparison(name);
+  const normQuery = normalizeForComparison(query);
+  if (normName === normQuery) return 3; // exact match
+  if (normName.startsWith(normQuery)) return 2; // starts with query
+  if (normName.includes(normQuery)) return 1; // contains query
+  return 0;
+}
+
+function aggregateResults(allResults: PlatformResult[], query?: string): AggregatedResult[] {
   const resultMap = new Map<string, AggregatedResult>();
 
   for (const result of allResults) {
@@ -953,7 +962,14 @@ function aggregateResults(allResults: PlatformResult[]): AggregatedResult[] {
   }
 
   return Array.from(resultMap.values())
-    .sort((a, b) => b.platforms.length - a.platforms.length);
+    .sort((a, b) => {
+      if (query) {
+        const scoreA = textMatchScore(a.name, query);
+        const scoreB = textMatchScore(b.name, query);
+        if (scoreA !== scoreB) return scoreB - scoreA;
+      }
+      return b.platforms.length - a.platforms.length;
+    });
 }
 
 async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
@@ -993,7 +1009,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   const qobuzMatches = qobuzResults.status === 'fulfilled' ? qobuzResults.value : new Map<string, string>();
 
   // Get aggregated results
-  const aggregated = aggregateResults(allResults);
+  const aggregated = aggregateResults(allResults, query);
 
   // Add additional platforms to matching artist results
   for (const result of aggregated) {
