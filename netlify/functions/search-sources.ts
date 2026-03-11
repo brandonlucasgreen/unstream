@@ -539,6 +539,15 @@ function normalizeForComparison(str: string): string {
   return normalizeAccents(str).toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
+function textMatchScore(name: string, query: string): number {
+  const normName = normalizeForComparison(name);
+  const normQuery = normalizeForComparison(query);
+  if (normName === normQuery) return 3;
+  if (normName.startsWith(normQuery)) return 2;
+  if (normName.includes(normQuery)) return 1;
+  return 0;
+}
+
 // Search Bandwagon for artists by scraping search results
 async function searchBandwagon(query: string): Promise<Map<string, string>> {
   const results = new Map<string, string>();
@@ -1081,7 +1090,7 @@ function extractPlatformIdentifier(url: string, sourceId: SourceId): string {
   }
 }
 
-function aggregateResults(allResults: PlatformResult[]): AggregatedResult[] {
+function aggregateResults(allResults: PlatformResult[], query?: string): AggregatedResult[] {
   const resultMap = new Map<string, AggregatedResult>();
 
   for (const result of allResults) {
@@ -1143,7 +1152,14 @@ function aggregateResults(allResults: PlatformResult[]): AggregatedResult[] {
   }
 
   return Array.from(resultMap.values())
-    .sort((a, b) => b.platforms.length - a.platforms.length);
+    .sort((a, b) => {
+      if (query) {
+        const scoreA = textMatchScore(a.name, query);
+        const scoreB = textMatchScore(b.name, query);
+        if (scoreA !== scoreB) return scoreB - scoreA;
+      }
+      return b.platforms.length - a.platforms.length;
+    });
 }
 
 async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
@@ -1175,7 +1191,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   const qobuzMatches = qobuzResults.status === 'fulfilled' ? qobuzResults.value : new Map<string, string>();
   const ampwallMatches = ampwallResults.status === 'fulfilled' ? ampwallResults.value : new Map<string, string>();
 
-  const aggregated = aggregateResults(allResults);
+  const aggregated = aggregateResults(allResults, query);
 
   // Track which platform URLs have been used to avoid adding the same URL to multiple results
   // This is important for name-matched platforms (Patreon, Bandwagon, etc.) where we can't
@@ -1728,8 +1744,11 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     return hasNonSearchOnlyPlatform;
   });
 
-  // Sort results: verified first, then by platform count
+  // Sort results: text match first, then verified, then by platform count
   filtered.sort((a, b) => {
+    const scoreA = textMatchScore(a.name, query);
+    const scoreB = textMatchScore(b.name, query);
+    if (scoreA !== scoreB) return scoreB - scoreA;
     if (a.matchConfidence === 'verified' && b.matchConfidence !== 'verified') return -1;
     if (a.matchConfidence !== 'verified' && b.matchConfidence === 'verified') return 1;
     return b.platforms.length - a.platforms.length;
