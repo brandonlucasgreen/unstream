@@ -274,6 +274,13 @@ export function ArtistPage() {
               Support
             </a>
             <span className="text-text-muted/40 text-xs">&#x2022;</span>
+            <Link
+              to={`/embed?artist=${encodeURIComponent(displayName)}`}
+              className="hover:text-text-primary transition-colors"
+            >
+              Embed
+            </Link>
+            <span className="text-text-muted/40 text-xs">&#x2022;</span>
             <a
               href="https://unstream.goatcounter.com"
               target="_blank"
