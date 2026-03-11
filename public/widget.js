@@ -121,19 +121,44 @@
     var slug = artist.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     var dataUrl = BASE_URL + '/data/artists/' + slug + '.json';
 
+    var mbUrl = BASE_URL + '/api/search/musicbrainz?query=' + encodeURIComponent(artist);
+
     fetch(dataUrl)
       .then(function (res) {
         if (!res.ok) throw new Error('Not found');
+        var contentType = res.headers.get('content-type') || '';
+        if (contentType.indexOf('application/json') === -1) throw new Error('Not JSON');
         return res.json();
       })
       .then(function (data) {
         if (!data || !data.length) throw new Error('Empty');
-        renderWidget(root, data[0], maxLinks, slug);
+        var artistData = data[0];
+        var directCount = artistData.platforms.filter(isDirectLink).length;
+
+        // If pre-generated data has enough links, render immediately
+        // but still try to enrich in background
+        if (directCount >= maxLinks) {
+          renderWidget(root, artistData, maxLinks, slug);
+          return;
+        }
+
+        // Not enough direct links — enrich with MusicBrainz before rendering
+        fetch(mbUrl)
+          .then(function (res) { return res.ok ? res.json() : null; })
+          .then(function (mbData) {
+            if (mbData && mbData.artistName) {
+              artistData = enrichWithMusicBrainz(artistData, mbData);
+            }
+            renderWidget(root, artistData, maxLinks, slug);
+          })
+          .catch(function () {
+            // MusicBrainz failed, render with what we have
+            renderWidget(root, artistData, maxLinks, slug);
+          });
       })
       .catch(function () {
-        // Fallback: try search API + MusicBrainz enrichment
+        // No pre-generated data — try search API + MusicBrainz enrichment
         var searchUrl = BASE_URL + '/api/search/sources?query=' + encodeURIComponent(artist);
-        var mbUrl = BASE_URL + '/api/search/musicbrainz?query=' + encodeURIComponent(artist);
 
         Promise.all([
           fetch(searchUrl).then(function (res) { return res.json(); }),
