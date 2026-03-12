@@ -94,6 +94,7 @@ function parseSocialUrl(url: string): SocialLink | null {
 }
 
 import { cacheGetOrFetch, artistCacheKey } from './cache';
+import { persistEnrichment } from './db';
 
 // Cache TTL for MusicBrainz lookups (30 minutes)
 const MUSICBRAINZ_CACHE_TTL = 30 * 60;
@@ -536,6 +537,13 @@ export async function handler(event: { queryStringParameters?: Record<string, st
 
     if (cached) {
       console.log(`[MusicBrainz] Cache hit for "${normalizedQuery}"`);
+    }
+
+    // Persist enrichment to the artist database (fire-and-forget)
+    if (result.artistName) {
+      persistEnrichment(result.artistName, result).catch(err => {
+        console.error('[DB] Background enrichment persist failed:', err);
+      });
     }
 
     return {

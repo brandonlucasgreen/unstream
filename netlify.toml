@@ -33,6 +33,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/artist"
+  to = "/.netlify/functions/artist-lookup"
+  status = 200
+
+[[redirects]]
   from = "/api/desktop/version"
   to = "/.netlify/functions/desktop-version"
   status = 200

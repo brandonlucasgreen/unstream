@@ -119,71 +119,81 @@
     shadow.appendChild(root);
 
     var slug = artist.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    var dataUrl = BASE_URL + '/data/artists/' + slug + '.json';
-
+    var dbUrl = BASE_URL + '/api/artist?slug=' + encodeURIComponent(slug);
     var mbUrl = BASE_URL + '/api/search/musicbrainz?query=' + encodeURIComponent(artist);
 
-    fetch(dataUrl)
+    // Step 1: Try the artist database (fastest path)
+    fetch(dbUrl)
       .then(function (res) {
-        if (!res.ok) throw new Error('Not found');
-        var contentType = res.headers.get('content-type') || '';
-        if (contentType.indexOf('application/json') === -1) throw new Error('Not JSON');
+        if (!res.ok) throw new Error('Not in DB');
         return res.json();
       })
-      .then(function (data) {
-        if (!data || !data.length) throw new Error('Empty');
-        var artistData = data[0];
-        var directCount = artistData.platforms.filter(isDirectLink).length;
-
-        // If pre-generated data has enough links, render immediately
-        // but still try to enrich in background
-        if (directCount >= maxLinks) {
-          renderWidget(root, artistData, maxLinks, slug);
-          return;
-        }
-
-        // Not enough direct links — enrich with MusicBrainz before rendering
-        fetch(mbUrl)
-          .then(function (res) { return res.ok ? res.json() : null; })
-          .then(function (mbData) {
-            if (mbData && mbData.artistName) {
-              artistData = enrichWithMusicBrainz(artistData, mbData);
-            }
-            renderWidget(root, artistData, maxLinks, slug);
-          })
-          .catch(function () {
-            // MusicBrainz failed, render with what we have
-            renderWidget(root, artistData, maxLinks, slug);
-          });
+      .then(function (artistData) {
+        if (!artistData || !artistData.platforms) throw new Error('Invalid data');
+        renderWidget(root, artistData, maxLinks, slug);
       })
       .catch(function () {
-        // No pre-generated data — try search API + MusicBrainz enrichment
-        var searchUrl = BASE_URL + '/api/search/sources?query=' + encodeURIComponent(artist);
+        // Step 2: Try pre-generated static data
+        var dataUrl = BASE_URL + '/data/artists/' + slug + '.json';
 
-        Promise.all([
-          fetch(searchUrl).then(function (res) { return res.json(); }),
-          fetch(mbUrl).then(function (res) { return res.ok ? res.json() : null; }).catch(function () { return null; }),
-        ])
-          .then(function (responses) {
-            var data = responses[0];
-            var mbData = responses[1];
+        fetch(dataUrl)
+          .then(function (res) {
+            if (!res.ok) throw new Error('Not found');
+            var contentType = res.headers.get('content-type') || '';
+            if (contentType.indexOf('application/json') === -1) throw new Error('Not JSON');
+            return res.json();
+          })
+          .then(function (data) {
+            if (!data || !data.length) throw new Error('Empty');
+            var artistData = data[0];
+            var directCount = artistData.platforms.filter(isDirectLink).length;
 
-            if (!data.results || data.results.length === 0) {
-              root.innerHTML = '<div class="uw-error">Artist not found. <a class="uw-more" href="' + BASE_URL + '/?q=' + encodeURIComponent(artist) + '" target="_blank" rel="noopener">Search on Unstream</a></div>';
+            if (directCount >= maxLinks) {
+              renderWidget(root, artistData, maxLinks, slug);
               return;
             }
 
-            var artistResult = data.results.find(function (r) { return r.type === 'artist'; }) || data.results[0];
-
-            // Merge MusicBrainz enrichment data if available
-            if (mbData && mbData.artistName) {
-              artistResult = enrichWithMusicBrainz(artistResult, mbData);
-            }
-
-            renderWidget(root, artistResult, maxLinks, slug);
+            // Not enough links — enrich with MusicBrainz
+            fetch(mbUrl)
+              .then(function (res) { return res.ok ? res.json() : null; })
+              .then(function (mbData) {
+                if (mbData && mbData.artistName) {
+                  artistData = enrichWithMusicBrainz(artistData, mbData);
+                }
+                renderWidget(root, artistData, maxLinks, slug);
+              })
+              .catch(function () {
+                renderWidget(root, artistData, maxLinks, slug);
+              });
           })
           .catch(function () {
-            root.innerHTML = '<div class="uw-error">Could not load artist data.</div>';
+            // Step 3: Live search API + MusicBrainz enrichment
+            var searchUrl = BASE_URL + '/api/search/sources?query=' + encodeURIComponent(artist);
+
+            Promise.all([
+              fetch(searchUrl).then(function (res) { return res.json(); }),
+              fetch(mbUrl).then(function (res) { return res.ok ? res.json() : null; }).catch(function () { return null; }),
+            ])
+              .then(function (responses) {
+                var data = responses[0];
+                var mbData = responses[1];
+
+                if (!data.results || data.results.length === 0) {
+                  root.innerHTML = '<div class="uw-error">Artist not found. <a class="uw-more" href="' + BASE_URL + '/?q=' + encodeURIComponent(artist) + '" target="_blank" rel="noopener">Search on Unstream</a></div>';
+                  return;
+                }
+
+                var artistResult = data.results.find(function (r) { return r.type === 'artist'; }) || data.results[0];
+
+                if (mbData && mbData.artistName) {
+                  artistResult = enrichWithMusicBrainz(artistResult, mbData);
+                }
+
+                renderWidget(root, artistResult, maxLinks, slug);
+              })
+              .catch(function () {
+                root.innerHTML = '<div class="uw-error">Could not load artist data.</div>';
+              });
           });
       });
   }

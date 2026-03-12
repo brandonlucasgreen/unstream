@@ -1,5 +1,6 @@
 import { parse } from 'node-html-parser';
 import { cacheGetOrFetch, artistCacheKey } from './cache';
+import { persistSearchResults } from './db';
 
 type SourceId =
   | 'bandcamp'
@@ -1852,6 +1853,11 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     // Normalize the query to handle accented characters (e.g., "Tanerélle" -> "Tanerelle")
     const normalizedQuery = normalizeSearchQuery(query);
     const results = await searchAllPlatforms(normalizedQuery);
+
+    // Persist artist results to the database (fire-and-forget)
+    persistSearchResults(results).catch(err => {
+      console.error('[DB] Background persist failed:', err);
+    });
 
     const response: SearchResponse = {
       query, // Return original query for display
