@@ -539,11 +539,13 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       console.log(`[MusicBrainz] Cache hit for "${normalizedQuery}"`);
     }
 
-    // Persist enrichment to the artist database (fire-and-forget)
+    // Persist enrichment to the artist database
     if (result.artistName) {
-      persistEnrichment(result.artistName, result).catch(err => {
+      try {
+        await persistEnrichment(result.artistName, result);
+      } catch (err) {
         console.error('[DB] Background enrichment persist failed:', err);
-      });
+      }
     }
 
     return {

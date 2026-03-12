@@ -1854,10 +1854,12 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     const normalizedQuery = normalizeSearchQuery(query);
     const results = await searchAllPlatforms(normalizedQuery);
 
-    // Persist artist results to the database (fire-and-forget)
-    persistSearchResults(results).catch(err => {
+    // Persist artist results to the database
+    try {
+      await persistSearchResults(results);
+    } catch (err) {
       console.error('[DB] Background persist failed:', err);
-    });
+    }
 
     const response: SearchResponse = {
       query, // Return original query for display

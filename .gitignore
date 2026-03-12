@@ -22,6 +22,10 @@ dist-ssr
 *.sln
 *.sw?
 
+# Environment variables
+.env
+.env.*
+
 # OS files
 .DS_Store
 **/.DS_Store
