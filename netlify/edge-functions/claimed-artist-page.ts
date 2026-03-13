@@ -319,8 +319,6 @@ export default async function handler(request: Request, context: Context) {
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
         <a href="https://unstream.featurebase.app/roadmap" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Roadmap</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
-        <a href="https://unstream.goatcounter.com" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Metrics</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
         <a href="mailto:support@unstream.stream" style="color:var(--muted);text-decoration:none">Support</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
         <a href="https://liberapay.com/brandonlucasgreen/donate" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Donate</a>

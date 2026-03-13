@@ -20,15 +20,6 @@ export function Footer() {
           </a>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <a
-            href="https://unstream.goatcounter.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-text-primary transition-colors"
-          >
-            Metrics
-          </a>
-          <span className="text-text-muted/40 text-xs">&#x2022;</span>
-          <a
             href="mailto:support@unstream.stream"
             className="hover:text-text-primary transition-colors"
           >
