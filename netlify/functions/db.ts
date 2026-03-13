@@ -93,6 +93,7 @@ interface LinkRow {
   artist_id: string;
   platform: string;
   url: string;
+  display_name: string | null;
   source: string;
   is_direct: boolean;
   latest_release: Record<string, unknown> | null;
@@ -139,6 +140,7 @@ export async function getArtistBySlug(slug: string): Promise<ArtistResult | null
     const platforms: PlatformLink[] = (links as LinkRow[]).map(link => ({
       sourceId: link.platform,
       url: link.url,
+      ...(link.display_name ? { displayName: link.display_name } : {}),
       ...(link.latest_release ? { latestRelease: link.latest_release as PlatformLink['latestRelease'] } : {}),
     }));
 

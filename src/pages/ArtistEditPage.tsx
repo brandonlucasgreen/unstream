@@ -8,12 +8,35 @@ import type { SourceId } from '../types';
 interface LinkEntry {
   platform: string;
   url: string;
+  displayName?: string;
 }
 
-// All platforms available for adding
-const ALL_PLATFORMS: { id: SourceId; name: string; category: string }[] = (
-  Object.values(sources) as { id: SourceId; name: string; category: string }[]
-).map(s => ({ id: s.id, name: s.name, category: s.category }));
+// All platforms available for adding, plus "other"
+const ALL_PLATFORMS: { id: string; name: string; category: string }[] = [
+  ...(Object.values(sources) as { id: SourceId; name: string; category: string }[])
+    .map(s => ({ id: s.id, name: s.name, category: s.category })),
+  { id: 'other', name: 'Other', category: 'other' },
+];
+
+// Streaming service URL patterns for soft warnings
+const STREAMING_PATTERNS: { pattern: RegExp; name: string }[] = [
+  { pattern: /open\.spotify\.com|spotify\.link/i, name: 'Spotify' },
+  { pattern: /music\.apple\.com|itunes\.apple\.com/i, name: 'Apple Music' },
+  { pattern: /music\.amazon\.|amazon\.com\/music/i, name: 'Amazon Music' },
+  { pattern: /deezer\.com/i, name: 'Deezer' },
+  { pattern: /tidal\.com\/(?:browse|track|album|artist)/i, name: 'Tidal' },
+  { pattern: /music\.youtube\.com/i, name: 'YouTube Music' },
+];
+
+function getStreamingWarning(url: string): string | null {
+  if (!url.trim()) return null;
+  for (const { pattern, name } of STREAMING_PATTERNS) {
+    if (pattern.test(url)) {
+      return `This looks like a ${name} link. Unstream focuses on platforms where artists earn a higher share of revenue. You can still add this link, but consider prioritizing direct-support platforms.`;
+    }
+  }
+  return null;
+}
 
 export function ArtistEditPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -54,14 +77,15 @@ export function ArtistEditPage() {
         setArtistName(data.name || '');
         setCurrentSlug(slug);
         setNewSlug(slug);
-        setBio(data.profile?.bio || '');
-        setFeaturedEmbed(data.profile?.featuredEmbed || '');
+        setBio(data.profile?.bio ?? '');
+        setFeaturedEmbed(data.profile?.featuredEmbed ?? '');
 
         // Load existing links
         const existingLinks: LinkEntry[] = (data.platforms || []).map(
-          (p: { sourceId: string; url: string }) => ({
+          (p: { sourceId: string; url: string; displayName?: string }) => ({
             platform: p.sourceId,
             url: p.url,
+            displayName: p.displayName || '',
           })
         );
         setLinks(existingLinks);
@@ -77,10 +101,14 @@ export function ArtistEditPage() {
     // Find first platform not already used
     const usedPlatforms = new Set(links.map(l => l.platform));
     const available = ALL_PLATFORMS.find(p => !usedPlatforms.has(p.id));
-    setLinks([...links, { platform: available?.id || 'bandcamp', url: '' }]);
+    setLinks([...links, { platform: available?.id || 'other', url: '', displayName: '' }]);
   }
 
-  function updateLink(index: number, field: 'platform' | 'url', value: string) {
+  function addOtherLink() {
+    setLinks([...links, { platform: 'other', url: '', displayName: '' }]);
+  }
+
+  function updateLink(index: number, field: 'platform' | 'url' | 'displayName', value: string) {
     const updated = [...links];
     updated[index] = { ...updated[index], [field]: value };
     setLinks(updated);
@@ -116,7 +144,15 @@ export function ArtistEditPage() {
       try {
         new URL(link.url);
       } catch {
-        setError(`Invalid URL for ${sources[link.platform as SourceId]?.name || link.platform}: ${link.url}`);
+        const name = link.platform === 'other'
+          ? (link.displayName || 'Other')
+          : (sources[link.platform as SourceId]?.name || link.platform);
+        setError(`Invalid URL for ${name}: ${link.url}`);
+        setSaving(false);
+        return;
+      }
+      if (link.platform === 'other' && !link.displayName?.trim()) {
+        setError('Please provide a name for each custom link.');
         setSaving(false);
         return;
       }
@@ -134,7 +170,11 @@ export function ArtistEditPage() {
           newSlug: newSlug !== currentSlug ? newSlug : undefined,
           bio,
           featuredEmbed: featuredEmbed || null,
-          links: validLinks,
+          links: validLinks.map(l => ({
+            platform: l.platform,
+            url: l.url,
+            displayName: l.displayName || undefined,
+          })),
         }),
       });
 
@@ -280,84 +320,130 @@ export function ArtistEditPage() {
           <section className="space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-medium">Platform Links</h2>
-              <button
-                onClick={addLink}
-                className="text-sm text-accent-primary hover:underline"
-              >
-                + Add link
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={addLink}
+                  className="text-sm text-accent-primary hover:underline"
+                >
+                  + Add platform
+                </button>
+                <button
+                  onClick={addOtherLink}
+                  className="text-sm text-text-muted hover:text-text-primary transition-colors"
+                >
+                  + Add other link
+                </button>
+              </div>
             </div>
+
+            <p className="text-xs text-text-muted">
+              Unstream highlights platforms where artists earn a larger share. We recommend prioritizing direct-support platforms like Bandcamp, Mirlo, and Faircamp over major streaming services.
+            </p>
 
             {links.length === 0 && (
               <p className="text-text-muted text-sm py-4 text-center">
-                No links yet. Click "Add link" to add your first platform.
+                No links yet. Click "Add platform" to add your first link.
               </p>
             )}
 
             <div className="space-y-2">
-              {links.map((link, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-2 p-3 rounded-lg bg-bg-secondary border border-border"
-                >
-                  {/* Reorder buttons */}
-                  <div className="flex flex-col gap-0.5">
-                    <button
-                      onClick={() => moveLink(index, -1)}
-                      disabled={index === 0}
-                      className="text-text-muted hover:text-text-primary disabled:opacity-20 text-xs leading-none"
-                      title="Move up"
-                    >
-                      ▲
-                    </button>
-                    <button
-                      onClick={() => moveLink(index, 1)}
-                      disabled={index === links.length - 1}
-                      className="text-text-muted hover:text-text-primary disabled:opacity-20 text-xs leading-none"
-                      title="Move down"
-                    >
-                      ▼
-                    </button>
-                  </div>
+              {links.map((link, index) => {
+                const streamingWarning = getStreamingWarning(link.url);
+                const isOther = link.platform === 'other';
 
-                  {/* Platform selector */}
-                  <select
-                    value={link.platform}
-                    onChange={e => updateLink(index, 'platform', e.target.value)}
-                    className="px-2 py-1.5 rounded bg-bg-primary border border-border text-text-primary text-sm focus:outline-none focus:border-accent-primary"
-                  >
-                    {ALL_PLATFORMS.map(p => (
-                      <option
-                        key={p.id}
-                        value={p.id}
-                        disabled={usedPlatforms.has(p.id) && p.id !== link.platform}
+                return (
+                  <div key={index} className="space-y-1">
+                    <div
+                      className={`flex items-center gap-2 p-3 rounded-lg bg-bg-secondary border ${streamingWarning ? 'border-amber-500/30' : 'border-border'}`}
+                    >
+                      {/* Reorder buttons */}
+                      <div className="flex flex-col gap-0.5">
+                        <button
+                          onClick={() => moveLink(index, -1)}
+                          disabled={index === 0}
+                          className="text-text-muted hover:text-text-primary disabled:opacity-20 text-xs leading-none"
+                          title="Move up"
+                        >
+                          ▲
+                        </button>
+                        <button
+                          onClick={() => moveLink(index, 1)}
+                          disabled={index === links.length - 1}
+                          className="text-text-muted hover:text-text-primary disabled:opacity-20 text-xs leading-none"
+                          title="Move down"
+                        >
+                          ▼
+                        </button>
+                      </div>
+
+                      {isOther ? (
+                        /* Custom link: name input + URL */
+                        <div className="flex-1 flex items-center gap-2 min-w-0">
+                          <input
+                            type="text"
+                            value={link.displayName || ''}
+                            onChange={e => updateLink(index, 'displayName', e.target.value)}
+                            placeholder="Link name"
+                            className="w-28 px-2 py-1.5 rounded bg-bg-primary border border-border text-text-primary placeholder-text-muted text-sm focus:outline-none focus:border-accent-primary"
+                          />
+                          <input
+                            type="url"
+                            value={link.url}
+                            onChange={e => updateLink(index, 'url', e.target.value)}
+                            placeholder="https://..."
+                            className="flex-1 px-2 py-1.5 rounded bg-bg-primary border border-border text-text-primary placeholder-text-muted text-sm focus:outline-none focus:border-accent-primary min-w-0"
+                          />
+                        </div>
+                      ) : (
+                        /* Platform link: selector + URL */
+                        <>
+                          <select
+                            value={link.platform}
+                            onChange={e => updateLink(index, 'platform', e.target.value)}
+                            className="px-2 py-1.5 rounded bg-bg-primary border border-border text-text-primary text-sm focus:outline-none focus:border-accent-primary"
+                          >
+                            {ALL_PLATFORMS.filter(p => p.id !== 'other').map(p => (
+                              <option
+                                key={p.id}
+                                value={p.id}
+                                disabled={usedPlatforms.has(p.id) && p.id !== link.platform}
+                              >
+                                {p.name}
+                              </option>
+                            ))}
+                          </select>
+
+                          <input
+                            type="url"
+                            value={link.url}
+                            onChange={e => updateLink(index, 'url', e.target.value)}
+                            placeholder="https://..."
+                            className="flex-1 px-2 py-1.5 rounded bg-bg-primary border border-border text-text-primary placeholder-text-muted text-sm focus:outline-none focus:border-accent-primary min-w-0"
+                          />
+                        </>
+                      )}
+
+                      {/* Remove button */}
+                      <button
+                        onClick={() => removeLink(index)}
+                        className="text-text-muted hover:text-red-400 transition-colors p-1"
+                        title="Remove link"
                       >
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
 
-                  {/* URL input */}
-                  <input
-                    type="url"
-                    value={link.url}
-                    onChange={e => updateLink(index, 'url', e.target.value)}
-                    placeholder={`https://...`}
-                    className="flex-1 px-2 py-1.5 rounded bg-bg-primary border border-border text-text-primary placeholder-text-muted text-sm focus:outline-none focus:border-accent-primary min-w-0"
-                  />
-
-                  {/* Remove button */}
-                  <button
-                    onClick={() => removeLink(index)}
-                    className="text-text-muted hover:text-red-400 transition-colors p-1"
-                    title="Remove link"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              ))}
+                    {/* Streaming service warning */}
+                    {streamingWarning && (
+                      <p className="text-xs text-amber-400 px-3">
+                        {streamingWarning}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </section>
 

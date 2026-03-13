@@ -98,10 +98,10 @@ export default async function handler(request: Request, context: Context) {
   const pageUrl = `https://unstream.stream/a/${slug}`;
   const description = bio || `Support ${artist.name} directly on platforms that pay artists fairly.`;
 
-  // Separate main platforms from social
+  // Separate main platforms from social; "other" and unknown platforms go to main
   const mainPlatforms = platforms.filter((p: { platform: string }) => {
     const info = PLATFORM_INFO[p.platform];
-    return info && info.category !== 'social';
+    return !info || info.category !== 'social';
   });
   const socialPlatforms = platforms.filter((p: { platform: string }) => {
     const info = PLATFORM_INFO[p.platform];
@@ -110,16 +110,18 @@ export default async function handler(request: Request, context: Context) {
 
   const bcFriday = isBandcampFriday();
 
-  const platformLinksHtml = mainPlatforms.map((p: { platform: string; url: string }) => {
+  const platformLinksHtml = mainPlatforms.map((p: { platform: string; url: string; display_name?: string }) => {
     const info = PLATFORM_INFO[p.platform];
-    if (!info) return '';
+    const linkName = p.platform === 'other' ? escapeHtml(p.display_name || 'Link') : (info?.name || escapeHtml(p.display_name || p.platform));
+    const linkColor = info?.color || '#71717a';
+    const linkIcon = info ? (SOCIAL_ICONS[p.platform] ? `<span style="font-size:16px">${SOCIAL_ICONS[p.platform]}</span>` : info.icon) : '🔗';
     const isBCFriday = p.platform === 'bandcamp' && bcFriday;
-    const payout = isBCFriday ? '~97%' : info.payoutPercent;
+    const payout = isBCFriday ? '~97%' : info?.payoutPercent;
     const payoutLabel = payout ? `<span style="font-size:12px;color:var(--muted)">${payout} to artist</span>` : '';
     const bcFridayLabel = isBCFriday ? `<span style="font-size:11px;font-weight:700;color:#1da0c3;animation:bc-pulse 2s ease-in-out infinite">Bandcamp Friday!</span>` : '';
-    return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid ${isBCFriday ? '#1da0c340' : 'var(--border)'};background:${isBCFriday ? '#1da0c310' : info.color + '08'};text-decoration:none;color:var(--text);transition:background 0.15s">
-      <span style="font-size:20px;display:inline-flex;align-items:center;justify-content:center">${SOCIAL_ICONS[p.platform] ? `<span style="font-size:16px">${SOCIAL_ICONS[p.platform]}</span>` : info.icon}</span>
-      <span style="flex:1;font-weight:500">${info.name}</span>
+    return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid ${isBCFriday ? '#1da0c340' : 'var(--border)'};background:${isBCFriday ? '#1da0c310' : linkColor + '08'};text-decoration:none;color:var(--text);transition:background 0.15s">
+      <span style="font-size:20px;display:inline-flex;align-items:center;justify-content:center">${linkIcon}</span>
+      <span style="flex:1;font-weight:500">${linkName}</span>
       ${payoutLabel}${bcFridayLabel}
     </a>`;
   }).join('');

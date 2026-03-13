@@ -49,6 +49,7 @@ export interface LatestRelease {
 export interface PlatformLink {
   sourceId: SourceId;
   url: string;
+  displayName?: string;
   latestRelease?: LatestRelease;
 }
 

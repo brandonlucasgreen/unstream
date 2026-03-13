@@ -33,50 +33,35 @@ const CORS_HEADERS = {
 interface LinkUpdate {
   platform: string;
   url: string;
+  displayName?: string;
 }
-
-// Allowed iframe src domains for embed codes
-const ALLOWED_EMBED_DOMAINS = [
-  'bandcamp.com',
-  'faircamp.', // faircamp instances use various subdomains
-  'open.spotify.com',
-  'w.soundcloud.com',
-  'player.vimeo.com',
-  'www.youtube.com',
-  'youtube.com',
-  'music.apple.com',
-  'embed.music.apple.com',
-  'tidal.com',
-  'embed.tidal.com',
-  'odesli.co',
-  'album.link',
-];
 
 function sanitizeEmbed(raw: string | null): string | null {
   if (!raw || !raw.trim()) return null;
 
-  // Extract iframe src and validate against allowed domains
+  // Extract iframe src and validate it's a proper URL
   const iframeMatch = raw.match(/<iframe[^>]*\ssrc=["']([^"']+)["'][^>]*>/i);
   if (!iframeMatch) return null;
 
   const src = iframeMatch[1];
   try {
     const url = new URL(src);
-    const hostname = url.hostname.toLowerCase();
-    const allowed = ALLOWED_EMBED_DOMAINS.some(domain =>
-      hostname === domain || hostname.endsWith('.' + domain)
-    );
-    if (!allowed) return null;
+    // Only allow https iframes
+    if (url.protocol !== 'https:') return null;
   } catch {
     return null;
   }
 
-  // Strip everything except the iframe element itself (no scripts, etc.)
+  // Strip everything except the iframe element itself (no scripts, no other HTML)
   const fullIframe = raw.match(/<iframe[^>]*>[\s\S]*?<\/iframe>/i);
   if (!fullIframe) return null;
 
+  // Verify no script tags or event handlers snuck in
+  const iframe = fullIframe[0];
+  if (/<script/i.test(iframe) || /\bon\w+\s*=/i.test(iframe)) return null;
+
   // Cap at 2000 chars
-  return fullIframe[0].slice(0, 2000);
+  return iframe.slice(0, 2000);
 }
 
 function slugify(text: string): string {
@@ -226,6 +211,7 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
         artist_id: artist.id,
         platform: link.platform,
         url: link.url,
+        display_name: link.displayName?.trim().slice(0, 50) || null,
         source: 'claimed',
         is_direct: true,
         display_order: index,
