@@ -11,6 +11,7 @@ import { ClaimedArtistPage } from './pages/ClaimedArtistPage.tsx'
 import { ArtistLoginPage } from './pages/ArtistLoginPage.tsx'
 import { ArtistDashboardPage } from './pages/ArtistDashboardPage.tsx'
 import { ArtistEditPage } from './pages/ArtistEditPage.tsx'
+import { ArtistDirectoryPage } from './pages/ArtistDirectoryPage.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -23,6 +24,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/artist-login" element={<ArtistLoginPage />} />
         <Route path="/artist-dashboard" element={<ArtistDashboardPage />} />
         <Route path="/artist-edit/:slug" element={<ArtistEditPage />} />
+        <Route path="/artists" element={<ArtistDirectoryPage />} />
         <Route path="/roadmap" element={<RoadmapPage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
       </Routes>

@@ -304,6 +304,8 @@ export default async function handler(request: Request, context: Context) {
         <span style="font-size:12px">Find music on platforms that pay artists fairly.</span>
       </div>
       <nav style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px">
+        <a href="/artists" style="color:var(--muted);text-decoration:none">Artists</a>
+        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
         <a href="https://unstream.featurebase.app/roadmap" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Roadmap</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
         <a href="mailto:support@unstream.stream" style="color:var(--muted);text-decoration:none">Support</a>

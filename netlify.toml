@@ -16,6 +16,15 @@
   path = "/a/*"
   function = "claimed-artist-page"
 
+[[edge_functions]]
+  path = "/artists"
+  function = "artist-directory-page"
+
+[[redirects]]
+  from = "/api/artist-directory"
+  to = "/.netlify/functions/artist-directory"
+  status = 200
+
 [[redirects]]
   from = "/api/search/sources"
   to = "/.netlify/functions/search-sources"
