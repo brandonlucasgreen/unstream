@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { getSession } from '../services/auth';
 import { sources } from '../services/sources';
-import { ThemeToggle } from '../components/ThemeToggle';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
-import { useTheme } from '../hooks/useTheme';
 import type { SourceId } from '../types';
 
 interface LinkEntry {
@@ -18,7 +16,6 @@ const ALL_PLATFORMS: { id: SourceId; name: string; category: string }[] = (
 ).map(s => ({ id: s.id, name: s.name, category: s.category }));
 
 export function ArtistEditPage() {
-  const { preference, cycleTheme } = useTheme();
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
 
@@ -173,12 +170,6 @@ export function ArtistEditPage() {
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
       <ArtistAuthBar />
-      <header className="p-4 border-b border-border flex items-center justify-between">
-        <Link to="/" className="text-xl font-bold text-accent-primary hover:opacity-80 transition-opacity">
-          Unstream
-        </Link>
-        <ThemeToggle preference={preference} onCycle={cycleTheme} />
-      </header>
 
       <main className="flex-1 p-6">
         <div className="max-w-2xl mx-auto space-y-8">

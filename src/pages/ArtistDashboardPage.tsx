@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getSession, getSupabaseClient } from '../services/auth';
-import { ThemeToggle } from '../components/ThemeToggle';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
-import { useTheme } from '../hooks/useTheme';
 
 interface ClaimedProfile {
   id: string;
@@ -17,7 +15,6 @@ interface ClaimedProfile {
 }
 
 export function ArtistDashboardPage() {
-  const { preference, cycleTheme } = useTheme();
   const navigate = useNavigate();
   const [profiles, setProfiles] = useState<ClaimedProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,12 +73,6 @@ export function ArtistDashboardPage() {
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
       <ArtistAuthBar />
-      <header className="p-4 border-b border-border flex items-center justify-between">
-        <Link to="/" className="text-xl font-bold text-accent-primary hover:opacity-80 transition-opacity">
-          Unstream
-        </Link>
-        <ThemeToggle preference={preference} onCycle={cycleTheme} />
-      </header>
 
       <main className="flex-1 p-6">
         <div className="max-w-2xl mx-auto space-y-6">
