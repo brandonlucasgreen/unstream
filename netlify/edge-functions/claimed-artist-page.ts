@@ -271,11 +271,11 @@ export default async function handler(request: Request, context: Context) {
   <!-- Platform Links -->
   <div class="container" style="padding-bottom:32px">
     ${bio ? `<p style="color:var(--muted);font-size:14px;margin-bottom:24px;text-align:left">${bio}</p>` : ''}
+    ${featuredEmbedHtml}
     ${mainPlatforms.length > 0 ? `
-      <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Support directly</h2>
+      <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px${featuredEmbed ? ';margin-top:24px' : ''}">Support directly</h2>
       <div style="display:grid;gap:8px">${platformLinksHtml}</div>
     ` : ''}
-    ${featuredEmbedHtml}
     ${socialLinksHtml}
     ${websiteHtml}
   </div>
