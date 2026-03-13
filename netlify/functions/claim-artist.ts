@@ -4,7 +4,7 @@
 //   action: 'verify' — scrape website, verify link-back, discover platform links
 
 import { createClient } from '@supabase/supabase-js';
-import { artistSlug } from './db';
+import { artistSlug, getClient } from './db';
 
 const PLATFORM_PATTERNS: [string, RegExp][] = [
   ['bandcamp', /([a-z0-9-]+)\.bandcamp\.com/i],
@@ -32,15 +32,9 @@ const PLATFORM_PATTERNS: [string, RegExp][] = [
   ['internetarchive', /archive\.org\/(details|search)/i],
 ];
 
+// Reuse the same service client from db.ts (proven to work with RLS)
 function getServiceClient() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_KEY;
-  if (!url || !key) return null;
-  return createClient(url, key, {
-    auth: { autoRefreshToken: false, persistSession: false },
-    db: { schema: 'public' },
-    global: { headers: { 'x-supabase-role': 'service_role' } },
-  });
+  return getClient();
 }
 
 // Verify the JWT from the request and return the user ID

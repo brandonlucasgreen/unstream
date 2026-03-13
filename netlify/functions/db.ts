@@ -5,7 +5,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 let supabase: SupabaseClient | null = null;
 
-function getClient(): SupabaseClient | null {
+export function getClient(): SupabaseClient | null {
   if (supabase) return supabase;
 
   const url = process.env.SUPABASE_URL;
