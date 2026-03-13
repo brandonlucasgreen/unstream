@@ -251,7 +251,7 @@ function generateArtistPageHtml(
 
   <!-- Hero -->
   <div class="container" style="padding-top:48px;padding-bottom:32px;text-align:center">
-    ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${escapedName}" style="width:128px;height:128px;border-radius:50%;object-fit:cover;border:2px solid var(--border);margin-bottom:16px">` : ''}
+    ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${escapedName}" style="width:128px;height:128px;border-radius:50%;object-fit:cover;border:2px solid var(--border);margin-bottom:16px;display:block;margin-left:auto;margin-right:auto">` : ''}
     <h1 style="font-size:28px;font-weight:700">${escapedName}</h1>
   </div>
 
