@@ -47,6 +47,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/artist-auth"
+  to = "/.netlify/functions/artist-auth"
+  status = 200
+
+[[redirects]]
   from = "/api/desktop/version"
   to = "/.netlify/functions/desktop-version"
   status = 200
