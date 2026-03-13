@@ -25,6 +25,8 @@ export function ResultCard({ result, defaultExpanded = true }: ResultCardProps) 
   const [showPlayer, setShowPlayer] = useState(false);
   const [showReportForm, setShowReportForm] = useState(false);
   const [reportText, setReportText] = useState('');
+  const [showSavePromo, setShowSavePromo] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
 
   // Helper to check if a URL is a direct link vs a search URL
   const isDirectLink = (url: string, sourceId: SourceId): boolean => {
@@ -128,6 +130,22 @@ export function ResultCard({ result, defaultExpanded = true }: ResultCardProps) 
     setReportText('');
   };
 
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = window.location.href;
+    const text = `Find ${result.name} on alternative platforms with Unstream`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `${result.name} on Unstream`, text, url });
+      } catch { /* cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(url);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    }
+  };
+
   // Group verified platforms by category
   const categorizedPlatforms = {
     marketplace: verifiedPlatforms.filter(p =>
@@ -151,9 +169,9 @@ export function ResultCard({ result, defaultExpanded = true }: ResultCardProps) 
   };
 
   const typeIcon = {
-    artist: '👤',
-    album: '💿',
-    track: '🎵',
+    artist: '\uD83D\uDC64',
+    album: '\uD83D\uDCBF',
+    track: '\uD83C\uDFB5',
   }[result.type];
 
   const typeLabel = {
@@ -231,10 +249,37 @@ export function ResultCard({ result, defaultExpanded = true }: ResultCardProps) 
           )}
         </div>
 
-        {/* Expand/collapse arrow */}
-        <div className="flex-shrink-0 flex items-center text-text-muted">
+        {/* Action buttons + expand arrow */}
+        <div className="flex-shrink-0 flex items-center gap-1">
+          {/* Save button */}
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowSavePromo(!showSavePromo); }}
+            className={`p-1.5 rounded-lg transition-colors ${showSavePromo ? 'text-accent-primary bg-accent-primary/10' : 'text-text-muted hover:text-text-primary hover:bg-bg-secondary'}`}
+            title="Save this artist"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+          </button>
+          {/* Share button */}
+          <button
+            onClick={handleShare}
+            className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors"
+            title="Share this result"
+          >
+            {shareCopied ? (
+              <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+            )}
+          </button>
+          {/* Expand/collapse arrow */}
           <svg
-            className={`w-5 h-5 transition-transform ${expanded ? 'rotate-180' : ''}`}
+            className={`w-5 h-5 text-text-muted transition-transform ${expanded ? 'rotate-180' : ''}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -243,6 +288,44 @@ export function ResultCard({ result, defaultExpanded = true }: ResultCardProps) 
           </svg>
         </div>
       </div>
+
+      {/* Save artist promo banner */}
+      {showSavePromo && (
+        <div className="px-4 pb-3 animate-in slide-in-from-top-2 duration-200" onClick={(e) => e.stopPropagation()}>
+          <div className="p-3 rounded-lg bg-accent-primary/5 border border-accent-primary/20">
+            <div className="flex items-start gap-3">
+              <svg className="w-5 h-5 text-accent-primary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-text-primary mb-1">Save artists with the Unstream app</p>
+                <p className="text-xs text-text-muted mb-3">
+                  Get the Mac menubar app or browser extension to save your favorite artists, get new release alerts, and auto-detect what's playing. Included with the Unstream Yearly Pass.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <a
+                    href="https://unstream.stream/#get-unstream"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-primary text-white text-xs font-medium hover:bg-accent-primary/90 transition-colors"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Get the app
+                  </a>
+                  <button
+                    onClick={() => setShowSavePromo(false)}
+                    className="px-3 py-1.5 rounded-lg text-xs text-text-muted hover:text-text-primary transition-colors"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Expanded platform list */}
       {expanded && (
@@ -515,35 +598,9 @@ export function ResultCard({ result, defaultExpanded = true }: ResultCardProps) 
             </div>
           )}
 
-          {/* Claim prompt for unclaimed artists */}
-          {result.type === 'artist' && result.matchConfidence !== 'claimed' && (
-            <div className="pt-3 mt-3 border-t border-border/50">
-              <Link
-                to={`/claim/${result.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`}
-                className="text-xs text-text-muted hover:text-accent-primary transition-colors flex items-center gap-1"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-                Are you {result.name}? Claim your artist page
-              </Link>
-            </div>
-          )}
-
-          {/* Report issue section */}
+          {/* Claim + Report on same line */}
           <div className="pt-3 mt-3 border-t border-border/50">
-            {!showReportForm ? (
-              <button
-                onClick={(e) => { e.stopPropagation(); setShowReportForm(true); }}
-                className="text-xs text-text-muted hover:text-text-secondary transition-colors flex items-center gap-1"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                Report an issue with this result
-              </button>
-            ) : (
+            {showReportForm ? (
               <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
                 <label className="text-xs text-text-secondary block">
                   What's wrong with this result?
@@ -571,6 +628,34 @@ export function ResultCard({ result, defaultExpanded = true }: ResultCardProps) 
                     Cancel
                   </button>
                 </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                {/* Claim - left */}
+                {result.type === 'artist' && result.matchConfidence !== 'claimed' ? (
+                  <Link
+                    to={`/claim/${result.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`}
+                    className="text-xs text-text-muted hover:text-accent-primary transition-colors flex items-center gap-1"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    Are you {result.name}? Claim your artist page
+                  </Link>
+                ) : (
+                  <div />
+                )}
+                {/* Report - right */}
+                <button
+                  onClick={(e) => { e.stopPropagation(); setShowReportForm(true); }}
+                  className="text-xs text-text-muted hover:text-text-secondary transition-colors flex items-center gap-1"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  Report this result
+                </button>
               </div>
             )}
           </div>
