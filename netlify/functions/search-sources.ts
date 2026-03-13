@@ -179,6 +179,16 @@ async function searchBandcamp(query: string): Promise<PlatformResult[]> {
               continue;
             }
 
+            // Filter out fan profiles: bandcamp.com/username (path-based)
+            // Only keep artist pages: artist.bandcamp.com (subdomain-based)
+            try {
+              const parsedUrl = new URL(url);
+              if (parsedUrl.hostname === 'bandcamp.com') {
+                console.log(`[Bandcamp] Filtering out fan profile: "${name}" at ${url}`);
+                continue;
+              }
+            } catch { /* invalid URL, skip */ }
+
             results.push({
               sourceId: 'bandcamp',
               name,
