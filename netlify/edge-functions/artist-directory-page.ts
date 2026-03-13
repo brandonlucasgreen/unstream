@@ -12,19 +12,29 @@ export default async function handler(request: Request, context: Context) {
 
   const supabase = createClient(supabaseUrl, supabaseKey);
 
+  // Fetch verified artist profiles
   const { data: profiles } = await supabase
     .from('artist_profiles')
-    .select('slug, artists!inner(name, image_url)')
+    .select('artist_id')
     .not('verified_at', 'is', null);
 
-  const artists = (profiles || []).map((p: Record<string, unknown>) => {
-    const artist = p.artists as Record<string, unknown>;
-    return {
-      slug: p.slug as string,
-      name: (artist?.name || p.slug) as string,
-      imageUrl: (artist?.image_url || null) as string | null,
-    };
-  }).sort((a, b) => a.name.localeCompare(b.name));
+  if (!profiles || profiles.length === 0) {
+    // No verified artists yet — fall through to SPA
+    return context.next();
+  }
+
+  // Fetch artist details separately (no FK join needed)
+  const artistIds = profiles.map((p: { artist_id: string }) => p.artist_id);
+  const { data: artistRows } = await supabase
+    .from('artists')
+    .select('id, name, slug, image_url')
+    .in('id', artistIds);
+
+  const artists = (artistRows || []).map((a: { slug: string; name: string; image_url?: string }) => ({
+    slug: a.slug,
+    name: a.name,
+    imageUrl: a.image_url || null,
+  })).sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name));
 
   // Group by first letter
   const grouped: Record<string, typeof artists> = {};

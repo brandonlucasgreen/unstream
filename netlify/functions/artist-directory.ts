@@ -10,24 +10,38 @@ export async function handler() {
 
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  // Fetch all verified (claimed) artists
-  const { data: profiles, error } = await supabase
+  // Fetch all verified (claimed) artist profiles
+  const { data: profiles, error: profileError } = await supabase
     .from('artist_profiles')
-    .select('slug, artists!inner(name, image_url)')
+    .select('artist_id')
     .not('verified_at', 'is', null);
 
-  if (error) {
+  if (profileError || !profiles || profiles.length === 0) {
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=300, s-maxage=300' },
+      body: JSON.stringify({ artists: [] }),
+    };
+  }
+
+  // Fetch artist details
+  const artistIds = profiles.map(p => p.artist_id);
+  const { data: artistRows, error: artistError } = await supabase
+    .from('artists')
+    .select('id, name, slug, image_url')
+    .in('id', artistIds);
+
+  if (artistError) {
     return { statusCode: 500, body: JSON.stringify({ error: 'Failed to fetch artists' }) };
   }
 
-  const artists = (profiles || []).map((p: Record<string, unknown>) => {
-    const artist = p.artists as Record<string, unknown>;
-    return {
-      slug: p.slug,
-      name: artist?.name || p.slug,
-      imageUrl: artist?.image_url || null,
-    };
-  }).sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name));
+  const artists = (artistRows || [])
+    .map(a => ({
+      slug: a.slug,
+      name: a.name,
+      imageUrl: a.image_url || null,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   return {
     statusCode: 200,
