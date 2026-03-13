@@ -16,6 +16,7 @@ interface ArtistProfile {
 interface PlatformLink {
   sourceId: string;
   url: string;
+  displayName?: string;
 }
 
 interface ArtistData {

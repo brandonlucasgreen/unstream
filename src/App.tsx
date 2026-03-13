@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import Markdown from 'react-markdown';
 import { SearchBar } from './components/SearchBar';
