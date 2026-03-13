@@ -25,7 +25,7 @@ interface ArtistData {
   profile?: ArtistProfile;
 }
 
-function EmbedSection({ artistName, slug }: { artistName: string; slug: string }) {
+function EmbedSection({ artistName }: { artistName: string }) {
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [maxLinks, setMaxLinks] = useState(6);
@@ -174,7 +174,7 @@ export function ClaimedArtistPage() {
     function fetchArtist() {
       // Cache-bust when freshly claimed to avoid stale CDN responses
       const cacheBust = justClaimed ? `&_t=${Date.now()}` : '';
-      fetch(`/api/artist?slug=${encodeURIComponent(slug)}${cacheBust}`)
+      fetch(`/api/artist?slug=${encodeURIComponent(slug!)}${cacheBust}`)
         .then(r => {
           if (!r.ok) throw new Error('not found');
           return r.json();
@@ -432,7 +432,7 @@ export function ClaimedArtistPage() {
       </div>
 
       {/* Embed Section */}
-      <EmbedSection artistName={artist!.name} slug={slug!} />
+      <EmbedSection artistName={artist!.name} />
 
       {/* Footer */}
       <footer className="mt-auto p-6 text-center border-t border-border">
