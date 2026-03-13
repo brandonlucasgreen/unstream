@@ -33,6 +33,7 @@ const PLATFORM_INFO: Record<string, { name: string; color: string; icon: string;
   threads: { name: 'Threads', color: '#E0E0E0', icon: '🧵', category: 'social' },
   bluesky: { name: 'Bluesky', color: '#0085FF', icon: '🦋', category: 'social' },
   mastodon: { name: 'Mastodon', color: '#6364FF', icon: '🦣', category: 'social' },
+  peertube: { name: 'PeerTube', color: '#F1680D', icon: '▶️', category: 'social' },
   newsletter: { name: 'Newsletter', color: '#666', icon: '📧', category: 'social' },
   wikipedia: { name: 'Wikipedia', color: '#636466', icon: '📖', category: 'social' },
   liberapay: { name: 'Liberapay', color: '#F6C915', icon: '🤝', category: 'patronage' },

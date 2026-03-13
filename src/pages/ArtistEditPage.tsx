@@ -16,6 +16,7 @@ interface LinkEntry {
 const ALL_PLATFORMS: { id: string; name: string; category: string }[] = [
   ...(Object.values(sources) as { id: SourceId; name: string; category: string }[])
     .map(s => ({ id: s.id, name: s.name, category: s.category })),
+  { id: 'peertube', name: 'PeerTube', category: 'social' },
   { id: 'newsletter', name: 'Newsletter', category: 'social' },
   { id: 'wikipedia', name: 'Wikipedia', category: 'official' },
   { id: 'liberapay', name: 'Liberapay', category: 'patronage' },

@@ -229,6 +229,7 @@ export function ClaimedArtistPage() {
 
   // Custom platform metadata for platforms not in the sources registry
   const CUSTOM_PLATFORMS: Record<string, { name: string; icon: string; color: string; group: 'main' | 'social' }> = {
+    peertube: { name: 'PeerTube', icon: '▶️', color: '#F1680D', group: 'social' },
     newsletter: { name: 'Newsletter', icon: '📧', color: '#666', group: 'social' },
     wikipedia: { name: 'Wikipedia', icon: '📖', color: '#636466', group: 'social' },
     liberapay: { name: 'Liberapay', icon: '🤝', color: '#F6C915', group: 'main' },
