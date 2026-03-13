@@ -437,6 +437,10 @@ export function ClaimedArtistPage() {
       {/* Footer */}
       <footer className="mt-auto border-t border-border py-6 px-4">
         <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-3 text-text-secondary text-sm">
+          <div className="flex flex-col items-center gap-1">
+            <Link to="/" className="font-semibold hover:text-text-primary transition-colors">Powered by Unstream</Link>
+            <span className="text-xs">Find music on platforms that pay artists fairly.</span>
+          </div>
           <span>Made with love in Massachusetts, USA</span>
           <nav className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
             <a href="https://unstream.featurebase.app/roadmap" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition-colors">Roadmap</a>
