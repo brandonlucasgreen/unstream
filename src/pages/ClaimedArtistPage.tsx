@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useParams, useLocation } from 'react-router-dom';
 import { sources } from '../services/sources';
+import { SocialIcon, hasSocialIcon } from '../components/SocialIcon';
 import type { SourceId } from '../types';
 
 interface ArtistProfile {
@@ -22,6 +23,134 @@ interface ArtistData {
   platforms: PlatformLink[];
   matchConfidence?: string;
   profile?: ArtistProfile;
+}
+
+function EmbedSection({ artistName, slug }: { artistName: string; slug: string }) {
+  const [open, setOpen] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [maxLinks, setMaxLinks] = useState(6);
+  const [copied, setCopied] = useState(false);
+  const previewRef = useRef<HTMLDivElement>(null);
+  const embedCode = `<div class="unstream-widget" data-artist="${artistName}" data-theme="${theme}" data-max-links="${maxLinks}"></div>\n<script src="https://unstream.stream/widget.js" async></script>`;
+
+  function handleCopy() {
+    navigator.clipboard.writeText(embedCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  // Load live preview when section is opened
+  useEffect(() => {
+    if (!open || !previewRef.current) return;
+
+    const container = previewRef.current;
+    container.innerHTML = '';
+
+    const widgetEl = document.createElement('div');
+    widgetEl.className = 'unstream-widget';
+    widgetEl.setAttribute('data-artist', artistName);
+    widgetEl.setAttribute('data-theme', theme);
+    widgetEl.setAttribute('data-max-links', String(maxLinks));
+    container.appendChild(widgetEl);
+
+    const script = document.createElement('script');
+    script.src = '/widget.js';
+    script.async = true;
+    container.appendChild(script);
+
+    return () => {
+      container.innerHTML = '';
+    };
+  }, [open, theme, maxLinks, artistName]);
+
+  return (
+    <div className="w-full max-w-2xl mx-auto px-6 pb-8">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 text-sm text-text-muted hover:text-text-primary transition-colors"
+      >
+        <svg
+          className={`w-4 h-4 transition-transform ${open ? 'rotate-90' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+        Embed this profile on your website
+      </button>
+
+      {open && (
+        <div className="mt-4 space-y-4 animate-in slide-in-from-top-2 duration-200">
+          {/* Options row */}
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-text-muted">Theme:</span>
+              <button
+                onClick={() => setTheme('dark')}
+                className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+                  theme === 'dark'
+                    ? 'bg-accent-primary/15 text-accent-primary'
+                    : 'bg-bg-secondary text-text-muted hover:text-text-primary'
+                }`}
+              >
+                Dark
+              </button>
+              <button
+                onClick={() => setTheme('light')}
+                className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+                  theme === 'light'
+                    ? 'bg-accent-primary/15 text-accent-primary'
+                    : 'bg-bg-secondary text-text-muted hover:text-text-primary'
+                }`}
+              >
+                Light
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-text-muted">Links: {maxLinks}</span>
+              <input
+                type="range"
+                min="3"
+                max="12"
+                value={maxLinks}
+                onChange={(e) => setMaxLinks(Number(e.target.value))}
+                className="w-20 accent-accent-primary"
+              />
+            </div>
+          </div>
+
+          {/* Live preview */}
+          <div
+            className="rounded-lg overflow-hidden"
+            style={{
+              backgroundColor: theme === 'light' ? '#f0f0f0' : '#0d0d0d',
+              padding: '16px',
+            }}
+          >
+            <div ref={previewRef} className="flex justify-center" />
+          </div>
+
+          {/* Code block */}
+          <div className="relative">
+            <pre className="bg-bg-secondary border border-border rounded-lg p-4 overflow-x-auto text-xs text-text-muted font-mono whitespace-pre-wrap break-all">
+              {embedCode}
+            </pre>
+            <button
+              onClick={handleCopy}
+              className="absolute top-2 right-2 px-3 py-1 rounded text-xs font-medium bg-accent-primary/10 text-accent-primary hover:bg-accent-primary/20 transition-colors"
+            >
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+
+          <p className="text-xs text-text-muted">
+            Paste this into your website's HTML. The widget loads asynchronously and won't affect your page speed.
+          </p>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function ClaimedArtistPage() {
@@ -82,7 +211,7 @@ export function ClaimedArtistPage() {
 
   useEffect(() => {
     if (artist) {
-      document.title = `${artist.name} — Unstream`;
+      document.title = `${artist.name} - Unstream`;
     }
   }, [artist]);
 
@@ -268,7 +397,11 @@ export function ClaimedArtistPage() {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-border hover:bg-bg-secondary transition-colors text-sm"
                   >
-                    <span>{source.icon}</span>
+                    {hasSocialIcon(platform.sourceId) ? (
+                      <SocialIcon platform={platform.sourceId as SourceId} />
+                    ) : (
+                      <span>{source.icon}</span>
+                    )}
                     <span>{source.name}</span>
                   </a>
                 );
@@ -297,6 +430,9 @@ export function ClaimedArtistPage() {
           </div>
         )}
       </div>
+
+      {/* Embed Section */}
+      <EmbedSection artistName={artist!.name} slug={slug!} />
 
       {/* Footer */}
       <footer className="mt-auto p-6 text-center border-t border-border">
