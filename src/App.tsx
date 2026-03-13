@@ -4,6 +4,8 @@ import type { ReactNode } from 'react';
 import Markdown from 'react-markdown';
 import { SearchBar } from './components/SearchBar';
 import { ResultCard } from './components/ResultCard';
+import { ThemeToggle } from './components/ThemeToggle';
+import { useTheme } from './hooks/useTheme';
 import type { SearchResult } from './types';
 import { sources, sourceCategories, searchPlatforms, resolveArtistUrl, fetchMusicBrainzData, mergeWithMusicBrainzData } from './services/sources';
 import { analytics } from './services/analytics';
@@ -57,7 +59,7 @@ function CollapsibleSection({ title, content, defaultOpen = false }: {
         </svg>
       </button>
       <div className={`overflow-hidden transition-all duration-200 ${isOpen ? 'max-h-[2000px] opacity-100 pb-4' : 'max-h-0 opacity-0'}`}>
-        <div className="prose prose-invert prose-sm max-w-none">
+        <div className="prose prose-sm max-w-none text-text-primary">
           <Markdown components={markdownComponents}>
             {content}
           </Markdown>
@@ -150,6 +152,7 @@ function ShareButton() {
 }
 
 function App() {
+  const { theme, toggleTheme } = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -372,7 +375,10 @@ function App() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="pt-8 pb-8 px-4">
+      <header className="pt-8 pb-8 px-4 relative">
+        <div className="absolute top-4 right-4">
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
+        </div>
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
             <button

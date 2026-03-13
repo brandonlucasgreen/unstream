@@ -1,10 +1,17 @@
 import { Link } from 'react-router-dom';
+import { ThemeToggle } from '../components/ThemeToggle';
+import { useTheme } from '../hooks/useTheme';
 
 export function PrivacyPolicyPage() {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="pt-8 pb-8 px-4">
+      <header className="pt-8 pb-8 px-4 relative">
+        <div className="absolute top-4 right-4">
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
+        </div>
         <div className="max-w-4xl mx-auto text-center">
           <Link
             to="/"
@@ -29,7 +36,7 @@ export function PrivacyPolicyPage() {
       {/* Content */}
       <main className="px-4 pb-16">
         <div className="max-w-3xl mx-auto">
-          <article className="prose prose-invert prose-lg max-w-none">
+          <article className="prose prose-lg max-w-none text-text-primary">
             <h2 className="font-display text-3xl font-semibold text-text-primary mb-6">Privacy Policy</h2>
             <p className="text-text-muted text-sm mb-8">Last updated: January 9, 2026</p>
 

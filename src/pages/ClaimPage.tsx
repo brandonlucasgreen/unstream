@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { signInWithMagicLink, getSession, getSupabaseClient } from '../services/auth';
+import { ThemeToggle } from '../components/ThemeToggle';
+import { useTheme } from '../hooks/useTheme';
 
 type ClaimStep = 'email' | 'check-email' | 'website' | 'verify' | 'done';
 
 export function ClaimPage() {
+  const { theme, toggleTheme } = useTheme();
   const { slug } = useParams<{ slug: string }>();
   const [step, setStep] = useState<ClaimStep>('email');
   const [email, setEmail] = useState('');
@@ -158,10 +161,11 @@ export function ClaimPage() {
 
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
-      <header className="p-4 border-b border-border">
+      <header className="p-4 border-b border-border flex items-center justify-between">
         <Link to="/" className="text-xl font-bold text-accent-primary hover:opacity-80 transition-opacity">
           Unstream
         </Link>
+        <ThemeToggle theme={theme} onToggle={toggleTheme} />
       </header>
 
       <main className="flex-1 flex items-center justify-center p-6">

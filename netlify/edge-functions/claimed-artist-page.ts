@@ -100,8 +100,8 @@ export default async function handler(request: Request, context: Context) {
   const platformLinksHtml = mainPlatforms.map((p: { platform: string; url: string }) => {
     const info = PLATFORM_INFO[p.platform];
     if (!info) return '';
-    const payoutLabel = info.payoutPercent ? `<span style="font-size:12px;color:#999">${info.payoutPercent} to artist</span>` : '';
-    return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid #2a2a2a;background:${info.color}08;text-decoration:none;color:#f0f0f0;transition:background 0.15s">
+    const payoutLabel = info.payoutPercent ? `<span style="font-size:12px;color:var(--muted)">${info.payoutPercent} to artist</span>` : '';
+    return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid var(--border);background:${info.color}08;text-decoration:none;color:var(--text);transition:background 0.15s">
       <span style="font-size:20px">${info.icon}</span>
       <span style="flex:1;font-weight:500">${info.name}</span>
       ${payoutLabel}
@@ -110,13 +110,13 @@ export default async function handler(request: Request, context: Context) {
 
   const socialLinksHtml = socialPlatforms.length > 0 ? `
     <div style="margin-top:24px">
-      <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#999;margin-bottom:12px">Follow</h2>
+      <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Follow</h2>
       <div style="display:flex;flex-wrap:wrap;gap:8px">
         ${socialPlatforms.map((p: { platform: string; url: string }) => {
           const info = PLATFORM_INFO[p.platform];
           if (!info) return '';
           const icon = SOCIAL_ICONS[p.platform] || info.icon;
-          return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid #2a2a2a;text-decoration:none;color:#f0f0f0;font-size:14px">${icon} ${info.name}</a>`;
+          return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);text-decoration:none;color:var(--text);font-size:14px">${icon} ${info.name}</a>`;
         }).join('')}
       </div>
     </div>
@@ -124,8 +124,8 @@ export default async function handler(request: Request, context: Context) {
 
   const websiteHtml = profile.website_url ? `
     <div style="margin-top:24px">
-      <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#999;margin-bottom:8px">Website</h2>
-      <a href="${escapeHtml(profile.website_url)}" target="_blank" rel="noopener noreferrer" style="color:#ff6b35;text-decoration:none;font-size:14px">${escapeHtml(new URL(profile.website_url).hostname.replace(/^www\./, ''))}</a>
+      <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:8px">Website</h2>
+      <a href="${escapeHtml(profile.website_url)}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;font-size:14px">${escapeHtml(new URL(profile.website_url).hostname.replace(/^www\./, ''))}</a>
     </div>
   ` : '';
 
@@ -144,31 +144,46 @@ export default async function handler(request: Request, context: Context) {
   <meta name="twitter:card" content="summary">
   <link rel="canonical" href="${pageUrl}">
   <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    (function(){var s=localStorage.getItem('unstream-theme');var t=s||(window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t)})();
+  </script>
   <style>
+    :root { --bg: #0d0d0d; --bg2: #1a1a1a; --text: #f0f0f0; --muted: #999; --border: #2a2a2a; --accent: #ff6b35; --footer-border: #1a1a1a; }
+    html[data-theme="light"] { --bg: #ffffff; --bg2: #f5f5f5; --text: #1a1a1a; --muted: #555; --border: #e0e0e0; --accent: #e55a2b; --footer-border: #e0e0e0; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Golos Text', system-ui, sans-serif; background: #0d0d0d; color: #f0f0f0; min-height: 100vh; display: flex; flex-direction: column; }
+    body { font-family: 'Golos Text', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
     a { color: inherit; }
     .container { max-width: 640px; margin: 0 auto; padding: 0 24px; width: 100%; }
+    .theme-toggle { position: absolute; top: 16px; right: 16px; background: none; border: none; cursor: pointer; color: var(--muted); padding: 8px; border-radius: 8px; }
+    .theme-toggle:hover { color: var(--text); background: var(--bg2); }
+    .theme-toggle .sun { display: none; }
+    .theme-toggle .moon { display: block; }
+    html[data-theme="light"] .theme-toggle .sun { display: block; }
+    html[data-theme="light"] .theme-toggle .moon { display: none; }
   </style>
 </head>
 <body>
+  <button class="theme-toggle" onclick="var t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',t);localStorage.setItem('unstream-theme',t)" aria-label="Toggle theme">
+    <svg class="sun" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+    <svg class="moon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+  </button>
   <!-- Hero -->
   <div class="container" style="padding-top:48px;padding-bottom:32px;text-align:center">
-    ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${artistName}" style="width:128px;height:128px;border-radius:50%;object-fit:cover;border:2px solid #2a2a2a;margin-bottom:16px">` : ''}
+    ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${artistName}" style="width:128px;height:128px;border-radius:50%;object-fit:cover;border:2px solid var(--border);margin-bottom:16px">` : ''}
     <div style="display:flex;align-items:center;justify-content:center;gap:8px">
       <h1 style="font-size:28px;font-weight:700">${artistName}</h1>
-      <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:500;background:rgba(255,107,53,0.15);color:#ff6b35">
+      <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:500;background:rgba(255,107,53,0.15);color:var(--accent)">
         <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
         Claimed
       </span>
     </div>
-    ${bio ? `<p style="margin-top:8px;color:#999;font-size:14px;max-width:400px;margin-left:auto;margin-right:auto">${bio}</p>` : ''}
+    ${bio ? `<p style="margin-top:8px;color:var(--muted);font-size:14px;max-width:400px;margin-left:auto;margin-right:auto">${bio}</p>` : ''}
   </div>
 
   <!-- Platform Links -->
   <div class="container" style="padding-bottom:32px">
     ${mainPlatforms.length > 0 ? `
-      <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#999;margin-bottom:12px">Support directly</h2>
+      <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Support directly</h2>
       <div style="display:grid;gap:8px">${platformLinksHtml}</div>
     ` : ''}
     ${socialLinksHtml}
@@ -177,35 +192,35 @@ export default async function handler(request: Request, context: Context) {
 
   <!-- Embed Section -->
   <div class="container" style="padding-bottom:32px">
-    <button id="embed-toggle" style="display:flex;align-items:center;gap:8px;font-size:14px;color:#999;background:none;border:none;cursor:pointer;font-family:inherit;padding:0" onclick="document.getElementById('embed-panel').style.display=document.getElementById('embed-panel').style.display==='none'?'block':'none';this.querySelector('svg').style.transform=document.getElementById('embed-panel').style.display==='none'?'':'rotate(90deg)'">
+    <button id="embed-toggle" style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:inherit;padding:0" onclick="document.getElementById('embed-panel').style.display=document.getElementById('embed-panel').style.display==='none'?'block':'none';this.querySelector('svg').style.transform=document.getElementById('embed-panel').style.display==='none'?'':'rotate(90deg)'">
       <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transition:transform 0.15s"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
       Embed this profile on your website
     </button>
     <div id="embed-panel" style="display:none;margin-top:16px">
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-bottom:12px">
         <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:12px;color:#999">Theme:</span>
-          <button class="theme-btn" data-theme="dark" style="padding:4px 10px;border-radius:4px;font-size:12px;font-weight:500;border:none;cursor:pointer;font-family:inherit;background:rgba(255,107,53,0.15);color:#ff6b35" onclick="setEmbedTheme('dark')">Dark</button>
-          <button class="theme-btn" data-theme="light" style="padding:4px 10px;border-radius:4px;font-size:12px;font-weight:500;border:none;cursor:pointer;font-family:inherit;background:#1a1a1a;color:#999" onclick="setEmbedTheme('light')">Light</button>
+          <span style="font-size:12px;color:var(--muted)">Theme:</span>
+          <button class="theme-btn" data-theme="dark" style="padding:4px 10px;border-radius:4px;font-size:12px;font-weight:500;border:none;cursor:pointer;font-family:inherit;background:rgba(255,107,53,0.15);color:var(--accent)" onclick="setEmbedTheme('dark')">Dark</button>
+          <button class="theme-btn" data-theme="light" style="padding:4px 10px;border-radius:4px;font-size:12px;font-weight:500;border:none;cursor:pointer;font-family:inherit;background:var(--bg2);color:var(--muted)" onclick="setEmbedTheme('light')">Light</button>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:12px;color:#999">Links: <span id="link-count">6</span></span>
-          <input type="range" min="3" max="12" value="6" id="max-links" style="width:80px;accent-color:#ff6b35" oninput="updateEmbed()">
+          <span style="font-size:12px;color:var(--muted)">Links: <span id="link-count">6</span></span>
+          <input type="range" min="3" max="12" value="6" id="max-links" style="width:80px;accent-color:var(--accent)" oninput="updateEmbed()">
         </div>
       </div>
-      <div id="embed-preview" style="background:#0d0d0d;border-radius:8px;padding:16px;margin-bottom:12px;display:flex;justify-content:center"></div>
+      <div id="embed-preview" style="background:var(--bg);border-radius:8px;padding:16px;margin-bottom:12px;display:flex;justify-content:center"></div>
       <div style="position:relative">
-        <pre id="embed-code" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:16px;padding-right:64px;overflow-x:auto;font-size:12px;color:#999;font-family:monospace;white-space:pre-wrap;word-break:break-all"></pre>
-        <button onclick="navigator.clipboard.writeText(document.getElementById('embed-code').textContent);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2000)" style="position:absolute;top:8px;right:8px;padding:4px 12px;border-radius:4px;font-size:12px;font-weight:500;border:none;cursor:pointer;font-family:inherit;background:rgba(255,107,53,0.1);color:#ff6b35">Copy</button>
+        <pre id="embed-code" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;padding-right:64px;overflow-x:auto;font-size:12px;color:var(--muted);font-family:monospace;white-space:pre-wrap;word-break:break-all"></pre>
+        <button onclick="navigator.clipboard.writeText(document.getElementById('embed-code').textContent);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2000)" style="position:absolute;top:8px;right:8px;padding:4px 12px;border-radius:4px;font-size:12px;font-weight:500;border:none;cursor:pointer;font-family:inherit;background:rgba(255,107,53,0.1);color:var(--accent)">Copy</button>
       </div>
-      <p style="font-size:12px;color:#666;margin-top:8px">Paste this into your website's HTML. The widget loads asynchronously and won't affect your page speed.</p>
+      <p style="font-size:12px;color:var(--muted);margin-top:8px">Paste this into your website's HTML. The widget loads asynchronously and won't affect your page speed.</p>
     </div>
   </div>
 
   <!-- Footer -->
-  <footer style="margin-top:auto;padding:24px;text-align:center;border-top:1px solid #1a1a1a">
-    <a href="https://unstream.stream" style="font-size:14px;color:#999;text-decoration:none">Powered by Unstream</a>
-    <p style="font-size:12px;color:#666;margin-top:4px">Find music on platforms that pay artists fairly.</p>
+  <footer style="margin-top:auto;padding:24px;text-align:center;border-top:1px solid var(--footer-border)">
+    <a href="https://unstream.stream" style="font-size:14px;color:var(--muted);text-decoration:none">Powered by Unstream</a>
+    <p style="font-size:12px;color:var(--muted);margin-top:4px">Find music on platforms that pay artists fairly.</p>
   </footer>
 
   <script>
@@ -218,7 +233,7 @@ export default async function handler(request: Request, context: Context) {
           b.style.background = 'rgba(255,107,53,0.15)';
           b.style.color = '#ff6b35';
         } else {
-          b.style.background = '#1a1a1a';
+          b.style.background = 'var(--bg2)';
           b.style.color = '#999';
         }
       });
@@ -232,7 +247,7 @@ export default async function handler(request: Request, context: Context) {
       // Live preview
       var container = document.getElementById('embed-preview');
       container.innerHTML = '';
-      container.style.background = embedTheme === 'light' ? '#f0f0f0' : '#0d0d0d';
+      container.style.background = embedTheme === 'light' ? '#f0f0f0' : '#0d0d0d'; // embed preview bg stays fixed per embed theme selection
       var w = document.createElement('div');
       w.className = 'unstream-widget';
       w.setAttribute('data-artist', artistName);
