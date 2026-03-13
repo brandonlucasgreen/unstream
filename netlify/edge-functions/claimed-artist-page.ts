@@ -222,11 +222,11 @@ export default async function handler(request: Request, context: Context) {
         Claimed
       </span>
     </div>
-    ${bio ? `<p style="margin-top:8px;color:var(--muted);font-size:14px;max-width:400px;margin-left:auto;margin-right:auto">${bio}</p>` : ''}
   </div>
 
   <!-- Platform Links -->
   <div class="container" style="padding-bottom:32px">
+    ${bio ? `<p style="color:var(--muted);font-size:14px;margin-bottom:24px;text-align:left">${bio}</p>` : ''}
     ${mainPlatforms.length > 0 ? `
       <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Support directly</h2>
       <div style="display:grid;gap:8px">${platformLinksHtml}</div>
