@@ -170,13 +170,6 @@ export function PrivacyPolicyPage() {
             </a>
             <span className="text-text-muted/40 text-xs">&#x2022;</span>
             <Link
-              to="/embed"
-              className="hover:text-text-primary transition-colors"
-            >
-              Embed Widget
-            </Link>
-            <span className="text-text-muted/40 text-xs">&#x2022;</span>
-            <Link
               to="/privacy-policy"
               className="hover:text-text-primary transition-colors"
             >

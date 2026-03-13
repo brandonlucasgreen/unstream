@@ -62,7 +62,10 @@ export interface SearchResult {
   platforms: PlatformLink[];
   // Match confidence: 'verified' means releases match across platforms,
   // 'unverified' means name-only match (no release data to compare)
-  matchConfidence?: 'verified' | 'unverified';
+  // 'claimed' means artist has verified ownership of this profile
+  matchConfidence?: 'verified' | 'unverified' | 'claimed';
+  // Slug for claimed artist page (/a/{slug})
+  claimedSlug?: string;
 }
 
 // API response from /api/search/sources

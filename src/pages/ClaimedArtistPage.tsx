@@ -1,0 +1,291 @@
+import { useState, useEffect } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { sources } from '../services/sources';
+import type { SourceId } from '../types';
+
+interface ArtistProfile {
+  bio?: string;
+  customImageUrl?: string;
+  websiteUrl?: string;
+  verified: boolean;
+}
+
+interface PlatformLink {
+  sourceId: string;
+  url: string;
+}
+
+interface ArtistData {
+  id: string;
+  name: string;
+  imageUrl?: string;
+  platforms: PlatformLink[];
+  matchConfidence?: string;
+  profile?: ArtistProfile;
+}
+
+export function ClaimedArtistPage() {
+  const { slug } = useParams<{ slug: string }>();
+  const [artist, setArtist] = useState<ArtistData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const [pending, setPending] = useState(false);
+
+  const displayName = artist?.name || slug?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || '';
+
+  useEffect(() => {
+    if (!slug) return;
+
+    fetch(`/api/artist?slug=${encodeURIComponent(slug)}`)
+      .then(r => {
+        if (!r.ok) throw new Error('not found');
+        return r.json();
+      })
+      .then((data: ArtistData) => {
+        if (data.matchConfidence === 'claimed' && data.profile?.verified) {
+          setArtist(data);
+        } else if (data.profile && !data.profile.verified) {
+          setPending(true);
+        } else {
+          setNotFound(true);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        setNotFound(true);
+        setLoading(false);
+      });
+  }, [slug]);
+
+  useEffect(() => {
+    if (artist) {
+      document.title = `${artist.name} — Unstream`;
+    }
+  }, [artist]);
+
+  // Filter to only direct platform links (exclude search URLs)
+  const directPlatforms = artist?.platforms.filter(p => {
+    const url = p.url.toLowerCase();
+    return !url.includes('duckduckgo.com') &&
+      !url.includes('google.com/search') &&
+      !url.includes('searchstyle=search') &&
+      !url.includes('explore-creators');
+  }) || [];
+
+  // Separate marketplace/patronage from social/other
+  const mainPlatforms = directPlatforms.filter(p => {
+    const source = sources[p.sourceId as SourceId];
+    return source && ['marketplace', 'patronage', 'library', 'decentralized', 'official'].includes(source.category);
+  });
+  const socialPlatforms = directPlatforms.filter(p => {
+    const source = sources[p.sourceId as SourceId];
+    return source?.category === 'social';
+  });
+
+  const imageUrl = artist?.profile?.customImageUrl || artist?.imageUrl;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-bg-primary text-text-primary flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-accent-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Pending verification shell
+  if (pending) {
+    return (
+      <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
+        <header className="p-4 border-b border-border-primary">
+          <Link to="/" className="text-xl font-bold text-accent-primary hover:opacity-80 transition-opacity">
+            Unstream
+          </Link>
+        </header>
+        <main className="flex-1 flex items-center justify-center p-6">
+          <div className="text-center space-y-4 max-w-sm">
+            <div className="text-4xl">⏳</div>
+            <h1 className="text-xl font-bold">{displayName}</h1>
+            <p className="text-text-muted text-sm">
+              This artist page is being set up and is pending verification.
+              Check back soon.
+            </p>
+            <Link
+              to={`/artist/${slug}`}
+              className="inline-block text-sm text-accent-primary hover:underline"
+            >
+              View search results for {displayName}
+            </Link>
+          </div>
+        </main>
+        <footer className="p-4 text-center text-xs text-text-muted border-t border-border-primary">
+          <Link to="/" className="hover:text-text-primary transition-colors">Powered by Unstream</Link>
+        </footer>
+      </div>
+    );
+  }
+
+  if (notFound) {
+    return (
+      <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
+        <header className="p-4 border-b border-border-primary">
+          <Link to="/" className="text-xl font-bold text-accent-primary hover:opacity-80 transition-opacity">
+            Unstream
+          </Link>
+        </header>
+        <main className="flex-1 flex items-center justify-center p-6">
+          <div className="text-center space-y-4">
+            <h1 className="text-xl font-bold">Artist page not found</h1>
+            <p className="text-text-muted text-sm">
+              This artist hasn't claimed their Unstream profile yet.
+            </p>
+            <Link
+              to={`/artist/${slug}`}
+              className="inline-block text-sm text-accent-primary hover:underline"
+            >
+              Search for {displayName} instead
+            </Link>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
+      {/* Hero Section */}
+      <div className="w-full max-w-2xl mx-auto px-6 pt-12 pb-8">
+        <div className="flex flex-col items-center text-center space-y-4">
+          {imageUrl && (
+            <img
+              src={imageUrl}
+              alt={artist!.name}
+              className="w-32 h-32 rounded-full object-cover border-2 border-border-primary"
+            />
+          )}
+          <div className="space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <h1 className="text-3xl font-bold">{artist!.name}</h1>
+              <span
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-accent-primary/15 text-accent-primary"
+                title="Verified artist"
+              >
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                Claimed
+              </span>
+            </div>
+            {artist!.profile?.bio && (
+              <p className="text-text-muted text-sm max-w-md">{artist!.profile.bio}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Platform Links */}
+      <div className="w-full max-w-2xl mx-auto px-6 pb-8">
+        {mainPlatforms.length > 0 && (
+          <div className="space-y-3">
+            <h2 className="text-xs font-medium text-text-muted uppercase tracking-wider">
+              Support directly
+            </h2>
+            <div className="grid gap-2">
+              {mainPlatforms.map(platform => {
+                const source = sources[platform.sourceId as SourceId];
+                if (!source) return null;
+                return (
+                  <a
+                    key={platform.sourceId}
+                    href={platform.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl border border-border-primary hover:border-transparent transition-all"
+                    style={{
+                      backgroundColor: `${source.color}08`,
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLElement).style.backgroundColor = `${source.color}18`;
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLElement).style.backgroundColor = `${source.color}08`;
+                    }}
+                  >
+                    <span className="text-xl">{source.icon}</span>
+                    <span className="font-medium flex-1">{source.name}</span>
+                    {source.artistPayoutPercent && (
+                      <span className="text-xs text-text-muted">
+                        {source.artistPayoutPercent} to artist
+                      </span>
+                    )}
+                    <svg className="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Social Links */}
+        {socialPlatforms.length > 0 && (
+          <div className="mt-8 space-y-3">
+            <h2 className="text-xs font-medium text-text-muted uppercase tracking-wider">
+              Follow
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {socialPlatforms.map(platform => {
+                const source = sources[platform.sourceId as SourceId];
+                if (!source) return null;
+                return (
+                  <a
+                    key={platform.sourceId}
+                    href={platform.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-border-primary hover:bg-bg-secondary transition-colors text-sm"
+                  >
+                    <span>{source.icon}</span>
+                    <span>{source.name}</span>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Website Link */}
+        {artist!.profile?.websiteUrl && (
+          <div className="mt-8 space-y-3">
+            <h2 className="text-xs font-medium text-text-muted uppercase tracking-wider">
+              Website
+            </h2>
+            <a
+              href={artist!.profile.websiteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-accent-primary hover:underline"
+            >
+              {new URL(artist!.profile.websiteUrl).hostname.replace(/^www\./, '')}
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <footer className="mt-auto p-6 text-center border-t border-border-primary">
+        <div className="space-y-2">
+          <Link to="/" className="text-sm text-text-muted hover:text-accent-primary transition-colors">
+            Powered by Unstream
+          </Link>
+          <p className="text-xs text-text-muted">
+            Find music on platforms that pay artists fairly.
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+}

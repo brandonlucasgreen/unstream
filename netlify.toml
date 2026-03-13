@@ -12,6 +12,10 @@
   path = "/artist/*"
   function = "artist-page"
 
+[[edge_functions]]
+  path = "/a/*"
+  function = "claimed-artist-page"
+
 [[redirects]]
   from = "/api/search/sources"
   to = "/.netlify/functions/search-sources"
@@ -35,6 +39,11 @@
 [[redirects]]
   from = "/api/artist"
   to = "/.netlify/functions/artist-lookup"
+  status = 200
+
+[[redirects]]
+  from = "/api/claim"
+  to = "/.netlify/functions/claim-artist"
   status = 200
 
 [[redirects]]

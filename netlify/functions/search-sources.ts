@@ -1,6 +1,6 @@
 import { parse } from 'node-html-parser';
 import { cacheGetOrFetch, artistCacheKey } from './cache';
-import { persistSearchResults } from './db';
+import { persistSearchResults, getArtistBySlug, artistSlug } from './db';
 
 type SourceId =
   | 'bandcamp'
@@ -50,7 +50,10 @@ interface AggregatedResult {
   }[];
   // Match confidence: 'verified' means releases match across platforms,
   // 'unverified' means name-only match (no release data to compare)
-  matchConfidence?: 'verified' | 'unverified';
+  // 'claimed' means artist has verified ownership of this profile
+  matchConfidence?: 'verified' | 'unverified' | 'claimed';
+  // Slug for claimed artist page (/a/{slug})
+  claimedSlug?: string;
 }
 
 interface SearchResponse {
@@ -1884,11 +1887,44 @@ export async function handler(event: { queryStringParameters?: Record<string, st
   try {
     // Normalize the query to handle accented characters (e.g., "Tanerélle" -> "Tanerelle")
     const normalizedQuery = normalizeSearchQuery(query);
+
+    // Check if there's a claimed artist in the DB matching this query
+    const slug = artistSlug(normalizedQuery);
+    let claimedResult: AggregatedResult | null = null;
+    try {
+      const dbArtist = await getArtistBySlug(slug);
+      if (dbArtist && dbArtist.matchConfidence === 'claimed') {
+        claimedResult = {
+          id: `claimed-${slug}`,
+          name: dbArtist.name,
+          type: 'artist',
+          imageUrl: dbArtist.imageUrl,
+          platforms: dbArtist.platforms.map(p => ({
+            sourceId: p.sourceId as SourceId,
+            url: p.url,
+            latestRelease: p.latestRelease,
+          })),
+          matchConfidence: 'claimed',
+          claimedSlug: slug,
+        };
+      }
+    } catch (err) {
+      console.error('[DB] Claimed artist lookup failed:', err);
+    }
+
     const results = await searchAllPlatforms(normalizedQuery);
 
-    // Persist artist results to the database
+    // If we have a claimed artist, put it first and remove any duplicate from live results
+    if (claimedResult) {
+      const claimedName = normalizeForComparison(claimedResult.name);
+      const filtered = results.filter(r => normalizeForComparison(r.name) !== claimedName);
+      results.length = 0;
+      results.push(claimedResult, ...filtered);
+    }
+
+    // Persist artist results to the database (skip claimed results, they're already in DB)
     try {
-      await persistSearchResults(results);
+      await persistSearchResults(results.filter(r => r.matchConfidence !== 'claimed'));
     } catch (err) {
       console.error('[DB] Background persist failed:', err);
     }

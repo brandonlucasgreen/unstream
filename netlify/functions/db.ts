@@ -56,6 +56,13 @@ interface PlatformLink {
   allReleaseTitles?: string[];
 }
 
+interface ArtistProfile {
+  bio?: string;
+  customImageUrl?: string;
+  websiteUrl?: string;
+  verified: boolean;
+}
+
 interface ArtistResult {
   id: string;
   name: string;
@@ -63,7 +70,8 @@ interface ArtistResult {
   type: 'artist' | 'album' | 'track';
   imageUrl?: string;
   platforms: PlatformLink[];
-  matchConfidence?: 'verified' | 'unverified';
+  matchConfidence?: 'verified' | 'unverified' | 'claimed';
+  profile?: ArtistProfile;
 }
 
 // --- DB Row Types ---
@@ -110,11 +118,13 @@ export async function getArtistBySlug(slug: string): Promise<ArtistResult | null
 
     const row = artist as ArtistRow;
 
-    // Check freshness
-    const updatedAt = new Date(row.updated_at).getTime();
-    const now = Date.now();
-    if (now - updatedAt > FRESHNESS_TTL_MS) {
-      return null; // Stale, caller should refresh
+    // Claimed artists are always fresh; auto-discovered artists expire
+    if (row.match_confidence !== 'claimed') {
+      const updatedAt = new Date(row.updated_at).getTime();
+      const now = Date.now();
+      if (now - updatedAt > FRESHNESS_TTL_MS) {
+        return null; // Stale, caller should refresh
+      }
     }
 
     const { data: links, error: linksError } = await client
@@ -131,6 +141,25 @@ export async function getArtistBySlug(slug: string): Promise<ArtistResult | null
       ...(link.latest_release ? { latestRelease: link.latest_release as PlatformLink['latestRelease'] } : {}),
     }));
 
+    // Fetch profile data for claimed artists
+    let profile: ArtistProfile | undefined;
+    if (row.match_confidence === 'claimed') {
+      const { data: profileData } = await client
+        .from('artist_profiles')
+        .select('bio, custom_image_url, website_url, verified_at')
+        .eq('artist_id', row.id)
+        .single();
+
+      if (profileData) {
+        profile = {
+          bio: profileData.bio || undefined,
+          customImageUrl: profileData.custom_image_url || undefined,
+          websiteUrl: profileData.website_url || undefined,
+          verified: !!profileData.verified_at,
+        };
+      }
+    }
+
     return {
       id: row.slug,
       name: row.name,
@@ -138,6 +167,7 @@ export async function getArtistBySlug(slug: string): Promise<ArtistResult | null
       imageUrl: row.image_url || undefined,
       platforms,
       matchConfidence: (row.match_confidence as ArtistResult['matchConfidence']) || undefined,
+      profile,
     };
   } catch (error) {
     console.error('[DB] getArtistBySlug error:', error);

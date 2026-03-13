@@ -244,6 +244,21 @@ export function ArtistPage() {
             ) : null}
           </div>
 
+          {/* Claim prompt */}
+          {!isLoading && results.length > 0 && (
+            <div className="mt-6 p-4 rounded-lg border border-border-primary bg-bg-secondary/50 text-center">
+              <p className="text-sm text-text-muted">
+                Are you {displayName}?{' '}
+                <Link
+                  to={`/claim/${slug}`}
+                  className="text-accent-primary hover:underline font-medium"
+                >
+                  Claim your artist page
+                </Link>
+              </p>
+            </div>
+          )}
+
           {/* Mac App Promo - after results */}
           {!isLoading && (
             <div className="mt-8">
@@ -273,13 +288,6 @@ export function ArtistPage() {
             >
               Support
             </a>
-            <span className="text-text-muted/40 text-xs">&#x2022;</span>
-            <Link
-              to={`/embed?artist=${encodeURIComponent(displayName)}`}
-              className="hover:text-text-primary transition-colors"
-            >
-              Embed
-            </Link>
             <span className="text-text-muted/40 text-xs">&#x2022;</span>
             <a
               href="https://unstream.goatcounter.com"
