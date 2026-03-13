@@ -279,9 +279,9 @@ function generateArtistPageHtml(
   <!-- Footer -->
   <footer style="margin-top:auto;padding:24px 16px;border-top:1px solid var(--footer-border)">
     <div style="max-width:896px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:12px;font-size:14px;color:var(--muted)">
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
-        <a href="https://unstream.stream" style="color:var(--muted);text-decoration:none;font-weight:600">Powered by Unstream</a>
-        <span style="font-size:12px">Find music on platforms that pay artists fairly.</span>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <a href="https://unstream.stream" style="color:var(--text);text-decoration:none;font-weight:700;font-size:18px">Powered by Unstream</a>
+        <span style="font-size:14px">Find music on platforms that pay artists fairly.</span>
       </div>
       <nav style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px">
         <a href="/artists" style="color:var(--muted);text-decoration:none">Artists</a>
