@@ -251,7 +251,7 @@ export async function handler(event: {
       return {
         statusCode: 500,
         headers: CORS_HEADERS,
-        body: JSON.stringify({ error: 'Failed to start claim' }),
+        body: JSON.stringify({ error: `Failed to start claim: ${upsertError.message}` }),
       };
     }
 

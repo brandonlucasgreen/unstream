@@ -96,7 +96,7 @@ export function ClaimedArtistPage() {
   if (pending) {
     return (
       <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
-        <header className="p-4 border-b border-border-primary">
+        <header className="p-4 border-b border-border">
           <Link to="/" className="text-xl font-bold text-accent-primary hover:opacity-80 transition-opacity">
             Unstream
           </Link>
@@ -117,7 +117,7 @@ export function ClaimedArtistPage() {
             </Link>
           </div>
         </main>
-        <footer className="p-4 text-center text-xs text-text-muted border-t border-border-primary">
+        <footer className="p-4 text-center text-xs text-text-muted border-t border-border">
           <Link to="/" className="hover:text-text-primary transition-colors">Powered by Unstream</Link>
         </footer>
       </div>
@@ -127,7 +127,7 @@ export function ClaimedArtistPage() {
   if (notFound) {
     return (
       <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
-        <header className="p-4 border-b border-border-primary">
+        <header className="p-4 border-b border-border">
           <Link to="/" className="text-xl font-bold text-accent-primary hover:opacity-80 transition-opacity">
             Unstream
           </Link>
@@ -159,7 +159,7 @@ export function ClaimedArtistPage() {
             <img
               src={imageUrl}
               alt={artist!.name}
-              className="w-32 h-32 rounded-full object-cover border-2 border-border-primary"
+              className="w-32 h-32 rounded-full object-cover border-2 border-border"
             />
           )}
           <div className="space-y-2">
@@ -199,7 +199,7 @@ export function ClaimedArtistPage() {
                     href={platform.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl border border-border-primary hover:border-transparent transition-all"
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl border border-border hover:border-transparent transition-all"
                     style={{
                       backgroundColor: `${source.color}08`,
                     }}
@@ -243,7 +243,7 @@ export function ClaimedArtistPage() {
                     href={platform.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-border-primary hover:bg-bg-secondary transition-colors text-sm"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-border hover:bg-bg-secondary transition-colors text-sm"
                   >
                     <span>{source.icon}</span>
                     <span>{source.name}</span>
@@ -276,7 +276,7 @@ export function ClaimedArtistPage() {
       </div>
 
       {/* Footer */}
-      <footer className="mt-auto p-6 text-center border-t border-border-primary">
+      <footer className="mt-auto p-6 text-center border-t border-border">
         <div className="space-y-2">
           <Link to="/" className="text-sm text-text-muted hover:text-accent-primary transition-colors">
             Powered by Unstream

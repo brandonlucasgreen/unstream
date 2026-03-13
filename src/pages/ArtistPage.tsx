@@ -246,7 +246,7 @@ export function ArtistPage() {
 
           {/* Claim prompt */}
           {!isLoading && results.length > 0 && (
-            <div className="mt-6 p-4 rounded-lg border border-border-primary bg-bg-secondary/50 text-center">
+            <div className="mt-6 p-4 rounded-lg border border-border bg-bg-secondary/50 text-center">
               <p className="text-sm text-text-muted">
                 Are you {displayName}?{' '}
                 <Link

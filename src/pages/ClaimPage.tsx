@@ -158,7 +158,7 @@ export function ClaimPage() {
 
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
-      <header className="p-4 border-b border-border-primary">
+      <header className="p-4 border-b border-border">
         <Link to="/" className="text-xl font-bold text-accent-primary hover:opacity-80 transition-opacity">
           Unstream
         </Link>
@@ -208,7 +208,7 @@ export function ClaimPage() {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder="artist@example.com"
-                  className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border-primary text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary"
+                  className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary"
                 />
               </div>
               <button
@@ -223,7 +223,7 @@ export function ClaimPage() {
 
           {/* Step 1b: Check email */}
           {step === 'check-email' && (
-            <div className="text-center space-y-4 p-6 rounded-lg bg-bg-secondary border border-border-primary">
+            <div className="text-center space-y-4 p-6 rounded-lg bg-bg-secondary border border-border">
               <div className="text-3xl">📧</div>
               <p className="font-medium">Check your email</p>
               <p className="text-sm text-text-muted">
@@ -247,7 +247,7 @@ export function ClaimPage() {
                   value={websiteUrl}
                   onChange={e => setWebsiteUrl(e.target.value)}
                   placeholder="https://linktr.ee/yourname"
-                  className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border-primary text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary"
+                  className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary"
                 />
                 <p className="text-xs text-text-muted mt-1">
                   This can be your personal website, Linktree, Carrd, or any page you control.
@@ -266,17 +266,17 @@ export function ClaimPage() {
           {/* Step 3: Verify link-back */}
           {step === 'verify' && (
             <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-bg-secondary border border-border-primary space-y-3">
+              <div className="p-4 rounded-lg bg-bg-secondary border border-border space-y-3">
                 <p className="text-sm font-medium">
                   Add this link to your website:
                 </p>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 px-3 py-2 rounded bg-bg-primary border border-border-primary text-sm text-accent-primary break-all">
+                  <code className="flex-1 px-3 py-2 rounded bg-bg-primary border border-border text-sm text-accent-primary break-all">
                     {verifyUrl}
                   </code>
                   <button
                     onClick={() => navigator.clipboard.writeText(verifyUrl)}
-                    className="flex-shrink-0 px-3 py-2 rounded-lg bg-bg-primary border border-border-primary text-sm hover:bg-bg-secondary transition-colors"
+                    className="flex-shrink-0 px-3 py-2 rounded-lg bg-bg-primary border border-border text-sm hover:bg-bg-secondary transition-colors"
                     title="Copy URL"
                   >
                     Copy
@@ -299,7 +299,7 @@ export function ClaimPage() {
 
           {/* Step 4: Done */}
           {step === 'done' && (
-            <div className="text-center space-y-4 p-6 rounded-lg bg-bg-secondary border border-border-primary">
+            <div className="text-center space-y-4 p-6 rounded-lg bg-bg-secondary border border-border">
               <div className="text-3xl">✅</div>
               <p className="text-xl font-bold">Profile claimed!</p>
               <p className="text-sm text-text-muted">
@@ -317,7 +317,7 @@ export function ClaimPage() {
         </div>
       </main>
 
-      <footer className="p-4 text-center text-xs text-text-muted border-t border-border-primary">
+      <footer className="p-4 text-center text-xs text-text-muted border-t border-border">
         <Link to="/" className="hover:text-text-primary transition-colors">Unstream</Link>
         {' · '}
         <Link to="/privacy-policy" className="hover:text-text-primary transition-colors">Privacy</Link>
