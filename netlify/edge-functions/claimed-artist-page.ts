@@ -243,9 +243,23 @@ export default async function handler(request: Request, context: Context) {
   </div>
 
   <!-- Footer -->
-  <footer style="margin-top:auto;padding:24px;text-align:center;border-top:1px solid var(--footer-border)">
-    <a href="https://unstream.stream" style="font-size:14px;color:var(--muted);text-decoration:none">Powered by Unstream</a>
-    <p style="font-size:12px;color:var(--muted);margin-top:4px">Find music on platforms that pay artists fairly.</p>
+  <footer style="margin-top:auto;padding:24px 16px;border-top:1px solid var(--footer-border)">
+    <div style="max-width:896px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:12px;font-size:14px;color:var(--muted)">
+      <span>Made with love in Massachusetts, USA</span>
+      <nav style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px">
+        <a href="https://unstream.featurebase.app/roadmap" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Roadmap</a>
+        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <a href="mailto:support@unstream.stream" style="color:var(--muted);text-decoration:none">Support</a>
+        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <a href="https://unstream.goatcounter.com" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Metrics</a>
+        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <a href="https://liberapay.com/brandonlucasgreen/donate" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Donate</a>
+        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <a href="/privacy-policy" style="color:var(--muted);text-decoration:none">Privacy</a>
+        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <a href="/claim/${escapeHtml(slug)}" style="color:var(--muted);text-decoration:none">Artist login</a>
+      </nav>
+    </div>
   </footer>
 
   <script>
