@@ -226,14 +226,23 @@ export function ClaimedArtistPage() {
       !url.includes('explore-creators');
   }) || [];
 
+  // Custom platform metadata for platforms not in the sources registry
+  const CUSTOM_PLATFORMS: Record<string, { name: string; icon: string; color: string; group: 'main' | 'social' }> = {
+    newsletter: { name: 'Newsletter', icon: '📧', color: '#666', group: 'social' },
+    wikipedia: { name: 'Wikipedia', icon: '📖', color: '#636466', group: 'social' },
+    liberapay: { name: 'Liberapay', icon: '🤝', color: '#F6C915', group: 'main' },
+  };
+
   // Separate marketplace/patronage from social/other
   const mainPlatforms = directPlatforms.filter(p => {
     const source = sources[p.sourceId as SourceId];
-    return source && ['marketplace', 'patronage', 'library', 'decentralized', 'official'].includes(source.category);
+    if (source) return ['marketplace', 'patronage', 'library', 'decentralized', 'official'].includes(source.category);
+    return CUSTOM_PLATFORMS[p.sourceId]?.group === 'main';
   });
   const socialPlatforms = directPlatforms.filter(p => {
     const source = sources[p.sourceId as SourceId];
-    return source?.category === 'social';
+    if (source?.category === 'social') return true;
+    return CUSTOM_PLATFORMS[p.sourceId]?.group === 'social';
   });
 
   const imageUrl = artist?.profile?.customImageUrl || artist?.imageUrl;
@@ -347,7 +356,11 @@ export function ClaimedArtistPage() {
             <div className="grid gap-2">
               {mainPlatforms.map(platform => {
                 const source = sources[platform.sourceId as SourceId];
-                if (!source) return null;
+                const custom = CUSTOM_PLATFORMS[platform.sourceId];
+                if (!source && !custom) return null;
+                const color = source?.color || custom?.color || '#666';
+                const icon = source?.icon || custom?.icon || '🔗';
+                const name = source?.name || custom?.name || platform.displayName || platform.sourceId;
                 return (
                   <a
                     key={platform.sourceId}
@@ -356,18 +369,18 @@ export function ClaimedArtistPage() {
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 px-4 py-3 rounded-xl border border-border hover:border-transparent transition-all"
                     style={{
-                      backgroundColor: `${source.color}08`,
+                      backgroundColor: `${color}08`,
                     }}
                     onMouseEnter={e => {
-                      (e.currentTarget as HTMLElement).style.backgroundColor = `${source.color}18`;
+                      (e.currentTarget as HTMLElement).style.backgroundColor = `${color}18`;
                     }}
                     onMouseLeave={e => {
-                      (e.currentTarget as HTMLElement).style.backgroundColor = `${source.color}08`;
+                      (e.currentTarget as HTMLElement).style.backgroundColor = `${color}08`;
                     }}
                   >
-                    <span className="text-xl">{source.icon}</span>
-                    <span className="font-medium flex-1">{source.name}</span>
-                    {source.artistPayoutPercent && (
+                    <span className="text-xl">{icon}</span>
+                    <span className="font-medium flex-1">{name}</span>
+                    {source?.artistPayoutPercent && (
                       <span className="text-xs text-text-muted">
                         {source.artistPayoutPercent} to artist
                       </span>
@@ -391,7 +404,9 @@ export function ClaimedArtistPage() {
             <div className="flex flex-wrap gap-2">
               {socialPlatforms.map(platform => {
                 const source = sources[platform.sourceId as SourceId];
-                if (!source) return null;
+                const custom = CUSTOM_PLATFORMS[platform.sourceId];
+                if (!source && !custom) return null;
+                const name = source?.name || custom?.name || platform.sourceId;
                 return (
                   <a
                     key={platform.sourceId}
@@ -401,11 +416,11 @@ export function ClaimedArtistPage() {
                     className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-border hover:bg-bg-secondary transition-colors text-sm"
                   >
                     {hasSocialIcon(platform.sourceId) ? (
-                      <SocialIcon platform={platform.sourceId as SourceId} />
+                      <SocialIcon platform={platform.sourceId} />
                     ) : (
-                      <span>{source.icon}</span>
+                      <span>{source?.icon || custom?.icon}</span>
                     )}
-                    <span>{source.name}</span>
+                    <span>{name}</span>
                   </a>
                 );
               })}
