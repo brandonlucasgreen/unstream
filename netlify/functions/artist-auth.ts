@@ -50,45 +50,16 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
 
       const normalizedEmail = email.toLowerCase().trim();
 
-      // First try: look up by email column in artist_profiles
-      const { data: profilesByEmail } = await client
+      const { data: profiles } = await client
         .from('artist_profiles')
         .select('id')
         .eq('email', normalizedEmail)
         .not('verified_at', 'is', null)
         .limit(1);
 
-      if (profilesByEmail && profilesByEmail.length > 0) {
-        return { statusCode: 200, headers, body: JSON.stringify({ hasAccount: true }) };
-      }
+      const hasAccount = profiles && profiles.length > 0;
 
-      // Fallback: look up user by email in Supabase Auth, then check by user_id
-      // (handles case where email column wasn't populated during claim)
-      const { data: userList } = await client.auth.admin.listUsers();
-      const authUser = userList?.users?.find(
-        u => u.email?.toLowerCase() === normalizedEmail
-      );
-
-      if (authUser) {
-        const { data: profilesByUserId } = await client
-          .from('artist_profiles')
-          .select('id')
-          .eq('user_id', authUser.id)
-          .not('verified_at', 'is', null)
-          .limit(1);
-
-        if (profilesByUserId && profilesByUserId.length > 0) {
-          // Backfill the email column for future lookups
-          await client
-            .from('artist_profiles')
-            .update({ email: normalizedEmail })
-            .eq('user_id', authUser.id);
-
-          return { statusCode: 200, headers, body: JSON.stringify({ hasAccount: true }) };
-        }
-      }
-
-      return { statusCode: 200, headers, body: JSON.stringify({ hasAccount: false }) };
+      return { statusCode: 200, headers, body: JSON.stringify({ hasAccount }) };
     } catch {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid request' }) };
     }

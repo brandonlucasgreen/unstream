@@ -104,7 +104,7 @@ export function ClaimPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ action: 'start', slug, websiteUrl }),
+        body: JSON.stringify({ action: 'start', slug, websiteUrl, email }),
       });
 
       const data = await response.json();

@@ -207,7 +207,7 @@ export async function handler(event: {
     };
   }
 
-  let body: { action: string; slug?: string; websiteUrl?: string };
+  let body: { action: string; slug?: string; websiteUrl?: string; email?: string };
   try {
     body = JSON.parse(event.body || '{}');
   } catch {
@@ -271,9 +271,8 @@ export async function handler(event: {
       };
     }
 
-    // Get user email from Supabase Auth
-    const { data: authUser } = await client.auth.admin.getUserById(userId);
-    const email = authUser?.user?.email || '';
+    // Use the email provided by the frontend (the one the artist signed in with)
+    const email = (body.email || '').toLowerCase().trim();
 
     const verificationCode = generateVerificationCode();
 
