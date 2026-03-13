@@ -457,6 +457,25 @@ function App() {
                       result={result}
                     />
                   ))}
+                  {/* Claim prompt for artists */}
+                  {results.some(r => r.type === 'artist' && r.matchConfidence !== 'claimed') && (() => {
+                    const firstArtist = results.find(r => r.type === 'artist' && r.matchConfidence !== 'claimed');
+                    if (!firstArtist) return null;
+                    const slug = firstArtist.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+                    return (
+                      <div className="p-4 rounded-lg border border-border-primary bg-bg-secondary/50 text-center">
+                        <p className="text-sm text-text-muted">
+                          Are you {firstArtist.name}?{' '}
+                          <Link
+                            to={`/claim/${slug}`}
+                            className="text-accent-primary hover:underline font-medium"
+                          >
+                            Claim your artist page
+                          </Link>
+                        </p>
+                      </div>
+                    );
+                  })()}
                 </div>
               ) : (
                 <div className="text-center py-16">
