@@ -36,7 +36,11 @@ function getServiceClient() {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
   if (!url || !key) return null;
-  return createClient(url, key);
+  return createClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+    db: { schema: 'public' },
+    global: { headers: { 'x-supabase-role': 'service_role' } },
+  });
 }
 
 // Verify the JWT from the request and return the user ID
