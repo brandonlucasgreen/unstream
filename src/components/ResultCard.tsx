@@ -187,21 +187,30 @@ export function ResultCard({ result, defaultExpanded = true }: ResultCardProps) 
         {/* Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs px-1.5 py-0.5 rounded bg-accent-primary/10 text-accent-primary">
-              {typeLabel}
-            </span>
+            {result.matchConfidence !== 'claimed' && (
+              <span className="text-xs px-1.5 py-0.5 rounded bg-accent-primary/10 text-accent-primary">
+                {typeLabel}
+              </span>
+            )}
             {result.matchConfidence === 'claimed' && (
-              <Link
-                to={`/a/${result.claimedSlug || result.id}`}
-                className="text-xs px-1.5 py-0.5 rounded bg-accent-primary/15 text-accent-primary flex items-center gap-1 hover:bg-accent-primary/25 transition-colors"
-                title="This artist has claimed their Unstream profile"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-                Claimed — View profile
-              </Link>
+              <>
+                <span
+                  className="text-xs px-1.5 py-0.5 rounded bg-accent-primary/15 text-accent-primary flex items-center gap-1"
+                  title="This artist has verified their Unstream profile"
+                >
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Verified
+                </span>
+                <Link
+                  to={`/a/${result.claimedSlug || result.id}`}
+                  className="text-xs px-1.5 py-0.5 rounded bg-bg-hover text-text-secondary hover:text-text-primary transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  View profile
+                </Link>
+              </>
             )}
             {result.matchConfidence === 'unverified' && (
               <span className="text-xs px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-500 flex items-center gap-1" title="Could not verify this is the same artist - no matching releases found">
