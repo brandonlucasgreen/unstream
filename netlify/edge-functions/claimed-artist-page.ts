@@ -249,7 +249,6 @@ export default async function handler(request: Request, context: Context) {
         <a href="https://unstream.stream" style="color:var(--muted);text-decoration:none;font-weight:600">Powered by Unstream</a>
         <span style="font-size:12px">Find music on platforms that pay artists fairly.</span>
       </div>
-      <span>Made with love in Massachusetts, USA</span>
       <nav style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px">
         <a href="https://unstream.featurebase.app/roadmap" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Roadmap</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
