@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { SearchBar } from '../components/SearchBar';
 import { ResultCard } from '../components/ResultCard';
+import { ArtistAuthBar } from '../components/ArtistAuthBar';
 import type { SearchResult } from '../types';
 import { searchPlatforms, fetchMusicBrainzData, mergeWithMusicBrainzData } from '../services/sources';
 import { analytics } from '../services/analytics';
@@ -174,6 +175,7 @@ export function ArtistPage() {
 
   return (
     <div className="min-h-screen">
+      <ArtistAuthBar />
       {/* Header */}
       <header className="pt-8 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">

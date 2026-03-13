@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useParams, useLocation } from 'react-router-dom';
 import { sources } from '../services/sources';
 import { SocialIcon, hasSocialIcon } from '../components/SocialIcon';
+import { ArtistAuthBar } from '../components/ArtistAuthBar';
 import type { SourceId } from '../types';
 
 interface ArtistProfile {
@@ -248,6 +249,7 @@ export function ClaimedArtistPage() {
   if (pending) {
     return (
       <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
+        <ArtistAuthBar />
         <header className="p-4 border-b border-border">
           <Link to="/" className="text-xl font-bold text-accent-primary hover:opacity-80 transition-opacity">
             Unstream
@@ -279,6 +281,7 @@ export function ClaimedArtistPage() {
   if (notFound) {
     return (
       <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
+        <ArtistAuthBar />
         <header className="p-4 border-b border-border">
           <Link to="/" className="text-xl font-bold text-accent-primary hover:opacity-80 transition-opacity">
             Unstream
@@ -304,6 +307,7 @@ export function ClaimedArtistPage() {
 
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
+      <ArtistAuthBar />
       {/* Hero Section */}
       <div className="w-full max-w-2xl mx-auto px-6 pt-12 pb-8">
         <div className="flex flex-col items-center text-center space-y-4">

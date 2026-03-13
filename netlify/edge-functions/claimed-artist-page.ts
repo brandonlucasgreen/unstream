@@ -162,9 +162,27 @@ export default async function handler(request: Request, context: Context) {
     .theme-toggle[data-pref="light"] .icon-sun { display: block; }
     .theme-toggle[data-pref="dark"] .icon-system { display: none; }
     .theme-toggle[data-pref="dark"] .icon-moon { display: block; }
+    .auth-bar { display: none; background: var(--bg2); border-bottom: 1px solid var(--border); padding: 8px 16px; font-size: 14px; }
+    .auth-bar.visible { display: flex; align-items: center; justify-content: space-between; }
+    .auth-bar a { color: var(--accent); text-decoration: none; font-weight: 500; }
+    .auth-bar a:hover { text-decoration: underline; }
+    .auth-bar .auth-left { display: flex; align-items: center; gap: 12px; }
+    .auth-bar .auth-left span { color: var(--muted); }
+    .auth-bar button { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; font-family: inherit; }
+    .auth-bar button:hover { color: var(--text); }
   </style>
 </head>
 <body>
+  <div class="auth-bar" id="auth-bar">
+    <div class="auth-left">
+      <span>Artist account</span>
+      <a href="/artist-dashboard">Dashboard</a>
+    </div>
+    <button onclick="(function(){for(var k in localStorage){if(k.match(/^sb-.*-auth-token$/)){localStorage.removeItem(k)}}document.getElementById('auth-bar').classList.remove('visible');window.location.href='/artist-login'})()">Sign out</button>
+  </div>
+  <script>
+    (function(){for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.match(/^sb-.*-auth-token$/)){try{var d=JSON.parse(localStorage.getItem(k));if(d&&d.access_token){document.getElementById('auth-bar').classList.add('visible')}}catch(e){}break}}})();
+  </script>
   <button class="theme-toggle" id="theme-toggle-btn" aria-label="Toggle theme">
     <svg class="icon-system" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
     <svg class="icon-sun" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { ArtistAuthBar } from '../components/ArtistAuthBar';
 import { useTheme } from '../hooks/useTheme';
 
 export function PrivacyPolicyPage() {
@@ -7,6 +8,7 @@ export function PrivacyPolicyPage() {
 
   return (
     <div className="min-h-screen">
+      <ArtistAuthBar />
       {/* Header */}
       <header className="pt-8 pb-8 px-4 relative">
         <div className="absolute top-4 right-4">

@@ -5,6 +5,7 @@ import Markdown from 'react-markdown';
 import { SearchBar } from './components/SearchBar';
 import { ResultCard } from './components/ResultCard';
 import { ThemeToggle } from './components/ThemeToggle';
+import { ArtistAuthBar } from './components/ArtistAuthBar';
 import { useTheme } from './hooks/useTheme';
 import type { SearchResult } from './types';
 import { sources, sourceCategories, searchPlatforms, resolveArtistUrl, fetchMusicBrainzData, mergeWithMusicBrainzData } from './services/sources';
@@ -374,6 +375,7 @@ function App() {
 
   return (
     <div className="min-h-screen">
+      <ArtistAuthBar />
       {/* Header */}
       <header className="pt-8 pb-8 px-4 relative">
         <div className="absolute top-4 right-4">
