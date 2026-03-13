@@ -35,6 +35,9 @@ function isDirectLink(url: string): boolean {
   );
 }
 
+// Platforms that are manual search links, not real artist presences
+const EXCLUDED_PLATFORMS = new Set(['buymeacoffee', 'kofi', 'ampwall']);
+
 // How long before artist data is considered stale (24 hours)
 const FRESHNESS_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -155,10 +158,18 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
   for (const result of results) {
     if (result.type !== 'artist') continue;
 
+    // Filter out excluded platforms and non-direct links
+    const validPlatforms = result.platforms.filter(
+      p => !EXCLUDED_PLATFORMS.has(p.sourceId) && isDirectLink(p.url)
+    );
+
+    // Only persist artists with at least 1 real direct link
+    if (validPlatforms.length === 0) continue;
+
     const slug = artistSlug(result.name);
 
     try {
-      // Upsert artist
+      // Upsert artist — always store as unverified until claimed
       const { data: artist, error: artistError } = await client
         .from('artists')
         .upsert(
@@ -166,7 +177,7 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
             slug,
             name: result.name,
             image_url: result.imageUrl || null,
-            match_confidence: result.matchConfidence || null,
+            match_confidence: 'unverified',
             source: 'auto',
             updated_at: new Date().toISOString(),
           },
@@ -182,13 +193,13 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
 
       const artistId = artist.id;
 
-      // Upsert links
-      const linkRows = result.platforms.map((platform, index) => ({
+      // Upsert links (only valid platforms)
+      const linkRows = validPlatforms.map((platform, index) => ({
         artist_id: artistId,
         platform: platform.sourceId,
         url: platform.url,
         source: 'search',
-        is_direct: isDirectLink(platform.url),
+        is_direct: true,
         latest_release: platform.latestRelease || null,
         display_order: index,
       }));
@@ -270,8 +281,8 @@ export async function persistEnrichment(
       enrichmentLinks.push({ platform: discovered.platform, url: discovered.url });
     }
 
-    // Upsert each enrichment link
-    for (const link of enrichmentLinks) {
+    // Upsert each enrichment link (skip excluded platforms and non-direct URLs)
+    for (const link of enrichmentLinks.filter(l => !EXCLUDED_PLATFORMS.has(l.platform) && isDirectLink(l.url))) {
       const { error } = await client
         .from('artist_links')
         .upsert(

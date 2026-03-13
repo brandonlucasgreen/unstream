@@ -1487,9 +1487,9 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
           const matchingReleases = qobuzPlatform.allReleaseTitles.filter(title => bandcampTitles.has(title));
           const matchCount = matchingReleases.length;
 
-          // Threshold: need at least 2 matching releases, OR 30% of the smaller catalog
+          // Threshold: need at least 1 matching release, OR 30% of the smaller catalog
           const minCatalogSize = Math.min(bandcampTitles.size, qobuzPlatform.allReleaseTitles.length);
-          const matchThreshold = Math.max(2, Math.ceil(minCatalogSize * 0.3));
+          const matchThreshold = Math.max(1, Math.ceil(minCatalogSize * 0.3));
           const hasEnoughMatches = matchCount >= matchThreshold;
 
           if (!hasEnoughMatches) {
@@ -1731,11 +1731,43 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     disambiguated.push(result);
   }
 
+  // Merge results with the same normalized artist name
+  // This catches cases where Qobuz standalone results duplicate an existing Bandcamp result
+  const mergedMap = new Map<string, AggregatedResult>();
+  for (const result of disambiguated) {
+    if (result.type !== 'artist') {
+      mergedMap.set(result.id, result);
+      continue;
+    }
+    const normName = normalizeForComparison(result.name);
+    const existing = [...mergedMap.values()].find(
+      r => r.type === 'artist' && normalizeForComparison(r.name) === normName
+    );
+    if (existing) {
+      // Merge platforms from the duplicate into the existing result
+      const existingPlatformIds = new Set(existing.platforms.map(p => p.sourceId));
+      for (const platform of result.platforms) {
+        if (!existingPlatformIds.has(platform.sourceId)) {
+          existing.platforms.push(platform);
+          existingPlatformIds.add(platform.sourceId);
+        }
+      }
+      // Keep the better image
+      if (!existing.imageUrl && result.imageUrl) {
+        existing.imageUrl = result.imageUrl;
+      }
+      console.log(`[Merge] Merged duplicate "${result.name}" into existing result (added ${result.platforms.length} platforms)`);
+    } else {
+      mergedMap.set(result.id, result);
+    }
+  }
+  const merged = Array.from(mergedMap.values());
+
   // Filter out results that only have search-only platforms (kofi, buymeacoffee, ampwall search links)
   // These are just fuzzy search links added to any Bandcamp result, not real matches
   // Note: Ampwall API results (non-search URLs) count as real matches
   const searchOnlyPlatforms = new Set(['kofi', 'buymeacoffee']);
-  const filtered = disambiguated.filter(result => {
+  const filtered = merged.filter(result => {
     const hasNonSearchOnlyPlatform = result.platforms.some(p => {
       if (searchOnlyPlatforms.has(p.sourceId)) return false;
       // Ampwall search links are search-only, but API results are not
