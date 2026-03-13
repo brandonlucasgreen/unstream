@@ -60,6 +60,7 @@ interface ArtistProfile {
   bio?: string;
   customImageUrl?: string;
   websiteUrl?: string;
+  featuredEmbed?: string;
   verified: boolean;
 }
 
@@ -146,7 +147,7 @@ export async function getArtistBySlug(slug: string): Promise<ArtistResult | null
     if (row.match_confidence === 'claimed') {
       const { data: profileData } = await client
         .from('artist_profiles')
-        .select('bio, custom_image_url, website_url, verified_at')
+        .select('bio, custom_image_url, website_url, featured_embed, verified_at')
         .eq('artist_id', row.id)
         .single();
 
@@ -155,6 +156,7 @@ export async function getArtistBySlug(slug: string): Promise<ArtistResult | null
           bio: profileData.bio || undefined,
           customImageUrl: profileData.custom_image_url || undefined,
           websiteUrl: profileData.website_url || undefined,
+          featuredEmbed: profileData.featured_embed || undefined,
           verified: !!profileData.verified_at,
         };
       }

@@ -35,6 +35,50 @@ interface LinkUpdate {
   url: string;
 }
 
+// Allowed iframe src domains for embed codes
+const ALLOWED_EMBED_DOMAINS = [
+  'bandcamp.com',
+  'faircamp.', // faircamp instances use various subdomains
+  'open.spotify.com',
+  'w.soundcloud.com',
+  'player.vimeo.com',
+  'www.youtube.com',
+  'youtube.com',
+  'music.apple.com',
+  'embed.music.apple.com',
+  'tidal.com',
+  'embed.tidal.com',
+  'odesli.co',
+  'album.link',
+];
+
+function sanitizeEmbed(raw: string | null): string | null {
+  if (!raw || !raw.trim()) return null;
+
+  // Extract iframe src and validate against allowed domains
+  const iframeMatch = raw.match(/<iframe[^>]*\ssrc=["']([^"']+)["'][^>]*>/i);
+  if (!iframeMatch) return null;
+
+  const src = iframeMatch[1];
+  try {
+    const url = new URL(src);
+    const hostname = url.hostname.toLowerCase();
+    const allowed = ALLOWED_EMBED_DOMAINS.some(domain =>
+      hostname === domain || hostname.endsWith('.' + domain)
+    );
+    if (!allowed) return null;
+  } catch {
+    return null;
+  }
+
+  // Strip everything except the iframe element itself (no scripts, etc.)
+  const fullIframe = raw.match(/<iframe[^>]*>[\s\S]*?<\/iframe>/i);
+  if (!fullIframe) return null;
+
+  // Cap at 2000 chars
+  return fullIframe[0].slice(0, 2000);
+}
+
 function slugify(text: string): string {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
@@ -58,7 +102,7 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Authentication required' }) };
   }
 
-  let body: { slug: string; newSlug?: string; bio?: string; links?: LinkUpdate[] };
+  let body: { slug: string; newSlug?: string; bio?: string; featuredEmbed?: string | null; links?: LinkUpdate[] };
   try {
     body = JSON.parse(event.body || '{}');
   } catch {
@@ -144,6 +188,20 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
     if (bioError) {
       console.error('[Profile] Bio update failed:', bioError);
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update bio' }) };
+    }
+  }
+
+  // --- Update featured embed ---
+  if (body.featuredEmbed !== undefined) {
+    const embed = sanitizeEmbed(body.featuredEmbed);
+    const { error: embedError } = await client
+      .from('artist_profiles')
+      .update({ featured_embed: embed, updated_at: new Date().toISOString() })
+      .eq('id', profile.id);
+
+    if (embedError) {
+      console.error('[Profile] Embed update failed:', embedError);
+      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update embed' }) };
     }
   }
 

@@ -28,6 +28,7 @@ export function ArtistEditPage() {
   const [currentSlug, setCurrentSlug] = useState('');
   const [newSlug, setNewSlug] = useState('');
   const [bio, setBio] = useState('');
+  const [featuredEmbed, setFeaturedEmbed] = useState('');
   const [links, setLinks] = useState<LinkEntry[]>([]);
 
   // Load current artist data
@@ -54,6 +55,7 @@ export function ArtistEditPage() {
         setCurrentSlug(slug);
         setNewSlug(slug);
         setBio(data.profile?.bio || '');
+        setFeaturedEmbed(data.profile?.featuredEmbed || '');
 
         // Load existing links
         const existingLinks: LinkEntry[] = (data.platforms || []).map(
@@ -131,6 +133,7 @@ export function ArtistEditPage() {
           slug: currentSlug,
           newSlug: newSlug !== currentSlug ? newSlug : undefined,
           bio,
+          featuredEmbed: featuredEmbed || null,
           links: validLinks,
         }),
       });
@@ -238,6 +241,39 @@ export function ArtistEditPage() {
               placeholder="Tell fans about your music..."
               className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary resize-none"
             />
+          </section>
+
+          {/* Featured Embed */}
+          <section className="space-y-2">
+            <label htmlFor="embed" className="block text-sm font-medium">
+              Featured Release
+            </label>
+            <p className="text-xs text-text-muted">
+              Paste an embed code from Bandcamp, Faircamp, Spotify, SoundCloud, or other platforms. Only <code className="bg-bg-secondary px-1 rounded">&lt;iframe&gt;</code> embeds are supported.
+            </p>
+            <textarea
+              id="embed"
+              value={featuredEmbed}
+              onChange={e => setFeaturedEmbed(e.target.value)}
+              rows={3}
+              placeholder='<iframe style="border: 0; width: 100%; height: 120px;" src="https://bandcamp.com/EmbeddedPlayer/..." seamless></iframe>'
+              className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary resize-none font-mono text-xs"
+            />
+            {featuredEmbed && (
+              <div className="space-y-2">
+                <p className="text-xs text-text-muted">Preview:</p>
+                <div
+                  className="rounded-lg overflow-hidden border border-border"
+                  dangerouslySetInnerHTML={{ __html: featuredEmbed }}
+                />
+                <button
+                  onClick={() => setFeaturedEmbed('')}
+                  className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                >
+                  Remove embed
+                </button>
+              </div>
+            )}
           </section>
 
           {/* Platform Links */}

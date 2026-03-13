@@ -94,6 +94,7 @@ export default async function handler(request: Request, context: Context) {
   const imageUrl = profile.custom_image_url || artist.image_url || '';
   const artistName = escapeHtml(artist.name);
   const bio = profile.bio ? escapeHtml(profile.bio) : '';
+  const featuredEmbed = profile.featured_embed || '';
   const pageUrl = `https://unstream.stream/a/${slug}`;
   const description = bio || `Support ${artist.name} directly on platforms that pay artists fairly.`;
 
@@ -141,6 +142,13 @@ export default async function handler(request: Request, context: Context) {
     <div style="margin-top:24px">
       <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:8px">Website</h2>
       <a href="${escapeHtml(profile.website_url)}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;font-size:14px">${escapeHtml(new URL(profile.website_url).hostname.replace(/^www\./, ''))}</a>
+    </div>
+  ` : '';
+
+  const featuredEmbedHtml = featuredEmbed ? `
+    <div style="margin-top:24px">
+      <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Featured Release</h2>
+      <div style="border-radius:12px;overflow:hidden">${featuredEmbed}</div>
     </div>
   ` : '';
 
@@ -265,6 +273,7 @@ export default async function handler(request: Request, context: Context) {
       <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Support directly</h2>
       <div style="display:grid;gap:8px">${platformLinksHtml}</div>
     ` : ''}
+    ${featuredEmbedHtml}
     ${socialLinksHtml}
     ${websiteHtml}
   </div>
