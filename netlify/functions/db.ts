@@ -199,6 +199,18 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
     const slug = artistSlug(result.name);
 
     try {
+      // Check if this artist is already claimed — never overwrite claimed status
+      const { data: existing } = await client
+        .from('artists')
+        .select('id, match_confidence')
+        .eq('slug', slug)
+        .single();
+
+      if (existing?.match_confidence === 'claimed') {
+        console.log(`[DB] Skipping persist for claimed artist "${result.name}"`);
+        continue;
+      }
+
       // Upsert artist — always store as unverified until claimed
       const { data: artist, error: artistError } = await client
         .from('artists')

@@ -1941,7 +1941,7 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 's-maxage=300, stale-while-revalidate',
+        'Cache-Control': 's-maxage=60, stale-while-revalidate',
       },
       body: JSON.stringify(response),
     };
