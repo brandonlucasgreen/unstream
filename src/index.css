@@ -128,4 +128,21 @@ html[data-theme="light"] {
     visibility: visible;
     transition-delay: 0.25s;
   }
+
+  /* Bandcamp Friday badge */
+  .bandcamp-friday-payout {
+    color: #1da0c3;
+  }
+
+  .bandcamp-friday-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #1da0c3;
+    animation: bc-friday-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes bc-friday-pulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
 }

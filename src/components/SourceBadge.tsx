@@ -1,5 +1,6 @@
 import type { Source } from '../types';
 import { analytics } from '../services/analytics';
+import { isBandcampFriday } from '../utils/bandcamp-friday';
 
 interface SourceBadgeProps {
   source: Source;
@@ -34,6 +35,8 @@ export function SourceBadge({ source, url, isDirectLink }: SourceBadgeProps) {
   }
 
   // Prominent styling for verified matches
+  const isBCFriday = source.id === 'bandcamp' && isBandcampFriday();
+  const displayPayout = isBCFriday ? '~97%' : source.artistPayoutPercent;
   const hasPayoutPercent = !!source.artistPayoutPercent;
 
   return (
@@ -54,17 +57,27 @@ export function SourceBadge({ source, url, isDirectLink }: SourceBadgeProps) {
       <span className="flex items-center gap-1">
         {source.name}
         {hasPayoutPercent ? (
-          <span
-            className="payout-badge relative text-[10px] font-semibold px-1 py-0.5 rounded cursor-help"
-            style={{
-              backgroundColor: `${source.color}30`,
-            }}
-          >
-            {source.artistPayoutPercent}
-            <span className="payout-tooltip">
-              This is the approximate percentage of a sale the artist receives on this platform.
+          <>
+            <span
+              className={`payout-badge relative text-[10px] font-semibold px-1 py-0.5 rounded cursor-help${isBCFriday ? ' bandcamp-friday-payout' : ''}`}
+              style={{
+                backgroundColor: isBCFriday ? '#1da0c320' : `${source.color}30`,
+              }}
+            >
+              {displayPayout}
+              <span className="payout-tooltip">
+                {isBCFriday
+                  ? "It's Bandcamp Friday! Bandcamp waives their revenue share today, so artists get ~97% of every sale."
+                  : 'This is the approximate percentage of a sale the artist receives on this platform.'}
+              </span>
             </span>
-          </span>
+            {isBCFriday && (
+              <span className="bandcamp-friday-label">
+                BC Friday!
+              </span>
+            )}
+          </>
+
         ) : (
           <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />

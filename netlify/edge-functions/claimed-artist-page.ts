@@ -1,6 +1,16 @@
 import { Context } from "https://edge.netlify.com";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+// UPDATE ANNUALLY: Bandcamp Friday dates from https://daily.bandcamp.com/features/bandcamp-fridays
+const BANDCAMP_FRIDAY_DATES = [
+  '2026-03-06', '2026-05-01', '2026-08-07',
+  '2026-09-04', '2026-10-02', '2026-11-06', '2026-12-04',
+];
+function isBandcampFriday(): boolean {
+  const pacificDate = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
+  return BANDCAMP_FRIDAY_DATES.includes(pacificDate);
+}
+
 const PLATFORM_INFO: Record<string, { name: string; color: string; icon: string; category: string; payoutPercent?: string }> = {
   bandcamp: { name: 'Bandcamp', color: '#1da0c3', icon: '🎵', category: 'marketplace', payoutPercent: '80-85%' },
   mirlo: { name: 'Mirlo', color: '#6366f1', icon: '🪺', category: 'marketplace', payoutPercent: '86-90%' },
@@ -97,14 +107,19 @@ export default async function handler(request: Request, context: Context) {
     return info?.category === 'social';
   });
 
+  const bcFriday = isBandcampFriday();
+
   const platformLinksHtml = mainPlatforms.map((p: { platform: string; url: string }) => {
     const info = PLATFORM_INFO[p.platform];
     if (!info) return '';
-    const payoutLabel = info.payoutPercent ? `<span style="font-size:12px;color:var(--muted)">${info.payoutPercent} to artist</span>` : '';
-    return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid var(--border);background:${info.color}08;text-decoration:none;color:var(--text);transition:background 0.15s">
+    const isBCFriday = p.platform === 'bandcamp' && bcFriday;
+    const payout = isBCFriday ? '~97%' : info.payoutPercent;
+    const payoutLabel = payout ? `<span style="font-size:12px;color:var(--muted)">${payout} to artist</span>` : '';
+    const bcFridayLabel = isBCFriday ? `<span style="font-size:11px;font-weight:700;color:#1da0c3;animation:bc-pulse 2s ease-in-out infinite">Bandcamp Friday!</span>` : '';
+    return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid ${isBCFriday ? '#1da0c340' : 'var(--border)'};background:${isBCFriday ? '#1da0c310' : info.color + '08'};text-decoration:none;color:var(--text);transition:background 0.15s">
       <span style="font-size:20px;display:inline-flex;align-items:center;justify-content:center">${SOCIAL_ICONS[p.platform] ? `<span style="font-size:16px">${SOCIAL_ICONS[p.platform]}</span>` : info.icon}</span>
       <span style="flex:1;font-weight:500">${info.name}</span>
-      ${payoutLabel}
+      ${payoutLabel}${bcFridayLabel}
     </a>`;
   }).join('');
 
@@ -175,6 +190,7 @@ export default async function handler(request: Request, context: Context) {
     .page-content { position: relative; flex: 1; display: flex; flex-direction: column; }
     .theme-toggle { position: absolute; top: 16px; right: 16px; background: none; border: none; cursor: pointer; color: var(--muted); padding: 8px; border-radius: 8px; z-index: 1; }
     .theme-toggle:hover { color: var(--text); background: var(--bg2); }
+    @keyframes bc-pulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
     .theme-toggle svg { display: none; }
     .theme-toggle .icon-system { display: block; }
     .theme-toggle[data-pref="light"] .icon-system { display: none; }
