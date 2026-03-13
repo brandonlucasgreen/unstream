@@ -102,7 +102,7 @@ export default async function handler(request: Request, context: Context) {
     if (!info) return '';
     const payoutLabel = info.payoutPercent ? `<span style="font-size:12px;color:var(--muted)">${info.payoutPercent} to artist</span>` : '';
     return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid var(--border);background:${info.color}08;text-decoration:none;color:var(--text);transition:background 0.15s">
-      <span style="font-size:20px">${info.icon}</span>
+      <span style="font-size:20px;display:inline-flex;align-items:center;justify-content:center">${SOCIAL_ICONS[p.platform] ? `<span style="font-size:16px">${SOCIAL_ICONS[p.platform]}</span>` : info.icon}</span>
       <span style="flex:1;font-weight:500">${info.name}</span>
       ${payoutLabel}
     </a>`;

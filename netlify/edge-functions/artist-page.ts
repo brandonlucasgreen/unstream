@@ -116,7 +116,7 @@ function generateArtistPageHtml(
       if (!info) return '';
       const label = info.searchOnly ? `Search ${info.name}` : info.name;
       return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;background:var(--bg2);border:1px solid var(--border);text-decoration:none;color:var(--text);transition:border-color 0.15s">
-        <span style="font-size:20px">${info.icon}</span>
+        <span style="font-size:20px;display:inline-flex;align-items:center;justify-content:center">${SOCIAL_ICONS[p.sourceId] ? `<span style="font-size:16px">${SOCIAL_ICONS[p.sourceId]}</span>` : info.icon}</span>
         <span style="flex:1;font-size:14px;font-weight:500">${escapeHtml(label)}</span>
         ${info.payoutPercent ? `<span style="font-size:11px;color:var(--muted)">${info.payoutPercent} to artist</span>` : ''}
         <svg width="16" height="16" fill="none" stroke="var(--muted)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
