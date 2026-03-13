@@ -175,13 +175,13 @@ export default async function handler(request: Request, context: Context) {
 <body>
   <div class="auth-bar" id="auth-bar">
     <div class="auth-left">
-      <span>Artist account</span>
+      <span>Logged in as <strong id="auth-email" style="color:var(--text)"></strong></span>
       <a href="/artist-dashboard">Dashboard</a>
     </div>
     <button onclick="(function(){for(var k in localStorage){if(k.match(/^sb-.*-auth-token$/)){localStorage.removeItem(k)}}document.getElementById('auth-bar').classList.remove('visible');window.location.href='/artist-login'})()">Sign out</button>
   </div>
   <script>
-    (function(){for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.match(/^sb-.*-auth-token$/)){try{var d=JSON.parse(localStorage.getItem(k));if(d&&d.access_token){document.getElementById('auth-bar').classList.add('visible')}}catch(e){}break}}})();
+    (function(){for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.match(/^sb-.*-auth-token$/)){try{var d=JSON.parse(localStorage.getItem(k));if(d&&d.access_token){document.getElementById('auth-bar').classList.add('visible');try{var p=JSON.parse(atob(d.access_token.split('.')[1]));if(p.email)document.getElementById('auth-email').textContent=p.email}catch(e){}}}catch(e){}break}}})();
   </script>
   <button class="theme-toggle" id="theme-toggle-btn" aria-label="Toggle theme">
     <svg class="icon-system" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>

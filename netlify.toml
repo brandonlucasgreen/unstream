@@ -52,6 +52,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/artist-profile"
+  to = "/.netlify/functions/artist-profile"
+  status = 200
+
+[[redirects]]
   from = "/api/desktop/version"
   to = "/.netlify/functions/desktop-version"
   status = 200

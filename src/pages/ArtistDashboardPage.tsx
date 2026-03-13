@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getSession, getSupabaseClient, signOut } from '../services/auth';
+import { getSession, getSupabaseClient } from '../services/auth';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { ArtistAuthBar } from '../components/ArtistAuthBar';
 import { useTheme } from '../hooks/useTheme';
 
 interface ClaimedProfile {
@@ -19,7 +20,6 @@ export function ArtistDashboardPage() {
   const { preference, cycleTheme } = useTheme();
   const navigate = useNavigate();
   const [profiles, setProfiles] = useState<ClaimedProfile[]>([]);
-  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,7 +57,6 @@ export function ArtistDashboardPage() {
 
         const data = await response.json();
         setProfiles(data.profiles || []);
-        setEmail(data.email || '');
       } catch {
         setError('Failed to load your profiles. Please try again.');
       }
@@ -65,11 +64,6 @@ export function ArtistDashboardPage() {
     }
     loadDashboard();
   }, [navigate]);
-
-  async function handleSignOut() {
-    await signOut();
-    navigate('/artist-login', { replace: true });
-  }
 
   if (loading) {
     return (
@@ -81,28 +75,18 @@ export function ArtistDashboardPage() {
 
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
+      <ArtistAuthBar />
       <header className="p-4 border-b border-border flex items-center justify-between">
         <Link to="/" className="text-xl font-bold text-accent-primary hover:opacity-80 transition-opacity">
           Unstream
         </Link>
-        <div className="flex items-center gap-3">
-          <ThemeToggle preference={preference} onCycle={cycleTheme} />
-          <button
-            onClick={handleSignOut}
-            className="text-sm text-text-muted hover:text-text-primary transition-colors"
-          >
-            Sign out
-          </button>
-        </div>
+        <ThemeToggle preference={preference} onCycle={cycleTheme} />
       </header>
 
       <main className="flex-1 p-6">
         <div className="max-w-2xl mx-auto space-y-6">
-          <div className="space-y-1">
+          <div>
             <h1 className="text-2xl font-bold">Your Artist Profiles</h1>
-            <p className="text-text-muted text-sm">
-              Signed in as <strong className="text-text-primary">{email}</strong>
-            </p>
           </div>
 
           {error && (
@@ -124,10 +108,9 @@ export function ArtistDashboardPage() {
           ) : (
             <div className="space-y-3">
               {profiles.map(profile => (
-                <Link
+                <div
                   key={profile.id}
-                  to={`/a/${profile.slug}`}
-                  className="flex items-center gap-4 p-4 rounded-lg bg-bg-secondary border border-border hover:border-border-hover transition-colors"
+                  className="flex items-center gap-4 p-4 rounded-lg bg-bg-secondary border border-border"
                 >
                   {profile.imageUrl ? (
                     <img
@@ -146,10 +129,21 @@ export function ArtistDashboardPage() {
                       unstream.stream/a/{profile.slug}
                     </p>
                   </div>
-                  <svg className="w-5 h-5 text-text-muted flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Link
+                      to={`/artist-edit/${profile.slug}`}
+                      className="px-3 py-1.5 rounded-lg bg-accent-primary text-white text-sm font-medium hover:bg-accent-primary/90 transition-colors"
+                    >
+                      Edit
+                    </Link>
+                    <Link
+                      to={`/a/${profile.slug}`}
+                      className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors"
+                    >
+                      View
+                    </Link>
+                  </div>
+                </div>
               ))}
             </div>
           )}

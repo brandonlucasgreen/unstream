@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signInWithMagicLink, getSession, getSupabaseClient } from '../services/auth';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { ArtistAuthBar } from '../components/ArtistAuthBar';
 import { useTheme } from '../hooks/useTheme';
 
 export function ArtistLoginPage() {
@@ -86,6 +87,7 @@ export function ArtistLoginPage() {
 
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
+      <ArtistAuthBar />
       <header className="p-4 border-b border-border flex items-center justify-between">
         <Link to="/" className="text-xl font-bold text-accent-primary hover:opacity-80 transition-opacity">
           Unstream
