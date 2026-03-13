@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { getSession } from '../services/auth';
 import { sources } from '../services/sources';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
+import { Footer } from '../components/Footer';
 import type { SourceId } from '../types';
 
 interface LinkEntry {
@@ -466,11 +467,7 @@ export function ArtistEditPage() {
         </div>
       </main>
 
-      <footer className="p-4 text-center text-xs text-text-muted border-t border-border">
-        <Link to="/" className="hover:text-text-primary transition-colors">Unstream</Link>
-        {' · '}
-        <Link to="/privacy-policy" className="hover:text-text-primary transition-colors">Privacy</Link>
-      </footer>
+      <Footer />
     </div>
   );
 }

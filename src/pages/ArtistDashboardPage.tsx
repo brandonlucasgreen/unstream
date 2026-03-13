@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getSession, getSupabaseClient } from '../services/auth';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
+import { Footer } from '../components/Footer';
 
 interface ClaimedProfile {
   id: string;
@@ -141,11 +142,7 @@ export function ArtistDashboardPage() {
         </div>
       </main>
 
-      <footer className="p-4 text-center text-xs text-text-muted border-t border-border">
-        <Link to="/" className="hover:text-text-primary transition-colors">Unstream</Link>
-        {' · '}
-        <Link to="/privacy-policy" className="hover:text-text-primary transition-colors">Privacy</Link>
-      </footer>
+      <Footer />
     </div>
   );
 }

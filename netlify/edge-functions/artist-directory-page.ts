@@ -160,24 +160,21 @@ export default async function handler(request: Request, context: Context) {
   <!-- Footer -->
   <footer style="margin-top:auto;padding:24px 16px;border-top:1px solid var(--footer-border)">
     <div style="max-width:896px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:12px;font-size:14px;color:var(--muted)">
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
-        <a href="https://unstream.stream" style="color:var(--muted);text-decoration:none;font-weight:600">Powered by Unstream</a>
-        <span style="font-size:12px">Find music on platforms that pay artists fairly.</span>
-      </div>
+      <a href="https://bgreen.lol" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Made with love in Massachusetts, USA</a>
       <nav style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px">
-        <a href="/artists" style="color:var(--accent);text-decoration:none;font-weight:500">Artists</a>
+        <a href="/artists" style="color:var(--accent);text-decoration:none;font-weight:500">Artist index</a>
+        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <a href="/artist-login" style="color:var(--muted);text-decoration:none">Login</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
         <a href="https://unstream.featurebase.app/roadmap" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Roadmap</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
-        <a href="mailto:support@unstream.stream" style="color:var(--muted);text-decoration:none">Support</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
         <a href="https://unstream.goatcounter.com" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Metrics</a>
+        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <a href="mailto:support@unstream.stream" style="color:var(--muted);text-decoration:none">Support</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
         <a href="https://liberapay.com/brandonlucasgreen/donate" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Donate</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
         <a href="/privacy-policy" style="color:var(--muted);text-decoration:none">Privacy</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
-        <a href="/artist-login" style="color:var(--muted);text-decoration:none">Artist login</a>
       </nav>
     </div>
   </footer>

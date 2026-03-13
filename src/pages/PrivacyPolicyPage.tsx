@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
 import { useTheme } from '../hooks/useTheme';
+import { Footer } from '../components/Footer';
 
 export function PrivacyPolicyPage() {
   const { preference, cycleTheme } = useTheme();
@@ -40,7 +41,7 @@ export function PrivacyPolicyPage() {
         <div className="max-w-3xl mx-auto">
           <article className="prose prose-lg max-w-none text-text-primary">
             <h2 className="font-display text-3xl font-semibold text-text-primary mb-6">Privacy Policy</h2>
-            <p className="text-text-muted text-sm mb-8">Last updated: January 9, 2026</p>
+            <p className="text-text-muted text-sm mb-8">Last updated: March 13, 2026</p>
 
             <section className="mb-8">
               <h3 className="font-display text-xl font-semibold text-text-primary mb-3">Overview</h3>
@@ -61,6 +62,13 @@ export function PrivacyPolicyPage() {
                 <li>Basic analytics (page views, search counts) - no personal identifiers</li>
               </ul>
 
+              <h4 className="font-semibold text-text-primary mt-4 mb-2">Artist Profiles (for artists who claim their page)</h4>
+              <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
+                <li>Email address - used for authentication and account recovery via Supabase Auth</li>
+                <li>Artist profile information you provide (bio, platform links, featured release embeds) - stored in our database and displayed publicly on your artist page</li>
+                <li>Your artist page URL slug - publicly visible</li>
+              </ul>
+
               <h4 className="font-semibold text-text-primary mt-4 mb-2">Chrome Extension</h4>
               <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
                 <li>Currently playing track information (artist name, song title) from Spotify, YouTube, YouTube Music, and Apple Music - used only to search for alternative platforms</li>
@@ -78,7 +86,7 @@ export function PrivacyPolicyPage() {
             <section className="mb-8">
               <h3 className="font-display text-xl font-semibold text-text-primary mb-3">What We Don't Collect</h3>
               <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
-                <li>Personal information (name, email, address) - unless you contact support</li>
+                <li>Personal information (name, email, address) - unless you contact support or create an artist profile</li>
                 <li>Login credentials for streaming services</li>
                 <li>Listening history or playlists</li>
                 <li>Cookies for tracking or advertising</li>
@@ -93,6 +101,7 @@ export function PrivacyPolicyPage() {
               </p>
               <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
                 <li><strong>Lemon Squeezy</strong> - for processing Unstream Plus purchases and license validation</li>
+                <li><strong>Supabase</strong> - for artist account authentication and profile data storage</li>
                 <li><strong>MusicBrainz</strong> - for fetching artist metadata and social links</li>
                 <li><strong>Bandcamp, Qobuz, and other music platforms</strong> - for searching artist availability</li>
               </ul>
@@ -104,7 +113,13 @@ export function PrivacyPolicyPage() {
             <section className="mb-8">
               <h3 className="font-display text-xl font-semibold text-text-primary mb-3">Data Storage</h3>
               <p className="text-text-primary/90 leading-relaxed mb-3">
-                All user preferences, saved artists, and license information are stored locally on your device using browser storage (for the extension) or app storage (for macOS). We do not maintain a database of user accounts or personal information.
+                For listeners, all user preferences, saved artists, and license information are stored locally on your device using browser storage (for the extension) or app storage (for macOS).
+              </p>
+              <p className="text-text-primary/90 leading-relaxed mb-3">
+                For artists who claim their page, account and profile data (email, bio, links, embeds) is stored in our database hosted by Supabase. You can request deletion of your artist account and all associated data by contacting us at{' '}
+                <a href="mailto:support@unstream.stream" className="text-accent-primary hover:text-accent-secondary transition-colors underline">
+                  support@unstream.stream
+                </a>.
               </p>
             </section>
 
@@ -116,6 +131,7 @@ export function PrivacyPolicyPage() {
               <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
                 <li><strong>Chrome Extension:</strong> Remove the extension or clear extension data in Chrome settings</li>
                 <li><strong>macOS App:</strong> Delete the app and its associated data from your system</li>
+                <li><strong>Artist Profile:</strong> Contact us at support@unstream.stream to request deletion of your account and all associated profile data</li>
               </ul>
             </section>
 
@@ -139,54 +155,7 @@ export function PrivacyPolicyPage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border py-6 px-4">
-        <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-3 text-text-secondary text-sm">
-          <span>Made with love in Massachusetts, USA</span>
-          <nav className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-            <a
-              href="https://unstream.featurebase.app/roadmap"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-text-primary transition-colors"
-            >
-              Roadmap
-            </a>
-            <span className="text-text-muted/40 text-xs">&#x2022;</span>
-            <a
-              href="mailto:support@unstream.stream"
-              className="hover:text-text-primary transition-colors"
-            >
-              Support
-            </a>
-            <span className="text-text-muted/40 text-xs">&#x2022;</span>
-            <a
-              href="https://unstream.goatcounter.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-text-primary transition-colors"
-            >
-              Metrics
-            </a>
-            <span className="text-text-muted/40 text-xs">&#x2022;</span>
-            <a
-              href="https://liberapay.com/brandonlucasgreen/donate"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-text-primary transition-colors"
-            >
-              Donate
-            </a>
-            <span className="text-text-muted/40 text-xs">&#x2022;</span>
-            <Link
-              to="/privacy-policy"
-              className="hover:text-text-primary transition-colors"
-            >
-              Privacy
-            </Link>
-          </nav>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { Link, useParams, useLocation } from 'react-router-dom';
 import { sources } from '../services/sources';
 import { SocialIcon, hasSocialIcon } from '../components/SocialIcon';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
+import { Footer } from '../components/Footer';
 import type { SourceId } from '../types';
 
 interface ArtistProfile {
@@ -271,9 +272,7 @@ export function ClaimedArtistPage() {
             </Link>
           </div>
         </main>
-        <footer className="p-4 text-center text-xs text-text-muted border-t border-border">
-          <Link to="/" className="hover:text-text-primary transition-colors">Powered by Unstream</Link>
-        </footer>
+        <Footer />
       </div>
     );
   }
@@ -438,28 +437,13 @@ export function ClaimedArtistPage() {
       {/* Embed Section */}
       <EmbedSection artistName={artist!.name} />
 
-      {/* Footer */}
-      <footer className="mt-auto border-t border-border py-6 px-4">
-        <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-3 text-text-secondary text-sm">
-          <div className="flex flex-col items-center gap-1">
-            <Link to="/" className="font-semibold hover:text-text-primary transition-colors">Powered by Unstream</Link>
-            <span className="text-xs">Find music on platforms that pay artists fairly.</span>
-          </div>
-          <nav className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-            <a href="https://unstream.featurebase.app/roadmap" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition-colors">Roadmap</a>
-            <span className="text-text-muted/40 text-xs">&#x2022;</span>
-            <a href="mailto:support@unstream.stream" className="hover:text-text-primary transition-colors">Support</a>
-            <span className="text-text-muted/40 text-xs">&#x2022;</span>
-            <a href="https://unstream.goatcounter.com" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition-colors">Metrics</a>
-            <span className="text-text-muted/40 text-xs">&#x2022;</span>
-            <a href="https://liberapay.com/brandonlucasgreen/donate" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition-colors">Donate</a>
-            <span className="text-text-muted/40 text-xs">&#x2022;</span>
-            <Link to="/privacy-policy" className="hover:text-text-primary transition-colors">Privacy</Link>
-            <span className="text-text-muted/40 text-xs">&#x2022;</span>
-            <Link to="/artist-login" className="hover:text-text-primary transition-colors">Artist login</Link>
-          </nav>
-        </div>
-      </footer>
+      {/* Powered by Unstream */}
+      <div className="py-6 px-4 text-center">
+        <Link to="/" className="font-semibold text-text-secondary hover:text-text-primary transition-colors">Powered by Unstream</Link>
+        <p className="text-xs text-text-muted mt-1">Find music on platforms that pay artists fairly.</p>
+      </div>
+
+      <Footer />
     </div>
   );
 }

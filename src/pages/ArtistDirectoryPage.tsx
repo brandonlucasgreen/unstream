@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
+import { Footer } from '../components/Footer';
 
 interface DirectoryArtist {
   slug: string;
@@ -118,11 +119,7 @@ export function ArtistDirectoryPage() {
         )}
       </div>
 
-      <footer className="p-4 text-center text-xs text-text-muted border-t border-border">
-        <Link to="/" className="hover:text-text-primary transition-colors">Unstream</Link>
-        {' · '}
-        <Link to="/privacy-policy" className="hover:text-text-primary transition-colors">Privacy</Link>
-      </footer>
+      <Footer />
     </div>
   );
 }
