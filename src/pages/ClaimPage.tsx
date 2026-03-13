@@ -307,7 +307,7 @@ export function ClaimPage() {
                 {discoveredLinks === 1 ? ' link' : ' links'} from your website.
               </p>
               <Link
-                to={`/a/${slug}`}
+                to={`/a/${slug}?claimed`}
                 className="inline-block px-6 py-2 rounded-lg bg-accent-primary text-white font-medium hover:bg-accent-primary/90 transition-colors"
               >
                 View your artist page

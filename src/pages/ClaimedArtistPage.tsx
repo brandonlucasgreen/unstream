@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useLocation } from 'react-router-dom';
 import { sources } from '../services/sources';
 import type { SourceId } from '../types';
 
@@ -26,6 +26,7 @@ interface ArtistData {
 
 export function ClaimedArtistPage() {
   const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
   const [artist, setArtist] = useState<ArtistData | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -33,29 +34,51 @@ export function ClaimedArtistPage() {
 
   const displayName = artist?.name || slug?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || '';
 
+  // Check if we arrived from the claim flow (freshly claimed)
+  const justClaimed = new URLSearchParams(location.search).has('claimed');
+
   useEffect(() => {
     if (!slug) return;
 
-    fetch(`/api/artist?slug=${encodeURIComponent(slug)}`)
-      .then(r => {
-        if (!r.ok) throw new Error('not found');
-        return r.json();
-      })
-      .then((data: ArtistData) => {
-        if (data.matchConfidence === 'claimed' && data.profile?.verified) {
-          setArtist(data);
-        } else if (data.profile && !data.profile.verified) {
-          setPending(true);
-        } else {
-          setNotFound(true);
-        }
-        setLoading(false);
-      })
-      .catch(() => {
-        setNotFound(true);
-        setLoading(false);
-      });
-  }, [slug]);
+    let retries = justClaimed ? 3 : 0;
+
+    function fetchArtist() {
+      // Cache-bust when freshly claimed to avoid stale CDN responses
+      const cacheBust = justClaimed ? `&_t=${Date.now()}` : '';
+      fetch(`/api/artist?slug=${encodeURIComponent(slug)}${cacheBust}`)
+        .then(r => {
+          if (!r.ok) throw new Error('not found');
+          return r.json();
+        })
+        .then((data: ArtistData) => {
+          if (data.matchConfidence === 'claimed' && data.profile?.verified) {
+            setArtist(data);
+            setLoading(false);
+          } else if (retries > 0) {
+            // DB might not have propagated yet, retry after a short delay
+            retries--;
+            setTimeout(fetchArtist, 1000);
+          } else if (data.profile && !data.profile.verified) {
+            setPending(true);
+            setLoading(false);
+          } else {
+            setNotFound(true);
+            setLoading(false);
+          }
+        })
+        .catch(() => {
+          if (retries > 0) {
+            retries--;
+            setTimeout(fetchArtist, 1000);
+          } else {
+            setNotFound(true);
+            setLoading(false);
+          }
+        });
+    }
+
+    fetchArtist();
+  }, [slug, justClaimed]);
 
   useEffect(() => {
     if (artist) {
