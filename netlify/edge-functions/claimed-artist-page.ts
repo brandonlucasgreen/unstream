@@ -256,8 +256,6 @@ export default async function handler(request: Request, context: Context) {
         <a href="https://liberapay.com/brandonlucasgreen/donate" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Donate</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
         <a href="/privacy-policy" style="color:var(--muted);text-decoration:none">Privacy</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
-        <a href="/claim/${escapeHtml(slug)}" style="color:var(--muted);text-decoration:none">Artist login</a>
       </nav>
     </div>
   </footer>

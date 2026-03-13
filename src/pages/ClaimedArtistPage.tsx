@@ -448,8 +448,6 @@ export function ClaimedArtistPage() {
             <a href="https://liberapay.com/brandonlucasgreen/donate" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition-colors">Donate</a>
             <span className="text-text-muted/40 text-xs">&#x2022;</span>
             <Link to="/privacy-policy" className="hover:text-text-primary transition-colors">Privacy</Link>
-            <span className="text-text-muted/40 text-xs">&#x2022;</span>
-            <Link to={`/claim/${slug}`} className="hover:text-text-primary transition-colors">Artist login</Link>
           </nav>
         </div>
       </footer>
