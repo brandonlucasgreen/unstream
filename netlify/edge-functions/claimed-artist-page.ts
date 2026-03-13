@@ -129,20 +129,38 @@ export default async function handler(request: Request, context: Context) {
     </div>
   ` : '';
 
+  // Build JSON-LD structured data for SEO
+  const sameAsUrls = platforms.map((p: { url: string }) => p.url);
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'MusicGroup',
+    name: artist.name,
+    url: pageUrl,
+    ...(imageUrl ? { image: imageUrl } : {}),
+    ...(bio ? { description: profile.bio } : {}),
+    ...(sameAsUrls.length > 0 ? { sameAs: sameAsUrls } : {}),
+  };
+
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${artistName} - Unstream</title>
+  <title>${artistName} - Unstream | Listen on platforms that pay artists fairly</title>
   <meta name="description" content="${escapeHtml(description)}">
   <meta property="og:title" content="${artistName} - Unstream">
   <meta property="og:description" content="${escapeHtml(description)}">
   <meta property="og:url" content="${pageUrl}">
   <meta property="og:type" content="profile">
-  ${imageUrl ? `<meta property="og:image" content="${escapeHtml(imageUrl)}">` : ''}
-  <meta name="twitter:card" content="summary">
+  <meta property="og:site_name" content="Unstream">
+  ${imageUrl ? `<meta property="og:image" content="${escapeHtml(imageUrl)}">
+  <meta property="og:image:alt" content="${artistName}">` : ''}
+  <meta name="twitter:card" content="${imageUrl ? 'summary_large_image' : 'summary'}">
+  <meta name="twitter:title" content="${artistName} - Unstream">
+  <meta name="twitter:description" content="${escapeHtml(description)}">
+  ${imageUrl ? `<meta name="twitter:image" content="${escapeHtml(imageUrl)}">` : ''}
   <link rel="canonical" href="${pageUrl}">
+  <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
   <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script>
     (function(){var s=localStorage.getItem('unstream-theme');var t=s||(window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t)})();
@@ -219,7 +237,7 @@ export default async function handler(request: Request, context: Context) {
       <h1 style="font-size:28px;font-weight:700">${artistName}</h1>
       <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:500;background:rgba(255,107,53,0.15);color:var(--accent)">
         <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-        Claimed
+        Verified
       </span>
     </div>
   </div>
