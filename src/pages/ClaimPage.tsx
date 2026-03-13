@@ -7,7 +7,7 @@ import { useTheme } from '../hooks/useTheme';
 type ClaimStep = 'email' | 'check-email' | 'website' | 'verify' | 'done';
 
 export function ClaimPage() {
-  const { theme, toggleTheme } = useTheme();
+  const { preference, cycleTheme } = useTheme();
   const { slug } = useParams<{ slug: string }>();
   const [step, setStep] = useState<ClaimStep>('email');
   const [email, setEmail] = useState('');
@@ -165,7 +165,7 @@ export function ClaimPage() {
         <Link to="/" className="text-xl font-bold text-accent-primary hover:opacity-80 transition-opacity">
           Unstream
         </Link>
-        <ThemeToggle theme={theme} onToggle={toggleTheme} />
+        <ThemeToggle preference={preference} onCycle={cycleTheme} />
       </header>
 
       <main className="flex-1 flex items-center justify-center p-6">

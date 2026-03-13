@@ -1,46 +1,65 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 type Theme = 'dark' | 'light';
+type ThemePreference = 'dark' | 'light' | 'system';
 const STORAGE_KEY = 'unstream-theme';
 
-function getInitialTheme(): Theme {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored === 'light' || stored === 'dark') return stored;
+function getSystemTheme(): Theme {
   return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 }
 
+function getInitialPreference(): ThemePreference {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored === 'light' || stored === 'dark') return stored;
+  return 'system';
+}
+
+function resolveTheme(pref: ThemePreference): Theme {
+  return pref === 'system' ? getSystemTheme() : pref;
+}
+
 export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>(getInitialTheme);
+  const [preference, setPreferenceState] = useState<ThemePreference>(getInitialPreference);
+  const [theme, setThemeState] = useState<Theme>(() => resolveTheme(getInitialPreference()));
 
-  function setTheme(t: Theme) {
-    setThemeState(t);
-    localStorage.setItem(STORAGE_KEY, t);
-    document.documentElement.setAttribute('data-theme', t);
+  const applyTheme = useCallback((pref: ThemePreference) => {
+    const resolved = resolveTheme(pref);
+    setPreferenceState(pref);
+    setThemeState(resolved);
+    document.documentElement.setAttribute('data-theme', resolved);
+    if (pref === 'system') {
+      localStorage.removeItem(STORAGE_KEY);
+    } else {
+      localStorage.setItem(STORAGE_KEY, pref);
+    }
+  }, []);
+
+  // Cycle: system -> light -> dark -> system
+  function cycleTheme() {
+    const next: ThemePreference =
+      preference === 'system' ? 'light' :
+      preference === 'light' ? 'dark' : 'system';
+    applyTheme(next);
   }
 
-  function toggleTheme() {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  }
-
-  // Sync on mount (in case the inline script already set it)
+  // Sync on mount
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, []);
 
-  // Listen for system preference changes when no stored preference
+  // Listen for system preference changes when using system setting
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return;
+    if (preference !== 'system') return;
 
     const mq = window.matchMedia('(prefers-color-scheme: light)');
     const handler = (e: MediaQueryListEvent) => {
-      const t = e.matches ? 'light' : 'dark';
-      setThemeState(t);
-      document.documentElement.setAttribute('data-theme', t);
+      const resolved = e.matches ? 'light' : 'dark';
+      setThemeState(resolved);
+      document.documentElement.setAttribute('data-theme', resolved);
     };
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
-  }, []);
+  }, [preference]);
 
-  return { theme, setTheme, toggleTheme };
+  return { theme, preference, setTheme: applyTheme, cycleTheme };
 }

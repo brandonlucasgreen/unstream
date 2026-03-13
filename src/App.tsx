@@ -152,7 +152,7 @@ function ShareButton() {
 }
 
 function App() {
-  const { theme, toggleTheme } = useTheme();
+  const { preference, cycleTheme } = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -377,7 +377,7 @@ function App() {
       {/* Header */}
       <header className="pt-8 pb-8 px-4 relative">
         <div className="absolute top-4 right-4">
-          <ThemeToggle theme={theme} onToggle={toggleTheme} />
+          <ThemeToggle preference={preference} onCycle={cycleTheme} />
         </div>
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">

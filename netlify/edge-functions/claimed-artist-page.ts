@@ -156,17 +156,42 @@ export default async function handler(request: Request, context: Context) {
     .container { max-width: 640px; margin: 0 auto; padding: 0 24px; width: 100%; }
     .theme-toggle { position: absolute; top: 16px; right: 16px; background: none; border: none; cursor: pointer; color: var(--muted); padding: 8px; border-radius: 8px; }
     .theme-toggle:hover { color: var(--text); background: var(--bg2); }
-    .theme-toggle .sun { display: none; }
-    .theme-toggle .moon { display: block; }
-    html[data-theme="light"] .theme-toggle .sun { display: block; }
-    html[data-theme="light"] .theme-toggle .moon { display: none; }
+    .theme-toggle svg { display: none; }
+    .theme-toggle .icon-system { display: block; }
+    .theme-toggle[data-pref="light"] .icon-system { display: none; }
+    .theme-toggle[data-pref="light"] .icon-sun { display: block; }
+    .theme-toggle[data-pref="dark"] .icon-system { display: none; }
+    .theme-toggle[data-pref="dark"] .icon-moon { display: block; }
   </style>
 </head>
 <body>
-  <button class="theme-toggle" onclick="var t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',t);localStorage.setItem('unstream-theme',t)" aria-label="Toggle theme">
-    <svg class="sun" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-    <svg class="moon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+  <button class="theme-toggle" id="theme-toggle-btn" aria-label="Toggle theme">
+    <svg class="icon-system" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+    <svg class="icon-sun" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+    <svg class="icon-moon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
   </button>
+  <script>
+    (function(){
+      var btn=document.getElementById('theme-toggle-btn');
+      var pref=localStorage.getItem('unstream-theme')||'system';
+      btn.setAttribute('data-pref',pref);
+      btn.title=(pref==='system'?'Using system theme':pref==='light'?'Light mode':'Dark mode')+' — click to change';
+      btn.onclick=function(){
+        var next=pref==='system'?'light':pref==='light'?'dark':'system';
+        pref=next;
+        btn.setAttribute('data-pref',next);
+        if(next==='system'){
+          localStorage.removeItem('unstream-theme');
+          var resolved=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';
+          document.documentElement.setAttribute('data-theme',resolved);
+        }else{
+          localStorage.setItem('unstream-theme',next);
+          document.documentElement.setAttribute('data-theme',next);
+        }
+        btn.title=(next==='system'?'Using system theme':next==='light'?'Light mode':'Dark mode')+' — click to change';
+      };
+    })();
+  </script>
   <!-- Hero -->
   <div class="container" style="padding-top:48px;padding-bottom:32px;text-align:center">
     ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${artistName}" style="width:128px;height:128px;border-radius:50%;object-fit:cover;border:2px solid var(--border);margin-bottom:16px">` : ''}

@@ -3,14 +3,14 @@ import { ThemeToggle } from '../components/ThemeToggle';
 import { useTheme } from '../hooks/useTheme';
 
 export function PrivacyPolicyPage() {
-  const { theme, toggleTheme } = useTheme();
+  const { preference, cycleTheme } = useTheme();
 
   return (
     <div className="min-h-screen">
       {/* Header */}
       <header className="pt-8 pb-8 px-4 relative">
         <div className="absolute top-4 right-4">
-          <ThemeToggle theme={theme} onToggle={toggleTheme} />
+          <ThemeToggle preference={preference} onCycle={cycleTheme} />
         </div>
         <div className="max-w-4xl mx-auto text-center">
           <Link
