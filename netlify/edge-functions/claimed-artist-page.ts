@@ -154,7 +154,8 @@ export default async function handler(request: Request, context: Context) {
     body { font-family: 'Golos Text', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
     a { color: inherit; }
     .container { max-width: 640px; margin: 0 auto; padding: 0 24px; width: 100%; }
-    .theme-toggle { position: absolute; top: 16px; right: 16px; background: none; border: none; cursor: pointer; color: var(--muted); padding: 8px; border-radius: 8px; }
+    .page-content { position: relative; flex: 1; display: flex; flex-direction: column; }
+    .theme-toggle { position: absolute; top: 16px; right: 16px; background: none; border: none; cursor: pointer; color: var(--muted); padding: 8px; border-radius: 8px; z-index: 1; }
     .theme-toggle:hover { color: var(--text); background: var(--bg2); }
     .theme-toggle svg { display: none; }
     .theme-toggle .icon-system { display: block; }
@@ -183,6 +184,7 @@ export default async function handler(request: Request, context: Context) {
   <script>
     (function(){for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.match(/^sb-.*-auth-token$/)){try{var d=JSON.parse(localStorage.getItem(k));if(d&&d.access_token){document.getElementById('auth-bar').classList.add('visible');try{var p=JSON.parse(atob(d.access_token.split('.')[1]));if(p.email)document.getElementById('auth-email').textContent=p.email}catch(e){}}}catch(e){}break}}})();
   </script>
+  <div class="page-content">
   <button class="theme-toggle" id="theme-toggle-btn" aria-label="Toggle theme">
     <svg class="icon-system" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
     <svg class="icon-sun" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
@@ -282,6 +284,7 @@ export default async function handler(request: Request, context: Context) {
       </nav>
     </div>
   </footer>
+  </div>
 
   <script>
     var embedTheme = 'dark';
