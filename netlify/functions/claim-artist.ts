@@ -68,8 +68,13 @@ function generateVerificationCode(): string {
   return code;
 }
 
-// Scrape a website and extract all <a href> links
-async function scrapeLinks(websiteUrl: string): Promise<string[]> {
+interface ScrapeResult {
+  links: string[];
+  html: string;
+}
+
+// Scrape a website and extract all <a href> links + raw HTML
+async function scrapeWebsite(websiteUrl: string): Promise<ScrapeResult | null> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
 
@@ -82,7 +87,7 @@ async function scrapeLinks(websiteUrl: string): Promise<string[]> {
       redirect: 'follow',
     });
 
-    if (!response.ok) return [];
+    if (!response.ok) return null;
 
     const html = await response.text();
     const links: string[] = [];
@@ -96,12 +101,55 @@ async function scrapeLinks(websiteUrl: string): Promise<string[]> {
       }
     }
 
-    return links;
+    return { links, html };
   } catch {
-    return [];
+    return null;
   } finally {
     clearTimeout(timeout);
   }
+}
+
+// Check if the page content references the artist name
+// Looks in: page title, meta tags, visible text, URL slugs
+function pageReferencesArtist(html: string, artistName: string): boolean {
+  const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const normalizedName = normalize(artistName);
+  if (!normalizedName) return false;
+
+  // Split artist name into words for partial matching
+  // e.g., "Kid Lightbulbs" → ["kid", "lightbulbs"]
+  const nameWords = artistName.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+
+  // Strip HTML tags to get visible text
+  const textContent = html
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ');
+
+  const normalizedText = normalize(textContent);
+
+  // Check 1: Full artist name appears in page text
+  if (normalizedText.includes(normalizedName)) return true;
+
+  // Check 2: Extract <title> and check it
+  const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+  if (titleMatch && normalize(titleMatch[1]).includes(normalizedName)) return true;
+
+  // Check 3: Check meta tags (og:title, description, etc.)
+  const metaRegex = /content=["']([^"']+)["']/gi;
+  let metaMatch;
+  while ((metaMatch = metaRegex.exec(html)) !== null) {
+    if (normalize(metaMatch[1]).includes(normalizedName)) return true;
+  }
+
+  // Check 4: All name words appear somewhere on the page (handles slight variations)
+  if (nameWords.length > 1) {
+    const allWordsPresent = nameWords.every(word => normalizedText.includes(word));
+    if (allWordsPresent) return true;
+  }
+
+  return false;
 }
 
 // Match discovered links to known platforms
@@ -323,15 +371,31 @@ export async function handler(event: {
     }
 
     // Scrape the website
-    const links = await scrapeLinks(profile.website_url);
+    const scrapeResult = await scrapeWebsite(profile.website_url);
 
-    if (links.length === 0) {
+    if (!scrapeResult || scrapeResult.links.length === 0) {
       return {
         statusCode: 422,
         headers: CORS_HEADERS,
         body: JSON.stringify({
           verified: false,
           error: 'Could not load your website. Make sure the URL is correct and publicly accessible.',
+        }),
+      };
+    }
+
+    const { links, html } = scrapeResult;
+
+    // Check that the website actually belongs to this artist
+    // The page must reference the artist name in its title, text, or meta tags
+    if (!pageReferencesArtist(html, artist.name)) {
+      console.log(`[Claim] Website ${profile.website_url} does not reference artist "${artist.name}"`);
+      return {
+        statusCode: 422,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({
+          verified: false,
+          error: `This website doesn't appear to belong to ${artist.name}. The page must mention the artist name in its content, title, or description.`,
         }),
       };
     }
