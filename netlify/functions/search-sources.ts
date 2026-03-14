@@ -1208,9 +1208,11 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   const aggregated = aggregateResults(allResults, query);
 
   // Track which platform URLs have been used to avoid adding the same URL to multiple results
-  // This is important for name-matched platforms (Patreon, Bandwagon, etc.) where we can't
-  // verify by release comparison - we only add each URL to ONE result
   const usedPlatformUrls = new Set<string>();
+
+  // NOTE: Name-only platforms (Bandwagon, Faircamp, Jamcoop, Patreon) are attached AFTER
+  // disambiguation, so we can check if the name is ambiguous post-release-comparison.
+  // Only Ampwall, Ko-fi, BuyMeACoffee (search-link platforms) and Qobuz are attached here.
 
   for (const result of aggregated) {
     if (result.type === 'artist') {
@@ -1241,40 +1243,6 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
           sourceId: 'buymeacoffee',
           url: 'https://buymeacoffee.com/explore-creators',
         });
-      }
-
-      // For name-matched platforms without release data, only add to ONE result
-      // to avoid the same Patreon/Bandwagon appearing on multiple same-name artists
-      if (bandwagonMatches.has(normalizedName)) {
-        const url = bandwagonMatches.get(normalizedName)!;
-        if (!usedPlatformUrls.has(url)) {
-          result.platforms.push({ sourceId: 'bandwagon', url });
-          usedPlatformUrls.add(url);
-        }
-      }
-
-      if (faircampMatches.has(normalizedName)) {
-        const url = faircampMatches.get(normalizedName)!;
-        if (!usedPlatformUrls.has(url)) {
-          result.platforms.push({ sourceId: 'faircamp', url });
-          usedPlatformUrls.add(url);
-        }
-      }
-
-      if (jamcoopMatches.has(normalizedName)) {
-        const url = jamcoopMatches.get(normalizedName)!;
-        if (!usedPlatformUrls.has(url)) {
-          result.platforms.push({ sourceId: 'jamcoop', url });
-          usedPlatformUrls.add(url);
-        }
-      }
-
-      if (patreonMatches.has(normalizedName)) {
-        const url = patreonMatches.get(normalizedName)!;
-        if (!usedPlatformUrls.has(url)) {
-          result.platforms.push({ sourceId: 'patreon', url });
-          usedPlatformUrls.add(url);
-        }
       }
 
       // Check for Qobuz matches - add ALL variations with numeric suffixes
@@ -1308,11 +1276,8 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     }
   }
 
-  // Track which platform matches were used so we can create entries for unmatched ones
+  // Track which Qobuz matches were used so we can create entries for unmatched ones
   const usedQobuzMatches = new Set<string>();
-  const usedPatreonMatches = new Set<string>();
-  const usedBandwagonMatches = new Set<string>();
-  const usedFaircampMatches = new Set<string>();
 
   // Track base names of aggregated results for variation matching
   const aggregatedBaseNames = new Set<string>();
@@ -1326,13 +1291,12 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
           (qobuzName.startsWith(normalizedName) && /^\d+$/.test(qobuzName.slice(normalizedName.length)));
       if (isVariation) usedQobuzMatches.add(qobuzName);
     }
-    if (patreonMatches.has(normalizedName)) usedPatreonMatches.add(normalizedName);
-    if (bandwagonMatches.has(normalizedName)) usedBandwagonMatches.add(normalizedName);
-    if (faircampMatches.has(normalizedName)) usedFaircampMatches.add(normalizedName);
   }
 
   // Create new results for Qobuz matches that weren't added to existing results
   // This handles artists who are on Qobuz but not on Bandcamp/Mirlo
+  // NOTE: Name-only platforms (Bandwagon, Faircamp, etc.) are NOT attached here.
+  // They are attached after disambiguation to avoid wrong-artist merges.
   for (const [normalizedName, url] of qobuzMatches) {
     // Skip if already used OR if this is a variation of an existing result
     const baseNameWithoutNumbers = normalizedName.replace(/\d+$/, '');
@@ -1350,20 +1314,6 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     const platforms: AggregatedResult['platforms'] = [
       { sourceId: 'qobuz', url },
     ];
-
-    // Check if this Qobuz artist also has matches on other platforms
-    if (patreonMatches.has(normalizedName) && !usedPatreonMatches.has(normalizedName)) {
-      platforms.push({ sourceId: 'patreon', url: patreonMatches.get(normalizedName)! });
-      usedPatreonMatches.add(normalizedName);
-    }
-    if (bandwagonMatches.has(normalizedName) && !usedBandwagonMatches.has(normalizedName)) {
-      platforms.push({ sourceId: 'bandwagon', url: bandwagonMatches.get(normalizedName)! });
-      usedBandwagonMatches.add(normalizedName);
-    }
-    if (faircampMatches.has(normalizedName) && !usedFaircampMatches.has(normalizedName)) {
-      platforms.push({ sourceId: 'faircamp', url: faircampMatches.get(normalizedName)! });
-      usedFaircampMatches.add(normalizedName);
-    }
 
     // Add search-only platforms
     platforms.push(
@@ -1744,8 +1694,9 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     disambiguated.push(result);
   }
 
-  // Merge results with the same normalized artist name
-  // This catches cases where Qobuz standalone results duplicate an existing Bandcamp result
+  // Merge results with the same normalized artist name — but ONLY when we have
+  // release-based evidence they're the same artist. Without release overlap,
+  // same-name results stay separate (they may be different people).
   const mergedMap = new Map<string, AggregatedResult>();
   for (const result of disambiguated) {
     if (result.type !== 'artist') {
@@ -1757,24 +1708,109 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
       r => r.type === 'artist' && normalizeForComparison(r.name) === normName
     );
     if (existing) {
-      // Merge platforms from the duplicate into the existing result
-      const existingPlatformIds = new Set(existing.platforms.map(p => p.sourceId));
-      for (const platform of result.platforms) {
-        if (!existingPlatformIds.has(platform.sourceId)) {
-          existing.platforms.push(platform);
-          existingPlatformIds.add(platform.sourceId);
+      // Check if we have release overlap before merging
+      const existingTitles = new Set<string>();
+      for (const p of existing.platforms) {
+        if (p.allReleaseTitles) p.allReleaseTitles.forEach(t => existingTitles.add(t));
+        if (p.latestRelease?.title) existingTitles.add(normalizeForComparison(p.latestRelease.title));
+      }
+      const incomingTitles = new Set<string>();
+      for (const p of result.platforms) {
+        if (p.allReleaseTitles) p.allReleaseTitles.forEach(t => incomingTitles.add(t));
+        if (p.latestRelease?.title) incomingTitles.add(normalizeForComparison(p.latestRelease.title));
+      }
+
+      // Merge if: either side has no release data (benefit of the doubt),
+      // or there's at least one overlapping release title
+      const hasOverlap = existingTitles.size === 0 || incomingTitles.size === 0 ||
+        [...incomingTitles].some(t => existingTitles.has(t));
+
+      if (hasOverlap) {
+        const existingPlatformIds = new Set(existing.platforms.map(p => p.sourceId));
+        for (const platform of result.platforms) {
+          if (!existingPlatformIds.has(platform.sourceId)) {
+            existing.platforms.push(platform);
+            existingPlatformIds.add(platform.sourceId);
+          }
         }
+        if (!existing.imageUrl && result.imageUrl) {
+          existing.imageUrl = result.imageUrl;
+        }
+        console.log(`[Merge] Merged duplicate "${result.name}" into existing result (release overlap confirmed)`);
+      } else {
+        // Different releases = different artist, keep separate
+        mergedMap.set(result.id, result);
+        console.log(`[Merge] Keeping "${result.name}" separate - no release overlap with existing result`);
       }
-      // Keep the better image
-      if (!existing.imageUrl && result.imageUrl) {
-        existing.imageUrl = result.imageUrl;
-      }
-      console.log(`[Merge] Merged duplicate "${result.name}" into existing result (added ${result.platforms.length} platforms)`);
     } else {
       mergedMap.set(result.id, result);
     }
   }
   const merged = Array.from(mergedMap.values());
+
+  // --- Deferred name-only platform attachment ---
+  // Now that disambiguation is complete, attach Bandwagon, Faircamp, Jamcoop, Patreon.
+  // If multiple results share the same name (disambiguation found different artists),
+  // try to match by release overlap. If no release data to compare, skip attachment
+  // entirely — the artist can add these links manually via claim/edit.
+  const nameOnlyMatches: [string, Map<string, string>][] = [
+    ['bandwagon', bandwagonMatches],
+    ['faircamp', faircampMatches],
+    ['jamcoop', jamcoopMatches],
+    ['patreon', patreonMatches],
+  ];
+
+  for (const [platformId, matchMap] of nameOnlyMatches) {
+    for (const [normalizedName, platformUrl] of matchMap) {
+      // Find all results matching this normalized name
+      const matchingResults = merged.filter(
+        r => r.type === 'artist' && normalizeForComparison(r.name) === normalizedName
+      );
+
+      if (matchingResults.length === 0) continue;
+
+      // Already has this platform? Skip
+      if (matchingResults.some(r => r.platforms.some(p => p.sourceId === platformId))) continue;
+
+      if (matchingResults.length === 1) {
+        // Unambiguous: only one result with this name, attach it
+        matchingResults[0].platforms.push({ sourceId: platformId, url: platformUrl });
+      } else {
+        // Ambiguous: multiple same-name results exist after disambiguation.
+        // Try to match by release overlap with the platform that has release data.
+        // Collect release titles from each result for comparison.
+        let bestResult: AggregatedResult | null = null;
+        let bestOverlap = 0;
+
+        for (const result of matchingResults) {
+          const resultTitles = new Set<string>();
+          for (const p of result.platforms) {
+            if (p.allReleaseTitles) p.allReleaseTitles.forEach(t => resultTitles.add(t));
+            if (p.latestRelease?.title) resultTitles.add(normalizeForComparison(p.latestRelease.title));
+          }
+
+          // We can't compare if this result has no release data
+          if (resultTitles.size === 0) continue;
+
+          // For now, we don't have release data from the name-only platform itself,
+          // but we can check if OTHER platforms on this result share releases with Qobuz.
+          // The result with the most verified platforms (releases) is the best candidate.
+          const platformCount = result.platforms.filter(p => p.allReleaseTitles && p.allReleaseTitles.length > 0).length;
+          if (platformCount > bestOverlap) {
+            bestOverlap = platformCount;
+            bestResult = result;
+          }
+        }
+
+        if (bestResult && bestOverlap > 0) {
+          bestResult.platforms.push({ sourceId: platformId, url: platformUrl });
+          console.log(`[Deferred Attach] Added ${platformId} to "${bestResult.name}" (best release evidence: ${bestOverlap} platforms with releases)`);
+        } else {
+          console.log(`[Deferred Attach] Skipping ${platformId} for "${normalizedName}" — ambiguous name, no release data to disambiguate`);
+        }
+      }
+    }
+  }
 
   // Filter out results that only have search-only platforms (kofi, buymeacoffee, ampwall search links)
   // These are just fuzzy search links added to any Bandcamp result, not real matches
