@@ -1,0 +1,97 @@
+[
+  {
+    "query": "Kid Lightbulbs",
+    "assertions": {
+      "minResults": 1,
+      "results": [
+        {
+          "name": "Kid Lightbulbs",
+          "requiredPlatforms": ["bandcamp"],
+          "urlPatterns": { "bandcamp": "kidlightbulbs.bandcamp.com" }
+        }
+      ]
+    }
+  },
+  {
+    "query": "Radiohead",
+    "assertions": {
+      "minResults": 1,
+      "results": [
+        {
+          "name": "Radiohead",
+          "requiredPlatforms": ["bandcamp", "qobuz"]
+        }
+      ]
+    }
+  },
+  {
+    "query": "Four Tet",
+    "assertions": {
+      "minResults": 1,
+      "results": [
+        {
+          "name": "Four Tet",
+          "requiredPlatforms": ["bandcamp"]
+        }
+      ]
+    }
+  },
+  {
+    "query": "Tanerélle",
+    "assertions": {
+      "minResults": 1,
+      "results": [
+        {
+          "nameContains": "Taner"
+        }
+      ]
+    }
+  },
+  {
+    "query": "Matt Young",
+    "assertions": {
+      "minResults": 2,
+      "disambiguation": {
+        "description": "Multiple Matt Youngs should be separate results with different Bandcamp profiles",
+        "minDistinctBandcampUrls": 2
+      }
+    }
+  },
+  {
+    "query": "Sonic Walker",
+    "assertions": {
+      "minResults": 1,
+      "results": [
+        {
+          "name": "Sonic Walker",
+          "requiredPlatforms": ["bandcamp"]
+        }
+      ]
+    }
+  },
+  {
+    "query": "Morice",
+    "assertions": {
+      "minResults": 1,
+      "results": [
+        {
+          "nameContains": "Morice"
+        }
+      ]
+    }
+  },
+  {
+    "query": "",
+    "assertions": {
+      "expectError": true,
+      "statusCode": 400
+    }
+  },
+  {
+    "query": "asdfjkl123garbage",
+    "assertions": {
+      "minResults": 0,
+      "maxResults": 0
+    }
+  }
+]
