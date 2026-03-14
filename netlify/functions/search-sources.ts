@@ -1592,6 +1592,16 @@ function mergeByReleaseOverlap(disambiguated: AggregatedResult[]): AggregatedRes
       continue;
     }
 
+    // Never merge results that share the same platform (e.g. two different Bandcamp profiles).
+    // These were deliberately split during aggregation as different artists on the same platform.
+    const existingSourceIds = new Set(existing.platforms.map(p => p.sourceId));
+    const hasSharedPlatform = result.platforms.some(p => existingSourceIds.has(p.sourceId));
+    if (hasSharedPlatform) {
+      mergedMap.set(result.id, result);
+      console.log(`[Merge] Keeping "${result.name}" separate - shares platform with existing result`);
+      continue;
+    }
+
     const existingTitles = collectReleaseTitles(existing);
     const incomingTitles = collectReleaseTitles(result);
 
@@ -1669,7 +1679,15 @@ async function attachNameOnlyPlatforms(
     }
 
     if (matching.length === 0) {
-      // No existing results — create a new one with these platforms
+      // No existing results — only create a new result if we have at least one curated platform.
+      // Patreon returns fuzzy search results that often don't match by name, so Patreon alone
+      // should never create a new result.
+      const hasCuratedPlatform = toAttach.some(p => CURATED_PLATFORMS.has(p.sourceId));
+      if (!hasCuratedPlatform) {
+        console.log(`[Deferred Attach] Skipping "${normalizedName}" — no curated platform, no existing result`);
+        continue;
+      }
+
       const displayName = displayNames.get(normalizedName) || normalizedName;
       const faircampEntry = toAttach.find(p => p.sourceId === 'faircamp');
 
@@ -1751,17 +1769,22 @@ async function attachNameOnlyPlatforms(
       }
     } else {
       // No Faircamp data available for disambiguation.
-      // Create a separate result rather than guessing wrong.
-      const displayName = matching[0].name;
-      const newResult: AggregatedResult = {
-        id: `nameonly-${normalizedName}-${Date.now()}`,
-        name: displayName,
-        type: 'artist',
-        platforms: toAttach.map(p => ({ sourceId: p.sourceId as SourceId, url: p.url })),
-        matchConfidence: 'unverified',
-      };
-      merged.push(newResult);
-      console.log(`[Deferred Attach] Ambiguous "${displayName}" with no Faircamp data — created separate result with ${toAttach.map(p => p.sourceId).join(', ')}`);
+      // Only create a separate result if we have curated platforms — otherwise skip.
+      const hasCuratedPlatform = toAttach.some(p => CURATED_PLATFORMS.has(p.sourceId));
+      if (hasCuratedPlatform) {
+        const displayName = matching[0].name;
+        const newResult: AggregatedResult = {
+          id: `nameonly-${normalizedName}-${Date.now()}`,
+          name: displayName,
+          type: 'artist',
+          platforms: toAttach.map(p => ({ sourceId: p.sourceId as SourceId, url: p.url })),
+          matchConfidence: 'unverified',
+        };
+        merged.push(newResult);
+        console.log(`[Deferred Attach] Ambiguous "${displayName}" with no Faircamp data — created separate result with ${toAttach.map(p => p.sourceId).join(', ')}`);
+      } else {
+        console.log(`[Deferred Attach] Skipping ambiguous "${normalizedName}" — no Faircamp data, no curated platform`);
+      }
     }
   }
 }
