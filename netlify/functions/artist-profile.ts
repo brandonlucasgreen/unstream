@@ -4,6 +4,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
+import { cacheDeleteByArtist } from './cache';
 
 function getServiceClient() {
   return getClient();
@@ -228,6 +229,38 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
     }
 
     console.log(`[Profile] Updated ${validLinks.length} links for artist "${artist.name}"`);
+  }
+
+  // --- Bust caches ---
+  // 1. Purge Redis cache for search results containing this artist
+  try {
+    await cacheDeleteByArtist(artist.name);
+  } catch (e) {
+    console.error('[Profile] Redis cache purge failed:', e);
+  }
+
+  // 2. Purge Netlify CDN cache for this artist's page via cache tag
+  try {
+    const siteId = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
+    const token = process.env.NETLIFY_API_TOKEN;
+    if (siteId && token) {
+      await fetch(`https://api.netlify.com/api/v1/purge`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          site_id: siteId,
+          cache_tags: [`artist-${finalSlug}`],
+        }),
+      });
+      console.log(`[Profile] Purged CDN cache for artist-${finalSlug}`);
+    } else {
+      console.warn('[Profile] NETLIFY_SITE_ID or NETLIFY_API_TOKEN not set, skipping CDN purge');
+    }
+  } catch (e) {
+    console.error('[Profile] CDN cache purge failed:', e);
   }
 
   return {

@@ -85,6 +85,50 @@ export async function cacheGetOrFetch<T>(
 }
 
 /**
+ * Delete a value from cache
+ */
+export async function cacheDelete(key: string): Promise<boolean> {
+  const client = getRedis();
+  if (!client) return false;
+
+  try {
+    await client.del(key);
+    console.log(`[Cache] DEL: ${key}`);
+    return true;
+  } catch (error) {
+    console.error(`[Cache] DEL error for ${key}:`, error);
+    return false;
+  }
+}
+
+/**
+ * Delete all cache keys matching a pattern (artist name across all platforms)
+ */
+export async function cacheDeleteByArtist(artistName: string): Promise<void> {
+  const client = getRedis();
+  if (!client) return;
+
+  const normalized = artistName.toLowerCase().trim().replace(/\s+/g, '_');
+  try {
+    // Scan for matching keys and delete them
+    const keys: string[] = [];
+    let cursor = 0;
+    do {
+      const [nextCursor, matchedKeys] = await client.scan(cursor, { match: `artist:*:${normalized}`, count: 100 });
+      cursor = Number(nextCursor);
+      keys.push(...matchedKeys);
+    } while (cursor !== 0);
+
+    if (keys.length > 0) {
+      await Promise.all(keys.map(k => client.del(k)));
+      console.log(`[Cache] Purged ${keys.length} cached entries for artist "${artistName}"`);
+    }
+  } catch (error) {
+    console.error(`[Cache] Purge error for artist "${artistName}":`, error);
+  }
+}
+
+/**
  * Generate a normalized cache key for artist searches
  */
 export function artistCacheKey(platform: string, query: string): string {

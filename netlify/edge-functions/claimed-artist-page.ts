@@ -374,7 +374,9 @@ export default async function handler(request: Request, context: Context) {
   return new Response(html, {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 's-maxage=300, stale-while-revalidate',
+      'Cache-Control': 'public, max-age=0, must-revalidate',
+      'Netlify-CDN-Cache-Control': 'public, s-maxage=300, stale-while-revalidate=300',
+      'Cache-Tag': `artist-${slug}`,
     },
   });
 }

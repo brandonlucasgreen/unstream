@@ -225,6 +225,10 @@ export function ClaimPage() {
               >
                 {loading ? 'Sending...' : 'Send sign-in link'}
               </button>
+              <p className="text-xs text-text-muted text-center">
+                By clicking you accept Unstream's{' '}
+                <Link to="/privacy-policy" className="text-accent-primary hover:underline">Privacy Policy</Link>
+              </p>
             </form>
           )}
 

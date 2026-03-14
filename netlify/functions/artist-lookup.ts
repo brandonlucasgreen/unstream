@@ -37,7 +37,8 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 's-maxage=60, stale-while-revalidate',
+        'Cache-Control': 'public, max-age=0, must-revalidate',
+        'Netlify-CDN-Cache-Control': 's-maxage=60, stale-while-revalidate=60',
       },
       body: JSON.stringify(artist),
     };
