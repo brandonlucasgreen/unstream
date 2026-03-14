@@ -90,6 +90,7 @@ export interface MusicBrainzData {
   discogsUrl: string | null;
   hasPre2005Release: boolean;
   socialLinks: SocialLink[];
+  platformUrls?: string[];
 }
 
 // Search state

@@ -394,7 +394,7 @@ describe('mergeWithMusicBrainzData', () => {
     expect(merged[1].platforms.find(p => p.sourceId === 'officialsite')).toBeUndefined();
   });
 
-  it('only enriches the best match when multiple results share the same name', () => {
+  it('only enriches the result whose platform URL matches MusicBrainz relation URLs', () => {
     const results = [
       makeArtistResult('Sockpuppet', [
         { sourceId: 'bandcamp', url: 'https://sockpuppet.bandcamp.com' },
@@ -411,17 +411,47 @@ describe('mergeWithMusicBrainzData', () => {
         { platform: 'kofi', url: 'https://ko-fi.com/fluffy' },
         { platform: 'patreon', url: 'https://patreon.com/fluffy' },
       ],
+      // MusicBrainz knows this artist's Bandcamp URL
+      platformUrls: ['https://sockpuppet.bandcamp.com'],
     });
 
     const merged = mergeWithMusicBrainzData(results, mbData);
 
-    // First result has more platforms, so it should get the enrichment
+    // First result's bandcamp URL matches the MB platform URL → gets enrichment
     expect(merged[0].platforms.find(p => p.sourceId === 'officialsite')).toBeDefined();
     expect(merged[0].platforms.find(p => p.sourceId === 'kofi')?.url).toBe('https://ko-fi.com/fluffy');
     expect(merged[0].platforms.find(p => p.sourceId === 'patreon')?.url).toBe('https://patreon.com/fluffy');
 
-    // Second result should NOT get the enrichment
+    // Second result has a different bandcamp URL → no enrichment
     expect(merged[1].platforms.find(p => p.sourceId === 'officialsite')).toBeUndefined();
     expect(merged[1].platforms.find(p => p.sourceId === 'patreon')).toBeUndefined();
+  });
+
+  it('falls back to heuristic scoring when no platformUrls are available', () => {
+    const results = [
+      makeArtistResult('Sockpuppet', [
+        { sourceId: 'bandcamp', url: 'https://sockpuppet.bandcamp.com' },
+        { sourceId: 'qobuz', url: 'https://qobuz.com/sockpuppet' },
+      ]),
+      makeArtistResult('Sockpuppet', [
+        { sourceId: 'bandcamp', url: 'https://sockpuppet-il.bandcamp.com' },
+      ]),
+    ];
+    const mbData = makeMBData({
+      artistName: 'Sockpuppet',
+      officialUrl: 'https://sockpuppet.com',
+      socialLinks: [
+        { platform: 'kofi', url: 'https://ko-fi.com/fluffy' },
+      ],
+      // No platformUrls — falls back to scoring heuristic
+    });
+
+    const merged = mergeWithMusicBrainzData(results, mbData);
+
+    // First result has more platforms, wins the heuristic
+    expect(merged[0].platforms.find(p => p.sourceId === 'officialsite')).toBeDefined();
+    expect(merged[0].platforms.find(p => p.sourceId === 'kofi')?.url).toBe('https://ko-fi.com/fluffy');
+    // Second result should NOT get enrichment
+    expect(merged[1].platforms.find(p => p.sourceId === 'kofi')).toBeUndefined();
   });
 });

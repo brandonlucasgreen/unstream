@@ -476,22 +476,46 @@ export function mergeWithMusicBrainzData(
     if (isMatch) matchingIndices.push(i);
   }
 
-  // If multiple results match, only enrich the best one (most platforms = most likely the right artist).
-  // MusicBrainz only returns data for one artist, so attaching to all same-name results is wrong.
+  // Disambiguate: use MusicBrainz platform URLs (bandcamp, streaming, etc.) to find
+  // the correct result by direct URL matching. Falls back to heuristic scoring only
+  // when no platform URLs are available.
   let bestMatchIndex = -1;
   if (matchingIndices.length === 1) {
     bestMatchIndex = matchingIndices[0];
   } else if (matchingIndices.length > 1) {
-    let bestScore = -1;
-    for (const idx of matchingIndices) {
-      const r = results[idx];
-      // Prefer: verified/claimed > more platforms > earlier in list
-      const confidenceScore = r.matchConfidence === 'claimed' ? 100 : r.matchConfidence === 'verified' ? 50 : 0;
-      const platformScore = r.platforms.filter(p => !['kofi', 'buymeacoffee', 'ampwall'].includes(p.sourceId)).length;
-      const score = confidenceScore + platformScore;
-      if (score > bestScore) {
-        bestScore = score;
-        bestMatchIndex = idx;
+    const mbPlatformUrls = mbData.platformUrls || [];
+
+    // Try direct URL matching first: check if any result has a platform URL
+    // that matches one of the MusicBrainz relation URLs
+    if (mbPlatformUrls.length > 0) {
+      // Normalize MB URLs for comparison (strip trailing slashes, lowercase hostname)
+      const normalizedMbUrls = new Set(mbPlatformUrls.map(u => u.replace(/\/+$/, '').toLowerCase()));
+
+      for (const idx of matchingIndices) {
+        const r = results[idx];
+        const hasDirectMatch = r.platforms.some(p => {
+          const normalized = p.url.replace(/\/+$/, '').toLowerCase();
+          return normalizedMbUrls.has(normalized);
+        });
+        if (hasDirectMatch) {
+          bestMatchIndex = idx;
+          break;
+        }
+      }
+    }
+
+    // Fallback: score by confidence + platform count if no direct URL match found
+    if (bestMatchIndex === -1) {
+      let bestScore = -1;
+      for (const idx of matchingIndices) {
+        const r = results[idx];
+        const confidenceScore = r.matchConfidence === 'claimed' ? 100 : r.matchConfidence === 'verified' ? 50 : 0;
+        const platformScore = r.platforms.filter(p => !['kofi', 'buymeacoffee', 'ampwall'].includes(p.sourceId)).length;
+        const score = confidenceScore + platformScore;
+        if (score > bestScore) {
+          bestScore = score;
+          bestMatchIndex = idx;
+        }
       }
     }
   }
