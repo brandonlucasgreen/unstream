@@ -26,6 +26,7 @@ interface MusicBrainzSearchResponse {
   hasPre2005Release: boolean;
   socialLinks: SocialLink[];
   discoveredPlatforms: DiscoveredPlatformLink[];
+  platformUrls: string[]; // Known platform URLs from MusicBrainz relations (bandcamp, mirlo, etc.)
 }
 
 // Known Mastodon/Fediverse instances (non-exhaustive, but covers popular ones)
@@ -339,6 +340,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     hasPre2005Release: false,
     socialLinks: [],
     discoveredPlatforms: [],
+    platformUrls: [],
   };
 
   try {
@@ -395,6 +397,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     let linktreeUrl: string | null = null;
     const socialLinks: SocialLink[] = [];
     const seenPlatforms = new Set<SocialPlatform>();
+    const platformUrls: string[] = [];
 
     if (artistResponse.ok) {
       const artistData = await artistResponse.json() as {
@@ -442,6 +445,22 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
             socialLinks.push(socialLink);
           }
         }
+      }
+
+      // Extract known music platform URLs from relations for disambiguation.
+      // These let us match MusicBrainz data to the correct search result
+      // when multiple same-name artists exist.
+      const platformRelTypes = new Set([
+        'bandcamp', 'streaming music', 'purchase for download',
+        'download for free', 'free streaming',
+      ]);
+      for (const rel of relations) {
+        if (rel.url?.resource && platformRelTypes.has(rel.type)) {
+          platformUrls.push(rel.url.resource);
+        }
+      }
+      if (platformUrls.length > 0) {
+        console.log(`[MusicBrainz] Found ${platformUrls.length} platform URLs: ${platformUrls.join(', ')}`);
       }
     }
 
@@ -500,6 +519,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       hasPre2005Release,
       socialLinks: allSocialLinks,
       discoveredPlatforms: officialSiteResult.discoveredPlatforms,
+      platformUrls,
     };
   } catch (error: unknown) {
     const err = error as { name?: string; message?: string };
