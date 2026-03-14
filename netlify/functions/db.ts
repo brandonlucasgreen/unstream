@@ -289,12 +289,18 @@ export async function persistEnrichment(
     // Find the artist
     const { data: artist, error: findError } = await client
       .from('artists')
-      .select('id')
+      .select('id, match_confidence')
       .eq('slug', slug)
       .single();
 
     if (findError || !artist) {
       // Artist not in DB yet (search hasn't been persisted). That's OK.
+      return;
+    }
+
+    // Never overwrite links for claimed artists — they manage their own links
+    if (artist.match_confidence === 'claimed') {
+      console.log(`[DB] Skipping enrichment for claimed artist "${artistName}"`);
       return;
     }
 
