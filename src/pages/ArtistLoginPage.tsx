@@ -59,6 +59,13 @@ export function ArtistLoginPage() {
         body: JSON.stringify({ email: email.trim() }),
       });
 
+      if (!checkResponse.ok) {
+        const errData = await checkResponse.json().catch(() => ({}));
+        setError(errData.error || 'Something went wrong. Please try again.');
+        setLoading(false);
+        return;
+      }
+
       const checkData = await checkResponse.json();
       if (!checkData.hasAccount) {
         setError('No claimed artist profiles found for this email. You can claim your artist page from any artist profile on Unstream.');
