@@ -285,9 +285,9 @@ function generateArtistPageHtml(
     <div style="max-width:896px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:12px;font-size:14px;color:var(--muted)">
       <a href="https://bgreen.lol" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Made with love in Massachusetts, USA</a>
       <nav style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px">
-        <a href="/artists" style="color:var(--muted);text-decoration:none">Artist index</a>
+        <a href="/artist-login" style="color:var(--muted);text-decoration:none">Artist login</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
-        <a href="/artist-login" style="color:var(--muted);text-decoration:none">Login</a>
+        <a href="/artists" style="color:var(--muted);text-decoration:none">Index</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
         <a href="https://unstream.featurebase.app/roadmap" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Roadmap</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
