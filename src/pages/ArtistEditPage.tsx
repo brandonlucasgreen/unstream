@@ -72,8 +72,7 @@ function getNameChangeWarning(original: string, updated: string): 'error' | 'war
   if (original.toLowerCase().replace(/[^a-z0-9]/g, '') === updated.toLowerCase().replace(/[^a-z0-9]/g, '')) return null;
   const sim = stringSimilarity(original, updated);
   if (sim >= 0.7) return null;
-  if (sim >= 0.4) return 'warn';
-  return 'error';
+  return 'warn';
 }
 
 export function ArtistEditPage() {
@@ -219,13 +218,8 @@ export function ArtistEditPage() {
 
     // Validate name change
     const nameLevel = getNameChangeWarning(originalName, artistName);
-    if (nameLevel === 'error' && !artistName.trim()) {
-      setError('Artist name cannot be empty.');
-      setSaving(false);
-      return;
-    }
     if (nameLevel === 'error') {
-      setError(`This name is too different from "${originalName}". Name changes should only fix capitalization or spacing.`);
+      setError('Artist name cannot be empty.');
       setSaving(false);
       return;
     }
@@ -366,11 +360,8 @@ export function ArtistEditPage() {
             />
             {artistName !== originalName && (() => {
               const level = getNameChangeWarning(originalName, artistName);
-              if (level === 'error' && !artistName.trim()) {
-                return <p className="text-xs text-red-400">Artist name cannot be empty.</p>;
-              }
               if (level === 'error') {
-                return <p className="text-xs text-red-400">This name is too different from "{originalName}". Name changes should only fix capitalization or spacing.</p>;
+                return <p className="text-xs text-red-400">Artist name cannot be empty.</p>;
               }
               if (level === 'warn') {
                 return <p className="text-xs text-amber-400">This is a significant change from "{originalName}". You'll be asked to confirm when saving.</p>;
