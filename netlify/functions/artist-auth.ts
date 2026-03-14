@@ -50,6 +50,7 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
 
       const normalizedEmail = email.toLowerCase().trim();
 
+      // Check 1: Direct email match in artist_profiles
       const { data: profiles } = await client
         .from('artist_profiles')
         .select('id')
@@ -57,9 +58,45 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
         .not('verified_at', 'is', null)
         .limit(1);
 
-      const hasAccount = profiles && profiles.length > 0;
+      if (profiles && profiles.length > 0) {
+        return { statusCode: 200, headers, body: JSON.stringify({ hasAccount: true }) };
+      }
 
-      return { statusCode: 200, headers, body: JSON.stringify({ hasAccount }) };
+      // Check 2: Look up Supabase auth user by email, then check by user_id.
+      // This handles profiles where the email wasn't stored (bug: claim page lost
+      // email state on magic link redirect, storing '' in the DB).
+      const url = process.env.SUPABASE_URL;
+      const serviceKey = process.env.SUPABASE_SERVICE_KEY;
+      if (url && serviceKey) {
+        const adminClient = createClient(url, serviceKey);
+        const { data: userList } = await adminClient.auth.admin.listUsers();
+        const matchingUser = userList?.users?.find(
+          u => u.email?.toLowerCase() === normalizedEmail
+        );
+
+        if (matchingUser) {
+          const { data: profilesByUser } = await client
+            .from('artist_profiles')
+            .select('id, email')
+            .eq('user_id', matchingUser.id)
+            .not('verified_at', 'is', null)
+            .limit(1);
+
+          if (profilesByUser && profilesByUser.length > 0) {
+            // Backfill the missing email so future logins work directly
+            if (!profilesByUser[0].email) {
+              await client
+                .from('artist_profiles')
+                .update({ email: normalizedEmail })
+                .eq('id', profilesByUser[0].id);
+              console.log(`[artist-auth] Backfilled email for profile ${profilesByUser[0].id} via user_id lookup`);
+            }
+            return { statusCode: 200, headers, body: JSON.stringify({ hasAccount: true }) };
+          }
+        }
+      }
+
+      return { statusCode: 200, headers, body: JSON.stringify({ hasAccount: false }) };
     } catch {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid request' }) };
     }
@@ -91,6 +128,20 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
     if (error) {
       console.error('[artist-auth] Error fetching profiles:', error);
       return { statusCode: 500, headers, body: JSON.stringify({ error: 'Failed to fetch profiles' }) };
+    }
+
+    // Backfill: if any profiles have empty email, update with the authenticated user's email.
+    // This fixes profiles created when the claim page lost the email on magic link redirect.
+    if (user.email && profiles && profiles.length > 0) {
+      for (const p of profiles) {
+        if (!p.email) {
+          await client
+            .from('artist_profiles')
+            .update({ email: user.email.toLowerCase().trim() })
+            .eq('id', p.id);
+          console.log(`[artist-auth] Backfilled email for profile ${p.id}`);
+        }
+      }
     }
 
     // Fetch artist details for each profile

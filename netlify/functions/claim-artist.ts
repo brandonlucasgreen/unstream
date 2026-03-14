@@ -37,8 +37,8 @@ function getServiceClient() {
   return getClient();
 }
 
-// Verify the JWT from the request and return the user ID
-async function authenticateRequest(authHeader: string | undefined): Promise<string | null> {
+// Verify the JWT from the request and return the user ID + email
+async function authenticateRequest(authHeader: string | undefined): Promise<{ userId: string; email: string } | null> {
   if (!authHeader?.startsWith('Bearer ')) return null;
   const token = authHeader.slice(7);
 
@@ -50,7 +50,7 @@ async function authenticateRequest(authHeader: string | undefined): Promise<stri
   const anonClient = createClient(url, anonKey);
   const { data, error } = await anonClient.auth.getUser(token);
   if (error || !data.user) return null;
-  return data.user.id;
+  return { userId: data.user.id, email: data.user.email || '' };
 }
 
 function generateVerificationCode(): string {
@@ -258,14 +258,15 @@ export async function handler(event: {
     };
   }
 
-  const userId = await authenticateRequest(event.headers.authorization || event.headers.Authorization);
-  if (!userId) {
+  const authUser = await authenticateRequest(event.headers.authorization || event.headers.Authorization);
+  if (!authUser) {
     return {
       statusCode: 401,
       headers: CORS_HEADERS,
       body: JSON.stringify({ error: 'Authentication required' }),
     };
   }
+  const userId = authUser.userId;
 
   let body: { action: string; slug?: string; websiteUrl?: string; email?: string; platform?: string; url?: string };
   try {
@@ -331,8 +332,9 @@ export async function handler(event: {
       };
     }
 
-    // Use the email provided by the frontend (the one the artist signed in with)
-    const email = (body.email || '').toLowerCase().trim();
+    // Use the email provided by the frontend, or fall back to the authenticated user's email.
+    // The frontend email may be empty if the page reloaded after magic link redirect.
+    const email = (body.email || authUser.email || '').toLowerCase().trim();
 
     const verificationCode = generateVerificationCode();
 

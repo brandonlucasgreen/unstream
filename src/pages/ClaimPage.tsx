@@ -69,6 +69,8 @@ export function ClaimPage() {
         const { data, error } = await supabase.auth.getSession();
         if (!error && data.session) {
           setAuthenticated(true);
+          // Restore email from session (lost on page reload after magic link)
+          if (data.session.user.email) setEmail(data.session.user.email);
           setStep('website');
           return;
         }
@@ -77,6 +79,7 @@ export function ClaimPage() {
       const session = await getSession();
       if (session) {
         setAuthenticated(true);
+        if (session.user.email) setEmail(session.user.email);
         setStep('website');
       }
     }
@@ -494,7 +497,7 @@ export function ClaimPage() {
                               disabled={fetchingAvatar !== null}
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-secondary border border-border text-sm hover:border-accent-primary transition-colors disabled:opacity-50"
                             >
-                              <SocialIcon platform={l.platform} size={14} />
+                              <SocialIcon platform={l.platform} className="w-3.5 h-3.5" />
                               {fetchingAvatar === l.platform ? 'Loading...' : `Use ${platformName(l.platform)} photo`}
                             </button>
                           ))}
@@ -532,7 +535,7 @@ export function ClaimPage() {
                         }}
                         className="w-4 h-4 rounded accent-accent-primary flex-shrink-0"
                       />
-                      <SocialIcon platform={link.platform} size={18} />
+                      <SocialIcon platform={link.platform} className="w-4.5 h-4.5" />
                       <div className="flex-1 min-w-0">
                         <span className="text-sm font-medium">{platformName(link.platform)}</span>
                         <p className="text-xs text-text-muted truncate">{link.url}</p>
