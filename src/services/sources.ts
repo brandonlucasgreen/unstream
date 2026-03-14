@@ -463,19 +463,41 @@ export function mergeWithMusicBrainzData(
 
   const mbNormalized = normalizeForComparison(mbData.artistName);
 
-  return results.map(result => {
-    // Only add to artist results
-    if (result.type !== 'artist') return result;
-
+  // Find which results match the MusicBrainz artist name
+  const matchingIndices: number[] = [];
+  for (let i = 0; i < results.length; i++) {
+    const result = results[i];
+    if (result.type !== 'artist') continue;
     const resultNormalized = normalizeForComparison(result.name);
-
-    // Check if artist name matches (exact, contains, or is contained by)
     const isMatch =
       resultNormalized === mbNormalized ||
-      resultNormalized.includes(mbNormalized) ||
-      mbNormalized.includes(resultNormalized);
+      (resultNormalized.includes(mbNormalized) && mbNormalized.length > resultNormalized.length * 0.7) ||
+      (mbNormalized.includes(resultNormalized) && resultNormalized.length > mbNormalized.length * 0.7);
+    if (isMatch) matchingIndices.push(i);
+  }
 
-    if (!isMatch) return result;
+  // If multiple results match, only enrich the best one (most platforms = most likely the right artist).
+  // MusicBrainz only returns data for one artist, so attaching to all same-name results is wrong.
+  let bestMatchIndex = -1;
+  if (matchingIndices.length === 1) {
+    bestMatchIndex = matchingIndices[0];
+  } else if (matchingIndices.length > 1) {
+    let bestScore = -1;
+    for (const idx of matchingIndices) {
+      const r = results[idx];
+      // Prefer: verified/claimed > more platforms > earlier in list
+      const confidenceScore = r.matchConfidence === 'claimed' ? 100 : r.matchConfidence === 'verified' ? 50 : 0;
+      const platformScore = r.platforms.filter(p => !['kofi', 'buymeacoffee', 'ampwall'].includes(p.sourceId)).length;
+      const score = confidenceScore + platformScore;
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatchIndex = idx;
+      }
+    }
+  }
+
+  return results.map((result, index) => {
+    if (index !== bestMatchIndex) return result;
 
     // Clone platforms array for immutable update
     const newPlatforms = [...result.platforms];

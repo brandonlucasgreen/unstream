@@ -393,4 +393,35 @@ describe('mergeWithMusicBrainzData', () => {
     expect(merged[0].platforms.find(p => p.sourceId === 'officialsite')).toBeDefined();
     expect(merged[1].platforms.find(p => p.sourceId === 'officialsite')).toBeUndefined();
   });
+
+  it('only enriches the best match when multiple results share the same name', () => {
+    const results = [
+      makeArtistResult('Sockpuppet', [
+        { sourceId: 'bandcamp', url: 'https://sockpuppet.bandcamp.com' },
+        { sourceId: 'qobuz', url: 'https://qobuz.com/sockpuppet' },
+      ]),
+      makeArtistResult('Sockpuppet', [
+        { sourceId: 'bandcamp', url: 'https://sockpuppet-il.bandcamp.com' },
+      ]),
+    ];
+    const mbData = makeMBData({
+      artistName: 'Sockpuppet',
+      officialUrl: 'https://sockpuppet.com',
+      socialLinks: [
+        { platform: 'kofi', url: 'https://ko-fi.com/fluffy' },
+        { platform: 'patreon', url: 'https://patreon.com/fluffy' },
+      ],
+    });
+
+    const merged = mergeWithMusicBrainzData(results, mbData);
+
+    // First result has more platforms, so it should get the enrichment
+    expect(merged[0].platforms.find(p => p.sourceId === 'officialsite')).toBeDefined();
+    expect(merged[0].platforms.find(p => p.sourceId === 'kofi')?.url).toBe('https://ko-fi.com/fluffy');
+    expect(merged[0].platforms.find(p => p.sourceId === 'patreon')?.url).toBe('https://patreon.com/fluffy');
+
+    // Second result should NOT get the enrichment
+    expect(merged[1].platforms.find(p => p.sourceId === 'officialsite')).toBeUndefined();
+    expect(merged[1].platforms.find(p => p.sourceId === 'patreon')).toBeUndefined();
+  });
 });
