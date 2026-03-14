@@ -819,6 +819,46 @@ async function searchFaircamp(query: string): Promise<Map<string, string>> {
   return results;
 }
 
+// Scrape release titles from a Faircamp artist page
+// Faircamp sites use a consistent static HTML structure: div.release > a (second <a> is the title)
+async function getFaircampReleaseTitles(url: string): Promise<string[]> {
+  try {
+    const response = await fetchWithTimeout(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    }, 4000);
+
+    if (!response.ok) return [];
+
+    const html = await response.text();
+    const root = parse(html);
+    const titles: string[] = [];
+
+    // Faircamp uses div.release for each release, with the second <a> containing the title text
+    const releases = root.querySelectorAll('.release');
+    for (const release of releases) {
+      const links = release.querySelectorAll('a');
+      // The second <a> in a .release div is the title link (first is the cover image link)
+      if (links.length >= 2) {
+        const title = links[1].textContent?.trim();
+        if (title) titles.push(normalizeForComparison(title));
+      }
+    }
+
+    if (titles.length > 0) {
+      console.log(`[Faircamp] Found ${titles.length} releases at ${url}`);
+    }
+    return titles;
+  } catch (error: unknown) {
+    const err = error as { name?: string; message?: string };
+    if (err.name !== 'AbortError') {
+      console.error(`[Faircamp] Error fetching releases from ${url}:`, err.message);
+    }
+    return [];
+  }
+}
+
 // Jam.coop artist directory cache
 let jamcoopDirectoryCache: Map<string, { name: string; url: string }> | null = null;
 let jamcoopCacheTime = 0;
@@ -1121,6 +1161,7 @@ const RELIABLE_RELEASE_PLATFORMS = new Set(['bandcamp']);
 
 // Curated platforms where presence is strong verification signal
 const CURATED_PLATFORMS = new Set(['mirlo', 'faircamp', 'jamcoop']);
+
 
 // Check if a Qobuz name is a variation of a base name (e.g. "mattyoung1" for "mattyoung")
 function isQobuzVariation(qobuzName: string, baseName: string): boolean {
@@ -1581,37 +1622,146 @@ function mergeByReleaseOverlap(disambiguated: AggregatedResult[]): AggregatedRes
 // Phase 4: Attach deferred name-only platforms & final filter/sort
 // ---------------------------------------------------------------------------
 
-function attachNameOnlyPlatforms(
+async function attachNameOnlyPlatforms(
   merged: AggregatedResult[],
   nameOnlyMaps: [string, Map<string, string>][],
-): void {
+): Promise<void> {
+  // Step 1: Group all name-only platform matches by normalized artist name.
+  // This ensures Faircamp + Jamcoop + Bandwagon for the same artist travel together.
+  // Also track display names from the original match maps.
+  const groupedByName = new Map<string, { sourceId: string; url: string }[]>();
+  const displayNames = new Map<string, string>(); // normalizedName -> best display name
   for (const [platformId, matchMap] of nameOnlyMaps) {
     for (const [normalizedName, platformUrl] of matchMap) {
-      const matching = merged.filter(
-        r => r.type === 'artist' && normalizeForComparison(r.name) === normalizedName
-      );
-      if (matching.length === 0) continue;
-      if (matching.some(r => r.platforms.some(p => p.sourceId === platformId))) continue;
+      if (!groupedByName.has(normalizedName)) groupedByName.set(normalizedName, []);
+      groupedByName.get(normalizedName)!.push({ sourceId: platformId, url: platformUrl });
+      // Try to extract a display name from the URL path
+      if (!displayNames.has(normalizedName)) {
+        try {
+          const urlObj = new URL(platformUrl);
+          const slug = urlObj.pathname.split('/').filter(Boolean).pop() || '';
+          if (slug) {
+            displayNames.set(normalizedName, slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
+          }
+        } catch { /* ignore */ }
+      }
+    }
+  }
 
-      if (matching.length === 1) {
-        matching[0].platforms.push({ sourceId: platformId as SourceId, url: platformUrl });
-        continue;
+  // Step 2: For each artist name group, attach or create a new result
+  for (const [normalizedName, platforms] of groupedByName) {
+    const matching = merged.filter(
+      r => r.type === 'artist' && normalizeForComparison(r.name) === normalizedName
+    );
+
+    // Filter out platforms already present on any matching result
+    const toAttach = platforms.filter(
+      p => !matching.some(r => r.platforms.some(rp => rp.sourceId === p.sourceId))
+    );
+    if (toAttach.length === 0) continue;
+
+    // Unambiguous: only one result with this name
+    if (matching.length === 1) {
+      for (const p of toAttach) {
+        matching[0].platforms.push({ sourceId: p.sourceId as SourceId, url: p.url });
+      }
+      continue;
+    }
+
+    if (matching.length === 0) {
+      // No existing results — create a new one with these platforms
+      const displayName = displayNames.get(normalizedName) || normalizedName;
+      const faircampEntry = toAttach.find(p => p.sourceId === 'faircamp');
+
+      const newResult: AggregatedResult = {
+        id: `nameonly-${normalizedName}`,
+        name: displayName,
+        type: 'artist',
+        platforms: toAttach.map(p => ({ sourceId: p.sourceId as SourceId, url: p.url })),
+        matchConfidence: 'unverified',
+      };
+
+      // If we have Faircamp, fetch releases to seed the result
+      if (faircampEntry) {
+        const titles = await getFaircampReleaseTitles(faircampEntry.url);
+        if (titles.length > 0) {
+          const fcPlatform = newResult.platforms.find(p => p.sourceId === 'faircamp');
+          if (fcPlatform) fcPlatform.allReleaseTitles = titles;
+          newResult.matchConfidence = 'verified';
+        }
       }
 
-      // Ambiguous: pick the result with the most release evidence
+      merged.push(newResult);
+      console.log(`[Deferred Attach] Created new result for "${displayName}" with ${toAttach.map(p => p.sourceId).join(', ')}`);
+      continue;
+    }
+
+    // Ambiguous: multiple same-name results exist after disambiguation.
+    // Use Faircamp release data to find the right match.
+    const faircampPlatform = toAttach.find(p => p.sourceId === 'faircamp');
+    let faircampTitles: string[] = [];
+
+    if (faircampPlatform) {
+      faircampTitles = await getFaircampReleaseTitles(faircampPlatform.url);
+    }
+
+    if (faircampTitles.length > 0) {
+      // Compare Faircamp releases against each existing result
       let bestResult: AggregatedResult | null = null;
       let bestOverlap = 0;
+
       for (const result of matching) {
-        const count = result.platforms.filter(p => p.allReleaseTitles && p.allReleaseTitles.length > 0).length;
-        if (count > bestOverlap) { bestOverlap = count; bestResult = result; }
+        const resultTitles = collectReleaseTitles(result);
+        if (resultTitles.size === 0) continue;
+
+        const overlap = faircampTitles.filter(t => resultTitles.has(t)).length;
+        if (overlap > bestOverlap) {
+          bestOverlap = overlap;
+          bestResult = result;
+        }
       }
 
       if (bestResult && bestOverlap > 0) {
-        bestResult.platforms.push({ sourceId: platformId as SourceId, url: platformUrl });
-        console.log(`[Deferred Attach] Added ${platformId} to "${bestResult.name}" (best release evidence: ${bestOverlap} platforms with releases)`);
+        // Found a match — attach all platforms in this group to that result
+        for (const p of toAttach) {
+          bestResult.platforms.push({ sourceId: p.sourceId as SourceId, url: p.url });
+        }
+        // Store Faircamp release titles for future disambiguation
+        const fcPlatform = bestResult.platforms.find(p => p.sourceId === 'faircamp');
+        if (fcPlatform) fcPlatform.allReleaseTitles = faircampTitles;
+        console.log(`[Deferred Attach] Faircamp releases matched "${bestResult.name}" (${bestOverlap} overlapping titles) — attached ${toAttach.map(p => p.sourceId).join(', ')}`);
       } else {
-        console.log(`[Deferred Attach] Skipping ${platformId} for "${normalizedName}" — ambiguous name, no release data to disambiguate`);
+        // No release overlap with any existing result — this is a DIFFERENT artist.
+        // Create a new result with all the name-only platforms.
+        // Reconstruct a display name from the first matching result (they share the same name)
+        const displayName = matching[0].name;
+        const newResult: AggregatedResult = {
+          id: `nameonly-${normalizedName}-${Date.now()}`,
+          name: displayName,
+          type: 'artist',
+          platforms: toAttach.map(p => ({ sourceId: p.sourceId as SourceId, url: p.url })),
+          matchConfidence: 'verified',
+        };
+        // Seed Faircamp release titles
+        const fcPlatform = newResult.platforms.find(p => p.sourceId === 'faircamp');
+        if (fcPlatform) fcPlatform.allReleaseTitles = faircampTitles;
+
+        merged.push(newResult);
+        console.log(`[Deferred Attach] No release overlap — created new result for "${displayName}" with ${toAttach.map(p => p.sourceId).join(', ')} (${faircampTitles.length} Faircamp releases)`);
       }
+    } else {
+      // No Faircamp data available for disambiguation.
+      // Create a separate result rather than guessing wrong.
+      const displayName = matching[0].name;
+      const newResult: AggregatedResult = {
+        id: `nameonly-${normalizedName}-${Date.now()}`,
+        name: displayName,
+        type: 'artist',
+        platforms: toAttach.map(p => ({ sourceId: p.sourceId as SourceId, url: p.url })),
+        matchConfidence: 'unverified',
+      };
+      merged.push(newResult);
+      console.log(`[Deferred Attach] Ambiguous "${displayName}" with no Faircamp data — created separate result with ${toAttach.map(p => p.sourceId).join(', ')}`);
     }
   }
 }
@@ -1681,8 +1831,10 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   const merged = mergeByReleaseOverlap(disambiguated);
 
   // Phase 4: Attach deferred name-only platforms, filter, and sort
-  attachNameOnlyPlatforms(merged, nameOnlyMaps);
-  return filterAndSort(merged, query);
+  await attachNameOnlyPlatforms(merged, nameOnlyMaps);
+  // Re-merge: new results from Phase 4 may overlap with existing Qobuz standalones
+  const finalMerged = mergeByReleaseOverlap(merged);
+  return filterAndSort(finalMerged, query);
 }
 
 // Search a Bandcamp artist page for a specific album title
