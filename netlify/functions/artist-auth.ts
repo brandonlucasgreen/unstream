@@ -75,38 +75,38 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
       // Check 2: Look up Supabase auth user by email, then check by user_id.
       // This handles profiles where the email wasn't stored (bug: claim page lost
       // email state on magic link redirect, storing '' in the DB).
-      // Query auth.users directly via service client (bypasses RLS).
-      const { data: authUsers, error: authError } = await client
-        .from('auth.users' as string)
-        .select('id')
-        .eq('email', normalizedEmail)
-        .limit(1);
-
-      // If direct auth.users query doesn't work (schema access), fall back to admin API
+      // Use GoTrue admin REST API directly with filter param (SDK listUsers doesn't
+      // support filtering and only returns the first page of results).
       let matchingUserId: string | null = null;
-      if (!authError && authUsers && authUsers.length > 0) {
-        console.log(`[artist-auth] Found auth user via direct query: ${authUsers[0].id}`);
-        matchingUserId = authUsers[0].id;
-      } else {
-        if (authError) console.log(`[artist-auth] auth.users query failed (expected if schema not exposed): ${authError.message}`);
-        console.log(`[artist-auth] Falling back to admin listUsers API`);
-        const url = process.env.SUPABASE_URL;
-        const serviceKey = process.env.SUPABASE_SERVICE_KEY;
-        if (url && serviceKey) {
-          const adminClient = createClient(url, serviceKey);
-          try {
-            const { data: userList } = await adminClient.auth.admin.listUsers();
-            console.log(`[artist-auth] listUsers returned ${userList?.users?.length ?? 0} users`);
-            const matchingUser = userList?.users?.find(
-              u => u.email?.toLowerCase() === normalizedEmail
-            );
-            if (matchingUser) {
-              console.log(`[artist-auth] Found auth user via listUsers: ${matchingUser.id}`);
-              matchingUserId = matchingUser.id;
+      const supabaseUrl = process.env.SUPABASE_URL;
+      const serviceKey = process.env.SUPABASE_SERVICE_KEY;
+      if (supabaseUrl && serviceKey) {
+        try {
+          const res = await fetch(
+            `${supabaseUrl}/auth/v1/admin/users?filter=${encodeURIComponent(normalizedEmail)}`,
+            {
+              headers: {
+                'Authorization': `Bearer ${serviceKey}`,
+                'apikey': serviceKey,
+              },
             }
-          } catch (adminErr) {
-            console.error('[artist-auth] Admin listUsers failed:', adminErr);
+          );
+          if (res.ok) {
+            const data = await res.json();
+            const users = data.users || [];
+            console.log(`[artist-auth] GoTrue admin filter returned ${users.length} users`);
+            const match = users.find(
+              (u: { email?: string }) => u.email?.toLowerCase() === normalizedEmail
+            );
+            if (match) {
+              console.log(`[artist-auth] Found auth user: ${match.id}`);
+              matchingUserId = match.id;
+            }
+          } else {
+            console.error(`[artist-auth] GoTrue admin API returned ${res.status}: ${await res.text()}`);
           }
+        } catch (err) {
+          console.error('[artist-auth] GoTrue admin API call failed:', err);
         }
       }
 
