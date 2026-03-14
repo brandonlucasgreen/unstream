@@ -290,7 +290,7 @@ export const sourceCategories = {
  *
  * Returns an array of individual artist names. If no separators found, returns the original query.
  */
-function parseMultiArtistQuery(query: string): string[] {
+export function parseMultiArtistQuery(query: string): string[] {
   // Pattern matches common collaboration separators
   // Note: " x " requires spaces to avoid splitting names like "The xx"
   const separatorPattern = /\s+(?:and|&|feat\.?|featuring|,|\+|x)\s+/gi;
@@ -305,14 +305,14 @@ function parseMultiArtistQuery(query: string): string[] {
 /**
  * Normalize a string for comparison (lowercase, alphanumeric only)
  */
-function normalizeForComparison(str: string): string {
+export function normalizeForComparison(str: string): string {
   return str.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
 /**
  * Score how well a result name matches the query (higher = better)
  */
-function textMatchScore(name: string, normQuery: string): number {
+export function textMatchScore(name: string, normQuery: string): number {
   const normName = normalizeForComparison(name);
   if (normName === normQuery) return 3;
   if (normName.startsWith(normQuery)) return 2;
@@ -323,7 +323,7 @@ function textMatchScore(name: string, normQuery: string): number {
 /**
  * Merge multiple search responses, deduplicating results by normalized name
  */
-function mergeSearchResponses(responses: SearchResponse[], originalQuery: string): SearchResponse {
+export function mergeSearchResponses(responses: SearchResponse[], originalQuery: string): SearchResponse {
   const resultMap = new Map<string, SearchResult>();
 
   for (const response of responses) {
