@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { signInWithMagicLink, getSession, getSupabaseClient } from '../services/auth';
+import { signInWithMagicLink, getSession, waitForMagicLinkSession } from '../services/auth';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
 import { Footer } from '../components/Footer';
@@ -60,20 +60,21 @@ export function ClaimPage() {
   // Check if user is already authenticated (returning from magic link)
   useEffect(() => {
     async function checkAuth() {
-      // Handle the auth callback hash from magic link
-      const supabase = getSupabaseClient();
-      if (!supabase) return;
-
       // Check for hash params from magic link redirect
       if (window.location.hash.includes('access_token')) {
-        const { data, error } = await supabase.auth.getSession();
-        if (!error && data.session) {
+        const { session, error: authError } = await waitForMagicLinkSession();
+        if (session) {
           setAuthenticated(true);
-          // Restore email from session (lost on page reload after magic link)
-          if (data.session.user.email) setEmail(data.session.user.email);
+          if (session.user.email) setEmail(session.user.email);
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
           setStep('website');
           return;
         }
+        if (authError) {
+          setError(authError);
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+        return;
       }
 
       const session = await getSession();

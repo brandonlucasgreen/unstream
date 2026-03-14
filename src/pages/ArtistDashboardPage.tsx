@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getSession, getSupabaseClient } from '../services/auth';
+import { getSession, waitForMagicLinkSession } from '../services/auth';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
 import { Footer } from '../components/Footer';
 
@@ -23,18 +23,22 @@ export function ArtistDashboardPage() {
 
   useEffect(() => {
     async function loadDashboard() {
-      const supabase = getSupabaseClient();
-      if (!supabase) {
-        navigate('/artist-login', { replace: true });
-        return;
-      }
+      let session;
 
       // Handle magic link callback hash
       if (window.location.hash.includes('access_token')) {
-        await supabase.auth.getSession();
+        const { session: magicSession, error: authError } = await waitForMagicLinkSession();
+        if (authError || !magicSession) {
+          // Redirect to login with the error visible there
+          navigate('/artist-login', { replace: true });
+          return;
+        }
+        window.history.replaceState(null, '', window.location.pathname);
+        session = magicSession;
+      } else {
+        session = await getSession();
       }
 
-      const session = await getSession();
       if (!session) {
         navigate('/artist-login', { replace: true });
         return;
