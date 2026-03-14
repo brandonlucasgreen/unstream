@@ -12,7 +12,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const MANIFEST_PATH = join(__dirname, '..', 'data', 'artists-manifest.json');
-const OUTPUT_PATH = join(__dirname, '..', 'public', 'sitemap.xml');
+const OUTPUT_PATH = join(__dirname, '..', 'apps', 'web', 'public', 'sitemap.xml');
 
 const BASE_URL = 'https://unstream.stream';
 
