@@ -88,7 +88,7 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Authentication required' }) };
   }
 
-  let body: { slug: string; newSlug?: string; bio?: string; featuredEmbed?: string | null; links?: LinkUpdate[] };
+  let body: { slug: string; newSlug?: string; bio?: string; featuredEmbed?: string | null; customImageUrl?: string | null; links?: LinkUpdate[] };
   try {
     body = JSON.parse(event.body || '{}');
   } catch {
@@ -174,6 +174,31 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
     if (bioError) {
       console.error('[Profile] Bio update failed:', bioError);
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update bio' }) };
+    }
+  }
+
+  // --- Update custom image ---
+  if (body.customImageUrl !== undefined) {
+    let imageUrl: string | null = null;
+    if (body.customImageUrl) {
+      try {
+        const parsed = new URL(body.customImageUrl);
+        if (parsed.protocol !== 'https:') {
+          return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Image URL must use HTTPS' }) };
+        }
+        imageUrl = body.customImageUrl;
+      } catch {
+        return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid image URL' }) };
+      }
+    }
+    const { error: imageError } = await client
+      .from('artist_profiles')
+      .update({ custom_image_url: imageUrl, updated_at: new Date().toISOString() })
+      .eq('id', profile.id);
+
+    if (imageError) {
+      console.error('[Profile] Image URL update failed:', imageError);
+      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update image' }) };
     }
   }
 

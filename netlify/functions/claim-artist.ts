@@ -164,6 +164,66 @@ function identifyPlatformLinks(links: string[]): { platform: string; url: string
   return found;
 }
 
+// Scrape an artist avatar/profile photo from a platform page
+async function scrapeAvatarFromPlatform(platform: string, pageUrl: string): Promise<string | null> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const response = await fetch(pageUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; UnstreamBot/1.0; +https://unstream.stream)',
+      },
+      signal: controller.signal,
+      redirect: 'follow',
+    });
+
+    if (!response.ok) return null;
+    const html = await response.text();
+
+    if (platform === 'bandcamp') {
+      // Try band-photo img first
+      const bandPhoto = html.match(/<img[^>]*class="[^"]*band-photo[^"]*"[^>]*src="([^"]+)"/i);
+      if (bandPhoto) return bandPhoto[1];
+      // Fallback: og:image (usually the band photo on artist pages)
+      const ogImage = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i);
+      if (ogImage) {
+        // Filter out album art — Bandcamp band photos are on f4.bcbits.com
+        const src = ogImage[1];
+        if (src.includes('f4.bcbits.com') || !src.includes('bcbits.com/img/a')) {
+          return src;
+        }
+      }
+      return null;
+    }
+
+    if (platform === 'youtube') {
+      // YouTube channel pages have og:image with the channel avatar
+      const ogImage = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i);
+      if (ogImage) return ogImage[1];
+      // Also try link rel image_src
+      const imageSrc = html.match(/<link[^>]*rel="image_src"[^>]*href="([^"]+)"/i);
+      if (imageSrc) return imageSrc[1];
+      return null;
+    }
+
+    if (platform === 'mirlo') {
+      // Mirlo artist pages have og:image with the artist photo
+      const ogImage = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i);
+      if (ogImage) return ogImage[1];
+      return null;
+    }
+
+    // Generic fallback: try og:image
+    const ogImage = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i);
+    return ogImage ? ogImage[1] : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',
@@ -207,7 +267,7 @@ export async function handler(event: {
     };
   }
 
-  let body: { action: string; slug?: string; websiteUrl?: string; email?: string };
+  let body: { action: string; slug?: string; websiteUrl?: string; email?: string; platform?: string; url?: string };
   try {
     body = JSON.parse(event.body || '{}');
   } catch {
@@ -328,7 +388,7 @@ export async function handler(event: {
     // Find the pending profile
     const { data: artist } = await client
       .from('artists')
-      .select('id, name')
+      .select('id, name, image_url')
       .eq('slug', slug)
       .single();
 
@@ -437,7 +497,7 @@ export async function handler(event: {
     // Add website as officialsite link
     const { data: existingLinks } = await client
       .from('artist_links')
-      .select('platform')
+      .select('platform, url')
       .eq('artist_id', artist.id);
 
     const existingPlatforms = new Set((existingLinks || []).map(l => l.platform));
@@ -468,20 +528,61 @@ export async function handler(event: {
 
     console.log(`[Claim] Verified "${artist.name}" — discovered ${discoveredLinks.length} platform links from website`);
 
+    // Build full link list for the review step (existing + newly discovered, deduplicated)
+    const allLinksMap = new Map<string, { platform: string; url: string }>();
+    for (const el of (existingLinks || [])) {
+      allLinksMap.set(el.platform, { platform: el.platform, url: el.url });
+    }
+    // Officialsite we just inserted
+    allLinksMap.set('officialsite', { platform: 'officialsite', url: profile.website_url });
+    for (const dl of discoveredLinks) {
+      allLinksMap.set(dl.platform, { platform: dl.platform, url: dl.url });
+    }
+
     return {
       statusCode: 200,
       headers: CORS_HEADERS,
       body: JSON.stringify({
         verified: true,
         discoveredLinks: discoveredLinks.length,
+        allLinks: Array.from(allLinksMap.values()),
+        imageUrl: artist.image_url || null,
         message: `Profile verified! Found ${discoveredLinks.length} platform links on your website.`,
       }),
+    };
+  }
+
+  // --- ACTION: FETCH-AVATAR ---
+  // Scrapes a platform page for an artist profile photo
+  if (body.action === 'fetch-avatar') {
+    const { platform, url: avatarPageUrl } = body;
+    if (!platform || !avatarPageUrl) {
+      return {
+        statusCode: 400,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: 'platform and url are required' }),
+      };
+    }
+
+    const imageUrl = await scrapeAvatarFromPlatform(platform, avatarPageUrl);
+    if (!imageUrl) {
+      return {
+        statusCode: 422,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: 'Could not find a profile photo on that page' }),
+      };
+    }
+
+    return {
+      statusCode: 200,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ imageUrl }),
     };
   }
 
   return {
     statusCode: 400,
     headers: CORS_HEADERS,
-    body: JSON.stringify({ error: 'Invalid action. Use "start" or "verify".' }),
+    body: JSON.stringify({ error: 'Invalid action. Use "start", "verify", or "fetch-avatar".' }),
   };
 }

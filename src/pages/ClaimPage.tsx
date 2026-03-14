@@ -1,16 +1,44 @@
 import { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { signInWithMagicLink, getSession, getSupabaseClient } from '../services/auth';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
 import { Footer } from '../components/Footer';
+import { SocialIcon } from '../components/SocialIcon';
 import { useTheme } from '../hooks/useTheme';
+import { sources } from '../services/sources';
+import type { SourceId } from '../types';
 
-type ClaimStep = 'email' | 'check-email' | 'website' | 'verify' | 'done';
+type ClaimStep = 'email' | 'check-email' | 'website' | 'verify' | 'review' | 'done';
+
+interface ReviewLink {
+  platform: string;
+  url: string;
+  checked: boolean;
+}
+
+// Platforms that support avatar scraping
+const AVATAR_PLATFORMS = new Set(['bandcamp', 'youtube', 'mirlo']);
+
+// Platform name lookup
+function platformName(id: string): string {
+  const CUSTOM_NAMES: Record<string, string> = {
+    officialsite: 'Official Website',
+    peertube: 'PeerTube',
+    newsletter: 'Newsletter',
+    wikipedia: 'Wikipedia',
+    liberapay: 'Liberapay',
+    other: 'Other',
+  };
+  if (CUSTOM_NAMES[id]) return CUSTOM_NAMES[id];
+  const source = sources[id as SourceId];
+  return source?.name || id;
+}
 
 export function ClaimPage() {
   const { preference, cycleTheme } = useTheme();
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const [step, setStep] = useState<ClaimStep>('email');
   const [email, setEmail] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
@@ -20,6 +48,12 @@ export function ClaimPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [artistName, setArtistName] = useState('');
   const [discoveredLinks, setDiscoveredLinks] = useState(0);
+
+  // Review step state
+  const [reviewLinks, setReviewLinks] = useState<ReviewLink[]>([]);
+  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
+  const [customImageUrl, setCustomImageUrl] = useState<string | null>(null);
+  const [fetchingAvatar, setFetchingAvatar] = useState<string | null>(null); // platform being fetched
 
   const displayName = artistName || slug?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || '';
 
@@ -154,7 +188,96 @@ export function ClaimPage() {
       }
 
       setDiscoveredLinks(data.discoveredLinks || 0);
-      setStep('done');
+
+      // Set up the review step with link and image data from verify response
+      if (data.allLinks) {
+        setReviewLinks(
+          data.allLinks.map((l: { platform: string; url: string }) => ({
+            platform: l.platform,
+            url: l.url,
+            checked: true,
+          }))
+        );
+      }
+      setCurrentImageUrl(data.imageUrl || null);
+      setStep('review');
+    } catch {
+      setError('Network error. Please try again.');
+    }
+    setLoading(false);
+  }
+
+  async function handleFetchAvatar(platform: string, url: string) {
+    setFetchingAvatar(platform);
+    setError(null);
+
+    const token = await getAuthToken();
+    if (!token) {
+      setError('Session expired. Please sign in again.');
+      setFetchingAvatar(null);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/claim', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ action: 'fetch-avatar', platform, url }),
+      });
+
+      const data = await response.json();
+      if (response.ok && data.imageUrl) {
+        setCustomImageUrl(data.imageUrl);
+      } else {
+        setError(data.error || 'Could not find a profile photo on that page');
+      }
+    } catch {
+      setError('Network error. Please try again.');
+    }
+    setFetchingAvatar(null);
+  }
+
+  async function handleConfirmReview() {
+    setError(null);
+    setLoading(true);
+
+    const token = await getAuthToken();
+    if (!token) {
+      setError('Session expired. Please sign in again.');
+      setStep('email');
+      setLoading(false);
+      return;
+    }
+
+    const confirmedLinks = reviewLinks
+      .filter(l => l.checked && l.url.trim())
+      .map(l => ({ platform: l.platform, url: l.url }));
+
+    try {
+      const response = await fetch('/api/artist-profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          slug,
+          links: confirmedLinks,
+          ...(customImageUrl ? { customImageUrl } : {}),
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error || 'Failed to save changes');
+        setLoading(false);
+        return;
+      }
+
+      navigate(`/a/${data.slug || slug}?claimed`);
     } catch {
       setError('Network error. Please try again.');
     }
@@ -172,7 +295,7 @@ export function ClaimPage() {
       </header>
 
       <main className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-md space-y-6">
+        <div className={`w-full ${step === 'review' ? 'max-w-lg' : 'max-w-md'} space-y-6`}>
           <div className="text-center space-y-2">
             <h1 className="text-2xl font-bold">Claim {displayName}</h1>
             <p className="text-text-muted text-sm">
@@ -186,12 +309,16 @@ export function ClaimPage() {
               1. Sign in
             </span>
             <span>{'>'}</span>
-            <span className={step === 'website' ? 'text-accent-primary font-medium' : step === 'verify' || step === 'done' ? 'text-green-400' : ''}>
-              2. Your website
+            <span className={step === 'website' ? 'text-accent-primary font-medium' : ['verify', 'review', 'done'].includes(step) ? 'text-green-400' : ''}>
+              2. Website
             </span>
             <span>{'>'}</span>
-            <span className={step === 'verify' ? 'text-accent-primary font-medium' : step === 'done' ? 'text-green-400' : ''}>
+            <span className={step === 'verify' ? 'text-accent-primary font-medium' : ['review', 'done'].includes(step) ? 'text-green-400' : ''}>
               3. Verify
+            </span>
+            <span>{'>'}</span>
+            <span className={step === 'review' ? 'text-accent-primary font-medium' : step === 'done' ? 'text-green-400' : ''}>
+              4. Review
             </span>
           </div>
 
@@ -308,7 +435,130 @@ export function ClaimPage() {
             </div>
           )}
 
-          {/* Step 4: Done */}
+          {/* Step 4: Review links & photo */}
+          {step === 'review' && (
+            <div className="space-y-6">
+              <div className="text-center space-y-1">
+                <p className="text-lg font-bold">Review your profile</p>
+                <p className="text-sm text-text-muted">
+                  We found {discoveredLinks} link{discoveredLinks === 1 ? '' : 's'} from your website.
+                  Uncheck any that don't belong to you, then confirm.
+                </p>
+              </div>
+
+              {/* Photo section */}
+              <section className="space-y-3">
+                <h2 className="text-sm font-medium">Profile Photo</h2>
+                <div className="flex items-start gap-4">
+                  <div className="w-20 h-20 rounded-full bg-bg-secondary border border-border flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {(customImageUrl || currentImageUrl) ? (
+                      <img
+                        src={customImageUrl || currentImageUrl || ''}
+                        alt={displayName}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-2xl text-text-muted">
+                        {displayName.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    {customImageUrl ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-green-400">New photo selected</span>
+                        <button
+                          onClick={() => setCustomImageUrl(null)}
+                          className="text-xs text-text-muted hover:text-text-primary"
+                        >
+                          Undo
+                        </button>
+                      </div>
+                    ) : currentImageUrl ? (
+                      <p className="text-sm text-text-muted">
+                        This photo was auto-discovered. If it's wrong, pull a new one from one of your platforms:
+                      </p>
+                    ) : (
+                      <p className="text-sm text-text-muted">
+                        No photo found. Pull one from a platform:
+                      </p>
+                    )}
+                    {!customImageUrl && (
+                      <div className="flex flex-wrap gap-2">
+                        {reviewLinks
+                          .filter(l => l.checked && AVATAR_PLATFORMS.has(l.platform))
+                          .map(l => (
+                            <button
+                              key={l.platform}
+                              onClick={() => handleFetchAvatar(l.platform, l.url)}
+                              disabled={fetchingAvatar !== null}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-secondary border border-border text-sm hover:border-accent-primary transition-colors disabled:opacity-50"
+                            >
+                              <SocialIcon platform={l.platform} size={14} />
+                              {fetchingAvatar === l.platform ? 'Loading...' : `Use ${platformName(l.platform)} photo`}
+                            </button>
+                          ))}
+                        {reviewLinks.filter(l => l.checked && AVATAR_PLATFORMS.has(l.platform)).length === 0 && (
+                          <p className="text-xs text-text-muted">
+                            No supported platforms found. You can update your photo later from the editor.
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </section>
+
+              {/* Links section */}
+              <section className="space-y-3">
+                <h2 className="text-sm font-medium">Your Links</h2>
+                <div className="space-y-1">
+                  {reviewLinks.map((link, index) => (
+                    <label
+                      key={`${link.platform}-${index}`}
+                      className={`flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer ${
+                        link.checked
+                          ? 'bg-bg-secondary border-border'
+                          : 'bg-bg-primary border-border/50 opacity-50'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={link.checked}
+                        onChange={() => {
+                          const updated = [...reviewLinks];
+                          updated[index] = { ...updated[index], checked: !updated[index].checked };
+                          setReviewLinks(updated);
+                        }}
+                        className="w-4 h-4 rounded accent-accent-primary flex-shrink-0"
+                      />
+                      <SocialIcon platform={link.platform} size={18} />
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-medium">{platformName(link.platform)}</span>
+                        <p className="text-xs text-text-muted truncate">{link.url}</p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+                {reviewLinks.length === 0 && (
+                  <p className="text-sm text-text-muted text-center py-2">
+                    No links discovered. You can add links later from your dashboard.
+                  </p>
+                )}
+              </section>
+
+              {/* Confirm */}
+              <button
+                onClick={handleConfirmReview}
+                disabled={loading}
+                className="w-full py-3 rounded-lg bg-accent-primary text-white font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
+              >
+                {loading ? 'Saving...' : 'This looks good — go to my page'}
+              </button>
+            </div>
+          )}
+
+          {/* Step 5: Done */}
           {step === 'done' && (
             <div className="text-center space-y-4 p-6 rounded-lg bg-bg-secondary border border-border">
               <div className="text-3xl">✅</div>
