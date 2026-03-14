@@ -70,39 +70,81 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
         return { statusCode: 200, headers, body: JSON.stringify({ hasAccount: true }) };
       }
 
+      console.log(`[artist-auth] No direct email match in artist_profiles for: ${normalizedEmail} (found ${profiles?.length ?? 0} rows)`);
+
       // Check 2: Look up Supabase auth user by email, then check by user_id.
       // This handles profiles where the email wasn't stored (bug: claim page lost
       // email state on magic link redirect, storing '' in the DB).
-      const url = process.env.SUPABASE_URL;
-      const serviceKey = process.env.SUPABASE_SERVICE_KEY;
-      if (url && serviceKey) {
-        const adminClient = createClient(url, serviceKey);
-        const { data: userData } = await adminClient.auth.admin.getUserByEmail(normalizedEmail);
-        const matchingUser = userData?.user ?? null;
+      // Query auth.users directly via service client (bypasses RLS).
+      const { data: authUsers, error: authError } = await client
+        .from('auth.users' as string)
+        .select('id')
+        .eq('email', normalizedEmail)
+        .limit(1);
 
-        if (matchingUser) {
-          console.log(`[artist-auth] Found auth user by email, checking profiles by user_id: ${matchingUser.id}`);
-          const { data: profilesByUser } = await client
-            .from('artist_profiles')
-            .select('id, email')
-            .eq('user_id', matchingUser.id)
-            .not('verified_at', 'is', null)
-            .limit(1);
-
-          if (profilesByUser && profilesByUser.length > 0) {
-            // Backfill the missing email so future logins work directly
-            if (!profilesByUser[0].email) {
-              await client
-                .from('artist_profiles')
-                .update({ email: normalizedEmail })
-                .eq('id', profilesByUser[0].id);
-              console.log(`[artist-auth] Backfilled email for profile ${profilesByUser[0].id} via user_id lookup`);
+      // If direct auth.users query doesn't work (schema access), fall back to admin API
+      let matchingUserId: string | null = null;
+      if (!authError && authUsers && authUsers.length > 0) {
+        console.log(`[artist-auth] Found auth user via direct query: ${authUsers[0].id}`);
+        matchingUserId = authUsers[0].id;
+      } else {
+        if (authError) console.log(`[artist-auth] auth.users query failed (expected if schema not exposed): ${authError.message}`);
+        console.log(`[artist-auth] Falling back to admin listUsers API`);
+        const url = process.env.SUPABASE_URL;
+        const serviceKey = process.env.SUPABASE_SERVICE_KEY;
+        if (url && serviceKey) {
+          const adminClient = createClient(url, serviceKey);
+          try {
+            const { data: userList } = await adminClient.auth.admin.listUsers();
+            console.log(`[artist-auth] listUsers returned ${userList?.users?.length ?? 0} users`);
+            const matchingUser = userList?.users?.find(
+              u => u.email?.toLowerCase() === normalizedEmail
+            );
+            if (matchingUser) {
+              console.log(`[artist-auth] Found auth user via listUsers: ${matchingUser.id}`);
+              matchingUserId = matchingUser.id;
             }
-            return { statusCode: 200, headers, body: JSON.stringify({ hasAccount: true }) };
+          } catch (adminErr) {
+            console.error('[artist-auth] Admin listUsers failed:', adminErr);
           }
-        } else {
-          console.log(`[artist-auth] No auth user found for email: ${normalizedEmail}`);
         }
+      }
+
+      if (matchingUserId) {
+        console.log(`[artist-auth] Found auth user by email, checking profiles by user_id: ${matchingUserId}`);
+        const { data: profilesByUser, error: profileError } = await client
+          .from('artist_profiles')
+          .select('id, email, verified_at')
+          .eq('user_id', matchingUserId)
+          .not('verified_at', 'is', null)
+          .limit(1);
+
+        console.log(`[artist-auth] Profiles by user_id: ${profilesByUser?.length ?? 0} verified rows${profileError ? `, error: ${profileError.message}` : ''}`);
+
+        if (profilesByUser && profilesByUser.length > 0) {
+          // Backfill the missing email so future logins work directly
+          if (!profilesByUser[0].email) {
+            await client
+              .from('artist_profiles')
+              .update({ email: normalizedEmail })
+              .eq('id', profilesByUser[0].id);
+            console.log(`[artist-auth] Backfilled email for profile ${profilesByUser[0].id} via user_id lookup`);
+          }
+          return { statusCode: 200, headers, body: JSON.stringify({ hasAccount: true }) };
+        }
+
+        // Debug: check if profile exists but without verified_at
+        const { data: allProfilesByUser } = await client
+          .from('artist_profiles')
+          .select('id, email, verified_at, user_id')
+          .eq('user_id', matchingUserId);
+        if (allProfilesByUser && allProfilesByUser.length > 0) {
+          console.log(`[artist-auth] Found ${allProfilesByUser.length} total profiles (including unverified) for user_id ${matchingUserId}:`,
+            allProfilesByUser.map(p => ({ id: p.id, email: p.email, verified_at: p.verified_at }))
+          );
+        }
+      } else {
+        console.log(`[artist-auth] No auth user found for email: ${normalizedEmail}`);
       }
 
       console.log(`[artist-auth] No verified profiles found for: ${normalizedEmail}`);
