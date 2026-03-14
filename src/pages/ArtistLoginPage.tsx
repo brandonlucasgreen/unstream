@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signInWithMagicLink, getSession, getSupabaseClient } from '../services/auth';
+import { signInWithMagicLink, getSession, waitForMagicLinkSession } from '../services/auth';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
 import { Footer } from '../components/Footer';
@@ -18,19 +18,22 @@ export function ArtistLoginPage() {
   // If already authenticated, redirect to dashboard
   useEffect(() => {
     async function checkAuth() {
-      const supabase = getSupabaseClient();
-      if (!supabase) {
-        setCheckingSession(false);
-        return;
-      }
-
       // Handle magic link callback hash
       if (window.location.hash.includes('access_token')) {
-        const { data, error } = await supabase.auth.getSession();
-        if (!error && data.session) {
+        const { session, error: authError } = await waitForMagicLinkSession();
+        if (session) {
+          // Clear the hash to avoid re-processing on refresh
+          window.history.replaceState(null, '', window.location.pathname);
           navigate('/artist-dashboard', { replace: true });
           return;
         }
+        if (authError) {
+          setError(authError);
+          // Clear the hash so the user doesn't keep hitting the expired token
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+        setCheckingSession(false);
+        return;
       }
 
       const session = await getSession();

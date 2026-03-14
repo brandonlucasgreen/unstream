@@ -10,7 +10,10 @@ function getServiceClient() {
 }
 
 async function authenticateRequest(authHeader: string | undefined): Promise<{ userId: string; email: string } | null> {
-  if (!authHeader?.startsWith('Bearer ')) return null;
+  if (!authHeader?.startsWith('Bearer ')) {
+    console.log('[artist-auth] Missing or invalid Authorization header');
+    return null;
+  }
   const token = authHeader.slice(7);
 
   const url = process.env.SUPABASE_URL;
@@ -19,7 +22,10 @@ async function authenticateRequest(authHeader: string | undefined): Promise<{ us
 
   const anonClient = createClient(url, anonKey);
   const { data, error } = await anonClient.auth.getUser(token);
-  if (error || !data.user) return null;
+  if (error || !data.user) {
+    console.log(`[artist-auth] Token validation failed: ${error?.message || 'no user'}`);
+    return null;
+  }
   return { userId: data.user.id, email: data.user.email || '' };
 }
 
@@ -49,6 +55,7 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
       }
 
       const normalizedEmail = email.toLowerCase().trim();
+      console.log(`[artist-auth] Login check for email: ${normalizedEmail}`);
 
       // Check 1: Direct email match in artist_profiles
       const { data: profiles } = await client
@@ -59,6 +66,7 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
         .limit(1);
 
       if (profiles && profiles.length > 0) {
+        console.log(`[artist-auth] Found profile by email match: ${profiles[0].id}`);
         return { statusCode: 200, headers, body: JSON.stringify({ hasAccount: true }) };
       }
 
@@ -69,12 +77,11 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
       const serviceKey = process.env.SUPABASE_SERVICE_KEY;
       if (url && serviceKey) {
         const adminClient = createClient(url, serviceKey);
-        const { data: userList } = await adminClient.auth.admin.listUsers();
-        const matchingUser = userList?.users?.find(
-          u => u.email?.toLowerCase() === normalizedEmail
-        );
+        const { data: userData } = await adminClient.auth.admin.getUserByEmail(normalizedEmail);
+        const matchingUser = userData?.user ?? null;
 
         if (matchingUser) {
+          console.log(`[artist-auth] Found auth user by email, checking profiles by user_id: ${matchingUser.id}`);
           const { data: profilesByUser } = await client
             .from('artist_profiles')
             .select('id, email')
@@ -93,9 +100,12 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
             }
             return { statusCode: 200, headers, body: JSON.stringify({ hasAccount: true }) };
           }
+        } else {
+          console.log(`[artist-auth] No auth user found for email: ${normalizedEmail}`);
         }
       }
 
+      console.log(`[artist-auth] No verified profiles found for: ${normalizedEmail}`);
       return { statusCode: 200, headers, body: JSON.stringify({ hasAccount: false }) };
     } catch {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid request' }) };
