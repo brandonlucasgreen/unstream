@@ -43,6 +43,38 @@ function getStreamingWarning(url: string): string | null {
   return null;
 }
 
+// Platforms that support avatar scraping
+const AVATAR_PLATFORMS = new Set(['bandcamp', 'youtube', 'mirlo']);
+
+// Check how similar two strings are (0-1 scale, Levenshtein-based)
+function stringSimilarity(a: string, b: string): number {
+  const la = a.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const lb = b.toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (la === lb) return 1;
+  if (!la || !lb) return 0;
+  const longer = la.length >= lb.length ? la : lb;
+  const shorter = la.length >= lb.length ? lb : la;
+  const matrix: number[][] = [];
+  for (let i = 0; i <= shorter.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= longer.length; j++) matrix[0][j] = j;
+  for (let i = 1; i <= shorter.length; i++) {
+    for (let j = 1; j <= longer.length; j++) {
+      matrix[i][j] = shorter[i - 1] === longer[j - 1]
+        ? matrix[i - 1][j - 1]
+        : Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
+    }
+  }
+  return 1 - matrix[shorter.length][longer.length] / longer.length;
+}
+
+function getNameChangeWarning(original: string, updated: string): 'error' | 'warn' | null {
+  if (!updated.trim()) return 'error';
+  if (original.toLowerCase().replace(/[^a-z0-9]/g, '') === updated.toLowerCase().replace(/[^a-z0-9]/g, '')) return null;
+  const sim = stringSimilarity(original, updated);
+  if (sim >= 0.7) return null;
+  return 'warn';
+}
+
 export function ArtistEditPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -52,11 +84,16 @@ export function ArtistEditPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  const [originalName, setOriginalName] = useState('');
   const [artistName, setArtistName] = useState('');
+  const [nameWarningConfirmed, setNameWarningConfirmed] = useState(false);
   const [currentSlug, setCurrentSlug] = useState('');
   const [newSlug, setNewSlug] = useState('');
   const [bio, setBio] = useState('');
   const [featuredEmbed, setFeaturedEmbed] = useState('');
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [customImageUrl, setCustomImageUrl] = useState<string | null>(null);
+  const [fetchingAvatar, setFetchingAvatar] = useState<string | null>(null);
   const [links, setLinks] = useState<LinkEntry[]>([]);
 
   // Load current artist data
@@ -79,9 +116,12 @@ export function ArtistEditPage() {
         }
 
         const data = await response.json();
+        setOriginalName(data.name || '');
         setArtistName(data.name || '');
         setCurrentSlug(slug);
         setNewSlug(slug);
+        setImageUrl(data.imageUrl || null);
+        setCustomImageUrl(data.profile?.customImageUrl || null);
         setBio(data.profile?.bio ?? '');
         setFeaturedEmbed(data.profile?.featuredEmbed ?? '');
 
@@ -123,6 +163,39 @@ export function ArtistEditPage() {
     setLinks(links.filter((_, i) => i !== index));
   }
 
+  async function handleFetchAvatar(platform: string, url: string) {
+    setFetchingAvatar(platform);
+    setError(null);
+
+    const session = await getSession();
+    if (!session) {
+      setError('Session expired. Please sign in again.');
+      setFetchingAvatar(null);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/claim', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ action: 'fetch-avatar', platform, url }),
+      });
+
+      const data = await response.json();
+      if (response.ok && data.imageUrl) {
+        setCustomImageUrl(data.imageUrl);
+      } else {
+        setError(data.error || 'Could not find a profile photo on that page');
+      }
+    } catch {
+      setError('Network error. Please try again.');
+    }
+    setFetchingAvatar(null);
+  }
+
   function moveLink(index: number, direction: -1 | 1) {
     const newIndex = index + direction;
     if (newIndex < 0 || newIndex >= links.length) return;
@@ -139,6 +212,20 @@ export function ArtistEditPage() {
     const session = await getSession();
     if (!session) {
       setError('Session expired. Please sign in again.');
+      setSaving(false);
+      return;
+    }
+
+    // Validate name change
+    const nameLevel = getNameChangeWarning(originalName, artistName);
+    if (nameLevel === 'error') {
+      setError('Artist name cannot be empty.');
+      setSaving(false);
+      return;
+    }
+    if (nameLevel === 'warn' && !nameWarningConfirmed) {
+      setError(`This is a significant name change from "${originalName}". Click save again to confirm.`);
+      setNameWarningConfirmed(true);
       setSaving(false);
       return;
     }
@@ -173,8 +260,10 @@ export function ArtistEditPage() {
         body: JSON.stringify({
           slug: currentSlug,
           newSlug: newSlug !== currentSlug ? newSlug : undefined,
+          newName: artistName !== originalName ? artistName.trim() : undefined,
           bio,
           featuredEmbed: featuredEmbed || null,
+          customImageUrl: customImageUrl,
           links: validLinks.map(l => ({
             platform: l.platform,
             url: l.url,
@@ -190,11 +279,14 @@ export function ArtistEditPage() {
         return;
       }
 
-      // If slug changed, update state and navigate
+      // Update local state after successful save
+      if (artistName !== originalName) {
+        setOriginalName(artistName);
+        setNameWarningConfirmed(false);
+      }
       if (data.slug !== currentSlug) {
         setCurrentSlug(data.slug);
         setSuccess('Changes saved! Slug updated.');
-        // Replace URL so back button works
         navigate(`/artist-edit/${data.slug}`, { replace: true });
       } else {
         setSuccess('Changes saved!');
@@ -250,6 +342,86 @@ export function ArtistEditPage() {
               {success}
             </div>
           )}
+
+          {/* Artist Name */}
+          <section className="space-y-2">
+            <label htmlFor="name" className="block text-sm font-medium">
+              Artist Name
+            </label>
+            <input
+              id="name"
+              type="text"
+              value={artistName}
+              onChange={e => {
+                setArtistName(e.target.value);
+                setNameWarningConfirmed(false);
+              }}
+              className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary focus:outline-none focus:border-accent-primary"
+            />
+            {artistName !== originalName && (() => {
+              const level = getNameChangeWarning(originalName, artistName);
+              if (level === 'error') {
+                return <p className="text-xs text-red-400">Artist name cannot be empty.</p>;
+              }
+              if (level === 'warn') {
+                return <p className="text-xs text-amber-400">This is a significant change from "{originalName}". You'll be asked to confirm when saving.</p>;
+              }
+              return <p className="text-xs text-text-muted">Name will be updated from "{originalName}".</p>;
+            })()}
+          </section>
+
+          {/* Profile Photo */}
+          <section className="space-y-3">
+            <h2 className="text-sm font-medium">Profile Photo</h2>
+            <div className="flex items-start gap-4">
+              {(customImageUrl || imageUrl) ? (
+                <img
+                  src={customImageUrl || imageUrl || ''}
+                  alt={artistName}
+                  className="w-20 h-20 rounded-full object-cover border border-border"
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-bg-secondary border border-border flex items-center justify-center text-text-muted text-2xl">
+                  {artistName.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="flex-1 space-y-2">
+                <p className="text-xs text-text-muted">
+                  Pull a photo from one of your linked platforms, or it will use the default from your search results.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {links
+                    .filter(l => AVATAR_PLATFORMS.has(l.platform) && l.url.trim())
+                    .map(l => {
+                      const platformLabel = ALL_PLATFORMS.find(p => p.id === l.platform)?.name || l.platform;
+                      return (
+                        <button
+                          key={l.platform}
+                          onClick={() => handleFetchAvatar(l.platform, l.url)}
+                          disabled={fetchingAvatar !== null}
+                          className="px-3 py-1.5 rounded-lg bg-bg-secondary border border-border text-sm text-text-muted hover:text-text-primary hover:border-border-hover transition-colors disabled:opacity-50"
+                        >
+                          {fetchingAvatar === l.platform ? 'Loading...' : `Use ${platformLabel} photo`}
+                        </button>
+                      );
+                    })}
+                  {links.filter(l => AVATAR_PLATFORMS.has(l.platform) && l.url.trim()).length === 0 && (
+                    <p className="text-xs text-text-muted">
+                      Add a Bandcamp, YouTube, or Mirlo link to pull a photo from that platform.
+                    </p>
+                  )}
+                </div>
+                {customImageUrl && (
+                  <button
+                    onClick={() => setCustomImageUrl(null)}
+                    className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                  >
+                    Remove custom photo
+                  </button>
+                )}
+              </div>
+            </div>
+          </section>
 
           {/* Slug */}
           <section className="space-y-2">

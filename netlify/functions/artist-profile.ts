@@ -88,7 +88,7 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Authentication required' }) };
   }
 
-  let body: { slug: string; newSlug?: string; bio?: string; featuredEmbed?: string | null; customImageUrl?: string | null; links?: LinkUpdate[] };
+  let body: { slug: string; newSlug?: string; newName?: string; bio?: string; featuredEmbed?: string | null; customImageUrl?: string | null; links?: LinkUpdate[] };
   try {
     body = JSON.parse(event.body || '{}');
   } catch {
@@ -161,6 +161,28 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
 
     finalSlug = newSlug;
     console.log(`[Profile] Slug changed: "${slug}" → "${newSlug}" for artist "${artist.name}"`);
+  }
+
+  // --- Update name ---
+  if (body.newName && body.newName !== artist.name) {
+    const newName = body.newName.trim();
+    if (!newName || newName.length < 1) {
+      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Artist name cannot be empty' }) };
+    }
+    if (newName.length > 100) {
+      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Artist name is too long' }) };
+    }
+
+    const { error: nameError } = await client
+      .from('artists')
+      .update({ name: newName, updated_at: new Date().toISOString() })
+      .eq('id', artist.id);
+
+    if (nameError) {
+      console.error('[Profile] Name update failed:', nameError);
+      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update name' }) };
+    }
+    console.log(`[Profile] Name changed: "${artist.name}" → "${newName}" for slug "${finalSlug}"`);
   }
 
   // --- Update bio ---
