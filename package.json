@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vitest run tests/unit --reporter=verbose && tsc -b && vite build && tsx scripts/generate-sitemap.ts",
+    "build": "tsc -b && vitest run tests/unit && vite build && tsx scripts/generate-sitemap.ts",
     "generate:artists": "tsx scripts/generate-artist-list.ts",
     "generate:data": "tsx scripts/generate-artist-data.ts",
     "test": "vitest run",

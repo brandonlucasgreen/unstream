@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
+  attachQobuzAndSearchLinks,
+  createQobuzOnlyResults,
   crossPlatformReleaseComparison,
   splitSuspiciousPlatforms,
   mergeByReleaseOverlap,
@@ -222,6 +224,121 @@ describe('preferBandcampFeaturedRelease', () => {
 
     expect(results[0].platforms[0].latestRelease).toBeDefined();
     expect(results[0].platforms[1].latestRelease).toBeUndefined();
+  });
+});
+
+describe('attachQobuzAndSearchLinks', () => {
+  it('attaches Qobuz variations to matching results', () => {
+    const results = [makeResult('Morice', [
+      { sourceId: 'bandcamp', url: 'https://morice.bandcamp.com' },
+    ])];
+    const qobuzMatches = new Map([
+      ['morice', 'https://qobuz.com/interpreter/morice/1'],
+      ['morice1', 'https://qobuz.com/interpreter/morice/2'],
+    ]);
+
+    attachQobuzAndSearchLinks(results, qobuzMatches, new Map());
+
+    const qobuzPlatforms = results[0].platforms.filter(p => p.sourceId === 'qobuz');
+    expect(qobuzPlatforms).toHaveLength(2);
+  });
+
+  it('adds search-only links for Bandcamp artists', () => {
+    const results = [makeResult('Artist', [
+      { sourceId: 'bandcamp', url: 'https://artist.bandcamp.com' },
+    ])];
+
+    attachQobuzAndSearchLinks(results, new Map(), new Map());
+
+    const kofi = results[0].platforms.find(p => p.sourceId === 'kofi');
+    const bmc = results[0].platforms.find(p => p.sourceId === 'buymeacoffee');
+    const ampwall = results[0].platforms.find(p => p.sourceId === 'ampwall');
+    expect(kofi).toBeDefined();
+    expect(bmc).toBeDefined();
+    expect(ampwall).toBeDefined();
+    expect(ampwall!.url).toContain('ampwall.com/explore');
+  });
+
+  it('prefers API-matched Ampwall over search fallback', () => {
+    const results = [makeResult('Artist', [
+      { sourceId: 'bandcamp', url: 'https://artist.bandcamp.com' },
+    ])];
+
+    attachQobuzAndSearchLinks(results, new Map(), new Map([['artist', 'https://ampwall.com/artist/artist']]));
+
+    const ampwall = results[0].platforms.find(p => p.sourceId === 'ampwall');
+    expect(ampwall!.url).toBe('https://ampwall.com/artist/artist');
+  });
+
+  it('sorts search-only links after real platforms', () => {
+    const results = [makeResult('Artist', [
+      { sourceId: 'bandcamp', url: 'https://artist.bandcamp.com' },
+    ])];
+
+    attachQobuzAndSearchLinks(results, new Map(), new Map());
+
+    const platformIds = results[0].platforms.map(p => p.sourceId);
+    expect(platformIds[0]).toBe('bandcamp');
+  });
+});
+
+describe('createQobuzOnlyResults', () => {
+  it('creates new results for unmatched Qobuz artists', () => {
+    const results: AggregatedResult[] = [
+      makeResult('Existing', [{ sourceId: 'bandcamp', url: 'https://existing.bandcamp.com' }]),
+    ];
+    const qobuzMatches = new Map([
+      ['newartist', 'https://qobuz.com/interpreter/new-artist/123'],
+    ]);
+
+    createQobuzOnlyResults(results, qobuzMatches);
+
+    expect(results).toHaveLength(2);
+    const newResult = results.find(r => r.id === 'qobuz-newartist');
+    expect(newResult).toBeDefined();
+    expect(newResult!.platforms[0].sourceId).toBe('qobuz');
+  });
+
+  it('does not create results for already-attached Qobuz matches', () => {
+    const results: AggregatedResult[] = [
+      makeResult('Artist', [
+        { sourceId: 'bandcamp', url: 'https://a.bandcamp.com' },
+        { sourceId: 'qobuz', url: 'https://qobuz.com/interpreter/artist/1' },
+      ]),
+    ];
+    const qobuzMatches = new Map([
+      ['artist', 'https://qobuz.com/interpreter/artist/1'],
+    ]);
+
+    createQobuzOnlyResults(results, qobuzMatches);
+
+    expect(results).toHaveLength(1);
+  });
+});
+
+describe('crossPlatformReleaseComparison threshold boundary', () => {
+  it('requires 1 match for catalogs of 3 or fewer (ceil(3*0.3)=1)', () => {
+    const results = [makeResult('Artist', [
+      { sourceId: 'bandcamp', url: 'https://a.bandcamp.com', allReleaseTitles: ['a', 'b', 'c'] },
+      { sourceId: 'qobuz', url: 'https://qobuz.com/1', allReleaseTitles: ['a', 'x', 'y'] },
+    ])];
+
+    crossPlatformReleaseComparison(results);
+
+    // 1 match ('a') meets threshold of ceil(min(3,3)*0.3)=1 → kept
+    expect(results[0].platforms.find(p => p.sourceId === 'qobuz')).toBeDefined();
+  });
+
+  it('requires 2 matches for catalogs of 4 (ceil(4*0.3)=2)', () => {
+    const results = [makeResult('Artist', [
+      { sourceId: 'bandcamp', url: 'https://a.bandcamp.com', allReleaseTitles: ['a', 'b', 'c', 'd'] },
+      { sourceId: 'qobuz', url: 'https://qobuz.com/1', allReleaseTitles: ['a', 'x', 'y', 'z'] },
+    ])];
+
+    crossPlatformReleaseComparison(results);
+
+    // 1 match ('a') < threshold of ceil(min(4,4)*0.3)=2 → removed
+    expect(results[0].platforms.find(p => p.sourceId === 'qobuz')).toBeUndefined();
   });
 });
 

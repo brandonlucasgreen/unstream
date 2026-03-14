@@ -642,36 +642,3 @@ export function filterAndSort(results: AggregatedResult[], query: string): Aggre
   return filtered;
 }
 
-// ---------------------------------------------------------------------------
-// Utility
-// ---------------------------------------------------------------------------
-
-// Parse various date formats into a Date object
-export function parseReleaseDate(dateStr: string | undefined): Date | undefined {
-  if (!dateStr) return undefined;
-
-  // Try ISO format: 2024-12-06
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-    return new Date(dateStr);
-  }
-
-  // Try "Month Day, Year" format: December 6, 2024
-  const monthDayYear = dateStr.match(/(\w+)\s+(\d{1,2}),?\s+(\d{4})/);
-  if (monthDayYear) {
-    const [, month, day, year] = monthDayYear;
-    const monthIndex = new Date(`${month} 1, 2000`).getMonth();
-    if (!isNaN(monthIndex)) {
-      return new Date(parseInt(year), monthIndex, parseInt(day));
-    }
-  }
-
-  // Try "MM/DD/YYYY" or "DD/MM/YYYY" format (assume MM/DD/YYYY for US)
-  const slashDate = dateStr.match(/(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
-  if (slashDate) {
-    const [, first, second, year] = slashDate;
-    // Assume MM/DD/YYYY
-    return new Date(parseInt(year), parseInt(first) - 1, parseInt(second));
-  }
-
-  return undefined;
-}
