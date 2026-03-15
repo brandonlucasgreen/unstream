@@ -270,7 +270,7 @@ function App() {
             The Unstream apps detect what's playing in Spotify, Apple Music or any music player in your browser, and shows the best ways to support that artist, right in your menu bar. Save artists you want to support later and get alerts when they release new music.
           </p>
           <p className="text-text-secondary mb-6">
-            If you find Unstream useful, consider <a href="/support" className="text-accent-primary hover:underline"><strong>supporting its development</strong></a> 🙏
+            Unstream is totally free to use. If you find Unstream useful, consider <a href="/support" className="text-accent-primary hover:underline"><strong>supporting its development</strong></a> 🙏
           </p>
           <div className="flex flex-col items-center gap-3 mb-2">
             <a

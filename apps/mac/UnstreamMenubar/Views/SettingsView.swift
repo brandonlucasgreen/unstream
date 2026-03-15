@@ -1,6 +1,20 @@
 import SwiftUI
 import ServiceManagement
 
+enum SettingsTab: String, CaseIterable {
+    case general = "General"
+    case integrations = "Integrations"
+    case about = "About"
+
+    var icon: String {
+        switch self {
+        case .general: return "gearshape"
+        case .integrations: return "link"
+        case .about: return "info.circle"
+        }
+    }
+}
+
 struct SettingsView: View {
     var releaseAlertManager: ReleaseAlertManager?
 
@@ -12,6 +26,7 @@ struct SettingsView: View {
     @State private var updateAvailable = false
     @State private var updateDownloadUrl: String? = nil
     @State private var isCheckingForUpdates = false
+    @State private var selectedTab: SettingsTab = .general
 
     // ListenBrainz state
     @State private var listenBrainzToken: String = ""
@@ -24,10 +39,145 @@ struct SettingsView: View {
     @StateObject private var shortcutRecorder = ShortcutRecorder()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Spacer()
-                .frame(height: 8)
+        VStack(spacing: 0) {
+            // Tab bar header
+            HStack(spacing: 0) {
+                ForEach(SettingsTab.allCases, id: \.self) { tab in
+                    Button(action: { selectedTab = tab }) {
+                        HStack(spacing: 5) {
+                            Image(systemName: tab.icon)
+                                .font(.system(size: 11))
+                            Text(tab.rawValue)
+                                .font(.system(size: 12, weight: selectedTab == tab ? .semibold : .regular))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(selectedTab == tab ? Color.accentColor.opacity(0.12) : Color.clear)
+                        .foregroundColor(selectedTab == tab ? .accentColor : .secondary)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 8)
 
+            Divider()
+                .padding(.top, 8)
+
+            // Tab content
+            switch selectedTab {
+            case .general:
+                generalTab
+            case .integrations:
+                integrationsTab
+            case .about:
+                aboutTab
+            }
+        }
+        .frame(width: 380)
+        .fixedSize(horizontal: false, vertical: true)
+        .onAppear {
+            launchAtLogin = getLaunchAtLoginStatus()
+            loadListenBrainzState()
+        }
+    }
+
+    // MARK: - General Tab
+
+    private var generalTab: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Music Listening
+            VStack(alignment: .leading, spacing: 4) {
+                Toggle("Music app listening", isOn: $musicListeningEnabled)
+                Text("Automatically detect what's playing in Music or Spotify")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Divider()
+
+            // Global Keyboard Shortcut
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Keyboard Shortcut")
+                    .font(.headline)
+
+                Text("Set a global shortcut to open Unstream from anywhere.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                HStack {
+                    if shortcutRecorder.isRecording {
+                        Text("Press shortcut...")
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .foregroundColor(.accentColor)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .strokeBorder(Color.accentColor, lineWidth: 1.5)
+                            )
+
+                        Button("Cancel") {
+                            shortcutRecorder.stopRecording()
+                        }
+                        .font(.caption)
+                    } else if let shortcut = hotkeyManager.currentShortcut {
+                        Text(shortcut.displayString)
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(Color.primary.opacity(0.08))
+                            )
+
+                        Button("Change") {
+                            startRecording()
+                        }
+                        .font(.caption)
+
+                        Button("Clear") {
+                            hotkeyManager.currentShortcut = nil
+                            hotkeyManager.isEnabled = false
+                        }
+                        .font(.caption)
+                        .foregroundColor(.red)
+                    } else {
+                        Button("Record Shortcut") {
+                            startRecording()
+                        }
+                        .font(.caption)
+                    }
+                }
+
+                if hotkeyManager.currentShortcut != nil {
+                    Toggle("Enable shortcut", isOn: $hotkeyManager.isEnabled)
+                }
+            }
+
+            Divider()
+
+            // Launch at Login
+            VStack(alignment: .leading, spacing: 4) {
+                Toggle("Start at login", isOn: $launchAtLogin)
+                    .onChange(of: launchAtLogin) { newValue in
+                        setLaunchAtLogin(newValue)
+                    }
+                Text("Automatically launch Unstream when you log in")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+        }
+        .padding()
+    }
+
+    // MARK: - Integrations Tab
+
+    private var integrationsTab: some View {
+        VStack(alignment: .leading, spacing: 16) {
             // Release Alerts
             if let alertManager = releaseAlertManager {
                 VStack(alignment: .leading, spacing: 8) {
@@ -74,7 +224,6 @@ struct SettingsView: View {
                     }
 
                     #if DEBUG
-                    // Debug controls for testing
                     VStack(alignment: .leading, spacing: 8) {
                         Divider()
                             .padding(.vertical, 4)
@@ -184,92 +333,15 @@ struct SettingsView: View {
                 }
             }
 
-            Divider()
+            Spacer()
+        }
+        .padding()
+    }
 
-            // Music Listening
-            VStack(alignment: .leading, spacing: 4) {
-                Toggle("Music app listening", isOn: $musicListeningEnabled)
-                Text("Automatically detect what's playing in Music or Spotify")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
+    // MARK: - About Tab
 
-            Divider()
-
-            // Global Keyboard Shortcut
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Keyboard Shortcut")
-                    .font(.headline)
-
-                Text("Set a global shortcut to open Unstream from anywhere.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-
-                HStack {
-                    if shortcutRecorder.isRecording {
-                        Text("Press shortcut...")
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
-                            .foregroundColor(.accentColor)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .strokeBorder(Color.accentColor, lineWidth: 1.5)
-                            )
-
-                        Button("Cancel") {
-                            shortcutRecorder.stopRecording()
-                        }
-                        .font(.caption)
-                    } else if let shortcut = hotkeyManager.currentShortcut {
-                        Text(shortcut.displayString)
-                            .font(.system(size: 13, weight: .medium, design: .rounded))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(Color.primary.opacity(0.08))
-                            )
-
-                        Button("Change") {
-                            startRecording()
-                        }
-                        .font(.caption)
-
-                        Button("Clear") {
-                            hotkeyManager.currentShortcut = nil
-                            hotkeyManager.isEnabled = false
-                        }
-                        .font(.caption)
-                        .foregroundColor(.red)
-                    } else {
-                        Button("Record Shortcut") {
-                            startRecording()
-                        }
-                        .font(.caption)
-                    }
-                }
-
-                if hotkeyManager.currentShortcut != nil {
-                    Toggle("Enable shortcut", isOn: $hotkeyManager.isEnabled)
-                }
-            }
-
-            Divider()
-
-            // Launch at Login
-            VStack(alignment: .leading, spacing: 4) {
-                Toggle("Start at login", isOn: $launchAtLogin)
-                    .onChange(of: launchAtLogin) { newValue in
-                        setLaunchAtLogin(newValue)
-                    }
-                Text("Automatically launch Unstream when you log in")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-
-            Divider()
-
+    private var aboutTab: some View {
+        VStack(alignment: .leading, spacing: 16) {
             // Updates
             VStack(alignment: .leading, spacing: 8) {
                 Toggle("Check for updates automatically", isOn: $checkForUpdatesAutomatically)
@@ -351,12 +423,6 @@ struct SettingsView: View {
             Spacer()
         }
         .padding()
-        .frame(width: 320)
-        .fixedSize(horizontal: false, vertical: true)
-        .onAppear {
-            launchAtLogin = getLaunchAtLoginStatus()
-            loadListenBrainzState()
-        }
     }
 
     // MARK: - Keyboard Shortcut

@@ -156,27 +156,32 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             popover.performClose(nil)
         }
 
-        if settingsWindow == nil {
-            let container = AppStateContainer.shared
-            let settingsView = SettingsView(
-                releaseAlertManager: container.releaseAlertManager
-            )
-
-            let hostingController = NSHostingController(rootView: settingsView)
-
-            let window = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 320, height: 400),
-                styleMask: [.titled, .closable],
-                backing: .buffered,
-                defer: false
-            )
-            window.title = "Unstream Settings"
-            window.contentViewController = hostingController
-            window.center()
-            window.isReleasedWhenClosed = false
-
-            settingsWindow = window
+        if let existing = settingsWindow {
+            existing.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
         }
+
+        let container = AppStateContainer.shared
+        let settingsView = SettingsView(
+            releaseAlertManager: container.releaseAlertManager
+        )
+
+        let hostingController = NSHostingController(rootView: settingsView)
+
+        let fittingSize = hostingController.view.fittingSize
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: fittingSize.width, height: fittingSize.height),
+            styleMask: [.titled, .closable],
+            backing: .buffered,
+            defer: false
+        )
+        window.title = "Unstream Settings"
+        window.contentViewController = hostingController
+        window.center()
+        window.isReleasedWhenClosed = false
+
+        settingsWindow = window
 
         settingsWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
