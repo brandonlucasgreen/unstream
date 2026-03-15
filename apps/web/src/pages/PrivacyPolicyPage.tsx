@@ -112,7 +112,7 @@ export function PrivacyPolicyPage() {
             <section className="mb-8">
               <h3 className="font-display text-xl font-semibold text-text-primary mb-3">Data Storage</h3>
               <p className="text-text-primary/90 leading-relaxed mb-3">
-                For listeners, all user preferences, saved artists, and license information are stored locally on your device using browser storage (for the extension) or app storage (for macOS).
+                For listeners, all user preferences and saved artists are stored locally on your device using browser storage (for the extension) or app storage (for macOS).
               </p>
               <p className="text-text-primary/90 leading-relaxed mb-3">
                 For artists who claim their page, account and profile data (email, bio, links, embeds) is stored in our database hosted by Supabase. You can request deletion of your artist account and all associated data by contacting us at{' '}
