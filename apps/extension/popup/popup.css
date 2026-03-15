@@ -1,0 +1,678 @@
+/* Unstream Chrome Extension - Popup Styles */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #E5E7EB;
+  background: #1F2937;
+  width: 380px;
+  min-height: 200px;
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+.container {
+  padding: 16px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-icon {
+  font-size: 20px;
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #F9FAFB;
+}
+
+/* Tab Navigation */
+.tab-nav {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #374151;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #9CA3AF;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover {
+  background: #374151;
+  color: #E5E7EB;
+}
+
+.tab-btn.active {
+  background: #3B82F6;
+  color: #F9FAFB;
+}
+
+/* Tab Content */
+.tab-content {
+  min-height: 200px;
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+/* Sections */
+.section {
+  margin-bottom: 16px;
+}
+
+.section.hidden {
+  display: none;
+}
+
+.section-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #9CA3AF;
+  margin-bottom: 8px;
+}
+
+/* Now Playing Card */
+.now-playing-card {
+  background: #374151;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.track-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.artist-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #F9FAFB;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-title {
+  font-size: 13px;
+  color: #9CA3AF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.source-badge {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background: #4B5563;
+  color: #D1D5DB;
+  text-transform: capitalize;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  color: #9CA3AF;
+}
+
+.empty-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+/* Results Grid */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #374151;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #E5E7EB;
+  transition: all 0.2s;
+}
+
+.result-item:hover {
+  background: #4B5563;
+  transform: translateY(-1px);
+}
+
+.result-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.result-name {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Social Links */
+.social-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #374151;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.social-link:hover {
+  background: #4B5563;
+  transform: scale(1.1);
+}
+
+.social-link svg {
+  width: 18px;
+  height: 18px;
+  fill: #E5E7EB;
+}
+
+.social-link:hover svg {
+  fill: #F9FAFB;
+}
+
+/* Actions Row */
+.actions-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+/* Save Button */
+.save-btn {
+  flex: 1;
+  padding: 10px 12px;
+  background: #374151;
+  border: 1px solid #4B5563;
+  border-radius: 8px;
+  color: #F9FAFB;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.save-btn:hover {
+  background: #4B5563;
+}
+
+.save-btn.saved {
+  background: #22C55E;
+  border-color: #22C55E;
+}
+
+.save-btn.saved .star {
+  color: #FEF08A;
+}
+
+.star {
+  font-size: 14px;
+}
+
+/* Open in Browser Button */
+.open-browser-btn {
+  flex: 1;
+  padding: 10px 12px;
+  background: #3B82F6;
+  border: none;
+  border-radius: 8px;
+  color: #F9FAFB;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.open-browser-btn:hover {
+  background: #2563EB;
+}
+
+.open-browser-btn svg {
+  flex-shrink: 0;
+}
+
+/* Report Issue Link */
+.report-issue-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #9CA3AF;
+  text-decoration: none;
+  padding: 6px 0;
+  transition: color 0.2s;
+}
+
+.report-issue-link:hover {
+  color: #D1D5DB;
+}
+
+.report-issue-link svg {
+  flex-shrink: 0;
+}
+
+
+/* New Releases */
+.new-releases {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.new-release-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #374151 0%, #1F2937 100%);
+  border: 1px solid #FCD34D;
+  border-radius: 8px;
+}
+
+.release-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.release-artist {
+  font-size: 14px;
+  font-weight: 600;
+  color: #F9FAFB;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.release-title {
+  font-size: 12px;
+  color: #FCD34D;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.release-platform {
+  font-size: 10px;
+  color: #9CA3AF;
+  text-transform: capitalize;
+}
+
+.release-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.release-open {
+  padding: 6px 12px;
+  background: #FCD34D;
+  border: none;
+  border-radius: 6px;
+  color: #1F2937;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.release-open:hover {
+  background: #FBBF24;
+}
+
+.release-dismiss {
+  padding: 6px 10px;
+  background: transparent;
+  border: 1px solid #4B5563;
+  border-radius: 6px;
+  color: #9CA3AF;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.release-dismiss:hover {
+  background: #374151;
+  color: #EF4444;
+  border-color: #EF4444;
+}
+
+.sparkle {
+  color: #FCD34D;
+}
+
+/* Saved Artists List */
+.saved-artists-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.saved-artist-card {
+  background: #374151;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.saved-artist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.saved-artist-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #F9FAFB;
+  cursor: pointer;
+}
+
+.saved-artist-name:hover {
+  color: #60A5FA;
+}
+
+.saved-artist-remove {
+  background: none;
+  border: none;
+  color: #6B7280;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.saved-artist-remove:hover {
+  background: #4B5563;
+  color: #EF4444;
+}
+
+.saved-artist-platforms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.platform-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: #4B5563;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #D1D5DB;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.platform-link:hover {
+  background: #6B7280;
+  color: #F9FAFB;
+}
+
+.platform-icon {
+  font-size: 12px;
+}
+
+/* Saved Artist Social Links */
+.saved-artist-social {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #4B5563;
+}
+
+.social-link-small {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #4B5563;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.social-link-small:hover {
+  background: #6B7280;
+  transform: scale(1.1);
+}
+
+.social-link-small svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Donate Button */
+.donate-btn {
+  display: inline-block;
+  padding: 8px 16px;
+  background: #F7B731;
+  border-radius: 8px;
+  color: #1F2937;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+
+.donate-btn:hover {
+  background: #F0A500;
+}
+
+/* Search Box */
+.search-box {
+  display: flex;
+  gap: 8px;
+}
+
+#search-input {
+  flex: 1;
+  padding: 10px 12px;
+  background: #374151;
+  border: 1px solid #4B5563;
+  border-radius: 8px;
+  color: #F9FAFB;
+  font-size: 14px;
+}
+
+#search-input::placeholder {
+  color: #6B7280;
+}
+
+#search-input:focus {
+  outline: none;
+  border-color: #60A5FA;
+}
+
+#search-btn {
+  padding: 10px 14px;
+  background: #3B82F6;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#search-btn:hover {
+  background: #2563EB;
+}
+
+/* Settings */
+.setting-description {
+  font-size: 13px;
+  color: #9CA3AF;
+  margin-bottom: 12px;
+}
+
+.check-now-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  background: #374151;
+  border: 1px solid #4B5563;
+  border-radius: 8px;
+  color: #F9FAFB;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.check-now-btn:hover {
+  background: #4B5563;
+}
+
+.check-now-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.check-now-btn.checking {
+  background: #3B82F6;
+  border-color: #3B82F6;
+}
+
+.last-check-time {
+  font-size: 11px;
+  color: #6B7280;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.about-text {
+  font-size: 13px;
+  color: #D1D5DB;
+}
+
+.about-text a {
+  color: #60A5FA;
+  text-decoration: none;
+}
+
+.about-text a:hover {
+  text-decoration: underline;
+}
+
+/* Bandcamp Friday Badge */
+.bc-friday-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 4px;
+  margin-left: 4px;
+  background: #1DA0C3;
+  color: white;
+  border-radius: 3px;
+  vertical-align: middle;
+  animation: bc-pulse 2s ease-in-out infinite;
+}
+
+@keyframes bc-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Payout Percentage Badge */
+.payout-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 4px;
+  margin-left: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #9CA3AF;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+
+/* Loading state */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}

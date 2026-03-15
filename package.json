@@ -4,16 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vitest run tests/unit && vite build && tsx scripts/generate-sitemap.ts",
+    "dev": "cd apps/web && npx vite",
+    "build": "cd apps/web && npx tsc -b && npx vitest run tests/unit && npx vite build && npx tsx ../../scripts/generate-sitemap.ts",
     "generate:artists": "tsx scripts/generate-artist-list.ts",
     "generate:data": "tsx scripts/generate-artist-data.ts",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:unit": "vitest run tests/unit",
-    "test:integration": "vitest run tests/integration",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "test": "cd apps/web && npx vitest run",
+    "test:watch": "cd apps/web && npx vitest",
+    "test:unit": "cd apps/web && npx vitest run tests/unit",
+    "test:integration": "cd apps/web && npx vitest run tests/integration",
+    "lint": "cd apps/web && npx eslint .",
+    "preview": "cd apps/web && npx vite preview"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.99.1",

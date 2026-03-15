@@ -1,8 +1,8 @@
 [build]
   command = "npm run build"
-  publish = "dist"
-  functions = "netlify/functions"
-  edge_functions = "netlify/edge-functions"
+  publish = "apps/web/dist"
+  functions = "api/functions"
+  edge_functions = "api/edge"
 
 [[edge_functions]]
   path = "/"
@@ -72,8 +72,8 @@
 
 [[redirects]]
   from = "/plus"
-  to = "https://kidlightbulbs.lemonsqueezy.com/checkout/buy/d4e127a7-2cef-4013-80b8-5d0de691f332"
-  status = 302
+  to = "/support"
+  status = 301
 
 # SPA catch-all: serve index.html for all routes (must be last)
 [[redirects]]

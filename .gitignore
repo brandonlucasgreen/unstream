@@ -41,10 +41,10 @@ dist-ssr
 .netlify/netlify.toml
 
 # Xcode build artifacts and user state
-UnstreamMenubar/build/
-UnstreamMenubar/.netlify/
-UnstreamMenubar/**/*.xcuserstate
-UnstreamMenubar/**/xcuserdata/
+apps/mac/build/
+apps/mac/.netlify/
+apps/mac/**/*.xcuserstate
+apps/mac/**/xcuserdata/
 
 # Extension release zips (build artifacts)
 *.zip
