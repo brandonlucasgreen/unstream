@@ -19,6 +19,10 @@ struct SettingsView: View {
     @State private var isValidatingToken = false
     @State private var tokenValidationError: String? = nil
 
+    // Keyboard shortcut state
+    @ObservedObject private var hotkeyManager = GlobalHotkeyManager.shared
+    @StateObject private var shortcutRecorder = ShortcutRecorder()
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Spacer()
@@ -192,6 +196,67 @@ struct SettingsView: View {
 
             Divider()
 
+            // Global Keyboard Shortcut
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Keyboard Shortcut")
+                    .font(.headline)
+
+                Text("Set a global shortcut to open Unstream from anywhere.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                HStack {
+                    if shortcutRecorder.isRecording {
+                        Text("Press shortcut...")
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .foregroundColor(.accentColor)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .strokeBorder(Color.accentColor, lineWidth: 1.5)
+                            )
+
+                        Button("Cancel") {
+                            shortcutRecorder.stopRecording()
+                        }
+                        .font(.caption)
+                    } else if let shortcut = hotkeyManager.currentShortcut {
+                        Text(shortcut.displayString)
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(Color.primary.opacity(0.08))
+                            )
+
+                        Button("Change") {
+                            startRecording()
+                        }
+                        .font(.caption)
+
+                        Button("Clear") {
+                            hotkeyManager.currentShortcut = nil
+                            hotkeyManager.isEnabled = false
+                        }
+                        .font(.caption)
+                        .foregroundColor(.red)
+                    } else {
+                        Button("Record Shortcut") {
+                            startRecording()
+                        }
+                        .font(.caption)
+                    }
+                }
+
+                if hotkeyManager.currentShortcut != nil {
+                    Toggle("Enable shortcut", isOn: $hotkeyManager.isEnabled)
+                }
+            }
+
+            Divider()
+
             // Launch at Login
             VStack(alignment: .leading, spacing: 4) {
                 Toggle("Start at login", isOn: $launchAtLogin)
@@ -292,6 +357,19 @@ struct SettingsView: View {
             launchAtLogin = getLaunchAtLoginStatus()
             loadListenBrainzState()
         }
+    }
+
+    // MARK: - Keyboard Shortcut
+
+    private func startRecording() {
+        shortcutRecorder.onShortcutCaptured = { newShortcut in
+            hotkeyManager.currentShortcut = newShortcut
+            if !hotkeyManager.isEnabled {
+                hotkeyManager.isEnabled = true
+            }
+        }
+        shortcutRecorder.onCancel = nil
+        shortcutRecorder.startRecording()
     }
 
     // MARK: - ListenBrainz Functions

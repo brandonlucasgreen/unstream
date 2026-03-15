@@ -95,6 +95,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
         // Initialize welcome launcher
         _ = WelcomeWindowLauncher.shared
+
+        // Initialize global hotkey manager (starts listening if enabled)
+        _ = GlobalHotkeyManager.shared
+
+        // ⌘, to open settings (local monitor since LSUIElement apps don't show menu bar)
+        NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            if event.modifierFlags.contains(.command) && event.charactersIgnoringModifiers == "," {
+                self?.openSettings()
+                return nil
+            }
+            return event
+        }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -139,6 +151,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
     // Open settings window
     func openSettings() {
+        // Close the popover first so it doesn't obscure settings
+        if popover.isShown {
+            popover.performClose(nil)
+        }
+
         if settingsWindow == nil {
             let container = AppStateContainer.shared
             let settingsView = SettingsView(

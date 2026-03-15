@@ -122,7 +122,7 @@ struct PopoverView: View {
                         Label("Roadmap", systemImage: "map")
                     }
 
-                    Link(destination: URL(string: "https://unstream.featurebase.app")!) {
+                    Link(destination: URL(string: "https://letterbird.co/hi-d2078591")!) {
                         Label("Share Feedback", systemImage: "bubble.left")
                     }
 

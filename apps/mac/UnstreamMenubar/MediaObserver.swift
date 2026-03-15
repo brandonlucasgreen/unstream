@@ -138,7 +138,7 @@ class MediaObserver: ObservableObject {
             return
         }
 
-        // Then try Parachord (Electron app — uses MediaRemote nowplaying)
+        // Then try Parachord (Electron app — uses WebSocket API)
         if let parachordInfo = getParachordNowPlaying() {
             print("[MediaObserver] Got Parachord info: \(parachordInfo.artist ?? "?") - \(parachordInfo.title ?? "?") (\(parachordInfo.duration ?? 0)s)")
             updateTrack((parachordInfo.artist, parachordInfo.title, parachordInfo.album, parachordInfo.duration, .parachord))
@@ -329,6 +329,8 @@ class MediaObserver: ObservableObject {
         return trackInfo
     }
 
+
+    // MARK: - AppleScript Helpers
 
     private func runAppleScript(_ source: String, silent: Bool = false) -> String? {
         guard let script = NSAppleScript(source: source) else {
