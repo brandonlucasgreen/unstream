@@ -13,6 +13,8 @@
 		<string>com.apple.Music</string>
 		<string>com.spotify.client</string>
 		<string>com.apple.systemevents</string>
+		<string>computer.crispycrunchy.radiccio</string>
+		<string>com.parachord.desktop</string>
 	</array>
 </dict>
 </plist>

@@ -69,7 +69,7 @@ export function PrivacyPolicyPage() {
                 <li>Your artist page URL slug - publicly visible</li>
               </ul>
 
-              <h4 className="font-semibold text-text-primary mt-4 mb-2">Chrome Extension</h4>
+              <h4 className="font-semibold text-text-primary mt-4 mb-2">Browser Extension (Chrome / Firefox)</h4>
               <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
                 <li>Currently playing track information (artist name, song title) from Spotify, YouTube, YouTube Music, and Apple Music - used only to search for alternative platforms</li>
                 <li>Saved artists - stored locally in your browser</li>
@@ -128,7 +128,7 @@ export function PrivacyPolicyPage() {
                 You can clear all locally stored data at any time by:
               </p>
               <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
-                <li><strong>Chrome Extension:</strong> Remove the extension or clear extension data in Chrome settings</li>
+                <li><strong>Browser Extension:</strong> Remove the extension or clear extension data in your browser settings</li>
                 <li><strong>macOS App:</strong> Delete the app and its associated data from your system</li>
                 <li><strong>Artist Profile:</strong> Contact us at support@unstream.stream to request deletion of your account and all associated profile data</li>
               </ul>

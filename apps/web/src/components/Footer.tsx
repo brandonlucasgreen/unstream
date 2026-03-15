@@ -11,7 +11,7 @@ export function Footer() {
           <Link to="/artists" className="hover:text-text-primary transition-colors">Index</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <a
-            href="https://unstream.featurebase.app/roadmap"
+            href="https://github.com/users/brandonlucasgreen/projects/3/views/1"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-text-primary transition-colors"
@@ -19,23 +19,16 @@ export function Footer() {
             Roadmap
           </a>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
+          <Link to="/support" className="hover:text-text-primary transition-colors">Support</Link>
+          <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <a
             href="mailto:support@unstream.stream"
             className="hover:text-text-primary transition-colors"
           >
-            Support
+            Report an issue
           </a>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
-          <a
-            href="https://liberapay.com/brandonlucasgreen/donate"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-text-primary transition-colors"
-          >
-            Donate
-          </a>
-          <span className="text-text-muted/40 text-xs">&#x2022;</span>
-          <Link to="/privacy-policy" className="hover:text-text-primary transition-colors">Privacy</Link>
+          <Link to="/privacy-policy" className="hover:text-text-primary transition-colors">Privacy policy</Link>
         </nav>
       </div>
     </footer>

@@ -300,7 +300,7 @@ export function ResultCard({ result, defaultExpanded = true }: ResultCardProps) 
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-text-primary mb-1">Save artists with the Unstream app</p>
                 <p className="text-xs text-text-muted mb-3">
-                  The Mac app and browser extensions detect what's playing automatically and keep track of artists you want to support. Saved artist lists &amp; new release alerts are free for everyone.
+                  The free Unstream app and browser extensions detect what's playing automatically, so you keep track of artists you want to support &amp; get notified when they release new music.
                 </p>
                 <div className="flex flex-wrap items-center gap-2">
                   <a

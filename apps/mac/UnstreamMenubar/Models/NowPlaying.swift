@@ -31,4 +31,6 @@ struct NowPlaying: Equatable {
 enum PlaybackSource: String, Equatable {
     case appleMusic = "Apple Music"
     case spotify = "Spotify"
+    case radiccio = "Radiccio"
+    case parachord = "Parachord"
 }

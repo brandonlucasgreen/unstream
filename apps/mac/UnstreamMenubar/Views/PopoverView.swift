@@ -118,7 +118,7 @@ struct PopoverView: View {
 
                     Divider()
 
-                    Link(destination: URL(string: "https://unstream.featurebase.app/roadmap")!) {
+                    Link(destination: URL(string: "https://github.com/users/brandonlucasgreen/projects/3/views/1")!) {
                         Label("Roadmap", systemImage: "map")
                     }
 
@@ -126,8 +126,8 @@ struct PopoverView: View {
                         Label("Share Feedback", systemImage: "bubble.left")
                     }
 
-                    Link(destination: URL(string: "mailto:support@unstream.stream")!) {
-                        Label("Support", systemImage: "envelope")
+                    Link(destination: URL(string: "https://unstream.stream/support")!) {
+                        Label("Support", systemImage: "heart")
                     }
 
                     Divider()

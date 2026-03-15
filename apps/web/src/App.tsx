@@ -267,13 +267,10 @@ function App() {
             Support the artist you're listening to right now
           </h2>
           <p className="text-text-secondary mb-4">
-            Unstream for macOS detects what's playing in Spotify or Apple Music and shows the best ways to support that artist, right in your menu bar.
-          </p>
-          <p className="text-text-secondary mb-4">
-            The browser extension does the same for any music playing in your browser (YouTube, Soundcloud, and more).
+            The Unstream apps detect what's playing in Spotify, Apple Music or any music player in your browser, and shows the best ways to support that artist, right in your menu bar. Save artists you want to support later and get alerts when they release new music.
           </p>
           <p className="text-text-secondary mb-6">
-            Saved artist lists, new release alerts, and more are included free. If you find Unstream useful, consider <a href="/support" className="text-accent-primary hover:underline"><strong>supporting development</strong></a>.
+            If you find Unstream useful, consider <a href="/support" className="text-accent-primary hover:underline"><strong>supporting its development</strong></a> 🙏
           </p>
           <div className="flex flex-col items-center gap-3 mb-2">
             <a
@@ -422,13 +419,6 @@ function App() {
                   </p>
                 </div>
               )}
-            </div>
-          )}
-
-          {/* Mac App Promo - after results */}
-          {hasSearched && !isLoading && (
-            <div className="mt-8">
-              {macAppPromo}
             </div>
           )}
 

@@ -131,6 +131,20 @@ class MediaObserver: ObservableObject {
             return
         }
 
+        // Then try Radiccio
+        if let radiccioInfo = getRadiccioNowPlaying() {
+            print("[MediaObserver] Got Radiccio info: \(radiccioInfo.artist ?? "?") - \(radiccioInfo.title ?? "?") (\(radiccioInfo.duration ?? 0)s)")
+            updateTrack((radiccioInfo.artist, radiccioInfo.title, radiccioInfo.album, radiccioInfo.duration, .radiccio))
+            return
+        }
+
+        // Then try Parachord (Electron app — uses MediaRemote nowplaying)
+        if let parachordInfo = getParachordNowPlaying() {
+            print("[MediaObserver] Got Parachord info: \(parachordInfo.artist ?? "?") - \(parachordInfo.title ?? "?") (\(parachordInfo.duration ?? 0)s)")
+            updateTrack((parachordInfo.artist, parachordInfo.title, parachordInfo.album, parachordInfo.duration, .parachord))
+            return
+        }
+
         // No music playing
         DispatchQueue.main.async { [weak self] in
             if self?.currentTrack != nil {
@@ -230,6 +244,91 @@ class MediaObserver: ObservableObject {
 
         return parseTrackInfo(info)
     }
+
+    private func getRadiccioNowPlaying() -> (artist: String?, title: String?, album: String?, duration: Double?)? {
+        let checkScript = "tell application \"System Events\" to return (exists process \"Radiccio\")"
+        guard let result = runAppleScript(checkScript, silent: true), result == "true" else {
+            return nil
+        }
+
+        let infoScript = """
+            tell application "Radiccio"
+                if player state is playing then
+                    set theTrack to current track
+                    set theArtist to artist of theTrack
+                    set theTitle to title of theTrack
+                    set theAlbum to album of theTrack
+                    set theDuration to duration of theTrack
+                    return theArtist & "|||" & theTitle & "|||" & theAlbum & "|||" & theDuration
+                else
+                    return "not_playing"
+                end if
+            end tell
+            """
+
+        guard let info = runAppleScript(infoScript), info != "not_playing" else {
+            return nil
+        }
+
+        return parseTrackInfo(info)
+    }
+
+    private func getParachordNowPlaying() -> (artist: String?, title: String?, album: String?, duration: Double?)? {
+        let checkScript = "tell application \"System Events\" to return (exists process \"Parachord\")"
+        guard let result = runAppleScript(checkScript, silent: true), result == "true" else {
+            return nil
+        }
+
+        // Parachord is an Electron app with a WebSocket API on port 9876.
+        // Connect as an "embed" client and request playback state.
+        return getParachordStateViaWebSocket()
+    }
+
+    private func getParachordStateViaWebSocket() -> (artist: String?, title: String?, album: String?, duration: Double?)? {
+        guard let url = URL(string: "ws://127.0.0.1:9876") else { return nil }
+
+        let session = URLSession(configuration: .default)
+        let task = session.webSocketTask(with: url)
+        task.resume()
+
+        defer { task.cancel(with: .goingAway, reason: nil) }
+
+        let semaphore = DispatchSemaphore(value: 0)
+        var trackInfo: (artist: String?, title: String?, album: String?, duration: Double?)? = nil
+
+        // Send embed registration + getState request
+        let request = "{\"type\":\"embed\",\"action\":\"getState\",\"requestId\":\"unstream\"}"
+        task.send(.string(request)) { error in
+            if error != nil { semaphore.signal() }
+        }
+
+        // Receive response
+        task.receive { result in
+            defer { semaphore.signal() }
+            guard case .success(let message) = result,
+                  case .string(let text) = message,
+                  let data = text.data(using: .utf8),
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  json["success"] as? Bool == true,
+                  json["isPlaying"] as? Bool == true,
+                  let track = json["currentTrack"] as? [String: Any] else {
+                return
+            }
+
+            let artist = track["artist"] as? String
+            let title = track["title"] as? String
+            let album = track["album"] as? String
+            let duration = track["duration"] as? Double
+
+            if artist != nil || title != nil {
+                trackInfo = (artist, title, album, duration)
+            }
+        }
+
+        _ = semaphore.wait(timeout: .now() + 2.0)
+        return trackInfo
+    }
+
 
     private func runAppleScript(_ source: String, silent: Bool = false) -> String? {
         guard let script = NSAppleScript(source: source) else {
