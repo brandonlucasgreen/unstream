@@ -21,7 +21,7 @@
 		63F41D587072FABF9A3BCDE8 /* UnstreamMenubarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02ABFD2B0A6C8C9935BB9A4C /* UnstreamMenubarApp.swift */; };
 		6A9BDF2C38C66D877E876532 /* UnstreamAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = D337F593A52D74DDB206DFEB /* UnstreamAPI.swift */; };
 		6D765D2F8868E2D249B2F4D1 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30C5DE6E6DA5D1F45AC53F5 /* UpdateChecker.swift */; };
-		7D2ED9356257F8FCD048C48A /* DonationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16738FBC421187F126053CEB /* DonationView.swift */; };
+
 		81C89F9324EFB329B2999A90 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D70033B2F693E68D6CEC84B3 /* Assets.xcassets */; };
 		8AF8BA4B7F92249D4EAA5920 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B31DB9784DB0CFBF5F20949 /* AppState.swift */; };
 
@@ -48,7 +48,7 @@
 		02ABFD2B0A6C8C9935BB9A4C /* UnstreamMenubarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnstreamMenubarApp.swift; sourceTree = "<group>"; };
 		0DF8BDEC9EAD2F3C23137159 /* ShortcutRecorderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutRecorderView.swift; sourceTree = "<group>"; };
 		0F4B81ECB685A1B630D56318 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		16738FBC421187F126053CEB /* DonationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DonationView.swift; sourceTree = "<group>"; };
+
 		16FEC357D5AF596E6A3C9FF2 /* NowPlayingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingView.swift; sourceTree = "<group>"; };
 		1C9CF96CDFC97980A68C89B1 /* BandcampReleaseChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandcampReleaseChecker.swift; sourceTree = "<group>"; };
 		28D8D0CE0AFF7F1CF89D27E9 /* ListenBrainzService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenBrainzService.swift; sourceTree = "<group>"; };
@@ -147,7 +147,7 @@
 				16FEC357D5AF596E6A3C9FF2 /* NowPlayingView.swift */,
 				C7D9B657DD1234685545F8B9 /* PlatformBadge.swift */,
 				6AFC8C5C2C45EA79D7152B06 /* PopoverView.swift */,
-				16738FBC421187F126053CEB /* DonationView.swift */,
+
 				B3E0ED8CFD58286DB2B51054 /* ResultsView.swift */,
 				6ADFAA14BEF36F0DB159CE97 /* SearchBarView.swift */,
 				0F4B81ECB685A1B630D56318 /* SettingsView.swift */,
@@ -256,7 +256,7 @@
 				A3D69F6D151B5BA91BCAD5AF /* NowPlayingView.swift in Sources */,
 				C0107F7F16CE5F7D50A0D8BA /* PlatformBadge.swift in Sources */,
 				DE73245E609554051FD75041 /* PopoverView.swift in Sources */,
-				7D2ED9356257F8FCD048C48A /* DonationView.swift in Sources */,
+
 				1F998E5730DEEFD73DE11E11 /* QobuzReleaseChecker.swift in Sources */,
 				A4B2436C3E5A4DEF1C6E7E10 /* ReleaseAlert.swift in Sources */,
 				1EABDEA7B5D44A4130C31207 /* ReleaseAlertManager.swift in Sources */,
