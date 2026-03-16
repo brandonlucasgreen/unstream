@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { signInWithMagicLink, getSession, waitForMagicLinkSession } from '../services/auth';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
@@ -38,7 +38,7 @@ function platformName(id: string): string {
 export function ClaimPage() {
   const { preference, cycleTheme } = useTheme();
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
+
   const [step, setStep] = useState<ClaimStep>('email');
   const [email, setEmail] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
@@ -281,7 +281,7 @@ export function ClaimPage() {
         return;
       }
 
-      navigate(`/a/${data.slug || slug}?claimed`);
+      window.location.href = `/a/${data.slug || slug}?claimed`;
     } catch {
       setError('Network error. Please try again.');
     }
@@ -571,12 +571,12 @@ export function ClaimPage() {
                 Your artist page is now live. We found {discoveredLinks} platform
                 {discoveredLinks === 1 ? ' link' : ' links'} from your website.
               </p>
-              <Link
-                to={`/a/${slug}?claimed`}
+              <a
+                href={`/a/${slug}?claimed`}
                 className="inline-block px-6 py-2 rounded-lg bg-accent-primary text-white font-medium hover:bg-accent-primary/90 transition-colors"
               >
                 View your artist page
-              </Link>
+              </a>
             </div>
           )}
         </div>

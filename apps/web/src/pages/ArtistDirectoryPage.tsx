@@ -88,9 +88,9 @@ export function ArtistDirectoryPage() {
                     <h2 className="text-xl font-bold pb-2 border-b border-border mb-1">{letter}</h2>
                     <div className="grid gap-0.5">
                       {grouped[letter].map(artist => (
-                        <Link
+                        <a
                           key={artist.slug}
-                          to={`/a/${artist.slug}`}
+                          href={`/a/${artist.slug}`}
                           className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg hover:bg-bg-secondary border border-transparent hover:border-border transition-colors"
                         >
                           {artist.imageUrl ? (
@@ -108,7 +108,7 @@ export function ArtistDirectoryPage() {
                           <svg className="ml-auto flex-shrink-0 w-3.5 h-3.5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
-                        </Link>
+                        </a>
                       ))}
                     </div>
                   </div>
