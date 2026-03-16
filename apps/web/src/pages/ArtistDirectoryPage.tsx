@@ -51,7 +51,7 @@ export function ArtistDirectoryPage() {
           <Link to="/" className="text-sm font-semibold text-text-muted uppercase tracking-wide hover:text-text-primary transition-colors">
             Unstream
           </Link>
-          <h1 className="text-2xl font-bold mt-1 mb-2">Artist Directory</h1>
+          <h1 className="text-2xl font-bold mt-1 mb-2">Artist Index</h1>
           {!loading && (
             <p className="text-text-muted text-sm">
               {artists.length} verified artist{artists.length !== 1 ? 's' : ''} on platforms that pay fairly
