@@ -221,13 +221,13 @@ export function ResultCard({ result, defaultExpanded = true }: ResultCardProps) 
                   </svg>
                   Verified
                 </span>
-                <Link
-                  to={`/a/${result.claimedSlug || result.id}`}
+                <a
+                  href={`/a/${result.claimedSlug || result.id}`}
                   className="text-xs px-1.5 py-0.5 rounded bg-bg-hover text-text-secondary hover:text-text-primary transition-colors"
                   onClick={(e) => e.stopPropagation()}
                 >
                   View profile
-                </Link>
+                </a>
               </>
             )}
             {result.matchConfidence === 'unverified' && (

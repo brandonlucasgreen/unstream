@@ -7,7 +7,6 @@ import { RoadmapPage } from './pages/RoadmapPage.tsx'
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage.tsx'
 import { ArtistPage } from './pages/ArtistPage.tsx'
 import { ClaimPage } from './pages/ClaimPage.tsx'
-import { ClaimedArtistPage } from './pages/ClaimedArtistPage.tsx'
 import { ArtistLoginPage } from './pages/ArtistLoginPage.tsx'
 import { ArtistDashboardPage } from './pages/ArtistDashboardPage.tsx'
 import { ArtistEditPage } from './pages/ArtistEditPage.tsx'
@@ -20,7 +19,6 @@ createRoot(document.getElementById('root')!).render(
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/artist/:slug" element={<ArtistPage />} />
-        <Route path="/a/:slug" element={<ClaimedArtistPage />} />
         <Route path="/claim/:slug" element={<ClaimPage />} />
         <Route path="/artist-login" element={<ArtistLoginPage />} />
         <Route path="/artist-dashboard" element={<ArtistDashboardPage />} />
