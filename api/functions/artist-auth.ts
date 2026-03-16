@@ -212,7 +212,7 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
         artistId: p.artist_id,
         name: artist?.name || 'Unknown',
         slug: artist?.slug || '',
-        imageUrl: artist?.image_url || p.custom_image_url,
+        imageUrl: p.custom_image_url || artist?.image_url,
         websiteUrl: p.website_url,
         bio: p.bio,
         claimedAt: p.claimed_at,

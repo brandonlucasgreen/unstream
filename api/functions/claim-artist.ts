@@ -182,15 +182,17 @@ async function scrapeAvatarFromPlatform(platform: string, pageUrl: string): Prom
     const html = await response.text();
 
     if (platform === 'bandcamp') {
-      // Try band-photo img first
-      const bandPhoto = html.match(/<img[^>]*class="[^"]*band-photo[^"]*"[^>]*src="([^"]+)"/i);
+      // Try band-photo img first (handle src before or after class)
+      const bandPhoto = html.match(/<img[^>]*class="[^"]*band-photo[^"]*"[^>]*src="([^"]+)"/i)
+        || html.match(/<img[^>]*src="([^"]+)"[^>]*class="[^"]*band-photo[^"]*"/i);
       if (bandPhoto) return bandPhoto[1];
-      // Fallback: og:image (usually the band photo on artist pages)
-      const ogImage = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i);
+      // Fallback: og:image, but filter out album art
+      const ogImage = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i)
+        || html.match(/<meta[^>]*content="([^"]+)"[^>]*property="og:image"/i);
       if (ogImage) {
-        // Filter out album art — Bandcamp band photos are on f4.bcbits.com
         const src = ogImage[1];
-        if (src.includes('f4.bcbits.com') || !src.includes('bcbits.com/img/a')) {
+        // Only use og:image if it's NOT album art (album art URLs contain /img/a)
+        if (!src.includes('/img/a')) {
           return src;
         }
       }
@@ -209,14 +211,30 @@ async function scrapeAvatarFromPlatform(platform: string, pageUrl: string): Prom
 
     if (platform === 'mirlo') {
       // Mirlo artist pages have og:image with the artist photo
-      const ogImage = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i);
-      if (ogImage) return ogImage[1];
+      const ogImage = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i)
+        || html.match(/<meta[^>]*content="([^"]+)"[^>]*property="og:image"/i);
+      if (ogImage) {
+        // Resolve relative URLs against the page URL
+        try {
+          return new URL(ogImage[1], pageUrl).href;
+        } catch {
+          return ogImage[1];
+        }
+      }
       return null;
     }
 
     // Generic fallback: try og:image
-    const ogImage = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i);
-    return ogImage ? ogImage[1] : null;
+    const ogImage = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i)
+      || html.match(/<meta[^>]*content="([^"]+)"[^>]*property="og:image"/i);
+    if (ogImage) {
+      try {
+        return new URL(ogImage[1], pageUrl).href;
+      } catch {
+        return ogImage[1];
+      }
+    }
+    return null;
   } catch {
     return null;
   } finally {
