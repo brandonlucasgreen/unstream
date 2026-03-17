@@ -138,7 +138,8 @@ private let platformConfig: [String: PlatformConfig] = [
     "threads": PlatformConfig(name: "Threads", icon: "at", color: "#E0E0E0", searchOnly: false),
     "bluesky": PlatformConfig(name: "Bluesky", icon: "cloud", color: "#0085FF", searchOnly: false),
     "mastodon": PlatformConfig(name: "Mastodon", icon: "bubble.left.and.bubble.right", color: "#858AFA", searchOnly: false),
+    "peertube": PlatformConfig(name: "PeerTube", icon: "play.circle", color: "#F1680D", searchOnly: false),
 ]
 
 // Social platform IDs for filtering
-let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon"]
+let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube"]

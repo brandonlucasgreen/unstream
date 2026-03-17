@@ -159,14 +159,14 @@ function mergeWithMusicBrainzData(results: SearchResult[], mbData: MusicBrainzDa
     // Sort platforms
     const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee']);
     const officialPlatforms = new Set(['officialsite', 'discogs', 'hoopla', 'freegal']);
-    const socialPlatforms = new Set(['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'mastodon']);
+    const socialPlatforms = new Set(['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'mastodon', 'peertube']);
     newPlatforms.sort((a, b) => {
       const aIsSocial = socialPlatforms.has(a.sourceId);
       const bIsSocial = socialPlatforms.has(b.sourceId);
       if (aIsSocial && !bIsSocial) return 1;
       if (!aIsSocial && bIsSocial) return -1;
       if (aIsSocial && bIsSocial) {
-        const order = ['instagram', 'tiktok', 'youtube', 'threads', 'bluesky', 'mastodon', 'facebook'];
+        const order = ['instagram', 'tiktok', 'youtube', 'peertube', 'threads', 'bluesky', 'mastodon', 'facebook'];
         return order.indexOf(a.sourceId) - order.indexOf(b.sourceId);
       }
       const aIsOfficial = officialPlatforms.has(a.sourceId);

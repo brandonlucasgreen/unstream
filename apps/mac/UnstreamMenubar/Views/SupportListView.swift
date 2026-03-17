@@ -234,10 +234,10 @@ struct SavedPlatformBadge: View {
     @Environment(\.colorScheme) var colorScheme
 
     // Social platforms show only icons (no text) to reduce clutter
-    private let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon"]
+    private let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube"]
 
     // Platforms that have brand SVG icons
-    private let brandIconPlatforms: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "bandcamp"]
+    private let brandIconPlatforms: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube", "bandcamp"]
 
     private var isSocialPlatform: Bool {
         socialPlatformIds.contains(platform.sourceId)
