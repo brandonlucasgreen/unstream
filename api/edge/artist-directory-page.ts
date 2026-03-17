@@ -15,7 +15,7 @@ export default async function handler(request: Request, context: Context) {
   // Fetch verified artist profiles
   const { data: profiles } = await supabase
     .from('artist_profiles')
-    .select('artist_id')
+    .select('artist_id, custom_image_url')
     .not('verified_at', 'is', null);
 
   if (!profiles || profiles.length === 0) {
@@ -30,10 +30,14 @@ export default async function handler(request: Request, context: Context) {
     .select('id, name, slug, image_url')
     .in('id', artistIds);
 
-  const artists = (artistRows || []).map((a: { slug: string; name: string; image_url?: string }) => ({
+  const customImageMap = new Map(
+    profiles.filter((p: { custom_image_url?: string }) => p.custom_image_url).map((p: { artist_id: string; custom_image_url: string }) => [p.artist_id, p.custom_image_url])
+  );
+
+  const artists = (artistRows || []).map((a: { id: string; slug: string; name: string; image_url?: string }) => ({
     slug: a.slug,
     name: a.name,
-    imageUrl: a.image_url || null,
+    imageUrl: customImageMap.get(a.id) || a.image_url || null,
   })).sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name));
 
   // Group by first letter

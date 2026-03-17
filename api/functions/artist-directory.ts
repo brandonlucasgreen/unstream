@@ -13,7 +13,7 @@ export async function handler() {
   // Fetch all verified (claimed) artist profiles
   const { data: profiles, error: profileError } = await supabase
     .from('artist_profiles')
-    .select('artist_id')
+    .select('artist_id, custom_image_url')
     .not('verified_at', 'is', null);
 
   if (profileError || !profiles || profiles.length === 0) {
@@ -35,11 +35,15 @@ export async function handler() {
     return { statusCode: 500, body: JSON.stringify({ error: 'Failed to fetch artists' }) };
   }
 
+  const customImageMap = new Map(
+    profiles.filter(p => p.custom_image_url).map(p => [p.artist_id, p.custom_image_url])
+  );
+
   const artists = (artistRows || [])
     .map(a => ({
       slug: a.slug,
       name: a.name,
-      imageUrl: a.image_url || null,
+      imageUrl: customImageMap.get(a.id) || a.image_url || null,
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
