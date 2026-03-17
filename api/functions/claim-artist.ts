@@ -4,7 +4,7 @@
 //   action: 'verify' — scrape website, verify link-back, discover platform links
 
 import { createClient } from '@supabase/supabase-js';
-import { artistSlug, getClient } from './db';
+import { getClient } from './db';
 
 const PLATFORM_PATTERNS: [string, RegExp][] = [
   ['bandcamp', /([a-z0-9-]+)\.bandcamp\.com/i],
@@ -473,13 +473,14 @@ export async function handler(event: {
       };
     }
 
-    // Check for Unstream link-back
-    const unstreamSlug = artistSlug(artist.name);
+    // Check for Unstream link-back using the DB slug (same one shown to the user in verifyUrl)
+    // Note: artistSlug(artist.name) can differ from the DB slug (e.g. apostrophes in names),
+    // so we use the DB slug to match exactly what we told the user to link to.
     const hasUnstreamLink = links.some(link => {
       try {
         const url = new URL(link);
         return url.hostname.includes('unstream.stream') &&
-          url.pathname.includes(unstreamSlug);
+          url.pathname.includes(slug);
       } catch {
         return false;
       }
