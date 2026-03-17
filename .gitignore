@@ -51,3 +51,6 @@ apps/mac/**/xcuserdata/
 
 # Conductor
 .conductor/
+
+# Claude Code
+CLAUDE.md
