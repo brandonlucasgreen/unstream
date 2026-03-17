@@ -6,7 +6,7 @@ struct SocialIconButton: View {
     @Environment(\.colorScheme) var colorScheme
 
     // Platforms that have brand SVG icons
-    private let brandIconPlatforms: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "bandcamp"]
+    private let brandIconPlatforms: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube", "bandcamp"]
 
     var body: some View {
         Button(action: openPlatform) {

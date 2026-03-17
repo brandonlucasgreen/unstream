@@ -2,7 +2,7 @@
 type SocialPlatform =
   | 'instagram' | 'facebook' | 'tiktok' | 'youtube'
   | 'threads' | 'bluesky'
-  | 'mastodon' | 'patreon' | 'kofi' | 'buymeacoffee';
+  | 'mastodon' | 'peertube' | 'patreon' | 'kofi' | 'buymeacoffee';
 
 interface SocialLink {
   platform: SocialPlatform;
@@ -41,6 +41,23 @@ const KNOWN_MASTODON_INSTANCES = [
 // Check if a URL belongs to a known Mastodon instance
 function isMastodonInstance(urlLower: string): boolean {
   return KNOWN_MASTODON_INSTANCES.some(instance => urlLower.includes(instance));
+}
+
+// Known PeerTube instances (non-exhaustive, covers popular + music-focused ones)
+const KNOWN_PEERTUBE_INSTANCES = [
+  'tilvids.com', 'diode.zone', 'spectra.video', 'makertube.net',
+  'tube.shanti.cafe', 'dalek.zone', 'videos.trom.tf', 'peertube.wtf',
+  'peertube.stream', 'lostpod.space', 'fedi.video', 'videovortex.tv',
+  'tube.anjara.eu', 'peertube.be', 'p.eertu.be', 'peertube.dk',
+  'vod.newellijay.tv', 'video.mxtthxw.art', 'video.sorokin.music',
+  'peertube.ignifi.me', 'clip.place', 'peerate.fr', 'gnulinux.tube',
+  'tube.grin.hu', 'audio.freediverse.com',
+  'communitymedia.video', 'tv.gravitons.org', 'fair.tube',
+];
+
+// Check if a URL belongs to a known PeerTube instance
+function isPeerTubeInstance(urlLower: string): boolean {
+  return KNOWN_PEERTUBE_INSTANCES.some(instance => urlLower.includes(instance));
 }
 
 // Convert a Mastodon handle (@user@server) to a URL
@@ -89,6 +106,11 @@ function parseSocialUrl(url: string): SocialLink | null {
   // Mastodon - check known instances (fediverse:creator meta tag handled separately)
   if (isMastodonInstance(urlLower)) {
     return { platform: 'mastodon', url };
+  }
+
+  // PeerTube - check known instances
+  if (isPeerTubeInstance(urlLower)) {
+    return { platform: 'peertube', url };
   }
 
   return null;
@@ -330,6 +352,74 @@ function mergeSocialLinks(...linkArrays: SocialLink[][]): SocialLink[] {
   return merged;
 }
 
+// Search PeerTube via Sepia Search API for artist video channels
+async function searchPeerTubeChannels(artistName: string): Promise<SocialLink | null> {
+  try {
+    const searchUrl = `https://sepiasearch.org/api/v1/search/video-channels?search=${encodeURIComponent(artistName)}&count=5`;
+
+    const response = await globalThis.fetch(searchUrl, {
+      headers: {
+        'User-Agent': 'Unstream/1.0 (https://unstream.stream - ethical music finder)',
+      },
+      signal: AbortSignal.timeout(5000),
+    });
+
+    if (!response.ok) {
+      console.log('Sepia Search failed:', response.status);
+      return null;
+    }
+
+    const data = await response.json() as {
+      total: number;
+      data: {
+        name: string;
+        displayName: string;
+        host: string;
+        url: string;
+        videosCount: number;
+        ownerAccount?: { name: string; displayName: string };
+      }[];
+    };
+
+    if (!data.data || data.data.length === 0) return null;
+
+    // Normalize artist name for matching
+    const normalizedQuery = artistName.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    // Find a channel whose displayName or ownerAccount name closely matches the artist
+    for (const channel of data.data) {
+      // Skip channels with no videos
+      if (channel.videosCount === 0) continue;
+
+      const normalizedDisplay = channel.displayName.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const normalizedChannelName = channel.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const normalizedOwner = channel.ownerAccount?.displayName?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
+      const normalizedOwnerName = channel.ownerAccount?.name?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
+
+      const isMatch =
+        normalizedDisplay === normalizedQuery ||
+        normalizedChannelName === normalizedQuery ||
+        normalizedOwner === normalizedQuery ||
+        normalizedOwnerName === normalizedQuery ||
+        // Allow partial matches where one contains the other (for names like "Lime Bar Videos" matching "Lime Bar")
+        (normalizedDisplay.includes(normalizedQuery) && normalizedQuery.length > normalizedDisplay.length * 0.5) ||
+        (normalizedQuery.includes(normalizedDisplay) && normalizedDisplay.length > normalizedQuery.length * 0.5);
+
+      if (isMatch) {
+        console.log(`[Sepia Search] Found PeerTube channel for "${artistName}": ${channel.displayName} on ${channel.host} (${channel.videosCount} videos)`);
+        return { platform: 'peertube', url: channel.url };
+      }
+    }
+
+    console.log(`[Sepia Search] No matching PeerTube channel for "${artistName}" (${data.total} total results)`);
+    return null;
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    console.error('Sepia Search error:', err.message);
+    return null;
+  }
+}
+
 // Search MusicBrainz for artist info including official website, Discogs, social links, and release history
 async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchResponse> {
   const emptyResult: MusicBrainzSearchResponse = {
@@ -494,10 +584,11 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       }
     }
 
-    // Fetch additional social links from Discogs and official site in parallel
-    const [discogsSocialLinks, officialSiteResult] = await Promise.all([
+    // Fetch additional social links from Discogs, official site, and PeerTube in parallel
+    const [discogsSocialLinks, officialSiteResult, peertubeLink] = await Promise.all([
       discogsUrl ? fetchDiscogsSocialLinks(discogsUrl) : Promise.resolve([]),
       officialUrl ? fetchOfficialSiteSocialLinks(officialUrl) : Promise.resolve({ socialLinks: [], linktreeUrl: null, discoveredPlatforms: [] }),
+      searchPeerTubeChannels(artist.name),
     ]);
 
     // If we found a Linktree URL from MusicBrainz or official site, scrape it for additional links
@@ -508,8 +599,12 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       linktreeSocialLinks = await fetchLinktreeLinks(finalLinktreeUrl);
     }
 
-    // Merge all social links (MusicBrainz first, then Discogs, then official site, then Linktree)
-    const allSocialLinks = mergeSocialLinks(socialLinks, discogsSocialLinks, officialSiteResult.socialLinks, linktreeSocialLinks);
+    // Collect PeerTube link from Sepia Search (if not already found via other sources)
+    const peertubeLinks: SocialLink[] = peertubeLink ? [peertubeLink] : [];
+
+    // Merge all social links (MusicBrainz first, then Discogs, then official site, then Linktree, then PeerTube)
+    // PeerTube from Sepia Search comes last so official site / Linktree links take priority
+    const allSocialLinks = mergeSocialLinks(socialLinks, discogsSocialLinks, officialSiteResult.socialLinks, linktreeSocialLinks, peertubeLinks);
 
     return {
       query,

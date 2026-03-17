@@ -75,7 +75,8 @@ struct SavedPlatform: Codable, Identifiable {
             "youtube": "YouTube",
             "threads": "Threads",
             "bluesky": "Bluesky",
-            "mastodon": "Mastodon"
+            "mastodon": "Mastodon",
+            "peertube": "PeerTube"
         ]
         return names[sourceId] ?? sourceId.capitalized
     }
@@ -103,7 +104,8 @@ struct SavedPlatform: Codable, Identifiable {
             "youtube": "play.rectangle.fill",
             "threads": "at",
             "bluesky": "cloud",
-            "mastodon": "elephant"
+            "mastodon": "elephant",
+            "peertube": "play.circle"
         ]
         return icons[sourceId] ?? "music.note"
     }
@@ -131,7 +133,8 @@ struct SavedPlatform: Codable, Identifiable {
             "youtube": "#FF0000",
             "threads": "#E0E0E0",
             "bluesky": "#0085FF",
-            "mastodon": "#6364FF"
+            "mastodon": "#6364FF",
+            "peertube": "#F1680D"
         ]
         return colors[sourceId] ?? "#888888"
     }
