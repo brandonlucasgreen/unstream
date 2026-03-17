@@ -49,8 +49,10 @@ export function SocialIcon({ platform, className = 'w-4 h-4' }: { platform: Sour
       );
     case 'peertube':
       return (
-        <svg className={className} viewBox="0 0 24 24" fill={color}>
-          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-1.243 17.07V6.93L18.258 12l-7.5 5.07z"/>
+        <svg className={className} viewBox="0 0 76 100" fill="none">
+          <polygon points="0,0 0,50 38,25" fill="currentColor" />
+          <polygon points="0,50 0,100 38,75" fill="#737373" />
+          <polygon points="38,25 38,75 76,50" fill="#F1680D" />
         </svg>
       );
     case 'newsletter':
