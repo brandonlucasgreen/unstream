@@ -33,4 +33,6 @@ enum PlaybackSource: String, Equatable {
     case spotify = "Spotify"
     case radiccio = "Radiccio"
     case parachord = "Parachord"
+    case tidal = "Tidal"
+    case qobuz = "Qobuz"
 }

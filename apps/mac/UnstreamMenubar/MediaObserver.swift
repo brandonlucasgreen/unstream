@@ -2,6 +2,55 @@ import Foundation
 import Combine
 import AppKit
 
+// MARK: - MediaRemote Bridge (private framework for system NowPlaying)
+
+/// Bridges to the private MediaRemote.framework to read system-level NowPlaying info.
+/// This enables detection of any app that publishes to macOS Control Center (e.g. Tidal).
+private struct MediaRemoteBridge {
+    typealias MRMediaRemoteGetNowPlayingInfoFunction = @convention(c) (DispatchQueue, @escaping ([String: Any]) -> Void) -> Void
+    typealias MRMediaRemoteGetNowPlayingClientFunction = @convention(c) (DispatchQueue, @escaping (AnyObject) -> Void) -> Void
+    typealias MRNowPlayingClientGetBundleIdentifierFunction = @convention(c) (AnyObject?) -> String?
+    typealias MRMediaRemoteGetNowPlayingApplicationIsPlayingFunction = @convention(c) (DispatchQueue, @escaping (Bool) -> Void) -> Void
+
+    let getNowPlayingInfo: MRMediaRemoteGetNowPlayingInfoFunction?
+    let getNowPlayingClient: MRMediaRemoteGetNowPlayingClientFunction?
+    let getBundleIdentifier: MRNowPlayingClientGetBundleIdentifierFunction?
+    let getIsPlaying: MRMediaRemoteGetNowPlayingApplicationIsPlayingFunction?
+
+    static let shared: MediaRemoteBridge? = {
+        let path = "/System/Library/PrivateFrameworks/MediaRemote.framework" as NSString
+        guard let bundle = CFBundleCreate(kCFAllocatorDefault, NSURL(fileURLWithPath: path as String)) else {
+            print("[MediaRemote] Failed to load MediaRemote.framework")
+            return nil
+        }
+
+        func loadFunc<T>(_ name: String) -> T? {
+            guard let ptr = CFBundleGetFunctionPointerForName(bundle, name as CFString) else {
+                print("[MediaRemote] Failed to load function: \(name)")
+                return nil
+            }
+            return unsafeBitCast(ptr, to: T.self)
+        }
+
+        let info: MRMediaRemoteGetNowPlayingInfoFunction? = loadFunc("MRMediaRemoteGetNowPlayingInfo")
+        let client: MRMediaRemoteGetNowPlayingClientFunction? = loadFunc("MRMediaRemoteGetNowPlayingClient")
+        let bundleId: MRNowPlayingClientGetBundleIdentifierFunction? = loadFunc("MRNowPlayingClientGetBundleIdentifier")
+        let isPlaying: MRMediaRemoteGetNowPlayingApplicationIsPlayingFunction? = loadFunc("MRMediaRemoteGetNowPlayingApplicationIsPlaying")
+
+        guard info != nil else {
+            print("[MediaRemote] Could not load required functions")
+            return nil
+        }
+
+        return MediaRemoteBridge(
+            getNowPlayingInfo: info,
+            getNowPlayingClient: client,
+            getBundleIdentifier: bundleId,
+            getIsPlaying: isPlaying
+        )
+    }()
+}
+
 /// Observes Now Playing information using AppleScript to query Music.app
 class MediaObserver: ObservableObject {
     @Published var currentTrack: NowPlaying?
@@ -142,6 +191,20 @@ class MediaObserver: ObservableObject {
         if let parachordInfo = getParachordNowPlaying() {
             print("[MediaObserver] Got Parachord info: \(parachordInfo.artist ?? "?") - \(parachordInfo.title ?? "?") (\(parachordInfo.duration ?? 0)s)")
             updateTrack((parachordInfo.artist, parachordInfo.title, parachordInfo.album, parachordInfo.duration, .parachord))
+            return
+        }
+
+        // Then try Tidal (via MediaRemote — no AppleScript dictionary)
+        if let tidalInfo = getTidalNowPlaying() {
+            print("[MediaObserver] Got Tidal info: \(tidalInfo.artist ?? "?") - \(tidalInfo.title ?? "?") (\(tidalInfo.duration ?? 0)s)")
+            updateTrack((tidalInfo.artist, tidalInfo.title, tidalInfo.album, tidalInfo.duration, .tidal))
+            return
+        }
+
+        // Then try Qobuz (Electron app — window title scraping)
+        if let qobuzInfo = getQobuzNowPlaying() {
+            print("[MediaObserver] Got Qobuz info: \(qobuzInfo.artist ?? "?") - \(qobuzInfo.title ?? "?") (\(qobuzInfo.duration ?? 0)s)")
+            updateTrack((qobuzInfo.artist, qobuzInfo.title, qobuzInfo.album, qobuzInfo.duration, .qobuz))
             return
         }
 
@@ -329,6 +392,117 @@ class MediaObserver: ObservableObject {
         return trackInfo
     }
 
+
+    // MARK: - Tidal (via MediaRemote)
+
+    /// Bundle IDs to match for MediaRemote-based detection, mapped to PlaybackSource
+    private static let mediaRemoteSources: [(bundleId: String, source: PlaybackSource)] = [
+        ("com.tidal.desktop", .tidal),
+    ]
+
+    private func getTidalNowPlaying() -> (artist: String?, title: String?, album: String?, duration: Double?)? {
+        // First check if TIDAL process is running
+        let checkScript = "tell application \"System Events\" to return (exists process \"TIDAL\")"
+        guard let result = runAppleScript(checkScript, silent: true), result == "true" else {
+            return nil
+        }
+
+        return getMediaRemoteNowPlaying(forBundleId: "com.tidal.desktop")
+    }
+
+    /// Reads NowPlaying info from the system MediaRemote framework, filtered to a specific bundle ID.
+    private func getMediaRemoteNowPlaying(forBundleId targetBundleId: String) -> (artist: String?, title: String?, album: String?, duration: Double?)? {
+        guard let bridge = MediaRemoteBridge.shared else { return nil }
+
+        let semaphore = DispatchSemaphore(value: 0)
+        var trackInfo: (artist: String?, title: String?, album: String?, duration: Double?)? = nil
+
+        // First check which app is currently the NowPlaying client
+        let clientSemaphore = DispatchSemaphore(value: 0)
+        var currentBundleId: String? = nil
+
+        bridge.getNowPlayingClient?(DispatchQueue.global(qos: .userInitiated)) { client in
+            currentBundleId = bridge.getBundleIdentifier?(client)
+            clientSemaphore.signal()
+        }
+        _ = clientSemaphore.wait(timeout: .now() + 2.0)
+
+        // Only proceed if the target app is the active NowPlaying source
+        guard currentBundleId == targetBundleId else { return nil }
+
+        // Check if actually playing
+        var isPlaying = false
+        let playingSemaphore = DispatchSemaphore(value: 0)
+        bridge.getIsPlaying?(DispatchQueue.global(qos: .userInitiated)) { playing in
+            isPlaying = playing
+            playingSemaphore.signal()
+        }
+        _ = playingSemaphore.wait(timeout: .now() + 2.0)
+
+        guard isPlaying else { return nil }
+
+        // Get track metadata
+        bridge.getNowPlayingInfo?(DispatchQueue.global(qos: .userInitiated)) { info in
+            let artist = info["kMRMediaRemoteNowPlayingInfoArtist"] as? String
+            let title = info["kMRMediaRemoteNowPlayingInfoTitle"] as? String
+            let album = info["kMRMediaRemoteNowPlayingInfoAlbum"] as? String
+            let duration = info["kMRMediaRemoteNowPlayingInfoDuration"] as? Double
+
+            if artist != nil || title != nil {
+                trackInfo = (artist, title, album, duration)
+            }
+            semaphore.signal()
+        }
+
+        _ = semaphore.wait(timeout: .now() + 2.0)
+        return trackInfo
+    }
+
+    // MARK: - Qobuz (window title scraping)
+
+    private func getQobuzNowPlaying() -> (artist: String?, title: String?, album: String?, duration: Double?)? {
+        // First check if Qobuz is running
+        let checkScript = "tell application \"System Events\" to return (exists process \"Qobuz\")"
+        guard let result = runAppleScript(checkScript, silent: true), result == "true" else {
+            return nil
+        }
+
+        // Try MediaRemote first (works on some Qobuz versions)
+        if let mediaRemoteInfo = getMediaRemoteNowPlaying(forBundleId: "com.qobuz.desktop") {
+            return mediaRemoteInfo
+        }
+
+        // Fallback: scrape window title — Qobuz shows "Artist - Track" in the title bar
+        let titleScript = """
+            tell application "System Events"
+                tell process "Qobuz"
+                    set windowTitle to name of front window
+                    return windowTitle
+                end tell
+            end tell
+            """
+
+        guard let windowTitle = runAppleScript(titleScript, silent: true),
+              !windowTitle.isEmpty,
+              windowTitle != "Qobuz" else {
+            return nil
+        }
+
+        // Qobuz window title format is typically "Artist - Track Title" or "Track Title - Artist"
+        // Some versions use " - " as delimiter
+        let parts = windowTitle.components(separatedBy: " - ")
+        guard parts.count >= 2 else {
+            return nil
+        }
+
+        // Convention from Windows scrobblers: first part is artist, second is track
+        let artist = parts[0].trimmingCharacters(in: .whitespaces)
+        let title = parts.dropFirst().joined(separator: " - ").trimmingCharacters(in: .whitespaces)
+
+        guard !artist.isEmpty, !title.isEmpty else { return nil }
+
+        return (artist, title, nil, nil)
+    }
 
     // MARK: - AppleScript Helpers
 
