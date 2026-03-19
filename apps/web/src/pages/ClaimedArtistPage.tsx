@@ -4,6 +4,7 @@ import { sources } from '../services/sources';
 import { SocialIcon, hasSocialIcon } from '../components/SocialIcon';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
 import { Footer } from '../components/Footer';
+import { useSavedArtists } from '../hooks/useSavedArtists';
 import type { SourceId } from '../types';
 
 interface ArtistProfile {
@@ -163,8 +164,10 @@ export function ClaimedArtistPage() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [pending, setPending] = useState(false);
+  const { isSaved, toggleSave } = useSavedArtists();
 
   const displayName = artist?.name || slug?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || '';
+  const saved = slug ? isSaved(slug) : false;
 
   // Check if we arrived from the claim flow (freshly claimed)
   const justClaimed = new URLSearchParams(location.search).has('claimed');
@@ -340,6 +343,15 @@ export function ClaimedArtistPage() {
                 </svg>
                 Claimed
               </span>
+              <button
+                onClick={() => slug && toggleSave(slug, artist!.name, artist!.imageUrl)}
+                className={`p-1.5 rounded-lg transition-colors ${saved ? 'text-accent-primary bg-accent-primary/10' : 'text-text-muted hover:text-text-primary hover:bg-bg-secondary'}`}
+                title={saved ? 'Unsave this artist' : 'Save this artist'}
+              >
+                <svg className="w-5 h-5" fill={saved ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                </svg>
+              </button>
             </div>
             {artist!.profile?.bio && (
               <p className="text-text-muted text-sm max-w-md">{artist!.profile.bio}</p>
