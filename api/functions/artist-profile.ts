@@ -293,22 +293,28 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
     // Insert new links
     const validLinks = (body.links || []).filter(l => l.platform && l.url);
     if (validLinks.length > 0) {
-      const linksToInsert = validLinks.map((link, index) => ({
-        artist_id: artist.id,
-        platform: link.platform,
-        url: link.url,
-        display_name: link.displayName?.trim().slice(0, 50) || null,
-        source: 'claimed',
-        is_direct: true,
-        display_order: index,
-      }));
+      // Assign unique platform IDs for "other" links to satisfy unique(artist_id, platform)
+      let otherCount = 0;
+      const linksToInsert = validLinks.map((link, index) => {
+        const platform = link.platform === 'other' ? `other_${otherCount++}` : link.platform;
+        const displayName = link.displayName?.trim().slice(0, 50) || null;
+        return {
+          artist_id: artist.id,
+          platform,
+          url: link.url,
+          ...(displayName ? { display_name: displayName } : {}),
+          source: 'claimed',
+          is_direct: true,
+          display_order: index,
+        };
+      });
 
       const { error: insertError } = await client
         .from('artist_links')
         .insert(linksToInsert);
 
       if (insertError) {
-        console.error('[Profile] Link insert failed:', insertError);
+        console.error('[Profile] Link insert failed:', JSON.stringify(insertError));
         return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to save links' }) };
       }
     }

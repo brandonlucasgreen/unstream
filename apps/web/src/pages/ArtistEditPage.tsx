@@ -125,10 +125,10 @@ export function ArtistEditPage() {
         setBio(data.profile?.bio ?? '');
         setFeaturedEmbed(data.profile?.featuredEmbed ?? '');
 
-        // Load existing links
+        // Load existing links (normalize "other_N" platforms back to "other")
         const existingLinks: LinkEntry[] = (data.platforms || []).map(
           (p: { sourceId: string; url: string; displayName?: string }) => ({
-            platform: p.sourceId,
+            platform: p.sourceId.startsWith('other') ? 'other' : p.sourceId,
             url: p.url,
             displayName: p.displayName || '',
           })
