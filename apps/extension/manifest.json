@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Unstream - Support Music Directly",
-  "description": "Find ethical alternatives for supporting your favorite artists. Bandcamp, Qobuz, artist websites, and decentralized platforms.",
+  "description": "See where your money actually goes. Unstream shows artist payout percentages and finds them on 23+ platforms. Free and open source.",
   "version": "2.0.0",
   "icons": {
     "16": "icons/icon16.png",
