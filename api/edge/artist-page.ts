@@ -192,7 +192,7 @@ function generateArtistPageHtml(
   <meta name="twitter:title" content="${escapedName} - Unstream">
   <meta name="twitter:description" content="${escapeHtml(description)}">
   ${imageUrl ? `<meta name="twitter:image" content="${escapeHtml(imageUrl)}">` : ''}
-  <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
+  <script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>
   <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
   ${cssHref ? `<link rel="stylesheet" href="${cssHref}">` : ''}
   <script>

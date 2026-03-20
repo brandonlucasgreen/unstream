@@ -118,6 +118,7 @@ function parseSocialUrl(url: string): SocialLink | null {
 
 import { cacheGetOrFetch, artistCacheKey } from './cache';
 import { persistEnrichment } from './db';
+import { checkRateLimit, getClientIp } from './ratelimit';
 
 // Cache TTL for MusicBrainz lookups (30 minutes)
 const MUSICBRAINZ_CACHE_TTL = 30 * 60;
@@ -624,16 +625,18 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
 }
 
 // Netlify function handler
-export async function handler(event: { queryStringParameters?: Record<string, string> }) {
+export async function handler(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
+  const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
+  const ip = getClientIp(event.headers || {});
+  const rl = await checkRateLimit(ip, 'strict', corsHeaders);
+  if (rl.limited) return rl.response;
+
   const query = event.queryStringParameters?.query;
 
   if (!query) {
     return {
       statusCode: 400,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'Query parameter is required' }),
     };
   }
