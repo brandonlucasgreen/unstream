@@ -117,7 +117,8 @@ export default async function handler(request: Request, context: Context) {
 
   const platformLinksHtml = mainPlatforms.map((p: { platform: string; url: string; display_name?: string }) => {
     const info = PLATFORM_INFO[p.platform];
-    const linkName = p.platform === 'other' ? escapeHtml(p.display_name || 'Link') : (info?.name || escapeHtml(p.display_name || p.platform));
+    const isOther = p.platform === 'other' || p.platform.startsWith('other_');
+    const linkName = isOther ? escapeHtml(p.display_name || 'Link') : (info?.name || escapeHtml(p.display_name || p.platform));
     const linkColor = info?.color || '#71717a';
     const linkIcon = info ? (SOCIAL_ICONS[p.platform] ? `<span style="font-size:16px">${SOCIAL_ICONS[p.platform]}</span>` : info.icon) : '🔗';
     const isBCFriday = p.platform === 'bandcamp' && bcFriday;
