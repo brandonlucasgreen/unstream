@@ -339,7 +339,8 @@ function App() {
             </button>
           </h1>
           <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto">
-            Support artists directly. Unstream shows you how 🤘
+            Support artists directly on alternative platforms.<br />
+            Reduce your dependency on streaming.
           </p>
         </div>
       </header>
