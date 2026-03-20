@@ -1,3 +1,5 @@
+import { checkRateLimit, getClientIp } from './ratelimit';
+
 // Helper to fetch with timeout
 async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs: number = 5000): Promise<Response> {
   const controller = new AbortController();
@@ -107,16 +109,18 @@ async function getBandcampEmbed(url: string): Promise<{ embedUrl: string; title:
 }
 
 // Netlify function handler
-export async function handler(event: { queryStringParameters?: Record<string, string> }) {
+export async function handler(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
+  const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
+  const ip = getClientIp(event.headers || {});
+  const rl = await checkRateLimit(ip, 'strict', corsHeaders);
+  if (rl.limited) return rl.response;
+
   const url = event.queryStringParameters?.url;
 
   if (!url) {
     return {
       statusCode: 400,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'URL parameter is required' }),
     };
   }

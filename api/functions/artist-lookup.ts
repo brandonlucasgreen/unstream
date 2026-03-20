@@ -3,17 +3,20 @@
 // Returns the artist with all links, or 404 if not found.
 
 import { getArtistBySlug } from './db';
+import { checkRateLimit, getClientIp } from './ratelimit';
 
-export async function handler(event: { queryStringParameters?: Record<string, string> }) {
+export async function handler(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
+  const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
+  const ip = getClientIp(event.headers || {});
+  const rl = await checkRateLimit(ip, 'standard', corsHeaders);
+  if (rl.limited) return rl.response;
+
   const slug = event.queryStringParameters?.slug;
 
   if (!slug) {
     return {
       statusCode: 400,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'slug parameter is required' }),
     };
   }

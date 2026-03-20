@@ -5,6 +5,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
 import { cacheDeleteByArtist } from './cache';
+import { checkRateLimit, getClientIp } from './ratelimit';
 
 function getServiceClient() {
   return getClient();
@@ -37,6 +38,19 @@ interface LinkUpdate {
   displayName?: string;
 }
 
+// Allowed embed domains for featured releases
+const ALLOWED_EMBED_DOMAINS = [
+  'bandcamp.com',
+  'youtube.com',
+  'youtube-nocookie.com',
+  'soundcloud.com',
+  'open.spotify.com',
+  'embed.music.apple.com',
+  'w.soundcloud.com',
+  'player.vimeo.com',
+  'embed.tidal.com',
+];
+
 function sanitizeEmbed(raw: string | null): string | null {
   if (!raw || !raw.trim()) return null;
 
@@ -45,21 +59,41 @@ function sanitizeEmbed(raw: string | null): string | null {
   if (!iframeMatch) return null;
 
   const src = iframeMatch[1];
+  let parsedUrl: URL;
   try {
-    const url = new URL(src);
-    // Only allow https iframes
-    if (url.protocol !== 'https:') return null;
+    parsedUrl = new URL(src);
+    if (parsedUrl.protocol !== 'https:') return null;
   } catch {
     return null;
   }
 
-  // Strip everything except the iframe element itself (no scripts, no other HTML)
-  const fullIframe = raw.match(/<iframe[^>]*>[\s\S]*?<\/iframe>/i);
-  if (!fullIframe) return null;
+  // Validate embed domain against allowlist
+  const hostname = parsedUrl.hostname.toLowerCase();
+  const domainAllowed = ALLOWED_EMBED_DOMAINS.some(
+    d => hostname === d || hostname.endsWith('.' + d)
+  );
+  if (!domainAllowed) return null;
 
-  // Verify no script tags or event handlers snuck in
-  const iframe = fullIframe[0];
-  if (/<script/i.test(iframe) || /\bon\w+\s*=/i.test(iframe)) return null;
+  // Rebuild iframe with only safe attributes (whitelist approach)
+  const safeAttrs: Record<string, string> = { src };
+
+  // Extract safe attributes from original
+  const widthMatch = raw.match(/\bwidth=["']([^"']+)["']/i);
+  const heightMatch = raw.match(/\bheight=["']([^"']+)["']/i);
+  const styleMatch = raw.match(/\bstyle=["']([^"']+)["']/i);
+  const allowMatch = raw.match(/\ballow=["']([^"']+)["']/i);
+  const allowfullscreen = /\ballowfullscreen\b/i.test(raw);
+
+  if (widthMatch) safeAttrs.width = widthMatch[1];
+  if (heightMatch) safeAttrs.height = heightMatch[1];
+  if (styleMatch) safeAttrs.style = styleMatch[1];
+  if (allowMatch) safeAttrs.allow = allowMatch[1];
+
+  // Build clean iframe from whitelist
+  const attrs = Object.entries(safeAttrs)
+    .map(([k, v]) => `${k}="${v.replace(/"/g, '&quot;')}"`)
+    .join(' ');
+  const iframe = `<iframe ${attrs}${allowfullscreen ? ' allowfullscreen' : ''} loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>`;
 
   // Cap at 2000 chars
   return iframe.slice(0, 2000);
@@ -73,6 +107,10 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   }
+
+  const ip = getClientIp(event.headers);
+  const rl = await checkRateLimit(ip, 'standard', CORS_HEADERS);
+  if (rl.limited) return rl.response;
 
   if (event.httpMethod !== 'PUT') {
     return { statusCode: 405, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Method not allowed' }) };

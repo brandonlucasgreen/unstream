@@ -4,6 +4,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
+import { checkRateLimit, getClientIp } from './ratelimit';
 
 function getServiceClient() {
   return getClient();
@@ -40,6 +41,10 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers, body: '' };
   }
+
+  const ip = getClientIp(event.headers);
+  const rl = await checkRateLimit(ip, 'standard', headers);
+  if (rl.limited) return rl.response;
 
   const client = getServiceClient();
   if (!client) {

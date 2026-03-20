@@ -5,6 +5,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
+import { checkRateLimit, getClientIp } from './ratelimit';
 
 const PLATFORM_PATTERNS: [string, RegExp][] = [
   ['bandcamp', /([a-z0-9-]+)\.bandcamp\.com/i],
@@ -62,6 +63,46 @@ function generateVerificationCode(): string {
   return code;
 }
 
+// Validate a URL is safe for server-side fetching (SSRF protection)
+function isUrlSafeToFetch(urlString: string): { safe: boolean; reason?: string } {
+  let parsed: URL;
+  try {
+    parsed = new URL(urlString);
+  } catch {
+    return { safe: false, reason: 'Invalid URL' };
+  }
+
+  // Only allow HTTP(S)
+  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+    return { safe: false, reason: 'Only HTTP/HTTPS URLs are allowed' };
+  }
+
+  const hostname = parsed.hostname.toLowerCase();
+
+  // Block localhost and loopback
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '0.0.0.0') {
+    return { safe: false, reason: 'Localhost URLs are not allowed' };
+  }
+
+  // Block private/reserved IP ranges
+  const ipv4Match = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (ipv4Match) {
+    const [, a, b] = ipv4Match.map(Number);
+    if (a === 10) return { safe: false, reason: 'Private IP not allowed' };
+    if (a === 172 && b >= 16 && b <= 31) return { safe: false, reason: 'Private IP not allowed' };
+    if (a === 192 && b === 168) return { safe: false, reason: 'Private IP not allowed' };
+    if (a === 169 && b === 254) return { safe: false, reason: 'Link-local IP not allowed' }; // AWS metadata
+    if (a === 0) return { safe: false, reason: 'Reserved IP not allowed' };
+  }
+
+  // Block common cloud metadata endpoints
+  if (hostname === 'metadata.google.internal' || hostname === 'metadata.google') {
+    return { safe: false, reason: 'Cloud metadata endpoint not allowed' };
+  }
+
+  return { safe: true };
+}
+
 interface ScrapeResult {
   links: string[];
   html: string;
@@ -69,6 +110,12 @@ interface ScrapeResult {
 
 // Scrape a website and extract all <a href> links + raw HTML
 async function scrapeWebsite(websiteUrl: string): Promise<ScrapeResult | null> {
+  const urlCheck = isUrlSafeToFetch(websiteUrl);
+  if (!urlCheck.safe) {
+    console.warn(`[Claim] SSRF blocked: ${websiteUrl} — ${urlCheck.reason}`);
+    return null;
+  }
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
 
@@ -166,6 +213,12 @@ function identifyPlatformLinks(links: string[]): { platform: string; url: string
 
 // Scrape an artist avatar/profile photo from a platform page
 async function scrapeAvatarFromPlatform(platform: string, pageUrl: string): Promise<string | null> {
+  const urlCheck = isUrlSafeToFetch(pageUrl);
+  if (!urlCheck.safe) {
+    console.warn(`[Claim] SSRF blocked avatar fetch: ${pageUrl} — ${urlCheck.reason}`);
+    return null;
+  }
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
 
@@ -259,6 +312,11 @@ export async function handler(event: {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   }
 
+  // Rate limit: strict tier (scraping endpoint)
+  const ip = getClientIp(event.headers);
+  const rl = await checkRateLimit(ip, 'strict', CORS_HEADERS);
+  if (rl.limited) return rl.response;
+
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -309,14 +367,13 @@ export async function handler(event: {
       };
     }
 
-    // Validate URL
-    try {
-      new URL(websiteUrl);
-    } catch {
+    // Validate URL and check for SSRF
+    const urlSafety = isUrlSafeToFetch(websiteUrl);
+    if (!urlSafety.safe) {
       return {
         statusCode: 400,
         headers: CORS_HEADERS,
-        body: JSON.stringify({ error: 'Invalid website URL' }),
+        body: JSON.stringify({ error: urlSafety.reason || 'Invalid website URL' }),
       };
     }
 

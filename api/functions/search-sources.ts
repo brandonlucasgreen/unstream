@@ -1,6 +1,7 @@
 import { parse } from 'node-html-parser';
 import { cacheGetOrFetch, artistCacheKey } from './cache';
 import { persistSearchResults, getArtistBySlug, artistSlug } from './db';
+import { checkRateLimit, getClientIp } from './ratelimit';
 import {
   type SourceId,
   type LatestRelease,
@@ -1309,16 +1310,18 @@ async function searchBandcampForAlbum(artistUrl: string, albumTitle: string): Pr
 }
 
 // Netlify function handler
-export async function handler(event: { queryStringParameters?: Record<string, string> }) {
+export async function handler(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
+  const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
+  const ip = getClientIp(event.headers || {});
+  const rl = await checkRateLimit(ip, 'strict', corsHeaders);
+  if (rl.limited) return rl.response;
+
   const query = event.queryStringParameters?.query;
 
   if (!query) {
     return {
       statusCode: 400,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'Query parameter is required' }),
     };
   }
