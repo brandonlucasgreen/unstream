@@ -23,14 +23,14 @@ export function ArtistPage() {
   // Update page title and meta tags
   useEffect(() => {
     if (displayName) {
-      document.title = `${displayName} on Unstream - Find music on alternative platforms`;
+      document.title = `${displayName} on Unstream - Support artists directly`;
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) {
         metaDesc.setAttribute('content', `Find ${displayName} on Bandcamp, Qobuz, and other ethical music platforms. Support artists directly.`);
       }
     }
     return () => {
-      document.title = 'Unstream - Find music on alternative platforms';
+      document.title = 'Unstream - Support artists directly';
     };
   }, [displayName]);
 
@@ -123,7 +123,7 @@ export function ArtistPage() {
             The browser extension does the same for any music playing in your browser (YouTube, Soundcloud, and more).
           </p>
           <p className="text-text-secondary mb-6">
-            Grab the <a href="https://bgreenlol.lemonsqueezy.com/checkout/buy/d4e127a7-2cef-4013-80b8-5d0de691f332" target="_blank" rel="noopener noreferrer" className="text-accent-primary hover:underline"><strong>Unstream Yearly Pass</strong></a> ($4.99/year) to unlock saved artist lists, new release alerts and more.
+            Unstream is free because the point is getting money to artists, not charging you to find them. If you find it useful, consider <a href="/support" className="text-accent-primary hover:underline"><strong>supporting its development</strong></a> 🤘
           </p>
           <div className="flex flex-col items-center gap-3 mb-2">
             <a
