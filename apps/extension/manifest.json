@@ -23,32 +23,32 @@
   "content_scripts": [
     {
       "matches": ["https://open.spotify.com/*"],
-      "js": ["content/spotify.js"],
+      "js": ["content/common.js", "content/spotify.js"],
       "run_at": "document_idle"
     },
     {
       "matches": ["https://www.youtube.com/*", "https://youtube.com/*"],
-      "js": ["content/youtube.js"],
+      "js": ["content/common.js", "content/youtube.js"],
       "run_at": "document_idle"
     },
     {
       "matches": ["https://music.youtube.com/*"],
-      "js": ["content/youtube-music.js"],
+      "js": ["content/common.js", "content/youtube-music.js"],
       "run_at": "document_idle"
     },
     {
       "matches": ["https://music.apple.com/*"],
-      "js": ["content/apple-music.js"],
+      "js": ["content/common.js", "content/apple-music.js"],
       "run_at": "document_idle"
     },
     {
       "matches": ["https://*.bandcamp.com/*", "https://bandcamp.com/*"],
-      "js": ["content/bandcamp.js"],
+      "js": ["content/common.js", "content/bandcamp.js"],
       "run_at": "document_idle"
     },
     {
       "matches": ["https://soundcloud.com/*", "https://www.soundcloud.com/*"],
-      "js": ["content/soundcloud.js"],
+      "js": ["content/common.js", "content/soundcloud.js"],
       "run_at": "document_idle"
     },
     {
@@ -64,7 +64,7 @@
         "*://soundcloud.com/*",
         "*://www.soundcloud.com/*"
       ],
-      "js": ["content/generic.js"],
+      "js": ["content/common.js", "content/generic.js"],
       "run_at": "document_idle"
     }
   ],
