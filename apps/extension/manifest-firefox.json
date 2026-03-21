@@ -14,7 +14,7 @@
     }
   },
   "description": "See where your money actually goes. Unstream shows artist payout percentages and finds them on 23+ platforms. Free, open source, no tracking.",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
@@ -34,22 +34,32 @@
   "content_scripts": [
     {
       "matches": ["https://open.spotify.com/*"],
-      "js": ["content/spotify.js"],
+      "js": ["content/common.js", "content/spotify.js"],
       "run_at": "document_idle"
     },
     {
       "matches": ["https://www.youtube.com/*", "https://youtube.com/*"],
-      "js": ["content/youtube.js"],
+      "js": ["content/common.js", "content/youtube.js"],
       "run_at": "document_idle"
     },
     {
       "matches": ["https://music.youtube.com/*"],
-      "js": ["content/youtube-music.js"],
+      "js": ["content/common.js", "content/youtube-music.js"],
       "run_at": "document_idle"
     },
     {
       "matches": ["https://music.apple.com/*"],
-      "js": ["content/apple-music.js"],
+      "js": ["content/common.js", "content/apple-music.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://*.bandcamp.com/*", "https://bandcamp.com/*"],
+      "js": ["content/common.js", "content/bandcamp.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://soundcloud.com/*", "https://www.soundcloud.com/*"],
+      "js": ["content/common.js", "content/soundcloud.js"],
       "run_at": "document_idle"
     },
     {
@@ -59,9 +69,13 @@
         "*://www.youtube.com/*",
         "*://youtube.com/*",
         "*://music.youtube.com/*",
-        "*://music.apple.com/*"
+        "*://music.apple.com/*",
+        "*://*.bandcamp.com/*",
+        "*://bandcamp.com/*",
+        "*://soundcloud.com/*",
+        "*://www.soundcloud.com/*"
       ],
-      "js": ["content/generic.js"],
+      "js": ["content/common.js", "content/generic.js"],
       "run_at": "document_idle"
     }
   ],
