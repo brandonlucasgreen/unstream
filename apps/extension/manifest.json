@@ -42,13 +42,27 @@
       "run_at": "document_idle"
     },
     {
+      "matches": ["https://*.bandcamp.com/*", "https://bandcamp.com/*"],
+      "js": ["content/bandcamp.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://soundcloud.com/*", "https://www.soundcloud.com/*"],
+      "js": ["content/soundcloud.js"],
+      "run_at": "document_idle"
+    },
+    {
       "matches": ["<all_urls>"],
       "exclude_matches": [
         "*://open.spotify.com/*",
         "*://www.youtube.com/*",
         "*://youtube.com/*",
         "*://music.youtube.com/*",
-        "*://music.apple.com/*"
+        "*://music.apple.com/*",
+        "*://*.bandcamp.com/*",
+        "*://bandcamp.com/*",
+        "*://soundcloud.com/*",
+        "*://www.soundcloud.com/*"
       ],
       "js": ["content/generic.js"],
       "run_at": "document_idle"

@@ -7,6 +7,17 @@
   let lastArtist = null;
   let lastTitle = null;
 
+  // Safe wrapper for safeSendMessage
+  function safeSendMessage(message) {
+    try {
+      if (chrome.runtime?.id) {
+        safeSendMessage(message);
+      }
+    } catch (e) {
+      // Extension context invalidated — ignore
+    }
+  }
+
   // Extract now playing info from Spotify Web Player
   function getNowPlaying() {
     // Try Media Session API first (most reliable)
@@ -49,7 +60,7 @@
     if (!isPlaying()) {
       if (lastArtist !== null) {
         // Music stopped
-        chrome.runtime.sendMessage({ type: 'MUSIC_STOPPED' });
+        safeSendMessage({ type: 'MUSIC_STOPPED' });
         lastArtist = null;
         lastTitle = null;
       }
@@ -66,7 +77,7 @@
       lastArtist = artist;
       lastTitle = title;
 
-      chrome.runtime.sendMessage({
+      safeSendMessage({
         type: 'MUSIC_DETECTED',
         data: { artist, title, source: 'spotify' }
       });

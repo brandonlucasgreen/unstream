@@ -8,10 +8,19 @@
   let lastArtist = null;
   let lastTitle = null;
 
+  // Safe wrapper for safeSendMessage
+  function safeSendMessage(message) {
+    try {
+      if (chrome.runtime?.id) {
+        safeSendMessage(message);
+      }
+    } catch (e) {
+      // Extension context invalidated — ignore
+    }
+  }
+
   // Map common music domains to friendly source names
   const DOMAIN_SOURCE_MAP = {
-    'bandcamp.com': 'bandcamp',
-    'soundcloud.com': 'soundcloud',
     'tidal.com': 'tidal',
     'deezer.com': 'deezer',
     'pandora.com': 'pandora',
@@ -44,11 +53,6 @@
       if (hostname === domain || hostname.endsWith('.' + domain)) {
         return source;
       }
-    }
-
-    // Special case for Bandcamp artist subdomains (artist.bandcamp.com)
-    if (hostname.endsWith('.bandcamp.com')) {
-      return 'bandcamp';
     }
 
     // Fallback: use hostname without www prefix
@@ -93,7 +97,7 @@
     if (!isPlaying()) {
       if (lastArtist !== null) {
         // Music stopped
-        chrome.runtime.sendMessage({ type: 'MUSIC_STOPPED' });
+        safeSendMessage({ type: 'MUSIC_STOPPED' });
         lastArtist = null;
         lastTitle = null;
       }
@@ -110,7 +114,7 @@
       lastArtist = artist;
       lastTitle = title;
 
-      chrome.runtime.sendMessage({
+      safeSendMessage({
         type: 'MUSIC_DETECTED',
         data: { artist, title, source: getSourceName() }
       });

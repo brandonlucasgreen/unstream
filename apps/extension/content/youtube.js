@@ -13,13 +13,54 @@
     'official audio', 'audio', 'lyrics', 'lyric video',
     'visualizer', 'official visualizer',
     'live', 'acoustic', 'remix', 'cover',
-    'ft.', 'feat.', 'featuring'
+    'ft.', 'feat.', 'featuring',
+    'music', 'song', 'album', 'ep ', 'single',
+    'prod.', 'produced by', 'beat',
+    'mv', 'pmv'
   ];
+
+  // Safe wrapper for chrome.runtime.sendMessage
+  function safeSendMessage(message) {
+    try {
+      if (chrome.runtime?.id) {
+        chrome.runtime.sendMessage(message);
+      }
+    } catch (e) {
+      // Extension context invalidated (service worker inactive) — ignore
+    }
+  }
 
   // Check if this looks like a music video
   function isMusicVideo(title) {
     const titleLower = title.toLowerCase();
     return MUSIC_KEYWORDS.some(keyword => titleLower.includes(keyword));
+  }
+
+  // Check if the channel is a YouTube Music auto-generated "Topic" channel
+  function isTopicChannel() {
+    const channelElement = document.querySelector('#channel-name a');
+    if (!channelElement) return false;
+    const channelName = channelElement.textContent?.trim() || '';
+    return channelName.endsWith(' - Topic');
+  }
+
+  // Check if the page has music category metadata
+  function hasMusicCategory() {
+    // Check structured data in the page
+    const metaGenre = document.querySelector('meta[itemprop="genre"]');
+    if (metaGenre) {
+      const genre = metaGenre.getAttribute('content')?.toLowerCase() || '';
+      if (genre === 'music' || genre.includes('music')) return true;
+    }
+
+    // Check for music-related badges/chips in the description
+    const chips = document.querySelectorAll('yt-formatted-string.super-title');
+    for (const chip of chips) {
+      const text = chip.textContent?.toLowerCase() || '';
+      if (text.includes('music')) return true;
+    }
+
+    return false;
   }
 
   // Extract artist from video title
@@ -36,14 +77,18 @@
       .replace(/\(live.*?\)/gi, '')
       .replace(/\(acoustic.*?\)/gi, '')
       .replace(/\[.*?\]/g, '')
+      .replace(/\(prod\..*?\)/gi, '')
+      .replace(/\(feat\..*?\)/gi, '')
       .trim();
 
-    // Try "Artist - Title" pattern
-    const dashMatch = cleanTitle.match(/^(.+?)\s*[-–—]\s*(.+)$/);
+    // Try "Artist - Title" pattern (with various dash types and pipe)
+    const dashMatch = cleanTitle.match(/^(.+?)\s*[-–—|]\s*(.+)$/);
     if (dashMatch) {
       const artist = dashMatch[1].trim();
       const song = dashMatch[2].trim();
-      return { artist, title: song };
+      if (artist && song) {
+        return { artist, title: song };
+      }
     }
 
     // Try "Title by Artist" pattern
@@ -65,20 +110,28 @@
       }
     }
 
-    // Fallback: Get video title
+    // Fallback: Get video title from DOM
     const video = document.querySelector('video');
     if (!video || video.paused) return null;
 
-    const titleElement = document.querySelector('h1.ytd-watch-metadata yt-formatted-string');
+    // Try multiple selectors for the video title (YouTube updates DOM structure)
+    const titleElement =
+      document.querySelector('h1.ytd-watch-metadata yt-formatted-string') ||
+      document.querySelector('h1.ytd-video-primary-info-renderer yt-formatted-string') ||
+      document.querySelector('#title h1 yt-formatted-string');
     if (!titleElement) return null;
 
     const videoTitle = titleElement.textContent?.trim();
     if (!videoTitle) return null;
 
-    // Check if it looks like a music video
-    if (!isMusicVideo(videoTitle)) return null;
+    // Accept the video if any of these are true:
+    // 1. Title contains music keywords
+    // 2. It's a Topic channel (auto-generated music)
+    // 3. Page has music category metadata
+    const looksLikeMusic = isMusicVideo(videoTitle) || isTopicChannel() || hasMusicCategory();
+    if (!looksLikeMusic) return null;
 
-    // Try to extract artist
+    // Try to extract artist from title
     const extracted = extractArtist(videoTitle);
     if (extracted) {
       return extracted;
@@ -112,7 +165,7 @@
   function poll() {
     if (!isPlaying()) {
       if (lastArtist !== null) {
-        chrome.runtime.sendMessage({ type: 'MUSIC_STOPPED' });
+        safeSendMessage({ type: 'MUSIC_STOPPED' });
         lastArtist = null;
         lastTitle = null;
       }
@@ -128,7 +181,7 @@
       lastArtist = artist;
       lastTitle = title;
 
-      chrome.runtime.sendMessage({
+      safeSendMessage({
         type: 'MUSIC_DETECTED',
         data: { artist, title, source: 'youtube' }
       });
@@ -138,6 +191,26 @@
   // Start polling
   setInterval(poll, POLL_INTERVAL);
   poll();
+
+  // Handle YouTube SPA navigation — re-poll immediately on page transitions
+  // YouTube fires this custom event when navigating between videos
+  document.addEventListener('yt-navigate-finish', () => {
+    // Reset state so we detect the new video
+    lastArtist = null;
+    lastTitle = null;
+    // Poll immediately after navigation, then again shortly after
+    // (DOM may not be fully updated on the first try)
+    poll();
+    setTimeout(poll, 1000);
+    setTimeout(poll, 2500);
+  });
+
+  // Also listen for popstate (back/forward navigation)
+  window.addEventListener('popstate', () => {
+    lastArtist = null;
+    lastTitle = null;
+    setTimeout(poll, 500);
+  });
 
   console.log('[Unstream] YouTube content script loaded');
 })();

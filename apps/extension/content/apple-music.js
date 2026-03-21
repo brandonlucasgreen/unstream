@@ -7,6 +7,17 @@
   let lastArtist = null;
   let lastTitle = null;
 
+  // Safe wrapper for safeSendMessage
+  function safeSendMessage(message) {
+    try {
+      if (chrome.runtime?.id) {
+        safeSendMessage(message);
+      }
+    } catch (e) {
+      // Extension context invalidated — ignore
+    }
+  }
+
   // Get now playing info from Apple Music Web
   function getNowPlaying() {
     // Try Media Session API first
@@ -62,7 +73,7 @@
   function poll() {
     if (!isPlaying()) {
       if (lastArtist !== null) {
-        chrome.runtime.sendMessage({ type: 'MUSIC_STOPPED' });
+        safeSendMessage({ type: 'MUSIC_STOPPED' });
         lastArtist = null;
         lastTitle = null;
       }
@@ -78,7 +89,7 @@
       lastArtist = artist;
       lastTitle = title;
 
-      chrome.runtime.sendMessage({
+      safeSendMessage({
         type: 'MUSIC_DETECTED',
         data: { artist, title, source: 'apple-music' }
       });
