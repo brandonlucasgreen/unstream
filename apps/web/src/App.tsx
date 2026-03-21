@@ -122,13 +122,13 @@ function App() {
   const justWentHomeRef = useRef(false);
 
   // Default page title
-  const defaultTitle = 'Unstream - Find music on alternative platforms';
+  const defaultTitle = 'Unstream - Support artists directly';
 
   // Update page title based on search query
   useEffect(() => {
     const query = searchParams.get('q');
     if (query) {
-      document.title = `${query} on Unstream - Find music on alternative platforms`;
+      document.title = `${query} on Unstream - Support artists directly`;
     } else {
       document.title = defaultTitle;
     }
@@ -270,7 +270,7 @@ function App() {
             The Unstream apps detect what's playing in Spotify, Apple Music or any music player in your browser, and shows the best ways to support that artist, right in your menu bar. Save artists you want to support later and get alerts when they release new music.
           </p>
           <p className="text-text-secondary mb-6">
-            Unstream is totally free to use. If you find Unstream useful, consider <a href="/support" className="text-accent-primary hover:underline"><strong>supporting its development</strong></a> 🙏
+            Unstream is free because the point is getting money to artists, not charging you to find them. If you find it useful, consider <a href="/support" className="text-accent-primary hover:underline"><strong>supporting its development</strong></a> 🤘
           </p>
           <div className="flex flex-col items-center gap-3 mb-2">
             <a
@@ -339,7 +339,8 @@ function App() {
             </button>
           </h1>
           <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto">
-            Find your favorite music on alternative platforms, directly support the artists you love, and move off streaming.
+            Support artists directly on alternative platforms.<br />
+            Reduce your dependency on streaming.
           </p>
         </div>
       </header>
