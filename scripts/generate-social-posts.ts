@@ -337,21 +337,21 @@ function generateDrafts(
 
       case 1: // payout angle, conversational
         if (ctx.topPlatformName && ctx.payout) {
-          threads = `${tName} keeps ${ctx.payout} of every sale on ${ctx.topPlatformName}. on Spotify they'd get about $0.003 per stream. not complicated math.\n\n${unstreamUrl}`;
-          bluesky = `${bName} on ${ctx.topPlatformName}: ${ctx.payout} per sale. On Spotify: ~$0.003 per stream. Not complicated math.\n\n${unstreamUrl}`;
+          threads = `${tName} keeps ${ctx.payout} of every sale on ${ctx.topPlatformName}. on Spotify they'd get about $0.003 per stream. pretty big difference.\n\n${unstreamUrl}`;
+          bluesky = `${bName} on ${ctx.topPlatformName}: ${ctx.payout} per sale. On Spotify: ~$0.003 per stream. That adds up.\n\n${unstreamUrl}`;
           instagram = `${iName} keeps ${ctx.payout} of every sale on ${ctx.topPlatformName}.\n\nOn Spotify they'd get about $0.003 per stream.\n\nOne album purchase does more than thousands of streams.\n\n${unstreamUrl}`;
         } else {
-          threads = `you can buy ${tName}'s music directly and they get most of the money. or you can stream it and they get fractions of a penny. seems like an easy call?\n\n${unstreamUrl}`;
-          bluesky = `You can buy ${bName}'s music directly — or stream it for fractions of a penny. Easy call.\n\n${unstreamUrl}`;
+          threads = `you can buy ${tName}'s music directly and they get most of the money. or you can stream it and they get fractions of a penny. worth thinking about.\n\n${unstreamUrl}`;
+          bluesky = `You can buy ${bName}'s music directly — they get way more than streaming would ever pay them.\n\n${unstreamUrl}`;
           instagram = `You can buy ${iName}'s music directly and they get most of the money.\n\nOr you can stream it and they get fractions of a penny.\n\nAll their links: ${unstreamUrl}`;
         }
         break;
 
-      case 2: // latest release
-        if (ctx.latestRelease) {
-          threads = `${tName} put out "${ctx.latestRelease.title}" and you can grab it on ${ctx.topPlatformName || 'their page'}${ctx.payout ? ` — ${ctx.payout} goes to them` : ''}. that's what direct support looks like.\n\n${unstreamUrl}`;
-          bluesky = `"${ctx.latestRelease.title}" by ${bName} — buy it where the money goes to the artist.\n\n${unstreamUrl}`;
-          instagram = `"${ctx.latestRelease.title}" by ${iName}\n\nYou can buy it directly on ${ctx.topPlatformName || 'platforms'}${ctx.payout ? ` where they keep ${ctx.payout}` : ''} instead of adding another fraction-of-a-penny stream.\n\n${unstreamUrl}`;
+      case 2: // has music on platform
+        if (ctx.topPlatformName) {
+          threads = `${tName} has music on ${ctx.topPlatformName} you can buy directly${ctx.payout ? ` — they keep ${ctx.payout}` : ''}. that's what direct support looks like.\n\n${unstreamUrl}`;
+          bluesky = `${bName} has music on ${ctx.topPlatformName} — buy it where the money goes to the artist.\n\n${unstreamUrl}`;
+          instagram = `${iName} has music on ${ctx.topPlatformName} you can buy directly${ctx.payout ? ` — they keep ${ctx.payout} of every sale` : ''} instead of adding another fraction-of-a-penny stream.\n\n${unstreamUrl}`;
         } else {
           // fallback: warm recommendation
           threads = `been looking at ${tName}'s page on Unstream — they've got ${ctx.directPlatforms.length || 'a few'} places where you can buy their stuff directly. worth a look 👀\n\n${unstreamUrl}`;
@@ -392,13 +392,12 @@ function generateDrafts(
         instagram = `One album purchase does more for ${iName} than streaming them for years.\n\nStreaming: ~$0.003 per play\nBuying${ctx.topPlatformName ? ` on ${ctx.topPlatformName}` : ''}: ${ctx.payout ? `${ctx.payout} goes to them` : 'they keep most of it'}\n\n${unstreamUrl}`;
         break;
 
-      case 2: // latest release
-        if (ctx.latestRelease) {
-          threads = `${tName} has "${ctx.latestRelease.title}" on ${ctx.topPlatformName || 'a bunch of places'} where you can buy it directly${ctx.payout ? ` and they keep ${ctx.payout}` : ''}. kind of cool that that's an option.\n\n${unstreamUrl}`;
-          bluesky = `"${ctx.latestRelease.title}" by ${bName} — buy it where the artist gets paid.\n\n${unstreamUrl}`;
-          instagram = `"${ctx.latestRelease.title}" by ${iName}\n\nYou can buy it directly${ctx.topPlatformName ? ` on ${ctx.topPlatformName}` : ''} where they get ${ctx.payout || 'way more than streaming pays'}.\n\n${unstreamUrl}`;
+      case 2: // has music on platform
+        if (ctx.topPlatformName) {
+          threads = `${tName} has music on ${ctx.topPlatformName} that you can buy directly${ctx.payout ? ` — they keep ${ctx.payout} of every sale` : ''}. way better than what streaming pays them.\n\n${unstreamUrl}`;
+          bluesky = `${bName} has music on ${ctx.topPlatformName} you can buy directly. ${ctx.payout ? `${ctx.payout} to the artist.` : 'Way more than streaming pays.'}\n\n${unstreamUrl}`;
+          instagram = `${iName} has music on ${ctx.topPlatformName} that you can buy directly${ctx.payout ? ` — they keep ${ctx.payout} of every sale` : ''}.\n\nWay better than what streaming pays them.\n\n${unstreamUrl}`;
         } else {
-          // fallback: simple "you can buy their music"
           threads = `you can buy ${tName}'s music directly online and they get way more out of it than streaming would ever pay them. worth knowing about.\n\n${unstreamUrl}`;
           bluesky = `You can buy ${bName}'s music directly. They get way more than streaming pays.\n\n${unstreamUrl}`;
           instagram = `You can buy ${iName}'s music directly online and they get way more than the fractions of a penny streaming pays.\n\nAll their links: ${unstreamUrl}`;
@@ -484,7 +483,9 @@ function generateFeaturePost(feature: ShippedFeature): PostDraft['posts'] {
   // These are starting-point drafts — the voice here is intentionally
   // understated. You'll want to edit these to feel more natural for
   // whatever the feature actually is.
-  const threads = `new on Unstream: ${feature.description.toLowerCase()}\n\n${url}`;
+  // feature.description should read well after "new on Unstream:" — write it
+  // as a standalone blurb, not a sentence that starts with "Unstream".
+  const threads = `new on Unstream: ${feature.description}\n\n${url}`;
   const bluesky = `New on Unstream: ${feature.description}\n\n${url}\n\n#musicsky #fairtrademusic #supportartists`;
   const instagram = `New on Unstream:\n\n${feature.description}\n\n${url}\n\n#music #fairtrademusic #supportartists #indiemusic #buymusic`;
 
@@ -748,19 +749,36 @@ function getWeekDates(weekStr?: string): { week: string; dates: string[] } {
 
 // --- Artist selection ---
 
+// Slugs to deprioritize — these are "us" and shouldn't appear in the first cycle.
+// They'll still be featured eventually once the pool cycles.
+const DEPRIORITIZE_SLUGS = new Set(['kid-lightbulbs']);
+
 function pickArtist(
   pool: { slug: string; name: string; imageUrl: string | null }[],
   history: History
 ): { slug: string; name: string; imageUrl: string | null } | null {
   // Prefer artists not yet featured
-  const unfeatured = pool.filter(a => !history.featured.includes(a.slug));
-  const candidates = unfeatured.length > 0 ? unfeatured : pool;
+  let unfeatured = pool.filter(a => !history.featured.includes(a.slug));
 
-  if (candidates.length === 0) return null;
+  // On the first pass through the pool, deprioritize our own project(s)
+  if (unfeatured.length > 1) {
+    const withoutSelf = unfeatured.filter(a => !DEPRIORITIZE_SLUGS.has(a.slug));
+    if (withoutSelf.length > 0) unfeatured = withoutSelf;
+  }
 
-  // Deterministic-ish random: pick based on date seed
-  const idx = Math.floor(Math.random() * candidates.length);
-  return candidates[idx];
+  if (unfeatured.length > 0) {
+    const idx = Math.floor(Math.random() * unfeatured.length);
+    return unfeatured[idx];
+  }
+
+  // Everyone's been featured — reset history and start a new cycle
+  if (pool.length > 0) {
+    history.featured = [];
+    const idx = Math.floor(Math.random() * pool.length);
+    return pool[idx];
+  }
+
+  return null;
 }
 
 // --- Buffer GraphQL integration ---
@@ -782,11 +800,14 @@ async function bufferGraphQL(query: string, variables?: Record<string, unknown>)
     body: JSON.stringify({ query, variables }),
   });
 
-  if (!res.ok) {
-    throw new Error(`Buffer API error: ${res.status} ${res.statusText}`);
+  const data = await res.json();
+
+  if (!res.ok || data.errors) {
+    const errMsg = data.errors?.map((e: { message: string }) => e.message).join('; ') || JSON.stringify(data);
+    throw new Error(`Buffer API error (${res.status}): ${errMsg}`);
   }
 
-  return res.json();
+  return data;
 }
 
 async function listChannels() {
@@ -830,7 +851,7 @@ async function createBufferPost(opts: CreatePostOpts) {
     text: opts.text,
     dueAt: opts.dueAt,
     schedulingType: 'automatic',
-    mode: 'customSchedule',
+    mode: 'customScheduled',
     saveToDraft: opts.saveToDraft,
   };
 
@@ -1120,7 +1141,7 @@ async function main() {
 
     for (const draft of drafts) {
       // Schedule at 12:00 PM ET each day
-      const dueAt = `${draft.date}T17:00:00Z`; // 12 PM ET = 5 PM UTC
+      const dueAt = `${draft.date}T13:00:00Z`; // 8 AM ET = 1 PM UTC
 
       const results = [];
 
@@ -1146,14 +1167,20 @@ async function main() {
         results.push({ platform: 'Bluesky', ...result });
       }
       if (instagramId) {
-        const result = await createBufferPost({
-          channelId: instagramId,
-          text: draft.posts.instagram,
-          dueAt,
-          imageUrl: draft.imageUrl,
-          saveToDraft,
-        });
-        results.push({ platform: 'Instagram', ...result });
+        // Instagram requires at least one image — Buffer rejects imageless posts entirely
+        if (!draft.imageUrl) {
+          results.push({ platform: 'Instagram', success: true, status: 'skipped (no image)', id: undefined });
+        } else {
+          const result = await createBufferPost({
+            channelId: instagramId,
+            text: draft.posts.instagram,
+            dueAt,
+            imageUrl: draft.imageUrl,
+            saveToDraft,
+            metadata: { instagram: { type: 'post', shouldShareToFeed: true } },
+          });
+          results.push({ platform: 'Instagram', ...result });
+        }
       }
 
       const ok = results.every(r => r.success);
