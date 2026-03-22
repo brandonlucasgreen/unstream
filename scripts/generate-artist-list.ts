@@ -44,6 +44,33 @@ function slugify(name: string): string {
     .replace(/^-|-$/g, '');
 }
 
+// Non-music occupations to exclude (Wikidata QIDs).
+// People with these occupations often have MusicBrainz IDs (comedy albums,
+// spoken word, etc.) but aren't primarily music artists.
+const EXCLUDE_OCCUPATIONS = [
+  'wd:Q245068',   // comedian
+  'wd:Q33999',    // actor
+  'wd:Q10800557', // film actor
+  'wd:Q10798782', // television actor
+  'wd:Q2405480',  // voice actor
+  'wd:Q947873',   // television presenter
+  'wd:Q82955',    // politician
+  'wd:Q2526255',  // film director
+  'wd:Q28389',    // screenwriter
+  'wd:Q36180',    // writer (non-songwriter)
+  'wd:Q49757',    // poet
+  'wd:Q15214752', // podcaster
+  'wd:Q170790',   // mathematician
+  'wd:Q901',      // scientist
+  'wd:Q2066131',  // athlete
+  'wd:Q937857',   // football player
+];
+
+// SPARQL snippet to exclude non-music occupations
+const OCCUPATION_FILTER = EXCLUDE_OCCUPATIONS
+  .map(qid => `FILTER NOT EXISTS { ?artist wdt:P106 ${qid} }`)
+  .join('\n  ');
+
 // Fetch a large pool so we can skip the top 1000 and still have 3000+ left.
 // Lower sitelink thresholds to reach deeper into the mid/long-tail.
 const QUERIES: { label: string; sparql: string }[] = [
@@ -70,6 +97,7 @@ SELECT ?artist ?artistLabel ?mbid ?sites WHERE {
   ?artist wdt:P434 ?mbid .           # has MusicBrainz ID
   ?artist wikibase:sitelinks ?sites .
   FILTER(?sites > 10)
+  ${OCCUPATION_FILTER}
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en" . }
 }
 ORDER BY DESC(?sites)
@@ -85,6 +113,7 @@ SELECT ?artist ?artistLabel ?mbid ?sites WHERE {
   ?artist wdt:P434 ?mbid .           # has MusicBrainz ID
   ?artist wikibase:sitelinks ?sites .
   FILTER(?sites > 10)
+  ${OCCUPATION_FILTER}
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en" . }
 }
 ORDER BY DESC(?sites)
@@ -100,6 +129,7 @@ SELECT ?artist ?artistLabel ?mbid ?sites WHERE {
   ?artist wdt:P434 ?mbid .           # has MusicBrainz ID
   ?artist wikibase:sitelinks ?sites .
   FILTER(?sites > 10)
+  ${OCCUPATION_FILTER}
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en" . }
 }
 ORDER BY DESC(?sites)
