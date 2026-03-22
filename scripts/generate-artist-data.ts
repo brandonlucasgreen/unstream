@@ -36,8 +36,10 @@ const LOCAL_API = 'http://localhost:5173';
 const PROD_API = 'https://unstream.stream';
 const useLocal = process.argv.includes('--local');
 const API_BASE = useLocal ? LOCAL_API : PROD_API;
-const CONCURRENCY = 3;
+const CONCURRENCY = useLocal ? 3 : 1; // Sequential against production to respect rate limits
 const MB_DELAY_MS = 1100; // MusicBrainz rate limit: 1 req/sec
+const API_DELAY_MS = useLocal ? 500 : 2500; // Delay between batches: generous for production (30 req/min)
+const MAX_RETRIES = 3;
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days - skip if data is newer
 
 // Artist must have a verified (non-search-only) link on at least one of these
@@ -194,24 +196,48 @@ function mergeWithMusicBrainzData(results: SearchResult[], mbData: MusicBrainzDa
   });
 }
 
+async function fetchWithRetry(url: string, label: string): Promise<Response> {
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    const response = await fetch(url, {
+      headers: { 'User-Agent': 'Unstream-DataGen/1.0' },
+    });
+
+    if (response.ok) return response;
+
+    if (response.status === 429) {
+      // Parse Retry-After header, default to exponential backoff
+      const retryAfter = response.headers.get('Retry-After');
+      const waitSec = retryAfter ? parseInt(retryAfter, 10) : attempt * 15;
+      const waitMs = Math.max(waitSec, 5) * 1000;
+      if (attempt < MAX_RETRIES) {
+        console.warn(`  ⚠ Rate limited on "${label}" (attempt ${attempt}/${MAX_RETRIES}), waiting ${Math.round(waitMs / 1000)}s...`);
+        await sleep(waitMs);
+        continue;
+      }
+    }
+
+    if (attempt === MAX_RETRIES) {
+      throw new Error(`${label}: ${response.status} after ${MAX_RETRIES} attempts`);
+    }
+  }
+
+  throw new Error(`${label}: exhausted retries`);
+}
+
 async function fetchSearchResults(artistName: string): Promise<SearchResponse> {
   const url = `${API_BASE}/api/search/sources?query=${encodeURIComponent(artistName)}`;
-  const response = await fetch(url, {
-    headers: { 'User-Agent': 'Unstream-DataGen/1.0' },
-  });
-  if (!response.ok) {
-    throw new Error(`Search API error for "${artistName}": ${response.status}`);
-  }
+  const response = await fetchWithRetry(url, `Search "${artistName}"`);
   return response.json();
 }
 
 async function fetchMusicBrainzData(artistName: string): Promise<MusicBrainzData | null> {
   const url = `${API_BASE}/api/search/musicbrainz?query=${encodeURIComponent(artistName)}`;
-  const response = await fetch(url, {
-    headers: { 'User-Agent': 'Unstream-DataGen/1.0' },
-  });
-  if (!response.ok) return null;
-  return response.json();
+  try {
+    const response = await fetchWithRetry(url, `MusicBrainz "${artistName}"`);
+    return response.json();
+  } catch {
+    return null; // MusicBrainz enrichment is optional — don't fail the whole artist
+  }
 }
 
 function sleep(ms: number): Promise<void> {
@@ -358,9 +384,9 @@ async function processInBatches(
     completed += batch.length;
     console.log(`  Progress: ${completed}/${artists.length} (${Math.round(completed / artists.length * 100)}%)`);
 
-    // Brief pause between batches to avoid overwhelming the API
+    // Pause between batches — longer for production to stay under rate limits
     if (i + concurrency < artists.length) {
-      await sleep(500);
+      await sleep(API_DELAY_MS);
     }
   }
 
@@ -381,7 +407,7 @@ async function main() {
   const artistList: ArtistEntry[] = JSON.parse(readFileSync(ARTIST_LIST_PATH, 'utf-8'));
   const artists = limit ? artistList.slice(0, limit) : artistList;
 
-  console.log(`API: ${API_BASE}${useLocal ? ' (local dev server)' : ' (production)'}`);
+  console.log(`API: ${API_BASE}${useLocal ? ' (local — fast, no rate limits)' : ` (production — throttled: ${CONCURRENCY} concurrent, ${API_DELAY_MS}ms delay, retry on 429)`}`);
   console.log(`Processing ${artists.length} artists (${force ? 'force refresh' : 'skipping recent'})...`);
 
   mkdirSync(ARTISTS_DIR, { recursive: true });
