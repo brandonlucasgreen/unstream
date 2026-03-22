@@ -1,33 +1,48 @@
-import { StrictMode } from 'react'
+import { StrictMode, Suspense, lazy } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { AuthProvider } from './contexts/AuthContext'
 import './index.css'
 import App from './App.tsx'
-import { RoadmapPage } from './pages/RoadmapPage.tsx'
-import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage.tsx'
 import { ArtistPage } from './pages/ArtistPage.tsx'
-import { ClaimPage } from './pages/ClaimPage.tsx'
-import { ArtistLoginPage } from './pages/ArtistLoginPage.tsx'
-import { ArtistDashboardPage } from './pages/ArtistDashboardPage.tsx'
-import { ArtistEditPage } from './pages/ArtistEditPage.tsx'
-import { ArtistDirectoryPage } from './pages/ArtistDirectoryPage.tsx'
-import { SupportPage } from './pages/SupportPage.tsx'
+
+// Lazy-load non-critical pages to reduce initial bundle size
+const ClaimPage = lazy(() => import('./pages/ClaimPage.tsx').then(m => ({ default: m.ClaimPage })))
+const ArtistLoginPage = lazy(() => import('./pages/ArtistLoginPage.tsx').then(m => ({ default: m.ArtistLoginPage })))
+const ArtistDashboardPage = lazy(() => import('./pages/ArtistDashboardPage.tsx').then(m => ({ default: m.ArtistDashboardPage })))
+const ArtistEditPage = lazy(() => import('./pages/ArtistEditPage.tsx').then(m => ({ default: m.ArtistEditPage })))
+const ArtistDirectoryPage = lazy(() => import('./pages/ArtistDirectoryPage.tsx').then(m => ({ default: m.ArtistDirectoryPage })))
+const RoadmapPage = lazy(() => import('./pages/RoadmapPage.tsx').then(m => ({ default: m.RoadmapPage })))
+const SupportPage = lazy(() => import('./pages/SupportPage.tsx').then(m => ({ default: m.SupportPage })))
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage.tsx').then(m => ({ default: m.PrivacyPolicyPage })))
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-bg-primary flex items-center justify-center">
+      <div className="text-text-muted">Loading...</div>
+    </div>
+  )
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="/artist/:slug" element={<ArtistPage />} />
-        <Route path="/claim/:slug" element={<ClaimPage />} />
-        <Route path="/artist-login" element={<ArtistLoginPage />} />
-        <Route path="/artist-dashboard" element={<ArtistDashboardPage />} />
-        <Route path="/artist-edit/:slug" element={<ArtistEditPage />} />
-        <Route path="/artists" element={<ArtistDirectoryPage />} />
-        <Route path="/roadmap" element={<RoadmapPage />} />
-        <Route path="/support" element={<SupportPage />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
+            <Route path="/" element={<App />} />
+            <Route path="/artist/:slug" element={<ArtistPage />} />
+            <Route path="/claim/:slug" element={<ClaimPage />} />
+            <Route path="/artist-login" element={<ArtistLoginPage />} />
+            <Route path="/artist-dashboard" element={<ArtistDashboardPage />} />
+            <Route path="/artist-edit/:slug" element={<ArtistEditPage />} />
+            <Route path="/artists" element={<ArtistDirectoryPage />} />
+            <Route path="/roadmap" element={<RoadmapPage />} />
+            <Route path="/support" element={<SupportPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+          </Routes>
+        </Suspense>
+      </BrowserRouter>
+    </AuthProvider>
   </StrictMode>,
 )

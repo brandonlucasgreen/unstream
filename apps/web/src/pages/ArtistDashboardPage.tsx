@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getSession, waitForMagicLinkSession } from '../services/auth';
+import { useAuth } from '../contexts/AuthContext';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
 import { Footer } from '../components/Footer';
 
@@ -17,36 +17,23 @@ interface ClaimedProfile {
 
 export function ArtistDashboardPage() {
   const navigate = useNavigate();
+  const { session, isLoading: authLoading } = useAuth();
   const [profiles, setProfiles] = useState<ClaimedProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function loadDashboard() {
-      let session;
+    if (authLoading) return; // Wait for auth context to resolve
 
-      // Handle magic link callback hash
-      if (window.location.hash.includes('access_token')) {
-        const { session: magicSession, error: authError } = await waitForMagicLinkSession();
-        if (authError || !magicSession) {
-          // Redirect to login with the error visible there
-          navigate('/artist-login', { replace: true });
-          return;
-        }
-        window.history.replaceState(null, '', window.location.pathname);
-        session = magicSession;
-      } else {
-        session = await getSession();
-      }
+    if (!session) {
+      navigate('/artist-login', { replace: true });
+      return;
+    }
 
-      if (!session) {
-        navigate('/artist-login', { replace: true });
-        return;
-      }
-
+    async function loadProfiles() {
       try {
         const response = await fetch('/api/artist-auth', {
-          headers: { 'Authorization': `Bearer ${session.access_token}` },
+          headers: { 'Authorization': `Bearer ${session!.access_token}` },
         });
 
         if (!response.ok) {
@@ -64,10 +51,10 @@ export function ArtistDashboardPage() {
       }
       setLoading(false);
     }
-    loadDashboard();
-  }, [navigate]);
+    loadProfiles();
+  }, [session, authLoading, navigate]);
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-bg-primary flex items-center justify-center">
         <div className="text-text-muted">Loading your profiles...</div>

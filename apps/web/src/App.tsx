@@ -1,7 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import type { ReactNode } from 'react';
-import Markdown from 'react-markdown';
 import { SearchBar } from './components/SearchBar';
 import { ResultCard } from './components/ResultCard';
 import { ThemeToggle } from './components/ThemeToggle';
@@ -11,29 +9,9 @@ import type { SearchResult } from './types';
 import { sources, sourceCategories, searchPlatforms, resolveArtistUrl, fetchMusicBrainzData, mergeWithMusicBrainzData } from './services/sources';
 import { analytics } from './services/analytics';
 import { Footer } from './components/Footer';
+import { faqSections } from './data/faq';
+import { markdownToHtml } from './utils/markdownLight';
 import './index.css';
-
-interface FAQSection {
-  title: string;
-  content: string;
-}
-
-function parseFAQContent(text: string): FAQSection[] {
-  const sections: FAQSection[] = [];
-  const h3Regex = /^### (.+)$/gm;
-  const matches = [...text.matchAll(h3Regex)];
-
-  for (let i = 0; i < matches.length; i++) {
-    const match = matches[i];
-    const title = match[1];
-    const startIndex = match.index! + match[0].length;
-    const endIndex = matches[i + 1]?.index ?? text.length;
-    const content = text.slice(startIndex, endIndex).trim();
-    sections.push({ title, content });
-  }
-
-  return sections;
-}
 
 function CollapsibleSection({ title, content, defaultOpen = false }: {
   title: string;
@@ -60,48 +38,17 @@ function CollapsibleSection({ title, content, defaultOpen = false }: {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
-      <div className={`overflow-hidden transition-all duration-200 ${isOpen ? 'max-h-[2000px] opacity-100 pb-4' : 'max-h-0 opacity-0'}`}>
-        <div className="prose prose-sm max-w-none text-text-primary">
-          <Markdown components={markdownComponents}>
-            {content}
-          </Markdown>
+      {isOpen && (
+        <div className="pb-4">
+          <div
+            className="prose prose-sm max-w-none text-text-primary space-y-3 [&_a]:text-accent-primary [&_a]:hover:underline [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1"
+            dangerouslySetInnerHTML={{ __html: markdownToHtml(content) }}
+          />
         </div>
-      </div>
+      )}
     </div>
   );
 }
-
-const markdownComponents = {
-  p: ({ children }: { children?: ReactNode }) => (
-    <p className="text-text-primary/90 leading-relaxed mb-3">
-      {children}
-    </p>
-  ),
-  a: ({ href, children }: { href?: string; children?: ReactNode }) => (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-accent-primary hover:text-accent-secondary transition-colors underline"
-    >
-      {children}
-    </a>
-  ),
-  ul: ({ children }: { children?: ReactNode }) => (
-    <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1 [&_ul]:mt-1 [&_ul]:mb-0">
-      {children}
-    </ul>
-  ),
-  li: ({ children }: { children?: ReactNode }) => (
-    <li className="text-text-primary/90">{children}</li>
-  ),
-  em: ({ children }: { children?: ReactNode }) => (
-    <em className="text-text-primary italic">{children}</em>
-  ),
-  strong: ({ children }: { children?: ReactNode }) => (
-    <strong className="text-text-primary font-semibold">{children}</strong>
-  ),
-};
 
 function App() {
   const { preference, cycleTheme } = useTheme();
@@ -114,7 +61,6 @@ function App() {
   const [resolvedQuery, setResolvedQuery] = useState<string>('');
   const [isResolving, setIsResolving] = useState(false);
   const [, setIsFromUrl] = useState(false);
-  const [faqSections, setFaqSections] = useState<FAQSection[]>([]);
 
   // Track current search to handle race conditions
   const currentSearchRef = useRef<number>(0);
@@ -135,20 +81,7 @@ function App() {
     }
   }, [searchParams]);
 
-  // Load FAQ content
-  useEffect(() => {
-    fetch('/faq.txt')
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to load FAQ');
-        return res.text();
-      })
-      .then(text => {
-        setFaqSections(parseFAQContent(text));
-      })
-      .catch(err => {
-        console.error('Failed to load FAQ:', err);
-      });
-  }, []);
+  // FAQ content is now statically imported from ./data/faq.ts
 
   // Handle URL parameters for deep-linked searches
   useEffect(() => {

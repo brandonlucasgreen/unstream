@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { signInWithMagicLink, getSession, waitForMagicLinkSession } from '../services/auth';
+import { signInWithMagicLink } from '../services/auth';
+import { useAuth } from '../contexts/AuthContext';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
 import { Footer } from '../components/Footer';
@@ -55,37 +56,21 @@ export function ClaimPage() {
   const [customImageUrl, setCustomImageUrl] = useState<string | null>(null);
   const [fetchingAvatar, setFetchingAvatar] = useState<string | null>(null); // platform being fetched
 
+  const { session: authSession, isLoading: authLoading } = useAuth();
+
   const displayName = artistName || slug?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || '';
 
-  // Check if user is already authenticated (returning from magic link)
+  // When auth context resolves with a session, advance to website step
   useEffect(() => {
-    async function checkAuth() {
-      // Check for hash params from magic link redirect
-      if (window.location.hash.includes('access_token')) {
-        const { session, error: authError } = await waitForMagicLinkSession();
-        if (session) {
-          setAuthenticated(true);
-          if (session.user.email) setEmail(session.user.email);
-          window.history.replaceState(null, '', window.location.pathname + window.location.search);
-          setStep('website');
-          return;
-        }
-        if (authError) {
-          setError(authError);
-          window.history.replaceState(null, '', window.location.pathname + window.location.search);
-        }
-        return;
-      }
-
-      const session = await getSession();
-      if (session) {
-        setAuthenticated(true);
-        if (session.user.email) setEmail(session.user.email);
+    if (authLoading) return;
+    if (authSession && !authenticated) {
+      setAuthenticated(true);
+      if (authSession.user.email) setEmail(authSession.user.email);
+      if (step === 'email' || step === 'check-email') {
         setStep('website');
       }
     }
-    checkAuth();
-  }, []);
+  }, [authSession, authLoading, authenticated, step]);
 
   // Fetch artist info
   useEffect(() => {
@@ -103,9 +88,8 @@ export function ClaimPage() {
       .catch(() => {});
   }, [slug]);
 
-  async function getAuthToken(): Promise<string | null> {
-    const session = await getSession();
-    return session?.access_token ?? null;
+  function getAuthToken(): string | null {
+    return authSession?.access_token ?? null;
   }
 
   async function handleSendMagicLink(e: React.FormEvent) {

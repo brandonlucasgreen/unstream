@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useReducer, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { getSession } from '../services/auth';
+import { useAuth } from '../contexts/AuthContext';
 import { sources } from '../services/sources';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
 import { Footer } from '../components/Footer';
@@ -75,57 +75,83 @@ function getNameChangeWarning(original: string, updated: string): 'error' | 'war
   return 'warn';
 }
 
+interface FormState {
+  loading: boolean;
+  saving: boolean;
+  error: string | null;
+  success: string | null;
+  originalName: string;
+  artistName: string;
+  nameWarningConfirmed: boolean;
+  currentSlug: string;
+  newSlug: string;
+  bio: string;
+  featuredEmbed: string;
+  imageUrl: string | null;
+  customImageUrl: string | null;
+  fetchingAvatar: string | null;
+  links: LinkEntry[];
+}
+
+type FormAction =
+  | { type: 'SET'; field: keyof FormState; value: FormState[keyof FormState] }
+  | { type: 'LOAD_DATA'; data: Partial<FormState> };
+
+function formReducer(state: FormState, action: FormAction): FormState {
+  switch (action.type) {
+    case 'SET':
+      return { ...state, [action.field]: action.value };
+    case 'LOAD_DATA':
+      return { ...state, ...action.data };
+  }
+}
+
+const initialFormState: FormState = {
+  loading: true,
+  saving: false,
+  error: null,
+  success: null,
+  originalName: '',
+  artistName: '',
+  nameWarningConfirmed: false,
+  currentSlug: '',
+  newSlug: '',
+  bio: '',
+  featuredEmbed: '',
+  imageUrl: null,
+  customImageUrl: null,
+  fetchingAvatar: null,
+  links: [],
+};
+
 export function ArtistEditPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { session, isLoading: authLoading } = useAuth();
+  const [form, dispatch] = useReducer(formReducer, initialFormState);
 
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-
-  const [originalName, setOriginalName] = useState('');
-  const [artistName, setArtistName] = useState('');
-  const [nameWarningConfirmed, setNameWarningConfirmed] = useState(false);
-  const [currentSlug, setCurrentSlug] = useState('');
-  const [newSlug, setNewSlug] = useState('');
-  const [bio, setBio] = useState('');
-  const [featuredEmbed, setFeaturedEmbed] = useState('');
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [customImageUrl, setCustomImageUrl] = useState<string | null>(null);
-  const [fetchingAvatar, setFetchingAvatar] = useState<string | null>(null);
-  const [links, setLinks] = useState<LinkEntry[]>([]);
+  // Convenience setters
+  const set = <K extends keyof FormState>(field: K, value: FormState[K]) =>
+    dispatch({ type: 'SET', field, value });
 
   // Load current artist data
   useEffect(() => {
+    if (authLoading) return;
+    if (!session) {
+      navigate('/artist-login', { replace: true });
+      return;
+    }
+    if (!slug) return;
+
     async function load() {
-      const session = await getSession();
-      if (!session) {
-        navigate('/artist-login', { replace: true });
-        return;
-      }
-
-      if (!slug) return;
-
       try {
-        const response = await fetch(`/api/artist?slug=${encodeURIComponent(slug)}`);
+        const response = await fetch(`/api/artist?slug=${encodeURIComponent(slug!)}`);
         if (!response.ok) {
-          setError('Artist not found');
-          setLoading(false);
+          dispatch({ type: 'LOAD_DATA', data: { error: 'Artist not found', loading: false } });
           return;
         }
 
         const data = await response.json();
-        setOriginalName(data.name || '');
-        setArtistName(data.name || '');
-        setCurrentSlug(slug);
-        setNewSlug(slug);
-        setImageUrl(data.imageUrl || null);
-        setCustomImageUrl(data.profile?.customImageUrl || null);
-        setBio(data.profile?.bio ?? '');
-        setFeaturedEmbed(data.profile?.featuredEmbed ?? '');
-
-        // Load existing links (normalize "other_N" platforms back to "other")
         const existingLinks: LinkEntry[] = (data.platforms || []).map(
           (p: { sourceId: string; url: string; displayName?: string }) => ({
             platform: p.sourceId.startsWith('other') ? 'other' : p.sourceId,
@@ -133,44 +159,56 @@ export function ArtistEditPage() {
             displayName: p.displayName || '',
           })
         );
-        setLinks(existingLinks);
+
+        dispatch({
+          type: 'LOAD_DATA',
+          data: {
+            originalName: data.name || '',
+            artistName: data.name || '',
+            currentSlug: slug!,
+            newSlug: slug!,
+            imageUrl: data.imageUrl || null,
+            customImageUrl: data.profile?.customImageUrl || null,
+            bio: data.profile?.bio ?? '',
+            featuredEmbed: data.profile?.featuredEmbed ?? '',
+            links: existingLinks,
+            loading: false,
+          },
+        });
       } catch {
-        setError('Failed to load artist data');
+        dispatch({ type: 'LOAD_DATA', data: { error: 'Failed to load artist data', loading: false } });
       }
-      setLoading(false);
     }
     load();
-  }, [slug, navigate]);
+  }, [slug, session, authLoading, navigate]);
 
   function addLink() {
-    // Find first platform not already used
-    const usedPlatforms = new Set(links.map(l => l.platform));
+    const usedPlatforms = new Set(form.links.map(l => l.platform));
     const available = ALL_PLATFORMS.find(p => !usedPlatforms.has(p.id));
-    setLinks([...links, { platform: available?.id || 'other', url: '', displayName: '' }]);
+    set('links', [...form.links, { platform: available?.id || 'other', url: '', displayName: '' }]);
   }
 
   function addOtherLink() {
-    setLinks([...links, { platform: 'other', url: '', displayName: '' }]);
+    set('links', [...form.links, { platform: 'other', url: '', displayName: '' }]);
   }
 
   function updateLink(index: number, field: 'platform' | 'url' | 'displayName', value: string) {
-    const updated = [...links];
+    const updated = [...form.links];
     updated[index] = { ...updated[index], [field]: value };
-    setLinks(updated);
+    set('links', updated);
   }
 
   function removeLink(index: number) {
-    setLinks(links.filter((_, i) => i !== index));
+    set('links', form.links.filter((_, i) => i !== index));
   }
 
   async function handleFetchAvatar(platform: string, url: string) {
-    setFetchingAvatar(platform);
-    setError(null);
+    set('fetchingAvatar', platform);
+    set('error', null);
 
-    const session = await getSession();
     if (!session) {
-      setError('Session expired. Please sign in again.');
-      setFetchingAvatar(null);
+      set('error', 'Session expired. Please sign in again.');
+      set('fetchingAvatar', null);
       return;
     }
 
@@ -186,52 +224,49 @@ export function ArtistEditPage() {
 
       const data = await response.json();
       if (response.ok && data.imageUrl) {
-        setCustomImageUrl(data.imageUrl);
+        set('customImageUrl', data.imageUrl);
       } else {
-        setError(data.error || 'Could not find a profile photo on that page');
+        set('error', data.error || 'Could not find a profile photo on that page');
       }
     } catch {
-      setError('Network error. Please try again.');
+      set('error', 'Network error. Please try again.');
     }
-    setFetchingAvatar(null);
+    set('fetchingAvatar', null);
   }
 
   function moveLink(index: number, direction: -1 | 1) {
     const newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= links.length) return;
-    const updated = [...links];
+    if (newIndex < 0 || newIndex >= form.links.length) return;
+    const updated = [...form.links];
     [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
-    setLinks(updated);
+    set('links', updated);
   }
 
   async function handleSave() {
-    setError(null);
-    setSuccess(null);
-    setSaving(true);
+    set('error', null);
+    set('success', null);
+    set('saving', true);
 
-    const session = await getSession();
     if (!session) {
-      setError('Session expired. Please sign in again.');
-      setSaving(false);
+      set('error', 'Session expired. Please sign in again.');
+      set('saving', false);
       return;
     }
 
-    // Validate name change
-    const nameLevel = getNameChangeWarning(originalName, artistName);
+    const nameLevel = getNameChangeWarning(form.originalName, form.artistName);
     if (nameLevel === 'error') {
-      setError('Artist name cannot be empty.');
-      setSaving(false);
+      set('error', 'Artist name cannot be empty.');
+      set('saving', false);
       return;
     }
-    if (nameLevel === 'warn' && !nameWarningConfirmed) {
-      setError(`This is a significant name change from "${originalName}". Click save again to confirm.`);
-      setNameWarningConfirmed(true);
-      setSaving(false);
+    if (nameLevel === 'warn' && !form.nameWarningConfirmed) {
+      set('error', `This is a significant name change from "${form.originalName}". Click save again to confirm.`);
+      set('nameWarningConfirmed', true);
+      set('saving', false);
       return;
     }
 
-    // Validate links
-    const validLinks = links.filter(l => l.url.trim());
+    const validLinks = form.links.filter(l => l.url.trim());
     for (const link of validLinks) {
       try {
         new URL(link.url);
@@ -239,13 +274,13 @@ export function ArtistEditPage() {
         const name = link.platform === 'other'
           ? (link.displayName || 'Other')
           : (sources[link.platform as SourceId]?.name || link.platform);
-        setError(`Invalid URL for ${name}: ${link.url}`);
-        setSaving(false);
+        set('error', `Invalid URL for ${name}: ${link.url}`);
+        set('saving', false);
         return;
       }
       if (link.platform === 'other' && !link.displayName?.trim()) {
-        setError('Please provide a name for each custom link.');
-        setSaving(false);
+        set('error', 'Please provide a name for each custom link.');
+        set('saving', false);
         return;
       }
     }
@@ -258,12 +293,12 @@ export function ArtistEditPage() {
           'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
-          slug: currentSlug,
-          newSlug: newSlug !== currentSlug ? newSlug : undefined,
-          newName: artistName !== originalName ? artistName.trim() : undefined,
-          bio,
-          featuredEmbed: featuredEmbed || null,
-          customImageUrl: customImageUrl,
+          slug: form.currentSlug,
+          newSlug: form.newSlug !== form.currentSlug ? form.newSlug : undefined,
+          newName: form.artistName !== form.originalName ? form.artistName.trim() : undefined,
+          bio: form.bio,
+          featuredEmbed: form.featuredEmbed || null,
+          customImageUrl: form.customImageUrl,
           links: validLinks.map(l => ({
             platform: l.platform,
             url: l.url,
@@ -274,30 +309,29 @@ export function ArtistEditPage() {
 
       const data = await response.json();
       if (!response.ok) {
-        setError(data.error || 'Failed to save changes');
-        setSaving(false);
+        set('error', data.error || 'Failed to save changes');
+        set('saving', false);
         return;
       }
 
-      // Update local state after successful save
-      if (artistName !== originalName) {
-        setOriginalName(artistName);
-        setNameWarningConfirmed(false);
+      if (form.artistName !== form.originalName) {
+        set('originalName', form.artistName);
+        set('nameWarningConfirmed', false);
       }
-      if (data.slug !== currentSlug) {
-        setCurrentSlug(data.slug);
-        setSuccess('Changes saved! Slug updated.');
+      if (data.slug !== form.currentSlug) {
+        set('currentSlug', data.slug);
+        set('success', 'Changes saved! Slug updated.');
         navigate(`/artist-edit/${data.slug}`, { replace: true });
       } else {
-        setSuccess('Changes saved!');
+        set('success', 'Changes saved!');
       }
     } catch {
-      setError('Network error. Please try again.');
+      set('error', 'Network error. Please try again.');
     }
-    setSaving(false);
+    set('saving', false);
   }
 
-  if (loading) {
+  if (form.loading) {
     return (
       <div className="min-h-screen bg-bg-primary flex items-center justify-center">
         <div className="text-text-muted">Loading...</div>
@@ -305,7 +339,7 @@ export function ArtistEditPage() {
     );
   }
 
-  const usedPlatforms = new Set(links.map(l => l.platform));
+  const usedPlatforms = new Set(form.links.map(l => l.platform));
 
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
@@ -315,9 +349,9 @@ export function ArtistEditPage() {
         <div className="max-w-2xl mx-auto space-y-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold">Edit {artistName}</h1>
+              <h1 className="text-2xl font-bold">Edit {form.artistName}</h1>
               <Link
-                to={`/a/${currentSlug}`}
+                to={`/a/${form.currentSlug}`}
                 className="text-sm text-accent-primary hover:underline"
               >
                 View live profile
@@ -331,15 +365,15 @@ export function ArtistEditPage() {
             </Link>
           </div>
 
-          {error && (
+          {form.error && (
             <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-              {error}
+              {form.error}
             </div>
           )}
 
-          {success && (
+          {form.success && (
             <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm">
-              {success}
+              {form.success}
             </div>
           )}
 
@@ -351,22 +385,22 @@ export function ArtistEditPage() {
             <input
               id="name"
               type="text"
-              value={artistName}
+              value={form.artistName}
               onChange={e => {
-                setArtistName(e.target.value);
-                setNameWarningConfirmed(false);
+                set('artistName', e.target.value);
+                set('nameWarningConfirmed', false);
               }}
               className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary focus:outline-none focus:border-accent-primary"
             />
-            {artistName !== originalName && (() => {
-              const level = getNameChangeWarning(originalName, artistName);
+            {form.artistName !== form.originalName && (() => {
+              const level = getNameChangeWarning(form.originalName, form.artistName);
               if (level === 'error') {
                 return <p className="text-xs text-red-400">Artist name cannot be empty.</p>;
               }
               if (level === 'warn') {
-                return <p className="text-xs text-amber-400">This is a significant change from "{originalName}". You'll be asked to confirm when saving.</p>;
+                return <p className="text-xs text-amber-400">This is a significant change from "{form.originalName}". You'll be asked to confirm when saving.</p>;
               }
-              return <p className="text-xs text-text-muted">Name will be updated from "{originalName}".</p>;
+              return <p className="text-xs text-text-muted">Name will be updated from "{form.originalName}".</p>;
             })()}
           </section>
 
@@ -374,15 +408,15 @@ export function ArtistEditPage() {
           <section className="space-y-3">
             <h2 className="text-sm font-medium">Profile Photo</h2>
             <div className="flex items-start gap-4">
-              {(customImageUrl || imageUrl) ? (
+              {(form.customImageUrl || form.imageUrl) ? (
                 <img
-                  src={customImageUrl || imageUrl || ''}
-                  alt={artistName}
+                  src={form.customImageUrl || form.imageUrl || ''}
+                  alt={form.artistName}
                   className="w-20 h-20 rounded-full object-cover border border-border"
                 />
               ) : (
                 <div className="w-20 h-20 rounded-full bg-bg-secondary border border-border flex items-center justify-center text-text-muted text-2xl">
-                  {artistName.charAt(0).toUpperCase()}
+                  {form.artistName.charAt(0).toUpperCase()}
                 </div>
               )}
               <div className="flex-1 space-y-2">
@@ -390,7 +424,7 @@ export function ArtistEditPage() {
                   Pull a photo from one of your linked platforms, or it will use the default from your search results.
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {links
+                  {form.links
                     .filter(l => AVATAR_PLATFORMS.has(l.platform) && l.url.trim())
                     .map(l => {
                       const platformLabel = ALL_PLATFORMS.find(p => p.id === l.platform)?.name || l.platform;
@@ -398,22 +432,22 @@ export function ArtistEditPage() {
                         <button
                           key={l.platform}
                           onClick={() => handleFetchAvatar(l.platform, l.url)}
-                          disabled={fetchingAvatar !== null}
+                          disabled={form.fetchingAvatar !== null}
                           className="px-3 py-1.5 rounded-lg bg-bg-secondary border border-border text-sm text-text-muted hover:text-text-primary hover:border-border-hover transition-colors disabled:opacity-50"
                         >
-                          {fetchingAvatar === l.platform ? 'Loading...' : `Use ${platformLabel} photo`}
+                          {form.fetchingAvatar === l.platform ? 'Loading...' : `Use ${platformLabel} photo`}
                         </button>
                       );
                     })}
-                  {links.filter(l => AVATAR_PLATFORMS.has(l.platform) && l.url.trim()).length === 0 && (
+                  {form.links.filter(l => AVATAR_PLATFORMS.has(l.platform) && l.url.trim()).length === 0 && (
                     <p className="text-xs text-text-muted">
                       Add a Bandcamp, YouTube, or Mirlo link to pull a photo from that platform.
                     </p>
                   )}
                 </div>
-                {customImageUrl && (
+                {form.customImageUrl && (
                   <button
-                    onClick={() => setCustomImageUrl(null)}
+                    onClick={() => set('customImageUrl', null)}
                     className="text-xs text-red-400 hover:text-red-300 transition-colors"
                   >
                     Remove custom photo
@@ -433,12 +467,12 @@ export function ArtistEditPage() {
               <input
                 id="slug"
                 type="text"
-                value={newSlug}
-                onChange={e => setNewSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                value={form.newSlug}
+                onChange={e => set('newSlug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                 className="flex-1 px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary focus:outline-none focus:border-accent-primary"
               />
             </div>
-            {newSlug !== currentSlug && (
+            {form.newSlug !== form.currentSlug && (
               <p className="text-xs text-amber-400">
                 Changing your slug will update your profile URL. Old links will stop working.
               </p>
@@ -448,12 +482,12 @@ export function ArtistEditPage() {
           {/* Bio */}
           <section className="space-y-2">
             <label htmlFor="bio" className="block text-sm font-medium">
-              Bio <span className="text-text-muted font-normal">({bio.length}/500)</span>
+              Bio <span className="text-text-muted font-normal">({form.bio.length}/500)</span>
             </label>
             <textarea
               id="bio"
-              value={bio}
-              onChange={e => setBio(e.target.value.slice(0, 500))}
+              value={form.bio}
+              onChange={e => set('bio', e.target.value.slice(0, 500))}
               rows={3}
               placeholder="Tell fans about your music..."
               className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary resize-none"
@@ -470,21 +504,21 @@ export function ArtistEditPage() {
             </p>
             <textarea
               id="embed"
-              value={featuredEmbed}
-              onChange={e => setFeaturedEmbed(e.target.value)}
+              value={form.featuredEmbed}
+              onChange={e => set('featuredEmbed', e.target.value)}
               rows={3}
               placeholder='<iframe style="border: 0; width: 100%; height: 120px;" src="https://bandcamp.com/EmbeddedPlayer/..." seamless></iframe>'
               className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary resize-none font-mono text-xs"
             />
-            {featuredEmbed && (
+            {form.featuredEmbed && (
               <div className="space-y-2">
                 <p className="text-xs text-text-muted">Preview:</p>
                 <div
                   className="rounded-lg overflow-hidden border border-border"
-                  dangerouslySetInnerHTML={{ __html: featuredEmbed }}
+                  dangerouslySetInnerHTML={{ __html: form.featuredEmbed }}
                 />
                 <button
-                  onClick={() => setFeaturedEmbed('')}
+                  onClick={() => set('featuredEmbed', '')}
                   className="text-xs text-red-400 hover:text-red-300 transition-colors"
                 >
                   Remove embed
@@ -517,14 +551,14 @@ export function ArtistEditPage() {
               Unstream highlights platforms where artists earn a larger share. We recommend prioritizing direct-support platforms like Bandcamp, Mirlo, and Faircamp over major streaming services.
             </p>
 
-            {links.length === 0 && (
+            {form.links.length === 0 && (
               <p className="text-text-muted text-sm py-4 text-center">
                 No links yet. Click "Add platform" to add your first link.
               </p>
             )}
 
             <div className="space-y-2">
-              {links.map((link, index) => {
+              {form.links.map((link, index) => {
                 const streamingWarning = getStreamingWarning(link.url);
                 const isOther = link.platform === 'other';
 
@@ -545,7 +579,7 @@ export function ArtistEditPage() {
                         </button>
                         <button
                           onClick={() => moveLink(index, 1)}
-                          disabled={index === links.length - 1}
+                          disabled={index === form.links.length - 1}
                           className="text-text-muted hover:text-text-primary disabled:opacity-20 text-xs leading-none"
                           title="Move down"
                         >
@@ -628,10 +662,10 @@ export function ArtistEditPage() {
           <div className="flex items-center gap-4 pt-4 border-t border-border">
             <button
               onClick={handleSave}
-              disabled={saving}
+              disabled={form.saving}
               className="px-6 py-2 rounded-lg bg-accent-primary text-white font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
             >
-              {saving ? 'Saving...' : 'Save changes'}
+              {form.saving ? 'Saving...' : 'Save changes'}
             </button>
             <Link
               to="/artist-dashboard"

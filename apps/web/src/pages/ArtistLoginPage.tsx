@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signInWithMagicLink, getSession, waitForMagicLinkSession } from '../services/auth';
+import { signInWithMagicLink } from '../services/auth';
+import { useAuth } from '../contexts/AuthContext';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
 import { Footer } from '../components/Footer';
@@ -9,42 +10,18 @@ import { useTheme } from '../hooks/useTheme';
 export function ArtistLoginPage() {
   const { preference, cycleTheme } = useTheme();
   const navigate = useNavigate();
+  const { session, isLoading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [checkingSession, setCheckingSession] = useState(true);
   const [emailSent, setEmailSent] = useState(false);
 
-  // If already authenticated, redirect to dashboard
+  // If already authenticated (or just completed magic link), redirect
   useEffect(() => {
-    async function checkAuth() {
-      // Handle magic link callback hash
-      if (window.location.hash.includes('access_token')) {
-        const { session, error: authError } = await waitForMagicLinkSession();
-        if (session) {
-          // Clear the hash to avoid re-processing on refresh
-          window.history.replaceState(null, '', window.location.pathname);
-          navigate('/artist-dashboard', { replace: true });
-          return;
-        }
-        if (authError) {
-          setError(authError);
-          // Clear the hash so the user doesn't keep hitting the expired token
-          window.history.replaceState(null, '', window.location.pathname);
-        }
-        setCheckingSession(false);
-        return;
-      }
-
-      const session = await getSession();
-      if (session) {
-        navigate('/artist-dashboard', { replace: true });
-        return;
-      }
-      setCheckingSession(false);
+    if (!authLoading && session) {
+      navigate('/artist-dashboard', { replace: true });
     }
-    checkAuth();
-  }, [navigate]);
+  }, [session, authLoading, navigate]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -88,7 +65,7 @@ export function ArtistLoginPage() {
     setLoading(false);
   }
 
-  if (checkingSession) {
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-bg-primary flex items-center justify-center">
         <div className="text-text-muted">Loading...</div>
