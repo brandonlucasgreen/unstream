@@ -12,5 +12,26 @@
     "description": "Browser extensions for Chrome and Firefox! See direct-support links for whatever artist you're listening to on Spotify or Apple Music.",
     "date": "2026-03-20",
     "announced": true
+  },
+  {
+    "id": "verified-artist-claims",
+    "title": "Claim your artist page",
+    "description": "Indie artists can now claim and verify their page for free — every artist we feature in our daily posts has one. Claim yours and get all your direct-support links in one place.",
+    "date": "2026-03-22",
+    "announced": false
+  },
+  {
+    "id": "listenbrainz-scrobbling",
+    "title": "ListenBrainz scrobbling",
+    "description": "The Mac app now scrobbles to ListenBrainz — open-source music tracking that actually respects your data.",
+    "date": "2026-03-22",
+    "announced": false
+  },
+  {
+    "id": "release-alerts",
+    "title": "Release alerts",
+    "description": "Save artists in the Mac app or browser extension and get notified when they drop something new. No more missing releases from the artists you care about.",
+    "date": "2026-03-22",
+    "announced": false
   }
 ]
