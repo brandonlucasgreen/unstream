@@ -120,6 +120,7 @@ function App() {
   const currentSearchRef = useRef<number>(0);
   // Track if we just went home to prevent re-triggering search from stale URL
   const justWentHomeRef = useRef(false);
+  const letterbirdRef = useRef<HTMLDivElement>(null);
 
   // Default page title
   const defaultTitle = 'Unstream - Support artists directly';
@@ -191,6 +192,17 @@ function App() {
       handleSearch(queryParam);
     }
   }, [searchParams, isResolving, hasSearched, setSearchParams]);
+
+  // Load Letterbird contact form embed
+  useEffect(() => {
+    const el = letterbirdRef.current;
+    if (el && !el.querySelector('script')) {
+      const script = document.createElement('script');
+      script.src = 'https://letterbird.co/embed/v1.js';
+      script.setAttribute('data-letterbirduser', 'hi-d2078591');
+      el.appendChild(script);
+    }
+  }, []);
 
   const handleSearch = useCallback(async (query: string) => {
     // Generate unique ID for this search to handle race conditions
@@ -505,16 +517,7 @@ function App() {
             <p className="text-text-secondary mb-6 text-center md:text-left">
               Can't find the artist you want to support? Have a feature idea? Reach out below.
             </p>
-            <div
-              ref={(el) => {
-                if (el && !el.querySelector('script')) {
-                  const script = document.createElement('script');
-                  script.src = 'https://letterbird.co/embed/v1.js';
-                  script.setAttribute('data-letterbirduser', 'hi-d2078591');
-                  el.appendChild(script);
-                }
-              }}
-            ></div>
+            <div ref={letterbirdRef}></div>
           </div>
         </div>
       </section>
