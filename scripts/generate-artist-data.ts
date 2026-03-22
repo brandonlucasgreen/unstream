@@ -52,6 +52,7 @@ interface ArtistEntry {
 interface PlatformLink {
   sourceId: string;
   url: string;
+  allReleaseTitles?: string[];
   latestRelease?: {
     title: string;
     type: string;
@@ -235,9 +236,8 @@ function hasQualifyingPlatform(result: SearchResult): boolean {
       url.includes('/explore');
     if (isSearchUrl) return false;
 
-    // For Bandcamp, only count artist pages (subdomain), not fan profiles (path)
-    // Artist page: https://artist.bandcamp.com
-    // Fan profile: https://bandcamp.com/username
+    // For Bandcamp, only count artist pages (subdomain), not fan profiles (path),
+    // and require at least one release (filters out squatter/empty pages)
     if (p.sourceId === 'bandcamp') {
       try {
         const parsed = new URL(url);
@@ -247,6 +247,9 @@ function hasQualifyingPlatform(result: SearchResult): boolean {
       } catch {
         return false;
       }
+      // Must have at least one release — empty Bandcamp pages don't count
+      const hasReleases = (p.allReleaseTitles && p.allReleaseTitles.length > 0) || p.latestRelease;
+      if (!hasReleases) return false;
     }
 
     return true;
@@ -270,11 +273,11 @@ async function processArtist(artist: ArtistEntry, force: boolean): Promise<Manif
     const stat = statSync(outputPath);
     const age = Date.now() - stat.mtimeMs;
     if (age < MAX_AGE_MS) {
-      // Read existing data for manifest
+      // Read existing data for manifest — also validate qualifying platform
       try {
         const existing: SearchResult[] = JSON.parse(readFileSync(outputPath, 'utf-8'));
         const match = existing.find(r => r.type === 'artist');
-        if (match) {
+        if (match && hasQualifyingPlatform(match)) {
           return {
             name: artist.name,
             slug: artist.slug,
