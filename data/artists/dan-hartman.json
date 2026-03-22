@@ -1,0 +1,38 @@
+[
+  {
+    "id": "danhartman",
+    "name": "dan hartman",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a1737303876_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://danhartman.bandcamp.com",
+        "allReleaseTitles": [
+          "runawaybabyjane",
+          "wewill"
+        ],
+        "latestRelease": {
+          "title": "runaway baby jane",
+          "type": "track",
+          "url": "https://danhartman.bandcamp.com/track/runaway-baby-jane",
+          "imageUrl": "https://f4.bcbits.com/img/a1737303876_16.jpg",
+          "releaseDate": "February 17, 2012"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=dan%20hartman"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+dan%20hartman"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "jinjer",
+    "name": "Jinjer",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0035319208_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jinjer-jinjer.bandcamp.com",
+        "allReleaseTitles": [
+          "duel",
+          "rogue",
+          "someonesdaughter",
+          "liveinlosangeles",
+          "wallflowers",
+          "aliveinmelbourne",
+          "macro",
+          "micro",
+          "ape",
+          "cloudfactory",
+          "kingofeverything",
+          "pisceslivesession"
+        ],
+        "latestRelease": {
+          "title": "Duél",
+          "type": "album",
+          "url": "https://jinjer-jinjer.bandcamp.com/album/du-l",
+          "imageUrl": "https://f4.bcbits.com/img/a0087411807_2.jpg",
+          "releaseDate": "February 7, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jinjer/2660285",
+        "allReleaseTitles": [
+          "duel",
+          "macro",
+          "wallflowers",
+          "kingofeverything",
+          "someonesdaughter",
+          "liveinlosangeles",
+          "wallflower",
+          "greenserpent",
+          "aliveinmelbourne",
+          "rogue",
+          "kafka",
+          "vortex",
+          "mediator",
+          "judgementpunishment",
+          "onthetop",
+          "micro",
+          "cloudfactoryreissue",
+          "pisceslivesession",
+          "audiotreefromnothingandaudiotree",
+          "ispeakastronomy"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jinjer"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jinjer"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

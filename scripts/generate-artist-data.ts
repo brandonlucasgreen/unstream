@@ -13,11 +13,13 @@
  *   data/artists/{slug}.json      - Single matching SearchResult (as array) for each artist
  *   data/artists-manifest.json    - Index with metadata for all qualifying artists
  *
- * Usage: npx tsx scripts/generate-artist-data.ts [--limit N] [--force]
+ * Usage: npx tsx scripts/generate-artist-data.ts [--limit N] [--force] [--local]
  *
  * Options:
  *   --limit N   Only process the first N artists (for testing)
  *   --force     Re-fetch even if recent data exists
+ *   --local     Use local dev server (localhost:5173) instead of production API
+ *               Bypasses production rate limiting. Run `npm run dev` first.
  */
 
 import { readFileSync, writeFileSync, existsSync, statSync, mkdirSync } from 'fs';
@@ -30,7 +32,10 @@ const ARTISTS_DIR = join(DATA_DIR, 'artists');
 const ARTIST_LIST_PATH = join(DATA_DIR, 'artist-list.json');
 const MANIFEST_PATH = join(DATA_DIR, 'artists-manifest.json');
 
-const API_BASE = 'https://unstream.stream';
+const LOCAL_API = 'http://localhost:5173';
+const PROD_API = 'https://unstream.stream';
+const useLocal = process.argv.includes('--local');
+const API_BASE = useLocal ? LOCAL_API : PROD_API;
 const CONCURRENCY = 3;
 const MB_DELAY_MS = 1100; // MusicBrainz rate limit: 1 req/sec
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days - skip if data is newer
@@ -47,6 +52,7 @@ interface ArtistEntry {
 interface PlatformLink {
   sourceId: string;
   url: string;
+  allReleaseTitles?: string[];
   latestRelease?: {
     title: string;
     type: string;
@@ -230,9 +236,8 @@ function hasQualifyingPlatform(result: SearchResult): boolean {
       url.includes('/explore');
     if (isSearchUrl) return false;
 
-    // For Bandcamp, only count artist pages (subdomain), not fan profiles (path)
-    // Artist page: https://artist.bandcamp.com
-    // Fan profile: https://bandcamp.com/username
+    // For Bandcamp, only count artist pages (subdomain), not fan profiles (path),
+    // and require at least one release (filters out squatter/empty pages)
     if (p.sourceId === 'bandcamp') {
       try {
         const parsed = new URL(url);
@@ -242,6 +247,9 @@ function hasQualifyingPlatform(result: SearchResult): boolean {
       } catch {
         return false;
       }
+      // Must have at least one release — empty Bandcamp pages don't count
+      const hasReleases = (p.allReleaseTitles && p.allReleaseTitles.length > 0) || p.latestRelease;
+      if (!hasReleases) return false;
     }
 
     return true;
@@ -265,11 +273,11 @@ async function processArtist(artist: ArtistEntry, force: boolean): Promise<Manif
     const stat = statSync(outputPath);
     const age = Date.now() - stat.mtimeMs;
     if (age < MAX_AGE_MS) {
-      // Read existing data for manifest
+      // Read existing data for manifest — also validate qualifying platform
       try {
         const existing: SearchResult[] = JSON.parse(readFileSync(outputPath, 'utf-8'));
         const match = existing.find(r => r.type === 'artist');
-        if (match) {
+        if (match && hasQualifyingPlatform(match)) {
           return {
             name: artist.name,
             slug: artist.slug,
@@ -373,6 +381,7 @@ async function main() {
   const artistList: ArtistEntry[] = JSON.parse(readFileSync(ARTIST_LIST_PATH, 'utf-8'));
   const artists = limit ? artistList.slice(0, limit) : artistList;
 
+  console.log(`API: ${API_BASE}${useLocal ? ' (local dev server)' : ' (production)'}`);
   console.log(`Processing ${artists.length} artists (${force ? 'force refresh' : 'skipping recent'})...`);
 
   mkdirSync(ARTISTS_DIR, { recursive: true });

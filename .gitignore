@@ -8,6 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+docs
 dist
 dist-ssr
 *.local
@@ -51,6 +52,9 @@ apps/mac/**/xcuserdata/
 
 # Conductor
 .conductor/
+
+# Social post drafts and history (generated, contains schedule state)
+data/social-posts/
 
 # Claude Code
 CLAUDE.md

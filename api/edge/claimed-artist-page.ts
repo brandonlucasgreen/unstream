@@ -125,7 +125,7 @@ export default async function handler(request: Request, context: Context) {
     const payout = isBCFriday ? '~97%' : info?.payoutPercent;
     const payoutLabel = payout ? `<span style="font-size:12px;color:var(--muted)">${payout} to artist</span>` : '';
     const bcFridayLabel = isBCFriday ? `<span style="font-size:11px;font-weight:700;color:#1da0c3;animation:bc-pulse 2s ease-in-out infinite">Bandcamp Friday!</span>` : '';
-    return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid ${isBCFriday ? '#1da0c340' : 'var(--border)'};background:${isBCFriday ? '#1da0c310' : linkColor + '08'};text-decoration:none;color:var(--text);transition:background 0.15s">
+    return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" data-track-platform="${escapeHtml(p.platform)}" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid ${isBCFriday ? '#1da0c340' : 'var(--border)'};background:${isBCFriday ? '#1da0c310' : linkColor + '08'};text-decoration:none;color:var(--text);transition:background 0.15s">
       <span style="font-size:20px;display:inline-flex;align-items:center;justify-content:center">${linkIcon}</span>
       <span style="flex:1;font-weight:500">${linkName}</span>
       ${payoutLabel}${bcFridayLabel}
@@ -140,7 +140,7 @@ export default async function handler(request: Request, context: Context) {
           const info = PLATFORM_INFO[p.platform];
           if (!info) return '';
           const icon = SOCIAL_ICONS[p.platform] || info.icon;
-          return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);text-decoration:none;color:var(--text);font-size:14px">${icon} ${info.name}</a>`;
+          return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" data-track-platform="${escapeHtml(p.platform)}" style="display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);text-decoration:none;color:var(--text);font-size:14px">${icon} ${info.name}</a>`;
         }).join('')}
       </div>
     </div>

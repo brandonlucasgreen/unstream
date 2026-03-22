@@ -28,8 +28,8 @@
         "sourceId": "qobuz",
         "url": "https://www.qobuz.com/us-en/interpreter/minor-threat/415039",
         "allReleaseTitles": [
-          "outofstepouttakes",
           "firsttwoseveninches",
+          "outofstepouttakes",
           "outofstep",
           "saladdays",
           "firstdemotape"
@@ -52,18 +52,6 @@
       {
         "sourceId": "buymeacoffee",
         "url": "https://buymeacoffee.com/explore-creators"
-      },
-      {
-        "sourceId": "discogs",
-        "url": "https://www.discogs.com/artist/252202"
-      },
-      {
-        "sourceId": "hoopla",
-        "url": "https://www.hoopladigital.com/search?q=Minor%20Threat&type=music"
-      },
-      {
-        "sourceId": "freegal",
-        "url": "https://www.freegalmusic.com/search-page/Minor%20Threat"
       }
     ],
     "matchConfidence": "verified"

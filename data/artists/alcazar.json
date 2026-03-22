@@ -1,0 +1,66 @@
+[
+  {
+    "id": "alcazar",
+    "name": "Alcazar",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031539596_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://alcazar1.bandcamp.com",
+        "allReleaseTitles": [
+          "ahistoryoftheworld",
+          "ahistoryoftheworld"
+        ],
+        "latestRelease": {
+          "title": "A History of the World",
+          "type": "track",
+          "url": "https://alcazar1.bandcamp.com/track/a-history-of-the-world",
+          "imageUrl": "https://f4.bcbits.com/img/a4111320858_16.jpg",
+          "releaseDate": "February 27, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Alcazar"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Alcazar"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.alcazarofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/52222"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Alcazar&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Alcazar"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/alcazarofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCH28m8Bt2wZk96sUN-4eXoA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/alcazarofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

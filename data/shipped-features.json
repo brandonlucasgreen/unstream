@@ -1,0 +1,16 @@
+[
+  {
+    "id": "artist-profiles",
+    "title": "Verified artist pages",
+    "description": "Artists can now claim their free page on Unstream with all their direct-support links in one place.",
+    "date": "2026-03-01",
+    "announced": true
+  },
+  {
+    "id": "browser-extension",
+    "title": "Browser extension",
+    "description": "Unstream now has a browser extension for Chrome and Firefox — it shows direct-support links for whatever artist you're listening to on Spotify or Apple Music.",
+    "date": "2026-03-20",
+    "announced": true
+  }
+]
