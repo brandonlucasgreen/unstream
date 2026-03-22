@@ -1,0 +1,38 @@
+[
+  {
+    "id": "malu",
+    "name": "Malü",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036915457_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://maluinator.bandcamp.com",
+        "allReleaseTitles": [
+          "returntothelivingdeafchristianmorgensternslowdownvinylremake",
+          "malukalypsoulhowdareyouinstrumentalmalukalypsoul"
+        ],
+        "latestRelease": {
+          "title": "Return to the Living Deaf (Christian Morgenstern Slowdown Vinyl Remake)",
+          "type": "track",
+          "url": "https://maluinator.bandcamp.com/track/return-to-the-living-deaf-christian-morgenstern-slowdown-vinyl-remake",
+          "imageUrl": "https://f4.bcbits.com/img/a1431491950_16.jpg",
+          "releaseDate": "July 14, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mal%C3%BC"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mal%C3%BC"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

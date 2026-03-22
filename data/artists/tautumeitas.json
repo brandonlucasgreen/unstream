@@ -1,0 +1,63 @@
+[
+  {
+    "id": "tautumeitas",
+    "name": "Tautumeitas",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036354330_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tautumeitas.bandcamp.com",
+        "allReleaseTitles": [
+          "dancojani",
+          "tautumeitas"
+        ],
+        "latestRelease": {
+          "title": "Danco, Jāni",
+          "type": "track",
+          "url": "https://tautumeitas.bandcamp.com/track/danco-j-ni",
+          "imageUrl": "https://f4.bcbits.com/img/a1696922483_16.jpg",
+          "releaseDate": "May 29, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/tautumeitas/3230251",
+        "allReleaseTitles": [
+          "burmanlaimi",
+          "zemsaulesunderthesolarspell",
+          "",
+          "skrejcels",
+          "laimasinarotajasauli",
+          "dancojani",
+          "spodremanuauguminu",
+          "kasdimd",
+          "guliguli",
+          "daicitasmeitas",
+          "dziesmasnoaulejas",
+          "dzivotcitadakaminataand",
+          "muosena"
+        ],
+        "latestRelease": {
+          "title": "Zem Saules Under The Solar Spell Tautumeitas",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/zem-saules-under-the-solar-spell-tautumeitas/fu1irtkhfziqa",
+          "releaseDate": "2025-04-25"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tautumeitas"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tautumeitas"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

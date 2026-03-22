@@ -1,0 +1,59 @@
+[
+  {
+    "id": "bigjoeturner",
+    "name": "Big Joe Turner",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031900689_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/big-joe-turner/43152",
+        "allReleaseTitles": [
+          "bluesinthenight",
+          "oldbutgold",
+          "jumpinwithjoe",
+          "rattleroll",
+          "nighttimeistherighttimetheronnrecordingsmore",
+          "tellmeprettybaby",
+          "thebossisback",
+          "atomicboogiepetejohnson",
+          "newportjazzfestival1958voliiibluesinthenightno1chuckberrybigmaybelle",
+          "brightgreatesthits",
+          "bigjoeblues",
+          "livefromthepalmscafesanfrancisco1977featuringmikebloomfield",
+          "shakejumpanddance",
+          "everydayihavetheblues",
+          "goldenstarcollection",
+          "flipflopfly",
+          "nobodyinmind",
+          "livefive",
+          "sunrisinblues",
+          "brilliantsongs"
+        ],
+        "latestRelease": {
+          "title": "Rattle Roll Big Joe Turner",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/rattle-roll-big-joe-turner/cedhk0z98pfyb",
+          "releaseDate": "2025-11-21"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://big-joe-turner.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Big%20Joe%20Turner"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Big%20Joe%20Turner"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

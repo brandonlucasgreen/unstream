@@ -1,0 +1,82 @@
+[
+  {
+    "id": "iyaz",
+    "name": "iyaz",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038738341_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/iyaz/311982",
+        "allReleaseTitles": [
+          "replay",
+          "prettygirlsfeattraviemccoy",
+          "solo",
+          "longwayhomedmpjboog",
+          "onlyyou",
+          "longwayhomedmp",
+          "sobigep",
+          "soloep",
+          "alivefeatnashofhotchellerae",
+          "onemillion",
+          "onepuffbcasejowellrandy",
+          "replaywithmoonlander",
+          "danceallnightgabbyb",
+          "islandgirls",
+          "rightabouttimebobj"
+        ],
+        "latestRelease": {
+          "title": "Pretty Girls Feat Travie Mccoy Iyaz",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/pretty-girls-feat-travie-mccoy-iyaz/0054391979636",
+          "releaseDate": "2011-05-10"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://theiyaz.bandcamp.com"
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/iyaz"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=iyaz"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+iyaz"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1728522"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/iyazlive/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://tiktok.com/@iyazlive"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC0tIFKS5uijPeJLjH8uAWJg"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.net/@iyazlive"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/iyaz"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

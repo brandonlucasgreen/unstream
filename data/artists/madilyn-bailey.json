@@ -1,0 +1,75 @@
+[
+  {
+    "id": "madilynbailey",
+    "name": "Madilyn Bailey",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a1004498940_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/madilyn-bailey/2203870",
+        "latestRelease": {
+          "title": "Petals Acoustic Madilyn Bailey",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/petals-acoustic-madilyn-bailey/pmim80q2hg5jc",
+          "releaseDate": "2023-10-20"
+        },
+        "allReleaseTitles": [
+          "liveatelbphilharmoniechannelaidchannelaid",
+          "truecrimemadilynand",
+          "petalsacoustic",
+          "titaniumrerecordedversionandmadilyn",
+          "galwaygirl",
+          "unholy",
+          "seriousandmadilyn",
+          "imamessissues",
+          "espressoacoustic",
+          "jarofhearts",
+          "myworstmadilynand",
+          "beautyandthebeastandraymondsalgado",
+          "goodluckbabeacoustic",
+          "youbrokemefirst",
+          "cruelsummer",
+          "themagicofchristmas",
+          "yourebeautifulalexgootand",
+          "goldenacoustic",
+          "lovestory",
+          "shineyourdiamondheartmadilynand"
+        ]
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://madilynbailey.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Madilyn%20Bailey"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Madilyn%20Bailey"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4643028"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/madilynbailey/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCZH4EVUqljV-zkZEd0Ot7EQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Maddybailey"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

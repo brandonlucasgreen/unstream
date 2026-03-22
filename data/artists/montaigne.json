@@ -26,40 +26,40 @@
         }
       },
       {
-        "sourceId": "patreon",
-        "url": "https://www.patreon.com/Montaigne"
-      },
-      {
         "sourceId": "qobuz",
         "url": "https://www.qobuz.com/us-en/interpreter/montaigne/694111",
         "allReleaseTitles": [
           "makingit",
           "gloriousheights",
           "becauseiloveyou",
-          "makemefeelsofeatdadifreyr",
-          "talkingshit",
+          "alwysburemixeddavidbyrne",
           "alwaysbeyoudavidbyrne",
+          "talkingshit",
+          "makemefeelsofeatdadifreyr",
           "nowinspace",
           "everybodyelse",
           "simancongozapapayasonpalenquekspr",
+          "complex",
           "itshardtobeafish",
           "mylifeisbetterwithyou",
-          "complex",
           "technicolour",
           "lifeof",
           "meloampmamenampomed",
           "swimback",
-          "alwysburemixeddavidbyrne",
           "dontbreakme",
           "itsallaboutthemoney",
-          "beyondtheglass"
+          "ready"
         ],
         "latestRelease": {
-          "title": "Talking Shit Montaigne",
+          "title": "Making It Montaigne",
           "type": "album",
-          "url": "https://www.qobuz.com/us-en/album/talking-shit-montaigne/zybb4y2qtd89b",
-          "releaseDate": "2024-10-10"
+          "url": "https://www.qobuz.com/us-en/album/making-it-montaigne/gin8zqii8nhoa",
+          "releaseDate": "2022-09-02"
         }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/Montaigne"
       },
       {
         "sourceId": "ampwall",

@@ -1,0 +1,58 @@
+[
+  {
+    "id": "susannesundfr",
+    "name": "Susanne Sundfør",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038890059_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://susannesundfor.bandcamp.com",
+        "allReleaseTitles": [
+          "blomiedit",
+          "blomi"
+        ],
+        "latestRelease": {
+          "title": "blómi (Edit)",
+          "type": "album",
+          "url": "https://susannesundfor.bandcamp.com/album/bl-mi-edit",
+          "imageUrl": "https://f4.bcbits.com/img/a3565658240_16.jpg",
+          "releaseDate": "October 11, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Susanne%20Sundf%C3%B8r"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Susanne%20Sundf%C3%B8r"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://susannesundfor.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/747088"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/susannesundfor/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCBPpr4JyW5JY_lOfWT2p9kQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/247990362191"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

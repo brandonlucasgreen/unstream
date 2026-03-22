@@ -1,0 +1,53 @@
+[
+  {
+    "id": "elliotgoldenthal",
+    "name": "Elliot Goldenthal",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013405529_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://elliotgoldenthal.bandcamp.com",
+        "allReleaseTitles": [
+          "thegloriasoriginalscoreelliotgoldenthal",
+          "amidsummernightsdreamelliotgoldenthal",
+          "goldenthalsymphonyingsharpminorepelliotgoldenthal",
+          "goldenthaljabberwockysingleelliotgoldenthalcharlestemkeyerikholtjejabberwockywinds",
+          "goldenthalothellosymphonyelliotgoldenthal",
+          "goldenthalstringquartetno1thestonecutterselliotgoldenthal",
+          "goldenthalthetempestmusicfromthemotionpictureelliotgoldenthal"
+        ],
+        "latestRelease": {
+          "title": "The Glorias (Original Score)\n                \n                \n\n                Elliot Goldenthal",
+          "type": "album",
+          "url": "https://elliotgoldenthal.bandcamp.com/album/the-glorias-original-score",
+          "imageUrl": "https://f4.bcbits.com/img/a3483637096_2.jpg",
+          "releaseDate": "October 2, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/elliot-goldenthal/9416",
+        "latestRelease": {
+          "title": "Elliot Goldenthal Music For Film Dirk Brosse Brussels Philharmonic Elliot Goldenthal",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/elliot-goldenthal-music-for-film-dirk-brosse-brussels-philharmonic-elliot-goldenthal/wd730iy5hqvfa",
+          "releaseDate": "2024-10-18"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Elliot%20Goldenthal"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Elliot%20Goldenthal"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

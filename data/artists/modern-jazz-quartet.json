@@ -1,0 +1,57 @@
+[
+  {
+    "id": "modernjazzquartet",
+    "name": "Modern Jazz Quartet",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037497039_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/modern-jazz-quartet-1/931609",
+        "allReleaseTitles": [
+          "sonnyrollinswiththesonnyrollinsthemodernjazzquartetartblakeykennydrew",
+          "sonnyrollinswiththesonnyrollinsartblakeykennydrewthemodernjazzquartet",
+          "concordethe",
+          "thelastconcertthe",
+          "lonelywomanthe",
+          "themontreuxyearsmodernjazzquartet",
+          "thesheriffthe",
+          "europeanconcertvol1the",
+          "bluesonbachthe",
+          "thirdstreammusicthe",
+          "europeanconcertvol2the",
+          "thecomedythe",
+          "thehistoricdonaueschingenjazzconcert1957theeddiesauterbigbandandrehodeiretsonjazzgroupdeparisthe",
+          "40yearsofmjqthe",
+          "liveatthelighthousethe",
+          "adagiofromconciertodearanjuezthe",
+          "fontessathe",
+          "pyramidthe"
+        ],
+        "latestRelease": {
+          "title": "Concorde The Modern Jazz Quartet",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/concorde-the-modern-jazz-quartet/0088807235218",
+          "releaseDate": "2008-01-01"
+        }
+      },
+      {
+        "sourceId": "bandcamp",
+        "url": "https://modernjazzquartet.bandcamp.com"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Modern%20Jazz%20Quartet"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Modern%20Jazz%20Quartet"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

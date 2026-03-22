@@ -1,0 +1,70 @@
+[
+  {
+    "id": "thepianoguys",
+    "name": "The Piano Guys",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032031981_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thepianoguys.bandcamp.com",
+        "allReleaseTitles": [
+          "unstoppable",
+          "lullaby",
+          "chill",
+          "10",
+          "limitless",
+          "uncharted",
+          "wonders",
+          "thepianoguys2"
+        ],
+        "latestRelease": {
+          "title": "Unstoppable",
+          "type": "album",
+          "url": "https://thepianoguys.bandcamp.com/album/unstoppable",
+          "imageUrl": "https://f4.bcbits.com/img/a0281265039_2.jpg",
+          "releaseDate": "November 10, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-piano-guys/900563",
+        "allReleaseTitles": [
+          "",
+          "limitless",
+          "2",
+          "afamilychristmas",
+          "10",
+          "christmastogether",
+          "wonders",
+          "wayfaringstrangerthetabernaclechoirattemplesquare",
+          "uncharted",
+          "someoneyouloved",
+          "sofarsogood",
+          "ocomeocomeemmanuelgabbybarrett",
+          "blessthebrokenroad",
+          "itsgonnabeokay"
+        ],
+        "latestRelease": {
+          "title": "10 The Piano Guys",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/10-the-piano-guys/glf6ngs8dhjuc",
+          "releaseDate": "2020-11-20"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Piano%20Guys"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Piano%20Guys"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -32,34 +32,6 @@
       {
         "sourceId": "buymeacoffee",
         "url": "https://buymeacoffee.com/explore-creators"
-      },
-      {
-        "sourceId": "officialsite",
-        "url": "http://www.miltonnascimento.com.br/"
-      },
-      {
-        "sourceId": "discogs",
-        "url": "https://www.discogs.com/artist/83723"
-      },
-      {
-        "sourceId": "hoopla",
-        "url": "https://www.hoopladigital.com/search?q=Milton%20Nascimento&type=music"
-      },
-      {
-        "sourceId": "freegal",
-        "url": "https://www.freegalmusic.com/search-page/Milton%20Nascimento"
-      },
-      {
-        "sourceId": "instagram",
-        "url": "https://www.instagram.com/miltonbitucanascimento/"
-      },
-      {
-        "sourceId": "youtube",
-        "url": "https://www.youtube.com/user/tvmiltonnascimento"
-      },
-      {
-        "sourceId": "facebook",
-        "url": "https://www.facebook.com/miltonbitucanascimento"
       }
     ],
     "matchConfidence": "verified"
