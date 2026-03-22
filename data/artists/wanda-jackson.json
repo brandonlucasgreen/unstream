@@ -1,0 +1,67 @@
+[
+  {
+    "id": "wandajackson-bandcamp-goldenlanejackson",
+    "name": "Wanda Jackson",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0007995268_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://goldenlanejackson.bandcamp.com",
+        "allReleaseTitles": [
+          "irememberelvis",
+          "crazy",
+          "thequeenofrockabillysalutesthekingofrocknroll"
+        ],
+        "latestRelease": {
+          "title": "I Remember Elvis",
+          "type": "album",
+          "url": "https://goldenlanejackson.bandcamp.com/album/i-remember-elvis",
+          "imageUrl": "https://f4.bcbits.com/img/a3128373209_2.jpg",
+          "releaseDate": "March 20, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Wanda%20Jackson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Wanda%20Jackson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.wandajackson.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/321332"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Wanda%20Jackson&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Wanda%20Jackson"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/wandajofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/wandajacksonmusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/WandaJackson"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

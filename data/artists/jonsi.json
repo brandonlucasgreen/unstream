@@ -37,27 +37,33 @@
         "sourceId": "qobuz",
         "url": "https://www.qobuz.com/us-en/interpreter/jonsi/287557",
         "allReleaseTitles": [
+          "rentalfamilyalexsomers",
           "obsidian",
           "shiver",
           "cannibalwithelizabethfraser",
           "riceboysleepsalexsomers",
           "lostandfoundalexsomers",
           "exhale",
+          "birkisinfangkjartanholmandalexsomers",
+          "saltlicoricewithrobyn",
           "bakgardarsinfangkjartanholmandfischersund",
           "swill",
-          "rentalfamilyalexsomers",
           "go",
           "bandeoriginaledufilmweboughtazoocameroncrowe2012",
           "golive",
-          "godo",
           "darkmorphdarkmorphcarlmichaelvonhausswolff",
-          "birkisinfangkjartanholmandalexsomers",
+          "godo",
           "allanimalsalexsomers",
           "mold",
-          "saltlicoricewithrobyn",
           "evollaminagydavaltysdottirand",
           "goout"
-        ]
+        ],
+        "latestRelease": {
+          "title": "Rental Family Alex Somers Jonsi",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/rental-family-alex-somers-jonsi/wgl7vga7bjfrb",
+          "releaseDate": "2025-11-21"
+        }
       },
       {
         "sourceId": "ampwall",

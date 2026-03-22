@@ -1,0 +1,60 @@
+[
+  {
+    "id": "ianstewart",
+    "name": "Ian Stewart",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0010231094_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ianstewartmusic.bandcamp.com",
+        "allReleaseTitles": [
+          "thesearentthewordsyourelookingforianstewartjacksonwhalan",
+          "thedeluxetatwylfcompanionianstewartandjacksonwhalan",
+          "dubonomics"
+        ],
+        "latestRelease": {
+          "title": "These Aren't The Words You're Looking For\n                \n                \n\n                Ian Stewart & Jackson Whalan",
+          "type": "album",
+          "url": "https://ianstewartmusic.bandcamp.com/album/these-arent-the-words-youre-looking-for",
+          "imageUrl": "https://f4.bcbits.com/img/a1997774071_2.jpg",
+          "releaseDate": "March 23, 2018"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/ian-stewart/350779",
+        "latestRelease": {
+          "title": "Come Thou Fount Ian Stewart",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/come-thou-fount-ian-stewart/ivldq5csd9kwa",
+          "releaseDate": "2024-06-18"
+        },
+        "allReleaseTitles": [
+          "thesearentthewordsyourelookingforjacksonwhalan",
+          "dubonomics",
+          "comethoufount",
+          "thenandnow",
+          "islas",
+          "catchmeimfalling",
+          "sangejtanu",
+          "gravitation",
+          "rapcityindanilefeatmrlifjacksonwhalan"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ian%20Stewart"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ian%20Stewart"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

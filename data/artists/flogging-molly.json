@@ -29,28 +29,28 @@
       {
         "sourceId": "qobuz",
         "url": "https://www.qobuz.com/us-en/interpreter/flogging-molly/513057",
+        "allReleaseTitles": [
+          "lifeisgood",
+          "tiltheanarchysrestored",
+          "anthem",
+          "withinamileofhome",
+          "liveatthegreektheatre",
+          "float",
+          "completecontrolsessions",
+          "swagger",
+          "whiskeyonasunday",
+          "drunkenlullabies",
+          "theresnothingleftpt2",
+          "goinghome",
+          "revolutionsingle",
+          "dontshutemdownsingle"
+        ],
         "latestRelease": {
           "title": "Til The Anarchys Restored Flogging Molly",
           "type": "album",
           "url": "https://www.qobuz.com/us-en/album/til-the-anarchys-restored-flogging-molly/yayvc0cayphgx",
           "releaseDate": "2023-03-10"
-        },
-        "allReleaseTitles": [
-          "tiltheanarchysrestored",
-          "lifeisgood",
-          "drunkenlullabies",
-          "anthem",
-          "swagger",
-          "float",
-          "liveatthegreektheatre",
-          "withinamileofhome",
-          "completecontrolsessions",
-          "whiskeyonasunday",
-          "theresnothingleftpt2",
-          "goinghome",
-          "revolutionsingle",
-          "dontshutemdownsingle"
-        ]
+        }
       },
       {
         "sourceId": "ampwall",

@@ -35,6 +35,38 @@
         }
       },
       {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/can-12/28025284",
+        "allReleaseTitles": [
+          "egebamyasi",
+          "liveinparis1973",
+          "liveinkeele1977",
+          "tagomago",
+          "liveinaston1977",
+          "futuredays",
+          "liveinbrighton1975",
+          "liveinstuttgart1975",
+          "liveincuxhaven1976",
+          "keele77eins",
+          "aston77vier",
+          "soledadtoby",
+          "4am",
+          "salgamoshoytoby",
+          "chonhungngayyeuxa",
+          "monstermovie",
+          "thesingles",
+          "can",
+          "soonoverbabaluma",
+          "thelosttapes"
+        ],
+        "latestRelease": {
+          "title": "Live In Aston 1977 Can",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/live-in-aston-1977-can/z4zilvvln8pmc",
+          "releaseDate": "2024-05-17"
+        }
+      },
+      {
         "sourceId": "ampwall",
         "url": "https://ampwall.com/explore?searchStyle=search&query=CAN"
       },
@@ -65,6 +97,10 @@
       {
         "sourceId": "youtube",
         "url": "https://www.youtube.com/watch?v=su0v4IW4trUp"
+      },
+      {
+        "sourceId": "peertube",
+        "url": "https://c-tube.c-base.org/video-channels/canal"
       },
       {
         "sourceId": "facebook",

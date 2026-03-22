@@ -9,6 +9,10 @@
         "sourceId": "bandcamp",
         "url": "https://ufoofficial.bandcamp.com",
         "allReleaseTitles": [
+          "thewildthewillingandtheinnocent2026remasterdeluxeedition",
+          "walkonwater",
+          "livesightingslive",
+          "werewolvesoflondon",
           "obsession2024remasterdeluxeedition",
           "sevendeadly",
           "thehanoversessions",
@@ -20,18 +24,13 @@
           "aerialvisionsvinniemoore",
           "thevisitor",
           "themonkeypuzzle",
-          "atributetoufovariousartists",
-          "earlyflight1972",
-          "rockbottomincincinnati1995",
-          "landinginstlouislive1982",
-          "liveattheoxfordapollo1985"
+          "atributetoufovariousartists"
         ],
         "latestRelease": {
-          "title": "Obsession (2024 Remaster - Deluxe Edition)",
+          "title": "The Wild, the Willing and the Innocent (2026 Remaster - Deluxe Edition)",
           "type": "album",
-          "url": "https://ufoofficial.bandcamp.com/album/obsession-2024-remaster-deluxe-edition",
-          "imageUrl": "https://f4.bcbits.com/img/a1076535774_2.jpg",
-          "releaseDate": "November 22, 2024"
+          "url": "https://ufoofficial.bandcamp.com/album/the-wild-the-willing-and-the-innocent-2026-remaster-deluxe-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a2964620478_2.jpg"
         }
       },
       {
@@ -61,6 +60,10 @@
       {
         "sourceId": "freegal",
         "url": "https://www.freegalmusic.com/search-page/UFO"
+      },
+      {
+        "sourceId": "peertube",
+        "url": "https://www.pony.tube/video-channels/south_park_pony_fans"
       },
       {
         "sourceId": "facebook",

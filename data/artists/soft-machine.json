@@ -9,6 +9,7 @@
         "sourceId": "bandcamp",
         "url": "https://softmachine-moonjune.bandcamp.com",
         "allReleaseTitles": [
+          "thirteen",
           "otherdoors",
           "liveatthebakedpotato",
           "hiddendetailshd",
@@ -25,11 +26,11 @@
           "moonjuneyearssampler"
         ],
         "latestRelease": {
-          "title": "Other Doors",
+          "title": "Thirteen",
           "type": "album",
-          "url": "https://softmachine-moonjune.bandcamp.com/album/other-doors",
-          "imageUrl": "https://f4.bcbits.com/img/a2484099315_2.jpg",
-          "releaseDate": "June 30, 2023"
+          "url": "https://softmachine-moonjune.bandcamp.com/album/thirteen",
+          "imageUrl": "https://f4.bcbits.com/img/a0950861280_2.jpg",
+          "releaseDate": "March 13, 2026"
         }
       },
       {

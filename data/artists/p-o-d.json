@@ -27,9 +27,9 @@
         "allReleaseTitles": [
           "satellite",
           "veritas",
+          "whenangelsserpentsdance",
           "theawakening",
           "dontletmedown",
-          "whenangelsserpentsdance",
           "socalsessions",
           "iwontbowdownfeatandresgimenezfromanimalandanimal",
           "circles",
@@ -38,9 +38,9 @@
           "iwontbowdown",
           "lieswetellourselves",
           "boomthecrystalmethodremix",
+          "alivesemiacousticversion",
           "greatesthitstheatlanticyears",
           "testify",
-          "payableondeath",
           "murderedlove"
         ],
         "latestRelease": {
@@ -88,7 +88,11 @@
       },
       {
         "sourceId": "youtube",
-        "url": "https://www.youtube.com/user/thepodchannel"
+        "url": "https://www.youtube.com/channel/UC3B67QDqkDsS6H4SGpoYEIg"
+      },
+      {
+        "sourceId": "peertube",
+        "url": "https://video.dragoncat.org/video-channels/jpod"
       },
       {
         "sourceId": "threads",

@@ -8,6 +8,13 @@
       {
         "sourceId": "bandcamp",
         "url": "https://piercetheveil.bandcamp.com",
+        "latestRelease": {
+          "title": "The Jaws Of Life (Deluxe)",
+          "type": "album",
+          "url": "https://piercetheveil.bandcamp.com/album/the-jaws-of-life-deluxe",
+          "imageUrl": "https://f4.bcbits.com/img/a3849007352_2.jpg",
+          "releaseDate": "May 9, 2025"
+        },
         "allReleaseTitles": [
           "thejawsoflifedeluxe",
           "karmapolice",
@@ -17,21 +24,14 @@
           "todayisawthewholeworldep",
           "misadventures",
           "collidewiththesky"
-        ],
-        "latestRelease": {
-          "title": "The Jaws Of Life (Deluxe)",
-          "type": "album",
-          "url": "https://piercetheveil.bandcamp.com/album/the-jaws-of-life-deluxe",
-          "imageUrl": "https://f4.bcbits.com/img/a3849007352_2.jpg",
-          "releaseDate": "May 9, 2025"
-        }
+        ]
       },
       {
         "sourceId": "qobuz",
         "url": "https://www.qobuz.com/us-en/interpreter/pierce-the-veil/1963650",
         "allReleaseTitles": [
-          "selfishmachinesreissue",
           "collidewiththesky",
+          "selfishmachinesreissue",
           "thejawsoflife",
           "kissmenow",
           "karmapolice",

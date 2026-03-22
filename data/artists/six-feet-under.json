@@ -3,12 +3,13 @@
     "id": "sixfeetunder",
     "name": "Six Feet Under",
     "type": "artist",
-    "imageUrl": "https://f4.bcbits.com/img/0035376657_23.jpg",
+    "imageUrl": "https://f4.bcbits.com/img/0043250412_23.jpg",
     "platforms": [
       {
         "sourceId": "bandcamp",
         "url": "https://sixfeetunder.bandcamp.com",
         "allReleaseTitles": [
+          "nexttodie",
           "killingforrevenge",
           "nightmaresofthedecomposed",
           "unburied",
@@ -23,46 +24,44 @@
           "commandment",
           "13",
           "livewithfullforce",
-          "bringerofblood",
-          "doubledeadredux"
+          "bringerofblood"
         ],
         "latestRelease": {
-          "title": "Killing for Revenge",
+          "title": "Next to Die",
           "type": "album",
-          "url": "https://sixfeetunder.bandcamp.com/album/killing-for-revenge",
-          "imageUrl": "https://f4.bcbits.com/img/a0318650032_2.jpg",
-          "releaseDate": "May 10, 2024"
+          "url": "https://sixfeetunder.bandcamp.com/album/next-to-die",
+          "imageUrl": "https://f4.bcbits.com/img/a3515138619_2.jpg"
         }
-      },
-      {
-        "sourceId": "patreon",
-        "url": "https://www.patreon.com/SixFeetUnderSims"
       },
       {
         "sourceId": "qobuz",
         "url": "https://www.qobuz.com/us-en/interpreter/six-feet-under/556069",
         "allReleaseTitles": [
           "killingforrevenge",
+          "unmistakablesmellofdeath",
+          "nexttodie",
           "nightmaresofthedecomposed",
-          "thebestof",
+          "unburied",
           "bringerofblood",
+          "13",
           "haunted",
           "graveyardclassics",
           "maximumviolence",
           "warpath",
+          "thebestof",
           "truecarnage",
           "livewithfullforce",
           "deathrituals",
           "wakethenight",
           "commandment",
-          "13",
           "graveyardclassics3",
-          "torment",
           "unborn",
-          "unburied",
-          "cryptofthedevil",
-          "graveyardclassicsivthenumberofthepriest"
+          "torment"
         ]
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/SixFeetUnderSims"
       },
       {
         "sourceId": "ampwall",

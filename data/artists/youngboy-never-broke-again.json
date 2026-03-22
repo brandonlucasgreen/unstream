@@ -1,0 +1,56 @@
+[
+  {
+    "id": "youngboyneverbrokeagain",
+    "name": "YoungBoy Never Broke Again",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a1710121412_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://youngboyneverbrokeagain.bandcamp.com",
+        "allReleaseTitles": [
+          "weshothiminhisheadhuh",
+          "notime",
+          "steppa",
+          "terminatornbayoungboy"
+        ],
+        "latestRelease": {
+          "title": "We shot him in his head huh",
+          "type": "album",
+          "url": "https://youngboyneverbrokeagain.bandcamp.com/album/we-shot-him-in-his-head-huh",
+          "imageUrl": "https://f4.bcbits.com/img/a1710121412_16.jpg",
+          "releaseDate": "February 29, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=YoungBoy%20Never%20Broke%20Again"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+YoungBoy%20Never%20Broke%20Again"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://youngboynba.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5616567"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/nba_youngboy/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UClW4jraMKz6Qj69lJf-tODA"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

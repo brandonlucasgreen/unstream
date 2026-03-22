@@ -9,6 +9,7 @@
         "sourceId": "bandcamp",
         "url": "https://judycollins.bandcamp.com",
         "allReleaseTitles": [
+          "winterstoriesjudycollinsjonasfjeld",
           "bohemiandigitalcopyonly",
           "paradise",
           "voicesshameless",
@@ -23,7 +24,6 @@
           "spellbound",
           "whitebirdanthologyoffavorites",
           "wildflowerfestivalphysicalcopyonly",
-          "winterstoriesjudycollinsjonasfjeld",
           "everybodyknowsjudycollinsstephenstills",
           "alovelettertostephensondheim",
           "liveatthemetropolitanmuseumofartatthetempleofdendur",
@@ -31,10 +31,11 @@
           "liveinireland"
         ],
         "latestRelease": {
-          "title": "Bohemian (Digital Copy Only)",
+          "title": "Winter Stories\n                \n                \n\n                Judy Collins & Jonas Fjeld",
           "type": "album",
-          "url": "https://judycollins.bandcamp.com/album/bohemian-digital-copy-only",
-          "imageUrl": "https://f4.bcbits.com/img/a2650495465_2.jpg"
+          "url": "https://judycollins.bandcamp.com/album/winter-stories",
+          "imageUrl": "https://f4.bcbits.com/img/a4093380196_2.jpg",
+          "releaseDate": "March 20, 2026"
         }
       },
       {

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "pierreschaeffer-bandcamp-pierreschaeffer",
+    "name": "Pierre Schaeffer",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024751875_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://pierreschaeffer.bandcamp.com",
+        "allReleaseTitles": [
+          "uvres19481952",
+          "uvres19581979"
+        ],
+        "latestRelease": {
+          "title": "Œuvres 1948-1952",
+          "type": "album",
+          "url": "https://pierreschaeffer.bandcamp.com/album/uvres-1948-1952",
+          "imageUrl": "https://f4.bcbits.com/img/a3735173954_16.jpg",
+          "releaseDate": "January 1, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Pierre%20Schaeffer"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Pierre%20Schaeffer"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/32181"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Pierre%20Schaeffer&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Pierre%20Schaeffer"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

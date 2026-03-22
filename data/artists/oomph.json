@@ -1,0 +1,104 @@
+[
+  {
+    "id": "oomph",
+    "name": "OOMPH!",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032737805_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://oomphband.bandcamp.com",
+        "allReleaseTitles": [
+          "richterundhenker",
+          "ritual",
+          "ego",
+          "plastik",
+          "unrein",
+          "wunschkind",
+          "defekt",
+          "sperm",
+          "oomph"
+        ],
+        "latestRelease": {
+          "title": "Richter und Henker",
+          "type": "album",
+          "url": "https://oomphband.bandcamp.com/album/richter-und-henker",
+          "imageUrl": "https://f4.bcbits.com/img/a1678673320_2.jpg",
+          "releaseDate": "September 8, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/oomph/68459",
+        "allReleaseTitles": [
+          "richterundhenker",
+          "wemdiestundeschlagt",
+          "monster",
+          "wahrheitoderpflicht",
+          "ritual",
+          "glaubeliebetod",
+          "ego",
+          "deswahnsinnsfettebeute",
+          "plastik",
+          "sperm",
+          "augenauf",
+          "truthordare",
+          "defekt",
+          "",
+          "unrein",
+          "wunschkind",
+          "sandmann"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=OOMPH!"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+OOMPH!"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.oomph.de/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/43378"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=OOMPH!&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/OOMPH!"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/oomphband/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@oomphband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC2t1FIXYFYmiZps5m2ShYVA"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://threads.net/oomphband"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/oomphband"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

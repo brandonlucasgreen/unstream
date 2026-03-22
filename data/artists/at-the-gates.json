@@ -25,27 +25,29 @@
       {
         "sourceId": "qobuz",
         "url": "https://www.qobuz.com/us-en/interpreter/at-the-gates/1031358",
-        "latestRelease": {
-          "title": "Gardens Of Grief At The Gates",
-          "type": "album",
-          "url": "https://www.qobuz.com/us-en/album/gardens-of-grief-at-the-gates/qvzih2k7g0ixc",
-          "releaseDate": "2024-11-22"
-        },
         "allReleaseTitles": [
           "thenightmareofbeing",
           "slaughterofthesoul",
-          "gardensofgrief",
-          "theredintheskyisours",
-          "todrinkfromthenightitself",
+          "thefevermask",
           "terminalspiritdisease",
+          "gardensofgrief",
           "withfearikisstheburningdarkness",
+          "theredintheskyisours",
+          "theghostofafuturedead",
+          "todrinkfromthenightitself",
           "suicidalfinalacts",
           "liveinkrakow",
           "atwarwithreality",
           "theredintheskyisoursdeluxe",
           "withthepantheonsblindep",
           "deathandthelabyrinth"
-        ]
+        ],
+        "latestRelease": {
+          "title": "The Fever Mask At The Gates",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-fever-mask-at-the-gates/u2h2kqhj1hh78",
+          "releaseDate": "2026-02-20"
+        }
       },
       {
         "sourceId": "ampwall",

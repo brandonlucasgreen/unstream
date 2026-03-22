@@ -8,23 +8,19 @@
       {
         "sourceId": "bandcamp",
         "url": "https://azis.bandcamp.com",
+        "allReleaseTitles": [
+          "diva",
+          "celuvaime",
+          "dueti",
+          "2005"
+        ],
         "latestRelease": {
           "title": "Дива (Diva)",
           "type": "album",
           "url": "https://azis.bandcamp.com/album/diva",
           "imageUrl": "https://f4.bcbits.com/img/a0920176551_16.jpg",
           "releaseDate": "July 7, 2007"
-        },
-        "allReleaseTitles": [
-          "diva",
-          "celuvaime",
-          "dueti",
-          "2005"
-        ]
-      },
-      {
-        "sourceId": "patreon",
-        "url": "https://www.patreon.com/AZIS4__0"
+        }
       },
       {
         "sourceId": "qobuz",
@@ -32,20 +28,19 @@
         "allReleaseTitles": [
           "tochnovtri",
           "diamantiiparimalinadjdamyan",
-          "sentrope",
           "",
           "2002",
           "",
           "2014",
           "hitcollection",
+          "sentrope",
           "thebest2",
           "habibi",
           "mrasnica",
+          "duets",
           "2005",
           "diva2007",
-          "diva",
-          "tzeluvayme",
-          "thebest"
+          "diva"
         ],
         "latestRelease": {
           "title": "Diamanti I Pari Malina Azis Dj Damyan",
@@ -65,6 +60,10 @@
       {
         "sourceId": "buymeacoffee",
         "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/AZIS4__0"
       }
     ],
     "matchConfidence": "verified"

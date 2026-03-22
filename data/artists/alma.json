@@ -1,0 +1,52 @@
+[
+  {
+    "id": "alma",
+    "name": "Alma",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018370728_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://almarecords.bandcamp.com",
+        "allReleaseTitles": [
+          "ataraxiamiguelgalvez",
+          "connectionvalleymassiel",
+          "greenmountainone1",
+          "greeneyesalejandrofernandez",
+          "nolosematricardi",
+          "madridpizzicatto",
+          "freshnessjyoel",
+          "visionandreacaioni",
+          "australtonimoreno",
+          "dazzlingcostas",
+          "akemiesignaciomoralespanafelipebravo",
+          "eternitykidmossfelipebravo",
+          "villbilllolumenayedisbel",
+          "seapadrazboi",
+          "moonlightjnjsjacobosaavedrajaynortown",
+          "negrobalotpiroin"
+        ],
+        "latestRelease": {
+          "title": "Ataraxia\n                \n                \n\n                Miguel Galvez",
+          "type": "album",
+          "url": "https://almarecords.bandcamp.com/album/ataraxia",
+          "imageUrl": "https://f4.bcbits.com/img/a1376378591_2.jpg",
+          "releaseDate": "September 9, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Alma"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Alma"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,106 @@
+[
+  {
+    "id": "skunkanansie",
+    "name": "Skunk Anansie",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026106966_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://skunkanansie.bandcamp.com",
+        "allReleaseTitles": [
+          "postorgasmicchill25thanniversaryexpandededition",
+          "piggycanttakeyouanywhere",
+          "thismeanswarwhatyoudoforlove",
+          "anacousticskunkanansie",
+          "blacktraffic",
+          "postorgasmicchill",
+          "stoosh",
+          "paranoidsunburnt"
+        ],
+        "latestRelease": {
+          "title": "Post Orgasmic Chill (25th Anniversary Expanded Edition)",
+          "type": "album",
+          "url": "https://skunkanansie.bandcamp.com/album/post-orgasmic-chill-25th-anniversary-expanded-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a0128220132_2.jpg",
+          "releaseDate": "December 6, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/skunk-anansie/121234",
+        "allReleaseTitles": [
+          "thepainfultruth",
+          "stoosh",
+          "anartistisanartist",
+          "cheers",
+          "shame",
+          "lostandfound",
+          "animal",
+          "anarchytecture",
+          "postorgasmicchill",
+          "thismeanswarwhatyoudoforlove",
+          "blacktraffic",
+          "wonderlustretouredition",
+          "piggycanttakeyouanywhere",
+          "paranoidsunburnt",
+          "anacousticliveinlondon",
+          "25live25",
+          "squander",
+          "hedonism"
+        ],
+        "latestRelease": {
+          "title": "Shame Skunk Anansie",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/shame-skunk-anansie/jlqm7tww3zebc",
+          "releaseDate": "2025-07-10"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Skunk%20Anansie"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Skunk%20Anansie"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.skunkanansie.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/11394"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Skunk%20Anansie&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Skunk%20Anansie"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/officialskunkanansie/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@officialskunkanansie?_t=8Vg09Pw4bv4&amp;_r=1"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCeMyXnTZGlK3acmklhuPBiA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/OfficialSkunkAnansie"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

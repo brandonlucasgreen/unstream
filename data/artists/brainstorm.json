@@ -1,0 +1,70 @@
+[
+  {
+    "id": "brainstorm",
+    "name": "BRAINSTORM",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0000225619_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://brainstormbrainstorm.bandcamp.com",
+        "allReleaseTitles": [
+          "shemovesep",
+          "heatwaves",
+          "themdoumoctarcovers",
+          "flatearthep",
+          "beastinthesky7inch",
+          "battlinggiants"
+        ],
+        "latestRelease": {
+          "title": "She Moves EP",
+          "type": "album",
+          "url": "https://brainstormbrainstorm.bandcamp.com/album/she-moves-ep",
+          "imageUrl": "https://f4.bcbits.com/img/a0060833246_2.jpg",
+          "releaseDate": "February 26, 2013"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=BRAINSTORM"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+BRAINSTORM"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.brainstorm-web.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/420399"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=BRAINSTORM&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/BRAINSTORM"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/official.brainstorm"
+      },
+      {
+        "sourceId": "peertube",
+        "url": "https://makertube.net/video-channels/brainstorm"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialbrainstorm"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

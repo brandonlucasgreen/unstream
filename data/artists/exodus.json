@@ -16,12 +16,9 @@
           "title": "Goliath",
           "type": "album",
           "url": "https://exodus.bandcamp.com/album/goliath",
-          "imageUrl": "https://f4.bcbits.com/img/a2453555077_16.jpg"
+          "imageUrl": "https://f4.bcbits.com/img/a2453555077_16.jpg",
+          "releaseDate": "March 20, 2026"
         }
-      },
-      {
-        "sourceId": "patreon",
-        "url": "https://www.patreon.com/Exodus_cl"
       },
       {
         "sourceId": "qobuz",
@@ -29,25 +26,29 @@
         "allReleaseTitles": [
           "personanongrata",
           "hesawomanshesaman",
-          "britishdisasterthebattleof89",
-          "3111",
-          "goliath",
-          "nevermore",
-          "bulletintheback",
-          "bondedbyblood",
-          "tempoofthedamned",
-          "fabulousdisaster",
-          "bloodinbloodout",
-          "shovelheadedkillmachine",
           "beatingaroundthebush",
+          "goliath",
+          "3111",
+          "britishdisasterthebattleof89",
+          "goliathfeatkatiejacoby",
+          "promiseyouthis",
+          "nevermore",
+          "patchwork",
+          "bulletintheback",
+          "idylle",
+          "bondedbyblood",
+          "fabulousdisaster",
+          "tempoofthedamned",
+          "bloodinbloodout",
           "impactisimminent",
           "theatrocityexhibitionexhibita",
-          "pleasuresoftheflesh",
-          "forceofhabit",
-          "exhibitbthehumancondition",
-          "lettherebeblood",
-          "shovelheadedtourmachineliveatwackenandotherassortedatrocities"
+          "shovelheadedkillmachine",
+          "forceofhabit"
         ]
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/Exodus_cl"
       },
       {
         "sourceId": "ampwall",

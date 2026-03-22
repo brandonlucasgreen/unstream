@@ -1,0 +1,81 @@
+[
+  {
+    "id": "gentlegiant-bandcamp-realgentlegiant",
+    "name": "GentleGiant",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022212458_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://realgentlegiant.bandcamp.com",
+        "allReleaseTitles": [
+          "quefeatcomfortanc",
+          "freebeat3",
+          "technika",
+          "spaceflight",
+          "screamingatclouds",
+          "waaavy",
+          "wherearewegoing",
+          "thundercloudsinmyhead",
+          "bounce",
+          "sancho",
+          "dubknowledge",
+          "st",
+          "sleepinblack",
+          "freebeat2",
+          "freebeat1",
+          "mystic",
+          "loopingspaceyshitaloneinmygarage"
+        ],
+        "latestRelease": {
+          "title": "Que? (feat. Comfortanc)",
+          "type": "track",
+          "url": "https://realgentlegiant.bandcamp.com/track/que-feat-comfortanc",
+          "imageUrl": "https://f4.bcbits.com/img/a0056878458_2.jpg",
+          "releaseDate": "March 26, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=GentleGiant"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+GentleGiant"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://gentlegiantmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/240248"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=GentleGiant&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/GentleGiant"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/gentlegiantband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/watch?v=ga0W_Zk3IEM"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/GENTLE-GIANT/121160188790"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

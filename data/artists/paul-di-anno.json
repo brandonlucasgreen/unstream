@@ -9,16 +9,15 @@
         "sourceId": "bandcamp",
         "url": "https://pauldianno.bandcamp.com",
         "allReleaseTitles": [
+          "talesfromthebeast",
           "talesfromthebeastdeluxeedition",
-          "wrathchildtheanthology",
-          "talesfromthebeast"
+          "wrathchildtheanthology"
         ],
         "latestRelease": {
-          "title": "Tales From The Beast - Deluxe Edition",
+          "title": "Tales From The Beast",
           "type": "album",
-          "url": "https://pauldianno.bandcamp.com/album/tales-from-the-beast-deluxe-edition",
-          "imageUrl": "https://f4.bcbits.com/img/a3288346103_2.jpg",
-          "releaseDate": "December 26, 2025"
+          "url": "https://pauldianno.bandcamp.com/album/tales-from-the-beast",
+          "imageUrl": "https://f4.bcbits.com/img/a3784387582_2.jpg"
         }
       },
       {

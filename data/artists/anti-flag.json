@@ -1,0 +1,84 @@
+[
+  {
+    "id": "antiflag",
+    "name": "Anti-Flag",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022287963_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://anti-flag.bandcamp.com",
+        "allReleaseTitles": [
+          "thegeneralstrike10yearanniversaryedition",
+          "dieforthegovernment",
+          "dieforthegovernment",
+          "17songdemo",
+          "adyingplea",
+          "livevol2",
+          "theirsystemdoesntworkforyouremastered",
+          "livevol1",
+          "liveandacousticinvienna",
+          "ceasefires",
+          "antiflagemigre7inch",
+          "antiflagkillkillkill7inch1995",
+          "adocumentofdissent",
+          "baconaf056",
+          "theirsystemdoesntworkforyouaf001",
+          "abenefitforvictimsofviolentcrimeaf051",
+          "theterrorstate",
+          "mobilizeaf014",
+          "undergroundnetwork",
+          "anewkindofarmyaf005"
+        ],
+        "latestRelease": {
+          "title": "The General Strike (10 Year Anniversary Edition)",
+          "type": "album",
+          "url": "https://anti-flag.bandcamp.com/album/the-general-strike-10-year-anniversary-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a1992731146_2.jpg",
+          "releaseDate": "August 17, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Anti-Flag"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Anti-Flag"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.anti-flag.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/253273"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Anti-Flag&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Anti-Flag"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/anti.flag.official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCcA08fGorzCJzPCIATs-Gtg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/anti.flag.official"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

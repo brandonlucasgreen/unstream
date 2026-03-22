@@ -27,6 +27,32 @@
         }
       },
       {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/christopher-cross/116939",
+        "allReleaseTitles": [
+          "expandededition",
+          "2019remaster",
+          "",
+          "ridelikethewindyachthousemixpartypupils",
+          "anotherpage2019remaster",
+          "thecafecarlylesessions",
+          "anotherpage",
+          "anightinparis",
+          "everyturnoftheworld",
+          "sailingbennysings",
+          "rendezvous",
+          "backofmymind",
+          "secretladder",
+          "doctorfaith",
+          "achristmas",
+          "allrighttheworldwidesingles19801988",
+          "window",
+          "takemeasiam",
+          "sailing",
+          "walkinginavalon"
+        ]
+      },
+      {
         "sourceId": "ampwall",
         "url": "https://ampwall.com/explore?searchStyle=search&query=Christopher%20Cross"
       },

@@ -21,6 +21,38 @@
         }
       },
       {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sly-stone/41090",
+        "allReleaseTitles": [
+          "highonyou",
+          "tenyearstoosoontheremixalbum",
+          "hotfuninthesummertime2023mixinstrumentalbootsycollins",
+          "familyaffair2023mixinstrumentalsingle",
+          "onemorehitampsalfilipelli",
+          "rolemodelampsalfilipelli",
+          "imbackfamilyfriends",
+          "theverybestof",
+          "iwanttotakeyouhigher2023mixinstrumentalsingle",
+          "greatesthits",
+          "familysoulsessionstherare45rpms6366",
+          "threeofakindstarshipsantana",
+          "everydaypeople2023mixinstrumentalsingle",
+          "colorblindcarlacook",
+          "thankyoufalettinmebemiceelfagin2023mixinstrumental",
+          "stand2023mixinstrumentalcarmineappice",
+          "dancetothemusicsingleraymanzarek",
+          "familyaffairrerecordedspedup",
+          "hiseyeisonthesparrow2023mixinstrumentalsingle",
+          "fireinmyheart"
+        ],
+        "latestRelease": {
+          "title": "One More Hit Sly Stone Amp Sal Filipelli",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/one-more-hit-sly-stone-amp-sal-filipelli/qaefu6qfpom2a",
+          "releaseDate": "2024-09-20"
+        }
+      },
+      {
         "sourceId": "ampwall",
         "url": "https://ampwall.com/explore?searchStyle=search&query=Sly%20Stone"
       },

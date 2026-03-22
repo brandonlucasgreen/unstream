@@ -41,27 +41,26 @@
       {
         "sourceId": "qobuz",
         "url": "https://www.qobuz.com/us-en/interpreter/the-national/384546",
-        "latestRelease": {
-          "title": "Rome The National",
-          "type": "album",
-          "url": "https://www.qobuz.com/us-en/album/rome-the-national/y7zsqju6za06b",
-          "releaseDate": "2024-12-13"
-        },
         "allReleaseTitles": [
           "troublewillfindme",
           "rome",
           "sleepwellbeast",
-          "firsttwopagesoffrankenstein",
           "iameasytofind",
+          "firsttwopagesoffrankenstein",
           "laughtrack",
           "sadsongsfordirtylovers",
+          "boxer",
           "cherrytree",
           "",
-          "boxer",
           "weirdgoodbyesfeatboniverfeatboniver",
-          "heaven",
           "boxerliveinbrussels"
-        ]
+        ],
+        "latestRelease": {
+          "title": "Rome The National",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/rome-the-national/gdvazdnqx34cb",
+          "releaseDate": "2025-12-13"
+        }
       },
       {
         "sourceId": "ampwall",

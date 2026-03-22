@@ -3,12 +3,13 @@
     "id": "melvins",
     "name": "Melvins",
     "type": "artist",
-    "imageUrl": "https://f4.bcbits.com/img/0035004084_23.jpg",
+    "imageUrl": "https://f4.bcbits.com/img/0042713935_23.jpg",
     "platforms": [
       {
         "sourceId": "bandcamp",
         "url": "https://melvinsofficial.bandcamp.com",
         "allReleaseTitles": [
+          "savageimperialdeathmarchmelvinsnapalmdeath",
           "thunderball",
           "tarantulaheart",
           "badmoodrising",
@@ -23,15 +24,13 @@
           "thebullsthebeeselectroretard",
           "holditin",
           "trescabrones",
-          "everybodylovessausages",
-          "freakpukemelvinslite"
+          "everybodylovessausages"
         ],
         "latestRelease": {
-          "title": "Thunderball",
+          "title": "Savage Imperial Death March\n                \n                \n\n                Melvins, Napalm Death",
           "type": "album",
-          "url": "https://melvinsofficial.bandcamp.com/album/thunderball",
-          "imageUrl": "https://f4.bcbits.com/img/a2271177607_2.jpg",
-          "releaseDate": "April 18, 2025"
+          "url": "https://melvinsofficial.bandcamp.com/album/savage-imperial-death-march",
+          "imageUrl": "https://f4.bcbits.com/img/a0658060150_2.jpg"
         }
       },
       {

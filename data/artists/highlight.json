@@ -1,0 +1,42 @@
+[
+  {
+    "id": "highlight-bandcamp-205highlight",
+    "name": "Highlight",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0001896710_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://205highlight.bandcamp.com",
+        "allReleaseTitles": [
+          "theintermission",
+          "themixtapebeforeallinonenight"
+        ],
+        "latestRelease": {
+          "title": "The Intermission",
+          "type": "album",
+          "url": "https://205highlight.bandcamp.com/album/the-intermission",
+          "imageUrl": "https://f4.bcbits.com/img/a0443400058_16.jpg",
+          "releaseDate": "October 4, 2013"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Highlight"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Highlight"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCGdZ_-svzY_hPLYVSKvMFvw"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

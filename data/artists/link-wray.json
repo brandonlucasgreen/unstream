@@ -1,0 +1,54 @@
+[
+  {
+    "id": "linkwray-bandcamp-linkwray",
+    "name": "Link Wray",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0017786057_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://linkwray.bandcamp.com",
+        "allReleaseTitles": [
+          "mybrothermyson",
+          "vernonsdiamond"
+        ],
+        "latestRelease": {
+          "title": "My Brother, My Son",
+          "type": "track",
+          "url": "https://linkwray.bandcamp.com/track/my-brother-my-son",
+          "imageUrl": "https://f4.bcbits.com/img/a1371604373_16.jpg",
+          "releaseDate": "April 1, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Link%20Wray"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Link%20Wray"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.rollercoasterrecords.com/link_wray.htm"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/246644"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Link%20Wray&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Link%20Wray"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

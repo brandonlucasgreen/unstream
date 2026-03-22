@@ -1,0 +1,74 @@
+[
+  {
+    "id": "achillelauro",
+    "name": "Achille Lauro",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3282099781_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://achillelauro.bandcamp.com",
+        "allReleaseTitles": [
+          "flightorflight",
+          "indiscretions"
+        ],
+        "latestRelease": {
+          "title": "Flight or Flight",
+          "type": "album",
+          "url": "https://achillelauro.bandcamp.com/album/flight-or-flight",
+          "imageUrl": "https://f4.bcbits.com/img/a3282099781_16.jpg",
+          "releaseDate": "February 11, 2012"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/achille-lauro/1590319",
+        "allReleaseTitles": [
+          "incoscientigiovani",
+          "millefedezoriettaberti",
+          "ragazzadiperiferiaannatatangelobossdoms",
+          "flightorflight",
+          "",
+          "youregoingtoliveandothernicethingstohear",
+          "lowchachasingle",
+          "indiscretions"
+        ],
+        "latestRelease": {
+          "title": "Incoscienti Giovani Achille Lauro",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/incoscienti-giovani-achille-lauro/puyih3lgyci7b",
+          "releaseDate": "2025-02-12"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Achille%20Lauro"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Achille%20Lauro"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3781613"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/achilleidol/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCBn0LqkY6sTa1iw-NQOGEbA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/AchilleL"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

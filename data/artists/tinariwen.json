@@ -8,6 +8,13 @@
       {
         "sourceId": "bandcamp",
         "url": "https://tinariwen.bandcamp.com",
+        "latestRelease": {
+          "title": "Hoggar",
+          "type": "album",
+          "url": "https://tinariwen.bandcamp.com/album/hoggar",
+          "imageUrl": "https://f4.bcbits.com/img/a3805357979_2.jpg",
+          "releaseDate": "March 13, 2026"
+        },
         "allReleaseTitles": [
           "hoggar",
           "adalan",
@@ -25,41 +32,29 @@
           "amadjar",
           "elwan",
           "insideoutside"
-        ],
-        "latestRelease": {
-          "title": "Hoggar",
-          "type": "album",
-          "url": "https://tinariwen.bandcamp.com/album/hoggar",
-          "imageUrl": "https://f4.bcbits.com/img/a3805357979_2.jpg"
-        }
+        ]
       },
       {
         "sourceId": "qobuz",
         "url": "https://www.qobuz.com/us-en/interpreter/tinariwen/62590",
         "allReleaseTitles": [
+          "hoggar",
           "idrachetracesofthepast",
-          "amadjar",
           "elwan",
+          "amadjar",
           "amatssou",
+          "emmaar",
+          "theradiotisdassessions",
           "liveinparis",
           "tassili",
-          "theradiotisdassessions",
-          "kel",
-          "insideoutsidejoshuatreeacousticsessions",
-          "wartilladancareywarrenellisstephenomalley",
-          "remixed",
           "amassakoul",
-          "emmaar",
+          "kel",
+          "amidinimehafsolan",
           "sagheratassanisulafaelyas",
-          "adalan",
-          "arawan"
-        ],
-        "latestRelease": {
-          "title": "Idrache Traces Of The Past Tinariwen",
-          "type": "album",
-          "url": "https://www.qobuz.com/us-en/album/idrache-traces-of-the-past-tinariwen/h4vg86mc48doa",
-          "releaseDate": "2024-11-15"
-        }
+          "imidiwantakyadam",
+          "insideoutsidejoshuatreeacousticsessions",
+          "wartilladancareywarrenellisstephenomalley"
+        ]
       },
       {
         "sourceId": "ampwall",

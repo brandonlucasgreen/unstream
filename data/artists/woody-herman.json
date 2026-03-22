@@ -1,0 +1,57 @@
+[
+  {
+    "id": "woodyherman",
+    "name": "Woody Herman",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0023671920_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://woodyherman.bandcamp.com",
+        "latestRelease": {
+          "title": "Together\n                \n                \n\n                Flip Phillips & The Woody Herman Orchestra",
+          "type": "album",
+          "url": "https://woodyherman.bandcamp.com/album/together",
+          "imageUrl": "https://f4.bcbits.com/img/a1825053701_2.jpg",
+          "releaseDate": "January 1, 2025"
+        },
+        "allReleaseTitles": [
+          "togetherflipphillipsthewoodyhermanorchestra",
+          "125thstreetprophet",
+          "live1944woodyhermanandthefirstherd",
+          "attheroundtablewoodyhermansextet",
+          "lionelhamptonpresentswoodyherman",
+          "chickdonaldwalterwoodrowthewoodyhermanband",
+          "roadfather",
+          "theuncollectedwoodyhermanandhisorchestra1937",
+          "lullabyofbirdlandthewallyheiderrecordings"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Woody%20Herman"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Woody%20Herman"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/239399"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Woody%20Herman&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Woody%20Herman"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

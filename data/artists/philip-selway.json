@@ -21,6 +21,28 @@
         }
       },
       {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/philip-selway/173431",
+        "allReleaseTitles": [
+          "liveatevolutionstudioselysiancollectivechrisvatalaro",
+          "letmegoost",
+          "strangedance",
+          "weatherhouse",
+          "comingupforair",
+          "itwillendintears",
+          "familial",
+          "checkforsignsoflife",
+          "runningblind",
+          "pickinguppieces",
+          "walk",
+          "aroundagain",
+          "theothersideelysiancollectivechrisvatalaro",
+          "pickinguppieceselysiancollectivechrisvatalaro",
+          "theheartofitallelysiancollectivechrisvatalaro",
+          "letmego"
+        ]
+      },
+      {
         "sourceId": "ampwall",
         "url": "https://ampwall.com/explore?searchStyle=search&query=Philip%20Selway"
       },

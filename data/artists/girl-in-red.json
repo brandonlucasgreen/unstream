@@ -1,0 +1,77 @@
+[
+  {
+    "id": "girlinred",
+    "name": "girl in red",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0015668759_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://girlinred.bandcamp.com",
+        "allReleaseTitles": [
+          "forgether",
+          "girls",
+          "4am",
+          "summerdepression",
+          "shewasthegirlinred",
+          "sayanything",
+          "dramaticlilbitch",
+          "willshecomeback",
+          "iwannabeyourgirlfriend"
+        ],
+        "latestRelease": {
+          "title": "forget her.",
+          "type": "track",
+          "url": "https://girlinred.bandcamp.com/track/forget-her-2",
+          "imageUrl": "https://f4.bcbits.com/img/a3526311700_2.jpg",
+          "releaseDate": "August 26, 2018"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/girlinred-10003785051/3785051",
+        "allReleaseTitles": [
+          "imdoingitagainbaby",
+          "wefellinloveinoctoberforgether",
+          "badidea",
+          "chapter1",
+          "hemingway",
+          "chapter2",
+          "octoberpassedmeby",
+          "confession",
+          "girlfriendisbetter",
+          "watchyousleep",
+          "iwannabeyourgirlfriend",
+          "pickme",
+          "girls",
+          "summerdepression",
+          "illdieanyway",
+          "deadgirlinthepool",
+          "youneedmenowsabrinacarpenter",
+          "ificouldmakeitgoquiet",
+          "toomuch",
+          "4am"
+        ],
+        "latestRelease": {
+          "title": "Hemingway Girl In Red",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/hemingway-girl-in-red/ua5s23ovwk78a",
+          "releaseDate": "2025-05-30"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=girl%20in%20red"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+girl%20in%20red"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

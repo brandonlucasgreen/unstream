@@ -3,12 +3,13 @@
     "id": "devintownsend",
     "name": "Devin Townsend",
     "type": "artist",
-    "imageUrl": "https://f4.bcbits.com/img/0022535380_23.jpg",
+    "imageUrl": "https://f4.bcbits.com/img/0043237550_23.jpg",
     "platforms": [
       {
         "sourceId": "bandcamp",
         "url": "https://devintownsend.bandcamp.com",
         "allReleaseTitles": [
+          "themothdeluxeedition24bithdaudio",
           "powernerd24bithdaudio",
           "powernerdcommentaryversion24bithdaudio",
           "infinityremastered2023",
@@ -23,20 +24,18 @@
           "oceanmachineliveattheancientromantheatreplovdiv24bithdaudio",
           "transcendencedeluxeedition",
           "zdeluxeedition",
-          "theretinalcircus",
-          "epicloud"
+          "theretinalcircus"
         ],
         "latestRelease": {
-          "title": "PowerNerd (24-bit HD audio)",
+          "title": "The Moth (Deluxe Edition) [24-bit HD audio]",
           "type": "album",
-          "url": "https://devintownsend.bandcamp.com/album/powernerd-24-bit-hd-audio",
-          "imageUrl": "https://f4.bcbits.com/img/a2712238017_2.jpg",
-          "releaseDate": "October 25, 2024"
+          "url": "https://devintownsend.bandcamp.com/album/the-moth-deluxe-edition-24-bit-hd-audio",
+          "imageUrl": "https://f4.bcbits.com/img/a3465688777_2.jpg"
         }
       },
       {
         "sourceId": "patreon",
-        "url": "https://www.patreon.com/DevinTownsend"
+        "url": "https://www.patreon.com/cw/DevinTownsend"
       },
       {
         "sourceId": "ampwall",

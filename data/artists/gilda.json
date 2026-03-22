@@ -1,0 +1,50 @@
+[
+  {
+    "id": "gilda",
+    "name": "Gilda",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031199706_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://gilda.bandcamp.com",
+        "allReleaseTitles": [
+          "inedite",
+          "gilda"
+        ],
+        "latestRelease": {
+          "title": "Inedite",
+          "type": "album",
+          "url": "https://gilda.bandcamp.com/album/inedite",
+          "imageUrl": "https://f4.bcbits.com/img/a2083047989_16.jpg",
+          "releaseDate": "January 28, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Gilda"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Gilda"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2484619"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Gilda&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Gilda"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

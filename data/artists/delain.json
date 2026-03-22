@@ -1,0 +1,101 @@
+[
+  {
+    "id": "delain",
+    "name": "Delain",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037066883_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://delain.bandcamp.com",
+        "allReleaseTitles": [
+          "thereapingacousticversionfeatjohannakurkela",
+          "dancewiththedevil",
+          "symphonicdarkwaters",
+          "darkwaters",
+          "thequestandthecurse",
+          "apocalypsechill",
+          "onesecond",
+          "burningbridges",
+          "huntersmoon",
+          "adecadeofdelainliveatparadiso",
+          "moonbathers",
+          "moonbathersdeluxeedition",
+          "lunarprelude",
+          "thehumancontradiction",
+          "thehumancontradictiondeluxeedition",
+          "interlude"
+        ],
+        "latestRelease": {
+          "title": "The Reaping (Acoustic Version) (feat. Johanna Kurkela)",
+          "type": "track",
+          "url": "https://delain.bandcamp.com/track/the-reaping-acoustic-version-feat-johanna-kurkela",
+          "imageUrl": "https://f4.bcbits.com/img/a2307833956_2.jpg",
+          "releaseDate": "April 2, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/delain/433475",
+        "allReleaseTitles": [
+          "darkwaters",
+          "apocalypsechill",
+          "dancewiththedevil",
+          "symphonicdarkwaters",
+          "thereaping",
+          "queenofshadow",
+          "lunarprelude",
+          "thequestandthecurse",
+          "thebelleyeofmelianandjohannakurkela",
+          "vitanovaeyeofmelianandjohannakurkela",
+          "mothtoaflame",
+          "beneath",
+          "everstrongeyeofmelianandjohannakurkela",
+          "doorwayofnighteyeofmelianandjohannakurkela",
+          "wearetheothers",
+          "aprilrain",
+          "moonbathers"
+        ],
+        "latestRelease": {
+          "title": "The Reaping Delain",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-reaping-delain/n2mhc0p9asckb",
+          "releaseDate": "2025-04-02"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Delain"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Delain"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.delain.nl/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/714771"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/delainofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCijF534Q4VFffUT-B4TFT9Q"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/delainmusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "id": "azizamustafazadeh",
+    "name": "Aziza Mustafa Zadeh",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036446099_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://azizamustafazadeh.bandcamp.com",
+        "allReleaseTitles": [
+          "danceoffire",
+          "always"
+        ],
+        "latestRelease": {
+          "title": "Dance Of Fire",
+          "type": "album",
+          "url": "https://azizamustafazadeh.bandcamp.com/album/dance-of-fire",
+          "imageUrl": "https://f4.bcbits.com/img/a4001150539_16.jpg",
+          "releaseDate": "May 7, 2018"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/aziza-mustafa-zadeh/37478",
+        "allReleaseTitles": [
+          "danceoffire",
+          "always",
+          "generations",
+          "",
+          "jazziza",
+          "seventhtruth"
+        ],
+        "latestRelease": {
+          "title": "Generations Aziza Mustafa Zadeh",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/generations-aziza-mustafa-zadeh/d3fhedz3so3wb",
+          "releaseDate": "2020-07-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Aziza%20Mustafa%20Zadeh"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Aziza%20Mustafa%20Zadeh"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.azizamustafazadeh.de/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/319364"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Aziza%20Mustafa%20Zadeh&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Aziza%20Mustafa%20Zadeh"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/azizamustafazadeh/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/JazzAziza"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,77 @@
+[
+  {
+    "id": "sash",
+    "name": "S.A.S.H",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019133215_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sashsundays.bandcamp.com",
+        "allReleaseTitles": [
+          "themanthattalksstevode",
+          "oldschoolraymono",
+          "hypnotherapyepalexarnout",
+          "closejamesdexter",
+          "radarepmichaeljames",
+          "holdoneplegittrip",
+          "easyriderepthewillersbrothers",
+          "cafesocietyepdanbaartz",
+          "emergerousepjakehough"
+        ],
+        "latestRelease": {
+          "title": "The Man That Talks\n                \n                \n\n                Stevo (DE)",
+          "type": "album",
+          "url": "https://sashsundays.bandcamp.com/album/the-man-that-talks",
+          "imageUrl": "https://f4.bcbits.com/img/a4176720759_2.jpg",
+          "releaseDate": "January 28, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=S.A.S.H"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+S.A.S.H"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.dj-sash.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7981"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=S.A.S.H&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/S.A.S.H"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/dj_sash_official"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://vm.tiktok.com/ZMeGp32yV/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/djsashworld"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sashmusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

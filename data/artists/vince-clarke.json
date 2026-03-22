@@ -21,6 +21,20 @@
         }
       },
       {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/vince-clarke/160757",
+        "allReleaseTitles": [
+          "songsofsilence",
+          "thelamentationsofjeremiah",
+          "whiterabbit",
+          "deeptronica",
+          "flyonthewindscreenanebrunmartingore",
+          "onmortalityimmortalitycharlesivesmortalitytablesvenoztks",
+          "ripplefrancesknightalexkeen",
+          "auroraiiiarstraumur"
+        ]
+      },
+      {
         "sourceId": "ampwall",
         "url": "https://ampwall.com/explore?searchStyle=search&query=Vince%20Clarke"
       },

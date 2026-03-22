@@ -3,12 +3,13 @@
     "id": "deathcabforcutie",
     "name": "Death Cab for Cutie",
     "type": "artist",
-    "imageUrl": "https://f4.bcbits.com/img/0042490570_23.jpg",
+    "imageUrl": "https://f4.bcbits.com/img/0043434484_23.jpg",
     "platforms": [
       {
         "sourceId": "bandcamp",
         "url": "https://deathcabforcutie.bandcamp.com",
         "allReleaseTitles": [
+          "ibuiltyouatower",
           "anarrowinthewall",
           "asphaltmeadowsacoustic",
           "asphaltmeadows",
@@ -23,15 +24,13 @@
           "theopendoorep",
           "narrowstairs",
           "plans",
-          "christmasbabypleasecomehome",
-          "transatlanticism"
+          "christmasbabypleasecomehome"
         ],
         "latestRelease": {
-          "title": "An Arrow In The Wall",
+          "title": "I Built You A Tower",
           "type": "album",
-          "url": "https://deathcabforcutie.bandcamp.com/album/an-arrow-in-the-wall",
-          "imageUrl": "https://f4.bcbits.com/img/a1629079699_2.jpg",
-          "releaseDate": "August 16, 2023"
+          "url": "https://deathcabforcutie.bandcamp.com/album/i-built-you-a-tower",
+          "imageUrl": "https://f4.bcbits.com/img/a0370958576_2.jpg"
         }
       },
       {
@@ -41,21 +40,21 @@
           "transatlanticism",
           "plans",
           "asphaltmeadows",
-          "codesandkeys",
           "kintsugi",
+          "codesandkeys",
           "narrowstairs",
-          "asphaltmeadowsacoustic",
+          "thephotoalbum",
           "thankyoufortoday",
+          "asphaltmeadowsacoustic",
           "thegeorgiaep",
           "theblueep",
-          "thephotoalbum",
           "northernlights",
-          "waitingforthesunrise",
+          "riptides",
           "transatlanticismdemos",
+          "ibuiltyouatower",
+          "waitingforthesunrise",
           "heretoforever",
-          "pepperacoustic",
-          "totheground",
-          "thestabilityep"
+          "pepperacoustic"
         ],
         "latestRelease": {
           "title": "Asphalt Meadows Death Cab For Cutie",

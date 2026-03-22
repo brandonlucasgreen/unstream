@@ -30,7 +30,8 @@
           "title": "Wildlive (Live at Olympiahalle)",
           "type": "album",
           "url": "https://powerwolf.bandcamp.com/album/wildlive-live-at-olympiahalle",
-          "imageUrl": "https://f4.bcbits.com/img/a1823392678_2.jpg"
+          "imageUrl": "https://f4.bcbits.com/img/a1823392678_2.jpg",
+          "releaseDate": "February 13, 2026"
         }
       },
       {
@@ -39,29 +40,23 @@
         "allReleaseTitles": [
           "wakeupthewicked",
           "callofthewild",
+          "wildliveliveatolympiahalle",
+          "hallowedbetheholygroundliveatwacken2019",
           "themonumentalmassacinematicmetalevent",
           "bestoftheblesseddeluxeversion",
           "poison",
-          "hallowedbetheholygroundliveatwacken2019",
           "barkatthemoon",
           "1589",
           "bestoftheblessed",
-          "missacantoremii",
           "mywillbedone",
           "noprayeratmidnight",
           "dancingwiththedead",
+          "blessedpossessed",
+          "missacantoremii",
           "sinnersofthesevenseas",
           "missacantoremi",
-          "beastofgevaudan",
-          "aliveorundead",
-          "stossgebet"
-        ],
-        "latestRelease": {
-          "title": "Wake Up The Wicked Powerwolf",
-          "type": "album",
-          "url": "https://www.qobuz.com/us-en/album/wake-up-the-wicked-powerwolf/gw2k1iq1gj7la",
-          "releaseDate": "2024-07-26"
-        }
+          "wildlive"
+        ]
       },
       {
         "sourceId": "ampwall",

@@ -10,9 +10,6 @@
         "url": "https://therejects.bandcamp.com",
         "allReleaseTitles": [
           "flagpolesitta",
-          "kidsinthestreetlimitedtouredition",
-          "whentheworldcomesdown",
-          "movealong",
           "sierrassong",
           "staydemocompilationtrack"
         ],
@@ -29,11 +26,11 @@
         "url": "https://www.qobuz.com/us-en/interpreter/the-all-american-rejects/67937",
         "allReleaseTitles": [
           "movealong",
-          "eggshelltapdancer",
           "easycomeeasygo",
+          "eggshelltapdancer",
           "searchparty",
-          "sendhertoheaven",
           "getthis",
+          "sendhertoheaven",
           "sierrassong",
           "whentheworldcomesdown",
           "",
@@ -42,13 +39,14 @@
           "flatlineep",
           "sweat",
           "dirtylittlesecret",
-          "theresaplace"
+          "theresaplace",
+          "sonyconnectsessions"
         ],
         "latestRelease": {
-          "title": "Eggshell Tap Dancer The All American Rejects",
+          "title": "Get This The All American Rejects",
           "type": "album",
-          "url": "https://www.qobuz.com/us-en/album/eggshell-tap-dancer-the-all-american-rejects/wdkkmz0i1coma",
-          "releaseDate": "2025-10-24"
+          "url": "https://www.qobuz.com/us-en/album/get-this-the-all-american-rejects/x7mkln69fvxva",
+          "releaseDate": "2025-11-28"
         }
       },
       {

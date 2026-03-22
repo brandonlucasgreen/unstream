@@ -1,0 +1,76 @@
+[
+  {
+    "id": "krsone",
+    "name": "KRS-One",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013700319_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://krsone.bandcamp.com",
+        "allReleaseTitles": [
+          "knockemout",
+          "betweendaprotestsextendededitionkrsone",
+          "theblockpartykrsonedjkidcaprikrsonekidcapri",
+          "streetlightfirstedition",
+          "krsoneanintroductiontohiphop",
+          "theworldismind",
+          "blackhistorymonthlessons12100yearanniversary2016",
+          "nowhearthisthealbumremastereddeluxeedition"
+        ],
+        "latestRelease": {
+          "title": "Knock Em Out",
+          "type": "track",
+          "url": "https://krsone.bandcamp.com/track/knock-em-out",
+          "imageUrl": "https://f4.bcbits.com/img/a3607448170_2.jpg",
+          "releaseDate": "November 9, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=KRS-One"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+KRS-One"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.krs-one.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/50514"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=KRS-One&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/KRS-One"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/teacha_krsone/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCA2w3yf1BlliMJoaT-vFqaA"
+      },
+      {
+        "sourceId": "mastodon",
+        "url": "https://siteassets.parastorage.com/pages/pages/thunderbolt?appDefinitionIdToSiteRevision=%7B%221522827f-c56c-a5c9-2ac9-00f9e6ae12d3%22%3A%221903%22%2C%2214271d6f-ba62-d045-549b-ab972ae1f70e%22%3A%2225%22%7D&beckyExperiments=.DatePickerPortal%2C.DisableDocumentScrollWhenLightBoxOpen%2C.EnableCustomCSSVarsForLoginSocialBar%2C.FreemiumBannerOdeditor%2C.LoginBarEnableLoggingInStateInSSR%2C.TextInputAutoFillFix%2C.UseLoginSocialBarCustomMenu%2C.UseNewLoginBarDropdownMenuAlignment%2C.UseNewLoginSocialBarCustomMenuPositioning%2C.UseNewLoginSocialBarElementStructure%2C.UseNewLoginSocialBarMemberInitialsAvatar%2C.VerticalMenu_uiType_NativeMapper%2C.WixFreeSiteBannerDesktop%2C.WixFreeSiteBannerMobile%2C.addIdAsClassName%2C.buttonUdp%2C.calculateCollapsibleTextLineHeightByFont%2C.disableBuilderWixComponents%2C.dom_store%2C.dontApplyDacOverridesOnBoBApps%2C.dynamicSlots%2C.fiveGridLineStudioSkins%2C.imageEncodingAVIF%2C.isClassNameToRootEnabled%2C.migrateStylableMenuUiTypeMapper%2C.motionTimeAnimationsCSS%2C.propsCarmiMappersMigration1%2C.propsCarmiMappersMigration4%2C.propsCarmiMappersMigration5%2C.runMappersWithSpecificDeps%2C.shouldUseResponsiveImages%2C.svgResolver_2%2C.takeAppDependenciesFromCSM%2C.uiTypeNativeMappers%2C.updateRichTextSemanticClassNamesOnCorvid%2C.useClassnameInResponsiveAppWidget%2C.useImageAvifFormatInNativeProGallery%2C.useResponsiveImgClassicFixed%2C.useSvgLoaderFeature%2C.useSvgLoaderFeatureOnBuilderComps%2C.useWowImageInFastGallery&blocksBuilderManifestGeneratorVersion=1.129.0&contentType=application%2Fjson&deviceType=Desktop&dfCk=6&dfVersion=1.5303.0&disableStaticPagesUrlHierarchy=false&editorName=Unknown&experiments=dm_bgScrubToMotionFixer%2Cdm_masterPageVariablesQueryFixer%2Cdm_migrateOldHoverBoxToNewFixer&externalBaseUrl=https%3A%2F%2Fwww.krs-one.com&fileId=74607281.bundle.min&formFactor=desktop&hasTPAWorkerOnSite=false&hasUserDomainMedia=false&isBuilderComponentModel=false&isHttps=true&isInSeo=false&isMultilingualEnabled=false&isPremiumDomain=true&isTrackClicksAnalyticsEnabled=false&isUrlMigrated=true&isWixCodeOnPage=false&isWixCodeOnSite=false&language=en&languageResolutionMethod=QueryParam&metaSiteId=9faf1ef8-9ad8-4b72-a062-e5f479f5f40f&module=thunderbolt-features&oneDocEnabled=true&originalLanguage=en&pageId=0545bc_a815405b29fe5958622d83042c322ad2_541.json&pilerExperiments=specs.piler.useEditorReactComponents&quickActionsMenuEnabled=false&registryLibrariesTopology=%5B%7B%22artifactId%22%3A%22editor-elements%22%2C%22namespace%22%3A%22wixui%22%2C%22url%22%3A%22https%3A%2F%2Fstatic.parastorage.com%2Fservices%2Feditor-elements%2F1.14996.0%22%7D%2C%7B%22artifactId%22%3A%22editor-elements%22%2C%22namespace%22%3A%22dsgnsys%22%2C%22url%22%3A%22https%3A%2F%2Fstatic.parastorage.com%2Fservices%2Feditor-elements%2F1.14996.0%22%7D%5D&remoteWidgetStructureBuilderVersion=1.251.0&siteId=a65fa8d5-57b7-4976-9894-8295183b32cb&siteRevision=541&staticHTMLComponentUrl=https%3A%2F%2Fwww-krs-one-com.filesusr.com%2F&useSandboxInHTMLComp=false&viewMode=desktop"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/112789938731219"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

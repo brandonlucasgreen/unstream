@@ -1,0 +1,71 @@
+[
+  {
+    "id": "levina",
+    "name": "Levina",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0043254778_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://levinamusic.bandcamp.com",
+        "allReleaseTitles": [
+          "knowyoubetterlevinalisabel",
+          "crushlevinatelica",
+          "liveatchanceprojectsep",
+          "letstalkep",
+          "thinkinginthedarkep"
+        ],
+        "latestRelease": {
+          "title": "Know You Better\n                \n                \n\n                Levina & Lisabel",
+          "type": "track",
+          "url": "https://levinamusic.bandcamp.com/track/know-you-better",
+          "imageUrl": "https://f4.bcbits.com/img/a3801521841_2.jpg",
+          "releaseDate": "October 24, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/levina/13163",
+        "latestRelease": {
+          "title": "Battleground Levina",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/battleground-levina/oivoowayns96a",
+          "releaseDate": "2022-11-17"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Levina"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Levina"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.levinamusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5589458"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/levinamusic/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCh_I8cK4n90_FzFkKsUk5uw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/levinamusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

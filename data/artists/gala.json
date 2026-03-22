@@ -1,0 +1,68 @@
+[
+  {
+    "id": "gala-bandcamp-galarteal",
+    "name": "Gala",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022460324_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://galarteal.bandcamp.com",
+        "allReleaseTitles": [
+          "chladnisfigures",
+          "twowanderingtrees",
+          "cp089underwaterbioacoustics",
+          "berlinsea"
+        ],
+        "latestRelease": {
+          "title": "Chladni's figures",
+          "type": "album",
+          "url": "https://galarteal.bandcamp.com/album/chladnis-figures",
+          "imageUrl": "https://f4.bcbits.com/img/a0798391699_16.jpg",
+          "releaseDate": "July 5, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Gala"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Gala"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.galasound.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/10770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Gala&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Gala"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://instagram.com/galaofficialpage"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/galasound"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/galasound"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

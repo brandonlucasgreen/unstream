@@ -37,12 +37,6 @@
       {
         "sourceId": "qobuz",
         "url": "https://www.qobuz.com/us-en/interpreter/enslaved/114068",
-        "latestRelease": {
-          "title": "Heimdal Enslaved",
-          "type": "album",
-          "url": "https://www.qobuz.com/us-en/album/heimdal-enslaved/w8etgdm1oin0a",
-          "releaseDate": "2024-03-01"
-        },
         "allReleaseTitles": [
           "intimes",
           "e",
@@ -51,20 +45,25 @@
           "chroniclesofthenorthbound",
           "roadburnlive",
           "hordanesland",
+          "belowthelights",
           "caravanstotheouterworlds",
+          "theriseofymir",
           "homebound",
           "kingdom",
           "forestdweller",
+          "gangandi",
           "frost",
-          "belowthelights",
-          "isa",
-          "vikingligrveldi",
           "vertebrae",
-          "ruun",
+          "isa",
           "axiomaethicaodini",
-          "mardraum",
-          "eld"
-        ]
+          "vikingligrveldi"
+        ],
+        "latestRelease": {
+          "title": "Heimdal Enslaved",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/heimdal-enslaved/w8etgdm1oin0a",
+          "releaseDate": "2024-03-01"
+        }
       },
       {
         "sourceId": "ampwall",

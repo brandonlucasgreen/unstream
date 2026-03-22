@@ -1,0 +1,62 @@
+[
+  {
+    "id": "cinderella",
+    "name": "Cinderella",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011675421_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://cinderellarocks.bandcamp.com",
+        "allReleaseTitles": [
+          "liveatthekeyclub",
+          "thewaylifegoesdeluxeeditiontomkeifer"
+        ],
+        "latestRelease": {
+          "title": "Live At The Key Club",
+          "type": "album",
+          "url": "https://cinderellarocks.bandcamp.com/album/live-at-the-key-club",
+          "imageUrl": "https://f4.bcbits.com/img/a2082795830_16.jpg",
+          "releaseDate": "February 27, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Cinderella"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Cinderella"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.cinderella.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/196350"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Cinderella&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Cinderella"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC2q7k7ped7sf4qGafCk8_TQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/cinderellanet"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

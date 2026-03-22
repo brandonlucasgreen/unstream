@@ -39,16 +39,16 @@
         "url": "https://www.qobuz.com/us-en/interpreter/adrian-belew/125329",
         "allReleaseTitles": [
           "lonerhino",
-          "sideone",
-          "desireoftherhinoking",
           "twangbarking",
           "innerrevolutionusinternetrelease",
-          "sidethree",
+          "sideone",
+          "desireoftherhinoking",
           "sidetwo",
+          "sidethree",
           "piper",
           "saladdays",
-          "popsided",
           "a13",
+          "popsided",
           "liveatrockpalastforumleverkusengermany3rdnovember2008",
           "comingattractions",
           "liveattheparadisetheaterbostonmajuly18th1989",
@@ -92,6 +92,10 @@
       {
         "sourceId": "instagram",
         "url": "https://www.instagram.com/theadrianbelew/"
+      },
+      {
+        "sourceId": "peertube",
+        "url": "https://tube.undernet.uy/video-channels/adrian.uy"
       },
       {
         "sourceId": "facebook",

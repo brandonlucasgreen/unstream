@@ -24,10 +24,6 @@
         }
       },
       {
-        "sourceId": "patreon",
-        "url": "https://www.patreon.com/Destruction_"
-      },
-      {
         "sourceId": "qobuz",
         "url": "https://www.qobuz.com/us-en/interpreter/destruction/551943",
         "allReleaseTitles": [
@@ -36,22 +32,26 @@
           "borntoperish",
           "borntothrash",
           "fastasashark",
+          "nokingsnomasters",
           "scumbaghumanrace",
           "angst",
           "",
           "stateofapathy",
           "eternaldevastation",
           "infernaloverkill",
-          "theantichrist",
-          "crackedbrain",
-          "thrashanthems",
-          "releasefromagony",
           "dayofreckoning",
-          "sentenceofdeath",
+          "crackedbrain",
+          "theantichrist",
+          "releasefromagony",
           "underattack",
-          "allhellbreaksloose",
-          "devolution"
+          "sentenceofdeath",
+          "thrashanthems",
+          "allhellbreaksloose"
         ]
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/Destruction_"
       },
       {
         "sourceId": "ampwall",
@@ -87,7 +87,7 @@
       },
       {
         "sourceId": "youtube",
-        "url": "https://www.youtube.com/user/DestructionDE"
+        "url": "https://www.youtube.com/channel/UCK-tnQ4gQTr3ReHIwpUpk6A"
       },
       {
         "sourceId": "facebook",

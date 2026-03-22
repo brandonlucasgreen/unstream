@@ -1,0 +1,56 @@
+[
+  {
+    "id": "brendanmurray",
+    "name": "Brendan Murray",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3676119585_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://brendanmurray.bandcamp.com",
+        "allReleaseTitles": [
+          "knuckleheadmedusa",
+          "cloudchamberscore",
+          "phasedarray",
+          "yourdreamname",
+          "badmenfromameltingmoonoriginalmotionpicturesoundtrack",
+          "insideasquare",
+          "strrerrcrossd",
+          "joyofwolfmotionpicturesoundtrack",
+          "stoplights",
+          "bluesheetsredglitter",
+          "plainsight",
+          "explodingheartmixes",
+          "commonwealth",
+          "scaredinmyheart",
+          "duelocations",
+          "cassettemusic",
+          "whatbecamewonders",
+          "restingplacesandgarden",
+          "constant",
+          "notnowplus"
+        ],
+        "latestRelease": {
+          "title": "Knucklehead Medusa",
+          "type": "album",
+          "url": "https://brendanmurray.bandcamp.com/album/knucklehead-medusa",
+          "imageUrl": "https://f4.bcbits.com/img/a0977151072_2.jpg",
+          "releaseDate": "September 1, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Brendan%20Murray"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Brendan%20Murray"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

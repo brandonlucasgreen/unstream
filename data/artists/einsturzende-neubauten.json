@@ -1,0 +1,49 @@
+[
+  {
+    "id": "einsturzendeneubauten",
+    "name": "Einstürzende Neubauten",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0021144174_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://neubauten.bandcamp.com",
+        "allReleaseTitles": [
+          "leipzigoct172024",
+          "rampenapmalienpopmusic",
+          "istist",
+          "totaleclipseofthesun",
+          "klaviermusikmusterhaus6",
+          "reduxorchestravseinsturzendeneubautenmusterhaus4reduxorchestravseinsturzendeneubauten",
+          "solobassfedermusterhaus3",
+          "kassettenmusterhaus5",
+          "unglaublicherlaermmusterhaus2",
+          "anarchitekturmusterhaus1",
+          "gijonliveconcertfrom2005",
+          "weingeistermusterhaus8",
+          "stimmenrestemusterhaus7"
+        ],
+        "latestRelease": {
+          "title": "Leipzig, Oct. 17, 2024",
+          "type": "album",
+          "url": "https://neubauten.bandcamp.com/album/leipzig-oct-17-2024",
+          "imageUrl": "https://f4.bcbits.com/img/a0351277284_2.jpg",
+          "releaseDate": "May 2, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Einst%C3%BCrzende%20Neubauten"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Einst%C3%BCrzende%20Neubauten"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

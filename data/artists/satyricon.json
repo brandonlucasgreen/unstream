@@ -1,0 +1,91 @@
+[
+  {
+    "id": "satyricon",
+    "name": "Satyricon",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011190137_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://satyricon.bandcamp.com",
+        "allReleaseTitles": [
+          "satyriconmunch",
+          "darkmedievaltimes",
+          "theshadowthrone",
+          "rebelextravaganza",
+          "deepcallethupondeep",
+          "nemesisdivina",
+          "liveattheopera"
+        ],
+        "latestRelease": {
+          "title": "Satyricon & Munch",
+          "type": "album",
+          "url": "https://satyricon.bandcamp.com/album/satyricon-munch",
+          "imageUrl": "https://f4.bcbits.com/img/a0823931926_2.jpg",
+          "releaseDate": "June 10, 2022"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/satyricon/243513",
+        "allReleaseTitles": [
+          "rebelextravaganza",
+          "munch",
+          "nowdiabolical",
+          "theageofnero",
+          "nemesisdivina",
+          "",
+          "deepcallethupondeep",
+          "darkmedievaltimes",
+          "liveattheopera",
+          "theshadowthrone",
+          "myskiniscold",
+          "blackcrowonatombstone",
+          "toyourbrethreninthedark",
+          "ourworlditrumblestonight"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Satyricon"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Satyricon"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.satyricon.no/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/170341"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Satyricon&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Satyricon"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/satyriconofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCRpIGIdtRHHCmxkK4k7ylaw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/SatyriconOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]
