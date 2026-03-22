@@ -8,7 +8,7 @@
 #
 # Logs to: data/social-posts/cron.log
 
-set -euo pipefail
+set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
@@ -31,7 +31,12 @@ echo "=== $(date) ===" >> "$LOG_FILE"
 echo "Generating posts for $NEXT_WEEK" >> "$LOG_FILE"
 
 # Generate posts and schedule for publication
-npx tsx scripts/generate-social-posts.ts --week "$NEXT_WEEK" --schedule --publish >> "$LOG_FILE" 2>&1
+if npx tsx scripts/generate-social-posts.ts --week "$NEXT_WEEK" --schedule --publish >> "$LOG_FILE" 2>&1; then
+  echo "Done." >> "$LOG_FILE"
+  osascript -e "display notification \"Posts for $NEXT_WEEK scheduled to Buffer. Check the dashboard to review.\" with title \"Unstream Social\" sound name \"Glass\""
+else
+  echo "FAILED." >> "$LOG_FILE"
+  osascript -e "display notification \"Failed to schedule posts for $NEXT_WEEK. Check data/social-posts/cron.log\" with title \"Unstream Social\" sound name \"Basso\""
+fi
 
-echo "Done." >> "$LOG_FILE"
 echo "" >> "$LOG_FILE"
