@@ -1,0 +1,39 @@
+name: Schedule weekly social posts
+
+on:
+  schedule:
+    # Every Monday at 2pm UTC (9am ET)
+    - cron: '0 14 * * 1'
+  workflow_dispatch: # Allow manual trigger from GitHub UI
+
+jobs:
+  schedule-posts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Calculate next week
+        id: week
+        run: echo "week=$(date -d '+7 days' +'%G-W%V')" >> "$GITHUB_OUTPUT"
+
+      - name: Generate and schedule posts
+        env:
+          BUFFER_ACCESS_TOKEN: ${{ secrets.BUFFER_ACCESS_TOKEN }}
+          BUFFER_ORG_ID: ${{ secrets.BUFFER_ORG_ID }}
+          BUFFER_CHANNEL_IDS: ${{ secrets.BUFFER_CHANNEL_IDS }}
+        run: npx tsx scripts/generate-social-posts.ts --week ${{ steps.week.outputs.week }} --schedule --publish
+
+      - name: Commit updated history
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/social-posts/history.json data/shipped-features.json
+          git diff --cached --quiet || git commit -m "Update social post history for ${{ steps.week.outputs.week }}"
+          git push
