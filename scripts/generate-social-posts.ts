@@ -1167,20 +1167,21 @@ async function main() {
         results.push({ platform: 'Bluesky', ...result });
       }
       if (instagramId) {
-        // Instagram requires at least one image — Buffer rejects imageless posts entirely
-        if (!draft.imageUrl) {
-          results.push({ platform: 'Instagram', success: true, status: 'skipped (no image)', id: undefined });
-        } else {
-          const result = await createBufferPost({
-            channelId: instagramId,
-            text: draft.posts.instagram,
-            dueAt,
-            imageUrl: draft.imageUrl,
-            saveToDraft,
-            metadata: { instagram: { type: 'post', shouldShareToFeed: true } },
-          });
-          results.push({ platform: 'Instagram', ...result });
+        // Instagram requires an image — use placeholder + save as draft if none available
+        const hasImage = !!draft.imageUrl;
+        const igImage = draft.imageUrl || `${UNSTREAM_BASE}/og-image.png`;
+        const result = await createBufferPost({
+          channelId: instagramId,
+          text: draft.posts.instagram,
+          dueAt,
+          imageUrl: igImage,
+          saveToDraft,
+          metadata: { instagram: { type: 'post', shouldShareToFeed: true } },
+        });
+        if (!hasImage && result.success) {
+          result.status = 'draft (needs image)';
         }
+        results.push({ platform: 'Instagram', ...result });
       }
 
       const ok = results.every(r => r.success);
