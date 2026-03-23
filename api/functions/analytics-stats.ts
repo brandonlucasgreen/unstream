@@ -90,33 +90,23 @@ export async function handler(event: {
     return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authorized to view analytics for this artist' }) };
   }
 
-  // Query analytics
-  let query = client
-    .from('artist_analytics')
-    .select('date, metric, count')
-    .eq('artist_id', artist.id);
-
+  // Query analytics via SECURITY DEFINER RPC to bypass RLS
+  let sinceDate = '1970-01-01';
   if (period !== 'all') {
     const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
     const since = new Date();
     since.setDate(since.getDate() - days);
-    query = query.gte('date', since.toISOString().split('T')[0]);
+    sinceDate = since.toISOString().split('T')[0];
   }
 
-  const { data: rows, error: queryError } = await query.order('date', { ascending: true });
-
-  // Debug: log query details to Netlify function logs
-  console.log('[analytics-stats] Debug:', JSON.stringify({
-    slug,
-    period,
-    artistId: artist.id,
-    queryError: queryError?.message || null,
-    rowCount: rows?.length ?? 'null',
-    rows: rows?.slice(0, 5) ?? [],
-  }));
+  const { data: rows, error: queryError } = await client.rpc('get_artist_analytics', {
+    p_artist_id: artist.id,
+    p_since: sinceDate,
+  });
 
   if (queryError) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to fetch analytics', debug: queryError.message }) };
+    console.error('[analytics-stats] RPC error:', queryError.message);
+    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to fetch analytics' }) };
   }
 
   // Aggregate
@@ -165,7 +155,6 @@ export async function handler(event: {
       },
       clicksByPlatform,
       daily,
-      _debug: { artistId: artist.id, rowCount: rows?.length ?? 0, rawRows: rows?.slice(0, 10) },
     }),
   };
 }
