@@ -53,11 +53,9 @@ apps/mac/**/xcuserdata/
 # Conductor
 .conductor/
 
-# Social post drafts (generated weekly, not committed)
-data/social-posts/2026-*
-data/social-posts/2027-*
-data/social-posts/cron.log
-data/social-posts/launchd-*.log
+# Social post weekly drafts and logs (generated, not committed)
+data/social-posts/20*-W*
+data/social-posts/*.log
 
 # Claude Code
 CLAUDE.md
