@@ -24,6 +24,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else if (message.type === 'GET_ENRICHMENT') {
     getEnrichment(message.artist).then(sendResponse);
     return true;
+  } else if (message.type === 'TRACK_ANALYTICS') {
+    trackAnalyticsEvent(message.slug, message.metric);
   } else if (message.type === 'MUSIC_STOPPED') {
     handleMusicStopped();
   } else if (message.type === 'CHECK_RELEASES_NOW') {
@@ -44,6 +46,19 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     checkForNewReleases();
   }
 });
+
+// Fire-and-forget analytics event for artist-level tracking
+async function trackAnalyticsEvent(slug, metric) {
+  try {
+    await fetch(`${API_BASE}/analytics/event`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slug, metric }),
+    });
+  } catch {
+    // silent fail
+  }
+}
 
 // Handle music detection from content scripts
 async function handleMusicDetection(data) {
@@ -77,6 +92,13 @@ async function handleMusicDetection(data) {
     await chrome.storage.local.set({
       [`cache:${artist}`]: { results, timestamp: now }
     });
+
+    // Track search appearances for claimed artists
+    for (const result of results) {
+      if (result.type === 'artist' && result.claimedSlug) {
+        trackAnalyticsEvent(result.claimedSlug, 'search');
+      }
+    }
 
     // Update badge based on results
     if (results.length > 0) {

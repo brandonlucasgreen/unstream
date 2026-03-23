@@ -60,6 +60,7 @@ export function PrivacyPolicyPage() {
               <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
                 <li>Search queries you enter (artist names) - used only to fetch results</li>
                 <li>Basic analytics (page views, search counts) - no personal identifiers</li>
+                <li>Anonymous, aggregate artist engagement data (search appearances, page views, link clicks) - stored as daily totals per artist with no personal identifiers, IP addresses, or session data. Used to provide verified artists with performance insights on their dashboard.</li>
               </ul>
 
               <h4 className="font-semibold text-text-primary mt-4 mb-2">Artist Profiles (for artists who claim their page)</h4>
@@ -73,12 +74,14 @@ export function PrivacyPolicyPage() {
               <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
                 <li>Currently playing track information (artist name, song title) from Spotify, YouTube, YouTube Music, and Apple Music - used only to search for alternative platforms</li>
                 <li>Saved artists - stored locally in your browser</li>
+                <li>Anonymous, aggregate artist engagement signals (search appearances, link clicks) - no personal identifiers stored, only daily totals per artist</li>
               </ul>
 
               <h4 className="font-semibold text-text-primary mt-4 mb-2">macOS App</h4>
               <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
                 <li>Currently playing track information from your system - used only to search for alternative platforms</li>
                 <li>Saved artists - stored locally on your device</li>
+                <li>Anonymous, aggregate artist engagement signals (search appearances, link clicks) - no personal identifiers stored, only daily totals per artist</li>
               </ul>
             </section>
 

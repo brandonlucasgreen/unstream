@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
+import { ArtistAnalytics } from '../components/ArtistAnalytics';
 import { Footer } from '../components/Footer';
 
 interface ClaimedProfile {
@@ -126,6 +127,7 @@ export function ArtistDashboardPage() {
                       View
                     </Link>
                   </div>
+                  <ArtistAnalytics slug={profile.slug} />
                 </div>
               ))}
             </div>

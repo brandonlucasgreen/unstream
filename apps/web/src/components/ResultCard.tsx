@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import type { SearchResult, SourceId } from '../types';
 import { sources, sourceCategories } from '../services/sources';
@@ -17,6 +17,16 @@ interface EmbedData {
 }
 
 export function ResultCard({ result, defaultExpanded = true }: ResultCardProps) {
+  const searchTracked = useRef(false);
+
+  // Track search appearance for claimed artists (once per mount)
+  useEffect(() => {
+    if (!searchTracked.current && result.type === 'artist' && result.claimedSlug) {
+      analytics.trackArtistSearchAppearance(result.claimedSlug);
+      searchTracked.current = true;
+    }
+  }, [result.type, result.claimedSlug]);
+
   const [imageError, setImageError] = useState(false);
   const [expanded, setExpanded] = useState(defaultExpanded);
   const [embedData, setEmbedData] = useState<EmbedData | null>(null);
@@ -435,7 +445,11 @@ export function ResultCard({ result, defaultExpanded = true }: ResultCardProps) 
                           backgroundColor: `${sources[platform.sourceId].color}20`,
                           color: sources[platform.sourceId].color,
                         }}
-                        onClick={(e) => { e.stopPropagation(); analytics.trackPlatformClick(sources[platform.sourceId].name); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          analytics.trackPlatformClick(sources[platform.sourceId].name);
+                          if (result.claimedSlug) analytics.trackArtistLinkClick(result.claimedSlug, platform.sourceId);
+                        }}
                       >
                         <span>{sources[platform.sourceId].icon}</span>
                         <span>{sources[platform.sourceId].name}</span>
@@ -595,7 +609,11 @@ export function ResultCard({ result, defaultExpanded = true }: ResultCardProps) 
                     rel="noopener noreferrer"
                     className="w-8 h-8 flex items-center justify-center rounded-full bg-bg-secondary hover:bg-bg-tertiary transition-colors"
                     title={sources[platform.sourceId].name}
-                    onClick={(e) => { e.stopPropagation(); analytics.trackPlatformClick(sources[platform.sourceId].name); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      analytics.trackPlatformClick(sources[platform.sourceId].name);
+                      if (result.claimedSlug) analytics.trackArtistLinkClick(result.claimedSlug, platform.sourceId);
+                    }}
                   >
                     <SocialIcon platform={platform.sourceId} />
                   </a>
