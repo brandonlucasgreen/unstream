@@ -105,8 +105,18 @@ export async function handler(event: {
 
   const { data: rows, error: queryError } = await query.order('date', { ascending: true });
 
+  // Debug: log query details to Netlify function logs
+  console.log('[analytics-stats] Debug:', JSON.stringify({
+    slug,
+    period,
+    artistId: artist.id,
+    queryError: queryError?.message || null,
+    rowCount: rows?.length ?? 'null',
+    rows: rows?.slice(0, 5) ?? [],
+  }));
+
   if (queryError) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to fetch analytics' }) };
+    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to fetch analytics', debug: queryError.message }) };
   }
 
   // Aggregate
@@ -155,6 +165,7 @@ export async function handler(event: {
       },
       clicksByPlatform,
       daily,
+      _debug: { artistId: artist.id, rowCount: rows?.length ?? 0, rawRows: rows?.slice(0, 10) },
     }),
   };
 }
