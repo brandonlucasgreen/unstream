@@ -77,6 +77,7 @@ class AppState: ObservableObject {
             // Phase 1: Get initial results
             let (results, hasPendingEnrichment) = try await api.searchArtist(query)
             searchResults = results
+            trackSearchAppearances(results)
 
             // Phase 2: Fetch MusicBrainz enrichment if available
             if hasPendingEnrichment {
@@ -137,6 +138,7 @@ class AppState: ObservableObject {
                 nowPlayingResults = results
                 lastFetchedArtist = artist
                 lastFetchTime = Date()
+                trackSearchAppearances(results)
                 print("[AppState] Got \(results.count) results for \(artist)")
 
                 // Phase 2: Fetch MusicBrainz enrichment if available
@@ -153,6 +155,24 @@ class AppState: ObservableObject {
             }
 
             isLoadingNowPlaying = false
+        }
+    }
+
+    // MARK: - Analytics
+
+    /// Track search appearances for claimed artists in the results
+    private func trackSearchAppearances(_ results: [ArtistResult]) {
+        for result in results {
+            if result.type == "artist", let slug = result.claimedSlug {
+                api.trackAnalyticsEvent(slug: slug, metric: "search")
+            }
+        }
+    }
+
+    /// Track a platform link click for a claimed artist
+    func trackLinkClick(artist: ArtistResult, platformId: String) {
+        if let slug = artist.claimedSlug {
+            api.trackAnalyticsEvent(slug: slug, metric: "click:\(platformId)")
         }
     }
 }

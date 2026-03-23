@@ -122,7 +122,21 @@ actor UnstreamAPI {
                 }
             }
 
-            return ArtistResult(id: result.id, name: result.name, type: result.type, imageUrl: result.imageUrl, platforms: newPlatforms)
+            return ArtistResult(id: result.id, name: result.name, type: result.type, imageUrl: result.imageUrl, platforms: newPlatforms, claimedSlug: result.claimedSlug, matchConfidence: result.matchConfidence)
+        }
+    }
+
+    /// Fire-and-forget analytics event for artist-level tracking.
+    /// Silently ignores errors — analytics should never break the user experience.
+    nonisolated func trackAnalyticsEvent(slug: String, metric: String) {
+        guard let url = URL(string: "\(baseURL)/analytics/event") else { return }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try? JSONSerialization.data(withJSONObject: ["slug": slug, "metric": metric])
+        // Fire and forget — don't await
+        Task.detached(priority: .utility) { [session] in
+            _ = try? await session.data(for: request)
         }
     }
 

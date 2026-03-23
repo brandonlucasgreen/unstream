@@ -3,6 +3,7 @@ import SwiftUI
 struct PlatformBadge: View {
     let result: PlatformResult
     var isSubtle: Bool = false
+    var onOpen: (() -> Void)? = nil
 
     private var isBCFriday: Bool {
         result.sourceId == "bandcamp" && isBandcampFriday()
@@ -72,6 +73,7 @@ struct PlatformBadge: View {
     private func openPlatform() {
         if let urlString = result.url, let url = URL(string: urlString) {
             NSWorkspace.shared.open(url)
+            onOpen?()
         }
     }
 }

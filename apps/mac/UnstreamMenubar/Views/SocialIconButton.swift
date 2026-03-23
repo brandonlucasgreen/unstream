@@ -3,6 +3,7 @@ import AppKit
 
 struct SocialIconButton: View {
     let result: PlatformResult
+    var onOpen: (() -> Void)? = nil
     @Environment(\.colorScheme) var colorScheme
 
     // Platforms that have brand SVG icons
@@ -43,6 +44,7 @@ struct SocialIconButton: View {
     private func openPlatform() {
         if let urlString = result.url, let url = URL(string: urlString) {
             NSWorkspace.shared.open(url)
+            onOpen?()
         }
     }
 }

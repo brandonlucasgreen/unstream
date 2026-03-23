@@ -2,9 +2,9 @@ import type { Handler } from '@netlify/functions';
 
 // Desktop app version info - update this when releasing new versions
 const VERSION_INFO = {
-  latestVersion: '1.5.0',
+  latestVersion: '2.1.0',
   downloadUrl: 'https://github.com/brandonlucasgreen/unstream/releases/latest',
-  releaseNotes: 'Release alerts for saved artists - get notified when artists release new music on Bandcamp or Faircamp',
+  releaseNotes: 'Artist analytics - verified artists can now see search appearances, page views, and link clicks on their dashboard',
 };
 
 export const handler: Handler = async (event) => {

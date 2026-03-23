@@ -34,6 +34,7 @@ struct ArtistResultView: View {
     let artist: ArtistResult
     var showPhoto: Bool = true
     @EnvironmentObject var supportListManager: SupportListManager
+    @EnvironmentObject var appState: AppState
 
     private var isSaved: Bool {
         supportListManager.isArtistSaved(artist.name)
@@ -98,7 +99,9 @@ struct ArtistResultView: View {
 
                     FlowLayout(spacing: 6) {
                         ForEach(artist.verifiedPlatforms) { platform in
-                            PlatformBadge(result: platform)
+                            PlatformBadge(result: platform, onOpen: {
+                                appState.trackLinkClick(artist: artist, platformId: platform.sourceId)
+                            })
                         }
                     }
                 }
@@ -113,7 +116,9 @@ struct ArtistResultView: View {
 
                     HStack(spacing: 8) {
                         ForEach(artist.socialPlatforms) { platform in
-                            SocialIconButton(result: platform)
+                            SocialIconButton(result: platform, onOpen: {
+                                appState.trackLinkClick(artist: artist, platformId: platform.sourceId)
+                            })
                         }
                     }
                 }
@@ -130,7 +135,9 @@ struct ArtistResultView: View {
 
                     FlowLayout(spacing: 6) {
                         ForEach(artist.searchOnlyPlatforms) { platform in
-                            PlatformBadge(result: platform, isSubtle: true)
+                            PlatformBadge(result: platform, isSubtle: true, onOpen: {
+                                appState.trackLinkClick(artist: artist, platformId: platform.sourceId)
+                            })
                         }
                     }
                 }
@@ -260,11 +267,14 @@ struct FlowLayout: Layout {
                     PlatformResult(sourceId: "qobuz", url: nil, latestRelease: nil),
                     PlatformResult(sourceId: "ampwall", url: nil, latestRelease: nil),
                     PlatformResult(sourceId: "kofi", url: nil, latestRelease: nil),
-                ]
+                ],
+                claimedSlug: nil,
+                matchConfidence: nil
             )
         ]
     )
     .environmentObject(SupportListManager())
+    .environmentObject(AppState())
     .padding()
     .frame(width: 300)
 }
