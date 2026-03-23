@@ -76,11 +76,15 @@ export async function handler(event: {
 
   // Atomic upsert-increment
   const today = new Date().toISOString().split('T')[0];
-  await client.rpc('increment_analytics', {
-    p_artist_id: artistId,
-    p_date: today,
-    p_metric: metric,
-  });
+  try {
+    await client.rpc('increment_analytics', {
+      p_artist_id: artistId,
+      p_date: today,
+      p_metric: metric,
+    });
+  } catch {
+    // Silent fail — don't break the caller's experience for analytics
+  }
 
   return { statusCode: 204, headers: CORS_HEADERS, body: '' };
 }

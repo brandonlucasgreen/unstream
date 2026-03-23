@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { sources } from '../services/sources';
+import type { SourceId } from '../types';
 
 type Period = '7d' | '30d' | '90d' | 'all';
 
@@ -43,7 +45,7 @@ export function ArtistAnalytics({ slug }: { slug: string }) {
       .then(setData)
       .catch(() => setError('Unable to load analytics'))
       .finally(() => setLoading(false));
-  }, [slug, period, session]);
+  }, [slug, period, session?.access_token]);
 
   const maxClicks = data ? Math.max(...Object.values(data.clicksByPlatform), 1) : 1;
 
@@ -91,7 +93,7 @@ export function ArtistAnalytics({ slug }: { slug: string }) {
                 .sort(([, a], [, b]) => b - a)
                 .map(([platform, count]) => (
                   <div key={platform} className="flex items-center gap-2 text-xs">
-                    <span className="w-20 text-text-muted truncate">{platform}</span>
+                    <span className="w-20 text-text-muted truncate">{sources[platform as SourceId]?.name || platform}</span>
                     <div className="flex-1 h-4 rounded bg-bg-primary overflow-hidden">
                       <div
                         className="h-full rounded bg-accent-primary/30"
