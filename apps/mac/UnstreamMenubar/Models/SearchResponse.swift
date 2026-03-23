@@ -26,6 +26,8 @@ struct ArtistResult: Codable, Identifiable {
     let type: String
     let imageUrl: String?
     let platforms: [PlatformResult]
+    let claimedSlug: String?
+    let matchConfidence: String?
 
     /// Platforms that have verified artist presence (excluding social)
     var verifiedPlatforms: [PlatformResult] {
