@@ -34,6 +34,11 @@ export function ArtistPage() {
     };
   }, [displayName]);
 
+  // Track page view (once per slug)
+  useEffect(() => {
+    if (slug) analytics.trackArtistPageView(slug);
+  }, [slug]);
+
   // Load artist data
   useEffect(() => {
     if (!slug) return;

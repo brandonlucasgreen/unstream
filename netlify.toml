@@ -76,6 +76,16 @@
   status = 200
 
 [[redirects]]
+  from = "/api/analytics/event"
+  to = "/.netlify/functions/analytics-event"
+  status = 200
+
+[[redirects]]
+  from = "/api/analytics/stats"
+  to = "/.netlify/functions/analytics-stats"
+  status = 200
+
+[[redirects]]
   from = "/plus"
   to = "/support"
   status = 301

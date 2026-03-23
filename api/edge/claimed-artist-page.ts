@@ -370,6 +370,26 @@ export default async function handler(request: Request, context: Context) {
     }
     updateEmbed();
   </script>
+  <script>
+    (function(){
+      var slug = '${slug.replace(/'/g, "\\'")}';
+      fetch('/api/analytics/event', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({slug: slug, metric: 'view'})
+      }).catch(function(){});
+      document.querySelectorAll('[data-track-platform]').forEach(function(el) {
+        el.addEventListener('click', function() {
+          var platform = this.getAttribute('data-track-platform');
+          fetch('/api/analytics/event', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({slug: slug, metric: 'click:' + platform})
+          }).catch(function(){});
+        });
+      });
+    })();
+  </script>
 </body>
 </html>`;
 

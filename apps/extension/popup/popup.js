@@ -155,6 +155,10 @@ async function loadResults(artist) {
 
 // Render results
 function renderResults(results) {
+  // Extract claimedSlug for analytics tracking
+  const claimedResult = results.find(r => r.type === 'artist' && r.claimedSlug);
+  const claimedSlug = claimedResult?.claimedSlug || null;
+
   const allPlatforms = [];
   for (const result of results) {
     if (result.platforms && Array.isArray(result.platforms)) {
@@ -190,6 +194,11 @@ function renderResults(results) {
     link.target = '_blank';
     link.className = 'result-item';
     link.title = config.name;
+    if (claimedSlug) {
+      link.addEventListener('click', () => {
+        chrome.runtime.sendMessage({ type: 'TRACK_ANALYTICS', slug: claimedSlug, metric: `click:${platform.sourceId}` });
+      });
+    }
 
     const iconSpan = document.createElement('span');
     iconSpan.className = 'result-icon';
