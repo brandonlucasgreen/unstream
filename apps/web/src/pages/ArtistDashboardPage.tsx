@@ -94,38 +94,40 @@ export function ArtistDashboardPage() {
               {profiles.map(profile => (
                 <div
                   key={profile.id}
-                  className="flex items-center gap-4 p-4 rounded-lg bg-bg-secondary border border-border"
+                  className="p-4 rounded-lg bg-bg-secondary border border-border"
                 >
-                  {profile.imageUrl ? (
-                    <img
-                      src={profile.imageUrl}
-                      alt={profile.name}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-bg-hover flex items-center justify-center text-text-muted text-lg">
-                      {profile.name.charAt(0).toUpperCase()}
+                  <div className="flex items-center gap-4">
+                    {profile.imageUrl ? (
+                      <img
+                        src={profile.imageUrl}
+                        alt={profile.name}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-bg-hover flex items-center justify-center text-text-muted text-lg">
+                        {profile.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold truncate">{profile.name}</p>
+                      <p className="text-sm text-text-muted">
+                        unstream.stream/a/{profile.slug}
+                      </p>
                     </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold truncate">{profile.name}</p>
-                    <p className="text-sm text-text-muted">
-                      unstream.stream/a/{profile.slug}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <Link
-                      to={`/artist-edit/${profile.slug}`}
-                      className="px-3 py-1.5 rounded-lg bg-accent-primary text-white text-sm font-medium hover:bg-accent-primary/90 transition-colors"
-                    >
-                      Edit
-                    </Link>
-                    <Link
-                      to={`/a/${profile.slug}`}
-                      className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors"
-                    >
-                      View
-                    </Link>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <Link
+                        to={`/artist-edit/${profile.slug}`}
+                        className="px-3 py-1.5 rounded-lg bg-accent-primary text-white text-sm font-medium hover:bg-accent-primary/90 transition-colors"
+                      >
+                        Edit
+                      </Link>
+                      <Link
+                        to={`/a/${profile.slug}`}
+                        className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors"
+                      >
+                        View
+                      </Link>
+                    </div>
                   </div>
                   <ArtistAnalytics slug={profile.slug} />
                 </div>
