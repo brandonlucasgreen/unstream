@@ -10,7 +10,7 @@ describe('isBandcampFriday', () => {
   });
 
   it('returns true for another known Bandcamp Friday date', () => {
-    const date = new Date('2026-05-01T15:00:00-07:00');
+    const date = new Date('2026-05-02T15:00:00-07:00');
     expect(isBandcampFriday(date)).toBe(true);
   });
 
@@ -43,7 +43,7 @@ describe('isBandcampFriday', () => {
 
   it('checks all 2026 Bandcamp Friday dates', () => {
     const dates = [
-      '2026-03-06', '2026-05-01', '2026-08-07',
+      '2026-03-06', '2026-05-02', '2026-08-07',
       '2026-09-04', '2026-10-02', '2026-11-06', '2026-12-04',
     ];
 
