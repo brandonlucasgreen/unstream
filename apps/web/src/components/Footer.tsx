@@ -11,7 +11,7 @@ export function Footer() {
           <Link to="/artists" className="hover:text-text-primary transition-colors">Index</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <a
-            href="https://github.com/users/brandonlucasgreen/projects/3/views/1"
+            href="https://unstream.featurebase.app/"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-text-primary transition-colors"
