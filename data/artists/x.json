@@ -1,0 +1,111 @@
+[
+  {
+    "id": "x",
+    "name": "X",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019593685_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://xtheband.bandcamp.com",
+        "allReleaseTitles": [
+          "wildthing",
+          "smokefiction",
+          "alphabetland",
+          "losangeles",
+          "wildgift",
+          "underthebigblacksun",
+          "morefuninthenewworld",
+          "seehowweare",
+          "aintlovegrand",
+          "theknitterspoorlittlecritterontheroad",
+          "xtras",
+          "delta88nightmarecyranodebergersback"
+        ],
+        "latestRelease": {
+          "title": "Wild Thing",
+          "type": "album",
+          "url": "https://xtheband.bandcamp.com/album/wild-thing",
+          "imageUrl": "https://f4.bcbits.com/img/a2981364217_2.jpg"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/x/116266",
+        "allReleaseTitles": [
+          "losangeles",
+          "losangeles2019remaster",
+          "smokefiction",
+          "delta88nightmarecyranodebergersback",
+          "risonanzadellanimanutrirelasalutementaleattraversolamusica",
+          "day1s",
+          "back",
+          "nowayout",
+          "chill",
+          "bigstepadiariesampsngd",
+          "wildgift",
+          "underthebigblacksun",
+          "alphabetland",
+          "athomewithyou",
+          "aspirations",
+          "morefuninthenewworld",
+          "morefuninthenewworld2019remaster",
+          "seehowweare",
+          "wildthingdevildoll",
+          "aintlovegrand"
+        ],
+        "latestRelease": {
+          "title": "Smoke Fiction X",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/smoke-fiction-x/b4g3e3ty42alc",
+          "releaseDate": "2024-08-02"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=X"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+X"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://xtheband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/128581"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=X&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/X"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/xthebandofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC6q-RDYzhaUnZmI4WJXaJTA"
+      },
+      {
+        "sourceId": "peertube",
+        "url": "https://yuitobe.wikiwiki.li/video-channels/x_channel"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/XLosAngeles"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,69 @@
+[
+  {
+    "id": "focus",
+    "name": "Focus...",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031968747_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://focus3dots.bandcamp.com",
+        "allReleaseTitles": [
+          "fewnificationthefew",
+          "focalpoint1172extendedversion",
+          "musicofthemisinterpreteddeluxeedition",
+          "swaykingtechpresentsfocusithad2happen",
+          "focuspresentsdedicated"
+        ],
+        "latestRelease": {
+          "title": "FEWnification\n                \n                \n\n                theFEW",
+          "type": "album",
+          "url": "https://focus3dots.bandcamp.com/album/fewnification",
+          "imageUrl": "https://f4.bcbits.com/img/a2409460988_2.jpg",
+          "releaseDate": "January 14, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Focus..."
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Focus..."
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.focustheband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/31208"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Focus...&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Focus..."
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/focustheband50/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCoOditDKABB0Gm34s5qgC5Q"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Focus/104061072962860?rf=107871439236118"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,100 @@
+[
+  {
+    "id": "grizzlybear",
+    "name": "Grizzly Bear",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025495553_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://grizzlybearbrooklyn.bandcamp.com",
+        "allReleaseTitles": [
+          "paintedruins",
+          "yellowhouse",
+          "shieldsbsides",
+          "shields",
+          "veckatimest",
+          "whileyouwaitfortheothers",
+          "twoweeks",
+          "twoweeksfredfalkemixes",
+          "friendep",
+          "knife",
+          "onaneckonaspit",
+          "hornofplenty"
+        ],
+        "latestRelease": {
+          "title": "Painted Ruins",
+          "type": "album",
+          "url": "https://grizzlybearbrooklyn.bandcamp.com/album/painted-ruins",
+          "imageUrl": "https://f4.bcbits.com/img/a0113987763_2.jpg",
+          "releaseDate": "October 17, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/grizzly-bear/385896",
+        "allReleaseTitles": [
+          "shields",
+          "paintedruins",
+          "veckatimest",
+          "twoweeks",
+          "yellowhouse",
+          "sorryforthedelay",
+          "brianenoxnicolasjaarxbrianenonicolasjaarand",
+          "friendep",
+          "shieldsexpanded",
+          "shieldsbsides",
+          "hornofplenty",
+          "mourningsound",
+          "yetagain",
+          "whileyouwaitfortheothers",
+          "threerings",
+          "sleepingute",
+          "knife",
+          "neighbors"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Grizzly%20Bear"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Grizzly%20Bear"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://grizzly-bear.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/385924"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Grizzly%20Bear&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Grizzly%20Bear"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://www.instagram.com/grizzlybear"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/grizzlybearband"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/grizzlybear"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

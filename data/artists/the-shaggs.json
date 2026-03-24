@@ -1,0 +1,64 @@
+[
+  {
+    "id": "theshaggs",
+    "name": "The Shaggs",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0008131800_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://theshaggs.bandcamp.com",
+        "allReleaseTitles": [
+          "shaggsownthing",
+          "philosophyoftheworld"
+        ],
+        "latestRelease": {
+          "title": "Shaggs’ Own Thing",
+          "type": "album",
+          "url": "https://theshaggs.bandcamp.com/album/shaggs-own-thing",
+          "imageUrl": "https://f4.bcbits.com/img/a1796673001_16.jpg",
+          "releaseDate": "July 17, 2020"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-shaggs/257713",
+        "allReleaseTitles": [
+          "philosophyoftheworld",
+          "shaggsownthing",
+          "wink",
+          "winkremastered"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Shaggs"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Shaggs"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.theshaggsonline.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/511270"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Shaggs&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Shaggs"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

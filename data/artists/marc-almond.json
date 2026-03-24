@@ -1,0 +1,67 @@
+[
+  {
+    "id": "marcalmond-bandcamp-marcalmond",
+    "name": "Marc Almond",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0042403914_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://marcalmond.bandcamp.com",
+        "allReleaseTitles": [
+          "salambomarcalmondthegaslighttroubadours",
+          "thatdressstarclusterremix",
+          "thatdressdemo"
+        ],
+        "latestRelease": {
+          "title": "Salambo\n                \n                \n\n                Marc Almond & The Gaslight Troubadours",
+          "type": "album",
+          "url": "https://marcalmond.bandcamp.com/album/salambo",
+          "imageUrl": "https://f4.bcbits.com/img/a3555523131_2.jpg",
+          "releaseDate": "March 3, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Marc%20Almond"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Marc%20Almond"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.marcalmond.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1505251"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Marc%20Almond&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Marc%20Almond"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/marcalmondofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCu0JrQZ7_8MyvC8_j3kIo7w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MarcAlmondOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

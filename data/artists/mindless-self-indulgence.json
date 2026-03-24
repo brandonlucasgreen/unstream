@@ -1,0 +1,80 @@
+[
+  {
+    "id": "mindlessselfindulgence",
+    "name": "Mindless Self Indulgence",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a1228710251_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mindlessselfindulgence.bandcamp.com",
+        "allReleaseTitles": [
+          "youllrebeltoanythingremastered",
+          "euringeremixeuringer",
+          "euringereuringer",
+          "pink",
+          "pink",
+          "fuckmachine",
+          "fuckmachine",
+          "howilearnedtostopgivingashitandlovemindlessselfindulgence",
+          "badchoicesmadeeasytheleftrights",
+          "howilearnedmetropolisedition",
+          "mastermind",
+          "youllrebeltoanythingexpandedremastered",
+          "ourpainyourgain",
+          "shutmeuptheremixes3",
+          "straighttovideotheremixes",
+          "youllrebeltoanything"
+        ],
+        "latestRelease": {
+          "title": "You'll Rebel To Anything (Remastered)",
+          "type": "album",
+          "url": "https://mindlessselfindulgence.bandcamp.com/album/youll-rebel-to-anything-remastered",
+          "imageUrl": "https://f4.bcbits.com/img/a1228710251_2.jpg",
+          "releaseDate": "July 1, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mindless%20Self%20Indulgence"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mindless%20Self%20Indulgence"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://mindlessselfindulgence.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/51619"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Mindless%20Self%20Indulgence&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Mindless%20Self%20Indulgence"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/mindlessselfindulgence/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC_gL3eSBR7dngPaWSbcccBg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/msi"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,95 @@
+[
+  {
+    "id": "bombaybicycleclub",
+    "name": "Bombay Bicycle Club",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036922534_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bombaybicycleclub.bandcamp.com",
+        "allReleaseTitles": [
+          "solongseeyoutomorrow",
+          "mybigday",
+          "fantasiesep"
+        ],
+        "latestRelease": {
+          "title": "So Long, See You Tomorrow",
+          "type": "album",
+          "url": "https://bombaybicycleclub.bandcamp.com/album/so-long-see-you-tomorrow",
+          "imageUrl": "https://f4.bcbits.com/img/a2366387455_2.jpg",
+          "releaseDate": "February 3, 2014"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/bombay-bicycle-club/114640",
+        "allReleaseTitles": [
+          "everythingelsehasgonewrong",
+          "mybigday",
+          "fantasies",
+          "twolivesep",
+          "turntheworldon",
+          "iwanttobeyouronlypet",
+          "diving",
+          "willow",
+          "tekken2chakakhan",
+          "adifferentkindoffix",
+          "ihadthebluesbutishookthemloose",
+          "solongseeyoutomorrow",
+          "flaws",
+          "tothebone",
+          "alwayslikethis",
+          "demos20042008"
+        ],
+        "latestRelease": {
+          "title": "Fantasies Bombay Bicycle Club",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/fantasies-bombay-bicycle-club/eof54wltchoma",
+          "releaseDate": "2024-02-23"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bombay%20Bicycle%20Club"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bombay%20Bicycle%20Club"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://bombaybicycleclubmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1103990"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/bombayinsta/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@bombaybicycleclub"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCTmVnjXgqOwBYPXMXUrMj6Q"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@bombayinsta"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/7232081282"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,95 @@
+[
+  {
+    "id": "draconian",
+    "name": "Draconian",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0043232826_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://draconian.bandcamp.com",
+        "allReleaseTitles": [
+          "insomnolentruin",
+          "underagodlessveil",
+          "sovran",
+          "arosefortheapocalypse",
+          "turningseasonwithin",
+          "theburninghalo",
+          "arcanerainfell",
+          "whereloversmourn"
+        ],
+        "latestRelease": {
+          "title": "In Somnolent Ruin",
+          "type": "album",
+          "url": "https://draconian.bandcamp.com/album/in-somnolent-ruin",
+          "imageUrl": "https://f4.bcbits.com/img/a0883506781_2.jpg"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/draconian/1013053",
+        "allReleaseTitles": [
+          "coldheavens",
+          "insomnolentruin",
+          "arcanerainfell",
+          "underagodlessveil",
+          "sovran",
+          "whereloversmourn",
+          "turningseasonwithin",
+          "arosefortheapocalypse",
+          "theburninghalo",
+          "stellartombs"
+        ]
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/draconianhorde"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Draconian"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Draconian"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://draconianofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/260846"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Draconian&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Draconian"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/draconianhorde/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@INSERT-HANDLE-TT"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC9GBCq8OAI6-7EJz7y6Z6zA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/draconianofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

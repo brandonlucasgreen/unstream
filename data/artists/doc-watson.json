@@ -1,0 +1,54 @@
+[
+  {
+    "id": "docwatson-bandcamp-docwatsonlive",
+    "name": "Doc Watson",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024928185_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://docwatsonlive.bandcamp.com",
+        "allReleaseTitles": [
+          "lifesworkaretrospective",
+          "liveatpurdueuniversity31964"
+        ],
+        "latestRelease": {
+          "title": "Life's Work: A Retrospective",
+          "type": "album",
+          "url": "https://docwatsonlive.bandcamp.com/album/lifes-work-a-retrospective",
+          "imageUrl": "https://f4.bcbits.com/img/a2993751972_16.jpg",
+          "releaseDate": "November 12, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Doc%20Watson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Doc%20Watson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/692192"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Doc%20Watson&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Doc%20Watson"
+      },
+      {
+        "sourceId": "peertube",
+        "url": "https://clip.place/video-channels/docwatson"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,81 @@
+[
+  {
+    "id": "sparklehorse",
+    "name": "Sparklehorse",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030707358_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sparklehorse.bandcamp.com",
+        "allReleaseTitles": [
+          "birdmachine",
+          "itwillneverstop"
+        ],
+        "latestRelease": {
+          "title": "Bird Machine",
+          "type": "album",
+          "url": "https://sparklehorse.bandcamp.com/album/bird-machine",
+          "imageUrl": "https://f4.bcbits.com/img/a3085079795_16.jpg",
+          "releaseDate": "September 8, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sparklehorse/43845",
+        "allReleaseTitles": [
+          "birdmachine",
+          "itwillneverstop",
+          "vivadixiesubmarinetransmissionplot",
+          "itsawonderfullife",
+          "goodmorningspider",
+          "darknightofthesouldangermouse",
+          "dreamtforlightyearsinthebellyofamountain",
+          "distortedghost",
+          "mariaslittleelbows",
+          "inthefishtank15fennesz",
+          "ninjarousdangermouse",
+          "goldday",
+          "chordsiveknown"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sparklehorse"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sparklehorse"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sparklehorse.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/12372"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sparklehorse&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sparklehorse"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sparklehorse.official/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sparklehorse"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

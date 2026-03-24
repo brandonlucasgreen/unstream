@@ -1,0 +1,101 @@
+[
+  {
+    "id": "evergrey",
+    "name": "Evergrey",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0043086810_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://evergrey.bandcamp.com",
+        "allReleaseTitles": [
+          "architectsofanewweave",
+          "architectsofanewweavedeluxealbum",
+          "oxygen",
+          "theoriesofemptiness",
+          "fromdarkdiscoveriestoheartlessportraits",
+          "aheartlessportraittheorpheantestament"
+        ],
+        "latestRelease": {
+          "title": "Architects Of A New Weave",
+          "type": "album",
+          "url": "https://evergrey.bandcamp.com/album/architects-of-a-new-weave",
+          "imageUrl": "https://f4.bcbits.com/img/a0295133191_2.jpg"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/evergrey/1563363",
+        "allReleaseTitles": [
+          "theatlantic",
+          "theoriesofemptiness",
+          "aheartlessportraittheorpheantestament",
+          "mondaymorningapocalypse",
+          "oxygen",
+          "architectsofthenewweave",
+          "beforetheaftermath",
+          "fromdarkdiscoveriestoheartlessportraits",
+          "colddreams",
+          "weightless",
+          "midwintercalls",
+          "blindfolded",
+          "asilentarc",
+          "recreationday",
+          "architectsofanewweave",
+          "escapeofthephoenix",
+          "gloriouscollision",
+          "fallingfromthesun",
+          "say",
+          "saveus"
+        ],
+        "latestRelease": {
+          "title": "Oxygen Evergrey",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/oxygen-evergrey/ybnl8f68f8s8b",
+          "releaseDate": "2025-11-06"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Evergrey"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Evergrey"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://evergrey.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/405810"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Evergrey&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Evergrey"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/evergreyofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCujgv2Lm1wJqO6PPJHNOSFQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Evergrey"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

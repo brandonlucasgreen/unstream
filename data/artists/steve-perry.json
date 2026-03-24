@@ -1,0 +1,66 @@
+[
+  {
+    "id": "steveperry",
+    "name": "Steve Perry",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0021132683_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://steveperry.bandcamp.com",
+        "allReleaseTitles": [
+          "theseasondeluxeedition",
+          "theseason",
+          "silverbells",
+          "traces"
+        ],
+        "latestRelease": {
+          "title": "The Season (Deluxe Edition)",
+          "type": "album",
+          "url": "https://steveperry.bandcamp.com/album/the-season-deluxe-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a0213734669_16.jpg",
+          "releaseDate": "October 28, 2022"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/steve-perry/159315",
+        "allReleaseTitles": [
+          "separatewaysworldsapartjourney",
+          "faithfullywillienelson",
+          "theseason3",
+          "whatawonderfulworld",
+          "popthatcoochie",
+          "streettalkexpandededition",
+          "greatesthits",
+          "fortheloveofstrangemedicineexpandededition",
+          "traces",
+          "thestreetsofkinsalethehighkings",
+          "theseason",
+          "silverbells",
+          "haveyourselfamerrylittlechristmas",
+          "sunshinesgray"
+        ],
+        "latestRelease": {
+          "title": "Faithfully Steve Perry Willie Nelson",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/faithfully-steve-perry-willie-nelson/r13ukylhso6sb",
+          "releaseDate": "2025-05-14"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Steve%20Perry"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Steve%20Perry"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

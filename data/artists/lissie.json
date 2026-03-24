@@ -1,0 +1,93 @@
+[
+  {
+    "id": "lissie",
+    "name": "Lissie",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024245641_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://lissie.bandcamp.com",
+        "allReleaseTitles": [
+          "watchovermeearlyworks20022009",
+          "thankyoutotheflowers",
+          "whenimalonethepianoretrospective",
+          "castles",
+          "liveatunionchapel",
+          "mywildwest"
+        ],
+        "latestRelease": {
+          "title": "Watch Over Me (Early Works 2002-2009)",
+          "type": "album",
+          "url": "https://lissie.bandcamp.com/album/watch-over-me-early-works-2002-2009",
+          "imageUrl": "https://f4.bcbits.com/img/a0227062912_2.jpg",
+          "releaseDate": "March 26, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/lissie/300245",
+        "allReleaseTitles": [
+          "promises",
+          "liveatunionchapel",
+          "carvingcanyons",
+          "castles",
+          "whenimalonethepianoretrospective",
+          "america",
+          "illstandbyyou",
+          "nightmoves",
+          "dreams",
+          "whenimalone",
+          "chasingthesun",
+          "bloodmuscle",
+          "thewildhoneypiebuzzsessionthewildhoneypie",
+          "bestdays",
+          "boyfriend",
+          "peaceonearth",
+          "loveblows",
+          "inarocketbeoga",
+          "flowers"
+        ],
+        "latestRelease": {
+          "title": "Promises Lissie",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/promises-lissie/ei88d145tltlb",
+          "releaseDate": "2025-08-22"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lissie"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lissie"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.lissie.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1006581"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/lissiemusic/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/lissiemusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/lissiemusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

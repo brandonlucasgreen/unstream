@@ -1,0 +1,96 @@
+[
+  {
+    "id": "tanyatucker",
+    "name": "Tanya Tucker",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0021119625_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tanyatucker.bandcamp.com",
+        "allReleaseTitles": [
+          "sweetwesternsound",
+          "livefromthetroubadour",
+          "bringmyflowersnowlivefromthetroubadour",
+          "whileimlivin"
+        ],
+        "latestRelease": {
+          "title": "Sweet Western Sound",
+          "type": "album",
+          "url": "https://tanyatucker.bandcamp.com/album/sweet-western-sound",
+          "imageUrl": "https://f4.bcbits.com/img/a0489883531_16.jpg",
+          "releaseDate": "June 2, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/tanya-tucker/47666",
+        "allReleaseTitles": [
+          "readyasillneverbe",
+          "whileimlivin",
+          "sweetwesternsound",
+          "livefromthetroubadour",
+          "thewinnersgame",
+          "16biggesthits",
+          "deltadawn",
+          "whatdoidowithme",
+          "cantrunfromyourself",
+          "firetofire",
+          "superhits",
+          "",
+          "sgreatesthits",
+          "20greatesthits",
+          "lovesongs",
+          "wouldyoulaywithmeinafieldofstone",
+          "tnt",
+          "tennesseewoman"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tanya%20Tucker"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tanya%20Tucker"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.tanyatucker.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/357985"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Tanya%20Tucker&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Tanya%20Tucker"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thetanyatucker/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@thetanyatucker"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/TanyaOfficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/TheTanyaTucker"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

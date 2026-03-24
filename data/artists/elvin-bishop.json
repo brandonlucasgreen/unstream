@@ -1,0 +1,69 @@
+[
+  {
+    "id": "elvinbishop",
+    "name": "Elvin Bishop",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0029918363_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ebishop.bandcamp.com",
+        "allReleaseTitles": [
+          "100yearsofblueselvinbishopcharliemusselwhite",
+          "somethingsmellsfunkyroundhereelvinbishopsbigfuntrio",
+          "elvinbishopsbigfuntrioelvinbishopsbigfuntrio",
+          "cantevendowrongright",
+          "thatsmypartnerelvinbishoplittlesmokeysmothers",
+          "theskinimin",
+          "aceinthehole",
+          "dontletthebossmangetyoudown",
+          "bigfun"
+        ],
+        "latestRelease": {
+          "title": "100 Years Of Blues\n                \n                \n\n                Elvin Bishop & Charlie Musselwhite",
+          "type": "album",
+          "url": "https://ebishop.bandcamp.com/album/100-years-of-blues",
+          "imageUrl": "https://f4.bcbits.com/img/a0911345409_2.jpg",
+          "releaseDate": "September 25, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Elvin%20Bishop"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Elvin%20Bishop"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://elvinbishopmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/310690"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Elvin%20Bishop&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Elvin%20Bishop"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/elvinbishopofficial/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/elvinbishop"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

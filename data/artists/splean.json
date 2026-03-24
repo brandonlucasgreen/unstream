@@ -1,0 +1,40 @@
+[
+  {
+    "id": "splean",
+    "name": "SPLEAN",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018056010_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://splean.bandcamp.com",
+        "allReleaseTitles": [
+          "ifunk",
+          "ireggae",
+          "irap",
+          "itechsplean"
+        ],
+        "latestRelease": {
+          "title": "IFUNK",
+          "type": "album",
+          "url": "https://splean.bandcamp.com/album/ifunk",
+          "imageUrl": "https://f4.bcbits.com/img/a2238692473_16.jpg",
+          "releaseDate": "December 6, 2019"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=SPLEAN"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+SPLEAN"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

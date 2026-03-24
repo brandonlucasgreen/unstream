@@ -1,0 +1,111 @@
+[
+  {
+    "id": "lisamiskovsky",
+    "name": "Lisa Miskovsky",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027798791_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://lisamiskovsky.bandcamp.com",
+        "allReleaseTitles": [
+          "eljest",
+          "litenarmare",
+          "drommen",
+          "jagbehoverdig",
+          "godjul",
+          "eljest",
+          "satanktejag",
+          "jagsomvann",
+          "besttocomeremix",
+          "besttocome",
+          "stillaliveidunsessions",
+          "runforcoveridunsessions",
+          "stopforthenightsummerheartremix",
+          "homezardonicliquidfictionremix",
+          "bottenviken",
+          "homefarfetchdremix",
+          "home",
+          "runforcover",
+          "lovesomebody"
+        ],
+        "latestRelease": {
+          "title": "Eljest",
+          "type": "album",
+          "url": "https://lisamiskovsky.bandcamp.com/album/eljest-2",
+          "imageUrl": "https://f4.bcbits.com/img/a1043123858_2.jpg",
+          "releaseDate": "March 6, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/lisa-miskovsky/171803",
+        "allReleaseTitles": [
+          "stillalive",
+          "eljest",
+          "fallingwater",
+          "",
+          "bottenviken",
+          "changes",
+          "runforcover",
+          "umea",
+          "whystartafire",
+          "violentsky",
+          "besttocome",
+          "godjul",
+          "ladystardust",
+          "abrandnewday",
+          "litenarmare",
+          "jagsomvann",
+          "drommen",
+          "singtome"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lisa%20Miskovsky"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lisa%20Miskovsky"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://lisamiskovsky.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/341876"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Lisa%20Miskovsky&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Lisa%20Miskovsky"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/lisamiskovsky_official/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@lisamiskovsky"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC0c-CJE7X-hIwi97YgpvxGA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/127460720640034"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

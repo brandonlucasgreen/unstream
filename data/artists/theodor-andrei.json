@@ -1,0 +1,91 @@
+[
+  {
+    "id": "theodorandrei",
+    "name": "Theodor Andrei",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025285151_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://theodorandrei.bandcamp.com",
+        "allReleaseTitles": [
+          "tigarimentolatetheodorandreixvalentina",
+          "tatuaj",
+          "selectiv",
+          "genulmeu",
+          "craciunulasta",
+          "beatuastafire",
+          "numaivreausentimentecuoanavelea",
+          "nuleplace",
+          "nutemiracanuteplace",
+          "steleledepecer",
+          "sidacaazizambesc",
+          "youngandsweet"
+        ],
+        "latestRelease": {
+          "title": "Țigări Mentolate\n                \n                \n\n                Theodor Andrei x Valentina",
+          "type": "track",
+          "url": "https://theodorandrei.bandcamp.com/track/ig-ri-mentolate",
+          "imageUrl": "https://f4.bcbits.com/img/a3706778042_2.jpg",
+          "releaseDate": "July 25, 2022"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/theodor-andrei/9051560",
+        "latestRelease": {
+          "title": "Preludiu Echilibru Theodor Andrei",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/preludiu-echilibru-theodor-andrei/km343yf8t1taa",
+          "releaseDate": "2024-01-10"
+        },
+        "allReleaseTitles": [
+          "dgtoffandon",
+          "preludiuechilibru",
+          "artist",
+          "arogvnt",
+          "selectiv",
+          "steleledepecer",
+          "craciunulasta",
+          "youngandsweet",
+          "prigoriateenfest",
+          "artistenglishversion",
+          "fantoma",
+          "nuleplace",
+          "genulmeu",
+          "numaivreausentimente",
+          "zendayafeatnita"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Theodor%20Andrei"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Theodor%20Andrei"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7881689"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/theodorandreiofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCkePUzOL3024h5dpQ5pcyVw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/profile.php?id=100008895332242"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

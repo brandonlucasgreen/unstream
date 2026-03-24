@@ -1,0 +1,72 @@
+[
+  {
+    "id": "theraconteurs",
+    "name": "The Raconteurs",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0015554719_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://theraconteurs.bandcamp.com",
+        "allReleaseTitles": [
+          "helpusstranger",
+          "heygypdigtheslowness",
+          "sundaydrivernowthatyouregone",
+          "brokenboysoldiers",
+          "steadyasshegoes",
+          "consolersofthelonely"
+        ],
+        "latestRelease": {
+          "title": "Help Us Stranger",
+          "type": "album",
+          "url": "https://theraconteurs.bandcamp.com/album/help-us-stranger",
+          "imageUrl": "https://f4.bcbits.com/img/a2447961151_2.jpg",
+          "releaseDate": "June 21, 2019"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-raconteurs/384737",
+        "allReleaseTitles": [
+          "helpusstranger",
+          "carolinadrama",
+          "brokenboysoldiers",
+          "consolersofthelonely",
+          "oldenoughfeatrickyscaggsandashleymonroe",
+          "oldenoughfeatrickyskaggsandashleymonroe",
+          "helpusstrangerwithtrackbytrackcommentary",
+          "saluteyoursolution"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Raconteurs"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Raconteurs"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.theraconteurs.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/475462"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/theraconteurs"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/theraconteurs"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,68 @@
+[
+  {
+    "id": "kenshiyonezu",
+    "name": "Kenshi Yonezu 米津玄師",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030634272_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kenshiyonezu.bandcamp.com",
+        "allReleaseTitles": [
+          "kickback",
+          "diorama"
+        ],
+        "latestRelease": {
+          "title": "KICK BACK",
+          "type": "album",
+          "url": "https://kenshiyonezu.bandcamp.com/album/kick-back",
+          "imageUrl": "https://f4.bcbits.com/img/a4191752116_16.jpg",
+          "releaseDate": "October 12, 2022"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/kenshi-yonezu/1432355",
+        "allReleaseTitles": [
+          "irisout",
+          "janedoehikaruutada",
+          "kickback",
+          "plazma",
+          "lostcorner",
+          "bootleg",
+          "straysheep",
+          "chikyugispinningglobe",
+          "lemon",
+          "bowandarrow",
+          "1991",
+          "paleblue",
+          "azalea",
+          "sayonara",
+          "moongazing",
+          "popsong",
+          "kickbackfrostchildrenremix",
+          "spiritsofthesea"
+        ],
+        "latestRelease": {
+          "title": "Jane Doe Kenshi Yonezu Hikaru Utada",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/jane-doe-kenshi-yonezu-hikaru-utada/df2jwq6zabs9a",
+          "releaseDate": "2025-09-22"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kenshi%20Yonezu%20%E7%B1%B3%E6%B4%A5%E7%8E%84%E5%B8%AB"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kenshi%20Yonezu%20%E7%B1%B3%E6%B4%A5%E7%8E%84%E5%B8%AB"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

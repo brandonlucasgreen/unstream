@@ -1,0 +1,103 @@
+[
+  {
+    "id": "themagneticfields",
+    "name": "The Magnetic Fields",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014275749_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://themagneticfields.bandcamp.com",
+        "allReleaseTitles": [
+          "thehouseoftomorrowremastered",
+          "quickies",
+          "50songmemoir",
+          "realism",
+          "distortion",
+          "i",
+          "loveatthebottomofthesea",
+          "69lovesongs",
+          "holiday",
+          "getlost",
+          "thecharmofthehighwaystrip",
+          "thewaywardbusdistantplastictreesremastered"
+        ],
+        "latestRelease": {
+          "title": "The House of Tomorrow (Remastered)",
+          "type": "album",
+          "url": "https://themagneticfields.bandcamp.com/album/the-house-of-tomorrow-remastered",
+          "imageUrl": "https://f4.bcbits.com/img/a3315308940_2.jpg",
+          "releaseDate": "May 28, 2022"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-magnetic-fields/330662",
+        "allReleaseTitles": [
+          "69lovesongs",
+          "50songmemoir5cd",
+          "quickies",
+          "thehouseoftomorrowremastered",
+          "thedaythepoliticiansdied",
+          "kraftwerkinablackout",
+          "loveatthebottomofthesea",
+          "holiday",
+          "i",
+          "andrewindragwhennextifallinlove",
+          "distortion",
+          "realism",
+          "getlost",
+          "thewaywardbusdistantplastictrees",
+          "thecharmofthehighwaystrip",
+          "thehouseoftomorrow",
+          "ithoughtyouweremyboyfriend",
+          "iwanttojoinabikergang",
+          "pleasestopdancingep"
+        ],
+        "latestRelease": {
+          "title": "Quickies The Magnetic Fields",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/quickies-the-magnetic-fields/vlw84xgusgjmc",
+          "releaseDate": "2020-05-15"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Magnetic%20Fields"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Magnetic%20Fields"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.houseoftomorrow.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/41095"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Magnetic%20Fields&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Magnetic%20Fields"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://instagram.com/themagfields"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MagneticFields"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

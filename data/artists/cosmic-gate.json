@@ -1,0 +1,80 @@
+[
+  {
+    "id": "cosmicgate",
+    "name": "Cosmic Gate",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013863529_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://cosmicgate.bandcamp.com",
+        "allReleaseTitles": [
+          "perspectives",
+          "wakeyourmindsessions005",
+          "mosaiikchaptertwo",
+          "hearmeoutcosmicgatedianamiro",
+          "followyouanywherecosmicgatenathannicholson",
+          "retrospectioncosmicgategreenhavendjs",
+          "wegotthefirecosmicgateoliviasebastianelli",
+          "blamepavelkhvaleevremixcosmicgatedianamiro",
+          "vertigo",
+          "mosaiikchapterone",
+          "nothingtohidecosmicgatedianamiro",
+          "cosmicgatepresentswakeyourmindsessions004",
+          "20yearsforwardeverbackwardnever",
+          "20yearsforwardeverbackwardneverextendedmixes",
+          "wakeyourmindsessions003",
+          "materiachaptertwo"
+        ],
+        "latestRelease": {
+          "title": "Perspectives",
+          "type": "album",
+          "url": "https://cosmicgate.bandcamp.com/album/perspectives",
+          "imageUrl": "https://f4.bcbits.com/img/a1988365016_2.jpg",
+          "releaseDate": "February 13, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Cosmic%20Gate"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Cosmic%20Gate"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://cosmic-gate.de/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/11101"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Cosmic%20Gate&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Cosmic%20Gate"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/realcosmicgate/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/cosmicgatetv"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/cosmicgate"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,64 @@
+[
+  {
+    "id": "wallows-bandcamp-wallowsmusic",
+    "name": "Wallows",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011684320_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://wallowsmusic.bandcamp.com",
+        "allReleaseTitles": [
+          "pullingleavesofftrees",
+          "uncomfortable",
+          "suntan",
+          "pleaser"
+        ],
+        "latestRelease": {
+          "title": "Pulling Leaves off Trees",
+          "type": "track",
+          "url": "https://wallowsmusic.bandcamp.com/track/pulling-leaves-off-trees",
+          "imageUrl": "https://f4.bcbits.com/img/a2136393440_16.jpg",
+          "releaseDate": "November 16, 2017"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Wallows"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Wallows"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://wallowsmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/6441684"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/wallowsmusic/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@wallows?lang=en"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCjNGsoJEu1AnHiP7kOYiXCw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/wallowsmusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

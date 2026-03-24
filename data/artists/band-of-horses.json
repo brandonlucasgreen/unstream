@@ -1,0 +1,109 @@
+[
+  {
+    "id": "bandofhorses",
+    "name": "Band of Horses",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3236768930_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bandofhorses.bandcamp.com",
+        "allReleaseTitles": [
+          "everythingallthetime20thanniversaryedition",
+          "thefuneral2025editgryffinbandofhorses",
+          "acousticattherymanvol2live",
+          "thegeneralspecificliveacoustic",
+          "isthereaghostliveacoustic",
+          "thefuneralexcisionremix",
+          "ceasetobegin",
+          "everythingallthetime"
+        ],
+        "latestRelease": {
+          "title": "Everything All The Time (20th Anniversary Edition)",
+          "type": "album",
+          "url": "https://bandofhorses.bandcamp.com/album/everything-all-the-time-20th-anniversary-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a3236768930_2.jpg",
+          "releaseDate": "March 20, 2026"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/band-of-horses/299301",
+        "allReleaseTitles": [
+          "everythingallthetime",
+          "miragerock",
+          "whyareyouok",
+          "thefuneral2025editgryffin",
+          "bidingtimeisaboattorow",
+          "knockknock",
+          "infinitearms",
+          "acousticattheryman",
+          "acousticattherymanvol2live",
+          "ceasetobegin",
+          "thingsaregreat",
+          "thefuneral",
+          "crutch",
+          "inneedofrepair",
+          "lights",
+          "detlefschrempf",
+          "laredo"
+        ],
+        "latestRelease": {
+          "title": "Biding Time Is A Boat To Row Band Of Horses",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/biding-time-is-a-boat-to-row-band-of-horses/oo4g8xz87o6hc",
+          "releaseDate": "2026-01-12"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Band%20of%20Horses"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Band%20of%20Horses"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://bandofhorses.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/424476"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Band%20of%20Horses&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Band%20of%20Horses"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/bandofhorses/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@bandofhorses"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCD5QVN7OwJhnx6iO9L3uT_Q"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@bandofhorses"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/5162567788"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

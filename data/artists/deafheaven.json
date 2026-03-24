@@ -1,0 +1,97 @@
+[
+  {
+    "id": "deafheaven",
+    "name": "Deafheaven",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025635461_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://deafheavens.bandcamp.com",
+        "allReleaseTitles": [
+          "sunbather10thanniversaryremixremaster",
+          "infinitegranite",
+          "10yearsgone",
+          "blackbrick",
+          "ordinarycorrupthumanlove",
+          "newbermuda",
+          "fromthekettleontothecoil",
+          "sunbather",
+          "roadstojudah",
+          "demo"
+        ],
+        "latestRelease": {
+          "title": "Sunbather: 10th Anniversary Remix / Remaster",
+          "type": "album",
+          "url": "https://deafheavens.bandcamp.com/album/sunbather-10th-anniversary-remix-remaster",
+          "imageUrl": "https://f4.bcbits.com/img/a0601495667_2.jpg",
+          "releaseDate": "November 17, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/deafheaven/964413",
+        "latestRelease": {
+          "title": "Lonely People With Power Deafheaven",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/lonely-people-with-power-deafheaven/ke40kp03patkc",
+          "releaseDate": "2025-03-28"
+        },
+        "allReleaseTitles": [
+          "lonelypeoplewithpower",
+          "sunbather",
+          "ordinarycorrupthumanlove",
+          "newbermuda",
+          "blackbrick",
+          "heathen",
+          "magnolia",
+          "infinitegranite",
+          "roadstojudah",
+          "10yearsgone",
+          "inblur",
+          "fromthekettleontothecoil",
+          "splitbossedenage",
+          "demo",
+          "vertigo",
+          "glint",
+          "thegnashing",
+          "greatmassofcolor",
+          "daedalus"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Deafheaven"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Deafheaven"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://deafheaven.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2025280"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/deafheavenband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC97UMkZzchbn0uO-KFyq8ww"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/deafheaven"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

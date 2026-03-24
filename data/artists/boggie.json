@@ -1,0 +1,65 @@
+[
+  {
+    "id": "boggie",
+    "name": "Boggie",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0002255439_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://boggie.bandcamp.com",
+        "allReleaseTitles": [
+          "goodgirlsingstheblues",
+          "dontwannabe",
+          "inaheartbeatoftime",
+          "victimoflove",
+          "seeingangels"
+        ],
+        "latestRelease": {
+          "title": "Good Girl Sings The Blues",
+          "type": "album",
+          "url": "https://boggie.bandcamp.com/album/good-girl-sings-the-blues",
+          "imageUrl": "https://f4.bcbits.com/img/a3717654194_2.jpg",
+          "releaseDate": "August 11, 2018"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Boggie"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Boggie"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.boggieofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4355579"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/boggieofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@boggieofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/csemerboglarka"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/BoggieOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

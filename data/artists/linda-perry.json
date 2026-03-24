@@ -1,0 +1,56 @@
+[
+  {
+    "id": "lindaperry",
+    "name": "Linda Perry",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0042882764_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://lindaperry.bandcamp.com",
+        "allReleaseTitles": [
+          "letitdiehere",
+          "inflight"
+        ],
+        "latestRelease": {
+          "title": "Let It Die Here",
+          "type": "album",
+          "url": "https://lindaperry.bandcamp.com/album/let-it-die-here",
+          "imageUrl": "https://f4.bcbits.com/img/a3062714041_16.jpg"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/linda-perry/80044",
+        "allReleaseTitles": [
+          "beautiful",
+          "luckiestgirlalivesoundtrackfromthenetflixfilm",
+          "citizenpennoriginalmotionpicturesoundtrack",
+          "inflight",
+          "outofmymind",
+          "letitdiehere",
+          ""
+        ],
+        "latestRelease": {
+          "title": "Beautiful Linda Perry",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/beautiful-linda-perry/h46wjudqtfao4",
+          "releaseDate": "2026-02-23"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Linda%20Perry"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Linda%20Perry"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

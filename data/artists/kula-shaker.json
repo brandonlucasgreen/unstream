@@ -1,0 +1,102 @@
+[
+  {
+    "id": "kulashaker",
+    "name": "Kula Shaker",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0034976073_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kulashakerband.bandcamp.com",
+        "allReleaseTitles": [
+          "naturalmagick",
+          "1stcongregationalchurchofeternalloveandfreehugs",
+          "k20",
+          "pilgrimsprogress",
+          "strangefolk",
+          "revengeoftheking",
+          "peasantspigsastronauts",
+          "kplusbonustracks2011remastered"
+        ],
+        "latestRelease": {
+          "title": "Natural Magick",
+          "type": "album",
+          "url": "https://kulashakerband.bandcamp.com/album/natural-magick",
+          "imageUrl": "https://f4.bcbits.com/img/a2009640105_2.jpg",
+          "releaseDate": "February 3, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/kula-shaker/148790",
+        "allReleaseTitles": [
+          "wormslayer",
+          "rationalmanbringingitbackhome",
+          "bemerciful",
+          "naturalmagick",
+          "luckynumber",
+          "1stcongregationalchurchofeternalloveandfreehugs",
+          "kulachristmaswrapupep",
+          "goodmoneyjagzkoonersmidnightcircusremixandjagzkooner",
+          "k20",
+          "brokeasfolk",
+          "goodmoney",
+          "waves",
+          "theonceandfutureking",
+          "indianrecordplayer",
+          "kollectedthebestof",
+          "k",
+          "peasantspigsastronauts",
+          "strangefolk"
+        ],
+        "latestRelease": {
+          "title": "Wormslayer Kula Shaker",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/wormslayer-kula-shaker/nhevp0dj2wl6b",
+          "releaseDate": "2026-01-30"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kula%20Shaker"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kula%20Shaker"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.kulashaker.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/256590"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Kula%20Shaker&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Kula%20Shaker"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kulashakerofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCoTrZweaRXMDdY9ItQ3RiZA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/kulashaker"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

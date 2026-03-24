@@ -1,0 +1,108 @@
+[
+  {
+    "id": "eisbrecher",
+    "name": "Eisbrecher",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026244370_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://eisbrecher.bandcamp.com",
+        "allReleaseTitles": [
+          "kaltfront",
+          "aufdiezunge",
+          "tranenlugennicht",
+          "kaltfrontsingle",
+          "everythingiswunderbar",
+          "diehollemusswarten",
+          "liebemachtmonster",
+          "schicksalsmelodien",
+          "ewigeseis15jahreeisbrecher",
+          "sturmfahrt",
+          "schock"
+        ],
+        "latestRelease": {
+          "title": "Kaltfront",
+          "type": "album",
+          "url": "https://eisbrecher.bandcamp.com/album/kaltfront",
+          "imageUrl": "https://f4.bcbits.com/img/a0781100178_2.jpg",
+          "releaseDate": "March 14, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/eisbrecher/726369",
+        "allReleaseTitles": [
+          "kaltfront",
+          "liebemachtmonster",
+          "antikorper",
+          "",
+          "sunde",
+          "schicksalsmelodien",
+          "aufdiezungefeatschattenmann",
+          "fakk",
+          "ewigeseis15jahre",
+          "diehollemusswarten",
+          "sturmfahrt",
+          "eiszeit",
+          "schockliveimcircuskrone",
+          "zehnjahrekalt",
+          "stossgebet",
+          "tranenlugennicht",
+          "everythingiswunderbar",
+          "wasisthierlos",
+          "meraluna2018live"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Eisbrecher"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Eisbrecher"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.eis-brecher.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/238890"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Eisbrecher&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Eisbrecher"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/eisbrecher_official/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@eisbrecher_official"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCTtmwDCkWEdNtiY5p8zgU2g"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@eisbrecher_official"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/eisbrecher"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

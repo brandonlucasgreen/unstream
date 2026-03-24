@@ -1,0 +1,46 @@
+[
+  {
+    "id": "thethe",
+    "name": "THE THE",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022678991_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thethe.bandcamp.com",
+        "allReleaseTitles": [
+          "1onevote",
+          "muscle",
+          "iwant2bu",
+          "seewithoutbeingseen",
+          "cineolamiscellany",
+          "radiocineolatrilogy",
+          "wecantstopwhatscoming",
+          "hyena",
+          "moonbug",
+          "tony"
+        ],
+        "latestRelease": {
+          "title": "$1 ONE VOTE!",
+          "type": "album",
+          "url": "https://thethe.bandcamp.com/album/1-one-vote",
+          "imageUrl": "https://f4.bcbits.com/img/a0821678375_2.jpg",
+          "releaseDate": "March 2, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=THE%20THE"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+THE%20THE"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,109 @@
+[
+  {
+    "id": "bertjansch",
+    "name": "Bert Jansch",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0004778044_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bertjansch.bandcamp.com",
+        "allReleaseTitles": [
+          "avocet40thanniversaryedition",
+          "whencircuscomestotown",
+          "toyballoon",
+          "bertatthebbc",
+          "theornamenttree",
+          "edgeofadream",
+          "theblackswan",
+          "crimsonmoon",
+          "liveinitaly",
+          "arareconundrum",
+          "laturnaround",
+          "santabarbarahoneymoon",
+          "amanidratherbepart1",
+          "livingintheshadowsparttwoontheedgeofadream",
+          "liveinaustralia",
+          "livingintheshadowspartone"
+        ],
+        "latestRelease": {
+          "title": "Avocet (40th Anniversary Edition)",
+          "type": "album",
+          "url": "https://bertjansch.bandcamp.com/album/avocet-40th-anniversary-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a0949059937_2.jpg",
+          "releaseDate": "October 27, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/bert-jansch/59321",
+        "latestRelease": {
+          "title": "Bert Jansch Bert Jansch",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/bert-jansch-bert-jansch/z7vgmqwfvw41v",
+          "releaseDate": "2018-11-14"
+        },
+        "allReleaseTitles": [
+          "",
+          "jackorion",
+          "bertjohnjohnrenbourn",
+          "birthdayblues",
+          "rosemarylane",
+          "crimsonmoon",
+          "liveinaustralia",
+          "itdontbotherme",
+          "downunder",
+          "nicola",
+          "theblackswan",
+          "bertatthebbc",
+          "moonshine",
+          "livingintheshadows",
+          "laturnaround",
+          "edgeofadream",
+          "pentanglingjohnrenbournpentangle"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bert%20Jansch"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bert%20Jansch"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://bertjansch.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/363204"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Bert%20Jansch&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Bert%20Jansch"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/bert_jansch_official"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/c/bertjanschofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/bertjansch"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

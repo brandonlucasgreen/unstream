@@ -1,0 +1,66 @@
+[
+  {
+    "id": "onyx",
+    "name": "Onyx",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0012215355_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://onyxhq.bandcamp.com",
+        "allReleaseTitles": [
+          "losttreasures",
+          "lowereastside",
+          "decadebutwaititgetsworsestickyfingaz",
+          "ghettoanthems",
+          "bloodondax",
+          "turndafucuptheoriginalsessions",
+          "onyx4life",
+          "100mad",
+          "blackrock",
+          "turndafucup"
+        ],
+        "latestRelease": {
+          "title": "Lost Treasures",
+          "type": "album",
+          "url": "https://onyxhq.bandcamp.com/album/lost-treasures",
+          "imageUrl": "https://f4.bcbits.com/img/a3731760778_2.jpg",
+          "releaseDate": "February 27, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Onyx"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Onyx"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.onyxdomain.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/39829"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Onyx&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Onyx"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/onyxdomain"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

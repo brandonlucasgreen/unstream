@@ -1,0 +1,76 @@
+[
+  {
+    "id": "panik",
+    "name": "PANIK!!!",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033633156_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://uhpanik.bandcamp.com",
+        "allReleaseTitles": [
+          "copium",
+          "hatejpg",
+          "namecalling",
+          "wfat1am",
+          "ns2themoon",
+          "disconcerted",
+          "howifeel2",
+          "headspace",
+          "youshouldstay",
+          "hellgiveuswhatweneed",
+          "letmego",
+          "itsallsciencefiction",
+          "betweenthelines",
+          "whoisyuh",
+          "trashhhhh",
+          "cringe3"
+        ],
+        "latestRelease": {
+          "title": "Copium",
+          "type": "track",
+          "url": "https://uhpanik.bandcamp.com/track/copium",
+          "imageUrl": "https://f4.bcbits.com/img/a0157893416_2.jpg",
+          "releaseDate": "September 24, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=PANIK!!!"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+PANIK!!!"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/191300"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=PANIK!!!&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/PANIK!!!"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/panikofthemolemen"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/panikonthebeat"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/PanikMolemen"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

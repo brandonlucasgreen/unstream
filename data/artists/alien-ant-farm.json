@@ -1,0 +1,72 @@
+[
+  {
+    "id": "alienantfarm",
+    "name": "Alien Ant Farm",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025224759_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://alienantfarm.bandcamp.com",
+        "allReleaseTitles": [
+          "reasonsalienantfarmjudgejury",
+          "smoothcriminal",
+          "badattitudealienantfarmjudgejury",
+          "actitudalienantfarmjudgejury"
+        ],
+        "latestRelease": {
+          "title": "Reasons\n                \n                \n\n                Alien Ant Farm, Judge & Jury",
+          "type": "track",
+          "url": "https://alienantfarm.bandcamp.com/track/reasons",
+          "imageUrl": "https://f4.bcbits.com/img/a0236976089_16.jpg",
+          "releaseDate": "March 6, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Alien%20Ant%20Farm"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Alien%20Ant%20Farm"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.alienantfarm.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/152509"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Alien%20Ant%20Farm&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Alien%20Ant%20Farm"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/alienantfarmofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@alienantfarmofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCS4K7vSumGqCQp3n1U994jg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Alien-Ant-Farm-Official/49871214693"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,83 @@
+[
+  {
+    "id": "shpongle",
+    "name": "Shpongle",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0009935186_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://shponglemusic.bandcamp.com",
+        "allReleaseTitles": [
+          "shpongle10inchredrockspicturedisc",
+          "shpongleremixedbycosmictrigger",
+          "carnivalofpeculiaritiesep",
+          "ineffablemysteriesfromshponglelandremasteredextendededition",
+          "ineffablemysteriesfromshponglelandremastered",
+          "shponglestaticliveatozora2019shponglestatic",
+          "nothinglastsbutnothingislostremastered",
+          "talesoftheinexpressibleremastered",
+          "codexvi",
+          "areyoushpongledremastered",
+          "divinemomentsoftruthastrixloudlsdremix",
+          "museumofconsciousness",
+          "thegodparticleep",
+          "ineffablemysteriesfromshpongleland",
+          "nothinglastsbutnothingislost",
+          "shpongleremixed",
+          "talesoftheinexpressible",
+          "divinemomentsoftruth",
+          "areyoushpongled"
+        ],
+        "latestRelease": {
+          "title": "Shpongle - 10 Inch Red Rocks Picture Disc",
+          "type": "album",
+          "url": "https://shponglemusic.bandcamp.com/album/shpongle-10-inch-red-rocks-picture-disc",
+          "imageUrl": "https://f4.bcbits.com/img/a0920941090_2.jpg",
+          "releaseDate": "September 6, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Shpongle"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Shpongle"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.shpongle.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/22673"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Shpongle&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Shpongle"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/shponglemusic/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/ShpongleMusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/shpongle"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

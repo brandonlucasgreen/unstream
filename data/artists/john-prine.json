@@ -1,0 +1,80 @@
+[
+  {
+    "id": "johnprine",
+    "name": "John Prine",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0012557646_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://johnprine.bandcamp.com",
+        "allReleaseTitles": [
+          "lostdogsmixedblessingsdeluxe",
+          "lostdogsmixedblessings",
+          "brokenheartsdirtywindowssongsofjohnprinevol2variousartists",
+          "iremembereverythingdigitaldownload",
+          "thekentuckysessionsjohnprinekelseywaldon",
+          "thelivingroomsessions",
+          "thetreeofforgiveness",
+          "september78",
+          "johnprineliveinasheville86",
+          "forbetterorworse",
+          "thesingingmailmandelivers",
+          "inpersononstage",
+          "inpersononstagebonustracks",
+          "fairsquareep",
+          "standardsongsforaveragepeople",
+          "fairsquare"
+        ],
+        "latestRelease": {
+          "title": "Lost Dogs & Mixed Blessings Deluxe",
+          "type": "album",
+          "url": "https://johnprine.bandcamp.com/album/lost-dogs-mixed-blessings-deluxe",
+          "imageUrl": "https://f4.bcbits.com/img/a1338896729_2.jpg",
+          "releaseDate": "September 12, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=John%20Prine"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+John%20Prine"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.johnprine.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/274724"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=John%20Prine&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/John%20Prine"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/john_prine/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCSMDqt4WdrxNwlN-erGj5-w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JohnPrine"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

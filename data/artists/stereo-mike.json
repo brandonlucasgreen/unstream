@@ -1,0 +1,40 @@
+[
+  {
+    "id": "stereomike-bandcamp-stere0mike",
+    "name": "StereoMike",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0021296867_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://stere0mike.bandcamp.com",
+        "allReleaseTitles": [
+          "sunshinestratocastersvol1",
+          "peaks",
+          "itsbruceybabyfeatjaguarkevins",
+          "hiimstereomike"
+        ],
+        "latestRelease": {
+          "title": "Sunshine & Stratocasters Vol.1",
+          "type": "album",
+          "url": "https://stere0mike.bandcamp.com/album/sunshine-stratocasters-vol-1",
+          "imageUrl": "https://f4.bcbits.com/img/a1492039125_16.jpg",
+          "releaseDate": "April 30, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=StereoMike"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+StereoMike"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

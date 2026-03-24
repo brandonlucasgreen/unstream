@@ -1,0 +1,78 @@
+[
+  {
+    "id": "gangoffour",
+    "name": "Gang of Four",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038989759_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://gangoffour.bandcamp.com",
+        "allReleaseTitles": [
+          "shrinkwrapped2025remaster",
+          "tattoo2025remaster",
+          "larouxdamagedgoodsremixeseptakenfromtheproblemofleisuregangoffourcoversalbum",
+          "theproblemofleisureacelebrationofandygillandgangoffour20tracksfeatidlestommorellofleamorevariousartists",
+          "antiheroep",
+          "thisheavengivesmemigraineep",
+          "happynow",
+          "complicitep",
+          "lucky",
+          "liveinthemoment",
+          "thedyingrayscollectiongangoffourfeatherbertgronemeyer",
+          "whathappensnextgangoffourfeaturingalisonmosshartherbertgronemeyerhoteirobbiefurze",
+          "content",
+          "secondlife"
+        ],
+        "latestRelease": {
+          "title": "Shrinkwrapped (2025 Remaster)",
+          "type": "album",
+          "url": "https://gangoffour.bandcamp.com/album/shrinkwrapped-2025-remaster",
+          "imageUrl": "https://f4.bcbits.com/img/a2489264542_2.jpg",
+          "releaseDate": "March 14, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Gang%20of%20Four"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Gang%20of%20Four"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://gangoffour.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/33929"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Gang%20of%20Four&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Gang%20of%20Four"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/gangoffourofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCW6JMhgMKkv48zkXHuIIRLA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/gangoffourofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

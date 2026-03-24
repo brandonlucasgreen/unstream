@@ -1,0 +1,79 @@
+[
+  {
+    "id": "greenriver",
+    "name": "Green River",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014701248_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://greenriver.bandcamp.com",
+        "allReleaseTitles": [
+          "liveatthetropicana1984",
+          "dryasabonedeluxeedition",
+          "rehabdolldeluxeedition",
+          "comeondown",
+          "1984demos"
+        ],
+        "latestRelease": {
+          "title": "Live At The Tropicana 1984",
+          "type": "album",
+          "url": "https://greenriver.bandcamp.com/album/live-at-the-tropicana-1984",
+          "imageUrl": "https://f4.bcbits.com/img/a1039896244_2.jpg",
+          "releaseDate": "April 13, 2019"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/green-river/767022",
+        "allReleaseTitles": [
+          "rehabdoll",
+          "dryasabone",
+          "comeondown",
+          "thistown",
+          "dryasabonerehabdoll",
+          "1984demos",
+          "liveatthetropicana",
+          "bulnabangblackriverandshell",
+          "unwind",
+          "forevermeans"
+        ],
+        "latestRelease": {
+          "title": "Rehab Doll Green River",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/rehab-doll-green-river/ctdsjnhcpjt8a",
+          "releaseDate": "2019-01-25"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Green%20River"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Green%20River"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/270968"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Green%20River&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Green%20River"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCzELfGVzUV1ibzevT0aabwg"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,75 @@
+[
+  {
+    "id": "carpathianforest",
+    "name": "Carpathian Forest",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0000100388_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://carpathianforest.bandcamp.com",
+        "allReleaseTitles": [
+          "thefuckingevilyears",
+          "fuckyouall",
+          "skjendhanslik",
+          "defendingthethroneofevil"
+        ],
+        "latestRelease": {
+          "title": "The Fucking Evil Years",
+          "type": "album",
+          "url": "https://carpathianforest.bandcamp.com/album/the-fucking-evil-years",
+          "imageUrl": "https://f4.bcbits.com/img/a0515388734_16.jpg",
+          "releaseDate": "December 8, 2017"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/carpathian-forest/650445",
+        "allReleaseTitles": [
+          "throughchasmcavesandtitanwoods",
+          "blackshiningleather",
+          "wearegoingtohellforthisoveradecadeofperversions",
+          "fuckyouall",
+          "defendingthethroneofevil",
+          "morbidfascinationofdeath",
+          "likeim"
+        ],
+        "latestRelease": {
+          "title": "Defending The Throne Of Evil Carpathian Forest",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/defending-the-throne-of-evil-carpathian-forest/i5y14ffaacp1a",
+          "releaseDate": "2012-11-11"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Carpathian%20Forest"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Carpathian%20Forest"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/259817"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Carpathian%20Forest&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Carpathian%20Forest"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/carpathianforest"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

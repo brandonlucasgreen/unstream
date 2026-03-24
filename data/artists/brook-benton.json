@@ -1,0 +1,81 @@
+[
+  {
+    "id": "brookbenton-bandcamp-brookbenton",
+    "name": "Brook Benton",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033382005_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://brookbenton.bandcamp.com",
+        "allReleaseTitles": [
+          "icriedforyoujet",
+          "beautifulmemoriesofchristmas",
+          "classicbenton"
+        ],
+        "latestRelease": {
+          "title": "I Cried For You / Jet",
+          "type": "album",
+          "url": "https://brookbenton.bandcamp.com/album/i-cried-for-you-jet",
+          "imageUrl": "https://f4.bcbits.com/img/a0721974218_2.jpg",
+          "releaseDate": "May 17, 2022"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/brook-benton/39376",
+        "allReleaseTitles": [
+          "endlesslyhits",
+          "thegospeltruth",
+          "yourealliwantforchristmasthistimeoftheyear",
+          "endlesslyrarities",
+          "mothernaturefathertime",
+          "hitrecord",
+          "hotelhappinesslietomererecordedversion",
+          "icriedforyoujet",
+          "yourealliwantforchristmascaroemerald",
+          "rainynightingeorgiathecompletereprisecotillionsinglesasbs",
+          "thetwoofusdinahwashington",
+          "homestyle",
+          "today",
+          "greatesthitsthemercuryyears",
+          "formybabythecollection",
+          "20thcenturymastersthemillenniumcollectionbestof",
+          "theplatinumcollection",
+          ""
+        ],
+        "latestRelease": {
+          "title": "Endlessly Hits Brook Benton",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/endlessly-hits-brook-benton/g7ecp9cc3u3nb",
+          "releaseDate": "2023-10-15"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Brook%20Benton"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Brook%20Benton"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1947227"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Brook%20Benton&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Brook%20Benton"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

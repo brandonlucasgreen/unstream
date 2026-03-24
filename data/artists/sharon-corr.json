@@ -1,0 +1,76 @@
+[
+  {
+    "id": "sharoncorr",
+    "name": "Sharon Corr",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024951604_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sharoncorrofficial.bandcamp.com",
+        "allReleaseTitles": [
+          "thesamesun",
+          "dreamofyou"
+        ],
+        "latestRelease": {
+          "title": "The Same Sun",
+          "type": "album",
+          "url": "https://sharoncorrofficial.bandcamp.com/album/the-same-sun",
+          "imageUrl": "https://f4.bcbits.com/img/a3861790053_16.jpg",
+          "releaseDate": "September 16, 2013"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sharon-corr/215865",
+        "allReleaseTitles": [
+          "thefoolthescorpion",
+          "dreamofyou",
+          "thesamesun",
+          "runningonrooftops",
+          "freefall",
+          "silverbellsmeandmyteddybearsirterrywoganaledjones"
+        ],
+        "latestRelease": {
+          "title": "The Fool The Scorpion Sharon Corr",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-fool-the-scorpion-sharon-corr/tlcvh9cv2j2gc",
+          "releaseDate": "2021-09-24"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sharon%20Corr"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sharon%20Corr"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sharoncorr.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/507141"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sharoncorrofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCRVU2m5DcKIgkQbKhj3z3VQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/SharonCorrOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

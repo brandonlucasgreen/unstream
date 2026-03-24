@@ -1,0 +1,98 @@
+[
+  {
+    "id": "elzasoares",
+    "name": "Elza Soares",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0008111363_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://elzasoares.bandcamp.com",
+        "allReleaseTitles": [
+          "endoftheworldremixes",
+          "thewomanattheendoftheworldamulherdofimdomundo"
+        ],
+        "latestRelease": {
+          "title": "End Of The World (Remixes)",
+          "type": "album",
+          "url": "https://elzasoares.bandcamp.com/album/end-of-the-world-remixes",
+          "imageUrl": "https://f4.bcbits.com/img/a0935067761_16.jpg",
+          "releaseDate": "June 30, 2017"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/elza-soares/67321",
+        "allReleaseTitles": [
+          "notempodaintolerancia",
+          "joaodeaquino",
+          "planetafome",
+          "bebame",
+          "elzaaovivonomunicipal",
+          "otemponaopara",
+          "napelepitty",
+          "riodejaneirowatzgoodremix",
+          "viverdeamoressofepazpazrafaelmike",
+          "blackpowerrenegado",
+          "senhoradaterra",
+          "drao",
+          "amulherdofimdomundothewomanattheendoftheworld",
+          "licaodevida",
+          "deusemulher",
+          "",
+          "somamortrabalhoeprogressosentaapua",
+          "elzanegranegraelza",
+          "endoftheworldremixes",
+          "talento"
+        ],
+        "latestRelease": {
+          "title": "No Tempo Da Intolerancia Elza Soares",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/no-tempo-da-intolerancia-elza-soares/c66whf9a7hfdc",
+          "releaseDate": "2023-06-23"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Elza%20Soares"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Elza%20Soares"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.elzasoaresoficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/83739"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Elza%20Soares&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Elza%20Soares"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/elzasoaresoficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCRVP24Dffcc_icmmVyIXu5g"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/elzasoares"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

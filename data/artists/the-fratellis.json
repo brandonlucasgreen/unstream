@@ -1,0 +1,86 @@
+[
+  {
+    "id": "thefratellis",
+    "name": "The Fratellis",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020977597_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thefratellis.bandcamp.com",
+        "allReleaseTitles": [
+          "halfdrunkunderafullmoondeluxe",
+          "yessiricanboogie",
+          "needalittleloverudimentalremix",
+          "halfdrunkunderafullmoon",
+          "inyourownsweettime",
+          "letsgo",
+          "eyeswidetonguetieddeluxeedition"
+        ],
+        "latestRelease": {
+          "title": "Half Drunk Under a Full Moon (Deluxe)",
+          "type": "album",
+          "url": "https://thefratellis.bandcamp.com/album/half-drunk-under-a-full-moon-deluxe",
+          "imageUrl": "https://f4.bcbits.com/img/a2884963778_2.jpg",
+          "releaseDate": "April 22, 2022"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-fratellis/392888",
+        "allReleaseTitles": [
+          "inyourownsweettime",
+          "halfdrunkunderafullmoon",
+          "yessiricanboogie",
+          "standuptragedy",
+          "sixdaysinjuneacoustic",
+          "sixdaysinjune",
+          "letsgo",
+          "starcrossedlosers",
+          "ivebeenblind",
+          "strangersinthestreetpparnold",
+          "needalittlelove"
+        ],
+        "latestRelease": {
+          "title": "Yes Sir I Can Boogie The Fratellis",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/yes-sir-i-can-boogie-the-fratellis/xv66xkc4m6soc",
+          "releaseDate": "2021-06-11"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Fratellis"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Fratellis"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://thefratellis.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/472288"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thefratellis/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCKkse0tdbjuqQ7CHy6mfTiA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thefratellis"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

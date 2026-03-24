@@ -1,0 +1,67 @@
+[
+  {
+    "id": "helmet",
+    "name": "Helmet",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026673490_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://helmet2.bandcamp.com",
+        "allReleaseTitles": [
+          "questoftheelfsscrolls",
+          "talesofthehelmetsknight",
+          "vanitas"
+        ],
+        "latestRelease": {
+          "title": "Quest of the Elf's scrolls",
+          "type": "album",
+          "url": "https://helmet2.bandcamp.com/album/quest-of-the-elfs-scrolls",
+          "imageUrl": "https://f4.bcbits.com/img/a1012688002_2.jpg",
+          "releaseDate": "December 29, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Helmet"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Helmet"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.helmetmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/87645"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Helmet&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Helmet"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/helmet_music/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCN-sR1pCGDf509XO-8WzmsQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/HelmetMusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,97 @@
+[
+  {
+    "id": "architects",
+    "name": "Architects",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037825052_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://architects.bandcamp.com",
+        "allReleaseTitles": [
+          "theskytheearthallbetween",
+          "curse",
+          "seeingred",
+          "theclassicsymptomsofabrokenspirit",
+          "whenwewereyoung",
+          "forthosethatwishtoexistatabbeyroad",
+          "forthosethatwishtoexist",
+          "daybreakerdeluxeedition",
+          "thehereandnow",
+          "hollowcrown",
+          "ruinbonustrackedition"
+        ],
+        "latestRelease": {
+          "title": "The Sky, The Earth & All Between",
+          "type": "album",
+          "url": "https://architects.bandcamp.com/album/the-sky-the-earth-all-between",
+          "imageUrl": "https://f4.bcbits.com/img/a2358751625_2.jpg",
+          "releaseDate": "February 28, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/architects/391633",
+        "allReleaseTitles": [
+          "theskytheearthallbetween",
+          "forthosethatwishtoexist",
+          "holyhell",
+          "allourgodshaveabandonedus",
+          "lostforeverlosttogether",
+          "theclassicsymptomsofabrokenspirit",
+          "forthosethatwishtoexistatabbeyroad",
+          "animals",
+          "doomsday",
+          "braindeadandhouseofprotection",
+          "whenwewereyoung",
+          "awastedhymn",
+          "ruin",
+          "daybreakerdeluxeedition",
+          "hollowcrown",
+          "nightmares",
+          "thehereandnow",
+          "allure",
+          "revenge",
+          "unmaskingmytruth"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Architects"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Architects"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.architectsofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1215482"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/architects/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@architectsofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCdp-kaIi7YO2WmNQ-LafmpA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/architectsuk"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

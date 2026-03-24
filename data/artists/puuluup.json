@@ -1,0 +1,76 @@
+[
+  {
+    "id": "puuluup",
+    "name": "Puuluup",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0017268670_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://puuluup.bandcamp.com",
+        "allReleaseTitles": [
+          "uksindatantsima",
+          "viimanesuusataja",
+          "kasekesedkapapuu",
+          "suutamulumi"
+        ],
+        "latestRelease": {
+          "title": "Üksinda tantsima",
+          "type": "track",
+          "url": "https://puuluup.bandcamp.com/track/ksinda-tantsima",
+          "imageUrl": "https://f4.bcbits.com/img/a2805473368_16.jpg",
+          "releaseDate": "February 14, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/puuluup-10003686220/3686220",
+        "allReleaseTitles": [
+          "viimanesuusataja",
+          "uksindatantsima",
+          "suutamulumi",
+          "isegikakeldapolekellegagi5miinust",
+          "mamacando",
+          "paalajarvevaalabaar",
+          "kapapuu",
+          "kasekesed",
+          "liigutagevastu",
+          "martafana"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Puuluup"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Puuluup"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.puuluup.ee/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/6458895"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/puuluupband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCpiJwjVtsG6NllwUWHIR6RA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/puuluup"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

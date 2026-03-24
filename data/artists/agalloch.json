@@ -1,0 +1,76 @@
+[
+  {
+    "id": "agalloch",
+    "name": "AGALLOCH",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0002612231_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://agalloch.bandcamp.com",
+        "allReleaseTitles": [
+          "themantledeluxeedition",
+          "palefolkloredeluxeedition",
+          "ofstonewindpillorremastered",
+          "thegreyepremastered",
+          "thewhiteepremastered",
+          "faustianechoes",
+          "ofstonewindpillor",
+          "theserpentthesphere",
+          "theweightofdarkness",
+          "nihiltotem",
+          "whereshadeoncewas",
+          "marrowofthespirit",
+          "fragment4",
+          "scarsoftheshatteredsky",
+          "nebelmeeragallochandmathiasgrassow",
+          "thedemonstrationarchive19961998"
+        ],
+        "latestRelease": {
+          "title": "The Mantle (Deluxe Edition)",
+          "type": "album",
+          "url": "https://agalloch.bandcamp.com/album/the-mantle-deluxe-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a0078217519_2.jpg",
+          "releaseDate": "July 12, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=AGALLOCH"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+AGALLOCH"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.agalloch.org/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/221549"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=AGALLOCH&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/AGALLOCH"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/agalloch_official/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/AgallochOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,100 @@
+[
+  {
+    "id": "tvontheradio",
+    "name": "TV on the Radio",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037060385_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tvontheradio.bandcamp.com",
+        "latestRelease": {
+          "title": "Desperate Youth, Blood Thirsty Babes (20th Anniversary Edition)",
+          "type": "album",
+          "url": "https://tvontheradio.bandcamp.com/album/desperate-youth-blood-thirsty-babes-20th-anniversary-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a3343607724_2.jpg",
+          "releaseDate": "November 15, 2024"
+        },
+        "allReleaseTitles": [
+          "desperateyouthbloodthirstybabes20thanniversaryedition",
+          "finalfantasy",
+          "dearsciencebonustrackversion",
+          "province",
+          "returntocookiemountain",
+          "newhealthrock",
+          "staringatthesun",
+          "desperateyouthbloodthirstybabes",
+          "youngliars"
+        ]
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/tv-on-the-radio/93174",
+        "allReleaseTitles": [
+          "returntocookiemountain",
+          "seeds",
+          "desperateyouthbloodthirstybabes",
+          "youngliars",
+          "dearscience",
+          "ninetypesoflight",
+          "testpilot",
+          "wolflikeme",
+          "staringatthesun",
+          "province",
+          "newhealthrock",
+          "familytree",
+          "dancingchoose",
+          "crying",
+          "goldenage"
+        ],
+        "latestRelease": {
+          "title": "Desperate Youth Blood Thirsty Babes Tv On The Radio",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/desperate-youth-blood-thirsty-babes-tv-on-the-radio/w3n3n5xlb2c4a",
+          "releaseDate": "2024-11-15"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=TV%20on%20the%20Radio"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+TV%20on%20the%20Radio"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.tvontheradio.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/172047"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=TV%20on%20the%20Radio&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/TV%20on%20the%20Radio"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/tvontheradio/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "http://www.youtube.com/user/tvontheradiovideos"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/TvOnTheRadio"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

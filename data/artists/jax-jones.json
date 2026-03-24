@@ -1,0 +1,39 @@
+[
+  {
+    "id": "jaxjones",
+    "name": "Jax Jones",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a2477248159_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jaxjones.bandcamp.com",
+        "allReleaseTitles": [
+          "forever",
+          "dontstopmoving",
+          "deepjoy"
+        ],
+        "latestRelease": {
+          "title": "Forever",
+          "type": "album",
+          "url": "https://jaxjones.bandcamp.com/album/forever",
+          "imageUrl": "https://f4.bcbits.com/img/a2477248159_2.jpg",
+          "releaseDate": "December 22, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jax%20Jones"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jax%20Jones"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

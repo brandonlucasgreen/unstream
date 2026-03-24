@@ -1,0 +1,110 @@
+[
+  {
+    "id": "throbbinggristle",
+    "name": "Throbbing Gristle",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022008874_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://throbbinggristle.bandcamp.com",
+        "allReleaseTitles": [
+          "liveatthevolksbuhneberlinnewyearseve2005",
+          "thelasttgsingle",
+          "convincingpeopleliveatthevolksbuhneberlinnewyearseve2005",
+          "scabssaws",
+          "tgcd1",
+          "thethirdmindmovements",
+          "mutanttg",
+          "thirtysecondannualreport",
+          "parttwotheendlessnot",
+          "tgnow",
+          "asouvenirofcambersands",
+          "journeythroughabody",
+          "missionofdeadsouls",
+          "throbbinggristlesgreatesthits",
+          "heathenearth",
+          "20jazzfunkgreats",
+          "doathethirdandfinalreport",
+          "thesecondannualreport"
+        ],
+        "latestRelease": {
+          "title": "Live at the Volksbühne, Berlin, New Year's Eve, 2005",
+          "type": "album",
+          "url": "https://throbbinggristle.bandcamp.com/album/live-at-the-volksb-hne-berlin-new-years-eve-2005",
+          "imageUrl": "https://f4.bcbits.com/img/a4134924546_2.jpg",
+          "releaseDate": "May 16, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/throbbing-gristle/651551",
+        "allReleaseTitles": [
+          "liveatthevolksbuhneberlinnewyearseve2005",
+          "asouvenirofcambersands",
+          "hamburgerlady",
+          "scabssaws",
+          "almostakiss",
+          "thelasttgsingle",
+          "themanfromnowhere",
+          "convincingpeople",
+          "20jazzfunkgreats",
+          "thesecondannualreport",
+          "thetasteoftgabeginnersguidetothemusicof",
+          "sgreatesthits",
+          "hotontheheelsoflove",
+          "doathethirdandfinalreportof",
+          "thethirdmindmovements",
+          "mutanttg",
+          "missionofdeadsouls",
+          "tgcd1",
+          "thirtysecondannualreport",
+          "parttwotheendlessnot"
+        ],
+        "latestRelease": {
+          "title": "Hamburger Lady Throbbing Gristle",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/hamburger-lady-throbbing-gristle/k03j24o1iuopc",
+          "releaseDate": "2025-04-02"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Throbbing%20Gristle"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Throbbing%20Gristle"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.throbbing-gristle.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/12589"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Throbbing%20Gristle&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Throbbing%20Gristle"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "http://www.youtube.com/industrialrecords"
+      },
+      {
+        "sourceId": "bluesky",
+        "url": "https://bsky.app/profile/throbbing-gristle.bsky.social"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

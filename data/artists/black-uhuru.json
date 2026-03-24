@@ -1,0 +1,62 @@
+[
+  {
+    "id": "blackuhuru",
+    "name": "Black Uhuru",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037375854_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://blackuhuru.bandcamp.com",
+        "allReleaseTitles": [
+          "blacksoundsoffreedomdeluxe",
+          "leggodubossieallstars"
+        ],
+        "latestRelease": {
+          "title": "Black Sounds Of Freedom Deluxe",
+          "type": "album",
+          "url": "https://blackuhuru.bandcamp.com/album/black-sounds-of-freedom-deluxe",
+          "imageUrl": "https://f4.bcbits.com/img/a0919529089_16.jpg",
+          "releaseDate": "June 29, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Black%20Uhuru"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Black%20Uhuru"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3924"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Black%20Uhuru&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Black%20Uhuru"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/BLACKUHURU_OFFICIAL/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/blackuhuruvevo"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/BlackUhuruOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

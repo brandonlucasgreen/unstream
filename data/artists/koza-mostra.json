@@ -1,0 +1,69 @@
+[
+  {
+    "id": "kozamostra",
+    "name": "Koza Mostra",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018672168_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kozamostra.bandcamp.com",
+        "allReleaseTitles": [
+          "bulletproof",
+          "malaka",
+          "corrida",
+          "kutrkeepuptherhythm",
+          "elvissingle",
+          "biliosingle",
+          "requiemftpedroerazosingle"
+        ],
+        "latestRelease": {
+          "title": "Bulletproof",
+          "type": "track",
+          "url": "https://kozamostra.bandcamp.com/track/bulletproof",
+          "imageUrl": "https://f4.bcbits.com/img/a2635172133_2.jpg",
+          "releaseDate": "February 24, 2026"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/koza-mostra/1072970",
+        "allReleaseTitles": [
+          "malaka",
+          "bulletproof",
+          "keepuptherhythm",
+          "corrida",
+          "amerika",
+          "giorti",
+          "itiafeatbandaentopicalive",
+          "bilio",
+          "elvis",
+          "tikanoedo",
+          "requiemfeatpedroerazofromgogolbordello",
+          "bordellooriginale"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Koza%20Mostra"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Koza%20Mostra"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3267874"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "http://www.facebook.com/KozaMostraOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

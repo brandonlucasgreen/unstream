@@ -1,2529 +1,5546 @@
 [
   {
-    "name": "$A$HA",
-    "slug": "a-ha",
-    "imageUrl": "https://f4.bcbits.com/img/0031540140_23.jpg",
-    "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "name": "12 Stones",
+    "slug": "12-stones",
+    "imageUrl": "https://f4.bcbits.com/img/0010795026_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "808 State",
+    "slug": "808-state",
+    "imageUrl": "https://f4.bcbits.com/img/0041414913_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Aaron Carter",
     "slug": "aaron-carter",
     "imageUrl": "https://f4.bcbits.com/img/0029828051_23.jpg",
     "platformCount": 7,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Abbey Lincoln",
     "slug": "abbey-lincoln",
     "imageUrl": "https://f4.bcbits.com/img/0028893116_23.jpg",
     "platformCount": 8,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Above & Beyond",
+    "slug": "above-beyond",
+    "imageUrl": "https://f4.bcbits.com/img/0019698680_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Absurd",
+    "slug": "absurd",
+    "imageUrl": "https://f4.bcbits.com/img/0034906609_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Ace Frehley",
     "slug": "ace-frehley",
     "imageUrl": "https://f4.bcbits.com/img/0014732527_23.jpg",
     "platformCount": 14,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Achille Lauro",
+    "slug": "achille-lauro",
+    "imageUrl": "https://f4.bcbits.com/img/a3282099781_7.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Adam Jones",
+    "slug": "adam-jones",
+    "imageUrl": "https://f4.bcbits.com/img/a1188461730_7.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Adrian Belew",
     "slug": "adrian-belew",
     "imageUrl": "https://f4.bcbits.com/img/0018772497_23.jpg",
-    "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Afroman",
+    "slug": "afroman",
+    "imageUrl": "https://f4.bcbits.com/img/0007389277_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Against Me!",
+    "slug": "against-me",
+    "imageUrl": "https://f4.bcbits.com/img/0010737792_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "AGALLOCH",
+    "slug": "agalloch",
+    "imageUrl": "https://f4.bcbits.com/img/0002612231_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Agnes Obel",
     "slug": "agnes-obel",
     "imageUrl": "https://f4.bcbits.com/img/0013363301_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Aiko",
+    "slug": "aiko",
+    "imageUrl": "https://f4.bcbits.com/img/0040938896_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Air",
     "slug": "air",
     "imageUrl": "https://f4.bcbits.com/img/0031269149_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Airbourne",
+    "slug": "airbourne",
+    "imageUrl": "https://f4.bcbits.com/img/0025518514_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Al Green",
     "slug": "al-green",
     "imageUrl": "https://f4.bcbits.com/img/0037816130_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Alan Jackson",
     "slug": "alan-jackson",
     "imageUrl": "https://f4.bcbits.com/img/0010840388_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Albert Hammond Jr.",
+    "slug": "albert-hammond-jr",
+    "imageUrl": "https://f4.bcbits.com/img/0012816422_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Alcazar",
     "slug": "alcazar",
     "imageUrl": "https://f4.bcbits.com/img/0031539596_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Alcest",
+    "slug": "alcest",
+    "imageUrl": "https://f4.bcbits.com/img/0035910114_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Alestorm",
+    "slug": "alestorm",
+    "imageUrl": "https://f4.bcbits.com/img/0038881435_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Alex Chilton",
+    "slug": "alex-chilton",
+    "imageUrl": "https://f4.bcbits.com/img/0028263921_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Alex Skolnick",
+    "slug": "alex-skolnick",
+    "imageUrl": "https://f4.bcbits.com/img/0025903886_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Alex Warren",
+    "slug": "alex-warren",
+    "imageUrl": "https://f4.bcbits.com/img/0018137522_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "aleXa",
+    "slug": "alexa",
+    "imageUrl": "https://f4.bcbits.com/img/0039257834_23.jpg",
+    "platformCount": 6,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Alexandra Burke",
     "slug": "alexandra-burke",
     "imageUrl": "https://f4.bcbits.com/img/0013009705_23.jpg",
     "platformCount": 8,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
-  },
-  {
-    "name": "Alexey Vorobyov",
-    "slug": "alexey-vorobyov",
-    "imageUrl": "https://f4.bcbits.com/img/0010831683_23.jpg",
-    "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Ali Zafar",
     "slug": "ali-zafar",
     "imageUrl": "https://f4.bcbits.com/img/0042087532_23.jpg",
     "platformCount": 8,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Alice Faye",
     "slug": "alice-faye",
     "imageUrl": "https://f4.bcbits.com/img/0031810995_23.jpg",
     "platformCount": 7,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Alice Merton",
+    "slug": "alice-merton",
+    "imageUrl": "https://f4.bcbits.com/img/0016195549_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Alice Phoebe Lou",
+    "slug": "alice-phoebe-lou",
+    "imageUrl": "https://f4.bcbits.com/img/0039713667_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Alicia Witt",
     "slug": "alicia-witt",
     "imageUrl": "https://f4.bcbits.com/img/0037849959_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Alien Ant Farm",
+    "slug": "alien-ant-farm",
+    "imageUrl": "https://f4.bcbits.com/img/0025224759_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Alison Krauss",
     "slug": "alison-krauss",
     "imageUrl": "https://f4.bcbits.com/img/0025527426_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Alison Mosshart",
+    "slug": "alison-mosshart",
+    "imageUrl": "https://f4.bcbits.com/img/0019875084_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "All That Remains",
+    "slug": "all-that-remains",
+    "imageUrl": "https://f4.bcbits.com/img/0011837465_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "All Time Low",
     "slug": "all-time-low",
     "imageUrl": "https://f4.bcbits.com/img/0019023324_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Allie X",
+    "slug": "allie-x",
+    "imageUrl": "https://f4.bcbits.com/img/0041603145_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Alma",
+    "slug": "alma",
+    "imageUrl": "https://f4.bcbits.com/img/0018370728_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Alter Bridge",
     "slug": "alter-bridge",
     "imageUrl": "https://f4.bcbits.com/img/0040337062_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Amadou & Mariam",
+    "slug": "amadou-mariam",
+    "imageUrl": "https://f4.bcbits.com/img/0024142573_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Amaral",
+    "slug": "amaral",
+    "imageUrl": "https://f4.bcbits.com/img/a2144089171_7.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Amber Rose",
     "slug": "amber-rose",
     "imageUrl": "https://f4.bcbits.com/img/0029422631_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "AMBER",
+    "slug": "amber",
+    "imageUrl": "https://f4.bcbits.com/img/a4254509882_7.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Amy Irving",
     "slug": "amy-irving",
     "imageUrl": "https://f4.bcbits.com/img/0038515611_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Anathema",
     "slug": "anathema",
     "imageUrl": "https://f4.bcbits.com/img/0038684257_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
-    "name": "Andrew Fletcher",
-    "slug": "andrew-fletcher",
-    "imageUrl": "https://f4.bcbits.com/img/0024189600_23.jpg",
+    "name": "Andrew Latimer",
+    "slug": "andrew-latimer",
+    "imageUrl": "https://f4.bcbits.com/img/0040634599_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Andrew Wood",
+    "slug": "andrew-wood",
+    "imageUrl": "https://f4.bcbits.com/img/0035924216_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Andrius Pojavis",
     "slug": "andrius-pojavis",
     "imageUrl": "https://f4.bcbits.com/img/0026948777_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Andy Bell",
+    "slug": "andy-bell",
+    "imageUrl": "https://f4.bcbits.com/img/0038308293_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Ane Brun",
+    "slug": "ane-brun",
+    "imageUrl": "https://f4.bcbits.com/img/0038798455_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Angie Stone",
     "slug": "angie-stone",
     "imageUrl": "https://f4.bcbits.com/img/0027918899_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Ani DiFranco",
     "slug": "ani-difranco",
     "imageUrl": "https://f4.bcbits.com/img/0041743389_23.jpg",
     "platformCount": 14,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Animal Collective",
     "slug": "animal-collective",
     "imageUrl": "https://f4.bcbits.com/img/0020714410_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Animals As Leaders",
+    "slug": "animals-as-leaders",
+    "imageUrl": "https://f4.bcbits.com/img/0008151297_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Anitta",
     "slug": "anitta",
     "imageUrl": "https://f4.bcbits.com/img/0027670867_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Anna von Hausswolff",
+    "slug": "anna-von-hausswolff",
+    "imageUrl": "https://f4.bcbits.com/img/0006059542_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Anne Marie",
     "slug": "anne-marie",
     "imageUrl": "https://f4.bcbits.com/img/0027203645_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Anneke van Giersbergen",
+    "slug": "anneke-van-giersbergen",
+    "imageUrl": "https://f4.bcbits.com/img/0038819042_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Anoushka Shankar",
     "slug": "anoushka-shankar",
     "imageUrl": "https://f4.bcbits.com/img/0038390602_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "ANTESTOR",
+    "slug": "antestor",
+    "imageUrl": "https://f4.bcbits.com/img/0018749982_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Anti-Flag",
+    "slug": "anti-flag",
+    "imageUrl": "https://f4.bcbits.com/img/0022287963_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Aphex Twin",
     "slug": "aphex-twin",
     "imageUrl": "https://f4.bcbits.com/img/0036351072_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Architects",
+    "slug": "architects",
+    "imageUrl": "https://f4.bcbits.com/img/0037825052_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Arrested Development",
+    "slug": "arrested-development",
+    "imageUrl": "https://f4.bcbits.com/img/0031891263_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Artie Shaw",
     "slug": "artie-shaw",
     "imageUrl": "https://f4.bcbits.com/img/0036070273_23.jpg",
     "platformCount": 7,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "As I Lay Dying",
     "slug": "as-i-lay-dying",
     "imageUrl": "https://f4.bcbits.com/img/0041272463_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Asher Roth",
+    "slug": "asher-roth",
+    "imageUrl": "https://f4.bcbits.com/img/0038637771_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "ashok kumar",
     "slug": "ashok-kumar",
     "imageUrl": "https://f4.bcbits.com/img/0014112846_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Asking Alexandria",
     "slug": "asking-alexandria",
     "imageUrl": "https://f4.bcbits.com/img/0035089295_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "At The Gates",
     "slug": "at-the-gates",
     "imageUrl": "https://f4.bcbits.com/img/0007296282_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Aurora",
     "slug": "aurora",
     "imageUrl": "https://f4.bcbits.com/img/0036700656_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Avishai Cohen",
+    "slug": "avishai-cohen",
+    "imageUrl": "https://f4.bcbits.com/img/0022090100_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Axel Rudi Pell",
+    "slug": "axel-rudi-pell",
+    "imageUrl": "https://f4.bcbits.com/img/0015358511_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Azam Ali",
+    "slug": "azam-ali",
+    "imageUrl": "https://f4.bcbits.com/img/0040859662_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "\u0410\u0437\u0438\u0441 (Azis)",
     "slug": "azis",
     "imageUrl": "https://f4.bcbits.com/img/a0920176551_7.jpg",
     "platformCount": 6,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Aziza Mustafa Zadeh",
+    "slug": "aziza-mustafa-zadeh",
+    "imageUrl": "https://f4.bcbits.com/img/0036446099_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Baaba Maal",
+    "slug": "baaba-maal",
+    "imageUrl": "https://f4.bcbits.com/img/0030632570_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Babyface",
     "slug": "babyface",
     "imageUrl": "https://f4.bcbits.com/img/0029572104_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Band of Horses",
+    "slug": "band-of-horses",
+    "imageUrl": "https://f4.bcbits.com/img/a3236768930_7.jpg",
+    "platformCount": 14,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Basement Jaxx",
+    "slug": "basement-jaxx",
+    "imageUrl": "https://f4.bcbits.com/img/0033338787_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "bbno$",
+    "slug": "bbno",
+    "imageUrl": "https://f4.bcbits.com/img/0041266164_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Beach House",
+    "slug": "beach-house",
+    "imageUrl": "https://f4.bcbits.com/img/0026683180_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Bear McCreary",
+    "slug": "bear-mccreary",
+    "imageUrl": "https://f4.bcbits.com/img/0013165049_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "bebe",
     "slug": "bebe",
     "imageUrl": "https://f4.bcbits.com/img/0005947299_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Behemoth",
     "slug": "behemoth",
     "imageUrl": "https://f4.bcbits.com/img/0039431748_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Belinda Carlisle",
     "slug": "belinda-carlisle",
     "imageUrl": "https://f4.bcbits.com/img/0017621512_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Belinda",
     "slug": "belinda",
     "imageUrl": "https://f4.bcbits.com/img/0020419694_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Belle and Sebastian",
     "slug": "belle-and-sebastian",
     "imageUrl": "https://f4.bcbits.com/img/0027902117_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Belphegor",
+    "slug": "belphegor",
+    "imageUrl": "https://f4.bcbits.com/img/0013678076_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Benny Golson",
     "slug": "benny-golson",
     "imageUrl": "https://f4.bcbits.com/img/0026908463_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Bert Jansch",
+    "slug": "bert-jansch",
+    "imageUrl": "https://f4.bcbits.com/img/0004778044_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Beth Hart",
     "slug": "beth-hart",
     "imageUrl": "https://f4.bcbits.com/img/0022085127_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Beth Orton",
+    "slug": "beth-orton",
+    "imageUrl": "https://f4.bcbits.com/img/0028830164_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Betty Davis",
+    "slug": "betty-davis",
+    "imageUrl": "https://f4.bcbits.com/img/0006154511_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Big Mama Thornton",
     "slug": "big-mama-thornton",
     "imageUrl": "https://f4.bcbits.com/img/0022102678_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Bijelo Dugme",
+    "slug": "bijelo-dugme",
+    "imageUrl": "https://f4.bcbits.com/img/0032471959_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Bikini Kill",
+    "slug": "bikini-kill",
+    "imageUrl": "https://f4.bcbits.com/img/0029961946_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Billy Preston",
     "slug": "billy-preston",
     "imageUrl": "https://f4.bcbits.com/img/0023519085_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Birdy",
     "slug": "birdy",
     "imageUrl": "https://f4.bcbits.com/img/a1264844761_7.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Black Uhuru",
+    "slug": "black-uhuru",
+    "imageUrl": "https://f4.bcbits.com/img/0037375854_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Blaze Bayley",
+    "slug": "blaze-bayley",
+    "imageUrl": "https://f4.bcbits.com/img/0003912090_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Blind Guardian",
     "slug": "blind-guardian",
     "imageUrl": "https://f4.bcbits.com/img/0029501647_23.jpg",
     "platformCount": 15,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
-    "name": "Bo Diddley",
-    "slug": "bo-diddley",
-    "imageUrl": "https://f4.bcbits.com/img/0006782759_23.jpg",
-    "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "name": "Blonde Redhead",
+    "slug": "blonde-redhead",
+    "imageUrl": "https://f4.bcbits.com/img/0032319618_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Blood Red Shoes",
+    "slug": "blood-red-shoes",
+    "imageUrl": "https://f4.bcbits.com/img/0031510473_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Blutengel",
+    "slug": "blutengel",
+    "imageUrl": "https://f4.bcbits.com/img/0018056824_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Bobby Darin",
     "slug": "bobby-darin",
     "imageUrl": "https://f4.bcbits.com/img/0022206294_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Bobby Kimball",
+    "slug": "bobby-kimball",
+    "imageUrl": "https://f4.bcbits.com/img/0009276322_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Boggie",
+    "slug": "boggie",
+    "imageUrl": "https://f4.bcbits.com/img/0002255439_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Bombay Bicycle Club",
+    "slug": "bombay-bicycle-club",
+    "imageUrl": "https://f4.bcbits.com/img/0036922534_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Bon Iver",
     "slug": "bon-iver",
     "imageUrl": "https://f4.bcbits.com/img/0038663714_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Booker T. Jones",
+    "slug": "booker-t-jones",
+    "imageUrl": "https://f4.bcbits.com/img/0028364187_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "BoomBox",
+    "slug": "boombox",
+    "imageUrl": "https://f4.bcbits.com/img/0032073526_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Boy George",
     "slug": "boy-george",
     "imageUrl": "https://f4.bcbits.com/img/0025722737_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "BOYS LIKE GIRLS",
+    "slug": "boys-like-girls",
+    "imageUrl": "https://f4.bcbits.com/img/0032415552_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Boz Scaggs",
+    "slug": "boz-scaggs",
+    "imageUrl": "https://f4.bcbits.com/img/0026401397_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Bradley Joseph",
+    "slug": "bradley-joseph",
+    "imageUrl": "https://f4.bcbits.com/img/a1988610045_7.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "BRAINSTORM",
+    "slug": "brainstorm",
+    "imageUrl": "https://f4.bcbits.com/img/0000225619_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Brendan Murray",
+    "slug": "brendan-murray",
+    "imageUrl": "https://f4.bcbits.com/img/a3676119585_7.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Brendan Perry",
+    "slug": "brendan-perry",
+    "imageUrl": "https://f4.bcbits.com/img/0022262843_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Brian Hyland",
+    "slug": "brian-hyland",
+    "imageUrl": "https://f4.bcbits.com/img/0022206749_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Brian Tyler",
     "slug": "brian-tyler",
     "imageUrl": "https://f4.bcbits.com/img/0013200475_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Bright Eyes",
     "slug": "bright-eyes",
     "imageUrl": "https://f4.bcbits.com/img/0040792507_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Bronski Beat",
+    "slug": "bronski-beat",
+    "imageUrl": "https://f4.bcbits.com/img/0028579368_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Brook Benton",
+    "slug": "brook-benton",
+    "imageUrl": "https://f4.bcbits.com/img/0033382005_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Brooke Candy",
+    "slug": "brooke-candy",
+    "imageUrl": "https://f4.bcbits.com/img/0016726144_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Bruce Hornsby",
+    "slug": "bruce-hornsby",
+    "imageUrl": "https://f4.bcbits.com/img/0020680651_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Brunette",
+    "slug": "brunette",
+    "imageUrl": "https://f4.bcbits.com/img/0027950771_23.jpg",
+    "platformCount": 7,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Bryan Greenberg",
     "slug": "bryan-greenberg",
     "imageUrl": "https://f4.bcbits.com/img/0019098553_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "BT",
+    "slug": "bt",
+    "imageUrl": "https://f4.bcbits.com/img/0025916534_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Burl Ives",
     "slug": "burl-ives",
     "imageUrl": "https://f4.bcbits.com/img/0031951657_23.jpg",
     "platformCount": 7,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Bush",
+    "slug": "bush",
+    "imageUrl": "https://f4.bcbits.com/img/0034118927_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Buzzcocks",
     "slug": "buzzcocks",
     "imageUrl": "https://f4.bcbits.com/img/0029149615_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "C\u0153ur de pirate",
     "slug": "c-ur-de-pirate",
     "imageUrl": "https://f4.bcbits.com/img/0037916293_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "CAKE",
+    "slug": "cake",
+    "imageUrl": "https://f4.bcbits.com/img/0039313922_23.jpg",
+    "platformCount": 14,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Caleb Landry Jones",
     "slug": "caleb-landry-jones",
     "imageUrl": "https://f4.bcbits.com/img/0035077862_23.jpg",
     "platformCount": 6,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Calogero",
+    "slug": "calogero",
+    "imageUrl": "https://f4.bcbits.com/img/0010444528_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "CAN",
     "slug": "can",
     "imageUrl": "https://f4.bcbits.com/img/0024939273_23.jpg",
-    "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "CANDLEMASS",
+    "slug": "candlemass",
+    "imageUrl": "https://f4.bcbits.com/img/0039180418_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Caravan Palace",
+    "slug": "caravan-palace",
+    "imageUrl": "https://f4.bcbits.com/img/0035034287_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Caravan",
+    "slug": "caravan",
+    "imageUrl": "https://f4.bcbits.com/img/a1683745755_7.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Carcass",
     "slug": "carcass",
     "imageUrl": "https://f4.bcbits.com/img/0007296753_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Carl Perkins",
     "slug": "carl-perkins",
     "imageUrl": "https://f4.bcbits.com/img/0026884785_23.jpg",
     "platformCount": 7,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Carmine Appice",
+    "slug": "carmine-appice",
+    "imageUrl": "https://f4.bcbits.com/img/0026051840_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Caro Emerald",
+    "slug": "caro-emerald",
+    "imageUrl": "https://f4.bcbits.com/img/0031756370_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Caroline Polachek",
+    "slug": "caroline-polachek",
+    "imageUrl": "https://f4.bcbits.com/img/0030700333_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Carpathian Forest",
+    "slug": "carpathian-forest",
+    "imageUrl": "https://f4.bcbits.com/img/0000100388_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Cassandra Wilson",
+    "slug": "cassandra-wilson",
+    "imageUrl": "https://f4.bcbits.com/img/0000933282_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Cattle Decapitation",
+    "slug": "cattle-decapitation",
+    "imageUrl": "https://f4.bcbits.com/img/0031432288_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Cavalera Conspiracy",
+    "slug": "cavalera-conspiracy",
+    "imageUrl": "https://f4.bcbits.com/img/0011346799_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Celldweller",
+    "slug": "celldweller",
+    "imageUrl": "https://f4.bcbits.com/img/0025172968_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Charles Trenet",
     "slug": "charles-trenet",
     "imageUrl": "https://f4.bcbits.com/img/0027329785_23.jpg",
     "platformCount": 7,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Charlie Clouser",
+    "slug": "charlie-clouser",
+    "imageUrl": "https://f4.bcbits.com/img/0013200474_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Charlie McGettigan",
+    "slug": "charlie-mcgettigan",
+    "imageUrl": "https://f4.bcbits.com/img/a0082289438_7.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Chic",
+    "slug": "chic",
+    "imageUrl": "https://f4.bcbits.com/img/a1383497943_7.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Chickenfoot",
+    "slug": "chickenfoot",
+    "imageUrl": "https://f4.bcbits.com/img/0019596470_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Chip Taylor",
+    "slug": "chip-taylor",
+    "imageUrl": "https://f4.bcbits.com/img/0014957051_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Chris Barnes",
+    "slug": "chris-barnes",
+    "imageUrl": "https://f4.bcbits.com/img/0040353650_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Christopher Cross",
     "slug": "christopher-cross",
     "imageUrl": "https://f4.bcbits.com/img/0036229546_23.jpg",
-    "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Christy Moore",
+    "slug": "christy-moore",
+    "imageUrl": "https://f4.bcbits.com/img/0003634885_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Chuck Mangione",
+    "slug": "chuck-mangione",
+    "imageUrl": "https://f4.bcbits.com/img/0010952054_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Cigarettes After Sex",
     "slug": "cigarettes-after-sex",
     "imageUrl": "https://f4.bcbits.com/img/0035228813_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Cinderella",
+    "slug": "cinderella",
+    "imageUrl": "https://f4.bcbits.com/img/0011675421_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Circus Mircus",
+    "slug": "circus-mircus",
+    "imageUrl": "https://f4.bcbits.com/img/0026731627_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "clairo",
     "slug": "clairo",
     "imageUrl": "https://f4.bcbits.com/img/a2621086018_7.jpg",
-    "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Claude",
+    "slug": "claude",
+    "imageUrl": "https://f4.bcbits.com/img/0029041838_23.jpg",
+    "platformCount": 6,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Clint Mansell",
     "slug": "clint-mansell",
     "imageUrl": "https://f4.bcbits.com/img/0013200490_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Clutch",
+    "slug": "clutch",
+    "imageUrl": "https://f4.bcbits.com/img/0011274023_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "CocoRosie",
+    "slug": "cocorosie",
+    "imageUrl": "https://f4.bcbits.com/img/0038380430_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "COLDRAIN",
+    "slug": "coldrain",
+    "imageUrl": "https://f4.bcbits.com/img/0023127457_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Common",
     "slug": "common",
     "imageUrl": "https://f4.bcbits.com/img/0025844558_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Converge",
+    "slug": "converge",
+    "imageUrl": "https://f4.bcbits.com/img/0041638735_23.jpg",
+    "platformCount": 14,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Conway Twitty",
+    "slug": "conway-twitty",
+    "imageUrl": "https://f4.bcbits.com/img/0033383727_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Corrosion of Conformity",
+    "slug": "corrosion-of-conformity",
+    "imageUrl": "https://f4.bcbits.com/img/0042736800_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Cosmic Gate",
+    "slug": "cosmic-gate",
+    "imageUrl": "https://f4.bcbits.com/img/0013863529_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "courtney barnett",
     "slug": "courtney-barnett",
     "imageUrl": "https://f4.bcbits.com/img/0042444827_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Crass",
     "slug": "crass",
     "imageUrl": "https://f4.bcbits.com/img/0022029769_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Creed",
     "slug": "creed",
     "imageUrl": "https://f4.bcbits.com/img/0030116006_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Cristina Branco",
+    "slug": "cristina-branco",
+    "imageUrl": "https://f4.bcbits.com/img/0033620479_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Cryptopsy",
+    "slug": "cryptopsy",
+    "imageUrl": "https://f4.bcbits.com/img/0032932199_23.jpg",
+    "platformCount": 14,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Culture Beat",
+    "slug": "culture-beat",
+    "imageUrl": "https://f4.bcbits.com/img/0039290574_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Cutting Crew",
     "slug": "cutting-crew",
     "imageUrl": "https://f4.bcbits.com/img/0020888949_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Dale Crover",
+    "slug": "dale-crover",
+    "imageUrl": "https://f4.bcbits.com/img/0036296617_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Daler Mehndi",
     "slug": "daler-mehndi",
     "imageUrl": "https://f4.bcbits.com/img/a3466830121_7.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Dan Balan",
     "slug": "dan-balan",
     "imageUrl": "https://f4.bcbits.com/img/0027753831_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "dan hartman",
     "slug": "dan-hartman",
     "imageUrl": "https://f4.bcbits.com/img/a1737303876_7.jpg",
-    "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "platformCount": 7,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Daniel Johnston",
     "slug": "daniel-johnston",
     "imageUrl": "https://f4.bcbits.com/img/0033314369_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Daniel Lanois",
+    "slug": "daniel-lanois",
+    "imageUrl": "https://f4.bcbits.com/img/0004139295_23.jpg",
+    "platformCount": 14,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Danny Saucedo",
     "slug": "danny-saucedo",
     "imageUrl": "https://f4.bcbits.com/img/0013249521_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Daron Malakian And Scars On Broadway",
     "slug": "daron-malakian-and-scars-on-broadway",
     "imageUrl": "https://f4.bcbits.com/img/0040352724_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Daughter",
+    "slug": "daughter",
+    "imageUrl": "https://f4.bcbits.com/img/0031020410_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "David Byrne",
     "slug": "david-byrne",
     "imageUrl": "https://f4.bcbits.com/img/0040012444_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "David Cross",
     "slug": "david-cross",
     "imageUrl": "https://f4.bcbits.com/img/0005676477_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "David Ellefson",
     "slug": "david-ellefson",
     "imageUrl": "https://f4.bcbits.com/img/0023990413_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "David Sylvian",
+    "slug": "david-sylvian",
+    "imageUrl": "https://f4.bcbits.com/img/0039379236_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "De La Soul",
+    "slug": "de-la-soul",
+    "imageUrl": "https://f4.bcbits.com/img/0032466902_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Deafheaven",
+    "slug": "deafheaven",
+    "imageUrl": "https://f4.bcbits.com/img/0025635461_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Dean Edwards",
     "slug": "dean-edwards",
     "imageUrl": "https://f4.bcbits.com/img/a1456545366_7.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Death Cab for Cutie",
     "slug": "death-cab-for-cutie",
-    "imageUrl": "https://f4.bcbits.com/img/0042490570_23.jpg",
+    "imageUrl": "https://f4.bcbits.com/img/0043434484_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Death Stars",
+    "slug": "deathstars",
+    "imageUrl": "https://f4.bcbits.com/img/a3330208474_7.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Decapitated",
+    "slug": "decapitated",
+    "imageUrl": "https://f4.bcbits.com/img/0022087317_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Dee Dee Bridgewater",
     "slug": "dee-dee-bridgewater",
     "imageUrl": "https://f4.bcbits.com/img/0039571449_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Dee Snider",
     "slug": "dee-snider",
     "imageUrl": "https://f4.bcbits.com/img/0025016456_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Deicide",
     "slug": "deicide",
     "imageUrl": "https://f4.bcbits.com/img/0011831399_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Del Shannon",
+    "slug": "del-shannon",
+    "imageUrl": "https://f4.bcbits.com/img/0025110973_23.jpg",
+    "platformCount": 7,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Delain",
+    "slug": "delain",
+    "imageUrl": "https://f4.bcbits.com/img/0037066883_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Dennis Brown",
+    "slug": "dennis-brown",
+    "imageUrl": "https://f4.bcbits.com/img/0012364642_23.jpg",
+    "platformCount": 7,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Denzel Curry",
+    "slug": "denzel-curry",
+    "imageUrl": "https://f4.bcbits.com/img/0043117229_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Descendents",
+    "slug": "descendents",
+    "imageUrl": "https://f4.bcbits.com/img/0003959930_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Destruction",
     "slug": "destruction",
     "imageUrl": "https://f4.bcbits.com/img/0037771542_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Devendra Banhart",
     "slug": "devendra-banhart",
     "imageUrl": "https://f4.bcbits.com/img/0032651786_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "DevilDriver",
+    "slug": "devildriver",
+    "imageUrl": "https://f4.bcbits.com/img/0037854608_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Devin Townsend",
     "slug": "devin-townsend",
-    "imageUrl": "https://f4.bcbits.com/img/0022535380_23.jpg",
+    "imageUrl": "https://f4.bcbits.com/img/0043237550_23.jpg",
     "platformCount": 14,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Devourment",
+    "slug": "devourment",
+    "imageUrl": "https://f4.bcbits.com/img/0016645921_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Diamanda Gal\u00e1s",
+    "slug": "diamanda-galas",
+    "imageUrl": "https://f4.bcbits.com/img/0016000334_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "DIE KRUPPS",
+    "slug": "die-krupps",
+    "imageUrl": "https://f4.bcbits.com/img/0002228032_23.jpg",
+    "platformCount": 14,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Dinah Jane",
+    "slug": "dinah-jane",
+    "imageUrl": "https://f4.bcbits.com/img/a3840052807_7.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Dinosaur Jr.",
     "slug": "dinosaur-jr",
     "imageUrl": "https://f4.bcbits.com/img/0023819975_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Diplo",
     "slug": "diplo",
     "imageUrl": "https://f4.bcbits.com/img/0027915856_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Dixie D'Amelio",
     "slug": "dixie-d-amelio",
     "imageUrl": "https://f4.bcbits.com/img/0020752061_23.jpg",
     "platformCount": 8,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Doc Watson",
+    "slug": "doc-watson",
+    "imageUrl": "https://f4.bcbits.com/img/0024928185_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Donna Lewis",
+    "slug": "donna-lewis",
+    "imageUrl": "https://f4.bcbits.com/img/0022857908_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "down.",
+    "slug": "down",
+    "imageUrl": "https://f4.bcbits.com/img/0017712302_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Draconian",
+    "slug": "draconian",
+    "imageUrl": "https://f4.bcbits.com/img/0043232826_23.jpg",
+    "platformCount": 14,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Dubioza kolektiv",
+    "slug": "dubioza-kolektiv",
+    "imageUrl": "https://f4.bcbits.com/img/0015645120_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Dusty Hill",
     "slug": "dusty-hill",
     "imageUrl": "https://f4.bcbits.com/img/0036084035_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Dying Fetus",
+    "slug": "dying-fetus",
+    "imageUrl": "https://f4.bcbits.com/img/0032911341_23.jpg",
+    "platformCount": 15,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Eddie Clarke",
     "slug": "eddie-clarke",
     "imageUrl": "https://f4.bcbits.com/img/0022502294_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Eddie Floyd",
+    "slug": "eddie-floyd",
+    "imageUrl": "https://f4.bcbits.com/img/0027893262_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Editors",
     "slug": "editors",
     "imageUrl": "https://f4.bcbits.com/img/0029780567_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Eimear Quinn",
     "slug": "eimear-quinn",
     "imageUrl": "https://f4.bcbits.com/img/0041716962_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Einst\u00fcrzende Neubauten",
+    "slug": "einsturzende-neubauten",
+    "imageUrl": "https://f4.bcbits.com/img/0021144174_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Eisbrecher",
+    "slug": "eisbrecher",
+    "imageUrl": "https://f4.bcbits.com/img/0026244370_23.jpg",
+    "platformCount": 14,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "elbow",
+    "slug": "elbow",
+    "imageUrl": "https://f4.bcbits.com/img/0021119927_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Eliane Elias",
+    "slug": "eliane-elias",
+    "imageUrl": "https://f4.bcbits.com/img/0024538169_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Elizabeth Cotten",
+    "slug": "elizabeth-cotten",
+    "imageUrl": "https://f4.bcbits.com/img/0013863775_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Elliot Goldenthal",
     "slug": "elliot-goldenthal",
     "imageUrl": "https://f4.bcbits.com/img/0013405529_23.jpg",
-    "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Elliott Smith",
     "slug": "elliott-smith",
     "imageUrl": "https://f4.bcbits.com/img/0042492006_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Elvin Bishop",
+    "slug": "elvin-bishop",
+    "imageUrl": "https://f4.bcbits.com/img/0029918363_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Elza Soares",
+    "slug": "elza-soares",
+    "imageUrl": "https://f4.bcbits.com/img/0008111363_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "EMMY",
     "slug": "emmy",
     "imageUrl": "https://f4.bcbits.com/img/0002458063_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "EMPEROR",
     "slug": "emperor",
     "imageUrl": "https://f4.bcbits.com/img/0020810209_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Enslaved",
     "slug": "enslaved",
     "imageUrl": "https://f4.bcbits.com/img/0018148365_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Entombed",
+    "slug": "entombed",
+    "imageUrl": "https://f4.bcbits.com/img/0007296934_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Escape the Fate",
+    "slug": "escape-the-fate",
+    "imageUrl": "https://f4.bcbits.com/img/0027319402_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "esperanza spalding",
     "slug": "esperanza-spalding",
     "imageUrl": "https://f4.bcbits.com/img/0024148906_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Ethel Cain",
+    "slug": "ethel-cain",
+    "imageUrl": "https://f4.bcbits.com/img/0029129579_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Eugene Levy",
     "slug": "eugene-levy",
     "imageUrl": "https://f4.bcbits.com/img/0022585801_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Evergrey",
+    "slug": "evergrey",
+    "imageUrl": "https://f4.bcbits.com/img/0043086810_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Everlast",
+    "slug": "everlast",
+    "imageUrl": "https://f4.bcbits.com/img/0000059641_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Exodus",
     "slug": "exodus",
     "imageUrl": "https://f4.bcbits.com/img/0042463914_23.jpg",
     "platformCount": 14,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Explosions in the Sky",
+    "slug": "explosions-in-the-sky",
+    "imageUrl": "https://f4.bcbits.com/img/0032933370_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Faith No More",
     "slug": "faith-no-more",
     "imageUrl": "https://f4.bcbits.com/img/0018053356_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Faithless",
     "slug": "faithless",
     "imageUrl": "https://f4.bcbits.com/img/0025708723_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "FecalMatter",
+    "slug": "fecal-matter",
+    "imageUrl": "https://f4.bcbits.com/img/0016232234_23.jpg",
+    "platformCount": 7,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Femi Kuti",
+    "slug": "femi-kuti",
+    "imageUrl": "https://f4.bcbits.com/img/0038478259_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Fine Young Cannibals",
+    "slug": "fine-young-cannibals",
+    "imageUrl": "https://f4.bcbits.com/img/0024735767_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Five Finger Death Punch",
     "slug": "five-finger-death-punch",
     "imageUrl": "https://f4.bcbits.com/img/0027318719_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "FKA twigs",
     "slug": "fka-twigs",
     "imageUrl": "https://f4.bcbits.com/img/0042013901_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Fleet Foxes",
+    "slug": "fleet-foxes",
+    "imageUrl": "https://f4.bcbits.com/img/0032651321_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Flogging Molly",
     "slug": "flogging-molly",
     "imageUrl": "https://f4.bcbits.com/img/0004647715_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Floor Jansen",
     "slug": "floor-jansen",
     "imageUrl": "https://f4.bcbits.com/img/0025407496_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Flora Purim",
+    "slug": "flora-purim",
+    "imageUrl": "https://f4.bcbits.com/img/0027313340_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Focus...",
+    "slug": "focus",
+    "imageUrl": "https://f4.bcbits.com/img/0031968747_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "foreigner",
     "slug": "foreigner",
     "imageUrl": "https://f4.bcbits.com/img/0018316576_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Fountains of Wayne",
+    "slug": "fountains-of-wayne",
+    "imageUrl": "https://f4.bcbits.com/img/0011979449_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Frank Iero",
     "slug": "frank-iero",
     "imageUrl": "https://f4.bcbits.com/img/0018635631_23.jpg",
     "platformCount": 7,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Frankie Avalon",
     "slug": "frankie-avalon",
     "imageUrl": "https://f4.bcbits.com/img/0036546621_23.jpg",
     "platformCount": 14,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Fun",
     "slug": "fun",
     "imageUrl": "https://f4.bcbits.com/img/0016130858_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Funkadelic",
+    "slug": "funkadelic",
+    "imageUrl": "https://f4.bcbits.com/img/0026457743_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Gala",
+    "slug": "gala",
+    "imageUrl": "https://f4.bcbits.com/img/0022460324_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Galena",
+    "slug": "galena",
+    "imageUrl": "https://f4.bcbits.com/img/0012500791_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Gamma Ray",
     "slug": "gamma-ray",
     "imageUrl": "https://f4.bcbits.com/img/0038065889_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Gang of Four",
+    "slug": "gang-of-four",
+    "imageUrl": "https://f4.bcbits.com/img/0038989759_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Garmarna",
+    "slug": "garmarna",
+    "imageUrl": "https://f4.bcbits.com/img/0016964484_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Garou",
     "slug": "garou",
     "imageUrl": "https://f4.bcbits.com/img/0008733672_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Gary Numan",
     "slug": "gary-numan",
     "imageUrl": "https://f4.bcbits.com/img/0020879054_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Gary",
+    "slug": "gary",
+    "imageUrl": "https://f4.bcbits.com/img/0000057097_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "G\u00e5te",
+    "slug": "gate",
+    "imageUrl": "https://f4.bcbits.com/img/0025159826_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Gazebo",
+    "slug": "gazebo",
+    "imageUrl": "https://f4.bcbits.com/img/0014686882_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "GentleGiant",
+    "slug": "gentle-giant",
+    "imageUrl": "https://f4.bcbits.com/img/0022212458_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "George Jones",
     "slug": "george-jones",
     "imageUrl": "https://f4.bcbits.com/img/0033373595_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "George Thorogood",
+    "slug": "george-thorogood",
+    "imageUrl": "https://f4.bcbits.com/img/0028696520_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Gilda",
+    "slug": "gilda",
+    "imageUrl": "https://f4.bcbits.com/img/0031199706_23.jpg",
+    "platformCount": 7,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "girl in red",
+    "slug": "girl-in-red",
+    "imageUrl": "https://f4.bcbits.com/img/0015668759_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Gisela",
     "slug": "gisela",
     "imageUrl": "https://f4.bcbits.com/img/0025020543_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Gladys Knight",
     "slug": "gladys-knight",
     "imageUrl": "https://f4.bcbits.com/img/0024522854_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Glass Animals",
+    "slug": "glass-animals",
+    "imageUrl": "https://f4.bcbits.com/img/0040177932_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Glen Matlock",
+    "slug": "glen-matlock",
+    "imageUrl": "https://f4.bcbits.com/img/0031266485_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Go-A",
     "slug": "go-a",
     "imageUrl": "https://f4.bcbits.com/img/0002361255_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Godspeed You! Black Emperor",
     "slug": "godspeed-you-black-emperor",
     "imageUrl": "https://f4.bcbits.com/img/0008410173_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Gogol Bordello",
     "slug": "gogol-bordello",
     "imageUrl": "https://f4.bcbits.com/img/0041721096_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "GoldenChild",
+    "slug": "golden-child",
+    "imageUrl": "https://f4.bcbits.com/img/0023866970_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Gotye",
     "slug": "gotye",
     "imageUrl": "https://f4.bcbits.com/img/0039748899_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Graham Greene",
     "slug": "graham-greene",
     "imageUrl": "https://f4.bcbits.com/img/0028134802_23.jpg",
     "platformCount": 8,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Grandmaster Flash",
+    "slug": "grandmaster-flash",
+    "imageUrl": "https://f4.bcbits.com/img/0005186469_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Green River",
+    "slug": "green-river",
+    "imageUrl": "https://f4.bcbits.com/img/0014701248_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Gregg Allman",
     "slug": "gregg-allman",
     "imageUrl": "https://f4.bcbits.com/img/0028696589_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Greg(o)rian",
+    "slug": "gregorian",
+    "imageUrl": "https://f4.bcbits.com/img/a0965468598_7.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Gregory Isaacs",
+    "slug": "gregory-isaacs",
+    "imageUrl": "https://f4.bcbits.com/img/0018713770_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Grimes",
     "slug": "grimes",
     "imageUrl": "https://f4.bcbits.com/img/0002128378_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Grizzly Bear",
+    "slug": "grizzly-bear",
+    "imageUrl": "https://f4.bcbits.com/img/0025495553_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Groove Armada",
+    "slug": "groove-armada",
+    "imageUrl": "https://f4.bcbits.com/img/0003646566_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Gunna",
+    "slug": "gunna",
+    "imageUrl": "https://f4.bcbits.com/img/0000217204_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "G\u00fcnther",
+    "slug": "gunther",
+    "imageUrl": "https://f4.bcbits.com/img/0000028022_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Guru / \u01e4\u1ee9\u0155\u016b",
+    "slug": "guru",
+    "imageUrl": "https://f4.bcbits.com/img/0032031380_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Gustavo Cerati",
     "slug": "gustavo-cerati",
     "imageUrl": "https://f4.bcbits.com/img/0024458504_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Gustavo Santaolalla",
     "slug": "gustavo-santaolalla",
     "imageUrl": "https://f4.bcbits.com/img/0021741530_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
-    "name": "H.E.R.",
-    "slug": "h-e-r",
-    "imageUrl": "https://f4.bcbits.com/img/0040728444_23.jpg",
-    "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "name": "GWAR",
+    "slug": "gwar",
+    "imageUrl": "https://f4.bcbits.com/img/0028314224_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Haggard",
+    "slug": "haggard",
+    "imageUrl": "https://f4.bcbits.com/img/0012683271_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "HAIM",
     "slug": "haim",
     "imageUrl": "https://f4.bcbits.com/img/0028735335_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Hammerfall",
     "slug": "hammerfall",
     "imageUrl": "https://f4.bcbits.com/img/0026893394_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Happy Mondays",
+    "slug": "happy-mondays",
+    "imageUrl": "https://f4.bcbits.com/img/0024735784_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Hatebreed",
+    "slug": "hatebreed",
+    "imageUrl": "https://f4.bcbits.com/img/0019894715_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "H\u00e9ctor Lavoe",
+    "slug": "hector-lavoe",
+    "imageUrl": "https://f4.bcbits.com/img/0021826743_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Helmet",
+    "slug": "helmet",
+    "imageUrl": "https://f4.bcbits.com/img/0026673490_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Herman's Hermits",
     "slug": "herman-s-hermits",
     "imageUrl": "https://f4.bcbits.com/img/0033384793_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "HIDE",
     "slug": "hide",
     "imageUrl": "https://f4.bcbits.com/img/0004766637_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Highlight",
+    "slug": "highlight",
+    "imageUrl": "https://f4.bcbits.com/img/0001896710_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Hildegard Knef",
     "slug": "hildegard-knef",
     "imageUrl": "https://f4.bcbits.com/img/0010403878_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Hot Chip",
+    "slug": "hot-chip",
+    "imageUrl": "https://f4.bcbits.com/img/0037187380_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Hubert Sumlin",
+    "slug": "hubert-sumlin",
+    "imageUrl": "https://f4.bcbits.com/img/0022228260_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "H\u00fcsker D\u00fc",
     "slug": "husker-du",
     "imageUrl": "https://f4.bcbits.com/img/0011247649_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Huun Huur Tu",
+    "slug": "huun-huur-tu",
+    "imageUrl": "https://f4.bcbits.com/img/0040216317_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "iDle",
     "slug": "i-dle",
     "imageUrl": "https://f4.bcbits.com/img/0013506374_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Ian Hunter",
+    "slug": "ian-hunter",
+    "imageUrl": "https://f4.bcbits.com/img/0037503525_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Ian McDonald",
+    "slug": "ian-mcdonald",
+    "imageUrl": "https://f4.bcbits.com/img/0020227821_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Ian Stewart",
+    "slug": "ian-stewart",
+    "imageUrl": "https://f4.bcbits.com/img/0010231094_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Iannis Xenakis",
     "slug": "iannis-xenakis",
     "imageUrl": "https://f4.bcbits.com/img/0020506689_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "ICE T",
     "slug": "ice-t",
     "imageUrl": "https://f4.bcbits.com/img/0000203393_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Iced Earth",
     "slug": "iced-earth",
     "imageUrl": "https://f4.bcbits.com/img/a4266366785_7.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Idan Raichel",
+    "slug": "idan-raichel",
+    "imageUrl": "https://f4.bcbits.com/img/0015753766_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Ike Turner",
     "slug": "ike-turner",
     "imageUrl": "https://f4.bcbits.com/img/0033384839_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Ill Ni\u00f1o",
+    "slug": "ill-nino",
+    "imageUrl": "https://f4.bcbits.com/img/a1398504652_7.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Immortal",
     "slug": "immortal",
     "imageUrl": "https://f4.bcbits.com/img/0030441054_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Imogen Heap",
     "slug": "imogen-heap",
     "imageUrl": "https://f4.bcbits.com/img/0019106901_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Interpol",
     "slug": "interpol",
     "imageUrl": "https://f4.bcbits.com/img/0028231954_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "IQ",
+    "slug": "iq",
+    "imageUrl": "https://f4.bcbits.com/img/0031600357_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Irma Thomas",
+    "slug": "irma-thomas",
+    "imageUrl": "https://f4.bcbits.com/img/0022265680_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Iron & Wine",
+    "slug": "iron-wine",
+    "imageUrl": "https://f4.bcbits.com/img/0029784766_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Jack DeJohnette",
+    "slug": "jack-dejohnette",
+    "imageUrl": "https://f4.bcbits.com/img/a3801919253_7.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Jack Teagarden",
+    "slug": "jack-teagarden",
+    "imageUrl": "https://f4.bcbits.com/img/0024726330_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Jack White",
     "slug": "jack-white",
     "imageUrl": "https://f4.bcbits.com/img/0036761431_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Jackie DeShannon",
+    "slug": "jackie-deshannon",
+    "imageUrl": "https://f4.bcbits.com/img/0032934019_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Jackson Wang",
     "slug": "jackson-wang",
     "imageUrl": "https://f4.bcbits.com/img/0011912441_23.jpg",
     "platformCount": 8,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Jacob Collier",
+    "slug": "jacob-collier",
+    "imageUrl": "https://f4.bcbits.com/img/0033727565_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "jain",
+    "slug": "jain",
+    "imageUrl": "https://f4.bcbits.com/img/0018638946_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "James Cotton",
+    "slug": "james-cotton",
+    "imageUrl": "https://f4.bcbits.com/img/0025495334_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "James LaBrie",
     "slug": "james-labrie",
     "imageUrl": "https://f4.bcbits.com/img/0013068511_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "James Newton Howard",
     "slug": "james-newton-howard",
     "imageUrl": "https://f4.bcbits.com/img/0011232455_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "James Taylor",
     "slug": "james-taylor",
     "imageUrl": "https://f4.bcbits.com/img/0025826466_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Jan Akkerman",
+    "slug": "jan-akkerman",
+    "imageUrl": "https://f4.bcbits.com/img/0041288794_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Janis Ian",
     "slug": "janis-ian",
     "imageUrl": "https://f4.bcbits.com/img/0026458752_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Jason White",
+    "slug": "jason-white",
+    "imageUrl": "https://f4.bcbits.com/img/a3927307538_7.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Jax Jones",
+    "slug": "jax-jones",
+    "imageUrl": "https://f4.bcbits.com/img/a2477248159_7.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Jello Biafra",
     "slug": "jello-biafra",
     "imageUrl": "https://f4.bcbits.com/img/0011461890_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Jeremih",
+    "slug": "jeremih",
+    "imageUrl": "https://f4.bcbits.com/img/0036911036_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Jessica Jung",
     "slug": "jessica-jung",
     "imageUrl": "https://f4.bcbits.com/img/a0200298732_7.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Jill Johnson",
     "slug": "jill-johnson",
     "imageUrl": "https://f4.bcbits.com/img/0009597290_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Jimmy Reed",
+    "slug": "jimmy-reed",
+    "imageUrl": "https://f4.bcbits.com/img/a3492104859_7.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Jinjer",
     "slug": "jinjer",
     "imageUrl": "https://f4.bcbits.com/img/0035319208_23.jpg",
-    "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
-    "name": "JJ",
-    "slug": "jj",
-    "imageUrl": "https://f4.bcbits.com/img/0027595514_23.jpg",
-    "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "name": "JLS",
+    "slug": "jls",
+    "imageUrl": "https://f4.bcbits.com/img/0039726949_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Joanna Newsom",
     "slug": "joanna-newsom",
     "imageUrl": "https://f4.bcbits.com/img/0008159436_23.jpg",
     "platformCount": 8,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Joe Elliott",
+    "slug": "joe-elliott",
+    "imageUrl": "https://f4.bcbits.com/img/0013568088_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Joe Henderson",
+    "slug": "joe-henderson",
+    "imageUrl": "https://f4.bcbits.com/img/0022112780_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Joe Jackson",
     "slug": "joe-jackson",
     "imageUrl": "https://f4.bcbits.com/img/0023131002_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "John Cooper",
+    "slug": "john-cooper",
+    "imageUrl": "https://f4.bcbits.com/img/0019197978_23.jpg",
+    "platformCount": 6,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "John Fogerty",
     "slug": "john-fogerty",
     "imageUrl": "https://f4.bcbits.com/img/0039863205_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "John Kay",
+    "slug": "john-kay",
+    "imageUrl": "https://f4.bcbits.com/img/0013050878_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "John Prine",
+    "slug": "john-prine",
+    "imageUrl": "https://f4.bcbits.com/img/0012557646_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "John Taylor",
+    "slug": "john-taylor",
+    "imageUrl": "https://f4.bcbits.com/img/0022849079_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "John Williams",
+    "slug": "john-williams",
+    "imageUrl": "https://f4.bcbits.com/img/0039424379_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Johnny Nash",
     "slug": "johnny-nash",
     "imageUrl": "https://f4.bcbits.com/img/a3949494345_7.jpg",
     "platformCount": 7,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Jonathan Richman",
+    "slug": "jonathan-richman",
+    "imageUrl": "https://f4.bcbits.com/img/0021286147_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Jonny Greenwood",
     "slug": "jonny-greenwood",
     "imageUrl": "https://f4.bcbits.com/img/0041679386_23.jpg",
     "platformCount": 8,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "J\u00f3nsi",
     "slug": "jonsi",
     "imageUrl": "https://f4.bcbits.com/img/0026561772_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Jos\u00e9 Gonz\u00e1lez",
+    "slug": "jose-gonzalez",
+    "imageUrl": "https://f4.bcbits.com/img/0041582115_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Josip A Lisac",
+    "slug": "josipa-lisac",
+    "imageUrl": "https://f4.bcbits.com/img/0005959342_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Judy Collins",
     "slug": "judy-collins",
     "imageUrl": "https://f4.bcbits.com/img/0018119902_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Juli",
+    "slug": "juli",
+    "imageUrl": "https://f4.bcbits.com/img/0033021709_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Julie Bergan",
+    "slug": "julie-bergan",
+    "imageUrl": "https://f4.bcbits.com/img/0017633766_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Julien Baker",
+    "slug": "julien-baker",
+    "imageUrl": "https://f4.bcbits.com/img/0022088920_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "June Carter Cash",
     "slug": "june-carter-cash",
     "imageUrl": "https://f4.bcbits.com/img/0007475527_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Justice",
     "slug": "justice",
     "imageUrl": "https://f4.bcbits.com/img/0035807360_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "j.y.j.",
     "slug": "jyj",
     "imageUrl": "https://f4.bcbits.com/img/0001957487_23.jpg",
     "platformCount": 8,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "k.d. lang",
     "slug": "k-d-lang",
     "imageUrl": "https://f4.bcbits.com/img/0021555591_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Kard",
+    "slug": "kard",
+    "imageUrl": "https://f4.bcbits.com/img/0037937126_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Karen O",
+    "slug": "karen-o",
+    "imageUrl": "https://f4.bcbits.com/img/0030845280_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Karl Bartos",
+    "slug": "karl-bartos",
+    "imageUrl": "https://f4.bcbits.com/img/0010307301_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Katarsis",
+    "slug": "katarsis",
+    "imageUrl": "https://f4.bcbits.com/img/0039685958_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Katatonia",
     "slug": "katatonia",
     "imageUrl": "https://f4.bcbits.com/img/0039254808_23.jpg",
     "platformCount": 14,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Kate Nash",
     "slug": "kate-nash",
     "imageUrl": "https://f4.bcbits.com/img/0042060074_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Keb' Mo'",
+    "slug": "keb-mo",
+    "imageUrl": "https://f4.bcbits.com/img/0028696471_23.jpg",
+    "platformCount": 14,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Keith David",
     "slug": "keith-david",
     "imageUrl": "https://f4.bcbits.com/img/0012626564_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Keith Emerson",
     "slug": "keith-emerson",
     "imageUrl": "https://f4.bcbits.com/img/0031879553_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Keke Palmer",
     "slug": "keke-palmer",
     "imageUrl": "https://f4.bcbits.com/img/0015345429_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Kelis",
     "slug": "kelis",
     "imageUrl": "https://f4.bcbits.com/img/0003768477_23.jpg",
     "platformCount": 14,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "kendji girac",
     "slug": "kendji-girac",
     "imageUrl": "https://f4.bcbits.com/img/0008381068_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Kenshi Yonezu \u7c73\u6d25\u7384\u5e2b",
+    "slug": "kenshi-yonezu",
+    "imageUrl": "https://f4.bcbits.com/img/0030634272_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Kent",
     "slug": "kent",
     "imageUrl": "https://f4.bcbits.com/img/0019898595_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "keri Hilson",
     "slug": "keri-hilson",
     "imageUrl": "https://f4.bcbits.com/img/0033522727_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Kiesza",
+    "slug": "kiesza",
+    "imageUrl": "https://f4.bcbits.com/img/0019857004_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Killswitch Engage",
     "slug": "killswitch-engage",
     "imageUrl": "https://f4.bcbits.com/img/0037829588_23.jpg",
     "platformCount": 14,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Kim Deal",
+    "slug": "kim-deal",
+    "imageUrl": "https://f4.bcbits.com/img/0036993170_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Kim Gordon",
     "slug": "kim-gordon",
     "imageUrl": "https://f4.bcbits.com/img/0042377658_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Kim Wilde",
     "slug": "kim-wilde",
     "imageUrl": "https://f4.bcbits.com/img/0037578768_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "King Diamond",
     "slug": "king-diamond",
     "imageUrl": "https://f4.bcbits.com/img/0008750823_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "kirka",
+    "slug": "kirka",
+    "imageUrl": "https://f4.bcbits.com/img/a3158701924_7.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Klaus Schulze",
     "slug": "klaus-schulze",
     "imageUrl": "https://f4.bcbits.com/img/0028051675_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "KNEECAP",
+    "slug": "kneecap",
+    "imageUrl": "https://f4.bcbits.com/img/0042462056_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Knife Party",
+    "slug": "knife-party",
+    "imageUrl": "https://f4.bcbits.com/img/a2782106136_7.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Koko Taylor",
+    "slug": "koko-taylor",
+    "imageUrl": "https://f4.bcbits.com/img/0026333461_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Kool G Rap",
+    "slug": "kool-g-rap",
+    "imageUrl": "https://f4.bcbits.com/img/0018588371_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Korpiklaani",
     "slug": "korpiklaani",
     "imageUrl": "https://f4.bcbits.com/img/0013505601_23.jpg",
     "platformCount": 14,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Koza Mostra",
+    "slug": "koza-mostra",
+    "imageUrl": "https://f4.bcbits.com/img/0018672168_23.jpg",
+    "platformCount": 7,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Kristin Chenoweth",
     "slug": "kristin-chenoweth",
     "imageUrl": "https://f4.bcbits.com/img/0028363550_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
-    "name": "Kyuss",
-    "slug": "kyuss",
-    "imageUrl": "https://f4.bcbits.com/img/0035338301_23.jpg",
-    "platformCount": 7,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "name": "KRS-One",
+    "slug": "krs-one",
+    "imageUrl": "https://f4.bcbits.com/img/0013700319_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Kula Shaker",
+    "slug": "kula-shaker",
+    "imageUrl": "https://f4.bcbits.com/img/0034976073_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Kvelertak",
+    "slug": "kvelertak",
+    "imageUrl": "https://f4.bcbits.com/img/0008069801_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "L.A. Guns",
+    "slug": "l-a-guns",
+    "imageUrl": "https://f4.bcbits.com/img/0007333942_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "lacrimosa.",
     "slug": "lacrimosa",
     "imageUrl": "https://f4.bcbits.com/img/0040286599_23.jpg",
-    "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Ladytron",
+    "slug": "ladytron",
+    "imageUrl": "https://f4.bcbits.com/img/0037975154_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Laibach",
     "slug": "laibach",
     "imageUrl": "https://f4.bcbits.com/img/0027726405_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "LAtto",
+    "slug": "latto",
+    "imageUrl": "https://f4.bcbits.com/img/0006797036_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Laura Marling",
     "slug": "laura-marling",
     "imageUrl": "https://f4.bcbits.com/img/0021051878_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Laurie Anderson",
     "slug": "laurie-anderson",
     "imageUrl": "https://f4.bcbits.com/img/0036485843_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "LCD Soundsystem",
     "slug": "lcd-soundsystem",
     "imageUrl": "https://f4.bcbits.com/img/0010947286_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Le Tigre",
+    "slug": "le-tigre",
+    "imageUrl": "https://f4.bcbits.com/img/0018290827_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Leaves' Eyes",
     "slug": "leaves-eyes",
     "imageUrl": "https://f4.bcbits.com/img/0012528705_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
-  },
-  {
-    "name": "Lee Majors",
-    "slug": "lee-majors",
-    "imageUrl": "https://f4.bcbits.com/img/0008341699_23.jpg",
-    "platformCount": 6,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Lee Ranaldo",
     "slug": "lee-ranaldo",
     "imageUrl": "https://f4.bcbits.com/img/0019489698_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Lena Raine",
+    "slug": "lena-raine",
+    "imageUrl": "https://f4.bcbits.com/img/0033825788_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Lenny Bruce",
     "slug": "lenny-bruce",
     "imageUrl": "https://f4.bcbits.com/img/0012348425_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Les Rita Mitsouko",
+    "slug": "les-rita-mitsouko",
+    "imageUrl": "https://f4.bcbits.com/img/0024416101_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Lesley Gore",
     "slug": "lesley-gore",
     "imageUrl": "https://f4.bcbits.com/img/0026883871_23.jpg",
     "platformCount": 7,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Levina",
+    "slug": "levina",
+    "imageUrl": "https://f4.bcbits.com/img/0043254778_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Lex Barker",
     "slug": "lex-barker",
     "imageUrl": "https://f4.bcbits.com/img/0010380894_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Lhasa de Sela",
     "slug": "lhasa-de-sela",
     "imageUrl": "https://f4.bcbits.com/img/0011683058_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "LiL PEEP",
     "slug": "lil-peep",
     "imageUrl": "https://f4.bcbits.com/img/0006383811_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Lil Tecca",
+    "slug": "lil-tecca",
+    "imageUrl": "https://f4.bcbits.com/img/0016201551_23.jpg",
+    "platformCount": 7,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Linda Perry",
+    "slug": "linda-perry",
+    "imageUrl": "https://f4.bcbits.com/img/0042882764_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Link Wray",
+    "slug": "link-wray",
+    "imageUrl": "https://f4.bcbits.com/img/0017786057_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Liquid Tension Experiment",
+    "slug": "liquid-tension-experiment",
+    "imageUrl": "https://f4.bcbits.com/img/0012358985_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Lisa Miskovsky",
+    "slug": "lisa-miskovsky",
+    "imageUrl": "https://f4.bcbits.com/img/0027798791_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Lissie",
+    "slug": "lissie",
+    "imageUrl": "https://f4.bcbits.com/img/0024245641_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Little Walter",
+    "slug": "little-walter",
+    "imageUrl": "https://f4.bcbits.com/img/0032650324_23.jpg",
+    "platformCount": 7,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Liv Kristine",
+    "slug": "liv-kristine",
+    "imageUrl": "https://f4.bcbits.com/img/0012489377_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Lord Of The Lost",
+    "slug": "lord-of-the-lost",
+    "imageUrl": "https://f4.bcbits.com/img/0038905127_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Lovebugs",
+    "slug": "lovebugs",
+    "imageUrl": "https://f4.bcbits.com/img/0034253461_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Lucero",
     "slug": "lucero",
     "imageUrl": "https://f4.bcbits.com/img/0041192607_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Lucinda Williams",
     "slug": "lucinda-williams",
     "imageUrl": "https://f4.bcbits.com/img/0013864464_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Lucy Dacus",
+    "slug": "lucy-dacus",
+    "imageUrl": "https://f4.bcbits.com/img/0038370646_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Luke Black",
     "slug": "luke-black",
     "imageUrl": "https://f4.bcbits.com/img/0037632297_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Luna",
+    "slug": "luna",
+    "imageUrl": "https://f4.bcbits.com/img/0027521141_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "M83",
     "slug": "m83",
     "imageUrl": "https://f4.bcbits.com/img/0031033471_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Mac DeMarco",
     "slug": "mac-demarco",
     "imageUrl": "https://f4.bcbits.com/img/0032021157_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Macy Gray",
     "slug": "macy-gray",
     "imageUrl": "https://f4.bcbits.com/img/0010951525_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Madeleine Peyroux",
+    "slug": "madeleine-peyroux",
+    "imageUrl": "https://f4.bcbits.com/img/0005406730_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Madison Beer",
     "slug": "madison-beer",
     "imageUrl": "https://f4.bcbits.com/img/0020596564_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Magazine",
+    "slug": "magazine",
+    "imageUrl": "https://f4.bcbits.com/img/0009227936_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "MAGMA",
+    "slug": "magma",
+    "imageUrl": "https://f4.bcbits.com/img/0029043156_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Maksim",
     "slug": "maksim",
     "imageUrl": "https://f4.bcbits.com/img/0018899424_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Malcolm Young",
     "slug": "malcolm-young",
     "imageUrl": "https://f4.bcbits.com/img/a3054349577_7.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Malice Mizer",
     "slug": "malice-mizer",
     "imageUrl": "https://f4.bcbits.com/img/a3364649492_7.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Mal\u00fc",
     "slug": "malu",
     "imageUrl": "https://f4.bcbits.com/img/0036915457_23.jpg",
-    "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Manu Chao",
     "slug": "manu-chao",
     "imageUrl": "https://f4.bcbits.com/img/0037004372_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Manu Dibango",
     "slug": "manu-dibango",
     "imageUrl": "https://f4.bcbits.com/img/0010308508_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Marc Almond",
+    "slug": "marc-almond",
+    "imageUrl": "https://f4.bcbits.com/img/0042403914_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Maria Mena",
     "slug": "maria-mena",
     "imageUrl": "https://f4.bcbits.com/img/0011794862_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Marina Satti",
+    "slug": "marina-satti",
+    "imageUrl": "https://f4.bcbits.com/img/0036966456_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Mario Lanza",
     "slug": "mario-lanza",
     "imageUrl": "https://f4.bcbits.com/img/0042508589_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Mark Owen",
     "slug": "mark-owen",
     "imageUrl": "https://f4.bcbits.com/img/0000203528_23.jpg",
     "platformCount": 8,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Mark Sheppard",
     "slug": "mark-sheppard",
     "imageUrl": "https://f4.bcbits.com/img/0032666738_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Martha Wainwright",
+    "slug": "martha-wainwright",
+    "imageUrl": "https://f4.bcbits.com/img/0037812171_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Martin Barre",
+    "slug": "martin-barre",
+    "imageUrl": "https://f4.bcbits.com/img/0014446591_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Martin Gore",
     "slug": "martin-gore",
     "imageUrl": "https://f4.bcbits.com/img/0022446087_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "MARUV",
     "slug": "maruv",
     "imageUrl": "https://f4.bcbits.com/img/0015731931_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Mary Hopkin",
     "slug": "mary-hopkin",
     "imageUrl": "https://f4.bcbits.com/img/0027121600_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "MASE",
+    "slug": "mase",
+    "imageUrl": "https://f4.bcbits.com/img/a3088174053_7.jpg",
+    "platformCount": 7,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Mashina Vremeni",
+    "slug": "mashina-vremeni",
+    "imageUrl": "https://f4.bcbits.com/img/a2931434062_7.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Massiel",
     "slug": "massiel",
     "imageUrl": "https://f4.bcbits.com/img/0031771760_23.jpg",
     "platformCount": 7,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Masta Killa",
+    "slug": "masta-killa",
+    "imageUrl": "https://f4.bcbits.com/img/0015755179_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Matthew Morrison",
     "slug": "matthew-morrison",
     "imageUrl": "https://f4.bcbits.com/img/0003465589_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Max Romeo",
+    "slug": "max-romeo",
+    "imageUrl": "https://f4.bcbits.com/img/0037951209_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Meat Puppets",
+    "slug": "meat-puppets",
+    "imageUrl": "https://f4.bcbits.com/img/0033466672_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Mecano",
+    "slug": "mecano",
+    "imageUrl": "https://f4.bcbits.com/img/0008477398_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Megara\u017b",
+    "slug": "megara",
+    "imageUrl": "https://f4.bcbits.com/img/0008215219_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Melvins",
     "slug": "melvins",
-    "imageUrl": "https://f4.bcbits.com/img/0035004084_23.jpg",
+    "imageUrl": "https://f4.bcbits.com/img/0042713935_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Merle Haggard",
     "slug": "merle-haggard",
     "imageUrl": "https://f4.bcbits.com/img/0025965288_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "MF DOOM",
     "slug": "mf-doom",
     "imageUrl": "https://f4.bcbits.com/img/0037415986_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "MGMT",
     "slug": "mgmt",
     "imageUrl": "https://f4.bcbits.com/img/0034008879_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Michael Kiwanuka",
+    "slug": "michael-kiwanuka",
+    "imageUrl": "https://f4.bcbits.com/img/0022372716_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Michael Rice",
+    "slug": "michael-rice",
+    "imageUrl": "https://f4.bcbits.com/img/0032162995_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Michelle Creber",
     "slug": "michelle-creber",
     "imageUrl": "https://f4.bcbits.com/img/0024187389_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Mike Bloomfield",
+    "slug": "mike-bloomfield",
+    "imageUrl": "https://f4.bcbits.com/img/0025800987_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Mike Love",
+    "slug": "mike-love",
+    "imageUrl": "https://f4.bcbits.com/img/0021636157_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Milton Nascimento",
     "slug": "milton-nascimento",
     "imageUrl": "https://f4.bcbits.com/img/0017843574_23.jpg",
-    "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Mindless Self Indulgence",
+    "slug": "mindless-self-indulgence",
+    "imageUrl": "https://f4.bcbits.com/img/a1228710251_7.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Minor Threat",
     "slug": "minor-threat",
     "imageUrl": "https://f4.bcbits.com/img/0007953821_23.jpg",
-    "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "MinusOne",
+    "slug": "minus-one",
+    "imageUrl": "https://f4.bcbits.com/img/0040291798_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Mira Awad",
     "slug": "mira-awad",
     "imageUrl": "https://f4.bcbits.com/img/0004205231_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Miranda July",
     "slug": "miranda-july",
     "imageUrl": "https://f4.bcbits.com/img/0004127916_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Mitski",
     "slug": "mitski",
     "imageUrl": "https://f4.bcbits.com/img/0042400479_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Modest Mouse",
     "slug": "modest-mouse",
     "imageUrl": "https://f4.bcbits.com/img/0023168867_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Mogwai",
     "slug": "mogwai",
     "imageUrl": "https://f4.bcbits.com/img/0037197641_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Molchat Doma",
+    "slug": "molchat-doma",
+    "imageUrl": "https://f4.bcbits.com/img/0036284521_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Montaigne",
     "slug": "montaigne",
     "imageUrl": "https://f4.bcbits.com/img/0037422994_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Morcheeba",
     "slug": "morcheeba",
     "imageUrl": "https://f4.bcbits.com/img/0038431602_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Moya Brennan",
     "slug": "moya-brennan",
     "imageUrl": "https://f4.bcbits.com/img/0020947302_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Mr. Bungle",
+    "slug": "mr-bungle",
+    "imageUrl": "https://f4.bcbits.com/img/0024584408_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Mr. President",
+    "slug": "mr-president",
+    "imageUrl": "https://f4.bcbits.com/img/0030671509_23.jpg",
+    "platformCount": 7,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Mudhoney",
+    "slug": "mudhoney",
+    "imageUrl": "https://f4.bcbits.com/img/0004157543_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Mulatu Astatke",
+    "slug": "mulatu-astatke",
+    "imageUrl": "https://f4.bcbits.com/img/0005186582_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "m\u00fam",
     "slug": "mum",
     "imageUrl": "https://f4.bcbits.com/img/0040011876_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "My Dying Bride",
     "slug": "my-dying-bride",
     "imageUrl": "https://f4.bcbits.com/img/0035035874_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Myles Kennedy",
     "slug": "myles-kennedy",
     "imageUrl": "https://f4.bcbits.com/img/0036282592_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "NAVIBAND",
+    "slug": "naviband",
+    "imageUrl": "https://f4.bcbits.com/img/0032966056_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Neil Murray",
+    "slug": "neil-murray",
+    "imageUrl": "https://f4.bcbits.com/img/0042879494_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Neko Case",
+    "slug": "neko-case",
+    "imageUrl": "https://f4.bcbits.com/img/0040272802_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Nemo",
     "slug": "nemo",
     "imageUrl": "https://f4.bcbits.com/img/0020103205_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Neneh Cherry",
     "slug": "neneh-cherry",
     "imageUrl": "https://f4.bcbits.com/img/0014174138_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "NEU!",
+    "slug": "neu",
+    "imageUrl": "https://f4.bcbits.com/img/0032358261_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Neutral Milk Hotel",
     "slug": "neutral-milk-hotel",
     "imageUrl": "https://f4.bcbits.com/img/0037071780_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Nick Carter",
     "slug": "nick-carter",
     "imageUrl": "https://f4.bcbits.com/img/0029641710_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Nicola Piovani",
+    "slug": "nicola-piovani",
+    "imageUrl": "https://f4.bcbits.com/img/0030539951_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Nicolas Jaar",
+    "slug": "nicolas-jaar",
+    "imageUrl": "https://f4.bcbits.com/img/0023120982_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Nightmare",
+    "slug": "nightmare",
+    "imageUrl": "https://f4.bcbits.com/img/0018200980_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "NILE",
     "slug": "nile",
     "imageUrl": "https://f4.bcbits.com/img/0036154616_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Nina Kraviz",
+    "slug": "nina-kraviz",
+    "imageUrl": "https://f4.bcbits.com/img/0042874536_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Nina Nesbitt",
+    "slug": "nina-nesbitt",
+    "imageUrl": "https://f4.bcbits.com/img/0039039471_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Nino Rota",
     "slug": "nino-rota",
     "imageUrl": "https://f4.bcbits.com/img/0031880161_23.jpg",
     "platformCount": 8,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "No Use For A Name",
+    "slug": "no-use-for-a-name",
+    "imageUrl": "https://f4.bcbits.com/img/0011023744_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Noel Gallagher's High Flying Birds",
+    "slug": "noel-gallagher-s-high-flying-birds",
+    "imageUrl": "https://f4.bcbits.com/img/0032544591_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "NOFX",
     "slug": "nofx",
     "imageUrl": "https://f4.bcbits.com/img/0013621542_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "O.Torvald",
+    "slug": "o-torvald",
+    "imageUrl": "https://f4.bcbits.com/img/a4261324696_7.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Obituary",
     "slug": "obituary",
     "imageUrl": "https://f4.bcbits.com/img/0030430940_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Okean Elzy",
     "slug": "okean-elzy",
     "imageUrl": "https://f4.bcbits.com/img/0036459415_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "\u00d3lafur Arnalds",
     "slug": "olafur-arnalds",
     "imageUrl": "https://f4.bcbits.com/img/0026003860_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Omar Souleyman",
+    "slug": "omar-souleyman",
+    "imageUrl": "https://f4.bcbits.com/img/0017671637_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Omega",
+    "slug": "omega",
+    "imageUrl": "https://f4.bcbits.com/img/0024604544_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "onewe",
+    "slug": "onewe",
+    "imageUrl": "https://f4.bcbits.com/img/0006919010_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Onyx",
+    "slug": "onyx",
+    "imageUrl": "https://f4.bcbits.com/img/0012215355_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "OOMPH!",
+    "slug": "oomph",
+    "imageUrl": "https://f4.bcbits.com/img/0032737805_23.jpg",
+    "platformCount": 14,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Orchestral Manoeuvres in the Dark",
     "slug": "orchestral-manoeuvres-in-the-dark",
     "imageUrl": "https://f4.bcbits.com/img/0030397338_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Os Mutantes",
+    "slug": "os-mutantes",
+    "imageUrl": "https://f4.bcbits.com/img/0008708361_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Otep",
+    "slug": "otep",
+    "imageUrl": "https://f4.bcbits.com/img/0013504944_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Owl City",
     "slug": "owl-city",
     "imageUrl": "https://f4.bcbits.com/img/0031831522_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "P.O.D.",
     "slug": "p-o-d",
     "imageUrl": "https://f4.bcbits.com/img/0034772193_23.jpg",
-    "platformCount": 14,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "platformCount": 15,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Pain Of Salvation",
+    "slug": "pain-of-salvation",
+    "imageUrl": "https://f4.bcbits.com/img/0039351324_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "PANIK!!!",
+    "slug": "panik",
+    "imageUrl": "https://f4.bcbits.com/img/0033633156_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Papa Roach",
     "slug": "papa-roach",
     "imageUrl": "https://f4.bcbits.com/img/0027318790_23.jpg",
     "platformCount": 14,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Parker Posey",
     "slug": "parker-posey",
     "imageUrl": "https://f4.bcbits.com/img/0010717373_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Pat Carroll",
     "slug": "pat-carroll",
     "imageUrl": "https://f4.bcbits.com/img/0030987204_23.jpg",
     "platformCount": 8,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Pat O'Brien",
+    "slug": "pat-o-brien",
+    "imageUrl": "https://f4.bcbits.com/img/a4177286336_7.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Patti Page",
     "slug": "patti-page",
     "imageUrl": "https://f4.bcbits.com/img/0026324144_23.jpg",
     "platformCount": 8,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Paul DiAnno",
     "slug": "paul-di-anno",
     "imageUrl": "https://f4.bcbits.com/img/0029356401_23.jpg",
     "platformCount": 8,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Paul Oakenfold",
     "slug": "paul-oakenfold",
     "imageUrl": "https://f4.bcbits.com/img/0027108519_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Paul Weller",
     "slug": "paul-weller",
     "imageUrl": "https://f4.bcbits.com/img/0026250427_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Pavement",
+    "slug": "pavement",
+    "imageUrl": "https://f4.bcbits.com/img/0020903121_23.jpg",
+    "platformCount": 16,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Peter Br\u00f6tzmann",
+    "slug": "peter-brotzmann",
+    "imageUrl": "https://f4.bcbits.com/img/0016489427_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Peter Hook",
     "slug": "peter-hook",
     "imageUrl": "https://f4.bcbits.com/img/0011193013_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Peter Nalitch",
     "slug": "peter-nalitch",
     "imageUrl": "https://f4.bcbits.com/img/a1144646771_7.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Philip Selway",
     "slug": "philip-selway",
     "imageUrl": "https://f4.bcbits.com/img/0030250531_23.jpg",
-    "platformCount": 8,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Phoebe Bridgers",
     "slug": "phoebe-bridgers",
     "imageUrl": "https://f4.bcbits.com/img/0010823805_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Pierce The Veil",
     "slug": "pierce-the-veil",
     "imageUrl": "https://f4.bcbits.com/img/0039618707_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Pierre Schaeffer",
+    "slug": "pierre-schaeffer",
+    "imageUrl": "https://f4.bcbits.com/img/0024751875_23.jpg",
+    "platformCount": 7,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Pink Martini",
+    "slug": "pink-martini",
+    "imageUrl": "https://f4.bcbits.com/img/0039407875_23.jpg",
+    "platformCount": 14,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Piqued Jacks",
+    "slug": "piqued-jacks",
+    "imageUrl": "https://f4.bcbits.com/img/0036948120_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Plain White T's",
+    "slug": "plain-white-t-s",
+    "imageUrl": "https://f4.bcbits.com/img/0033487083_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "pomme",
+    "slug": "pomme",
+    "imageUrl": "https://f4.bcbits.com/img/0000522434_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Porcupine Tree",
     "slug": "porcupine-tree",
     "imageUrl": "https://f4.bcbits.com/img/0018853461_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Portugal. The Man",
+    "slug": "portugal-the-man",
+    "imageUrl": "https://f4.bcbits.com/img/0041105555_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Powerwolf",
     "slug": "powerwolf",
     "imageUrl": "https://f4.bcbits.com/img/0041529439_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Pulp",
     "slug": "pulp",
     "imageUrl": "https://f4.bcbits.com/img/0039274534_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Pusha T",
+    "slug": "pusha-t",
+    "imageUrl": "https://f4.bcbits.com/img/0028443204_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Puuluup",
+    "slug": "puuluup",
+    "imageUrl": "https://f4.bcbits.com/img/0017268670_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Queens of the Stone Age",
     "slug": "queens-of-the-stone-age",
     "imageUrl": "https://f4.bcbits.com/img/0032348393_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Quicksilver Messenger Service",
+    "slug": "quicksilver-messenger-service",
+    "imageUrl": "https://f4.bcbits.com/img/0005716272_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Quiet Riot",
+    "slug": "quiet-riot",
+    "imageUrl": "https://f4.bcbits.com/img/0011176625_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "R.L. Burnside",
+    "slug": "r-l-burnside",
+    "imageUrl": "https://f4.bcbits.com/img/0008966253_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Rachael Yamagata",
+    "slug": "rachael-yamagata",
+    "imageUrl": "https://f4.bcbits.com/img/0041582784_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "RAIN",
     "slug": "rain",
     "imageUrl": "https://f4.bcbits.com/img/0030998296_23.jpg",
     "platformCount": 8,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Rainbow",
     "slug": "rainbow",
     "imageUrl": "https://f4.bcbits.com/img/0007249084_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Randy Newman",
     "slug": "randy-newman",
     "imageUrl": "https://f4.bcbits.com/img/0013875979_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Raphael",
     "slug": "raphael",
     "imageUrl": "https://f4.bcbits.com/img/0026205543_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "RATT",
+    "slug": "ratt",
+    "imageUrl": "https://f4.bcbits.com/img/0018948165_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "RBD",
     "slug": "rbd",
     "imageUrl": "https://f4.bcbits.com/img/0027705896_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Rebecca Sugar",
     "slug": "rebecca-sugar",
     "imageUrl": "https://f4.bcbits.com/img/0039957978_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Red One",
     "slug": "redone",
     "imageUrl": "https://f4.bcbits.com/img/0039042520_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "REGINA",
+    "slug": "regina",
+    "imageUrl": "https://f4.bcbits.com/img/0041331203_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Regine Velasquez",
     "slug": "regine-velasquez",
     "imageUrl": "https://f4.bcbits.com/img/0032950098_23.jpg",
     "platformCount": 7,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Ricchi e Poveri",
     "slug": "ricchi-e-poveri",
     "imageUrl": "https://f4.bcbits.com/img/0005118469_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "RICHARD CARPENTER",
+    "slug": "richard-carpenter",
+    "imageUrl": "https://f4.bcbits.com/img/a0690000729_7.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Richie Hawtin",
+    "slug": "richie-hawtin",
+    "imageUrl": "https://f4.bcbits.com/img/0035172405_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Rick Wakeman",
     "slug": "rick-wakeman",
     "imageUrl": "https://f4.bcbits.com/img/0007167415_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Rita",
     "slug": "rita",
     "imageUrl": "https://f4.bcbits.com/img/0010200607_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Riz Ahmed",
     "slug": "riz-ahmed",
     "imageUrl": "https://f4.bcbits.com/img/0018859912_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Rob Halford",
     "slug": "rob-halford",
     "imageUrl": "https://f4.bcbits.com/img/a3599299576_7.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Robert Miles",
     "slug": "robert-miles",
     "imageUrl": "https://f4.bcbits.com/img/0033642436_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Robert Wilson",
     "slug": "robert-wilson",
     "imageUrl": "https://f4.bcbits.com/img/0000213499_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Roberto Alagna",
     "slug": "roberto-alagna",
     "imageUrl": "https://f4.bcbits.com/img/0035400442_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Robyn",
     "slug": "robyn",
     "imageUrl": "https://f4.bcbits.com/img/0042296808_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Rodrigo y Gabriela",
+    "slug": "rodrigo-y-gabriela",
+    "imageUrl": "https://f4.bcbits.com/img/0032109111_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "R\u00f3is\u00edn Murphy",
     "slug": "roisin-murphy",
     "imageUrl": "https://f4.bcbits.com/img/0033488250_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Roy Ayers",
+    "slug": "roy-ayers",
+    "imageUrl": "https://f4.bcbits.com/img/0019563213_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Roy Buchanan",
+    "slug": "roy-buchanan",
+    "imageUrl": "https://f4.bcbits.com/img/0029897369_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Roy Haynes",
+    "slug": "roy-haynes",
+    "imageUrl": "https://f4.bcbits.com/img/0020982111_23.jpg",
+    "platformCount": 7,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Roy Rogers",
     "slug": "roy-rogers",
     "imageUrl": "https://f4.bcbits.com/img/0024111629_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "R\u00f6yksopp",
     "slug": "royksopp",
     "imageUrl": "https://f4.bcbits.com/img/0038430808_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Rub\u00e9n Blades",
     "slug": "ruben-blades",
     "imageUrl": "https://f4.bcbits.com/img/0021860068_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Running Wild",
+    "slug": "running-wild",
+    "imageUrl": "https://f4.bcbits.com/img/0015411707_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Ry Cooder",
     "slug": "ry-cooder",
     "imageUrl": "https://f4.bcbits.com/img/0019876999_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "S.H.E",
+    "slug": "s-h-e",
+    "imageUrl": "https://f4.bcbits.com/img/0027189939_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "SaBa",
+    "slug": "saba",
+    "imageUrl": "https://f4.bcbits.com/img/0014036429_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Salif Keita",
     "slug": "salif-keita",
     "imageUrl": "https://f4.bcbits.com/img/0037988392_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Sandra",
     "slug": "sandra",
     "imageUrl": "https://f4.bcbits.com/img/0034793388_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Sara Tavares",
+    "slug": "sara-tavares",
+    "imageUrl": "https://f4.bcbits.com/img/a2119265746_7.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Sarah McLachlan",
     "slug": "sarah-mclachlan",
     "imageUrl": "https://f4.bcbits.com/img/0040106090_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
-    "name": "Saxon",
-    "slug": "saxon",
-    "imageUrl": "https://f4.bcbits.com/img/0021582440_23.jpg",
+    "name": "S.A.S.H",
+    "slug": "sash",
+    "imageUrl": "https://f4.bcbits.com/img/0019133215_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Satoshi",
+    "slug": "satoshi",
+    "imageUrl": "https://f4.bcbits.com/img/0026597748_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Satyricon",
+    "slug": "satyricon",
+    "imageUrl": "https://f4.bcbits.com/img/0011190137_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Sebastian Bach",
     "slug": "sebastian-bach",
     "imageUrl": "https://f4.bcbits.com/img/0017233357_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Secret Garden",
     "slug": "secret-garden",
     "imageUrl": "https://f4.bcbits.com/img/0007136481_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Selah Sue",
+    "slug": "selah-sue",
+    "imageUrl": "https://f4.bcbits.com/img/0024306584_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "sentenced",
+    "slug": "sentenced",
+    "imageUrl": "https://f4.bcbits.com/img/0004671632_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Shaggy",
     "slug": "shaggy",
     "imageUrl": "https://f4.bcbits.com/img/0026364024_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "shagrath",
+    "slug": "shagrath",
+    "imageUrl": "https://f4.bcbits.com/img/0037266879_23.jpg",
+    "platformCount": 7,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Shakespears Sister",
+    "slug": "shakespears-sister",
+    "imageUrl": "https://f4.bcbits.com/img/0028073543_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Shane West",
     "slug": "shane-west",
     "imageUrl": "https://f4.bcbits.com/img/0007932146_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Sharon Corr",
+    "slug": "sharon-corr",
+    "imageUrl": "https://f4.bcbits.com/img/0024951604_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Sheila E.",
+    "slug": "sheila-e",
+    "imageUrl": "https://f4.bcbits.com/img/0041178664_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Shel Silverstein",
     "slug": "shel-silverstein",
     "imageUrl": "https://f4.bcbits.com/img/a3196183559_7.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Shkodra Elektronike",
     "slug": "shkodra-elektronike",
     "imageUrl": "https://f4.bcbits.com/img/0031951339_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Shpongle",
+    "slug": "shpongle",
+    "imageUrl": "https://f4.bcbits.com/img/0009935186_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Six Feet Under",
     "slug": "six-feet-under",
-    "imageUrl": "https://f4.bcbits.com/img/0035376657_23.jpg",
+    "imageUrl": "https://f4.bcbits.com/img/0043250412_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Sixpence None The Richer",
+    "slug": "sixpence-none-the-richer",
+    "imageUrl": "https://f4.bcbits.com/img/0036870000_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "SJ\u00d3N",
     "slug": "sjon",
     "imageUrl": "https://f4.bcbits.com/img/0000559224_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Skillet",
     "slug": "skillet",
     "imageUrl": "https://f4.bcbits.com/img/a3177445493_7.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Skinny Puppy",
+    "slug": "skinny-puppy",
+    "imageUrl": "https://f4.bcbits.com/img/0012306131_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Skip James",
+    "slug": "skip-james",
+    "imageUrl": "https://f4.bcbits.com/img/0006798359_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Skunk Anansie",
+    "slug": "skunk-anansie",
+    "imageUrl": "https://f4.bcbits.com/img/0026106966_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Sleater-Kinney",
+    "slug": "sleater-kinney",
+    "imageUrl": "https://f4.bcbits.com/img/0034811376_23.jpg",
+    "platformCount": 14,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Slint",
+    "slug": "slint",
+    "imageUrl": "https://f4.bcbits.com/img/0019881381_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "SLOT",
+    "slug": "slot",
+    "imageUrl": "https://f4.bcbits.com/img/0038681417_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Slowdive",
     "slug": "slowdive",
     "imageUrl": "https://f4.bcbits.com/img/0032714254_23.jpg",
     "platformCount": 14,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Sly Stone",
     "slug": "sly-stone",
     "imageUrl": "https://f4.bcbits.com/img/0006659416_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "snow",
+    "slug": "snow",
+    "imageUrl": "https://f4.bcbits.com/img/0032460207_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "\u0421\u043e\u0444\u0438 \u041c\u0430\u0440\u0438\u043d\u043e\u0432\u0430 (Sofi Marinova)",
     "slug": "sofi-marinova",
     "imageUrl": "https://f4.bcbits.com/img/a2642362520_7.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Soft Machine",
     "slug": "soft-machine",
     "imageUrl": "https://f4.bcbits.com/img/0032159139_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "sohee",
     "slug": "sohee",
     "imageUrl": "https://f4.bcbits.com/img/0012799846_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Sona Jobarteh",
+    "slug": "sona-jobarteh",
+    "imageUrl": "https://f4.bcbits.com/img/a0603668434_7.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "SONIA",
+    "slug": "sonia",
+    "imageUrl": "https://f4.bcbits.com/img/0018408265_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Sonny Chiba",
     "slug": "sonny-chiba",
     "imageUrl": "https://f4.bcbits.com/img/a1515013338_7.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "SOPOR AETERNUS & The Ensemble Of Shadows",
+    "slug": "sopor-aeternus-the-ensemble-of-shadows",
+    "imageUrl": "https://f4.bcbits.com/img/0000217859_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Sparklehorse",
+    "slug": "sparklehorse",
+    "imageUrl": "https://f4.bcbits.com/img/0030707358_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "SPLEAN",
+    "slug": "splean",
+    "imageUrl": "https://f4.bcbits.com/img/0018056010_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Squarepusher",
+    "slug": "squarepusher",
+    "imageUrl": "https://f4.bcbits.com/img/0042907169_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Steel Panther",
+    "slug": "steel-panther",
+    "imageUrl": "https://f4.bcbits.com/img/0028966744_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Stefania",
     "slug": "stefania",
     "imageUrl": "https://f4.bcbits.com/img/0004812600_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Stephen Foster",
     "slug": "stephen-foster",
     "imageUrl": "https://f4.bcbits.com/img/0041333286_23.jpg",
     "platformCount": 7,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "StereoMike",
+    "slug": "stereo-mike",
+    "imageUrl": "https://f4.bcbits.com/img/0021296867_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Stereolab",
+    "slug": "stereolab",
+    "imageUrl": "https://f4.bcbits.com/img/0014068201_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Steve Lukather",
     "slug": "steve-lukather",
     "imageUrl": "https://f4.bcbits.com/img/0032045309_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Steve Miller",
+    "slug": "steve-miller",
+    "imageUrl": "https://f4.bcbits.com/img/0039318917_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Steve Perry",
+    "slug": "steve-perry",
+    "imageUrl": "https://f4.bcbits.com/img/0021132683_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Steve Reich",
     "slug": "steve-reich",
     "imageUrl": "https://f4.bcbits.com/img/0028123320_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Steve Vai",
     "slug": "steve-vai",
     "imageUrl": "https://f4.bcbits.com/img/0030428807_23.jpg",
     "platformCount": 14,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Stray Cats",
+    "slug": "stray-cats",
+    "imageUrl": "https://f4.bcbits.com/img/0007862869_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Suffocation",
+    "slug": "suffocation",
+    "imageUrl": "https://f4.bcbits.com/img/0033414338_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Sugababes",
     "slug": "sugababes",
     "imageUrl": "https://f4.bcbits.com/img/0028073472_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Suicide",
+    "slug": "suicide",
+    "imageUrl": "https://f4.bcbits.com/img/0012687822_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "SuRie",
+    "slug": "surie",
+    "imageUrl": "https://f4.bcbits.com/img/0040888364_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Susanne Sundf\u00f8r",
     "slug": "susanne-sundf-r",
     "imageUrl": "https://f4.bcbits.com/img/0038890059_23.jpg",
     "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Suzanne Vega",
     "slug": "suzanne-vega",
     "imageUrl": "https://f4.bcbits.com/img/0020964045_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "SWANS",
+    "slug": "swans",
+    "imageUrl": "https://f4.bcbits.com/img/0039889729_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "T.O.P",
     "slug": "t-o-p",
     "imageUrl": "https://f4.bcbits.com/img/0042354081_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Taking Back Sunday",
+    "slug": "taking-back-sunday",
+    "imageUrl": "https://f4.bcbits.com/img/0009822205_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Tanya Tucker",
+    "slug": "tanya-tucker",
+    "imageUrl": "https://f4.bcbits.com/img/0021119625_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Tautumeitas",
     "slug": "tautumeitas",
     "imageUrl": "https://f4.bcbits.com/img/0036354330_23.jpg",
-    "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Telex",
+    "slug": "telex",
+    "imageUrl": "https://f4.bcbits.com/img/0024248490_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Tenacious D",
     "slug": "tenacious-d",
     "imageUrl": "https://f4.bcbits.com/img/0028642167_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Teresa Brewer",
+    "slug": "teresa-brewer",
+    "imageUrl": "https://f4.bcbits.com/img/0025494584_23.jpg",
+    "platformCount": 7,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The 13th Floor Elevators",
+    "slug": "the-13th-floor-elevators",
+    "imageUrl": "https://f4.bcbits.com/img/0037122972_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "The 1975",
     "slug": "the-1975",
     "imageUrl": "https://f4.bcbits.com/img/0039072558_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Agonist",
+    "slug": "the-agonist",
+    "imageUrl": "https://f4.bcbits.com/img/0026050719_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "The All-American Rejects",
     "slug": "the-all-american-rejects",
     "imageUrl": "https://f4.bcbits.com/img/0027252627_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "the-ark",
+    "slug": "the-ark",
+    "imageUrl": "https://f4.bcbits.com/img/0030704585_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Birthday Massacre",
+    "slug": "the-birthday-massacre",
+    "imageUrl": "https://f4.bcbits.com/img/0012306246_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Breeders",
+    "slug": "the-breeders",
+    "imageUrl": "https://f4.bcbits.com/img/0032790941_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "The Byrds",
     "slug": "the-byrds",
     "imageUrl": "https://f4.bcbits.com/img/0019738266_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Coasters",
+    "slug": "the-coasters",
+    "imageUrl": "https://f4.bcbits.com/img/0015882022_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "The Cult",
     "slug": "the-cult",
     "imageUrl": "https://f4.bcbits.com/img/0027599488_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "The Damned",
     "slug": "the-damned",
     "imageUrl": "https://f4.bcbits.com/img/0009208574_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "The Darkness",
     "slug": "the-darkness",
     "imageUrl": "https://f4.bcbits.com/img/0038317566_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Decemberists",
+    "slug": "the-decemberists",
+    "imageUrl": "https://f4.bcbits.com/img/0035429770_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Dodos",
+    "slug": "the-dodos",
+    "imageUrl": "https://f4.bcbits.com/img/0026716279_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Fratellis",
+    "slug": "the-fratellis",
+    "imageUrl": "https://f4.bcbits.com/img/0020977597_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "The F.Ray",
     "slug": "the-fray",
     "imageUrl": "https://f4.bcbits.com/img/0015087145_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Futureheads",
+    "slug": "the-futureheads",
+    "imageUrl": "https://f4.bcbits.com/img/0019710762_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "The Game",
     "slug": "the-game",
     "imageUrl": "https://f4.bcbits.com/img/0025811607_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Hardkiss",
+    "slug": "the-hardkiss",
+    "imageUrl": "https://f4.bcbits.com/img/0037777036_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "The Jesus And Mary Chain",
     "slug": "the-jesus-and-mary-chain",
     "imageUrl": "https://f4.bcbits.com/img/0027308189_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Kills",
+    "slug": "the-kills",
+    "imageUrl": "https://f4.bcbits.com/img/0020502245_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "The Knife",
     "slug": "the-knife",
     "imageUrl": "https://f4.bcbits.com/img/0021303595_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Lemonheads",
+    "slug": "the-lemonheads",
+    "imageUrl": "https://f4.bcbits.com/img/0014575541_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Magnetic Fields",
+    "slug": "the-magnetic-fields",
+    "imageUrl": "https://f4.bcbits.com/img/0014275749_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Mamas",
+    "slug": "the-mamas",
+    "imageUrl": "https://f4.bcbits.com/img/0030327692_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "The National",
     "slug": "the-national",
     "imageUrl": "https://f4.bcbits.com/img/0021361257_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Orb",
+    "slug": "the-orb",
+    "imageUrl": "https://f4.bcbits.com/img/0019389986_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "The Piano Guys",
     "slug": "the-piano-guys",
     "imageUrl": "https://f4.bcbits.com/img/0032031981_23.jpg",
-    "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Postal Service",
+    "slug": "the-postal-service",
+    "imageUrl": "https://f4.bcbits.com/img/0022384947_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "The Pretty Reckless",
     "slug": "the-pretty-reckless",
     "imageUrl": "https://f4.bcbits.com/img/0041295573_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Psychedelic Furs",
+    "slug": "the-psychedelic-furs",
+    "imageUrl": "https://f4.bcbits.com/img/0020700226_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Raconteurs",
+    "slug": "the-raconteurs",
+    "imageUrl": "https://f4.bcbits.com/img/0015554719_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Residents",
+    "slug": "the-residents",
+    "imageUrl": "https://f4.bcbits.com/img/0034941443_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "THE ROOP",
     "slug": "the-roop",
     "imageUrl": "https://f4.bcbits.com/img/0042561013_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Searchers",
+    "slug": "the-searchers",
+    "imageUrl": "https://f4.bcbits.com/img/0021357247_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Seekers",
+    "slug": "the-seekers",
+    "imageUrl": "https://f4.bcbits.com/img/0015633316_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Shaggs",
+    "slug": "the-shaggs",
+    "imageUrl": "https://f4.bcbits.com/img/0008131800_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "The Shins",
     "slug": "the-shins",
     "imageUrl": "https://f4.bcbits.com/img/0031170583_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Sugarcubes",
+    "slug": "the-sugarcubes",
+    "imageUrl": "https://f4.bcbits.com/img/0026833064_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "The Sweet",
     "slug": "the-sweet",
     "imageUrl": "https://f4.bcbits.com/img/0018289738_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Swinging Blue Jeans",
+    "slug": "the-swinging-blue-jeans",
+    "imageUrl": "https://f4.bcbits.com/img/0037049266_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "THE THE",
+    "slug": "the-the",
+    "imageUrl": "https://f4.bcbits.com/img/0022678991_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Used",
+    "slug": "the-used",
+    "imageUrl": "https://f4.bcbits.com/img/0012858676_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "The Wanted",
     "slug": "the-wanted",
     "imageUrl": "https://f4.bcbits.com/img/0022657362_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "The Waterboys",
     "slug": "the-waterboys",
     "imageUrl": "https://f4.bcbits.com/img/0020499834_23.jpg",
-    "platformCount": 6,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "platformCount": 15,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "The Wombats",
+    "slug": "the-wombats",
+    "imageUrl": "https://f4.bcbits.com/img/0016421937_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "The xx",
     "slug": "the-xx",
     "imageUrl": "https://f4.bcbits.com/img/0041731446_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Theodor Andrei",
+    "slug": "theodor-andrei",
+    "imageUrl": "https://f4.bcbits.com/img/0025285151_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "They Might Be Giants",
+    "slug": "they-might-be-giants",
+    "imageUrl": "https://f4.bcbits.com/img/0019754365_23.jpg",
+    "platformCount": 14,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Throbbing Gristle",
+    "slug": "throbbing-gristle",
+    "imageUrl": "https://f4.bcbits.com/img/0022008874_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "tico torres",
     "slug": "tico-torres",
     "imageUrl": "https://f4.bcbits.com/img/0005881359_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Tigran Hamasyan",
+    "slug": "tigran-hamasyan",
+    "imageUrl": "https://f4.bcbits.com/img/0028449084_23.jpg",
+    "platformCount": 14,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Tim Staffell",
+    "slug": "tim-staffell",
+    "imageUrl": "https://f4.bcbits.com/img/0030489008_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Timo Tolkki",
+    "slug": "timo-tolkki",
+    "imageUrl": "https://f4.bcbits.com/img/0036141119_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Tina Karol",
     "slug": "tina-karol",
     "imageUrl": "https://f4.bcbits.com/img/0011165672_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Tinariwen",
     "slug": "tinariwen",
     "imageUrl": "https://f4.bcbits.com/img/0031729956_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "tindersticks",
+    "slug": "tindersticks",
+    "imageUrl": "https://f4.bcbits.com/img/0036014695_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Tiny Tim",
+    "slug": "tiny-tim",
+    "imageUrl": "https://f4.bcbits.com/img/a2943605141_7.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "TLC",
     "slug": "tlc",
     "imageUrl": "https://f4.bcbits.com/img/0027621388_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Tom Hamilton",
+    "slug": "tom-hamilton",
+    "imageUrl": "https://f4.bcbits.com/img/0011733599_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Tom Lehrer",
     "slug": "tom-lehrer",
     "imageUrl": "https://f4.bcbits.com/img/0032126061_23.jpg",
     "platformCount": 8,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Tom Morello",
     "slug": "tom-morello",
     "imageUrl": "https://f4.bcbits.com/img/0026766930_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Tommy Emmanuel",
     "slug": "tommy-emmanuel",
     "imageUrl": "https://f4.bcbits.com/img/0035026412_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
-    "name": "Tot\u00f2",
-    "slug": "toto",
-    "imageUrl": "https://f4.bcbits.com/img/a4292517627_7.jpg",
-    "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "name": "Tony Allen",
+    "slug": "tony-allen",
+    "imageUrl": "https://f4.bcbits.com/img/0032184369_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Tony Joe White",
+    "slug": "tony-joe-white",
+    "imageUrl": "https://f4.bcbits.com/img/0039206414_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "toshi",
+    "slug": "toshi",
+    "imageUrl": "https://f4.bcbits.com/img/0036156651_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Transatlantic",
+    "slug": "transatlantic",
+    "imageUrl": "https://f4.bcbits.com/img/0026841670_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Trentem\u00f8ller",
+    "slug": "trentem-ller",
+    "imageUrl": "https://f4.bcbits.com/img/0036046272_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Tristania",
     "slug": "tristania",
     "imageUrl": "https://f4.bcbits.com/img/0012554119_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Turbonegro",
+    "slug": "turbonegro",
+    "imageUrl": "https://f4.bcbits.com/img/0017422061_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "TV on the Radio",
+    "slug": "tv-on-the-radio",
+    "imageUrl": "https://f4.bcbits.com/img/0037060385_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Tyagaraja",
     "slug": "tyagaraja",
     "imageUrl": "https://f4.bcbits.com/img/0000013280_23.jpg",
     "platformCount": 5,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Tyler Bates",
+    "slug": "tyler-bates",
+    "imageUrl": "https://f4.bcbits.com/img/0013522646_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "T\u00fdr",
+    "slug": "tyr",
+    "imageUrl": "https://f4.bcbits.com/img/0035001728_23.jpg",
+    "platformCount": 6,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "UFO",
     "slug": "ufo",
     "imageUrl": "https://f4.bcbits.com/img/0011336963_23.jpg",
-    "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Ultravox",
     "slug": "ultravox",
     "imageUrl": "https://f4.bcbits.com/img/0037503404_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Underoath",
+    "slug": "underoath",
+    "imageUrl": "https://f4.bcbits.com/img/0037162348_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Van Canto",
+    "slug": "van-canto",
+    "imageUrl": "https://f4.bcbits.com/img/0012340924_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Vanessa Amorosi",
+    "slug": "vanessa-amorosi",
+    "imageUrl": "https://f4.bcbits.com/img/0024957722_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Venom",
     "slug": "venom",
     "imageUrl": "https://f4.bcbits.com/img/0009568120_23.jpg",
     "platformCount": 12,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "VESNA\u2122",
+    "slug": "vesna",
+    "imageUrl": "https://f4.bcbits.com/img/0042742260_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Vince Clarke",
     "slug": "vince-clarke",
     "imageUrl": "https://f4.bcbits.com/img/0033319758_23.jpg",
-    "platformCount": 9,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "VNV Nation",
+    "slug": "vnv-nation",
+    "imageUrl": "https://f4.bcbits.com/img/0005233244_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "W.A.S.P.",
     "slug": "w-a-s-p",
     "imageUrl": "https://f4.bcbits.com/img/0011745138_23.jpg",
     "platformCount": 15,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Walk off the Earth",
+    "slug": "walk-off-the-earth",
+    "imageUrl": "https://f4.bcbits.com/img/0018832798_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Wallows",
+    "slug": "wallows",
+    "imageUrl": "https://f4.bcbits.com/img/0011684320_23.jpg",
+    "platformCount": 10,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Wanda Jackson",
+    "slug": "wanda-jackson",
+    "imageUrl": "https://f4.bcbits.com/img/0007995268_23.jpg",
+    "platformCount": 11,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Wang Leehom",
     "slug": "wang-leehom",
     "imageUrl": "https://f4.bcbits.com/img/0038155565_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "wayv",
+    "slug": "wayv",
+    "imageUrl": "https://f4.bcbits.com/img/0001628197_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "White Zombie",
+    "slug": "white-zombie",
+    "imageUrl": "https://f4.bcbits.com/img/0008534787_23.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Wilco",
     "slug": "wilco",
     "imageUrl": "https://f4.bcbits.com/img/0011047560_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "WildYouth",
+    "slug": "wild-youth",
+    "imageUrl": "https://f4.bcbits.com/img/0001766920_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Will champion",
     "slug": "will-champion",
     "imageUrl": "https://f4.bcbits.com/img/0014325487_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "William DuVall",
+    "slug": "william-duvall",
+    "imageUrl": "https://f4.bcbits.com/img/0014793645_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Willie Col\u00f3n",
+    "slug": "willie-colon",
+    "imageUrl": "https://f4.bcbits.com/img/0021827185_23.jpg",
+    "platformCount": 4,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Windir",
+    "slug": "windir",
+    "imageUrl": "https://f4.bcbits.com/img/0019028052_23.jpg",
+    "platformCount": 9,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Winter",
+    "slug": "winter",
+    "imageUrl": "https://f4.bcbits.com/img/0039696753_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Wolf Alice",
+    "slug": "wolf-alice",
+    "imageUrl": "https://f4.bcbits.com/img/0028301262_23.jpg",
+    "platformCount": 5,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Wolfmother",
     "slug": "wolfmother",
     "imageUrl": "https://f4.bcbits.com/img/0002999011_23.jpg",
-    "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Woody Herman",
+    "slug": "woody-herman",
+    "imageUrl": "https://f4.bcbits.com/img/0023671920_23.jpg",
+    "platformCount": 7,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "X",
+    "slug": "x",
+    "imageUrl": "https://f4.bcbits.com/img/0019593685_23.jpg",
+    "platformCount": 13,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Xandria",
+    "slug": "xandria",
+    "imageUrl": "https://f4.bcbits.com/img/0028760730_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Yann Tiersen",
     "slug": "yann-tiersen",
     "imageUrl": "https://f4.bcbits.com/img/0037968096_23.jpg",
     "platformCount": 14,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Yeah Yeah Yeahs",
     "slug": "yeah-yeah-yeahs",
     "imageUrl": "https://f4.bcbits.com/img/0028842925_23.jpg",
     "platformCount": 11,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Yo La Tengo",
+    "slug": "yo-la-tengo",
+    "imageUrl": "https://f4.bcbits.com/img/0030332896_23.jpg",
+    "platformCount": 12,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "Yolanda Be Cool",
+    "slug": "yolanda-be-cool",
+    "imageUrl": "https://f4.bcbits.com/img/0010778349_23.jpg",
+    "platformCount": 7,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
+  },
+  {
+    "name": "YoungBoy Never Broke Again",
+    "slug": "youngboy-never-broke-again",
+    "imageUrl": "https://f4.bcbits.com/img/a1710121412_7.jpg",
+    "platformCount": 8,
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Zakk Wylde",
     "slug": "zakk-wylde",
     "imageUrl": "https://f4.bcbits.com/img/0014805527_23.jpg",
     "platformCount": 13,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "Ziferblat",
     "slug": "ziferblat",
     "imageUrl": "https://f4.bcbits.com/img/0039660287_23.jpg",
     "platformCount": 10,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   },
   {
     "name": "ZOE",
     "slug": "zoe",
     "imageUrl": "https://f4.bcbits.com/img/0023685451_23.jpg",
     "platformCount": 4,
-    "lastUpdated": "2026-03-22T00:00:00.000Z"
+    "lastUpdated": "2026-03-24T00:00:00.000Z"
   }
 ]

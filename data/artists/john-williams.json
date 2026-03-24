@@ -1,0 +1,58 @@
+[
+  {
+    "id": "johnwilliams",
+    "name": "John Williams",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039424379_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://johntwilliams.bandcamp.com",
+        "allReleaseTitles": [
+          "thecowboysoriginalmotionpicturesoundtrackdeluxeedition",
+          "themesfromthephantommenaceandotherfilmhits"
+        ],
+        "latestRelease": {
+          "title": "The Cowboys (Original Motion Picture Soundtrack) [Deluxe Edition]",
+          "type": "album",
+          "url": "https://johntwilliams.bandcamp.com/album/the-cowboys-original-motion-picture-soundtrack-deluxe-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a1740408614_16.jpg",
+          "releaseDate": "September 17, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=John%20Williams"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+John%20Williams"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.johnwilliamscomposer.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/273394"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=John%20Williams&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/John%20Williams"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCfv8TEQ44ej9uPGF-SNsDBA"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

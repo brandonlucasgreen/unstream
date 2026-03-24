@@ -1,0 +1,41 @@
+[
+  {
+    "id": "alexwarren",
+    "name": "Alex Warren",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018137522_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://alexwarren.bandcamp.com",
+        "allReleaseTitles": [
+          "littlebylittle",
+          "seeyouoncemoreversion1",
+          "7days",
+          "yourplan",
+          "allalongftpania"
+        ],
+        "latestRelease": {
+          "title": "Little By Little",
+          "type": "track",
+          "url": "https://alexwarren.bandcamp.com/track/little-by-little",
+          "imageUrl": "https://f4.bcbits.com/img/a0935570125_2.jpg",
+          "releaseDate": "June 4, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Alex%20Warren"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Alex%20Warren"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

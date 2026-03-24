@@ -1,0 +1,112 @@
+[
+  {
+    "id": "underoath",
+    "name": "Underoath",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037162348_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://underoath.bandcamp.com",
+        "allReleaseTitles": [
+          "theplaceafterthisone",
+          "generationnosurrender",
+          "survivorsguilt",
+          "teeth",
+          "voyeuristdigitalghost",
+          "lifelinedrowning",
+          "lifelinedrowning",
+          "letgo",
+          "voyeuristcleanversion",
+          "hallelujahfeatcharlottesands",
+          "voyeurist",
+          "eraseme"
+        ],
+        "latestRelease": {
+          "title": "The Place After This One",
+          "type": "album",
+          "url": "https://underoath.bandcamp.com/album/the-place-after-this-one",
+          "imageUrl": "https://f4.bcbits.com/img/a1352621561_2.jpg",
+          "releaseDate": "March 28, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/underoath/264536",
+        "allReleaseTitles": [
+          "theplaceafterthisone",
+          "voyeurist",
+          "audiotreefromnothingandaudiotree",
+          "hallelujahcharlottesands",
+          "teeth",
+          "survivorsguilt",
+          "inthenightdesrocs",
+          "lofiandlessgravity",
+          "voyeuristdigitalghost",
+          "generationnosurrender",
+          "sweetdreambohnes",
+          "letgo",
+          "lifelinedrowning",
+          "monstersfeataarongillespieofmagicwhateveraarongillespie",
+          "definethegreatline",
+          "theyreonlychasingsafety",
+          "lostinthesoundofseparation",
+          "playyouroldstuff",
+          "criesofthepast",
+          "thechangingoftimes"
+        ],
+        "latestRelease": {
+          "title": "Underoath Audiotree From Nothing Underoath And Audiotree",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/underoath-audiotree-from-nothing-underoath-and-audiotree/ommir0v6h5yqt",
+          "releaseDate": "2026-01-23"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Underoath"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Underoath"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.underoath777.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/326404"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Underoath&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Underoath"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/underoathband/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@underoathband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCmeDeURJ8-s1WNoFL5bR10Q"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/underoath"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

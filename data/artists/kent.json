@@ -8,17 +8,17 @@
       {
         "sourceId": "bandcamp",
         "url": "https://kent2.bandcamp.com",
+        "allReleaseTitles": [
+          "shipyardshuffle",
+          "hotchickensandwich"
+        ],
         "latestRelease": {
           "title": "Shipyard Shuffle",
           "type": "album",
           "url": "https://kent2.bandcamp.com/album/shipyard-shuffle",
           "imageUrl": "https://f4.bcbits.com/img/a1371489880_16.jpg",
           "releaseDate": "May 5, 2020"
-        },
-        "allReleaseTitles": [
-          "shipyardshuffle",
-          "hotchickensandwich"
-        ]
+        }
       },
       {
         "sourceId": "patreon",

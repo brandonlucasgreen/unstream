@@ -1,0 +1,92 @@
+[
+  {
+    "id": "descendents",
+    "name": "Descendents",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0003959930_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://descendents.bandcamp.com",
+        "allReleaseTitles": [
+          "9thwalnut",
+          "thatsthebreaks",
+          "suffrage",
+          "whoweare",
+          "hypercaffiumspazzinate",
+          "cooltobeyou",
+          "merican",
+          "everythingsucks"
+        ],
+        "latestRelease": {
+          "title": "9th & Walnut",
+          "type": "album",
+          "url": "https://descendents.bandcamp.com/album/9th-walnut",
+          "imageUrl": "https://f4.bcbits.com/img/a3883155103_2.jpg",
+          "releaseDate": "July 23, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/descendents/462181",
+        "allReleaseTitles": [
+          "milogoestocollege",
+          "hypercaffiumspazzinate",
+          "suffrage",
+          "9thwalnut",
+          "thatsthebreaks",
+          "idontwanttogrowup",
+          "all",
+          "enjoy",
+          "bonusfat",
+          "everythingsucks",
+          "whoweare",
+          "liveagelive",
+          "cooltobeyou",
+          "merican",
+          "liveplusonealland",
+          "babydonchaknow",
+          "nightage",
+          "likethewayiknow"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Descendents"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Descendents"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://descendentsonline.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/44288"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Descendents&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Descendents"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/descendents/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thedescendents"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,86 @@
+[
+  {
+    "id": "mastakilla",
+    "name": "Masta Killa",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0015755179_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mastakilla.bandcamp.com",
+        "allReleaseTitles": [
+          "balance",
+          "loyaltyisroyalty",
+          "sellingmysoul",
+          "nosaiddate"
+        ],
+        "latestRelease": {
+          "title": "Balance",
+          "type": "album",
+          "url": "https://mastakilla.bandcamp.com/album/balance",
+          "imageUrl": "https://f4.bcbits.com/img/a1301997566_16.jpg",
+          "releaseDate": "May 30, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/masta-killa/176002",
+        "allReleaseTitles": [
+          "nosaiddate",
+          "madeinbrooklyn",
+          "beillrakimkurupt",
+          "therapy",
+          "sellingmysoul",
+          "manfather2sonpxro",
+          "balance",
+          "gladtomeetyoumethodmansnoopdogg",
+          "eagleclawraekwoncappadonna",
+          "bkharlemfeatheadice"
+        ],
+        "latestRelease": {
+          "title": "Be Ill Rakim Kurupt Masta Killa",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/be-ill-rakim-kurupt-masta-killa/opm3mbj4s3dga",
+          "releaseDate": "2024-06-21"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Masta%20Killa"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Masta%20Killa"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.mastakilla.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/107494"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Masta%20Killa&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Masta%20Killa"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/mastakillamusic/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/mastakillamusic/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

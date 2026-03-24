@@ -1,0 +1,61 @@
+[
+  {
+    "id": "elizabethcotten",
+    "name": "Elizabeth Cotten",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013863775_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://elizabethcotten.bandcamp.com",
+        "allReleaseTitles": [
+          "shakesugaree",
+          "live",
+          "freighttrainandothernorthcarolinafolksongsandtunes"
+        ],
+        "latestRelease": {
+          "title": "Shake Sugaree",
+          "type": "album",
+          "url": "https://elizabethcotten.bandcamp.com/album/shake-sugaree",
+          "imageUrl": "https://f4.bcbits.com/img/a3246937476_2.jpg",
+          "releaseDate": "September 21, 2004"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/elizabeth-cotten/143917",
+        "allReleaseTitles": [
+          "freighttrainandothernorthcarolinafolksongsandtunes",
+          "shakesugaree",
+          "vol3whenimgone",
+          "live"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Elizabeth%20Cotten"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Elizabeth%20Cotten"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/367082"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Elizabeth%20Cotten&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Elizabeth%20Cotten"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

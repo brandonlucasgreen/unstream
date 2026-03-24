@@ -1,0 +1,60 @@
+[
+  {
+    "id": "sonia",
+    "name": "SONIA",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018408265_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sonia666.bandcamp.com",
+        "allReleaseTitles": [
+          "rejecteddemos20222025marcus",
+          "popupheadlightsmarcus32x",
+          "ti001targetedindividual",
+          "soniamegacollection3upper"
+        ],
+        "latestRelease": {
+          "title": "REJECTED DEMOS 2022-2025\n                \n                \n\n                MARCUS",
+          "type": "album",
+          "url": "https://sonia666.bandcamp.com/album/rejected-demos-2022-2025",
+          "imageUrl": "https://f4.bcbits.com/img/a1737254864_16.jpg",
+          "releaseDate": "February 22, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=SONIA"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+SONIA"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/91777"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=SONIA&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/SONIA"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCF9FDsgHx8sk63KstFfUN6A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/SoniaevansSonia"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

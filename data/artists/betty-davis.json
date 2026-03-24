@@ -1,0 +1,50 @@
+[
+  {
+    "id": "bettydavis",
+    "name": "Betty Davis",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0006154511_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bettydavis.bandcamp.com",
+        "allReleaseTitles": [
+          "bettydavis",
+          "theysayimdifferent"
+        ],
+        "latestRelease": {
+          "title": "Betty Davis",
+          "type": "album",
+          "url": "https://bettydavis.bandcamp.com/album/betty-davis",
+          "imageUrl": "https://f4.bcbits.com/img/a0769177781_16.jpg",
+          "releaseDate": "December 23, 2015"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/betty-davis/135928",
+        "allReleaseTitles": [
+          "",
+          "nastygal",
+          "theysayimdifferent",
+          "crashinfrompassion",
+          "thecolumbiayears",
+          "isitloveordesire"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Betty%20Davis"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Betty%20Davis"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

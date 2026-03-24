@@ -1,0 +1,50 @@
+[
+  {
+    "id": "brunette-bandcamp-brunettetc",
+    "name": "Brunette",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027950771_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://brunettetc.bandcamp.com",
+        "allReleaseTitles": [
+          "fightnight",
+          "shittyoldford"
+        ],
+        "latestRelease": {
+          "title": "Fight Night",
+          "type": "album",
+          "url": "https://brunettetc.bandcamp.com/album/fight-night",
+          "imageUrl": "https://f4.bcbits.com/img/a3344427760_16.jpg",
+          "releaseDate": "April 5, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Brunette"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Brunette"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/12735539"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/brunette_e_/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCbklBKyChBz9-vsnX3vD5RA"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

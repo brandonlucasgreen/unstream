@@ -1,0 +1,66 @@
+[
+  {
+    "id": "georgethorogood",
+    "name": "George Thorogood",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028696520_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://georgethorogood.bandcamp.com",
+        "allReleaseTitles": [
+          "thebaddestshowonearthgreatesthitslive",
+          "liveinboston1982thecompleteconcert",
+          "partyofone",
+          "georgethorogoodandthedelawaredestroyersbonustrackversion",
+          "essentialrecordingsonebourbononescotchonebeer",
+          "whodoyoulovegeorgethorogoodandthedestroyers",
+          "georgethorogoodthedestroyers"
+        ],
+        "latestRelease": {
+          "title": "The Baddest Show On Earth: Greatest Hits Live",
+          "type": "album",
+          "url": "https://georgethorogood.bandcamp.com/album/the-baddest-show-on-earth-greatest-hits-live",
+          "imageUrl": "https://f4.bcbits.com/img/a3599899733_2.jpg"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=George%20Thorogood"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+George%20Thorogood"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://georgethorogood.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/283557"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/georgethorogoodofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@georgethorogoodofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/GThorogoodOfficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/georgethorogood/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

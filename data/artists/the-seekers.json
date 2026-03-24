@@ -1,0 +1,66 @@
+[
+  {
+    "id": "theseekers",
+    "name": "The Seekers",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0015633316_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://theseekers.bandcamp.com",
+        "allReleaseTitles": [
+          "aliveandkickin",
+          "noplacetofall"
+        ],
+        "latestRelease": {
+          "title": "Alive and Kickin'",
+          "type": "album",
+          "url": "https://theseekers.bandcamp.com/album/alive-and-kickin",
+          "imageUrl": "https://f4.bcbits.com/img/a3940930805_16.jpg",
+          "releaseDate": "February 18, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Seekers"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Seekers"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.theseekers.com.au/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/325082"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Seekers&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Seekers"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/theseekerspartnershipofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/TheSeekersChannel"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/TheSeekersOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

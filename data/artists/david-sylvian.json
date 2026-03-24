@@ -1,0 +1,68 @@
+[
+  {
+    "id": "davidsylvian",
+    "name": "David Sylvian",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039379236_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://davidsylvian.bandcamp.com",
+        "allReleaseTitles": [
+          "lastbulletdemo",
+          "latenight",
+          "sleepwalkers",
+          "wandermude"
+        ],
+        "latestRelease": {
+          "title": "last bullet (demo)",
+          "type": "track",
+          "url": "https://davidsylvian.bandcamp.com/track/last-bullet-demo",
+          "imageUrl": "https://f4.bcbits.com/img/a1200545718_16.jpg",
+          "releaseDate": "April 23, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=David%20Sylvian"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+David%20Sylvian"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.davidsylvian.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/10069"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=David%20Sylvian&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/David%20Sylvian"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/davidsylvian258/"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@davidsylvian258"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/DavidSylvianOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

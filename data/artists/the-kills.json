@@ -1,0 +1,102 @@
+[
+  {
+    "id": "thekills",
+    "name": "The Kills",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020502245_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thekills.bandcamp.com",
+        "allReleaseTitles": [
+          "happiergirlssessions",
+          "godgames",
+          "newyorklahex",
+          "listofdemandsreparations",
+          "ashice",
+          "thelastgoodbye",
+          "babysays",
+          "futurestartsslow",
+          "satelliteremixes",
+          "bloodpressures",
+          "blackballoon",
+          "midnightboom"
+        ],
+        "latestRelease": {
+          "title": "Happier Girls Sessions",
+          "type": "album",
+          "url": "https://thekills.bandcamp.com/album/happier-girls-sessions",
+          "imageUrl": "https://f4.bcbits.com/img/a3524039341_2.jpg",
+          "releaseDate": "September 20, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-kills/42681",
+        "allReleaseTitles": [
+          "ashice",
+          "godgames",
+          "littlebastards",
+          "happiergirlssessions",
+          "nowow",
+          "listofdemandsreparations",
+          "cosmicdancer",
+          "echohomenonelectricep",
+          "wasterpiece",
+          "happierthanever",
+          "doingittodeath",
+          "103",
+          "newyorklahex",
+          "iputaspellonyou",
+          "desperado",
+          "heartofadog",
+          "raisemedemo",
+          "siberiannights",
+          "bloodpressures",
+          "midnightboom"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Kills"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Kills"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://hostess.co.jp/thekills/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/202601"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Kills&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Kills"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thekills/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCJ3Ati1rQyzfeAvr7MbTcVg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/TheKills"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

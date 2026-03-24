@@ -1,0 +1,68 @@
+[
+  {
+    "id": "mulatuastatke",
+    "name": "Mulatu Astatke",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0005186582_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mulatuastatke.bandcamp.com",
+        "allReleaseTitles": [
+          "mulatuplaysmulatu",
+          "tensionmulatuastatkehoodnaorchestra",
+          "newyorkaddislondonthestoryofethiojazz19651975",
+          "mulatuofethiopiaexpandededition",
+          "mulatuofethiopia",
+          "mulatustepsahead",
+          "inspirationinformation3mulatuastatketheheliocentrics"
+        ],
+        "latestRelease": {
+          "title": "Mulatu Plays Mulatu",
+          "type": "album",
+          "url": "https://mulatuastatke.bandcamp.com/album/mulatu-plays-mulatu",
+          "imageUrl": "https://f4.bcbits.com/img/a0857039495_2.jpg",
+          "releaseDate": "September 26, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/mulatu-astatke/53240",
+        "allReleaseTitles": [
+          "mulatuplaysmulatu",
+          "tensionhoodnaorchestra",
+          "ethiojazz",
+          "sketchesofethiopia",
+          "netsanet",
+          "dunggatehoodnaorchestra",
+          "kulun",
+          "majorhoodnaorchestra",
+          "ethiopiquesvol4ethiojazzmusiqueinstrumentale19691974",
+          "ethiopianmoderninstrumentalshits",
+          "newyorkaddislondonthestoryofethiojazz19651975",
+          "mulatuofethiopia",
+          "toknowwithoutknowingblackjesusexperience",
+          "timeless",
+          "ethiojazzvol1",
+          "meskelflowersalternateversionwebwebmaxherre",
+          "kulunmankwaleshiblackjesusexperience",
+          "mascaramsetabablackjesusexperience",
+          "gamo"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mulatu%20Astatke"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mulatu%20Astatke"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

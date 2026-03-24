@@ -1,0 +1,99 @@
+[
+  {
+    "id": "steelpanther",
+    "name": "Steel Panther",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028966744_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://steelpanther.bandcamp.com",
+        "allReleaseTitles": [
+          "heavymetalrules",
+          "lowerthebar",
+          "livefromlexxismomsgarage",
+          "allyoucaneat"
+        ],
+        "latestRelease": {
+          "title": "Heavy Metal Rules",
+          "type": "album",
+          "url": "https://steelpanther.bandcamp.com/album/heavy-metal-rules",
+          "imageUrl": "https://f4.bcbits.com/img/a3756874576_16.jpg",
+          "releaseDate": "September 27, 2019"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/steel-panther/665689",
+        "allReleaseTitles": [
+          "ontheprowl",
+          "beautifulgirls",
+          "poontangboomerang",
+          "igotwhatyouwant",
+          "anythinggoes",
+          "feelthesteel",
+          "ballsout",
+          "fantasy",
+          "iwantitthatway",
+          "allyoucaneat",
+          "heavymetalrules",
+          "lowerthebar",
+          "thestockingsong",
+          "sexysanta",
+          "dontstopbelievin",
+          "communityproperty",
+          "fuck2020",
+          "godsofpussy",
+          "deathtoallbutmetal"
+        ],
+        "latestRelease": {
+          "title": "On The Prowl Steel Panther",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/on-the-prowl-steel-panther/muolinwt3yklb",
+          "releaseDate": "2023-02-24"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Steel%20Panther"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Steel%20Panther"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://metalskool.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1788218"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Steel%20Panther&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Steel%20Panther"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/steelpanther/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCdbJCOYEJ5Z9hlx2jXX5ulg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/steelpanther"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

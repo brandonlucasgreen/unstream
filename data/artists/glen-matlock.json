@@ -1,0 +1,77 @@
+[
+  {
+    "id": "glenmatlock",
+    "name": "Glen Matlock",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031266485_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://glenmatlock.bandcamp.com",
+        "allReleaseTitles": [
+          "consequencescoming",
+          "consequencescomingconstantcraving"
+        ],
+        "latestRelease": {
+          "title": "Consequences Coming",
+          "type": "album",
+          "url": "https://glenmatlock.bandcamp.com/album/consequences-coming",
+          "imageUrl": "https://f4.bcbits.com/img/a3937300333_16.jpg",
+          "releaseDate": "April 28, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/glen-matlock/135057",
+        "allReleaseTitles": [
+          "consequencescoming",
+          "bornrunning",
+          "goodtogo",
+          "somethingbouttheweekendfeathotei",
+          "magiccarpetride",
+          "headonastick",
+          "bornrunningthephilistines",
+          "somethingbouttheweekendfeathoteifeathotei",
+          "thisship"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Glen%20Matlock"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Glen%20Matlock"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.glenmatlock.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/349817"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Glen%20Matlock&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Glen%20Matlock"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/glenmatlock1/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/GlenMatlockOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

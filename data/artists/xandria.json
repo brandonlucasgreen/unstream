@@ -1,0 +1,102 @@
+[
+  {
+    "id": "xandria",
+    "name": "Xandria",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028760730_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://xandria.bandcamp.com",
+        "allReleaseTitles": [
+          "universaltales",
+          "universal",
+          "mycurseismyredemptionsummer80sremixfeatcanttias",
+          "thewondersstillawaiting",
+          "youwillneverbeourgodfeatralfscheepers",
+          "reborn",
+          "theaterofdimensions",
+          "theaterofdimensionsdeluxeedition",
+          "fireashes",
+          "sacrificium",
+          "sacrificiumdeluxeedition",
+          "neverworldsend",
+          "neverworldsenddeluxeedition"
+        ],
+        "latestRelease": {
+          "title": "Universal Tales",
+          "type": "album",
+          "url": "https://xandria.bandcamp.com/album/universal-tales",
+          "imageUrl": "https://f4.bcbits.com/img/a1968948450_2.jpg",
+          "releaseDate": "November 22, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/xandria/220005",
+        "allReleaseTitles": [
+          "thewondersstillawaiting",
+          "universaltales",
+          "sacrificium",
+          "theaterofdimensionsdeluxeversion",
+          "200years",
+          "theaterofdimensions",
+          "twoworlds",
+          "universal",
+          "reborn",
+          "ghosts",
+          "notimetoliveforever",
+          "youwillneverbeourgod",
+          "mycurseismyredemptionfeatcanttias",
+          "neverworldsend",
+          "ravenheart",
+          "fireashes",
+          "nowforevertheirmostbeautifulsongsbestof",
+          "notetoself",
+          "elijah"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Xandria"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Xandria"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.xandria.de/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/302224"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Xandria&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Xandria"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/xandria_official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCKfzrr0MMPH_xFAx0JCD0-A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/xandriaofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

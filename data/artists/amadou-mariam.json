@@ -1,0 +1,108 @@
+[
+  {
+    "id": "amadoumariam",
+    "name": "Amadou & Mariam",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024142573_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://amadoumariam.bandcamp.com",
+        "allReleaseTitles": [
+          "lamouralafolie",
+          "livecutsatabbeyroad",
+          "lavieestbelle",
+          "mogolumorisbeatremix",
+          "beauxdimanchesevermihigorework",
+          "mogolu",
+          "mysahel",
+          "eclipse",
+          "eclipseenglishversion",
+          "frombamakotobirminghamamadoumariamtheblindboysofalabama",
+          "laconfusion",
+          "bofousafou",
+          "malimeetslatinamerica",
+          "folila",
+          "ohamadou",
+          "labendelaworldfoodprogramcampaignsong"
+        ],
+        "latestRelease": {
+          "title": "L'amour à la folie",
+          "type": "album",
+          "url": "https://amadoumariam.bandcamp.com/album/lamour-la-folie",
+          "imageUrl": "https://f4.bcbits.com/img/a1954357353_2.jpg",
+          "releaseDate": "October 24, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/amadou-mariam/37572",
+        "allReleaseTitles": [
+          "lamouralafolie",
+          "laconfusion",
+          "folila",
+          "eclipse",
+          "dimancheabamako",
+          "patiencedjsnake",
+          "bofousafou",
+          "welcometomali",
+          "mogolu",
+          "livecutsatabbeyroad",
+          "mogoluremixes",
+          "mysahelvieuxfarkatoureomgoumygueye",
+          "malimeetslatinamerica",
+          "halalafrancismercierneylnadrums",
+          "lavieestbelle",
+          "filaoubessamecerroneremix",
+          "remixes",
+          "seteblondishfrancismercierand"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Amadou%20%26%20Mariam"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Amadou%20%26%20Mariam"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://amadou-mariam.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/144288"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Amadou%20%26%20Mariam&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Amadou%20%26%20Mariam"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/amadouetmariam/?hl=fr"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@amadouetmariamofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/amadouandmariam"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/amadoumariam"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

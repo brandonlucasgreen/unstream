@@ -1,0 +1,79 @@
+[
+  {
+    "id": "the13thfloorelevators",
+    "name": "The 13th Floor Elevators",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037122972_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://13thfloorelevators.bandcamp.com",
+        "allReleaseTitles": [
+          "bullofthewoods",
+          "eastereverywhere",
+          "thepsychedelicsoundsof",
+          "13ofthebest"
+        ],
+        "latestRelease": {
+          "title": "Bull Of The Woods",
+          "type": "album",
+          "url": "https://13thfloorelevators.bandcamp.com/album/bull-of-the-woods",
+          "imageUrl": "https://f4.bcbits.com/img/a1333281053_16.jpg",
+          "releaseDate": "October 25, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-13th-floor-elevators/71671",
+        "allReleaseTitles": [
+          "thepsychedelicworldof",
+          "thepsychedelicworldofcd1",
+          "eastereverywhere",
+          "goinguptheverybestof",
+          "thepsychedelicworldofcd2",
+          "bullofthewoods",
+          "elevatorslive",
+          "thepsychedelicworldofcd3",
+          "liveincalifornia",
+          "liveintexas",
+          "deathintexaslive"
+        ],
+        "latestRelease": {
+          "title": "Going Up The Very Best Of The 13th Floor Elevators",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/going-up-the-very-best-of-the-13th-floor-elevators/0842914002387",
+          "releaseDate": "2006-04-14"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%2013th%20Floor%20Elevators"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%2013th%20Floor%20Elevators"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/304455"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%2013th%20Floor%20Elevators&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%2013th%20Floor%20Elevators"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/johnikewalton"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

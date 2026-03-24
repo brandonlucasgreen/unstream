@@ -1,0 +1,105 @@
+[
+  {
+    "id": "explosionsinthesky",
+    "name": "Explosions in the Sky",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032933370_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://explosionsinthesky.bandcamp.com",
+        "allReleaseTitles": [
+          "end",
+          "bigbendanoriginalsoundtrackforpublictelevision",
+          "howstrangeinnocenceanniversaryedition",
+          "therescueanniversaryedition",
+          "thewilderness",
+          "manglehornanoriginalmotionpicturesoundtrackexplosionsintheskyanddavidwingo",
+          "princeavalancheanoriginalmotionpicturesoundtrackexplosionsintheskyanddavidwingo",
+          "takecaretakecaretakecare",
+          "allofasuddenimisseveryoneremixes",
+          "allofasuddenimisseveryone",
+          "theearthisnotacolddeadplace",
+          "thosewhotellthetruthshalldiethosewhotellthetruthshallliveforever",
+          "howstrangeinnocence"
+        ],
+        "latestRelease": {
+          "title": "End",
+          "type": "album",
+          "url": "https://explosionsinthesky.bandcamp.com/album/end",
+          "imageUrl": "https://f4.bcbits.com/img/a1726477227_2.jpg",
+          "releaseDate": "September 15, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/explosions-in-the-sky/189261",
+        "allReleaseTitles": [
+          "theearthisnotacolddeadplace",
+          "howstrangeinnocence",
+          "end",
+          "thosewhotellthetruthshalldiethosewhotellthetruthshallliveforever",
+          "americanprimevalsoundtrackfromthenetflixseries",
+          "therescue",
+          "tenbillionpeople",
+          "movingon",
+          "daysix",
+          "asongforourfathers",
+          "thewilderness",
+          "lonesurvivororiginalmotionpicturesoundtrackstevejablonsky",
+          "allofasuddenimisseveryoneremixes",
+          "manglehornoriginalmotionpicturesoundtrackanddavidwingo",
+          "chisosfrombigbendanoriginalsoundtrackforpublictelevision",
+          "climbingbearfrombigbendanoriginalsoundtrackforpublictelevision",
+          "nightfallfrombigbendanoriginalsoundtrackforpublictelevision",
+          "flyingfrombigbendanoriginalsoundtrackforpublictelevision",
+          "disintegrationanxiety",
+          "logicofadream"
+        ],
+        "latestRelease": {
+          "title": "American Primeval Soundtrack From The Netflix Series Explosions In The Sky",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/american-primeval-soundtrack-from-the-netflix-series-explosions-in-the-sky/qj9att9qvttwa",
+          "releaseDate": "2025-01-09"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Explosions%20in%20the%20Sky"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Explosions%20in%20the%20Sky"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://explosionsinthesky.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/190408"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Explosions%20in%20the%20Sky&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Explosions%20in%20the%20Sky"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/explosionsinthesky/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ExplosionsInTheSkyMusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

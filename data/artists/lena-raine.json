@@ -1,0 +1,104 @@
+[
+  {
+    "id": "lenaraine",
+    "name": "Lena Raine",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033825788_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://radicaldreamland.bandcamp.com",
+        "allReleaseTitles": [
+          "ofthedevilepisode2courtroomclash",
+          "earthbladeacrosstheboundsoffate",
+          "beastieballoriginalsoundtrack",
+          "celeste64fragmentsofthemountainoriginalsoundtrack",
+          "harmonythefallofreverieoriginalgamesoundtrack",
+          "moonglowbayoriginalsoundtrack",
+          "chicoryacolorfultaleoriginalsoundtrack",
+          "chicorythesoundsofpicnicprovince",
+          "celesteclassic2lanistrekoriginalsoundversion",
+          "oneknowing",
+          "reknowing",
+          "celesteoriginalsoundtrack",
+          "celestebsidesvariousartists",
+          "celestefarewelloriginalsoundtrack",
+          "celestemadelinesgrabbag",
+          "escismescoriginalsoundtrack"
+        ],
+        "latestRelease": {
+          "title": "of the Devil Episode 2 ~ Courtroom Clash!",
+          "type": "album",
+          "url": "https://radicaldreamland.bandcamp.com/album/of-the-devil-episode-2-courtroom-clash",
+          "imageUrl": "https://f4.bcbits.com/img/a2539753516_2.jpg",
+          "releaseDate": "January 1, 2026"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/lena-raine/4018664",
+        "allReleaseTitles": [
+          "minecraftcavescliffsoriginalgamesoundtrackminecraft",
+          "minecraftnetherupdateoriginalgamesoundtrackminecraft",
+          "minecraftthewildupdateoriginalgamesoundtracksamuelabergminecraft",
+          "chicorypianocollectionstrevoralangomes",
+          "celestebsidesoriginalgamesoundtrack",
+          "guildwars2heartofthornsoriginalgamesoundtrackmaclainediemerandstanlepard",
+          "celestefarewelloriginalsoundtrack",
+          "chicoryacolorfultaleoriginalsoundtrack",
+          "celestepianocollectionsandtrevoralangomes",
+          "harmonythefallofreverieoriginalgamesoundtrack",
+          "chicoryanafternooninluncheon",
+          "hackmudostvol1",
+          "celesteoriginalsoundtrack",
+          "guildwars2livingworldseason4originalgamesoundtrackmaclainediemerbrendonwilliamsandwilbertrogetii",
+          "guildwars2livingworldseason2originalgamesoundtrackmaclainediemerandstanlepard",
+          "lullabyforlancer",
+          "oneknowing",
+          "moonglowbayoriginalsoundtrack",
+          "chicorythesoundsofpicnicprovince",
+          "reknowing"
+        ],
+        "latestRelease": {
+          "title": "Chicory Piano Collections Trevor Alan Gomes Lena Raine",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/chicory-piano-collections-trevor-alan-gomes-lena-raine/f08x3gmnaal1a",
+          "releaseDate": "2022-11-17"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/lenaraine"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lena%20Raine"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lena%20Raine"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://lena.fyi/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/6315339"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kuraine/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCbUHGz_K9jhvbQjfXdJUwxA"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

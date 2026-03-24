@@ -1,0 +1,98 @@
+[
+  {
+    "id": "martinbarre",
+    "name": "Martin Barre",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014446591_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://martinbarremusic.bandcamp.com",
+        "allReleaseTitles": [
+          "wintersettingmartinbarrejohncarter",
+          "martinbarreandjohncarterwintersetting",
+          "orderofplay",
+          "asummerband",
+          "rarities",
+          "awaywithwords",
+          "stageleft",
+          "backtosteel",
+          "liveinny",
+          "atrickofmemory",
+          "themeeting",
+          "roadslesstravelled"
+        ],
+        "latestRelease": {
+          "title": "Winter Setting (Martin Barre & John Carter)",
+          "type": "album",
+          "url": "https://martinbarremusic.bandcamp.com/album/winter-setting-martin-barre-john-carter",
+          "imageUrl": "https://f4.bcbits.com/img/a1979960019_2.jpg",
+          "releaseDate": "June 9, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/martin-barre/739954",
+        "allReleaseTitles": [
+          "roadslesstravelled",
+          "backtosteel",
+          "50yearsofjethrotull",
+          "liveatthewildey",
+          "orderofplay",
+          "stageleft2020remasteredversion",
+          "awaywithwords",
+          "atrickofmemory2020remasteredversion",
+          "cantfindmywayhomeinstrumentalshirleyking",
+          "asummerband2020remasteredversion",
+          "peopleinthefrontrowmelanie",
+          "spiritflyingfreejohncarter",
+          "themeeting2020remasteredversion",
+          "liveatthefactoryunderground"
+        ],
+        "latestRelease": {
+          "title": "Live At The Wildey Martin Barre",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/live-at-the-wildey-martin-barre/bw2pfkam7dpic",
+          "releaseDate": "2022-01-21"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Martin%20Barre"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Martin%20Barre"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.martinbarre.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/339215"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Martin%20Barre&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Martin%20Barre"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/martinbarreofficial/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Martinbarreofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,107 @@
+[
+  {
+    "id": "painofsalvation",
+    "name": "Pain Of Salvation",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039351324_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://painofsalvation.bandcamp.com",
+        "allReleaseTitles": [
+          "theperfectelementpt1anniversarymix2020",
+          "pantherspecialedition",
+          "inthepassinglightofdayspecialedition",
+          "remedylaneremixedrelived",
+          "fallinghome",
+          "roadsalttwo",
+          "roadsaltone",
+          "linoleumep",
+          "theseconddeathofpainofsalvation",
+          "scarsick",
+          "beoriginalstageproduction",
+          "be",
+          "125",
+          "theperfectelementpti",
+          "onehourbytheconcretelake",
+          "entropia"
+        ],
+        "latestRelease": {
+          "title": "The Perfect Element, Pt. 1 (Anniversary Mix 2020)",
+          "type": "album",
+          "url": "https://painofsalvation.bandcamp.com/album/the-perfect-element-pt-1-anniversary-mix-2020",
+          "imageUrl": "https://f4.bcbits.com/img/a1319724023_2.jpg",
+          "releaseDate": "November 20, 2020"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/pain-of-salvation/320529",
+        "allReleaseTitles": [
+          "panther",
+          "theperfectelementpti",
+          "inthepassinglightofday",
+          "be",
+          "remedylane",
+          "entropia",
+          "scarsick",
+          "onehourbytheconcretelake",
+          "theperfectelementptianniversarymix2020",
+          "theperfectelementpt1anniversarymix2020",
+          "remedylanerelived",
+          "roadsaltone",
+          "fallinghome",
+          "roadsalttwo",
+          "remedylaneremixed",
+          "1205",
+          "onthetwodeathsof",
+          "meaningless",
+          "linoleumep"
+        ],
+        "latestRelease": {
+          "title": "Panther Pain Of Salvation",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/panther-pain-of-salvation/q9741xcizusrc",
+          "releaseDate": "2020-08-28"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Pain%20Of%20Salvation"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Pain%20Of%20Salvation"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://painofsalvation.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/388262"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Pain%20Of%20Salvation&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Pain%20Of%20Salvation"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/painofsalvationband/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Painofsalvation"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

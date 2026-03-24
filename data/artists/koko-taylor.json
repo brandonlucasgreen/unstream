@@ -1,0 +1,73 @@
+[
+  {
+    "id": "kokotaylor",
+    "name": "Koko Taylor",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026333461_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kokotaylor.bandcamp.com",
+        "allReleaseTitles": [
+          "crownjewels",
+          "thebestof",
+          "oldschool",
+          "deluxeedition",
+          "royalblue",
+          "forceofnature",
+          "jumpforjoy",
+          "livefromchicagoanaudiencewiththequeen",
+          "queenoftheblues",
+          "fromtheheartofawoman",
+          "theearthshaker",
+          "igotwhatittakes"
+        ],
+        "latestRelease": {
+          "title": "Crown Jewels",
+          "type": "album",
+          "url": "https://kokotaylor.bandcamp.com/album/crown-jewels",
+          "imageUrl": "https://f4.bcbits.com/img/a3620568183_2.jpg",
+          "releaseDate": "July 18, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/koko-taylor/53575",
+        "allReleaseTitles": [
+          "crownjewels",
+          "thebestof",
+          "queenoftheblues",
+          "basicsoul",
+          "",
+          "theearthshaker",
+          "oldschool",
+          "whatittakesthechessyears",
+          "royalblue",
+          "bluescollectionvol2",
+          "bluescollectionvol1",
+          "allblues",
+          "fromtheheartofawoman",
+          "forceofnature",
+          "jumpforjoy",
+          "deluxeedition",
+          "livefromchicagoanaudiencewiththequeen",
+          "igotwhatittakes",
+          "chicagobluesfestival1994"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Koko%20Taylor"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Koko%20Taylor"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

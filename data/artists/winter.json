@@ -1,0 +1,78 @@
+[
+  {
+    "id": "winter",
+    "name": "Winter",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039696753_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://daydreamingwinter.bandcamp.com",
+        "allReleaseTitles": [
+          "adultromantix",
+          "waterseasonwinterhooky",
+          "andshesstilllistening",
+          "shaniatwainlovestory",
+          "sallow",
+          "thelonelygirl",
+          "whatkindofblueareyou",
+          "luafeatnailahhunter",
+          "alliknow",
+          "violetblue",
+          "endlessspacebetweenyoui",
+          "hazy",
+          "infinitesummerep",
+          "ethereality",
+          "memoriacolorida",
+          "juststayfeattrabants"
+        ],
+        "latestRelease": {
+          "title": "Adult Romantix",
+          "type": "album",
+          "url": "https://daydreamingwinter.bandcamp.com/album/adult-romantix",
+          "imageUrl": "https://f4.bcbits.com/img/a4116037929_2.jpg",
+          "releaseDate": "August 22, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/winter/200873",
+        "allReleaseTitles": [
+          "adultromantix",
+          "nobodysoyeongidlelizive",
+          "ofaespaxmydemon",
+          "ittfworldteamtabletennischampionshipsfinalsbusan2024officialthemesongyimsiwan",
+          "whatkindofblueareyou",
+          "endlessspacebetweenyoui",
+          "miseryhorsejumperoflove",
+          "waterseasonhooky",
+          "hidealullabytanukichan",
+          "icanbeyourszzzahara",
+          "andshesstilllistening",
+          "estrelamagicatriptides",
+          "shaniatwainlovestory",
+          "violetblue",
+          "agitatedmxrcenaryxlout",
+          "mronmymind",
+          "hazy",
+          "montagemangelcoreh6itamhabazaneblanlkand",
+          "bangbangfunkhimxnnotxndyboyand",
+          "metadrownverge"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Winter"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Winter"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

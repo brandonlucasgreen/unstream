@@ -1,0 +1,40 @@
+[
+  {
+    "id": "sheilae",
+    "name": "Sheila E.",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041178664_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sheilae.bandcamp.com",
+        "allReleaseTitles": [
+          "hellafonkesheilaeandtheetrain",
+          "icon",
+          "sheilaefriendsbailardeluxe",
+          "sheilaefriendsbailarinstrumentals"
+        ],
+        "latestRelease": {
+          "title": "Hella Fonk E (Sheila E. and the E-Train)",
+          "type": "album",
+          "url": "https://sheilae.bandcamp.com/album/hella-fonk-e-sheila-e-and-the-e-train",
+          "imageUrl": "https://f4.bcbits.com/img/a0125409205_16.jpg",
+          "releaseDate": "October 23, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sheila%20E."
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sheila%20E."
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

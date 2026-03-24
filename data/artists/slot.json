@@ -1,0 +1,38 @@
+[
+  {
+    "id": "slot-bandcamp-slotmp3",
+    "name": "SLOT",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038681417_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://slotmp3.bandcamp.com",
+        "allReleaseTitles": [
+          "limbo",
+          "demo"
+        ],
+        "latestRelease": {
+          "title": "Limbo",
+          "type": "album",
+          "url": "https://slotmp3.bandcamp.com/album/limbo",
+          "imageUrl": "https://f4.bcbits.com/img/a0039452954_16.jpg",
+          "releaseDate": "March 24, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=SLOT"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+SLOT"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

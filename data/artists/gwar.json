@@ -1,0 +1,109 @@
+[
+  {
+    "id": "gwar",
+    "name": "GWAR",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028314224_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://gwar.bandcamp.com",
+        "allReleaseTitles": [
+          "thereturnofgorgor",
+          "battlemaximus",
+          "thenewdarkages",
+          "scumdogsxxxlive",
+          "thediscwithnoname",
+          "scumdogsoftheuniverse30thanniversaryremix",
+          "thebloodofgods",
+          "battlemaximus",
+          "bloodypitofhorror",
+          "lustinspace",
+          "stripperchristmassummerweekend",
+          "beyondhell",
+          "livefrommtfuji",
+          "warparty",
+          "lettherebegwar",
+          "violencehasarrived"
+        ],
+        "latestRelease": {
+          "title": "The Return of Gor Gor",
+          "type": "album",
+          "url": "https://gwar.bandcamp.com/album/the-return-of-gor-gor",
+          "imageUrl": "https://f4.bcbits.com/img/a1256472051_2.jpg",
+          "releaseDate": "July 25, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/gwar/824848",
+        "allReleaseTitles": [
+          "scumdogsoftheuniverse",
+          "thebloodofgods",
+          "thereturnofgorgor",
+          "thenewdarkages",
+          "battlemaximus",
+          "lotlizard",
+          "fuckthisplace",
+          "isntthisdisgusting",
+          "illbeyourmonster",
+          "americamustbedestroyed",
+          "lustinspace",
+          "warparty",
+          "thistoiletearth",
+          "violencehasarrived",
+          "ragnarok",
+          "hello",
+          "beyondhell",
+          "carnivalofchaos",
+          "wekilleverythinguncensored"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=GWAR"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+GWAR"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.gwar.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/251932"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=GWAR&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/GWAR"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/gwar/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@gwar"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "http://www.youtube.com/gwar "
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/gwar"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

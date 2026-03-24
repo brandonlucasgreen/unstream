@@ -1,0 +1,63 @@
+[
+  {
+    "id": "conwaytwitty",
+    "name": "Conway Twitty",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033383727_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://conwaytwitty.bandcamp.com",
+        "allReleaseTitles": [
+          "imnotthroughlovingyouyet",
+          "theharoldjenkinssunsessions",
+          "ihadatruelove"
+        ],
+        "latestRelease": {
+          "title": "I'm Not Through Loving You Yet",
+          "type": "album",
+          "url": "https://conwaytwitty.bandcamp.com/album/im-not-through-loving-you-yet",
+          "imageUrl": "https://f4.bcbits.com/img/a0645409475_2.jpg",
+          "releaseDate": "January 1, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Conway%20Twitty"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Conway%20Twitty"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://conwaytwitty.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/333391"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Conway%20Twitty&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Conway%20Twitty"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/conwaytwitty"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

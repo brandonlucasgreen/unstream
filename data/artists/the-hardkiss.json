@@ -1,0 +1,81 @@
+[
+  {
+    "id": "thehardkiss",
+    "name": "The Hardkiss",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037777036_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thehardkissua.bandcamp.com",
+        "allReleaseTitles": [
+          "",
+          "festival",
+          "",
+          "",
+          "",
+          "rafttoneremix",
+          "7rafttoneremix",
+          "",
+          "",
+          "",
+          "",
+          "thehardkissfeatmonatik",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "latestRelease": {
+          "title": "Тільки там",
+          "type": "album",
+          "url": "https://thehardkissua.bandcamp.com/album/--16",
+          "imageUrl": "https://f4.bcbits.com/img/a4125206803_2.jpg",
+          "releaseDate": "February 7, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-hardkiss/729450",
+        "allReleaseTitles": [
+          "",
+          "tenderness",
+          "crush",
+          "childrenofthesunhamatom",
+          "festival",
+          "ursula",
+          "live",
+          "7",
+          "tapolskyremix",
+          "",
+          "aiaiai"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Hardkiss"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Hardkiss"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/11833"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Hardkiss&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Hardkiss"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

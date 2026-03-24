@@ -1,0 +1,97 @@
+[
+  {
+    "id": "thedecemberists",
+    "name": "The Decemberists",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0035429770_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thedecemberists.bandcamp.com",
+        "allReleaseTitles": [
+          "asiteverwassoitwillbeagain",
+          "livehomelibraryvoli",
+          "picaresque",
+          "hermajestythedecemberists",
+          "castawaysandcutouts",
+          "thetain",
+          "thetainbw5songslp",
+          "picaresqueties",
+          "billyliar"
+        ],
+        "latestRelease": {
+          "title": "As It Ever Was, So It Will Be Again",
+          "type": "album",
+          "url": "https://thedecemberists.bandcamp.com/album/as-it-ever-was-so-it-will-be-again",
+          "imageUrl": "https://f4.bcbits.com/img/a4136176766_2.jpg",
+          "releaseDate": "June 14, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-decemberists/47667",
+        "allReleaseTitles": [
+          "thecranewife",
+          "asiteverwassoitwillbeagain",
+          "whataterribleworldwhatabeautifulworld",
+          "illbeyourgirl",
+          "travelingon",
+          "ohno",
+          "joaninthegarden",
+          "burialground",
+          "alliwantisyou",
+          "severed",
+          "onceinmylife",
+          "thekingisdead",
+          "hazardsoflove",
+          "picaresque",
+          "castawaysandcutouts",
+          "florasongs",
+          "hermajesty",
+          "fivesongsep"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Decemberists"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Decemberists"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.decemberists.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/264812"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Decemberists&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Decemberists"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thedecemberists/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCf0uVkfr1g6PhD1QwtNE3kg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thedecemberists"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

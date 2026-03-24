@@ -1,0 +1,91 @@
+[
+  {
+    "id": "brookecandy",
+    "name": "Brooke Candy",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0016726144_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://brookecandy.bandcamp.com",
+        "allReleaseTitles": [
+          "sexorcism",
+          "dripfeaterikajayne",
+          "xxxtcfeatcharlixcxmaliibumiitch"
+        ],
+        "latestRelease": {
+          "title": "SEXORCISM",
+          "type": "album",
+          "url": "https://brookecandy.bandcamp.com/album/sexorcism",
+          "imageUrl": "https://f4.bcbits.com/img/a1151229206_2.jpg",
+          "releaseDate": "October 25, 2019"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/brooke-candy/1073437",
+        "allReleaseTitles": [
+          "kfcsanteriacaincultopeaches",
+          "sexorcism",
+          "candyland",
+          "cum",
+          "safeword",
+          "flipphone",
+          "spiral",
+          "pills",
+          "fmuatwremixes",
+          "block",
+          "juicyfruit",
+          "nextbitch",
+          "yogaonlyfire",
+          "pogo",
+          "swansandcoucouchloe",
+          "opulenceep",
+          "livingoutloud",
+          "happydays",
+          "mysex",
+          "war"
+        ],
+        "latestRelease": {
+          "title": "Kfc Santeria Cain Culto Peaches Brooke Candy",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/kfc-santeria-cain-culto-peaches-brooke-candy/mdmqf1t6j7zou",
+          "releaseDate": "2025-12-10"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Brooke%20Candy"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Brooke%20Candy"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://brookecandyofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3243307"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/brookecandy/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCVtubBtrzi2kvpAiQpE4KSQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialbrookecandy"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

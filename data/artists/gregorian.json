@@ -1,0 +1,71 @@
+[
+  {
+    "id": "gregorian",
+    "name": "Greg(o)rian",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a0965468598_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://gregoriandoom.bandcamp.com",
+        "allReleaseTitles": [
+          "uttercondemnation2014",
+          "settlementsandburialchambers",
+          "dormancyofouromniscientmasters"
+        ],
+        "latestRelease": {
+          "title": "Utter Condemnation (2014)",
+          "type": "album",
+          "url": "https://gregoriandoom.bandcamp.com/album/utter-condemnation-2014-2",
+          "imageUrl": "https://f4.bcbits.com/img/a0965468598_2.jpg",
+          "releaseDate": "April 18, 2014"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Greg(o)rian"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Greg(o)rian"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.gregorian.de/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/190949"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Greg(o)rian&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Greg(o)rian"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/gregorianofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@gregorian_official"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/GregorianMasters"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/gregorianofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,68 @@
+[
+  {
+    "id": "turbonegro",
+    "name": "Turbonegro",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0017422061_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://turbonegronorway.bandcamp.com",
+        "allReleaseTitles": [
+          "hotcarsusedcontraceptives",
+          "neverisforever",
+          "apocalypsedudes",
+          "asscobra"
+        ],
+        "latestRelease": {
+          "title": "Hot Cars & Used Contraceptives",
+          "type": "album",
+          "url": "https://turbonegronorway.bandcamp.com/album/hot-cars-used-contraceptives",
+          "imageUrl": "https://f4.bcbits.com/img/a3429664684_16.jpg",
+          "releaseDate": "March 13, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Turbonegro"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Turbonegro"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.turbonegro.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/116256"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Turbonegro&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Turbonegro"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/turbonegrohq/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/TurbonegroHQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/TurbonegroHQ"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

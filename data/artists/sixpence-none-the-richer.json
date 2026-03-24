@@ -1,0 +1,88 @@
+[
+  {
+    "id": "sixpencenonethericher",
+    "name": "Sixpence None The Richer",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036870000_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sixpencenonethericher.bandcamp.com",
+        "allReleaseTitles": [
+          "liveatgruenehall",
+          "thedawnofgracedeluxe",
+          "rosemaryhill"
+        ],
+        "latestRelease": {
+          "title": "Live at Gruene Hall",
+          "type": "album",
+          "url": "https://sixpencenonethericher.bandcamp.com/album/live-at-gruene-hall",
+          "imageUrl": "https://f4.bcbits.com/img/a0744809340_2.jpg",
+          "releaseDate": "May 2, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sixpence-none-the-richer/151870",
+        "allReleaseTitles": [
+          "deluxeanniversaryedition",
+          "kissme",
+          "rosemaryhill",
+          "thedawnofgrace",
+          "liveatgruenehall",
+          "thetideleighnash",
+          "julia",
+          "theneedleandthedamagedonesweetrelief",
+          "ibelieveinfatherchristmas",
+          "onceinalifetimefeatleighnashtheascendantsfeaturingleighnash",
+          "divinediscontent",
+          "",
+          "greatesthits",
+          "thebestof",
+          "thereshegoesdaveauderemixes",
+          "6picksessentialradiohitsep",
+          "thisbeautifulmess",
+          "theultimatecollection",
+          "thefatherlessthewidow"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sixpence%20None%20The%20Richer"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sixpence%20None%20The%20Richer"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sixpence-ntr.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/230500"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sixpence%20None%20The%20Richer&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sixpence%20None%20The%20Richer"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/sixpencemusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sixpencenonethericher"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

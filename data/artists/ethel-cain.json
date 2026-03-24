@@ -1,0 +1,38 @@
+[
+  {
+    "id": "ethelcain",
+    "name": "Ethel Cain",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0029129579_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mothercain.bandcamp.com",
+        "allReleaseTitles": [
+          "unreleasedii",
+          "unreleased"
+        ],
+        "latestRelease": {
+          "title": "Unreleased II",
+          "type": "album",
+          "url": "https://mothercain.bandcamp.com/album/unreleased-ii",
+          "imageUrl": "https://f4.bcbits.com/img/a0336703729_16.jpg",
+          "releaseDate": "May 21, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ethel%20Cain"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ethel%20Cain"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

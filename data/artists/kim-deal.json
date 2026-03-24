@@ -1,0 +1,76 @@
+[
+  {
+    "id": "kimdeal",
+    "name": "Kim Deal",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036993170_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kimdeal.bandcamp.com",
+        "allReleaseTitles": [
+          "nobodylovesyoumore",
+          "coast"
+        ],
+        "latestRelease": {
+          "title": "Nobody Loves You More",
+          "type": "album",
+          "url": "https://kimdeal.bandcamp.com/album/nobody-loves-you-more",
+          "imageUrl": "https://f4.bcbits.com/img/a1271670273_16.jpg",
+          "releaseDate": "November 22, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/kim-deal/461133",
+        "allReleaseTitles": [
+          "nobodylovesyoumore",
+          "coast",
+          "crystalbreath",
+          "agoodtimepushed"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kim%20Deal"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kim%20Deal"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.kimdealmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1057864"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Kim%20Deal&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Kim%20Deal"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kimdealmusicofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCbOwLtem1bwJIKN95fa7R2w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/kimdealmusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

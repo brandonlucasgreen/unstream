@@ -1,0 +1,92 @@
+[
+  {
+    "id": "alliex",
+    "name": "Allie X",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041603145_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://alliex.bandcamp.com",
+        "allReleaseTitles": [
+          "happinessisgoingtogetyou",
+          "girlwithnofacedeluxe",
+          "girlwithnoface",
+          "capegoddeluxe",
+          "capegod",
+          "supersunset",
+          "collxtionll",
+          "collxtionl"
+        ],
+        "latestRelease": {
+          "title": "Happiness Is Going To Get You",
+          "type": "album",
+          "url": "https://alliex.bandcamp.com/album/happiness-is-going-to-get-you",
+          "imageUrl": "https://f4.bcbits.com/img/a2819472125_2.jpg",
+          "releaseDate": "November 7, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/allie-x/2361161",
+        "allReleaseTitles": [
+          "happinessisgoingtogetyou",
+          "girlwithnoface",
+          "capegod",
+          "collxtionii",
+          "isanybodyoutthere",
+          "glam",
+          "deviliknow",
+          "shadowvicetoneand",
+          "focus",
+          "girloftheyear",
+          "reunite",
+          "blackeye",
+          "bonvoyage",
+          "offwithhertits",
+          "offwithhertitstrst",
+          "lovemewrongtroyesivan",
+          "superduperpartypeople",
+          "weirdworld"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Allie%20X"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Allie%20X"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://alliex.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3635043"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/alliex/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@iamalliex"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCb1cXeayhg_La-C_saU76DA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/alliexxxxandra"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

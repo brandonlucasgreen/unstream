@@ -45,6 +45,33 @@ const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days - skip if data is newer
 // Artist must have a verified (non-search-only) link on at least one of these
 const QUALIFYING_PLATFORMS = new Set(['bandcamp', 'faircamp', 'mirlo']);
 
+// Known false matches: famous artist name matches a different person on Bandcamp.
+// These are excluded from data generation entirely.
+const BLOCKLIST_SLUGS = new Set([
+  'a-ha',              // "sashabeats" on Bandcamp, not the Norwegian band
+  'abc',               // "alphabetset", not Martin Fry's band
+  'alice',             // ambiguous name, not a notable artist
+  'andrew-fletcher',   // not the Depeche Mode member
+  'band-aid',          // demo band, not the charity supergroup
+  'bwo',               // "godisalobster", not Bodies Without Organs
+  'h-e-r',             // record label, not H.E.R. the singer
+  'highway',           // producer, not a notable band
+  'ian-brown',         // "ammogideon", not the Stone Roses singer
+  'jj',                // "jackjutson", not the Swedish duo
+  'jasmine-thompson',  // different person
+  'kyuss',             // "enviaudio", not the stoner rock band
+  'mark-isham',        // generic Bandcamp, not the film composer
+  'michael-mcdonald',  // different Michael McDonald
+  'saxon',             // "sxn93", not the NWOBHM band
+  'sleeping-with-sirens', // "payforyersins", not the post-hardcore band
+  'steve-clark',       // not the Def Leppard guitarist
+  'the-crystals',      // "thecrystalawards", not the 60s girl group
+  'toto',              // DJ posting remixes, not Toto
+  'alexey-vorobyov',   // "34birds", different person
+  'bo-diddley',        // legacy artist, not active
+  'lee-majors',        // actor, not a music artist
+]);
+
 interface ArtistEntry {
   name: string;
   slug: string;
@@ -292,6 +319,9 @@ function isNameMatch(resultName: string, artistName: string): boolean {
 }
 
 async function processArtist(artist: ArtistEntry, force: boolean): Promise<ManifestEntry | null> {
+  // Skip blocklisted artists (known false matches)
+  if (BLOCKLIST_SLUGS.has(artist.slug)) return null;
+
   const outputPath = join(ARTISTS_DIR, `${artist.slug}.json`);
 
   // Skip if recent data exists and not forcing

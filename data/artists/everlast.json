@@ -1,0 +1,69 @@
+[
+  {
+    "id": "everlast-bandcamp-everlast",
+    "name": "Everlast",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0000059641_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://everlast.bandcamp.com",
+        "allReleaseTitles": [
+          "feelingsftdrogers",
+          "mytimehascomeftrawtalent",
+          "igetlonelytooremixftdrake",
+          "withamanbutstillstrugglingprodbyjuneg",
+          "thelightprodbylexibanks"
+        ],
+        "latestRelease": {
+          "title": "Feelings ft. D. Rogers",
+          "type": "track",
+          "url": "https://everlast.bandcamp.com/track/feelings-ft-d-rogers",
+          "imageUrl": "https://f4.bcbits.com/img/a0227642877_2.jpg",
+          "releaseDate": "August 28, 2011"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Everlast"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Everlast"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.martyr-inc.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/76490"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Everlast&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Everlast"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/ogeverlast/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/EverlastMusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/everlastmusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

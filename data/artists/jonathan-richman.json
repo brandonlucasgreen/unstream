@@ -1,0 +1,97 @@
+[
+  {
+    "id": "jonathanrichman",
+    "name": "Jonathan Richman",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0021286147_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jonathanrichman.bandcamp.com",
+        "allReleaseTitles": [
+          "onlyfrozenskyanyway",
+          "jonathanrichmanyatasamarounep",
+          "coldpizzaotherhotstuffepjonathantommy",
+          "wanttovisitmyinnerhouse",
+          "season2justasparkonjourneyfromthedarkepisodes712",
+          "season1justasparkonjourneyfromthedarkepisodes16",
+          "sa",
+          "shessofromsomewhereelse",
+          "thatsallweneedatourparty",
+          "peoplearedisgusting",
+          "ishkodeishkode",
+          "keithbwtheyshowedmethedoortobohemia",
+          "osunbwwaitwait"
+        ],
+        "latestRelease": {
+          "title": "Only Frozen Sky Anyway",
+          "type": "album",
+          "url": "https://jonathanrichman.bandcamp.com/album/only-frozen-sky-anyway",
+          "imageUrl": "https://f4.bcbits.com/img/a3634782911_2.jpg",
+          "releaseDate": "July 4, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jonathan-richman/220161",
+        "allReleaseTitles": [
+          "onlyfrozenskyanyway",
+          "modernlovers88themodernlovers",
+          "jonathangoescountry",
+          "coldpizzaotherhotstuff",
+          "wanttovisitmyinnerhouse",
+          "ishkodeishkode",
+          "sa",
+          "themodernloversthemodernlovers",
+          "ijonathan",
+          "becauseherbeautyisrawandwild",
+          "omoonqueenofnightonearth",
+          "youmustasktheheart",
+          "notsomuchtobelovedastolove",
+          "livethemodernlovers",
+          "imsoconfused",
+          "havingapartywith",
+          "",
+          "jonathansingsthemodernlovers"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jonathan%20Richman"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jonathan%20Richman"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/237653"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jonathan%20Richman&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jonathan%20Richman"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/richman_jonathan/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCe1wtZi7EpCcc7tkzlK2-wQ"
+      },
+      {
+        "sourceId": "peertube",
+        "url": "https://tube.sp-codes.de/video-channels/jonathan"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

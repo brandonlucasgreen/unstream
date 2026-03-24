@@ -1,0 +1,76 @@
+[
+  {
+    "id": "quietriot",
+    "name": "Quiet Riot",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011176625_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://deadlinequietriot.bandcamp.com",
+        "allReleaseTitles": [
+          "aliveandwelldeluxeedition",
+          "chuckwrightsshelteringskychuckwrightsshelteringsky",
+          "metalhealthbangyourhead",
+          "liverare"
+        ],
+        "latestRelease": {
+          "title": "Alive And Well - Deluxe Edition",
+          "type": "album",
+          "url": "https://deadlinequietriot.bandcamp.com/album/alive-and-well-deluxe-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a3077571307_16.jpg",
+          "releaseDate": "March 5, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Quiet%20Riot"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Quiet%20Riot"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://quietriot.band/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/261370"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Quiet%20Riot&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Quiet%20Riot"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/quietriotband/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@quietriotband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC_64i2VewDA-MGG0uA7L65w"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@quietriotband"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/quietriot"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

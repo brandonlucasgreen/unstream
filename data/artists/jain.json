@@ -1,0 +1,63 @@
+[
+  {
+    "id": "jain",
+    "name": "jain",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018638946_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jaintn.bandcamp.com",
+        "allReleaseTitles": [
+          "theendofjune",
+          "cabbage",
+          "jain"
+        ],
+        "latestRelease": {
+          "title": "the end of june",
+          "type": "album",
+          "url": "https://jaintn.bandcamp.com/album/the-end-of-june",
+          "imageUrl": "https://f4.bcbits.com/img/a3020369794_2.jpg",
+          "releaseDate": "July 21, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=jain"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+jain"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.jain-music.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3549416"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jainmusic/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@sonymusicfrance"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/TheHOBMUSIC"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/JAINMUSIC"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

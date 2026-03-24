@@ -1,0 +1,80 @@
+[
+  {
+    "id": "asherroth",
+    "name": "Asher Roth",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038637771_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://asherroth.bandcamp.com",
+        "allReleaseTitles": [
+          "temporaryheavenasherrothheathergrey",
+          "whysitsogreyoutasherrothheathergrey",
+          "flowersontheweekend"
+        ],
+        "latestRelease": {
+          "title": "Temporary Heaven\n                \n                \n\n                Asher Roth & Heather Grey",
+          "type": "album",
+          "url": "https://asherroth.bandcamp.com/album/temporary-heaven",
+          "imageUrl": "https://f4.bcbits.com/img/a3966370190_2.jpg",
+          "releaseDate": "April 10, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/asher-roth/71375",
+        "latestRelease": {
+          "title": "Happiness U Of C Asher Roth Ai Que Jon Baylor",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/happiness-u-of-c-asher-roth-ai-que-jon-baylor/nqlriih773vhm",
+          "releaseDate": "2026-02-18"
+        },
+        "allReleaseTitles": [
+          "4godandguala",
+          "happinessuofcaiquejonbaylor",
+          "ytu",
+          "grindgetreadyitsanewday",
+          "asleepinthebreadaisle",
+          "retrohash",
+          "pabstjazz",
+          "flowersontheweekend",
+          "partygirlmeekmill",
+          "getoutdemo",
+          "lastmanstandingakon",
+          "whysitsogreyoutheathergrey",
+          "knowgrandmaster456tapeandguala",
+          "oops",
+          "heavenandheathergreyfeaturinghomeboysandmanandlojii",
+          "alladdup",
+          "myislandjonahtolchin"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Asher%20Roth"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Asher%20Roth"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://asherrothmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1447802"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "http://www.facebook.com/Asherroth"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

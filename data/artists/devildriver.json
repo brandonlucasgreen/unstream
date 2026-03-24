@@ -1,0 +1,95 @@
+[
+  {
+    "id": "devildriver",
+    "name": "DevilDriver",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037854608_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://devildriver.bandcamp.com",
+        "allReleaseTitles": [
+          "dealingwithdemonsvolii",
+          "dealingwithdemonsi",
+          "outlawstiltheendvol1",
+          "trustnoone",
+          "winterkills",
+          "winterkillsdeluxeversion"
+        ],
+        "latestRelease": {
+          "title": "Dealing With Demons Vol. II",
+          "type": "album",
+          "url": "https://devildriver.bandcamp.com/album/dealing-with-demons-vol-ii",
+          "imageUrl": "https://f4.bcbits.com/img/a0069594278_2.jpg",
+          "releaseDate": "May 12, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/devildriver/324845",
+        "allReleaseTitles": [
+          "dealingwithdemonsvolii",
+          "dealingwithdemonsi",
+          "outlawstiltheendvol1",
+          "ghostridersinthesky",
+          "ifbloodislife",
+          "keepawayfrommeradioedit",
+          "countryheroes",
+          "thisrelationshipbroken",
+          "copperheadroad",
+          "",
+          "winterkillsdeluxeversion",
+          "thefuryofourmakershand",
+          "prayforvillains",
+          "beast",
+          "trustnoone",
+          "winterkills",
+          "thelastkindwords",
+          "deadtorights",
+          "throughthedepths"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=DevilDriver"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+DevilDriver"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://devildriver.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/299888"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=DevilDriver&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/DevilDriver"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/devildriver/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC8EZEFD-LeZiyp6qt1zh33g"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/devildriver"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

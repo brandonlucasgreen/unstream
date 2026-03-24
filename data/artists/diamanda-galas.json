@@ -1,0 +1,83 @@
+[
+  {
+    "id": "diamandagalas",
+    "name": "Diamanda Galás",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0016000334_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://diamandagalas.bandcamp.com",
+        "allReleaseTitles": [
+          "deformationsecondpianovariations",
+          "youmustbecertainofthedevil2025remaster",
+          "saintofthepit2024remaster",
+          "diamandagalasinconcert",
+          "brokengargoyles",
+          "thedivinepunishment2022remaster",
+          "diamandagalas",
+          "deformationpianovariations",
+          "litaniesofsatan2020remaster",
+          "saintofthepit",
+          "youmustbecertainofthedevil",
+          "plaguemass",
+          "thesinger",
+          "venacava",
+          "thesportinglife",
+          "schreix"
+        ],
+        "latestRelease": {
+          "title": "De-formation: Second Piano Variations",
+          "type": "album",
+          "url": "https://diamandagalas.bandcamp.com/album/de-formation-second-piano-variations",
+          "imageUrl": "https://f4.bcbits.com/img/a1820250096_2.jpg",
+          "releaseDate": "November 1, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/diamanda-galas/8786",
+        "allReleaseTitles": [
+          "thedivinepunishment",
+          "brokengargoyles",
+          "saintofthepit",
+          "youmustbecertainofthedevil",
+          "inconcert",
+          "",
+          "thesportinglife",
+          "thesinger",
+          "maledictionandprayer",
+          "plaguemass",
+          "thelitaniesofsatan",
+          "litaniesofsatan",
+          "venacava",
+          "laserpentacanta",
+          "alltheway",
+          "guiltyguiltyguilty",
+          "defixioneswillandtestament",
+          "atsaintthomastheapostleharlem",
+          "schreix"
+        ],
+        "latestRelease": {
+          "title": "You Must Be Certain Of The Devil Diamanda Galas",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/you-must-be-certain-of-the-devil-diamanda-galas/e0b0a40vbptpa",
+          "releaseDate": "2025-11-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Diamanda%20Gal%C3%A1s"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Diamanda%20Gal%C3%A1s"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

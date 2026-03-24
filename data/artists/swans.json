@@ -1,0 +1,105 @@
+[
+  {
+    "id": "swans",
+    "name": "SWANS",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039889729_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://swans.bandcamp.com",
+        "allReleaseTitles": [
+          "birthing",
+          "thebeggar",
+          "childrenofgod2020remaster",
+          "leavingmeaning",
+          "dieturistzu",
+          "greatannihilatordrainlandremastered2017",
+          "theglowingman",
+          "copyounggod",
+          "greedtimeismoneybastard",
+          "holymoneyascrew",
+          "publiccastrationisagoodidea",
+          "filthdeluxeremastered2015",
+          "loveoflife",
+          "whitelightfromthemouthofinfinity",
+          "oxygen",
+          "childrenofgodworldofskin"
+        ],
+        "latestRelease": {
+          "title": "Birthing",
+          "type": "album",
+          "url": "https://swans.bandcamp.com/album/birthing",
+          "imageUrl": "https://f4.bcbits.com/img/a3801591723_2.jpg",
+          "releaseDate": "May 30, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/swans/391363",
+        "allReleaseTitles": [
+          "birthing",
+          "childrenofgod",
+          "thebeggar",
+          "leavingmeaning",
+          "feelgoodnow",
+          "takeafirstride",
+          "itscomingitsreal",
+          "paradiseismine",
+          "theegg",
+          "theburningworld",
+          "tobekind",
+          "whitelightfromthemouthofinfinity",
+          "soundtracksfortheblind",
+          "thegreatannihilatorremastered",
+          "aredeadlive9597",
+          "aredeadlive9597",
+          "publiccastrationisagoodidea",
+          "theglowingman",
+          "variousfailures"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=SWANS"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+SWANS"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.swans.pair.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/154588"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=SWANS&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/SWANS"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/swans_official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCS58Cb8jis4zhSa9fSWKs3A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/SwansOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

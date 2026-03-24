@@ -1,0 +1,107 @@
+[
+  {
+    "id": "squarepusher",
+    "name": "Squarepusher",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0042907169_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://squarepusher.bandcamp.com",
+        "allReleaseTitles": [
+          "kammerkonzert",
+          "stereotype",
+          "ultravisitor20thanniversaryedition",
+          "ultravisitorremastered",
+          "dostrotime",
+          "wendorlan",
+          "feedmeweirdthingsremastered",
+          "lamentalep",
+          "beupahello",
+          "vortrack",
+          "allnightchromajamesmcvinnietomjenkinson",
+          "damogenfuries",
+          "musicforrobotssquarepusherxzmachines",
+          "enstrobia",
+          "kcrwsession",
+          "ufabulum"
+        ],
+        "latestRelease": {
+          "title": "Kammerkonzert",
+          "type": "album",
+          "url": "https://squarepusher.bandcamp.com/album/kammerkonzert",
+          "imageUrl": "https://f4.bcbits.com/img/a0279664615_2.jpg"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/squarepusher/53272",
+        "allReleaseTitles": [
+          "dostrotime",
+          "feedmeweirdthings",
+          "stereotype",
+          "ultravisitor",
+          "beupahello",
+          "venusno17maximised",
+          "lamentalep",
+          "k2central",
+          "obrien",
+          "abacus2",
+          "k7museum",
+          "wendorlan",
+          "themefromernestborgnine",
+          "hardnormaldaddy",
+          "doyouknow",
+          "goplastic",
+          "myredhotcar",
+          "damogenfuries",
+          "shobaleaderonecrypticmotion",
+          "budakhanmindphone"
+        ],
+        "latestRelease": {
+          "title": "Dostrotime Squarepusher",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/dostrotime-squarepusher/qvm7bg8vbpzaa",
+          "releaseDate": "2024-03-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Squarepusher"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Squarepusher"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.squarepusher.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/269"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Squarepusher&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Squarepusher"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/squarepushermusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/squarepusher"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

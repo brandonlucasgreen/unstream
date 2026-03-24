@@ -1,0 +1,94 @@
+[
+  {
+    "id": "suffocation",
+    "name": "Suffocation",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033414338_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://suffocation.bandcamp.com",
+        "allReleaseTitles": [
+          "hymnsfromtheapocrypha",
+          "liveinnorthamerica",
+          "ofthedarklight",
+          "pinnacleofbedlam",
+          "bloodoath"
+        ],
+        "latestRelease": {
+          "title": "Hymns From The Apocrypha",
+          "type": "album",
+          "url": "https://suffocation.bandcamp.com/album/hymns-from-the-apocrypha",
+          "imageUrl": "https://f4.bcbits.com/img/a1801993147_2.jpg",
+          "releaseDate": "November 3, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/suffocation/478787",
+        "allReleaseTitles": [
+          "hymnsfromtheapocrypha",
+          "ofthedarklight",
+          "liveinnorthamerica",
+          "effigyoftheforgotten",
+          "piercedfromwithin",
+          "breedingthespawn",
+          "despisethesun",
+          "",
+          "pinnacleofbedlam",
+          "bloodoath",
+          "soulstodeny",
+          "thebestof",
+          "thecloseofachapterlive",
+          "filtertype5",
+          "heavensgate"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Suffocation"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Suffocation"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.suffocationofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/267062"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Suffocation&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Suffocation"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/suffocationofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@suffocationofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCclo9P5aWVQ97jSWVgRknPQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/suffocation"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

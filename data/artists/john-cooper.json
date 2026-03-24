@@ -1,0 +1,65 @@
+[
+  {
+    "id": "johncooper",
+    "name": "John Cooper",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019197978_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://johncooper2.bandcamp.com",
+        "allReleaseTitles": [
+          "acousticroughsketchesvoli",
+          "lullabiesprayersandadventuresindreamland"
+        ],
+        "latestRelease": {
+          "title": "Acoustic Rough Sketches Vol I",
+          "type": "album",
+          "url": "https://johncooper2.bandcamp.com/album/acoustic-rough-sketches-vol-i",
+          "imageUrl": "https://f4.bcbits.com/img/a2894461629_16.jpg",
+          "releaseDate": "March 29, 2020"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/john-cooper/33369",
+        "allReleaseTitles": [
+          "acousticroughsketchesvoli",
+          "lullabiesprayersandadventuresindreamland",
+          "thebaeckerjazzworshipservice",
+          "tidyweekender25djpollwinnersmix05",
+          "njoylife",
+          "watchingforwatchungplaza",
+          "words",
+          "wedontdeserveyou",
+          "forevercharliebosh",
+          "",
+          "landoftheliving"
+        ],
+        "latestRelease": {
+          "title": "Tidy Weekender 25 Dj Poll Winners Mix 05 John Cooper",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/tidy-weekender-25-dj-poll-winners-mix-05-john-cooper/pvolgiq70nbgc",
+          "releaseDate": "2019-09-04"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=John%20Cooper"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+John%20Cooper"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/JohnCooper_uk"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

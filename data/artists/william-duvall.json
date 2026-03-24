@@ -1,0 +1,57 @@
+[
+  {
+    "id": "williamduvall",
+    "name": "William DuVall",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014793645_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://williamduvall.bandcamp.com",
+        "allReleaseTitles": [
+          "111221liveinstudionashville",
+          "onealone"
+        ],
+        "latestRelease": {
+          "title": "11.12.21 Live-In-Studio Nashville",
+          "type": "album",
+          "url": "https://williamduvall.bandcamp.com/album/111221-live-in-studio-nashville",
+          "imageUrl": "https://f4.bcbits.com/img/a0066701283_16.jpg",
+          "releaseDate": "June 10, 2022"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/william-duvall/310994",
+        "allReleaseTitles": [
+          "thisismongolwarriorsoulsfeatofaliceinchainsthehuandfeaturingaliceinchains",
+          "onealone",
+          "111221liveinstudionashville",
+          "smokeandmirrorsfromhollylanestudios",
+          "rockslide",
+          "whitehot",
+          "tilthelightguidesmehome"
+        ],
+        "latestRelease": {
+          "title": "This Is Mongol Warrior Souls Feat William Duvall Of Alice In Chains The Hu And William Duvall Featuring Alice In Chains",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/this-is-mongol-warrior-souls-feat-william-duvall-of-alice-in-chains-the-hu-and-william-duvall-featuring-alice-in-chains/pginy76z5vxtc",
+          "releaseDate": "2023-02-10"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=William%20DuVall"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+William%20DuVall"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

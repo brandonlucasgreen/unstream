@@ -1,0 +1,50 @@
+[
+  {
+    "id": "fecalmatter",
+    "name": "FecalMatter",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0016232234_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://fecalmatter3.bandcamp.com",
+        "allReleaseTitles": [
+          "diahrea",
+          "goneprodbybrowskimusic"
+        ],
+        "latestRelease": {
+          "title": "Diahrea",
+          "type": "track",
+          "url": "https://fecalmatter3.bandcamp.com/track/diahrea",
+          "imageUrl": "https://f4.bcbits.com/img/a1462027763_16.jpg",
+          "releaseDate": "April 30, 2019"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=FecalMatter"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+FecalMatter"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/540434"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=FecalMatter&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/FecalMatter"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

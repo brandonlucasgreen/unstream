@@ -1,0 +1,67 @@
+[
+  {
+    "id": "onewe",
+    "name": "onewe",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0006919010_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://onewe.bandcamp.com",
+        "allReleaseTitles": [
+          "insearchofwillowcreekmichaelboer",
+          "dusttimbremichaelboer",
+          "hologramsmichaelboer",
+          "dreamelevatormichaelboer",
+          "uncharteddigitalsinglebluntobjectsonewechamberdivision",
+          "whitedronewhitedirgemichaelboer",
+          "thefallowedfieldsonewechamberdivision",
+          "catmichaelboer",
+          "lookintomyeyesmichaelboer",
+          "sexualharassmentmichaelboer",
+          "delayedstressmichaelboer"
+        ],
+        "latestRelease": {
+          "title": "In Search of Willow Creek\n                \n                \n\n                Michael Böer",
+          "type": "album",
+          "url": "https://onewe.bandcamp.com/album/in-search-of-willow-creek",
+          "imageUrl": "https://f4.bcbits.com/img/a0129412920_2.jpg",
+          "releaseDate": "February 28, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=onewe"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+onewe"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://onewe.co.kr/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/8202101"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/official_onewe/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCj-dtq6jHfj4_fufifPzMEQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialonewe"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

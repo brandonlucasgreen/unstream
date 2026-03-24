@@ -1,0 +1,54 @@
+[
+  {
+    "id": "haggard-bandcamp-haggardband",
+    "name": "Haggard",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0012683271_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://haggardband.bandcamp.com",
+        "allReleaseTitles": [
+          "awakingthecenturies",
+          "andthoushalttrusttheseer"
+        ],
+        "latestRelease": {
+          "title": "Awaking The Centuries",
+          "type": "album",
+          "url": "https://haggardband.bandcamp.com/album/awaking-the-centuries",
+          "imageUrl": "https://f4.bcbits.com/img/a2583942762_16.jpg",
+          "releaseDate": "February 22, 2018"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/haggard/218215",
+        "allReleaseTitles": [
+          "awakingthecenturies",
+          "andthoushalttrusttheseer",
+          "haveyoueverseenworldsprogressivetechnology",
+          ""
+        ],
+        "latestRelease": {
+          "title": "Haggard Haggard",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/haggard-haggard/zl3b2lnoxelcb",
+          "releaseDate": "2023-12-08"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Haggard"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Haggard"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

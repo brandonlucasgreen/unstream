@@ -1,0 +1,54 @@
+[
+  {
+    "id": "theswingingbluejeans",
+    "name": "The Swinging Blue Jeans",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037049266_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://theswingingbluejeans.bandcamp.com",
+        "allReleaseTitles": [
+          "allthehitsplusmore",
+          "liveshakin"
+        ],
+        "latestRelease": {
+          "title": "All the Hits Plus More",
+          "type": "album",
+          "url": "https://theswingingbluejeans.bandcamp.com/album/all-the-hits-plus-more",
+          "imageUrl": "https://f4.bcbits.com/img/a0326076547_16.jpg",
+          "releaseDate": "January 8, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Swinging%20Blue%20Jeans"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Swinging%20Blue%20Jeans"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.swingingbluejeans.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/269091"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Swinging%20Blue%20Jeans&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Swinging%20Blue%20Jeans"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

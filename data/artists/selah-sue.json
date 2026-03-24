@@ -1,0 +1,104 @@
+[
+  {
+    "id": "selahsue",
+    "name": "Selah Sue",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024306584_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://selahsue.bandcamp.com",
+        "allReleaseTitles": [
+          "anotherwayselahsuethegallands",
+          "personadeluxe",
+          "trytomakefriendstrinixremix",
+          "persona",
+          "hurrayextended",
+          "hurrayfeattobiselahsuetobi",
+          "freefall",
+          "bedroomremixes",
+          "bedroomep",
+          "reason",
+          "rarities",
+          "selahsue"
+        ],
+        "latestRelease": {
+          "title": "Another Way\n                \n                \n\n                Selah Sue, The Gallands",
+          "type": "album",
+          "url": "https://selahsue.bandcamp.com/album/another-way",
+          "imageUrl": "https://f4.bcbits.com/img/a3005732016_2.jpg",
+          "releaseDate": "January 23, 2026"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/selah-sue/354590",
+        "allReleaseTitles": [
+          "asone",
+          "persona",
+          "reason",
+          "bedroomep",
+          "alone",
+          "you",
+          "pills",
+          "movinthegallandsstephanegallandelvingalland",
+          "harleydavidson",
+          "bedroom",
+          "freefall",
+          "togetherfeatchildishgambinochildishgambino",
+          "hurrayfeattobi",
+          "hurray",
+          "pleasefeatceelogreenceelogreen",
+          "",
+          "crazyvibesnekfeuguizmo",
+          "raggamuffinfeatjcolejcole",
+          "trytomakefriends",
+          "alonefeatguizmoguizmo"
+        ],
+        "latestRelease": {
+          "title": "As One Selah Sue",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/as-one-selah-sue/p7ab8sfpfmuga",
+          "releaseDate": "2025-12-05"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Selah%20Sue"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Selah%20Sue"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.selahsue.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1993572"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/selahsue/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@selahsue"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCWfv392tJM2LGc6KQrOZklQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/SelahSue"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

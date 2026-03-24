@@ -1,0 +1,65 @@
+[
+  {
+    "id": "sentenced",
+    "name": "sentenced",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0004671632_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sentenceduk.bandcamp.com",
+        "allReleaseTitles": [
+          "drownedbybloodsentenceduk",
+          "infinitepain",
+          "putrefaction",
+          "waysofthewicked",
+          "evilseedbonustrack"
+        ],
+        "latestRelease": {
+          "title": "Drowned By Blood\n                \n                \n\n                Sentenced UK",
+          "type": "album",
+          "url": "https://sentenceduk.bandcamp.com/album/drowned-by-blood",
+          "imageUrl": "https://f4.bcbits.com/img/a3138526784_2.jpg",
+          "releaseDate": "November 13, 2017"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=sentenced"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+sentenced"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sentenced.org/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/253675"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=sentenced&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/sentenced"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCQIC8L7NvJovBEYt_wcsYQw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Sentenced89"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,114 @@
+[
+  {
+    "id": "converge",
+    "name": "Converge",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041638735_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://convergecult.bandcamp.com",
+        "allReleaseTitles": [
+          "loveisnotenough",
+          "liveatcbgbsconvergecoalesce",
+          "liveinorlandofl031422",
+          "theduskinusdeluxeedition",
+          "thepoacherdiariesredux",
+          "bloodmooniconvergechelseawolfe",
+          "endlessarrow",
+          "beautifulruin",
+          "theduskinus",
+          "icantellyouaboutpain",
+          "janelive",
+          "youfailmeredux",
+          "thousandsofmilesbetweenus",
+          "liveatthebbc",
+          "poundforpoundthewolverinebluessessions",
+          "allweloveweleavebehind"
+        ],
+        "latestRelease": {
+          "title": "Love Is Not Enough",
+          "type": "album",
+          "url": "https://convergecult.bandcamp.com/album/love-is-not-enough",
+          "imageUrl": "https://f4.bcbits.com/img/a1291330267_2.jpg",
+          "releaseDate": "February 13, 2026"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/converge/462192",
+        "allReleaseTitles": [
+          "loveisnotenough",
+          "allweloveweleavebehind",
+          "bloodmooniandchelseawolfe",
+          "youfailmeredux",
+          "icantellyouaboutpain",
+          "caringandkilling",
+          "audiotreefromnothingandaudiotree",
+          "thepoacherdiaries",
+          "beautifulruin",
+          "bloodmoonandchelseawolfe",
+          "liveinorlandofl3142022",
+          "coilandchelseawolfe",
+          "endlessarrow",
+          "janedoe",
+          "theduskinus",
+          "axetofall",
+          "noheroes",
+          "petitioningtheemptysky",
+          "youfailme",
+          "whenforevercomescrashing"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Converge"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Converge"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.convergecult.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/292633"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Converge&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Converge"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/converge/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCztS97HJxfVWncp-QCsTmPA"
+      },
+      {
+        "sourceId": "peertube",
+        "url": "https://videos.cemea.org/video-channels/convergences"
+      },
+      {
+        "sourceId": "bluesky",
+        "url": "https://bsky.app/profile/convergecult.bsky.social"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/converge"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

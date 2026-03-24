@@ -26,16 +26,6 @@
         }
       },
       {
-        "sourceId": "qobuz",
-        "url": "https://www.qobuz.com/us-en/interpreter/elliot-goldenthal/9416",
-        "latestRelease": {
-          "title": "Elliot Goldenthal Music For Film Dirk Brosse Brussels Philharmonic Elliot Goldenthal",
-          "type": "album",
-          "url": "https://www.qobuz.com/us-en/album/elliot-goldenthal-music-for-film-dirk-brosse-brussels-philharmonic-elliot-goldenthal/wd730iy5hqvfa",
-          "releaseDate": "2024-10-18"
-        }
-      },
-      {
         "sourceId": "ampwall",
         "url": "https://ampwall.com/explore?searchStyle=search&query=Elliot%20Goldenthal"
       },
@@ -46,6 +36,26 @@
       {
         "sourceId": "buymeacoffee",
         "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://goldenthal.filmmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/169893"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Elliot%20Goldenthal&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Elliot%20Goldenthal"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ElliotGoldenthal/"
       }
     ],
     "matchConfidence": "verified"

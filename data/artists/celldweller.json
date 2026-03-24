@@ -1,0 +1,84 @@
+[
+  {
+    "id": "celldweller",
+    "name": "Celldweller",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025172968_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://celldweller.bandcamp.com",
+        "allReleaseTitles": [
+          "legacyofkainsoulreaverthedeadshallriseost",
+          "anoffworldchristmas",
+          "whatchildisthissingle",
+          "fakebreakerfeatreebzsinglecelldwellerxswarm",
+          "soundtrackforthevoicesinmyheadvol012025remaster",
+          "celldwellerdefinitiveedition",
+          "switchbacksinglecelldwellerthebrowning",
+          "onegoodreasondrumcorpsremixsingle",
+          "fadeawayvoidchapterremixsingle",
+          "shapeshifterfeatstylesofbeyondzardonicpythiusremixsingle",
+          "uncrownedkaixoremixsingle",
+          "entertheunioversesingle",
+          "satellitesremixed",
+          "satellitesdeluxeedition",
+          "starwarscoverscelldwellerscandroid",
+          "intothevoidremixcontestcompilation"
+        ],
+        "latestRelease": {
+          "title": "Legacy of Kain: Soul Reaver - The Dead Shall Rise (OST)",
+          "type": "album",
+          "url": "https://celldweller.bandcamp.com/album/legacy-of-kain-soul-reaver-the-dead-shall-rise-ost",
+          "imageUrl": "https://f4.bcbits.com/img/a0253096193_2.jpg",
+          "releaseDate": "March 18, 2026"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "http://patreon.com/klayton"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Celldweller"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Celldweller"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.celldweller.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/185072"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Celldweller&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Celldweller"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/celldweller/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/celldweller"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/celldweller"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

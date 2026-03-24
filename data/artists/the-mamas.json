@@ -1,0 +1,52 @@
+[
+  {
+    "id": "themamas",
+    "name": "The Mamas",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030327692_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://themamasmusic.bandcamp.com",
+        "allReleaseTitles": [
+          "trash",
+          "ridingonthebus",
+          "dancefloor",
+          "juicy",
+          "bananaclub",
+          "sneans"
+        ],
+        "latestRelease": {
+          "title": "Trash",
+          "type": "track",
+          "url": "https://themamasmusic.bandcamp.com/track/trash",
+          "imageUrl": "https://f4.bcbits.com/img/a1155227967_2.jpg",
+          "releaseDate": "November 4, 2022"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-mamas/1284310",
+        "allReleaseTitles": [
+          "juicy",
+          "trash",
+          "ridingonthebus",
+          "dancefloor"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Mamas"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Mamas"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

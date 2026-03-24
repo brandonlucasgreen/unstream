@@ -1,0 +1,108 @@
+[
+  {
+    "id": "rachaelyamagata",
+    "name": "Rachael Yamagata",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041582784_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rachaelyamagata.bandcamp.com",
+        "allReleaseTitles": [
+          "porchsongs",
+          "acoustichappenstance",
+          "heavyweightep",
+          "chesapeake",
+          "spinningincircles",
+          "looseendsep",
+          "letmebeyourgirl",
+          "rachaelyamagataaudiotreelive"
+        ],
+        "latestRelease": {
+          "title": "Porch Songs",
+          "type": "album",
+          "url": "https://rachaelyamagata.bandcamp.com/album/porch-songs",
+          "imageUrl": "https://f4.bcbits.com/img/a0695842712_2.jpg",
+          "releaseDate": "October 19, 2018"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/rachael-yamagata/189280",
+        "allReleaseTitles": [
+          "starlitalchemy",
+          "somethingintherainmusicfromtheoriginaltvseries",
+          "elephantsteethsinkingintoheart",
+          "happenstancedeluxeversion",
+          "porchsongs",
+          "nodirectionfromonespringnightpt1",
+          "happenstance",
+          "chesapeake",
+          "acoustichappenstance",
+          "wecouldstillbehappyfromonespringnightpt4",
+          "tightropewalker",
+          "isityoufromonespringnightpt3",
+          "ep",
+          "onaudiotreeliveandaudiotree",
+          "backwards",
+          "birds",
+          "river",
+          "nobody",
+          "selectionsfromelephantsteethsinkingintoheart",
+          "letmebeyourgirl"
+        ],
+        "latestRelease": {
+          "title": "Starlit Alchemy Rachael Yamagata",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/starlit-alchemy-rachael-yamagata/df8hdgv77m7qc",
+          "releaseDate": "2025-10-03"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rachael%20Yamagata"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rachael%20Yamagata"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://rachaelyamagata.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/517770"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rachael%20Yamagata&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rachael%20Yamagata"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rachaelyamagata/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@officialrachaelyamagata"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/RachaelYamagataTV"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/rachaelyamagata"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

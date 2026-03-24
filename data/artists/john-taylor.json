@@ -1,0 +1,46 @@
+[
+  {
+    "id": "johntaylor",
+    "name": "John Taylor",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022849079_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://johntaylor4.bandcamp.com",
+        "allReleaseTitles": [
+          "waning",
+          "localonthe8s",
+          "howwouldiknow",
+          "leavingsosoon",
+          "seven",
+          "doyawanna",
+          "thedan",
+          "shine",
+          "rooted",
+          "insideout"
+        ],
+        "latestRelease": {
+          "title": "Waning",
+          "type": "track",
+          "url": "https://johntaylor4.bandcamp.com/track/waning",
+          "imageUrl": "https://f4.bcbits.com/img/a0051735752_2.jpg",
+          "releaseDate": "May 24, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=John%20Taylor"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+John%20Taylor"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

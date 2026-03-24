@@ -1,0 +1,66 @@
+[
+  {
+    "id": "deathstars",
+    "name": "Death Stars",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3330208474_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://deathstars.bandcamp.com",
+        "allReleaseTitles": [
+          "arseholefactorydeathstarssyntaxmules",
+          "deathstarsfeathauntsofchoosemicsdeathstarssyntaxmulesfeaturinghaunts"
+        ],
+        "latestRelease": {
+          "title": "Arsehole Factory\n                \n                \n\n                Death Stars [Syntax & Mules]",
+          "type": "track",
+          "url": "https://deathstars.bandcamp.com/track/arsehole-factory",
+          "imageUrl": "https://f4.bcbits.com/img/a1165396711_16.jpg",
+          "releaseDate": "July 15, 2011"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Death%20Stars"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Death%20Stars"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.deathstars.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/252553"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Death%20Stars&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Death%20Stars"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/deathstarsofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/deathstars"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/deathstars"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

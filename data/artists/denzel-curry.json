@@ -1,0 +1,75 @@
+[
+  {
+    "id": "denzelcurry",
+    "name": "Denzel Curry",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0043117229_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://denzelcurrymusic.bandcamp.com",
+        "allReleaseTitles": [
+          "strictly4thescythe",
+          "kingofthemischievoussouth",
+          "stillinthepaintwithlazerdim700bktheruladenzelcurrylazerdim700bktherula",
+          "kingofthemischievoussouthvol2",
+          "skedwoo",
+          "skedfeatkennymason",
+          "meltmyeyezseeyourfuture",
+          "denzelcurrykeyglockremix",
+          "zatoichifeatslowthai",
+          "walkin",
+          "thegame",
+          "unlocked15",
+          "soincrediblepkgrobertglasperversiondenzelcurrysmino",
+          "livefromtheabyss",
+          "unlockedinstrumentals",
+          "unlockeddenzelcurrykennybeats"
+        ],
+        "latestRelease": {
+          "title": "Strictly 4 The Scythe",
+          "type": "album",
+          "url": "https://denzelcurrymusic.bandcamp.com/album/strictly-4-the-scythe",
+          "imageUrl": "https://f4.bcbits.com/img/a2094917125_2.jpg",
+          "releaseDate": "March 6, 2026"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/denzel-curry/1815481",
+        "allReleaseTitles": [
+          "hivemindfeatknockedloose",
+          "meltmyeyezseeyourfuture",
+          "strictly4thescythe",
+          "kingofthemischievoussouth",
+          "bruuuhjid",
+          "blackopskidcudi",
+          "kingofthemischievoussouthvol2",
+          "unlockedkennybeats",
+          "goatedarmaniwhite",
+          "walkin",
+          "bullsonparade",
+          "tokyodriftingglassanimals",
+          "fakejeezymaxokreamjpegmafia",
+          "subidkand",
+          "dbzyourolddroogmethodmanandfeaturingmadlib",
+          "lemonadeyungblud",
+          "5dayswithmeechydarkojasiahmeechydarko"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Denzel%20Curry"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Denzel%20Curry"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

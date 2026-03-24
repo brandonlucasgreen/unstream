@@ -1,0 +1,120 @@
+[
+  {
+    "id": "theymightbegiants",
+    "name": "They Might Be Giants",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019754365_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tmbg.bandcamp.com",
+        "allReleaseTitles": [
+          "outsidebrain",
+          "wutang",
+          "whoaretheelectors",
+          "floodliveinamerica",
+          "stellub",
+          "thespinesurfsalonerarities19982005",
+          "beastofhorns",
+          "lazy",
+          "book",
+          "thepamphletep",
+          "romansongsjohnlinnell",
+          "ilostthursday",
+          "johnhenrydemos",
+          "liveatthemusichallofwilliamsburg112915",
+          "mymurderedremains",
+          "theescapeteam"
+        ],
+        "latestRelease": {
+          "title": "Outside Brain",
+          "type": "track",
+          "url": "https://tmbg.bandcamp.com/track/outside-brain",
+          "imageUrl": "https://f4.bcbits.com/img/a0250181850_2.jpg",
+          "releaseDate": "March 17, 2026"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/they-might-be-giants/203553",
+        "allReleaseTitles": [
+          "flood",
+          "eyeball",
+          "thecommunistshavethemusic",
+          "wutang",
+          "thespine",
+          "longtallweekend",
+          "lazy",
+          "partofyouwantstobelieveme",
+          "apollo18",
+          "ilikefun",
+          "book",
+          "beastofhornssampler",
+          "icantrememberthedream",
+          "outsidebrain",
+          "supercool",
+          "whoaretheelectors",
+          "ibrokemyownrule",
+          "theworldistodig",
+          "factoryshowroom",
+          "herecomesscienceforkids"
+        ],
+        "latestRelease": {
+          "title": "Wu Tang They Might Be Giants",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/wu-tang-they-might-be-giants/o5ulkbd931vah",
+          "releaseDate": "2026-02-10"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=They%20Might%20Be%20Giants"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+They%20Might%20Be%20Giants"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.tmbg.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/159350"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=They%20Might%20Be%20Giants&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/They%20Might%20Be%20Giants"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/tmbgofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@tmbgofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/ParticleMen"
+      },
+      {
+        "sourceId": "bluesky",
+        "url": "https://bsky.app/profile/tmbg.bsky.social"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/theymightbegiants"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

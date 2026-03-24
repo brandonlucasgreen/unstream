@@ -1,0 +1,66 @@
+[
+  {
+    "id": "osmutantes",
+    "name": "Os Mutantes",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0008708361_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://osmutantes.bandcamp.com",
+        "allReleaseTitles": [
+          "worldpsychedelicclassics1everythingispossiblethebestofosmutantes",
+          "liveatthebarbicantheatre"
+        ],
+        "latestRelease": {
+          "title": "World Psychedelic Classics 1: Everything is Possible: The Best of Os Mutantes",
+          "type": "album",
+          "url": "https://osmutantes.bandcamp.com/album/world-psychedelic-classics-1-everything-is-possible-the-best-of-os-mutantes",
+          "imageUrl": "https://f4.bcbits.com/img/a1699171970_16.jpg",
+          "releaseDate": "June 8, 1999"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Os%20Mutantes"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Os%20Mutantes"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.osmutantes.com.br/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/15161"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Os%20Mutantes&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Os%20Mutantes"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/osmutantesbanda/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/bandamutantes"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/osmutantes"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

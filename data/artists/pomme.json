@@ -1,0 +1,62 @@
+[
+  {
+    "id": "pomme",
+    "name": "pomme",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0000522434_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://pomme.bandcamp.com",
+        "allReleaseTitles": [
+          "pommeliveatthefarmstudiospomme",
+          "pommelp2012pomme"
+        ],
+        "latestRelease": {
+          "title": "Pomme Live at The Farm Studios\n                \n                \n\n                Pomme",
+          "type": "album",
+          "url": "https://pomme.bandcamp.com/album/pomme-live-at-the-farm-studios",
+          "imageUrl": "https://f4.bcbits.com/img/a0811605986_16.jpg",
+          "releaseDate": "November 6, 2012"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=pomme"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+pomme"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.pommemusic.fr/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3786024"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/pommeofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@tamere_enstringdeguerre"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCZy0-5YHgLpzgT-biGtJgJg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pommeofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

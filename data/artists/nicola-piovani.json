@@ -1,0 +1,73 @@
+[
+  {
+    "id": "nicolapiovani",
+    "name": "Nicola Piovani",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030539951_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://nicolapiovani.bandcamp.com",
+        "allReleaseTitles": [
+          "ilprofumodellasignorainnerotheperfumeoftheladyinblackoriginalmotionpicturesoundtrack",
+          "lavitaingiocolavieenjeuoriginalmotionpicturesoundtrack",
+          "nelnomedelpadreinthenameofthefatheroriginalmotionpicturesoundtrackexpandededition",
+          "lemieragazzedicartaoriginalmotionpicturesoundtrack",
+          "thebestofnicolapiovani",
+          "nowhereoriginalmotionpicturesoundtrack",
+          "ilmarchesedelgrillooriginalmotionpicturesoundtrack",
+          "ifratellidefilippooriginalmotionpicturesoundtrackdeluxeedition",
+          "gliannipiubellibestyearsoriginalmotionpicturesoundtrack",
+          "acasatuttibenethereisnoplacelikehomeoriginalsoundtrack",
+          "gingerefredoriginalmotionpicturesoundtrack",
+          "iltrenoperistanbuloriginalmotionpicturesoundtrack",
+          "nelnomedelpadreoriginalmotionpicturesoundtrack"
+        ],
+        "latestRelease": {
+          "title": "Il profumo della signora in nero - The Perfume of the Lady in Black (Original Motion Picture Soundtrack)",
+          "type": "album",
+          "url": "https://nicolapiovani.bandcamp.com/album/il-profumo-della-signora-in-nero-the-perfume-of-the-lady-in-black-original-motion-picture-soundtrack",
+          "imageUrl": "https://f4.bcbits.com/img/a3703421040_2.jpg",
+          "releaseDate": "July 4, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Nicola%20Piovani"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Nicola%20Piovani"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.nicolapiovani.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/523696"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Nicola%20Piovani&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Nicola%20Piovani"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/nicolapiovaniufficiale/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Nicola-Piovani/48997597049"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

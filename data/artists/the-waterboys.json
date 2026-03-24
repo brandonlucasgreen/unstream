@@ -30,6 +30,12 @@
       {
         "sourceId": "qobuz",
         "url": "https://www.qobuz.com/us-en/interpreter/the-waterboys/66858",
+        "latestRelease": {
+          "title": "The Waterboys Present Rips From The Cutting Room Floor The Waterboys",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-waterboys-present-rips-from-the-cutting-room-floor-the-waterboys/pg0xddvp8edsj",
+          "releaseDate": "2025-12-05"
+        },
         "allReleaseTitles": [
           "lifedeathanddennishopper",
           "presentripsfromthecuttingroomfloor",
@@ -39,13 +45,11 @@
           "anappointmentwithmryeats",
           "goodluckseeker",
           "allsoulshill"
-        ],
-        "latestRelease": {
-          "title": "The Waterboys Present Rips From The Cutting Room Floor The Waterboys",
-          "type": "album",
-          "url": "https://www.qobuz.com/us-en/album/the-waterboys-present-rips-from-the-cutting-room-floor-the-waterboys/pg0xddvp8edsj",
-          "releaseDate": "2025-12-05"
-        }
+        ]
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/waterboys"
       },
       {
         "sourceId": "ampwall",
@@ -60,8 +64,40 @@
         "url": "https://buymeacoffee.com/explore-creators"
       },
       {
-        "sourceId": "patreon",
-        "url": "https://www.patreon.com/waterboys"
+        "sourceId": "officialsite",
+        "url": "http://www.mikescottwaterboys.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/125174"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Waterboys&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Waterboys"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/waterboysmusic/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@thewaterboys.music?_t=ZT-8sg8sG596ty&_r=1"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCMflk2MD3YD_N30ujpHuMYA"
+      },
+      {
+        "sourceId": "bluesky",
+        "url": "https://bsky.app/profile/waterboysmusic.bsky.social"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/TheWaterboysOfficial"
       }
     ],
     "matchConfidence": "verified"

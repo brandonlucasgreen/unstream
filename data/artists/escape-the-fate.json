@@ -1,0 +1,100 @@
+[
+  {
+    "id": "escapethefate",
+    "name": "Escape the Fate",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027319402_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://escapethefate.bandcamp.com",
+        "allReleaseTitles": [
+          "chemicalwarfarebsides",
+          "chemicalwarfare",
+          "iamhuman",
+          "hateme",
+          "ungrateful"
+        ],
+        "latestRelease": {
+          "title": "Chemical Warfare: B-Sides",
+          "type": "album",
+          "url": "https://escapethefate.bandcamp.com/album/chemical-warfare-b-sides",
+          "imageUrl": "https://f4.bcbits.com/img/a3677781670_2.jpg",
+          "releaseDate": "September 10, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/escape-the-fate/322046",
+        "allReleaseTitles": [
+          "redefineddeadrabbittsjudgejury",
+          "masochisticloversthehauntand",
+          "hellscapedeadrabbittsjudgejury",
+          "mistakedeadrabbittslaurenbabicjudgejury",
+          "oxygendeadrabbittsattilajudgejury",
+          "artificialgodsdeadrabbittshighsocietyjudgejury",
+          "chemicalwarfarebsides",
+          "blackmoldsilosjudgejurycraigmabbitt",
+          "dyingisyourlatestfashion",
+          "ungrateful",
+          "",
+          "theresnosympathyforthedead",
+          "thiswarisours",
+          "outoftheshadows20",
+          "cheerstogoodbyefeatspencercharnasiceninekillsfeatspencercharnas",
+          "monster",
+          "christmassong",
+          "dearlydepartedfeatrobbietheusedtheusedfeatrobbietheused",
+          "iamhuman"
+        ],
+        "latestRelease": {
+          "title": "Redefined Dead Rabbitts Escape The Fate Judge Jury",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/redefined-dead-rabbitts-escape-the-fate-judge-jury/pm8tdglnbdqyc",
+          "releaseDate": "2025-03-14"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/escapethefate"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Escape%20the%20Fate"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Escape%20the%20Fate"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.escapethefate.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/479886"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/escapethefate/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@escapethefateofficial?lang=ja-JP&is_from_webapp=1&sender_device=mobile&sender_web_id=7315411612041971218"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCx2op0Cvq3d6NQUf9B0wBQg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/escapethefate"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

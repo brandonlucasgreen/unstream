@@ -1,0 +1,41 @@
+[
+  {
+    "id": "wildyouth",
+    "name": "WildYouth",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0001766920_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://wildyouthfl.bandcamp.com",
+        "allReleaseTitles": [
+          "rappininwonderland",
+          "computershorts",
+          "strangedazesingle",
+          "centersingle",
+          "itsfeltlikeyearsandyetep"
+        ],
+        "latestRelease": {
+          "title": "Rappin In Wonderland",
+          "type": "album",
+          "url": "https://wildyouthfl.bandcamp.com/album/rappin-in-wonderland",
+          "imageUrl": "https://f4.bcbits.com/img/a3105916993_2.jpg",
+          "releaseDate": "February 16, 2014"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=WildYouth"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+WildYouth"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

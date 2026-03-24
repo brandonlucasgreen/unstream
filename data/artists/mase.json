@@ -1,0 +1,51 @@
+[
+  {
+    "id": "mase",
+    "name": "MASE",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3088174053_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mase.bandcamp.com",
+        "allReleaseTitles": [
+          "scaleofjudgmentmase",
+          "unitedstatesofwhat",
+          "backtothestreets"
+        ],
+        "latestRelease": {
+          "title": "Scale Of Judgment\n                \n                \n\n                Mase",
+          "type": "album",
+          "url": "https://mase.bandcamp.com/album/scale-of-judgment",
+          "imageUrl": "https://f4.bcbits.com/img/a3088174053_2.jpg",
+          "releaseDate": "March 21, 2017"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=MASE"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+MASE"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/836326"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=MASE&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/MASE"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

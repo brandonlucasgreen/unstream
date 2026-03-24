@@ -1,0 +1,77 @@
+[
+  {
+    "id": "juli",
+    "name": "Juli",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033021709_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://julioixna.bandcamp.com",
+        "allReleaseTitles": [
+          "timelinebjorkremixdubversion",
+          "resonance",
+          "dubinthestreetoixnafeatbexniwithloveoixnabexni",
+          "julitrash",
+          "horns"
+        ],
+        "latestRelease": {
+          "title": "Timeline [Björk Remix - dub version]",
+          "type": "track",
+          "url": "https://julioixna.bandcamp.com/track/timeline-bj-rk-remix-dub-version",
+          "imageUrl": "https://f4.bcbits.com/img/a1145682374_2.jpg",
+          "releaseDate": "December 1, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Juli"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Juli"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.juli.tv/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/255033"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Juli&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Juli"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/juliband/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@juli.band"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UClkiJNUravQBU-7HzKXGv7Q"
+      },
+      {
+        "sourceId": "peertube",
+        "url": "https://makertube.net/video-channels/julianh_channel"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/julimusik"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "saratavares",
+    "name": "Sara Tavares",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a2119265746_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://saratavares.bandcamp.com",
+        "allReleaseTitles": [
+          "xinti",
+          "balance"
+        ],
+        "latestRelease": {
+          "title": "Xinti",
+          "type": "album",
+          "url": "https://saratavares.bandcamp.com/album/xinti",
+          "imageUrl": "https://f4.bcbits.com/img/a2119265746_16.jpg",
+          "releaseDate": "May 11, 2009"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sara%20Tavares"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sara%20Tavares"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

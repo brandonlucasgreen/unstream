@@ -1,0 +1,73 @@
+[
+  {
+    "id": "piquedjacks",
+    "name": "Piqued Jacks",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036948120_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://piquedjacks.bandcamp.com",
+        "allReleaseTitles": [
+          "eternalrideofaheartfulmindremixsingle",
+          "thelivingpast",
+          "eternalrideofaheartfulmindsingle",
+          "lonervsloversingle",
+          "wildlyshinesingle",
+          "aerialroots",
+          "shyestkindredspiritacousticsingle",
+          "climblikeivydoesdeluxeedition",
+          "romanticsoldiersingle",
+          "nobazookasingle",
+          "upturnedperspectivessingle",
+          "amusementparksingle",
+          "mykitesingle",
+          "youphoricsingle",
+          "justamachineep",
+          "brotherhoodsep",
+          "momothemonkeyep"
+        ],
+        "latestRelease": {
+          "title": "Eternal Ride Of A Heartful Mind (Remix Single)",
+          "type": "track",
+          "url": "https://piquedjacks.bandcamp.com/track/eternal-ride-of-a-heartful-mind-remix-single",
+          "imageUrl": "https://f4.bcbits.com/img/a4177407887_2.jpg",
+          "releaseDate": "April 24, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Piqued%20Jacks"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Piqued%20Jacks"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.piquedjacks.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5358195"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/piquedjacks_/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/fourPiquedJacks"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/piquedjacks"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

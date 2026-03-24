@@ -1,0 +1,76 @@
+[
+  {
+    "id": "bbno",
+    "name": "bbno$",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041266164_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bbnomoney.bandcamp.com",
+        "allReleaseTitles": [
+          "bbno",
+          "meanttobe",
+          "babygravy3lol",
+          "takeatrip",
+          "tickingaway",
+          "thisisnotabeaniehaha",
+          "badboyremix",
+          "girlfriend",
+          "quarantinefreeeee",
+          "uneedjesus",
+          "ithappenslittlebig",
+          "sorry",
+          "still",
+          "myohmy",
+          "badtothebone",
+          "goodnessgracious"
+        ],
+        "latestRelease": {
+          "title": "bbno$",
+          "type": "album",
+          "url": "https://bbnomoney.bandcamp.com/album/bbno",
+          "imageUrl": "https://f4.bcbits.com/img/a3112057469_2.jpg",
+          "releaseDate": "October 17, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=bbno%24"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+bbno%24"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://bbnomula.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/6756549"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/bbnomula/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@bbnotiktok"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCC8FSfSnbjiZ6vGr68ZLtzg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/bbnomula"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

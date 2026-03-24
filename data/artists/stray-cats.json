@@ -1,0 +1,67 @@
+[
+  {
+    "id": "straycats",
+    "name": "Stray Cats",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0007862869_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://goldenlanestraycats.bandcamp.com",
+        "allReleaseTitles": [
+          "liveattheroxy1981",
+          "liveattheroxy1981",
+          "rockabillystrut"
+        ],
+        "latestRelease": {
+          "title": "Live at the Roxy 1981",
+          "type": "album",
+          "url": "https://goldenlanestraycats.bandcamp.com/album/live-at-the-roxy-1981-2",
+          "imageUrl": "https://f4.bcbits.com/img/a0728009496_2.jpg",
+          "releaseDate": "September 16, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Stray%20Cats"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Stray%20Cats"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.straycats.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/180921"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Stray%20Cats&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Stray%20Cats"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/StrayCatsmusic/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCXa6Zx78hAdpxWndrhLr3Ug"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/people/Stray-Cats/100044619660843/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

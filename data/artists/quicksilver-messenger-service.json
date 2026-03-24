@@ -1,0 +1,73 @@
+[
+  {
+    "id": "quicksilvermessengerservice",
+    "name": "Quicksilver Messenger Service",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0005716272_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://quicksilvermessengerservice.bandcamp.com",
+        "allReleaseTitles": [
+          "happytrailslive1969",
+          "raretracks",
+          "morehappytrails1969",
+          "anthologybox19661970digitalcopyonly",
+          "liveacrossamerica19671977",
+          "newyearseve1967",
+          "stonybrookcollegenewyork1970live",
+          "fillmoreauditoriumfebruary51967live",
+          "liveinsanjoseseptember1966",
+          "fillmoreauditoriumnovember51966",
+          "liveatthewinterlandballroomdecember11973",
+          "liveattheoldmilltavernmarch291970",
+          "liveatthefillmorejune71968"
+        ],
+        "latestRelease": {
+          "title": "Happy Trails Live 1969",
+          "type": "album",
+          "url": "https://quicksilvermessengerservice.bandcamp.com/album/happy-trails-live-1969",
+          "imageUrl": "https://f4.bcbits.com/img/a0231202738_2.jpg",
+          "releaseDate": "March 20, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Quicksilver%20Messenger%20Service"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Quicksilver%20Messenger%20Service"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://quicksilvermessengerservice.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/335811"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Quicksilver%20Messenger%20Service&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Quicksilver%20Messenger%20Service"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCULeBH-b2jqU6xP518x4RKQ/videos"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/QMS-Quicksilver-Messenger-Service-32915458057"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

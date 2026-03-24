@@ -1,0 +1,71 @@
+[
+  {
+    "id": "claude",
+    "name": "Claude",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0029041838_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://girlclaude.bandcamp.com",
+        "allReleaseTitles": [
+          "youmayaswellbeavampire",
+          "alotsgonnachange",
+          "enactor"
+        ],
+        "latestRelease": {
+          "title": "You May as Well Be a Vampire",
+          "type": "track",
+          "url": "https://girlclaude.bandcamp.com/track/you-may-as-well-be-a-vampire",
+          "imageUrl": "https://f4.bcbits.com/img/a0876303162_2.jpg",
+          "releaseDate": "August 16, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/claude/47925",
+        "latestRelease": {
+          "title": "Amour Claude",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/amour-claude/e5j6tjvokzuea",
+          "releaseDate": "2025-09-26"
+        },
+        "allReleaseTitles": [
+          "amour",
+          "bestezangers2024",
+          "ecoutezmoi",
+          "addition",
+          "lapression",
+          "thesinglescollection",
+          "ebvloed",
+          "lowpressure",
+          "midnight",
+          "everythingsgreat",
+          "barbie",
+          "risky",
+          "blocks",
+          "additionsoustraction",
+          "odeamark",
+          "alotsgonnachange"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Claude"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Claude"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/claudeofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

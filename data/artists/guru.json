@@ -1,0 +1,38 @@
+[
+  {
+    "id": "guruuru",
+    "name": "Guru / Ǥứŕū",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032031380_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://guru-ritual.bandcamp.com",
+        "allReleaseTitles": [
+          "revelintheendoftheworld",
+          "novalvx"
+        ],
+        "latestRelease": {
+          "title": "Revel in the End of the World",
+          "type": "album",
+          "url": "https://guru-ritual.bandcamp.com/album/revel-in-the-end-of-the-world-2",
+          "imageUrl": "https://f4.bcbits.com/img/a1096794000_16.jpg",
+          "releaseDate": "April 25, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Guru%20%2F%20%C7%A4%E1%BB%A9%C5%95%C5%AB"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Guru%20%2F%20%C7%A4%E1%BB%A9%C5%95%C5%AB"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

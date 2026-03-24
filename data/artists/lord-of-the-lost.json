@@ -1,0 +1,105 @@
+[
+  {
+    "id": "lordofthelost",
+    "name": "Lord Of The Lost",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038905127_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://lordofthelost.bandcamp.com",
+        "allReleaseTitles": [
+          "opvsnoirvol3",
+          "ihatepeoplefeatwednesday13",
+          "opvsnoirvol2instrumental",
+          "liveatgothicmeetsklassik2023",
+          "opvsnoirvol2",
+          "opvsnoirvol1instrumental",
+          "raveyardfeatkaarija",
+          "opvsnoirvol1",
+          "mysanctuary",
+          "judasinstrumental",
+          "lordsoffyre",
+          "liveatwoa",
+          "weaponsofmassseduction",
+          "weaponsofmassseductiondeluxeversion",
+          "onelastsongsingleedit",
+          "bloodglitterinstrumental"
+        ],
+        "latestRelease": {
+          "title": "OPVS NOIR Vol. 3",
+          "type": "album",
+          "url": "https://lordofthelost.bandcamp.com/album/opvs-noir-vol-3",
+          "imageUrl": "https://f4.bcbits.com/img/a3380438354_2.jpg"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/lord-of-the-lost/894451",
+        "allReleaseTitles": [
+          "opvsnoirvol1",
+          "opvsnoirvol2",
+          "lightcanonlyshineinthedarknesswithintemptation",
+          "weaponsofmassseduction",
+          "bloodglitter",
+          "judas",
+          "lordsoffyrefeuerschwanz",
+          "swansymphoniesiii",
+          "wouldyouwalkwithmethroughhellinfectedrain",
+          "iwilldieinit",
+          "raveyard",
+          "oneofuswillbenext",
+          "mysanctuary",
+          "theartofbeingalonebeyondtheblack",
+          "ihatepeoplewednesday13",
+          "liveatgothicmeetsklassik2023",
+          "lavieesthellhannesbraun",
+          "lordsoffyrefeuerschwanz"
+        ],
+        "latestRelease": {
+          "title": "Opvs Noir Vol 2 Lord Of The Lost",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/opvs-noir-vol-2-lord-of-the-lost/mw6rc1pb27uca",
+          "releaseDate": "2025-12-12"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lord%20Of%20The%20Lost"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lord%20Of%20The%20Lost"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://lordofthelost.de/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1579621"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/officiallordofthelost/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@lordofthelostofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCKmi2SZRPoCqXA01qtzIqrw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/lordofthelost"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

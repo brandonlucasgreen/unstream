@@ -1,0 +1,64 @@
+[
+  {
+    "id": "yolandabecool",
+    "name": "Yolanda Be Cool",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0010778349_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://yolandabecool.bandcamp.com",
+        "allReleaseTitles": [
+          "getdownfeattraxmangabssremixyolandabecooltraxman",
+          "getdownfeattraxmanremixesyolandabecooltraxman",
+          "getdownfeattraxmanyolandabecooltraxman",
+          "nowlisten",
+          "emergencyremixestommytrashyolandabecool",
+          "emergencytommytrashyolandabecool",
+          "wenospeakamericano10yearanniversaryyolandabecooldcup",
+          "nomoresorrowremixes",
+          "nomoresorrowjadedremix",
+          "nomoresorrow",
+          "danceandchantremixesthesequel",
+          "danceandchantremixes",
+          "danceandchant",
+          "musikafeatkwanzaaposse",
+          "hacialanocheremixesyolandabecoolmassivedrum",
+          "hacialanocheyolandabecoolmassivedrum"
+        ],
+        "latestRelease": {
+          "title": "Get Down (feat. Traxman) [Gabss Remix]\n                \n                \n\n                Yolanda Be Cool & Traxman",
+          "type": "album",
+          "url": "https://yolandabecool.bandcamp.com/album/get-down-feat-traxman-gabss-remix",
+          "imageUrl": "https://f4.bcbits.com/img/a0895595208_2.jpg",
+          "releaseDate": "January 9, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Yolanda%20Be%20Cool"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Yolanda%20Be%20Cool"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1561295"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/yolandabecool"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "http://www.facebook.com/YolandaBeCool2"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

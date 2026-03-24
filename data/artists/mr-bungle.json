@@ -1,0 +1,81 @@
+[
+  {
+    "id": "mrbungle",
+    "name": "Mr. Bungle",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024584408_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mrbungle.bandcamp.com",
+        "allReleaseTitles": [
+          "thenighttheycamehome",
+          "theragingwrathoftheeasterbunnydemo",
+          "usa"
+        ],
+        "latestRelease": {
+          "title": "The Night They Came Home",
+          "type": "album",
+          "url": "https://mrbungle.bandcamp.com/album/the-night-they-came-home",
+          "imageUrl": "https://f4.bcbits.com/img/a4156460356_2.jpg",
+          "releaseDate": "June 11, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/mr-bungle/343677",
+        "allReleaseTitles": [
+          "theragingwrathoftheeasterbunnydemo",
+          "usa",
+          "thenighttheycamehome",
+          "",
+          "eracist",
+          "suddendeath",
+          "lossofcontrol",
+          "bunglegrind",
+          "california",
+          "discovolante",
+          "thestudioalbumcollection",
+          ""
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mr.%20Bungle"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mr.%20Bungle"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.mrbungle.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/202323"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Mr.%20Bungle&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Mr.%20Bungle"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/mrbungleofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ou818"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,70 @@
+[
+  {
+    "id": "caravan",
+    "name": "Caravan",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a1683745755_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://caravan-riviera-ep.bandcamp.com",
+        "allReleaseTitles": [
+          "pt008sicilianoep",
+          "pt001rivieraep"
+        ],
+        "latestRelease": {
+          "title": "PT008 - Siciliano EP",
+          "type": "album",
+          "url": "https://caravan-riviera-ep.bandcamp.com/album/pt008-siciliano-ep",
+          "imageUrl": "https://f4.bcbits.com/img/a1683745755_16.jpg",
+          "releaseDate": "February 22, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Caravan"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Caravan"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://officialcaravan.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/66999"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Caravan&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Caravan"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/caravancanterburyband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCqMZ5-eJyASSx43kfoH8G5Q"
+      },
+      {
+        "sourceId": "peertube",
+        "url": "https://www.yiny.org/video-channels/caravan_tour"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/OfficialCaravan"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

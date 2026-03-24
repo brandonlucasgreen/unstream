@@ -1,0 +1,50 @@
+[
+  {
+    "id": "dennisbrown",
+    "name": "Dennis Brown",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0012364642_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://dennisbrown.bandcamp.com",
+        "allReleaseTitles": [
+          "ififollowmyheart",
+          "nomanisanisland"
+        ],
+        "latestRelease": {
+          "title": "If I Follow My Heart",
+          "type": "album",
+          "url": "https://dennisbrown.bandcamp.com/album/if-i-follow-my-heart",
+          "imageUrl": "https://f4.bcbits.com/img/a0134034124_16.jpg",
+          "releaseDate": "October 30, 2015"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Dennis%20Brown"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Dennis%20Brown"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/77811"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Dennis%20Brown&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Dennis%20Brown"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

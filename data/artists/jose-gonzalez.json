@@ -1,0 +1,51 @@
+[
+  {
+    "id": "josegonzalez",
+    "name": "José González",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041582115_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://josgonzlez.bandcamp.com",
+        "allReleaseTitles": [
+          "againstthedyingofthelight",
+          "pajarito",
+          "brokenarrowsporticoquartetrework",
+          "heartbeatslogic1000remix",
+          "crossesbibioremix",
+          "veneer20thanniversarydeluxeedition",
+          "localvalleydeluxe",
+          "headonep",
+          "visionsep",
+          "visionselaminusremix",
+          "swingep",
+          "swingsolomunremix",
+          "elinventoremixep",
+          "tjommedjkozeremix",
+          "localvalley",
+          "elinvento"
+        ],
+        "latestRelease": {
+          "title": "Against the Dying of the Light",
+          "type": "album",
+          "url": "https://josgonzlez.bandcamp.com/album/against-the-dying-of-the-light",
+          "imageUrl": "https://f4.bcbits.com/img/a0185547224_2.jpg"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jos%C3%A9%20Gonz%C3%A1lez"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jos%C3%A9%20Gonz%C3%A1lez"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

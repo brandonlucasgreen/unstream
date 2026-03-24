@@ -1,0 +1,100 @@
+[
+  {
+    "id": "cristinabranco",
+    "name": "Cristina Branco",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033620479_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://cristinabranco.bandcamp.com",
+        "allReleaseTitles": [
+          "mae",
+          "eva",
+          "branco",
+          "menina"
+        ],
+        "latestRelease": {
+          "title": "mãe",
+          "type": "album",
+          "url": "https://cristinabranco.bandcamp.com/album/m-e",
+          "imageUrl": "https://f4.bcbits.com/img/a1323228260_16.jpg",
+          "releaseDate": "September 22, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/cristina-branco/40098",
+        "allReleaseTitles": [
+          "fadoemmovimentoagnespykabernardocoutoensembledesequilibres",
+          "mae",
+          "mulheresdeabril",
+          "amorasnumatardedeoutonojoaopauloestevesdasilva",
+          "senhoradomarredondo",
+          "endechasabarbaraescrava",
+          "teresatorga",
+          "olencodacarolinajoaopauloestevesdasilva",
+          "murmurios",
+          "eva",
+          "menina",
+          "branco",
+          "denaosaberoquemeespera",
+          "ulisses",
+          "corpoiluminado",
+          "sensus"
+        ],
+        "latestRelease": {
+          "title": "Mulheres De Abril Cristina Branco",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/mulheres-de-abril-cristina-branco/emr5f4v7urm9a",
+          "releaseDate": "2025-11-28"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Cristina%20Branco"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Cristina%20Branco"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.cristinabranco.pt/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/278946"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Cristina%20Branco&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Cristina%20Branco"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/cristinabrancocb/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@cristinabrancomusica"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCA-6bZ3BcWmL4cEP8EQ5OAQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/CristinaBrancoCB"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

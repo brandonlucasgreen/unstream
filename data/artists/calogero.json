@@ -1,0 +1,58 @@
+[
+  {
+    "id": "calogero",
+    "name": "Calogero",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0010444528_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://calogero.bandcamp.com",
+        "allReleaseTitles": [
+          "beettapesvol2assortedmelodies",
+          "beettapesvol1"
+        ],
+        "latestRelease": {
+          "title": "Beet tape(s) vol 2 assorted melodies",
+          "type": "album",
+          "url": "https://calogero.bandcamp.com/album/beet-tape-s-vol-2-assorted-melodies",
+          "imageUrl": "https://f4.bcbits.com/img/a1310182151_16.jpg",
+          "releaseDate": "May 30, 2017"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Calogero"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Calogero"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.calogero.fr/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1988594"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Calogero&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Calogero"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/calogero.officiel"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

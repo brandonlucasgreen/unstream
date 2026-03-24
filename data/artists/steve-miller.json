@@ -1,0 +1,61 @@
+[
+  {
+    "id": "stevemiller",
+    "name": "Steve Miller",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039318917_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://stevemiller.bandcamp.com",
+        "allReleaseTitles": [
+          "counterbalance",
+          "echelon"
+        ],
+        "latestRelease": {
+          "title": "Counterbalance",
+          "type": "album",
+          "url": "https://stevemiller.bandcamp.com/album/counterbalance",
+          "imageUrl": "https://f4.bcbits.com/img/a1179349757_16.jpg",
+          "releaseDate": "April 15, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/steve-miller/69705",
+        "allReleaseTitles": [
+          "flylikeaneagleplayingforchangeivanneville",
+          "born2bblue",
+          "themountain",
+          "liberty",
+          "echelon",
+          "conundrum",
+          "homebrewedeltondeanpippyle",
+          "soliloquy",
+          "counterbalance",
+          "recoiltherapy",
+          "thestorysofarohreallyandlolcoxhill"
+        ],
+        "latestRelease": {
+          "title": "Fly Like An Eagle Playing For Change Steve Miller Ivan Neville",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/fly-like-an-eagle-playing-for-change-steve-miller-ivan-neville/i3y7xo8s178wc",
+          "releaseDate": "2025-02-20"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Steve%20Miller"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Steve%20Miller"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

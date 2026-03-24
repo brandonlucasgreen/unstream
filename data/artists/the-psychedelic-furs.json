@@ -1,0 +1,87 @@
+[
+  {
+    "id": "thepsychedelicfurs",
+    "name": "The Psychedelic Furs",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020700226_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thepsychedelicfurs.bandcamp.com",
+        "allReleaseTitles": [
+          "evergreen",
+          "madeofrain"
+        ],
+        "latestRelease": {
+          "title": "Evergreen",
+          "type": "track",
+          "url": "https://thepsychedelicfurs.bandcamp.com/track/evergreen",
+          "imageUrl": "https://f4.bcbits.com/img/a1076733387_16.jpg",
+          "releaseDate": "September 1, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-psychedelic-furs/148784",
+        "allReleaseTitles": [
+          "madeofrain",
+          "evergreen",
+          "noone",
+          "dontbelieve",
+          "youllbemine",
+          "comeallyefaithful",
+          "greatesthits",
+          "talktalktalk",
+          "mirrormoves",
+          "forevernow",
+          "bookofdays",
+          "superhits",
+          "collections",
+          "allofthisandnothing",
+          ""
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Psychedelic%20Furs"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Psychedelic%20Furs"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.thepsychedelicfurs.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/125410"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Psychedelic%20Furs&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Psychedelic%20Furs"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/pfurs/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/ThePsychFurs"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/psychedelicfurs"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

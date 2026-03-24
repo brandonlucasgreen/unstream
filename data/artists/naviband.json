@@ -1,0 +1,80 @@
+[
+  {
+    "id": "naviband",
+    "name": "NAVIBAND",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032966056_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://naviband.bandcamp.com",
+        "allReleaseTitles": [
+          "navibandsingles2023",
+          "naviband",
+          "",
+          ""
+        ],
+        "latestRelease": {
+          "title": "NAVIBAND - Песні пра Дом (singles 20-23)",
+          "type": "album",
+          "url": "https://naviband.bandcamp.com/album/naviband-singles-20-23",
+          "imageUrl": "https://f4.bcbits.com/img/a3515117933_16.jpg",
+          "releaseDate": "June 21, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/naviband/2897073",
+        "allReleaseTitles": [
+          "historyjamajhozyccia",
+          "tayanna",
+          "",
+          "cheev"
+        ],
+        "latestRelease": {
+          "title": "Cheev Naviband",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/cheev-naviband/wervr6l7v59ic",
+          "releaseDate": "2024-09-27"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/naviband"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=NAVIBAND"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+NAVIBAND"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://naviband.by/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/5718927"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/naviband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCXLXTYfHFuURlcsKTV0kd0w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/naviband.minsk"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

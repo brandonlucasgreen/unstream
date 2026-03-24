@@ -1,0 +1,106 @@
+[
+  {
+    "id": "tonyjoewhite",
+    "name": "Tony Joe White",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039206414_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tonyjoewhite.bandcamp.com",
+        "allReleaseTitles": [
+          "therealthang",
+          "eyes",
+          "liveinamsterdam",
+          "polksaladannie50thanniversaryedition",
+          "uncovered",
+          "theshine",
+          "deepcuts",
+          "thepathofadecentgroove",
+          "lakeplacidblues",
+          "feelingsnakey",
+          "closertothetruth",
+          "bouttodanceinmypantstonyjoewhiteflyingmojitobros",
+          "smokefromthechimney",
+          "thebeginning",
+          "badmouthin",
+          "raincrow",
+          "hoodoo"
+        ],
+        "latestRelease": {
+          "title": "The Real Thang",
+          "type": "album",
+          "url": "https://tonyjoewhite.bandcamp.com/album/the-real-thang",
+          "imageUrl": "https://f4.bcbits.com/img/a4214425287_2.jpg",
+          "releaseDate": "October 24, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/tony-joe-white/154720",
+        "allReleaseTitles": [
+          "feelingsnakey",
+          "standbyme",
+          "smokefromthechimney",
+          "suzieq",
+          "therealthang",
+          "cowboysinger",
+          "polksaladannie",
+          "livingofftheland",
+          "mamasdontletyourcowboysgrowuptobebabies",
+          "pantherridge",
+          "womanflyingmojitobros",
+          "makinloveisgoodforyouflyingmojitobros",
+          "goodbyela",
+          "closertothetruth",
+          "hoodoo",
+          "eyes",
+          "theheroines",
+          "onehotjuly",
+          "continued"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tony%20Joe%20White"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tony%20Joe%20White"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.tonyjoewhite.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/249828"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Tony%20Joe%20White&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Tony%20Joe%20White"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/tonyjoewhiteofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/TonyJoeWhiteOfficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/tonyjoewhiteofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

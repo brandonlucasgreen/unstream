@@ -1,0 +1,47 @@
+[
+  {
+    "id": "michaelrice",
+    "name": "Michael Rice",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032162995_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://michaelrice.bandcamp.com",
+        "allReleaseTitles": [
+          "dreamsequencergeohashi",
+          "antiv9geohashi",
+          "decada",
+          "coalescenceborosilicatepurl",
+          "aconcretewastelandlokyata",
+          "toskavolvii",
+          "howwillitend",
+          "theendlesstour",
+          "arecurringdream",
+          "whathappened",
+          "gloom"
+        ],
+        "latestRelease": {
+          "title": "Dream Sequencer\n                \n                \n\n                Geohashi",
+          "type": "album",
+          "url": "https://michaelrice.bandcamp.com/album/dream-sequencer",
+          "imageUrl": "https://f4.bcbits.com/img/a1656322662_2.jpg",
+          "releaseDate": "April 21, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Michael%20Rice"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Michael%20Rice"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

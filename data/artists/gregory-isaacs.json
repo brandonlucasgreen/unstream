@@ -1,0 +1,56 @@
+[
+  {
+    "id": "gregoryisaacs",
+    "name": "Gregory Isaacs",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018713770_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://gregory-isaacs.bandcamp.com",
+        "allReleaseTitles": [
+          "hearticledonlogicaldriftremix",
+          "herebyappointment",
+          "rastabusiness",
+          "workupasweat"
+        ],
+        "latestRelease": {
+          "title": "Hearticle Don (Logical Drift Remix)",
+          "type": "track",
+          "url": "https://gregory-isaacs.bandcamp.com/track/hearticle-don-logical-drift-remix",
+          "imageUrl": "https://f4.bcbits.com/img/a0363981288_16.jpg",
+          "releaseDate": "March 5, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Gregory%20Isaacs"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Gregory%20Isaacs"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/20703"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Gregory%20Isaacs&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Gregory%20Isaacs"
+      },
+      {
+        "sourceId": "peertube",
+        "url": "https://tube.funil.de/video-channels/gregory"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

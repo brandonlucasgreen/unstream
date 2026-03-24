@@ -1,0 +1,67 @@
+[
+  {
+    "id": "bookertjones",
+    "name": "Booker T. Jones",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028364187_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bookertjones.bandcamp.com",
+        "allReleaseTitles": [
+          "soundthealarm",
+          "staxprofilesbookertthemgs",
+          "soulmen",
+          "timeistightbookertthemgs",
+          "meltingpotbookertthemgs",
+          "mclemoreavenuebookertthemgs",
+          "soullimbobookertthemgs"
+        ],
+        "latestRelease": {
+          "title": "Sound The Alarm",
+          "type": "album",
+          "url": "https://bookertjones.bandcamp.com/album/sound-the-alarm",
+          "imageUrl": "https://f4.bcbits.com/img/a3598182240_2.jpg",
+          "releaseDate": "June 25, 2013"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Booker%20T.%20Jones"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Booker%20T.%20Jones"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.bookert.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/248403"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Booker%20T.%20Jones&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Booker%20T.%20Jones"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/bookertjonesmusic/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/bookertjones/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

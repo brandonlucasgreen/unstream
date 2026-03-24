@@ -1,0 +1,108 @@
+[
+  {
+    "id": "arresteddevelopment",
+    "name": "Arrested Development",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031891263_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://officialarresteddevelopment.bandcamp.com",
+        "allReleaseTitles": [
+          "myjobaintdoneremixes",
+          "adultcontemporaryhiphop",
+          "packitoutmaxisingle",
+          "alliseeismelanin",
+          "bulletsinthechamber",
+          "hiphopsaveslivesmaxisingle",
+          "onthecuttingroomflooramixtape",
+          "iwontletyoudownmaxisingle",
+          "forthefknlove",
+          "vibefeatbigdaddykaneclevelandpjonesspeechtashalaraeconfiga",
+          "onya",
+          "dontfightyourdemons",
+          "becomingsingle"
+        ],
+        "latestRelease": {
+          "title": "My Job Ain't Done (Remixes)",
+          "type": "album",
+          "url": "https://officialarresteddevelopment.bandcamp.com/album/my-job-aint-done-remixes",
+          "imageUrl": "https://f4.bcbits.com/img/a2588804039_2.jpg",
+          "releaseDate": "August 29, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/arrested-development/68085",
+        "allReleaseTitles": [
+          "adultcontemporaryhiphop",
+          "forthefknlove",
+          "dontfightyourdemons",
+          "packitout",
+          "alliseeismelanin",
+          "3years5monthsand2daysinthelifeof",
+          "bulletsinthechamber",
+          "thecollection",
+          "zingalamaduni",
+          "sincethelasttime",
+          "onthecuttingroomfloormixtape",
+          "classicmasters",
+          "unplugged",
+          "amongthetrees",
+          "craftoptics",
+          "where",
+          "heroesoftheharvest",
+          "rawlive",
+          "strong"
+        ],
+        "latestRelease": {
+          "title": "Adult Contemporary Hip Hop Arrested Development",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/adult-contemporary-hip-hop-arrested-development/c78i2w4zu28ka",
+          "releaseDate": "2025-07-04"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Arrested%20Development"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Arrested%20Development"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.speechmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/34567"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Arrested%20Development&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Arrested%20Development"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/arresteddevelopment__/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC2022fsgG83l0p0r2AunBxA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Arrested-Development/32081803388"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,96 @@
+[
+  {
+    "id": "madeleinepeyroux",
+    "name": "Madeleine Peyroux",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0005406730_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://madeleinepeyroux.bandcamp.com",
+        "allReleaseTitles": [
+          "keepmeinyourheartforawhilethebestofmadeleinepeyroux",
+          "carelesslove",
+          "gotyouonmymindmadeleinepeyrouxwilliamgalison"
+        ],
+        "latestRelease": {
+          "title": "Keep Me In Your Heart For A While: The Best Of Madeleine Peyroux",
+          "type": "album",
+          "url": "https://madeleinepeyroux.bandcamp.com/album/keep-me-in-your-heart-for-a-while-the-best-of-madeleine-peyroux",
+          "imageUrl": "https://f4.bcbits.com/img/a3425792779_2.jpg",
+          "releaseDate": "January 1, 2014"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/madeleine-peyroux/41252",
+        "allReleaseTitles": [
+          "letswalk",
+          "secularhymns",
+          "anthem",
+          "carelesslove",
+          "nomeanness",
+          "pleasecomeoninside",
+          "itsamistake",
+          "howiwish",
+          "halftheperfectworld",
+          "dreamland",
+          "theblueroom",
+          "barebones",
+          "standingontherooftop",
+          "gotyouonmymindwilliamgalison",
+          "american",
+          "showmandan",
+          "thepartyoughtabecominsoon"
+        ],
+        "latestRelease": {
+          "title": "Lets Walk Madeleine Peyroux",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/lets-walk-madeleine-peyroux/i25stn34nkhsc",
+          "releaseDate": "2024-06-28"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Madeleine%20Peyroux"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Madeleine%20Peyroux"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://madeleinepeyroux.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/397911"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Madeleine%20Peyroux&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Madeleine%20Peyroux"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCdL-6Fxe8Mago4ELldWr2gA"
+      },
+      {
+        "sourceId": "bluesky",
+        "url": "https://bsky.app/profile/madeleinepeyroux.bsky.social"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/MadeleinePeyroux"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

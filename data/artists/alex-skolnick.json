@@ -1,0 +1,58 @@
+[
+  {
+    "id": "alexskolnick",
+    "name": "Alex Skolnick",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025903886_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://alexskolnick.bandcamp.com",
+        "allReleaseTitles": [
+          "bigliehuhmoney",
+          "floridamanblues"
+        ],
+        "latestRelease": {
+          "title": "B.I.G. L.I.E.\n                \n                \n\n                HU$H MONEY",
+          "type": "track",
+          "url": "https://alexskolnick.bandcamp.com/track/b-i-g-l-i-e",
+          "imageUrl": "https://f4.bcbits.com/img/a3264121133_16.jpg",
+          "releaseDate": "January 6, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Alex%20Skolnick"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Alex%20Skolnick"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://alexskolnick.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/299755"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/alexskolnick"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/TheRealAlexSkolnick"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/AlexSkolnickFanPage"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

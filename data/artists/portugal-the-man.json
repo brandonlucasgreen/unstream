@@ -1,0 +1,95 @@
+[
+  {
+    "id": "portugaltheman",
+    "name": "Portugal. The Man",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041105555_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://portugaltheman.bandcamp.com",
+        "allReleaseTitles": [
+          "shish",
+          "uluselectsvol2",
+          "vis",
+          "chrisblackchangedmylife",
+          "oregoncitysessions",
+          "woodstock",
+          "evilfriends",
+          "inthemountaininthecloud",
+          "americanghetto",
+          "themajesticmajesty",
+          "thesatanicsatanist",
+          "censoredcolors",
+          "churchmouth",
+          "itscomplicatedbeingawizard",
+          "waiteryouvultures"
+        ],
+        "latestRelease": {
+          "title": "SHISH",
+          "type": "album",
+          "url": "https://portugaltheman.bandcamp.com/album/shish",
+          "imageUrl": "https://f4.bcbits.com/img/a0567665704_2.jpg",
+          "releaseDate": "November 7, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/portugal-the-man/596410",
+        "allReleaseTitles": [
+          "shish",
+          "glideneiked",
+          "woodstock",
+          "evilfriends",
+          "whatmeworry",
+          "vis",
+          "chrisblackchangedmylife",
+          "uluselectsvol2",
+          "denali",
+          "stealmysunshinenovocaineforthesoul",
+          "moneyarkells",
+          "tananamush",
+          "diveintotheoceanalokzeebaand",
+          "angoon",
+          "dummy",
+          "golden",
+          "oregoncitysessions",
+          "bittersweetlpgiobbiand"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Portugal.%20The%20Man"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Portugal.%20The%20Man"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.portugaltheman.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/574537"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/portugaltheman/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC0TobZSDyMaXaoVK_9TcPHA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/portugaltheman"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

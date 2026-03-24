@@ -63,6 +63,26 @@
       {
         "sourceId": "buymeacoffee",
         "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://thepianoguys.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3507956"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thepianoguys/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCmKurapML4BF9Bjtj4RbvXw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/PianoGuys"
       }
     ],
     "matchConfidence": "verified"

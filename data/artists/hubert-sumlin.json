@@ -1,0 +1,81 @@
+[
+  {
+    "id": "hubertsumlin",
+    "name": "Hubert Sumlin",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022228260_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://hubertsumlin.bandcamp.com",
+        "allReleaseTitles": [
+          "newyork95",
+          "crawlingkingsnakebwhubertsboogie"
+        ],
+        "latestRelease": {
+          "title": "New York 95",
+          "type": "album",
+          "url": "https://hubertsumlin.bandcamp.com/album/new-york-95",
+          "imageUrl": "https://f4.bcbits.com/img/a0507675139_16.jpg",
+          "releaseDate": "December 4, 2020"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/hubert-sumlin-2/90494",
+        "allReleaseTitles": [
+          "bluesguitarboss",
+          "bluesanytime",
+          "legendspinetopperkins",
+          "chicagobluessessionvol22billybranch",
+          "aboutthemshoes",
+          "hubertsumlin",
+          "wakeupcall",
+          "newyork95",
+          "gamblinwomancareybell",
+          "imthebackdoorman",
+          "howlinwolfhiswolfganglive",
+          "madeinargentina1993",
+          "onenightonlywilliedixonsunnlandslim",
+          "crawlingkingsnakebwhubertsboogie",
+          "nopantiesonthebus"
+        ],
+        "latestRelease": {
+          "title": "Blues Guitar Boss Hubert Sumlin",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/blues-guitar-boss-hubert-sumlin/0886788632851",
+          "releaseDate": "2012-04-02"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Hubert%20Sumlin"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Hubert%20Sumlin"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.hubertsumlinblues.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/512585"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Hubert%20Sumlin&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Hubert%20Sumlin"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

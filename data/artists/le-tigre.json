@@ -1,0 +1,71 @@
+[
+  {
+    "id": "letigre",
+    "name": "Le Tigre",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018290827_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://letigre1.bandcamp.com",
+        "allReleaseTitles": [
+          "nosfuturs",
+          "letigrefeatjformzidlikejevoudrais",
+          "wabisabi",
+          "lapalissades",
+          "letigrethegeneralvegainternationalletigrethegeneralvega",
+          "fondsdetiroirsletigrekefristo",
+          "spudwebbletigrekefristo",
+          "ep",
+          "originesdesgriffes"
+        ],
+        "latestRelease": {
+          "title": "Nos Futurs",
+          "type": "album",
+          "url": "https://letigre1.bandcamp.com/album/nos-futurs",
+          "imageUrl": "https://f4.bcbits.com/img/a0484192661_2.jpg",
+          "releaseDate": "December 8, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/le-tigre/68447",
+        "latestRelease": {
+          "title": "Freestyle Le Tigre",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/freestyle-le-tigre/yq6jersf871uh",
+          "releaseDate": "2025-12-22"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Le%20Tigre"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Le%20Tigre"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/40310"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Le%20Tigre&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Le%20Tigre"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/LeTigreWorld"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

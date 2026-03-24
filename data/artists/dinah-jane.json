@@ -1,0 +1,68 @@
+[
+  {
+    "id": "dinahjane",
+    "name": "Dinah Jane",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3840052807_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://dinahjane.bandcamp.com",
+        "allReleaseTitles": [
+          "lottery",
+          "szns",
+          "retrograde",
+          "bottledup",
+          "bottledupversionespanol",
+          "bottledupversaoportuguesa"
+        ],
+        "latestRelease": {
+          "title": "Lottery",
+          "type": "track",
+          "url": "https://dinahjane.bandcamp.com/track/lottery",
+          "imageUrl": "https://f4.bcbits.com/img/a3840052807_2.jpg",
+          "releaseDate": "March 13, 2020"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/dinah-jane/3255991",
+        "allReleaseTitles": [
+          "bottleduptydollaignmarcebassy",
+          "swaymyshaan",
+          "juicecountyvolume1",
+          "fallinginlovejking",
+          "lottery",
+          "retrograde",
+          "sznsaboogiewitdahoodie",
+          "letsgo",
+          "bottleduptydollaign",
+          "backstrokefeatdjflictsammyjohnsonampampfia",
+          "1",
+          "missedaspot",
+          "1501",
+          "yaya"
+        ],
+        "latestRelease": {
+          "title": "Juice County Volume 1 Dinah Jane",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/juice-county-volume-1-dinah-jane/ktoz4upe1nipc",
+          "releaseDate": "2024-08-30"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Dinah%20Jane"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Dinah%20Jane"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

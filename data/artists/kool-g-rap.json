@@ -1,0 +1,64 @@
+[
+  {
+    "id": "koolgrap",
+    "name": "Kool G Rap",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018588371_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://theofficialkoolgrap.bandcamp.com",
+        "allReleaseTitles": [
+          "geniusofrap",
+          "deadoralive",
+          "halfaclip",
+          "anofferyoucantrefuse",
+          "clickofrespect",
+          "thegiancanastory",
+          "ratedxxx",
+          "the456",
+          "therootsofevil",
+          "liveandletdie",
+          "wanteddeadoralive",
+          "roadtotheriches"
+        ],
+        "latestRelease": {
+          "title": "Genius Of Rap",
+          "type": "album",
+          "url": "https://theofficialkoolgrap.bandcamp.com/album/genius-of-rap",
+          "imageUrl": "https://f4.bcbits.com/img/a2924965781_2.jpg",
+          "releaseDate": "January 1, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kool%20G%20Rap"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kool%20G%20Rap"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/40523"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Kool%20G%20Rap&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Kool%20G%20Rap"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/koolgrap4ever"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

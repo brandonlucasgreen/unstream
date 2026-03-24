@@ -1,0 +1,121 @@
+[
+  {
+    "id": "pavement",
+    "name": "Pavement",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020903121_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://pavement.bandcamp.com",
+        "allReleaseTitles": [
+          "hecklerschoicebiggumsandheavyliftersapavementcollection",
+          "pavementsoriginalmotionpicturesoundtrack",
+          "spitonastranger",
+          "terrortwilightfarewellhorizontal",
+          "terrortwilightfarewellhorizontal24bit",
+          "quarantinethepastthebestofpavement",
+          "liveeuropaturnenmcmxcvii",
+          "brightenthecornersnicenecreedenceed",
+          "liveeuropaturnenmcmxcvii",
+          "woweezoweesordidsentinelsedition",
+          "crookedraincrookedrainlasdesertorigins",
+          "slantedenchantedluxereduxe",
+          "terrortwilight",
+          "brightenthecorners",
+          "woweezowee",
+          "crookedraincrookedrain",
+          "westingbymusketandsextant",
+          "waterydomestic",
+          "slantedenchanted"
+        ],
+        "latestRelease": {
+          "title": "Hecklers Choice: Big Gums and Heavy Lifters - A Pavement Collection",
+          "type": "album",
+          "url": "https://pavement.bandcamp.com/album/hecklers-choice-big-gums-and-heavy-lifters-a-pavement-collection",
+          "imageUrl": "https://f4.bcbits.com/img/a0422743821_2.jpg",
+          "releaseDate": "September 18, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/pavement/384396",
+        "allReleaseTitles": [
+          "hecklerschoicebiggumsandheavyliftersacollection",
+          "s",
+          "terrortwilightfarewellhorizontal",
+          "liveeuropaturnenmcmxcvii",
+          "slantedenchanted",
+          "bethehook",
+          "summerbabelivemay191992",
+          "crookedraincrookedrain",
+          "brightenthecornersnicenecreedenceed",
+          "crookedraincrookedrainlasdesertorigins",
+          "woweezowee",
+          "brightenthecorners",
+          "terrortwilight",
+          "slantedenchantedluxereduxe",
+          "quarantinethepastthebestof",
+          "westingbymusketandsextant"
+        ]
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/_pavement_"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Pavement"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Pavement"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.matadorrecords.com/pavement/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/7578"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Pavement&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Pavement"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/matadorrecords/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@matadorrecords"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/matadorrecs"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.net/@matadorrecords"
+      },
+      {
+        "sourceId": "bluesky",
+        "url": "https://bsky.app/profile/matadorrecords.bsky.social"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pavementtherockband"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

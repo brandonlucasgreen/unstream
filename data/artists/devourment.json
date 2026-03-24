@@ -1,0 +1,87 @@
+[
+  {
+    "id": "devourment",
+    "name": "Devourment",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0016645921_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://devourment.bandcamp.com",
+        "allReleaseTitles": [
+          "obscenemajesty",
+          "conceivedinsewage"
+        ],
+        "latestRelease": {
+          "title": "Obscene Majesty",
+          "type": "album",
+          "url": "https://devourment.bandcamp.com/album/obscene-majesty",
+          "imageUrl": "https://f4.bcbits.com/img/a3728971839_16.jpg",
+          "releaseDate": "August 16, 2019"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/devourment/2944346",
+        "allReleaseTitles": [
+          "obscenemajesty",
+          "babykiller",
+          "unleashthecarnivore",
+          "butchertheweak",
+          "conceivedinsewage",
+          "avirulentstrainofretaliation",
+          "impaled",
+          "cognitivesedationbutchery",
+          "narcissisticparaphilia"
+        ],
+        "latestRelease": {
+          "title": "Babykiller Devourment",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/babykiller-devourment/acu7092kvp53a",
+          "releaseDate": "2021-12-16"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Devourment"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Devourment"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.devourmentofficial.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/338988"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Devourment&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Devourment"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/devourmentofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCGA15QPrmABhpCmhn5omZSw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/DevourmentOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

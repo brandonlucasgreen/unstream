@@ -1,0 +1,47 @@
+[
+  {
+    "id": "tomhamilton",
+    "name": "Tom Hamilton",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011733599_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tomhamilton1.bandcamp.com",
+        "allReleaseTitles": [
+          "threwthruthroughannelabergetomhamiltonandsuzanalascu",
+          "offhourwaitstate",
+          "twoimprovisationsconniecrotherstomhamilton",
+          "elegyforericrichards",
+          "slybersonictromosomepeterzummotomhamllton",
+          "streetlevelsoundtrackforwalking",
+          "bitterforestalmargolistomhamilton",
+          "stoneintowaterannapangaloutomhamilton",
+          "galacticdilemmamiguelfrasconitomhamilton",
+          "sergestudies",
+          "sebastiansshadow"
+        ],
+        "latestRelease": {
+          "title": "Threw, Thru & Through\n                \n                \n\n                Anne La Berge, Tom Hamilton, and Suzana Lașcu",
+          "type": "album",
+          "url": "https://tomhamilton1.bandcamp.com/album/threw-thru-through",
+          "imageUrl": "https://f4.bcbits.com/img/a1167523261_2.jpg",
+          "releaseDate": "February 7, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tom%20Hamilton"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tom%20Hamilton"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

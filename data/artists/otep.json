@@ -1,0 +1,101 @@
+[
+  {
+    "id": "otep",
+    "name": "Otep",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013504944_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://otep.bandcamp.com",
+        "allReleaseTitles": [
+          "kult45",
+          "generationdoom",
+          "generationdoomdeluxeedition",
+          "hydra",
+          "soundslikearmageddonlive2012",
+          "atavistdeluxeversion",
+          "smashthecontrolmachine",
+          "theascension"
+        ],
+        "latestRelease": {
+          "title": "KULT 45",
+          "type": "album",
+          "url": "https://otep.bandcamp.com/album/kult-45",
+          "imageUrl": "https://f4.bcbits.com/img/a1205020880_2.jpg",
+          "releaseDate": "July 27, 2018"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/otep/129967",
+        "allReleaseTitles": [
+          "themancinnamonbabeamp",
+          "bosskrohmesrepriseandkrohme",
+          "sevastra",
+          "generationdoom",
+          "houseofsecrets",
+          "atavist",
+          "theascension",
+          "hydra",
+          "smashthecontrolmachine",
+          "thegodslayer",
+          "kult45",
+          "jihad",
+          "soundslikearmageddon",
+          "youshouldseemeinacrown",
+          "thewayiam",
+          "apexpredator",
+          "ostracized"
+        ],
+        "latestRelease": {
+          "title": "The Man Cinnamon Babe Amp Otep",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-man-cinnamon-babe-amp-otep/c4izdsegpswga",
+          "releaseDate": "2023-07-20"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Otep"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Otep"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.oteploves.me/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/828918"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Otep&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Otep"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/otepofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/otepvevo"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/otepofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

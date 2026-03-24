@@ -1,0 +1,103 @@
+[
+  {
+    "id": "annekevangiersbergen",
+    "name": "Anneke van Giersbergen",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038819042_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://annekevangiersbergen.bandcamp.com",
+        "allReleaseTitles": [
+          "lavie",
+          "thedarkestskiesarethebrightest",
+          "letthelightinannekevangiersbergenwithkameratazuid",
+          "symphonized",
+          "drive",
+          "air",
+          "pureair",
+          "inyourroom",
+          "liveineurope",
+          "verlorenverledenannekevangiersbergenarstiir"
+        ],
+        "latestRelease": {
+          "title": "La Vie",
+          "type": "album",
+          "url": "https://annekevangiersbergen.bandcamp.com/album/la-vie",
+          "imageUrl": "https://f4.bcbits.com/img/a1076273552_2.jpg",
+          "releaseDate": "February 28, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/anneke-van-giersbergen/571601",
+        "allReleaseTitles": [
+          "lavie",
+          "redsky",
+          "derivierdetroubadours",
+          "bestezangers2021",
+          "onemorenanosecond",
+          "everythingischanging",
+          "thedarkestskiesarethebrightest",
+          "verlorenverledenandarstidir",
+          "weary",
+          "pureairandaguadeannique",
+          "drive",
+          "airandaguadeannique",
+          "symphonized",
+          "inyourroomandaguadeannique",
+          "liveineuropeaguadeanniqueandaguadeannique",
+          "mykandyanshirtblueflamingo",
+          "onlyyoucanseedjhidden"
+        ],
+        "latestRelease": {
+          "title": "Red Sky Anneke Van Giersbergen",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/red-sky-anneke-van-giersbergen/vjejh3xfbhs1b",
+          "releaseDate": "2026-02-20"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Anneke%20van%20Giersbergen"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Anneke%20van%20Giersbergen"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.annekevangiersbergen.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/263993"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/annekevangiersbergenofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@realannekevangiersbergen"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCm_94rBrpfStzau3yI3MrYA"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@annekevangiersbergenofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/annekevangiersbergenofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

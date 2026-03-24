@@ -1,0 +1,82 @@
+[
+  {
+    "id": "tyr",
+    "name": "Týr",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0035001728_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tyrband.bandcamp.com",
+        "allReleaseTitles": [
+          "battleballads",
+          "anightatthenordichouse",
+          "hel",
+          "valkyrja",
+          "thelayofthrym",
+          "bythelightofthenorthernstar",
+          "howfartoasgaard",
+          "land",
+          "ragnarok",
+          "ericthered"
+        ],
+        "latestRelease": {
+          "title": "Battle Ballads",
+          "type": "album",
+          "url": "https://tyrband.bandcamp.com/album/battle-ballads",
+          "imageUrl": "https://f4.bcbits.com/img/a3958495361_2.jpg",
+          "releaseDate": "April 12, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/tyr/1067624",
+        "allReleaseTitles": [
+          "thebestofthenapalmyears",
+          "playersaribajgora",
+          "tt2",
+          "4thesummer",
+          "vidunderbarn",
+          "manenstigbrenner",
+          "biancaerbackfeatbiancabianca",
+          "demonenenoscarblesson",
+          "goodnesssakefeatjalenvstheworldj0nezy",
+          "bythelightofthenorthernstar",
+          "battleballads",
+          "valkyrja",
+          "therune2025",
+          "thelayofthrym",
+          "hel",
+          "ericthered",
+          "land",
+          "ragnarok",
+          "howfartoasgaard",
+          "bedovelsegjormester"
+        ],
+        "latestRelease": {
+          "title": "Tt2 Tyr",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/tt2-tyr/d61v2s108cuzb",
+          "releaseDate": "2025-05-02"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=T%C3%BDr"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+T%C3%BDr"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/TyrBand"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,40 @@
+[
+  {
+    "id": "goldenchild-bandcamp-goldenchild7",
+    "name": "GoldenChild",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0023866970_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://goldenchild7.bandcamp.com",
+        "allReleaseTitles": [
+          "spellbookvol1",
+          "rotation112thgcedit",
+          "shifting",
+          "cantletyadothis"
+        ],
+        "latestRelease": {
+          "title": "SPELLBOOK, VOL.1",
+          "type": "album",
+          "url": "https://goldenchild7.bandcamp.com/album/spellbook-vol-1",
+          "imageUrl": "https://f4.bcbits.com/img/a1637518338_16.jpg",
+          "releaseDate": "July 29, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=GoldenChild"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+GoldenChild"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

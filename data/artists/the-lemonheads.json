@@ -1,0 +1,111 @@
+[
+  {
+    "id": "thelemonheads",
+    "name": "The Lemonheads",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014575541_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thelemonheadsmusic.bandcamp.com",
+        "allReleaseTitles": [
+          "twoweeksinaustraliatwoliveat3rrrfm",
+          "lovechant",
+          "inthemarginsevenyearache",
+          "deependsadcinderella",
+          "lemonheadsindreamland",
+          "carbuttonclothdeluxeexpandedclothboundedition",
+          "comeonfeel30thanniversaryedition",
+          "itsashameaboutray30thanniversaryedition",
+          "lovey30thanniversaryedition",
+          "hotelsessions",
+          "varshons2",
+          "takeiteasy",
+          "fearofliving",
+          "cantforget",
+          "favoritespanishdishes",
+          "lickdeluxe",
+          "creatordeluxe",
+          "hateyourfriendsdeluxe",
+          "ifonlyyouweredead"
+        ],
+        "latestRelease": {
+          "title": "Two Weeks in Australia Two (Live at 3RRR FM)",
+          "type": "album",
+          "url": "https://thelemonheadsmusic.bandcamp.com/album/two-weeks-in-australia-two-live-at-3rrr-fm",
+          "imageUrl": "https://f4.bcbits.com/img/a3913364885_2.jpg",
+          "releaseDate": "December 1, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-lemonheads/321054",
+        "allReleaseTitles": [
+          "lovechant",
+          "deependsadcinderella",
+          "itsashameaboutray",
+          "fearofliving",
+          "cantforget",
+          "comeonfeel",
+          "the90sstudioalbumcollection",
+          "lovey",
+          "carbuttoncloth",
+          "comeonfeel",
+          "thebestof",
+          "favoritespanishdishes",
+          "luka",
+          "realtalk",
+          "varshons2",
+          "varshons"
+        ],
+        "latestRelease": {
+          "title": "Love Chant The Lemonheads",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/love-chant-the-lemonheads/d1gabk0fwwsgc",
+          "releaseDate": "2025-10-24"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Lemonheads"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Lemonheads"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.thelemonheads.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/294469"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Lemonheads&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Lemonheads"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://www.instagram.com/thelemonheadsofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "http://www.youtube.com/thelemonheads"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/TheLemonheads"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

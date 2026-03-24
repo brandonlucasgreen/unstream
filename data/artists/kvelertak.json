@@ -1,0 +1,90 @@
+[
+  {
+    "id": "kvelertak",
+    "name": "Kvelertak",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0008069801_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kvelertakofnorway.bandcamp.com",
+        "allReleaseTitles": [
+          "nattesferd",
+          "kvelertak",
+          "meir"
+        ],
+        "latestRelease": {
+          "title": "Nattesferd",
+          "type": "album",
+          "url": "https://kvelertakofnorway.bandcamp.com/album/nattesferd",
+          "imageUrl": "https://f4.bcbits.com/img/a1089732230_2.jpg",
+          "releaseDate": "May 13, 2016"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/kvelertak/883009",
+        "allReleaseTitles": [
+          "meir",
+          "nattesferd",
+          "julablot",
+          "endling",
+          "",
+          "splid",
+          "crackofdoomtroysanders",
+          "krotervegtehelvete",
+          "bratebrann",
+          "splidgameofdoom",
+          "fandentadettehull",
+          "skoggangr",
+          "bruanebrenn",
+          "blodtorst",
+          "mjod"
+        ],
+        "latestRelease": {
+          "title": "Endling Kvelertak",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/endling-kvelertak/uj5qafq290zku",
+          "releaseDate": "2023-09-08"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kvelertak"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kvelertak"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://kvelertak.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1868277"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kvelertakofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@kvelertakofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/kvelertak"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Kvelertak"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

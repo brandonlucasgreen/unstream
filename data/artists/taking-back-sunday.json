@@ -1,0 +1,106 @@
+[
+  {
+    "id": "takingbacksunday",
+    "name": "Taking Back Sunday",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0009822205_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://takingbacksunday.bandcamp.com",
+        "allReleaseTitles": [
+          "soldacoustichires",
+          "soldlivefromtheiheartradioalbumreleasepartywithtakingbacksunday",
+          "soldremixes",
+          "152",
+          "theone",
+          "tellallyourfriends20thanniversaryedition",
+          "tidalwavebsides",
+          "twenty",
+          "tidalwave",
+          "happinessis",
+          "whereyouwanttobe"
+        ],
+        "latestRelease": {
+          "title": "S'old Acoustic (Hi Res)",
+          "type": "album",
+          "url": "https://takingbacksunday.bandcamp.com/album/sold-acoustic-hi-res",
+          "imageUrl": "https://f4.bcbits.com/img/a1734855574_2.jpg",
+          "releaseDate": "March 26, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/taking-back-sunday/149390",
+        "allReleaseTitles": [
+          "lovedyoualittlethemainecharlottesands",
+          "lovedyoualittleacousticthemainecharlottesands",
+          "152",
+          "soldacoustic",
+          "theone",
+          "sold",
+          "whereyouwanttobe",
+          "loudernow",
+          "tellallyourfriends",
+          "tidalwave",
+          "happinessisthecompleterecordings",
+          "livefromorensanz",
+          "greendaytheearlyyearscoversnewclassics",
+          "happinessis",
+          "newagain"
+        ],
+        "latestRelease": {
+          "title": "Sold Acoustic Taking Back Sunday",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/sold-acoustic-taking-back-sunday/cxvyqza15ag2a",
+          "releaseDate": "2024-03-26"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Taking%20Back%20Sunday"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Taking%20Back%20Sunday"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.takingbacksunday.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/252165"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Taking%20Back%20Sunday&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Taking%20Back%20Sunday"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/takingbacksunday/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@takingbacksunday?lang=ja-JP&is_from_webapp=1&sender_device=mobile&sender_web_id=7315411612041971218"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/takingbacksunday"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/TakingBackSunday"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

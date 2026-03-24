@@ -1,0 +1,88 @@
+[
+  {
+    "id": "boyslikegirls",
+    "name": "BOYS LIKE GIRLS",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032415552_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://boyslikegirls.bandcamp.com",
+        "allReleaseTitles": [
+          "sundayatfoxwoods",
+          "theoutside",
+          "language",
+          "bloodandsugar"
+        ],
+        "latestRelease": {
+          "title": "SUNDAY AT FOXWOODS",
+          "type": "album",
+          "url": "https://boyslikegirls.bandcamp.com/album/sunday-at-foxwoods",
+          "imageUrl": "https://f4.bcbits.com/img/a3614448358_16.jpg",
+          "releaseDate": "October 20, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/boys-like-girls/148399",
+        "allReleaseTitles": [
+          "watchthefiredashboardconfessionaland",
+          "thehomecoming",
+          "theoutside3oh3statechampsthereadysetthesummerset",
+          "sundayatfoxwoods",
+          "bloodandsugar",
+          "language",
+          "theoutside",
+          "miracle",
+          "",
+          "lovedrunk",
+          "crazyworld",
+          "crazyworldep"
+        ],
+        "latestRelease": {
+          "title": "The Homecoming Boys Like Girls",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-homecoming-boys-like-girls/ao0yxw1vdfydc",
+          "releaseDate": "2025-09-08"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=BOYS%20LIKE%20GIRLS"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+BOYS%20LIKE%20GIRLS"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.boyslikegirls.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/767752"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/boyslikegirls/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@boyslikegirls"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCUMVaSA7G1VLTnYhivV3hmw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/boyslikegirls"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

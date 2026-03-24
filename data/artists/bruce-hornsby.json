@@ -1,0 +1,95 @@
+[
+  {
+    "id": "brucehornsby",
+    "name": "Bruce Hornsby",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0020680651_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://brucehornsby.bandcamp.com",
+        "allReleaseTitles": [
+          "flicted",
+          "nonsecureconnection",
+          "absolutezero",
+          "soloconcerts"
+        ],
+        "latestRelease": {
+          "title": "'Flicted",
+          "type": "album",
+          "url": "https://brucehornsby.bandcamp.com/album/flicted",
+          "imageUrl": "https://f4.bcbits.com/img/a0367558905_16.jpg",
+          "releaseDate": "May 27, 2022"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/bruce-hornsby/106332",
+        "allReleaseTitles": [
+          "thewayitisandtherange",
+          "scenesfromthesouthsideandtherange",
+          "anightonthetownandtherange",
+          "nightonthetowntherange",
+          "indigopark",
+          "absolutezero",
+          "livethewayitistour198687andtherange",
+          "flicted",
+          "secrethousebutcherbrown",
+          "deepseaventsbrhymymusic",
+          "thewayitis",
+          "rehabreunionthenoisemakers",
+          "feelthepainfastcarjamilawoods",
+          "ecstaticfeatbonnieraitt",
+          "castofffeatjustinvernon",
+          "sidelinesfeatblakemillsezrakoenig",
+          "deepbluebrhymymusic",
+          "toomuchmonkeybusiness",
+          "spirittrail25thanniversaryedition"
+        ],
+        "latestRelease": {
+          "title": "Indigo Park Bruce Hornsby",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/indigo-park-bruce-hornsby/une0y9bet53io",
+          "releaseDate": "2026-02-04"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bruce%20Hornsby"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bruce%20Hornsby"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.brucehornsby.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/49172"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Bruce%20Hornsby&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Bruce%20Hornsby"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/BruceHornsby"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/brucehornsby"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

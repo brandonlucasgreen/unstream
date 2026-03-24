@@ -1,0 +1,70 @@
+[
+  {
+    "id": "skipjames",
+    "name": "Skip James",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0006798359_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://skipjames.bandcamp.com",
+        "allReleaseTitles": [
+          "devilgotmywoman",
+          "todayremastered2024"
+        ],
+        "latestRelease": {
+          "title": "Devil Got My Woman",
+          "type": "album",
+          "url": "https://skipjames.bandcamp.com/album/devil-got-my-woman",
+          "imageUrl": "https://f4.bcbits.com/img/a2451807769_16.jpg",
+          "releaseDate": "February 11, 2016"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/skip-james/31061",
+        "allReleaseTitles": [
+          "today",
+          "devilgotmywoman",
+          "hardtimekillinfloor",
+          "thecompleteearlyrecordings1930",
+          "rareandunreleased",
+          "hardtimesishere",
+          "bluesfromthedelta",
+          "legendsofcountrybluesthecompleteprewarrecordingsofdisca",
+          "1931",
+          "vanguardvisionaries",
+          "livevol2bloomington1968part1",
+          "worriedblues",
+          "imsogladtherediscoveredrecordings",
+          "50yearsmississippibluesinbentoniajackowens",
+          "presenting",
+          "live19641966",
+          "specialrider",
+          "deltablueschroniclesearlyyearsanthology",
+          "theverybestof",
+          "livevol3bloomington1968part2"
+        ],
+        "latestRelease": {
+          "title": "Hard Time Killin Floor Skip James",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/hard-time-killin-floor-skip-james/fw60lfut0zhtb",
+          "releaseDate": "2003-06-14"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Skip%20James"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Skip%20James"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

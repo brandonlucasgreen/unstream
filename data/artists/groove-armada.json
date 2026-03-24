@@ -1,0 +1,70 @@
+[
+  {
+    "id": "groovearmada",
+    "name": "Groove Armada",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0003646566_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://groovearmada.bandcamp.com",
+        "allReleaseTitles": [
+          "doitright",
+          "tt8groovearmadafourtunecookieep",
+          "tt5groovearmadam2many80something",
+          "tt3groovearmadacaptainsensualdansolo",
+          "northernstar15thanniversary",
+          "lovelightstheunderground"
+        ],
+        "latestRelease": {
+          "title": "Do It Right",
+          "type": "album",
+          "url": "https://groovearmada.bandcamp.com/album/do-it-right",
+          "imageUrl": "https://f4.bcbits.com/img/a1979243683_2.jpg",
+          "releaseDate": "January 16, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Groove%20Armada"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Groove%20Armada"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.groovearmada.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3385"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Groove%20Armada&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Groove%20Armada"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/groovearmada/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/GrooveArmadaVEVO"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Groovearmada"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

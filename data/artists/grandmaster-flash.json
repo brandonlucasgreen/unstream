@@ -1,0 +1,63 @@
+[
+  {
+    "id": "grandmasterflash",
+    "name": "Grandmaster Flash",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0005186469_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://grandmasterflash.bandcamp.com",
+        "allReleaseTitles": [
+          "shinealldayfeatqtipjumzkelspencer",
+          "swaggerfeatredcafesnoopdogglynncarter",
+          "thebridgeconceptofaculture"
+        ],
+        "latestRelease": {
+          "title": "Shine All Day feat. Q-Tip, JUMZ & Kel Spencer",
+          "type": "album",
+          "url": "https://grandmasterflash.bandcamp.com/album/shine-all-day-feat-q-tip-jumz-kel-spencer-2",
+          "imageUrl": "https://f4.bcbits.com/img/a1588541655_2.jpg",
+          "releaseDate": "January 1, 2009"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Grandmaster%20Flash"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Grandmaster%20Flash"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://grandmasterflash.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/21715"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Grandmaster%20Flash&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Grandmaster%20Flash"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/@djflash4eva"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/grandmasterflashofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

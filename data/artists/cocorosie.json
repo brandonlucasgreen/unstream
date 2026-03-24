@@ -1,0 +1,114 @@
+[
+  {
+    "id": "cocorosie",
+    "name": "CocoRosie",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038380430_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://cocorosiemusic.bandcamp.com",
+        "allReleaseTitles": [
+          "untilwinter",
+          "littledeathwishes",
+          "smokeemoutcocorosieanohni",
+          "lamaisondemonreve20thanniversaryedition",
+          "leastihaveyou",
+          "elevatorangelsepcocorosiefeaturinggaelrakotondrabe",
+          "beautifulboyzcocorosiefeaturinggaelrakotondrabe",
+          "goaway",
+          "endofthefreakshowcocorosiefeaturingbigfreediaanohnibrookecandycakesdakilla",
+          "puttheshineon",
+          "weareonfire",
+          "greyoceans",
+          "lemonade",
+          "godhasavoiceshespeaksthroughme",
+          "theadventuresofghosthorsestillborn",
+          "noahsark",
+          "beautifulboyz",
+          "lamaisondemonreve"
+        ],
+        "latestRelease": {
+          "title": "UNTIL WINTER",
+          "type": "track",
+          "url": "https://cocorosiemusic.bandcamp.com/track/until-winter",
+          "imageUrl": "https://f4.bcbits.com/img/a2758796584_2.jpg",
+          "releaseDate": "March 6, 2026"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/cocorosie/556773",
+        "allReleaseTitles": [
+          "littledeathwishes",
+          "puttheshineon",
+          "heartachecity",
+          "elevatorangels",
+          "lamaisondemonreve",
+          "smokeemoutanohni",
+          "pushingdaisies",
+          "yesterday",
+          "restless",
+          "cutstitchscar",
+          "weareonfire",
+          "hushlittlebayaltarbabiancacasady",
+          "endofthefreakshowfeaturingbigfreediaanohnibrookecandyandcakesdakilla",
+          "smashmyhead",
+          "alohafriday",
+          "lambandthewolf",
+          "theadventuresofghosthorsestillborn",
+          "noahsark",
+          "greyoceans",
+          "talesofagrasswidow"
+        ],
+        "latestRelease": {
+          "title": "Little Death Wishes Cocorosie",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/little-death-wishes-cocorosie/vekiu1cp8r5bc",
+          "releaseDate": "2025-03-28"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=CocoRosie"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+CocoRosie"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.cocorosiemusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/204103"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=CocoRosie&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/CocoRosie"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/cocorosie_official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/larealcocorosie"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/LaRealCocoRosie"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

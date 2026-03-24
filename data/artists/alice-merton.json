@@ -1,0 +1,95 @@
+[
+  {
+    "id": "alicemerton",
+    "name": "Alice Merton",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0016195549_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://alicemertonmusic.bandcamp.com",
+        "allReleaseTitles": [
+          "sides",
+          "heroisland",
+          "vertigo"
+        ],
+        "latestRelease": {
+          "title": "S.I.D.E.S.",
+          "type": "album",
+          "url": "https://alicemertonmusic.bandcamp.com/album/s-i-d-e-s",
+          "imageUrl": "https://f4.bcbits.com/img/a2803448188_2.jpg",
+          "releaseDate": "June 17, 2022"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/alice-merton/1212885",
+        "allReleaseTitles": [
+          "visions",
+          "mint4",
+          "heron",
+          "heronii",
+          "ignoranceisbliss",
+          "charliebrown",
+          "mint",
+          "runawaygirl",
+          "landline",
+          "liveinfrankfurtfrankfurtradiosymphony",
+          "norootsdaifreyr",
+          "cruelintentions",
+          "whysoserious",
+          "sameteam",
+          "heroisland",
+          "pickmeup",
+          "learntolive",
+          "loveback",
+          "blindside",
+          "norootsep"
+        ],
+        "latestRelease": {
+          "title": "Visions Alice Merton",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/visions-alice-merton/u0m0xy07nnrib",
+          "releaseDate": "2026-01-16"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Alice%20Merton"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Alice%20Merton"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.alicemerton.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4325585"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/alicemerton/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@alicemerton"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCVxrTuGYoEvz26wYrq1uGjQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/alicemerton"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

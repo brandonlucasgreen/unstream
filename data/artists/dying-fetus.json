@@ -1,0 +1,119 @@
+[
+  {
+    "id": "dyingfetus",
+    "name": "Dying Fetus",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032911341_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://dyingfetus.bandcamp.com",
+        "allReleaseTitles": [
+          "intothecesspoolsingle",
+          "makethembegfordeath",
+          "unbridledfurysingle",
+          "compulsionforcrueltysingle",
+          "wrongonetofuckwith",
+          "reignsupremedeluxeedition",
+          "historyrepeats",
+          "grotesqueimpalement",
+          "descendintodepravitydeluxeedition",
+          "warofattrition",
+          "stopatnothing",
+          "destroytheopposition",
+          "killingonadrenaline",
+          "purificationthroughviolence",
+          "infatuationwithmalevolence"
+        ],
+        "latestRelease": {
+          "title": "Into The Cesspool (Single)",
+          "type": "album",
+          "url": "https://dyingfetus.bandcamp.com/album/into-the-cesspool-single",
+          "imageUrl": "https://f4.bcbits.com/img/a0139296296_2.jpg",
+          "releaseDate": "September 19, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/dying-fetus/799777",
+        "allReleaseTitles": [
+          "wrongonetofuckwith",
+          "intothecesspool",
+          "makethembegfordeath",
+          "unbridledfury",
+          "throwtheminthevan",
+          "feastofashes",
+          "destroytheopposition",
+          "reignsupremedeluxeversion",
+          "stopatnothing",
+          "reignsupreme",
+          "killingonadrenaline",
+          "warofattrition",
+          "descendintodepravity",
+          "descendintodepravitydeluxeversion",
+          "historyrepeats",
+          "compulsionforcruelty"
+        ],
+        "latestRelease": {
+          "title": "Into The Cesspool Dying Fetus",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/into-the-cesspool-dying-fetus/d1xfoy9ca8v1b",
+          "releaseDate": "2025-09-19"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/DyingFetus"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Dying%20Fetus"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Dying%20Fetus"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://dyingfetusband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/252431"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Dying%20Fetus&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Dying%20Fetus"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/dyingfetusofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@dyingfetusband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/OfficialDyingFetus"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@dyingfetusofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/DyingFetus"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

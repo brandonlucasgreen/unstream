@@ -1,0 +1,91 @@
+[
+  {
+    "id": "femikuti",
+    "name": "Femi Kuti",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038478259_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://femikuti.bandcamp.com",
+        "allReleaseTitles": [
+          "journeythroughlife",
+          "politicsdonexposethem",
+          "legacystopthehate",
+          "africaforafrica"
+        ],
+        "latestRelease": {
+          "title": "Journey Through Life",
+          "type": "album",
+          "url": "https://femikuti.bandcamp.com/album/journey-through-life",
+          "imageUrl": "https://f4.bcbits.com/img/a1133974403_16.jpg",
+          "releaseDate": "April 25, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/femi-kuti/41835",
+        "allReleaseTitles": [
+          "journeythroughlife",
+          "legacymadekuti",
+          "noplaceformydream",
+          "",
+          "onepeopleoneworld",
+          "africaforafrica",
+          "stopthehate",
+          "ogadoctor",
+          "africashrine",
+          "daybyday",
+          "politicsdonexposethem",
+          "papapa",
+          "after24years",
+          "legacynewafrikashrinelivesessionsmadekuti",
+          "natheirwaybethatradioedit",
+          "aswestruggleeveryday",
+          "stopthehateedit"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Femi%20Kuti"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Femi%20Kuti"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://femikuti.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3376"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Femi%20Kuti&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Femi%20Kuti"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/femiakuti/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCTTqEp2cL90aZObHOI1Sxcg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/femikutiofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

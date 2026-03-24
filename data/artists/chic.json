@@ -1,0 +1,63 @@
+[
+  {
+    "id": "chic",
+    "name": "Chic",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a1383497943_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://chic.bandcamp.com",
+        "allReleaseTitles": [
+          "pastmemoirs",
+          "programmedinihibitionep",
+          "relationalmodel"
+        ],
+        "latestRelease": {
+          "title": "Past Memoirs",
+          "type": "album",
+          "url": "https://chic.bandcamp.com/album/past-memoirs",
+          "imageUrl": "https://f4.bcbits.com/img/a1383497943_2.jpg",
+          "releaseDate": "August 28, 2013"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Chic"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Chic"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/9081"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Chic&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Chic"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCl8SEpoDrxkD_Ld1teSat6A"
+      },
+      {
+        "sourceId": "peertube",
+        "url": "https://video.infosec.exchange/video-channels/chico"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/chicorganization"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

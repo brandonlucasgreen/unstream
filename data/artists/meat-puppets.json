@@ -1,0 +1,114 @@
+[
+  {
+    "id": "meatpuppets",
+    "name": "Meat Puppets",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033466672_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://meatpuppets.bandcamp.com",
+        "allReleaseTitles": [
+          "uponthesun2022megamix",
+          "liveinmontana",
+          "potatotown",
+          "monsters",
+          "huevos",
+          "mirage",
+          "outmyway",
+          "uponthesun",
+          "meatpuppetsii",
+          "meatpuppets",
+          "campsongs",
+          "multiplyep",
+          "dustynotes",
+          "ratfarm",
+          "lollipop",
+          "sewntogether",
+          "risetoyourknees",
+          "bluemoonofkentuckycampsongsbonustrack"
+        ],
+        "latestRelease": {
+          "title": "Up On The Sun 2022 MegaMix",
+          "type": "track",
+          "url": "https://meatpuppets.bandcamp.com/track/up-on-the-sun-2022-megamix",
+          "imageUrl": "https://f4.bcbits.com/img/a0201212235_2.jpg",
+          "releaseDate": "December 22, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/meat-puppets/477429",
+        "allReleaseTitles": [
+          "dustynotes",
+          "campsongs",
+          "toohightodie",
+          "forbiddenplaces",
+          "ii",
+          "uponthesun",
+          "outmyway",
+          "",
+          "inacar",
+          "nojoke",
+          "goldenlies",
+          "huevos",
+          "mirage",
+          "monsters",
+          "ratfarm",
+          "live",
+          "risetoyourknees",
+          "liveinmontana",
+          "lollipop",
+          "warranty"
+        ],
+        "latestRelease": {
+          "title": "Camp Songs Meat Puppets",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/camp-songs-meat-puppets/d1ny6n9uals8b",
+          "releaseDate": "2023-10-06"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Meat%20Puppets"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Meat%20Puppets"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.themeatpuppets.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/88468"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Meat%20Puppets&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Meat%20Puppets"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/puppetsofmeat/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCuMniXW9_1mrhFMhnp5QAJQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/meatpuppets"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

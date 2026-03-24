@@ -1,0 +1,42 @@
+[
+  {
+    "id": "andrewwood",
+    "name": "Andrew Wood",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0035924216_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://andrewwood.bandcamp.com",
+        "allReleaseTitles": [
+          "frustumculling",
+          "towardoffdisease"
+        ],
+        "latestRelease": {
+          "title": "Frustum Culling",
+          "type": "album",
+          "url": "https://andrewwood.bandcamp.com/album/frustum-culling",
+          "imageUrl": "https://f4.bcbits.com/img/a0078168964_16.jpg",
+          "releaseDate": "December 6, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Andrew%20Wood"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Andrew%20Wood"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/483437"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

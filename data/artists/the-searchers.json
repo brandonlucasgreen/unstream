@@ -1,0 +1,58 @@
+[
+  {
+    "id": "thesearchers",
+    "name": "The Searchers",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0021357247_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thesearchers.bandcamp.com",
+        "allReleaseTitles": [
+          "donherbertekow",
+          "thesearchershobbiesgalorecompilation"
+        ],
+        "latestRelease": {
+          "title": "Don Herbert - Ekow",
+          "type": "album",
+          "url": "https://thesearchers.bandcamp.com/album/don-herbert-ekow",
+          "imageUrl": "https://f4.bcbits.com/img/a3084266472_16.jpg",
+          "releaseDate": "May 13, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Searchers"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Searchers"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.the-searchers.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/277352"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Searchers&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Searchers"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/@TheSearchersOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

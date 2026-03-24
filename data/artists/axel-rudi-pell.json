@@ -1,0 +1,94 @@
+[
+  {
+    "id": "axelrudipell",
+    "name": "Axel Rudi Pell",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0015358511_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://axelrudipell.bandcamp.com",
+        "allReleaseTitles": [
+          "ghosttown",
+          "risensymbol",
+          "theballadsvi",
+          "lostxxiii",
+          "diamondsunlockedii",
+          "signofthetimes",
+          "xxxanniversarylive",
+          "knightscall",
+          "gameofsins",
+          "theballadsv",
+          "magicmoments",
+          "intothestorm"
+        ],
+        "latestRelease": {
+          "title": "Ghost Town",
+          "type": "album",
+          "url": "https://axelrudipell.bandcamp.com/album/ghost-town",
+          "imageUrl": "https://f4.bcbits.com/img/a3981705619_2.jpg",
+          "releaseDate": "March 20, 2026"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/axel-rudi-pell/2119202",
+        "allReleaseTitles": [
+          "theballadsvi",
+          "risensymbol",
+          "ghosttown",
+          "lostxxiii",
+          "sanity",
+          "diamondsandrust",
+          "guillotinewalk",
+          "theballadsiii",
+          "oceansoftime",
+          "theballadsii",
+          "theballads",
+          "knightscall",
+          "blackmoonpyramid",
+          "magic",
+          "xxxanniversarylive",
+          "kingsandqueens",
+          "themasqueradeball",
+          "shadowzone",
+          "theballadsv",
+          "mystica"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Axel%20Rudi%20Pell"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Axel%20Rudi%20Pell"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.axel-rudi-pell.de/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/381412"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Axel%20Rudi%20Pell&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Axel%20Rudi%20Pell"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/AXEL-RUDI-PELL-OFFICIAL-SITE-427164065301"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

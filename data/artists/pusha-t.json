@@ -1,0 +1,94 @@
+[
+  {
+    "id": "pushat",
+    "name": "Pusha T",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028443204_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://pushatband.bandcamp.com",
+        "allReleaseTitles": [
+          "itsalmostdry",
+          "daytona",
+          "kingpushdarkestbeforedawntheprelude",
+          "mynameismyname",
+          "fearofgodiiletuspray"
+        ],
+        "latestRelease": {
+          "title": "It's Almost Dry",
+          "type": "album",
+          "url": "https://pushatband.bandcamp.com/album/its-almost-dry",
+          "imageUrl": "https://f4.bcbits.com/img/a3922281589_2.jpg",
+          "releaseDate": "April 22, 2022"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/pusha-t/129949",
+        "allReleaseTitles": [
+          "letgodsortemoutclipsemalice",
+          "daytona",
+          "itsalmostdryexplicitversion",
+          "acetrumpetsacolorsshowclipsecolorsandmalice",
+          "itsalmostdry",
+          "kingpushdarkestbeforedawntheprelude",
+          "mrputthatshitoncyhi",
+          "dietcoke",
+          "dangerdangergodfatherofharlemswizzbeatzjadakiss",
+          "neckwristpharrellwilliamsjayz",
+          "lookatmemobbdeepclipsemalice",
+          "hearmeclearlynigo",
+          "lightspleasefeatchasebkhiinfinitechaseb"
+        ],
+        "latestRelease": {
+          "title": "Let God Sort Em Out Clipse Pusha T Malice",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/let-god-sort-em-out-clipse-pusha-t-malice/tngk7ywb8sm3b",
+          "releaseDate": "2025-07-11"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Pusha%20T"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Pusha%20T"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://pusha-t.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/158775"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Pusha%20T&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Pusha%20T"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kingpush/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCav5tmZJsDYJ7SC7vglxhnA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Pusha-T/168714679807608"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

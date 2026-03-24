@@ -1,0 +1,88 @@
+[
+  {
+    "id": "surie",
+    "name": "SuRie",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0040888364_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://surie.bandcamp.com",
+        "allReleaseTitles": [
+          "largerframes",
+          "buildingawoman",
+          "surieep"
+        ],
+        "latestRelease": {
+          "title": "Larger Frames",
+          "type": "album",
+          "url": "https://surie.bandcamp.com/album/larger-frames",
+          "imageUrl": "https://f4.bcbits.com/img/a0686187918_2.jpg",
+          "releaseDate": "December 5, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/surie/1861441",
+        "allReleaseTitles": [
+          "storm",
+          "littleframes",
+          "rye",
+          "whenitallgoesquiet",
+          "treadingwater",
+          "solsburyhillorchestraoftheswandavidlepage",
+          "somethingbeginningwith",
+          "lastchristmas",
+          "buildingawoman",
+          "dozen",
+          "onlyyouandi",
+          "fields",
+          "outofuniverse"
+        ],
+        "latestRelease": {
+          "title": "Little Frames Surie",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/little-frames-surie/oi5z7s61ad3xa",
+          "releaseDate": "2024-11-03"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/wearesurie"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=SuRie"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+SuRie"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.surie.me/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/6428292"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/surieofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCreFo8GNZgdcpOa-4rvrZmQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/SuRieOfficial/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

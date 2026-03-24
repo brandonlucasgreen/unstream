@@ -1,0 +1,114 @@
+[
+  {
+    "id": "diekrupps",
+    "name": "DIE KRUPPS",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0002228032_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://diekrupps.bandcamp.com",
+        "allReleaseTitles": [
+          "willnichtmussoncollisioncourse",
+          "oncollisioncourse",
+          "songsfromthedarksideofheavendiekrupps",
+          "vision2020vision",
+          "robosapien",
+          "industriemaedchen",
+          "themachinistsofjoy",
+          "risikofaktor",
+          "vollekraftnullacht",
+          "paradisenow",
+          "iiiodysseyofthemind",
+          "thefinalremixes",
+          "iithefinaloptionthefinaloptionremixed",
+          "iithefinaloption",
+          "atributetometallica",
+          "i"
+        ],
+        "latestRelease": {
+          "title": "Will nicht - MUSS! / On Collision Course",
+          "type": "album",
+          "url": "https://diekrupps.bandcamp.com/album/will-nicht-muss-on-collision-course",
+          "imageUrl": "https://f4.bcbits.com/img/a3674543861_2.jpg",
+          "releaseDate": "December 12, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/die-krupps/552351",
+        "allReleaseTitles": [
+          "vmetalmachinemusic",
+          "templeofloveofrahaza",
+          "themachinistsofjoy",
+          "vision2020vision",
+          "willnichtmussoncollisioncourse",
+          "cinnamongirlcinnamonbabe",
+          "thebeautifulpeople",
+          "toomuchhistory",
+          "iithefinaloption",
+          "aliveinaglasscagecaliban",
+          "judgmentnightonyx",
+          "vollekraftvoraus",
+          "oncollisioncourse",
+          "santaclaus",
+          "ii",
+          "vollekraftnullacht",
+          "stahlwerksynfonie",
+          "iiiodysseyofthemind",
+          "i",
+          "risikofaktor"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=DIE%20KRUPPS"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+DIE%20KRUPPS"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.diekrupps.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/36932"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=DIE%20KRUPPS&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/DIE%20KRUPPS"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/diekruppsband/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@diekruppsband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/DieKruppsOfficial"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@diekruppsband"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/diekruppsofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

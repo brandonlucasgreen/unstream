@@ -1,0 +1,59 @@
+[
+  {
+    "id": "sonajobarteh",
+    "name": "Sona Jobarteh",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a0603668434_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sonajobarteh.bandcamp.com",
+        "allReleaseTitles": [
+          "fasiya",
+          "badinyaakumoo",
+          "motherlandthescore"
+        ],
+        "latestRelease": {
+          "title": "Fasiya",
+          "type": "album",
+          "url": "https://sonajobarteh.bandcamp.com/album/fasiya",
+          "imageUrl": "https://f4.bcbits.com/img/a0603668434_2.jpg",
+          "releaseDate": "February 11, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sona%20Jobarteh"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sona%20Jobarteh"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sonajobarteh.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4329539"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sonajobarteh"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://youtu.be/_Qfk3aJ8p5E"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sonajobarteh"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

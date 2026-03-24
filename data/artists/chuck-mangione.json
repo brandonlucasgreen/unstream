@@ -1,0 +1,100 @@
+[
+  {
+    "id": "chuckmangione",
+    "name": "Chuck Mangione",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0010952054_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://chuckmangione.bandcamp.com",
+        "allReleaseTitles": [
+          "everythingforlovehires96khz24bit",
+          "thefeelingsbackhires96khz24bit",
+          "everythingforlove",
+          "thefeelingsback"
+        ],
+        "latestRelease": {
+          "title": "Everything For Love (Hi-Res) 96kHz - 24bit",
+          "type": "album",
+          "url": "https://chuckmangione.bandcamp.com/album/everything-for-love-hi-res-96khz-24bit",
+          "imageUrl": "https://f4.bcbits.com/img/a3774150057_16.jpg",
+          "releaseDate": "January 2, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/chuck-mangione/38662",
+        "allReleaseTitles": [
+          "feelssogood",
+          "childrenofsanchez",
+          "everythingforlove",
+          "thefeelingsback",
+          "mainsqueeze",
+          "aneveningofmagicliveatthehollywoodbowl",
+          "funandgames",
+          "landofmakebelievehamiltonphilharmonicorchestra",
+          "buttercornladykeithjarrettartblakeythejazzmessengers",
+          "20thcenturymastersthebestof",
+          "greatesthits",
+          "70milesyoung",
+          "eyesoftheveiledtemptress",
+          "lovenotes",
+          "amgoldseries",
+          "journeytoarainbow"
+        ],
+        "latestRelease": {
+          "title": "Everything For Love Chuck Mangione",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/everything-for-love-chuck-mangione/oey2bmznqzjrc",
+          "releaseDate": "2000-09-26"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Chuck%20Mangione"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Chuck%20Mangione"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.chuckmangione.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/92051"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Chuck%20Mangione&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Chuck%20Mangione"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/officialchuckmangione/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@chuckmangioneofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCNb7QS9iP-ezfkK_tNdWn0Q"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/groups/733652076794406"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,59 @@
+[
+  {
+    "id": "jeremih",
+    "name": "Jeremih",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036911036_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jeremih.bandcamp.com",
+        "allReleaseTitles": [
+          "secretsanta",
+          "sickfeat4batz",
+          "waitonit"
+        ],
+        "latestRelease": {
+          "title": "Secret Santa",
+          "type": "track",
+          "url": "https://jeremih.bandcamp.com/track/secret-santa",
+          "imageUrl": "https://f4.bcbits.com/img/a1558652420_2.jpg",
+          "releaseDate": "December 20, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jeremih"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jeremih"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.jeremihmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1502171"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/jeremih/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC2mlBoe1tk4U3Ib8SzU5y2g"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialjeremih"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

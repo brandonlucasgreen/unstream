@@ -1,0 +1,88 @@
+[
+  {
+    "id": "irmathomas",
+    "name": "Irma Thomas",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022265680_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://irmathomas.bandcamp.com",
+        "allReleaseTitles": [
+          "inbetweentears",
+          "thesoulqueenofneworleans50thanniversarycelebration",
+          "aftertherain",
+          "liveatneworleansjazzheritagefestival1976"
+        ],
+        "latestRelease": {
+          "title": "In Between Tears",
+          "type": "album",
+          "url": "https://irmathomas.bandcamp.com/album/in-between-tears",
+          "imageUrl": "https://f4.bcbits.com/img/a4021260225_16.jpg",
+          "releaseDate": "November 4, 2020"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/irma-thomas/67352",
+        "allReleaseTitles": [
+          "audiencewiththequeengalactic",
+          "ladylibertygalactic",
+          "whereibelonggalactic",
+          "howgladiamgalactic",
+          "liveatneworleansjazzheritagefestival1976",
+          "takealook",
+          "wishsomeonewouldcare",
+          "thisisonmysidethebestof",
+          "thesoulqueenofneworleans50thanniversarycelebration",
+          "aftertherain",
+          "straightfromthesoul",
+          "collection19611966",
+          "soulqueenofneworleans",
+          "simplygrand",
+          "singitmarciaballtracynelson",
+          "somethinggoodthemuscleshoalssessions",
+          "myheartsinmemphisthesongsofdanpenn",
+          "inbetweentears",
+          "simplythebestlive",
+          "truebeliever"
+        ],
+        "latestRelease": {
+          "title": "Live At New Orleans Jazz Heritage Festival 1976 Irma Thomas",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/live-at-new-orleans-jazz-heritage-festival-1976-irma-thomas/t6eelucg1jg1e",
+          "releaseDate": "2026-01-12"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Irma%20Thomas"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Irma%20Thomas"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.irmathomas.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/381633"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Irma%20Thomas&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Irma%20Thomas"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

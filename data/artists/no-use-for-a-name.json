@@ -1,0 +1,94 @@
+[
+  {
+    "id": "nouseforaname",
+    "name": "No Use For A Name",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011023744_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://nouseforaname.bandcamp.com",
+        "allReleaseTitles": [
+          "raritiesvol2theoriginals",
+          "raritiesvol1thecovers",
+          "thefeelgoodrecordoftheyear",
+          "allthebestsongs",
+          "keepthemconfused",
+          "hardrockbottom",
+          "dontmissthetrain",
+          "incognito",
+          "liveinadivenouseforaname",
+          "morebetterness",
+          "makingfriends",
+          "lecheconcarne",
+          "thedailygrind"
+        ],
+        "latestRelease": {
+          "title": "Rarities Vol. 2: The Originals",
+          "type": "album",
+          "url": "https://nouseforaname.bandcamp.com/album/rarities-vol-2-the-originals",
+          "imageUrl": "https://f4.bcbits.com/img/a3762068207_2.jpg",
+          "releaseDate": "February 12, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/no-use-for-a-name/492757",
+        "allReleaseTitles": [
+          "raritiesvol2theoriginals",
+          "hardrockbottom",
+          "makingfriends",
+          "lecheconcarne",
+          "allthebestsongsreissue",
+          "morebetterness",
+          "thefeelgoodrecordoftheyear",
+          "thedailygrind",
+          "keepthemconfused",
+          "talking",
+          "raritiesvol1thecovers",
+          "dontmissthetrain",
+          "liveinadive",
+          "incognito",
+          "hybridmoments"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=No%20Use%20For%20A%20Name"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+No%20Use%20For%20A%20Name"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.nouseforanamemusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/253259"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=No%20Use%20For%20A%20Name&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/No%20Use%20For%20A%20Name"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/nouseforanameofficial?igsh=MTdpNXB3bGFzM2F3NA=="
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/nouseofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

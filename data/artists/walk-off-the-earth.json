@@ -1,0 +1,76 @@
+[
+  {
+    "id": "walkofftheearth",
+    "name": "Walk off the Earth",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018832798_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://walkofftheearth.bandcamp.com",
+        "allReleaseTitles": [
+          "fireinmysoulinstrumental",
+          "ruletheworldinstrumental",
+          "ahistoryofthebeatles",
+          "hitsongsmashup",
+          "revoinparis",
+          "redhandsrazudoxremix",
+          "closer",
+          "wreckingballsarahblackwoodjennipleauemilybones",
+          "listentothemusic",
+          "cornerofqueenytversion",
+          "cheersdrinktothat",
+          "homewalkofftheearthstreetpharmacy",
+          "backinupsong",
+          "coolin",
+          "100prooflife",
+          "julia"
+        ],
+        "latestRelease": {
+          "title": "Fire In My Soul (Instrumental)",
+          "type": "album",
+          "url": "https://walkofftheearth.bandcamp.com/album/fire-in-my-soul-instrumental",
+          "imageUrl": "https://f4.bcbits.com/img/a0999178682_2.jpg",
+          "releaseDate": "January 6, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Walk%20off%20the%20Earth"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Walk%20off%20the%20Earth"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.walkofftheearth.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2571116"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/walkofftheearth/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "http://tiktok.com/@walkofftheearth"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC9PEibgWOqZ-1I1JdxRmr6g"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/GianniandSarahMusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

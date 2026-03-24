@@ -1,0 +1,51 @@
+[
+  {
+    "id": "satoshi",
+    "name": "Satoshi",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026597748_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://satoshicahul.bandcamp.com",
+        "allReleaseTitles": [
+          "rush",
+          "rush",
+          "cealegifttatuni",
+          "lacrimiinlocdeagheazmamiltreoremix",
+          "foaieverde",
+          "umaturmanfeatmishabird",
+          "caldurapedos",
+          "est",
+          "eden",
+          "pecal",
+          "lasaisatreaca",
+          "sunt",
+          "origini",
+          "cadinsus",
+          "varuamaru"
+        ],
+        "latestRelease": {
+          "title": "RUSH",
+          "type": "album",
+          "url": "https://satoshicahul.bandcamp.com/album/rush",
+          "imageUrl": "https://f4.bcbits.com/img/a3442632927_2.jpg",
+          "releaseDate": "February 16, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Satoshi"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Satoshi"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

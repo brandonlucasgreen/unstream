@@ -1,0 +1,60 @@
+[
+  {
+    "id": "kareno",
+    "name": "Karen O",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030845280_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kareno.bandcamp.com",
+        "allReleaseTitles": [
+          "themoontonesthemoontones",
+          "jinglebellsthemerrymistletones",
+          "ochristmastreethemerrymistletones",
+          "joytotheworldthemerrymistletones"
+        ],
+        "latestRelease": {
+          "title": "The Moontones\n                \n                \n\n                The Moontones",
+          "type": "album",
+          "url": "https://kareno.bandcamp.com/album/the-moontones",
+          "imageUrl": "https://f4.bcbits.com/img/a1529492913_16.jpg",
+          "releaseDate": "January 1, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Karen%20O"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Karen%20O"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.karenomusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/245778"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/ko/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/officialkareno"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialkareno"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

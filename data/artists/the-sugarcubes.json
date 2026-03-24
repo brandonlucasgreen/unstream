@@ -1,0 +1,74 @@
+[
+  {
+    "id": "thesugarcubes",
+    "name": "The Sugarcubes",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026833064_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thesugarcubes.bandcamp.com",
+        "allReleaseTitles": [
+          "thegreatcrossoverpotential",
+          "itsit",
+          "stickaroundforjoy",
+          "heretodaytomorrownextweek",
+          "lifestoogood"
+        ],
+        "latestRelease": {
+          "title": "The Great Crossover Potential",
+          "type": "album",
+          "url": "https://thesugarcubes.bandcamp.com/album/the-great-crossover-potential",
+          "imageUrl": "https://f4.bcbits.com/img/a2008089987_2.jpg",
+          "releaseDate": "July 14, 1998"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-sugarcubes/1070624",
+        "allReleaseTitles": [
+          "intheirownwords",
+          "lifestoogood",
+          "heretodaytomorrownextweek",
+          "itsit",
+          "hit",
+          "vitamin",
+          "walkabout",
+          "stickaroundforjoy",
+          "thegreatcrossoverpotential"
+        ],
+        "latestRelease": {
+          "title": "In Their Own Words The Sugarcubes",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/in-their-own-words-the-sugarcubes/f36kjtmqm6idc",
+          "releaseDate": "1995-05-22"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Sugarcubes"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Sugarcubes"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/9452"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Sugarcubes&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Sugarcubes"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "bush",
+    "name": "Bush",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0034118927_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bush.bandcamp.com",
+        "allReleaseTitles": [
+          "everythingzenjasonaalonbutlerremix",
+          "swallowedgluremix",
+          "glycerinecoreysbedroommix",
+          "sixteenstone",
+          "theseaofmemoriesdeluxeedition",
+          "razorbladesuitcase"
+        ],
+        "latestRelease": {
+          "title": "Everything Zen (Jason Aalon Butler Remix)",
+          "type": "track",
+          "url": "https://bush.bandcamp.com/track/everything-zen-jason-aalon-butler-remix",
+          "imageUrl": "https://f4.bcbits.com/img/a0529956245_2.jpg",
+          "releaseDate": "August 23, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bush"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bush"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

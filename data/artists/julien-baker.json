@@ -1,0 +1,47 @@
+[
+  {
+    "id": "julienbaker",
+    "name": "Julien Baker",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022088920_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://julienbaker.bandcamp.com",
+        "allReleaseTitles": [
+          "bsides",
+          "adreamersholiday",
+          "littleoblivionsremixes",
+          "littleoblivions",
+          "tokyo",
+          "reddoorconversationpiece",
+          "turnoutthelights",
+          "turnoutthelights24bit",
+          "funeralpyredistantsolarsystems",
+          "sprainedankle",
+          "julienbakeraudiotreelive"
+        ],
+        "latestRelease": {
+          "title": "B-Sides",
+          "type": "album",
+          "url": "https://julienbaker.bandcamp.com/album/b-sides",
+          "imageUrl": "https://f4.bcbits.com/img/a4289973784_2.jpg",
+          "releaseDate": "July 21, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Julien%20Baker"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Julien%20Baker"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

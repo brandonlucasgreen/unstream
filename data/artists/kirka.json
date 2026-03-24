@@ -1,0 +1,62 @@
+[
+  {
+    "id": "kirka-bandcamp-kirka",
+    "name": "kirka",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3158701924_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kirka.bandcamp.com",
+        "allReleaseTitles": [
+          "dontdrink",
+          "wow"
+        ],
+        "latestRelease": {
+          "title": "Dont Drink",
+          "type": "album",
+          "url": "https://kirka.bandcamp.com/album/dont-drink",
+          "imageUrl": "https://f4.bcbits.com/img/a3158701924_16.jpg",
+          "releaseDate": "January 22, 2019"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=kirka"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+kirka"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.kirka.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/310649"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=kirka&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/kirka"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/@KirkaFC"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/KirkaFanClub/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

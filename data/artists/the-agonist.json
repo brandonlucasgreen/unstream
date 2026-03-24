@@ -1,0 +1,87 @@
+[
+  {
+    "id": "theagonist",
+    "name": "The Agonist",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026050719_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://theagonist.bandcamp.com",
+        "allReleaseTitles": [
+          "daysbeforetheworldwept",
+          "orphans",
+          "five",
+          "theeyeofprovidence",
+          "prisoners",
+          "lullabiesforthedormantmind",
+          "onceonlyimaginedbonustrackedition"
+        ],
+        "latestRelease": {
+          "title": "Days Before The World Wept",
+          "type": "album",
+          "url": "https://theagonist.bandcamp.com/album/days-before-the-world-wept",
+          "imageUrl": "https://f4.bcbits.com/img/a0260421023_2.jpg",
+          "releaseDate": "October 15, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-agonist/667470",
+        "allReleaseTitles": [
+          "daysbeforetheworldwept",
+          "lullabiesforthedormantmind",
+          "prisoners",
+          "eyeofprovidence",
+          "onceonlyimagined",
+          "takemetochurch",
+          "five",
+          "orphans",
+          "themoment",
+          "thechain"
+        ]
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/TheAgonist"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Agonist"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Agonist"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://theagonistband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/923583"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/theagonistofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@theagonistofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC9tvdlWjVaWaNIaB2dzZrfA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/TheAgonistOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

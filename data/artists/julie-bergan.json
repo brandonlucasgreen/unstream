@@ -1,0 +1,65 @@
+[
+  {
+    "id": "juliebergan",
+    "name": "Julie Bergan",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0017633766_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://juliebergan.bandcamp.com",
+        "allReleaseTitles": [
+          "igniteremixes",
+          "turnonthelights",
+          "dontgiveuponmenowjonasblueremix",
+          "ignite",
+          "turnonthelightsremixes"
+        ],
+        "latestRelease": {
+          "title": "Ignite (Remixes)",
+          "type": "album",
+          "url": "https://juliebergan.bandcamp.com/album/ignite-remixes",
+          "imageUrl": "https://f4.bcbits.com/img/a3793098993_2.jpg",
+          "releaseDate": "June 6, 2018"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Julie%20Bergan"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Julie%20Bergan"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.juliebergan.no/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4451310"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/juliebergan/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@juliebergan"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCYJJ4dblxJXCiuFq8kw3YaA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/445741442160460"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

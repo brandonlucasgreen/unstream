@@ -1,0 +1,66 @@
+[
+  {
+    "id": "gunna-bandcamp-gunna2real",
+    "name": "Gunna",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0000217204_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://gunna2real.bandcamp.com",
+        "allReleaseTitles": [
+          "gunnateezijustwantitallgunnateezwithfeauturesfrommulahmulahduce",
+          "24hoursthemixtapegunnamulah"
+        ],
+        "latestRelease": {
+          "title": "Gunna . $teez : I Just Want It All !\n                \n                \n\n                Gunna . $teez , with feautures from Mulah & Mulah Duce",
+          "type": "album",
+          "url": "https://gunna2real.bandcamp.com/album/gunna-teez-i-just-want-it-all",
+          "imageUrl": "https://f4.bcbits.com/img/a4266162746_16.jpg",
+          "releaseDate": "July 1, 2012"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Gunna"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Gunna"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://only1gunna.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1689451"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/gunna/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@gunna?_t=8d2b1H7Lgzl&_r=1"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCAkIMkEaa9sZmjcy7mfd5lQ"
+      },
+      {
+        "sourceId": "peertube",
+        "url": "https://peertube.netzbegruenung.de/video-channels/btw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/gunnaofficial/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

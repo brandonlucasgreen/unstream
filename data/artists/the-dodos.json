@@ -1,0 +1,98 @@
+[
+  {
+    "id": "thedodos",
+    "name": "The Dodos",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026716279_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://dodosmusic.bandcamp.com",
+        "allReleaseTitles": [
+          "kablooeymericlong",
+          "grizzlypeak",
+          "theatlantic",
+          "thesurface",
+          "certaintywaves",
+          "individ",
+          "carrier",
+          "nocolor",
+          "timetodiedeluxeedition",
+          "visiter",
+          "bewareofthemaniacs",
+          "dodobird"
+        ],
+        "latestRelease": {
+          "title": "Kablooey\n                \n                \n\n                Meric Long",
+          "type": "album",
+          "url": "https://dodosmusic.bandcamp.com/album/kablooey",
+          "imageUrl": "https://f4.bcbits.com/img/a0780413919_2.jpg",
+          "releaseDate": "October 24, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-dodos/45521",
+        "allReleaseTitles": [
+          "kablooeymericlongand",
+          "grizzlypeak",
+          "certaintywaves",
+          "withaguitarpalehorizon",
+          "anniethesurface",
+          "thesurface",
+          "theatlantic",
+          "bewareofthemaniacs",
+          "visiter",
+          "carrier",
+          "nocolor",
+          "timetodie",
+          "individ",
+          "mirrorfake",
+          "polyvinyl4tracksinglesseriesvol2",
+          "asmallactofdefiancemericlongand",
+          "cheapthrills",
+          "dodobird",
+          "onaudiotreeliveandaudiotree",
+          ""
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Dodos"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Dodos"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.dodosmusic.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1130374"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://instagram.com/dodosmusic"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@polyvinylrecordco"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC0fxDGX4SJwh_m_4FL1c-pw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/dodosmusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,98 @@
+[
+  {
+    "id": "elianeelias",
+    "name": "Eliane Elias",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024538169_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://elianeelias.bandcamp.com",
+        "allReleaseTitles": [
+          "lovestories",
+          "musicfrommanoflamancha",
+          "danceoftime",
+          "madeinbrazil",
+          "amandarandybreckerelianeelias"
+        ],
+        "latestRelease": {
+          "title": "Love Stories",
+          "type": "album",
+          "url": "https://elianeelias.bandcamp.com/album/love-stories",
+          "imageUrl": "https://f4.bcbits.com/img/a0138927655_2.jpg",
+          "releaseDate": "August 30, 2019"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/eliane-elias/35612",
+        "allReleaseTitles": [
+          "sweptaway",
+          "sweptawaymarcjohnson",
+          "lovestories",
+          "quietude",
+          "mirrormirrorchickcoreachuchovaldes",
+          "madeinbrazil",
+          "danceoftime",
+          "musicfrommanoflamancha",
+          "voceeeuyouandi",
+          "sotinhaquesercomvocethislovethativefound",
+          "timeandagain",
+          "semprefeatdjavan",
+          "atfirstsight",
+          "everythingilove",
+          "dreamer",
+          "kissedbynature",
+          "brazilianclassics"
+        ],
+        "latestRelease": {
+          "title": "Quietude Eliane Elias",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/quietude-eliane-elias/d60e709h8rc00",
+          "releaseDate": "2022-10-14"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Eliane%20Elias"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Eliane%20Elias"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://elianeelias.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/86031"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Eliane%20Elias&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Eliane%20Elias"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/elianeeliasofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/elianeeliasofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ElianeEliasMusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

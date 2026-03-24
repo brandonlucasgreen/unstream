@@ -1,0 +1,50 @@
+[
+  {
+    "id": "brendanperry",
+    "name": "Brendan Perry",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022262843_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://brendan-perry.bandcamp.com",
+        "allReleaseTitles": [
+          "eyeofthehunterliveattheica",
+          "songsofdisenchantmentmusicfromthegreekunderground"
+        ],
+        "latestRelease": {
+          "title": "Eye of the Hunter / Live at the I.C.A.",
+          "type": "album",
+          "url": "https://brendan-perry.bandcamp.com/album/eye-of-the-hunter-live-at-the-i-c-a",
+          "imageUrl": "https://f4.bcbits.com/img/a3107630978_16.jpg",
+          "releaseDate": "October 20, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/brendan-perry/384701",
+        "allReleaseTitles": [
+          "nolandbagadcessonoliviermellano",
+          "eyeofthehunterliveattheica",
+          "songsofdisenchantmentmusicfromthegreekunderground",
+          "happytime",
+          "ark",
+          "eyeofthehunter"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Brendan%20Perry"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Brendan%20Perry"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

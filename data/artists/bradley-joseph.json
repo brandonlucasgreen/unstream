@@ -1,0 +1,42 @@
+[
+  {
+    "id": "bradleyjoseph",
+    "name": "Bradley Joseph",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a1988610045_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bradleyjoseph.bandcamp.com",
+        "allReleaseTitles": [
+          "fortheloveofitupbeatpianoinstrumentals",
+          "onedeepbreathoriginalcinematicpianoinstrumentals",
+          "hearthemasses",
+          "pianolovesongsrelaxingpianoclassiclovesongs",
+          "thejourneycontinuesthemostrelaxingpianocdontheplanet",
+          "solojourneythemostrelaxingpianocdintheworld"
+        ],
+        "latestRelease": {
+          "title": "For The Love Of It - Upbeat Piano Instrumentals",
+          "type": "album",
+          "url": "https://bradleyjoseph.bandcamp.com/album/for-the-love-of-it-upbeat-piano-instrumentals",
+          "imageUrl": "https://f4.bcbits.com/img/a1988610045_2.jpg",
+          "releaseDate": "January 9, 2013"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bradley%20Joseph"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bradley%20Joseph"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

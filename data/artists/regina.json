@@ -1,0 +1,45 @@
+[
+  {
+    "id": "regina",
+    "name": "REGINA",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041331203_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://reginatheband.bandcamp.com",
+        "allReleaseTitles": [
+          "liminalspace",
+          "liveatfeminoisefestival",
+          "wouldyoulikesomefrieswiththat",
+          "whiteout",
+          "ageofaquarius",
+          "rot",
+          "skysfallingquarantinelivesession",
+          "apology",
+          "mother"
+        ],
+        "latestRelease": {
+          "title": "Liminal Space",
+          "type": "album",
+          "url": "https://reginatheband.bandcamp.com/album/liminal-space",
+          "imageUrl": "https://f4.bcbits.com/img/a3694738362_2.jpg",
+          "releaseDate": "September 12, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=REGINA"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+REGINA"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

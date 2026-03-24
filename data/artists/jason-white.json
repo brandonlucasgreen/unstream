@@ -1,0 +1,38 @@
+[
+  {
+    "id": "jasonwhite-bandcamp-jasonwhite",
+    "name": "Jason White",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3927307538_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jasonwhite.bandcamp.com",
+        "allReleaseTitles": [
+          "hammerhead",
+          "thequantummechanicsoflovepart1"
+        ],
+        "latestRelease": {
+          "title": "Hammerhead",
+          "type": "track",
+          "url": "https://jasonwhite.bandcamp.com/track/hammerhead",
+          "imageUrl": "https://f4.bcbits.com/img/a3927307538_16.jpg",
+          "releaseDate": "October 20, 2010"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jason%20White"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jason%20White"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

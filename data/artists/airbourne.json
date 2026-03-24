@@ -1,0 +1,72 @@
+[
+  {
+    "id": "airbourne",
+    "name": "Airbourne",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025518514_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://airbourne.bandcamp.com",
+        "allReleaseTitles": [
+          "diamondcutsthebsides",
+          "blackdogbarking",
+          "nogutsnoglory",
+          "runninwild"
+        ],
+        "latestRelease": {
+          "title": "Diamond Cuts - The B-Sides",
+          "type": "album",
+          "url": "https://airbourne.bandcamp.com/album/diamond-cuts-the-b-sides",
+          "imageUrl": "https://f4.bcbits.com/img/a3428927765_16.jpg",
+          "releaseDate": "July 30, 2021"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/airbourne"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Airbourne"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Airbourne"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.airbournerock.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/165993"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Airbourne&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Airbourne"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/airbourne/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/Airbournerock"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/airbournerock"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

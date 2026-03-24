@@ -1,0 +1,76 @@
+[
+  {
+    "id": "blutengel",
+    "name": "Blutengel",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018056824_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://blutengel.bandcamp.com",
+        "allReleaseTitles": [
+          "thedevil",
+          "damonensturm",
+          "shewearsblack",
+          "nothingleftfeatsolarfake",
+          "dersturm",
+          "youwalkaway2k23anniversaryversion",
+          "unsterblichoursoulswillneverdie",
+          "unsterblichoursoulswillneverdielimitededition",
+          "livingontheedgeofthenightagothicanthem",
+          "kingofblood",
+          "webelongtothenight",
+          "tief",
+          "darkhistory",
+          "oursoulswillneverdie",
+          "erlosungthevictoryoflight",
+          "erlosungthevictoryoflightdeluxeedition"
+        ],
+        "latestRelease": {
+          "title": "The Devil",
+          "type": "track",
+          "url": "https://blutengel.bandcamp.com/track/the-devil",
+          "imageUrl": "https://f4.bcbits.com/img/a1729884497_2.jpg",
+          "releaseDate": "October 16, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Blutengel"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Blutengel"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://blutengel.de/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/80723"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Blutengel&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Blutengel"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/OfficialBlutengel"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/BlutengelOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

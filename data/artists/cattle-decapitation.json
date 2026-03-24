@@ -1,0 +1,97 @@
+[
+  {
+    "id": "cattledecapitation",
+    "name": "Cattle Decapitation",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031432288_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://cattledecapitation.bandcamp.com",
+        "allReleaseTitles": [
+          "terrasite",
+          "homovore",
+          "humanjerky",
+          "deathatlas",
+          "mediumrarities",
+          "theanthropoceneextinction",
+          "monolithofinhumanity",
+          "theharvestfloor",
+          "karmabloodykarma",
+          "humanure",
+          "toserveman"
+        ],
+        "latestRelease": {
+          "title": "Terrasite",
+          "type": "album",
+          "url": "https://cattledecapitation.bandcamp.com/album/terrasite",
+          "imageUrl": "https://f4.bcbits.com/img/a1425566417_2.jpg",
+          "releaseDate": "May 12, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/cattle-decapitation/783222",
+        "allReleaseTitles": [
+          "deathatlas",
+          "terrasite",
+          "humanjerky",
+          "homovore",
+          "scourgeoftheoffspring",
+          "weeatouryoung",
+          "bringbacktheplague",
+          "onedayclosertotheendoftheworld",
+          "monolithofinhumanity",
+          "theanthropoceneextinction",
+          "theharvestfloor",
+          "humanure",
+          "toserveman",
+          "mediumrarities",
+          "karmabloodykarma",
+          "anexpositionofinsides"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Cattle%20Decapitation"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Cattle%20Decapitation"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.cattledecapitation.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/388407"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Cattle%20Decapitation&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Cattle%20Decapitation"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/cattledecapitation/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCex8j-hd7QwiSIf7h3JMVjA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/cattledecapitation"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "12stones-bandcamp-12stonesband",
+    "name": "12 Stones",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0010795026_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://12stonesband.bandcamp.com",
+        "allReleaseTitles": [
+          "pictureperfect",
+          "pictureperfect"
+        ],
+        "latestRelease": {
+          "title": "Picture Perfect",
+          "type": "album",
+          "url": "https://12stonesband.bandcamp.com/album/picture-perfect-2",
+          "imageUrl": "https://f4.bcbits.com/img/a2969069540_16.jpg",
+          "releaseDate": "June 10, 2022"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/12-stones/149391",
+        "allReleaseTitles": [
+          "gardenofshadowsseventhdayslumberstarringo",
+          "goldenchildjudgejury",
+          "pictureperfect",
+          "anthemfortheunderdog",
+          "kissfromarose",
+          "anthemfortheunderdogrerecordedspedup",
+          "pottersfield",
+          "",
+          "theonlyeasydaywasyesterday",
+          "weareone",
+          "pictureperfectsingle",
+          "worldsocoldlyricnoeljudgejury"
+        ],
+        "latestRelease": {
+          "title": "Golden Child 12 Stones Judge Jury",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/golden-child-12-stones-judge-jury/zw4tuvd6z7gly",
+          "releaseDate": "2026-01-27"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=12%20Stones"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+12%20Stones"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

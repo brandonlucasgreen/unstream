@@ -1,0 +1,85 @@
+[
+  {
+    "id": "bikinikill",
+    "name": "Bikini Kill",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0029961946_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bikinikill.bandcamp.com",
+        "allReleaseTitles": [
+          "theantipleasuredissertation",
+          "ilikefuckingbwihatedanger",
+          "revolutiongirlstylenow",
+          "bikinikillep",
+          "yeahyeahyeahyeah",
+          "thefirsttworecords",
+          "newradio",
+          "pussywhipped",
+          "rejectallamerican",
+          "thesingles",
+          "thepunksingersoundtrackvariousartists",
+          "frumpieonepiecethefrumpies",
+          "modsmorganandtheorgandonors",
+          "gsp12gsp",
+          "girlspermthemuseascendsgsp",
+          "therealdistractionstherealdistractions"
+        ],
+        "latestRelease": {
+          "title": "The Anti-Pleasure Dissertation",
+          "type": "album",
+          "url": "https://bikinikill.bandcamp.com/album/the-anti-pleasure-dissertation",
+          "imageUrl": "https://f4.bcbits.com/img/a0563136463_2.jpg",
+          "releaseDate": "November 25, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/bikini-kill/1270149",
+        "allReleaseTitles": [
+          "thesingles",
+          "thefirsttworecords",
+          "pussywhipped",
+          "rejectallamerican",
+          "revolutiongirlstylenow"
+        ],
+        "latestRelease": {
+          "title": "The First Two Records Bikini Kill",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-first-two-records-bikini-kill/oubnqj9o6qrtc",
+          "releaseDate": "2018-10-15"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bikini%20Kill"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bikini%20Kill"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://bikinikill.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/267489"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Bikini%20Kill&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Bikini%20Kill"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

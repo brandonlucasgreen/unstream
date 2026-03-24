@@ -1,0 +1,71 @@
+[
+  {
+    "id": "gunther",
+    "name": "Günther",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0000028022_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://gunther.bandcamp.com",
+        "allReleaseTitles": [
+          "fvfvfv",
+          "nuclearstallions",
+          "thegreatesttelevisedswordsmaniveseeninyears"
+        ],
+        "latestRelease": {
+          "title": "Fvfvfv",
+          "type": "album",
+          "url": "https://gunther.bandcamp.com/album/fvfvfv",
+          "imageUrl": "https://f4.bcbits.com/img/a3807454466_2.jpg",
+          "releaseDate": "November 1, 2010"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/gunther/151309",
+        "allReleaseTitles": [
+          "exutoire",
+          "pleasureman",
+          "famous",
+          "coupedemain",
+          "nopantalones",
+          "xxxandgpf",
+          "realsassy",
+          "shutupdancewithmejohnanderssonmatssoderlundsebastianroth",
+          "llorame",
+          "casedepart",
+          "coupedemainglamourhammer",
+          "dynamitefeatblizzbugaddi",
+          "coupedemainspedup",
+          "thegreatesttelevisedswordsmaniveseeninyears",
+          "imaginame",
+          "14dias",
+          "moonchild",
+          "mirandohaciaarriba",
+          "x1",
+          "liedersoverschiedenwiedasleben"
+        ],
+        "latestRelease": {
+          "title": "Exutoire Gunther",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/exutoire-gunther/d3qnrbhf1e8tc",
+          "releaseDate": "2023-11-17"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=G%C3%BCnther"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+G%C3%BCnther"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

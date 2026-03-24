@@ -1,0 +1,112 @@
+[
+  {
+    "id": "mudhoney",
+    "name": "Mudhoney",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0004157543_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mudhoney.bandcamp.com",
+        "allReleaseTitles": [
+          "lightyourwaygetonmycloud",
+          "plasticeternity",
+          "everygoodboydeservesfudge30thanniversarydeluxeedition",
+          "livemud",
+          "pedazodepastel",
+          "morninginamerica",
+          "digitalgarbage",
+          "lie",
+          "superfuzzbigmuff",
+          "touchmeimsicksweetyoungthing",
+          "vanishingpoint",
+          "superfuzzbigmuffdeluxeedition",
+          "theluckyones",
+          "underabillionsuns",
+          "sincewevebecometranslucent",
+          "everygoodboydeservesfudge",
+          "mudhoney"
+        ],
+        "latestRelease": {
+          "title": "Light Your Way / Get On my Cloud",
+          "type": "album",
+          "url": "https://mudhoney.bandcamp.com/album/light-your-way-get-on-my-cloud",
+          "imageUrl": "https://f4.bcbits.com/img/a0834014203_2.jpg",
+          "releaseDate": "June 22, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/mudhoney/154801",
+        "allReleaseTitles": [
+          "everygoodboydeservesfudge",
+          "plasticeternity",
+          "digitalgarbage",
+          "morninginamerica",
+          "vanishingpoint",
+          "lie",
+          "ounceofdeception",
+          "superfuzzbigmuffdeluxeedition",
+          "st",
+          "pieceofcake",
+          "tomorrowhittoday",
+          "mybrotherthecow",
+          "theluckyones",
+          "fivedollarbobsmockcooterstew",
+          "pieceofcakeexpanded",
+          "liveatelsol",
+          "mybrotherthecowexpanded",
+          "sincewevebecometranslucent",
+          "underabillionsuns"
+        ],
+        "latestRelease": {
+          "title": "Plastic Eternity Mudhoney",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/plastic-eternity-mudhoney/c8jegfgekfwoc",
+          "releaseDate": "2023-04-07"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mudhoney"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mudhoney"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://web.archive.org/web/19981207073708/http://www.repriserec.com/mudhoney/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/83081"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Mudhoney&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Mudhoney"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/mudhoney_/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCDTbr5CIsgVAwXxUIfukV6w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Mudhoney/120610017957082"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

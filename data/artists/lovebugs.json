@@ -1,0 +1,96 @@
+[
+  {
+    "id": "lovebugs-bandcamp-norwegianlovebugs",
+    "name": "Lovebugs",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0034253461_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://norwegianlovebugs.bandcamp.com",
+        "allReleaseTitles": [
+          "overloved",
+          "circus",
+          "warrior",
+          "kick"
+        ],
+        "latestRelease": {
+          "title": "OverLoved",
+          "type": "album",
+          "url": "https://norwegianlovebugs.bandcamp.com/album/overloved",
+          "imageUrl": "https://f4.bcbits.com/img/a0723588152_16.jpg",
+          "releaseDate": "April 12, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/lovebugs/821910",
+        "allReleaseTitles": [
+          "landho",
+          "heartbreakcity",
+          "onlyforeverthebestof",
+          "ineverywakingmoment",
+          "awaydays",
+          "naked",
+          "transatlanticflight",
+          "13songswithaview",
+          "unwritten",
+          "armageddon",
+          "thehighestheights",
+          "overloved",
+          "lifeistoday",
+          "attheplaza",
+          "loneliestgeneration",
+          "coraline",
+          "avalon",
+          "therefusal",
+          "hungthemoon",
+          "warrior"
+        ],
+        "latestRelease": {
+          "title": "Heartbreak City Lovebugs",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/heartbreak-city-lovebugs/qrbf386qnlqva",
+          "releaseDate": "2025-04-11"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lovebugs"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lovebugs"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.lovebugs.ch/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/535709"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Lovebugs&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Lovebugs"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/stefanlovebugs"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/lovebugsmusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

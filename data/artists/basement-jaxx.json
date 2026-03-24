@@ -1,0 +1,100 @@
+[
+  {
+    "id": "basementjaxx",
+    "name": "Basement Jaxx",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0033338787_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://basementjaxx.bandcamp.com",
+        "allReleaseTitles": [
+          "wheresmyheadatbasementjaxx100gecs",
+          "kishkash",
+          "rooty",
+          "remedy"
+        ],
+        "latestRelease": {
+          "title": "where’s my head at _\n                \n                \n\n                Basement Jaxx & 100 gecs",
+          "type": "album",
+          "url": "https://basementjaxx.bandcamp.com/album/where-s-my-head-at",
+          "imageUrl": "https://f4.bcbits.com/img/a0723425346_16.jpg",
+          "releaseDate": "November 14, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/basement-jaxx/204734",
+        "allReleaseTitles": [
+          "wheresmyheadat100gecs",
+          "flylife",
+          "jumpnshoutslartajohn",
+          "orchestraliithemetropolitanorchestrasarahgracewilliams",
+          "bambinachrstphr",
+          "rooty",
+          "remedy",
+          "ohmygosh",
+          "junto",
+          "thesingles",
+          "wheresyourheadat",
+          "vsmetropoleorkestmetropoleorkest",
+          "zephyr",
+          "ep3",
+          "redalert",
+          "doyourthing",
+          "goodluck",
+          "ep2",
+          "rendezvu",
+          "yodelsong"
+        ],
+        "latestRelease": {
+          "title": "Jump N Shout Basement Jaxx Slarta John",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/jump-n-shout-basement-jaxx-slarta-john/mlcss75yyvkqa",
+          "releaseDate": "2025-12-12"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Basement%20Jaxx"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Basement%20Jaxx"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.basementjaxx.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1600"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Basement%20Jaxx&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Basement%20Jaxx"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/basement_jaxx/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCAfJ3OKeayzTdq3tFyIrDHg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/BasementJaxx"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

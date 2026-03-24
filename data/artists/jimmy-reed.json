@@ -1,0 +1,85 @@
+[
+  {
+    "id": "jimmyreed",
+    "name": "Jimmy Reed",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a3492104859_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://jimmyreed.bandcamp.com",
+        "allReleaseTitles": [
+          "imjimmyreedremastered2024",
+          "aintthatlovinyoubaby"
+        ],
+        "latestRelease": {
+          "title": "I’m Jimmy Reed (Remastered 2024)",
+          "type": "album",
+          "url": "https://jimmyreed.bandcamp.com/album/i-m-jimmy-reed-remastered-2024",
+          "imageUrl": "https://f4.bcbits.com/img/a3492104859_16.jpg",
+          "releaseDate": "September 25, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/jimmy-reed/64015",
+        "allReleaseTitles": [
+          "im",
+          "bigbossman",
+          "iaintgotyou",
+          "mrluckthecompleteveejaysingles",
+          "foundlove",
+          "atcarnegiehall",
+          "rockinwithreed",
+          "theverybestof",
+          "plays12stringguitarblues",
+          "just",
+          "thelegendtheman",
+          "asjimmyisdigitallyremastered",
+          "hardwalkinghannadigitallyremastered",
+          "bigleggedwomanotherfavoritesdigitallyremastered",
+          "taintnobigthingbutheis",
+          "nowappearing",
+          "atsoulcity",
+          "bluesismybusiness",
+          "aintthatlovinyoubaby"
+        ],
+        "latestRelease": {
+          "title": "Mr Luck The Complete Vee Jay Singles Jimmy Reed",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/mr-luck-the-complete-vee-jay-singles-jimmy-reed/0088807202489",
+          "releaseDate": "2017-06-30"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Jimmy%20Reed"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Jimmy%20Reed"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/64678"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Jimmy%20Reed&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Jimmy%20Reed"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Jimmy-Reed/113134668700906"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "clutch",
+    "name": "Clutch",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011274023_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://clutchkid.bandcamp.com",
+        "allReleaseTitles": [
+          "housejunglednbbreakcore2023",
+          "flexmusic22017",
+          "unmixedunfinished2016",
+          "singles2017",
+          "frameofmindep2017",
+          "rhythmsandrhymes2017",
+          "triplestackep2017",
+          "flexmusic2016",
+          "granitewalls2016",
+          "versatileep2016",
+          "artifactsep2016",
+          "singles20142016",
+          "acapellarmks2016",
+          "clutchxmigobeattape2016",
+          "coldflipswithroughkicks2015",
+          "madshitfromthelabyrinth2015",
+          "dailyspeciallooptape2015",
+          "1beats20142015"
+        ],
+        "latestRelease": {
+          "title": "House/Jungle/DNB/Breakcore [2023]",
+          "type": "album",
+          "url": "https://clutchkid.bandcamp.com/album/house-jungle-dnb-breakcore-2023",
+          "imageUrl": "https://f4.bcbits.com/img/a3593848720_2.jpg",
+          "releaseDate": "May 18, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Clutch"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Clutch"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.pro-rock.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/289116"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Clutch&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Clutch"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/clutchofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCzBKwuocupWfmxt_-2mVzfA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Clutchband"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

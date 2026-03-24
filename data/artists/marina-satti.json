@@ -1,0 +1,64 @@
+[
+  {
+    "id": "marinasatti-bandcamp-marinaxsatti",
+    "name": "Marina Satti",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036966456_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://marinaxsatti.bandcamp.com",
+        "allReleaseTitles": [
+          "popep",
+          "lalalalaremixsinglemarinasattioge",
+          "stiniyiamaslazyflowvogueremixsingle",
+          "zari",
+          "tucutum",
+          "yenna",
+          "mantissasingle",
+          "single"
+        ],
+        "latestRelease": {
+          "title": "P.O.P. - EP",
+          "type": "album",
+          "url": "https://marinaxsatti.bandcamp.com/album/p-o-p-ep",
+          "imageUrl": "https://f4.bcbits.com/img/a1843820927_2.jpg",
+          "releaseDate": "May 14, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Marina%20Satti"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Marina%20Satti"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://marinasatti.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3823774"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/marina_satti/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCi3uO5WvvPu9o3FYDyShBBQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/marinasatti.music"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

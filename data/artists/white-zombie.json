@@ -1,0 +1,54 @@
+[
+  {
+    "id": "whitezombie",
+    "name": "White Zombie",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0008534787_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://whitezombie.bandcamp.com",
+        "allReleaseTitles": [
+          "whitezombiegodsonvoodoomoon",
+          "whitezombieitcamefromnyc"
+        ],
+        "latestRelease": {
+          "title": "White Zombie: Gods on Voodoo Moon",
+          "type": "album",
+          "url": "https://whitezombie.bandcamp.com/album/white-zombie-gods-on-voodoo-moon",
+          "imageUrl": "https://f4.bcbits.com/img/a2870865495_16.jpg",
+          "releaseDate": "January 1, 1985"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=White%20Zombie"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+White%20Zombie"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/33742"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=White%20Zombie&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/White%20Zombie"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/WhiteZombieVEVO"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "id": "donnalewis",
+    "name": "Donna Lewis",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022857908_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://donnalewis.bandcamp.com",
+        "allReleaseTitles": [
+          "fallbackgirldonnalewisdavidlowe",
+          "meetmedonnalewisdavidlowe",
+          "cominghomedonnalewisdavidlowe",
+          "whereisthelovedonnalewisdavidlowe",
+          "burningmandonnalewisdavidlowe",
+          "roomsinwords",
+          "tellmeastoryacousticsessionsfromroomswithaview",
+          "tellmeastory",
+          "stonesintheriverbedalwaysdescendingddasremix",
+          "itoldyousoholmesivesremix",
+          "thefrontlinefreedownload",
+          "toldyousoep",
+          "inthepink",
+          "itoldyouso",
+          "silentworld",
+          "runningupthathilldonnalewisanddavidbaron"
+        ],
+        "latestRelease": {
+          "title": "Fall Back Girl\n                \n                \n\n                Donna Lewis & David Lowe",
+          "type": "track",
+          "url": "https://donnalewis.bandcamp.com/track/fall-back-girl",
+          "imageUrl": "https://f4.bcbits.com/img/a3534653780_2.jpg",
+          "releaseDate": "March 13, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Donna%20Lewis"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Donna%20Lewis"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

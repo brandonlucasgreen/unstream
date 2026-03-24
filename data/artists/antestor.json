@@ -1,0 +1,71 @@
+[
+  {
+    "id": "antestor",
+    "name": "ANTESTOR",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0018749982_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://antestor.bandcamp.com",
+        "allReleaseTitles": [
+          "theforsaken",
+          "dettapteliv",
+          "martyrium"
+        ],
+        "latestRelease": {
+          "title": "The Forsaken",
+          "type": "album",
+          "url": "https://antestor.bandcamp.com/album/the-forsaken",
+          "imageUrl": "https://f4.bcbits.com/img/a2667188871_2.jpg",
+          "releaseDate": "November 21, 2004"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/antestor/517358",
+        "allReleaseTitles": [
+          "thereturnoftheblackdeath",
+          "theforsaken",
+          "omen",
+          "dettapteliv"
+        ],
+        "latestRelease": {
+          "title": "Omen Antestor",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/omen-antestor/oj30s96n3vxuc",
+          "releaseDate": "2012-11-16"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=ANTESTOR"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+ANTESTOR"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/347458"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=ANTESTOR&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/ANTESTOR"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ANTESTOR"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

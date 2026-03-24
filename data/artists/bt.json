@@ -1,0 +1,80 @@
+[
+  {
+    "id": "bt",
+    "name": "BT",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025916534_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://songsofbt.bandcamp.com",
+        "allReleaseTitles": [
+          "mafiatheoldcountryoriginalgamesoundtrack",
+          "thisbinaryuniverseremastered",
+          "metaversal",
+          "thelostartoflongingdeluxe",
+          "thelostartoflonging",
+          "everythingyouresearchingforisontheothersideoffear",
+          "betweenhereandyou",
+          "everyotherwaypurenrgextendedremixbtjes",
+          "mercurysolace",
+          "ifthestarsareeternalsoareyouandi",
+          "flamingjune",
+          "laptopsymphony",
+          "amillionstarsbtfeaturingkirstyhawkshawkirstyhawkshaw",
+          "thesereimaginedmachines",
+          "theemergencybtandandrewbayer",
+          "thesehumblemachines"
+        ],
+        "latestRelease": {
+          "title": "Mafia: The Old Country (Original Game Soundtrack)",
+          "type": "album",
+          "url": "https://songsofbt.bandcamp.com/album/mafia-the-old-country-original-game-soundtrack",
+          "imageUrl": "https://f4.bcbits.com/img/a3226004175_2.jpg",
+          "releaseDate": "August 8, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=BT"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+BT"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.btmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2737"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=BT&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/BT"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/bt/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCGZD2HPiSnqOvhPvxGP5MQQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/bt"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

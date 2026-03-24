@@ -1,0 +1,83 @@
+[
+  {
+    "id": "rodrigoygabriela",
+    "name": "Rodrigo y Gabriela",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032109111_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://rodrigoygabriela.bandcamp.com",
+        "allReleaseTitles": [
+          "rodrigoygabrielast20thanniversaryrefoc",
+          "inbetweenthoughtsanewworld",
+          "symphonyno25ingminork183firstmovementmozartcover",
+          "weirdfishesarpeggi",
+          "lingusmichaelleaguenichardremix",
+          "jazzepthemettaleplpbundle",
+          "thejazzep",
+          "teextrano",
+          "acreditanoveiolistentotheoldmansofitukkerremix",
+          "merrychristmasmrlawrence",
+          "acreditanoveiolistentotheoldmangalantisversion",
+          "acreditanoveiolistentotheoldmanfatboyslimremix",
+          "acreditanoveiolistentotheoldmanpeleftrodrigoygabrierla",
+          "mettavolutionlive",
+          "themettalep",
+          "mettavolution"
+        ],
+        "latestRelease": {
+          "title": "Rodrigo y Gabriela S/T 20th Anniversary + ReFoc",
+          "type": "album",
+          "url": "https://rodrigoygabriela.bandcamp.com/album/rodrigo-y-gabriela-s-t-20th-anniversary-refoc",
+          "imageUrl": "https://f4.bcbits.com/img/a0030012779_2.jpg"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Rodrigo%20y%20Gabriela"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Rodrigo%20y%20Gabriela"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.rodgab.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/514314"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Rodrigo%20y%20Gabriela&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Rodrigo%20y%20Gabriela"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rodrigoygabriela/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@rodygab?lang=en"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC2aEvw7VlapqdI6TB6AMjNQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/rodgab"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,75 @@
+[
+  {
+    "id": "otorvald",
+    "name": "O.Torvald",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a4261324696_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://otorvald.bandcamp.com",
+        "allReleaseTitles": [
+          "",
+          ""
+        ],
+        "latestRelease": {
+          "title": "ПРИМАТ",
+          "type": "album",
+          "url": "https://otorvald.bandcamp.com/album/--2",
+          "imageUrl": "https://f4.bcbits.com/img/a4261324696_16.jpg",
+          "releaseDate": "November 23, 2012"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/o-torvald/1034601",
+        "allReleaseTitles": [
+          "",
+          "xx",
+          "dillerkaifuii",
+          "dillerkaifui",
+          "vporchestra",
+          "",
+          "time"
+        ]
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/otorvald"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=O.Torvald"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+O.Torvald"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://o-torvald.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3567309"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/otorvald/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/OTORVALDband"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/OTorvald"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

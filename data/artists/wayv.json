@@ -1,0 +1,38 @@
+[
+  {
+    "id": "wayv",
+    "name": "wayv",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0001628197_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://wayv.bandcamp.com",
+        "allReleaseTitles": [
+          "handsteps",
+          "lightsout"
+        ],
+        "latestRelease": {
+          "title": "HandSteps",
+          "type": "album",
+          "url": "https://wayv.bandcamp.com/album/handsteps",
+          "imageUrl": "https://f4.bcbits.com/img/a3313950507_16.jpg",
+          "releaseDate": "April 5, 2014"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=wayv"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+wayv"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

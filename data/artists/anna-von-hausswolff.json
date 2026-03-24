@@ -1,0 +1,95 @@
+[
+  {
+    "id": "annavonhausswolff",
+    "name": "Anna von Hausswolff",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0006059542_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://annavonhausswolff.bandcamp.com",
+        "allReleaseTitles": [
+          "iconoclasts",
+          "strugglewiththebeast",
+          "facingatlas",
+          "stardustthewholewoman",
+          "liveatmontreuxjazzfestival",
+          "allthoughtsfly",
+          "theoptimist",
+          "ceremony",
+          "singingfromthegrave",
+          "trackoftime",
+          "deadmagic",
+          "themiraculous",
+          "ceremony"
+        ],
+        "latestRelease": {
+          "title": "ICONOCLASTS",
+          "type": "album",
+          "url": "https://annavonhausswolff.bandcamp.com/album/iconoclasts",
+          "imageUrl": "https://f4.bcbits.com/img/a1200576438_2.jpg",
+          "releaseDate": "October 31, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/anna-von-hausswolff/1078840",
+        "allReleaseTitles": [
+          "iconoclasts",
+          "deadmagic",
+          "liveatmontreuxjazzfestival",
+          "facingatlas",
+          "strugglewiththebeast",
+          "agingyoungwomenfeaturingethelcain",
+          "stardustthewholewoman",
+          "thetruththeglowthefall",
+          "themysteriousvanishingofelectra",
+          "allthoughtsfly",
+          "themiraculous",
+          "ceremony",
+          "thelittlematchgirlhydrasdreammattibyeand",
+          "singingfromthegrave",
+          "theoptimist",
+          "trackoftime",
+          "kallanbetatype",
+          "sacrobosco",
+          "anoath",
+          "comewanderwithmedeliverance"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Anna%20von%20Hausswolff"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Anna%20von%20Hausswolff"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.annavonhausswolff.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1724854"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/annavonhausswolff/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCzGfg7QwtVgx5bT7kVQ24UA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/annavonhausswolff"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

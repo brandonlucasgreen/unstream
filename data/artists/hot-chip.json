@@ -1,0 +1,73 @@
+[
+  {
+    "id": "hotchip",
+    "name": "Hot Chip",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037187380_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://hotchip.bandcamp.com",
+        "allReleaseTitles": [
+          "nomnomnomcatburglarhotchipsleafordmods",
+          "comingonstrongerer20thanniversarydeluxeedition",
+          "losingmyheadsuperpitcherdub",
+          "comingonstrong",
+          "downwithprince"
+        ],
+        "latestRelease": {
+          "title": "Nom Nom Nom / Cat Burglar\n                \n                \n\n                Hot Chip & Sleaford Mods",
+          "type": "album",
+          "url": "https://hotchip.bandcamp.com/album/nom-nom-nom-cat-burglar",
+          "imageUrl": "https://f4.bcbits.com/img/a1620684541_2.jpg",
+          "releaseDate": "November 26, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Hot%20Chip"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Hot%20Chip"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.hot-chip.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/159840"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Hot%20Chip&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Hot%20Chip"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/hot.chip/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "http://tiktok.com/@hotchipofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/hotchipofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/hotchip"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

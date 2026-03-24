@@ -1,0 +1,62 @@
+[
+  {
+    "id": "tinytim-bandcamp-tiny-tim",
+    "name": "Tiny Tim",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a2943605141_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tiny-tim.bandcamp.com",
+        "allReleaseTitles": [
+          "live",
+          "dmo",
+          "dermaptera"
+        ],
+        "latestRelease": {
+          "title": "LIVE",
+          "type": "album",
+          "url": "https://tiny-tim.bandcamp.com/album/live",
+          "releaseDate": "May 10, 2013"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Tiny%20Tim"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Tiny%20Tim"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/96001"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Tiny%20Tim&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Tiny%20Tim"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/rememberingtinytim/?hl=fi"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "http://www.youtube.com/user/GodBlessYouTinyTim"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Tiny-Tim/43576103816"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

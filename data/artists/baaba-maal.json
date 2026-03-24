@@ -1,0 +1,105 @@
+[
+  {
+    "id": "baabamaal",
+    "name": "Baaba Maal",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030632570_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://baabamaal.bandcamp.com",
+        "allReleaseTitles": [
+          "freakoutbabaaliremixfeattheverybest",
+          "agreementbeatricedillonremix",
+          "being",
+          "yerimayocelebrationsingle",
+          "thetravellerspecialedition",
+          "television",
+          "ontheroad",
+          "missingyou",
+          "djamleelii",
+          "nomadsoul"
+        ],
+        "latestRelease": {
+          "title": "Freak Out (Baba Ali Remix) (Feat. The Very Best)",
+          "type": "track",
+          "url": "https://baabamaal.bandcamp.com/track/freak-out-baba-ali-remix-feat-the-very-best",
+          "imageUrl": "https://f4.bcbits.com/img/a1199176922_2.jpg",
+          "releaseDate": "June 7, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/baaba-maal/61708",
+        "latestRelease": {
+          "title": "Afroculture Flavour Baaba Maal",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/afroculture-flavour-baaba-maal/t3p2cbm0f228b",
+          "releaseDate": "2025-10-29"
+        },
+        "allReleaseTitles": [
+          "thetraveller",
+          "lajaponaisebleuevers19h19zuukoumayzie",
+          "afrocultureflavour",
+          "teddoungaldubaronthejerijeriband",
+          "fulanirock",
+          "openingjohanhugojacobvetter",
+          "firininfouta",
+          "being",
+          "lamtoro",
+          "nomadsoul",
+          "missingyoumiyeewnii",
+          "missiingyoumiyeewnii",
+          "djamleeliitheadventurersmansourseck",
+          "therewillbetimemumfordsons",
+          "motherafrika",
+          "souvenirvol3lellaolel",
+          "wonamumfordsonstheverybestbeatenberg",
+          "liveattheroyalfestivalhall",
+          "television"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Baaba%20Maal"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Baaba%20Maal"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://baabamaal.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3919"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Baaba%20Maal&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Baaba%20Maal"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/baabamaalofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCCpHXDm-tPU7BJRFCDRz5xQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/baabamaal"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

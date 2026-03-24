@@ -1,0 +1,41 @@
+[
+  {
+    "id": "saba-bandcamp-saba",
+    "name": "SaBa",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014036429_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://saba.bandcamp.com",
+        "allReleaseTitles": [
+          "itsgoingdownfeatdoshogauge",
+          "igotsoul",
+          "beyondprimitive",
+          "dubsynthphony",
+          "gotwobbleep"
+        ],
+        "latestRelease": {
+          "title": "It's Going Down (feat. Dosho & Gauge)",
+          "type": "track",
+          "url": "https://saba.bandcamp.com/track/its-going-down-feat-dosho-gauge",
+          "imageUrl": "https://f4.bcbits.com/img/a4134718929_2.jpg",
+          "releaseDate": "August 21, 2018"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=SaBa"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+SaBa"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

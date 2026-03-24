@@ -1,0 +1,75 @@
+[
+  {
+    "id": "bloodredshoes",
+    "name": "Blood Red Shoes",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031510473_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bloodredshoes.bandcamp.com",
+        "allReleaseTitles": [
+          "liveatgurten",
+          "20yearsofbloodredshoesliveinparis",
+          "liveinamsterdam",
+          "liveinprague",
+          "liveinmontreux",
+          "liveinhamburg",
+          "liveinbristol",
+          "liveinlyon",
+          "liveinkoln",
+          "liveinmadrid",
+          "murdermedzdeathraysremixbloodredshoesdzdeathrays",
+          "murdermeacoustic",
+          "morbidfascinationpianoversion",
+          "ghostsontape",
+          "onthehook",
+          "",
+          "liveonline",
+          "gettragic",
+          "boxofsecrets"
+        ],
+        "latestRelease": {
+          "title": "Live at Gurten",
+          "type": "album",
+          "url": "https://bloodredshoes.bandcamp.com/album/live-at-gurten",
+          "imageUrl": "https://f4.bcbits.com/img/a1107249292_2.jpg",
+          "releaseDate": "December 6, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Blood%20Red%20Shoes"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Blood%20Red%20Shoes"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.bloodredshoes.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/534920"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/bloodredshoesuk/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCUKZKIEXKbCf01CXNS3tMbA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/bloodredshoes"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

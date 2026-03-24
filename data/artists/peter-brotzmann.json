@@ -1,0 +1,52 @@
+[
+  {
+    "id": "peterbrotzmann",
+    "name": "Peter Brötzmann",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0016489427_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://peterbroetzmann.bandcamp.com",
+        "allReleaseTitles": [
+          "thequartetpeterbrotzmannjohnedwardsstevenoblejasonadasiewicz",
+          "butterflymushroombrotzmannnilssenlove",
+          "fragmentsofmusiclifeanddeathofalbertaylerdielikeadog",
+          "chickenshitbingobrotzmannnilssenlove",
+          "outspanno1brotzmannvanhovebenninkmangelsdorff",
+          "outspanno2brotzmannvanhovebennink",
+          "aneternalreminderofnottodayliveatmoersoxbowpeterbrotzmann",
+          "jazzinderkammer1974brotzmannvanhovebennink",
+          "memoriesofatunicatepeterbrotzmannfredlonbergholm",
+          "songlinesbrotzmannhopkinsali",
+          "upanddownthelionrevisedbrotzmannschlippenbachjohansson",
+          "voldabrotzmannyaginilssenlove",
+          "headonbrotzmannyaginilssenlove",
+          "thewelsconcertbrotzmannganiadrake",
+          "thedriedratdogpeterbrotzmannhamiddrake",
+          "lovecomeslikesourtomilk"
+        ],
+        "latestRelease": {
+          "title": "The Quartet\n                \n                \n\n                Peter Brötzmann / John Edwards / Steve Noble / Jason Adasiewicz",
+          "type": "album",
+          "url": "https://peterbroetzmann.bandcamp.com/album/the-quartet",
+          "imageUrl": "https://f4.bcbits.com/img/a1388325543_2.jpg",
+          "releaseDate": "March 7, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Peter%20Br%C3%B6tzmann"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Peter%20Br%C3%B6tzmann"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,103 @@
+[
+  {
+    "id": "boombox",
+    "name": "BoomBox",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032073526_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://boombox.bandcamp.com",
+        "allReleaseTitles": [
+          "stayinalive",
+          "specialized",
+          "dangerouswatersradioedits",
+          "dangerouswaters",
+          "escalatorremixes",
+          "escalator",
+          "ghostnotes",
+          "bitsandpiecesremix",
+          "boomboxfeatbackbeatbrassliveindenvernye2019",
+          "unitetheworld",
+          "westernvoodoo",
+          "bitspieces",
+          "fillinginthecolor",
+          "downriverelectric",
+          "visionsofbackbeat"
+        ],
+        "latestRelease": {
+          "title": "Stayin Alive",
+          "type": "track",
+          "url": "https://boombox.bandcamp.com/track/stayin-alive",
+          "imageUrl": "https://f4.bcbits.com/img/a4122785218_2.jpg",
+          "releaseDate": "November 22, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/boombox/311759",
+        "latestRelease": {
+          "title": "Moonlight Gel The Polish Ambassador Boombox Boombassador",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/moonlight-gel-the-polish-ambassador-boombox-boombassador/jvdvxuruib47b",
+          "releaseDate": "2025-09-03"
+        },
+        "allReleaseTitles": [
+          "ifoundmyfriendsthepolishambassadorboombassador",
+          "naturesatitthepolishambassadorboombassador",
+          "travelthroughtimethepolishambassadorboombassador",
+          "closetomethepolishambassadorboombassador",
+          "moonlightgelthepolishambassadorboombassador",
+          "dontgoworryingthepolishambassadorboombassador",
+          "flydesignthepolishambassadorboombassador",
+          "visionsofbackbeat",
+          "downriverelectric",
+          "fillinginthecolor",
+          "westernvoodoo",
+          "dangerouswaters",
+          "stayinalive",
+          "restlesstoo",
+          "bitspieces",
+          "onebyonethepolishambassadorboombassador",
+          "specialized",
+          "escalator",
+          "buenasnoches",
+          "ghostnotes"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=BoomBox"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+BoomBox"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://thisisboombox.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4024782"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://instagram.com/thisisboombox"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://youtu.be/l6PHOpoMW2E?si=HjebVCrHscUlIM-l"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thisisboombox"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

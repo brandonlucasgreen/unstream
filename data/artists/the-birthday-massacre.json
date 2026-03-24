@@ -1,0 +1,110 @@
+[
+  {
+    "id": "thebirthdaymassacre",
+    "name": "The Birthday Massacre",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0012306246_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thebirthdaymassacre.bandcamp.com",
+        "allReleaseTitles": [
+          "pathways",
+          "allofyou",
+          "sleeptonight",
+          "fascination",
+          "theneverendingstory",
+          "diamonds",
+          "underyourspell",
+          "imagica",
+          "superstition",
+          "hideandseek",
+          "imaginarymonsters",
+          "pinsandneedles",
+          "lookingglassep",
+          "nothingnowhere",
+          "showandtell",
+          "walkingwithstrangers",
+          "violet"
+        ],
+        "latestRelease": {
+          "title": "Pathways",
+          "type": "album",
+          "url": "https://thebirthdaymassacre.bandcamp.com/album/pathways",
+          "imageUrl": "https://f4.bcbits.com/img/a0088031338_2.jpg",
+          "releaseDate": "April 11, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-birthday-massacre/776040",
+        "allReleaseTitles": [
+          "pathways",
+          "diamonds",
+          "pinsandneedles",
+          "underyourspell",
+          "walkingwithstrangers",
+          "imagica",
+          "nothingandnowhere",
+          "violet",
+          "fascination",
+          "hideandseek",
+          "imaginarymonsters",
+          "sleeptonight",
+          "allofyou",
+          "superstition",
+          "theneverendingstory",
+          "theskywillturn",
+          "lookingglass",
+          "showandtell",
+          "dreamsofyou"
+        ]
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/thebirthdaymassacre"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Birthday%20Massacre"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Birthday%20Massacre"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://thebirthdaymassacre.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/316067"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Birthday%20Massacre&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Birthday%20Massacre"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thebirthdaymassacre/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCfJpbYVHVXWGEaZTAJdBbHA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/TheBirthdayMassacre"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

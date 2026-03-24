@@ -1,0 +1,106 @@
+[
+  {
+    "id": "ironwine",
+    "name": "Iron & Wine",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0029784766_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ironandwine.bandcamp.com",
+        "allReleaseTitles": [
+          "hensteeth",
+          "robinseggfeatimwithherironwinefeaturingimwithherimwithher",
+          "lightverse",
+          "whocanseeforeversoundtrack",
+          "archiveseriesvolumeno5tallahasseerecordings",
+          "liveatthirdmanrecords",
+          "ourendlessnumbereddaysdeluxeedition",
+          "weedgarden",
+          "beastepic",
+          "aroundthewell",
+          "theshepherdsdog",
+          "womanking",
+          "ourendlessnumbereddays",
+          "theseatherhythm",
+          "thecreekdrankthecradle",
+          "callyourboys"
+        ],
+        "latestRelease": {
+          "title": "Hen's Teeth",
+          "type": "album",
+          "url": "https://ironandwine.bandcamp.com/album/hens-teeth",
+          "imageUrl": "https://f4.bcbits.com/img/a3976857768_2.jpg",
+          "releaseDate": "February 27, 2026"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/iron-wine/353368",
+        "allReleaseTitles": [
+          "hensteeth",
+          "makinggoodtime",
+          "theshepherdsdog",
+          "lightverse",
+          "songsfromthestageglensideimwithher",
+          "timeaftertime",
+          "beastepic",
+          "weedgarden",
+          "inyourocean",
+          "lori",
+          "robinseggfeatimwithher",
+          "archiveseriesvolumeno3",
+          "yearstoburncalexicoand",
+          "nevermeantamericanfootballand",
+          "ghostonghost",
+          "loveletterforfiresambeamjescahoopand",
+          "whocanseeforeversoundtrack",
+          "archiveseriesvolumeno1",
+          "luther",
+          "iwanttoknowwhatloveis"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Iron%20%26%20Wine"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Iron%20%26%20Wine"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.ironandwine.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/96923"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Iron%20%26%20Wine&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Iron%20%26%20Wine"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/ironandwinetour/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/IronandWine"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ironandwine"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

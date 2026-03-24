@@ -1,0 +1,89 @@
+[
+  {
+    "id": "karlbartos",
+    "name": "Karl Bartos",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0010307301_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://karlbartos.bandcamp.com",
+        "allReleaseTitles": [
+          "communication",
+          "thecabinetofdrcaligari",
+          "offtherecord",
+          "atomium"
+        ],
+        "latestRelease": {
+          "title": "Communication",
+          "type": "album",
+          "url": "https://karlbartos.bandcamp.com/album/communication",
+          "imageUrl": "https://f4.bcbits.com/img/a1358573817_16.jpg",
+          "releaseDate": "November 21, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/karl-bartos/191540",
+        "allReleaseTitles": [
+          "thecabinetofdrcaligari",
+          "choirofangelicvoices",
+          "themusicalbox",
+          "communication",
+          "atomium",
+          "imthemessage",
+          "themodelzippykidruslantroknyukralfhutterandemilschult",
+          "15minutesoffame",
+          "cameraobscura"
+        ],
+        "latestRelease": {
+          "title": "The Cabinet Of Dr Caligari Karl Bartos",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-cabinet-of-dr-caligari-karl-bartos/no7oxwt05t47a",
+          "releaseDate": "2024-02-09"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Karl%20Bartos"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Karl%20Bartos"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://trocadero-home.com/?cat=24"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/22862"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Karl%20Bartos&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Karl%20Bartos"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/trocadero_music/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCReQ257_hLN-OVFIAJON0uA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/trocaderohome"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

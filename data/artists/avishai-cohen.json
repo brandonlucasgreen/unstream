@@ -1,0 +1,70 @@
+[
+  {
+    "id": "avishaicohen",
+    "name": "Avishai Cohen",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022090100_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://avishaicohen.bandcamp.com",
+        "allReleaseTitles": [
+          "darknights",
+          "triveniii",
+          "introducingtriveni",
+          "flood",
+          "seven",
+          "afterthebigrain"
+        ],
+        "latestRelease": {
+          "title": "Dark Nights",
+          "type": "album",
+          "url": "https://avishaicohen.bandcamp.com/album/dark-nights",
+          "imageUrl": "https://f4.bcbits.com/img/a1352852049_2.jpg",
+          "releaseDate": "October 28, 2014"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Avishai%20Cohen"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Avishai%20Cohen"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://avishaicohen.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/304734"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Avishai%20Cohen&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Avishai%20Cohen"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/avishaicohenmusic/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCrmpMB9MG__yxxfYSQ9Mfxg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/AvishaiCohenMusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

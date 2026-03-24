@@ -1,0 +1,42 @@
+[
+  {
+    "id": "galena-bandcamp-galenasound",
+    "name": "Galena",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0012500791_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://galenasound.bandcamp.com",
+        "allReleaseTitles": [
+          "sliced",
+          "tropicofprancer"
+        ],
+        "latestRelease": {
+          "title": "SLICED",
+          "type": "album",
+          "url": "https://galenasound.bandcamp.com/album/sliced",
+          "imageUrl": "https://f4.bcbits.com/img/a1108059757_16.jpg",
+          "releaseDate": "January 21, 2019"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Galena"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Galena"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/109925"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

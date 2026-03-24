@@ -1,0 +1,59 @@
+[
+  {
+    "id": "liquidtensionexperiment",
+    "name": "Liquid Tension Experiment",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0012358985_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://liquidtensionexperiment.bandcamp.com",
+        "allReleaseTitles": [
+          "spontaneouscombustionliquidtrioexperiment",
+          "liquidtensionexperiment2",
+          "liquidtensionexperiment"
+        ],
+        "latestRelease": {
+          "title": "Spontaneous Combustion\n                \n                \n\n                Liquid Trio Experiment",
+          "type": "album",
+          "url": "https://liquidtensionexperiment.bandcamp.com/album/spontaneous-combustion",
+          "imageUrl": "https://f4.bcbits.com/img/a1329078235_2.jpg",
+          "releaseDate": "October 23, 2007"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Liquid%20Tension%20Experiment"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Liquid%20Tension%20Experiment"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1401957"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Liquid%20Tension%20Experiment&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Liquid%20Tension%20Experiment"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC2Yx6hbjxJeh2ZrFjRFox7w"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ltexperiment"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

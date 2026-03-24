@@ -1,0 +1,83 @@
+[
+  {
+    "id": "cavaleraconspiracy",
+    "name": "Cavalera Conspiracy",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011346799_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://cavaleraconspiracy.bandcamp.com",
+        "allReleaseTitles": [
+          "schizophrenia",
+          "bestialdevastation",
+          "morbidvisions",
+          "psychosis",
+          "pandemonium",
+          "pandemoniumdeluxeedition"
+        ],
+        "latestRelease": {
+          "title": "Schizophrenia",
+          "type": "album",
+          "url": "https://cavaleraconspiracy.bandcamp.com/album/schizophrenia",
+          "imageUrl": "https://f4.bcbits.com/img/a2892700328_2.jpg",
+          "releaseDate": "June 21, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/cavalera-conspiracy/478182",
+        "allReleaseTitles": [
+          "schizophrenia",
+          "morbidvisions",
+          "bestialdevastation",
+          "inflikted",
+          "bluntforcetrauma",
+          "psychosis",
+          "pandemonium",
+          "killinginside",
+          "insane",
+          "sanctuary",
+          "spectralwar"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Cavalera%20Conspiracy"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Cavalera%20Conspiracy"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.cavaleraconspiracy.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1145475"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/cavaleraconspiracy/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@cavconspiracy"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCEGKcFSQgxGetaALFdGBZ3A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/cavaleraconspiracy"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

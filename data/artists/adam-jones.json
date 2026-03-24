@@ -1,0 +1,43 @@
+[
+  {
+    "id": "adamjones",
+    "name": "Adam Jones",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a1188461730_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://adamjones.bandcamp.com",
+        "allReleaseTitles": [
+          "somethingonlymemoriescanstir",
+          "asuitableending",
+          "escapingthedark",
+          "otherwiseendless",
+          "intothenightmare",
+          "arowofgooddays",
+          "constellations"
+        ],
+        "latestRelease": {
+          "title": "Something Only Memories Can Stir",
+          "type": "track",
+          "url": "https://adamjones.bandcamp.com/track/something-only-memories-can-stir",
+          "imageUrl": "https://f4.bcbits.com/img/a1188461730_2.jpg",
+          "releaseDate": "November 17, 2009"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Adam%20Jones"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Adam%20Jones"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

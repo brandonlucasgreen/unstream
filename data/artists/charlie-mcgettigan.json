@@ -1,0 +1,63 @@
+[
+  {
+    "id": "charliemcgettigan",
+    "name": "Charlie McGettigan",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a0082289438_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://charliemcgettigan3.bandcamp.com",
+        "allReleaseTitles": [
+          "merrychristmasandahappynewyear",
+          "merrychristmasandahappynewyear",
+          "ordinaryboy"
+        ],
+        "latestRelease": {
+          "title": "Merry Christmas and a Happy New Year",
+          "type": "track",
+          "url": "https://charliemcgettigan3.bandcamp.com/track/merry-christmas-and-a-happy-new-year-2",
+          "imageUrl": "https://f4.bcbits.com/img/a0082289438_2.jpg",
+          "releaseDate": "December 3, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Charlie%20McGettigan"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Charlie%20McGettigan"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.charliemcgettigan.ie/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/527912"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Charlie%20McGettigan&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Charlie%20McGettigan"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/charliemcgettigan"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/CharlieMcGettiganMusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

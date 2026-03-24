@@ -1,0 +1,106 @@
+[
+  {
+    "id": "belphegor",
+    "name": "Belphegor",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013678076_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://belphegor-austria.bandcamp.com",
+        "allReleaseTitles": [
+          "thedevils",
+          "blutsabbathremastered2021",
+          "thelastsupperremastered2021",
+          "blackestsabbath1997",
+          "totenritual",
+          "conjuringthedead",
+          "bloodmagicknecromance",
+          "walpurgisriteshexenwahn",
+          "bondagegoatzombie",
+          "pestapokalypsevi",
+          "goatreichfleshcult",
+          "luciferincestus",
+          "necrodaemonterrorsathan"
+        ],
+        "latestRelease": {
+          "title": "The Devils",
+          "type": "album",
+          "url": "https://belphegor-austria.bandcamp.com/album/the-devils",
+          "imageUrl": "https://f4.bcbits.com/img/a0766138175_2.jpg",
+          "releaseDate": "July 29, 2022"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/belphegor/555793",
+        "allReleaseTitles": [
+          "necrodaemonterrorsathan",
+          "sanctusdiaboliconfidimus",
+          "totenritual",
+          "scarletbeastleviathan",
+          "thedevils",
+          "blackestsabbath1997",
+          "blutsabbath",
+          "bondagegoatzombie",
+          "pestapokalypsevi",
+          "bloodmagicknecromance",
+          "conjuringthedead",
+          "luciferincestus",
+          "walpurgisriteshexenwahn",
+          "goatreichfleshcult",
+          "thelastsupper",
+          "virtusasinariaprayer",
+          "totentanzdancemacabre"
+        ],
+        "latestRelease": {
+          "title": "Scarlet Beast Leviathan Belphegor",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/scarlet-beast-leviathan-belphegor/kgay05dxpqcbo",
+          "releaseDate": "2026-02-18"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Belphegor"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Belphegor"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.belphegor.at/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/282546"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Belphegor&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Belphegor"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/belphegor_official/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC8onBbvdRbw1wIGm9aSI1NA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/belphegor"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,39 @@
+[
+  {
+    "id": "toshi",
+    "name": "toshi",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036156651_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://toshi1.bandcamp.com",
+        "allReleaseTitles": [
+          "lessence",
+          "emphasis",
+          "kairos"
+        ],
+        "latestRelease": {
+          "title": "l'essence",
+          "type": "album",
+          "url": "https://toshi1.bandcamp.com/album/lessence",
+          "imageUrl": "https://f4.bcbits.com/img/a1915448364_2.jpg",
+          "releaseDate": "June 20, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=toshi"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+toshi"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

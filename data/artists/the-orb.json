@@ -1,0 +1,104 @@
+[
+  {
+    "id": "theorb",
+    "name": "The Orb",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019389986_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://theorb.bandcamp.com",
+        "allReleaseTitles": [
+          "buddhisthipsters",
+          "bittersweetafternoondftram",
+          "orboretum",
+          "orboretumtheorbcollection",
+          "setisedibus",
+          "yarnsfromthechocolatetrianglechocolatehillstheorb",
+          "prism",
+          "enterthekettleoss",
+          "theheavenssedibus",
+          "abolitionoftheroyalfamiliaguillotinemixes",
+          "abolitionoftheroyalfamilia",
+          "nosoundsareoutofbounds",
+          "nosoundsareoutofboundsdeluxe",
+          "thecowremixessininspacept3",
+          "cowchilloutworld",
+          "alpinediskomikssininspacept2"
+        ],
+        "latestRelease": {
+          "title": "Buddhist Hipsters",
+          "type": "album",
+          "url": "https://theorb.bandcamp.com/album/buddhist-hipsters",
+          "imageUrl": "https://f4.bcbits.com/img/a1458260200_2.jpg",
+          "releaseDate": "October 10, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-orb/51020",
+        "allReleaseTitles": [
+          "buddhisthipsters",
+          "metallicspheresincolouranddavidgilmour",
+          "metallicspheresanddavidgilmour",
+          "nosoundsareoutofbounds",
+          "nosoundsareoutofboundsdeluxe",
+          "rolandalbertmeetupcountryinugandarolandalbert",
+          "prism",
+          "abolitionoftheroyalfamilia",
+          "theheavenssedibus",
+          "itscomingsoon",
+          "yarnsfromthechocolatetrianglechocolatehills",
+          "enterthekettleoss",
+          "homehighorbsminiearths",
+          "homehighorbsminiearth"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Orb"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Orb"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.theorb.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/54286"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Orb&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Orb"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://www.instagram.com/theorblive"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "http://www.youtube.com/channel/UCWThCot7dw_bdRrY87UDXFw"
+      },
+      {
+        "sourceId": "bluesky",
+        "url": "http://bsky.app/profile/theorblive.bsky.social"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/TheOrb"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

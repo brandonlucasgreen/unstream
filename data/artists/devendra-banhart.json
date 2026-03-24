@@ -30,24 +30,19 @@
       {
         "sourceId": "qobuz",
         "url": "https://www.qobuz.com/us-en/interpreter/devendra-banhart/65571",
-        "latestRelease": {
-          "title": "How Could You Let Me Go Vashti Bunyan Devendra Banhart",
-          "type": "album",
-          "url": "https://www.qobuz.com/us-en/album/how-could-you-let-me-go-vashti-bunyan-devendra-banhart/atk5gmdzlb2va",
-          "releaseDate": "2023-11-10"
-        },
         "allReleaseTitles": [
-          "howcouldyouletmegovashtibunyan",
           "flyingwig",
           "ma",
+          "howcouldyouletmegovashtibunyan",
           "franklinstower",
           "mala",
           "apeinpinkmarble",
           "cripplecrow",
           "vastovoid",
           "memorial",
-          "youdontknowmeblakemillsbeverlyglenncopeland",
+          "ifeeljustlikeachilddemo",
           "lovesong",
+          "youdontknowmeblakemillsbeverlyglenncopeland",
           "kantoriongaku",
           "inacisternbwintocloudsnoahgeorgeson",
           "acatbwaraninreposenoahgeorgeson",
@@ -55,9 +50,14 @@
           "itsnotalwaysfunny",
           "paythetoll",
           "paythetolladamgreen",
-          "takingapage",
-          "ninorojo"
-        ]
+          "takingapage"
+        ],
+        "latestRelease": {
+          "title": "How Could You Let Me Go Vashti Bunyan Devendra Banhart",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/how-could-you-let-me-go-vashti-bunyan-devendra-banhart/atk5gmdzlb2va",
+          "releaseDate": "2023-11-10"
+        }
       },
       {
         "sourceId": "ampwall",

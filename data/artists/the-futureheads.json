@@ -1,0 +1,67 @@
+[
+  {
+    "id": "thefutureheads",
+    "name": "The Futureheads",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019710762_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thefutureheads.bandcamp.com",
+        "allReleaseTitles": [
+          "rant",
+          "thechaos",
+          "thisisnottheworld"
+        ],
+        "latestRelease": {
+          "title": "Rant",
+          "type": "album",
+          "url": "https://thefutureheads.bandcamp.com/album/rant",
+          "imageUrl": "https://f4.bcbits.com/img/a3726572361_2.jpg",
+          "releaseDate": "April 2, 2012"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Futureheads"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Futureheads"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.thefutureheads.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/132795"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Futureheads&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Futureheads"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/thefutureheads/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/@wearethefutureheads"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thefutureheads"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

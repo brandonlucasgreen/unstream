@@ -1,0 +1,112 @@
+[
+  {
+    "id": "skinnypuppy",
+    "name": "Skinny Puppy",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0012306131_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://skinnypuppy.bandcamp.com",
+        "allReleaseTitles": [
+          "mythmakerdeluxe",
+          "thegreaterwrongoftheright",
+          "weapon",
+          "bootleggedbrokeandinsolventseas",
+          "doomsdaybackforthvol5live",
+          "bsidescollection",
+          "remixdystemper",
+          "brap",
+          "backandforthseries2",
+          "lastrights",
+          "toodarkpark",
+          "12inchanthology",
+          "digit",
+          "rabies",
+          "aintitdeadyet",
+          "vivisectvi"
+        ],
+        "latestRelease": {
+          "title": "Mythmaker (Deluxe)",
+          "type": "album",
+          "url": "https://skinnypuppy.bandcamp.com/album/mythmaker-deluxe",
+          "imageUrl": "https://f4.bcbits.com/img/a1859779737_2.jpg",
+          "releaseDate": "November 11, 2014"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/skinny-puppy/267636",
+        "allReleaseTitles": [
+          "pias40",
+          "lastrights",
+          "rabies",
+          "toodarkpark",
+          "weapon",
+          "theprocess",
+          "remission",
+          "cleansefoldandmanipulate",
+          "12anthology",
+          "mythmaker",
+          "spasmolytic",
+          "bites",
+          "thegreaterwrongoftherightremastered",
+          "vivisectvi",
+          "thesinglescollect",
+          "backandforth",
+          "tormentor",
+          "censor",
+          "tinomen",
+          "mindtheperpetualintercourse"
+        ],
+        "latestRelease": {
+          "title": "Pias 40 Skinny Puppy",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/pias-40-skinny-puppy/p9itlu97mq1vb",
+          "releaseDate": "2023-06-23"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Skinny%20Puppy"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Skinny%20Puppy"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://skinnypuppy.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/11192"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Skinny%20Puppy&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Skinny%20Puppy"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/officialskinnypuppy/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCjBUnfnYV_pRzBbm2AHoVKg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/OfficialSkinnyPuppy"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

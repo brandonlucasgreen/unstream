@@ -1,0 +1,92 @@
+[
+  {
+    "id": "fleetfoxes",
+    "name": "Fleet Foxes",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032651321_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://fleetfoxes.bandcamp.com",
+        "allReleaseTitles": [
+          "liveonbostonharbor",
+          "hejiraliveatthespringrecitalfeatdanielrossengregpecknoldthewesterlies",
+          "undercontrolliveatforesthillsstadiumfeatuwadethewesterlies",
+          "averylonelysolstice",
+          "shorestemsedition",
+          "shore",
+          "firstcollection20062009",
+          "crackup",
+          "helplessnessblues",
+          "fleetfoxes",
+          "sungiant"
+        ],
+        "latestRelease": {
+          "title": "Live On Boston Harbor",
+          "type": "album",
+          "url": "https://fleetfoxes.bandcamp.com/album/live-on-boston-harbor",
+          "imageUrl": "https://f4.bcbits.com/img/a0252910625_2.jpg",
+          "releaseDate": "June 28, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/fleet-foxes/111528",
+        "allReleaseTitles": [
+          "",
+          "helplessnessblues",
+          "dontputitallonmenoahcyrus",
+          "crackup",
+          "shore",
+          "liveonbostonharbor",
+          "averylonelysolstice",
+          "tmcolepulicelynnavery",
+          "crackupchoralversioninthemorningliveinswitzerland",
+          "sungiantep",
+          "askylikeiveneverseenfromtheamazonoriginalmoviewildcatfeattimbernardes",
+          "firstcollection20062009",
+          "mykonosbwfalseknightontheroad"
+        ],
+        "latestRelease": {
+          "title": "Dont Put It All On Me Noah Cyrus Fleet Foxes",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/dont-put-it-all-on-me-noah-cyrus-fleet-foxes/pqwubpsb6nioc",
+          "releaseDate": "2025-03-19"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Fleet%20Foxes"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Fleet%20Foxes"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.fleetfoxes.co/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1105843"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/fleetfoxes/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCna-InS-5L5qv82diztOT7A"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Fleet-Foxes/24709128407"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

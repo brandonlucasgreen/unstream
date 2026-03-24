@@ -1,0 +1,71 @@
+[
+  {
+    "id": "bozscaggs",
+    "name": "Boz Scaggs",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026401397_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bozscaggs.bandcamp.com",
+        "allReleaseTitles": [
+          "detour",
+          "liveinsanfrancisco66",
+          "dig",
+          "outoftheblues",
+          "speaklow",
+          "greatesthitslive",
+          "butbeautifulstandardsvolumei"
+        ],
+        "latestRelease": {
+          "title": "Detour",
+          "type": "album",
+          "url": "https://bozscaggs.bandcamp.com/album/detour-2",
+          "imageUrl": "https://f4.bcbits.com/img/a0735330815_2.jpg",
+          "releaseDate": "October 17, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Boz%20Scaggs"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Boz%20Scaggs"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.bozscaggs.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/268583"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Boz%20Scaggs&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Boz%20Scaggs"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/bozscaggsmusic/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/bozscaggsmusic"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/BozScaggsMusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

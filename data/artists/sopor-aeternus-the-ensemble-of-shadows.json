@@ -1,0 +1,80 @@
+[
+  {
+    "id": "soporaeternustheensembleofshadows",
+    "name": "SOPOR AETERNUS & The Ensemble Of Shadows",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0000217859_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://soporaeternus.bandcamp.com",
+        "latestRelease": {
+          "title": "THE DEAD HAVE COME (original motion picture soundtrack, 2025)",
+          "type": "album",
+          "url": "https://soporaeternus.bandcamp.com/album/the-dead-have-come-original-motion-picture-soundtrack-2025",
+          "imageUrl": "https://f4.bcbits.com/img/a4103156359_2.jpg",
+          "releaseDate": "October 31, 2025"
+        },
+        "allReleaseTitles": [
+          "thedeadhavecomeoriginalmotionpicturesoundtrack2025",
+          "deamutarionoriginalmotionpicturesoundtrack2025",
+          "fabdeadcultveil2024",
+          "therules2023",
+          "thecolours2023",
+          "aloneatsamsaneveningwith2023",
+          "todesschlaf2022",
+          "avernoinferno19922021",
+          "thestoryofesreitendietotensoschnellorhowirememberit2021spokenword",
+          "islandofthedead2020",
+          "thedead2020",
+          "vordemtodetraumenwir2019",
+          "deathflamingos2019",
+          "whenyouloveamanreprise2018",
+          "thespiralsacrifice2018",
+          "mitternacht2014"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=SOPOR%20AETERNUS%20%26%20The%20Ensemble%20Of%20Shadows"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+SOPOR%20AETERNUS%20%26%20The%20Ensemble%20Of%20Shadows"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.soporaeternus.de/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/234885"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=SOPOR%20AETERNUS%20%26%20The%20Ensemble%20Of%20Shadows&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/SOPOR%20AETERNUS%20%26%20The%20Ensemble%20Of%20Shadows"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sopor_aeternus_tattoos/ "
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCirmC5tKgapWVxHHZQMRrnw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/sopor.aeternus.official"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

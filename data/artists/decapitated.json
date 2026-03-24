@@ -1,0 +1,99 @@
+[
+  {
+    "id": "decapitated",
+    "name": "Decapitated",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022087317_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://decapitated.bandcamp.com",
+        "allReleaseTitles": [
+          "cancerculture",
+          "thefirstdamned",
+          "anticult",
+          "bloodmantra",
+          "carnivalisforever",
+          "organichallucinosis",
+          "thenegation",
+          "nihility",
+          "windsofcreation"
+        ],
+        "latestRelease": {
+          "title": "Cancer Culture",
+          "type": "album",
+          "url": "https://decapitated.bandcamp.com/album/cancer-culture",
+          "imageUrl": "https://f4.bcbits.com/img/a0880407435_2.jpg",
+          "releaseDate": "May 27, 2022"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/decapitated/598005",
+        "allReleaseTitles": [
+          "thefirstdamned",
+          "nihility",
+          "organichallucinosis",
+          "windsofcreation",
+          "thenegation",
+          "carnivalisforever",
+          "anticult",
+          "bloodmantra",
+          "livenottinghamrescuerooms20thdec2004",
+          "justacigarette"
+        ],
+        "latestRelease": {
+          "title": "The First Damned Decapitated",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/the-first-damned-decapitated/wrg8bulb4v34b",
+          "releaseDate": "2021-06-04"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Decapitated"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Decapitated"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.decapitatedband.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/276920"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Decapitated&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Decapitated"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/decapitatedband/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/decapitatedofficial"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@decapitatedband"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/decapitated"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

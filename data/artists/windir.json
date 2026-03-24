@@ -1,0 +1,73 @@
+[
+  {
+    "id": "windir",
+    "name": "Windir",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019028052_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://windirband.bandcamp.com",
+        "allReleaseTitles": [
+          "likferd",
+          "1184",
+          "arntor",
+          "soknardalr"
+        ],
+        "latestRelease": {
+          "title": "Likferd",
+          "type": "album",
+          "url": "https://windirband.bandcamp.com/album/likferd",
+          "imageUrl": "https://f4.bcbits.com/img/a0437383100_16.jpg",
+          "releaseDate": "March 27, 2003"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/windir/2716795",
+        "allReleaseTitles": [
+          "1184",
+          "arntor",
+          "likferd",
+          "valfarein",
+          "soknardalr"
+        ],
+        "latestRelease": {
+          "title": "Valfar Ein Windir Windir",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/valfar-ein-windir-windir/f8j2u5p7y5r9b",
+          "releaseDate": "2004-11-02"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Windir"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Windir"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.windir.no/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/417283"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Windir&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Windir"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

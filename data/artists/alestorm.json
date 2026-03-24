@@ -1,0 +1,102 @@
+[
+  {
+    "id": "alestorm",
+    "name": "Alestorm",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038881435_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://alestorm.bandcamp.com",
+        "allReleaseTitles": [
+          "thethunderfistchronicles",
+          "thethunderfistchroniclesdeluxeversion",
+          "voyageofthedeadmarauder",
+          "seventhrumofaseventhrum",
+          "seventhrumofaseventhrumdeluxedigitaledition",
+          "liveintilburg",
+          "bigshiplittleshipbasslinejunkie",
+          "curseofthecrystalcoconut",
+          "curseofthecrystalcoconutdigitaldeluxe",
+          "captainmorgansrevenge10thanniversaryedition",
+          "sunsetonthegoldenage",
+          "sunsetonthegoldenagedeluxeedition",
+          "liveattheendoftheworld",
+          "inthenavy",
+          "backthroughtime",
+          "blacksailsatmidnight",
+          "leviathan",
+          "captainmorgansrevenge",
+          "nogravebuttheseadeluxeedition",
+          "nogravebutthesea"
+        ],
+        "latestRelease": {
+          "title": "The Thunderfist Chronicles",
+          "type": "album",
+          "url": "https://alestorm.bandcamp.com/album/the-thunderfist-chronicles",
+          "imageUrl": "https://f4.bcbits.com/img/a3976226707_2.jpg",
+          "releaseDate": "June 20, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/alestorm/1067588",
+        "allReleaseTitles": [
+          "thethunderfistchronicles",
+          "voyageofthedeadmarauder",
+          "thewellerman",
+          "party",
+          "chickenonaraft",
+          "frozenpiss2",
+          "curseofthecrystalcoconutdeluxeversion",
+          "killedtodeathbypiracy",
+          "seventhrumofaseventhrum",
+          "liveintilburg",
+          "bigshiplittleshipbasslinejunkie",
+          "treasurechestpartyquest",
+          "uzbekistan",
+          "magellansexpedition",
+          "thestorm",
+          "fannybaws",
+          "thebattleofcapefearriver",
+          "tortuga",
+          "curseofthecrystalcoconut",
+          "nogravebutthesea"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Alestorm"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Alestorm"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.alestorm.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1050916"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/alestormofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCpmH4GvnC0AmPhrLUAKJyUg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/alestormband"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

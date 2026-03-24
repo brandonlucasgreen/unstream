@@ -1,0 +1,115 @@
+[
+  {
+    "id": "carolinepolachek",
+    "name": "Caroline Polachek",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030700333_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://carolinepolachek.bandcamp.com",
+        "allReleaseTitles": [
+          "desireiwanttoturnintoyoueveraskingedition",
+          "butterflynetfeaturingweyesblood",
+          "dangacapellainstrumental",
+          "dang",
+          "desireiwanttoturnintoyou",
+          "welcometomyisland",
+          "sunset",
+          "billions",
+          "bunnyisarider",
+          "standingatthegateremixcollection",
+          "somesmallhopecarolinepolacheklaurenauder",
+          "breathless",
+          "oceanoftearsumruremix",
+          "hitmewhereithurtstoroymoiremixfeatchinomoreno",
+          "heybigeyesgeorgeclantonremix",
+          "dooroklouremix",
+          "thegateextendedmix",
+          "panginstrumental",
+          "sohotyourehurtingmyfeelingsagcookremixcarolinepolachekagcook",
+          "pang"
+        ],
+        "latestRelease": {
+          "title": "Desire, I Want To Turn Into You: Everasking Edition",
+          "type": "album",
+          "url": "https://carolinepolachek.bandcamp.com/album/desire-i-want-to-turn-into-you-everasking-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a1334755198_2.jpg",
+          "releaseDate": "February 14, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/caroline-polachek/619329",
+        "allReleaseTitles": [
+          "onthebeach",
+          "desireiwanttoturnintoyoueveraskingedition",
+          "desireiwanttoturnintoyou",
+          "pang",
+          "hitmewhereithurtsxskrillexdylanbrady",
+          "azimuthdannylharle",
+          "tellmeineverknewthatcaroline",
+          "welcometomyisland",
+          "bunnyisarider",
+          "butterflynetfeatweyesbloodweyesblood",
+          "sunset",
+          "bangbang",
+          "lastdaysnonvogliomaivedereilsoletramontare12ensembleoliverleith",
+          "starburnedandunkissed",
+          "billions",
+          "heybigeyes",
+          "thegate",
+          "bloodandbutter",
+          "oceanoftears"
+        ],
+        "latestRelease": {
+          "title": "Hit Me Where It Hurts X Skrillex Dylan Brady Caroline Polachek",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/hit-me-where-it-hurts-x-skrillex-dylan-brady-caroline-polachek/a1yi5p5op84vb",
+          "releaseDate": "2025-11-14"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Caroline%20Polachek"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Caroline%20Polachek"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.carolinepolachek.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1269616"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/carolineplz/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@carolineplz"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCrQ-0cexx-2QvmQL3jc-4iA"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.com/@carolineplz"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/CarolinePolachekMusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

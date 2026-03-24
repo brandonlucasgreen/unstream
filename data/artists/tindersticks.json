@@ -1,0 +1,77 @@
+[
+  {
+    "id": "tindersticks",
+    "name": "tindersticks",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036014695_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://tindersticks.bandcamp.com",
+        "allReleaseTitles": [
+          "softtissue",
+          "starsatnoonoriginalsoundtrack",
+          "pastimperfectthebestoftindersticks9221",
+          "manaloneremix",
+          "distractions",
+          "seemygirls",
+          "notreasurebuthope",
+          "musicforclairedenishighlifestuartastaples",
+          "arrhythmiastuartastaples",
+          "minutebodiestheintimateworldoffpercysmith",
+          "thewaitingroomtindersticks",
+          "acrosssixleapyears",
+          "thesomethingrain"
+        ],
+        "latestRelease": {
+          "title": "Soft Tissue",
+          "type": "album",
+          "url": "https://tindersticks.bandcamp.com/album/soft-tissue",
+          "imageUrl": "https://f4.bcbits.com/img/a3774962701_2.jpg",
+          "releaseDate": "September 13, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=tindersticks"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+tindersticks"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.tindersticks.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/15259"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=tindersticks&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/tindersticks"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/tindersticks_uk/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/tindersticksofficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/tindersticksofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

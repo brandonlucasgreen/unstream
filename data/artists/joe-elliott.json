@@ -1,0 +1,39 @@
+[
+  {
+    "id": "joeelliott",
+    "name": "Joe Elliott",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013568088_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://joeelliott.bandcamp.com",
+        "allReleaseTitles": [
+          "softy",
+          "septemberjoeandshaneelliott",
+          "existentialcircus"
+        ],
+        "latestRelease": {
+          "title": "Softy",
+          "type": "album",
+          "url": "https://joeelliott.bandcamp.com/album/softy",
+          "imageUrl": "https://f4.bcbits.com/img/a1361321164_2.jpg",
+          "releaseDate": "February 22, 2019"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Joe%20Elliott"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Joe%20Elliott"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

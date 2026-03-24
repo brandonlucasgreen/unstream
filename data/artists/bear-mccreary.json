@@ -1,0 +1,64 @@
+[
+  {
+    "id": "bearmccreary",
+    "name": "Bear McCreary",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013165049_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bearmccreary.bandcamp.com",
+        "allReleaseTitles": [
+          "seeseason1appletvoriginalseriessoundtrack",
+          "thewalkingdeadoriginaltelevisionsoundtrack",
+          "revoltoriginalmotionpicturesoundtrack",
+          "colossaloriginalmotionpicturesoundtrack"
+        ],
+        "latestRelease": {
+          "title": "See: Season 1 (Apple TV+ Original Series Soundtrack)",
+          "type": "album",
+          "url": "https://bearmccreary.bandcamp.com/album/see-season-1-apple-tv-original-series-soundtrack",
+          "imageUrl": "https://f4.bcbits.com/img/a0609637120_16.jpg",
+          "releaseDate": "February 7, 2020"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bear%20McCreary"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bear%20McCreary"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://bearmccreary.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/733955"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/bearmccreary/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@bearmccreary_official"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/bearmccreary"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/BearMcCrearyOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

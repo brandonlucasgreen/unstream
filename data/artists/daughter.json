@@ -1,0 +1,58 @@
+[
+  {
+    "id": "daughter",
+    "name": "Daughter",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031020410_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ohdaughter.bandcamp.com",
+        "allReleaseTitles": [
+          "thewildyouthep",
+          "hisyoungheartep"
+        ],
+        "latestRelease": {
+          "title": "The Wild Youth EP",
+          "type": "album",
+          "url": "https://ohdaughter.bandcamp.com/album/the-wild-youth-ep",
+          "imageUrl": "https://f4.bcbits.com/img/a2678000301_16.jpg",
+          "releaseDate": "November 21, 2011"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Daughter"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Daughter"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.ohdaughter.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2218596"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/ohdaughter/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCHcgFneOU0qvJZB_Sh8wgFw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/ohdaughter"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

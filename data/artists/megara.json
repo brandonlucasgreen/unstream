@@ -1,0 +1,65 @@
+[
+  {
+    "id": "megaraz",
+    "name": "MegaraŻ",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0008215219_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://megaraz.bandcamp.com",
+        "allReleaseTitles": [
+          "lifeep2021",
+          "megarazep2017",
+          "crimezone",
+          "naczterech",
+          "pierwszy"
+        ],
+        "latestRelease": {
+          "title": "LiFE EP 2021",
+          "type": "album",
+          "url": "https://megaraz.bandcamp.com/album/life-ep-2021",
+          "imageUrl": "https://f4.bcbits.com/img/a3694838811_2.jpg",
+          "releaseDate": "October 2, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Megara%C5%BB"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Megara%C5%BB"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://megaraband.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/6343052"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/wearemegara/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@wearemegara"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCKk-Syg-rBel_QlXaolRihQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/weareMEGARA"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

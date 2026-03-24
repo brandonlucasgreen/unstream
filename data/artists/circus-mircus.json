@@ -1,0 +1,89 @@
+[
+  {
+    "id": "circusmircus",
+    "name": "Circus Mircus",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026731627_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://circusmircus.bandcamp.com",
+        "allReleaseTitles": [
+          "furorefiasco",
+          "pindropmind",
+          "lizardinafishtankftqajitodia",
+          "realizoftblolbrsttatorusia",
+          "soulpop",
+          "lockmein",
+          "betterlate",
+          "2334",
+          "weathersupport",
+          "semipro",
+          "theodetothebishkekstone",
+          "circusmircus"
+        ],
+        "latestRelease": {
+          "title": "Furore/Fiasco",
+          "type": "album",
+          "url": "https://circusmircus.bandcamp.com/album/furore-fiasco",
+          "imageUrl": "https://f4.bcbits.com/img/a3256633869_2.jpg",
+          "releaseDate": "November 20, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/circus-mircus/13321703",
+        "allReleaseTitles": [
+          "lovelettersliveatstocktonrecords",
+          "akhalteke",
+          "furorefiasco",
+          "realizofeatblolbrsttatorusia",
+          "pindropmind",
+          "lizardinafishtankfeatqajitodia",
+          "soulpop",
+          "upisdown",
+          "voiceofamerica"
+        ],
+        "latestRelease": {
+          "title": "Akhalteke Circus Mircus",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/akhalteke-circus-mircus/zyg3iqxn26oxx",
+          "releaseDate": "2026-02-11"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Circus%20Mircus"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Circus%20Mircus"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://circusmircus.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/11103926"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/circusmircusunofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC0ngGDlp7GqeWYdrzaiu4og"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/circusmircusunofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

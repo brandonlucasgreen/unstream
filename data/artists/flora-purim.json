@@ -1,0 +1,106 @@
+[
+  {
+    "id": "florapurim",
+    "name": "Flora Purim",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027313340_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://florapurim.bandcamp.com",
+        "allReleaseTitles": [
+          "ifyouwill",
+          "liveinberkeleyairtomoreiraflorapurim",
+          "nosdoisflorapurimsingsmiltonnascimento",
+          "wingsofimaginationflorapurimairto",
+          "whatyoseeremixesep",
+          "nowgoaheadandopenyoureyesremixesep",
+          "speedoflight",
+          "theflight",
+          "thecoloursoflifeairtomoreiraflorapurim",
+          "thatswhatshesaid",
+          "encounter",
+          "openyoureyesyoucanfly",
+          "500mileshighliveatmontreux",
+          "storiestotell",
+          "butterflydreams"
+        ],
+        "latestRelease": {
+          "title": "If You Will",
+          "type": "album",
+          "url": "https://florapurim.bandcamp.com/album/if-you-will",
+          "imageUrl": "https://f4.bcbits.com/img/a1122736647_2.jpg",
+          "releaseDate": "April 29, 2022"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/flora-purim/50842",
+        "allReleaseTitles": [
+          "butterflydreams",
+          "airtofloraacelebration60yearssoundsdreamsotherstoriesairtomoreira",
+          "storiestotell",
+          "aquiohricardobacelarandairtomoreira",
+          "dafosmickeyhartairtomoreira",
+          "carryon",
+          "everydayeverynight",
+          "openyoureyesyoucanfly",
+          "threewaymirrorairtomoreiraandjoefarrell",
+          "thecoloursoflifeairtomoreiraand",
+          "500mileshigh",
+          "nothingwillbeasitwastomorrow",
+          "ifyouwill",
+          "encounter",
+          "floraempm",
+          "speaknoevil",
+          "florassong",
+          "perpetualemotion",
+          "liveinberkeleyairtomoreiraand"
+        ],
+        "latestRelease": {
+          "title": "Aqui Oh Ricardo Bacelar Flora Purim And Airto Moreira",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/aqui-oh-ricardo-bacelar-flora-purim-and-airto-moreira/j4cjqg7qq6mbb",
+          "releaseDate": "2025-08-29"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Flora%20Purim"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Flora%20Purim"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.florapurim.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/88228"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Flora%20Purim&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Flora%20Purim"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/AirflowP"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/AirtoMoreira.FloraPurim"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

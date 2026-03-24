@@ -1,0 +1,99 @@
+[
+  {
+    "id": "nicolasjaar",
+    "name": "Nicolas Jaar",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0023120982_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://nicolasjaar.bandcamp.com",
+        "allReleaseTitles": [
+          "piedras12",
+          "themiddleofnowherejaarrework",
+          "archivosderadiopiedrasnicolasjaar",
+          "telas",
+          "cenizas",
+          "pomegranates",
+          "sirens",
+          "nymphs",
+          "nymphstriplelp",
+          "spaceisonlynoise",
+          "fight"
+        ],
+        "latestRelease": {
+          "title": "Piedras 1 & 2",
+          "type": "album",
+          "url": "https://nicolasjaar.bandcamp.com/album/piedras-1-2",
+          "imageUrl": "https://f4.bcbits.com/img/a0159555092_2.jpg",
+          "releaseDate": "January 17, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/nicolas-jaar/150578",
+        "allReleaseTitles": [
+          "spaceisonlynoise",
+          "timeforus",
+          "crashingwavesdancetotherhythmsetbythebroadcastjournalistrevealingthetragediesofthedaycharbelhaberandsarymoussa",
+          "piedras1",
+          "piedras2",
+          "shmaalitarweedayasminehamdan",
+          "nymphsiii",
+          "nymphsii",
+          "archivosderadiopiedras",
+          "part1charbelhaberandsarymoussa",
+          "cenizas",
+          "telas",
+          "letremblementahossanand",
+          "nymphsi",
+          "sirensdeluxeedition",
+          "intihaalisethiand",
+          "brianenoxxgrizzlybearbrianenoandgrizzlybear",
+          "elbandido",
+          "sirens",
+          "pomegranates"
+        ],
+        "latestRelease": {
+          "title": "Crashing Waves Dance To The Rhythm Set By The Broadcast Journalist Revealing The Tragedies Of The Day Charbel Haber Nicolas Jaar And Sary Moussa",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/crashing-waves-dance-to-the-rhythm-set-by-the-broadcast-journalist-revealing-the-tragedies-of-the-day-charbel-haber-nicolas-jaar-and-sary-moussa/kqpe4vpyhi0rb",
+          "releaseDate": "2025-06-27"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Nicolas%20Jaar"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Nicolas%20Jaar"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.nicolasjaar.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1096231"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/nicolasjaar/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/watch?v=lXTP3sReRYI"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Nicolas-Jaar/15727540611"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

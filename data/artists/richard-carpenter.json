@@ -1,0 +1,41 @@
+[
+  {
+    "id": "richardcarpenter",
+    "name": "RICHARD CARPENTER",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a0690000729_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://richardcarpenter.bandcamp.com",
+        "allReleaseTitles": [
+          "howyougonnatellme",
+          "herlove",
+          "earthquake",
+          "11",
+          "malik1malikcarpentervocalsrichardcarpentermusic"
+        ],
+        "latestRelease": {
+          "title": "HOW YOU GONNA TELL ME",
+          "type": "track",
+          "url": "https://richardcarpenter.bandcamp.com/track/how-you-gonna-tell-me",
+          "imageUrl": "https://f4.bcbits.com/img/a0690000729_2.jpg",
+          "releaseDate": "June 13, 2015"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=RICHARD%20CARPENTER"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+RICHARD%20CARPENTER"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

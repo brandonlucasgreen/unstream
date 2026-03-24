@@ -1,0 +1,68 @@
+[
+  {
+    "id": "suicide",
+    "name": "Suicide",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0012687822_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://suicideroir.bandcamp.com",
+        "allReleaseTitles": [
+          "halfalive",
+          "ghostriders"
+        ],
+        "latestRelease": {
+          "title": "Half Alive",
+          "type": "album",
+          "url": "https://suicideroir.bandcamp.com/album/half-alive",
+          "imageUrl": "https://f4.bcbits.com/img/a4221472419_16.jpg",
+          "releaseDate": "June 6, 2000"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/suicide/41532",
+        "allReleaseTitles": [
+          "surrender",
+          "technology",
+          "deliberatedelusion",
+          "",
+          "thesecondalbumthefirstrehearsaltapes",
+          "dreambabydream",
+          "awayoflife",
+          "cheree",
+          "americansupreme",
+          "whybeblue",
+          "frankieteardrop",
+          "dreambabydreamep",
+          "awayofliferarities",
+          "ghostriders",
+          "attemptedliveatmaxskansascity1980",
+          "halfalive",
+          "bornintheusa",
+          "devourthefallen"
+        ],
+        "latestRelease": {
+          "title": "Deliberate Delusion Suicide",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/deliberate-delusion-suicide/pnakl23ttvitc",
+          "releaseDate": "2024-05-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Suicide"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Suicide"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,86 @@
+[
+  {
+    "id": "noelgallaghershighflyingbirds",
+    "name": "Noel Gallagher's High Flying Birds",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0032544591_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://noelgallagher.bandcamp.com",
+        "allReleaseTitles": [
+          "councilskies",
+          "whobuiltthemoon",
+          "chasingyesterday",
+          "noelgallaghershighflyingbirds"
+        ],
+        "latestRelease": {
+          "title": "Council Skies",
+          "type": "album",
+          "url": "https://noelgallagher.bandcamp.com/album/council-skies",
+          "imageUrl": "https://f4.bcbits.com/img/a2220238559_16.jpg",
+          "releaseDate": "June 2, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/noel-gallagher-s-high-flying-birds-1/675163",
+        "allReleaseTitles": [
+          "chasingyesterdaydeluxe",
+          "bluemoonrisingep",
+          "whobuiltthemoondeluxe",
+          "whobuiltthemoon",
+          "councilskiesdeluxe",
+          "abbeyroadsessions",
+          "magicsecrets2",
+          "blackstardancing",
+          "thisistheplaceep",
+          "backthewaywecamevol120112021",
+          "councilskies",
+          "magicsecrets1",
+          "thedyingofthelight",
+          "inalittlewhile",
+          "ifloveisthelaw",
+          "riverman",
+          "lockallthedoors",
+          "prettyboy",
+          "deadtotheworld",
+          "wereonourwaynow"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Noel%20Gallagher's%20High%20Flying%20Birds"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Noel%20Gallagher's%20High%20Flying%20Birds"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.noelgallagher.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2384642"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/themightyi/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/NoelGallagherTV"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/noelgallaghermusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

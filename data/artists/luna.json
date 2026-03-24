@@ -1,0 +1,49 @@
+[
+  {
+    "id": "luna",
+    "name": "Luna",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0027521141_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://luna.bandcamp.com",
+        "allReleaseTitles": [
+          "satelliteoflove",
+          "liverendezvous",
+          "livepenthouse",
+          "livebewitched",
+          "marqueemoon",
+          "tellmedoyoumissme",
+          "postscripts",
+          "aplaceofgreatersafety",
+          "asentimentaleducation",
+          "thedaysofournights",
+          "rendezvous",
+          "romantica",
+          "closecoverbeforestriking"
+        ],
+        "latestRelease": {
+          "title": "Satellite of Love",
+          "type": "album",
+          "url": "https://luna.bandcamp.com/album/satellite-of-love",
+          "imageUrl": "https://f4.bcbits.com/img/a0678872519_2.jpg",
+          "releaseDate": "December 13, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Luna"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Luna"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

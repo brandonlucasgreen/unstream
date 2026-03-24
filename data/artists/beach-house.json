@@ -1,0 +1,98 @@
+[
+  {
+    "id": "beachhouse",
+    "name": "Beach House",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0026683180_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://beachhouse.bandcamp.com",
+        "allReleaseTitles": [
+          "become",
+          "oncetwicemelody",
+          "loseyoursmilealien",
+          "7",
+          "bsidesandrarities",
+          "thankyourluckystars",
+          "depressioncherry",
+          "bloom",
+          "itunessession2010",
+          "teendream",
+          "devotion",
+          "beachhouse"
+        ],
+        "latestRelease": {
+          "title": "Become",
+          "type": "album",
+          "url": "https://beachhouse.bandcamp.com/album/become",
+          "imageUrl": "https://f4.bcbits.com/img/a0106799378_2.jpg",
+          "releaseDate": "April 28, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/beach-house/40495",
+        "allReleaseTitles": [
+          "depressioncherry",
+          "bloom",
+          "oncetwicemelody",
+          "7",
+          "thankyourluckystars",
+          "bsidesandrarities",
+          "become",
+          "teendream",
+          "",
+          "devotion",
+          "alien",
+          "itunessession",
+          "alldayhouse",
+          "beachfrontparty"
+        ],
+        "latestRelease": {
+          "title": "Once Twice Melody Beach House",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/once-twice-melody-beach-house/cxugdqmf2mjxc",
+          "releaseDate": "2022-02-18"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Beach%20House"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Beach%20House"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.beachhousebaltimore.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/592308"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/beaccchhoussse/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCN-jxm11fOETNF5JrZsATCg"
+      },
+      {
+        "sourceId": "bluesky",
+        "url": "https://bsky.app/profile/beachhouseband.bsky.social"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/beachhouse"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

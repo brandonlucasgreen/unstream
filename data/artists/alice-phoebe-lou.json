@@ -1,0 +1,82 @@
+[
+  {
+    "id": "alicephoebelou",
+    "name": "Alice Phoebe Lou",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039713667_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://alicephoebelou.bandcamp.com",
+        "latestRelease": {
+          "title": "Oblivion",
+          "type": "album",
+          "url": "https://alicephoebelou.bandcamp.com/album/oblivion",
+          "imageUrl": "https://f4.bcbits.com/img/a1860717191_2.jpg",
+          "releaseDate": "October 23, 2025"
+        },
+        "allReleaseTitles": [
+          "oblivion",
+          "darling",
+          "pretender",
+          "oldshadows",
+          "thesurface",
+          "youandi",
+          "better",
+          "theworldabove",
+          "shelter",
+          "losemyhead",
+          "openmydoor",
+          "shelter",
+          "childsplay",
+          "glow",
+          "touch",
+          "liveatfunkhaus",
+          "witches",
+          "papercastles",
+          "solaep",
+          "orbit"
+        ]
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/alice-phoebe-lou/1243510",
+        "allReleaseTitles": [
+          "oblivion",
+          "shelter",
+          "glow",
+          "thesurface",
+          "touch",
+          "youandi",
+          "pretender",
+          "better",
+          "oldshadows",
+          "devilssweetheartolmo",
+          "childsplay",
+          "liveatfunkhaus",
+          "theworldabove",
+          "dusk",
+          "openmydoor",
+          "dirtymouth",
+          "darling",
+          "losemyhead",
+          "witches",
+          "she"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Alice%20Phoebe%20Lou"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Alice%20Phoebe%20Lou"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

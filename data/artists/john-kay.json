@@ -1,0 +1,44 @@
+[
+  {
+    "id": "johnkay",
+    "name": "John Kay",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013050878_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://johnkay.bandcamp.com",
+        "allReleaseTitles": [
+          "highalone",
+          "dontmesswithmyroutine",
+          "weknowweregonnadie",
+          "dealingwithpeople",
+          "steptothisgetonmylevel",
+          "nomore",
+          "wildwildlife",
+          "dealingwithpeople"
+        ],
+        "latestRelease": {
+          "title": "High & Alone",
+          "type": "track",
+          "url": "https://johnkay.bandcamp.com/track/high-alone",
+          "imageUrl": "https://f4.bcbits.com/img/a1100362179_2.jpg",
+          "releaseDate": "April 20, 2018"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=John%20Kay"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+John%20Kay"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

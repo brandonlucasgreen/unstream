@@ -1,0 +1,105 @@
+[
+  {
+    "id": "dubiozakolektiv",
+    "name": "Dubioza kolektiv",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0015645120_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://dubiozakolektiv.bandcamp.com",
+        "allReleaseTitles": [
+          "fuckyou",
+          "fakenews",
+          "pjesmicezadjecuiodrasle",
+          "happymachine",
+          "apsurdistan"
+        ],
+        "latestRelease": {
+          "title": "f.u.c.k.y.o.u.",
+          "type": "track",
+          "url": "https://dubiozakolektiv.bandcamp.com/track/f-u-c-k-y-o-u",
+          "imageUrl": "https://f4.bcbits.com/img/a0320477829_2.jpg",
+          "releaseDate": "November 28, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/dubioza-kolektiv/1003484",
+        "allReleaseTitles": [
+          "takemetoamericasalvatoreganacci",
+          "godisnotyourbabysittergoranbregovic",
+          "hardfolklosninosdelosojosrojos",
+          "tribojezvuka",
+          "apsurdistan",
+          "wildwildeast",
+          "fakenews",
+          "",
+          "pjesmicezadjecuiodrasle",
+          "agrikultura",
+          "u3pmdinosaran",
+          "balkanboys",
+          "happymachine",
+          "5do12",
+          "rakijayronadriasalas",
+          "fuckyou",
+          "pannoniaterranovalivetamburaskisastavlege",
+          "blkrczm",
+          "dubnamite",
+          "ajojdinosaran"
+        ],
+        "latestRelease": {
+          "title": "God Is Not Your Babysitter Goran Bregovic Dubioza Kolektiv",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/god-is-not-your-babysitter-goran-bregovic-dubioza-kolektiv/qz3jdijs2u4lk",
+          "releaseDate": "2026-02-13"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Dubioza%20kolektiv"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Dubioza%20kolektiv"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://dubioza.org/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/598412"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Dubioza%20kolektiv&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Dubioza%20kolektiv"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/dubiozagram/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/dubiozatv"
+      },
+      {
+        "sourceId": "peertube",
+        "url": "https://www.yiny.org/video-channels/dubioza_kolektiv"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/dubioza"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

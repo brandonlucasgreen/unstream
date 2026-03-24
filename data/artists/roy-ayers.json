@@ -1,0 +1,72 @@
+[
+  {
+    "id": "royayers",
+    "name": "Roy Ayers",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019563213_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://royayers.bandcamp.com",
+        "allReleaseTitles": [
+          "liquidlove",
+          "reachingthehighestpleasureiamyourmindpart2pepebradockremix",
+          "babydoll",
+          "royayersjid002royayersadrianyoungeandalishaheedmuhammad",
+          "reachingthehighestpleasure",
+          "iamyourmindmrv2020solechannelremixes",
+          "silvervibrations",
+          "holidaybenrauremixes",
+          "sugarthereflexrevisioninstrumental",
+          "virginubiquityiiunreleasedrecordings19761981",
+          "virginubiquityremixed",
+          "virginubiquityunreleasedrecordings"
+        ],
+        "latestRelease": {
+          "title": "Liquid Love",
+          "type": "album",
+          "url": "https://royayers.bandcamp.com/album/liquid-love",
+          "imageUrl": "https://f4.bcbits.com/img/a1261771370_2.jpg",
+          "releaseDate": "November 10, 2023"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Roy%20Ayers"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Roy%20Ayers"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.royayers.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2265"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Roy%20Ayers&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Roy%20Ayers"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "http://www.instagram.com/royayerssunshine"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "http://www.facebook.com/RoyAyers"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

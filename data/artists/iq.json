@@ -1,0 +1,114 @@
+[
+  {
+    "id": "iq",
+    "name": "IQ",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0031600357_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://iq-gep.bandcamp.com",
+        "allReleaseTitles": [
+          "dominion",
+          "resistance",
+          "everlive",
+          "theroadofbones",
+          "theroadofbones2discedition",
+          "frequency",
+          "darkmatter",
+          "theseventhhouse",
+          "subterraneatheconcert",
+          "thelostattic",
+          "sevenstoriesinto98",
+          "subterranea",
+          "ever",
+          "jaipollettedarnu",
+          "areyousittingcomfortably",
+          "nomzamo",
+          "thewake",
+          "talesfromthelushattic"
+        ],
+        "latestRelease": {
+          "title": "Dominion",
+          "type": "album",
+          "url": "https://iq-gep.bandcamp.com/album/dominion",
+          "imageUrl": "https://f4.bcbits.com/img/a2321635369_2.jpg",
+          "releaseDate": "March 28, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/iq/623121",
+        "latestRelease": {
+          "title": "Skickat Iq Lamix Hanna Mel And Lovis",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/skickat-iq-lamix-hanna-mel-and-lovis/vu9jynzqlouha",
+          "releaseDate": "2025-06-16"
+        },
+        "allReleaseTitles": [
+          "dominion",
+          "skickatlamixhannamelandlovis",
+          "24hours",
+          "socastartdjcheem",
+          "thegalleryroomlivesessionremmiejeen",
+          "depthandsignificant7",
+          "slowdown",
+          "nightshiftandskeete",
+          "life",
+          "jamaicanprince",
+          "norehearsalandsignificant7",
+          "scream",
+          "padlock",
+          "draandlukwatsss",
+          "theroadofbones",
+          "thewake",
+          "darkmatter",
+          "almostbutnotquite",
+          "ever",
+          "theseventhhouse"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=IQ"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+IQ"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.iq-hq.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/691292"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=IQ&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/IQ"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/iqhqlive/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCPPt46K4XXulW84A6PrKQkw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/IQHQLive"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

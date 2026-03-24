@@ -1,0 +1,109 @@
+[
+  {
+    "id": "happymondays",
+    "name": "Happy Mondays",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024735784_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://happymondays.bandcamp.com",
+        "latestRelease": {
+          "title": "Loose Fit (Shadow Child Remix)",
+          "type": "album",
+          "url": "https://happymondays.bandcamp.com/album/loose-fit-shadow-child-remix",
+          "imageUrl": "https://f4.bcbits.com/img/a0621867581_2.jpg",
+          "releaseDate": "February 27, 2026"
+        },
+        "allReleaseTitles": [
+          "loosefitshadowchildremix",
+          "godscopannapriorremix",
+          "thefactorysinglesbestofdeluxe",
+          "hallelujahdanielaveryremix",
+          "steponpauloakenfoldremixhappymondayspauloakenfold",
+          "loosefit",
+          "stepon",
+          "tarttart",
+          "uncledysfunktional2020mix",
+          "hallelujahewanpearsonremix",
+          "theearlyeps",
+          "bummedcollectorsedition",
+          "greatesthits",
+          "hallelujah",
+          "yesplease",
+          "live"
+        ]
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/happy-mondays/310548",
+        "allReleaseTitles": [
+          "thefactorysinglesbestofdeluxe",
+          "stepon",
+          "loosefit",
+          "theearlyepsremastered",
+          "tarttart",
+          "hallelujah",
+          "",
+          "pillsnthrillsandbellyaches",
+          "bummed",
+          "godscop",
+          "greatesthits",
+          "squirrelandgmantwentyfourhourpartypeopleplasticfacecarntsmilewhiteout",
+          "uncledysfunktional",
+          "live2012",
+          "yesplease",
+          "live",
+          "callthecopsliveinnewyork1990"
+        ],
+        "latestRelease": {
+          "title": "Loose Fit Happy Mondays",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/loose-fit-happy-mondays/s9jm7r9a2t472",
+          "releaseDate": "2026-02-27"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Happy%20Mondays"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Happy%20Mondays"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.happymondaysofficial.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/12097"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Happy%20Mondays&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Happy%20Mondays"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/happymondaysofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/playlist?list=PL1xm0HhIaKcHrQLhMHKcfKZQbsvDUnGNZ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/HappyMondaysOnline"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

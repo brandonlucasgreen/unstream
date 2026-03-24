@@ -1,0 +1,76 @@
+[
+  {
+    "id": "katarsis",
+    "name": "Katarsis",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039685958_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://katarsis.bandcamp.com",
+        "allReleaseTitles": [
+          "inwardpath",
+          "infiniteocean"
+        ],
+        "latestRelease": {
+          "title": "Inward Path",
+          "type": "album",
+          "url": "https://katarsis.bandcamp.com/album/inward-path",
+          "imageUrl": "https://f4.bcbits.com/img/a0385132083_16.jpg",
+          "releaseDate": "November 6, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/katarsis/3251426",
+        "allReleaseTitles": [
+          "inwardpath",
+          "alcerrarmisojos",
+          "tavoakys",
+          "odisea",
+          "viventermellemmurepalysundersolopgangensrodderfridamolgaardhannahelmstrom",
+          "againsttwoforces",
+          "bdsmbailadespaciosobremi",
+          "insomnia",
+          "koyaanisqatsi",
+          "ruidodesnudo",
+          "alasdeangel",
+          "",
+          "losnadie",
+          "lamarchaturka",
+          "paperwings",
+          "endeligevihaer",
+          "eternos",
+          "caminoalarazon",
+          "lascosascalladitas",
+          "laespadainmortal"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Katarsis"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Katarsis"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/Katarsisgyvas/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCaJoIlHBEEmCrix2j-slMJA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/100070499824204"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "illnino",
+    "name": "Ill Niño",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/a1398504652_7.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://illnino.bandcamp.com",
+        "allReleaseTitles": [
+          "thetempestillnino",
+          "calmbeforethestormillnino"
+        ],
+        "latestRelease": {
+          "title": "The Tempest\n                \n                \n\n                Ill Nino",
+          "type": "album",
+          "url": "https://illnino.bandcamp.com/album/the-tempest",
+          "imageUrl": "https://f4.bcbits.com/img/a1398504652_16.jpg",
+          "releaseDate": "July 30, 2015"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ill%20Ni%C3%B1o"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ill%20Ni%C3%B1o"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

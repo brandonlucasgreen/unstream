@@ -1,0 +1,66 @@
+[
+  {
+    "id": "josipalisac",
+    "name": "Josip A Lisac",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0005959342_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://josip-a-lisac.bandcamp.com",
+        "allReleaseTitles": [
+          "upravcukazaljkenazidu",
+          "sveumojevreme"
+        ],
+        "latestRelease": {
+          "title": "U pravcu kazaljke na zidu",
+          "type": "album",
+          "url": "https://josip-a-lisac.bandcamp.com/album/u-pravcu-kazaljke-na-zidu",
+          "imageUrl": "https://f4.bcbits.com/img/a3249761993_16.jpg",
+          "releaseDate": "October 18, 2015"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Josip%20A%20Lisac"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Josip%20A%20Lisac"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.josipalisac.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/489783"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Josip%20A%20Lisac&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Josip%20A%20Lisac"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/josipa_lisac/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCHybozPdxYsHAk4CkHjZruQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/20118606082"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

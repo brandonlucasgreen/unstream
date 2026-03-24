@@ -1,0 +1,50 @@
+[
+  {
+    "id": "teresabrewer",
+    "name": "Teresa Brewer",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025494584_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://teresabrewer.bandcamp.com",
+        "allReleaseTitles": [
+          "awomansworldridearoo",
+          "steptotherearlivealittle"
+        ],
+        "latestRelease": {
+          "title": "A Woman's World / Ride-A-Roo",
+          "type": "album",
+          "url": "https://teresabrewer.bandcamp.com/album/a-womans-world-ride-a-roo",
+          "imageUrl": "https://f4.bcbits.com/img/a3655718824_16.jpg",
+          "releaseDate": "January 1, 1968"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Teresa%20Brewer"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Teresa%20Brewer"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/439545"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Teresa%20Brewer&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Teresa%20Brewer"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

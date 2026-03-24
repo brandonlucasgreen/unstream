@@ -1,0 +1,72 @@
+[
+  {
+    "id": "ninakraviz",
+    "name": "Nina Kraviz",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0042874536_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://ninakraviz.bandcamp.com",
+        "allReleaseTitles": [
+          "treats001",
+          "ninakraviztardeninakravizpsymixalternativeversionfreedownload",
+          "tarderemixes",
+          "whitehorseindirapaganottoninakraviz",
+          "tarde",
+          "haceejercicios",
+          "thistimeremixesninakravizfourtetpraecoxmoodymannterrencedixonhieroglyphicbeinglindstrm",
+          "skyscrapersremixespartiininakravizaadjadissolverlockedgrooveromazuckerman",
+          "thistime",
+          "skyscrapershiloremixninakravizhilo",
+          "skyscrapersremixes",
+          "skyscraperssolomunremix",
+          "skyscrapers",
+          "ghettokravizdjslugoremixes",
+          "ninakravizpresentsmasseductionrewired",
+          "newyorkninakravizvocalmix"
+        ],
+        "latestRelease": {
+          "title": "treats 001",
+          "type": "album",
+          "url": "https://ninakraviz.bandcamp.com/album/treats-001",
+          "imageUrl": "https://f4.bcbits.com/img/a3735731615_2.jpg",
+          "releaseDate": "February 27, 2026"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Nina%20Kraviz"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Nina%20Kraviz"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://ninakraviz.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/911822"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/ninakraviz/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCF6lav85ybIK3Umon9oI-dw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/NinaKraviz"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

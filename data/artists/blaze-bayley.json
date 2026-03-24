@@ -1,0 +1,80 @@
+[
+  {
+    "id": "blazebayley",
+    "name": "Blaze Bayley",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0003912090_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://blazebayleyofficial.bandcamp.com",
+        "allReleaseTitles": [
+          "blazecentrecultureleloyesfrance",
+          "blazebayleycafedemeistergeleennetherlands270316",
+          "blazebayleylivemalmosweden4thapril2001",
+          "blazebayleyliveatalderelyedge",
+          "blazebayleyaoniafestivalroadhousebirmingham3rdmay2015",
+          "blazebayleyfestivaldevouziers20141101",
+          "blazebayleywizzfest19thmarch2011",
+          "blazebayleyliveinmoscow4trackep",
+          "blazebayleyjbsdudley6thfeb2010",
+          "blazebayleycollosseummusicpubkosiceslovakia19092014",
+          "itsalongwayhomethisxmasbyblazemichelle",
+          "blazebayleyliveatcrowleysrockbarswansea071114",
+          "blazebayleykingsheadfulham180103",
+          "blazebayleymichelllesciarrottarocknrollchristmas",
+          "liveatmetalfestjbsdudleyuk25thseptember2009",
+          "liveattheasylumbirmingham270712officialbootleg"
+        ],
+        "latestRelease": {
+          "title": "B L A Z E Centre Culturel, Eloyes France",
+          "type": "album",
+          "url": "https://blazebayleyofficial.bandcamp.com/album/b-l-a-z-e-centre-culturel-eloyes-france",
+          "imageUrl": "https://f4.bcbits.com/img/a1415227707_2.jpg",
+          "releaseDate": "July 4, 2017"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Blaze%20Bayley"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Blaze%20Bayley"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.blazebayley.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/277359"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Blaze%20Bayley&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Blaze%20Bayley"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/blazebayley/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC0KJuyHJ4j3g9iJM1ff24Cw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialblazebayley"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

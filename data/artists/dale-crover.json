@@ -1,0 +1,73 @@
+[
+  {
+    "id": "dalecrover",
+    "name": "Dale Crover",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036296617_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://dalecrover.bandcamp.com",
+        "allReleaseTitles": [
+          "glossolalia",
+          "ratatattat",
+          "christmastimeishere",
+          "theficklefingeroffate"
+        ],
+        "latestRelease": {
+          "title": "Glossolalia",
+          "type": "album",
+          "url": "https://dalecrover.bandcamp.com/album/glossolalia",
+          "imageUrl": "https://f4.bcbits.com/img/a3080181408_16.jpg",
+          "releaseDate": "September 13, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/dale-crover/491970",
+        "allReleaseTitles": [
+          "glossolalia",
+          "theficklefingeroffate",
+          "ratatattat",
+          "dougyuletide",
+          "spoileddaisies",
+          "iquitfeatkimthayil",
+          "tinydirtihearanechodeerhoof",
+          "christmastimeishere",
+          "badmove",
+          "dowsingrodthejournalskeptamp",
+          "hillbillymath"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Dale%20Crover"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Dale%20Crover"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/261337"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Dale%20Crover&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Dale%20Crover"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/drcrover "
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

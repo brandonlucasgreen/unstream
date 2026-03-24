@@ -1,0 +1,78 @@
+[
+  {
+    "id": "gazebo",
+    "name": "Gazebo",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014686882_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://gazebo.bandcamp.com",
+        "allReleaseTitles": [
+          "ilikechopin2025cristianmarchiremixes",
+          "frompashawithloveep",
+          "gazeboilikechopin2020coronaversion",
+          "masterpiece2018",
+          "italobynumbers",
+          "reset",
+          "ilikelive",
+          "thesyndrone",
+          "ladiestheartofremixage",
+          "thefourteenthofjulyep"
+        ],
+        "latestRelease": {
+          "title": "I Like Chopin 2025 (Cristian Marchi Remixes)",
+          "type": "album",
+          "url": "https://gazebo.bandcamp.com/album/i-like-chopin-2025-cristian-marchi-remixes",
+          "imageUrl": "https://f4.bcbits.com/img/a1241654347_2.jpg",
+          "releaseDate": "November 27, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Gazebo"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Gazebo"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.gazebo.info/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/47835"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Gazebo&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Gazebo"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/gazeboofficial"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://vm.tiktok.com/ZML3yJJmu/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/gazeboinfo"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/GazeboOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

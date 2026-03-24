@@ -1,0 +1,90 @@
+[
+  {
+    "id": "alexchilton",
+    "name": "Alex Chilton",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028263921_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://alexchilton.bandcamp.com",
+        "allReleaseTitles": [
+          "set",
+          "cliches",
+          "songsfromrobinhoodlane",
+          "frommemphistoneworleans",
+          "highpriest",
+          "feudalisttarts"
+        ],
+        "latestRelease": {
+          "title": "Set",
+          "type": "album",
+          "url": "https://alexchilton.bandcamp.com/album/set",
+          "imageUrl": "https://f4.bcbits.com/img/a1713125709_2.jpg",
+          "releaseDate": "May 9, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/alex-chilton/97927",
+        "allReleaseTitles": [
+          "myrival",
+          "takemehomeandmakemelikeit",
+          "likefliesonsherbert",
+          "bachsbottom",
+          "cubistbluesalanvegabenvaughn",
+          "allweevergotfromthemwaspain",
+          "freeagainthe1970sessions",
+          "set",
+          "amancalleddestruction",
+          "highpriest",
+          "songsfromrobinhoodlane",
+          "feudalisttartsexpanded",
+          "blacklist",
+          "cliches",
+          "frommemphistoneworleans",
+          "electricitybycandlelightnyc21397",
+          "thedeathofrockpeterholsapplevs",
+          "liveinanvers",
+          "encoreliveinlondon",
+          "batonrouge1985"
+        ],
+        "latestRelease": {
+          "title": "My Rival Alex Chilton",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/my-rival-alex-chilton/qk1imkayqbyoa",
+          "releaseDate": "2023-10-02"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Alex%20Chilton"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Alex%20Chilton"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/224992"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Alex%20Chilton&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Alex%20Chilton"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/alexchiltonforever"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

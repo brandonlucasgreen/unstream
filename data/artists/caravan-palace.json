@@ -1,0 +1,106 @@
+[
+  {
+    "id": "caravanpalace",
+    "name": "Caravan Palace",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0035034287_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://caravanpalace.bandcamp.com",
+        "allReleaseTitles": [
+          "dustyhousemixfullmixonefile",
+          "citycookcrackazatremix",
+          "avalanchesdargzremix",
+          "reverseiamnobodiremix",
+          "raccoonsgaudidonlettsremix",
+          "gangbustersmelodyclub",
+          "fool",
+          "mirrors",
+          "reverse",
+          "mad",
+          "moonshineremixes",
+          "ii",
+          "chronologic",
+          "miracleep",
+          "blackbetty"
+        ],
+        "latestRelease": {
+          "title": "Dusty House Mix (Full mix - One file)",
+          "type": "album",
+          "url": "https://caravanpalace.bandcamp.com/album/dusty-house-mix-full-mix-one-file",
+          "imageUrl": "https://f4.bcbits.com/img/a1578329861_2.jpg",
+          "releaseDate": "June 20, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/caravan-palace/104439",
+        "allReleaseTitles": [
+          "ii",
+          "gangbustersmelodyclub",
+          "chronologic",
+          "ii10thanniversaryedition",
+          "miracle",
+          "supersonics",
+          "",
+          "citycook",
+          "dustyhousemix",
+          "moonshine",
+          "reverse",
+          "mirrors",
+          "mad",
+          "avalanches",
+          "fool",
+          "raccoons",
+          "panic",
+          "blackbetty",
+          "pluma"
+        ],
+        "latestRelease": {
+          "title": "Gangbusters Melody Club Caravan Palace",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/gangbusters-melody-club-caravan-palace/bf2mnj0zpfbac",
+          "releaseDate": "2024-03-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Caravan%20Palace"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Caravan%20Palace"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.caravanpalace.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1337187"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/caravanpalace/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@caravanpalaceofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCKH9HfYY_GEcyltl2mbD5lA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/CaravanPalace"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

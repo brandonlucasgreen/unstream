@@ -1,0 +1,98 @@
+[
+  {
+    "id": "shakespearssister",
+    "name": "Shakespears Sister",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028073543_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://shakespearssister.bandcamp.com",
+        "allReleaseTitles": [
+          "blackskyremasteredexpanded",
+          "my16thapologyremasteredexpanded",
+          "helloturnyourradioonremasteredexpanded",
+          "goodbyecruelworldremasteredexpanded",
+          "idontcareremasteredexpanded",
+          "stayremasteredexpanded",
+          "rideagain",
+          "singlesparty19882019",
+          "hormonallyyours",
+          "sacredheart"
+        ],
+        "latestRelease": {
+          "title": "Black Sky (Remastered & Expanded)",
+          "type": "album",
+          "url": "https://shakespearssister.bandcamp.com/album/black-sky-remastered-expanded",
+          "imageUrl": "https://f4.bcbits.com/img/a0779797019_2.jpg",
+          "releaseDate": "December 9, 2022"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/shakespears-sister/451105",
+        "allReleaseTitles": [
+          "rideagain",
+          "hormonallyyours",
+          "stay",
+          "singlesparty19882019",
+          "blacksky",
+          "sacredheart",
+          "cosmicdancer",
+          "helloturnyourradioon",
+          "songsfromtheredroomdeluxeedition",
+          "songsfromtheredroom",
+          "idontcare",
+          "3",
+          "goodbyecruelworld",
+          "remixes",
+          "my16thapology",
+          "itsatrip"
+        ],
+        "latestRelease": {
+          "title": "Black Sky Shakespears Sister",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/black-sky-shakespears-sister/zyoa1khagqu7a",
+          "releaseDate": "2025-04-25"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Shakespears%20Sister"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Shakespears%20Sister"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/30318"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Shakespears%20Sister&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Shakespears%20Sister"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/shakespearssisterofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCIQshpyQlnV70IZ_FidSwjw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/shakespearssisterofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

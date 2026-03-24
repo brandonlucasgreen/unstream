@@ -21,6 +21,37 @@
         }
       },
       {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/wolfmother/48050",
+        "allReleaseTitles": [
+          "rockout",
+          "",
+          "stayalittlelonger",
+          "midnighttrain",
+          "rocknrollbaby",
+          "victorious",
+          "",
+          "newcrown",
+          "cosmicegg",
+          "highonmyownsupplyhighonmyownsupplyacoustic",
+          "chasethefeelingchriscester",
+          "jokerthethief",
+          "jokerandthethief",
+          "newmoonrising",
+          "higher",
+          "backround",
+          "mindseye",
+          "woman",
+          "lovetrain"
+        ],
+        "latestRelease": {
+          "title": "Stay A Little Longer Wolfmother",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/stay-a-little-longer-wolfmother/u0zz88xqey6ic",
+          "releaseDate": "2023-04-28"
+        }
+      },
+      {
         "sourceId": "ampwall",
         "url": "https://ampwall.com/explore?searchStyle=search&query=Wolfmother"
       },

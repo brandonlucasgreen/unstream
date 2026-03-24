@@ -1,0 +1,100 @@
+[
+  {
+    "id": "alcest",
+    "name": "Alcest",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0035910114_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://alcest.bandcamp.com",
+        "allReleaseTitles": [
+          "leschantsdelaurore",
+          "lenvol",
+          "protectionacousticinstrumentalversion",
+          "sapphireperturbatorversion",
+          "protectionbenchisholmversion",
+          "spiritualinstinct",
+          "kodama",
+          "kodamaluxus",
+          "lesdiscretsalcestsplitep",
+          "shelter",
+          "shelterluxus",
+          "bbclivesession",
+          "lesvoyagesdelame",
+          "lesecret",
+          "ecaillesdelune",
+          "souvenirsdunautremonde"
+        ],
+        "latestRelease": {
+          "title": "Les Chants de l'Aurore",
+          "type": "album",
+          "url": "https://alcest.bandcamp.com/album/les-chants-de-laurore",
+          "imageUrl": "https://f4.bcbits.com/img/a1286460736_2.jpg",
+          "releaseDate": "June 21, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/alcest/2027901",
+        "allReleaseTitles": [
+          "spiritualinstinct",
+          "leschantsdelaurore",
+          "sapphire",
+          "protection",
+          "ecaillesdelune",
+          "lesvoyagesdelame",
+          "kodama",
+          "shelter",
+          "souvenirsdunautremonde",
+          "lesecret",
+          "souvenirsdunautremondegnegnolistephanepautandneige",
+          "spliteplesdiscrets",
+          "bbclivesession",
+          "autretemps"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Alcest"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Alcest"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://alcestmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/873960"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Alcest&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Alcest"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/alcestofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCiglljVztEd0FR315fA9dmQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/alcest.official"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

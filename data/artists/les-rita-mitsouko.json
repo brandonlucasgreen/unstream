@@ -1,0 +1,110 @@
+[
+  {
+    "id": "lesritamitsouko",
+    "name": "Les Rita Mitsouko",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0024416101_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://lesritamitsouko.bandcamp.com",
+        "allReleaseTitles": [
+          "lintegrale",
+          "bestofraretes",
+          "catherineringerchantelesritamitsoukoalaphilharmoniedeparis",
+          "ritamitsouko",
+          "thenocomprendo",
+          "marcrobert",
+          "re",
+          "systemed",
+          "acoustiques",
+          "coolfrenesie",
+          "lafemmetrombone",
+          "enconcertaveclorchestrelamoureux",
+          "variety",
+          "varietyversionanglaise",
+          "varietyremixesep",
+          "theeye",
+          "communiqueurdamourremixes",
+          "andyfolamoursitaloremix"
+        ],
+        "latestRelease": {
+          "title": "L'INTEGRALE",
+          "type": "album",
+          "url": "https://lesritamitsouko.bandcamp.com/album/lintegrale",
+          "imageUrl": "https://f4.bcbits.com/img/a3088364540_2.jpg",
+          "releaseDate": "September 27, 2019"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/les-rita-mitsouko/46082",
+        "allReleaseTitles": [
+          "ritamitsouko",
+          "thenocomprendo",
+          "acoustiques",
+          "marcrobert",
+          "coolfrenesie",
+          "re",
+          "lintegrale",
+          "variety",
+          "systemed",
+          "lafemmetrombone",
+          "enconcertaveclorchestrelamoureux",
+          "andy",
+          "theeye",
+          "bestofraretes",
+          "catherineringerchantealaphilharmoniedepariscatherineringer",
+          "varietyremixesep"
+        ],
+        "latestRelease": {
+          "title": "Cool Frenesie Les Rita Mitsouko",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/cool-frenesie-les-rita-mitsouko/5060107721173",
+          "releaseDate": "2000-03-07"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Les%20Rita%20Mitsouko"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Les%20Rita%20Mitsouko"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.lesritamitsouko.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/55760"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Les%20Rita%20Mitsouko&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Les%20Rita%20Mitsouko"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/lesritamitsoukoofficiel/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCdatNLVvGBK4RCccS5Cp3RQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/RitaMitsouko"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

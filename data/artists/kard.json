@@ -1,0 +1,58 @@
+[
+  {
+    "id": "kard",
+    "name": "Kard",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0037937126_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kard.bandcamp.com",
+        "allReleaseTitles": [
+          "epdigital01karddamagecircuits",
+          "analoganarchy"
+        ],
+        "latestRelease": {
+          "title": "Ep Digital 01\n                \n                \n\n                Kard & Damage Circuits",
+          "type": "album",
+          "url": "https://kard.bandcamp.com/album/ep-digital-01",
+          "imageUrl": "https://f4.bcbits.com/img/a4140647367_16.jpg",
+          "releaseDate": "December 21, 2024"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kard"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kard"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://dspmedia.co.kr/dsp/sub/p_pop09.php"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/2309996"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/official_kard/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC5OwlwvsVmf_lXHguB6OYFw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialkard"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

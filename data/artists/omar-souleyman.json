@@ -1,0 +1,71 @@
+[
+  {
+    "id": "omarsouleyman",
+    "name": "Omar Souleyman",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0017671637_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://omarsouleyman.bandcamp.com",
+        "allReleaseTitles": [
+          "erbil",
+          "rahatalchantymme",
+          "layleboysnoizeremix",
+          "shlon",
+          "shitridin",
+          "layle",
+          "tosyriawithloveremixes",
+          "tosyriawithlove",
+          "darbelhawa",
+          "bahdeninami"
+        ],
+        "latestRelease": {
+          "title": "Erbil",
+          "type": "album",
+          "url": "https://omarsouleyman.bandcamp.com/album/erbil",
+          "imageUrl": "https://f4.bcbits.com/img/a3112024250_2.jpg",
+          "releaseDate": "March 29, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/omar-souleyman/1115474",
+        "allReleaseTitles": [
+          "wenuwenu",
+          "tosyriawithlove",
+          "shlon",
+          "layle",
+          "shitridin",
+          "erbil",
+          "bahdeninami",
+          "arabicpapifeatdjbliss",
+          "livearabicdabkegrupzorlu",
+          "darbelhawa",
+          "sayirnazaralfares",
+          "tosyriawithloveremixes",
+          "rahatalchantymme"
+        ],
+        "latestRelease": {
+          "title": "Layle Omar Souleyman",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/layle-omar-souleyman/hihm3mxoaqmtk",
+          "releaseDate": "2020-04-24"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Omar%20Souleyman"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Omar%20Souleyman"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

@@ -1,0 +1,91 @@
+[
+  {
+    "id": "huunhuurtu",
+    "name": "Huun Huur Tu",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0040216317_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://huunhuurtu.bandcamp.com",
+        "allReleaseTitles": [
+          "spiritsfromtuva",
+          "bestlive",
+          "motherearthfathe12sky",
+          "ancestorscall",
+          "liveattriskel",
+          "morelive",
+          "childrenoftheotter"
+        ],
+        "latestRelease": {
+          "title": "Spirits from Tuva",
+          "type": "album",
+          "url": "https://huunhuurtu.bandcamp.com/album/spirits-from-tuva",
+          "imageUrl": "https://f4.bcbits.com/img/a1880606482_2.jpg",
+          "releaseDate": "December 16, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/huun-huur-tu/61587",
+        "allReleaseTitles": [
+          "dreamersinthefieldcarmenrizzodhaniharrison",
+          "ancestorscall",
+          "flyflymysadnessthebulgarianvoicesangelite",
+          "mountaintalethebulgarianvoicesangelitemoscowarttriowith",
+          "wanderabouttuvalive",
+          "theorphanslament",
+          "sixtyhorsesinmyherd",
+          "bestlive",
+          "liveatthetriskel",
+          "spiritsfromtuva",
+          "legendthebulgarianvoicesangelitewithmoscowarttrio",
+          "childrenoftheotter",
+          "whereyounggrassgrows",
+          "motherearthfathersky",
+          "ifidbeenbornaneagle",
+          "steppehorsesstimmhorn"
+        ],
+        "latestRelease": {
+          "title": "Dreamers In The Field Carmen Rizzo Huun Huur Tu Dhani Harrison",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/dreamers-in-the-field-carmen-rizzo-huun-huur-tu-dhani-harrison/mec1nzjuw7j86",
+          "releaseDate": "2024-04-19"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Huun%20Huur%20Tu"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Huun%20Huur%20Tu"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://hhtmusic.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/109547"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Huun%20Huur%20Tu&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Huun%20Huur%20Tu"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/huunhuurtu/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

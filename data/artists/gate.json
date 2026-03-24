@@ -1,0 +1,75 @@
+[
+  {
+    "id": "gate",
+    "name": "Gåte",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025159826_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://gaate.bandcamp.com",
+        "allReleaseTitles": [
+          "paveg",
+          "ulveham",
+          "ulveham",
+          "vandrar",
+          "svartebokafeatdjervskarvanegatedjerv",
+          "nord",
+          "tilnordep"
+        ],
+        "latestRelease": {
+          "title": "På Veg",
+          "type": "track",
+          "url": "https://gaate.bandcamp.com/track/p-veg",
+          "imageUrl": "https://f4.bcbits.com/img/a1652779753_2.jpg",
+          "releaseDate": "November 27, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/gate/418770",
+        "allReleaseTitles": [
+          "bannlyst",
+          "stoltsolvar",
+          "ridebolloggullborg",
+          "hot",
+          "ouinon",
+          "thewayyoudrive",
+          "saturne",
+          "svartebokadjerv",
+          "vandrar",
+          "ulveham",
+          "iselilja",
+          "paveg",
+          "jygri",
+          "nord",
+          "tilnord",
+          "thenumbers",
+          "liva",
+          "live",
+          "worldwide",
+          "arepublicofsadness"
+        ],
+        "latestRelease": {
+          "title": "Oui Non Gate",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/oui-non-gate/jpbj0d5lu0r8b",
+          "releaseDate": "2024-03-29"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=G%C3%A5te"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+G%C3%A5te"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

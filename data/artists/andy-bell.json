@@ -1,0 +1,72 @@
+[
+  {
+    "id": "andybell",
+    "name": "Andy Bell",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038308293_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://andybell.bandcamp.com",
+        "allReleaseTitles": [
+          "pinballwanderer",
+          "applegreenufo",
+          "iminloveandybellfeatdotallisonandmichaelrother",
+          "hallogalloandybellmasal",
+          "tidallovenumbersandybellmasal",
+          "murmurationofwarmdappledlightonherbackafterswimmingeditandybellmasal",
+          "tidalloveconversationinthatfamiliargoldenorchardeditandybellmasal",
+          "strangeloopsouterpsych",
+          "untitledfilmstillsep",
+          "thegroundingprocessep",
+          "iamastrangeloopep",
+          "lifeline",
+          "worldofecho",
+          "flicker",
+          "somethinglikelove",
+          "allonyouep"
+        ],
+        "latestRelease": {
+          "title": "pinball wanderer",
+          "type": "album",
+          "url": "https://andybell.bandcamp.com/album/pinball-wanderer",
+          "imageUrl": "https://f4.bcbits.com/img/a2824300450_2.jpg",
+          "releaseDate": "February 28, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Andy%20Bell"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Andy%20Bell"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.andybell.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/40576"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://instagram.com/officialandybell"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@officialandybell"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/officialandybell"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

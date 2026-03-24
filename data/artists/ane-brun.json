@@ -1,0 +1,80 @@
+[
+  {
+    "id": "anebrun",
+    "name": "Ane Brun",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038798455_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://anebrun.bandcamp.com",
+        "allReleaseTitles": [
+          "benjaminfromthetvseriesetterbenjamin",
+          "emiliessongfromthetvseriestordyvelnflygeriskymningen",
+          "twointhisstory",
+          "sonnet138whenmyloveswearsthatheismadeoftruth",
+          "20thanniversarytour",
+          "balloonrangeranthem",
+          "handinthefirebodyoceanremix",
+          "handinthefirekillenmanjaroremix",
+          "handinthefire",
+          "songs20132023",
+          "rarities2",
+          "honey",
+          "portrayals",
+          "nrmere",
+          "nrmere",
+          "vimttesiensoloppgang"
+        ],
+        "latestRelease": {
+          "title": "Benjamin (From the TV series 'Etter Benjamin')",
+          "type": "track",
+          "url": "https://anebrun.bandcamp.com/track/benjamin-from-the-tv-series-etter-benjamin",
+          "imageUrl": "https://f4.bcbits.com/img/a3987319732_2.jpg",
+          "releaseDate": "September 24, 2025"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Ane%20Brun"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Ane%20Brun"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://anebrun.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/287135"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Ane%20Brun&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Ane%20Brun"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/anebrun/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UChihnFNbUit9rhVXCNeTsrQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/anebrunofficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

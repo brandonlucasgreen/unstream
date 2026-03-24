@@ -1,0 +1,103 @@
+[
+  {
+    "id": "lucydacus",
+    "name": "Lucy Dacus",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0038370646_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://lucydacus.bandcamp.com",
+        "allReleaseTitles": [
+          "foreverisafeelingthearchives",
+          "busbacktorichmondmorethanfriends",
+          "foreverisafeeling",
+          "homeagainitstoolate",
+          "kissinglessons",
+          "thumbsagain",
+          "homevideo",
+          "homevideo24bit",
+          "thumbs",
+          "foolsgold",
+          "foreverhalfmast",
+          "mymotheri",
+          "lavieenrose",
+          "historian",
+          "lucydacusaudiotreelive",
+          "noburden",
+          "idontwannabefunnyanymore"
+        ],
+        "latestRelease": {
+          "title": "Forever Is A Feeling: The Archives",
+          "type": "album",
+          "url": "https://lucydacus.bandcamp.com/album/forever-is-a-feeling-the-archives",
+          "imageUrl": "https://f4.bcbits.com/img/a3859655693_2.jpg",
+          "releaseDate": "October 10, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/lucy-dacus/2733695",
+        "allReleaseTitles": [
+          "foreverisafeeling",
+          "homevideo",
+          "foreverisafeelingthearchives",
+          "busbacktorichmondmorethanfriends",
+          "2019",
+          "kissinglessons",
+          "intheairtonight",
+          "isabellahamiltonleithauser",
+          "dancinginthedark",
+          "homeagainitstoolate",
+          "lastchristmas",
+          "lavieenrose",
+          "hotheavy",
+          "thumbsagain",
+          "foolsgold",
+          "mymotheri",
+          "thumbs",
+          "foreverhalfmast",
+          "vbs",
+          "brando"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Lucy%20Dacus"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Lucy%20Dacus"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.lucydac.us/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/4902515"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/lucydacus/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@lucydacus"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC30azBKZICH0yBDZhOtyDlg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/lucy.dacus"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

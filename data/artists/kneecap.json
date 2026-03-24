@@ -1,0 +1,106 @@
+[
+  {
+    "id": "kneecap",
+    "name": "KNEECAP",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0042462056_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kneecap.bandcamp.com",
+        "allReleaseTitles": [
+          "fenian",
+          "smugglersscholars",
+          "nocomment",
+          "liarstale",
+          "sayonararemixes",
+          "kneecapsaynonaratherecap",
+          "sayonara",
+          "therecapftmozey",
+          "hood2025",
+          "fineartremixes",
+          "kneecaporiginalsoundtrack",
+          "fineart",
+          "betterwaytoliveftgrianchattenremixes",
+          "lovemakingftnino",
+          "fineart",
+          "sickinthehead"
+        ],
+        "latestRelease": {
+          "title": "FENIAN",
+          "type": "album",
+          "url": "https://kneecap.bandcamp.com/album/fenian",
+          "imageUrl": "https://f4.bcbits.com/img/a3516992685_2.jpg"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/kneecap/11472368",
+        "allReleaseTitles": [
+          "fineart",
+          "guiltyconscience",
+          "hood",
+          "getyourbritsout",
+          "hood2025",
+          "mam",
+          "itsbeenages",
+          "thartagusthart",
+          "nocomment",
+          "feniancunts",
+          "gaelgigolos",
+          "cearta",
+          "3cag",
+          "sayonarapaulhartnoll",
+          "sickinthehead",
+          "liarstale",
+          "betterwaytolive",
+          "fenian",
+          "smugglersscholars"
+        ],
+        "latestRelease": {
+          "title": "Hood 2025 Kneecap",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/hood-2025-kneecap/hz46gxzsqa5aa",
+          "releaseDate": "2025-01-27"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=KNEECAP"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+KNEECAP"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.kneecap.ie/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/13892566"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kneecap32/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@kneecapceol"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCR8_tdf_kr2tn01dFmRK6wQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/KNEECAP32"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

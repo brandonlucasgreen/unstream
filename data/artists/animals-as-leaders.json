@@ -1,0 +1,64 @@
+[
+  {
+    "id": "animalsasleaders",
+    "name": "Animals As Leaders",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0008151297_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://animalsasleaders.bandcamp.com",
+        "allReleaseTitles": [
+          "animalsasleadersanimalsasleadersencoreedition",
+          "weightless",
+          "waveofbabiesdigitalsingle",
+          "animalsasleaders"
+        ],
+        "latestRelease": {
+          "title": "Animals As Leaders - \"Animals As Leaders: Encore Edition\"",
+          "type": "album",
+          "url": "https://animalsasleaders.bandcamp.com/album/animals-as-leaders-animals-as-leaders-encore-edition",
+          "imageUrl": "https://f4.bcbits.com/img/a2631367201_16.jpg",
+          "releaseDate": "July 10, 2015"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Animals%20As%20Leaders"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Animals%20As%20Leaders"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://animalsasleaders.org/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1439605"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/animalsasleaders/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@animalsasleaders"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/@animalsasleaders"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/animalsasleaders"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

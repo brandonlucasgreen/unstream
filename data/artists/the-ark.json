@@ -1,0 +1,38 @@
+[
+  {
+    "id": "theark",
+    "name": "the-ark",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0030704585_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://the-ark.bandcamp.com",
+        "allReleaseTitles": [
+          "babylove",
+          "bang"
+        ],
+        "latestRelease": {
+          "title": "babylove",
+          "type": "track",
+          "url": "https://the-ark.bandcamp.com/track/babylove",
+          "imageUrl": "https://f4.bcbits.com/img/a2717624336_16.jpg",
+          "releaseDate": "December 22, 2022"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=the-ark"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+the-ark"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

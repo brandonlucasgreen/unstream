@@ -1,0 +1,72 @@
+[
+  {
+    "id": "chickenfoot",
+    "name": "Chickenfoot",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019596470_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://chickenfoot.bandcamp.com",
+        "allReleaseTitles": [
+          "bestlive",
+          "chickenfootdeluxeedition",
+          "chickenfootiii"
+        ],
+        "latestRelease": {
+          "title": "Best + Live",
+          "type": "album",
+          "url": "https://chickenfoot.bandcamp.com/album/best-live",
+          "imageUrl": "https://f4.bcbits.com/img/a2727188174_2.jpg",
+          "releaseDate": "March 10, 2017"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/chickenfoot/901057",
+        "allReleaseTitles": [
+          "bestlive",
+          "",
+          "iii",
+          "deluxeedition",
+          "differentdevil",
+          "bigfoot",
+          "divinetermination"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Chickenfoot"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Chickenfoot"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.chickenfoot.us/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1466360"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/chickenfoot/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/iChickenfoot"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/chickenfoot"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

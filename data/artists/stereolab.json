@@ -1,0 +1,108 @@
+[
+  {
+    "id": "stereolab",
+    "name": "Stereolab",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0014068201_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://stereolab.bandcamp.com",
+        "allReleaseTitles": [
+          "cloudlandflashesintheafternoon",
+          "fedupwithyourjobconstantanduniformmovementunknown",
+          "instanthologramsonmetalfilm",
+          "margerineeclipse",
+          "sounddust",
+          "cobraandphasesgroupplayvoltageinthemilkynight",
+          "dotsandloops",
+          "emperortomatoketchup",
+          "marsaudiacquintet",
+          "transientrandomnoiseburstswithannouncements",
+          "switchedonvolumes15",
+          "littlepiecesofstereolabaswitchedonsampler",
+          "pulseoftheearlybrainswitchedonvolume5",
+          "electricallypossessedswitchedonvolume4",
+          "aluminumtunesswitchedonvolume3",
+          "refriedectoplasmswitchedonvolume2"
+        ],
+        "latestRelease": {
+          "title": "Cloud Land / Flashes In The Afternoon",
+          "type": "album",
+          "url": "https://stereolab.bandcamp.com/album/cloud-land-flashes-in-the-afternoon",
+          "imageUrl": "https://f4.bcbits.com/img/a1998169782_2.jpg",
+          "releaseDate": "February 13, 2026"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/stereolab/322106",
+        "allReleaseTitles": [
+          "instanthologramsonmetalfilm",
+          "fedupwithyourjobconstantanduniformmovementunknown",
+          "cloudlandflashesintheafternoon",
+          "emperortomatoketchup",
+          "electricallypossessedswitchedonvolume4",
+          "thegroopplayedspaceagebatchelorpadmusic",
+          "peng",
+          "aerialtroubles",
+          "pulseoftheearlybrainswitchedonvolume5",
+          "lowfi",
+          "notmusic",
+          "melodieisawound",
+          "dotsandloops",
+          "dimensionm2",
+          "marsaudiacquintet",
+          "householdnames",
+          "refriedectoplasmswitchedonvolume2",
+          "thesuperit"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Stereolab"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Stereolab"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://stereolab.co.uk/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/388"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Stereolab&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Stereolab"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/stereolabgroop/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCOzAX95rI-jq25jYza_rLPA"
+      },
+      {
+        "sourceId": "bluesky",
+        "url": "https://bsky.app/profile/stereolabgroop.bsky.social"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/stereolabgroop"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

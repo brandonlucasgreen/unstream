@@ -1,0 +1,75 @@
+[
+  {
+    "id": "charlieclouser",
+    "name": "Charlie Clouser",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0013200474_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://charlieclouser.bandcamp.com",
+        "allReleaseTitles": [
+          "sawxoriginalmotionpicturesoundtrack",
+          "spiraloriginalmotionpicturescore",
+          "sawanthologyvol1musicfromthemotionpictures",
+          "sawanthologyvol2musicfromthemotionpictures",
+          "jigsaworiginalmotionpicturesoundtrack"
+        ],
+        "latestRelease": {
+          "title": "Saw X (Original Motion Picture Soundtrack)",
+          "type": "album",
+          "url": "https://charlieclouser.bandcamp.com/album/saw-x-original-motion-picture-soundtrack",
+          "imageUrl": "https://f4.bcbits.com/img/a3244627022_2.jpg",
+          "releaseDate": "September 29, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/charlie-clouser/458675",
+        "allReleaseTitles": [
+          "sawxoriginalmotionpicturesoundtrack",
+          "spiraloriginalmotionpicturescore",
+          "residentevilextinctionoriginalmotionpicturescore",
+          "sawanthologyvol1originalmotionpicturescore",
+          "americanhorrorstorythemecesardavilairizarry",
+          "deadsilenceoriginalmotionpicturesoundtrack",
+          "sawanthologyvol2originalmotionpicturescore",
+          "jigsaworiginalmotionpicturesoundtrack",
+          "meetgabrielafromsawx",
+          "bloodboardeditfromsawx",
+          "waywardpinesoriginaltelevisionsoundtrack",
+          "childhoodsenddeluxeeditionoriginalminiseriessoundtrack"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Charlie%20Clouser"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Charlie%20Clouser"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/27509"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/charlieclousermusic/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCjp7ZE-VQquuS5fvivyOaFQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/100000554022287"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

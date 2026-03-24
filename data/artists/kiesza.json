@@ -1,0 +1,70 @@
+[
+  {
+    "id": "kiesza",
+    "name": "Kiesza",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019857004_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://kiesza-music.bandcamp.com",
+        "allReleaseTitles": [
+          "allofthefeelingsracebanyonremix",
+          "sensuumdefectui",
+          "crave",
+          "storm",
+          "yourethebesttheremixes",
+          "yourethebest",
+          "sweetlovefeatroyaleavenue",
+          "sweetlove",
+          "kieszagiveittothemomentcassianremix",
+          "kieszafeatdjembadjembagiveittothemoment"
+        ],
+        "latestRelease": {
+          "title": "All Of The Feelings (Race Banyon Remix)",
+          "type": "track",
+          "url": "https://kiesza-music.bandcamp.com/track/all-of-the-feelings-race-banyon-remix",
+          "imageUrl": "https://f4.bcbits.com/img/a3656044989_2.jpg",
+          "releaseDate": "November 5, 2021"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Kiesza"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Kiesza"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.kiesza.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/3744149"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/kiesza/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@kiesza"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC-h7O5eERbl6lLuOgYJ0GbQ"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Kiesza"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

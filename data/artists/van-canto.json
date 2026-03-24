@@ -1,0 +1,84 @@
+[
+  {
+    "id": "vancanto",
+    "name": "Van Canto",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0012340924_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://vancanto.bandcamp.com",
+        "allReleaseTitles": [
+          "tothepowerofeight",
+          "trustinrustdeluxeversion",
+          "trustinrust",
+          "dawnofthebrave",
+          "dawnofthebravedeluxeedition",
+          "breakthesilence",
+          "breakthesilencebonusversion",
+          "astormtocome",
+          "hero",
+          "tribeofforce"
+        ],
+        "latestRelease": {
+          "title": "To The Power Of Eight",
+          "type": "album",
+          "url": "https://vancanto.bandcamp.com/album/to-the-power-of-eight",
+          "imageUrl": "https://f4.bcbits.com/img/a1586018984_2.jpg",
+          "releaseDate": "June 4, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/van-canto/1067625",
+        "allReleaseTitles": [
+          "tothepowerofeight",
+          "digdownangusmcsix",
+          "hero",
+          "tribeofforce",
+          "astormtocome",
+          "breakthesilence",
+          "dawnofthebravedeluxeedition",
+          "trustinrustdeluxeversion",
+          "dawnofthebrave",
+          "trustinrust"
+        ],
+        "latestRelease": {
+          "title": "Dig Down Angus Mcsix Van Canto",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/dig-down-angus-mcsix-van-canto/r1meqa559n43e",
+          "releaseDate": "2026-01-28"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Van%20Canto"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Van%20Canto"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://vancanto.de/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/1281538"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/vancanto"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/vancantoband"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

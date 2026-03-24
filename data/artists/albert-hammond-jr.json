@@ -1,0 +1,87 @@
+[
+  {
+    "id": "alberthammondjr",
+    "name": "Albert Hammond Jr.",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0012816422_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://alberthammondjr.bandcamp.com",
+        "allReleaseTitles": [
+          "moretolife",
+          "fasttimes",
+          "francistrouble"
+        ],
+        "latestRelease": {
+          "title": "More To Life",
+          "type": "track",
+          "url": "https://alberthammondjr.bandcamp.com/track/more-to-life",
+          "imageUrl": "https://f4.bcbits.com/img/a1064867988_2.jpg",
+          "releaseDate": "May 30, 2019"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/albert-hammond-jr/366573",
+        "allReleaseTitles": [
+          "idontwannatalkijustwannadanceglassanimals",
+          "etchings",
+          "momentarymasters",
+          "francistrouble",
+          "comotellama",
+          "ahj",
+          "fasttimes",
+          "moretolife",
+          "losingtouch",
+          "thirteen",
+          "gfc",
+          "bornslippy"
+        ],
+        "latestRelease": {
+          "title": "I Dont Wanna Talk I Just Wanna Dance Albert Hammond Jr Glass Animals",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/i-dont-wanna-talk-i-just-wanna-dance-albert-hammond-jr-glass-animals/kfzikh27pdmvb",
+          "releaseDate": "2021-09-10"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Albert%20Hammond%20Jr."
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Albert%20Hammond%20Jr."
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://alberthammondjr.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/430104"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/alberthammondjr/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@alberthammondjr"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/alberthammondjr"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/AHJofficial/"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

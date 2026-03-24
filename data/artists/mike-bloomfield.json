@@ -1,0 +1,55 @@
+[
+  {
+    "id": "mikebloomfield-bandcamp-mikebloomfieldlive",
+    "name": "Mike Bloomfield",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0025800987_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://mikebloomfieldlive.bandcamp.com",
+        "allReleaseTitles": [
+          "lateatnightmccabesjanuary11977",
+          "sanfrancisconightsliveattheoldwaldorfapril181977",
+          "liveatmccabesguitarworkshopjanuary11977"
+        ],
+        "latestRelease": {
+          "title": "Late At Night: McCabe's January 1, 1977",
+          "type": "album",
+          "url": "https://mikebloomfieldlive.bandcamp.com/album/late-at-night-mccabes-january-1-1977",
+          "imageUrl": "https://f4.bcbits.com/img/a3587728075_2.jpg",
+          "releaseDate": "November 9, 2018"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Mike%20Bloomfield"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Mike%20Bloomfield"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://mikebloomfield.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/258121"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Mike%20Bloomfield&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Mike%20Bloomfield"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

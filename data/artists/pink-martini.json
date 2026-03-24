@@ -1,0 +1,119 @@
+[
+  {
+    "id": "pinkmartini",
+    "name": "Pink Martini",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0039407875_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://pinkmartini.bandcamp.com",
+        "allReleaseTitles": [
+          "bellaciaoep",
+          "theroadchinaforbes",
+          "thelemonadesong",
+          "letsbefriends",
+          "amadomiointhai",
+          "besamemuchoednavazquezwithpinkmartini",
+          "tomorrowjimmieherrodwithpinkmartini",
+          "hotelamourmeowmeowthomaslauderdaleandpinkmartini",
+          "nonouaisthefrenchsongsofpinkmartini",
+          "iamwoman",
+          "sympathique20thanniversaryedition",
+          "loveforsalekathleensaadatwiththomaslauderdaleandpinkmartini",
+          "thebutterflysongjapaneseversion",
+          "jedisoui",
+          "dreamalittledreampinkmartinithevontrapps",
+          "gethappy"
+        ],
+        "latestRelease": {
+          "title": "Bella ciao EP",
+          "type": "album",
+          "url": "https://pinkmartini.bandcamp.com/album/bella-ciao-ep",
+          "imageUrl": "https://f4.bcbits.com/img/a0610352172_2.jpg",
+          "releaseDate": "May 14, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/pink-martini/28492",
+        "allReleaseTitles": [
+          "bellaciao",
+          "jedisoui",
+          "sympathique20thanniversaryedition",
+          "thelemonadesong",
+          "sympathique",
+          "hangonlittletomato",
+          "bolero",
+          "joligarcon",
+          "letsbefriends",
+          "amadomio",
+          "exodus",
+          "iamwoman",
+          "thebutterflysongjapaneseversion",
+          "splendorinthegrass",
+          "heyeugene",
+          "aretrospective",
+          "1969",
+          "besamemuchoednavazquez",
+          "nonouais"
+        ],
+        "latestRelease": {
+          "title": "Bella Ciao Pink Martini",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/bella-ciao-pink-martini/ogr0y3uilumsa",
+          "releaseDate": "2025-05-14"
+        }
+      },
+      {
+        "sourceId": "patreon",
+        "url": "https://www.patreon.com/pinkmartini"
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Pink%20Martini"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Pink%20Martini"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://pinkmartini.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/27852"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Pink%20Martini&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Pink%20Martini"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/pinkmartini/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@pinkmartiniofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UC674a0Y6Rc7D59gUotdUzYg"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pinkmartini"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

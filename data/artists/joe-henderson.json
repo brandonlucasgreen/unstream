@@ -1,0 +1,57 @@
+[
+  {
+    "id": "joehenderson",
+    "name": "Joe Henderson",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022112780_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://joehenderson.bandcamp.com",
+        "latestRelease": {
+          "title": "Multiple (Remastered 2025)",
+          "type": "album",
+          "url": "https://joehenderson.bandcamp.com/album/multiple-remastered-2025",
+          "imageUrl": "https://f4.bcbits.com/img/a1573783831_2.jpg",
+          "releaseDate": "March 7, 2025"
+        },
+        "allReleaseTitles": [
+          "multipleremastered2025",
+          "theelements",
+          "powertothepeopleremastered2024",
+          "ifwecouldstartalloveragainsinglesrarities",
+          "snapyourfingers"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Joe%20Henderson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Joe%20Henderson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.joehendersonsax.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/10079"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Joe%20Henderson&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Joe%20Henderson"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

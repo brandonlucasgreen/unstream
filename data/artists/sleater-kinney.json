@@ -1,0 +1,118 @@
+[
+  {
+    "id": "sleaterkinney",
+    "name": "Sleater-Kinney",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0034811376_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://sleaterkinney.bandcamp.com",
+        "allReleaseTitles": [
+          "littleropedeluxe",
+          "heretoday",
+          "crusaderspecialinterestremix",
+          "frayedropesessions",
+          "littlerope",
+          "pathofwellness",
+          "liveinparis",
+          "nocitiestolove",
+          "thewoods",
+          "onebeatremastered",
+          "allhandsonthebadoneremastered",
+          "thehotrockremastered",
+          "digmeoutremastered",
+          "callthedoctorremastered",
+          "sleaterkinneyremastered"
+        ],
+        "latestRelease": {
+          "title": "Little Rope (Deluxe)",
+          "type": "album",
+          "url": "https://sleaterkinney.bandcamp.com/album/little-rope-deluxe",
+          "imageUrl": "https://f4.bcbits.com/img/a0907308497_2.jpg",
+          "releaseDate": "November 1, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/sleater-kinney/344866",
+        "allReleaseTitles": [
+          "thewoods",
+          "digmeoutremastered",
+          "nocitiestolove",
+          "onebeatremastered",
+          "thecenterwonthold",
+          "littlerope",
+          "callthedoctorremastered",
+          "thehotrockremastered",
+          "allhandsonthebadoneremastered",
+          "remastered",
+          "digmeinadigmeoutcoversalbum",
+          "wordsandguitarandcourtneybarnett",
+          "liveinparis",
+          "turnitonandmargoprice",
+          "hurryonhome",
+          "frayedropesessions",
+          "thistime",
+          "entertain",
+          "heretoday"
+        ],
+        "latestRelease": {
+          "title": "No Cities To Love Sleater Kinney",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/no-cities-to-love-sleater-kinney/0098787110081",
+          "releaseDate": "2015-01-19"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Sleater-Kinney"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Sleater-Kinney"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.sleater-kinney.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/218269"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Sleater-Kinney&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Sleater-Kinney"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/sleater_kinney/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@sleater.kinney"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCBwIM0Lj7XkhOfZhBJ5qb2g"
+      },
+      {
+        "sourceId": "threads",
+        "url": "https://www.threads.net/@sleater_kinney"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/SleaterKinney"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

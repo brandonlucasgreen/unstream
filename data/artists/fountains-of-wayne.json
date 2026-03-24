@@ -1,0 +1,84 @@
+[
+  {
+    "id": "fountainsofwayne",
+    "name": "Fountains of Wayne",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0011979449_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://fountainsofwayne.bandcamp.com",
+        "allReleaseTitles": [
+          "outofstateplates",
+          "welcomeinterstatemanagers",
+          "skyfullofholes"
+        ],
+        "latestRelease": {
+          "title": "Out-of-State Plates",
+          "type": "album",
+          "url": "https://fountainsofwayne.bandcamp.com/album/out-of-state-plates",
+          "imageUrl": "https://f4.bcbits.com/img/a0693122109_2.jpg",
+          "releaseDate": "January 13, 2023"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/fountains-of-wayne/68357",
+        "allReleaseTitles": [
+          "welcomeinterstatemanagers",
+          "trafficandweather",
+          "outofstateplates",
+          "",
+          "skyfullofholes",
+          "utopiaparkway",
+          "skyfullofholesamazonmp3exclusivebonustrackversion",
+          "maureen",
+          "talks"
+        ],
+        "latestRelease": {
+          "title": "Sky Full Of Holes Fountains Of Wayne",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/sky-full-of-holes-fountains-of-wayne/oxxlviqwvhb1b",
+          "releaseDate": "2011-08-01"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Fountains%20of%20Wayne"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Fountains%20of%20Wayne"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://www.lojinx.com/artists/fountains-of-wayne"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/265618"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Fountains%20of%20Wayne&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Fountains%20of%20Wayne"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/fowdotcom"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/fountainsofwayne"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

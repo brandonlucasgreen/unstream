@@ -1,0 +1,92 @@
+[
+  {
+    "id": "molchatdoma",
+    "name": "Molchat Doma",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0036284521_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://domamolchat.bandcamp.com",
+        "allReleaseTitles": [
+          "belayapolosaremixes",
+          "liveatpanoramahotel",
+          "belayapolosa",
+          "monument",
+          "etazhi2018",
+          "skrishnashihdomovalbum2017",
+          "zvezdysingle2019",
+          "kommersantysingle2017"
+        ],
+        "latestRelease": {
+          "title": "Belaya Polosa Remixes",
+          "type": "album",
+          "url": "https://domamolchat.bandcamp.com/album/belaya-polosa-remixes",
+          "imageUrl": "https://f4.bcbits.com/img/a1059118768_2.jpg",
+          "releaseDate": "August 22, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/molchat-doma/6398023",
+        "allReleaseTitles": [
+          "",
+          "monument",
+          "son",
+          "belayapolosaremixes",
+          "liveatpanoramahotel",
+          "heavenandhell",
+          "tyzheneznaeshktoya",
+          "belayapolosa",
+          "belayapolosa",
+          "nesmeshno",
+          "discoteque",
+          "otvetanet",
+          "yatakustal",
+          "",
+          "ploho",
+          "son",
+          "tyzheneznaesh",
+          "nevdvoem"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Molchat%20Doma"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Molchat%20Doma"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "https://molchatdoma.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/6271575"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/molchatdomaband/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@molchatdomaband"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCK7awvr80upziSM47-h0Odw"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "http://www.facebook.com/molchatdomaband"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

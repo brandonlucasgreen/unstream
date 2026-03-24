@@ -1,0 +1,94 @@
+[
+  {
+    "id": "808state",
+    "name": "808 State",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0041414913_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://state808.bandcamp.com",
+        "allReleaseTitles": [
+          "statetostate1",
+          "statetostate2",
+          "statetostate3",
+          "outposttransmission",
+          "transmissionsuite",
+          "wherewyesevern"
+        ],
+        "latestRelease": {
+          "title": "State to State 1",
+          "type": "album",
+          "url": "https://state808.bandcamp.com/album/state-to-state-1",
+          "imageUrl": "https://f4.bcbits.com/img/a3675983733_2.jpg",
+          "releaseDate": "September 24, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/808-state/551530",
+        "allReleaseTitles": [
+          "statetostate1",
+          "exel",
+          "pacific",
+          "ninety",
+          "utdstate90",
+          "8088898",
+          "soundandvisionremixepdavidbowievs",
+          "momentsinlovetheartofnoise",
+          "esptheeffect",
+          "gorgeous",
+          "oneintenub40",
+          "cubikolympic",
+          "tunessplitstheatommctunes",
+          "donsolaris",
+          "transmissionsuite",
+          "808archives",
+          "thenorthatitsheightsmctunes",
+          "forecast"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=808%20State"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+808%20State"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.808state.com/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/318"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=808%20State&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/808%20State"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/808stateofficial/"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "http://www.youtube.com/user/808StateOfficial"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/808StateOfficial"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

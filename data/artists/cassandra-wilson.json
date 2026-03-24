@@ -1,0 +1,67 @@
+[
+  {
+    "id": "cassandrawilson",
+    "name": "Cassandra Wilson",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0000933282_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://cassandrawilson.bandcamp.com",
+        "allReleaseTitles": [
+          "jinglebells",
+          "littledrummerboy",
+          "riseupshepherdandfollow"
+        ],
+        "latestRelease": {
+          "title": "Jingle Bells",
+          "type": "track",
+          "url": "https://cassandrawilson.bandcamp.com/track/jingle-bells",
+          "imageUrl": "https://f4.bcbits.com/img/a4054509392_2.jpg",
+          "releaseDate": "December 25, 2012"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Cassandra%20Wilson"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Cassandra%20Wilson"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.bluenote.com/ArtistMain.aspx?ArtistId=907277"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/44120"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Cassandra%20Wilson&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Cassandra%20Wilson"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/user/cassandrawilson"
+      },
+      {
+        "sourceId": "peertube",
+        "url": "https://tube.tchncs.de/video-channels/cassandra"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/pages/Cassandra-Wilson/361569243871752"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

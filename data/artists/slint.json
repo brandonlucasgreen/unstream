@@ -1,0 +1,86 @@
+[
+  {
+    "id": "slint",
+    "name": "Slint",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0019881381_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://slint.bandcamp.com",
+        "allReleaseTitles": [
+          "tweezremastered",
+          "tweeztweethanmix",
+          "hippiechicktweethanmix",
+          "breadcrumbtrailgoodmorningcaptain",
+          "spiderlandremastered",
+          "slint",
+          "spiderland",
+          "tweez"
+        ],
+        "latestRelease": {
+          "title": "Tweez (Remastered)",
+          "type": "album",
+          "url": "https://slint.bandcamp.com/album/tweez-remastered",
+          "imageUrl": "https://f4.bcbits.com/img/a1131063184_2.jpg",
+          "releaseDate": "October 25, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/slint/2435607",
+        "allReleaseTitles": [
+          "spiderlandremastered",
+          "tweez",
+          "spiderland",
+          "",
+          "breadcrumbtrailgoodmorningcaptain",
+          "hippiechick"
+        ],
+        "latestRelease": {
+          "title": "Tweez Slint",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/tweez-slint/jbwl6t39o6vka",
+          "releaseDate": "2024-10-25"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Slint"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Slint"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.slint.us/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/56206"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Slint&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Slint"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://instagram.com/slintmusic?igshid=YmMyMTA2M2Y="
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/Slint"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

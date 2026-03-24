@@ -1,0 +1,89 @@
+[
+  {
+    "id": "bronskibeat",
+    "name": "Bronski Beat",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0028579368_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://bronskibeat.bandcamp.com",
+        "allReleaseTitles": [
+          "forbiddenfruittheageofconsentremixed",
+          "smalltownboydaveaudevstallpaulremix",
+          "theageofconsent40thanniversaryedition",
+          "smalltownboybronskibeattheknocksperfumegenius",
+          "whysuperchumbomixbronskibeatneiltennant",
+          "smalltownboyplanningtorocksthelovethatyouneedrework",
+          "smalltownboyabsoluterework",
+          "theageofconsentremasteredexpanded",
+          "truthdaredoubledare",
+          "hundredsandthousands"
+        ],
+        "latestRelease": {
+          "title": "Forbidden Fruit - The Age of Consent Remixed",
+          "type": "album",
+          "url": "https://bronskibeat.bandcamp.com/album/forbidden-fruit-the-age-of-consent-remixed-1",
+          "imageUrl": "https://f4.bcbits.com/img/a1859244656_2.jpg",
+          "releaseDate": "July 11, 2025"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/bronski-beat/409561",
+        "allReleaseTitles": [
+          "theverybestofjimmysomervillethecommunardsjimmysomervillethecommunards",
+          "forbiddenfruittheageofconsentremixed",
+          "smalltownboy",
+          "theageofconsent",
+          "ifeellovemarcalmond",
+          "smalltownboyfeatperfumegeniustheknocks",
+          "truthdaredoubledare",
+          "hundredsandthousands",
+          "iluvthenightlife"
+        ]
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Bronski%20Beat"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Bronski%20Beat"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/11419"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Bronski%20Beat&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Bronski%20Beat"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/bronskibeatofficial/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@bronskibeatofficial"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UChd-WHoVlFDJdnZslKjIqwA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/bronskibeatband"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

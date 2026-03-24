@@ -1,0 +1,93 @@
+[
+  {
+    "id": "thepostalservice",
+    "name": "The Postal Service",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0022384947_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://thepostalservice.bandcamp.com",
+        "allReleaseTitles": [
+          "thedistrictsleepsalonetonightsylvanessoremixthepostalserviceandsylvanesso",
+          "everythingwillchange",
+          "giveupdeluxe10thanniversaryedition",
+          "giveup"
+        ],
+        "latestRelease": {
+          "title": "The District Sleeps Alone Tonight (Sylvan Esso Remix)\n                \n                \n\n                The Postal Service and Sylvan Esso",
+          "type": "track",
+          "url": "https://thepostalservice.bandcamp.com/track/the-district-sleeps-alone-tonight-sylvan-esso-remix",
+          "imageUrl": "https://f4.bcbits.com/img/a3517172140_16.jpg",
+          "releaseDate": "August 22, 2024"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/the-postal-service/492528",
+        "allReleaseTitles": [
+          "giveupdeluxe10thanniversaryedition",
+          "thedistrictsleepsalonetonightsylvanessoremixsylvanesso",
+          "everythingwillchange",
+          "thedistrictsleepsalonetonightnaturalanthem",
+          "suchgreatheights",
+          "giveup",
+          "againstallodds",
+          "thedistrictsleepsalonetonight",
+          "wewillbecomesilhouettes"
+        ],
+        "latestRelease": {
+          "title": "Everything Will Change The Postal Service",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/everything-will-change-the-postal-service/ixlpf1mg26c2a",
+          "releaseDate": "2020-12-04"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=The%20Postal%20Service"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+The%20Postal%20Service"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://postalservicemusic.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/92936"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=The%20Postal%20Service&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/The%20Postal%20Service"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/postalservicemusic/"
+      },
+      {
+        "sourceId": "tiktok",
+        "url": "https://www.tiktok.com/@postalservicemusic"
+      },
+      {
+        "sourceId": "youtube",
+        "url": "https://www.youtube.com/channel/UCMDkrt0YyyYkM_FHV25HGgA"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/thepostalservice"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]

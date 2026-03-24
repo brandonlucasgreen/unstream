@@ -1,0 +1,94 @@
+[
+  {
+    "id": "runningwild",
+    "name": "Running Wild",
+    "type": "artist",
+    "imageUrl": "https://f4.bcbits.com/img/0015411707_23.jpg",
+    "platforms": [
+      {
+        "sourceId": "bandcamp",
+        "url": "https://runningwild.bandcamp.com",
+        "allReleaseTitles": [
+          "bloodonblood",
+          "crossingtheblades",
+          "rapidforay"
+        ],
+        "latestRelease": {
+          "title": "Blood on Blood",
+          "type": "album",
+          "url": "https://runningwild.bandcamp.com/album/blood-on-blood",
+          "imageUrl": "https://f4.bcbits.com/img/a3207442560_2.jpg",
+          "releaseDate": "October 29, 2021"
+        }
+      },
+      {
+        "sourceId": "qobuz",
+        "url": "https://www.qobuz.com/us-en/interpreter/running-wild/212201",
+        "allReleaseTitles": [
+          "deathorglory",
+          "blackhandinn",
+          "masquerade",
+          "portroyal",
+          "shadowmaker",
+          "pileofskulls",
+          "bloodonblood",
+          "blazonstone",
+          "crossingtheblades",
+          "underjollyroger",
+          "gatestopurgatory",
+          "rapidforay",
+          "brandedandexiled",
+          "readyforboarding",
+          "ridingthestormtheverybestofthenoiseyears19831995",
+          "rideonthewildside",
+          "ridingthestorm",
+          "diamondspearls",
+          "theshellback"
+        ],
+        "latestRelease": {
+          "title": "Shadowmaker Running Wild",
+          "type": "album",
+          "url": "https://www.qobuz.com/us-en/album/shadowmaker-running-wild/w2mkrgror8s91",
+          "releaseDate": "2012-04-23"
+        }
+      },
+      {
+        "sourceId": "ampwall",
+        "url": "https://ampwall.com/explore?searchStyle=search&query=Running%20Wild"
+      },
+      {
+        "sourceId": "kofi",
+        "url": "https://duckduckgo.com/?q=site:ko-fi.com+Running%20Wild"
+      },
+      {
+        "sourceId": "buymeacoffee",
+        "url": "https://buymeacoffee.com/explore-creators"
+      },
+      {
+        "sourceId": "officialsite",
+        "url": "http://www.running-wild.net/"
+      },
+      {
+        "sourceId": "discogs",
+        "url": "https://www.discogs.com/artist/271521"
+      },
+      {
+        "sourceId": "hoopla",
+        "url": "https://www.hoopladigital.com/search?q=Running%20Wild&type=music"
+      },
+      {
+        "sourceId": "freegal",
+        "url": "https://www.freegalmusic.com/search-page/Running%20Wild"
+      },
+      {
+        "sourceId": "instagram",
+        "url": "https://www.instagram.com/runningwildmusic/"
+      },
+      {
+        "sourceId": "facebook",
+        "url": "https://www.facebook.com/runningwildmusic"
+      }
+    ],
+    "matchConfidence": "verified"
+  }
+]
