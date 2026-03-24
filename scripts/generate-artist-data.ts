@@ -13,13 +13,15 @@
  *   data/artists/{slug}.json      - Single matching SearchResult (as array) for each artist
  *   data/artists-manifest.json    - Index with metadata for all qualifying artists
  *
- * Usage: npx tsx scripts/generate-artist-data.ts [--limit N] [--force] [--local]
+ * Usage: npx tsx scripts/generate-artist-data.ts [--limit N] [--force] [--local] [--skip-validation]
  *
  * Options:
- *   --limit N   Only process the first N artists (for testing)
- *   --force     Re-fetch even if recent data exists
- *   --local     Use local dev server (localhost:5173) instead of production API
- *               Bypasses production rate limiting. Run `npm run dev` first.
+ *   --limit N           Only process the first N artists (for testing)
+ *   --force             Re-fetch even if recent data exists
+ *   --local             Use local dev server (localhost:5173) instead of production API
+ *                       Bypasses production rate limiting. Run `npm run dev` first.
+ *   --skip-validation   Skip MusicBrainz release cross-reference validation
+ *                       (faster runs, but won't catch name collisions)
  */
 
 import { readFileSync, writeFileSync, existsSync, statSync, mkdirSync } from 'fs';
@@ -40,6 +42,7 @@ const CONCURRENCY = useLocal ? 3 : 1; // Sequential against production to respec
 const MB_DELAY_MS = 1100; // MusicBrainz rate limit: 1 req/sec
 const API_DELAY_MS = useLocal ? 500 : 2500; // Delay between batches: generous for production (30 req/min)
 const MAX_RETRIES = 3;
+const skipValidation = process.argv.includes('--skip-validation');
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days - skip if data is newer
 
 // Artist must have a verified (non-search-only) link on at least one of these
@@ -318,6 +321,69 @@ function isNameMatch(resultName: string, artistName: string): boolean {
   return normalizeForComparison(resultName) === normalizeForComparison(artistName);
 }
 
+/**
+ * Normalize a release title for comparison: lowercase, strip non-alphanumeric.
+ */
+function normalizeTitle(title: string): string {
+  return title.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+/**
+ * Validate that a Bandcamp artist is the same person as the MusicBrainz artist
+ * by comparing release titles. Returns true if there's any overlap (or if
+ * validation can't be performed).
+ */
+async function validateArtistMatch(
+  artist: ArtistEntry,
+  bandcampTitles: string[]
+): Promise<{ valid: boolean; reason?: string }> {
+  if (skipValidation) return { valid: true };
+  if (!artist.musicbrainzId) return { valid: true };
+  if (bandcampTitles.length === 0) return { valid: true };
+
+  await sleep(MB_DELAY_MS);
+
+  try {
+    const url = `https://musicbrainz.org/ws/2/release-group?artist=${artist.musicbrainzId}&type=album|single|ep&limit=50&fmt=json`;
+    const response = await fetchWithRetry(url, `MB validate "${artist.name}"`);
+    const data = await response.json();
+    const releaseGroups = data['release-groups'] || [];
+
+    // If MB has very few releases, skip validation (too unreliable)
+    if (releaseGroups.length <= 2) return { valid: true };
+
+    const mbTitles = new Set(
+      releaseGroups.map((rg: { title: string }) => normalizeTitle(rg.title))
+    );
+    const bcTitles = new Set(
+      bandcampTitles.map(normalizeTitle)
+    );
+
+    // Remove self-titled entries (common for both real and impostor artists)
+    const artistNorm = normalizeTitle(artist.name);
+    mbTitles.delete(artistNorm);
+    bcTitles.delete(artistNorm);
+
+    // Check for any overlap
+    let overlap = 0;
+    for (const title of bcTitles) {
+      if (mbTitles.has(title)) overlap++;
+    }
+
+    if (overlap === 0) {
+      return {
+        valid: false,
+        reason: `no release overlap (MB: ${releaseGroups.length} releases, BC: ${bandcampTitles.length} releases)`,
+      };
+    }
+
+    return { valid: true };
+  } catch {
+    // If validation fails (network error, etc.), allow the artist through
+    return { valid: true };
+  }
+}
+
 async function processArtist(artist: ArtistEntry, force: boolean): Promise<ManifestEntry | null> {
   // Skip blocklisted artists (known false matches)
   if (BLOCKLIST_SLUGS.has(artist.slug)) return null;
@@ -374,6 +440,16 @@ async function processArtist(artist: ArtistEntry, force: boolean): Promise<Manif
     }
 
     const theArtist = qualifyingArtists[0];
+
+    // Validate: compare Bandcamp releases against MusicBrainz discography
+    // to detect name collisions (different artist on Bandcamp than expected)
+    const bandcamp = theArtist.platforms.find(p => p.sourceId === 'bandcamp');
+    const bcTitles = bandcamp?.allReleaseTitles || [];
+    const validation = await validateArtistMatch(artist, bcTitles);
+    if (!validation.valid) {
+      console.warn(`  ⚠ Skipping ${artist.name}: ${validation.reason}`);
+      return null;
+    }
 
     // Save only this single artist result (as an array for compatibility)
     writeFileSync(outputPath, JSON.stringify([theArtist], null, 2));
