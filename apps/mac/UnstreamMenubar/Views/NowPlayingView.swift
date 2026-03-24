@@ -3,6 +3,7 @@ import SwiftUI
 struct NowPlayingView: View {
     let nowPlaying: NowPlaying
     var artistImageUrl: String? = nil
+    var platforms: [PlatformResult] = []
 
     private var fallbackImage: some View {
         RoundedRectangle(cornerRadius: 6)
@@ -75,19 +76,59 @@ struct NowPlayingView: View {
                 }
 
                 Spacer()
+
+                // Share button (only shown when platforms are available)
+                if !platforms.isEmpty {
+                    Button(action: shareCard) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Share what you're listening to")
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
+
+    private func shareCard() {
+        let cardView = ShareCardView(
+            nowPlaying: nowPlaying,
+            artistImageUrl: artistImageUrl,
+            platforms: platforms
+        )
+
+        guard let image = cardView.renderAsImage() else { return }
+
+        // Copy to clipboard
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.writeObjects([image])
+
+        // Show share sheet
+        let picker = NSSharingServicePicker(items: [image])
+        if let window = NSApp.keyWindow,
+           let contentView = window.contentView {
+            let rect = NSRect(x: contentView.bounds.midX, y: contentView.bounds.maxY - 50, width: 1, height: 1)
+            picker.show(relativeTo: rect, of: contentView, preferredEdge: .minY)
+        }
+    }
 }
 
 #Preview {
-    NowPlayingView(nowPlaying: NowPlaying(
-        title: "Paranoid Android",
-        artist: "Radiohead",
-        album: "OK Computer",
-        artworkData: nil
-    ))
+    NowPlayingView(
+        nowPlaying: NowPlaying(
+            title: "Paranoid Android",
+            artist: "Radiohead",
+            album: "OK Computer",
+            artworkData: nil
+        ),
+        platforms: [
+            PlatformResult(sourceId: "bandcamp", url: "https://radiohead.bandcamp.com", latestRelease: nil),
+            PlatformResult(sourceId: "mirlo", url: nil, latestRelease: nil),
+        ]
+    )
     .padding()
     .frame(width: 300)
 }
