@@ -31,7 +31,6 @@
 		B579BD5D419381542635B599 /* GlobalHotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D91E01960825AB91EA7636B9 /* GlobalHotkeyManager.swift */; };
 		C0107F7F16CE5F7D50A0D8BA /* PlatformBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D9B657DD1234685545F8B9 /* PlatformBadge.swift */; };
 		C20B064551D442777F4AA214 /* SocialIconButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72CCEF9F491C5DB910B9770C /* SocialIconButton.swift */; };
-		CDA9FBE008D4EB1ACAE1EA86 /* ShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1FA9F291B6217B9BCD4335 /* ShareCardView.swift */; };
 		D147F2A8F1E057A077BF76DB /* SupportEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B4CFECA238C55B2AC991EC /* SupportEntry.swift */; };
 		D343A2907DF9CA58448F0AB8 /* BandcampFriday.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52D42FFCEB236CE82225CD45 /* BandcampFriday.swift */; };
 		DA0A97C9D04A1D74B50D683A /* SearchResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79AEF0735722A4FCDD838D05 /* SearchResponse.swift */; };
@@ -53,7 +52,6 @@
 		2B7398E6F98C9B402F83327A /* ReleaseCheckAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseCheckAPI.swift; sourceTree = "<group>"; };
 		2D47D9855363817A64069A63 /* MirloReleaseChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MirloReleaseChecker.swift; sourceTree = "<group>"; };
 		32DDDEA451820FFF8BD8CE18 /* BrandIcons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandIcons.swift; sourceTree = "<group>"; };
-		3A1FA9F291B6217B9BCD4335 /* ShareCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardView.swift; sourceTree = "<group>"; };
 		3F719095F38E73BF1F9414D3 /* ReleaseAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseAlert.swift; sourceTree = "<group>"; };
 		4E064093C0C4A1CE3ADB28E0 /* ReleaseAlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseAlertManager.swift; sourceTree = "<group>"; };
 		52D42FFCEB236CE82225CD45 /* BandcampFriday.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandcampFriday.swift; sourceTree = "<group>"; };
@@ -144,7 +142,6 @@
 				B3E0ED8CFD58286DB2B51054 /* ResultsView.swift */,
 				6ADFAA14BEF36F0DB159CE97 /* SearchBarView.swift */,
 				0F4B81ECB685A1B630D56318 /* SettingsView.swift */,
-				3A1FA9F291B6217B9BCD4335 /* ShareCardView.swift */,
 				0DF8BDEC9EAD2F3C23137159 /* ShortcutRecorderView.swift */,
 				72CCEF9F491C5DB910B9770C /* SocialIconButton.swift */,
 				76DCA7477F0CF8307B66DA71 /* SupportListView.swift */,
@@ -258,7 +255,6 @@
 				0AAD76FA8003714E0C30D5C5 /* SearchBarView.swift in Sources */,
 				DA0A97C9D04A1D74B50D683A /* SearchResponse.swift in Sources */,
 				066DC7F963C2900F4BDE29CD /* SettingsView.swift in Sources */,
-				CDA9FBE008D4EB1ACAE1EA86 /* ShareCardView.swift in Sources */,
 				E1C1D7D58C8E8DC98B9F40D6 /* ShortcutRecorderView.swift in Sources */,
 				C20B064551D442777F4AA214 /* SocialIconButton.swift in Sources */,
 				D147F2A8F1E057A077BF76DB /* SupportEntry.swift in Sources */,

@@ -81,6 +81,17 @@ struct ArtistResultView: View {
 
                 Spacer()
 
+                // Share card button
+                if !artist.verifiedPlatforms.isEmpty {
+                    Button(action: shareArtistCard) {
+                        Image(systemName: "square.and.arrow.up")
+                            .foregroundColor(.secondary)
+                            .font(.system(size: 13))
+                    }
+                    .buttonStyle(.plain)
+                    .help("Share this artist")
+                }
+
                 Button(action: { supportListManager.toggleArtist(artist) }) {
                     Image(systemName: isSaved ? "heart.fill" : "heart")
                         .foregroundColor(isSaved ? .red : .secondary)
@@ -204,6 +215,35 @@ struct ArtistResultView: View {
             return
         }
         NSWorkspace.shared.open(url)
+    }
+
+    private func shareArtistCard() {
+        let url: String
+        if let claimedSlug = artist.claimedSlug {
+            // Verified artist — use their claimed page
+            url = "https://unstream.stream/a/\(claimedSlug)"
+        } else if let encodedName = artist.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+            // Not verified — link to search so it always works
+            url = "https://unstream.stream/?q=\(encodedName)"
+        } else {
+            url = "https://unstream.stream"
+        }
+
+        var text = "Here's how you can support \(artist.name) directly: \(url)"
+
+        // Add now-playing context if this is the currently playing artist
+        if let nowPlaying = appState.nowPlaying,
+           nowPlaying.artist?.lowercased() == artist.name.lowercased(),
+           let title = nowPlaying.title {
+            text = "Listening to \"\(title)\" by \(artist.name) — here's how you can support them directly: \(url)"
+        }
+
+        let picker = NSSharingServicePicker(items: [text])
+        if let window = NSApp.keyWindow,
+           let contentView = window.contentView {
+            let rect = NSRect(x: contentView.bounds.midX, y: contentView.bounds.maxY - 50, width: 1, height: 1)
+            picker.show(relativeTo: rect, of: contentView, preferredEdge: .minY)
+        }
     }
 }
 

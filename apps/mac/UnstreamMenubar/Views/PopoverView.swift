@@ -76,8 +76,7 @@ struct PopoverView: View {
                             if let nowPlaying = appState.nowPlaying {
                                 NowPlayingView(
                                     nowPlaying: nowPlaying,
-                                    artistImageUrl: appState.nowPlayingResults.first?.imageUrl,
-                                    platforms: appState.nowPlayingResults.first?.verifiedPlatforms ?? []
+                                    artistImageUrl: appState.nowPlayingResults.first?.imageUrl
                                 )
                                 if appState.isLoadingNowPlaying {
                                     LoadingView()
