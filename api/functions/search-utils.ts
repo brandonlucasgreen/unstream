@@ -463,6 +463,7 @@ export function preferBandcampFeaturedRelease(aggregated: AggregatedResult[]): v
 // Remove Qobuz platforms with no releases (dead/placeholder pages)
 export function removeDeadQobuzLinks(aggregated: AggregatedResult[]): void {
   for (const result of aggregated) {
+    if (result.overrideMerged) continue;
     result.platforms = result.platforms.filter(p => {
       if (p.sourceId !== 'qobuz') return true;
       const hasReleases = p.latestRelease || (p.allReleaseTitles && p.allReleaseTitles.length > 0);
@@ -523,6 +524,7 @@ export function deduplicateQobuzUrls(aggregated: AggregatedResult[]): void {
     if (matches.length <= 1) continue;
     matches.sort((a, b) => b.matchCount - a.matchCount);
     for (let i = 1; i < matches.length; i++) {
+      if (matches[i].result.overrideMerged) continue;
       console.log(`[Qobuz Dedup] Removing ${qobuzUrl} from "${matches[i].result.name}" (${matches[i].matchCount} matches) - keeping on "${matches[0].result.name}" (${matches[0].matchCount} matches)`);
       matches[i].result.platforms = matches[i].result.platforms.filter(p => p.url !== qobuzUrl);
     }
