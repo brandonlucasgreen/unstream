@@ -1249,16 +1249,8 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
 
   // Phase 2.5: Apply manual merge overrides before release-based disambiguation
   const overrides = await getMergeOverrides();
-  console.log(`[Pipeline] ${overrides.length} merge override(s) loaded`);
   if (overrides.length > 0) {
     applyMergeOverrides(aggregated, overrides);
-  }
-
-  // Log override-protected results before Phase 3
-  for (const r of aggregated) {
-    if (r.overrideMerged) {
-      console.log(`[Pipeline] Pre-Phase3: "${r.name}" overrideMerged=true, platforms: ${r.platforms.map(p => `${p.sourceId}:${p.url}`).join(', ')}`);
-    }
   }
 
   // Phase 3: Fetch releases, then disambiguate using release data
@@ -1270,13 +1262,6 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   createOrphanedQobuzStandalones(aggregated, qobuzMatches);
   const disambiguated = splitSuspiciousPlatforms(aggregated);
   const merged = mergeByReleaseOverlap(disambiguated);
-
-  // Log override-protected results after Phase 3
-  for (const r of merged) {
-    if (r.overrideMerged) {
-      console.log(`[Pipeline] Post-Phase3: "${r.name}" platforms: ${r.platforms.map(p => p.sourceId).join(', ')}`);
-    }
-  }
 
   // Phase 4: Attach deferred name-only platforms, filter, and sort
   await attachNameOnlyPlatforms(merged, nameOnlyMaps);
