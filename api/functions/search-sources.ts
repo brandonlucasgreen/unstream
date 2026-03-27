@@ -1,6 +1,6 @@
 import { parse } from 'node-html-parser';
 import { cacheGetOrFetch, artistCacheKey } from './cache';
-import { persistSearchResults, getArtistBySlug, artistSlug } from './db';
+import { persistSearchResults, getArtistBySlug, artistSlug, getMergeOverrides } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import {
   type SourceId,
@@ -24,6 +24,7 @@ import {
   splitSuspiciousPlatforms,
   mergeByReleaseOverlap,
   filterAndSort,
+  applyMergeOverrides,
 } from './search-utils';
 
 // Helper to fetch with timeout
@@ -1245,6 +1246,12 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   // Phase 2: Attach Qobuz + search-only links, create Qobuz-only results
   attachQobuzAndSearchLinks(aggregated, qobuzMatches, ampwallMatches);
   createQobuzOnlyResults(aggregated, qobuzMatches);
+
+  // Phase 2.5: Apply manual merge overrides before release-based disambiguation
+  const overrides = await getMergeOverrides();
+  if (overrides.length > 0) {
+    applyMergeOverrides(aggregated, overrides);
+  }
 
   // Phase 3: Fetch releases, then disambiguate using release data
   await fetchReleasesForDisambiguation(aggregated);
