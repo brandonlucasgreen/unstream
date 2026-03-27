@@ -10,7 +10,9 @@ import {
   preferBandcampFeaturedRelease,
   filterAndSort,
   normalizeForComparison,
+  applyMergeOverrides,
   type AggregatedResult,
+  type MergeOverride,
 } from '../../../../api/functions/search-utils';
 
 // Helper to create a test result
@@ -367,5 +369,158 @@ describe('filterAndSort', () => {
     const filtered = filterAndSort(results, 'test');
 
     expect(filtered[0].name).toBe('B');
+  });
+});
+
+describe('applyMergeOverrides', () => {
+  function makeOverride(
+    groupName: string,
+    platformUrls: string[],
+    opts: Partial<MergeOverride> = {},
+  ): MergeOverride {
+    return {
+      id: 'test-id',
+      group_name: groupName,
+      platform_urls: platformUrls,
+      excluded_urls: [],
+      canonical_image_url: null,
+      ...opts,
+    };
+  }
+
+  it('merges two results with matching platform URLs', () => {
+    const results = [
+      makeResult('Gooseworx', [
+        { sourceId: 'bandcamp', url: 'https://gooseworx.bandcamp.com' },
+      ]),
+      makeResult('Gooseworx', [
+        { sourceId: 'qobuz', url: 'https://www.qobuz.com/us-en/interpreter/gooseworx/123' },
+      ], { id: '-qobuz' }),
+    ];
+
+    const overrides = [makeOverride('Gooseworx', [
+      'https://gooseworx.bandcamp.com',
+      'https://www.qobuz.com/us-en/interpreter/gooseworx/123',
+    ])];
+
+    applyMergeOverrides(results, overrides);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].platforms).toHaveLength(2);
+    expect(results[0].platforms.map(p => p.sourceId)).toContain('bandcamp');
+    expect(results[0].platforms.map(p => p.sourceId)).toContain('qobuz');
+    expect(results[0].matchConfidence).toBe('verified');
+    expect(results[0].overrideMerged).toBe(true);
+  });
+
+  it('does nothing when only one result matches override URLs', () => {
+    const results = [
+      makeResult('Gooseworx', [
+        { sourceId: 'bandcamp', url: 'https://gooseworx.bandcamp.com' },
+      ]),
+    ];
+
+    const overrides = [makeOverride('Gooseworx', [
+      'https://gooseworx.bandcamp.com',
+      'https://www.qobuz.com/us-en/interpreter/gooseworx/123',
+    ])];
+
+    applyMergeOverrides(results, overrides);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].overrideMerged).toBeUndefined();
+  });
+
+  it('removes excluded URLs from merged result', () => {
+    const results = [
+      makeResult('TestArtist', [
+        { sourceId: 'bandcamp', url: 'https://testartist.bandcamp.com' },
+        { sourceId: 'kofi', url: 'https://ko-fi.com/bogus' },
+      ]),
+      makeResult('TestArtist', [
+        { sourceId: 'qobuz', url: 'https://www.qobuz.com/test/123' },
+      ], { id: '-qobuz' }),
+    ];
+
+    const overrides = [makeOverride('TestArtist', [
+      'https://testartist.bandcamp.com',
+      'https://www.qobuz.com/test/123',
+    ], {
+      excluded_urls: ['https://ko-fi.com/bogus'],
+    })];
+
+    applyMergeOverrides(results, overrides);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].platforms.map(p => p.sourceId)).not.toContain('kofi');
+    expect(results[0].platforms).toHaveLength(2);
+  });
+
+  it('uses canonical image when provided', () => {
+    const results = [
+      makeResult('TestArtist', [
+        { sourceId: 'bandcamp', url: 'https://test.bandcamp.com' },
+      ], { imageUrl: 'https://old-image.jpg' }),
+      makeResult('TestArtist', [
+        { sourceId: 'qobuz', url: 'https://qobuz.com/test' },
+      ], { id: '-qobuz' }),
+    ];
+
+    const overrides = [makeOverride('TestArtist', [
+      'https://test.bandcamp.com',
+      'https://qobuz.com/test',
+    ], {
+      canonical_image_url: 'https://canonical-image.jpg',
+    })];
+
+    applyMergeOverrides(results, overrides);
+
+    expect(results[0].imageUrl).toBe('https://canonical-image.jpg');
+  });
+
+  it('matches URLs case-insensitively and ignores trailing slashes', () => {
+    const results = [
+      makeResult('TestArtist', [
+        { sourceId: 'bandcamp', url: 'https://Test.Bandcamp.com/' },
+      ]),
+      makeResult('TestArtist', [
+        { sourceId: 'qobuz', url: 'https://Qobuz.com/Test/' },
+      ], { id: '-qobuz' }),
+    ];
+
+    const overrides = [makeOverride('TestArtist', [
+      'https://test.bandcamp.com',
+      'https://qobuz.com/test',
+    ])];
+
+    applyMergeOverrides(results, overrides);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].overrideMerged).toBe(true);
+  });
+
+  it('override-merged results are not split by crossPlatformReleaseComparison', () => {
+    const results = [makeResult('Gooseworx', [
+      { sourceId: 'bandcamp', url: 'https://gooseworx.bandcamp.com', allReleaseTitles: ['album a', 'album b'] },
+      { sourceId: 'qobuz', url: 'https://qobuz.com/gooseworx', allReleaseTitles: ['album x', 'album y'] },
+    ], { overrideMerged: true })];
+
+    crossPlatformReleaseComparison(results);
+
+    // Qobuz should NOT be removed despite zero release overlap
+    expect(results[0].platforms.find(p => p.sourceId === 'qobuz')).toBeDefined();
+  });
+
+  it('override-merged results are not split by splitSuspiciousPlatforms', () => {
+    const results = [makeResult('Gooseworx', [
+      { sourceId: 'bandcamp', url: 'https://gooseworx.bandcamp.com', latestRelease: { title: 'A', type: 'album' as const, url: 'https://x' } },
+      { sourceId: 'qobuz', url: 'https://qobuz.com/gooseworx' },
+    ], { overrideMerged: true })];
+
+    const disambiguated = splitSuspiciousPlatforms(results);
+
+    expect(disambiguated).toHaveLength(1);
+    expect(disambiguated[0].platforms).toHaveLength(2);
+    expect(disambiguated[0].overrideMerged).toBe(true);
   });
 });

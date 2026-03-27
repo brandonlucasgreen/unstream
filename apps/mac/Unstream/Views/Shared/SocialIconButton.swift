@@ -1,10 +1,17 @@
 import SwiftUI
+
+#if os(macOS)
 import AppKit
+#endif
 
 struct SocialIconButton: View {
     let result: PlatformResult
     var onOpen: (() -> Void)? = nil
     @Environment(\.colorScheme) var colorScheme
+
+    #if os(iOS)
+    @Environment(\.openURL) private var openURL
+    #endif
 
     // Platforms that have brand SVG icons
     private let brandIconPlatforms: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube", "bandcamp"]
@@ -29,11 +36,12 @@ struct SocialIconButton: View {
             .cornerRadius(14)
         }
         .buttonStyle(.plain)
+        #if os(macOS)
         .help("Open \(result.displayName)")
+        #endif
     }
 
     private var iconColor: Color {
-        // Use light gray for black/dark icons (better visibility on dark backgrounds)
         let hex = result.color
         if hex == "#000000" || hex == "#E0E0E0" {
             return Color(white: 0.7)
@@ -43,29 +51,12 @@ struct SocialIconButton: View {
 
     private func openPlatform() {
         if let urlString = result.url, let url = URL(string: urlString) {
+            #if os(macOS)
             NSWorkspace.shared.open(url)
+            #else
+            openURL(url)
+            #endif
             onOpen?()
         }
     }
-}
-
-#Preview {
-    HStack(spacing: 8) {
-        SocialIconButton(result: PlatformResult(
-            sourceId: "instagram",
-            url: "https://instagram.com/test",
-            latestRelease: nil
-        ))
-        SocialIconButton(result: PlatformResult(
-            sourceId: "youtube",
-            url: "https://youtube.com/test",
-            latestRelease: nil
-        ))
-        SocialIconButton(result: PlatformResult(
-            sourceId: "tiktok",
-            url: "https://tiktok.com/@test",
-            latestRelease: nil
-        ))
-    }
-    .padding()
 }

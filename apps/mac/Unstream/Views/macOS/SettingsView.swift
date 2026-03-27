@@ -395,18 +395,7 @@ struct SettingsView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
 
-                Link(destination: URL(string: "https://liberapay.com/unstream")!) {
-                    HStack {
-                        Image(systemName: "heart")
-                        Text("Donate via Liberapay")
-                    }
-                    .font(.system(size: 13, weight: .medium))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
-                    .background(Color.yellow.opacity(0.15))
-                    .foregroundColor(.yellow)
-                    .cornerRadius(8)
-                }
+                TipJarView()
             }
 
             Divider()

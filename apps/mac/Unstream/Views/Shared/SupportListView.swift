@@ -1,5 +1,8 @@
 import SwiftUI
+
+#if os(macOS)
 import AppKit
+#endif
 
 struct SupportListView: View {
     @ObservedObject var supportListManager: SupportListManager
@@ -12,6 +15,7 @@ struct SupportListView: View {
                 HStack(spacing: 8) {
                     SavedArtistsSearchBar(supportListManager: supportListManager)
 
+                    #if os(macOS)
                     Button(action: shareArtistList) {
                         Image(systemName: "square.and.arrow.up")
                             .foregroundColor(.secondary)
@@ -19,6 +23,13 @@ struct SupportListView: View {
                     }
                     .buttonStyle(.plain)
                     .help("Share saved artists")
+                    #else
+                    ShareLink(item: generateShareText()) {
+                        Image(systemName: "square.and.arrow.up")
+                            .foregroundColor(.secondary)
+                            .font(.system(size: 14))
+                    }
+                    #endif
                 }
             }
 
@@ -73,30 +84,28 @@ struct SupportListView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private func shareArtistList() {
-        let shareText = generateShareText()
-
-        let picker = NSSharingServicePicker(items: [shareText])
-        if let window = NSApp.keyWindow,
-           let contentView = window.contentView {
-            // Show the picker near the top of the window
-            let rect = NSRect(x: contentView.bounds.midX, y: contentView.bounds.maxY - 50, width: 1, height: 1)
-            picker.show(relativeTo: rect, of: contentView, preferredEdge: .minY)
-        }
-    }
-
     private func generateShareText() -> String {
         var text = "My Saved Unstream Artists\n"
-
         for entry in supportListManager.entries {
             text += "\n\(entry.artistName)\n"
             for platform in entry.platforms {
                 text += "- \(platform.displayName): \(platform.url)\n"
             }
         }
-
         return text
     }
+
+    #if os(macOS)
+    private func shareArtistList() {
+        let shareText = generateShareText()
+        let picker = NSSharingServicePicker(items: [shareText])
+        if let window = NSApp.keyWindow,
+           let contentView = window.contentView {
+            let rect = NSRect(x: contentView.bounds.midX, y: contentView.bounds.maxY - 50, width: 1, height: 1)
+            picker.show(relativeTo: rect, of: contentView, preferredEdge: .minY)
+        }
+    }
+    #endif
 }
 
 struct SavedArtistsSearchBar: View {
@@ -125,8 +134,16 @@ struct SavedArtistsSearchBar: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
-        .background(Color(NSColor.textBackgroundColor))
+        .background(searchBarBackgroundColor)
         .cornerRadius(8)
+    }
+
+    private var searchBarBackgroundColor: Color {
+        #if os(macOS)
+        Color(NSColor.textBackgroundColor)
+        #else
+        Color(.systemGray6)
+        #endif
     }
 }
 
@@ -137,40 +154,15 @@ struct SupportEntryView: View {
     let onRemove: () -> Void
     let onRefresh: () -> Void
 
+    #if os(macOS)
     @State private var isHovering = false
+    #endif
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 10) {
                 // Artist photo
-                if let imageUrl = entry.imageUrl, let url = URL(string: imageUrl) {
-                    AsyncImage(url: url) { phase in
-                        switch phase {
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                        case .failure(_):
-                            Image(systemName: "person.circle.fill")
-                                .resizable()
-                                .foregroundColor(.secondary.opacity(0.5))
-                        case .empty:
-                            ProgressView()
-                                .scaleEffect(0.5)
-                        @unknown default:
-                            Image(systemName: "person.circle.fill")
-                                .resizable()
-                                .foregroundColor(.secondary.opacity(0.5))
-                        }
-                    }
-                    .frame(width: 36, height: 36)
-                    .clipShape(Circle())
-                } else {
-                    Image(systemName: "person.circle.fill")
-                        .resizable()
-                        .foregroundColor(.secondary.opacity(0.5))
-                        .frame(width: 36, height: 36)
-                }
+                artistPhoto
 
                 Text(entry.artistName)
                     .font(.system(size: 14, weight: .semibold))
@@ -188,8 +180,10 @@ struct SupportEntryView: View {
                             .font(.system(size: 12))
                     }
                     .buttonStyle(.plain)
+                    #if os(macOS)
                     .opacity(isHovering ? 1 : 0.3)
                     .help("Refresh platforms")
+                    #endif
                 }
 
                 Button(action: onRemove) {
@@ -198,8 +192,10 @@ struct SupportEntryView: View {
                         .font(.system(size: 14))
                 }
                 .buttonStyle(.plain)
+                #if os(macOS)
                 .opacity(isHovering ? 1 : 0.5)
                 .help("Remove from Saved Artists")
+                #endif
             }
 
             // New release indicator
@@ -221,10 +217,47 @@ struct SupportEntryView: View {
                 .foregroundColor(.secondary.opacity(0.7))
         }
         .padding(10)
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(cardBackgroundColor)
         .cornerRadius(8)
+        #if os(macOS)
         .onHover { hovering in
             isHovering = hovering
+        }
+        #endif
+    }
+
+    private var cardBackgroundColor: Color {
+        #if os(macOS)
+        Color(NSColor.controlBackgroundColor)
+        #else
+        Color(.secondarySystemGroupedBackground)
+        #endif
+    }
+
+    @ViewBuilder
+    private var artistPhoto: some View {
+        if let imageUrl = entry.imageUrl, let url = URL(string: imageUrl) {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .success(let image):
+                    image.resizable().aspectRatio(contentMode: .fill)
+                case .failure(_):
+                    Image(systemName: "person.circle.fill")
+                        .resizable().foregroundColor(.secondary.opacity(0.5))
+                case .empty:
+                    ProgressView().scaleEffect(0.5)
+                @unknown default:
+                    Image(systemName: "person.circle.fill")
+                        .resizable().foregroundColor(.secondary.opacity(0.5))
+                }
+            }
+            .frame(width: 36, height: 36)
+            .clipShape(Circle())
+        } else {
+            Image(systemName: "person.circle.fill")
+                .resizable()
+                .foregroundColor(.secondary.opacity(0.5))
+                .frame(width: 36, height: 36)
         }
     }
 }
@@ -233,10 +266,11 @@ struct SavedPlatformBadge: View {
     let platform: SavedPlatform
     @Environment(\.colorScheme) var colorScheme
 
-    // Social platforms show only icons (no text) to reduce clutter
-    private let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube"]
+    #if os(iOS)
+    @Environment(\.openURL) private var openURL
+    #endif
 
-    // Platforms that have brand SVG icons
+    private let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube"]
     private let brandIconPlatforms: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube", "bandcamp"]
 
     private var isSocialPlatform: Bool {
@@ -244,7 +278,6 @@ struct SavedPlatformBadge: View {
     }
 
     private var platformColor: Color {
-        // Use light gray for black/dark icons (better visibility on dark backgrounds)
         let hex = platform.color
         if hex == "#000000" || hex == "#E0E0E0" {
             return Color(white: 0.7)
@@ -253,42 +286,17 @@ struct SavedPlatformBadge: View {
     }
 
     var body: some View {
-        Button(action: openURL) {
+        Button(action: openPlatformURL) {
             if isSocialPlatform {
                 // Social platforms: icon only (circular)
-                Group {
-                    if let url = Bundle.main.url(forResource: platform.sourceId, withExtension: "svg"),
-                       let nsImage = NSImage(contentsOf: url) {
-                        Image(nsImage: nsImage)
-                            .renderingMode(.template)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 14, height: 14)
-                            .foregroundColor(colorScheme == .dark ? .white : platformColor)
-                    } else {
-                        Image(systemName: platform.icon)
-                            .font(.system(size: 14))
-                            .foregroundColor(colorScheme == .dark ? .white : platformColor)
-                    }
-                }
-                .frame(width: 28, height: 28)
-                .background(platformColor.opacity(0.15))
-                .cornerRadius(14)
+                platformIcon(size: 14)
+                    .frame(width: 28, height: 28)
+                    .background(platformColor.opacity(0.15))
+                    .cornerRadius(14)
             } else {
                 // Regular platforms: icon + text
                 HStack(spacing: 4) {
-                    if brandIconPlatforms.contains(platform.sourceId),
-                       let url = Bundle.main.url(forResource: platform.sourceId, withExtension: "svg"),
-                       let nsImage = NSImage(contentsOf: url) {
-                        Image(nsImage: nsImage)
-                            .renderingMode(.template)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 10, height: 10)
-                    } else {
-                        Image(systemName: platform.icon)
-                            .font(.system(size: 10))
-                    }
+                    platformIcon(size: 10)
                     Text(platform.displayName)
                         .font(.system(size: 11, weight: .medium))
                 }
@@ -300,17 +308,52 @@ struct SavedPlatformBadge: View {
             }
         }
         .buttonStyle(.plain)
+        #if os(macOS)
         .help("Open \(platform.displayName)")
+        #endif
     }
 
-    private func openURL() {
+    @ViewBuilder
+    private func platformIcon(size: CGFloat) -> some View {
+        #if os(macOS)
+        if brandIconPlatforms.contains(platform.sourceId),
+           let url = Bundle.main.url(forResource: platform.sourceId, withExtension: "svg"),
+           let nsImage = NSImage(contentsOf: url) {
+            Image(nsImage: nsImage)
+                .renderingMode(.template)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: size, height: size)
+                .foregroundColor(colorScheme == .dark ? .white : platformColor)
+        } else {
+            Image(systemName: platform.icon)
+                .font(.system(size: size))
+                .foregroundColor(colorScheme == .dark ? .white : platformColor)
+        }
+        #else
+        // On iOS, use SF Symbols (BrandIcons could be used for custom shapes in future)
+        Image(systemName: platform.icon)
+            .font(.system(size: size))
+            .foregroundColor(colorScheme == .dark ? .white : platformColor)
+        #endif
+    }
+
+    private func openPlatformURL() {
         guard let url = URL(string: platform.url) else { return }
+        #if os(macOS)
         NSWorkspace.shared.open(url)
+        #else
+        openURL(url)
+        #endif
     }
 }
 
 struct NewReleaseBadge: View {
     let release: NewRelease
+
+    #if os(iOS)
+    @Environment(\.openURL) private var openURL
+    #endif
 
     var body: some View {
         Button(action: openRelease) {
@@ -328,28 +371,17 @@ struct NewReleaseBadge: View {
             .cornerRadius(6)
         }
         .buttonStyle(.plain)
+        #if os(macOS)
         .help("Open \(release.releaseName) on \(release.platform.capitalized)")
+        #endif
     }
 
     private func openRelease() {
         guard let url = URL(string: release.releaseUrl) else { return }
+        #if os(macOS)
         NSWorkspace.shared.open(url)
+        #else
+        openURL(url)
+        #endif
     }
-}
-
-private struct SupportListViewPreviewContainer: View {
-    @StateObject private var supportList = SupportListManager()
-
-    var body: some View {
-        SupportListView(
-            supportListManager: supportList,
-            releaseAlertManager: ReleaseAlertManager(supportListManager: supportList)
-        )
-        .padding()
-        .frame(width: 300)
-    }
-}
-
-#Preview {
-    SupportListViewPreviewContainer()
 }

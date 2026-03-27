@@ -1,21 +1,27 @@
 import SwiftUI
 import Combine
+import UserNotifications
+
+#if os(macOS)
 import AppKit
 import ServiceManagement
-import UserNotifications
+#endif
 
 // MARK: - Shared State Container
 
-/// Holds all the shared state managers so they can be accessed by both AppDelegate and SwiftUI views
+/// Holds all the shared state managers so they can be accessed by both platforms
 @MainActor
 class AppStateContainer: ObservableObject {
     static let shared = AppStateContainer()
 
     let appState = AppState()
-    let mediaObserver = MediaObserver()
     let supportListManager: SupportListManager
     let releaseAlertManager: ReleaseAlertManager
+
+    #if os(macOS)
+    let mediaObserver = MediaObserver()
     let scrobbleManager = ScrobbleManager.shared
+    #endif
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -26,6 +32,7 @@ class AppStateContainer: ObservableObject {
         self.supportListManager = supportList
         self.releaseAlertManager = releaseAlert
 
+        #if os(macOS)
         // Set up media observer to update app state
         mediaObserver.$currentTrack
             .sink { [weak self] nowPlaying in
@@ -36,10 +43,78 @@ class AppStateContainer: ObservableObject {
                 self.scrobbleManager.trackChanged(to: nowPlaying)
             }
             .store(in: &cancellables)
+        #endif
+    }
+
+    /// Check for a pending search from the share extension (iOS)
+    func checkPendingSearch() {
+        guard let sharedDefaults = UserDefaults(suiteName: "group.lol.bgreen.unstream"),
+              let pendingQuery = sharedDefaults.string(forKey: "pendingSearch"),
+              !pendingQuery.isEmpty else { return }
+
+        // Clear the pending search
+        sharedDefaults.removeObject(forKey: "pendingSearch")
+
+        // Perform the search
+        appState.searchQuery = pendingQuery
+        Task {
+            await appState.performSearch()
+        }
     }
 }
 
-// MARK: - App Delegate (Pure AppKit - no SwiftUI App)
+// MARK: - SwiftUI App
+
+@main
+struct UnstreamApp: App {
+    #if os(macOS)
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    #endif
+
+    @StateObject private var container = AppStateContainer.shared
+
+    var body: some Scene {
+        #if os(macOS)
+        // macOS: Empty settings scene — actual UI handled by AppDelegate's popover
+        Settings {
+            EmptyView()
+        }
+        #else
+        // iOS: Standard windowed app
+        WindowGroup {
+            iOSContentView()
+                .environmentObject(container.appState)
+                .environmentObject(container.supportListManager)
+                .environmentObject(container.releaseAlertManager)
+                .onOpenURL { url in
+                    handleIncomingURL(url)
+                }
+                .onAppear {
+                    container.checkPendingSearch()
+                }
+        }
+        #endif
+    }
+
+    #if os(iOS)
+    private func handleIncomingURL(_ url: URL) {
+        guard url.scheme == "unstream",
+              url.host == "search",
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let query = components.queryItems?.first(where: { $0.name == "q" })?.value,
+              !query.isEmpty else { return }
+
+        container.appState.searchQuery = query
+        Task {
+            await container.appState.performSearch()
+        }
+    }
+    #endif
+}
+
+// MARK: - macOS App Delegate
+
+#if os(macOS)
 
 @MainActor
 class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
@@ -55,6 +130,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         AppDelegate.shared = self
+
+        // Hide from dock — menu bar only (replaces LSUIElement in Info.plist for multiplatform compat)
+        NSApp.setActivationPolicy(.accessory)
 
         // Set notification delegate so we can handle clicks
         UNUserNotificationCenter.current().delegate = self
@@ -135,13 +213,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         completionHandler([.banner, .sound])
     }
 
-    // Notification click - open URL directly, don't activate app
+    // Notification click - open URL directly
     nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        // Open the URL
         if let releaseUrl = response.notification.request.content.userInfo["releaseUrl"] as? String,
            let url = URL(string: releaseUrl) {
             NSWorkspace.shared.open(url)
@@ -279,20 +356,6 @@ class WelcomeWindowLauncher {
     }
 }
 
-// MARK: - SwiftUI App (minimal - settings handled by AppDelegate)
-
-@main
-struct UnstreamMenubarApp: App {
-    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-
-    var body: some Scene {
-        // Empty Settings scene - actual settings handled by AppDelegate.openSettings()
-        Settings {
-            EmptyView()
-        }
-    }
-}
-
 // MARK: - Welcome Content View
 
 struct WelcomeContentView: View {
@@ -341,3 +404,5 @@ struct WelcomeContentView: View {
         .frame(width: 420, height: 300)
     }
 }
+
+#endif

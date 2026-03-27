@@ -1,5 +1,9 @@
 import SwiftUI
 
+#if os(macOS)
+import AppKit
+#endif
+
 struct ResultsView: View {
     let title: String?
     let results: [ArtistResult]
@@ -36,6 +40,10 @@ struct ArtistResultView: View {
     @EnvironmentObject var supportListManager: SupportListManager
     @EnvironmentObject var appState: AppState
 
+    #if os(iOS)
+    @Environment(\.openURL) private var openURL
+    #endif
+
     private var isSaved: Bool {
         supportListManager.isArtistSaved(artist.name)
     }
@@ -46,34 +54,7 @@ struct ArtistResultView: View {
             HStack(spacing: 10) {
                 // Artist photo (conditionally shown)
                 if showPhoto {
-                    if let imageUrl = artist.imageUrl, let url = URL(string: imageUrl) {
-                        AsyncImage(url: url) { phase in
-                            switch phase {
-                            case .success(let image):
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                            case .failure(_):
-                                Image(systemName: "person.circle.fill")
-                                    .resizable()
-                                    .foregroundColor(.secondary.opacity(0.5))
-                            case .empty:
-                                ProgressView()
-                                    .scaleEffect(0.5)
-                            @unknown default:
-                                Image(systemName: "person.circle.fill")
-                                    .resizable()
-                                    .foregroundColor(.secondary.opacity(0.5))
-                            }
-                        }
-                        .frame(width: 40, height: 40)
-                        .clipShape(Circle())
-                    } else {
-                        Image(systemName: "person.circle.fill")
-                            .resizable()
-                            .foregroundColor(.secondary.opacity(0.5))
-                            .frame(width: 40, height: 40)
-                    }
+                    artistPhoto
                 }
 
                 Text(artist.name)
@@ -81,15 +62,9 @@ struct ArtistResultView: View {
 
                 Spacer()
 
-                // Share card button
+                // Share button
                 if !artist.verifiedPlatforms.isEmpty {
-                    Button(action: shareArtistCard) {
-                        Image(systemName: "square.and.arrow.up")
-                            .foregroundColor(.secondary)
-                            .font(.system(size: 13))
-                    }
-                    .buttonStyle(.plain)
-                    .help("Share this artist")
+                    shareButton
                 }
 
                 Button(action: { supportListManager.toggleArtist(artist) }) {
@@ -98,7 +73,9 @@ struct ArtistResultView: View {
                         .font(.system(size: 14))
                 }
                 .buttonStyle(.plain)
+                #if os(macOS)
                 .help(isSaved ? "Remove from Saved Artists" : "Add to Saved Artists")
+                #endif
             }
 
             // Verified platforms section
@@ -118,7 +95,7 @@ struct ArtistResultView: View {
                 }
             }
 
-            // Social platforms section (show before "Also try")
+            // Social platforms section
             if !artist.socialPlatforms.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Social:")
@@ -138,11 +115,9 @@ struct ArtistResultView: View {
             // Search-only platforms section
             if !artist.searchOnlyPlatforms.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
-                    HStack(spacing: 4) {
-                        Text("Also try:")
-                            .font(.caption)
-                            .foregroundColor(.secondary.opacity(0.8))
-                    }
+                    Text("Also try:")
+                        .font(.caption)
+                        .foregroundColor(.secondary.opacity(0.8))
 
                     FlowLayout(spacing: 6) {
                         ForEach(artist.searchOnlyPlatforms) { platform in
@@ -180,23 +155,105 @@ struct ArtistResultView: View {
             .frame(maxWidth: .infinity, alignment: .center)
         }
         .padding(10)
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(cardBackgroundColor)
         .cornerRadius(8)
+    }
+
+    // MARK: - Subviews
+
+    @ViewBuilder
+    private var artistPhoto: some View {
+        if let imageUrl = artist.imageUrl, let url = URL(string: imageUrl) {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .success(let image):
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                case .failure(_):
+                    Image(systemName: "person.circle.fill")
+                        .resizable()
+                        .foregroundColor(.secondary.opacity(0.5))
+                case .empty:
+                    ProgressView()
+                        .scaleEffect(0.5)
+                @unknown default:
+                    Image(systemName: "person.circle.fill")
+                        .resizable()
+                        .foregroundColor(.secondary.opacity(0.5))
+                }
+            }
+            .frame(width: 40, height: 40)
+            .clipShape(Circle())
+        } else {
+            Image(systemName: "person.circle.fill")
+                .resizable()
+                .foregroundColor(.secondary.opacity(0.5))
+                .frame(width: 40, height: 40)
+        }
+    }
+
+    @ViewBuilder
+    private var shareButton: some View {
+        #if os(macOS)
+        Button(action: shareArtistCard) {
+            Image(systemName: "square.and.arrow.up")
+                .foregroundColor(.secondary)
+                .font(.system(size: 13))
+        }
+        .buttonStyle(.plain)
+        .help("Share this artist")
+        #else
+        let text = shareText
+        ShareLink(item: text) {
+            Image(systemName: "square.and.arrow.up")
+                .foregroundColor(.secondary)
+                .font(.system(size: 13))
+        }
+        #endif
+    }
+
+    // MARK: - Helpers
+
+    private var cardBackgroundColor: Color {
+        #if os(macOS)
+        Color(NSColor.controlBackgroundColor)
+        #else
+        Color(.secondarySystemGroupedBackground)
+        #endif
+    }
+
+    private var shareText: String {
+        let url: String
+        if let claimedSlug = artist.claimedSlug {
+            url = "https://unstream.stream/a/\(claimedSlug)"
+        } else if let encodedName = artist.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+            url = "https://unstream.stream/?q=\(encodedName)"
+        } else {
+            url = "https://unstream.stream"
+        }
+
+        if let nowPlaying = appState.nowPlaying,
+           nowPlaying.artist?.lowercased() == artist.name.lowercased(),
+           let title = nowPlaying.title {
+            return "Listening to \"\(title)\" by \(artist.name) — here's how you can support them directly: \(url)"
+        }
+
+        return "Here's how you can support \(artist.name) directly: \(url)"
     }
 
     private func openInUnstream(artist: String) {
         guard let encodedQuery = artist.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "https://unstream.stream/?q=\(encodedQuery)") else {
-            return
-        }
+              let url = URL(string: "https://unstream.stream/?q=\(encodedQuery)") else { return }
+        #if os(macOS)
         NSWorkspace.shared.open(url)
+        #else
+        openURL(url)
+        #endif
     }
 
     private func reportIssue(artist: ArtistResult) {
-        let platformList = artist.platforms.map { platform in
-            "- \(platform.sourceId): \(platform.url ?? "N/A")"
-        }.joined(separator: "\n")
-
+        let platformList = artist.platforms.map { "- \($0.sourceId): \($0.url ?? "N/A")" }.joined(separator: "\n")
         let subject = "Issue Report: \(artist.name)"
         let body = """
         Artist/Result: \(artist.name)
@@ -211,33 +268,17 @@ struct ArtistResultView: View {
 
         guard let encodedSubject = subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let encodedBody = body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "mailto:support@unstream.stream?subject=\(encodedSubject)&body=\(encodedBody)") else {
-            return
-        }
+              let url = URL(string: "mailto:support@unstream.stream?subject=\(encodedSubject)&body=\(encodedBody)") else { return }
+        #if os(macOS)
         NSWorkspace.shared.open(url)
+        #else
+        openURL(url)
+        #endif
     }
 
+    #if os(macOS)
     private func shareArtistCard() {
-        let url: String
-        if let claimedSlug = artist.claimedSlug {
-            // Verified artist — use their claimed page
-            url = "https://unstream.stream/a/\(claimedSlug)"
-        } else if let encodedName = artist.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
-            // Not verified — link to search so it always works
-            url = "https://unstream.stream/?q=\(encodedName)"
-        } else {
-            url = "https://unstream.stream"
-        }
-
-        var text = "Here's how you can support \(artist.name) directly: \(url)"
-
-        // Add now-playing context if this is the currently playing artist
-        if let nowPlaying = appState.nowPlaying,
-           nowPlaying.artist?.lowercased() == artist.name.lowercased(),
-           let title = nowPlaying.title {
-            text = "Listening to \"\(title)\" by \(artist.name) — here's how you can support them directly: \(url)"
-        }
-
+        let text = shareText
         let picker = NSSharingServicePicker(items: [text])
         if let window = NSApp.keyWindow,
            let contentView = window.contentView {
@@ -245,6 +286,7 @@ struct ArtistResultView: View {
             picker.show(relativeTo: rect, of: contentView, preferredEdge: .minY)
         }
     }
+    #endif
 }
 
 // Simple flow layout for platform badges
@@ -291,30 +333,4 @@ struct FlowLayout: Layout {
 
         return (CGSize(width: maxWidth, height: totalHeight), positions)
     }
-}
-
-#Preview {
-    ResultsView(
-        title: "Search Results",
-        results: [
-            ArtistResult(
-                id: "radiohead",
-                name: "Radiohead",
-                type: "artist",
-                imageUrl: nil,
-                platforms: [
-                    PlatformResult(sourceId: "bandcamp", url: "https://radiohead.bandcamp.com", latestRelease: nil),
-                    PlatformResult(sourceId: "qobuz", url: nil, latestRelease: nil),
-                    PlatformResult(sourceId: "ampwall", url: nil, latestRelease: nil),
-                    PlatformResult(sourceId: "kofi", url: nil, latestRelease: nil),
-                ],
-                claimedSlug: nil,
-                matchConfidence: nil
-            )
-        ]
-    )
-    .environmentObject(SupportListManager())
-    .environmentObject(AppState())
-    .padding()
-    .frame(width: 300)
 }

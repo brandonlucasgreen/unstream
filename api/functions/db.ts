@@ -100,6 +100,37 @@ interface LinkRow {
   display_order: number | null;
 }
 
+// --- Merge Overrides ---
+
+export interface MergeOverrideRow {
+  id: string;
+  group_name: string;
+  platform_urls: string[];
+  excluded_urls: string[];
+  canonical_image_url: string | null;
+}
+
+export async function getMergeOverrides(): Promise<MergeOverrideRow[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  try {
+    const { data, error } = await client
+      .from('artist_merge_overrides')
+      .select('id, group_name, platform_urls, excluded_urls, canonical_image_url');
+
+    if (error) {
+      console.error('[DB] Failed to fetch merge overrides:', error);
+      return [];
+    }
+
+    return (data as MergeOverrideRow[]) || [];
+  } catch (error) {
+    console.error('[DB] getMergeOverrides error:', error);
+    return [];
+  }
+}
+
 // --- Read Operations ---
 
 /**
