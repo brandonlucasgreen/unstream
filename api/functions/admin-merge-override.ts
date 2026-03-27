@@ -30,24 +30,30 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-export default async function handler(request: Request) {
-  if (request.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: CORS_HEADERS });
+export async function handler(event: {
+  httpMethod: string;
+  headers: Record<string, string | undefined>;
+  body?: string;
+}) {
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   }
 
-  if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
       headers: CORS_HEADERS,
-    });
+      body: JSON.stringify({ error: 'Method not allowed' }),
+    };
   }
 
-  const admin = await authenticateAdmin(request.headers.get('Authorization') || undefined);
+  const admin = await authenticateAdmin(event.headers['authorization'] || event.headers['Authorization'] || undefined);
   if (!admin) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
+    return {
+      statusCode: 401,
       headers: CORS_HEADERS,
-    });
+      body: JSON.stringify({ error: 'Unauthorized' }),
+    };
   }
 
   let body: {
@@ -59,36 +65,40 @@ export default async function handler(request: Request) {
   };
 
   try {
-    body = await request.json();
+    body = JSON.parse(event.body || '{}');
   } catch {
-    return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
-      status: 400,
+    return {
+      statusCode: 400,
       headers: CORS_HEADERS,
-    });
+      body: JSON.stringify({ error: 'Invalid JSON' }),
+    };
   }
 
   const { group_name, platform_urls, excluded_urls, canonical_image_url, notes } = body;
 
   if (!group_name?.trim()) {
-    return new Response(JSON.stringify({ error: 'group_name is required' }), {
-      status: 400,
+    return {
+      statusCode: 400,
       headers: CORS_HEADERS,
-    });
+      body: JSON.stringify({ error: 'group_name is required' }),
+    };
   }
 
   if (!Array.isArray(platform_urls) || platform_urls.length < 2) {
-    return new Response(JSON.stringify({ error: 'At least 2 platform_urls are required' }), {
-      status: 400,
+    return {
+      statusCode: 400,
       headers: CORS_HEADERS,
-    });
+      body: JSON.stringify({ error: 'At least 2 platform_urls are required' }),
+    };
   }
 
   const client = getClient();
   if (!client) {
-    return new Response(JSON.stringify({ error: 'Database not configured' }), {
-      status: 500,
+    return {
+      statusCode: 500,
       headers: CORS_HEADERS,
-    });
+      body: JSON.stringify({ error: 'Database not configured' }),
+    };
   }
 
   const { data, error } = await client
@@ -105,14 +115,16 @@ export default async function handler(request: Request) {
 
   if (error) {
     console.error('[Admin] Failed to insert merge override:', error);
-    return new Response(JSON.stringify({ error: 'Failed to save merge override' }), {
-      status: 500,
+    return {
+      statusCode: 500,
       headers: CORS_HEADERS,
-    });
+      body: JSON.stringify({ error: 'Failed to save merge override' }),
+    };
   }
 
-  return new Response(JSON.stringify({ success: true, override: data }), {
-    status: 201,
+  return {
+    statusCode: 201,
     headers: CORS_HEADERS,
-  });
+    body: JSON.stringify({ success: true, override: data }),
+  };
 }
