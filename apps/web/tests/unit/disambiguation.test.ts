@@ -432,6 +432,27 @@ describe('applyMergeOverrides', () => {
     expect(results[0].matchConfidence).toBe('verified');
   });
 
+  it('injects missing override URLs that search did not return', () => {
+    const results = [
+      makeResult('Gooseworx', [
+        { sourceId: 'bandcamp', url: 'https://gooseworx.bandcamp.com' },
+      ]),
+    ];
+
+    const overrides = [makeOverride('Gooseworx', [
+      'https://gooseworx.bandcamp.com',
+      'https://www.qobuz.com/us-en/interpreter/gooseworx/123',
+    ])];
+
+    applyMergeOverrides(results, overrides);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].platforms.map(p => p.sourceId)).toContain('qobuz');
+    expect(results[0].platforms.find(p => p.sourceId === 'qobuz')?.url)
+      .toBe('https://www.qobuz.com/us-en/interpreter/gooseworx/123');
+    expect(results[0].overrideMerged).toBe(true);
+  });
+
   it('removes excluded URLs from merged result', () => {
     const results = [
       makeResult('TestArtist', [
