@@ -9,6 +9,9 @@ import { analytics } from '../services/analytics';
 interface ResultCardProps {
   result: SearchResult;
   defaultExpanded?: boolean;
+  isAdmin?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: (id: string) => void;
 }
 
 interface EmbedData {
@@ -16,7 +19,7 @@ interface EmbedData {
   title: string;
 }
 
-export function ResultCard({ result, defaultExpanded = true }: ResultCardProps) {
+export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected, onToggleSelect }: ResultCardProps) {
   const searchTracked = useRef(false);
 
   // Track search appearance for claimed artists (once per mount)
@@ -196,6 +199,18 @@ export function ResultCard({ result, defaultExpanded = true }: ResultCardProps) 
         className="flex gap-4 p-4 cursor-pointer"
         onClick={() => setExpanded(!expanded)}
       >
+        {/* Admin merge checkbox */}
+        {isAdmin && result.type === 'artist' && result.matchConfidence !== 'claimed' && onToggleSelect && (
+          <div className="flex items-center flex-shrink-0">
+            <input
+              type="checkbox"
+              checked={!!isSelected}
+              onChange={() => onToggleSelect(result.id)}
+              onClick={(e) => e.stopPropagation()}
+              className="w-5 h-5 rounded border-border text-accent-primary focus:ring-accent-primary/50 cursor-pointer"
+            />
+          </div>
+        )}
         {/* Thumbnail */}
         <div className="w-16 h-16 flex-shrink-0 rounded overflow-hidden bg-bg-secondary">
           {result.imageUrl && !imageError ? (

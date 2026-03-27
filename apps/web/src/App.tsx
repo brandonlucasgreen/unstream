@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { SearchBar } from './components/SearchBar';
 import { ResultCard } from './components/ResultCard';
 import { ThemeToggle } from './components/ThemeToggle';
@@ -8,6 +8,7 @@ import { useTheme } from './hooks/useTheme';
 import type { SearchResult } from './types';
 import { sources, sourceCategories, searchPlatforms, resolveArtistUrl, fetchMusicBrainzData, mergeWithMusicBrainzData } from './services/sources';
 import { analytics } from './services/analytics';
+import { useAuth } from './contexts/AuthContext';
 import { Footer } from './components/Footer';
 import { faqSections } from './data/faq';
 import { markdownToHtml } from './utils/markdownLight';
@@ -52,6 +53,8 @@ function CollapsibleSection({ title, content, defaultOpen = false }: {
 
 function App() {
   const { preference, cycleTheme } = useTheme();
+  const { isAdmin } = useAuth();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -61,6 +64,7 @@ function App() {
   const [resolvedQuery, setResolvedQuery] = useState<string>('');
   const [isResolving, setIsResolving] = useState(false);
   const [, setIsFromUrl] = useState(false);
+  const [selectedForMerge, setSelectedForMerge] = useState<Set<string>>(new Set());
 
   // Track current search to handle race conditions
   const currentSearchRef = useRef<number>(0);
@@ -200,9 +204,24 @@ function App() {
     setResolvedQuery('');
     setIsEnriching(false);
     setIsFromUrl(false);
+    setSelectedForMerge(new Set());
     // Clear the URL params when going home
     setSearchParams({}, { replace: true });
   }, [setSearchParams]);
+
+  const handleToggleSelect = useCallback((id: string) => {
+    setSelectedForMerge(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const handleMergeSelected = useCallback(() => {
+    const selectedResults = results.filter(r => selectedForMerge.has(r.id));
+    navigate('/admin/merge', { state: { results: selectedResults } });
+  }, [results, selectedForMerge, navigate]);
 
   const macAppPromo = (
     <div className="bg-surface-secondary rounded-2xl p-6 md:p-8 border border-border">
@@ -354,6 +373,9 @@ function App() {
                     <ResultCard
                       key={result.id}
                       result={result}
+                      isAdmin={isAdmin}
+                      isSelected={selectedForMerge.has(result.id)}
+                      onToggleSelect={handleToggleSelect}
                     />
                   ))}
                 </div>
@@ -365,6 +387,21 @@ function App() {
                   </p>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Admin floating merge button */}
+          {isAdmin && selectedForMerge.size >= 2 && (
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+              <button
+                onClick={handleMergeSelected}
+                className="px-6 py-3 rounded-xl bg-accent-primary text-white font-medium shadow-lg shadow-accent-primary/30 hover:bg-accent-primary/90 transition-colors flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+                Merge {selectedForMerge.size} Artists
+              </button>
             </div>
           )}
 
