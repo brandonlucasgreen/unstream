@@ -1,9 +1,17 @@
 import SwiftUI
 
+#if os(macOS)
+import AppKit
+#endif
+
 struct PlatformBadge: View {
     let result: PlatformResult
     var isSubtle: Bool = false
     var onOpen: (() -> Void)? = nil
+
+    #if os(iOS)
+    @Environment(\.openURL) private var openURL
+    #endif
 
     private var isBCFriday: Bool {
         result.sourceId == "bandcamp" && isBandcampFriday()
@@ -45,7 +53,9 @@ struct PlatformBadge: View {
             )
         }
         .buttonStyle(.plain)
+        #if os(macOS)
         .help(helpText)
+        #endif
     }
 
     private var displayPayout: String? {
@@ -72,28 +82,13 @@ struct PlatformBadge: View {
 
     private func openPlatform() {
         if let urlString = result.url, let url = URL(string: urlString) {
+            #if os(macOS)
             NSWorkspace.shared.open(url)
+            #else
+            openURL(url)
+            #endif
             onOpen?()
         }
-    }
-}
-
-// Color extension to parse hex strings
-extension Color {
-    init?(hex: String) {
-        var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
-        hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
-
-        guard hexSanitized.count == 6,
-              let hexNumber = UInt64(hexSanitized, radix: 16) else {
-            return nil
-        }
-
-        let r = Double((hexNumber & 0xFF0000) >> 16) / 255.0
-        let g = Double((hexNumber & 0x00FF00) >> 8) / 255.0
-        let b = Double(hexNumber & 0x0000FF) / 255.0
-
-        self.init(red: r, green: g, blue: b)
     }
 }
 
