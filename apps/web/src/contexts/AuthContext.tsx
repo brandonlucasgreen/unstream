@@ -2,9 +2,12 @@ import { createContext, useContext, useEffect, useState, useCallback, type React
 import type { Session, User } from '@supabase/supabase-js';
 import { getSupabaseClient, waitForMagicLinkSession } from '../services/auth';
 
+const ADMIN_EMAIL = 'info@kidlightbulbs.com';
+
 interface AuthContextValue {
   session: Session | null;
   user: User | null;
+  isAdmin: boolean;
   isLoading: boolean;
   signOut: () => Promise<void>;
 }
@@ -71,8 +74,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // onAuthStateChange listener will clear session/user
   }, []);
 
+  const isAdmin = !!user?.email && user.email.toLowerCase() === ADMIN_EMAIL;
+
   return (
-    <AuthContext.Provider value={{ session, user, isLoading, signOut: handleSignOut }}>
+    <AuthContext.Provider value={{ session, user, isAdmin, isLoading, signOut: handleSignOut }}>
       {children}
     </AuthContext.Provider>
   );
