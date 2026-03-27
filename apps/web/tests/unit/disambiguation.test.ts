@@ -545,4 +545,34 @@ describe('applyMergeOverrides', () => {
     expect(disambiguated[0].platforms).toHaveLength(2);
     expect(disambiguated[0].overrideMerged).toBe(true);
   });
+
+  it('merges a name-matched duplicate that has no overlapping URLs with the override', () => {
+    const results = [
+      makeResult('Radiohead', [
+        { sourceId: 'bandcamp', url: 'https://radiohead.bandcamp.com' },
+      ]),
+      makeResult('Radiohead', [
+        { sourceId: 'qobuz', url: 'https://www.qobuz.com/us-en/interpreter/radiohead/456' },
+      ], { id: '-qobuz' }),
+      makeResult('Radiohead', [
+        { sourceId: 'mirlo', url: 'https://mirlo.space/radiohead' },
+      ], { id: '-mirlo' }),
+    ];
+
+    // Override only lists bandcamp + qobuz URLs, but the mirlo result
+    // should still be merged because the name matches
+    const overrides = [makeOverride('Radiohead', [
+      'https://radiohead.bandcamp.com',
+      'https://www.qobuz.com/us-en/interpreter/radiohead/456',
+    ])];
+
+    applyMergeOverrides(results, overrides);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].platforms).toHaveLength(3);
+    expect(results[0].platforms.map(p => p.sourceId)).toContain('bandcamp');
+    expect(results[0].platforms.map(p => p.sourceId)).toContain('qobuz');
+    expect(results[0].platforms.map(p => p.sourceId)).toContain('mirlo');
+    expect(results[0].overrideMerged).toBe(true);
+  });
 });

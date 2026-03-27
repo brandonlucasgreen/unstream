@@ -102,13 +102,15 @@ export function applyMergeOverrides(
     // Normalize override URLs for comparison
     const overrideUrls = new Set(override.platform_urls.map(u => u.replace(/\/+$/, '').toLowerCase()));
 
-    // Find all results that have at least one platform URL in this override group
+    // Find all results that match by URL or by name
+    const overrideName = normalizeForComparison(override.group_name);
     const matchingIndices: number[] = [];
     for (let i = 0; i < aggregated.length; i++) {
-      const hasMatch = aggregated[i].platforms.some(p =>
+      const hasUrlMatch = aggregated[i].platforms.some(p =>
         overrideUrls.has(p.url.replace(/\/+$/, '').toLowerCase())
       );
-      if (hasMatch) matchingIndices.push(i);
+      const hasNameMatch = normalizeForComparison(aggregated[i].name) === overrideName;
+      if (hasUrlMatch || hasNameMatch) matchingIndices.push(i);
     }
 
     if (matchingIndices.length === 0) continue;
