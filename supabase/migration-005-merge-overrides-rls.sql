@@ -9,3 +9,11 @@ CREATE POLICY "Allow public read access"
   ON artist_merge_overrides
   FOR SELECT
   USING (true);
+
+-- Allow service-role inserts (Netlify functions use the service key,
+-- but explicitly granting INSERT avoids edge cases where the client
+-- doesn't fully bypass RLS).
+CREATE POLICY "Allow service role insert"
+  ON artist_merge_overrides
+  FOR INSERT
+  WITH CHECK (true);
