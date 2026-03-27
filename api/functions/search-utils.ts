@@ -92,7 +92,15 @@ export function applyMergeOverrides(
       if (hasMatch) matchingIndices.push(i);
     }
 
-    if (matchingIndices.length <= 1) continue;
+    if (matchingIndices.length === 0) continue;
+
+    // All override URLs already on a single result — just protect it from later splitting
+    if (matchingIndices.length === 1) {
+      aggregated[matchingIndices[0]].overrideMerged = true;
+      aggregated[matchingIndices[0]].matchConfidence = 'verified';
+      console.log(`[Override] Protected "${override.group_name}" from disambiguation (all URLs on one result)`);
+      continue;
+    }
 
     // Merge all matching results into the first one
     const primaryIdx = matchingIndices[0];

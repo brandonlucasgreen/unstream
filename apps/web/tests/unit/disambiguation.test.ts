@@ -413,7 +413,7 @@ describe('applyMergeOverrides', () => {
     expect(results[0].overrideMerged).toBe(true);
   });
 
-  it('does nothing when only one result matches override URLs', () => {
+  it('protects single result that already has all override URLs from later splitting', () => {
     const results = [
       makeResult('Gooseworx', [
         { sourceId: 'bandcamp', url: 'https://gooseworx.bandcamp.com' },
@@ -428,7 +428,8 @@ describe('applyMergeOverrides', () => {
     applyMergeOverrides(results, overrides);
 
     expect(results).toHaveLength(1);
-    expect(results[0].overrideMerged).toBeUndefined();
+    expect(results[0].overrideMerged).toBe(true);
+    expect(results[0].matchConfidence).toBe('verified');
   });
 
   it('removes excluded URLs from merged result', () => {
