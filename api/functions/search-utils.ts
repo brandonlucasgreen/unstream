@@ -71,6 +71,25 @@ export interface MergeOverride {
   canonical_image_url: string | null;
 }
 
+// Infer sourceId from a platform URL
+export function sourceIdFromUrl(url: string): SourceId | null {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    if (host.endsWith('bandcamp.com')) return 'bandcamp';
+    if (host.endsWith('qobuz.com')) return 'qobuz';
+    if (host.endsWith('mirlo.space')) return 'mirlo';
+    if (host.endsWith('ninaprotocol.com')) return 'nina';
+    if (host.endsWith('ampwall.com')) return 'ampwall';
+    if (host.endsWith('discogs.com')) return 'discogs';
+    if (host.endsWith('patreon.com')) return 'patreon';
+    if (host.endsWith('buymeacoffee.com')) return 'buymeacoffee';
+    if (host.endsWith('ko-fi.com')) return 'kofi';
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Apply manual merge overrides (runs before release-based disambiguation)
 // ---------------------------------------------------------------------------
@@ -94,29 +113,45 @@ export function applyMergeOverrides(
 
     if (matchingIndices.length === 0) continue;
 
-    // All override URLs already on a single result — just protect it from later splitting
-    if (matchingIndices.length === 1) {
-      aggregated[matchingIndices[0]].overrideMerged = true;
-      aggregated[matchingIndices[0]].matchConfidence = 'verified';
-      console.log(`[Override] Protected "${override.group_name}" from disambiguation (all URLs on one result)`);
-      continue;
-    }
+    // Determine the primary result (merge others into it if multiple)
+    const primary = aggregated[matchingIndices[0]];
 
-    // Merge all matching results into the first one
-    const primaryIdx = matchingIndices[0];
-    const primary = aggregated[primaryIdx];
-    const existingSourceIds = new Set(primary.platforms.map(p => p.sourceId));
+    if (matchingIndices.length > 1) {
+      // Merge all matching results into the first one
+      const existingSourceIds = new Set(primary.platforms.map(p => p.sourceId));
 
-    for (let i = 1; i < matchingIndices.length; i++) {
-      const other = aggregated[matchingIndices[i]];
-      for (const p of other.platforms) {
-        if (!existingSourceIds.has(p.sourceId)) {
-          primary.platforms.push(p);
-          existingSourceIds.add(p.sourceId);
+      for (let i = 1; i < matchingIndices.length; i++) {
+        const other = aggregated[matchingIndices[i]];
+        for (const p of other.platforms) {
+          if (!existingSourceIds.has(p.sourceId)) {
+            primary.platforms.push(p);
+            existingSourceIds.add(p.sourceId);
+          }
+        }
+        if (!primary.imageUrl && other.imageUrl) {
+          primary.imageUrl = other.imageUrl;
         }
       }
-      if (!primary.imageUrl && other.imageUrl) {
-        primary.imageUrl = other.imageUrl;
+
+      console.log(`[Override] Merged ${matchingIndices.length} results for "${override.group_name}"`);
+
+      // Remove the merged results (iterate in reverse to keep indices stable)
+      for (let i = matchingIndices.length - 1; i >= 1; i--) {
+        aggregated.splice(matchingIndices[i], 1);
+      }
+    } else {
+      console.log(`[Override] Protected "${override.group_name}" from disambiguation (all URLs on one result)`);
+    }
+
+    // Inject any override URLs that aren't already on the result (e.g. Qobuz search missed them)
+    const existingUrls = new Set(primary.platforms.map(p => p.url.replace(/\/+$/, '').toLowerCase()));
+    for (const url of override.platform_urls) {
+      const normalized = url.replace(/\/+$/, '').toLowerCase();
+      if (existingUrls.has(normalized)) continue;
+      const sourceId = sourceIdFromUrl(url);
+      if (sourceId) {
+        primary.platforms.push({ sourceId, url });
+        console.log(`[Override] Injected missing ${sourceId} URL for "${override.group_name}": ${url}`);
       }
     }
 
@@ -136,13 +171,6 @@ export function applyMergeOverrides(
 
     primary.matchConfidence = 'verified';
     primary.overrideMerged = true;
-
-    console.log(`[Override] Merged ${matchingIndices.length} results for "${override.group_name}"`);
-
-    // Remove the merged results (iterate in reverse to keep indices stable)
-    for (let i = matchingIndices.length - 1; i >= 1; i--) {
-      aggregated.splice(matchingIndices[i], 1);
-    }
   }
 }
 
