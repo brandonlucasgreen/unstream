@@ -118,7 +118,10 @@ export async function handler(event: {
     return {
       statusCode: 500,
       headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'Failed to save merge override' }),
+      body: JSON.stringify({
+        error: 'Failed to save merge override',
+        detail: error.message || error.code || String(error),
+      }),
     };
   }
 
