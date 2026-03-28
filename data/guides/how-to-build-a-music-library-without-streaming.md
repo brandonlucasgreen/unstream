@@ -8,11 +8,11 @@ draft: true
 
 # How to build a music library without streaming
 
-I cancelled my Apple Music subscription after 10+ years. I don't miss it as much as I expected. Here's the practical stuff I figured out along the way.
+I cancelled my [Apple Music](https://music.apple.com) subscription after 10+ years. I don't miss it as much as I expected. Here's the practical stuff I figured out along the way.
 
 ## Figure out what you actually listen to
 
-Before you buy anything, it helps to know what you actually care about versus what you just have on in the background. Most streaming services show your listening history: Spotify has Wrapped and tools like [stats.fm](https://stats.fm) for detailed all-time data. Apple Music has Replay playlists. If you scrobble with Last.fm or ListenBrainz, you already have this.
+Before you buy anything, it helps to know what you actually care about versus what you just have on in the background. Most streaming services show your listening history: [Spotify](https://spotify.com) has Wrapped and tools like [stats.fm](https://stats.fm) for detailed all-time data. Apple Music has Replay playlists. If you scrobble with [Last.fm](https://www.last.fm) or [ListenBrainz](https://listenbrainz.org), you already have this.
 
 Make a short list of your top 15–20 artists. These are the ones worth buying from first — the artists whose music you'd actually miss if it disappeared.
 
@@ -28,7 +28,7 @@ Over a year that's 12–24 albums you permanently own, with $100+ going directly
 
 ## Find where artists sell
 
-This used to be the annoying part. Artists sell across tons of platforms — Bandcamp, Mirlo, Ampwall, their own websites, Ko-fi — and checking each one individually is tedious enough that most people just don't bother.
+This used to be the annoying part. Artists sell across tons of platforms — [Bandcamp](https://bandcamp.com), [Mirlo](https://mirlo.space), [Ampwall](https://ampwall.com), their own websites, [Ko-fi](https://ko-fi.com) — and checking each one individually is tedious enough that most people just don't bother.
 
 [Unstream](https://unstream.stream) does this in one search. Type in an artist and it shows everywhere they sell across 23+ platforms, with how much of your money reaches them on each one. Free, no account needed.
 
@@ -36,17 +36,17 @@ This used to be the annoying part. Artists sell across tons of platforms — Ban
 
 Once you have files, you need something to play them. There are more options than you'd think.
 
-**Desktop:** Apple Music / iTunes still works great as a local library manager even without a subscription — it was built for this before it was built for streaming. Strawberry is a solid open-source alternative on Mac, Linux, and Windows. foobar2000 is the classic choice on Windows if you like customization.
+**Desktop:** Apple Music / iTunes still works great as a local library manager even without a subscription — it was built for this before it was built for streaming. [Strawberry](https://www.strawberrymusicplayer.org) is a solid open-source alternative on Mac, Linux, and Windows. [foobar2000](https://www.foobar2000.org) is the classic choice on Windows if you like customization.
 
-**Mobile:** Apple Music syncs local files from your Mac to your iPhone, which is convenient if you're in that ecosystem. Poweramp is the go-to on Android — great interface, plays everything. Plexamp is excellent if you run a Plex server at home (more on that below).
+**Mobile:** Apple Music syncs local files from your Mac to your iPhone, which is convenient if you're in that ecosystem. [Poweramp](https://powerampapp.com) is the go-to on Android — great interface, plays everything. [Plexamp](https://www.plex.tv/plexamp/) is excellent if you run a [Plex](https://www.plex.tv) server at home (more on that below).
 
-**Self-hosted:** This is the fun rabbit hole. Navidrome or Jellyfin let you run your own streaming server for your purchased music, accessible from anywhere on any device. It's like having your own private Spotify, except it's your music and nobody's tracking what you listen to. Takes a little setup but it's surprisingly easy if you have a computer that's always on or a cheap VPS.
+**Self-hosted:** This is the fun rabbit hole. [Navidrome](https://www.navidrome.org) or [Jellyfin](https://jellyfin.org) let you run your own streaming server for your purchased music, accessible from anywhere on any device. It's like having your own private Spotify, except it's your music and nobody's tracking what you listen to. Takes a little setup but it's surprisingly easy if you have a computer that's always on or a cheap VPS.
 
 The main point: you don't need a subscription service to have music on your phone. Local files work fine, and have for decades.
 
 ## Use your actual library
 
-Your public library probably offers free music through **Hoopla** and **Freegal** — just need a library card. Hoopla in particular has a surprisingly large catalog including a lot of indie releases. You typically get a set number of borrows per month (varies by library, usually 8–20).
+Your public library probably offers free music through **[Hoopla](https://www.hoopladigital.com)** and **[Freegal](https://www.freegalmusic.com)** — just need a library card. Hoopla in particular has a surprisingly large catalog including a lot of indie releases. You typically get a set number of borrows per month (varies by library, usually 8–20).
 
 These are great for exploring new music without spending anything. Hear something interesting? Buy it on Bandcamp. Didn't love it? No money spent. They also support your local library system, which is nice.
 
@@ -56,9 +56,9 @@ This is honestly one of the better parts of leaving streaming behind. When an al
 
 **People.** Ask friends what they're into. Join music forums, subreddits, Discord servers, Mastodon communities. The recommendations you get from actual humans who know your taste are better than anything Spotify's algorithm produces.
 
-**Music blogs and publications.** [Bandcamp Daily](https://daily.bandcamp.com/) is excellent — real music journalism with in-depth reviews and genre deep-dives. The Quietus, Pitchfork, and genre-specific blogs all do good curation work. These are people who spend their lives listening to music and writing about what's worth your time.
+**Music blogs and publications.** [Bandcamp Daily](https://daily.bandcamp.com/) is excellent — real music journalism with in-depth reviews and genre deep-dives. [The Quietus](https://thequietus.com), [Pitchfork](https://pitchfork.com), and genre-specific blogs all do good curation work. These are people who spend their lives listening to music and writing about what's worth your time.
 
-**Radio.** College radio, community radio, and internet stations like KEXP and NTS are goldmines for discovery. KEXP in particular has an incredible archive of live sessions. The DJ-curated experience is fundamentally different from algorithmic playlists — someone with actual taste picked these songs and put them in this order.
+**Radio.** College radio, community radio, and internet stations like [KEXP](https://kexp.org) and [NTS](https://www.nts.live) are goldmines for discovery. KEXP in particular has an incredible archive of live sessions. The DJ-curated experience is fundamentally different from algorithmic playlists — someone with actual taste picked these songs and put them in this order.
 
 **Live shows.** Nothing beats seeing an artist live and buying their record at the merch table. You get to talk to them, they sign it, and you have a memory attached to the music. Streaming can't do that.
 

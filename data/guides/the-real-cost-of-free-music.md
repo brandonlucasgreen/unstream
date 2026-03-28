@@ -24,7 +24,7 @@ Each step made music cheaper and more convenient for listeners. Each step also r
 
 ## Who this works for
 
-The streaming model isn't broken for everyone. Major labels — Universal, Sony, Warner — control 60–70% of the market and negotiated equity stakes in the platforms themselves. When Spotify's stock goes up, so does their portfolio. The pro-rata royalty model (where all streams get pooled and divided by market share) naturally funnels money toward their massive catalogs. They're doing fine.
+The streaming model isn't broken for everyone. Major labels — Universal, Sony, Warner — control 60–70% of the market and negotiated equity stakes in the platforms themselves. When [Spotify](https://spotify.com)'s stock goes up, so does their portfolio. The pro-rata royalty model (where all streams get pooled and divided by market share) naturally funnels money toward their massive catalogs. They're doing fine.
 
 Spotify itself has never consistently turned a profit from *music* — the growth story is about subscriber count, ad revenue, and increasingly podcasts and audiobooks. The music is basically a loss leader to keep you subscribed.
 
@@ -40,7 +40,7 @@ And organic discovery keeps getting harder. Streaming platforms optimize for eng
 
 ## The alternative that already exists
 
-On platforms like Bandcamp, Mirlo, Ampwall, and Faircamp, the economics are different:
+On platforms like [Bandcamp](https://bandcamp.com), [Mirlo](https://mirlo.space), [Ampwall](https://ampwall.com), and [Faircamp](https://simonrepp.com/faircamp/), the economics are different:
 
 - You pay for a specific thing — an album, a track, a membership
 - The artist gets 80–97% of your payment, depending on the platform

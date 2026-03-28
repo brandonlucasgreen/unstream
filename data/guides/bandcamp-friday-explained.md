@@ -8,7 +8,7 @@ draft: true
 
 # Bandcamp Friday, explained
 
-On the **first Friday of every month**, Bandcamp waives their revenue share on all sales. Normally they take 10–15% (which is already pretty good compared to most platforms). On Bandcamp Fridays, that drops to zero.
+On the **first Friday of every month**, [Bandcamp](https://bandcamp.com) waives their revenue share on all sales. Normally they take 10–15% (which is already pretty good compared to most platforms). On Bandcamp Fridays, that drops to zero.
 
 Artists take home about **97%** of every sale — the only deduction is credit card processing fees. It's about as close as you can get to handing someone cash for their music.
 
@@ -24,7 +24,7 @@ On a normal day, a $10 album on Bandcamp nets the artist about **$8.00–8.50** 
 
 On Bandcamp Friday, that same $10 purchase nets about **$9.40–9.70**. The per-transaction difference isn't huge, but the real impact is the concentration. Bandcamp Fridays drive massively more total sales than a normal Friday — artists promote their catalogs, fans set aside budget, labels time their releases, and the whole thing becomes a collective event. The shared ritual of it matters.
 
-For context: an artist would need roughly 2,500 Spotify streams to earn what one $10 Bandcamp Friday purchase gives them.
+For context: an artist would need roughly 2,500 [Spotify](https://spotify.com) streams to earn what one $10 Bandcamp Friday purchase gives them.
 
 ## Getting the most out of it
 

@@ -16,11 +16,11 @@ That kind of broke my brain. It made the whole streaming model — fractions of 
 
 ## The other side
 
-At the same time, I'd been paying for Apple Music for over a decade and wanting to cancel. Not because it's bad — it's incredibly convenient. But I missed *owning* things. I wanted to find something new, buy it, and have it be mine. I wanted more of my money going to artists and less to Apple.
+At the same time, I'd been paying for [Apple Music](https://music.apple.com) for over a decade and wanting to cancel. Not because it's bad — it's incredibly convenient. But I missed *owning* things. I wanted to find something new, buy it, and have it be mine. I wanted more of my money going to artists and less to Apple.
 
 I'd also been getting increasingly uncomfortable with the economics. I knew the per-stream payout numbers were bad, but when I did the math on my own listening — how many times I'd played certain albums, what those artists actually earned from my subscription — it felt pretty gross. I was paying $10.99 a month and the artists I cared about most were seeing pennies.
 
-When I started looking around for alternatives, I was surprised by how much was already out there. So many artists I like were selling on Bandcamp. A bunch were on platforms I'd never heard of — Mirlo, Ampwall, Faircamp. Some had Ko-fi pages or Patreon memberships. The whole infrastructure for supporting artists directly was already there.
+When I started looking around for alternatives, I was surprised by how much was already out there. So many artists I like were selling on [Bandcamp](https://bandcamp.com). A bunch were on platforms I'd never heard of — [Mirlo](https://mirlo.space), [Ampwall](https://ampwall.com), [Faircamp](https://simonrepp.com/faircamp/). Some had [Ko-fi](https://ko-fi.com) pages or [Patreon](https://www.patreon.com) memberships. The whole infrastructure for supporting artists directly was already there.
 
 The problem was just finding it all.
 
@@ -42,7 +42,7 @@ A few things I cared about from the start:
 
 **Open source.** The whole codebase is [on GitHub](https://github.com/brandonlucasgreen/unstream). Anyone can see how it works, suggest improvements, or contribute. If I disappeared tomorrow the code would still be there.
 
-**Not anti-streaming.** I'm not here to shame anyone for using Spotify. I still use it sometimes. But I think people should know alternatives exist, and that those alternatives pay artists dramatically better. Unstream just makes them easier to find.
+**Not anti-streaming.** I'm not here to shame anyone for using [Spotify](https://spotify.com). I still use it sometimes. But I think people should know alternatives exist, and that those alternatives pay artists dramatically better. Unstream just makes them easier to find.
 
 ## What it's turned into
 
