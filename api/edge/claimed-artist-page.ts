@@ -55,6 +55,7 @@ const SOCIAL_ICONS: Record<string, string> = {
 };
 
 export default async function handler(request: Request, context: Context) {
+  try {
   const url = new URL(request.url);
   const slug = url.pathname.replace(/^\/a\//, '').replace(/\/$/, '');
 
@@ -401,4 +402,7 @@ export default async function handler(request: Request, context: Context) {
       'Cache-Tag': `artist-${slug}`,
     },
   });
+  } catch {
+    return context.next();
+  }
 }
