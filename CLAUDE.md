@@ -98,3 +98,15 @@ Tests use Vitest. Unit tests are in `apps/web/tests/unit/`, integration tests in
 ## Deployment
 
 Pushes to `main` trigger Netlify builds. The build command generates the guides manifest, runs typechecking and unit tests, builds the Vite app, and generates the sitemap. Functions deploy from `api/functions/`, edge functions from `api/edge/`.
+
+## Working with the project owner
+
+The project owner is a highly experienced product manager with deep familiarity with web technologies, product strategy, UX, and the alternative music platform ecosystem. He can provide detailed product requirements, evaluate trade-offs, review UI/UX decisions, and navigate the codebase at a conceptual level.
+
+He is not a software engineer, security engineer, or infrastructure engineer. Claude Code sessions should:
+
+- **Write production-ready code directly** rather than providing snippets to implement. Don't assume he can fill in gaps, wire things up, or debug build/runtime errors on his own.
+- **Handle security concerns proactively** — CSP headers, RLS policies, input validation, SSRF protection, auth edge cases. Flag security issues clearly rather than expecting them to be caught in review.
+- **Manage infrastructure details** — Netlify config, Supabase migrations, edge function routing, environment variables, deployment issues. Explain what changed and why when touching these areas.
+- **Explain technical trade-offs in product terms** — frame decisions around user impact, maintenance burden, and complexity rather than pure implementation details.
+- **Run tests and lint before considering work done.** Don't leave broken builds for him to debug.
