@@ -19,9 +19,23 @@ const PILLAR_LABELS: Record<string, string> = {
   'builder': 'Builder / open source',
 };
 
+const INDEX_TITLE = 'Guides - Unstream';
+const INDEX_DESCRIPTION = 'How streaming payouts work, platforms worth knowing about, and ways to put more money in artists\' pockets.';
+
 export function GuidesIndexPage() {
   const [guides, setGuides] = useState<GuideEntry[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    document.title = INDEX_TITLE;
+    const descTag = document.querySelector('meta[name="description"]');
+    if (descTag) descTag.setAttribute('content', INDEX_DESCRIPTION);
+
+    return () => {
+      document.title = 'Unstream - Support Artists Directly';
+      if (descTag) descTag.setAttribute('content', 'Search any artist and find where to support them directly on alternative platforms like Bandcamp, Mirlo, and more.');
+    };
+  }, []);
 
   useEffect(() => {
     fetch('/data/guides/guides-manifest.json')

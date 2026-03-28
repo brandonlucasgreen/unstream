@@ -25,6 +25,10 @@
   path = "/artists"
   function = "artist-directory-page"
 
+[[edge_functions]]
+  path = "/guides/*"
+  function = "guide-page"
+
 [[redirects]]
   from = "/api/artist-directory"
   to = "/.netlify/functions/artist-directory"

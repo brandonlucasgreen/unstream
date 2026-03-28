@@ -30,12 +30,24 @@ export function GuidePage() {
       fetch('/data/guides/guides-manifest.json').then(res => res.json()),
     ])
       .then(([md, manifest]: [string, GuideMeta[]]) => {
-        // Strip YAML frontmatter before rendering
         const stripped = md.replace(/^---\n[\s\S]*?\n---\n*/, '');
         setContent(stripped);
-        setMeta(manifest.find(g => g.slug === slug) || null);
+        const guideMeta = manifest.find(g => g.slug === slug) || null;
+        setMeta(guideMeta);
+
+        if (guideMeta) {
+          document.title = `${guideMeta.title} - Unstream`;
+          const descTag = document.querySelector('meta[name="description"]');
+          if (descTag) descTag.setAttribute('content', guideMeta.description);
+        }
       })
       .catch(() => setError(true));
+
+    return () => {
+      document.title = 'Unstream - Support Artists Directly';
+      const descTag = document.querySelector('meta[name="description"]');
+      if (descTag) descTag.setAttribute('content', 'Search any artist and find where to support them directly on alternative platforms like Bandcamp, Mirlo, and more.');
+    };
   }, [slug]);
 
   if (error) {
@@ -48,6 +60,8 @@ export function GuidePage() {
       </div>
     );
   }
+
+  const pageUrl = `https://unstream.stream/guides/${slug}`;
 
   return (
     <div className="min-h-screen">
@@ -71,12 +85,39 @@ export function GuidePage() {
           {content === null ? (
             <p className="text-text-muted text-center">Loading...</p>
           ) : (
-            <article className="prose prose-neutral dark:prose-invert max-w-none
-              prose-headings:font-display prose-headings:text-text-primary
-              prose-p:text-text-secondary prose-a:text-accent-primary
-              prose-li:text-text-secondary prose-strong:text-text-primary">
-              <Markdown>{content}</Markdown>
-            </article>
+            <>
+              {meta && (
+                <script
+                  type="application/ld+json"
+                  dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                      '@context': 'https://schema.org',
+                      '@type': 'Article',
+                      'headline': meta.title,
+                      'description': meta.description,
+                      'datePublished': meta.published,
+                      'url': pageUrl,
+                      'author': {
+                        '@type': 'Person',
+                        'name': 'Brandon Lucas Green',
+                        'url': 'https://bgreen.lol',
+                      },
+                      'publisher': {
+                        '@type': 'Organization',
+                        'name': 'Unstream',
+                        'url': 'https://unstream.stream',
+                      },
+                    }),
+                  }}
+                />
+              )}
+              <article className="prose prose-neutral dark:prose-invert max-w-none
+                prose-headings:font-display prose-headings:text-text-primary
+                prose-p:text-text-secondary prose-a:text-accent-primary
+                prose-li:text-text-secondary prose-strong:text-text-primary">
+                <Markdown>{content}</Markdown>
+              </article>
+            </>
           )}
         </div>
       </main>

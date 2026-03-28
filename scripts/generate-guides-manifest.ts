@@ -39,7 +39,13 @@ function parseFrontmatter(content: string): Record<string, string> | null {
     const colon = line.indexOf(':');
     if (colon === -1) continue;
     const key = line.slice(0, colon).trim();
-    const value = line.slice(colon + 1).trim();
+    let value = line.slice(colon + 1).trim();
+    // Strip surrounding quotes from YAML values
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    // Unescape escaped quotes
+    value = value.replace(/\\"/g, '"').replace(/\\'/g, "'");
     fields[key] = value;
   }
   return fields;
