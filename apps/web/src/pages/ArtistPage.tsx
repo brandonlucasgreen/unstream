@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { SearchBar } from '../components/SearchBar';
 import { ResultCard } from '../components/ResultCard';
-import { ArtistAuthBar } from '../components/ArtistAuthBar';
+
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import type { SearchResult } from '../types';
@@ -178,7 +178,7 @@ export function ArtistPage() {
 
   return (
     <div className="min-h-screen">
-      <ArtistAuthBar />
+
       <Header />
 
       {/* Search */}

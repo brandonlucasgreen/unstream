@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { signInWithMagicLink } from '../services/auth';
 import { useAuth } from '../contexts/AuthContext';
-import { ArtistAuthBar } from '../components/ArtistAuthBar';
+
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { SocialIcon } from '../components/SocialIcon';
@@ -273,7 +273,7 @@ export function ClaimPage() {
 
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
-      <ArtistAuthBar />
+
       <Header />
 
       <main className="flex-1 flex items-center justify-center p-6">

@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { SearchBar } from './components/SearchBar';
 import { ResultCard } from './components/ResultCard';
-import { ArtistAuthBar } from './components/ArtistAuthBar';
+
 import { Header } from './components/Header';
 import type { SearchResult } from './types';
 import { sources, sourceCategories, searchPlatforms, resolveArtistUrl, fetchMusicBrainzData, mergeWithMusicBrainzData } from './services/sources';
@@ -285,7 +285,7 @@ function App() {
 
   return (
     <div className="min-h-screen">
-      <ArtistAuthBar />
+
       <Header />
       {/* Hero */}
       <div className="pt-6 pb-8 px-4">
