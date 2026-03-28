@@ -180,7 +180,7 @@ export function ArtistEditPage() {
       }
     }
     load();
-  }, [slug, session, authLoading, navigate]);
+  }, [slug, session?.user?.id, authLoading, navigate]);
 
   function addLink() {
     const usedPlatforms = new Set(form.links.map(l => l.platform));
