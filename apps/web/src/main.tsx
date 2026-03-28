@@ -16,6 +16,7 @@ const RoadmapPage = lazy(() => import('./pages/RoadmapPage.tsx').then(m => ({ de
 const SupportPage = lazy(() => import('./pages/SupportPage.tsx').then(m => ({ default: m.SupportPage })))
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage.tsx').then(m => ({ default: m.PrivacyPolicyPage })))
 const AdminMergePage = lazy(() => import('./pages/AdminMergePage.tsx').then(m => ({ default: m.AdminMergePage })))
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage.tsx').then(m => ({ default: m.ResetPasswordPage })))
 const GuidesIndexPage = lazy(() => import('./pages/GuidesIndexPage.tsx').then(m => ({ default: m.GuidesIndexPage })))
 const GuidePage = lazy(() => import('./pages/GuidePage.tsx').then(m => ({ default: m.GuidePage })))
 
@@ -38,6 +39,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/a/:slug" element={<ArtistPage />} />
             <Route path="/claim/:slug" element={<ClaimPage />} />
             <Route path="/artist-login" element={<ArtistLoginPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/artist-dashboard" element={<ArtistDashboardPage />} />
             <Route path="/artist-edit/:slug" element={<ArtistEditPage />} />
             <Route path="/artists" element={<ArtistDirectoryPage />} />
