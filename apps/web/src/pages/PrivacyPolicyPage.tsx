@@ -1,40 +1,12 @@
-import { Link } from 'react-router-dom';
-import { ThemeToggle } from '../components/ThemeToggle';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
-import { useTheme } from '../hooks/useTheme';
+import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 
 export function PrivacyPolicyPage() {
-  const { preference, cycleTheme } = useTheme();
-
   return (
     <div className="min-h-screen">
       <ArtistAuthBar />
-      {/* Header */}
-      <header className="pt-8 pb-8 px-4 relative">
-        <div className="absolute top-4 right-4">
-          <ThemeToggle preference={preference} onCycle={cycleTheme} />
-        </div>
-        <div className="max-w-4xl mx-auto text-center">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-text-primary transition-colors mb-4"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to search
-          </Link>
-          <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
-            <Link
-              to="/"
-              className="text-text-primary hover:opacity-80 transition-opacity"
-            >
-              Unstream 🤘🏻
-            </Link>
-          </h1>
-        </div>
-      </header>
+      <Header />
 
       {/* Content */}
       <main className="px-4 pb-16">
