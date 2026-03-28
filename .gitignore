@@ -8,7 +8,6 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-docs
 dist
 dist-ssr
 *.local
@@ -60,5 +59,3 @@ data/social-posts/*.log
 # Generated guides manifest (built from frontmatter)
 data/guides/guides-manifest.json
 
-# Claude Code
-CLAUDE.md
