@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArtistAuthBar } from '../components/ArtistAuthBar';
+
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 
@@ -50,7 +50,7 @@ export function ArtistDirectoryPage() {
 
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
-      <ArtistAuthBar />
+
       <Header />
 
       <div className="flex-1 flex flex-col">

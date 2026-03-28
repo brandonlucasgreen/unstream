@@ -1,11 +1,11 @@
-import { ArtistAuthBar } from '../components/ArtistAuthBar';
+
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 
 export function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen">
-      <ArtistAuthBar />
+
       <Header />
 
       {/* Content */}

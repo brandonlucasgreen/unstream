@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { ArtistAuthBar } from '../components/ArtistAuthBar';
+
 import { Header } from '../components/Header';
 import { ArtistAnalytics } from '../components/ArtistAnalytics';
 import { PasswordSection } from '../components/PasswordSection';
@@ -67,7 +67,7 @@ export function ArtistDashboardPage() {
 
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
-      <ArtistAuthBar />
+
       <Header />
 
       <main className="flex-1 p-6">

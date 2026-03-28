@@ -1,11 +1,11 @@
-import { ArtistAuthBar } from '../components/ArtistAuthBar';
+
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 
 export function SupportPage() {
   return (
     <div className="min-h-screen">
-      <ArtistAuthBar />
+
       <Header />
 
       <div className="pt-8 pb-8 px-4">

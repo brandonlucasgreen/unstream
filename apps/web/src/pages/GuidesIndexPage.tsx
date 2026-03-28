@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArtistAuthBar } from '../components/ArtistAuthBar';
+
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 
@@ -36,7 +36,7 @@ export function GuidesIndexPage() {
 
   return (
     <div className="min-h-screen">
-      <ArtistAuthBar />
+
       <Header />
       <div className="pt-6 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">

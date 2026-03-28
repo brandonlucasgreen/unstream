@@ -2,7 +2,7 @@ import { useReducer, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { sources } from '../services/sources';
-import { ArtistAuthBar } from '../components/ArtistAuthBar';
+
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import type { SourceId } from '../types';
@@ -344,7 +344,7 @@ export function ArtistEditPage() {
 
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
-      <ArtistAuthBar />
+
       <Header />
 
       <main className="flex-1 p-6">
