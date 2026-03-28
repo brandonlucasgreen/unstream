@@ -6,6 +6,7 @@ function escapeHtml(str: string): string {
 }
 
 export default async function handler(request: Request, context: Context) {
+  try {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const supabaseKey = Deno.env.get("SUPABASE_SERVICE_KEY");
   if (!supabaseUrl || !supabaseKey) return context.next();
@@ -189,4 +190,8 @@ export default async function handler(request: Request, context: Context) {
       'Cache-Control': 'public, max-age=300, s-maxage=300',
     },
   });
+  } catch {
+    // If anything fails, fall through to the SPA
+    return context.next();
+  }
 }

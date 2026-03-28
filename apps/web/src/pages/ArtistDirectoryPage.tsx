@@ -15,13 +15,20 @@ export function ArtistDirectoryPage() {
 
   useEffect(() => {
     async function load() {
-      try {
-        const res = await fetch('/api/artist-directory');
-        if (res.ok) {
-          const data = await res.json();
-          setArtists(data.artists || []);
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const res = await fetch('/api/artist-directory');
+          if (res.ok) {
+            const data = await res.json();
+            setArtists(data.artists || []);
+            break;
+          }
+          if (attempt === 0 && res.status >= 500) continue;
+        } catch {
+          if (attempt === 0) continue;
         }
-      } catch { /* ignore */ }
+        break;
+      }
       setLoading(false);
     }
     load();
