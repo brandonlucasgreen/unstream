@@ -57,5 +57,8 @@ apps/mac/**/xcuserdata/
 data/social-posts/20*-W*
 data/social-posts/*.log
 
+# Generated guides manifest (built from frontmatter)
+data/guides/guides-manifest.json
+
 # Claude Code
 CLAUDE.md

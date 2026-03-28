@@ -25,13 +25,13 @@ export default defineConfig({
       },
     },
     {
-      name: 'copy-artist-data',
+      name: 'copy-data-to-dist',
       closeBundle() {
         const src = resolve(__dirname, '..', '..', 'data');
         const dest = resolve(__dirname, 'dist', 'data');
         if (existsSync(src)) {
           cpSync(src, dest, { recursive: true });
-          console.log('Copied data/ to dist/data/');
+          console.log('Copied /data to dist/data');
         }
       },
     },

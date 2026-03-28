@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "cd apps/web && npx vite",
-    "build": "cd apps/web && npx tsc -b && npx vitest run tests/unit && npx vite build && npx tsx ../../scripts/generate-sitemap.ts",
+    "build": "npx tsx scripts/generate-guides-manifest.ts && cd apps/web && npx tsc -b && npx vitest run tests/unit && npx vite build && npx tsx ../../scripts/generate-sitemap.ts",
     "generate:artists": "tsx scripts/generate-artist-list.ts",
     "generate:data": "tsx scripts/generate-artist-data.ts",
     "generate:social": "tsx scripts/generate-social-posts.ts",
@@ -18,13 +18,15 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.99.1",
+    "@tailwindcss/typography": "^0.5.19",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.36.1",
     "bandcamp-fetch": "^1.1.2",
     "node-html-parser": "^7.0.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-"react-router-dom": "^7.11.0"
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.11.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

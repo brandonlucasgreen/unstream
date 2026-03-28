@@ -10,6 +10,9 @@ export function Footer() {
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <Link to="/artists" className="hover:text-text-primary transition-colors">Index</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
+          {/* TODO: unhide when real guide content is published */}
+          {/* <Link to="/guides" className="hover:text-text-primary transition-colors">Guides</Link>
+          <span className="text-text-muted/40 text-xs">&#x2022;</span> */}
           <a
             href="https://unstream.featurebase.app/"
             target="_blank"
