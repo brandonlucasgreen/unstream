@@ -32,6 +32,7 @@ createRoot(document.getElementById('root')!).render(
           <Routes>
             <Route path="/" element={<App />} />
             <Route path="/artist/:slug" element={<ArtistPage />} />
+            <Route path="/a/:slug" element={<ArtistPage />} />
             <Route path="/claim/:slug" element={<ClaimPage />} />
             <Route path="/artist-login" element={<ArtistLoginPage />} />
             <Route path="/artist-dashboard" element={<ArtistDashboardPage />} />
