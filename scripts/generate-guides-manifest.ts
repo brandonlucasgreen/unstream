@@ -7,6 +7,7 @@
  *   description: One-line description for the index page
  *   pillar: artist-economics | platform-discovery | how-to | builder
  *   published: 2026-03-28
+ *   draft: true          (optional – when true the guide is excluded from the manifest)
  *   ---
  *
  * Output: data/guides/guides-manifest.json
@@ -54,6 +55,12 @@ function main() {
 
     if (!fm) {
       console.warn(`Skipping ${file}: no frontmatter found`);
+      continue;
+    }
+
+    // Skip drafts
+    if (fm.draft === 'true') {
+      console.log(`Skipping ${file}: draft`);
       continue;
     }
 
