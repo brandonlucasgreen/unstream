@@ -6,7 +6,6 @@ published: 2026-03-28
 draft: false
 ---
 
-# Bandcamp and beyond: alternative music platforms worth knowing
 
 Most people who want to support artists more directly know about Bandcamp. But there's a whole ecosystem of artist-friendly platforms out there, and some of them are really interesting. Here's a tour.
 

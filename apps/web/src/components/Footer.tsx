@@ -8,6 +8,8 @@ export function Footer() {
         <nav className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
           <Link to="/artists" className="hover:text-text-primary transition-colors">Index</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
+          <Link to="/guides" className="hover:text-text-primary transition-colors">Guides</Link>
+          <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <a
             href="https://unstream.featurebase.app/"
             target="_blank"

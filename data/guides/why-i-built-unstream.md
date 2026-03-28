@@ -6,7 +6,6 @@ published: 2026-03-28
 draft: false
 ---
 
-# Why I built Unstream
 
 I make music under the name [Kid Lightbulbs](https://kidlightbulbs.com). I'm not famous. I haven't performed live in years. By every metric the streaming industry cares about, I shouldn't be making money from music.
 

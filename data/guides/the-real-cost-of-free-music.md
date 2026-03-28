@@ -6,7 +6,6 @@ published: 2026-03-28
 draft: false
 ---
 
-# The real cost of "free" music
 
 Every song ever recorded, on demand, for $10.99 a month (or free with ads). As a listener, it's hard to argue with that.
 

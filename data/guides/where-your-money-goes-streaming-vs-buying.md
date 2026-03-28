@@ -6,7 +6,6 @@ published: 2026-03-28
 draft: false
 ---
 
-# Where your money goes when you stream vs. buy music
 
 You pay $10.99 a month for [Spotify](https://spotify.com). You listen to hundreds of songs. Some of that money goes to artists, right?
 
