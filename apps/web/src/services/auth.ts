@@ -75,6 +75,33 @@ export function waitForMagicLinkSession(timeoutMs = 5000): Promise<{ session: Se
   });
 }
 
+export async function signInWithPassword(email: string, password: string): Promise<{ error: string | null }> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return { error: 'Auth not configured' };
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  return { error: error?.message ?? null };
+}
+
+export async function resetPasswordForEmail(email: string, redirectTo: string): Promise<{ error: string | null }> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return { error: 'Auth not configured' };
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+  return { error: error?.message ?? null };
+}
+
+export async function updatePassword(newPassword: string): Promise<{ error: string | null }> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return { error: 'Auth not configured' };
+
+  const { error } = await supabase.auth.updateUser({
+    password: newPassword,
+    data: { has_password: true },
+  });
+  return { error: error?.message ?? null };
+}
+
 export async function signOut(): Promise<void> {
   const supabase = getSupabaseClient();
   if (!supabase) return;

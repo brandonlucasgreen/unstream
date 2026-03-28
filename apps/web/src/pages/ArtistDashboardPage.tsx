@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
 import { ArtistAnalytics } from '../components/ArtistAnalytics';
+import { PasswordSection } from '../components/PasswordSection';
 import { Footer } from '../components/Footer';
 
 interface ClaimedProfile {
@@ -134,6 +135,11 @@ export function ArtistDashboardPage() {
               ))}
             </div>
           )}
+
+          <div className="space-y-2">
+            <h2 className="text-lg font-semibold">Account</h2>
+            <PasswordSection />
+          </div>
         </div>
       </main>
 
