@@ -10,7 +10,7 @@ draft: true
 
 On the **first Friday of every month**, [Bandcamp](https://bandcamp.com) waives their revenue share on all sales. Normally they take 10–15% (which is already pretty good compared to most platforms). On Bandcamp Fridays, that drops to zero.
 
-Artists take home about **97%** of every sale — the only deduction is credit card processing fees. It's about as close as you can get to handing someone cash for their music.
+Artists take home about **97%** of every sale — the only deduction is credit card processing fees. It's about as close as you can get to handing someone cash for their music, but that someone is any independent artist in the world from your laptop or smartphone.
 
 ## How it started
 
@@ -22,7 +22,7 @@ The first one did $4.3 million in a single day. It obviously hit a nerve — fan
 
 On a normal day, a $10 album on Bandcamp nets the artist about **$8.00–8.50** after Bandcamp's cut and payment processing. That's already excellent — far better than streaming, where an artist might need 2,000+ plays to earn the same.
 
-On Bandcamp Friday, that same $10 purchase nets about **$9.40–9.70**. The per-transaction difference isn't huge, but the real impact is the concentration. Bandcamp Fridays drive massively more total sales than a normal Friday — artists promote their catalogs, fans set aside budget, labels time their releases, and the whole thing becomes a collective event. The shared ritual of it matters.
+On Bandcamp Friday, that same $10 purchase nets about **$9.70**. The per-transaction difference isn't huge, but the real impact is the concentration. Bandcamp Fridays drive massively more total sales than a normal Friday — artists promote their catalogs, fans set aside budget, labels time their releases, and the whole thing becomes a collective event. The shared ritual of it matters.
 
 For context: an artist would need roughly 2,500 [Spotify](https://spotify.com) streams to earn what one $10 Bandcamp Friday purchase gives them.
 
@@ -42,4 +42,4 @@ For context: an artist would need roughly 2,500 [Spotify](https://spotify.com) s
 
 [Unstream](https://unstream.stream) flags Bandcamp Friday automatically — search results show the adjusted ~97% payout for Bandcamp listings and a "BC Friday!" label. Quick way to check if an artist you're thinking about has a Bandcamp page, and a nudge to buy there today.
 
-Bandcamp Friday is the first Friday of every month. [isitbandcampfriday.com](https://isitbandcampfriday.com) will tell you if today's the day.
+Bandcamp Friday is the first Friday of most months! [isitbandcampfriday.com](https://isitbandcampfriday.com) will tell you if today's the day.

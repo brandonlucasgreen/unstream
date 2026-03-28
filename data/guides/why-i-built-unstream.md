@@ -16,33 +16,33 @@ That kind of broke my brain. It made the whole streaming model — fractions of 
 
 ## The other side
 
-At the same time, I'd been paying for [Apple Music](https://music.apple.com) for over a decade and wanting to cancel. Not because it's bad — it's incredibly convenient. But I missed *owning* things. I wanted to find something new, buy it, and have it be mine. I wanted more of my money going to artists and less to Apple.
+At the same time, I'd been paying for [Apple Music](https://music.apple.com) for over a decade and wanted to cancel. Not because it's bad — it's incredibly convenient. But I missed *owning* things. I wanted to find something new, buy it, and have it be mine. I wanted more of my money going to artists and one fewer subscription.
 
 I'd also been getting increasingly uncomfortable with the economics. I knew the per-stream payout numbers were bad, but when I did the math on my own listening — how many times I'd played certain albums, what those artists actually earned from my subscription — it felt pretty gross. I was paying $10.99 a month and the artists I cared about most were seeing pennies.
 
-When I started looking around for alternatives, I was surprised by how much was already out there. So many artists I like were selling on [Bandcamp](https://bandcamp.com). A bunch were on platforms I'd never heard of — [Mirlo](https://mirlo.space), [Ampwall](https://ampwall.com), [Faircamp](https://simonrepp.com/faircamp/). Some had [Ko-fi](https://ko-fi.com) pages or [Patreon](https://www.patreon.com) memberships. The whole infrastructure for supporting artists directly was already there.
+When I started looking around for alternatives, I was surprised by how much was already out there. So many artists I like were selling on [Bandcamp](https://bandcamp.com). A bunch were on platforms most people have never heard of — [Mirlo](https://mirlo.space), [Ampwall](https://ampwall.com), [Faircamp](https://simonrepp.com/faircamp/). Some had [Ko-fi](https://ko-fi.com) pages or [Patreon](https://www.patreon.com) memberships. The whole infrastructure for supporting artists directly was already there.
 
-The problem was just finding it all.
+The problem was just knowing where to look.
 
 ## So I built the thing
 
-If I wanted to know whether a particular artist sold on Bandcamp *and* had a Mirlo page *and* accepted tips on Ko-fi, I'd have to check each platform one by one. Multiply that by every artist I listen to and it's a real pain.
+If I wanted to know where I could buy music, I'd have to check each platform one by one. Multiply that by every artist I listen to and it's a real pain. End the conversation entirely if you’re _not_ me and don’t know these platforms exist at all or what to search for.
 
-So I built a tool to do it over a holiday break. [Unstream](https://unstream.stream) searches 23+ alternative music platforms at once. Type in an artist name and it shows you everywhere they sell, stream, or accept support — with the approximate percentage that goes to the artist on each one. So you're not just finding where to buy, you're making an informed choice about where your money has the most impact.
+So I built a tool to do it over a holiday break. [Unstream](https://unstream.stream) searches over a dozen alternative music platforms at once. Type in an artist name and it shows you everywhere they sell, stream, or accept support — with the approximate percentage that goes to the artist on each one. So you're not just finding where to buy, you're making an informed choice about where your money has the most impact.
 
 The name is a verb. *Unstream* your music — move it off the rental platforms and into something you own, on platforms where artists keep 80–97% instead of fractions of a penny.
 
 ## How I think about it
 
-A few things I cared about from the start:
+There are a few important principles behind Unstream:
 
 **Free, always.** The entire point is getting money to artists. Charging you to find them would defeat the purpose. Unstream is donation-supported — you can chip in if you want to keep the lights on, but you never have to.
 
 **No tracking.** No accounts required to search (artists can optionally create accounts to claim their profiles). No advertising cookies. No selling your listening habits. Your music taste is your business.
 
-**Open source.** The whole codebase is [on GitHub](https://github.com/brandonlucasgreen/unstream). Anyone can see how it works, suggest improvements, or contribute. If I disappeared tomorrow the code would still be there.
+**Open source.** The whole codebase is [on GitHub](https://github.com/brandonlucasgreen/unstream). Anyone can see how it works, suggest improvements, or contribute.
 
-**Not anti-streaming.** I'm not here to shame anyone for using [Spotify](https://spotify.com). I still use it sometimes. But I think people should know alternatives exist, and that those alternatives pay artists dramatically better. Unstream just makes them easier to find.
+**Not _entirely_ anti-streaming.** I'm not here to shame anyone for using [Spotify](https://spotify.com). I still use Apple Music myself for some things. But I think people should know alternatives exist, and that those alternatives pay artists dramatically better. Unstream just makes them easier to find.
 
 ## What it's turned into
 
