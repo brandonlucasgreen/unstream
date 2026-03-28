@@ -16,6 +16,8 @@ const RoadmapPage = lazy(() => import('./pages/RoadmapPage.tsx').then(m => ({ de
 const SupportPage = lazy(() => import('./pages/SupportPage.tsx').then(m => ({ default: m.SupportPage })))
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage.tsx').then(m => ({ default: m.PrivacyPolicyPage })))
 const AdminMergePage = lazy(() => import('./pages/AdminMergePage.tsx').then(m => ({ default: m.AdminMergePage })))
+const GuidesIndexPage = lazy(() => import('./pages/GuidesIndexPage.tsx').then(m => ({ default: m.GuidesIndexPage })))
+const GuidePage = lazy(() => import('./pages/GuidePage.tsx').then(m => ({ default: m.GuidePage })))
 
 function LoadingFallback() {
   return (
@@ -41,6 +43,8 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/roadmap" element={<RoadmapPage />} />
             <Route path="/support" element={<SupportPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/guides" element={<GuidesIndexPage />} />
+            <Route path="/guides/:slug" element={<GuidePage />} />
             <Route path="/admin/merge" element={<AdminMergePage />} />
           </Routes>
         </Suspense>

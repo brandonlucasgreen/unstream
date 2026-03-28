@@ -12,6 +12,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const MANIFEST_PATH = join(__dirname, '..', 'data', 'artists-manifest.json');
+const GUIDES_MANIFEST_PATH = join(__dirname, '..', 'data', 'guides', 'guides-manifest.json');
 const OUTPUT_PATH = join(__dirname, '..', 'apps', 'web', 'public', 'sitemap.xml');
 
 const BASE_URL = 'https://unstream.stream';
@@ -22,6 +23,14 @@ interface ManifestEntry {
   imageUrl: string | null;
   platformCount: number;
   lastUpdated: string;
+}
+
+interface GuideEntry {
+  slug: string;
+  title: string;
+  description: string;
+  pillar: string;
+  published: string;
 }
 
 function escapeXml(str: string): string {
@@ -37,6 +46,7 @@ function main() {
   // Static pages
   const staticPages = [
     { url: '/', changefreq: 'weekly', priority: '1.0' },
+    { url: '/guides', changefreq: 'weekly', priority: '0.8' },
     { url: '/privacy-policy', changefreq: 'yearly', priority: '0.3' },
   ];
 
@@ -63,6 +73,22 @@ function main() {
     console.log(`Added ${manifest.length} artist URLs to sitemap`);
   } else {
     console.log('No artists manifest found, generating sitemap with static pages only');
+  }
+
+  // Guide pages from manifest
+  if (existsSync(GUIDES_MANIFEST_PATH)) {
+    const guides: GuideEntry[] = JSON.parse(readFileSync(GUIDES_MANIFEST_PATH, 'utf-8'));
+
+    for (const guide of guides) {
+      urls.push(`  <url>
+    <loc>${escapeXml(`${BASE_URL}/guides/${guide.slug}`)}</loc>
+    <lastmod>${guide.published}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>`);
+    }
+
+    console.log(`Added ${guides.length} guide URLs to sitemap`);
   }
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
