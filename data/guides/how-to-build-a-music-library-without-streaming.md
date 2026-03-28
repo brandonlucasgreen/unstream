@@ -8,7 +8,7 @@ draft: true
 
 # How to build a music library without streaming
 
-I cancelled my [Apple Music](https://music.apple.com) subscription after 10+ years. I don't miss it as much as I expected. Here's the practical stuff I figured out along the way.
+I still have my [Apple Music](https://music.apple.com) subscription, but I’ve relied on it less and less in the last few years thanks to the music library I’ve been slowly building. It turns out that it’s still possible to buy music from artists, own that music, and build a library that you can access from anywhere just like a streaming service. Here's the practical stuff I’ve learned along this journey.
 
 ## Figure out what you actually listen to
 
@@ -52,7 +52,7 @@ These are great for exploring new music without spending anything. Hear somethin
 
 ## Find music without algorithms
 
-This is honestly one of the better parts of leaving streaming behind. When an algorithm isn't steering your listening, you rediscover how to find music on your own terms:
+This is honestly one of the better parts of relying less on streaming. When an algorithm isn't steering all your listening, you start finding music on your own terms again:
 
 **People.** Ask friends what they're into. Join music forums, subreddits, Discord servers, Mastodon communities. The recommendations you get from actual humans who know your taste are better than anything Spotify's algorithm produces.
 
@@ -66,6 +66,6 @@ This is honestly one of the better parts of leaving streaming behind. When an al
 
 ## You don't have to be all-or-nothing
 
-Plenty of people keep streaming for casual listening and convenience while also buying from the artists they care about most. That's a perfectly reasonable approach. The goal isn't purity — it's shifting more of your spending toward models that actually pay artists.
+That's basically what I do — I still stream casually, but I also buy from the artists I care about most. The goal isn't to quit streaming cold turkey. It's to shift more of your spending toward models that actually pay artists, and to build something that's yours in the process.
 
 Start with one album this month from someone you love. See how it feels to own it.
