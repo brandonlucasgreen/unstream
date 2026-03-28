@@ -290,6 +290,9 @@ function App() {
       {/* Hero */}
       <div className="pt-6 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">
+          <h1 className="font-display text-4xl md:text-5xl font-bold mb-4 text-text-primary">
+            Unstream 🤘🏻
+          </h1>
           <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto">
             Support artists directly on alternative platforms.<br />
             Reduce your dependency on streaming.

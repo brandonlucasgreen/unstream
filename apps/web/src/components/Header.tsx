@@ -7,7 +7,7 @@ export function Header() {
 
   return (
     <header className="p-4 border-b border-border flex items-center justify-between">
-      <Link to="/" className="text-xl font-bold text-accent-primary hover:opacity-80 transition-opacity">
+      <Link to="/" className="text-xl font-bold text-text-primary hover:opacity-80 transition-opacity">
         Unstream 🤘🏻
       </Link>
       <ThemeToggle preference={preference} onCycle={cycleTheme} />
