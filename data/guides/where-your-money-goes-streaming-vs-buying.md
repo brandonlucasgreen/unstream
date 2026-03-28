@@ -3,7 +3,7 @@ title: Where your money goes when you stream vs. buy music
 description: A breakdown of how streaming royalties work compared to direct purchases, and why the difference matters for independent artists.
 pillar: artist-economics
 published: 2026-03-28
-draft: true
+draft: false
 ---
 
 # Where your money goes when you stream vs. buy music

@@ -3,7 +3,7 @@ title: Why I built Unstream
 description: The story behind Unstream - from indie musician earning $2,200 on Bandcamp to building a tool that helps fans support artists directly.
 pillar: builder
 published: 2026-03-28
-draft: true
+draft: false
 ---
 
 # Why I built Unstream

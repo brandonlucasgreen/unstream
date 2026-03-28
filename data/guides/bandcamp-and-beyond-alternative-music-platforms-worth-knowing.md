@@ -3,7 +3,7 @@ title: "Bandcamp and beyond: alternative music platforms worth knowing"
 description: A guide to the growing ecosystem of artist-friendly music platforms, from Bandcamp to Faircamp to Mirlo and more.
 pillar: platform-discovery
 published: 2026-03-28
-draft: true
+draft: false
 ---
 
 # Bandcamp and beyond: alternative music platforms worth knowing

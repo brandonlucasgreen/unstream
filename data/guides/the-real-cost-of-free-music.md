@@ -3,7 +3,7 @@ title: "The real cost of \"free\" music"
 description: How streaming turned music from something you buy into something you rent, and what that's meant for the people who make it.
 pillar: artist-economics
 published: 2026-03-28
-draft: true
+draft: false
 ---
 
 # The real cost of "free" music

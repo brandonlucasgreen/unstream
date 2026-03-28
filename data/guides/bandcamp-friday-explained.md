@@ -3,7 +3,7 @@ title: "Bandcamp Friday, explained"
 description: What Bandcamp Friday is, when it happens, and how to make the most of it.
 pillar: how-to
 published: 2026-03-28
-draft: true
+draft: false
 ---
 
 # Bandcamp Friday, explained

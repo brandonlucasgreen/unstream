@@ -3,7 +3,7 @@ title: How to build a music library without streaming
 description: A practical guide to buying, owning, and playing your own music collection.
 pillar: how-to
 published: 2026-03-28
-draft: true
+draft: false
 ---
 
 # How to build a music library without streaming
