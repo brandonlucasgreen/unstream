@@ -6,7 +6,6 @@ published: 2026-03-28
 draft: false
 ---
 
-# How to build a music library without streaming
 
 I still have my [Apple Music](https://music.apple.com) subscription, but I’ve relied on it less and less in the last few years thanks to the music library I’ve been slowly building. It turns out that it’s still possible to buy music from artists, own that music, and build a library that you can access from anywhere just like a streaming service. Here's the practical stuff I’ve learned along this journey.
 

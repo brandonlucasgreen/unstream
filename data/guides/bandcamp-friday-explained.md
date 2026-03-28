@@ -6,7 +6,6 @@ published: 2026-03-28
 draft: false
 ---
 
-# Bandcamp Friday, explained
 
 On the **first Friday of every month**, [Bandcamp](https://bandcamp.com) waives their revenue share on all sales. Normally they take 10–15% (which is already pretty good compared to most platforms). On Bandcamp Fridays, that drops to zero.
 

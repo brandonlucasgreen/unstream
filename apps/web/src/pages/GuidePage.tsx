@@ -74,7 +74,10 @@ export function GuidePage() {
               <h1 className="font-display text-3xl md:text-4xl font-semibold text-text-primary mb-2">
                 {meta.title}
               </h1>
-              <p className="text-text-secondary">{meta.description}</p>
+              <p className="text-text-secondary mb-3">{meta.description}</p>
+              <p className="text-text-muted text-sm">
+                By <a href="https://bgreen.lol" target="_blank" rel="noopener noreferrer" className="text-text-secondary hover:text-text-primary transition-colors">Brandon Lucas Green</a> — musician, builder of Unstream
+              </p>
             </>
           )}
         </div>
