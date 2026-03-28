@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
+import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 
 interface DirectoryArtist {
@@ -51,14 +51,11 @@ export function ArtistDirectoryPage() {
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
       <ArtistAuthBar />
+      <Header />
 
       <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <div className="pt-12 pb-8 text-center px-6">
-          <Link to="/" className="text-sm font-semibold text-text-muted uppercase tracking-wide hover:text-text-primary transition-colors">
-            Unstream
-          </Link>
-          <h1 className="text-2xl font-bold mt-1 mb-2">Artist Index</h1>
+        <div className="pt-8 pb-8 text-center px-6">
+          <h1 className="text-2xl font-bold mb-2">Artist Index</h1>
           {!loading && (
             <p className="text-text-muted text-sm">
               {artists.length} verified artist{artists.length !== 1 ? 's' : ''} on platforms that pay fairly

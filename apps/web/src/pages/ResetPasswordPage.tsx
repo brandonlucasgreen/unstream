@@ -2,12 +2,10 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { updatePassword } from '../services/auth';
 import { useAuth } from '../contexts/AuthContext';
-import { ThemeToggle } from '../components/ThemeToggle';
+import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
-import { useTheme } from '../hooks/useTheme';
 
 export function ResetPasswordPage() {
-  const { preference, cycleTheme } = useTheme();
   const navigate = useNavigate();
   const { session, isLoading: authLoading } = useAuth();
   const [newPassword, setNewPassword] = useState('');
@@ -57,12 +55,7 @@ export function ResetPasswordPage() {
 
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
-      <header className="p-4 border-b border-border flex items-center justify-between">
-        <Link to="/" className="text-xl font-bold text-accent-primary hover:opacity-80 transition-opacity">
-          Unstream
-        </Link>
-        <ThemeToggle preference={preference} onCycle={cycleTheme} />
-      </header>
+      <Header />
 
       <main className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md space-y-6">

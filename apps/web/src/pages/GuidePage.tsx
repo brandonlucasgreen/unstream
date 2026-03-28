@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Markdown from 'react-markdown';
-import { ThemeToggle } from '../components/ThemeToggle';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
-import { useTheme } from '../hooks/useTheme';
+import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 
 interface GuideMeta {
@@ -16,7 +15,6 @@ interface GuideMeta {
 
 export function GuidePage() {
   const { slug } = useParams<{ slug: string }>();
-  const { preference, cycleTheme } = useTheme();
   const [content, setContent] = useState<string | null>(null);
   const [meta, setMeta] = useState<GuideMeta | null>(null);
   const [error, setError] = useState(false);
@@ -54,20 +52,9 @@ export function GuidePage() {
   return (
     <div className="min-h-screen">
       <ArtistAuthBar />
-      <header className="pt-8 pb-8 px-4 relative">
-        <div className="absolute top-4 right-4">
-          <ThemeToggle preference={preference} onCycle={cycleTheme} />
-        </div>
+      <Header />
+      <div className="pt-6 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <Link
-            to="/guides"
-            className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-text-primary transition-colors mb-4"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            All guides
-          </Link>
           {meta && (
             <>
               <h1 className="font-display text-3xl md:text-4xl font-semibold text-text-primary mb-2">
@@ -77,7 +64,7 @@ export function GuidePage() {
             </>
           )}
         </div>
-      </header>
+      </div>
 
       <main className="px-4 pb-16">
         <div className="max-w-2xl mx-auto">

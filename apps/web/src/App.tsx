@@ -2,9 +2,8 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { SearchBar } from './components/SearchBar';
 import { ResultCard } from './components/ResultCard';
-import { ThemeToggle } from './components/ThemeToggle';
 import { ArtistAuthBar } from './components/ArtistAuthBar';
-import { useTheme } from './hooks/useTheme';
+import { Header } from './components/Header';
 import type { SearchResult } from './types';
 import { sources, sourceCategories, searchPlatforms, resolveArtistUrl, fetchMusicBrainzData, mergeWithMusicBrainzData } from './services/sources';
 import { analytics } from './services/analytics';
@@ -52,7 +51,6 @@ function CollapsibleSection({ title, content, defaultOpen = false }: {
 }
 
 function App() {
-  const { preference, cycleTheme } = useTheme();
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -288,26 +286,16 @@ function App() {
   return (
     <div className="min-h-screen">
       <ArtistAuthBar />
-      {/* Header */}
-      <header className="pt-8 pb-8 px-4 relative">
-        <div className="absolute top-4 right-4">
-          <ThemeToggle preference={preference} onCycle={cycleTheme} />
-        </div>
+      <Header />
+      {/* Hero */}
+      <div className="pt-6 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
-            <button
-              onClick={handleGoHome}
-              className="text-text-primary hover:opacity-80 transition-opacity cursor-pointer"
-            >
-              Unstream 🤘🏻
-            </button>
-          </h1>
           <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto">
             Support artists directly on alternative platforms.<br />
             Reduce your dependency on streaming.
           </p>
         </div>
-      </header>
+      </div>
 
       {/* Search */}
       <main className="px-4 pb-16">

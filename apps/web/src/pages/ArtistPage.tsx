@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { SearchBar } from '../components/SearchBar';
 import { ResultCard } from '../components/ResultCard';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
+import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import type { SearchResult } from '../types';
 import { searchPlatforms, fetchMusicBrainzData, mergeWithMusicBrainzData } from '../services/sources';
@@ -110,10 +111,6 @@ export function ArtistPage() {
     navigate(`/?q=${encodeURIComponent(query)}`);
   }, [navigate]);
 
-  const handleGoHome = useCallback(() => {
-    navigate('/');
-  }, [navigate]);
-
   const macAppPromo = (
     <div className="bg-surface-secondary rounded-2xl p-6 md:p-8 border border-border">
       <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10">
@@ -182,22 +179,7 @@ export function ArtistPage() {
   return (
     <div className="min-h-screen">
       <ArtistAuthBar />
-      {/* Header */}
-      <header className="pt-8 pb-8 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
-            <button
-              onClick={handleGoHome}
-              className="text-text-primary hover:opacity-80 transition-opacity cursor-pointer"
-            >
-              Unstream 🤘🏻
-            </button>
-          </h1>
-          <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto">
-            Find your favorite music on alternative platforms, directly support the artists you love, and move off streaming.
-          </p>
-        </div>
-      </header>
+      <Header />
 
       {/* Search */}
       <main className="px-4 pb-16">

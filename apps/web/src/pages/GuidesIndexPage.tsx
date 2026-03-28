@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ThemeToggle } from '../components/ThemeToggle';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
-import { useTheme } from '../hooks/useTheme';
+import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 
 interface GuideEntry {
@@ -21,7 +20,6 @@ const PILLAR_LABELS: Record<string, string> = {
 };
 
 export function GuidesIndexPage() {
-  const { preference, cycleTheme } = useTheme();
   const [guides, setGuides] = useState<GuideEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,26 +37,15 @@ export function GuidesIndexPage() {
   return (
     <div className="min-h-screen">
       <ArtistAuthBar />
-      <header className="pt-8 pb-8 px-4 relative">
-        <div className="absolute top-4 right-4">
-          <ThemeToggle preference={preference} onCycle={cycleTheme} />
-        </div>
+      <Header />
+      <div className="pt-6 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-text-primary transition-colors mb-4"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to search
-          </Link>
           <h1 className="font-display text-3xl md:text-4xl font-semibold text-text-primary mb-2">Guides</h1>
           <p className="text-text-secondary text-lg">
             How streaming payouts work, platforms worth knowing about, and ways to put more money in artists' pockets.
           </p>
         </div>
-      </header>
+      </div>
 
       <main className="px-4 pb-16">
         <div className="max-w-3xl mx-auto">

@@ -1,33 +1,18 @@
-import { Link } from 'react-router-dom';
-import { ThemeToggle } from '../components/ThemeToggle';
 import { ArtistAuthBar } from '../components/ArtistAuthBar';
-import { useTheme } from '../hooks/useTheme';
+import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 
 export function SupportPage() {
-  const { preference, cycleTheme } = useTheme();
-
   return (
     <div className="min-h-screen">
       <ArtistAuthBar />
-      {/* Header */}
-      <header className="pt-8 pb-8 px-4 relative">
-        <div className="absolute top-4 right-4">
-          <ThemeToggle preference={preference} onCycle={cycleTheme} />
-        </div>
+      <Header />
+
+      <div className="pt-8 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-text-primary transition-colors mb-4"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to search
-          </Link>
           <h1 className="font-display text-3xl md:text-4xl font-semibold text-text-primary mb-4">Support Unstream</h1>
         </div>
-      </header>
+      </div>
 
       {/* Content */}
       <main className="px-4 pb-16">
