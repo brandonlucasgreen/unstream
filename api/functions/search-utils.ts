@@ -103,7 +103,14 @@ export function applyMergeOverrides(
       override.platform_urls.map(u => u.replace(/\/+$/, '').toLowerCase())
     );
 
-    // Step 1: Strip ALL override URLs from every existing result.
+    // Step 1: Check if this override is relevant to the current search.
+    // Only apply if at least one override URL appears in the search results.
+    const hasRelevantResult = aggregated.some(r =>
+      r.platforms.some(p => overrideUrls.has(p.url.replace(/\/+$/, '').toLowerCase()))
+    );
+    if (!hasRelevantResult) continue;
+
+    // Step 2: Strip ALL override URLs from every existing result.
     // The override result will be the sole owner of these URLs.
     for (const result of aggregated) {
       const before = result.platforms.length;
