@@ -112,7 +112,6 @@ export function applyMergeOverrides(
       const hasNameMatch = normalizeForComparison(aggregated[i].name) === overrideName;
       if (hasUrlMatch || hasNameMatch) matchingIndices.push(i);
     }
-
     if (matchingIndices.length === 0) continue;
 
     // Determine the primary result (merge others into it if multiple)
@@ -177,6 +176,18 @@ export function applyMergeOverrides(
       if (removed.length > 0) {
         console.log(`[Override] Removed ${removed.length} excluded URL(s) from "${override.group_name}"`);
       }
+    }
+
+    // Strip platforms that aren't in the override URL list and aren't
+    // search-only links. This prevents name-matched results from a different
+    // artist (e.g. Bandcamp "BenG" vs override "Ben-G!") from leaking in.
+    const finalOverrideUrls = new Set(override.platform_urls.map(u => u.replace(/\/+$/, '').toLowerCase()));
+    const before = primary.platforms.length;
+    primary.platforms = primary.platforms.filter(p =>
+      finalOverrideUrls.has(p.url.replace(/\/+$/, '').toLowerCase()) || isSearchOnlyLink(p)
+    );
+    if (primary.platforms.length < before) {
+      console.log(`[Override] Stripped ${before - primary.platforms.length} non-override platform(s) from "${override.group_name}"`);
     }
 
     if (override.canonical_image_url) {
