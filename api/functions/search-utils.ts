@@ -312,10 +312,14 @@ export function collectReleaseTitles(result: AggregatedResult): Set<string> {
 }
 
 // Reconstruct a display name from a URL slug (e.g. "ben-g" → "Ben G").
+// Strips trailing numeric suffixes that platforms use for disambiguation
+// (e.g. Qobuz "ben-g-1" → "Ben G", not "Ben G 1").
 // If an original query is provided and its normalized form matches,
 // prefer the query since it preserves special characters (e.g. "Ben-G!").
 export function displayNameFromSlug(slug: string, originalQuery?: string): string {
-  const reconstructed = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  // Strip trailing numeric segment (platform disambiguation, not part of the name)
+  const cleanSlug = slug.replace(/-\d+$/, '');
+  const reconstructed = cleanSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   if (originalQuery && normalizeForComparison(originalQuery) === normalizeForComparison(reconstructed)) {
     return originalQuery;
   }
