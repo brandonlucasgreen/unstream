@@ -630,6 +630,8 @@ export function deduplicateQobuzUrls(aggregated: AggregatedResult[]): void {
 export function createOrphanedQobuzStandalones(
   aggregated: AggregatedResult[],
   qobuzMatches: Map<string, string>,
+  reservedOverrideUrls?: Set<string>,
+  reservedOverrideNames?: Set<string>,
 ): void {
   const attachedUrls = new Set<string>();
   for (const r of aggregated) {
@@ -640,6 +642,9 @@ export function createOrphanedQobuzStandalones(
 
   for (const [qobuzName, qobuzUrl] of qobuzMatches) {
     if (attachedUrls.has(qobuzUrl)) continue;
+    // Skip URLs/names reserved by overrides — the override handles them
+    if (reservedOverrideUrls?.has(qobuzUrl.replace(/\/+$/, '').toLowerCase())) continue;
+    if (reservedOverrideNames?.has(qobuzName.replace(/\d+$/, ''))) continue;
 
     const displayName = qobuzDisplayName(qobuzUrl, qobuzName);
     const standaloneId = `qobuz-standalone-${qobuzName}`;

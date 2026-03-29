@@ -1268,7 +1268,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   removeDeadQobuzLinks(aggregated);
   crossPlatformReleaseComparison(aggregated);
   deduplicateQobuzUrls(aggregated);
-  createOrphanedQobuzStandalones(aggregated, qobuzMatches);
+  createOrphanedQobuzStandalones(aggregated, qobuzMatches, reservedOverrideUrls, reservedOverrideNames);
   const disambiguated = splitSuspiciousPlatforms(aggregated);
   const merged = mergeByReleaseOverlap(disambiguated);
 
