@@ -447,6 +447,7 @@ export function attachQobuzAndSearchLinks(
   aggregated: AggregatedResult[],
   qobuzMatches: Map<string, string>,
   ampwallMatches: Map<string, string>,
+  reservedOverrideUrls?: Set<string>,
 ): void {
   const usedPlatformUrls = new Set<string>();
 
@@ -477,9 +478,11 @@ export function attachQobuzAndSearchLinks(
     }
 
     // Qobuz: attach ALL name variations (e.g. "morice", "morice1", "morice2")
-    // Disambiguation will sort out which actually match based on releases
+    // Disambiguation will sort out which actually match based on releases.
+    // Skip URLs reserved by merge overrides — the override will handle them.
     for (const [qobuzName, qobuzUrl] of qobuzMatches) {
       if (isQobuzVariation(qobuzName, normalizedName)) {
+        if (reservedOverrideUrls?.has(qobuzUrl.replace(/\/+$/, '').toLowerCase())) continue;
         result.platforms.push({ sourceId: 'qobuz', url: qobuzUrl });
       }
     }
