@@ -102,23 +102,33 @@ export function applyMergeOverrides(
     // Normalize override URLs for comparison
     const overrideUrls = new Set(override.platform_urls.map(u => u.replace(/\/+$/, '').toLowerCase()));
 
-    // Find all results that match by URL or by name
+    // Only merge results that share a URL with the override.
+    // Name-only matches are left as separate results — they may be
+    // different artists who happen to have a similar name.
     const overrideName = normalizeForComparison(override.group_name);
-    const matchingIndices: number[] = [];
+    const urlMatchIndices: number[] = [];
+    let nameOnlyMatchIndex = -1;
     for (let i = 0; i < aggregated.length; i++) {
       const hasUrlMatch = aggregated[i].platforms.some(p =>
         overrideUrls.has(p.url.replace(/\/+$/, '').toLowerCase())
       );
-      const hasNameMatch = normalizeForComparison(aggregated[i].name) === overrideName;
-      if (hasUrlMatch || hasNameMatch) matchingIndices.push(i);
+      if (hasUrlMatch) {
+        urlMatchIndices.push(i);
+      } else if (nameOnlyMatchIndex === -1 && normalizeForComparison(aggregated[i].name) === overrideName) {
+        nameOnlyMatchIndex = i;
+      }
     }
+
+    // Use URL matches if any, otherwise fall back to the first name match
+    // so the override can still find its target when no URLs matched yet
+    const matchingIndices = urlMatchIndices.length > 0 ? urlMatchIndices : (nameOnlyMatchIndex >= 0 ? [nameOnlyMatchIndex] : []);
     if (matchingIndices.length === 0) continue;
 
     // Determine the primary result (merge others into it if multiple)
     const primary = aggregated[matchingIndices[0]];
 
     if (matchingIndices.length > 1) {
-      // Merge all matching results into the first one
+      // Merge all URL-matched results into the first one
       const existingSourceIds = new Set(primary.platforms.map(p => p.sourceId));
 
       for (let i = 1; i < matchingIndices.length; i++) {
