@@ -16,7 +16,7 @@ export function Header() {
   return (
     <header className="p-4 border-b border-border flex items-center justify-between gap-4">
       <Link to="/" className="text-xl font-bold text-text-primary hover:opacity-80 transition-opacity shrink-0">
-        Unstream 🤘🏻
+        Unstream
       </Link>
       <div className="flex items-center gap-3 text-sm">
         {!isLoading && (
