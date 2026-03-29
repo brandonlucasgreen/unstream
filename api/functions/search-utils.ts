@@ -145,15 +145,27 @@ export function applyMergeOverrides(
       console.log(`[Override] Protected "${override.group_name}" from disambiguation (all URLs on one result)`);
     }
 
-    // Inject any override URLs that aren't already on the result (e.g. Qobuz search missed them)
+    // Ensure all override URLs are on the result, replacing any existing
+    // links for the same platform that point to a different URL (e.g. wrong
+    // Qobuz artist variant picked up by search)
     const existingUrls = new Set(primary.platforms.map(p => p.url.replace(/\/+$/, '').toLowerCase()));
     for (const url of override.platform_urls) {
       const normalized = url.replace(/\/+$/, '').toLowerCase();
       if (existingUrls.has(normalized)) continue;
       const sourceId = sourceIdFromUrl(url);
       if (sourceId) {
-        primary.platforms.push({ sourceId, url });
-        console.log(`[Override] Injected missing ${sourceId} URL for "${override.group_name}": ${url}`);
+        // Replace existing link for this platform if the URL differs
+        const existingIdx = primary.platforms.findIndex(p => p.sourceId === sourceId);
+        if (existingIdx !== -1) {
+          const existingUrl = primary.platforms[existingIdx].url.replace(/\/+$/, '').toLowerCase();
+          if (existingUrl !== normalized) {
+            console.log(`[Override] Replaced ${sourceId} URL for "${override.group_name}": ${primary.platforms[existingIdx].url} → ${url}`);
+            primary.platforms[existingIdx] = { sourceId, url };
+          }
+        } else {
+          primary.platforms.push({ sourceId, url });
+          console.log(`[Override] Injected missing ${sourceId} URL for "${override.group_name}": ${url}`);
+        }
       }
     }
 
@@ -171,6 +183,9 @@ export function applyMergeOverrides(
       primary.imageUrl = override.canonical_image_url;
     }
 
+    // Use the override's group_name as the display name — it preserves
+    // special characters that slug-based reconstruction strips
+    primary.name = override.group_name;
     primary.matchConfidence = 'verified';
     primary.overrideMerged = true;
   }
