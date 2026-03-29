@@ -71,13 +71,13 @@ function App() {
   const letterbirdRef = useRef<HTMLDivElement>(null);
 
   // Default page title
-  const defaultTitle = 'Unstream - Support artists directly';
+  const defaultTitle = 'Unstream - Find where to buy music directly from artists you love';
 
   // Update page title based on search query
   useEffect(() => {
     const query = searchParams.get('q');
     if (query) {
-      document.title = `${query} on Unstream - Support artists directly`;
+      document.title = `${query} on Unstream - Find where to support them`;
     } else {
       document.title = defaultTitle;
     }
@@ -291,11 +291,10 @@ function App() {
       <div className="pt-6 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="font-display text-4xl md:text-5xl font-bold mb-4 text-text-primary">
-            Unstream
+            Find where to buy music directly from artists you love
           </h1>
           <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto">
-            Support artists directly on alternative platforms.<br />
-            Reduce your dependency on streaming.
+            Search any artist across 15+ platforms where they keep up to 97% of every sale — not fractions of a penny from streams.
           </p>
         </div>
       </div>
