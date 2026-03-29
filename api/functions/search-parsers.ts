@@ -6,6 +6,7 @@ import {
   type PlatformResult,
   normalizeForComparison,
   namesMatch,
+  displayNameFromSlug,
 } from './search-utils';
 
 // ---------------------------------------------------------------------------
@@ -110,7 +111,7 @@ export function parseQobuzSearchResults(html: string, query: string): [string, s
         (slugNormalized.startsWith(queryNormalized) && /^\d*$/.test(slugNormalized.slice(queryNormalized.length)));
 
     if (isMatch) {
-      const artistName = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      const artistName = displayNameFromSlug(slug, query);
       const normalizedName = normalizeForComparison(artistName);
 
       if (!seen.has(normalizedName)) {

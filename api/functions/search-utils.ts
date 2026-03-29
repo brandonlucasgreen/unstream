@@ -102,24 +102,36 @@ export function applyMergeOverrides(
     // Normalize override URLs for comparison
     const overrideUrls = new Set(override.platform_urls.map(u => u.replace(/\/+$/, '').toLowerCase()));
 
-    // Find all results that match by URL or by name
+    // Only merge results that share a real (non-search-only) URL with the override.
+    // Name-only matches are left as separate results — they may be
+    // different artists who happen to have a similar name.
+    // Search-only links (e.g. buymeacoffee.com/explore-creators) are excluded
+    // from URL matching because they're identical across all results.
     const overrideName = normalizeForComparison(override.group_name);
-    const matchingIndices: number[] = [];
+    const urlMatchIndices: number[] = [];
+    let nameOnlyMatchIndex = -1;
     for (let i = 0; i < aggregated.length; i++) {
       const hasUrlMatch = aggregated[i].platforms.some(p =>
-        overrideUrls.has(p.url.replace(/\/+$/, '').toLowerCase())
+        !isSearchOnlyLink(p) && overrideUrls.has(p.url.replace(/\/+$/, '').toLowerCase())
       );
-      const hasNameMatch = normalizeForComparison(aggregated[i].name) === overrideName;
-      if (hasUrlMatch || hasNameMatch) matchingIndices.push(i);
+      if (hasUrlMatch) {
+        urlMatchIndices.push(i);
+      } else if (nameOnlyMatchIndex === -1 && normalizeForComparison(aggregated[i].name) === overrideName) {
+        nameOnlyMatchIndex = i;
+      }
     }
 
+    // Use URL matches if any, otherwise fall back to the first name match
+    // so the override can still find its target when no URLs matched yet
+    const hasUrlMatches = urlMatchIndices.length > 0;
+    const matchingIndices = hasUrlMatches ? urlMatchIndices : (nameOnlyMatchIndex >= 0 ? [nameOnlyMatchIndex] : []);
     if (matchingIndices.length === 0) continue;
 
     // Determine the primary result (merge others into it if multiple)
     const primary = aggregated[matchingIndices[0]];
 
     if (matchingIndices.length > 1) {
-      // Merge all matching results into the first one
+      // Merge all URL-matched results into the first one
       const existingSourceIds = new Set(primary.platforms.map(p => p.sourceId));
 
       for (let i = 1; i < matchingIndices.length; i++) {
@@ -145,15 +157,27 @@ export function applyMergeOverrides(
       console.log(`[Override] Protected "${override.group_name}" from disambiguation (all URLs on one result)`);
     }
 
-    // Inject any override URLs that aren't already on the result (e.g. Qobuz search missed them)
+    // Ensure all override URLs are on the result, replacing any existing
+    // links for the same platform that point to a different URL (e.g. wrong
+    // Qobuz artist variant picked up by search)
     const existingUrls = new Set(primary.platforms.map(p => p.url.replace(/\/+$/, '').toLowerCase()));
     for (const url of override.platform_urls) {
       const normalized = url.replace(/\/+$/, '').toLowerCase();
       if (existingUrls.has(normalized)) continue;
       const sourceId = sourceIdFromUrl(url);
       if (sourceId) {
-        primary.platforms.push({ sourceId, url });
-        console.log(`[Override] Injected missing ${sourceId} URL for "${override.group_name}": ${url}`);
+        // Replace existing link for this platform if the URL differs
+        const existingIdx = primary.platforms.findIndex(p => p.sourceId === sourceId);
+        if (existingIdx !== -1) {
+          const existingUrl = primary.platforms[existingIdx].url.replace(/\/+$/, '').toLowerCase();
+          if (existingUrl !== normalized) {
+            console.log(`[Override] Replaced ${sourceId} URL for "${override.group_name}": ${primary.platforms[existingIdx].url} → ${url}`);
+            primary.platforms[existingIdx] = { sourceId, url };
+          }
+        } else {
+          primary.platforms.push({ sourceId, url });
+          console.log(`[Override] Injected missing ${sourceId} URL for "${override.group_name}": ${url}`);
+        }
       }
     }
 
@@ -167,8 +191,28 @@ export function applyMergeOverrides(
       }
     }
 
-    if (override.canonical_image_url) {
-      primary.imageUrl = override.canonical_image_url;
+    // When matched by URL, strip platforms not in the override list (keeping
+    // search-only links). This prevents wrong links from leaking in via merge.
+    // Skip for name-only fallback — we're not confident enough to alter platforms.
+    if (hasUrlMatches) {
+      const finalOverrideUrls = new Set(override.platform_urls.map(u => u.replace(/\/+$/, '').toLowerCase()));
+      const before = primary.platforms.length;
+      primary.platforms = primary.platforms.filter(p =>
+        finalOverrideUrls.has(p.url.replace(/\/+$/, '').toLowerCase()) || isSearchOnlyLink(p)
+      );
+      if (primary.platforms.length < before) {
+        console.log(`[Override] Stripped ${before - primary.platforms.length} non-override platform(s) from "${override.group_name}"`);
+      }
+    }
+
+    // Only apply override image and display name when we matched by URL.
+    // Name-only fallback matches might be a different artist that just
+    // happens to have a similar name — don't overwrite their identity.
+    if (hasUrlMatches) {
+      if (override.canonical_image_url) {
+        primary.imageUrl = override.canonical_image_url;
+      }
+      primary.name = override.group_name;
     }
 
     primary.matchConfidence = 'verified';
@@ -311,11 +355,26 @@ export function collectReleaseTitles(result: AggregatedResult): Set<string> {
   return titles;
 }
 
+// Reconstruct a display name from a URL slug (e.g. "ben-g" → "Ben G").
+// Strips trailing numeric suffixes that platforms use for disambiguation
+// (e.g. Qobuz "ben-g-1" → "Ben G", not "Ben G 1").
+// If an original query is provided and its normalized form matches,
+// prefer the query since it preserves special characters (e.g. "Ben-G!").
+export function displayNameFromSlug(slug: string, originalQuery?: string): string {
+  // Strip trailing numeric segment (platform disambiguation, not part of the name)
+  const cleanSlug = slug.replace(/-\d+$/, '');
+  const reconstructed = cleanSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  if (originalQuery && normalizeForComparison(originalQuery) === normalizeForComparison(reconstructed)) {
+    return originalQuery;
+  }
+  return reconstructed;
+}
+
 // Extract display name from a Qobuz URL slug
-export function qobuzDisplayName(url: string, fallback: string): string {
+export function qobuzDisplayName(url: string, fallback: string, originalQuery?: string): string {
   const match = url.match(/\/interpreter\/([^/]+)\//);
   return match
-    ? match[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+    ? displayNameFromSlug(match[1], originalQuery)
     : fallback;
 }
 

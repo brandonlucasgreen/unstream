@@ -25,6 +25,7 @@ import {
   mergeByReleaseOverlap,
   filterAndSort,
   applyMergeOverrides,
+  displayNameFromSlug,
 } from './search-utils';
 
 // Helper to fetch with timeout
@@ -346,7 +347,7 @@ async function getQobuzLatestRelease(artistUrl: string): Promise<LatestRelease |
       const releaseDate = await getQobuzAlbumReleaseDate(fullUrl);
 
       return {
-        title: album.slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+        title: displayNameFromSlug(album.slug),
         type: 'album',
         url: fullUrl,
         imageUrl: undefined,
@@ -390,7 +391,7 @@ async function getQobuzLatestRelease(artistUrl: string): Promise<LatestRelease |
       // Fallback to first album if all date fetches failed
       const album = validAlbums[0];
       return {
-        title: album.slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+        title: displayNameFromSlug(album.slug),
         type: 'album',
         url: `https://www.qobuz.com${album.path}`,
         imageUrl: undefined,
@@ -997,7 +998,7 @@ async function searchQobuz(query: string): Promise<Map<string, string>> {
               (slugNormalized.startsWith(queryNormalized) && /^\d*$/.test(slugNormalized.slice(queryNormalized.length)));
 
           if (isMatch) {
-            const artistName = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            const artistName = displayNameFromSlug(slug, query);
             const normalizedName = normalizeForComparison(artistName);
 
             if (!seen.has(normalizedName)) {
@@ -1073,7 +1074,7 @@ async function attachNameOnlyPlatforms(
           const urlObj = new URL(platformUrl);
           const slug = urlObj.pathname.split('/').filter(Boolean).pop() || '';
           if (slug) {
-            displayNames.set(normalizedName, slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
+            displayNames.set(normalizedName, displayNameFromSlug(slug));
           }
         } catch { /* ignore */ }
       }
