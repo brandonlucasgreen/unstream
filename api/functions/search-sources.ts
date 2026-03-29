@@ -1022,6 +1022,78 @@ async function searchQobuz(query: string): Promise<Map<string, string>> {
   return new Map(data);
 }
 
+// Search Beatport via __NEXT_DATA__ JSON embedded in search page
+async function searchBeatport(query: string): Promise<Map<string, string>> {
+  const cacheKey = artistCacheKey('beatport', query);
+
+  const { data } = await cacheGetOrFetch<[string, string][]>(
+    cacheKey,
+    async () => {
+      const results: [string, string][] = [];
+
+      try {
+        const searchUrl = `https://www.beatport.com/search?q=${encodeURIComponent(query)}`;
+        const response = await fetchWithTimeout(searchUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+          },
+        }, 5000);
+
+        if (!response.ok) return results;
+
+        const html = await response.text();
+        const root = parse(html);
+        const scriptEl = root.querySelector('script#__NEXT_DATA__');
+        if (!scriptEl) return results;
+
+        const json = JSON.parse(scriptEl.textContent);
+        const queries = json?.props?.pageProps?.dehydratedState?.queries;
+        // Find the query result that contains artist data
+        let artists: { artist_id: number; artist_name: string; slug?: string }[] | undefined;
+        for (const q of queries || []) {
+          const data = q?.state?.data?.artists?.data;
+          if (Array.isArray(data)) {
+            artists = data;
+            break;
+          }
+        }
+        if (!artists) return results;
+
+        const queryNormalized = normalizeForComparison(query);
+        const seen = new Set<string>();
+
+        for (const artist of artists.slice(0, 10)) {
+          const { artist_name, artist_id } = artist;
+          if (!artist_name || !artist_id) continue;
+
+          const normalizedName = normalizeForComparison(artist_name);
+
+          // Strict matching: exact, query prefix, or numeric suffix variation
+          const isMatch = normalizedName === queryNormalized ||
+            queryNormalized.startsWith(normalizedName) ||
+            (normalizedName.startsWith(queryNormalized) && /^\d*$/.test(normalizedName.slice(queryNormalized.length)));
+
+          if (isMatch && !seen.has(normalizedName)) {
+            seen.add(normalizedName);
+            const slug = artist_name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+            results.push([normalizedName, `https://www.beatport.com/artist/${slug}/${artist_id}`]);
+          }
+        }
+      } catch (error: unknown) {
+        const err = error as { name?: string; message?: string };
+        if (err.name !== 'AbortError') {
+          console.error('Beatport search error:', err.message);
+        }
+      }
+
+      return results;
+    },
+    PLATFORM_CACHE_TTL
+  );
+
+  return new Map(data);
+}
+
 // ---------------------------------------------------------------------------
 // Phase 3: Fetch releases & disambiguate
 // ---------------------------------------------------------------------------
@@ -1218,7 +1290,7 @@ async function attachNameOnlyPlatforms(
 
 async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   // Phase 1: Search all platforms in parallel and aggregate Bandcamp/Mirlo results
-  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, qobuzResults, ampwallResults] = await Promise.allSettled([
+  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, qobuzResults, ampwallResults, beatportResults] = await Promise.allSettled([
     searchBandcamp(query),
     searchBandwagon(query),
     searchMirlo(query),
@@ -1227,6 +1299,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     searchPatreon(query),
     searchQobuz(query),
     searchAmpwall(query),
+    searchBeatport(query),
   ]);
 
   const allResults: PlatformResult[] = [];
@@ -1238,6 +1311,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     ['faircamp', faircampResults.status === 'fulfilled' ? faircampResults.value : new Map()],
     ['jamcoop', jamcoopResults.status === 'fulfilled' ? jamcoopResults.value : new Map()],
     ['patreon', patreonResults.status === 'fulfilled' ? patreonResults.value : new Map()],
+    ['beatport', beatportResults.status === 'fulfilled' ? beatportResults.value : new Map()],
   ];
   const qobuzMatches = qobuzResults.status === 'fulfilled' ? qobuzResults.value : new Map<string, string>();
   const ampwallMatches = ampwallResults.status === 'fulfilled' ? ampwallResults.value : new Map<string, string>();
