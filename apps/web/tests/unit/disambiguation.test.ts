@@ -405,15 +405,17 @@ describe('applyMergeOverrides', () => {
 
     applyMergeOverrides(results, overrides);
 
+    // Override creates its own result with both platform URLs
     expect(results).toHaveLength(1);
-    expect(results[0].platforms).toHaveLength(2);
-    expect(results[0].platforms.map(p => p.sourceId)).toContain('bandcamp');
-    expect(results[0].platforms.map(p => p.sourceId)).toContain('qobuz');
+    expect(results[0].name).toBe('Gooseworx');
+    const sourceIds = results[0].platforms.map(p => p.sourceId);
+    expect(sourceIds).toContain('bandcamp');
+    expect(sourceIds).toContain('qobuz');
     expect(results[0].matchConfidence).toBe('verified');
     expect(results[0].overrideMerged).toBe(true);
   });
 
-  it('protects single result that already has all override URLs from later splitting', () => {
+  it('creates override result even when only one search result existed', () => {
     const results = [
       makeResult('Gooseworx', [
         { sourceId: 'bandcamp', url: 'https://gooseworx.bandcamp.com' },
@@ -428,8 +430,13 @@ describe('applyMergeOverrides', () => {
     applyMergeOverrides(results, overrides);
 
     expect(results).toHaveLength(1);
+    expect(results[0].name).toBe('Gooseworx');
     expect(results[0].overrideMerged).toBe(true);
     expect(results[0].matchConfidence).toBe('verified');
+    // Has both override URLs plus search-only links
+    const sourceIds = results[0].platforms.map(p => p.sourceId);
+    expect(sourceIds).toContain('bandcamp');
+    expect(sourceIds).toContain('qobuz');
   });
 
   it('injects missing override URLs that search did not return', () => {
@@ -453,7 +460,7 @@ describe('applyMergeOverrides', () => {
     expect(results[0].overrideMerged).toBe(true);
   });
 
-  it('removes excluded URLs from merged result', () => {
+  it('override result only contains URLs from override list, not from search results', () => {
     const results = [
       makeResult('TestArtist', [
         { sourceId: 'bandcamp', url: 'https://testartist.bandcamp.com' },
@@ -467,15 +474,16 @@ describe('applyMergeOverrides', () => {
     const overrides = [makeOverride('TestArtist', [
       'https://testartist.bandcamp.com',
       'https://www.qobuz.com/test/123',
-    ], {
-      excluded_urls: ['https://ko-fi.com/bogus'],
-    })];
+    ])];
 
     applyMergeOverrides(results, overrides);
 
     expect(results).toHaveLength(1);
-    expect(results[0].platforms.map(p => p.sourceId)).not.toContain('kofi');
-    expect(results[0].platforms).toHaveLength(2);
+    // The bogus ko-fi URL from search results is NOT on the override result
+    const realPlatforms = results[0].platforms.filter(p =>
+      p.url === 'https://testartist.bandcamp.com' || p.url === 'https://www.qobuz.com/test/123'
+    );
+    expect(realPlatforms).toHaveLength(2);
   });
 
   it('uses canonical image when provided', () => {
@@ -546,7 +554,7 @@ describe('applyMergeOverrides', () => {
     expect(disambiguated[0].overrideMerged).toBe(true);
   });
 
-  it('only merges URL-matched results, leaving name-only matches as separate results', () => {
+  it('creates override result and strips its URLs from other results', () => {
     const results = [
       makeResult('Radiohead', [
         { sourceId: 'bandcamp', url: 'https://radiohead.bandcamp.com' },
@@ -559,8 +567,6 @@ describe('applyMergeOverrides', () => {
       ], { id: '-mirlo' }),
     ];
 
-    // Override only lists bandcamp + qobuz URLs — mirlo result has no URL
-    // overlap so it stays as a separate result (could be a different artist)
     const overrides = [makeOverride('Radiohead', [
       'https://radiohead.bandcamp.com',
       'https://www.qobuz.com/us-en/interpreter/radiohead/456',
@@ -568,13 +574,14 @@ describe('applyMergeOverrides', () => {
 
     applyMergeOverrides(results, overrides);
 
-    expect(results).toHaveLength(2);
-    expect(results[0].platforms).toHaveLength(2);
+    // Override result is first, with its URLs + search-only links
+    expect(results[0].name).toBe('Radiohead');
+    expect(results[0].overrideMerged).toBe(true);
     expect(results[0].platforms.map(p => p.sourceId)).toContain('bandcamp');
     expect(results[0].platforms.map(p => p.sourceId)).toContain('qobuz');
-    expect(results[0].overrideMerged).toBe(true);
-    // Mirlo result remains separate
-    expect(results[1].platforms).toHaveLength(1);
+    // Original results with those URLs were emptied and removed;
+    // mirlo result (not in override) survives
+    expect(results).toHaveLength(2);
     expect(results[1].platforms[0].sourceId).toBe('mirlo');
   });
 });
