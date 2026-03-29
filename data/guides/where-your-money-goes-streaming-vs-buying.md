@@ -50,7 +50,7 @@ And it compounds in a way streaming doesn't. After three years of streaming you 
 You don't need to cancel streaming — plenty of people keep it for casual listening and convenience while also buying from artists they care about. That's fine. Even small shifts matter:
 
 - **Buy from one or two artists a month** instead of just streaming them. Prioritize the ones who seem like they need it most — independent, unsigned, small following.
-- **Search on [Unstream](https://unstream.stream)** to find where your favorite artists sell across 23+ platforms and see exactly how much reaches them on each one.
+- **Search on [Unstream](https://unstream.stream)** to find where your favorite artists sell across 15 platforms and see exactly how much reaches them on each one.
 - **Buy on Bandcamp Fridays** to maximize what goes to the artist.
 - **Check your library's music services** — [Hoopla](https://www.hoopladigital.com) and [Freegal](https://www.freegalmusic.com) are free with a library card and good for exploring new stuff without spending.
 

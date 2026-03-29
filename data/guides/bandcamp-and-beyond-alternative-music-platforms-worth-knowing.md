@@ -57,4 +57,4 @@ Don't sleep on your local library. **[Hoopla](https://www.hoopladigital.com)** a
 
 The biggest pain point with this whole ecosystem is fragmentation. Your favorite artist might be on Bandcamp, Mirlo, *and* Ko-fi — but you'd have no idea unless you checked each platform separately.
 
-That's what [Unstream](https://unstream.stream) does. Search for any artist and it checks 23+ platforms at once, showing you everywhere they sell and how much of your money actually reaches them on each one.
+That's what [Unstream](https://unstream.stream) does. Search for any artist and it checks 15 platforms at once, showing you everywhere they sell and how much of your money actually reaches them on each one.
