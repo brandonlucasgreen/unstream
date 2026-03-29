@@ -102,15 +102,17 @@ export function applyMergeOverrides(
     // Normalize override URLs for comparison
     const overrideUrls = new Set(override.platform_urls.map(u => u.replace(/\/+$/, '').toLowerCase()));
 
-    // Only merge results that share a URL with the override.
+    // Only merge results that share a real (non-search-only) URL with the override.
     // Name-only matches are left as separate results — they may be
     // different artists who happen to have a similar name.
+    // Search-only links (e.g. buymeacoffee.com/explore-creators) are excluded
+    // from URL matching because they're identical across all results.
     const overrideName = normalizeForComparison(override.group_name);
     const urlMatchIndices: number[] = [];
     let nameOnlyMatchIndex = -1;
     for (let i = 0; i < aggregated.length; i++) {
       const hasUrlMatch = aggregated[i].platforms.some(p =>
-        overrideUrls.has(p.url.replace(/\/+$/, '').toLowerCase())
+        !isSearchOnlyLink(p) && overrideUrls.has(p.url.replace(/\/+$/, '').toLowerCase())
       );
       if (hasUrlMatch) {
         urlMatchIndices.push(i);
