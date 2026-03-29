@@ -9,6 +9,7 @@ import { sources, sourceCategories, searchPlatforms, resolveArtistUrl, fetchMusi
 import { analytics } from './services/analytics';
 import { useAuth } from './contexts/AuthContext';
 import { Footer } from './components/Footer';
+import { PlatformIcon } from './components/PlatformIcon';
 import { faqSections } from './data/faq';
 import { markdownToHtml } from './utils/markdownLight';
 import './index.css';
@@ -428,7 +429,7 @@ function App() {
                                 color: source.color,
                               }}
                             >
-                              <span>{source.icon}</span>
+                              <PlatformIcon sourceId={source.id} color={source.color} emoji={source.icon} />
                               <span>{source.name}</span>
                             </a>
                           );
