@@ -294,7 +294,7 @@ function App() {
             Find where to buy music directly from artists you love
           </h1>
           <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto">
-            Search any artist across 15+ platforms where they keep up to 97% of every sale — not fractions of a penny from streams.
+            Search with Unstream across 15+ platforms where artists keep up to 97% of every sale — not fractions of a penny from streams.
           </p>
         </div>
       </div>
