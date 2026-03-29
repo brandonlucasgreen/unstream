@@ -53,6 +53,6 @@ This isn't theoretical. Bandcamp alone has paid artists over a billion dollars. 
 You don't have to quit streaming. But a few things go a long way:
 
 1. **Pick the artists you care about most** and buy their music directly. One $10 album purchase on Bandcamp gives an artist more than thousands of streams.
-2. **Use [Unstream](https://unstream.stream)** to find where artists sell across 23+ platforms and see how much of your money reaches them on each one.
+2. **Use [Unstream](https://unstream.stream)** to find where artists sell across 15 platforms and see how much of your money reaches them on each one.
 3. **Buy on Bandcamp Fridays** (first Friday of every month) when artists keep ~97%.
 4. **Tell people.** Most listeners have no idea how any of this works. The streaming experience is so smooth that it's easy to assume the artists behind it are being taken care of. They're mostly not.
