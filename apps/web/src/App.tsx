@@ -9,6 +9,7 @@ import { sources, sourceCategories, searchPlatforms, resolveArtistUrl, fetchMusi
 import { analytics } from './services/analytics';
 import { useAuth } from './contexts/AuthContext';
 import { Footer } from './components/Footer';
+import { PlatformIcon } from './components/PlatformIcon';
 import { faqSections } from './data/faq';
 import { markdownToHtml } from './utils/markdownLight';
 import './index.css';
@@ -294,7 +295,7 @@ function App() {
             Find where to buy music directly from artists you love
           </h1>
           <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto">
-            Search with Unstream across 15+ platforms where artists keep up to 97% of every sale — not fractions of a penny from streams.
+            Search with Unstream across 16+ platforms where artists keep up to 97% of every sale — not fractions of a penny from streams.
           </p>
         </div>
       </div>
@@ -428,7 +429,7 @@ function App() {
                                 color: source.color,
                               }}
                             >
-                              <span>{source.icon}</span>
+                              <PlatformIcon sourceId={source.id} color={source.color} emoji={source.icon} />
                               <span>{source.name}</span>
                             </a>
                           );

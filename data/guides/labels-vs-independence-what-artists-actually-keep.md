@@ -82,7 +82,7 @@ This is especially relevant as more artists realize that a smaller, engaged audi
 
 The biggest challenge for independent artists is still discovery. Labels have marketing machines. Independent artists have social media, word of mouth, and whatever organic growth they can generate.
 
-But this is changing. Tools like [Unstream](https://unstream.stream) help listeners find where their favorite artists sell directly across 15 platforms. Communities on [Bandcamp](https://bandcamp.com), [Mirlo](https://mirlo.space), and music forums actively champion independent releases. Music blogs and independent publications still cover artists who aren't on major labels.
+But this is changing. Tools like [Unstream](https://unstream.stream) help listeners find where their favorite artists sell directly across 16 platforms. Communities on [Bandcamp](https://bandcamp.com), [Mirlo](https://mirlo.space), and music forums actively champion independent releases. Music blogs and independent publications still cover artists who aren't on major labels.
 
 And the artists who build direct relationships with fans — through email lists, community platforms like [Patreon](https://www.patreon.com) or [Ko-fi](https://ko-fi.com), and direct-sales storefronts — tend to have more durable careers than those who rely on algorithmic discovery. An algorithm can stop recommending you tomorrow. A fan who bought your last three albums on Bandcamp is going to buy the next one too.
 

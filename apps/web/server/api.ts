@@ -12,7 +12,8 @@ type SourceId =
   | 'kofi'
   | 'hoopla'
   | 'freegal'
-  | 'qobuz';
+  | 'qobuz'
+  | 'beatport';
 
 // Social platform types for MusicBrainz enrichment
 type SocialPlatform = 'instagram' | 'facebook' | 'tiktok' | 'youtube' | 'threads' | 'bluesky' | 'twitter';
@@ -915,6 +916,63 @@ async function searchQobuz(query: string): Promise<Map<string, string>> {
   return results;
 }
 
+// Search Beatport via __NEXT_DATA__ JSON embedded in search page
+async function searchBeatport(query: string): Promise<Map<string, string>> {
+  const results = new Map<string, string>();
+
+  try {
+    const searchUrl = `https://www.beatport.com/search?q=${encodeURIComponent(query)}`;
+    const response = await fetchWithTimeout(searchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    }, 5000);
+
+    if (!response.ok) return results;
+
+    const html = await response.text();
+    const root = parse(html);
+    const scriptEl = root.querySelector('script#__NEXT_DATA__');
+    if (!scriptEl) return results;
+
+    const json = JSON.parse(scriptEl.textContent);
+    const queries = json?.props?.pageProps?.dehydratedState?.queries;
+    let artists: { artist_id: number; artist_name: string }[] | undefined;
+    for (const q of queries || []) {
+      const data = q?.state?.data?.artists?.data;
+      if (Array.isArray(data)) {
+        artists = data;
+        break;
+      }
+    }
+    if (!artists) return results;
+
+    const queryNormalized = normalizeForComparison(query);
+
+    for (const artist of artists.slice(0, 10)) {
+      const { artist_name, artist_id } = artist;
+      if (!artist_name || !artist_id) continue;
+
+      const normalizedName = normalizeForComparison(artist_name);
+
+      const isMatch = normalizedName === queryNormalized ||
+        queryNormalized.startsWith(normalizedName) ||
+        (normalizedName.startsWith(queryNormalized) && /^\d*$/.test(normalizedName.slice(queryNormalized.length)));
+
+      if (isMatch && !results.has(normalizedName)) {
+        const slug = artist_name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        results.set(normalizedName, `https://www.beatport.com/artist/${slug}/${artist_id}`);
+      }
+    }
+  } catch (error: any) {
+    if (error.name !== 'AbortError') {
+      console.error('Beatport search error:', error.message);
+    }
+  }
+
+  return results;
+}
+
 function generateResultId(name: string, artist?: string): string {
   const normalized = normalizeForComparison(artist ? `${artist}-${name}` : name);
   return normalized || Math.random().toString(36).substring(2);
@@ -973,7 +1031,7 @@ function aggregateResults(allResults: PlatformResult[], query?: string): Aggrega
 }
 
 async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
-  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, patreonResults, qobuzResults, musicbrainzResults] = await Promise.allSettled([
+  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, patreonResults, qobuzResults, musicbrainzResults, beatportResults] = await Promise.allSettled([
     searchBandcamp(query),
     searchBandwagon(query),
     searchMirlo(query),
@@ -981,6 +1039,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     searchPatreon(query),
     searchQobuz(query),
     searchMusicBrainz(query),
+    searchBeatport(query),
   ]);
 
   const allResults: PlatformResult[] = [];
@@ -1007,6 +1066,9 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
 
   // Get Qobuz matches (returns Map of normalized artist name -> URL)
   const qobuzMatches = qobuzResults.status === 'fulfilled' ? qobuzResults.value : new Map<string, string>();
+
+  // Get Beatport matches (returns Map of normalized artist name -> URL)
+  const beatportMatches = beatportResults.status === 'fulfilled' ? beatportResults.value : new Map<string, string>();
 
   // Get aggregated results
   const aggregated = aggregateResults(allResults, query);
@@ -1064,6 +1126,14 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         result.platforms.push({
           sourceId: 'qobuz',
           url: qobuzMatches.get(normalizedName)!,
+        });
+      }
+
+      // Add Beatport link if artist matches
+      if (beatportMatches.has(normalizedName)) {
+        result.platforms.push({
+          sourceId: 'beatport',
+          url: beatportMatches.get(normalizedName)!,
         });
       }
 

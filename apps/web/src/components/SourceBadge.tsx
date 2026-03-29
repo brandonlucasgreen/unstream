@@ -1,6 +1,7 @@
 import type { Source } from '../types';
 import { analytics } from '../services/analytics';
 import { isBandcampFriday } from '../utils/bandcamp-friday';
+import { PlatformIcon } from './PlatformIcon';
 
 interface SourceBadgeProps {
   source: Source;
@@ -51,9 +52,7 @@ export function SourceBadge({ source, url, isDirectLink }: SourceBadgeProps) {
       }}
       onClick={() => analytics.trackPlatformClick(source.name)}
     >
-      <span className="text-base">
-        {source.icon}
-      </span>
+      <PlatformIcon sourceId={source.id} color={source.color} emoji={source.icon} />
       <span className="flex items-center gap-1">
         {source.name}
         {hasPayoutPercent ? (

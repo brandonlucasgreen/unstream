@@ -133,6 +133,18 @@ export const sources: Record<SourceId, Source> = {
     homepageUrl: 'https://www.qobuz.com',
     artistPayoutPercent: '~70%',
   },
+  beatport: {
+    id: 'beatport',
+    name: 'Beatport',
+    description: 'DRM-free DJ & electronic music store',
+    color: '#94d500',
+    icon: '🎛️',
+    category: 'marketplace',
+    hasEmbed: false,
+    searchUrlTemplate: 'https://www.beatport.com/search?q={query}',
+    homepageUrl: 'https://www.beatport.com',
+    artistPayoutPercent: '55-70%',
+  },
   jamcoop: {
     id: 'jamcoop',
     name: 'Jam.coop',
@@ -261,7 +273,7 @@ export const sourceCategories = {
   marketplace: {
     name: 'Music Marketplaces',
     description: 'Buy music directly from artists',
-    sources: ['bandcamp', 'mirlo', 'ampwall', 'qobuz', 'jamcoop', 'discogs'] as SourceId[],
+    sources: ['bandcamp', 'mirlo', 'ampwall', 'qobuz', 'beatport', 'jamcoop', 'discogs'] as SourceId[],
   },
   patronage: {
     name: 'Patronage Platforms',

@@ -13,7 +13,7 @@
       "strict_min_version": "120.0"
     }
   },
-  "description": "See where your money actually goes. Unstream shows artist payout percentages and finds them on 15 platforms. Free, open source, no tracking.",
+  "description": "See where your money actually goes. Unstream shows artist payout percentages and finds them on 16 platforms. Free, open source, no tracking.",
   "version": "2.1.0",
   "icons": {
     "16": "icons/icon16.png",

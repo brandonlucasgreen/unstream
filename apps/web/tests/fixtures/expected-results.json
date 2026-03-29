@@ -81,6 +81,19 @@
     }
   },
   {
+    "query": "Ben-G!",
+    "assertions": {
+      "minResults": 1,
+      "results": [
+        {
+          "name": "Ben-G!",
+          "requiredPlatforms": ["beatport"],
+          "urlPatterns": { "beatport": "beatport.com/artist" }
+        }
+      ]
+    }
+  },
+  {
     "query": "",
     "assertions": {
       "expectError": true,
