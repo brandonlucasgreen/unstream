@@ -121,7 +121,8 @@ export function applyMergeOverrides(
 
     // Use URL matches if any, otherwise fall back to the first name match
     // so the override can still find its target when no URLs matched yet
-    const matchingIndices = urlMatchIndices.length > 0 ? urlMatchIndices : (nameOnlyMatchIndex >= 0 ? [nameOnlyMatchIndex] : []);
+    const hasUrlMatches = urlMatchIndices.length > 0;
+    const matchingIndices = hasUrlMatches ? urlMatchIndices : (nameOnlyMatchIndex >= 0 ? [nameOnlyMatchIndex] : []);
     if (matchingIndices.length === 0) continue;
 
     // Determine the primary result (merge others into it if multiple)
@@ -188,25 +189,30 @@ export function applyMergeOverrides(
       }
     }
 
-    // Strip platforms that aren't in the override URL list and aren't
-    // search-only links. This prevents name-matched results from a different
-    // artist (e.g. Bandcamp "BenG" vs override "Ben-G!") from leaking in.
-    const finalOverrideUrls = new Set(override.platform_urls.map(u => u.replace(/\/+$/, '').toLowerCase()));
-    const before = primary.platforms.length;
-    primary.platforms = primary.platforms.filter(p =>
-      finalOverrideUrls.has(p.url.replace(/\/+$/, '').toLowerCase()) || isSearchOnlyLink(p)
-    );
-    if (primary.platforms.length < before) {
-      console.log(`[Override] Stripped ${before - primary.platforms.length} non-override platform(s) from "${override.group_name}"`);
+    // When matched by URL, strip platforms not in the override list (keeping
+    // search-only links). This prevents wrong links from leaking in via merge.
+    // Skip for name-only fallback — we're not confident enough to alter platforms.
+    if (hasUrlMatches) {
+      const finalOverrideUrls = new Set(override.platform_urls.map(u => u.replace(/\/+$/, '').toLowerCase()));
+      const before = primary.platforms.length;
+      primary.platforms = primary.platforms.filter(p =>
+        finalOverrideUrls.has(p.url.replace(/\/+$/, '').toLowerCase()) || isSearchOnlyLink(p)
+      );
+      if (primary.platforms.length < before) {
+        console.log(`[Override] Stripped ${before - primary.platforms.length} non-override platform(s) from "${override.group_name}"`);
+      }
     }
 
-    if (override.canonical_image_url) {
-      primary.imageUrl = override.canonical_image_url;
+    // Only apply override image and display name when we matched by URL.
+    // Name-only fallback matches might be a different artist that just
+    // happens to have a similar name — don't overwrite their identity.
+    if (hasUrlMatches) {
+      if (override.canonical_image_url) {
+        primary.imageUrl = override.canonical_image_url;
+      }
+      primary.name = override.group_name;
     }
 
-    // Use the override's group_name as the display name — it preserves
-    // special characters that slug-based reconstruction strips
-    primary.name = override.group_name;
     primary.matchConfidence = 'verified';
     primary.overrideMerged = true;
   }
