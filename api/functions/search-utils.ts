@@ -311,11 +311,22 @@ export function collectReleaseTitles(result: AggregatedResult): Set<string> {
   return titles;
 }
 
+// Reconstruct a display name from a URL slug (e.g. "ben-g" → "Ben G").
+// If an original query is provided and its normalized form matches,
+// prefer the query since it preserves special characters (e.g. "Ben-G!").
+export function displayNameFromSlug(slug: string, originalQuery?: string): string {
+  const reconstructed = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  if (originalQuery && normalizeForComparison(originalQuery) === normalizeForComparison(reconstructed)) {
+    return originalQuery;
+  }
+  return reconstructed;
+}
+
 // Extract display name from a Qobuz URL slug
-export function qobuzDisplayName(url: string, fallback: string): string {
+export function qobuzDisplayName(url: string, fallback: string, originalQuery?: string): string {
   const match = url.match(/\/interpreter\/([^/]+)\//);
   return match
-    ? match[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+    ? displayNameFromSlug(match[1], originalQuery)
     : fallback;
 }
 
