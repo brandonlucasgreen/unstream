@@ -99,124 +99,62 @@ export function applyMergeOverrides(
   overrides: MergeOverride[],
 ): void {
   for (const override of overrides) {
-    // Normalize override URLs for comparison
-    const overrideUrls = new Set(override.platform_urls.map(u => u.replace(/\/+$/, '').toLowerCase()));
+    const overrideUrls = new Set(
+      override.platform_urls.map(u => u.replace(/\/+$/, '').toLowerCase())
+    );
 
-    // Only merge results that share a real (non-search-only) URL with the override.
-    // Name-only matches are left as separate results — they may be
-    // different artists who happen to have a similar name.
-    // Search-only links (e.g. buymeacoffee.com/explore-creators) are excluded
-    // from URL matching because they're identical across all results.
-    const overrideName = normalizeForComparison(override.group_name);
-    const urlMatchIndices: number[] = [];
-    let nameOnlyMatchIndex = -1;
-    for (let i = 0; i < aggregated.length; i++) {
-      const hasUrlMatch = aggregated[i].platforms.some(p =>
-        !isSearchOnlyLink(p) && overrideUrls.has(p.url.replace(/\/+$/, '').toLowerCase())
+    // Step 1: Strip ALL override URLs from every existing result.
+    // The override result will be the sole owner of these URLs.
+    for (const result of aggregated) {
+      const before = result.platforms.length;
+      result.platforms = result.platforms.filter(p =>
+        !overrideUrls.has(p.url.replace(/\/+$/, '').toLowerCase())
       );
-      if (hasUrlMatch) {
-        urlMatchIndices.push(i);
-      } else if (nameOnlyMatchIndex === -1 && normalizeForComparison(aggregated[i].name) === overrideName) {
-        nameOnlyMatchIndex = i;
+      if (result.platforms.length < before) {
+        console.log(`[Override] Stripped ${before - result.platforms.length} URL(s) from "${result.name}" (claimed by "${override.group_name}")`);
       }
     }
 
-    // Use URL matches if any, otherwise fall back to the first name match
-    // so the override can still find its target when no URLs matched yet
-    const hasUrlMatches = urlMatchIndices.length > 0;
-    const matchingIndices = hasUrlMatches ? urlMatchIndices : (nameOnlyMatchIndex >= 0 ? [nameOnlyMatchIndex] : []);
-    if (matchingIndices.length === 0) continue;
-
-    // Determine the primary result (merge others into it if multiple)
-    const primary = aggregated[matchingIndices[0]];
-
-    if (matchingIndices.length > 1) {
-      // Merge all URL-matched results into the first one
-      const existingSourceIds = new Set(primary.platforms.map(p => p.sourceId));
-
-      for (let i = 1; i < matchingIndices.length; i++) {
-        const other = aggregated[matchingIndices[i]];
-        for (const p of other.platforms) {
-          if (!existingSourceIds.has(p.sourceId)) {
-            primary.platforms.push(p);
-            existingSourceIds.add(p.sourceId);
-          }
-        }
-        if (!primary.imageUrl && other.imageUrl) {
-          primary.imageUrl = other.imageUrl;
-        }
+    // Step 2: Remove results that have no real platforms left (only search-only or empty)
+    for (let i = aggregated.length - 1; i >= 0; i--) {
+      const hasRealPlatform = aggregated[i].platforms.some(p => !isSearchOnlyLink(p));
+      if (!hasRealPlatform) {
+        console.log(`[Override] Removed empty result "${aggregated[i].name}" after URL stripping`);
+        aggregated.splice(i, 1);
       }
-
-      console.log(`[Override] Merged ${matchingIndices.length} results for "${override.group_name}"`);
-
-      // Remove the merged results (iterate in reverse to keep indices stable)
-      for (let i = matchingIndices.length - 1; i >= 1; i--) {
-        aggregated.splice(matchingIndices[i], 1);
-      }
-    } else {
-      console.log(`[Override] Protected "${override.group_name}" from disambiguation (all URLs on one result)`);
     }
 
-    // Ensure all override URLs are on the result, replacing any existing
-    // links for the same platform that point to a different URL (e.g. wrong
-    // Qobuz artist variant picked up by search)
-    const existingUrls = new Set(primary.platforms.map(p => p.url.replace(/\/+$/, '').toLowerCase()));
+    // Step 3: Build the override's platform list from its URLs
+    const overridePlatforms: { sourceId: SourceId; url: string }[] = [];
     for (const url of override.platform_urls) {
-      const normalized = url.replace(/\/+$/, '').toLowerCase();
-      if (existingUrls.has(normalized)) continue;
       const sourceId = sourceIdFromUrl(url);
-      if (sourceId) {
-        // Replace existing link for this platform if the URL differs
-        const existingIdx = primary.platforms.findIndex(p => p.sourceId === sourceId);
-        if (existingIdx !== -1) {
-          const existingUrl = primary.platforms[existingIdx].url.replace(/\/+$/, '').toLowerCase();
-          if (existingUrl !== normalized) {
-            console.log(`[Override] Replaced ${sourceId} URL for "${override.group_name}": ${primary.platforms[existingIdx].url} → ${url}`);
-            primary.platforms[existingIdx] = { sourceId, url };
-          }
-        } else {
-          primary.platforms.push({ sourceId, url });
-          console.log(`[Override] Injected missing ${sourceId} URL for "${override.group_name}": ${url}`);
-        }
+      if (sourceId && !isSearchOnlyLink({ sourceId, url })) {
+        overridePlatforms.push({ sourceId, url });
       }
     }
 
-    // Remove excluded URLs from the merged result
-    if (override.excluded_urls.length > 0) {
-      const excludedSet = new Set(override.excluded_urls.map(u => u.replace(/\/+$/, '').toLowerCase()));
-      const removed = primary.platforms.filter(p => excludedSet.has(p.url.replace(/\/+$/, '').toLowerCase()));
-      primary.platforms = primary.platforms.filter(p => !excludedSet.has(p.url.replace(/\/+$/, '').toLowerCase()));
-      if (removed.length > 0) {
-        console.log(`[Override] Removed ${removed.length} excluded URL(s) from "${override.group_name}"`);
-      }
-    }
+    // Step 4: Create the override result and add it to the front
+    if (overridePlatforms.length > 0) {
+      const overrideResult: AggregatedResult = {
+        id: `override-${normalizeForComparison(override.group_name)}`,
+        name: override.group_name,
+        type: 'artist',
+        imageUrl: override.canonical_image_url || undefined,
+        platforms: overridePlatforms,
+        matchConfidence: 'verified',
+        overrideMerged: true,
+      };
 
-    // When matched by URL, strip platforms not in the override list (keeping
-    // search-only links). This prevents wrong links from leaking in via merge.
-    // Skip for name-only fallback — we're not confident enough to alter platforms.
-    if (hasUrlMatches) {
-      const finalOverrideUrls = new Set(override.platform_urls.map(u => u.replace(/\/+$/, '').toLowerCase()));
-      const before = primary.platforms.length;
-      primary.platforms = primary.platforms.filter(p =>
-        finalOverrideUrls.has(p.url.replace(/\/+$/, '').toLowerCase()) || isSearchOnlyLink(p)
+      // Add search-only links for discoverability
+      overrideResult.platforms.push(
+        { sourceId: 'ampwall' as SourceId, url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(override.group_name)}` },
+        { sourceId: 'kofi' as SourceId, url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(override.group_name)}` },
+        { sourceId: 'buymeacoffee' as SourceId, url: 'https://buymeacoffee.com/explore-creators' },
       );
-      if (primary.platforms.length < before) {
-        console.log(`[Override] Stripped ${before - primary.platforms.length} non-override platform(s) from "${override.group_name}"`);
-      }
-    }
 
-    // Only apply override image and display name when we matched by URL.
-    // Name-only fallback matches might be a different artist that just
-    // happens to have a similar name — don't overwrite their identity.
-    if (hasUrlMatches) {
-      if (override.canonical_image_url) {
-        primary.imageUrl = override.canonical_image_url;
-      }
-      primary.name = override.group_name;
+      aggregated.unshift(overrideResult);
+      console.log(`[Override] Created result for "${override.group_name}" with ${overridePlatforms.length} platform(s)`);
     }
-
-    primary.matchConfidence = 'verified';
-    primary.overrideMerged = true;
   }
 }
 
@@ -447,8 +385,6 @@ export function attachQobuzAndSearchLinks(
   aggregated: AggregatedResult[],
   qobuzMatches: Map<string, string>,
   ampwallMatches: Map<string, string>,
-  reservedOverrideUrls?: Set<string>,
-  reservedOverrideNames?: Set<string>,
 ): void {
   const usedPlatformUrls = new Set<string>();
 
@@ -479,13 +415,9 @@ export function attachQobuzAndSearchLinks(
     }
 
     // Qobuz: attach ALL name variations (e.g. "morice", "morice1", "morice2")
-    // Disambiguation will sort out which actually match based on releases.
-    // Skip Qobuz matches whose name matches an override — the override owns
-    // all Qobuz variants for that artist, not just the exact URL in its list.
+    // Disambiguation will sort out which actually match based on releases
     for (const [qobuzName, qobuzUrl] of qobuzMatches) {
       if (isQobuzVariation(qobuzName, normalizedName)) {
-        if (reservedOverrideUrls?.has(qobuzUrl.replace(/\/+$/, '').toLowerCase())) continue;
-        if (reservedOverrideNames?.has(qobuzName.replace(/\d+$/, ''))) continue;
         result.platforms.push({ sourceId: 'qobuz', url: qobuzUrl });
       }
     }
@@ -630,8 +562,6 @@ export function deduplicateQobuzUrls(aggregated: AggregatedResult[]): void {
 export function createOrphanedQobuzStandalones(
   aggregated: AggregatedResult[],
   qobuzMatches: Map<string, string>,
-  reservedOverrideUrls?: Set<string>,
-  reservedOverrideNames?: Set<string>,
 ): void {
   const attachedUrls = new Set<string>();
   for (const r of aggregated) {
@@ -642,9 +572,6 @@ export function createOrphanedQobuzStandalones(
 
   for (const [qobuzName, qobuzUrl] of qobuzMatches) {
     if (attachedUrls.has(qobuzUrl)) continue;
-    // Skip URLs/names reserved by overrides — the override handles them
-    if (reservedOverrideUrls?.has(qobuzUrl.replace(/\/+$/, '').toLowerCase())) continue;
-    if (reservedOverrideNames?.has(qobuzName.replace(/\d+$/, ''))) continue;
 
     const displayName = qobuzDisplayName(qobuzUrl, qobuzName);
     const standaloneId = `qobuz-standalone-${qobuzName}`;

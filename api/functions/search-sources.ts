@@ -1244,20 +1244,14 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
 
   const aggregated = aggregateResults(allResults, query);
 
-  // Fetch overrides early so we can reserve their URLs and names during Phase 2
-  const overrides = await getMergeOverrides();
-  const reservedOverrideUrls = new Set(
-    overrides.flatMap(o => o.platform_urls.map(u => u.replace(/\/+$/, '').toLowerCase()))
-  );
-  const reservedOverrideNames = new Set(
-    overrides.map(o => normalizeForComparison(o.group_name))
-  );
-
   // Phase 2: Attach Qobuz + search-only links, create Qobuz-only results
-  attachQobuzAndSearchLinks(aggregated, qobuzMatches, ampwallMatches, reservedOverrideUrls, reservedOverrideNames);
+  attachQobuzAndSearchLinks(aggregated, qobuzMatches, ampwallMatches);
   createQobuzOnlyResults(aggregated, qobuzMatches);
 
-  // Phase 2.5: Apply manual merge overrides before release-based disambiguation
+  // Phase 2.5: Apply manual merge overrides before release-based disambiguation.
+  // Overrides authoritatively create their own result and strip their URLs
+  // from all other results — no reservation needed.
+  const overrides = await getMergeOverrides();
   if (overrides.length > 0) {
     applyMergeOverrides(aggregated, overrides);
   }
@@ -1268,7 +1262,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   removeDeadQobuzLinks(aggregated);
   crossPlatformReleaseComparison(aggregated);
   deduplicateQobuzUrls(aggregated);
-  createOrphanedQobuzStandalones(aggregated, qobuzMatches, reservedOverrideUrls, reservedOverrideNames);
+  createOrphanedQobuzStandalones(aggregated, qobuzMatches);
   const disambiguated = splitSuspiciousPlatforms(aggregated);
   const merged = mergeByReleaseOverlap(disambiguated);
 
