@@ -4768,7 +4768,37 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://unstream.stream/guides/example-guide</loc>
+    <loc>https://unstream.stream/guides/bandcamp-and-beyond-alternative-music-platforms-worth-knowing</loc>
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://unstream.stream/guides/bandcamp-friday-explained</loc>
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://unstream.stream/guides/how-to-build-a-music-library-without-streaming</loc>
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://unstream.stream/guides/the-real-cost-of-free-music</loc>
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://unstream.stream/guides/where-your-money-goes-streaming-vs-buying</loc>
+    <lastmod>2026-03-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://unstream.stream/guides/why-i-built-unstream</loc>
     <lastmod>2026-03-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>

@@ -12,13 +12,6 @@ interface GuideEntry {
   published: string;
 }
 
-const PILLAR_LABELS: Record<string, string> = {
-  'artist-economics': 'Artist economics',
-  'platform-discovery': 'Platform discovery',
-  'how-to': 'How-to for fans',
-  'builder': 'Builder / open source',
-};
-
 const INDEX_TITLE = 'Guides - Unstream';
 const INDEX_DESCRIPTION = 'How streaming payouts work, platforms worth knowing about, and ways to put more money in artists\' pockets.';
 
@@ -75,16 +68,11 @@ export function GuidesIndexPage() {
                   to={`/guides/${guide.slug}`}
                   className="block bg-surface-secondary rounded-xl p-6 border border-border hover:border-accent-primary/40 transition-colors"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h2 className="font-display text-lg font-semibold text-text-primary mb-1">
-                        {guide.title}
-                      </h2>
-                      <p className="text-text-secondary text-sm">{guide.description}</p>
-                    </div>
-                    <span className="shrink-0 text-xs text-text-muted bg-surface-primary px-2 py-1 rounded">
-                      {PILLAR_LABELS[guide.pillar] || guide.pillar}
-                    </span>
+                  <div>
+                    <h2 className="font-display text-lg font-semibold text-text-primary mb-1">
+                      {guide.title}
+                    </h2>
+                    <p className="text-text-secondary text-sm">{guide.description}</p>
                   </div>
                 </Link>
               ))}
