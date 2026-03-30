@@ -16,6 +16,7 @@ const RoadmapPage = lazy(() => import('./pages/RoadmapPage.tsx').then(m => ({ de
 const SupportPage = lazy(() => import('./pages/SupportPage.tsx').then(m => ({ default: m.SupportPage })))
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage.tsx').then(m => ({ default: m.PrivacyPolicyPage })))
 const AdminMergePage = lazy(() => import('./pages/AdminMergePage.tsx').then(m => ({ default: m.AdminMergePage })))
+const AdminVerifyPage = lazy(() => import('./pages/AdminVerifyPage.tsx').then(m => ({ default: m.AdminVerifyPage })))
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage.tsx').then(m => ({ default: m.ResetPasswordPage })))
 const GuidesIndexPage = lazy(() => import('./pages/GuidesIndexPage.tsx').then(m => ({ default: m.GuidesIndexPage })))
 const GuidePage = lazy(() => import('./pages/GuidePage.tsx').then(m => ({ default: m.GuidePage })))
@@ -49,6 +50,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/guides" element={<GuidesIndexPage />} />
             <Route path="/guides/:slug" element={<GuidePage />} />
             <Route path="/admin/merge" element={<AdminMergePage />} />
+            <Route path="/admin/verify" element={<AdminVerifyPage />} />
           </Routes>
         </Suspense>
       </BrowserRouter>

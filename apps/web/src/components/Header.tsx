@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ThemeToggle } from './ThemeToggle';
 import { useTheme } from '../hooks/useTheme';
@@ -6,7 +7,25 @@ import { useAuth } from '../contexts/AuthContext';
 export function Header() {
   const { preference, cycleTheme } = useTheme();
   const navigate = useNavigate();
-  const { session, user, isLoading, signOut } = useAuth();
+  const { session, user, isAdmin, isLoading, signOut } = useAuth();
+  const [pendingVerifyCount, setPendingVerifyCount] = useState(0);
+
+  // Fetch pending verification count for admins
+  useEffect(() => {
+    if (!isAdmin || !session?.access_token) return;
+
+    fetch('/api/admin/verify', {
+      headers: { 'Authorization': `Bearer ${session.access_token}` },
+    })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data?.requests) {
+          const pending = data.requests.filter((r: { status: string }) => r.status === 'pending').length;
+          setPendingVerifyCount(pending);
+        }
+      })
+      .catch(() => { /* silent */ });
+  }, [isAdmin, session?.access_token]);
 
   async function handleSignOut() {
     await signOut();
@@ -25,6 +44,14 @@ export function Header() {
               <span className="text-text-muted hidden sm:inline">
                 {user?.email}
               </span>
+              {isAdmin && pendingVerifyCount > 0 && (
+                <Link
+                  to="/admin/verify"
+                  className="text-accent-primary hover:underline font-medium"
+                >
+                  Verify ({pendingVerifyCount})
+                </Link>
+              )}
               <Link
                 to="/artist-dashboard"
                 className="text-accent-primary hover:underline font-medium"
