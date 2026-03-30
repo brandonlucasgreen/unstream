@@ -69,6 +69,9 @@ export interface SearchResult {
   matchConfidence?: 'verified' | 'unverified' | 'claimed';
   // Slug for claimed artist page (/a/{slug})
   claimedSlug?: string;
+  // Wikipedia bio summary from MusicBrainz enrichment
+  wikipediaSummary?: string;
+  wikipediaUrl?: string;
 }
 
 // API response from /api/search/sources
@@ -93,6 +96,8 @@ export interface MusicBrainzData {
   hasPre2005Release: boolean;
   socialLinks: SocialLink[];
   platformUrls?: string[];
+  wikipediaSummary?: string | null;
+  wikipediaUrl?: string | null;
 }
 
 // Search state

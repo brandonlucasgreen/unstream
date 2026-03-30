@@ -27,6 +27,8 @@ interface MusicBrainzSearchResponse {
   socialLinks: SocialLink[];
   discoveredPlatforms: DiscoveredPlatformLink[];
   platformUrls: string[]; // Known platform URLs from MusicBrainz relations (bandcamp, mirlo, etc.)
+  wikipediaSummary: string | null;
+  wikipediaUrl: string | null;
 }
 
 // Known Mastodon/Fediverse instances (non-exhaustive, but covers popular ones)
@@ -114,6 +116,35 @@ function parseSocialUrl(url: string): SocialLink | null {
   }
 
   return null;
+}
+
+// Fetch a short bio summary from the Wikipedia REST API
+async function fetchWikipediaSummary(wikipediaUrl: string): Promise<{ extract: string; pageUrl: string } | null> {
+  try {
+    const match = wikipediaUrl.match(/\/wiki\/(.+)$/);
+    if (!match) return null;
+    const title = match[1];
+    const response = await globalThis.fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`,
+      {
+        headers: { 'User-Agent': 'Unstream/1.0 (https://unstream.stream)' },
+        signal: AbortSignal.timeout(5000),
+      }
+    );
+    if (!response.ok) return null;
+    const data = await response.json() as {
+      type?: string;
+      extract?: string;
+      content_urls?: { desktop?: { page?: string } };
+    };
+    if (data.type === 'disambiguation') return null;
+    return {
+      extract: data.extract || '',
+      pageUrl: data.content_urls?.desktop?.page || wikipediaUrl,
+    };
+  } catch {
+    return null;
+  }
 }
 
 import { cacheGetOrFetch, artistCacheKey } from './cache';
@@ -432,6 +463,8 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     socialLinks: [],
     discoveredPlatforms: [],
     platformUrls: [],
+    wikipediaSummary: null,
+    wikipediaUrl: null,
   };
 
   try {
@@ -486,6 +519,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     let officialUrl: string | null = null;
     let discogsUrl: string | null = null;
     let linktreeUrl: string | null = null;
+    let wikipediaUrl: string | null = null;
     const socialLinks: SocialLink[] = [];
     const seenPlatforms = new Set<SocialPlatform>();
     const platformUrls: string[] = [];
@@ -512,6 +546,14 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       for (const rel of relations) {
         if (rel.type === 'discogs' && rel.url?.resource) {
           discogsUrl = rel.url.resource;
+          break;
+        }
+      }
+
+      // Look for English Wikipedia link
+      for (const rel of relations) {
+        if (rel.type === 'wikipedia' && rel.url?.resource && rel.url.resource.includes('en.wikipedia.org')) {
+          wikipediaUrl = rel.url.resource;
           break;
         }
       }
@@ -585,11 +627,12 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       }
     }
 
-    // Fetch additional social links from Discogs, official site, and PeerTube in parallel
-    const [discogsSocialLinks, officialSiteResult, peertubeLink] = await Promise.all([
+    // Fetch additional social links from Discogs, official site, PeerTube, and Wikipedia in parallel
+    const [discogsSocialLinks, officialSiteResult, peertubeLink, wikipediaResult] = await Promise.all([
       discogsUrl ? fetchDiscogsSocialLinks(discogsUrl) : Promise.resolve([]),
       officialUrl ? fetchOfficialSiteSocialLinks(officialUrl) : Promise.resolve({ socialLinks: [], linktreeUrl: null, discoveredPlatforms: [] }),
       searchPeerTubeChannels(artist.name),
+      wikipediaUrl ? fetchWikipediaSummary(wikipediaUrl) : Promise.resolve(null),
     ]);
 
     // If we found a Linktree URL from MusicBrainz or official site, scrape it for additional links
@@ -616,6 +659,8 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       socialLinks: allSocialLinks,
       discoveredPlatforms: officialSiteResult.discoveredPlatforms,
       platformUrls,
+      wikipediaSummary: wikipediaResult?.extract || null,
+      wikipediaUrl: wikipediaResult?.pageUrl || wikipediaUrl,
     };
   } catch (error: unknown) {
     const err = error as { name?: string; message?: string };
@@ -691,6 +736,8 @@ export async function handler(event: { queryStringParameters?: Record<string, st
         hasPre2005Release: false,
         socialLinks: [],
         discoveredPlatforms: [],
+        wikipediaSummary: null,
+        wikipediaUrl: null,
       }),
     };
   }

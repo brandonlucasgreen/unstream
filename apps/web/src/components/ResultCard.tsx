@@ -387,6 +387,27 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
               </span>
             </div>
           )}
+          {/* Wikipedia bio summary */}
+          {result.type === 'artist' && result.wikipediaSummary && (
+            <div className="space-y-1">
+              <p className="text-sm text-text-secondary leading-relaxed">
+                {result.wikipediaSummary.length > 200
+                  ? result.wikipediaSummary.substring(0, 200).replace(/\s+\S*$/, '') + '...'
+                  : result.wikipediaSummary}
+                {result.wikipediaUrl && (
+                  <>
+                    {' '}
+                    <a href={result.wikipediaUrl} target="_blank" rel="noopener noreferrer"
+                       className="text-accent-primary hover:underline text-xs"
+                       onClick={(e) => e.stopPropagation()}>
+                      Wikipedia
+                    </a>
+                  </>
+                )}
+              </p>
+            </div>
+          )}
+
           {/* Featured Release Section with Preview */}
           {latestRelease && platformsWithRelease.length > 0 && (
             <div className="space-y-2">
