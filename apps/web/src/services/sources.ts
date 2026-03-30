@@ -618,6 +618,11 @@ export function mergeWithMusicBrainzData(
       return 0;
     });
 
-    return { ...result, platforms: newPlatforms };
+    return {
+      ...result,
+      platforms: newPlatforms,
+      wikipediaSummary: mbData.wikipediaSummary || undefined,
+      wikipediaUrl: mbData.wikipediaUrl || undefined,
+    };
   });
 }
