@@ -31,6 +31,10 @@ async function registerCommands() {
             },
           ],
         },
+        {
+          name: 'Lookup on Unstream',
+          type: 3, // MESSAGE command (context menu)
+        },
       ]),
     }
   );

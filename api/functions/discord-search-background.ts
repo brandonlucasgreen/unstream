@@ -50,19 +50,73 @@ interface DiscordEmbed {
 export async function handler(event: { body: string | null }) {
   if (!event.body) return { statusCode: 400 };
 
-  const { interaction_token, application_id, artist_name } = JSON.parse(event.body) as {
+  const { interaction_token, application_id, artist_name, resolve_url } = JSON.parse(event.body) as {
     interaction_token: string;
     application_id: string;
-    artist_name: string;
+    artist_name?: string;
+    resolve_url?: string;
   };
 
   const webhookUrl = `https://discord.com/api/v10/webhooks/${application_id}/${interaction_token}/messages/@original`;
+  const siteUrl = process.env.URL || 'https://unstream.stream';
 
   try {
+    // Resolve URL to artist name if needed
+    let resolvedArtistName = artist_name;
+
+    if (resolve_url) {
+      const resolveResponse = await fetch(
+        `${siteUrl}/api/resolve/url?url=${encodeURIComponent(resolve_url)}`
+      );
+      if (!resolveResponse.ok) {
+        await fetch(webhookUrl, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bot ${DISCORD_BOT_TOKEN}`,
+          },
+          body: JSON.stringify({
+            embeds: [
+              {
+                title: 'Could not resolve link',
+                description: "Couldn't identify the artist from that link. Try searching on [unstream.stream](https://unstream.stream).",
+                color: 0xEF4444,
+              },
+            ],
+          }),
+        });
+        return { statusCode: 200 };
+      }
+      const resolveData = (await resolveResponse.json()) as { artist_name?: string };
+      if (!resolveData.artist_name) {
+        await fetch(webhookUrl, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bot ${DISCORD_BOT_TOKEN}`,
+          },
+          body: JSON.stringify({
+            embeds: [
+              {
+                title: 'Could not resolve link',
+                description: "Couldn't identify the artist from that link. Try searching on [unstream.stream](https://unstream.stream).",
+                color: 0xEF4444,
+              },
+            ],
+          }),
+        });
+        return { statusCode: 200 };
+      }
+      resolvedArtistName = resolveData.artist_name;
+    }
+
+    if (!resolvedArtistName) {
+      return { statusCode: 400 };
+    }
+
     // Call search API
-    const siteUrl = process.env.URL || 'https://unstream.stream';
     const searchResponse = await fetch(
-      `${siteUrl}/api/search/sources?query=${encodeURIComponent(artist_name)}`
+      `${siteUrl}/api/search/sources?query=${encodeURIComponent(resolvedArtistName)}`
     );
     const searchData: SearchResponse = await searchResponse.json();
 
@@ -90,9 +144,9 @@ export async function handler(event: { body: string | null }) {
 
       const platformCount = (topResult.platforms || []).length;
       embed = {
-        title: topResult.name || artist_name,
+        title: topResult.name || resolvedArtistName,
         description: `Found on ${platformCount} alternative platform${platformCount !== 1 ? 's' : ''}`,
-        url: `https://unstream.stream/?q=${encodeURIComponent(artist_name)}`,
+        url: `https://unstream.stream/?q=${encodeURIComponent(resolvedArtistName)}`,
         color: 0x8B5CF6, // Purple accent
         fields,
         footer: { text: 'Unstream \u00B7 Support artists directly \u00B7 unstream.stream' },
@@ -104,7 +158,7 @@ export async function handler(event: { body: string | null }) {
     } else {
       embed = {
         title: 'No results found',
-        description: `No alternative platforms found for "${artist_name}". Try searching on [unstream.stream](https://unstream.stream).`,
+        description: `No alternative platforms found for "${resolvedArtistName}". Try searching on [unstream.stream](https://unstream.stream).`,
         color: 0xEF4444,
       };
     }
