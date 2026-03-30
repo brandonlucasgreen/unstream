@@ -26,7 +26,6 @@ Here's a rough breakdown of where a $10 album sale goes under a typical major la
 | Artist royalty (pre-recoupment) | $1.50 |
 | After recoupment deductions | Often $0 |
 
-<!-- FACT CHECK: This breakdown is illustrative/approximate. Actual splits vary by deal. The retailer/platform cut for digital is typically 30% ($3 on a $10 sale), which checks out. Label share and artist royalty are consistent with a ~15% artist rate after retailer cut. -->
 
 Streaming makes this starker. If a major-label track earns [$0.003–0.005 per stream on Spotify](https://dittomusic.com/en/blog/how-much-does-spotify-pay-per-stream), the artist's 15–20% share works out to roughly **$0.0005–0.001 per stream**. An artist needs well over a million streams to earn $1,000. And that's before the label recoups whatever they spent.
 
@@ -55,7 +54,6 @@ Some indie labels have also adapted to the direct-sales model well. Plenty of in
 
 The infrastructure for independent music distribution has gotten dramatically better in the last decade. Services like [DistroKid](https://distrokid.com) ($22.99/year, keep 100% of royalties), [TuneCore](https://tunecore.com) (annual subscription, keep 100%), and [CD Baby](https://cdbaby.com) (one-time fee, keep [91% of royalties](https://aristake.com/digital-distribution-comparison/)) let artists distribute to all major streaming platforms — and crucially, the artist keeps their masters.
 
-<!-- FACT CHECK: DistroKid and TuneCore both take a 20% cut of YouTube Content ID revenue, and TuneCore takes 20% from social platforms (TikTok, Instagram). The "100% of royalties" applies to core streaming platforms like Spotify and Apple Music. -->
 
 Combine that with direct-sales platforms and the economics shift dramatically:
 
@@ -68,7 +66,6 @@ Combine that with direct-sales platforms and the economics shift dramatically:
 | Independent via [Ampwall](https://ampwall.com) | [$9.00–9.50](https://ampwall.com/selling) |
 | Independent via [Faircamp](https://simonrepp.com/faircamp/) | [~$9.70+](https://codeberg.org/Be.ing/faircamp) |
 
-<!-- FACT CHECK: Bandcamp takes 15% digital (10% after $5K in sales) + payment processing (~4-6%). On a $10 album: $10 - $1.50 (15%) - $0.59 (processing) ≈ $7.91. The 82% average figure from Bandcamp's own site translates to ~$8.20. Close enough for the range given. Mirlo's default 10% fee + processing ≈ $8.50-9.00 checks out. Ampwall's 5% fee + processing ≈ $9.00-9.50 checks out. Faircamp is self-hosted with only payment processing fees. -->
 
 That's not a marginal difference. An independent artist selling 1,000 albums on Bandcamp earns roughly the same as a major-label artist selling 5,000–8,000 copies. And the independent artist owns everything.
 

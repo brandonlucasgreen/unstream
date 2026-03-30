@@ -65,7 +65,7 @@ Not every platform hides this. The ones that are most transparent tend to be the
 | **[Bandcamp](https://bandcamp.com)** | ~82% average (~97% on Bandcamp Fridays) | [Published on site](https://bandcamp.com/fair_trade_music_policy) |
 | **[Qobuz](https://www.qobuz.com)** | Pays ~[$0.0187/stream](https://community.qobuz.com/press-en/qobuz-unveils-its-average-payout-per-stream) (audited), ~5x Spotify | First platform to have per-stream rate independently verified |
 
-<!-- FACT CHECK: Ko-fi's payment processor fees (PayPal/Stripe ~3% + $0.30) are separate from platform fees. The 95-100% figure is platform fee only; after processing, effective rate is closer to 92-97%. -->
+
 
 These platforms don't have anything to hide because their model is straightforward: you buy something, the artist gets most of the money, the platform takes a transparent cut. It's a selling point, not a liability.
 
