@@ -54,15 +54,6 @@ async function authenticateRequest(authHeader: string | undefined): Promise<{ us
   return { userId: data.user.id, email: data.user.email || '' };
 }
 
-function generateVerificationCode(): string {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let code = '';
-  for (let i = 0; i < 8; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return code;
-}
-
 // Validate a URL is safe for server-side fetching (SSRF protection)
 function isUrlSafeToFetch(urlString: string): { safe: boolean; reason?: string } {
   let parsed: URL;
@@ -108,12 +99,18 @@ interface ScrapeResult {
   html: string;
 }
 
-// Scrape a website and extract all <a href> links + raw HTML
-async function scrapeWebsite(websiteUrl: string): Promise<ScrapeResult | null> {
+// Scrape a website and extract all <a href> links + raw HTML.
+// Returns a detailed result with error info so callers can give specific feedback.
+interface ScrapeError {
+  type: 'ssrf_blocked' | 'fetch_failed' | 'not_ok';
+  message: string;
+}
+
+async function scrapeWebsite(websiteUrl: string): Promise<{ result: ScrapeResult | null; error?: ScrapeError }> {
   const urlCheck = isUrlSafeToFetch(websiteUrl);
   if (!urlCheck.safe) {
     console.warn(`[Claim] SSRF blocked: ${websiteUrl} — ${urlCheck.reason}`);
-    return null;
+    return { result: null, error: { type: 'ssrf_blocked', message: urlCheck.reason || 'URL not allowed' } };
   }
 
   const controller = new AbortController();
@@ -122,13 +119,17 @@ async function scrapeWebsite(websiteUrl: string): Promise<ScrapeResult | null> {
   try {
     const response = await fetch(websiteUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; UnstreamBot/1.0; +https://unstream.stream)',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
       },
       signal: controller.signal,
       redirect: 'follow',
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      return { result: null, error: { type: 'not_ok', message: `Your website returned HTTP ${response.status}. Make sure the URL is correct and publicly accessible.` } };
+    }
 
     const html = await response.text();
     const links: string[] = [];
@@ -142,9 +143,9 @@ async function scrapeWebsite(websiteUrl: string): Promise<ScrapeResult | null> {
       }
     }
 
-    return { links, html };
+    return { result: { links, html } };
   } catch {
-    return null;
+    return { result: null, error: { type: 'fetch_failed', message: "We couldn't reach your website. Make sure the URL is correct and the site is publicly accessible." } };
   } finally {
     clearTimeout(timeout);
   }
@@ -225,7 +226,7 @@ async function scrapeAvatarFromPlatform(platform: string, pageUrl: string): Prom
   try {
     const response = await fetch(pageUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; UnstreamBot/1.0; +https://unstream.stream)',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
       },
       signal: controller.signal,
       redirect: 'follow',
@@ -344,7 +345,7 @@ export async function handler(event: {
   }
   const userId = authUser.userId;
 
-  let body: { action: string; slug?: string; websiteUrl?: string; email?: string; platform?: string; url?: string };
+  let body: { action: string; slug?: string; websiteUrl?: string; email?: string; platform?: string; url?: string; message?: string };
   try {
     body = JSON.parse(event.body || '{}');
   } catch {
@@ -411,8 +412,6 @@ export async function handler(event: {
     // The frontend email may be empty if the page reloaded after magic link redirect.
     const email = (body.email || authUser.email || '').toLowerCase().trim();
 
-    const verificationCode = generateVerificationCode();
-
     // Upsert the profile (allows retrying the claim flow)
     const { error: upsertError } = await client
       .from('artist_profiles')
@@ -422,7 +421,6 @@ export async function handler(event: {
           user_id: userId,
           email,
           website_url: websiteUrl,
-          verification_code: verificationCode,
           verified_at: null,
         },
         { onConflict: 'artist_id' }
@@ -443,7 +441,6 @@ export async function handler(event: {
       statusCode: 200,
       headers: CORS_HEADERS,
       body: JSON.stringify({
-        verificationCode,
         verifyUrl,
         message: `Add a link to ${verifyUrl} on your website, then verify.`,
       }),
@@ -501,15 +498,15 @@ export async function handler(event: {
     }
 
     // Scrape the website
-    const scrapeResult = await scrapeWebsite(profile.website_url);
+    const { result: scrapeResult, error: scrapeError } = await scrapeWebsite(profile.website_url);
 
-    if (!scrapeResult || scrapeResult.links.length === 0) {
+    if (!scrapeResult) {
       return {
         statusCode: 422,
         headers: CORS_HEADERS,
         body: JSON.stringify({
           verified: false,
-          error: 'Could not load your website. Make sure the URL is correct and publicly accessible.',
+          error: scrapeError?.message || "We couldn't reach your website. Make sure the URL is correct and publicly accessible.",
         }),
       };
     }
@@ -531,9 +528,9 @@ export async function handler(event: {
     }
 
     // Check for Unstream link-back using the DB slug (same one shown to the user in verifyUrl)
-    // Note: artistSlug(artist.name) can differ from the DB slug (e.g. apostrophes in names),
-    // so we use the DB slug to match exactly what we told the user to link to.
-    const hasUnstreamLink = links.some(link => {
+    // First check extracted <a href> links
+    const unstreamUrlPattern = `unstream.stream/a/${slug}`;
+    let hasUnstreamLink = links.some(link => {
       try {
         const url = new URL(link);
         return url.hostname.includes('unstream.stream') &&
@@ -543,13 +540,22 @@ export async function handler(event: {
       }
     });
 
+    // Fallback: check raw HTML text for the verification URL.
+    // This catches JS-rendered links, data attributes, or other non-href references.
+    if (!hasUnstreamLink) {
+      hasUnstreamLink = html.includes(unstreamUrlPattern);
+      if (hasUnstreamLink) {
+        console.log(`[Claim] Found unstream link in raw HTML (not in href) for "${artist.name}"`);
+      }
+    }
+
     if (!hasUnstreamLink) {
       return {
         statusCode: 422,
         headers: CORS_HEADERS,
         body: JSON.stringify({
           verified: false,
-          error: `We couldn't find a link to unstream.stream on your website. Add a link to https://unstream.stream/a/${slug} and try again.`,
+          error: `We found your website but couldn't find a link to unstream.stream on it. Add a link to https://unstream.stream/a/${slug} and try again.`,
         }),
       };
     }
@@ -658,9 +664,111 @@ export async function handler(event: {
     };
   }
 
+  // --- ACTION: REQUEST-MANUAL-REVIEW ---
+  // Submits a manual verification request when automated verification fails
+  if (body.action === 'request-manual-review') {
+    const { slug } = body;
+    const message = body.message;
+
+    if (!slug || !message || message.trim().length === 0) {
+      return {
+        statusCode: 400,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: 'slug and message are required' }),
+      };
+    }
+
+    if (message.length > 5000) {
+      return {
+        statusCode: 400,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: 'Message is too long (max 5000 characters)' }),
+      };
+    }
+
+    // Find the artist
+    const { data: artist, error: findError } = await client
+      .from('artists')
+      .select('id, name')
+      .eq('slug', slug)
+      .single();
+
+    if (findError || !artist) {
+      return {
+        statusCode: 404,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: 'Artist not found' }),
+      };
+    }
+
+    // Check if already claimed
+    const { data: existingProfile } = await client
+      .from('artist_profiles')
+      .select('user_id, verified_at')
+      .eq('artist_id', artist.id)
+      .single();
+
+    if (existingProfile?.verified_at && existingProfile.user_id !== userId) {
+      return {
+        statusCode: 409,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: 'This artist has already been claimed' }),
+      };
+    }
+
+    // Check for existing pending request from this user for this artist
+    const { data: existingRequest } = await client
+      .from('verification_requests')
+      .select('id, status')
+      .eq('artist_id', artist.id)
+      .eq('user_id', userId)
+      .eq('status', 'pending')
+      .single();
+
+    if (existingRequest) {
+      return {
+        statusCode: 409,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: 'You already have a pending verification request for this artist.' }),
+      };
+    }
+
+    const userEmail = body.email || authUser.email || '';
+
+    const { error: insertError } = await client
+      .from('verification_requests')
+      .insert({
+        artist_id: artist.id,
+        user_id: userId,
+        email: userEmail.toLowerCase().trim(),
+        message: message.trim(),
+        status: 'pending',
+      });
+
+    if (insertError) {
+      console.error('[Claim] Failed to create verification request:', insertError);
+      return {
+        statusCode: 500,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: 'Failed to submit verification request' }),
+      };
+    }
+
+    console.log(`[Claim] Manual verification request submitted for "${artist.name}" by ${userEmail}`);
+
+    return {
+      statusCode: 200,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({
+        submitted: true,
+        message: 'Your verification request has been submitted. We\'ll review it within a few days.',
+      }),
+    };
+  }
+
   return {
     statusCode: 400,
     headers: CORS_HEADERS,
-    body: JSON.stringify({ error: 'Invalid action. Use "start", "verify", or "fetch-avatar".' }),
+    body: JSON.stringify({ error: 'Invalid action. Use "start", "verify", "fetch-avatar", or "request-manual-review".' }),
   };
 }
