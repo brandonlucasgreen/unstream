@@ -58,6 +58,12 @@ const NON_MUSIC_OCCUPATIONS = [
   'Q937857',   // football player
 ];
 
+// Hardcoded exclusions — safety net for when Wikidata queries fail (502s, timeouts).
+// These are non-music artists who have Bandcamp pages for unrelated people with the same name.
+const MANUAL_EXCLUDE_SLUGS = new Set([
+  'lenny-bruce',       // deceased comedian, Bandcamp page is a different person
+]);
+
 // --- Types ---
 
 interface ManifestArtist {
@@ -967,6 +973,9 @@ async function main() {
   if (nonMusicSlugs.size > 0) {
     console.log(`  Excluding ${nonMusicSlugs.size} non-music artists (comedians, actors, etc.)`);
   }
+
+  // Merge Wikidata exclusions with hardcoded safety net
+  for (const slug of MANUAL_EXCLUDE_SLUGS) nonMusicSlugs.add(slug);
 
   // Filter manifest to only music artists with good data
   const prominentPool = manifest.filter(a => {
