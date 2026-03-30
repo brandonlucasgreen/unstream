@@ -27,7 +27,11 @@
     "react-dom": "^19.2.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.11.0",
+<<<<<<< HEAD
     "remark-gfm": "^4.0.1"
+=======
+    "tweetnacl": "^1.0.3"
+>>>>>>> b471537 (Add Discord bot with /unstream slash command for artist search)
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
