@@ -145,6 +145,18 @@ export const sources: Record<SourceId, Source> = {
     homepageUrl: 'https://www.beatport.com',
     artistPayoutPercent: '55-70%',
   },
+  even: {
+    id: 'even',
+    name: 'EVEN',
+    description: 'Direct-to-fan music marketplace',
+    color: '#000000',
+    icon: '🎤',
+    category: 'marketplace',
+    hasEmbed: false,
+    searchUrlTemplate: 'https://even.biz/search?q={query}',
+    homepageUrl: 'https://even.biz',
+    artistPayoutPercent: '~80%',
+  },
   jamcoop: {
     id: 'jamcoop',
     name: 'Jam.coop',
@@ -273,7 +285,7 @@ export const sourceCategories = {
   marketplace: {
     name: 'Music Marketplaces',
     description: 'Buy music directly from artists',
-    sources: ['bandcamp', 'mirlo', 'ampwall', 'qobuz', 'beatport', 'jamcoop', 'discogs'] as SourceId[],
+    sources: ['bandcamp', 'mirlo', 'ampwall', 'qobuz', 'beatport', 'even', 'jamcoop', 'discogs'] as SourceId[],
   },
   patronage: {
     name: 'Patronage Platforms',
