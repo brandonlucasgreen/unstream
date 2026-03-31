@@ -58,12 +58,12 @@ Not every platform hides this. The ones that are most transparent tend to be the
 
 | Platform | Disclosed artist share | How we know |
 |----------|----------------------|--------|
-| **[Faircamp](https://simonrepp.com/faircamp/)** | ~97%+ (only hosting costs) | [Self-hosted, no platform fees](https://codeberg.org/Be.ing/faircamp) |
+| **[Faircamp](https://simonrepp.com/faircamp/)** | ~97%+ (only hosting costs; credit card fees may apply depending on payment method) | [Self-hosted, no platform fees](https://codeberg.org/Be.ing/faircamp) |
 | **[Ampwall](https://ampwall.com)** | ~92–95% | [5% platform fee](https://ampwall.com/selling), often covered by buyers |
-| **[Ko-fi](https://ko-fi.com)** | 95–100% (0% on tips, 5% on sales; Gold plan: 0%) | [Published on site](https://help.ko-fi.com/hc/en-us/articles/360002506494-Does-Ko-fi-take-a-fee) |
+| **[Ko-fi](https://ko-fi.com)** | 92–97% (0% platform fee on tips, 5% on sales; Gold plan: 0% — credit card fees apply) | [Published on site](https://help.ko-fi.com/hc/en-us/articles/360002506494-Does-Ko-fi-take-a-fee) |
 | **[Mirlo](https://mirlo.space)** | ~87–90% (default 10% fee, artist-adjustable) | [Published on site, co-op model](https://funmusic.place/blog/introducing-mirlo/) |
 | **[Bandcamp](https://bandcamp.com)** | ~82% average (~97% on Bandcamp Fridays) | [Published on site](https://bandcamp.com/fair_trade_music_policy) |
-| **[Qobuz](https://www.qobuz.com)** | Pays ~[$0.0187/stream](https://community.qobuz.com/press-en/qobuz-unveils-its-average-payout-per-stream) (audited), ~5x Spotify | First platform to have per-stream rate independently verified |
+| **[Qobuz](https://www.qobuz.com)** | Pays ~[$0.0187/stream](https://community.qobuz.com/press-en/qobuz-unveils-its-average-payout-per-stream) (audited, ~5x Spotify); download store pays ~70% to rights holder | First platform to have per-stream rate independently verified |
 
 
 
