@@ -13,7 +13,8 @@ type SourceId =
   | 'hoopla'
   | 'freegal'
   | 'qobuz'
-  | 'beatport';
+  | 'beatport'
+  | 'even';
 
 // Social platform types for MusicBrainz enrichment
 type SocialPlatform = 'instagram' | 'facebook' | 'tiktok' | 'youtube' | 'threads' | 'bluesky' | 'twitter';
@@ -973,6 +974,50 @@ async function searchBeatport(query: string): Promise<Map<string, string>> {
   return results;
 }
 
+// Search EVEN via Algolia API (direct-to-fan marketplace)
+async function searchEven(query: string): Promise<Map<string, string>> {
+  const results = new Map<string, string>();
+
+  try {
+    const response = await fetchWithTimeout('https://S64VD9CU46-dsn.algolia.net/1/indexes/Artist/query', {
+      method: 'POST',
+      headers: {
+        'X-Algolia-Application-Id': 'S64VD9CU46',
+        'X-Algolia-API-Key': 'eea52fd4a67d03678477ffdfbad362e2',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query, hitsPerPage: 10 }),
+    }, 5000);
+
+    if (!response.ok) return results;
+
+    const json = await response.json();
+    const queryNormalized = normalizeForComparison(query);
+
+    for (const hit of (json as { hits?: { name?: string; slug?: string; username?: string }[] }).hits || []) {
+      const name = hit.name;
+      const slug = hit.slug || hit.username;
+      if (!name || !slug) continue;
+
+      const normalizedName = normalizeForComparison(name);
+
+      const isMatch = normalizedName === queryNormalized ||
+        queryNormalized.startsWith(normalizedName) ||
+        (normalizedName.startsWith(queryNormalized) && /^\d*$/.test(normalizedName.slice(queryNormalized.length)));
+
+      if (isMatch && !results.has(normalizedName)) {
+        results.set(normalizedName, `https://even.biz/artists/${slug}`);
+      }
+    }
+  } catch (error: any) {
+    if (error.name !== 'AbortError') {
+      console.error('EVEN search error:', error.message);
+    }
+  }
+
+  return results;
+}
+
 function generateResultId(name: string, artist?: string): string {
   const normalized = normalizeForComparison(artist ? `${artist}-${name}` : name);
   return normalized || Math.random().toString(36).substring(2);
@@ -1031,7 +1076,7 @@ function aggregateResults(allResults: PlatformResult[], query?: string): Aggrega
 }
 
 async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
-  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, patreonResults, qobuzResults, musicbrainzResults, beatportResults] = await Promise.allSettled([
+  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, patreonResults, qobuzResults, musicbrainzResults, beatportResults, evenResults] = await Promise.allSettled([
     searchBandcamp(query),
     searchBandwagon(query),
     searchMirlo(query),
@@ -1040,6 +1085,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     searchQobuz(query),
     searchMusicBrainz(query),
     searchBeatport(query),
+    searchEven(query),
   ]);
 
   const allResults: PlatformResult[] = [];
@@ -1069,6 +1115,9 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
 
   // Get Beatport matches (returns Map of normalized artist name -> URL)
   const beatportMatches = beatportResults.status === 'fulfilled' ? beatportResults.value : new Map<string, string>();
+
+  // Get EVEN matches (returns Map of normalized artist name -> URL)
+  const evenMatches = evenResults.status === 'fulfilled' ? evenResults.value : new Map<string, string>();
 
   // Get aggregated results
   const aggregated = aggregateResults(allResults, query);
@@ -1134,6 +1183,14 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
         result.platforms.push({
           sourceId: 'beatport',
           url: beatportMatches.get(normalizedName)!,
+        });
+      }
+
+      // Add EVEN link if artist matches
+      if (evenMatches.has(normalizedName)) {
+        result.platforms.push({
+          sourceId: 'even',
+          url: evenMatches.get(normalizedName)!,
         });
       }
 

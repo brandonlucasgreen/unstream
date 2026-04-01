@@ -89,7 +89,7 @@ Some of this is starting to happen anyway. Artists share royalty screenshots on 
 Until platforms are required or pressured to disclose payout rates in a standardized way:
 
 - **Favor platforms that publish their rates.** [Bandcamp](https://bandcamp.com), [Mirlo](https://mirlo.space), [Ampwall](https://ampwall.com), and others are upfront about what artists keep. That transparency is a feature.
-- **Use [Unstream](https://unstream.stream)** to search for artists across 15 platforms and see payout percentages for each one.
+- **Use [Unstream](https://unstream.stream)** to search for artists across 17 platforms and see payout percentages for each one.
 - **Ask the question.** When a platform says it "supports artists," ask how much. If the answer is vague or unavailable, that tells you something.
 - **Buy directly when you can.** A $10 album on Bandcamp puts [about $8.20 in the artist's pocket](https://bandcamp.com/fair_trade_music_policy). No ambiguity, no opaque royalty pool, no six-month delay.
 

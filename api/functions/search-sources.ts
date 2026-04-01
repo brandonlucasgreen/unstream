@@ -1094,6 +1094,64 @@ async function searchBeatport(query: string): Promise<Map<string, string>> {
   return new Map(data);
 }
 
+// Search EVEN via Algolia API (direct-to-fan marketplace)
+async function searchEven(query: string): Promise<Map<string, string>> {
+  const cacheKey = artistCacheKey('even', query);
+
+  const { data } = await cacheGetOrFetch<[string, string][]>(
+    cacheKey,
+    async () => {
+      const results: [string, string][] = [];
+
+      try {
+        const response = await fetchWithTimeout('https://S64VD9CU46-dsn.algolia.net/1/indexes/Artist/query', {
+          method: 'POST',
+          headers: {
+            'X-Algolia-Application-Id': 'S64VD9CU46',
+            'X-Algolia-API-Key': 'eea52fd4a67d03678477ffdfbad362e2',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ query, hitsPerPage: 10 }),
+        }, 5000);
+
+        if (!response.ok) return results;
+
+        const json = await response.json();
+        const queryNormalized = normalizeForComparison(query);
+        const seen = new Set<string>();
+
+        for (const hit of json.hits || []) {
+          const name = hit.name;
+          const slug = hit.slug || hit.username;
+          if (!name || !slug) continue;
+
+          const normalizedName = normalizeForComparison(name);
+
+          // Strict matching: exact, query prefix, or numeric suffix variation
+          const isMatch = normalizedName === queryNormalized ||
+            queryNormalized.startsWith(normalizedName) ||
+            (normalizedName.startsWith(queryNormalized) && /^\d*$/.test(normalizedName.slice(queryNormalized.length)));
+
+          if (isMatch && !seen.has(normalizedName)) {
+            seen.add(normalizedName);
+            results.push([normalizedName, `https://even.biz/artists/${slug}`]);
+          }
+        }
+      } catch (error: unknown) {
+        const err = error as { name?: string; message?: string };
+        if (err.name !== 'AbortError') {
+          console.error('EVEN search error:', err.message);
+        }
+      }
+
+      return results;
+    },
+    PLATFORM_CACHE_TTL
+  );
+
+  return new Map(data);
+}
+
 // ---------------------------------------------------------------------------
 // Phase 3: Fetch releases & disambiguate
 // ---------------------------------------------------------------------------
@@ -1290,7 +1348,7 @@ async function attachNameOnlyPlatforms(
 
 async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   // Phase 1: Search all platforms in parallel and aggregate Bandcamp/Mirlo results
-  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, qobuzResults, ampwallResults, beatportResults] = await Promise.allSettled([
+  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, qobuzResults, ampwallResults, beatportResults, evenResults] = await Promise.allSettled([
     searchBandcamp(query),
     searchBandwagon(query),
     searchMirlo(query),
@@ -1300,6 +1358,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     searchQobuz(query),
     searchAmpwall(query),
     searchBeatport(query),
+    searchEven(query),
   ]);
 
   const allResults: PlatformResult[] = [];
@@ -1312,6 +1371,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     ['jamcoop', jamcoopResults.status === 'fulfilled' ? jamcoopResults.value : new Map()],
     ['patreon', patreonResults.status === 'fulfilled' ? patreonResults.value : new Map()],
     ['beatport', beatportResults.status === 'fulfilled' ? beatportResults.value : new Map()],
+    ['even', evenResults.status === 'fulfilled' ? evenResults.value : new Map()],
   ];
   const qobuzMatches = qobuzResults.status === 'fulfilled' ? qobuzResults.value : new Map<string, string>();
   const ampwallMatches = ampwallResults.status === 'fulfilled' ? ampwallResults.value : new Map<string, string>();

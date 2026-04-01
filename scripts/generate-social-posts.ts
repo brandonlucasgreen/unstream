@@ -525,9 +525,9 @@ function generatePromoPost(weekNumber: number): { posts: PostDraft['posts']; fea
 
   switch (angle) {
     case 0: // what it does
-      threads = `i built a free tool that searches 16 platforms to help you find where to buy music directly from artists. no account, no tracking, no paywall.\n\n${url}`;
-      bluesky = `Free tool that searches 16 platforms to find where to buy music directly from artists. No account needed.\n\n${url}`;
-      instagram = `Unstream searches 15 alternative music platforms to help you find where to buy music directly from artists.\n\nNo account. No tracking. No paywall. Just a way to get more money to the people who make the music.\n\n${url}`;
+      threads = `i built a free tool that searches 17 platforms to help you find where to buy music directly from artists. no account, no tracking, no paywall.\n\n${url}`;
+      bluesky = `Free tool that searches 17 platforms to find where to buy music directly from artists. No account needed.\n\n${url}`;
+      instagram = `Unstream searches 17 alternative music platforms to help you find where to buy music directly from artists.\n\nNo account. No tracking. No paywall. Just a way to get more money to the people who make the music.\n\n${url}`;
       break;
 
     case 1: // the why
@@ -549,9 +549,9 @@ function generatePromoPost(weekNumber: number): { posts: PostDraft['posts']; fea
       break;
 
     case 4: // how it works
-      threads = `search for any artist on Unstream and it checks 16 platforms — Bandcamp, Faircamp, Mirlo, Qobuz, and more — in a few seconds. shows you where to buy their music directly — with payout percentages so you know where your money goes.\n\n${url}`;
-      bluesky = `Search any artist on Unstream → it checks 16 platforms and shows where to buy their music directly, with payout percentages.\n\n${url}`;
-      instagram = `Search for any artist on Unstream.\n\nIt checks 16 platforms — Bandcamp, Faircamp, Mirlo, Qobuz, and more — in seconds — and shows you where to buy their music directly, with transparent payout percentages.\n\n${url}`;
+      threads = `search for any artist on Unstream and it checks 17 platforms — Bandcamp, Faircamp, Mirlo, Qobuz, and more — in a few seconds. shows you where to buy their music directly — with payout percentages so you know where your money goes.\n\n${url}`;
+      bluesky = `Search any artist on Unstream → it checks 17 platforms and shows where to buy their music directly, with payout percentages.\n\n${url}`;
+      instagram = `Search for any artist on Unstream.\n\nIt checks 17 platforms — Bandcamp, Faircamp, Mirlo, Qobuz, and more — in seconds — and shows you where to buy their music directly, with transparent payout percentages.\n\n${url}`;
       break;
 
     default: // the pitch, earnest
