@@ -51,7 +51,7 @@ export function SupportPage() {
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-lg mt-0.5">*</span>
-                <span>Report bugs or suggest features on <a href="https://unstream.featurebase.app" target="_blank" rel="noopener noreferrer" className="text-accent-primary hover:underline">Featurebase</a></span>
+                <span>Report bugs or suggest features on <a href="https://github.com/brandonlucasgreen/unstream/issues" target="_blank" rel="noopener noreferrer" className="text-accent-primary hover:underline">GitHub</a></span>
               </li>
             </ul>
           </div>

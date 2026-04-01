@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 export function RoadmapPage() {
   useEffect(() => {
-    window.location.href = 'https://unstream.featurebase.app/roadmap';
+    window.location.href = 'https://github.com/users/brandonlucasgreen/projects/4';
   }, []);
 
   return (

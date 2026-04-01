@@ -74,11 +74,11 @@ We also link to a number of alternative services that can help you reduce your d
   },
   {
     title: "Is there a Windows app / iOS app / Android app / Chrome extension / Firefox extension for Unstream?",
-    content: `Not yet, but I may consider building any or all of these in the future! Feel free to suggest or up-vote any of these ideas on the [Unstream feedback board](https://unstream.featurebase.app).`
+    content: `Not yet, but I may consider building any or all of these in the future! Feel free to suggest or up-vote any of these ideas on the [Unstream roadmap](https://github.com/users/brandonlucasgreen/projects/4).`
   },
   {
     title: "I'd like to request a feature or improvement. How can I do that?",
-    content: `Head over to the [Unstream feedback board](https://unstream.featurebase.app) and share your idea! You can also upvote other people's ideas.`
+    content: `Head over to the [Unstream roadmap](https://github.com/users/brandonlucasgreen/projects/4) to see what's planned, or [open an issue](https://github.com/brandonlucasgreen/unstream/issues) to suggest something new.`
   },
   {
     title: "I'm having an issue using Unstream. How can I report it?",
