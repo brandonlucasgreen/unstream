@@ -95,6 +95,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/admin/verify"
+  to = "/.netlify/functions/admin-verify"
+  status = 200
+
+[[redirects]]
   from = "/plus"
   to = "/support"
   status = 301

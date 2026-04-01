@@ -9,7 +9,7 @@ import { SocialIcon } from '../components/SocialIcon';
 import { sources } from '../services/sources';
 import type { SourceId } from '../types';
 
-type ClaimStep = 'email' | 'check-email' | 'website' | 'verify' | 'review' | 'done';
+type ClaimStep = 'email' | 'check-email' | 'website' | 'verify' | 'review' | 'done' | 'manual-review' | 'manual-review-submitted';
 
 interface ReviewLink {
   platform: string;
@@ -54,6 +54,10 @@ export function ClaimPage() {
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
   const [customImageUrl, setCustomImageUrl] = useState<string | null>(null);
   const [fetchingAvatar, setFetchingAvatar] = useState<string | null>(null); // platform being fetched
+
+  // Manual review state
+  const [manualReviewMessage, setManualReviewMessage] = useState('');
+  const [manualReviewSubmitting, setManualReviewSubmitting] = useState(false);
 
   const { session: authSession, isLoading: authLoading } = useAuth();
 
@@ -271,6 +275,48 @@ export function ClaimPage() {
     setLoading(false);
   }
 
+  async function handleManualReviewSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setManualReviewSubmitting(true);
+
+    const token = await getAuthToken();
+    if (!token) {
+      setError('Session expired. Please sign in again.');
+      setStep('email');
+      setManualReviewSubmitting(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/claim', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          action: 'request-manual-review',
+          slug,
+          email,
+          message: manualReviewMessage,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error || 'Failed to submit verification request');
+        setManualReviewSubmitting(false);
+        return;
+      }
+
+      setStep('manual-review-submitted');
+    } catch {
+      setError('Network error. Please try again.');
+    }
+    setManualReviewSubmitting(false);
+  }
+
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
 
@@ -414,6 +460,79 @@ export function ClaimPage() {
               >
                 {loading ? 'Checking your website...' : 'Verify my website'}
               </button>
+
+              <div className="text-center pt-2">
+                <button
+                  onClick={() => { setError(null); setStep('manual-review'); }}
+                  className="text-sm text-text-muted hover:text-accent-primary transition-colors"
+                >
+                  Having trouble? Request manual verification
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Manual review request */}
+          {step === 'manual-review' && (
+            <form onSubmit={handleManualReviewSubmit} className="space-y-4">
+              <div className="p-4 rounded-lg bg-bg-secondary border border-border space-y-2">
+                <p className="text-sm font-medium">Request manual verification</p>
+                <p className="text-xs text-text-muted">
+                  If automated verification isn't working, we can review your request manually.
+                  Tell us who you are and provide any proof that you're associated with {displayName} --
+                  links to your profiles on other platforms, social media accounts, etc.
+                </p>
+              </div>
+              <div>
+                <label htmlFor="manual-message" className="block text-sm font-medium mb-1">
+                  Your message
+                </label>
+                <textarea
+                  id="manual-message"
+                  required
+                  rows={5}
+                  maxLength={5000}
+                  value={manualReviewMessage}
+                  onChange={e => setManualReviewMessage(e.target.value)}
+                  placeholder={"I'm the artist behind " + displayName + ". Here are my profiles:\n- https://bandcamp.com/...\n- https://instagram.com/..."}
+                  className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary text-sm resize-y"
+                />
+                <p className="text-xs text-text-muted mt-1">
+                  {manualReviewMessage.length}/5000 characters
+                </p>
+              </div>
+              <button
+                type="submit"
+                disabled={manualReviewSubmitting || manualReviewMessage.trim().length === 0}
+                className="w-full py-2 rounded-lg bg-accent-primary text-white font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
+              >
+                {manualReviewSubmitting ? 'Submitting...' : 'Submit verification request'}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setError(null); setStep('verify'); }}
+                className="w-full py-2 text-sm text-text-muted hover:text-text-primary transition-colors"
+              >
+                Back to automated verification
+              </button>
+            </form>
+          )}
+
+          {/* Manual review submitted */}
+          {step === 'manual-review-submitted' && (
+            <div className="text-center space-y-4 p-6 rounded-lg bg-bg-secondary border border-border">
+              <div className="text-3xl">📋</div>
+              <p className="text-xl font-bold">Request submitted</p>
+              <p className="text-sm text-text-muted">
+                Your verification request has been submitted. We'll review it within a few days
+                and notify you at <strong className="text-text-primary">{email}</strong>.
+              </p>
+              <Link
+                to={`/a/${slug}`}
+                className="inline-block px-6 py-2 rounded-lg bg-bg-primary border border-border text-sm hover:bg-bg-secondary transition-colors"
+              >
+                View artist page
+              </Link>
             </div>
           )}
 
