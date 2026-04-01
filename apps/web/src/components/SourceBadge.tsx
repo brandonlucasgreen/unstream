@@ -40,6 +40,11 @@ export function SourceBadge({ source, url, isDirectLink }: SourceBadgeProps) {
   const displayPayout = isBCFriday ? '~97%' : source.artistPayoutPercent;
   const hasPayoutPercent = !!source.artistPayoutPercent;
 
+  // Dark colors (EVEN #000000, Discogs #333333) are unreadable on dark backgrounds.
+  // Use CSS variables so the badge text is legible in both themes.
+  const isDarkColor = source.color <= '#444444';
+  const textColor = isDarkColor ? 'var(--badge-dark-text, #999999)' : source.color;
+
   return (
     <a
       href={url}
@@ -48,11 +53,11 @@ export function SourceBadge({ source, url, isDirectLink }: SourceBadgeProps) {
       className="source-badge hover:opacity-80"
       style={{
         backgroundColor: `${source.color}20`,
-        color: source.color,
+        color: textColor,
       }}
       onClick={() => analytics.trackPlatformClick(source.name)}
     >
-      <PlatformIcon sourceId={source.id} color={source.color} emoji={source.icon} />
+      <PlatformIcon sourceId={source.id} color={textColor} emoji={source.icon} />
       <span className="flex items-center gap-1">
         {source.name}
         {hasPayoutPercent ? (
