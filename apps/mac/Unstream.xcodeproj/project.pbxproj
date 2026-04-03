@@ -3,14 +3,14 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		0038D14301F153EF60346193 /* SocialIconButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFEA3443AD56B9950B43AAE /* SocialIconButton.swift */; };
 		0EC3D68464514744CE3AA448 /* BandcampReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43017BB6FDE57EBD35755D7B /* BandcampReleaseChecker.swift */; };
 		0F9D0A7FD89742003BD8D140 /* TipJarStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C40AC0CB901A9F09846258C /* TipJarStore.swift */; };
-		11B4891578B50BCF51D68613 /* SearchTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = E330692CA1EC213166D9351F /* SearchTab.swift */; platformFilters = (ios, ); };
+		11B4891578B50BCF51D68613 /* SearchTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = E330692CA1EC213166D9351F /* SearchTab.swift */; platformFilter = ios; };
 		194D5CB6D2373174426884C5 /* FaircampReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE9F88505AF840EC94B5C0BC /* FaircampReleaseChecker.swift */; };
 		1C82AF206862EABE1F4F856E /* ReleaseAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F71936662EEAC06B0C1F008 /* ReleaseAlert.swift */; };
 		26D515CC48F859D85DD6CD60 /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2724397667CCEE30A098B9CE /* ColorExtensions.swift */; };
@@ -21,14 +21,14 @@
 		45220D6B5414D8728BE175C4 /* UnstreamAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829FB6D91FC50FBA72747788 /* UnstreamAPI.swift */; };
 		461E318C0B5687BD71C42E75 /* ShortcutRecorderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CDD15E71A80A31952A7720C /* ShortcutRecorderView.swift */; platformFilters = (macos, ); };
 		47ADDB550C3A545314574336 /* MirloReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 397ABE663954D6016159C13E /* MirloReleaseChecker.swift */; };
-		5669C87F79BF30EBCC921AB0 /* UnstreamShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C2ACE9E0FA5F270656066467 /* UnstreamShareExtension.appex */; platformFilters = (ios, ); settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		5669C87F79BF30EBCC921AB0 /* UnstreamShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C2ACE9E0FA5F270656066467 /* UnstreamShare.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		584FBF6DA0057BC30EB4C786 /* BrandIcons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FEFD60988639A1ECC95D56A /* BrandIcons.swift */; };
-		5B170D71E9A7E9A471424F16 /* iOSSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 359150E4043D5233395827D3 /* iOSSettingsTab.swift */; platformFilters = (ios, ); };
-		640AB7A350949FAA23C72A53 /* iOSContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5033CFF636FB4C7C07D315A6 /* iOSContentView.swift */; platformFilters = (ios, ); };
+		5B170D71E9A7E9A471424F16 /* iOSSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 359150E4043D5233395827D3 /* iOSSettingsTab.swift */; platformFilter = ios; };
+		640AB7A350949FAA23C72A53 /* iOSContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5033CFF636FB4C7C07D315A6 /* iOSContentView.swift */; platformFilter = ios; };
 		7182754E06D41AE6FB47653A /* SupportListManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F5BF0BE3FBF25D3C4102A6 /* SupportListManager.swift */; };
 		7F078F17D544C2F32A801E60 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B2D53C4C4BBA92385BF4F0A /* SettingsView.swift */; platformFilters = (macos, ); };
 		7FA2720BFA00323DC8E66A9A /* ListenBrainzService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 757215FB463E24C4101FECCF /* ListenBrainzService.swift */; platformFilters = (macos, ); };
-		8916C6D428EE94E16E491566 /* ReleasesTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C8F1E48E643DCC1EECD4A93 /* ReleasesTab.swift */; platformFilters = (ios, ); };
+		8916C6D428EE94E16E491566 /* ReleasesTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C8F1E48E643DCC1EECD4A93 /* ReleasesTab.swift */; platformFilter = ios; };
 		8961565967B20B3F28A7877E /* GlobalHotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B52C116B5CC91BC40D028AF /* GlobalHotkeyManager.swift */; platformFilters = (macos, ); };
 		8A4181366EB270C58A708C65 /* SearchBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45AC0E531396E8C63A2001CF /* SearchBarView.swift */; platformFilters = (macos, ); };
 		8C94768621D55383151FD59F /* SearchResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1581BE8FAF07C7C9D3CD99F5 /* SearchResponse.swift */; };
@@ -36,12 +36,14 @@
 		A3526462820B7494F5463BE2 /* UnstreamApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 913EEE8809001930E4F88F8C /* UnstreamApp.swift */; };
 		A8FD43FE100F214CA8E6241C /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE9E59C365D8F116C435B8BC /* EmptyStateView.swift */; };
 		A91A7A297319DD5233D5CAC3 /* ArtistResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94E30B61F5B6C06CA39DB0E2 /* ArtistResultView.swift */; };
+		AA1111111111111111111111 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222222222222222222222 /* KeychainHelper.swift */; };
+		AA3333333333333333333333 /* PlexService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4444444444444444444444 /* PlexService.swift */; };
 		B1BACADB228F567C2A0806F6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 529125F63F2294A642A38108 /* Assets.xcassets */; };
 		B824ABE933F7CD456A903C9A /* ReleaseAlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB06541602FC51167DB50DC9 /* ReleaseAlertManager.swift */; };
 		B8D05D430D492713FB2E97EF /* BandcampFriday.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4745357EE3AD119D3F7B059 /* BandcampFriday.swift */; };
 		BB206A0B929BB295A35820A8 /* QobuzReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6904B96B5E95C5FF26DABC1 /* QobuzReleaseChecker.swift */; };
 		BDD1E7A826216311FD1D8231 /* UnstreamTips.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 75A0258B88C9087A92AF57F5 /* UnstreamTips.storekit */; };
-		BEE6889852F609316894074E /* SupportListTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8C60F297D83E962E0D769E7 /* SupportListTab.swift */; platformFilters = (ios, ); };
+		BEE6889852F609316894074E /* SupportListTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8C60F297D83E962E0D769E7 /* SupportListTab.swift */; platformFilter = ios; };
 		CC626E6B835C52240F626B7C /* PopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF4E58F91C106A97A5179125 /* PopoverView.swift */; platformFilters = (macos, ); };
 		DAF5726D4B93EA321E5D4643 /* MediaObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 385B09E1C63EAE37830E8A04 /* MediaObserver.swift */; platformFilters = (macos, ); };
 		DCA4950DEB8FCA6734B3E003 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E82B185A730210A472CD947F /* UpdateChecker.swift */; platformFilters = (macos, ); };
@@ -50,8 +52,6 @@
 		EAD31F1949071C4F694741C3 /* TipJarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752695EB82D70EEE00B921FA /* TipJarView.swift */; };
 		F20D83D3642078C9B2C45ED0 /* NowPlaying.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC8C8A39D8800BDBA893E0EA /* NowPlaying.swift */; };
 		F998779FA5383D13C309A824 /* PlatformBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC8A2405B5A74531E19338D9 /* PlatformBadge.swift */; };
-		AA1111111111111111111111 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222222222222222222222 /* KeychainHelper.swift */; };
-		AA3333333333333333333333 /* PlexService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4444444444444444444444 /* PlexService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -71,7 +71,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				5669C87F79BF30EBCC921AB0 /* UnstreamShareExtension.appex in Embed Foundation Extensions */,
+				5669C87F79BF30EBCC921AB0 /* UnstreamShare.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -96,14 +96,12 @@
 		5033CFF636FB4C7C07D315A6 /* iOSContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSContentView.swift; sourceTree = "<group>"; };
 		529125F63F2294A642A38108 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		590FD31A0B703B21FFCCBEA7 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
-		607E17AC019A1B8698E64ACC /* Unstream.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Unstream.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		607E17AC019A1B8698E64ACC /* Unstream.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Unstream.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		673FC4B1F41A233725896DB8 /* ReleaseCheckAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseCheckAPI.swift; sourceTree = "<group>"; };
-		AA2222222222222222222222 /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
-		AA4444444444444444444444 /* PlexService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlexService.swift; sourceTree = "<group>"; };
 		6B52C116B5CC91BC40D028AF /* GlobalHotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotkeyManager.swift; sourceTree = "<group>"; };
 		752695EB82D70EEE00B921FA /* TipJarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipJarView.swift; sourceTree = "<group>"; };
 		757215FB463E24C4101FECCF /* ListenBrainzService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenBrainzService.swift; sourceTree = "<group>"; };
-		75A0258B88C9087A92AF57F5 /* UnstreamTips.storekit */ = {isa = PBXFileReference; path = UnstreamTips.storekit; sourceTree = "<group>"; };
+		75A0258B88C9087A92AF57F5 /* UnstreamTips.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = UnstreamTips.storekit; sourceTree = "<group>"; };
 		7EFEA3443AD56B9950B43AAE /* SocialIconButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialIconButton.swift; sourceTree = "<group>"; };
 		7FEFD60988639A1ECC95D56A /* BrandIcons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandIcons.swift; sourceTree = "<group>"; };
 		815E763FB42240B9048D5711 /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
@@ -114,12 +112,14 @@
 		9B08A02BD24EAF475A2689D6 /* NowPlayingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingView.swift; sourceTree = "<group>"; };
 		9B2D53C4C4BBA92385BF4F0A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		9C40AC0CB901A9F09846258C /* TipJarStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipJarStore.swift; sourceTree = "<group>"; };
+		AA2222222222222222222222 /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
+		AA4444444444444444444444 /* PlexService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlexService.swift; sourceTree = "<group>"; };
 		AB06541602FC51167DB50DC9 /* ReleaseAlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseAlertManager.swift; sourceTree = "<group>"; };
 		B4745357EE3AD119D3F7B059 /* BandcampFriday.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandcampFriday.swift; sourceTree = "<group>"; };
 		BC8C8A39D8800BDBA893E0EA /* NowPlaying.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlaying.swift; sourceTree = "<group>"; };
 		BE9E59C365D8F116C435B8BC /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		BE9F88505AF840EC94B5C0BC /* FaircampReleaseChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaircampReleaseChecker.swift; sourceTree = "<group>"; };
-		C2ACE9E0FA5F270656066467 /* UnstreamShareExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = UnstreamShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C2ACE9E0FA5F270656066467 /* UnstreamShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = UnstreamShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC8A2405B5A74531E19338D9 /* PlatformBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformBadge.swift; sourceTree = "<group>"; };
 		DC148A11F868801384A78672 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		E330692CA1EC213166D9351F /* SearchTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTab.swift; sourceTree = "<group>"; };
@@ -275,7 +275,7 @@
 			isa = PBXGroup;
 			children = (
 				607E17AC019A1B8698E64ACC /* Unstream.app */,
-				C2ACE9E0FA5F270656066467 /* UnstreamShareExtension.appex */,
+				C2ACE9E0FA5F270656066467 /* UnstreamShare.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -329,7 +329,7 @@
 			packageProductDependencies = (
 			);
 			productName = UnstreamShareExtension;
-			productReference = C2ACE9E0FA5F270656066467 /* UnstreamShareExtension.appex */;
+			productReference = C2ACE9E0FA5F270656066467 /* UnstreamShare.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -342,11 +342,9 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					47EAA15AC0EA29029489E759 = {
-						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 					50FDF92E61EA31C4052D0F8B = {
-						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -361,7 +359,6 @@
 			);
 			mainGroup = 8FAB1B835E79317CB7A4F886;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -445,9 +442,7 @@
 /* Begin PBXTargetDependency section */
 		8EA042466705A10BFB55C37D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			platformFilters = (
-				ios,
-			);
+			platformFilter = ios;
 			target = 50FDF92E61EA31C4052D0F8B /* UnstreamShareExtension */;
 			targetProxy = 2B3CD56DE802B9A4FB70813D /* PBXContainerItemProxy */;
 		};
@@ -459,7 +454,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = UnstreamShareExtension/ShareExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = CV926C8KS8;
 				INFOPLIST_FILE = UnstreamShareExtension/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -478,7 +473,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = UnstreamShareExtension/ShareExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = CV926C8KS8;
 				INFOPLIST_FILE = UnstreamShareExtension/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -562,7 +557,7 @@
 				CODE_SIGN_ENTITLEMENTS = Unstream/Unstream.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = CV926C8KS8;
 				INFOPLIST_FILE = Unstream/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -586,7 +581,7 @@
 				CODE_SIGN_ENTITLEMENTS = Unstream/Unstream.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = CV926C8KS8;
 				INFOPLIST_FILE = Unstream/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
