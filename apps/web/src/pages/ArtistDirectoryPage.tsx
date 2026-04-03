@@ -55,7 +55,7 @@ export function ArtistDirectoryPage() {
 
       <div className="flex-1 flex flex-col">
         <div className="pt-8 pb-8 text-center px-6">
-          <h1 className="text-2xl font-bold mb-2">Artist Index</h1>
+          <h1 className="text-2xl font-bold mb-2">Indie Artist Index</h1>
           {!loading && (
             <p className="text-text-muted text-sm">
               {artists.length} verified artist{artists.length !== 1 ? 's' : ''} on platforms that pay fairly
