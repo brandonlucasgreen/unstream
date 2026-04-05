@@ -41,7 +41,10 @@ targets:
       INFOPLIST_FILE: Unstream/Info.plist
       CODE_SIGN_STYLE: Automatic
       DEVELOPMENT_TEAM: ""
-      CODE_SIGN_ENTITLEMENTS: Unstream/Unstream.entitlements
+      CODE_SIGN_ENTITLEMENTS:
+        "[sdk=macosx*]": Unstream/Unstream-macOS.entitlements
+        "[sdk=iphoneos*]": Unstream/Unstream-iOS.entitlements
+        "[sdk=iphonesimulator*]": Unstream/Unstream-iOS.entitlements
       ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     dependencies:
       - target: UnstreamShareExtension

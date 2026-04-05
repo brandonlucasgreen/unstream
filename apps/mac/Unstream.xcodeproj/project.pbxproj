@@ -84,7 +84,8 @@
 		1CDD15E71A80A31952A7720C /* ShortcutRecorderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutRecorderView.swift; sourceTree = "<group>"; };
 		1D967BFF6EECB9BFC4835ABA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		1F71936662EEAC06B0C1F008 /* ReleaseAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseAlert.swift; sourceTree = "<group>"; };
-		20001DAD97A8A0637B6D5F4A /* Unstream.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Unstream.entitlements; sourceTree = "<group>"; };
+		20001DAD97A8A0637B6D5F4A /* Unstream-macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Unstream-macOS.entitlements"; sourceTree = "<group>"; };
+		20001DAD97A8A0637B6D5F4B /* Unstream-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Unstream-iOS.entitlements"; sourceTree = "<group>"; };
 		2724397667CCEE30A098B9CE /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
 		2C8F1E48E643DCC1EECD4A93 /* ReleasesTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleasesTab.swift; sourceTree = "<group>"; };
 		359150E4043D5233395827D3 /* iOSSettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSSettingsTab.swift; sourceTree = "<group>"; };
@@ -184,7 +185,8 @@
 				EC887595A94809296121C2D0 /* Info.plist */,
 				AB06541602FC51167DB50DC9 /* ReleaseAlertManager.swift */,
 				49F5BF0BE3FBF25D3C4102A6 /* SupportListManager.swift */,
-				20001DAD97A8A0637B6D5F4A /* Unstream.entitlements */,
+				20001DAD97A8A0637B6D5F4A /* Unstream-macOS.entitlements */,
+				20001DAD97A8A0637B6D5F4B /* Unstream-iOS.entitlements */,
 				829FB6D91FC50FBA72747788 /* UnstreamAPI.swift */,
 				913EEE8809001930E4F88F8C /* UnstreamApp.swift */,
 				CBFF34D3930D2D2C364B1F73 /* Models */,
@@ -554,7 +556,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Unstream/Unstream.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "Unstream/Unstream-macOS.entitlements";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = "Unstream/Unstream-iOS.entitlements";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = "Unstream/Unstream-iOS.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = CV926C8KS8;
@@ -578,7 +582,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Unstream/Unstream.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "Unstream/Unstream-macOS.entitlements";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = "Unstream/Unstream-iOS.entitlements";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = "Unstream/Unstream-iOS.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = CV926C8KS8;
