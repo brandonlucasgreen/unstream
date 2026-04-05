@@ -52,8 +52,20 @@ class AppStateContainer: ObservableObject {
               let pendingQuery = sharedDefaults.string(forKey: "pendingSearch"),
               !pendingQuery.isEmpty else { return }
 
+        // Ignore stale pending searches (older than 5 minutes)
+        let timestamp = sharedDefaults.double(forKey: "pendingSearchTimestamp")
+        if timestamp > 0 {
+            let age = Date().timeIntervalSince1970 - timestamp
+            guard age < 300 else {
+                sharedDefaults.removeObject(forKey: "pendingSearch")
+                sharedDefaults.removeObject(forKey: "pendingSearchTimestamp")
+                return
+            }
+        }
+
         // Clear the pending search
         sharedDefaults.removeObject(forKey: "pendingSearch")
+        sharedDefaults.removeObject(forKey: "pendingSearchTimestamp")
 
         // Perform the search
         appState.searchQuery = pendingQuery
@@ -72,6 +84,9 @@ struct UnstreamApp: App {
     #endif
 
     @StateObject private var container = AppStateContainer.shared
+    #if os(iOS)
+    @Environment(\.scenePhase) private var scenePhase
+    #endif
 
     var body: some Scene {
         #if os(macOS)
@@ -91,6 +106,11 @@ struct UnstreamApp: App {
                 }
                 .onAppear {
                     container.checkPendingSearch()
+                }
+                .onChange(of: scenePhase) { _, newPhase in
+                    if newPhase == .active {
+                        container.checkPendingSearch()
+                    }
                 }
         }
         #endif

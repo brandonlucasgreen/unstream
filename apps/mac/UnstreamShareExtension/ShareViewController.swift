@@ -42,25 +42,13 @@ class ShareViewController: UIViewController {
     private func handleURL(_ url: URL) {
         let query = extractArtistFromURL(url) ?? url.absoluteString
 
-        // Save to shared App Group UserDefaults
+        // Save to shared App Group UserDefaults for the main app to pick up on launch
         if let sharedDefaults = UserDefaults(suiteName: "group.lol.bgreen.unstream") {
             sharedDefaults.set(query, forKey: "pendingSearch")
+            sharedDefaults.set(Date().timeIntervalSince1970, forKey: "pendingSearchTimestamp")
         }
 
-        // Try to open the main app via URL scheme
-        if let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-           let appURL = URL(string: "unstream://search?q=\(encodedQuery)") {
-            // Use responder chain to open URL (share extensions can't use UIApplication.shared)
-            var responder: UIResponder? = self
-            while let nextResponder = responder?.next {
-                if let application = nextResponder as? UIApplication {
-                    application.open(appURL)
-                    break
-                }
-                responder = nextResponder
-            }
-        }
-
+        // Complete the extension request — the main app will check for pending searches on next launch/foreground
         close()
     }
 
