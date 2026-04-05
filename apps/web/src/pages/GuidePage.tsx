@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
@@ -118,7 +119,7 @@ export function GuidePage() {
                 prose-headings:font-display prose-headings:text-text-primary
                 prose-p:text-text-secondary prose-a:text-accent-primary
                 prose-li:text-text-secondary prose-strong:text-text-primary">
-                <Markdown>{content}</Markdown>
+                <Markdown remarkPlugins={[remarkGfm]}>{content}</Markdown>
               </article>
             </>
           )}

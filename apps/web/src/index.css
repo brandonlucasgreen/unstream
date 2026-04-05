@@ -24,6 +24,8 @@
 
   --color-surface: #111111;
   --color-surface-secondary: #161616;
+
+  --badge-dark-text: #999999;
 }
 
 html[data-theme="light"] {
@@ -41,6 +43,8 @@ html[data-theme="light"] {
   --color-accent-tertiary: #b8910a;
   --color-surface: #f8f8f8;
   --color-surface-secondary: #f0f0f0;
+
+  --badge-dark-text: #333333;
 }
 
 @layer base {

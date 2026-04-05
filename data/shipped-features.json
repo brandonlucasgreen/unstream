@@ -18,7 +18,7 @@
     "title": "Claim your artist page",
     "description": "Indie artists can now claim and verify their page for free — every artist we feature in our daily posts has one. Claim yours and get all your direct-support links in one place.",
     "date": "2026-03-22",
-    "announced": false
+    "announced": true
   },
   {
     "id": "listenbrainz-scrobbling",

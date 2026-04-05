@@ -15,6 +15,7 @@ export type SourceId =
   | 'kofi'
   | 'qobuz'
   | 'beatport'
+  | 'even'
   | 'officialsite'
   | 'discogs';
 
@@ -86,6 +87,7 @@ export function sourceIdFromUrl(url: string): SourceId | null {
     if (host.endsWith('buymeacoffee.com')) return 'buymeacoffee';
     if (host.endsWith('ko-fi.com')) return 'kofi';
     if (host.endsWith('beatport.com')) return 'beatport';
+    if (host.endsWith('even.biz')) return 'even';
     return null;
   } catch {
     return null;

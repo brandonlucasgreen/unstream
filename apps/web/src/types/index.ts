@@ -12,6 +12,7 @@ export type SourceId =
   | 'freegal'
   | 'qobuz'
   | 'beatport'
+  | 'even'
   | 'jamcoop'
   | 'officialsite'
   | 'discogs'

@@ -34,6 +34,14 @@ struct SettingsView: View {
     @State private var isValidatingToken = false
     @State private var tokenValidationError: String? = nil
 
+    // Plex state
+    @AppStorage("plexIntegrationEnabled") private var plexEnabled = false
+    @State private var plexServerURL: String = ""
+    @State private var plexToken: String = ""
+    @State private var plexServerName: String? = nil
+    @State private var isValidatingPlex = false
+    @State private var plexValidationError: String? = nil
+
     // Keyboard shortcut state
     @ObservedObject private var hotkeyManager = GlobalHotkeyManager.shared
     @StateObject private var shortcutRecorder = ShortcutRecorder()
@@ -80,6 +88,7 @@ struct SettingsView: View {
         .onAppear {
             launchAtLogin = getLaunchAtLoginStatus()
             loadListenBrainzState()
+            loadPlexState()
         }
     }
 
@@ -333,9 +342,97 @@ struct SettingsView: View {
                 }
             }
 
+            Divider()
+
+            // Plex Integration
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("Plex")
+                        .font(.headline)
+                    if plexServerName != nil {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.caption)
+                    }
+                }
+
+                Toggle("Enable Plex music detection", isOn: $plexEnabled)
+                    .onChange(of: plexEnabled) { newValue in
+                        PlexService.shared.isEnabled = newValue
+                    }
+
+                Text("Detect music playing on your Plex server (Plexamp, Plex Web, etc.)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                if plexEnabled {
+                    VStack(alignment: .leading, spacing: 8) {
+                        if let serverName = plexServerName {
+                            HStack {
+                                Text("Connected to: \(serverName)")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Button("Disconnect") {
+                                    disconnectPlex()
+                                }
+                                .font(.caption)
+                                .foregroundColor(.red)
+                            }
+                        } else {
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack {
+                                    Text("Server URL")
+                                        .font(.caption)
+                                        .frame(width: 70, alignment: .leading)
+                                    TextField("http://localhost:32400", text: $plexServerURL)
+                                        .textFieldStyle(.roundedBorder)
+                                        .frame(maxWidth: 200)
+                                }
+
+                                HStack {
+                                    Text("Token")
+                                        .font(.caption)
+                                        .frame(width: 70, alignment: .leading)
+                                    SecureField("Plex auth token", text: $plexToken)
+                                        .textFieldStyle(.roundedBorder)
+                                        .frame(maxWidth: 200)
+                                }
+
+                                HStack {
+                                    Button(isValidatingPlex ? "Connecting..." : "Connect") {
+                                        validatePlexConnection()
+                                    }
+                                    .disabled(plexToken.isEmpty || isValidatingPlex)
+
+                                    if isValidatingPlex {
+                                        ProgressView()
+                                            .scaleEffect(0.6)
+                                    }
+                                }
+                            }
+
+                            if let error = plexValidationError {
+                                Text(error)
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+                            }
+
+                            Link("How to find your Plex token",
+                                 destination: URL(string: "https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/")!)
+                                .font(.caption)
+                        }
+                    }
+                }
+            }
+
             Spacer()
         }
         .padding()
+        .onReceive(NotificationCenter.default.publisher(for: .plexAuthError)) { _ in
+            plexServerName = nil
+            plexValidationError = "Plex token is invalid or expired. Please reconnect."
+        }
     }
 
     // MARK: - About Tab
@@ -462,6 +559,57 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Plex Functions
+
+    private func loadPlexState() {
+        plexServerURL = PlexService.shared.serverURL
+        plexToken = PlexService.shared.authToken ?? ""
+
+        // If we have a token, validate the connection to get server name
+        if !plexToken.isEmpty && plexEnabled {
+            validatePlexConnection()
+        }
+    }
+
+    private func validatePlexConnection() {
+        isValidatingPlex = true
+        plexValidationError = nil
+
+        // Save config before validating
+        PlexService.shared.serverURL = plexServerURL
+        PlexService.shared.authToken = plexToken
+
+        PlexService.shared.validateConnection { result in
+            DispatchQueue.main.async {
+                isValidatingPlex = false
+                switch result {
+                case .success(let serverName):
+                    plexServerName = serverName
+                    plexValidationError = nil
+                    PlexService.shared.isEnabled = true
+                    plexEnabled = true
+                case .failure(let error):
+                    plexServerName = nil
+                    plexValidationError = error.localizedDescription
+                    if case .unauthorized = error {
+                        // Clear invalid token from Keychain
+                        PlexService.shared.authToken = nil
+                        plexToken = ""
+                    }
+                }
+            }
+        }
+    }
+
+    private func disconnectPlex() {
+        PlexService.shared.disconnect()
+        plexServerURL = ""
+        plexToken = ""
+        plexServerName = nil
+        plexValidationError = nil
+        plexEnabled = false
     }
 
     private func disconnectListenBrainz() {

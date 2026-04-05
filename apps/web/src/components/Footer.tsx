@@ -6,12 +6,12 @@ export function Footer() {
       <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-3 text-text-secondary text-sm">
         <a href="https://bgreen.lol" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition-colors">Made with love in Massachusetts, USA</a>
         <nav className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-          <Link to="/artists" className="hover:text-text-primary transition-colors">Index</Link>
+          <Link to="/artists" className="hover:text-text-primary transition-colors">Indie Artist Index</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <Link to="/guides" className="hover:text-text-primary transition-colors">Guides</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <a
-            href="https://unstream.featurebase.app/"
+            href="https://github.com/users/brandonlucasgreen/projects/4"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-text-primary transition-colors"

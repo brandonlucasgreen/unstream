@@ -145,6 +145,13 @@ class MediaObserver: ObservableObject {
             return
         }
 
+        // Finally try Plex (local server API — lowest priority)
+        if let plexInfo = getPlexNowPlaying() {
+            print("[MediaObserver] Got Plex info: \(plexInfo.artist ?? "?") - \(plexInfo.title ?? "?") (\(plexInfo.duration ?? 0)s)")
+            updateTrack((plexInfo.artist, plexInfo.title, plexInfo.album, plexInfo.duration, .plex))
+            return
+        }
+
         // No music playing
         DispatchQueue.main.async { [weak self] in
             if self?.currentTrack != nil {
@@ -329,6 +336,15 @@ class MediaObserver: ObservableObject {
         return trackInfo
     }
 
+
+    // MARK: - Plex Detection
+
+    private func getPlexNowPlaying() -> (artist: String?, title: String?, album: String?, duration: Double?)? {
+        // Only attempt Plex detection when the integration is enabled and configured.
+        // No process-running check needed — we just hit the local HTTP API.
+        guard PlexService.shared.isConfigured else { return nil }
+        return PlexService.shared.getNowPlaying()
+    }
 
     // MARK: - AppleScript Helpers
 

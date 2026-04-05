@@ -94,6 +94,19 @@
     }
   },
   {
+    "query": "French Montana",
+    "assertions": {
+      "minResults": 1,
+      "results": [
+        {
+          "name": "French Montana",
+          "requiredPlatforms": ["even"],
+          "urlPatterns": { "even": "even.biz/artists/" }
+        }
+      ]
+    }
+  },
+  {
     "query": "",
     "assertions": {
       "expectError": true,
