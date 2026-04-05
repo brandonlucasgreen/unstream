@@ -296,41 +296,19 @@ class WelcomeWindowLauncher {
     static let shared = WelcomeWindowLauncher()
     private var window: NSWindow?
     private var hasAttemptedShow = false
-    private var observers: [Any] = []
 
     init() {
         guard !UserDefaults.standard.bool(forKey: "hasLaunchedBefore") else { return }
 
-        let timer = Timer(timeInterval: 1.0, repeats: false) { [weak self] _ in
-            self?.showWelcomeWindow()
-        }
-        RunLoop.main.add(timer, forMode: .common)
-
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
             self?.showWelcomeWindow()
         }
-
-        let observer = NotificationCenter.default.addObserver(
-            forName: NSApplication.didBecomeActiveNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                self?.showWelcomeWindow()
-            }
-        }
-        observers.append(observer)
     }
 
     func showWelcomeWindow() {
         guard !UserDefaults.standard.bool(forKey: "hasLaunchedBefore") else { return }
         guard !hasAttemptedShow else { return }
         hasAttemptedShow = true
-
-        for observer in observers {
-            NotificationCenter.default.removeObserver(observer)
-        }
-        observers.removeAll()
 
         let welcomeView = WelcomeContentView {
             self.dismiss()
