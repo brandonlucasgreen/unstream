@@ -1,3 +1,4 @@
+#if os(macOS)
 import SwiftUI
 
 struct NowPlayingView: View {
@@ -91,3 +92,4 @@ struct NowPlayingView: View {
     .padding()
     .frame(width: 300)
 }
+#endif
