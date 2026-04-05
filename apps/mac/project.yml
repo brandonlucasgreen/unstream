@@ -60,7 +60,7 @@ targets:
         CFBundlePackageType: APPL
         CFBundleExecutable: $(EXECUTABLE_NAME)
         NSHighResolutionCapable: true
-        NSHumanReadableCopyright: "Copyright 2026 brandon lucas green"
+        NSHumanReadableCopyright: "Copyright 2025-2026 brandon lucas green"
         NSAppleEventsUsageDescription: "Unstream needs to check what music is playing so it can find the artist on ethical platforms."
         CFBundleURLTypes:
           - CFBundleURLSchemes:

@@ -103,6 +103,13 @@ class AppState: ObservableObject {
         hasSearched = false
     }
 
+    /// Clear results only (preserves query text for re-search)
+    func clearResults() {
+        searchResults = []
+        searchError = nil
+        hasSearched = false
+    }
+
     func updateNowPlaying(_ nowPlaying: NowPlaying?) async {
         let previousArtist = self.nowPlaying?.artist
         self.nowPlaying = nowPlaying
