@@ -68,6 +68,8 @@ targets:
           - CFBundleURLSchemes:
               - unstream
             CFBundleURLName: lol.bgreen.Unstream
+        BGTaskSchedulerPermittedIdentifiers:
+          - lol.bgreen.Unstream.releaseCheck
         UILaunchScreen:
           UIColorName: ""
         UISupportedInterfaceOrientations:

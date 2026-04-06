@@ -7,6 +7,10 @@ import AppKit
 import ServiceManagement
 #endif
 
+#if os(iOS)
+import BackgroundTasks
+#endif
+
 // MARK: - Shared State Container
 
 /// Holds all the shared state managers so they can be accessed by both platforms
@@ -141,12 +145,55 @@ struct UnstreamApp: App {
 #if os(iOS)
 
 class iOSAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    static let releaseCheckTaskId = "lol.bgreen.Unstream.releaseCheck"
+
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         UNUserNotificationCenter.current().delegate = self
+        registerBackgroundTasks()
         return true
+    }
+
+    // MARK: - Background Release Checks
+
+    private func registerBackgroundTasks() {
+        BGTaskScheduler.shared.register(
+            forTaskWithIdentifier: Self.releaseCheckTaskId,
+            using: nil
+        ) { task in
+            guard let appRefreshTask = task as? BGAppRefreshTask else { return }
+            self.handleReleaseCheck(task: appRefreshTask)
+        }
+        scheduleReleaseCheck()
+    }
+
+    private func handleReleaseCheck(task: BGAppRefreshTask) {
+        let checkTask = Task {
+            await AppStateContainer.shared.releaseAlertManager.checkNow()
+        }
+
+        task.expirationHandler = {
+            checkTask.cancel()
+        }
+
+        Task {
+            _ = await checkTask.value
+            task.setTaskCompleted(success: true)
+            self.scheduleReleaseCheck()
+        }
+    }
+
+    func scheduleReleaseCheck() {
+        let request = BGAppRefreshTaskRequest(identifier: Self.releaseCheckTaskId)
+        // Check no sooner than 6 hours from now
+        request.earliestBeginDate = Date(timeIntervalSinceNow: 6 * 60 * 60)
+        do {
+            try BGTaskScheduler.shared.submit(request)
+        } catch {
+            print("[BGTask] Failed to schedule release check: \(error)")
+        }
     }
 
     // Show notifications even when the app is in the foreground
