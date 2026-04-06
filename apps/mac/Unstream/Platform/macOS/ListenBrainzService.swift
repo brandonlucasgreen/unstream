@@ -13,10 +13,31 @@ class ListenBrainzService {
         self.session = URLSession(configuration: config)
     }
 
-    /// The user's ListenBrainz token (stored in UserDefaults)
+    private static let keychainKey = "listenBrainzToken"
+    private static let legacyDefaultsKey = "listenBrainzToken"
+    private static var hasMigrated = false
+
+    /// The user's ListenBrainz token (stored in Keychain)
     var userToken: String? {
-        get { UserDefaults.standard.string(forKey: "listenBrainzToken") }
-        set { UserDefaults.standard.set(newValue, forKey: "listenBrainzToken") }
+        get {
+            // One-time migration from UserDefaults to Keychain
+            if !Self.hasMigrated {
+                Self.hasMigrated = true
+                if let legacyToken = UserDefaults.standard.string(forKey: Self.legacyDefaultsKey),
+                   !legacyToken.isEmpty {
+                    KeychainHelper.save(key: Self.keychainKey, value: legacyToken)
+                    UserDefaults.standard.removeObject(forKey: Self.legacyDefaultsKey)
+                }
+            }
+            return KeychainHelper.load(key: Self.keychainKey)
+        }
+        set {
+            if let value = newValue {
+                KeychainHelper.save(key: Self.keychainKey, value: value)
+            } else {
+                KeychainHelper.delete(key: Self.keychainKey)
+            }
+        }
     }
 
     /// Whether scrobbling is enabled

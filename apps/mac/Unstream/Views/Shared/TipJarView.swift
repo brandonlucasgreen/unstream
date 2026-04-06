@@ -3,6 +3,7 @@ import StoreKit
 
 struct TipJarView: View {
     @StateObject private var store = TipJarStore()
+    @State private var loadTimedOut = false
 
     private let tipEmojis = ["☕", "💛", "⭐"]
     private let tipLabels = ["Small tip", "Medium tip", "Large tip"]
@@ -21,10 +22,27 @@ struct TipJarView: View {
                         .foregroundColor(.secondary)
                 }
                 .padding(.vertical, 8)
+            } else if store.products.isEmpty && loadTimedOut {
+                VStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.title2)
+                        .foregroundColor(.orange)
+                    Text("Unable to load. Check your connection and try again.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                    Button("Retry") {
+                        loadTimedOut = false
+                        Task {
+                            await loadWithTimeout()
+                        }
+                    }
+                    .font(.caption)
+                }
             } else if store.products.isEmpty {
                 ProgressView()
                     .task {
-                        await store.loadProducts()
+                        await loadWithTimeout()
                     }
             } else {
                 ForEach(Array(store.products.enumerated()), id: \.element.id) { index, product in
@@ -55,6 +73,24 @@ struct TipJarView: View {
                         .foregroundColor(.red)
                 }
             }
+        }
+    }
+
+    private func loadWithTimeout() async {
+        // Start a timeout timer concurrently
+        let timeoutTask = Task {
+            try? await Task.sleep(nanoseconds: 10_000_000_000) // 10 seconds
+            if !Task.isCancelled && store.products.isEmpty {
+                await MainActor.run { loadTimedOut = true }
+            }
+        }
+
+        await store.loadProducts()
+
+        // If products loaded successfully, cancel the timeout
+        timeoutTask.cancel()
+        if !store.products.isEmpty {
+            loadTimedOut = false
         }
     }
 }

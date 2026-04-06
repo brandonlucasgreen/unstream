@@ -10,6 +10,9 @@ class AppState: ObservableObject {
     @Published var searchError: String? = nil
     @Published var hasSearched: Bool = false
 
+    // Tab selection (iOS)
+    @Published var selectedTab: Int = 0
+
     // Now Playing state
     @Published var nowPlaying: NowPlaying? = nil
     @Published var isPlaying: Bool = false
@@ -74,30 +77,36 @@ class AppState: ObservableObject {
         searchError = nil
 
         do {
-            // Phase 1: Get initial results
+            // Phase 1: Get initial results — show them immediately
             let (results, hasPendingEnrichment) = try await api.searchArtist(query)
             searchResults = results
+            isSearching = false
             trackSearchAppearances(results)
 
-            // Phase 2: Fetch MusicBrainz enrichment if available
+            // Phase 2: Enrich with MusicBrainz data in the background
             if hasPendingEnrichment {
                 if let mbData = try await api.fetchMusicBrainzData(query) {
                     let enrichedResults = await api.mergeWithMusicBrainzData(results: results, mbData: mbData)
                     searchResults = enrichedResults
-                    // Cache the enriched results
                     await api.cacheResults(query: query, results: enrichedResults)
                 }
             }
         } catch {
             searchError = "Failed to search. Please try again."
+            isSearching = false
             print("Search error: \(error)")
         }
-
-        isSearching = false
     }
 
     func clearSearch() {
         searchQuery = ""
+        searchResults = []
+        searchError = nil
+        hasSearched = false
+    }
+
+    /// Clear results only (preserves query text for re-search)
+    func clearResults() {
         searchResults = []
         searchError = nil
         hasSearched = false
@@ -133,15 +142,16 @@ class AppState: ObservableObject {
 
             do {
                 print("[AppState] Fetching platforms for: \(artist)")
-                // Phase 1: Get initial results
+                // Phase 1: Get initial results — show them immediately
                 let (results, hasPendingEnrichment) = try await api.searchArtist(artist)
                 nowPlayingResults = results
                 lastFetchedArtist = artist
                 lastFetchTime = Date()
+                isLoadingNowPlaying = false
                 trackSearchAppearances(results)
                 print("[AppState] Got \(results.count) results for \(artist)")
 
-                // Phase 2: Fetch MusicBrainz enrichment if available
+                // Phase 2: Enrich with MusicBrainz data in the background
                 if hasPendingEnrichment {
                     if let mbData = try await api.fetchMusicBrainzData(artist) {
                         let enrichedResults = await api.mergeWithMusicBrainzData(results: results, mbData: mbData)
@@ -152,9 +162,8 @@ class AppState: ObservableObject {
                 }
             } catch {
                 print("[AppState] Now playing search error: \(error)")
+                isLoadingNowPlaying = false
             }
-
-            isLoadingNowPlaying = false
         }
     }
 

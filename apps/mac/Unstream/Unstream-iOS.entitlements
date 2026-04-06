@@ -4,31 +4,15 @@
 <dict>
 	<key>com.apple.security.app-sandbox</key>
 	<true/>
-	<key>com.apple.security.automation.apple-events</key>
-	<true/>
 	<key>com.apple.security.network.client</key>
 	<true/>
-	<key>com.apple.security.scripting-targets</key>
-	<dict>
-		<key>com.apple.Music</key>
-		<array>
-			<string>com.apple.Music.playback</string>
-			<string>com.apple.Music.library</string>
-		</array>
-		<key>com.spotify.client</key>
-		<array>
-			<string>com.spotify.playback</string>
-		</array>
-	</dict>
-	<key>com.apple.security.temporary-exception.apple-events</key>
-	<array>
-		<string>com.parachord.desktop</string>
-	</array>
 	<key>com.apple.security.application-groups</key>
 	<array>
 		<string>group.lol.bgreen.unstream</string>
 	</array>
 	<key>com.apple.developer.ubiquity-kvstore-identifier</key>
 	<string>$(TeamIdentifierPrefix)lol.bgreen.Unstream</string>
+	<key>com.apple.developer.in-app-payments</key>
+	<true/>
 </dict>
 </plist>

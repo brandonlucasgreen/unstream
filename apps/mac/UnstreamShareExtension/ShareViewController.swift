@@ -6,6 +6,9 @@ class ShareViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        // Make extension invisible — we have no UI, just process and close
+        view.isHidden = true
+
         // Process shared items immediately
         handleSharedItems()
     }
@@ -16,18 +19,26 @@ class ShareViewController: UIViewController {
             return
         }
 
+        // Collect the share text (often contains artist name) and URL
+        var sharedURL: URL?
+        var sharedText: String?
+
         for item in extensionItems {
+            // The attributedContentText often contains "Song by Artist" or similar
+            if let text = item.attributedContentText?.string, !text.isEmpty {
+                sharedText = text
+            }
+
             for provider in item.attachments ?? [] {
                 if provider.hasItemConformingToTypeIdentifier(UTType.url.identifier) {
                     provider.loadItem(forTypeIdentifier: UTType.url.identifier) { [weak self] item, error in
                         DispatchQueue.main.async {
                             if let url = item as? URL {
-                                self?.handleURL(url)
+                                sharedURL = url
                             } else if let urlData = item as? Data, let url = URL(dataRepresentation: urlData, relativeTo: nil) {
-                                self?.handleURL(url)
-                            } else {
-                                self?.close()
+                                sharedURL = url
                             }
+                            self?.handleSharedContent(url: sharedURL, text: sharedText)
                         }
                     }
                     return // Only handle the first URL
@@ -39,28 +50,28 @@ class ShareViewController: UIViewController {
         close()
     }
 
-    private func handleURL(_ url: URL) {
-        let query = extractArtistFromURL(url) ?? url.absoluteString
+    private func handleSharedContent(url: URL?, text: String?) {
+        // Try to extract artist from URL first
+        let artistFromURL = url.flatMap { extractArtistFromURL($0) }
 
-        // Save to shared App Group UserDefaults
+        // Try to extract artist from share text (e.g. "Song Name by Artist Name" from Apple Music)
+        let artistFromText = text.flatMap { extractArtistFromText($0) }
+
+        // Priority: URL extraction > text extraction > raw URL
+        let query = artistFromURL ?? artistFromText ?? url?.absoluteString ?? ""
+
+        guard !query.isEmpty else {
+            close()
+            return
+        }
+
+        // Save to shared App Group UserDefaults for the main app to pick up on launch
         if let sharedDefaults = UserDefaults(suiteName: "group.lol.bgreen.unstream") {
             sharedDefaults.set(query, forKey: "pendingSearch")
+            sharedDefaults.set(Date().timeIntervalSince1970, forKey: "pendingSearchTimestamp")
         }
 
-        // Try to open the main app via URL scheme
-        if let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-           let appURL = URL(string: "unstream://search?q=\(encodedQuery)") {
-            // Use responder chain to open URL (share extensions can't use UIApplication.shared)
-            var responder: UIResponder? = self
-            while let nextResponder = responder?.next {
-                if let application = nextResponder as? UIApplication {
-                    application.open(appURL)
-                    break
-                }
-                responder = nextResponder
-            }
-        }
-
+        // Complete the extension request — the main app will check for pending searches on next launch/foreground
         close()
     }
 
@@ -83,13 +94,16 @@ class ShareViewController: UIViewController {
             return nil // Let the app/API handle Spotify URLs
         }
 
-        // Apple Music: music.apple.com/XX/artist/name/ID
+        // Apple Music: music.apple.com/XX/artist/name/ID or /album/name/ID or /song/name/ID
         if host == "music.apple.com" || host.hasSuffix(".music.apple.com") {
+            // Direct artist link: /artist/name/ID
             if let artistIndex = pathComponents.firstIndex(of: "artist"),
                artistIndex + 1 < pathComponents.count {
                 return pathComponents[artistIndex + 1]
                     .replacingOccurrences(of: "-", with: " ")
             }
+            // Album/song links: can't extract artist from URL alone, return nil to fall through to text extraction
+            return nil
         }
 
         // SoundCloud: soundcloud.com/artistname
@@ -124,6 +138,29 @@ class ShareViewController: UIViewController {
 
         // Faircamp: typically custom domains, hard to detect
         // Fall through to nil
+
+        return nil
+    }
+
+    /// Extract artist name from share text like "Song Name by Artist Name" or "Artist Name — Song Name"
+    private func extractArtistFromText(_ text: String) -> String? {
+        // Apple Music shares as "Song Name by Artist Name" or "Album Name by Artist Name"
+        if let byRange = text.range(of: " by ", options: .backwards) {
+            let artist = String(text[byRange.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
+            if !artist.isEmpty {
+                return artist
+            }
+        }
+
+        // Some apps use "Artist — Song" or "Artist - Song" format
+        for separator in [" — ", " – ", " - "] {
+            if let sepRange = text.range(of: separator) {
+                let artist = String(text[..<sepRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+                if !artist.isEmpty && !artist.contains("http") {
+                    return artist
+                }
+            }
+        }
 
         return nil
     }

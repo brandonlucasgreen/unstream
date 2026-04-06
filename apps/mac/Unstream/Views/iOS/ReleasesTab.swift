@@ -38,14 +38,21 @@ struct ReleasesTab: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding()
                 } else {
-                    ScrollView {
-                        VStack(spacing: 12) {
-                            ForEach(releaseAlertManager.newReleases) { release in
-                                ReleaseRow(release: release)
-                            }
+                    List {
+                        ForEach(releaseAlertManager.newReleases) { release in
+                            ReleaseRow(release: release)
+                                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                                .listRowSeparator(.hidden)
+                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                    Button(role: .destructive) {
+                                        releaseAlertManager.dismissRelease(release)
+                                    } label: {
+                                        Label("Dismiss", systemImage: "xmark.circle")
+                                    }
+                                }
                         }
-                        .padding()
                     }
+                    .listStyle(.plain)
                 }
             }
             .navigationTitle("Releases")

@@ -16,6 +16,9 @@ class SupportListManager: ObservableObject {
         }
     }
 
+    private static let maxEntries = 500
+    private var isMerging = false
+
     private let storageKey = "supportList"
     private let iCloudStore = NSUbiquitousKeyValueStore.default
 
@@ -133,9 +136,21 @@ class SupportListManager: ObservableObject {
         refreshingEntryIds.remove(entry.id)
     }
 
+    // MARK: - Entry Cap
+
+    /// Trim entries to stay under the iCloud KVS size limit.
+    /// Keeps the most recently added entries.
+    private func enforceEntryCap() {
+        guard entries.count > Self.maxEntries else { return }
+        print("[SupportListManager] Warning: trimming \(entries.count) entries to \(Self.maxEntries)")
+        // Sort by dateAdded descending, keep newest
+        entries = Array(entries.sorted { $0.dateAdded > $1.dateAdded }.prefix(Self.maxEntries))
+    }
+
     // MARK: - Persistence
 
     private func saveEntries() {
+        enforceEntryCap()
         do {
             let data = try JSONEncoder().encode(entries)
 
@@ -186,10 +201,55 @@ class SupportListManager: ObservableObject {
     }
 
     @objc private func iCloudDidUpdate(_ notification: Notification) {
-        // Reload entries when iCloud data changes from another device
+        // Union merge: combine local and remote entries, keeping all unique artists
         Task { @MainActor in
-            loadEntries()
+            mergeWithiCloudData()
         }
+    }
+
+    /// Merge remote iCloud entries with local entries using union strategy.
+    /// For the same artist (by name, case-insensitive), keep the entry with more platforms
+    /// or the more recently added one.
+    private func mergeWithiCloudData() {
+        guard !isMerging else { return }
+        isMerging = true
+        defer { isMerging = false }
+
+        guard let remoteData = iCloudStore.data(forKey: storageKey),
+              let remoteEntries = try? JSONDecoder().decode([SupportEntry].self, from: remoteData) else {
+            return
+        }
+
+        var merged: [String: SupportEntry] = [:]
+
+        // Index local entries by lowercased artist name
+        for entry in entries {
+            let key = entry.artistName.lowercased()
+            merged[key] = entry
+        }
+
+        // Merge remote entries
+        for remoteEntry in remoteEntries {
+            let key = remoteEntry.artistName.lowercased()
+            if let existing = merged[key] {
+                // Conflict: same artist exists locally and remotely
+                // Keep the one with more platforms; if equal, keep the more recent one
+                if remoteEntry.platforms.count > existing.platforms.count {
+                    merged[key] = remoteEntry
+                } else if remoteEntry.platforms.count == existing.platforms.count,
+                          remoteEntry.dateAdded > existing.dateAdded {
+                    merged[key] = remoteEntry
+                }
+                // Otherwise keep existing (local)
+            } else {
+                // New artist from remote -- add it
+                merged[key] = remoteEntry
+            }
+        }
+
+        // Sort by dateAdded descending (newest first)
+        entries = merged.values.sorted { $0.dateAdded > $1.dateAdded }
+        saveEntries()
     }
 
     deinit {

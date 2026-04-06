@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		PP111111111111111111111111 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = PP222222222222222222222222 /* PrivacyInfo.xcprivacy */; };
+		PP333333333333333333333333 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = PP444444444444444444444444 /* PrivacyInfo.xcprivacy */; };
 		0038D14301F153EF60346193 /* SocialIconButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFEA3443AD56B9950B43AAE /* SocialIconButton.swift */; };
 		0EC3D68464514744CE3AA448 /* BandcampReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43017BB6FDE57EBD35755D7B /* BandcampReleaseChecker.swift */; };
 		0F9D0A7FD89742003BD8D140 /* TipJarStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C40AC0CB901A9F09846258C /* TipJarStore.swift */; };
@@ -32,6 +34,7 @@
 		8961565967B20B3F28A7877E /* GlobalHotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B52C116B5CC91BC40D028AF /* GlobalHotkeyManager.swift */; platformFilters = (macos, ); };
 		8A4181366EB270C58A708C65 /* SearchBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45AC0E531396E8C63A2001CF /* SearchBarView.swift */; platformFilters = (macos, ); };
 		8C94768621D55383151FD59F /* SearchResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1581BE8FAF07C7C9D3CD99F5 /* SearchResponse.swift */; };
+		A1B2C3D4E5F60718293A4B5D /* PlatformCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B5C /* PlatformCatalog.swift */; };
 		917C407BBA300BE70B9BDEFB /* ScrobbleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEEE83E95439F19BFC679216 /* ScrobbleManager.swift */; platformFilters = (macos, ); };
 		A3526462820B7494F5463BE2 /* UnstreamApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 913EEE8809001930E4F88F8C /* UnstreamApp.swift */; };
 		A8FD43FE100F214CA8E6241C /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE9E59C365D8F116C435B8BC /* EmptyStateView.swift */; };
@@ -81,10 +84,12 @@
 /* Begin PBXFileReference section */
 		1003A79CD2A20BF7227C6FB0 /* SupportEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportEntry.swift; sourceTree = "<group>"; };
 		1581BE8FAF07C7C9D3CD99F5 /* SearchResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResponse.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4B5C /* PlatformCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformCatalog.swift; sourceTree = "<group>"; };
 		1CDD15E71A80A31952A7720C /* ShortcutRecorderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutRecorderView.swift; sourceTree = "<group>"; };
 		1D967BFF6EECB9BFC4835ABA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		1F71936662EEAC06B0C1F008 /* ReleaseAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseAlert.swift; sourceTree = "<group>"; };
-		20001DAD97A8A0637B6D5F4A /* Unstream.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Unstream.entitlements; sourceTree = "<group>"; };
+		20001DAD97A8A0637B6D5F4A /* Unstream-macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Unstream-macOS.entitlements"; sourceTree = "<group>"; };
+		20001DAD97A8A0637B6D5F4B /* Unstream-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Unstream-iOS.entitlements"; sourceTree = "<group>"; };
 		2724397667CCEE30A098B9CE /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
 		2C8F1E48E643DCC1EECD4A93 /* ReleasesTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleasesTab.swift; sourceTree = "<group>"; };
 		359150E4043D5233395827D3 /* iOSSettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSSettingsTab.swift; sourceTree = "<group>"; };
@@ -129,6 +134,8 @@
 		EEEE83E95439F19BFC679216 /* ScrobbleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrobbleManager.swift; sourceTree = "<group>"; };
 		EF4E58F91C106A97A5179125 /* PopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverView.swift; sourceTree = "<group>"; };
 		F8C60F297D83E962E0D769E7 /* SupportListTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportListTab.swift; sourceTree = "<group>"; };
+		PP222222222222222222222222 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		PP444444444444444444444444 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -182,9 +189,11 @@
 				529125F63F2294A642A38108 /* Assets.xcassets */,
 				B4745357EE3AD119D3F7B059 /* BandcampFriday.swift */,
 				EC887595A94809296121C2D0 /* Info.plist */,
+				PP222222222222222222222222 /* PrivacyInfo.xcprivacy */,
 				AB06541602FC51167DB50DC9 /* ReleaseAlertManager.swift */,
 				49F5BF0BE3FBF25D3C4102A6 /* SupportListManager.swift */,
-				20001DAD97A8A0637B6D5F4A /* Unstream.entitlements */,
+				20001DAD97A8A0637B6D5F4A /* Unstream-macOS.entitlements */,
+				20001DAD97A8A0637B6D5F4B /* Unstream-iOS.entitlements */,
 				829FB6D91FC50FBA72747788 /* UnstreamAPI.swift */,
 				913EEE8809001930E4F88F8C /* UnstreamApp.swift */,
 				CBFF34D3930D2D2C364B1F73 /* Models */,
@@ -224,6 +233,7 @@
 			isa = PBXGroup;
 			children = (
 				1D967BFF6EECB9BFC4835ABA /* Info.plist */,
+				PP444444444444444444444444 /* PrivacyInfo.xcprivacy */,
 				815E763FB42240B9048D5711 /* ShareExtension.entitlements */,
 				590FD31A0B703B21FFCCBEA7 /* ShareViewController.swift */,
 			);
@@ -247,6 +257,7 @@
 			children = (
 				DC148A11F868801384A78672 /* AppState.swift */,
 				BC8C8A39D8800BDBA893E0EA /* NowPlaying.swift */,
+				A1B2C3D4E5F60718293A4B5C /* PlatformCatalog.swift */,
 				1F71936662EEAC06B0C1F008 /* ReleaseAlert.swift */,
 				1581BE8FAF07C7C9D3CD99F5 /* SearchResponse.swift */,
 				1003A79CD2A20BF7227C6FB0 /* SupportEntry.swift */,
@@ -315,11 +326,20 @@
 			productReference = 607E17AC019A1B8698E64ACC /* Unstream.app */;
 			productType = "com.apple.product-type.application";
 		};
+		PP555555555555555555555555 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				PP333333333333333333333333 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		50FDF92E61EA31C4052D0F8B /* UnstreamShareExtension */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7EEF831377D2576244518632 /* Build configuration list for PBXNativeTarget "UnstreamShareExtension" */;
 			buildPhases = (
 				AE1AD660010190E975D1FE67 /* Sources */,
+				PP555555555555555555555555 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -374,6 +394,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B1BACADB228F567C2A0806F6 /* Assets.xcassets in Resources */,
+				PP111111111111111111111111 /* PrivacyInfo.xcprivacy in Resources */,
 				BDD1E7A826216311FD1D8231 /* UnstreamTips.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -418,6 +439,7 @@
 				8916C6D428EE94E16E491566 /* ReleasesTab.swift in Sources */,
 				917C407BBA300BE70B9BDEFB /* ScrobbleManager.swift in Sources */,
 				8A4181366EB270C58A708C65 /* SearchBarView.swift in Sources */,
+				A1B2C3D4E5F60718293A4B5D /* PlatformCatalog.swift in Sources */,
 				8C94768621D55383151FD59F /* SearchResponse.swift in Sources */,
 				11B4891578B50BCF51D68613 /* SearchTab.swift in Sources */,
 				7F078F17D544C2F32A801E60 /* SettingsView.swift in Sources */,
@@ -554,7 +576,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Unstream/Unstream.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "Unstream/Unstream-macOS.entitlements";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = "Unstream/Unstream-iOS.entitlements";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = "Unstream/Unstream-iOS.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = CV926C8KS8;
@@ -578,7 +602,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Unstream/Unstream.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "Unstream/Unstream-macOS.entitlements";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = "Unstream/Unstream-iOS.entitlements";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = "Unstream/Unstream-iOS.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = CV926C8KS8;

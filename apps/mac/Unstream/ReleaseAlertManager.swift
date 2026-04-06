@@ -17,6 +17,8 @@ class ReleaseAlertManager: ObservableObject {
     private let storageKey = "releaseCheckState"
 
     private let releaseAPI = ReleaseCheckAPI()
+    private let iCloudStore = NSUbiquitousKeyValueStore.default
+    private let dismissedIdsKey = "dismissedReleaseIds"
 
     private weak var supportListManager: SupportListManager?
 
@@ -40,10 +42,18 @@ class ReleaseAlertManager: ObservableObject {
         self.supportListManager = supportListManager
         self.releaseAlertsEnabled = UserDefaults.standard.bool(forKey: "releaseAlertsEnabled")
         self.checkState = Self.loadState()
-        self.newReleases = checkState.newReleases.filter { $0.isActive }
+
+        // Filter out releases that were dismissed on another device via iCloud
+        let dismissedIds = loadDismissedIds()
+        self.newReleases = checkState.newReleases.filter { $0.isActive && !dismissedIds.contains($0.id) }
         self.lastCheckDate = checkState.lastCheckDate
 
+        setupDismissedIdSync()
         setupScheduling()
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 
     // MARK: - Public Methods
@@ -53,10 +63,11 @@ class ReleaseAlertManager: ObservableObject {
         newReleases.first { $0.artistName.lowercased() == artistName.lowercased() && $0.isActive }
     }
 
-    /// Dismiss a new release notification
+    /// Dismiss a new release notification (syncs dismissed state via iCloud KVS)
     func dismissRelease(_ release: NewRelease) {
         newReleases.removeAll { $0.id == release.id }
         checkState.newReleases.removeAll { $0.id == release.id }
+        saveDismissedId(release.id)
         saveState()
     }
 
@@ -313,6 +324,48 @@ class ReleaseAlertManager: ObservableObject {
     private func saveState() {
         if let data = try? JSONEncoder().encode(checkState) {
             UserDefaults.standard.set(data, forKey: storageKey)
+        }
+    }
+
+    // MARK: - Dismissed Release Sync (iCloud KVS)
+
+    private func loadDismissedIds() -> Set<UUID> {
+        guard let strings = iCloudStore.array(forKey: dismissedIdsKey) as? [String] else {
+            return []
+        }
+        return Set(strings.compactMap { UUID(uuidString: $0) })
+    }
+
+    private func saveDismissedId(_ id: UUID) {
+        var ids = (iCloudStore.array(forKey: dismissedIdsKey) as? [String]) ?? []
+        let idString = id.uuidString
+        if !ids.contains(idString) {
+            ids.append(idString)
+            // Cap at 200 entries to avoid unbounded growth
+            if ids.count > 200 {
+                ids = Array(ids.suffix(200))
+            }
+            iCloudStore.set(ids, forKey: dismissedIdsKey)
+            iCloudStore.synchronize()
+        }
+    }
+
+    private func setupDismissedIdSync() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(dismissedIdsDidUpdate),
+            name: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
+            object: iCloudStore
+        )
+        iCloudStore.synchronize()
+    }
+
+    @objc private func dismissedIdsDidUpdate(_ notification: Notification) {
+        Task { @MainActor in
+            let dismissedIds = loadDismissedIds()
+            newReleases.removeAll { dismissedIds.contains($0.id) }
+            checkState.newReleases.removeAll { dismissedIds.contains($0.id) }
+            saveState()
         }
     }
 }

@@ -7,6 +7,10 @@ import AppKit
 import ServiceManagement
 #endif
 
+#if os(iOS)
+import BackgroundTasks
+#endif
+
 // MARK: - Shared State Container
 
 /// Holds all the shared state managers so they can be accessed by both platforms
@@ -52,10 +56,23 @@ class AppStateContainer: ObservableObject {
               let pendingQuery = sharedDefaults.string(forKey: "pendingSearch"),
               !pendingQuery.isEmpty else { return }
 
+        // Ignore stale pending searches (older than 5 minutes)
+        let timestamp = sharedDefaults.double(forKey: "pendingSearchTimestamp")
+        if timestamp > 0 {
+            let age = Date().timeIntervalSince1970 - timestamp
+            guard age < 300 else {
+                sharedDefaults.removeObject(forKey: "pendingSearch")
+                sharedDefaults.removeObject(forKey: "pendingSearchTimestamp")
+                return
+            }
+        }
+
         // Clear the pending search
         sharedDefaults.removeObject(forKey: "pendingSearch")
+        sharedDefaults.removeObject(forKey: "pendingSearchTimestamp")
 
-        // Perform the search
+        // Switch to the Search tab and perform the search
+        appState.selectedTab = 0
         appState.searchQuery = pendingQuery
         Task {
             await appState.performSearch()
@@ -69,9 +86,14 @@ class AppStateContainer: ObservableObject {
 struct UnstreamApp: App {
     #if os(macOS)
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    #elseif os(iOS)
+    @UIApplicationDelegateAdaptor(iOSAppDelegate.self) var appDelegate
     #endif
 
-    @StateObject private var container = AppStateContainer.shared
+    @ObservedObject private var container = AppStateContainer.shared
+    #if os(iOS)
+    @Environment(\.scenePhase) private var scenePhase
+    #endif
 
     var body: some Scene {
         #if os(macOS)
@@ -92,6 +114,11 @@ struct UnstreamApp: App {
                 .onAppear {
                     container.checkPendingSearch()
                 }
+                .onChange(of: scenePhase) { _, newPhase in
+                    if newPhase == .active {
+                        container.checkPendingSearch()
+                    }
+                }
         }
         #endif
     }
@@ -104,6 +131,7 @@ struct UnstreamApp: App {
               let query = components.queryItems?.first(where: { $0.name == "q" })?.value,
               !query.isEmpty else { return }
 
+        container.appState.selectedTab = 0
         container.appState.searchQuery = query
         Task {
             await container.appState.performSearch()
@@ -111,6 +139,87 @@ struct UnstreamApp: App {
     }
     #endif
 }
+
+// MARK: - iOS App Delegate
+
+#if os(iOS)
+
+class iOSAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    static let releaseCheckTaskId = "lol.bgreen.Unstream.releaseCheck"
+
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+    ) -> Bool {
+        UNUserNotificationCenter.current().delegate = self
+        registerBackgroundTasks()
+        return true
+    }
+
+    // MARK: - Background Release Checks
+
+    private func registerBackgroundTasks() {
+        BGTaskScheduler.shared.register(
+            forTaskWithIdentifier: Self.releaseCheckTaskId,
+            using: nil
+        ) { task in
+            guard let appRefreshTask = task as? BGAppRefreshTask else { return }
+            self.handleReleaseCheck(task: appRefreshTask)
+        }
+        scheduleReleaseCheck()
+    }
+
+    private func handleReleaseCheck(task: BGAppRefreshTask) {
+        let checkTask = Task {
+            await AppStateContainer.shared.releaseAlertManager.checkNow()
+        }
+
+        task.expirationHandler = {
+            checkTask.cancel()
+        }
+
+        Task {
+            _ = await checkTask.value
+            task.setTaskCompleted(success: true)
+            self.scheduleReleaseCheck()
+        }
+    }
+
+    func scheduleReleaseCheck() {
+        let request = BGAppRefreshTaskRequest(identifier: Self.releaseCheckTaskId)
+        // Check no sooner than 6 hours from now
+        request.earliestBeginDate = Date(timeIntervalSinceNow: 6 * 60 * 60)
+        do {
+            try BGTaskScheduler.shared.submit(request)
+        } catch {
+            print("[BGTask] Failed to schedule release check: \(error)")
+        }
+    }
+
+    // Show notifications even when the app is in the foreground
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .sound])
+    }
+
+    // Handle notification taps — open the release URL
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        if let releaseUrl = response.notification.request.content.userInfo["releaseUrl"] as? String,
+           let url = URL(string: releaseUrl) {
+            UIApplication.shared.open(url)
+        }
+        completionHandler()
+    }
+}
+
+#endif
 
 // MARK: - macOS App Delegate
 
@@ -276,41 +385,19 @@ class WelcomeWindowLauncher {
     static let shared = WelcomeWindowLauncher()
     private var window: NSWindow?
     private var hasAttemptedShow = false
-    private var observers: [Any] = []
 
     init() {
         guard !UserDefaults.standard.bool(forKey: "hasLaunchedBefore") else { return }
 
-        let timer = Timer(timeInterval: 1.0, repeats: false) { [weak self] _ in
-            self?.showWelcomeWindow()
-        }
-        RunLoop.main.add(timer, forMode: .common)
-
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
             self?.showWelcomeWindow()
         }
-
-        let observer = NotificationCenter.default.addObserver(
-            forName: NSApplication.didBecomeActiveNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                self?.showWelcomeWindow()
-            }
-        }
-        observers.append(observer)
     }
 
     func showWelcomeWindow() {
         guard !UserDefaults.standard.bool(forKey: "hasLaunchedBefore") else { return }
         guard !hasAttemptedShow else { return }
         hasAttemptedShow = true
-
-        for observer in observers {
-            NotificationCenter.default.removeObserver(observer)
-        }
-        observers.removeAll()
 
         let welcomeView = WelcomeContentView {
             self.dismiss()
