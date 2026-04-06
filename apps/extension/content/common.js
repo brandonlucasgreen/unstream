@@ -40,11 +40,21 @@ window.Unstream = (function() {
     return false;
   }
 
-  // Creates and starts the polling loop. Returns a reset() function for SPA navigation.
+  // Guard against multiple pollers if the content script is re-injected
+  let activePollerSource = null;
+
+  // Creates and starts the polling loop. Returns reset(), poll(), and stop() functions.
   function createPoller({ getNowPlaying, isPlaying, source }) {
+    // Prevent duplicate pollers for the same source
+    if (activePollerSource === source) {
+      return { reset() {}, poll() {}, stop() {} };
+    }
+    activePollerSource = source;
+
     const POLL_INTERVAL = 3000;
     let lastArtist = null;
     let lastTitle = null;
+    let intervalId = null;
 
     function poll() {
       if (!isPlaying()) {
@@ -71,7 +81,7 @@ window.Unstream = (function() {
       }
     }
 
-    setInterval(poll, POLL_INTERVAL);
+    intervalId = setInterval(poll, POLL_INTERVAL);
     poll();
 
     // Return helpers for SPA navigation handling
@@ -80,7 +90,14 @@ window.Unstream = (function() {
         lastArtist = null;
         lastTitle = null;
       },
-      poll
+      poll,
+      stop() {
+        if (intervalId !== null) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
+        activePollerSource = null;
+      }
     };
   }
 
