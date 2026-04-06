@@ -41,14 +41,15 @@
 
   const poller = createPoller({ getNowPlaying, isPlaying, source: 'soundcloud' });
 
-  // SoundCloud is an SPA — listen for URL changes
+  // SoundCloud is an SPA — poll for URL changes instead of using a
+  // MutationObserver on document.body (which fires excessively).
   let lastUrl = location.href;
-  new MutationObserver(() => {
+  setInterval(() => {
     if (location.href !== lastUrl) {
       lastUrl = location.href;
       poller.reset();
       setTimeout(poller.poll, 500);
       setTimeout(poller.poll, 1500);
     }
-  }).observe(document.body, { childList: true, subtree: true });
+  }, 1500);
 })();

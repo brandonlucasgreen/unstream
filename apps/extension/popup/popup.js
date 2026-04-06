@@ -1,5 +1,27 @@
 // Unstream Chrome Extension - Popup Logic
 
+// Allowed domains for release URLs (must match service-worker.js)
+const ALLOWED_RELEASE_DOMAINS = [
+  'bandcamp.com',
+  'mirlo.space',
+  'qobuz.com',
+  'ampwall.com',
+  'faircamp.eu',
+];
+
+function isAllowedReleaseUrl(url) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
+    const hostname = parsed.hostname.toLowerCase();
+    return ALLOWED_RELEASE_DOMAINS.some(domain =>
+      hostname === domain || hostname.endsWith('.' + domain)
+    );
+  } catch {
+    return false;
+  }
+}
+
 // Source icons and names
 const SOURCE_CONFIG = {
   bandcamp: { icon: '🎵', name: 'Bandcamp' },
@@ -59,7 +81,6 @@ const elements = {
   saveArtistBtn: document.getElementById('save-artist-btn'),
   openBrowserBtn: document.getElementById('open-browser-btn'),
   reportIssueLink: document.getElementById('report-issue-link'),
-  proPrompt: document.getElementById('pro-prompt'),
   searchInput: document.getElementById('search-input'),
   searchBtn: document.getElementById('search-btn'),
   artistName: document.getElementById('artist-name'),
@@ -136,21 +157,29 @@ async function loadResults(artist) {
   elements.resultsGrid.replaceChildren(loadingDiv);
   elements.resultsSection.classList.remove('hidden');
 
-  const response = await chrome.runtime.sendMessage({
-    type: 'GET_RESULTS',
-    artist,
-  });
+  try {
+    const response = await chrome.runtime.sendMessage({
+      type: 'GET_RESULTS',
+      artist,
+    });
 
-  if (response.error) {
+    if (!response || response.error) {
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error';
+      errorDiv.textContent = 'Failed to load results';
+      elements.resultsGrid.replaceChildren(errorDiv);
+      return;
+    }
+
+    currentResults = response.results || [];
+    renderResults(currentResults);
+  } catch (error) {
+    console.error('loadResults error:', error);
     const errorDiv = document.createElement('div');
     errorDiv.className = 'error';
-    errorDiv.textContent = 'Failed to load results';
+    errorDiv.textContent = 'Extension is reloading, please try again';
     elements.resultsGrid.replaceChildren(errorDiv);
-    return;
   }
-
-  currentResults = response.results || [];
-  renderResults(currentResults);
 }
 
 // Render results
@@ -185,7 +214,7 @@ function renderResults(results) {
     return;
   }
 
-  const bcFriday = typeof isBandcampFriday === 'function' && isBandcampFriday();
+  const bcFriday = isBandcampFriday();
   const fragment = document.createDocumentFragment();
   nonSocialPlatforms.slice(0, 8).forEach(platform => {
     const config = SOURCE_CONFIG[platform.sourceId] || { icon: '🔗', name: platform.sourceId };
@@ -261,15 +290,20 @@ function isSearchOnlySource(id, url) {
 
 // Load enrichment (MusicBrainz data)
 async function loadEnrichment(artist) {
-  const enrichment = await chrome.runtime.sendMessage({
-    type: 'GET_ENRICHMENT',
-    artist,
-  });
+  try {
+    const enrichment = await chrome.runtime.sendMessage({
+      type: 'GET_ENRICHMENT',
+      artist,
+    });
 
-  if (enrichment && enrichment.socialLinks && enrichment.socialLinks.length > 0) {
-    currentSocialLinks = enrichment.socialLinks;
-    renderSocialLinks(enrichment.socialLinks);
-  } else {
+    if (enrichment && enrichment.socialLinks && enrichment.socialLinks.length > 0) {
+      currentSocialLinks = enrichment.socialLinks;
+      renderSocialLinks(enrichment.socialLinks);
+    } else {
+      currentSocialLinks = null;
+    }
+  } catch (error) {
+    console.error('loadEnrichment error:', error);
     currentSocialLinks = null;
   }
 }
@@ -289,8 +323,9 @@ function renderSocialLinks(links) {
 
     const iconSvg = SOCIAL_ICONS[link.platform];
     if (iconSvg) {
-      // Use innerHTML to properly render the SVG
-      anchor.innerHTML = iconSvg;
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(iconSvg, 'image/svg+xml');
+      anchor.appendChild(doc.documentElement);
     }
     fragment.appendChild(anchor);
   });
@@ -303,7 +338,7 @@ function renderSocialLinks(links) {
 async function updateSaveButton() {
   if (!currentArtist) return;
 
-  const { savedArtists = [] } = await chrome.storage.sync.get('savedArtists');
+  const { savedArtists = [] } = await chrome.storage.local.get('savedArtists');
   const isSaved = savedArtists.includes(currentArtist);
 
   const starSpan = document.createElement('span');
@@ -324,8 +359,8 @@ async function updateSaveButton() {
 async function toggleSaveArtist() {
   if (!currentArtist) return;
 
-  const { savedArtists = [] } = await chrome.storage.sync.get('savedArtists');
-  const { savedArtistsData = {} } = await chrome.storage.sync.get('savedArtistsData');
+  const { savedArtists = [] } = await chrome.storage.local.get('savedArtists');
+  const { savedArtistsData = {} } = await chrome.storage.local.get('savedArtistsData');
   const index = savedArtists.indexOf(currentArtist);
 
   if (index >= 0) {
@@ -354,15 +389,21 @@ async function toggleSaveArtist() {
     savedArtistsData[currentArtist] = artistData;
   }
 
-  await chrome.storage.sync.set({ savedArtists, savedArtistsData });
+  await chrome.storage.local.set({ savedArtists, savedArtistsData });
   updateSaveButton();
   loadSavedArtists();
 }
 
 // Load saved artists
 async function loadSavedArtists() {
-  const { savedArtists = [] } = await chrome.storage.sync.get('savedArtists');
-  const { savedArtistsData = {} } = await chrome.storage.sync.get('savedArtistsData');
+  // Show loading state
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = 'loading';
+  loadingDiv.textContent = 'Loading saved artists...';
+  elements.savedArtistsList.replaceChildren(loadingDiv);
+
+  const { savedArtists = [] } = await chrome.storage.local.get('savedArtists');
+  const { savedArtistsData = {} } = await chrome.storage.local.get('savedArtistsData');
 
   if (savedArtists.length === 0) {
     elements.savedArtistsList.replaceChildren();
@@ -454,7 +495,9 @@ async function loadSavedArtists() {
 
         const iconSvg = SOCIAL_ICONS[link.platform];
         if (iconSvg) {
-          anchor.innerHTML = iconSvg;
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(iconSvg, 'image/svg+xml');
+          anchor.appendChild(doc.documentElement);
         }
         socialDiv.appendChild(anchor);
       });
@@ -470,14 +513,14 @@ async function loadSavedArtists() {
 
 // Remove saved artist
 async function removeSavedArtist(artist) {
-  const { savedArtists = [] } = await chrome.storage.sync.get('savedArtists');
-  const { savedArtistsData = {} } = await chrome.storage.sync.get('savedArtistsData');
+  const { savedArtists = [] } = await chrome.storage.local.get('savedArtists');
+  const { savedArtistsData = {} } = await chrome.storage.local.get('savedArtistsData');
   const index = savedArtists.indexOf(artist);
 
   if (index >= 0) {
     savedArtists.splice(index, 1);
     delete savedArtistsData[artist];
-    await chrome.storage.sync.set({ savedArtists, savedArtistsData });
+    await chrome.storage.local.set({ savedArtists, savedArtistsData });
     loadSavedArtists();
     updateSaveButton();
   }
@@ -485,7 +528,17 @@ async function removeSavedArtist(artist) {
 
 // Load new releases for saved artists
 async function loadNewReleases() {
-  newReleases = await chrome.runtime.sendMessage({ type: 'GET_NEW_RELEASES' }) || [];
+  // Show loading state
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = 'loading';
+  loadingDiv.textContent = 'Checking releases...';
+  elements.newReleases.replaceChildren(loadingDiv);
+
+  try {
+    newReleases = await chrome.runtime.sendMessage({ type: 'GET_NEW_RELEASES' }) || [];
+  } catch {
+    newReleases = [];
+  }
   renderNewReleases();
 }
 
@@ -528,7 +581,9 @@ function renderNewReleases() {
     openBtn.title = 'Listen';
     openBtn.textContent = 'Listen';
     openBtn.addEventListener('click', () => {
-      chrome.tabs.create({ url: release.releaseUrl });
+      if (isAllowedReleaseUrl(release.releaseUrl)) {
+        chrome.tabs.create({ url: release.releaseUrl });
+      }
     });
 
     const dismissBtn = document.createElement('button');
@@ -628,13 +683,25 @@ function switchToTab(tabName) {
   });
 }
 
-// Manual search
-async function searchArtist(artist) {
-  if (!artist) return;
+// Manual search (with in-flight guard to prevent API spam)
+let searchInFlight = false;
 
-  showNowPlaying({ artist, title: '', source: 'search' });
-  await loadResults(artist);
-  await loadEnrichment(artist);
+async function searchArtist(artist) {
+  if (!artist || searchInFlight) return;
+
+  searchInFlight = true;
+  elements.searchBtn.disabled = true;
+  elements.searchInput.disabled = true;
+
+  try {
+    showNowPlaying({ artist, title: '', source: 'search' });
+    await loadResults(artist);
+    await loadEnrichment(artist);
+  } finally {
+    searchInFlight = false;
+    elements.searchBtn.disabled = false;
+    elements.searchInput.disabled = false;
+  }
 }
 
 // Open in browser

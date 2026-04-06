@@ -5,6 +5,8 @@
   const { createPoller, getFromMediaSession } = window.Unstream;
 
   function getNowPlaying() {
+    // Media Session is the preferred primary source. The DOM selectors below
+    // are fragile and may break when Spotify updates their web player markup.
     const ms = getFromMediaSession();
     if (ms) return ms;
 

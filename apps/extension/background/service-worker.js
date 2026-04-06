@@ -2,10 +2,32 @@
 // Handles API calls, caching, badge updates, and release alerts
 
 const API_BASE = 'https://unstream.stream/api';
-const RELEASE_API_BASE = 'https://unstream.stream/.netlify/functions';
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 const DEBOUNCE_MS = 2000; // 2 seconds debounce for same artist
 const RELEASE_CHECK_ALARM = 'releaseCheck';
+
+// Allowed domains for release URLs
+const ALLOWED_RELEASE_DOMAINS = [
+  'bandcamp.com',
+  'mirlo.space',
+  'qobuz.com',
+  'ampwall.com',
+  'faircamp.eu',
+  // Faircamp instances may be self-hosted, so also allow common patterns
+];
+
+function isAllowedReleaseUrl(url) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
+    const hostname = parsed.hostname.toLowerCase();
+    return ALLOWED_RELEASE_DOMAINS.some(domain =>
+      hostname === domain || hostname.endsWith('.' + domain)
+    );
+  } catch {
+    return false;
+  }
+}
 const RELEASE_CHECK_INTERVAL_MINUTES = 7 * 24 * 60; // 7 days in minutes
 
 // Current state
@@ -17,6 +39,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'MUSIC_DETECTED') {
     handleMusicDetection(message.data);
   } else if (message.type === 'GET_CURRENT_ARTIST') {
+    // If in-memory state was lost (service worker restart), restore from storage
+    if (currentArtist === null) {
+      chrome.storage.local.get('currentTrack').then(({ currentTrack }) => {
+        if (currentTrack && Date.now() - currentTrack.timestamp < 5 * 60 * 1000) {
+          currentArtist = currentTrack.artist;
+          lastSearchTime = currentTrack.timestamp;
+          sendResponse({ artist: currentArtist });
+        } else {
+          sendResponse({ artist: null });
+        }
+      });
+      return true; // Keep channel open for async response
+    }
     sendResponse({ artist: currentArtist });
   } else if (message.type === 'GET_RESULTS') {
     getResults(message.artist).then(sendResponse);
@@ -68,7 +103,7 @@ async function handleMusicDetection(data) {
 
   // Debounce: don't re-search same artist within 2 seconds
   const now = Date.now();
-  if (artist === currentArtist && now - lastSearchTime < DEBOUNCE_MS) {
+  if (artist.toLowerCase() === currentArtist?.toLowerCase() && now - lastSearchTime < DEBOUNCE_MS) {
     return;
   }
 
@@ -243,8 +278,48 @@ function updateBadge(state, count = 0) {
   }
 }
 
-// Initialize
-updateBadge('idle');
+// Prune stale cache and enrichment entries older than 24 hours
+async function pruneStaleCache() {
+  const MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
+  try {
+    const all = await chrome.storage.local.get(null);
+    const keysToRemove = [];
+    const now = Date.now();
+
+    for (const [key, value] of Object.entries(all)) {
+      if ((key.startsWith('cache:') || key.startsWith('enrichment:')) && value && value.timestamp) {
+        if (now - value.timestamp > MAX_AGE) {
+          keysToRemove.push(key);
+        }
+      }
+    }
+
+    if (keysToRemove.length > 0) {
+      await chrome.storage.local.remove(keysToRemove);
+    }
+  } catch {
+    // Non-critical — ignore errors
+  }
+}
+
+// Initialize: restore state from storage in case service worker was restarted
+async function restoreState() {
+  try {
+    const { currentTrack } = await chrome.storage.local.get('currentTrack');
+    if (currentTrack && Date.now() - currentTrack.timestamp < 5 * 60 * 1000) {
+      currentArtist = currentTrack.artist;
+      lastSearchTime = currentTrack.timestamp;
+      updateBadge('found');
+    } else {
+      updateBadge('idle');
+    }
+  } catch {
+    updateBadge('idle');
+  }
+}
+
+restoreState();
+pruneStaleCache();
 setupReleaseAlerts();
 
 // =====================
@@ -312,7 +387,7 @@ async function scheduleNextReleaseCheck() {
 // Check for new releases
 async function checkForNewReleases() {
   // Get saved artists with their platform data
-  const { savedArtistsData = {} } = await chrome.storage.sync.get('savedArtistsData');
+  const { savedArtistsData = {} } = await chrome.storage.local.get('savedArtistsData');
   const artistNames = Object.keys(savedArtistsData);
 
   if (artistNames.length === 0) {
@@ -407,7 +482,7 @@ async function checkForNewReleases() {
 
 // Call the release check API
 async function checkReleaseAPI(artistName, platforms) {
-  const url = `${RELEASE_API_BASE}/check-releases`;
+  const url = `${API_BASE}/check-releases`;
 
   const response = await fetch(url, {
     method: 'POST',
@@ -473,7 +548,7 @@ chrome.notifications.onClicked.addListener(async (notificationId) => {
     const releases = await getNewReleases();
     const release = releases.find(r => r.id === releaseId);
 
-    if (release && release.releaseUrl) {
+    if (release && release.releaseUrl && isAllowedReleaseUrl(release.releaseUrl)) {
       chrome.tabs.create({ url: release.releaseUrl });
     }
   }
