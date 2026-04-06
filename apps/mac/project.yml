@@ -42,7 +42,7 @@ targets:
       PRODUCT_NAME: Unstream
       INFOPLIST_FILE: Unstream/Info.plist
       CODE_SIGN_STYLE: Automatic
-      DEVELOPMENT_TEAM: ""
+      DEVELOPMENT_TEAM: "CV926C8KS8"
       CODE_SIGN_ENTITLEMENTS:
         "[sdk=macosx*]": Unstream/Unstream-macOS.entitlements
         "[sdk=iphoneos*]": Unstream/Unstream-iOS.entitlements
@@ -92,7 +92,7 @@ targets:
       PRODUCT_NAME: UnstreamShare
       INFOPLIST_FILE: UnstreamShareExtension/Info.plist
       CODE_SIGN_STYLE: Automatic
-      DEVELOPMENT_TEAM: ""
+      DEVELOPMENT_TEAM: "CV926C8KS8"
       CODE_SIGN_ENTITLEMENTS: UnstreamShareExtension/ShareExtension.entitlements
     info:
       path: UnstreamShareExtension/Info.plist
@@ -100,8 +100,8 @@ targets:
         CFBundleName: UnstreamShare
         CFBundleDisplayName: Share to Unstream
         CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
-        CFBundleVersion: "1"
-        CFBundleShortVersionString: "1.0.0"
+        CFBundleVersion: "3"
+        CFBundleShortVersionString: "3.0.0"
         CFBundlePackageType: XPC!
         NSExtension:
           NSExtensionAttributes:
