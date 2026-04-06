@@ -50,6 +50,12 @@ struct SavedPlatform: Codable, Identifiable {
     let url: String
     let customDisplayName: String?
 
+    enum CodingKeys: String, CodingKey {
+        case sourceId
+        case url
+        case customDisplayName
+    }
+
     var id: String { sourceId }
 
     init(sourceId: String, url: String, customDisplayName: String? = nil) {

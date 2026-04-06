@@ -16,6 +16,9 @@ class SupportListManager: ObservableObject {
         }
     }
 
+    private static let maxEntries = 500
+    private var isMerging = false
+
     private let storageKey = "supportList"
     private let iCloudStore = NSUbiquitousKeyValueStore.default
 
@@ -133,9 +136,21 @@ class SupportListManager: ObservableObject {
         refreshingEntryIds.remove(entry.id)
     }
 
+    // MARK: - Entry Cap
+
+    /// Trim entries to stay under the iCloud KVS size limit.
+    /// Keeps the most recently added entries.
+    private func enforceEntryCap() {
+        guard entries.count > Self.maxEntries else { return }
+        print("[SupportListManager] Warning: trimming \(entries.count) entries to \(Self.maxEntries)")
+        // Sort by dateAdded descending, keep newest
+        entries = Array(entries.sorted { $0.dateAdded > $1.dateAdded }.prefix(Self.maxEntries))
+    }
+
     // MARK: - Persistence
 
     private func saveEntries() {
+        enforceEntryCap()
         do {
             let data = try JSONEncoder().encode(entries)
 
@@ -196,6 +211,10 @@ class SupportListManager: ObservableObject {
     /// For the same artist (by name, case-insensitive), keep the entry with more platforms
     /// or the more recently added one.
     private func mergeWithiCloudData() {
+        guard !isMerging else { return }
+        isMerging = true
+        defer { isMerging = false }
+
         guard let remoteData = iCloudStore.data(forKey: storageKey),
               let remoteEntries = try? JSONDecoder().decode([SupportEntry].self, from: remoteData) else {
             return
