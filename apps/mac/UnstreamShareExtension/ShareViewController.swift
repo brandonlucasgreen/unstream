@@ -6,6 +6,9 @@ class ShareViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        // Make extension invisible — we have no UI, just process and close
+        view.isHidden = true
+
         // Process shared items immediately
         handleSharedItems()
     }
