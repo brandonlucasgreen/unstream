@@ -67,7 +67,8 @@ class AppStateContainer: ObservableObject {
         sharedDefaults.removeObject(forKey: "pendingSearch")
         sharedDefaults.removeObject(forKey: "pendingSearchTimestamp")
 
-        // Perform the search
+        // Switch to the Search tab and perform the search
+        appState.selectedTab = 0
         appState.searchQuery = pendingQuery
         Task {
             await appState.performSearch()
@@ -124,6 +125,7 @@ struct UnstreamApp: App {
               let query = components.queryItems?.first(where: { $0.name == "q" })?.value,
               !query.isEmpty else { return }
 
+        container.appState.selectedTab = 0
         container.appState.searchQuery = query
         Task {
             await container.appState.performSearch()

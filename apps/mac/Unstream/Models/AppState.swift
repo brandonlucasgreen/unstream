@@ -10,6 +10,9 @@ class AppState: ObservableObject {
     @Published var searchError: String? = nil
     @Published var hasSearched: Bool = false
 
+    // Tab selection (iOS)
+    @Published var selectedTab: Int = 0
+
     // Now Playing state
     @Published var nowPlaying: NowPlaying? = nil
     @Published var isPlaying: Bool = false
