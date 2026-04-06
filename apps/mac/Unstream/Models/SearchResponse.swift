@@ -49,7 +49,7 @@ struct PlatformResult: Codable, Identifiable {
     let sourceId: String
     let url: String?
     let latestRelease: LatestRelease?
-    let customDisplayName: String?
+    var customDisplayName: String? = nil
 
     var id: String { sourceId }
 
