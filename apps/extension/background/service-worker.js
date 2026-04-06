@@ -2,7 +2,6 @@
 // Handles API calls, caching, badge updates, and release alerts
 
 const API_BASE = 'https://unstream.stream/api';
-const RELEASE_API_BASE = 'https://unstream.stream/.netlify/functions';
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 const DEBOUNCE_MS = 2000; // 2 seconds debounce for same artist
 const RELEASE_CHECK_ALARM = 'releaseCheck';
@@ -483,7 +482,7 @@ async function checkForNewReleases() {
 
 // Call the release check API
 async function checkReleaseAPI(artistName, platforms) {
-  const url = `${RELEASE_API_BASE}/check-releases`;
+  const url = `${API_BASE}/check-releases`;
 
   const response = await fetch(url, {
     method: 'POST',
