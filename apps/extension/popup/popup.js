@@ -81,7 +81,6 @@ const elements = {
   saveArtistBtn: document.getElementById('save-artist-btn'),
   openBrowserBtn: document.getElementById('open-browser-btn'),
   reportIssueLink: document.getElementById('report-issue-link'),
-  proPrompt: document.getElementById('pro-prompt'),
   searchInput: document.getElementById('search-input'),
   searchBtn: document.getElementById('search-btn'),
   artistName: document.getElementById('artist-name'),
@@ -215,7 +214,7 @@ function renderResults(results) {
     return;
   }
 
-  const bcFriday = typeof isBandcampFriday === 'function' && isBandcampFriday();
+  const bcFriday = isBandcampFriday();
   const fragment = document.createDocumentFragment();
   nonSocialPlatforms.slice(0, 8).forEach(platform => {
     const config = SOURCE_CONFIG[platform.sourceId] || { icon: '🔗', name: platform.sourceId };
@@ -397,6 +396,12 @@ async function toggleSaveArtist() {
 
 // Load saved artists
 async function loadSavedArtists() {
+  // Show loading state
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = 'loading';
+  loadingDiv.textContent = 'Loading saved artists...';
+  elements.savedArtistsList.replaceChildren(loadingDiv);
+
   const { savedArtists = [] } = await chrome.storage.local.get('savedArtists');
   const { savedArtistsData = {} } = await chrome.storage.local.get('savedArtistsData');
 
@@ -523,7 +528,17 @@ async function removeSavedArtist(artist) {
 
 // Load new releases for saved artists
 async function loadNewReleases() {
-  newReleases = await chrome.runtime.sendMessage({ type: 'GET_NEW_RELEASES' }) || [];
+  // Show loading state
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = 'loading';
+  loadingDiv.textContent = 'Checking releases...';
+  elements.newReleases.replaceChildren(loadingDiv);
+
+  try {
+    newReleases = await chrome.runtime.sendMessage({ type: 'GET_NEW_RELEASES' }) || [];
+  } catch {
+    newReleases = [];
+  }
   renderNewReleases();
 }
 
@@ -668,13 +683,25 @@ function switchToTab(tabName) {
   });
 }
 
-// Manual search
-async function searchArtist(artist) {
-  if (!artist) return;
+// Manual search (with in-flight guard to prevent API spam)
+let searchInFlight = false;
 
-  showNowPlaying({ artist, title: '', source: 'search' });
-  await loadResults(artist);
-  await loadEnrichment(artist);
+async function searchArtist(artist) {
+  if (!artist || searchInFlight) return;
+
+  searchInFlight = true;
+  elements.searchBtn.disabled = true;
+  elements.searchInput.disabled = true;
+
+  try {
+    showNowPlaying({ artist, title: '', source: 'search' });
+    await loadResults(artist);
+    await loadEnrichment(artist);
+  } finally {
+    searchInFlight = false;
+    elements.searchBtn.disabled = false;
+    elements.searchInput.disabled = false;
+  }
 }
 
 // Open in browser
