@@ -6,6 +6,22 @@ class TipJarStore: ObservableObject {
     @Published var products: [Product] = []
     @Published var purchaseState: PurchaseState = .idle
 
+    private var transactionListener: Task<Void, Never>?
+
+    init() {
+        transactionListener = Task.detached {
+            for await result in Transaction.updates {
+                if let transaction = try? result.payloadValue {
+                    await transaction.finish()
+                }
+            }
+        }
+    }
+
+    deinit {
+        transactionListener?.cancel()
+    }
+
     enum PurchaseState: Equatable {
         case idle
         case purchasing
