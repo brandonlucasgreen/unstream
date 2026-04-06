@@ -40,6 +40,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'MUSIC_DETECTED') {
     handleMusicDetection(message.data);
   } else if (message.type === 'GET_CURRENT_ARTIST') {
+    // If in-memory state was lost (service worker restart), restore from storage
+    if (currentArtist === null) {
+      chrome.storage.local.get('currentTrack').then(({ currentTrack }) => {
+        if (currentTrack && Date.now() - currentTrack.timestamp < 5 * 60 * 1000) {
+          currentArtist = currentTrack.artist;
+          lastSearchTime = currentTrack.timestamp;
+          sendResponse({ artist: currentArtist });
+        } else {
+          sendResponse({ artist: null });
+        }
+      });
+      return true; // Keep channel open for async response
+    }
     sendResponse({ artist: currentArtist });
   } else if (message.type === 'GET_RESULTS') {
     getResults(message.artist).then(sendResponse);
@@ -91,7 +104,7 @@ async function handleMusicDetection(data) {
 
   // Debounce: don't re-search same artist within 2 seconds
   const now = Date.now();
-  if (artist === currentArtist && now - lastSearchTime < DEBOUNCE_MS) {
+  if (artist.toLowerCase() === currentArtist?.toLowerCase() && now - lastSearchTime < DEBOUNCE_MS) {
     return;
   }
 
@@ -266,8 +279,23 @@ function updateBadge(state, count = 0) {
   }
 }
 
-// Initialize
-updateBadge('idle');
+// Initialize: restore state from storage in case service worker was restarted
+async function restoreState() {
+  try {
+    const { currentTrack } = await chrome.storage.local.get('currentTrack');
+    if (currentTrack && Date.now() - currentTrack.timestamp < 5 * 60 * 1000) {
+      currentArtist = currentTrack.artist;
+      lastSearchTime = currentTrack.timestamp;
+      updateBadge('found');
+    } else {
+      updateBadge('idle');
+    }
+  } catch {
+    updateBadge('idle');
+  }
+}
+
+restoreState();
 setupReleaseAlerts();
 
 // =====================

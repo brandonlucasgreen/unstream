@@ -158,21 +158,29 @@ async function loadResults(artist) {
   elements.resultsGrid.replaceChildren(loadingDiv);
   elements.resultsSection.classList.remove('hidden');
 
-  const response = await chrome.runtime.sendMessage({
-    type: 'GET_RESULTS',
-    artist,
-  });
+  try {
+    const response = await chrome.runtime.sendMessage({
+      type: 'GET_RESULTS',
+      artist,
+    });
 
-  if (response.error) {
+    if (!response || response.error) {
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error';
+      errorDiv.textContent = 'Failed to load results';
+      elements.resultsGrid.replaceChildren(errorDiv);
+      return;
+    }
+
+    currentResults = response.results || [];
+    renderResults(currentResults);
+  } catch (error) {
+    console.error('loadResults error:', error);
     const errorDiv = document.createElement('div');
     errorDiv.className = 'error';
-    errorDiv.textContent = 'Failed to load results';
+    errorDiv.textContent = 'Extension is reloading, please try again';
     elements.resultsGrid.replaceChildren(errorDiv);
-    return;
   }
-
-  currentResults = response.results || [];
-  renderResults(currentResults);
 }
 
 // Render results
@@ -283,15 +291,20 @@ function isSearchOnlySource(id, url) {
 
 // Load enrichment (MusicBrainz data)
 async function loadEnrichment(artist) {
-  const enrichment = await chrome.runtime.sendMessage({
-    type: 'GET_ENRICHMENT',
-    artist,
-  });
+  try {
+    const enrichment = await chrome.runtime.sendMessage({
+      type: 'GET_ENRICHMENT',
+      artist,
+    });
 
-  if (enrichment && enrichment.socialLinks && enrichment.socialLinks.length > 0) {
-    currentSocialLinks = enrichment.socialLinks;
-    renderSocialLinks(enrichment.socialLinks);
-  } else {
+    if (enrichment && enrichment.socialLinks && enrichment.socialLinks.length > 0) {
+      currentSocialLinks = enrichment.socialLinks;
+      renderSocialLinks(enrichment.socialLinks);
+    } else {
+      currentSocialLinks = null;
+    }
+  } catch (error) {
+    console.error('loadEnrichment error:', error);
     currentSocialLinks = null;
   }
 }
