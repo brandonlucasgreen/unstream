@@ -35,6 +35,8 @@ targets:
         destinationFilters: [macOS]
       - path: Unstream/Views/iOS
         destinationFilters: [iOS]
+    resources:
+      - path: Unstream/PrivacyInfo.xcprivacy
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: lol.bgreen.Unstream
       PRODUCT_NAME: Unstream
@@ -83,6 +85,8 @@ targets:
     platform: iOS
     sources:
       - UnstreamShareExtension
+    resources:
+      - path: UnstreamShareExtension/PrivacyInfo.xcprivacy
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: lol.bgreen.Unstream.ShareExtension
       PRODUCT_NAME: UnstreamShare
