@@ -4,20 +4,29 @@
   'use strict';
   const { createPoller, getFromMediaSession } = window.Unstream;
 
-  const MUSIC_KEYWORDS = [
+  // Strong indicators: a single match is sufficient
+  const STRONG_KEYWORDS = [
     'official video', 'official music video', 'music video',
-    'official audio', 'audio', 'lyrics', 'lyric video',
-    'visualizer', 'official visualizer',
-    'live', 'acoustic', 'remix', 'cover',
+    'official audio', 'lyric video', 'official visualizer',
     'ft.', 'feat.', 'featuring',
-    'music', 'song', 'album', 'ep ', 'single',
-    'prod.', 'produced by', 'beat',
+    'prod.', 'produced by',
     'mv', 'pmv'
+  ];
+
+  // Weak indicators: require two matches or combination with hasMusicCategory
+  const WEAK_KEYWORDS = [
+    'audio', 'lyrics', 'visualizer',
+    'acoustic', 'remix', 'cover',
+    'music', 'song', 'album', 'ep ', 'single',
   ];
 
   function isMusicVideo(title) {
     const lower = title.toLowerCase();
-    return MUSIC_KEYWORDS.some(kw => lower.includes(kw));
+    if (STRONG_KEYWORDS.some(kw => lower.includes(kw))) return true;
+
+    // For weak keywords, require at least two matches
+    const weakMatches = WEAK_KEYWORDS.filter(kw => lower.includes(kw)).length;
+    return weakMatches >= 2;
   }
 
   function isTopicChannel() {
@@ -80,7 +89,10 @@
     const videoTitle = titleElement.textContent?.trim();
     if (!videoTitle) return null;
 
-    if (!isMusicVideo(videoTitle) && !isTopicChannel() && !hasMusicCategory()) return null;
+    // Require music signals: strong keyword match, topic channel, music
+    // category, or a weak keyword match combined with music category
+    const isMusic = isMusicVideo(videoTitle) || isTopicChannel() || hasMusicCategory();
+    if (!isMusic) return null;
 
     const extracted = extractArtist(videoTitle);
     if (extracted) return extracted;

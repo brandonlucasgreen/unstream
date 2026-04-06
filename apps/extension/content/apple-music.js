@@ -5,9 +5,12 @@
   const { createPoller, getFromMediaSession } = window.Unstream;
 
   function getNowPlaying() {
+    // Apple Music reliably populates Media Session, so prefer it as the
+    // primary source. DOM selectors are fragile fallbacks only.
     const ms = getFromMediaSession();
     if (ms) return ms;
 
+    // Fallback: DOM selectors (may break when Apple updates their web player)
     const lcd = document.querySelector('.web-chrome-playback-lcd__song-name-scroll-inner');
     const artistContainer = document.querySelector('.web-chrome-playback-lcd__sub-copy-scroll-inner');
 
