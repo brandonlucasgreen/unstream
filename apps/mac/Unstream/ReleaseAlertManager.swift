@@ -52,6 +52,10 @@ class ReleaseAlertManager: ObservableObject {
         setupScheduling()
     }
 
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
     // MARK: - Public Methods
 
     /// Get the new release for a specific artist, if any

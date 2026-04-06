@@ -82,9 +82,11 @@ class AppStateContainer: ObservableObject {
 struct UnstreamApp: App {
     #if os(macOS)
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    #elseif os(iOS)
+    @UIApplicationDelegateAdaptor(iOSAppDelegate.self) var appDelegate
     #endif
 
-    @StateObject private var container = AppStateContainer.shared
+    @ObservedObject private var container = AppStateContainer.shared
     #if os(iOS)
     @Environment(\.scenePhase) private var scenePhase
     #endif
@@ -133,6 +135,44 @@ struct UnstreamApp: App {
     }
     #endif
 }
+
+// MARK: - iOS App Delegate
+
+#if os(iOS)
+
+class iOSAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+    ) -> Bool {
+        UNUserNotificationCenter.current().delegate = self
+        return true
+    }
+
+    // Show notifications even when the app is in the foreground
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .sound])
+    }
+
+    // Handle notification taps — open the release URL
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        if let releaseUrl = response.notification.request.content.userInfo["releaseUrl"] as? String,
+           let url = URL(string: releaseUrl) {
+            UIApplication.shared.open(url)
+        }
+        completionHandler()
+    }
+}
+
+#endif
 
 // MARK: - macOS App Delegate
 
