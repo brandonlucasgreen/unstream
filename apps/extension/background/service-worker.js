@@ -279,6 +279,30 @@ function updateBadge(state, count = 0) {
   }
 }
 
+// Prune stale cache and enrichment entries older than 24 hours
+async function pruneStaleCache() {
+  const MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
+  try {
+    const all = await chrome.storage.local.get(null);
+    const keysToRemove = [];
+    const now = Date.now();
+
+    for (const [key, value] of Object.entries(all)) {
+      if ((key.startsWith('cache:') || key.startsWith('enrichment:')) && value && value.timestamp) {
+        if (now - value.timestamp > MAX_AGE) {
+          keysToRemove.push(key);
+        }
+      }
+    }
+
+    if (keysToRemove.length > 0) {
+      await chrome.storage.local.remove(keysToRemove);
+    }
+  } catch {
+    // Non-critical — ignore errors
+  }
+}
+
 // Initialize: restore state from storage in case service worker was restarted
 async function restoreState() {
   try {
@@ -296,6 +320,7 @@ async function restoreState() {
 }
 
 restoreState();
+pruneStaleCache();
 setupReleaseAlerts();
 
 // =====================
@@ -363,7 +388,7 @@ async function scheduleNextReleaseCheck() {
 // Check for new releases
 async function checkForNewReleases() {
   // Get saved artists with their platform data
-  const { savedArtistsData = {} } = await chrome.storage.sync.get('savedArtistsData');
+  const { savedArtistsData = {} } = await chrome.storage.local.get('savedArtistsData');
   const artistNames = Object.keys(savedArtistsData);
 
   if (artistNames.length === 0) {

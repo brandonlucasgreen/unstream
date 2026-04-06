@@ -339,7 +339,7 @@ function renderSocialLinks(links) {
 async function updateSaveButton() {
   if (!currentArtist) return;
 
-  const { savedArtists = [] } = await chrome.storage.sync.get('savedArtists');
+  const { savedArtists = [] } = await chrome.storage.local.get('savedArtists');
   const isSaved = savedArtists.includes(currentArtist);
 
   const starSpan = document.createElement('span');
@@ -360,8 +360,8 @@ async function updateSaveButton() {
 async function toggleSaveArtist() {
   if (!currentArtist) return;
 
-  const { savedArtists = [] } = await chrome.storage.sync.get('savedArtists');
-  const { savedArtistsData = {} } = await chrome.storage.sync.get('savedArtistsData');
+  const { savedArtists = [] } = await chrome.storage.local.get('savedArtists');
+  const { savedArtistsData = {} } = await chrome.storage.local.get('savedArtistsData');
   const index = savedArtists.indexOf(currentArtist);
 
   if (index >= 0) {
@@ -390,15 +390,15 @@ async function toggleSaveArtist() {
     savedArtistsData[currentArtist] = artistData;
   }
 
-  await chrome.storage.sync.set({ savedArtists, savedArtistsData });
+  await chrome.storage.local.set({ savedArtists, savedArtistsData });
   updateSaveButton();
   loadSavedArtists();
 }
 
 // Load saved artists
 async function loadSavedArtists() {
-  const { savedArtists = [] } = await chrome.storage.sync.get('savedArtists');
-  const { savedArtistsData = {} } = await chrome.storage.sync.get('savedArtistsData');
+  const { savedArtists = [] } = await chrome.storage.local.get('savedArtists');
+  const { savedArtistsData = {} } = await chrome.storage.local.get('savedArtistsData');
 
   if (savedArtists.length === 0) {
     elements.savedArtistsList.replaceChildren();
@@ -508,14 +508,14 @@ async function loadSavedArtists() {
 
 // Remove saved artist
 async function removeSavedArtist(artist) {
-  const { savedArtists = [] } = await chrome.storage.sync.get('savedArtists');
-  const { savedArtistsData = {} } = await chrome.storage.sync.get('savedArtistsData');
+  const { savedArtists = [] } = await chrome.storage.local.get('savedArtists');
+  const { savedArtistsData = {} } = await chrome.storage.local.get('savedArtistsData');
   const index = savedArtists.indexOf(artist);
 
   if (index >= 0) {
     savedArtists.splice(index, 1);
     delete savedArtistsData[artist];
-    await chrome.storage.sync.set({ savedArtists, savedArtistsData });
+    await chrome.storage.local.set({ savedArtists, savedArtistsData });
     loadSavedArtists();
     updateSaveButton();
   }
