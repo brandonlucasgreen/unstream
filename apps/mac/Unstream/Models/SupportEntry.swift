@@ -28,14 +28,14 @@ struct SupportEntry: Codable, Identifiable {
         // Add verified platforms (including officialsite, discogs, etc.)
         for platform in artist.verifiedPlatforms {
             if let url = platform.url {
-                allPlatforms.append(SavedPlatform(sourceId: platform.sourceId, url: url))
+                allPlatforms.append(SavedPlatform(sourceId: platform.sourceId, url: url, customDisplayName: platform.customDisplayName))
             }
         }
 
         // Add social platforms
         for platform in artist.socialPlatforms {
             if let url = platform.url {
-                allPlatforms.append(SavedPlatform(sourceId: platform.sourceId, url: url))
+                allPlatforms.append(SavedPlatform(sourceId: platform.sourceId, url: url, customDisplayName: platform.customDisplayName))
             }
         }
 
@@ -48,15 +48,22 @@ struct SupportEntry: Codable, Identifiable {
 struct SavedPlatform: Codable, Identifiable {
     let sourceId: String
     let url: String
+    let customDisplayName: String?
 
     var id: String { sourceId }
 
+    init(sourceId: String, url: String, customDisplayName: String? = nil) {
+        self.sourceId = sourceId
+        self.url = url
+        self.customDisplayName = customDisplayName
+    }
+
     var displayName: String {
-        platformCatalog[sourceId]?.name ?? sourceId.capitalized
+        customDisplayName ?? platformCatalog[sourceId]?.name ?? sourceId.capitalized
     }
 
     var icon: String {
-        platformCatalog[sourceId]?.icon ?? "music.note"
+        platformCatalog[sourceId]?.icon ?? "globe"
     }
 
     var color: String {

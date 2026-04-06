@@ -49,15 +49,23 @@ struct PlatformResult: Codable, Identifiable {
     let sourceId: String
     let url: String?
     let latestRelease: LatestRelease?
+    let customDisplayName: String?
 
     var id: String { sourceId }
 
+    enum CodingKeys: String, CodingKey {
+        case sourceId
+        case url
+        case latestRelease
+        case customDisplayName = "displayName"
+    }
+
     var displayName: String {
-        platformCatalog[sourceId]?.name ?? sourceId.capitalized
+        customDisplayName ?? platformCatalog[sourceId]?.name ?? sourceId.capitalized
     }
 
     var icon: String {
-        platformCatalog[sourceId]?.icon ?? "music.note"
+        platformCatalog[sourceId]?.icon ?? "globe"
     }
 
     var color: String {
