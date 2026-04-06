@@ -1,5 +1,27 @@
 // Unstream Chrome Extension - Popup Logic
 
+// Allowed domains for release URLs (must match service-worker.js)
+const ALLOWED_RELEASE_DOMAINS = [
+  'bandcamp.com',
+  'mirlo.space',
+  'qobuz.com',
+  'ampwall.com',
+  'faircamp.eu',
+];
+
+function isAllowedReleaseUrl(url) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
+    const hostname = parsed.hostname.toLowerCase();
+    return ALLOWED_RELEASE_DOMAINS.some(domain =>
+      hostname === domain || hostname.endsWith('.' + domain)
+    );
+  } catch {
+    return false;
+  }
+}
+
 // Source icons and names
 const SOURCE_CONFIG = {
   bandcamp: { icon: '🎵', name: 'Bandcamp' },
@@ -289,8 +311,9 @@ function renderSocialLinks(links) {
 
     const iconSvg = SOCIAL_ICONS[link.platform];
     if (iconSvg) {
-      // Use innerHTML to properly render the SVG
-      anchor.innerHTML = iconSvg;
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(iconSvg, 'image/svg+xml');
+      anchor.appendChild(doc.documentElement);
     }
     fragment.appendChild(anchor);
   });
@@ -454,7 +477,9 @@ async function loadSavedArtists() {
 
         const iconSvg = SOCIAL_ICONS[link.platform];
         if (iconSvg) {
-          anchor.innerHTML = iconSvg;
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(iconSvg, 'image/svg+xml');
+          anchor.appendChild(doc.documentElement);
         }
         socialDiv.appendChild(anchor);
       });
@@ -528,7 +553,9 @@ function renderNewReleases() {
     openBtn.title = 'Listen';
     openBtn.textContent = 'Listen';
     openBtn.addEventListener('click', () => {
-      chrome.tabs.create({ url: release.releaseUrl });
+      if (isAllowedReleaseUrl(release.releaseUrl)) {
+        chrome.tabs.create({ url: release.releaseUrl });
+      }
     });
 
     const dismissBtn = document.createElement('button');

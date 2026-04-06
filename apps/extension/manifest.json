@@ -52,17 +52,29 @@
       "run_at": "document_idle"
     },
     {
-      "matches": ["<all_urls>"],
-      "exclude_matches": [
-        "*://open.spotify.com/*",
-        "*://www.youtube.com/*",
-        "*://youtube.com/*",
-        "*://music.youtube.com/*",
-        "*://music.apple.com/*",
-        "*://*.bandcamp.com/*",
-        "*://bandcamp.com/*",
-        "*://soundcloud.com/*",
-        "*://www.soundcloud.com/*"
+      "matches": [
+        "https://listen.tidal.com/*",
+        "https://*.tidal.com/*",
+        "https://www.deezer.com/*",
+        "https://www.pandora.com/*",
+        "https://music.amazon.com/*",
+        "https://www.amazon.com/music/*",
+        "https://audius.co/*",
+        "https://www.qobuz.com/*",
+        "https://www.last.fm/*",
+        "https://www.mixcloud.com/*",
+        "https://audiomack.com/*",
+        "https://www.beatport.com/*",
+        "https://www.napster.com/*",
+        "https://www.iheart.com/*",
+        "https://tunein.com/*",
+        "https://www.radio.com/*",
+        "https://www.anghami.com/*",
+        "https://www.jiosaavn.com/*",
+        "https://gaana.com/*",
+        "https://wynk.in/*",
+        "https://www.boomplay.com/*",
+        "https://stream.resonate.coop/*"
       ],
       "js": ["content/common.js", "content/generic.js"],
       "run_at": "document_idle"

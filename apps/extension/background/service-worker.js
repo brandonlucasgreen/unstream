@@ -6,6 +6,29 @@ const RELEASE_API_BASE = 'https://unstream.stream/.netlify/functions';
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 const DEBOUNCE_MS = 2000; // 2 seconds debounce for same artist
 const RELEASE_CHECK_ALARM = 'releaseCheck';
+
+// Allowed domains for release URLs
+const ALLOWED_RELEASE_DOMAINS = [
+  'bandcamp.com',
+  'mirlo.space',
+  'qobuz.com',
+  'ampwall.com',
+  'faircamp.eu',
+  // Faircamp instances may be self-hosted, so also allow common patterns
+];
+
+function isAllowedReleaseUrl(url) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
+    const hostname = parsed.hostname.toLowerCase();
+    return ALLOWED_RELEASE_DOMAINS.some(domain =>
+      hostname === domain || hostname.endsWith('.' + domain)
+    );
+  } catch {
+    return false;
+  }
+}
 const RELEASE_CHECK_INTERVAL_MINUTES = 7 * 24 * 60; // 7 days in minutes
 
 // Current state
@@ -473,7 +496,7 @@ chrome.notifications.onClicked.addListener(async (notificationId) => {
     const releases = await getNewReleases();
     const release = releases.find(r => r.id === releaseId);
 
-    if (release && release.releaseUrl) {
+    if (release && release.releaseUrl && isAllowedReleaseUrl(release.releaseUrl)) {
       chrome.tabs.create({ url: release.releaseUrl });
     }
   }
