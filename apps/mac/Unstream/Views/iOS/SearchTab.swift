@@ -69,7 +69,7 @@ struct SearchTab: View {
             .onSubmit(of: .search) {
                 Task { await appState.performSearch() }
             }
-            .onChange(of: appState.searchQuery) { _, newValue in
+            .onChange(of: appState.searchQuery) { newValue in
                 if newValue.isEmpty {
                     appState.clearResults()
                 }

@@ -114,7 +114,7 @@ struct UnstreamApp: App {
                 .onAppear {
                     container.checkPendingSearch()
                 }
-                .onChange(of: scenePhase) { _, newPhase in
+                .onChange(of: scenePhase) { newPhase in
                     if newPhase == .active {
                         container.checkPendingSearch()
                     }

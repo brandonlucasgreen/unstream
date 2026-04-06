@@ -170,7 +170,7 @@ struct SettingsView: View {
             // Launch at Login
             VStack(alignment: .leading, spacing: 4) {
                 Toggle("Start at login", isOn: $launchAtLogin)
-                    .onChange(of: launchAtLogin) { _, newValue in
+                    .onChange(of: launchAtLogin) { newValue in
                         setLaunchAtLogin(newValue)
                     }
                 Text("Automatically launch Unstream when you log in")
@@ -289,7 +289,7 @@ struct SettingsView: View {
                 }
 
                 Toggle("Enable ListenBrainz scrobbling", isOn: $listenBrainzEnabled)
-                    .onChange(of: listenBrainzEnabled) { _, newValue in
+                    .onChange(of: listenBrainzEnabled) { newValue in
                         ListenBrainzService.shared.isEnabled = newValue
                     }
 
@@ -357,7 +357,7 @@ struct SettingsView: View {
                 }
 
                 Toggle("Enable Plex music detection", isOn: $plexEnabled)
-                    .onChange(of: plexEnabled) { _, newValue in
+                    .onChange(of: plexEnabled) { newValue in
                         PlexService.shared.isEnabled = newValue
                     }
 
