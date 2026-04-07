@@ -19,18 +19,22 @@ class ShareViewController: UIViewController {
             return
         }
 
-        // Collect the share text (often contains artist name) and URL
+        // Collect all available data from the share sheet
         var sharedURL: URL?
         var sharedText: String?
+        var pendingLoads = 0
+        var completedLoads = 0
 
         for item in extensionItems {
-            // The attributedContentText often contains "Song by Artist" or similar
+            // attributedContentText sometimes has "Song by Artist"
             if let text = item.attributedContentText?.string, !text.isEmpty {
                 sharedText = text
             }
 
             for provider in item.attachments ?? [] {
+                // Load URL
                 if provider.hasItemConformingToTypeIdentifier(UTType.url.identifier) {
+                    pendingLoads += 1
                     provider.loadItem(forTypeIdentifier: UTType.url.identifier) { [weak self] item, error in
                         DispatchQueue.main.async {
                             if let url = item as? URL {
@@ -38,16 +42,39 @@ class ShareViewController: UIViewController {
                             } else if let urlData = item as? Data, let url = URL(dataRepresentation: urlData, relativeTo: nil) {
                                 sharedURL = url
                             }
-                            self?.handleSharedContent(url: sharedURL, text: sharedText)
+                            completedLoads += 1
+                            if completedLoads >= pendingLoads {
+                                self?.handleSharedContent(url: sharedURL, text: sharedText)
+                            }
                         }
                     }
-                    return // Only handle the first URL
+                }
+
+                // Also load plain text — Apple Music shares artist info as a separate text attachment
+                if provider.hasItemConformingToTypeIdentifier(UTType.plainText.identifier) {
+                    pendingLoads += 1
+                    provider.loadItem(forTypeIdentifier: UTType.plainText.identifier) { [weak self] item, error in
+                        DispatchQueue.main.async {
+                            if let text = item as? String, !text.isEmpty {
+                                // Don't overwrite with a URL string — only keep if it looks like a name/title
+                                if !text.hasPrefix("http") {
+                                    sharedText = text
+                                }
+                            }
+                            completedLoads += 1
+                            if completedLoads >= pendingLoads {
+                                self?.handleSharedContent(url: sharedURL, text: sharedText)
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        // No URL found
-        close()
+        // If no attachments to load, close immediately
+        if pendingLoads == 0 {
+            close()
+        }
     }
 
     private func handleSharedContent(url: URL?, text: String?) {
@@ -65,14 +92,21 @@ class ShareViewController: UIViewController {
             return
         }
 
-        // Save to shared App Group UserDefaults for the main app to pick up on launch
+        // Save to shared App Group UserDefaults for the main app to pick up
         if let sharedDefaults = UserDefaults(suiteName: "group.lol.bgreen.unstream") {
             sharedDefaults.set(query, forKey: "pendingSearch")
             sharedDefaults.set(Date().timeIntervalSince1970, forKey: "pendingSearchTimestamp")
+            sharedDefaults.synchronize()
         }
 
-        // Complete the extension request — the main app will check for pending searches on next launch/foreground
-        close()
+        // Open the main app via URL scheme
+        if let appURL = URL(string: "unstream://search?q=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")") {
+            extensionContext?.open(appURL) { _ in
+                self.close()
+            }
+        } else {
+            close()
+        }
     }
 
     /// Extract artist name from known streaming service URL patterns
@@ -89,7 +123,6 @@ class ShareViewController: UIViewController {
         }
 
         // Spotify: open.spotify.com/artist/ID or open.spotify.com/track/ID
-        // We can't resolve the ID client-side, so pass the URL for API resolution
         if host == "open.spotify.com" {
             return nil // Let the app/API handle Spotify URLs
         }
@@ -102,7 +135,7 @@ class ShareViewController: UIViewController {
                 return pathComponents[artistIndex + 1]
                     .replacingOccurrences(of: "-", with: " ")
             }
-            // Album/song links: can't extract artist from URL alone, return nil to fall through to text extraction
+            // Album/song links: can't extract artist from URL alone, fall through to text extraction
             return nil
         }
 
@@ -135,9 +168,6 @@ class ShareViewController: UIViewController {
                 }
             }
         }
-
-        // Faircamp: typically custom domains, hard to detect
-        // Fall through to nil
 
         return nil
     }

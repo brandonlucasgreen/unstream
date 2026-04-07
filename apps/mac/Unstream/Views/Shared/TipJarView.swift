@@ -58,7 +58,9 @@ struct TipJarView: View {
                                 .fontWeight(.semibold)
                         }
                         .padding(.vertical, 4)
+                        .contentShape(Rectangle())
                     }
+                    .buttonStyle(.borderless)
                     .disabled(store.purchaseState == .purchasing)
                 }
 
