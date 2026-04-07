@@ -57,7 +57,7 @@ targets:
         CFBundleName: Unstream
         CFBundleDisplayName: Unstream
         CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
-        CFBundleVersion: "3"
+        CFBundleVersion: "8"
         CFBundleShortVersionString: "3.0.0"
         CFBundlePackageType: APPL
         CFBundleExecutable: $(EXECUTABLE_NAME)
@@ -102,7 +102,7 @@ targets:
         CFBundleName: UnstreamShare
         CFBundleDisplayName: Share to Unstream
         CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
-        CFBundleVersion: "3"
+        CFBundleVersion: "8"
         CFBundleShortVersionString: "3.0.0"
         CFBundlePackageType: XPC!
         NSExtension:

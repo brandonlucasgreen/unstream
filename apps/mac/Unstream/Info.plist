@@ -34,7 +34,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>3</string>
+	<string>8</string>
 	<key>NSAppleEventsUsageDescription</key>
 	<string>Unstream needs to check what music is playing so it can find the artist on ethical platforms.</string>
 	<key>NSHighResolutionCapable</key>
