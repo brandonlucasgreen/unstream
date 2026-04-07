@@ -66,53 +66,93 @@ class ShareViewController: UIViewController {
     }
 
     private func handleSharedContent(url: URL?, text: String?) {
+        // Try direct extraction from URL
         let artistFromURL = url.flatMap { extractArtistFromURL($0) }
-        let artistFromText = text.flatMap { extractArtistFromText($0) }
-        let query = artistFromURL ?? artistFromText ?? url?.absoluteString ?? ""
 
+        if let artist = artistFromURL {
+            saveAndOpen(query: artist)
+            return
+        }
+
+        // Try text extraction
+        let artistFromText = text.flatMap { extractArtistFromText($0) }
+        if let artist = artistFromText {
+            saveAndOpen(query: artist)
+            return
+        }
+
+        // For Apple Music album/song URLs, try the iTunes Lookup API
+        if let url = url, isAppleMusicURL(url), let itunesID = extractAppleMusicID(url) {
+            lookupAppleMusicArtist(id: itunesID) { [weak self] artist in
+                DispatchQueue.main.async {
+                    let query = artist ?? url.absoluteString
+                    self?.saveAndOpen(query: query)
+                }
+            }
+            return
+        }
+
+        // Last resort: use the raw URL
+        saveAndOpen(query: url?.absoluteString ?? "")
+    }
+
+    private func saveAndOpen(query: String) {
         guard !query.isEmpty else {
             close()
             return
         }
 
-        // Save to App Group for the main app
         if let sharedDefaults = UserDefaults(suiteName: "group.lol.bgreen.unstream") {
             sharedDefaults.set(query, forKey: "pendingSearch")
             sharedDefaults.set(Date().timeIntervalSince1970, forKey: "pendingSearchTimestamp")
             sharedDefaults.synchronize()
         }
 
-        // Open the main app via URL scheme using the responder chain.
-        // extensionContext?.open() is NOT available in share extensions.
-        // The responder chain approach is the standard workaround used by
-        // production apps (WhatsApp, Telegram, etc.) to open the containing app.
         let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         if let appURL = URL(string: "unstream://search?q=\(encodedQuery)") {
             openURL(appURL)
         }
 
-        // Small delay to let the URL open before dismissing
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
             self?.close()
         }
     }
 
-    /// Open a URL from within an extension using the responder chain
-    private func openURL(_ url: URL) {
-        var responder: UIResponder? = self
-        while let r = responder {
-            if let application = r as? UIApplication {
-                application.open(url, options: [:], completionHandler: nil)
-                return
+    // MARK: - Apple Music Lookup
+
+    private func isAppleMusicURL(_ url: URL) -> Bool {
+        let host = url.host?.lowercased() ?? ""
+        return host == "music.apple.com" || host.hasSuffix(".music.apple.com")
+    }
+
+    /// Extract the numeric ID from an Apple Music URL path
+    /// e.g. /us/album/step-into-the-ocean/1751803047 → "1751803047"
+    private func extractAppleMusicID(_ url: URL) -> String? {
+        // The ID is the last numeric path component
+        for component in url.pathComponents.reversed() {
+            if component.allSatisfy(\.isNumber) && !component.isEmpty {
+                return component
             }
-            // Use selector to find openURL on the shared application
-            let selector = sel_registerName("openURL:")
-            if r.responds(to: selector) {
-                r.perform(selector, with: url)
-                return
-            }
-            responder = r.next
         }
+        return nil
+    }
+
+    /// Look up an Apple Music item by its iTunes ID to get the artist name.
+    /// Uses the public iTunes Search API — no authentication needed.
+    private func lookupAppleMusicArtist(id: String, completion: @escaping (String?) -> Void) {
+        let lookupURL = URL(string: "https://itunes.apple.com/lookup?id=\(id)")!
+        let task = URLSession.shared.dataTask(with: lookupURL) { data, _, error in
+            guard let data = data, error == nil,
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let results = json["results"] as? [[String: Any]],
+                  let first = results.first,
+                  let artistName = first["artistName"] as? String else {
+                completion(nil)
+                return
+            }
+            completion(artistName)
+        }
+        task.resume()
     }
 
     // MARK: - URL Extraction
@@ -130,17 +170,16 @@ class ShareViewController: UIViewController {
         }
 
         // Spotify: can't resolve IDs client-side
-        if host == "open.spotify.com" {
-            return nil
-        }
+        if host == "open.spotify.com" { return nil }
 
-        // Apple Music: /artist/name/ID extracts directly, /album/ and /song/ fall through to text
-        if host == "music.apple.com" || host.hasSuffix(".music.apple.com") {
+        // Apple Music: only direct /artist/ links can be extracted from URL
+        if isAppleMusicURL(url) {
             if let artistIndex = pathComponents.firstIndex(of: "artist"),
                artistIndex + 1 < pathComponents.count {
                 return pathComponents[artistIndex + 1]
                     .replacingOccurrences(of: "-", with: " ")
             }
+            // Album/song: handled by iTunes Lookup in handleSharedContent
             return nil
         }
 
@@ -161,9 +200,7 @@ class ShareViewController: UIViewController {
         if host == "mirlo.space" || host == "www.mirlo.space" {
             if pathComponents.count >= 2 {
                 let artist = pathComponents[1]
-                if !artist.isEmpty {
-                    return artist.replacingOccurrences(of: "-", with: " ")
-                }
+                if !artist.isEmpty { return artist.replacingOccurrences(of: "-", with: " ") }
             }
         }
 
@@ -173,7 +210,6 @@ class ShareViewController: UIViewController {
     // MARK: - Text Extraction
 
     private func extractArtistFromText(_ text: String) -> String? {
-        // Strip common suffixes from share sheet text
         var cleaned = text
         for suffix in [" on Apple Music", " on Spotify", " on SoundCloud", " on YouTube Music", " on TIDAL"] {
             if cleaned.hasSuffix(suffix) {
@@ -181,30 +217,36 @@ class ShareViewController: UIViewController {
             }
         }
 
-        // Apple Music: "Album Name by Artist Name" or "Song Name by Artist Name"
         if let byRange = cleaned.range(of: " by ", options: .backwards) {
             let artist = String(cleaned[byRange.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
-            if !artist.isEmpty {
-                return artist
-            }
+            if !artist.isEmpty { return artist }
         }
 
-        // "Artist — Song" or "Artist - Song"
         for separator in [" — ", " – ", " - "] {
             if let sepRange = cleaned.range(of: separator) {
                 let artist = String(cleaned[..<sepRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
-                if !artist.isEmpty && !artist.contains("http") {
-                    return artist
-                }
+                if !artist.isEmpty && !artist.contains("http") { return artist }
             }
         }
 
-        // If the cleaned text is short and doesn't look like a URL, it might be an artist name directly
-        if !cleaned.contains("http") && !cleaned.contains("/") && cleaned.count < 100 {
-            return cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
-        }
-
         return nil
+    }
+
+    // MARK: - Helpers
+
+    /// Open a URL from a share extension via the responder chain.
+    /// This is the standard workaround since extensionContext?.open() is not
+    /// available in share extensions.
+    private func openURL(_ url: URL) {
+        var responder: UIResponder? = self
+        while let r = responder {
+            let selector = sel_registerName("openURL:")
+            if r.responds(to: selector) {
+                r.perform(selector, with: url)
+                return
+            }
+            responder = r.next
+        }
     }
 
     private func close() {
