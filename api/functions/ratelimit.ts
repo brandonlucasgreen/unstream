@@ -186,25 +186,7 @@ export async function checkRateLimit(
   if (!limiter) return { limited: false };
 
   try {
-    // Check per-minute limit
-    const result = await limiter.limit(identifier);
-
-    if (!result.success) {
-      console.log(`[RateLimit] Blocked ${tier} request from ${identifier}`);
-      return {
-        limited: true,
-        response: {
-          statusCode: 429,
-          headers: {
-            ...corsHeaders,
-            'Retry-After': String(Math.ceil(result.reset / 1000 - Date.now() / 1000)),
-          },
-          body: JSON.stringify({ error: 'Too many requests. Please try again later.' }),
-        },
-      };
-    }
-
-    // Check daily quota
+    // Check daily quota first to avoid consuming per-minute tokens on exhausted quotas
     if (dailyLimiter) {
       const dailyResult = await dailyLimiter.limit(identifier);
       if (!dailyResult.success) {
@@ -221,6 +203,24 @@ export async function checkRateLimit(
           },
         };
       }
+    }
+
+    // Check per-minute limit
+    const result = await limiter.limit(identifier);
+
+    if (!result.success) {
+      console.log(`[RateLimit] Blocked ${tier} request from ${identifier}`);
+      return {
+        limited: true,
+        response: {
+          statusCode: 429,
+          headers: {
+            ...corsHeaders,
+            'Retry-After': String(Math.ceil(result.reset / 1000 - Date.now() / 1000)),
+          },
+          body: JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+        },
+      };
     }
 
     return { limited: false };
@@ -266,8 +266,8 @@ export async function checkApiRateLimit(
     return {
       limited: result.limited,
       response: result.response,
-      // Anonymous rate limit info is approximate; exact headers aren't computed for perf
-      rateLimitInfo: result.limited ? undefined : { limit: 10, remaining: 10, reset: Math.ceil(Date.now() / 1000) + 60 },
+      // Anonymous requests don't expose per-request remaining counts
+      rateLimitInfo: undefined,
     };
   }
 
@@ -283,7 +283,7 @@ export async function checkApiRateLimit(
   // Use key UUID as identifier for per-key rate limiting (prefix is too short for uniqueness)
   const keyId = `rl:api:${apiKeyInfo.id}`;
 
-  if (!perMin) return { limited: false, rateLimitInfo: { limit: perMinLimit, remaining: perMinLimit, reset: Date.now() + 60000 } };
+  if (!perMin) return { limited: false, rateLimitInfo: { limit: perMinLimit, remaining: perMinLimit, reset: Math.ceil(Date.now() / 1000) + 60 } };
 
   try {
     // Check daily quota first (skip for internal tier which is unlimited).
@@ -353,7 +353,7 @@ export async function checkApiRateLimit(
   } catch (error) {
     // Fail open — don't block requests if Redis is down
     console.error('[RateLimit] API rate limit check failed, allowing request:', error);
-    return { limited: false, rateLimitInfo: { limit: perMinLimit, remaining: perMinLimit, reset: Date.now() + 60000 } };
+    return { limited: false, rateLimitInfo: { limit: perMinLimit, remaining: perMinLimit, reset: Math.ceil(Date.now() / 1000) + 60 } };
   }
 }
 

@@ -1465,8 +1465,10 @@ async function searchBandcampForAlbum(artistUrl: string, albumTitle: string): Pr
 export async function handler(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
   const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
 
-  // Skip rate limiting when called internally from v1 wrappers (which do their own check)
-  if (!event.headers?.['x-internal-skip-ratelimit']) {
+  // Skip rate limiting when called internally from v1 wrappers (which do their own check).
+  // Requires a shared secret to prevent external clients from spoofing this header.
+  const internalSecret = process.env.INTERNAL_FUNCTION_SECRET;
+  if (!internalSecret || event.headers?.['x-internal-skip-ratelimit'] !== internalSecret) {
     const ip = getClientIp(event.headers || {});
     const rl = await checkRateLimit(ip, 'strict', corsHeaders);
     if (rl.limited) return rl.response;

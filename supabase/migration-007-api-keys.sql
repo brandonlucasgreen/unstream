@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS api_keys (
   tier TEXT NOT NULL DEFAULT 'free'  -- 'free' | 'pro' | 'internal'
     CHECK (tier IN ('free', 'pro', 'internal')),
   daily_limit INTEGER NOT NULL DEFAULT 100,
-  per_minute INTEGER NOT NULL DEFAULT 5,
+  per_minute INTEGER NOT NULL DEFAULT 30,
   is_active BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   last_used_at TIMESTAMPTZ,
@@ -26,5 +26,21 @@ CREATE INDEX IF NOT EXISTS idx_api_keys_prefix ON api_keys (key_prefix) WHERE is
 -- RLS: service_role only (no direct public access)
 ALTER TABLE api_keys ENABLE ROW LEVEL SECURITY;
 
--- No public policies — all access goes through serverless functions
--- using the service_role key.
+-- Explicit deny for anon/authenticated roles (defense in depth)
+REVOKE ALL ON api_keys FROM anon, authenticated;
+
+-- Enforce max 3 active keys per owner at the database level (prevents race conditions)
+CREATE OR REPLACE FUNCTION check_api_key_limit()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF (SELECT COUNT(*) FROM api_keys
+      WHERE owner_email = NEW.owner_email AND is_active = true) >= 3 THEN
+    RAISE EXCEPTION 'api_key_limit_exceeded';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER enforce_api_key_limit
+  BEFORE INSERT ON api_keys
+  FOR EACH ROW EXECUTE FUNCTION check_api_key_limit();

@@ -35,7 +35,7 @@ export async function handler(event: NetlifyEvent) {
   }
 
   // Rate limit check
-  const identifier = apiKeyInfo ? `rl:api:${apiKeyInfo.keyPrefix}` : getClientIp(event.headers);
+  const identifier = getClientIp(event.headers);
   const rl = await checkApiRateLimit(apiKeyInfo, identifier, corsHeaders);
   if (rl.limited) return rl.response;
 

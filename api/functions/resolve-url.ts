@@ -39,8 +39,14 @@ async function resolveStreamingUrl(url: string): Promise<{ artistName: string; s
     if (url.startsWith('spotify:')) {
       const parts = url.split(':');
       if (parts.length >= 3) {
-        // Convert URI to URL format
-        url = `https://open.spotify.com/${parts[1]}/${parts[2]}`;
+        const type = parts[1];
+        const id = parts[2];
+        // Only allow known types and alphanumeric IDs to prevent path traversal
+        if (/^(artist|album|track)$/.test(type) && /^[a-zA-Z0-9]+$/.test(id)) {
+          url = `https://open.spotify.com/${type}/${id}`;
+        } else {
+          return null;
+        }
       }
     }
 
@@ -174,8 +180,10 @@ async function resolveStreamingUrl(url: string): Promise<{ artistName: string; s
 export async function handler(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
   const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
 
-  // Skip rate limiting when called internally from v1 wrappers (which do their own check)
-  if (!event.headers?.['x-internal-skip-ratelimit']) {
+  // Skip rate limiting when called internally from v1 wrappers (which do their own check).
+  // Requires a shared secret to prevent external clients from spoofing this header.
+  const internalSecret = process.env.INTERNAL_FUNCTION_SECRET;
+  if (!internalSecret || event.headers?.['x-internal-skip-ratelimit'] !== internalSecret) {
     const ip = getClientIp(event.headers || {});
     const rl = await checkRateLimit(ip, 'strict', corsHeaders);
     if (rl.limited) return rl.response;

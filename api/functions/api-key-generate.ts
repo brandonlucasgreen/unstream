@@ -5,7 +5,7 @@
 // - DELETE: Revoke an API key (requires Supabase auth)
 
 import { getClient } from './db';
-import { authenticateBearer, buildCorsHeaders } from './middleware';
+import { authenticateBearer, buildCorsHeaders, generateRequestId, v1Response } from './middleware';
 
 const MAX_KEYS_PER_USER = 3;
 
@@ -30,9 +30,11 @@ interface NetlifyEvent {
 }
 
 export async function handler(event: NetlifyEvent) {
+  const requestId = generateRequestId();
   const origin = event.headers.origin || event.headers.Origin;
   const corsHeaders = buildCorsHeaders(origin, false, {
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'X-Request-Id': requestId,
   });
 
   // CORS preflight
@@ -48,7 +50,7 @@ export async function handler(event: NetlifyEvent) {
     return {
       statusCode: 401,
       headers: corsHeaders,
-      body: JSON.stringify({ error: 'Authentication required' }),
+      body: JSON.stringify(v1Response({ error: 'Authentication required' }, requestId)),
     };
   }
 
@@ -57,7 +59,7 @@ export async function handler(event: NetlifyEvent) {
     return {
       statusCode: 500,
       headers: corsHeaders,
-      body: JSON.stringify({ error: 'Server configuration error' }),
+      body: JSON.stringify(v1Response({ error: 'Server configuration error' }, requestId)),
     };
   }
 
@@ -69,20 +71,20 @@ export async function handler(event: NetlifyEvent) {
           return {
             statusCode: 403,
             headers: corsHeaders,
-            body: JSON.stringify({ error: 'API key creation is currently available by invitation only. Contact api@unstream.stream to request access.' }),
+            body: JSON.stringify(v1Response({ error: 'API key creation is currently available by invitation only. Contact api@unstream.stream to request access.' }, requestId)),
           };
         }
-        return await handleCreateKey(user, client, corsHeaders);
+        return await handleCreateKey(user, client, corsHeaders, requestId);
       }
       case 'GET':
-        return await handleListKeys(user, client, corsHeaders);
+        return await handleListKeys(user, client, corsHeaders, requestId);
       case 'DELETE':
-        return await handleDeleteKey(user, event, client, corsHeaders);
+        return await handleDeleteKey(user, event, client, corsHeaders, requestId);
       default:
         return {
           statusCode: 405,
           headers: corsHeaders,
-          body: JSON.stringify({ error: 'Method not allowed' }),
+          body: JSON.stringify(v1Response({ error: 'Method not allowed' }, requestId)),
         };
     }
   } catch (err) {
@@ -90,7 +92,7 @@ export async function handler(event: NetlifyEvent) {
     return {
       statusCode: 500,
       headers: corsHeaders,
-      body: JSON.stringify({ error: 'Internal server error' }),
+      body: JSON.stringify(v1Response({ error: 'Internal server error' }, requestId)),
     };
   }
 }
@@ -99,6 +101,7 @@ async function handleCreateKey(
   user: { userId: string; email: string },
   client: NonNullable<ReturnType<typeof getClient>>,
   corsHeaders: Record<string, string>,
+  requestId: string,
 ) {
   // Check key count limit
   const { data: existingKeys, error: countError } = await client
@@ -112,7 +115,7 @@ async function handleCreateKey(
     return {
       statusCode: 500,
       headers: corsHeaders,
-      body: JSON.stringify({ error: 'Failed to check existing keys' }),
+      body: JSON.stringify(v1Response({ error: 'Failed to check existing keys' }, requestId)),
     };
   }
 
@@ -120,7 +123,7 @@ async function handleCreateKey(
     return {
       statusCode: 403,
       headers: corsHeaders,
-      body: JSON.stringify({ error: `Maximum of ${MAX_KEYS_PER_USER} API keys allowed per account` }),
+      body: JSON.stringify(v1Response({ error: `Maximum of ${MAX_KEYS_PER_USER} API keys allowed per account` }, requestId)),
     };
   }
 
@@ -167,14 +170,14 @@ async function handleCreateKey(
     return {
       statusCode: 500,
       headers: corsHeaders,
-      body: JSON.stringify({ error: 'Failed to create API key' }),
+      body: JSON.stringify(v1Response({ error: 'Failed to create API key' }, requestId)),
     };
   }
 
   return {
     statusCode: 201,
     headers: corsHeaders,
-    body: JSON.stringify({
+    body: JSON.stringify(v1Response({
       api_key: keyValue, // Only returned once, on creation
       key_info: {
         id: data.id,
@@ -184,7 +187,7 @@ async function handleCreateKey(
         per_minute: data.per_minute,
         created_at: data.created_at,
       },
-    }),
+    }, requestId)),
   };
 }
 
@@ -192,6 +195,7 @@ async function handleListKeys(
   user: { userId: string; email: string },
   client: NonNullable<ReturnType<typeof getClient>>,
   corsHeaders: Record<string, string>,
+  requestId: string,
 ) {
   const { data, error } = await client
     .from('api_keys')
@@ -203,14 +207,14 @@ async function handleListKeys(
     return {
       statusCode: 500,
       headers: corsHeaders,
-      body: JSON.stringify({ error: 'Failed to list API keys' }),
+      body: JSON.stringify(v1Response({ error: 'Failed to list API keys' }, requestId)),
     };
   }
 
   return {
     statusCode: 200,
     headers: corsHeaders,
-    body: JSON.stringify({ keys: data || [] }),
+    body: JSON.stringify(v1Response({ keys: data || [] }, requestId)),
   };
 }
 
@@ -219,6 +223,7 @@ async function handleDeleteKey(
   event: NetlifyEvent,
   client: NonNullable<ReturnType<typeof getClient>>,
   corsHeaders: Record<string, string>,
+  requestId: string,
 ) {
   let keyId: string | undefined;
   // Accept key ID from query string or request body
@@ -231,7 +236,7 @@ async function handleDeleteKey(
       return {
         statusCode: 400,
         headers: corsHeaders,
-        body: JSON.stringify({ error: 'Invalid JSON body' }),
+        body: JSON.stringify(v1Response({ error: 'Invalid JSON body' }, requestId)),
       };
     }
   }
@@ -240,7 +245,7 @@ async function handleDeleteKey(
     return {
       statusCode: 400,
       headers: corsHeaders,
-      body: JSON.stringify({ error: 'Key ID is required' }),
+      body: JSON.stringify(v1Response({ error: 'Key ID is required' }, requestId)),
     };
   }
 
@@ -258,13 +263,13 @@ async function handleDeleteKey(
     return {
       statusCode: 404,
       headers: corsHeaders,
-      body: JSON.stringify({ error: 'API key not found or already revoked' }),
+      body: JSON.stringify(v1Response({ error: 'API key not found or already revoked' }, requestId)),
     };
   }
 
   return {
     statusCode: 200,
     headers: corsHeaders,
-    body: JSON.stringify({ message: 'API key revoked' }),
+    body: JSON.stringify(v1Response({ message: 'API key revoked' }, requestId)),
   };
 }

@@ -45,6 +45,8 @@ export function buildPublicCorsHeaders(): Record<string, string> {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
+    'Vary': 'Origin',
+    'X-Content-Type-Options': 'nosniff',
   };
 }
 
@@ -299,10 +301,11 @@ export function isUrlHostnameAllowed(urlString: string): boolean {
       }
     }
 
-    // Allow faircamp domains: "faircamp" must appear as a full domain label,
-    // not just a substring (prevents evil-faircamp.com from matching)
+    // Allow faircamp domains: "faircamp" must appear as a non-leftmost domain label.
+    // artist.faircamp.net passes, but faircamp.evil.com does not (attacker-controlled).
     const labels = hostname.split('.');
-    if (labels.includes('faircamp')) return true;
+    const fairIdx = labels.indexOf('faircamp');
+    if (fairIdx > 0) return true;
 
     return false;
   } catch {

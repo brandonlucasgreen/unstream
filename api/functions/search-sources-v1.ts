@@ -34,7 +34,7 @@ export async function handler(event: NetlifyEvent) {
   }
 
   // Rate limit check — use API key tier if present, otherwise strict IP
-  const identifier = apiKeyInfo ? `rl:api:${apiKeyInfo.keyPrefix}` : getClientIp(event.headers);
+  const identifier = getClientIp(event.headers);
   const rl = await checkApiRateLimit(apiKeyInfo, identifier, corsHeaders);
   if (rl.limited) return rl.response;
 
@@ -60,7 +60,7 @@ export async function handler(event: NetlifyEvent) {
   // Pass x-internal-skip-ratelimit to prevent double rate limiting (v1 wrapper already checked).
   const coreResult = await coreSearchHandler({
     queryStringParameters: { query },
-    headers: { ...event.headers, 'x-internal-skip-ratelimit': '1' } as Record<string, string>,
+    headers: { ...event.headers, 'x-internal-skip-ratelimit': process.env.INTERNAL_FUNCTION_SECRET ?? '' } as Record<string, string>,
   });
 
   if (!coreResult) {
