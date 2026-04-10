@@ -150,6 +150,7 @@ async function fetchWikipediaSummary(wikipediaUrl: string): Promise<{ extract: s
 import { cacheGetOrFetch, artistCacheKey } from './cache';
 import { persistEnrichment } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
+import { validateQuery } from './middleware';
 
 // Cache TTL for MusicBrainz lookups (30 minutes)
 const MUSICBRAINZ_CACHE_TTL = 30 * 60;
@@ -676,15 +677,15 @@ export async function handler(event: { queryStringParameters?: Record<string, st
   const rl = await checkRateLimit(ip, 'strict', corsHeaders);
   if (rl.limited) return rl.response;
 
-  const query = event.queryStringParameters?.query;
-
-  if (!query) {
+  const queryResult = validateQuery(event.queryStringParameters?.query);
+  if ('error' in queryResult) {
     return {
       statusCode: 400,
       headers: corsHeaders,
-      body: JSON.stringify({ error: 'Query parameter is required' }),
+      body: JSON.stringify({ error: queryResult.error }),
     };
   }
+  const query = queryResult.query;
 
   try {
     // Normalize the query to handle accented characters (e.g., "Tanerélle" -> "Tanerelle")

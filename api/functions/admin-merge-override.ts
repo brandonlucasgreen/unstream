@@ -4,7 +4,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
 
-const ADMIN_EMAIL = 'info@kidlightbulbs.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'info@kidlightbulbs.com';
 
 async function authenticateAdmin(authHeader: string | undefined): Promise<{ userId: string; email: string } | null> {
   if (!authHeader?.startsWith('Bearer ')) return null;

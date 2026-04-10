@@ -1,6 +1,6 @@
 # Unstream Public API: Security Architecture
 
-> Status: **On hold** (March 2026). Saved for reference if a company or integration partner expresses interest. The primary scaling risk (third-party platforms blocking Unstream's IPs under high request volume) needs to be addressed before opening the API publicly.
+> Status: **In progress — invitation-only beta** (April 2026). The API is live with dual routes: existing `/api/*` for the web app (unchanged) and new `/api/v1/*` for external consumers with API key auth, CORS tightening, and tiered rate limiting. Access is available by invitation to 5-10 partners during the beta period.
 
 ## 1. Current State
 
