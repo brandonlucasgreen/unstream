@@ -280,12 +280,35 @@ export async function checkApiRateLimit(
 
   const { perMin, daily, perMinLimit, dailyLimit } = tierLimiters[apiKeyInfo.tier] || tierLimiters.free;
 
-  // Use key prefix as identifier for per-key rate limiting
-  const keyId = `rl:api:${apiKeyInfo.keyPrefix}`;
+  // Use key UUID as identifier for per-key rate limiting (prefix is too short for uniqueness)
+  const keyId = `rl:api:${apiKeyInfo.id}`;
 
   if (!perMin) return { limited: false, rateLimitInfo: { limit: perMinLimit, remaining: perMinLimit, reset: Date.now() + 60000 } };
 
   try {
+    // Check daily quota first (skip for internal tier which is unlimited).
+    // This avoids consuming per-minute tokens on requests that are already over daily quota.
+    if (daily && dailyLimit > 0) {
+      const dailyResult = await daily.limit(keyId);
+      if (!dailyResult.success) {
+        console.log(`[RateLimit] Blocked ${apiKeyInfo.tier} daily quota for key ${apiKeyInfo.keyPrefix}`);
+        return {
+          limited: true,
+          response: {
+            statusCode: 429,
+            headers: {
+              ...corsHeaders,
+              'Retry-After': String(Math.ceil(dailyResult.reset / 1000 - Date.now() / 1000)),
+              'X-RateLimit-Limit': String(dailyLimit),
+              'X-RateLimit-Remaining': '0',
+              'X-RateLimit-Reset': String(Math.ceil(dailyResult.reset / 1000)),
+            },
+            body: JSON.stringify({ error: 'Daily request limit exceeded. Please try again tomorrow.' }),
+          },
+        };
+      }
+    }
+
     const perMinResult = await perMin.limit(keyId);
 
     if (!perMinResult.success) {
@@ -306,33 +329,15 @@ export async function checkApiRateLimit(
       };
     }
 
-    // Check daily quota (skip for internal tier which is unlimited)
+    // Return daily info if available, otherwise per-minute info
     if (daily && dailyLimit > 0) {
-      const dailyResult = await daily.limit(keyId);
-      if (!dailyResult.success) {
-        console.log(`[RateLimit] Blocked ${apiKeyInfo.tier} daily quota for key ${apiKeyInfo.keyPrefix}`);
-        return {
-          limited: true,
-          response: {
-            statusCode: 429,
-            headers: {
-              ...corsHeaders,
-              'Retry-After': String(Math.ceil(dailyResult.reset / 1000 - Date.now() / 1000)),
-              'X-RateLimit-Limit': String(dailyLimit),
-              'X-RateLimit-Remaining': '0',
-              'X-RateLimit-Reset': String(Math.ceil(dailyResult.reset / 1000)),
-            },
-            body: JSON.stringify({ error: 'Daily request limit exceeded. Please try again tomorrow.' }),
-          },
-        };
-      }
-
+      // Re-check to get remaining count (the limit() call above already decremented)
       return {
         limited: false,
         rateLimitInfo: {
-          limit: dailyLimit,
-          remaining: dailyResult.remaining,
-          reset: Math.ceil(dailyResult.reset / 1000),
+          limit: perMinLimit,
+          remaining: perMinResult.remaining,
+          reset: Math.ceil(perMinResult.reset / 1000),
         },
       };
     }
@@ -356,8 +361,9 @@ export async function checkApiRateLimit(
  * Extract client IP from Netlify function event headers.
  */
 export function getClientIp(headers: Record<string, string | undefined>): string {
-  return headers['x-forwarded-for']?.split(',')[0]?.trim()
-    || headers['x-nf-client-connection-ip']
+  // Prefer Netlify's trusted header (cannot be spoofed by clients)
+  return headers['x-nf-client-connection-ip']
     || headers['client-ip']
+    || headers['x-forwarded-for']?.split(',')[0]?.trim()
     || 'unknown';
 }

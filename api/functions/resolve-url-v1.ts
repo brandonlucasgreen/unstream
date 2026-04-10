@@ -4,6 +4,7 @@
 
 import { authenticateApiKey, buildCorsHeaders, generateRequestId, v1Response } from './middleware';
 import { checkApiRateLimit, getClientIp } from './ratelimit';
+import { handler as coreResolveHandler } from './resolve-url';
 
 interface NetlifyEvent {
   httpMethod: string;
@@ -24,6 +25,14 @@ export async function handler(event: NetlifyEvent) {
     return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
+  if (event.httpMethod !== 'GET') {
+    return {
+      statusCode: 405,
+      headers: corsHeaders,
+      body: JSON.stringify(v1Response({ error: 'Method not allowed. Use GET.' }, requestId)),
+    };
+  }
+
   // Rate limit check
   const identifier = apiKeyInfo ? `rl:api:${apiKeyInfo.keyPrefix}` : getClientIp(event.headers);
   const rl = await checkApiRateLimit(apiKeyInfo, identifier, corsHeaders);
@@ -36,14 +45,20 @@ export async function handler(event: NetlifyEvent) {
     rateLimitHeaders['X-RateLimit-Reset'] = String(rl.rateLimitInfo.reset);
   }
 
-  // Call the original resolve-url handler
-  const { handler: coreHandler } = await import('./resolve-url');
-  const coreResult = await coreHandler({
-    httpMethod: event.httpMethod,
+  // Call the original resolve-url handler.
+  // Pass x-internal-skip-ratelimit to prevent double rate limiting (v1 wrapper already checked).
+  const coreResult = await coreResolveHandler({
     queryStringParameters: event.queryStringParameters,
-    headers: event.headers,
-    body: event.body,
+    headers: { ...event.headers, 'x-internal-skip-ratelimit': '1' } as Record<string, string>,
   });
+
+  if (!coreResult) {
+    return {
+      statusCode: 500,
+      headers: { ...corsHeaders, ...rateLimitHeaders, 'X-Request-Id': requestId },
+      body: JSON.stringify(v1Response({ error: 'Internal server error' }, requestId)),
+    };
+  }
 
   // Parse the response and wrap in v1 envelope
   try {

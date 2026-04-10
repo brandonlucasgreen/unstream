@@ -9,6 +9,19 @@ import { authenticateBearer, buildCorsHeaders } from './middleware';
 
 const MAX_KEYS_PER_USER = 3;
 
+// Invitation-only beta: comma-separated list of emails allowed to create API keys.
+// Set via ALLOWED_API_EMAILS env var in Netlify. Admin email is always allowed.
+function isEmailAllowedForApiKeys(email: string): boolean {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (adminEmail && email.toLowerCase() === adminEmail.toLowerCase()) return true;
+
+  const allowedEmails = process.env.ALLOWED_API_EMAILS;
+  if (!allowedEmails) return false;
+
+  const allowlist = allowedEmails.split(',').map(e => e.trim().toLowerCase());
+  return allowlist.includes(email.toLowerCase());
+}
+
 interface NetlifyEvent {
   httpMethod: string;
   headers: Record<string, string | undefined>;
@@ -50,8 +63,17 @@ export async function handler(event: NetlifyEvent) {
 
   try {
     switch (event.httpMethod) {
-      case 'POST':
+      case 'POST': {
+        // Invitation-only: check if user is allowed to create API keys
+        if (!isEmailAllowedForApiKeys(user.email)) {
+          return {
+            statusCode: 403,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'API key creation is currently available by invitation only. Contact api@unstream.stream to request access.' }),
+          };
+        }
         return await handleCreateKey(user, client, corsHeaders);
+      }
       case 'GET':
         return await handleListKeys(user, client, corsHeaders);
       case 'DELETE':
@@ -107,7 +129,7 @@ async function handleCreateKey(
   const keyBytes = new Uint8Array(16);
   crypto.getRandomValues(keyBytes);
   const keyValue = 'usk_' + Array.from(keyBytes).map(b => b.toString(16).padStart(2, '0')).join('');
-  const keyPrefix = keyValue.slice(0, 8);
+  const keyPrefix = keyValue.slice(0, 12); // usk_ + 8 hex chars = 4 billion possible prefixes
 
   // Hash the key with SHA-256
   const encoder = new TextEncoder();
@@ -116,9 +138,9 @@ async function handleCreateKey(
 
   // Default tier limits
   const tierLimits = {
-    free: { daily_limit: 100, per_second: 5 },
-    pro: { daily_limit: 10000, per_second: 10 },
-    internal: { daily_limit: 0, per_second: 30 },
+    free: { daily_limit: 100, per_minute: 30 },
+    pro: { daily_limit: 10000, per_minute: 100 },
+    internal: { daily_limit: 0, per_minute: 300 },
   };
 
   const defaultTier = 'free';
@@ -134,10 +156,10 @@ async function handleCreateKey(
       key_hash: keyHash,
       tier: defaultTier,
       daily_limit: limits.daily_limit,
-      per_second: limits.per_second,
+      per_minute: limits.per_minute,
       is_active: true,
     })
-    .select('id, key_prefix, tier, daily_limit, per_second, created_at')
+    .select('id, key_prefix, tier, daily_limit, per_minute, created_at')
     .single();
 
   if (error) {
@@ -159,7 +181,7 @@ async function handleCreateKey(
         prefix: data.key_prefix,
         tier: data.tier,
         daily_limit: data.daily_limit,
-        per_second: data.per_second,
+        per_minute: data.per_minute,
         created_at: data.created_at,
       },
     }),
@@ -173,7 +195,7 @@ async function handleListKeys(
 ) {
   const { data, error } = await client
     .from('api_keys')
-    .select('id, key_prefix, tier, daily_limit, per_second, is_active, created_at, last_used_at, description')
+    .select('id, key_prefix, tier, daily_limit, per_minute, is_active, created_at, last_used_at, description')
     .eq('owner_email', user.email);
 
   if (error) {

@@ -1464,9 +1464,13 @@ async function searchBandcampForAlbum(artistUrl: string, albumTitle: string): Pr
 // Netlify function handler
 export async function handler(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
   const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
-  const ip = getClientIp(event.headers || {});
-  const rl = await checkRateLimit(ip, 'strict', corsHeaders);
-  if (rl.limited) return rl.response;
+
+  // Skip rate limiting when called internally from v1 wrappers (which do their own check)
+  if (!event.headers?.['x-internal-skip-ratelimit']) {
+    const ip = getClientIp(event.headers || {});
+    const rl = await checkRateLimit(ip, 'strict', corsHeaders);
+    if (rl.limited) return rl.response;
+  }
 
   const queryResult = validateQuery(event.queryStringParameters?.query);
   if ('error' in queryResult) {

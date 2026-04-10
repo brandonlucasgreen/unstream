@@ -6,12 +6,12 @@ CREATE TABLE IF NOT EXISTS api_keys (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   owner_email TEXT NOT NULL,
   owner_name TEXT,
-  key_prefix TEXT NOT NULL,          -- First 8 chars of the API key for lookup
+  key_prefix TEXT NOT NULL,          -- First 12 chars of the API key for lookup
   key_hash TEXT NOT NULL UNIQUE,     -- SHA-256 hash of the full key
   tier TEXT NOT NULL DEFAULT 'free'  -- 'free' | 'pro' | 'internal'
     CHECK (tier IN ('free', 'pro', 'internal')),
   daily_limit INTEGER NOT NULL DEFAULT 100,
-  per_second INTEGER NOT NULL DEFAULT 5,
+  per_minute INTEGER NOT NULL DEFAULT 5,
   is_active BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   last_used_at TIMESTAMPTZ,

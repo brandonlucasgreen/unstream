@@ -4,7 +4,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'info@kidlightbulbs.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
 async function authenticateAdmin(authHeader: string | undefined): Promise<{ userId: string; email: string } | null> {
   if (!authHeader?.startsWith('Bearer ')) return null;
@@ -18,7 +18,7 @@ async function authenticateAdmin(authHeader: string | undefined): Promise<{ user
   const { data, error } = await anonClient.auth.getUser(token);
   if (error || !data.user || !data.user.email) return null;
 
-  if (data.user.email.toLowerCase() !== ADMIN_EMAIL) return null;
+  if (!ADMIN_EMAIL || data.user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) return null;
 
   return { userId: data.user.id, email: data.user.email };
 }

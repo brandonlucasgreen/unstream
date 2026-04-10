@@ -4,7 +4,7 @@
 
 import { authenticateApiKey, buildCorsHeaders, generateRequestId, validateQuery, v1Response } from './middleware';
 import { checkApiRateLimit, getClientIp } from './ratelimit';
-// but we'll actually call the original handler and wrap the response
+import { handler as coreSearchHandler } from './search-sources';
 
 interface NetlifyEvent {
   httpMethod: string;
@@ -56,14 +56,20 @@ export async function handler(event: NetlifyEvent) {
   }
   const query = queryResult.query;
 
-  // Import and call the core search logic
-  // We need to call the original handler but with v1 wrapping
-  const { handler: coreHandler } = await import('./search-sources');
-  const coreResult = await coreHandler({
-    httpMethod: 'GET',
+  // Call the core search logic, wrapping the response in v1 envelope.
+  // Pass x-internal-skip-ratelimit to prevent double rate limiting (v1 wrapper already checked).
+  const coreResult = await coreSearchHandler({
     queryStringParameters: { query },
-    headers: event.headers,
+    headers: { ...event.headers, 'x-internal-skip-ratelimit': '1' } as Record<string, string>,
   });
+
+  if (!coreResult) {
+    return {
+      statusCode: 500,
+      headers: { ...corsHeaders, ...rateLimitHeaders, 'X-Request-Id': requestId },
+      body: JSON.stringify(v1Response({ error: 'Internal server error' }, requestId)),
+    };
+  }
 
   // Parse the response and wrap in v1 envelope
   try {

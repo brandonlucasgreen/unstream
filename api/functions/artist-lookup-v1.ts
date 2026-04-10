@@ -26,6 +26,14 @@ export async function handler(event: NetlifyEvent) {
     return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
+  if (event.httpMethod !== 'GET') {
+    return {
+      statusCode: 405,
+      headers: corsHeaders,
+      body: JSON.stringify(v1Response({ error: 'Method not allowed. Use GET.' }, requestId)),
+    };
+  }
+
   // Rate limit check
   const identifier = apiKeyInfo ? `rl:api:${apiKeyInfo.keyPrefix}` : getClientIp(event.headers);
   const rl = await checkApiRateLimit(apiKeyInfo, identifier, corsHeaders);

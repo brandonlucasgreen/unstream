@@ -16,6 +16,22 @@ async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutM
   }
 }
 
+// Allowlist of hostnames that resolve-url may fetch
+const RESOLVE_ALLOWED_HOSTNAMES = new Set([
+  'open.spotify.com',
+  'music.apple.com',
+]);
+
+function isResolveUrlAllowed(urlString: string): boolean {
+  try {
+    const parsed = new URL(urlString);
+    if (parsed.protocol !== 'https:') return false;
+    return RESOLVE_ALLOWED_HOSTNAMES.has(parsed.hostname.toLowerCase());
+  } catch {
+    return false;
+  }
+}
+
 // Resolve artist name from Spotify or Apple Music URL
 async function resolveStreamingUrl(url: string): Promise<{ artistName: string; source: 'spotify' | 'apple' } | null> {
   try {
@@ -27,6 +43,9 @@ async function resolveStreamingUrl(url: string): Promise<{ artistName: string; s
         url = `https://open.spotify.com/${parts[1]}/${parts[2]}`;
       }
     }
+
+    // SSRF protection: only allow fetches to Spotify and Apple Music
+    if (!isResolveUrlAllowed(url)) return null;
 
     // Check if it's a Spotify URL
     const spotifyMatch = url.match(/open\.spotify\.com\/(artist|album|track)\/([a-zA-Z0-9]+)/);
@@ -154,9 +173,13 @@ async function resolveStreamingUrl(url: string): Promise<{ artistName: string; s
 // Netlify function handler
 export async function handler(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
   const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
-  const ip = getClientIp(event.headers || {});
-  const rl = await checkRateLimit(ip, 'strict', corsHeaders);
-  if (rl.limited) return rl.response;
+
+  // Skip rate limiting when called internally from v1 wrappers (which do their own check)
+  if (!event.headers?.['x-internal-skip-ratelimit']) {
+    const ip = getClientIp(event.headers || {});
+    const rl = await checkRateLimit(ip, 'strict', corsHeaders);
+    if (rl.limited) return rl.response;
+  }
 
   const url = event.queryStringParameters?.url;
 

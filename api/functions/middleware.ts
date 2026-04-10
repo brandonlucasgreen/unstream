@@ -29,6 +29,8 @@ export function buildCorsHeaders(
     'Access-Control-Allow-Origin': allowOrigin,
     'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-Key',
+    'Vary': 'Origin',
+    'X-Content-Type-Options': 'nosniff',
     ...extraHeaders,
   };
 }
@@ -97,7 +99,7 @@ export interface ApiKeyInfo {
   keyPrefix: string;
   tier: 'free' | 'pro' | 'internal';
   dailyLimit: number;
-  perSecond: number;
+  perMinute: number;
   ownerEmail: string;
 }
 
@@ -114,44 +116,48 @@ export async function authenticateApiKey(
   const client = getClient();
   if (!client) return null;
 
-  // Extract the prefix (first 8 chars) for lookup
-  const prefix = apiKeyHeader.slice(0, 8);
-  if (prefix.length < 8) return null;
+  // Extract the prefix (first 12 chars: "usk_" + 8 hex) for lookup
+  const prefix = apiKeyHeader.slice(0, 12);
+  if (prefix.length < 12) return null;
 
   // Hash the full key with SHA-256
   const encoder = new TextEncoder();
-  const data = encoder.encode(apiKeyHeader);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const encoded = encoder.encode(apiKeyHeader);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', encoded);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const keyHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
   // Look up by prefix and compare hash
-  const { data, error } = await client
+  const { data: keyRow, error } = await client
     .from('api_keys')
-    .select('id, key_prefix, key_hash, tier, daily_limit, per_second, owner_email, is_active')
+    .select('id, key_prefix, key_hash, tier, daily_limit, per_minute, owner_email, is_active')
     .eq('key_prefix', prefix)
     .eq('is_active', true)
     .single();
 
-  if (error || !data) return null;
+  if (error || !keyRow) return null;
 
-  // Compare hashes
-  if (data.key_hash !== keyHash) return null;
+  // Timing-safe hash comparison to prevent timing attacks
+  const { timingSafeEqual } = await import('crypto');
+  const hashA = Buffer.from(keyRow.key_hash, 'hex');
+  const hashB = Buffer.from(keyHash, 'hex');
+  if (hashA.length !== hashB.length || !timingSafeEqual(hashA, hashB)) return null;
 
   // Update last_used_at (fire-and-forget)
-  client
-    .from('api_keys')
-    .update({ last_used_at: new Date().toISOString() })
-    .eq('id', data.id)
-    .then(() => { /* no-op */ });
+  Promise.resolve(
+    client
+      .from('api_keys')
+      .update({ last_used_at: new Date().toISOString() })
+      .eq('id', keyRow.id)
+  ).catch(() => { /* no-op */ });
 
   return {
-    id: data.id,
-    keyPrefix: data.key_prefix,
-    tier: data.tier,
-    dailyLimit: data.daily_limit,
-    perSecond: data.per_second,
-    ownerEmail: data.owner_email,
+    id: keyRow.id,
+    keyPrefix: keyRow.key_prefix,
+    tier: keyRow.tier,
+    dailyLimit: keyRow.daily_limit,
+    perMinute: keyRow.per_minute,
+    ownerEmail: keyRow.owner_email,
   };
 }
 
@@ -243,32 +249,44 @@ export function isUrlHostnameAllowed(urlString: string): boolean {
     const parsed = new URL(urlString);
     const hostname = parsed.hostname.toLowerCase();
 
-    // Block localhost and private ranges
+    // Only allow HTTPS and HTTP
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+      return false;
+    }
+
+    // Block localhost and well-known metadata endpoints
     if (
       hostname === 'localhost' ||
       hostname === '127.0.0.1' ||
       hostname === '::1' ||
       hostname === '0.0.0.0' ||
-      hostname === 'metadata.google.internal'
+      hostname === 'metadata.google.internal' ||
+      hostname === '100.100.100.200'  // Alibaba/Tencent cloud metadata
     ) {
       return false;
     }
 
-    // Block private IP ranges
+    // Block any IPv6 address (no allowlisted hostnames are IPv6).
+    // This catches ::ffff:127.0.0.1, fe80::, fc00::, fd00::, etc.
+    if (hostname.includes(':')) {
+      return false;
+    }
+
+    // Block private IPv4 ranges
     const ipv4Match = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
     if (ipv4Match) {
       const [, a, b] = ipv4Match.map(Number);
       if (a === 10) return false;
       if (a === 172 && b >= 16 && b <= 31) return false;
       if (a === 192 && b === 168) return false;
-      if (a === 169 && b === 254) return false; // AWS metadata
+      if (a === 169 && b === 254) return false; // AWS metadata / link-local
       if (a === 0) return false;
+      if (a === 100 && b >= 64 && b <= 127) return false; // CGNAT range
     }
 
-    // Only allow HTTPS and HTTP
-    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
-      return false;
-    }
+    // Block any remaining raw IP address (not a hostname)
+    if (/^\d+$/.test(hostname)) return false; // decimal notation like 2130706433
+    if (/^0\d/.test(hostname.split('.')[0])) return false; // octal notation like 0177.0.0.1
 
     // Check exact match
     if (ALLOWED_OUTBOUND_HOSTNAMES.has(hostname)) return true;
@@ -281,12 +299,10 @@ export function isUrlHostnameAllowed(urlString: string): boolean {
       }
     }
 
-    // Allow faircamp domains (contain "faircamp" in hostname) as a special case
-    if (hostname.includes('faircamp')) return true;
-
-    // Allow artist websites from search results — these are user-provided URLs
-    // that we verify through search platforms, so they're safe to fetch
-    // (We already restrict SSRF via the private IP blocks above)
+    // Allow faircamp domains: "faircamp" must appear as a full domain label,
+    // not just a substring (prevents evil-faircamp.com from matching)
+    const labels = hostname.split('.');
+    if (labels.includes('faircamp')) return true;
 
     return false;
   } catch {
