@@ -5,6 +5,19 @@
 
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
+import { type SourceId, CURATED_PLATFORMS, SEARCH_ONLY_PLATFORMS } from './search-utils';
+
+// Build set of valid source IDs for click: metrics from the SourceId union + platform sets
+const VALID_SOURCE_IDS = new Set<string>([
+  ...CURATED_PLATFORMS,
+  ...SEARCH_ONLY_PLATFORMS,
+  // Additional valid click sources not in the curated/search-only sets
+  'bandcamp', 'qobuz', 'beatport', 'even', 'nina', 'artcore', 'ampwall',
+  'patreon', 'officialsite', 'discogs', 'musicbrainz',
+  'spotify', 'apple-music', 'youtube', 'instagram', 'facebook', 'tiktok',
+  'threads', 'bluesky', 'mastodon', 'funkwhale',
+  'listenbrainz', 'librefm', 'internetarchive',
+]);
 
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
@@ -13,8 +26,15 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-// Allowlist for metric values: search, view, or click:{platform}
-const METRIC_PATTERN = /^(search|view|click:[a-z0-9_-]+)$/;
+// Validate metric values: must be 'search', 'view', or 'click:{valid_source_id}'
+function isValidMetric(metric: string): boolean {
+  if (metric === 'search' || metric === 'view') return true;
+  if (metric.startsWith('click:')) {
+    const sourceId = metric.slice(6);
+    return VALID_SOURCE_IDS.has(sourceId);
+  }
+  return false;
+}
 
 // Module-level cache: slug → artist_id (persists across warm invocations)
 const slugCache = new Map<string, string>();
@@ -49,7 +69,7 @@ export async function handler(event: {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' }; // silent no-op on bad JSON
   }
 
-  if (!slug || !metric || !METRIC_PATTERN.test(metric)) {
+  if (!slug || !metric || !isValidMetric(metric)) {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' }; // silent no-op
   }
 

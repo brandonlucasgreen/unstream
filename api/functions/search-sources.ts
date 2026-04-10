@@ -2,6 +2,7 @@ import { parse } from 'node-html-parser';
 import { cacheGetOrFetch, artistCacheKey } from './cache';
 import { persistSearchResults, getArtistBySlug, artistSlug, getMergeOverrides } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
+import { validateQuery } from './middleware';
 import {
   type SourceId,
   type LatestRelease,
@@ -1104,11 +1105,18 @@ async function searchEven(query: string): Promise<Map<string, string>> {
       const results: [string, string][] = [];
 
       try {
+        const algoliaAppId = process.env.ALGOLIA_APP_ID || 'S64VD9CU46';
+        const algoliaApiKey = process.env.ALGOLIA_API_KEY;
+        if (!algoliaApiKey) {
+          console.warn('[EVEN] Missing ALGOLIA_API_KEY env var, skipping Even search');
+          return results;
+        }
+
         const response = await fetchWithTimeout('https://S64VD9CU46-dsn.algolia.net/1/indexes/Artist/query', {
           method: 'POST',
           headers: {
-            'X-Algolia-Application-Id': 'S64VD9CU46',
-            'X-Algolia-API-Key': 'eea52fd4a67d03678477ffdfbad362e2',
+            'X-Algolia-Application-Id': algoliaAppId,
+            'X-Algolia-API-Key': algoliaApiKey,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ query, hitsPerPage: 10 }),
@@ -1456,19 +1464,25 @@ async function searchBandcampForAlbum(artistUrl: string, albumTitle: string): Pr
 // Netlify function handler
 export async function handler(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
   const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
-  const ip = getClientIp(event.headers || {});
-  const rl = await checkRateLimit(ip, 'strict', corsHeaders);
-  if (rl.limited) return rl.response;
 
-  const query = event.queryStringParameters?.query;
+  // Skip rate limiting when called internally from v1 wrappers (which do their own check).
+  // Requires a shared secret to prevent external clients from spoofing this header.
+  const internalSecret = process.env.INTERNAL_FUNCTION_SECRET;
+  if (!internalSecret || event.headers?.['x-internal-skip-ratelimit'] !== internalSecret) {
+    const ip = getClientIp(event.headers || {});
+    const rl = await checkRateLimit(ip, 'strict', corsHeaders);
+    if (rl.limited) return rl.response;
+  }
 
-  if (!query) {
+  const queryResult = validateQuery(event.queryStringParameters?.query);
+  if ('error' in queryResult) {
     return {
       statusCode: 400,
       headers: corsHeaders,
-      body: JSON.stringify({ error: 'Query parameter is required' }),
+      body: JSON.stringify({ error: queryResult.error }),
     };
   }
+  const query = queryResult.query;
 
   try {
     // Normalize the query to handle accented characters (e.g., "Tanerélle" -> "Tanerelle")

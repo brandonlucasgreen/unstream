@@ -104,6 +104,37 @@
   to = "/.netlify/functions/discord-interaction"
   status = 200
 
+# V1 Public API routes
+[[redirects]]
+  from = "/api/v1/search"
+  to = "/.netlify/functions/search-sources-v1"
+  status = 200
+
+[[redirects]]
+  from = "/api/v1/artist/*"
+  to = "/.netlify/functions/artist-lookup-v1"
+  status = 200
+
+[[redirects]]
+  from = "/api/v1/resolve"
+  to = "/.netlify/functions/resolve-url-v1"
+  status = 200
+
+[[redirects]]
+  from = "/api/v1/platforms"
+  to = "/.netlify/functions/platforms-list"
+  status = 200
+
+[[redirects]]
+  from = "/api/v1/status"
+  to = "/.netlify/functions/api-status"
+  status = 200
+
+[[redirects]]
+  from = "/api/v1/keys"
+  to = "/.netlify/functions/api-key-generate"
+  status = 200
+
 [[redirects]]
   from = "/plus"
   to = "/support"

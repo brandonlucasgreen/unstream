@@ -1,27 +1,8 @@
 // API endpoint: POST /api/admin/merge-override
 // Admin-only endpoint for creating artist merge overrides from the UI.
 
-import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
-
-const ADMIN_EMAIL = 'info@kidlightbulbs.com';
-
-async function authenticateAdmin(authHeader: string | undefined): Promise<{ userId: string; email: string } | null> {
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const token = authHeader.slice(7);
-
-  const url = process.env.SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return null;
-
-  const anonClient = createClient(url, anonKey);
-  const { data, error } = await anonClient.auth.getUser(token);
-  if (error || !data.user || !data.user.email) return null;
-
-  if (data.user.email.toLowerCase() !== ADMIN_EMAIL) return null;
-
-  return { userId: data.user.id, email: data.user.email };
-}
+import { authenticateAdmin } from './middleware';
 
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
