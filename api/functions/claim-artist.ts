@@ -413,6 +413,8 @@ export async function handler(event: {
     const email = (body.email || authUser.email || '').toLowerCase().trim();
 
     // Upsert the profile (allows retrying the claim flow)
+    // verification_code is a legacy NOT NULL column — populate it with a random value
+    // since the actual verification now uses link-back checking, not a code
     const { error: upsertError } = await client
       .from('artist_profiles')
       .upsert(
@@ -421,6 +423,7 @@ export async function handler(event: {
           user_id: userId,
           email,
           website_url: websiteUrl,
+          verification_code: crypto.randomUUID(),
           verified_at: null,
         },
         { onConflict: 'artist_id' }
