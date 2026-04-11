@@ -33,5 +33,26 @@
     "description": "Save artists in the Mac app or browser extension and get notified when they drop something new. No more missing releases from the artists you care about.",
     "date": "2026-03-22",
     "announced": false
+  },
+  {
+    "id": "public-api",
+    "title": "Public API v1",
+    "description": "Developers can now build on top of Unstream. The public API supports artist search, artist lookup, URL resolution, and a full platform list — with API key auth and tiered rate limiting.",
+    "date": "2026-04-11",
+    "announced": false
+  },
+  {
+    "id": "noscript-search",
+    "title": "No-JavaScript search",
+    "description": "Unstream now works without JavaScript. The search experience is fully server-rendered for accessibility, crawlers, and anyone who prefers a leaner web.",
+    "date": "2026-04-11",
+    "announced": false
+  },
+  {
+    "id": "ios-app",
+    "title": "Universal Apple app (iOS + macOS)",
+    "description": "The Mac app is now a universal Apple app. Download it on iPhone and iPad too — search for artists, save your favorites, and get release alerts on the go.",
+    "date": "2026-04-11",
+    "announced": false
   }
 ]

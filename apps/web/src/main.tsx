@@ -21,6 +21,7 @@ const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage.tsx').the
 const GuidesIndexPage = lazy(() => import('./pages/GuidesIndexPage.tsx').then(m => ({ default: m.GuidesIndexPage })))
 const GuidePage = lazy(() => import('./pages/GuidePage.tsx').then(m => ({ default: m.GuidePage })))
 const DevelopersPage = lazy(() => import('./pages/DevelopersPage.tsx').then(m => ({ default: m.DevelopersPage })))
+const ChangelogPage = lazy(() => import('./pages/ChangelogPage.tsx').then(m => ({ default: m.ChangelogPage })))
 
 function LoadingFallback() {
   return (
@@ -53,6 +54,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/admin/merge" element={<AdminMergePage />} />
             <Route path="/admin/verify" element={<AdminVerifyPage />} />
             <Route path="/developers" element={<DevelopersPage />} />
+            <Route path="/changelog" element={<ChangelogPage />} />
           </Routes>
         </Suspense>
       </BrowserRouter>
