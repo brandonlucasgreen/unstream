@@ -22,6 +22,10 @@
   function = "claimed-artist-page"
 
 [[edge_functions]]
+  path = "/search"
+  function = "noscript-search"
+
+[[edge_functions]]
   path = "/artists"
   function = "artist-directory-page"
 

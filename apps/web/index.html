@@ -23,6 +23,46 @@
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <style>
+        :root { --ns-bg: #0d0d0d; --ns-bg2: #1a1a1a; --ns-text: #f0f0f0; --ns-muted: #999; --ns-border: #2a2a2a; --ns-accent: #ff6b35; }
+        @media (prefers-color-scheme: light) {
+          :root { --ns-bg: #ffffff; --ns-bg2: #f5f5f5; --ns-text: #1a1a1a; --ns-muted: #555; --ns-border: #e0e0e0; --ns-accent: #e55a2b; }
+        }
+        .noscript-fallback {
+          position: fixed; inset: 0; z-index: 9999;
+          background: var(--ns-bg); color: var(--ns-text);
+          font-family: 'Golos Text', system-ui, sans-serif;
+          display: flex; flex-direction: column; align-items: center;
+          justify-content: center; padding: 24px; text-align: center;
+        }
+        .noscript-fallback h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        .noscript-fallback p { font-size: 16px; color: var(--ns-muted); margin-bottom: 32px; max-width: 480px; }
+        .noscript-form { display: flex; gap: 8px; width: 100%; max-width: 480px; }
+        .noscript-form input {
+          flex: 1; padding: 14px 18px; border-radius: 12px;
+          border: 1px solid var(--ns-border); background: var(--ns-bg2);
+          color: var(--ns-text); font-size: 16px; font-family: inherit;
+        }
+        .noscript-form button {
+          padding: 14px 28px; border-radius: 12px; border: none;
+          background: var(--ns-accent); color: #fff;
+          font-size: 16px; font-family: inherit; font-weight: 600; cursor: pointer;
+        }
+        .noscript-form button:hover { opacity: 0.9; }
+        .noscript-note { font-size: 13px; color: var(--ns-muted); margin-top: 24px; }
+        .noscript-note a { color: var(--ns-accent); }
+      </style>
+      <div class="noscript-fallback">
+        <h1>Unstream</h1>
+        <p>Find music on platforms that pay artists fairly. Search any artist to see where your money actually goes.</p>
+        <form class="noscript-form" action="/search" method="get">
+          <input type="text" name="q" placeholder="Search for an artist..." autofocus>
+          <button type="submit">Search</button>
+        </form>
+        <p class="noscript-note">You're viewing Unstream without JavaScript. Core search works, but some features require JS. <a href="/artists">Browse the artist index</a></p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
     <script data-goatcounter="https://unstream.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
