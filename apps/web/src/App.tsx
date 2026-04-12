@@ -164,6 +164,7 @@ function App() {
 
       setResults(response.results);
       setIsLoading(false);
+      analytics.trackSearchResults(response.results.length > 0, response.results.length);
 
       // Phase 2: MusicBrainz enrichment (runs in background)
       if (response.hasPendingEnrichment && response.results.length > 0) {

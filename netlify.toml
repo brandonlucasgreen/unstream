@@ -94,6 +94,16 @@
   status = 200
 
 [[redirects]]
+  from = "/api/analytics/app-event"
+  to = "/.netlify/functions/analytics-app-event"
+  status = 200
+
+[[redirects]]
+  from = "/api/analytics/dashboard"
+  to = "/.netlify/functions/analytics-dashboard"
+  status = 200
+
+[[redirects]]
   from = "/api/admin/merge-override"
   to = "/.netlify/functions/admin-merge-override"
   status = 200

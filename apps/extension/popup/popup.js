@@ -223,11 +223,12 @@ function renderResults(results) {
     link.target = '_blank';
     link.className = 'result-item';
     link.title = config.name;
-    if (claimedSlug) {
-      link.addEventListener('click', () => {
+    link.addEventListener('click', () => {
+      chrome.runtime.sendMessage({ type: 'TRACK_APP_EVENT', event_type: 'platform_click', context: { platform: platform.sourceId } });
+      if (claimedSlug) {
         chrome.runtime.sendMessage({ type: 'TRACK_ANALYTICS', slug: claimedSlug, metric: `click:${platform.sourceId}` });
-      });
-    }
+      }
+    });
 
     const iconSpan = document.createElement('span');
     iconSpan.className = 'result-icon';
