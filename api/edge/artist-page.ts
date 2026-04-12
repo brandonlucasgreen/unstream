@@ -308,7 +308,7 @@ function generateArtistPageHtml(
   ${jsHref ? `<script type="module" src="${jsHref}"></script>` : '<script type="module" src="/src/main.tsx"></script>'}
 
   <!-- Analytics -->
-  <script data-goatcounter="https://unstream.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="0b2ee6ec-0b7a-4ea6-9b79-8ebc3b280874"></script>
 </body>
 </html>`;
 }

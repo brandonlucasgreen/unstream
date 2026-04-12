@@ -1,10 +1,10 @@
 /**
- * Analytics tracking using GoatCounter + Unstream artist analytics API
+ * Analytics tracking using Umami + Unstream artist analytics API
  * + product analytics (app_events).
  *
- * General events (search, download, etc.) go to GoatCounter only.
+ * General events (search, download, etc.) go to Umami only.
  * Artist-specific events (search appearances, page views, link clicks)
- * go to BOTH GoatCounter and our Supabase-backed analytics API so
+ * go to BOTH Umami and our Supabase-backed analytics API so
  * verified artists can see their stats on the dashboard.
  * Product events (all user actions) go to the app_events endpoint for
  * the admin analytics dashboard. All product events are anonymized —
@@ -13,16 +13,14 @@
 
 declare global {
   interface Window {
-    goatcounter?: {
-      count: (vars: { path: string; event: boolean }) => void;
+    umami?: {
+      track: (eventName: string, data?: Record<string, string | number | boolean>) => void;
     };
   }
 }
 
-function trackEvent(path: string): void {
-  if (window.goatcounter?.count) {
-    window.goatcounter.count({ path, event: true });
-  }
+function trackEvent(eventName: string): void {
+  window.umami?.track(eventName);
 }
 
 /** Fire-and-forget POST to our analytics API for artist-level metrics. */
@@ -47,13 +45,13 @@ function trackAppEvent(
 }
 
 export const analytics = {
-  // General events (GoatCounter only)
-  trackDownload: () => trackEvent('/download'),
-  trackReportIssue: () => trackEvent('/report-issue'),
+  // General events (Umami only)
+  trackDownload: () => trackEvent('download'),
+  trackReportIssue: () => trackEvent('report-issue'),
 
-  // Search initiated (GoatCounter + product analytics — fires before results arrive)
+  // Search initiated (Umami + product analytics — fires before results arrive)
   trackSearch: () => {
-    trackEvent('/search');
+    trackEvent('search');
     trackAppEvent('search', {});
   },
 
@@ -62,29 +60,29 @@ export const analytics = {
     trackAppEvent('search', { has_results: hasResults, result_count: resultCount });
   },
 
-  // Platform click (GoatCounter + product analytics)
+  // Platform click (Umami + product analytics)
   trackPlatformClick: (platformName: string) => {
-    trackEvent(`/go/${platformName.toLowerCase()}`);
+    trackEvent(`go-${platformName.toLowerCase()}`);
     trackAppEvent('platform_click', { platform: platformName.toLowerCase() });
   },
 
-  // Page views (product analytics only — GoatCounter handles page views automatically)
+  // Page views (product analytics only — Umami handles page views automatically)
   trackPageView: (page: string) => {
     trackAppEvent('page_view', { page });
   },
 
-  // Artist-specific events (GoatCounter + Supabase artist analytics + product analytics)
+  // Artist-specific events (Umami + Supabase artist analytics + product analytics)
   trackArtistPageView: (slug: string) => {
-    trackEvent(`/artist/${slug}/view`);
+    trackEvent(`artist-view`);
     trackArtistEvent(slug, 'view');
     trackAppEvent('page_view', { page: 'artist' });
   },
   trackArtistSearchAppearance: (slug: string) => {
-    trackEvent(`/artist/${slug}/search`);
+    trackEvent(`artist-search`);
     trackArtistEvent(slug, 'search');
   },
   trackArtistLinkClick: (slug: string, platform: string) => {
-    trackEvent(`/artist/${slug}/click/${platform.toLowerCase()}`);
+    trackEvent(`artist-click-${platform.toLowerCase()}`);
     trackArtistEvent(slug, `click:${platform.toLowerCase()}`);
     trackAppEvent('platform_click', { platform: platform.toLowerCase() });
   },
