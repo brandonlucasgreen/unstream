@@ -61,6 +61,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   } else if (message.type === 'TRACK_ANALYTICS') {
     trackAnalyticsEvent(message.slug, message.metric);
+  } else if (message.type === 'TRACK_APP_EVENT') {
+    trackAppEvent(message.event_type, message.context || {});
   } else if (message.type === 'MUSIC_STOPPED') {
     handleMusicStopped();
   } else if (message.type === 'CHECK_RELEASES_NOW') {
@@ -95,6 +97,19 @@ async function trackAnalyticsEvent(slug, metric) {
   }
 }
 
+// Fire-and-forget product analytics event
+async function trackAppEvent(event_type, context = {}) {
+  try {
+    await fetch(`${API_BASE}/analytics/app-event`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event_type, app: 'extension', context }),
+    });
+  } catch {
+    // silent fail
+  }
+}
+
 // Handle music detection from content scripts
 async function handleMusicDetection(data) {
   const { artist, title, source } = data;
@@ -118,6 +133,9 @@ async function handleMusicDetection(data) {
     currentTrack: { artist, title, source, timestamp: now }
   });
 
+  // Track extension activation with streaming service
+  trackAppEvent('extension_activated', { streaming_service: source || 'unknown' });
+
   // Fetch results
   try {
     const data = await searchArtist(artist);
@@ -127,6 +145,9 @@ async function handleMusicDetection(data) {
     await chrome.storage.local.set({
       [`cache:${artist}`]: { results, timestamp: now }
     });
+
+    // Track search (product analytics)
+    trackAppEvent('search', { has_results: results.length > 0, result_count: results.length });
 
     // Track search appearances for claimed artists
     for (const result of results) {
