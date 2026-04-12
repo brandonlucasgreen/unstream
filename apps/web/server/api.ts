@@ -978,12 +978,19 @@ async function searchBeatport(query: string): Promise<Map<string, string>> {
 async function searchEven(query: string): Promise<Map<string, string>> {
   const results = new Map<string, string>();
 
+  const algoliaAppId = process.env.ALGOLIA_APP_ID || 'S64VD9CU46';
+  const algoliaApiKey = process.env.ALGOLIA_API_KEY;
+  if (!algoliaApiKey) {
+    console.warn('[EVEN] Missing ALGOLIA_API_KEY env var, skipping Even search');
+    return results;
+  }
+
   try {
-    const response = await fetchWithTimeout('https://S64VD9CU46-dsn.algolia.net/1/indexes/Artist/query', {
+    const response = await fetchWithTimeout(`https://${algoliaAppId}-dsn.algolia.net/1/indexes/Artist/query`, {
       method: 'POST',
       headers: {
-        'X-Algolia-Application-Id': 'S64VD9CU46',
-        'X-Algolia-API-Key': 'eea52fd4a67d03678477ffdfbad362e2',
+        'X-Algolia-Application-Id': algoliaAppId,
+        'X-Algolia-API-Key': algoliaApiKey,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ query, hitsPerPage: 10 }),
