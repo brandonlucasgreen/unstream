@@ -2,6 +2,7 @@
 // Records anonymous product usage events from web, extension, and Mac app.
 // No PII stored: session_hash is a one-way SHA-256 of (ip + user_agent + date).
 
+import { createHash } from 'crypto';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 
@@ -22,13 +23,9 @@ const VALID_EVENT_TYPES = new Set([
 
 const VALID_APPS = new Set(['web', 'extension', 'mac']);
 
-async function hashSessionId(ip: string, userAgent: string): Promise<string> {
+function hashSessionId(ip: string, userAgent: string): string {
   const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-  const raw = `${ip}:${userAgent}:${date}`;
-  const encoded = new TextEncoder().encode(raw);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', encoded);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return createHash('sha256').update(`${ip}:${userAgent}:${date}`).digest('hex');
 }
 
 export async function handler(event: {
@@ -83,17 +80,17 @@ export async function handler(event: {
   }
 
   const userAgent = event.headers['user-agent'] || '';
-  const sessionHash = await hashSessionId(ip, userAgent);
+  const sessionHash = hashSessionId(ip, userAgent);
 
-  try {
-    await client.from('app_events').insert({
-      event_type,
-      app,
-      context: safeContext,
-      session_hash: sessionHash,
-    });
-  } catch {
-    // Silent fail — never break the caller for analytics
+  // Supabase JS client returns { error } rather than throwing — check it explicitly
+  const { error: insertError } = await client.from('app_events').insert({
+    event_type,
+    app,
+    context: safeContext,
+    session_hash: sessionHash,
+  });
+  if (insertError) {
+    console.error('[Analytics] Failed to insert app_event:', insertError.message);
   }
 
   return { statusCode: 204, headers: CORS_HEADERS, body: '' };
