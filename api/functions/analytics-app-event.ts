@@ -1,8 +1,10 @@
 // POST /api/analytics/app-event
 // Records anonymous product usage events from web, extension, and Mac app.
-// No PII stored: session_hash is a one-way SHA-256 of (ip + user_agent + date).
+// No PII stored: session_hash is a keyed HMAC-SHA256 of (ip + user_agent + date).
+// The HMAC key (SESSION_HASH_SECRET) makes the hash non-reversible even with
+// knowledge of the input space, unlike plain SHA-256.
 
-import { createHash } from 'crypto';
+import { createHash, createHmac } from 'crypto';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 
@@ -25,7 +27,15 @@ const VALID_APPS = new Set(['web', 'extension', 'mac']);
 
 function hashSessionId(ip: string, userAgent: string): string {
   const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-  return createHash('sha256').update(`${ip}:${userAgent}:${date}`).digest('hex');
+  const raw = `${ip}:${userAgent}:${date}`;
+  const secret = process.env.SESSION_HASH_SECRET;
+  if (!secret) {
+    // Fallback: plain SHA-256 if secret not configured. Events still recorded;
+    // deduplication works but hashes are technically reversible.
+    console.warn('[Analytics] SESSION_HASH_SECRET not set — falling back to plain SHA-256');
+    return createHash('sha256').update(raw).digest('hex');
+  }
+  return createHmac('sha256', secret).update(raw).digest('hex');
 }
 
 export async function handler(event: {
