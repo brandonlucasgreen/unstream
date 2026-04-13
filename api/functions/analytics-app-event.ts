@@ -90,7 +90,7 @@ export async function handler(event: {
     session_hash: sessionHash,
   });
   if (insertError) {
-    console.error('[Analytics] Failed to insert app_event:', insertError.message);
+    console.error('[Analytics] Failed to insert app_event:', insertError);
   }
 
   return { statusCode: 204, headers: CORS_HEADERS, body: '' };

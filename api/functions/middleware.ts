@@ -1,6 +1,7 @@
 // Centralized middleware for API functions.
 // Provides CORS, authentication, query validation, and SSRF protection.
 
+import { createHash, randomUUID, timingSafeEqual } from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
 
@@ -123,11 +124,7 @@ export async function authenticateApiKey(
   if (prefix.length < 12) return null;
 
   // Hash the full key with SHA-256
-  const encoder = new TextEncoder();
-  const encoded = encoder.encode(apiKeyHeader);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', encoded);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const keyHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  const keyHash = createHash('sha256').update(apiKeyHeader).digest('hex');
 
   // Look up by prefix and compare hash
   const { data: keyRow, error } = await client
@@ -140,7 +137,6 @@ export async function authenticateApiKey(
   if (error || !keyRow) return null;
 
   // Timing-safe hash comparison to prevent timing attacks
-  const { timingSafeEqual } = await import('crypto');
   const hashA = Buffer.from(keyRow.key_hash, 'hex');
   const hashB = Buffer.from(keyHash, 'hex');
   if (hashA.length !== hashB.length || !timingSafeEqual(hashA, hashB)) return null;
@@ -321,7 +317,7 @@ export function isUrlHostnameAllowed(urlString: string): boolean {
  * Generate a unique request ID for tracing.
  */
 export function generateRequestId(): string {
-  return crypto.randomUUID();
+  return randomUUID();
 }
 
 // ---------------------------------------------------------------------------
