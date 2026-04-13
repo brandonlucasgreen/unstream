@@ -126,7 +126,7 @@ export async function handler(event: {
     if (queryErrors.length > 0) {
       console.error('[Analytics Dashboard] Query errors:', queryErrors.map(e => e?.message));
       // If the core count queries all errored (e.g. app_events table missing), surface it
-      if (searchesToday.error && searches7d.error && searches30d.error) {
+      if (queryErrors.length >= 3) {
         return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Analytics table unavailable — migration may not have been applied' }) };
       }
     }
