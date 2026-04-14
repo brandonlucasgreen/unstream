@@ -238,7 +238,7 @@ function App() {
           </p>
           <div className="flex flex-col items-center gap-3 mb-2">
             <a
-              href="https://github.com/brandonlucasgreen/unstream/releases/latest/download/Unstream.dmg"
+              href="https://github.com/brandonlucasgreen/unstream/releases/latest"
               className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-accent-primary text-white hover:bg-accent-primary/90 transition-colors font-medium shadow-lg shadow-accent-primary/20"
               onClick={() => analytics.trackDownload()}
             >

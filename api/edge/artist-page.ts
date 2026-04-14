@@ -90,7 +90,39 @@ function generateArtistPageHtml(
   const canonicalUrl = `https://unstream.stream/artist/${slug}`;
   const firstArtist = results.find(r => r.type === 'artist');
   const imageUrl = firstArtist?.imageUrl || '';
-  const description = `Find ${artistName} on Bandcamp, Qobuz, and other ethical music platforms. Support artists directly.`;
+
+  // Build SEO description dynamically from actual platforms found
+  const allPlatforms = (firstArtist?.platforms || [])
+    .filter(p => {
+      const u = p.url.toLowerCase();
+      return !u.includes('duckduckgo.com') && !u.includes('google.com/search') && !u.includes('searchstyle=search');
+    })
+    .filter(p => {
+      const info = PLATFORM_INFO[p.sourceId];
+      return info && info.category !== 'social';
+    });
+  const platformNames = allPlatforms.map(p => PLATFORM_INFO[p.sourceId]?.name).filter(Boolean);
+
+  // Build title suffix from actual platforms (keep it short for SERPs)
+  let titlePlatforms: string;
+  if (platformNames.length === 0) {
+    titlePlatforms = 'alternative platforms';
+  } else if (platformNames.length <= 2) {
+    titlePlatforms = platformNames.join(' &amp; ');
+  } else {
+    titlePlatforms = `${platformNames[0]} &amp; more`;
+  }
+
+  let description: string;
+  if (platformNames.length === 0) {
+    description = `Find ${artistName} on alternative music platforms. Support artists directly outside streaming.`;
+  } else if (platformNames.length <= 3) {
+    description = `${artistName} is on ${platformNames.join(', ')}. Find direct links and support them outside streaming.`;
+  } else {
+    const featured = platformNames.slice(0, 2).join(', ');
+    const remaining = platformNames.length - 2;
+    description = `${artistName} is on ${featured}, and ${remaining} other platform${remaining > 1 ? 's' : ''}. Find direct links and support them outside streaming.`;
+  }
 
   // Gather all platforms from the first artist result
   const platforms = firstArtist?.platforms || [];
@@ -178,18 +210,18 @@ function generateArtistPageHtml(
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${escapedName} - Unstream | Listen on platforms that pay artists fairly</title>
+  <title>${escapedName} on ${titlePlatforms} | Unstream</title>
   <meta name="description" content="${escapeHtml(description)}">
   <link rel="canonical" href="${canonicalUrl}">
   <meta property="og:type" content="profile">
   <meta property="og:url" content="${canonicalUrl}">
-  <meta property="og:title" content="${escapedName} - Unstream">
+  <meta property="og:title" content="${escapedName} on ${titlePlatforms} | Unstream">
   <meta property="og:description" content="${escapeHtml(description)}">
   <meta property="og:site_name" content="Unstream">
   ${imageUrl ? `<meta property="og:image" content="${escapeHtml(imageUrl)}">
   <meta property="og:image:alt" content="${escapedName}">` : ''}
   <meta name="twitter:card" content="${imageUrl ? 'summary_large_image' : 'summary'}">
-  <meta name="twitter:title" content="${escapedName} - Unstream">
+  <meta name="twitter:title" content="${escapedName} on ${titlePlatforms} | Unstream">
   <meta name="twitter:description" content="${escapeHtml(description)}">
   ${imageUrl ? `<meta name="twitter:image" content="${escapeHtml(imageUrl)}">` : ''}
   <script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>
