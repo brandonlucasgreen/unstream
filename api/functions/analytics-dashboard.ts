@@ -73,12 +73,14 @@ export async function handler(event: {
         .eq('event_type', 'search')
         .gte('created_at', ago30),
 
-      // Successful searches (has_results=true) last 7 days
+      // Searches with known outcome (has_results field present) last 7 days
+      // We fire two 'search' events: one on initiation (no has_results) and one on completion.
+      // Only completed searches count toward success rate.
       client
         .from('app_events')
-        .select('id', { count: 'exact', head: true })
+        .select('context')
         .eq('event_type', 'search')
-        .eq('context->>has_results', 'true')
+        .not('context->>has_results', 'is', null)
         .gte('created_at', ago7),
 
       // Daily event counts for last 30 days (searches + clicks)
@@ -188,9 +190,13 @@ export async function handler(event: {
       .sort((a, b) => b.activations - a.activations);
 
     // --- Success rate ---
-    const totalSearches7d = searches7d.count || 0;
-    const successRate7d = totalSearches7d > 0
-      ? Math.round(((successfulSearches7d.count || 0) / totalSearches7d) * 100)
+    // Only count searches where we received a result (has_results field present).
+    // Initiation events (no has_results) are excluded from both numerator and denominator.
+    const completedSearchRows = (successfulSearches7d.data || []) as Array<{ context: Record<string, unknown> }>;
+    const completedCount = completedSearchRows.length;
+    const successCount = completedSearchRows.filter(r => r.context?.has_results === true).length;
+    const successRate7d = completedCount > 0
+      ? Math.round((successCount / completedCount) * 100)
       : null;
 
     return {
