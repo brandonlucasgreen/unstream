@@ -73,14 +73,13 @@ export async function handler(event: {
         .eq('event_type', 'search')
         .gte('created_at', ago30),
 
-      // Searches with known outcome (has_results field present) last 7 days
-      // We fire two 'search' events: one on initiation (no has_results) and one on completion.
-      // Only completed searches count toward success rate.
+      // All search events (with context) last 7 days — filtered in JS for success rate.
+      // We fire two 'search' events per query: initiation (no has_results) and completion
+      // (has_results: true/false). We filter in JS to avoid flaky JSONB null checks.
       client
         .from('app_events')
         .select('context')
         .eq('event_type', 'search')
-        .not('context->>has_results', 'is', null)
         .gte('created_at', ago7),
 
       // Daily event counts for last 30 days (searches + clicks)
@@ -190,11 +189,12 @@ export async function handler(event: {
       .sort((a, b) => b.activations - a.activations);
 
     // --- Success rate ---
-    // Only count searches where we received a result (has_results field present).
-    // Initiation events (no has_results) are excluded from both numerator and denominator.
-    const completedSearchRows = (successfulSearches7d.data || []) as Array<{ context: Record<string, unknown> }>;
-    const completedCount = completedSearchRows.length;
-    const successCount = completedSearchRows.filter(r => r.context?.has_results === true).length;
+    // Filter in JS: only count events where has_results is present (completion events).
+    // Initiation events have no has_results field and are excluded from both sides.
+    const allSearchRows7d = (successfulSearches7d.data || []) as Array<{ context: Record<string, unknown> | null }>;
+    const completedRows = allSearchRows7d.filter(r => r.context != null && 'has_results' in r.context);
+    const completedCount = completedRows.length;
+    const successCount = completedRows.filter(r => r.context?.has_results === true).length;
     const successRate7d = completedCount > 0
       ? Math.round((successCount / completedCount) * 100)
       : null;
