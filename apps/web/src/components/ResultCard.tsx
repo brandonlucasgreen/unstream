@@ -614,7 +614,7 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
                   <span className="font-medium text-text-primary">Save artists &amp; get release alerts</span>
                   {' '}with the free{' '}
                   <a
-                    href="https://github.com/brandonlucasgreen/unstream/releases/latest/download/Unstream.dmg"
+                    href="https://github.com/brandonlucasgreen/unstream/releases/latest"
                     className="text-accent-primary hover:underline"
                     onClick={(e) => { e.stopPropagation(); analytics.trackDownload(); }}
                   >
