@@ -1,8 +1,18 @@
+import { useEffect } from 'react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { analytics } from '../services/analytics';
 
 export function ExtensionPage() {
+  useEffect(() => {
+    document.title = 'Browser Extension — Detect & support artists while you listen | Unstream';
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute('content', 'Free browser extension that detects what music is playing and shows you how to support artists on Bandcamp, Mirlo, and other platforms. Available for Chrome and Firefox.');
+    }
+    return () => { document.title = 'Unstream - Support artists directly'; };
+  }, []);
+
   return (
     <div className="min-h-screen">
 
@@ -95,7 +105,7 @@ export function ExtensionPage() {
               Unstream for macOS sits in your menu bar and detects what's playing in Spotify or Apple Music — no browser needed.
             </p>
             <a
-              href="https://github.com/brandonlucasgreen/unstream/releases/latest/download/Unstream.dmg"
+              href="https://github.com/brandonlucasgreen/unstream/releases/latest"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-surface border border-border text-text-primary hover:bg-surface-secondary transition-colors font-medium"
               onClick={() => analytics.trackDownload()}
             >
