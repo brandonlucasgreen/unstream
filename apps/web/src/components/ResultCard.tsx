@@ -626,7 +626,7 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-accent-primary hover:underline"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => { e.stopPropagation(); analytics.trackDownload(); }}
                   >
                     Chrome
                   </a>
@@ -636,7 +636,7 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-accent-primary hover:underline"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => { e.stopPropagation(); analytics.trackDownload(); }}
                   >
                     Firefox
                   </a>

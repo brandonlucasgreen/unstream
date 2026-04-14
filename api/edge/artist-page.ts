@@ -102,6 +102,17 @@ function generateArtistPageHtml(
       return info && info.category !== 'social';
     });
   const platformNames = allPlatforms.map(p => PLATFORM_INFO[p.sourceId]?.name).filter(Boolean);
+
+  // Build title suffix from actual platforms (keep it short for SERPs)
+  let titlePlatforms: string;
+  if (platformNames.length === 0) {
+    titlePlatforms = 'alternative platforms';
+  } else if (platformNames.length <= 2) {
+    titlePlatforms = platformNames.join(' &amp; ');
+  } else {
+    titlePlatforms = `${platformNames[0]} &amp; more`;
+  }
+
   let description: string;
   if (platformNames.length === 0) {
     description = `Find ${artistName} on alternative music platforms. Support artists directly outside streaming.`;
@@ -199,18 +210,18 @@ function generateArtistPageHtml(
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${escapedName} on Bandcamp &amp; alternative platforms | Unstream</title>
+  <title>${escapedName} on ${titlePlatforms} | Unstream</title>
   <meta name="description" content="${escapeHtml(description)}">
   <link rel="canonical" href="${canonicalUrl}">
   <meta property="og:type" content="profile">
   <meta property="og:url" content="${canonicalUrl}">
-  <meta property="og:title" content="${escapedName} on Bandcamp &amp; alternative platforms | Unstream">
+  <meta property="og:title" content="${escapedName} on ${titlePlatforms} | Unstream">
   <meta property="og:description" content="${escapeHtml(description)}">
   <meta property="og:site_name" content="Unstream">
   ${imageUrl ? `<meta property="og:image" content="${escapeHtml(imageUrl)}">
   <meta property="og:image:alt" content="${escapedName}">` : ''}
   <meta name="twitter:card" content="${imageUrl ? 'summary_large_image' : 'summary'}">
-  <meta name="twitter:title" content="${escapedName} on Bandcamp &amp; alternative platforms | Unstream">
+  <meta name="twitter:title" content="${escapedName} on ${titlePlatforms} | Unstream">
   <meta name="twitter:description" content="${escapeHtml(description)}">
   ${imageUrl ? `<meta name="twitter:image" content="${escapeHtml(imageUrl)}">` : ''}
   <script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>
