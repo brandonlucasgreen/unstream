@@ -205,7 +205,7 @@ export async function handler(event: {
       body: JSON.stringify({
         summary: {
           searches_today: searchesToday.count || 0,
-          searches_7d: totalSearches7d,
+          searches_7d: searches7d.count || 0,
           searches_30d: searches30d.count || 0,
           success_rate_7d: successRate7d,
           top_platform: platforms[0]?.platform || null,
