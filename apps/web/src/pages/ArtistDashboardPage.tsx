@@ -24,6 +24,21 @@ export function ArtistDashboardPage() {
   const [profiles, setProfiles] = useState<ClaimedProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
+
+  const handleShareProfile = async (slug: string) => {
+    const url = `https://unstream.stream/a/${slug}`;
+    const text = `Find my music on alternative platforms with Unstream`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'My Unstream page', text, url });
+      } catch { /* cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(url);
+      setCopiedSlug(slug);
+      setTimeout(() => setCopiedSlug(null), 2000);
+    }
+  };
 
   useEffect(() => {
     if (authLoading) return; // Wait for auth context to resolve
@@ -130,6 +145,27 @@ export function ArtistDashboardPage() {
                       >
                         View
                       </Link>
+                      <button
+                        onClick={() => handleShareProfile(profile.slug)}
+                        className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors flex items-center gap-1.5"
+                        title="Share your artist page"
+                      >
+                        {copiedSlug === profile.slug ? (
+                          <>
+                            <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Copied!
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                            </svg>
+                            Share
+                          </>
+                        )}
+                      </button>
                     </div>
                   </div>
                   <ArtistAnalytics slug={profile.slug} />

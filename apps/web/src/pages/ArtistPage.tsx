@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { SearchBar } from '../components/SearchBar';
 import { ResultCard } from '../components/ResultCard';
 
@@ -12,11 +12,29 @@ import { analytics } from '../services/analytics';
 export function ArtistPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const justClaimed = searchParams.get('claimed') !== null;
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEnriching, setIsEnriching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [artistName, setArtistName] = useState('');
+  const [claimBannerDismissed, setClaimBannerDismissed] = useState(false);
+  const [claimShareCopied, setClaimShareCopied] = useState(false);
+
+  const handleClaimShare = async () => {
+    const url = `https://unstream.stream/a/${slug}`;
+    const text = `Find my music on alternative platforms with Unstream`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `${displayName} on Unstream`, text, url });
+      } catch { /* cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(url);
+      setClaimShareCopied(true);
+      setTimeout(() => setClaimShareCopied(false), 2000);
+    }
+  };
 
   // Derive display name from slug as initial value
   const displayName = artistName || (slug?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || '');
@@ -24,10 +42,10 @@ export function ArtistPage() {
   // Update page title and meta tags
   useEffect(() => {
     if (displayName) {
-      document.title = `${displayName} on Unstream - Support artists directly`;
+      document.title = `${displayName} on Bandcamp & alternative platforms | Unstream`;
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) {
-        metaDesc.setAttribute('content', `Find ${displayName} on Bandcamp, Qobuz, and other ethical music platforms. Support artists directly.`);
+        metaDesc.setAttribute('content', `${displayName} is on Bandcamp and other alternative platforms. Find direct links and support them outside streaming.`);
       }
     }
     return () => {
@@ -189,6 +207,53 @@ export function ArtistPage() {
             isLoading={isLoading}
             initialQuery={displayName}
           />
+
+          {/* Post-claim success banner */}
+          {justClaimed && !claimBannerDismissed && (
+            <div className="mt-6 p-4 rounded-xl bg-green-500/10 border border-green-500/20">
+              <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-text-primary mb-1">
+                    Your page is live! Share it with your fans.
+                  </p>
+                  <p className="text-xs text-text-muted mb-3">
+                    Let your audience know they can find all your alternative platform links in one place.
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleClaimShare}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-primary text-white text-xs font-medium hover:bg-accent-primary/90 transition-colors"
+                    >
+                      {claimShareCopied ? (
+                        <>
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          Link copied!
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                          </svg>
+                          Share your page
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => setClaimBannerDismissed(true)}
+                      className="px-3 py-1.5 text-xs text-text-muted hover:text-text-primary transition-colors"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Error state */}
           {error && (
