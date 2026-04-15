@@ -23,6 +23,7 @@ const GuidePage = lazy(() => import('./pages/GuidePage.tsx').then(m => ({ defaul
 const DevelopersPage = lazy(() => import('./pages/DevelopersPage.tsx').then(m => ({ default: m.DevelopersPage })))
 const ChangelogPage = lazy(() => import('./pages/ChangelogPage.tsx').then(m => ({ default: m.ChangelogPage })))
 const ExtensionPage = lazy(() => import('./pages/ExtensionPage.tsx').then(m => ({ default: m.ExtensionPage })))
+const ImportPage = lazy(() => import('./pages/ImportPage.tsx').then(m => ({ default: m.ImportPage })))
 const AdminAnalyticsPage = lazy(() => import('./pages/AdminAnalyticsPage.tsx').then(m => ({ default: m.AdminAnalyticsPage })))
 
 function LoadingFallback() {
@@ -58,6 +59,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
             <Route path="/developers" element={<DevelopersPage />} />
             <Route path="/extension" element={<ExtensionPage />} />
+            <Route path="/import" element={<ImportPage />} />
             <Route path="/changelog" element={<ChangelogPage />} />
           </Routes>
         </Suspense>
