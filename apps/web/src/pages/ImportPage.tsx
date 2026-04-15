@@ -1,7 +1,18 @@
+import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 
 export function ImportPage() {
+  useEffect(() => {
+    document.title = 'Import Your Music Library — Find artists on direct-support platforms | Unstream';
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute('content', 'See which artists from your Spotify, Apple Music, or Last.fm library are available on Bandcamp, Mirlo, Faircamp, and other platforms that pay artists fairly.');
+    }
+    return () => { document.title = 'Unstream - Support artists directly'; };
+  }, []);
+
   return (
     <div className="min-h-screen">
 
@@ -70,18 +81,18 @@ export function ImportPage() {
               You can search for any artist right now, or install the browser extension to automatically detect artists as you listen.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <a
-                href="/"
+              <Link
+                to="/"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent-primary text-white hover:bg-accent-primary/90 transition-colors font-medium"
               >
                 Search for an artist
-              </a>
-              <a
-                href="/extension"
+              </Link>
+              <Link
+                to="/extension"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-surface border border-border text-text-primary hover:bg-surface-secondary transition-colors font-medium"
               >
                 Get the extension
-              </a>
+              </Link>
             </div>
           </div>
 
