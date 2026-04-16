@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>The Unstream Dispatch</title>
+    <link>https://unstream.stream</link>
+    <atom:link href="https://unstream.stream/dispatch.xml" rel="self" type="application/rss+xml" />
+    <description>Weekly music industry intelligence — platform news, streaming economics, and what it means for independent artists. Written by Unstream.</description>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 16 Apr 2026 00:01:17 GMT</lastBuildDate>
+
+  </channel>
+</rss>
