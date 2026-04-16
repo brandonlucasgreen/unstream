@@ -6,9 +6,9 @@ A weekly briefing of music industry news, written by Gail (Unstream's music indu
 
 1. A scheduled Claude Code **routine** (created via `/schedule`) runs every Friday.
 2. The routine reads `PROMPT.md` in this directory, does the research using web search, and writes a new markdown file at `data/dispatch/YYYY-Www.md`.
-3. The routine commits to a `claude/dispatch-YYYY-Www` branch and opens a pull request.
-4. Brandon reviews, refines, and merges the PR.
-5. On merge, Netlify rebuilds. `scripts/generate-dispatch-feed.ts` regenerates `apps/web/public/dispatch.xml` from all entries in this directory.
+3. The routine commits directly to `main` and pushes.
+4. Netlify rebuilds on push. `scripts/generate-dispatch-feed.ts` regenerates `apps/web/public/dispatch.xml` from all entries in this directory.
+5. Brandon reads the new dispatch in his RSS reader and makes any refinements as follow-up commits.
 
 ## Dispatch format
 

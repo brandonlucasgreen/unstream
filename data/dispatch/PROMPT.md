@@ -75,14 +75,17 @@ Brief note: what's confirmed, what's speculation, what's rumor. Readers should b
 
 ## Publishing workflow
 
-After writing the markdown file:
+After writing the markdown file, commit directly to `main` and push:
 
-1. Create a new branch: `claude/dispatch-YYYY-Www`
-2. Commit the file with message: `Add dispatch for YYYY-Www`
-3. Push the branch
-4. Open a pull request titled `Dispatch: Week of {Month D, YYYY}` with a short PR description summarizing the top 2–3 items.
+1. Stage `data/dispatch/YYYY-Www.md`
+2. Commit with message: `Add dispatch for YYYY-Www`
+3. Push to `main`
 
-Brandon will review, refine, and merge. Do **not** merge the PR yourself.
+That's it — no branch, no PR. Netlify will rebuild on push and regenerate `dispatch.xml`, which is what Brandon reads from his RSS reader. Any refinements happen as follow-up commits after he's read the dispatch.
+
+**Do not** open a PR. **Do not** create a feature branch. Commit straight to main.
+
+If you determine the week has genuinely no news to report, still create the dispatch file — write a short "quiet week" entry — and commit it. Don't skip a week silently, because the RSS feed is the signal that the pipeline is working.
 
 ## If a week is genuinely slow
 

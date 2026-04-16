@@ -108,6 +108,13 @@ function main() {
       continue;
     }
 
+    try {
+      toRfc822(fields.published);
+    } catch (e) {
+      console.warn(`Skipping ${file}: ${(e as Error).message}`);
+      continue;
+    }
+
     entries.push({
       slug: basename(file, '.md'),
       title: fields.title,
