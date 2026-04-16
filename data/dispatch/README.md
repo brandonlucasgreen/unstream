@@ -27,7 +27,7 @@ summary: "One-line teaser for the feed"
 
 Body is markdown. The body becomes the `<content:encoded>` of the RSS item.
 
-Set `draft: true` in frontmatter to exclude a dispatch from the feed (useful when a routine opens a PR and you want to hold it back from publishing while refining).
+Set `draft: true` in frontmatter to exclude a dispatch from the feed. Use this sparingly — the default workflow is "commit to main and publish." Do **not** open a PR to stage a draft; use `draft: true` only when Brandon has explicitly asked for one.
 
 ## Publishing pipeline
 
