@@ -73,6 +73,9 @@ function toRfc822(isoDate: string): string {
   // Interpret the date as 10:00 ET on that day (the publish time).
   // Using UTC -04:00 as a stable offset avoids DST surprises in the feed — RSS readers only care about ordering.
   const date = new Date(`${isoDate}T14:00:00Z`);
+  if (isNaN(date.getTime())) {
+    throw new Error(`Invalid published date: "${isoDate}" — use YYYY-MM-DD format`);
+  }
   return date.toUTCString();
 }
 
@@ -123,13 +126,15 @@ function main() {
   const itemsXml = entries
     .map((entry) => {
       const html = marked.parse(entry.bodyMarkdown, { async: false }) as string;
+      // Escape the CDATA terminator so body content can never break the XML structure.
+      const cdataSafe = html.replace(/]]>/g, ']]]]><![CDATA[>');
       return `    <item>
       <title>${escapeXml(entry.title)}</title>
       <link>${escapeXml(`${SITE_URL}/dispatch/${entry.slug}`)}</link>
       <guid isPermaLink="false">unstream-dispatch-${escapeXml(entry.slug)}</guid>
       <pubDate>${toRfc822(entry.published)}</pubDate>
       <description>${escapeXml(entry.summary)}</description>
-      <content:encoded><![CDATA[${html}]]></content:encoded>
+      <content:encoded><![CDATA[${cdataSafe}]]></content:encoded>
     </item>`;
     })
     .join('\n');
