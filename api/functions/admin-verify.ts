@@ -4,16 +4,19 @@
 import { getClient } from './db';
 import { authenticateAdmin, buildCorsHeaders } from './middleware';
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function handler(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body?: string;
 }) {
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: buildCorsHeaders(event.headers['origin'] || event.headers['Origin'], false), body: '' };
-  }
+  const origin = event.headers['origin'] || event.headers['Origin'];
+  const CORS_HEADERS = buildCorsHeaders(origin, false);
 
-  const CORS_HEADERS = buildCorsHeaders(event.headers['origin'] || event.headers['Origin'], false);
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+  }
 
   const admin = await authenticateAdmin(event.headers['authorization'] || event.headers['Authorization'] || undefined);
   if (!admin) {
@@ -132,6 +135,14 @@ export async function handler(event: {
       statusCode: 400,
       headers: CORS_HEADERS,
       body: JSON.stringify({ error: 'requestId is required' }),
+    };
+  }
+
+  if (!UUID_REGEX.test(requestId)) {
+    return {
+      statusCode: 400,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ error: 'requestId must be a UUID' }),
     };
   }
 
