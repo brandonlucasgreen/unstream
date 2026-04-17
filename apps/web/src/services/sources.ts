@@ -51,8 +51,8 @@ export const sources: Record<SourceId, Source> = {
     hasEmbed: false,
     searchUrlTemplate: 'https://bandwagon.fm/artists?q={query}',
     homepageUrl: 'https://bandwagon.fm',
-  },
     aiPolicy: 'unknown', // No public AI policy found
+  },
   faircamp: {
     id: 'faircamp',
     name: 'Faircamp',

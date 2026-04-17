@@ -9,6 +9,11 @@ interface SourceBadgeProps {
   isDirectLink?: boolean;
 }
 
+const AI_POLICY_TOOLTIPS: Partial<Record<string, string>> = {
+  bandcamp: 'Bandcamp explicitly banned AI-generated music in January 2026.',
+  qobuz: 'Qobuz has an AI Charter, detects/tags AI content, and excludes it from human-curated recommendations.',
+};
+
 export function SourceBadge({ source, url, isDirectLink }: SourceBadgeProps) {
   // If we have a direct link, show as verified even if source is normally searchOnly
   const isSearchOnly = isDirectLink ? false : (source.searchOnly ?? false);
@@ -97,9 +102,10 @@ export function SourceBadge({ source, url, isDirectLink }: SourceBadgeProps) {
           >
             {source.aiPolicy === 'banned' ? '🚫' : '🛡️'}
             <span className="ai-policy-tooltip">
-              {source.aiPolicy === 'banned'
-                ? 'Bandcamp explicitly banned AI-generated music in January 2026.'
-                : 'Qobuz has an AI Charter, detects/tags AI content, and excludes it from human-curated recommendations.'}
+              {AI_POLICY_TOOLTIPS[source.id] ??
+                (source.aiPolicy === 'banned'
+                  ? 'This platform has banned AI-generated music.'
+                  : 'This platform restricts or tags AI-generated music.')}
             </span>
           </span>
         )}
