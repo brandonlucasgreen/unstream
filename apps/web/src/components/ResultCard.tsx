@@ -486,8 +486,23 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
                   />
                 ))}
               </div>
+              {/* Badge legend — explains payout % and AI policy icons */}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-text-muted">
+                <span className="flex items-center gap-1">
+                  <span className="px-1 py-0.5 rounded bg-bg-secondary text-[10px] font-semibold">%</span>
+                  Artist's share of each sale
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="text-xs">🚫</span>
+                  AI-generated music banned
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="text-xs">🛡️</span>
+                  AI content restricted/tagged
+                </span>
+              </div>
             </div>
-          )}
+          )}}
 
           {categorizedPlatforms.patronage.length > 0 && (
             <div className="space-y-2">
