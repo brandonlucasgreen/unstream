@@ -48,6 +48,16 @@ struct ArtistResultView: View {
         supportListManager.isArtistSaved(artist.name)
     }
 
+    #if os(iOS)
+    private let headerIconButtonSize: CGFloat = 44
+    private let heartIconSize: CGFloat = 22
+    private let shareIconSize: CGFloat = 20
+    #else
+    private let headerIconButtonSize: CGFloat = 14
+    private let heartIconSize: CGFloat = 14
+    private let shareIconSize: CGFloat = 13
+    #endif
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             // Artist name with photo and save button
@@ -70,7 +80,9 @@ struct ArtistResultView: View {
                 Button(action: { supportListManager.toggleArtist(artist) }) {
                     Image(systemName: isSaved ? "heart.fill" : "heart")
                         .foregroundColor(isSaved ? .red : .secondary)
-                        .font(.system(size: 14))
+                        .font(.system(size: heartIconSize))
+                        .frame(width: headerIconButtonSize, height: headerIconButtonSize)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 #if os(macOS)
@@ -199,7 +211,9 @@ struct ArtistResultView: View {
         Button(action: shareArtistCard) {
             Image(systemName: "square.and.arrow.up")
                 .foregroundColor(.secondary)
-                .font(.system(size: 13))
+                .font(.system(size: shareIconSize))
+                .frame(width: headerIconButtonSize, height: headerIconButtonSize)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .help("Share this artist")
@@ -208,7 +222,9 @@ struct ArtistResultView: View {
         ShareLink(item: text) {
             Image(systemName: "square.and.arrow.up")
                 .foregroundColor(.secondary)
-                .font(.system(size: 13))
+                .font(.system(size: shareIconSize))
+                .frame(width: headerIconButtonSize, height: headerIconButtonSize)
+                .contentShape(Rectangle())
         }
         #endif
     }

@@ -16,24 +16,32 @@ struct SocialIconButton: View {
     // Platforms that have brand SVG icons
     private let brandIconPlatforms: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube", "bandcamp"]
 
+    #if os(iOS)
+    private let buttonSize: CGFloat = 44
+    private let iconSize: CGFloat = 20
+    #else
+    private let buttonSize: CGFloat = 28
+    private let iconSize: CGFloat = 14
+    #endif
+
     var body: some View {
         Button(action: openPlatform) {
             Group {
                 if brandIconPlatforms.contains(result.sourceId) {
                     BrandIcon(
                         platform: result.sourceId,
-                        size: 14,
+                        size: iconSize,
                         color: colorScheme == .dark ? .white : iconColor
                     )
                 } else {
                     Image(systemName: result.icon)
-                        .font(.system(size: 14))
+                        .font(.system(size: iconSize))
                         .foregroundColor(colorScheme == .dark ? .white : iconColor)
                 }
             }
-            .frame(width: 28, height: 28)
+            .frame(width: buttonSize, height: buttonSize)
             .background(iconColor.opacity(0.15))
-            .cornerRadius(14)
+            .cornerRadius(buttonSize / 2)
         }
         .buttonStyle(.plain)
         #if os(macOS)
