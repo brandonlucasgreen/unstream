@@ -2,14 +2,7 @@
 // Admin-only endpoint for reviewing artist verification requests.
 
 import { getClient } from './db';
-import { authenticateAdmin } from './middleware';
-
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-};
+import { authenticateAdmin, buildCorsHeaders } from './middleware';
 
 export async function handler(event: {
   httpMethod: string;
@@ -17,8 +10,10 @@ export async function handler(event: {
   body?: string;
 }) {
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { statusCode: 204, headers: buildCorsHeaders(event.headers['origin'] || event.headers['Origin'], false), body: '' };
   }
+
+  const CORS_HEADERS = buildCorsHeaders(event.headers['origin'] || event.headers['Origin'], false);
 
   const admin = await authenticateAdmin(event.headers['authorization'] || event.headers['Authorization'] || undefined);
   if (!admin) {
@@ -115,6 +110,14 @@ export async function handler(event: {
   }
 
   const { action, requestId, reviewerNotes } = body;
+
+  if (reviewerNotes && reviewerNotes.length > 2000) {
+    return {
+      statusCode: 400,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ error: 'reviewerNotes must be 2000 characters or fewer' }),
+    };
+  }
 
   if (!action || !['approve', 'reject'].includes(action)) {
     return {
