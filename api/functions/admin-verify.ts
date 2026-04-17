@@ -2,20 +2,18 @@
 // Admin-only endpoint for reviewing artist verification requests.
 
 import { getClient } from './db';
-import { authenticateAdmin } from './middleware';
+import { authenticateAdmin, buildCorsHeaders } from './middleware';
 
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-};
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function handler(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body?: string;
 }) {
+  const origin = event.headers['origin'] || event.headers['Origin'];
+  const CORS_HEADERS = buildCorsHeaders(origin, false);
+
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   }
@@ -42,7 +40,7 @@ export async function handler(event: {
   if (event.httpMethod === 'GET') {
     const { data, error } = await client
       .from('verification_requests')
-      .select('*')
+      .select('id, email, message, status, reviewer_notes, created_at, reviewed_at, artist_id, user_id, artists(name, slug)')
       .order('status', { ascending: true }) // 'pending' sorts before others alphabetically
       .order('created_at', { ascending: false });
 
@@ -55,10 +53,37 @@ export async function handler(event: {
       };
     }
 
+    const requests = (data || []).map((r: {
+      id: string;
+      email: string;
+      message: string | null;
+      status: string;
+      reviewer_notes: string | null;
+      created_at: string;
+      reviewed_at: string | null;
+      artist_id: string;
+      user_id: string;
+      artists: { name: string; slug: string } | { name: string; slug: string }[] | null;
+    }) => {
+      const artist = Array.isArray(r.artists) ? r.artists[0] : r.artists;
+      return {
+        id: r.id,
+        artist_name: artist?.name ?? '(unknown)',
+        artist_slug: artist?.slug ?? '',
+        email: r.email,
+        website_url: null,
+        message: r.message,
+        status: r.status,
+        reviewer_notes: r.reviewer_notes,
+        created_at: r.created_at,
+        reviewed_at: r.reviewed_at,
+      };
+    });
+
     return {
       statusCode: 200,
       headers: CORS_HEADERS,
-      body: JSON.stringify({ requests: data || [] }),
+      body: JSON.stringify({ requests }),
     };
   }
 
@@ -89,6 +114,14 @@ export async function handler(event: {
 
   const { action, requestId, reviewerNotes } = body;
 
+  if (reviewerNotes && reviewerNotes.length > 2000) {
+    return {
+      statusCode: 400,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ error: 'reviewerNotes must be 2000 characters or fewer' }),
+    };
+  }
+
   if (!action || !['approve', 'reject'].includes(action)) {
     return {
       statusCode: 400,
@@ -102,6 +135,14 @@ export async function handler(event: {
       statusCode: 400,
       headers: CORS_HEADERS,
       body: JSON.stringify({ error: 'requestId is required' }),
+    };
+  }
+
+  if (!UUID_REGEX.test(requestId)) {
+    return {
+      statusCode: 400,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ error: 'requestId must be a UUID' }),
     };
   }
 
@@ -131,48 +172,68 @@ export async function handler(event: {
   const now = new Date().toISOString();
 
   if (action === 'approve') {
-    // 1. Find the artist profile associated with this request
-    const { data: profile, error: profileError } = await client
+    // An artist_profiles row may not exist yet if the user submitted a manual
+    // review without first attempting the automated link-back claim flow.
+    const { data: existingProfile, error: profileLookupError } = await client
       .from('artist_profiles')
-      .select('id, artist_id')
-      .eq('id', request.artist_profile_id)
-      .single();
+      .select('id')
+      .eq('artist_id', request.artist_id)
+      .maybeSingle();
 
-    if (profileError || !profile) {
+    if (profileLookupError) {
+      console.error('[Admin] Failed to look up artist profile:', profileLookupError);
       return {
         statusCode: 500,
         headers: CORS_HEADERS,
-        body: JSON.stringify({ error: 'Artist profile not found for this request' }),
+        body: JSON.stringify({ error: 'Failed to look up artist profile' }),
       };
     }
 
-    // 2. Set verified_at on artist_profiles
-    const { error: verifyError } = await client
-      .from('artist_profiles')
-      .update({ verified_at: now })
-      .eq('id', profile.id);
+    if (existingProfile) {
+      const { error: verifyError } = await client
+        .from('artist_profiles')
+        .update({ verified_at: now })
+        .eq('id', existingProfile.id);
 
-    if (verifyError) {
-      console.error('[Admin] Failed to verify artist profile:', verifyError);
-      return {
-        statusCode: 500,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({ error: 'Failed to update artist profile' }),
-      };
+      if (verifyError) {
+        console.error('[Admin] Failed to verify artist profile:', verifyError);
+        return {
+          statusCode: 500,
+          headers: CORS_HEADERS,
+          body: JSON.stringify({ error: 'Failed to update artist profile' }),
+        };
+      }
+    } else {
+      const { error: createError } = await client
+        .from('artist_profiles')
+        .insert({
+          artist_id: request.artist_id,
+          user_id: request.user_id,
+          email: request.email,
+          website_url: null,
+          verified_at: now,
+        });
+
+      if (createError) {
+        console.error('[Admin] Failed to create artist profile:', createError);
+        return {
+          statusCode: 500,
+          headers: CORS_HEADERS,
+          body: JSON.stringify({ error: 'Failed to create artist profile' }),
+        };
+      }
     }
 
-    // 3. Update artists table match_confidence to 'claimed'
     const { error: artistError } = await client
       .from('artists')
       .update({ match_confidence: 'claimed' })
-      .eq('id', profile.artist_id);
+      .eq('id', request.artist_id);
 
     if (artistError) {
       console.error('[Admin] Failed to update artist match_confidence:', artistError);
       // Non-fatal: the profile is verified even if this fails
     }
 
-    // 4. Update the verification request status
     const { error: updateError } = await client
       .from('verification_requests')
       .update({

@@ -158,6 +158,16 @@ struct SupportEntryView: View {
     @State private var isHovering = false
     #endif
 
+    #if os(iOS)
+    private let iconButtonSize: CGFloat = 44
+    private let refreshIconSize: CGFloat = 18
+    private let heartIconSize: CGFloat = 20
+    #else
+    private let iconButtonSize: CGFloat = 14
+    private let refreshIconSize: CGFloat = 12
+    private let heartIconSize: CGFloat = 14
+    #endif
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 10) {
@@ -172,12 +182,14 @@ struct SupportEntryView: View {
                 if isRefreshing {
                     ProgressView()
                         .scaleEffect(0.6)
-                        .frame(width: 14, height: 14)
+                        .frame(width: iconButtonSize, height: iconButtonSize)
                 } else {
                     Button(action: onRefresh) {
                         Image(systemName: "arrow.clockwise")
                             .foregroundColor(.secondary)
-                            .font(.system(size: 12))
+                            .font(.system(size: refreshIconSize))
+                            .frame(width: iconButtonSize, height: iconButtonSize)
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     #if os(macOS)
@@ -189,7 +201,9 @@ struct SupportEntryView: View {
                 Button(action: onRemove) {
                     Image(systemName: "heart.fill")
                         .foregroundColor(.red)
-                        .font(.system(size: 14))
+                        .font(.system(size: heartIconSize))
+                        .frame(width: iconButtonSize, height: iconButtonSize)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 #if os(macOS)
@@ -285,23 +299,41 @@ struct SavedPlatformBadge: View {
         return Color(hex: hex) ?? .blue
     }
 
+    #if os(iOS)
+    private let socialBadgeSize: CGFloat = 44
+    private let socialIconSize: CGFloat = 20
+    private let badgeIconSize: CGFloat = 14
+    private let badgeFontSize: CGFloat = 14
+    private let badgePaddingH: CGFloat = 12
+    private let badgePaddingV: CGFloat = 10
+    private let badgeSpacing: CGFloat = 6
+    #else
+    private let socialBadgeSize: CGFloat = 28
+    private let socialIconSize: CGFloat = 14
+    private let badgeIconSize: CGFloat = 10
+    private let badgeFontSize: CGFloat = 11
+    private let badgePaddingH: CGFloat = 8
+    private let badgePaddingV: CGFloat = 4
+    private let badgeSpacing: CGFloat = 4
+    #endif
+
     var body: some View {
         Button(action: openPlatformURL) {
             if isSocialPlatform {
                 // Social platforms: icon only (circular)
-                platformIcon(size: 14)
-                    .frame(width: 28, height: 28)
+                platformIcon(size: socialIconSize)
+                    .frame(width: socialBadgeSize, height: socialBadgeSize)
                     .background(platformColor.opacity(0.15))
-                    .cornerRadius(14)
+                    .cornerRadius(socialBadgeSize / 2)
             } else {
                 // Regular platforms: icon + text
-                HStack(spacing: 4) {
-                    platformIcon(size: 10)
+                HStack(spacing: badgeSpacing) {
+                    platformIcon(size: badgeIconSize)
                     Text(platform.displayName)
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.system(size: badgeFontSize, weight: .medium))
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
+                .padding(.horizontal, badgePaddingH)
+                .padding(.vertical, badgePaddingV)
                 .background(platformColor.opacity(0.15))
                 .foregroundColor(platformColor)
                 .cornerRadius(6)
@@ -315,27 +347,17 @@ struct SavedPlatformBadge: View {
 
     @ViewBuilder
     private func platformIcon(size: CGFloat) -> some View {
-        #if os(macOS)
-        if brandIconPlatforms.contains(platform.sourceId),
-           let url = Bundle.main.url(forResource: platform.sourceId, withExtension: "svg"),
-           let nsImage = NSImage(contentsOf: url) {
-            Image(nsImage: nsImage)
-                .renderingMode(.template)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: size, height: size)
-                .foregroundColor(colorScheme == .dark ? .white : platformColor)
+        if brandIconPlatforms.contains(platform.sourceId) {
+            BrandIcon(
+                platform: platform.sourceId,
+                size: size,
+                color: colorScheme == .dark ? .white : platformColor
+            )
         } else {
             Image(systemName: platform.icon)
                 .font(.system(size: size))
                 .foregroundColor(colorScheme == .dark ? .white : platformColor)
         }
-        #else
-        // On iOS, use SF Symbols (BrandIcons could be used for custom shapes in future)
-        Image(systemName: platform.icon)
-            .font(.system(size: size))
-            .foregroundColor(colorScheme == .dark ? .white : platformColor)
-        #endif
     }
 
     private func openPlatformURL() {
@@ -355,17 +377,27 @@ struct NewReleaseBadge: View {
     @Environment(\.openURL) private var openURL
     #endif
 
+    #if os(iOS)
+    private let fontSize: CGFloat = 14
+    private let paddingH: CGFloat = 12
+    private let paddingV: CGFloat = 10
+    #else
+    private let fontSize: CGFloat = 11
+    private let paddingH: CGFloat = 8
+    private let paddingV: CGFloat = 4
+    #endif
+
     var body: some View {
         Button(action: openRelease) {
             HStack(spacing: 6) {
                 Image(systemName: "sparkles")
                     .foregroundColor(.yellow)
                 Text("New release: \(release.releaseName)")
-                    .font(.system(size: 11, weight: .medium))
+                    .font(.system(size: fontSize, weight: .medium))
                     .lineLimit(1)
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
+            .padding(.horizontal, paddingH)
+            .padding(.vertical, paddingV)
             .background(Color.yellow.opacity(0.15))
             .foregroundColor(.primary)
             .cornerRadius(6)

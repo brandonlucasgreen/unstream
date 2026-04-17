@@ -59,6 +59,9 @@ export function ClaimPage() {
   const [manualReviewMessage, setManualReviewMessage] = useState('');
   const [manualReviewSubmitting, setManualReviewSubmitting] = useState(false);
 
+  // Resend cooldown state
+  const [resendCooldown, setResendCooldown] = useState(0);
+
   const { session: authSession, isLoading: authLoading } = useAuth();
 
   const displayName = artistName || slug?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || '';
@@ -108,6 +111,25 @@ export function ClaimPage() {
       setError(error);
     } else {
       setStep('check-email');
+    }
+  }
+
+  async function handleResend() {
+    setError(null);
+    setLoading(true);
+    const redirectTo = `${window.location.origin}/claim/${slug}`;
+    const { error } = await signInWithMagicLink(email, redirectTo);
+    setLoading(false);
+    if (error) {
+      setError(error);
+    } else {
+      setResendCooldown(60);
+      const interval = setInterval(() => {
+        setResendCooldown(prev => {
+          if (prev <= 1) { clearInterval(interval); return 0; }
+          return prev - 1;
+        });
+      }, 1000);
     }
   }
 
@@ -396,6 +418,31 @@ export function ClaimPage() {
                 We sent a sign-in link to <strong className="text-text-primary">{email}</strong>.
                 Click the link to continue claiming your profile.
               </p>
+              <p className="text-xs text-text-muted">
+                Don't see it? Check your spam or junk folder.
+                {email.includes('privaterelay.appleid.com') && (
+                  <> If you used Apple's Hide My Email, delivery may take a few extra minutes.</>
+                )}
+              </p>
+              <div className="space-y-2">
+                <div>
+                  <button
+                    onClick={handleResend}
+                    disabled={resendCooldown > 0 || loading}
+                    className="text-sm text-accent-primary hover:underline disabled:opacity-50 disabled:no-underline"
+                  >
+                    {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend email'}
+                  </button>
+                </div>
+                <div>
+                  <button
+                    onClick={() => { setStep('email'); setEmail(''); setResendCooldown(0); }}
+                    className="text-xs text-text-muted hover:text-text-primary underline"
+                  >
+                    Use a different email
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 

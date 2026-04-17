@@ -17,18 +17,34 @@ struct PlatformBadge: View {
         result.sourceId == "bandcamp" && isBandcampFriday()
     }
 
+    #if os(iOS)
+    private let iconSize: CGFloat = 14
+    private let fontSize: CGFloat = 14
+    private let payoutFontSize: CGFloat = 12
+    private let paddingH: CGFloat = 12
+    private let paddingV: CGFloat = 10
+    private let spacing: CGFloat = 6
+    #else
+    private let iconSize: CGFloat = 10
+    private let fontSize: CGFloat = 11
+    private let payoutFontSize: CGFloat = 9
+    private let paddingH: CGFloat = 8
+    private let paddingV: CGFloat = 4
+    private let spacing: CGFloat = 4
+    #endif
+
     var body: some View {
         Button(action: openPlatform) {
-            HStack(spacing: 4) {
+            HStack(spacing: spacing) {
                 Image(systemName: result.icon)
-                    .font(.system(size: 10))
+                    .font(.system(size: iconSize))
                 Text(isSubtle ? "Search \(result.displayName)" : result.displayName)
-                    .font(.system(size: 11, weight: .medium))
+                    .font(.system(size: fontSize, weight: .medium))
 
                 // Payout percentage badge
                 if !isSubtle, let payout = displayPayout {
                     Text(payout)
-                        .font(.system(size: 9, weight: .semibold))
+                        .font(.system(size: payoutFontSize, weight: .semibold))
                         .padding(.horizontal, 3)
                         .padding(.vertical, 1)
                         .background(isBCFriday ? Color(hex: "#1DA0C3")!.opacity(0.2) : badgeColor.opacity(0.2))
@@ -38,12 +54,12 @@ struct PlatformBadge: View {
                 // BC Friday label
                 if !isSubtle && isBCFriday {
                     Text("BC Friday!")
-                        .font(.system(size: 9, weight: .bold))
+                        .font(.system(size: payoutFontSize, weight: .bold))
                         .foregroundColor(Color(hex: "#1DA0C3") ?? .blue)
                 }
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
+            .padding(.horizontal, paddingH)
+            .padding(.vertical, paddingV)
             .background(badgeColor.opacity(isSubtle ? 0.08 : 0.15))
             .foregroundColor(isSubtle ? badgeColor.opacity(0.7) : badgeColor)
             .cornerRadius(6)

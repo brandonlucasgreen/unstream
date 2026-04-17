@@ -1,20 +1,12 @@
 // Unstream Chrome Extension - Service Worker
 // Handles API calls, caching, badge updates, and release alerts
 
+import { ALLOWED_RELEASE_DOMAINS } from '../lib/constants.js';
+
 const API_BASE = 'https://unstream.stream/api';
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 const DEBOUNCE_MS = 2000; // 2 seconds debounce for same artist
 const RELEASE_CHECK_ALARM = 'releaseCheck';
-
-// Allowed domains for release URLs
-const ALLOWED_RELEASE_DOMAINS = [
-  'bandcamp.com',
-  'mirlo.space',
-  'qobuz.com',
-  'ampwall.com',
-  'faircamp.eu',
-  // Faircamp instances may be self-hosted, so also allow common patterns
-];
 
 function isAllowedReleaseUrl(url) {
   try {
