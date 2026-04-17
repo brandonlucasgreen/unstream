@@ -502,7 +502,7 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
                 </span>
               </div>
             </div>
-          )}}
+          )}
 
           {categorizedPlatforms.patronage.length > 0 && (
             <div className="space-y-2">
