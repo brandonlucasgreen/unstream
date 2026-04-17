@@ -9,6 +9,7 @@
     "generate:artists": "tsx scripts/generate-artist-list.ts",
     "generate:data": "tsx scripts/generate-artist-data.ts",
     "generate:social": "tsx scripts/generate-social-posts.ts",
+    "sync:bandcamp-dates": "npx tsx scripts/sync-bandcamp-dates.ts",
     "test": "cd apps/web && npx vitest run",
     "test:watch": "cd apps/web && npx vitest",
     "test:unit": "cd apps/web && npx vitest run tests/unit",

@@ -1,13 +1,7 @@
 // Unstream Chrome Extension - Popup Logic
 
-// Allowed domains for release URLs (must match service-worker.js)
-const ALLOWED_RELEASE_DOMAINS = [
-  'bandcamp.com',
-  'mirlo.space',
-  'qobuz.com',
-  'ampwall.com',
-  'faircamp.eu',
-];
+import { isBandcampFriday } from '../lib/bandcamp-friday.js';
+import { ALLOWED_RELEASE_DOMAINS, SOURCE_CONFIG, PAYOUT_PERCENTAGES } from '../lib/constants.js';
 
 function isAllowedReleaseUrl(url) {
   try {
@@ -21,37 +15,6 @@ function isAllowedReleaseUrl(url) {
     return false;
   }
 }
-
-// Source icons and names
-const SOURCE_CONFIG = {
-  bandcamp: { icon: '🎵', name: 'Bandcamp' },
-  qobuz: { icon: '🎧', name: 'Qobuz' },
-  jamcoop: { icon: '🎸', name: 'Jam.coop' },
-  officialsite: { icon: '🌐', name: 'Official Site' },
-  discogs: { icon: '📀', name: 'Discogs' },
-  mirlo: { icon: '🪺', name: 'Mirlo' },
-  faircamp: { icon: '⛺', name: 'Faircamp' },
-  bandwagon: { icon: '🚐', name: 'Bandwagon' },
-  nina: { icon: '🎵', name: 'Nina Protocol' },
-  patreon: { icon: '🎨', name: 'Patreon' },
-  kofi: { icon: '☕', name: 'Ko-fi' },
-  buymeacoffee: { icon: '☕', name: 'Buy Me a Coffee' },
-  ampwall: { icon: '🔊', name: 'Ampwall' },
-  hoopla: { icon: '📚', name: 'Hoopla' },
-  freegal: { icon: '📚', name: 'Freegal' },
-};
-
-// Artist payout percentages (matches web app sources.ts)
-const PAYOUT_PERCENTAGES = {
-  bandcamp: '80-85%',
-  mirlo: '86-90%',
-  ampwall: '92-95%',
-  faircamp: '90-97%',
-  patreon: '86-90%',
-  buymeacoffee: '~92%',
-  kofi: '92-97%',
-  qobuz: '~70%',
-};
 
 // Social icons - using inline SVG with explicit fill colors
 const SOCIAL_ICONS = {
