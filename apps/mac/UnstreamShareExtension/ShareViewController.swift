@@ -150,7 +150,7 @@ struct ShareSearchView: View {
                 onOpenUnstream: { openInUnstream(artist: artistName) }
             )
         case .empty(let name):
-            statusView(spinner: false, message: "No results found for "\(name)"")
+            statusView(spinner: false, message: "No results found for \"\(name)\"")
                 .safeAreaInset(edge: .bottom) { openUnstreamButton(artist: name) }
         case .networkError:
             statusView(spinner: false, message: "Search unavailable. Open Unstream to try again.")
