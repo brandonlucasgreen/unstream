@@ -1,5 +1,6 @@
 import UIKit
 import SwiftUI
+import SafariServices
 import UniformTypeIdentifiers
 
 // MARK: - API Models
@@ -70,12 +71,38 @@ class ShareSearchViewModel: ObservableObject {
     }
 
     @Published var searchState: SearchState = .extracting
+    @Published var isSaved = false
     private(set) var artistQuery = ""
 
     func search(for artist: String) {
         artistQuery = artist
         searchState = .loading(artist)
         Task { await performSearch(artist: artist) }
+    }
+
+    func saveArtist(name: String, platforms: [PlatformLinkData]) {
+        guard let defaults = UserDefaults(suiteName: "group.lol.bgreen.unstream") else { return }
+
+        struct PendingPlatform: Encodable {
+            let sourceId: String
+            let url: String
+        }
+        struct PendingArtist: Encodable {
+            let name: String
+            let imageUrl: String?
+            let platforms: [PendingPlatform]
+        }
+
+        let pending = PendingArtist(
+            name: name,
+            imageUrl: nil,
+            platforms: platforms.map { PendingPlatform(sourceId: $0.sourceId, url: $0.url) }
+        )
+
+        guard let data = try? JSONEncoder().encode(pending) else { return }
+        defaults.set(data, forKey: "pendingSaveArtist")
+        defaults.synchronize()
+        isSaved = true
     }
 
     private func performSearch(artist: String) async {
@@ -146,15 +173,14 @@ struct ShareSearchView: View {
             ResultsView(
                 artistName: artistName,
                 platforms: platforms,
+                isSaved: viewModel.isSaved,
                 onOpenURL: onOpenURL,
-                onOpenUnstream: { openInUnstream(artist: artistName) }
+                onSave: { viewModel.saveArtist(name: artistName, platforms: platforms) }
             )
         case .empty(let name):
             statusView(spinner: false, message: "No results found for \"\(name)\"")
-                .safeAreaInset(edge: .bottom) { openUnstreamButton(artist: name) }
         case .networkError:
-            statusView(spinner: false, message: "Search unavailable. Open Unstream to try again.")
-                .safeAreaInset(edge: .bottom) { openUnstreamButton(artist: viewModel.artistQuery) }
+            statusView(spinner: false, message: "Search unavailable. Check your connection and try again in Unstream.")
         }
     }
 
@@ -169,25 +195,6 @@ struct ShareSearchView: View {
         .frame(maxWidth: .infinity, minHeight: 100)
         .padding()
     }
-
-    private func openUnstreamButton(artist: String) -> some View {
-        Button { openInUnstream(artist: artist) } label: {
-            Label("Open in Unstream", systemImage: "arrow.up.right.square")
-                .font(.subheadline)
-        }
-        .buttonStyle(.bordered)
-        .padding(.bottom, 16)
-    }
-
-    private func openInUnstream(artist: String) {
-        guard !artist.isEmpty,
-              let encoded = artist.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "unstream://search?q=\(encoded)") else {
-            onDismiss()
-            return
-        }
-        onOpenURL(url)
-    }
 }
 
 // MARK: - Results View
@@ -195,8 +202,9 @@ struct ShareSearchView: View {
 private struct ResultsView: View {
     let artistName: String
     let platforms: [PlatformLinkData]
+    let isSaved: Bool
     let onOpenURL: (URL) -> Void
-    let onOpenUnstream: () -> Void
+    let onSave: () -> Void
 
     private var primary: [PlatformLinkData] {
         platforms.filter { allPlatformMeta[$0.sourceId]?.isSocial != true }
@@ -213,7 +221,7 @@ private struct ResultsView: View {
                 Divider()
                 platformRows
                 Divider()
-                openUnstreamRow
+                saveRow
             }
         }
     }
@@ -250,24 +258,22 @@ private struct ResultsView: View {
         }
     }
 
-    private var openUnstreamRow: some View {
-        Button(action: onOpenUnstream) {
+    private var saveRow: some View {
+        Button(action: onSave) {
             HStack {
-                Image(systemName: "arrow.up.right.square")
+                Image(systemName: isSaved ? "checkmark.circle.fill" : "plus.circle")
                     .frame(width: 36)
-                    .foregroundColor(.accentColor)
-                Text("Open full results in Unstream")
+                    .foregroundColor(isSaved ? .green : .accentColor)
+                Text(isSaved ? "Saved to Unstream" : "Save to Unstream")
                     .font(.body)
-                    .foregroundColor(.accentColor)
+                    .foregroundColor(isSaved ? .green : .accentColor)
                 Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
         }
         .buttonStyle(.plain)
+        .disabled(isSaved)
     }
 }
 
@@ -329,11 +335,13 @@ class ShareViewController: UIViewController {
         let rootView = ShareSearchView(
             viewModel: viewModel,
             onOpenURL: { [weak self] url in
-                self?.extensionContext?.open(url) { [weak self] _ in
-                    DispatchQueue.main.async {
-                        self?.extensionContext?.completeRequest(returningItems: nil)
-                    }
-                }
+                guard let self = self,
+                      url.scheme == "https" || url.scheme == "http" else { return }
+                // SFSafariViewController works reliably in share extensions for https URLs.
+                // The user taps Done in Safari to return to the extension overlay.
+                let safariVC = SFSafariViewController(url: url)
+                safariVC.dismissButtonStyle = .done
+                self.present(safariVC, animated: true)
             },
             onDismiss: { [weak self] in
                 self?.extensionContext?.completeRequest(returningItems: nil)
@@ -526,7 +534,7 @@ class ShareViewController: UIViewController {
             }
         }
 
-        // "Artist Name on Spotify" → after stripping suffix, return the name directly
+        // "Artist Name on Spotify" → after stripping suffix, use the remaining text directly
         if hadSuffix && !cleaned.isEmpty && !cleaned.contains("http") {
             return cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
         }

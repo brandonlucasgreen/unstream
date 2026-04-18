@@ -58,6 +58,20 @@ class SupportListManager: ObservableObject {
         entries.contains { $0.artistName.lowercased() == artistName.lowercased() }
     }
 
+    /// Called by the main app when it finds a `pendingSaveArtist` queued by the share extension.
+    func addEntryFromExtension(name: String, imageUrl: String?, platforms: [(sourceId: String, url: String)]) {
+        guard !entries.contains(where: { $0.artistName.lowercased() == name.lowercased() }) else { return }
+        let entry = SupportEntry(
+            id: UUID(),
+            artistName: name,
+            imageUrl: imageUrl,
+            platforms: platforms.map { SavedPlatform(sourceId: $0.sourceId, url: $0.url) },
+            dateAdded: Date()
+        )
+        entries.insert(entry, at: 0)
+        saveEntries()
+    }
+
     func toggleArtist(_ artist: ArtistResult) {
         if isArtistSaved(artist.name) {
             entries.removeAll { $0.artistName.lowercased() == artist.name.lowercased() }
