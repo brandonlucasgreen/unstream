@@ -31,6 +31,20 @@ struct PlatformMeta {
     let isSocial: Bool
 }
 
+// Returns true when the API has produced a generic search URL rather than a real artist page.
+// These links only appear when an artist hasn't claimed their profile; claimed profiles always
+// supply direct URLs, so this check lets those through while hiding useless search placeholders.
+private func isSearchOnlyURL(sourceId: String, url: String) -> Bool {
+    switch sourceId {
+    case "kofi":         return !url.contains("ko-fi.com/")
+    case "buymeacoffee": return url.contains("explore-creators")
+    case "ampwall":      return url.contains("explore?searchStyle")
+    case "hoopla":       return url.contains("/search?")
+    case "freegal":      return url.contains("/search-page/")
+    default:             return false
+    }
+}
+
 private let allPlatformMeta: [String: PlatformMeta] = [
     "bandcamp":     .init(name: "Bandcamp",        icon: "🎵", payoutPercent: "80–85%", isSocial: false),
     "mirlo":        .init(name: "Mirlo",           icon: "🪺", payoutPercent: "86–90%", isSocial: false),
@@ -148,17 +162,18 @@ struct ShareSearchView: View {
         VStack(spacing: 0) {
             HStack {
                 Text("Unstream")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold))
                 Spacer()
                 Button("Done", action: onDismiss)
-                    .font(.system(size: 15, weight: .medium))
+                    .font(.system(size: 17, weight: .medium))
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
 
             Divider()
             mainContent
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color(.systemBackground))
     }
 
@@ -207,7 +222,10 @@ private struct ResultsView: View {
     let onSave: () -> Void
 
     private var primary: [PlatformLinkData] {
-        platforms.filter { allPlatformMeta[$0.sourceId]?.isSocial != true }
+        platforms.filter {
+            allPlatformMeta[$0.sourceId]?.isSocial != true &&
+            !isSearchOnlyURL(sourceId: $0.sourceId, url: $0.url)
+        }
     }
 
     private var socialCount: Int {
