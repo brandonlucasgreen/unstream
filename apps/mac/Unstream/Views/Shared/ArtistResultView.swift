@@ -271,8 +271,8 @@ struct ArtistResultView: View {
         #if os(macOS)
         NSWorkspace.shared.open(url)
         #else
-        // Open mailto links in Safari sheet so user can compose in-app
-        safariItem = SafariURL(url: url)
+        // SFSafariViewController only accepts http/https, so route mailto: through UIApplication
+        UIApplication.shared.open(url)
         #endif
     }
 
