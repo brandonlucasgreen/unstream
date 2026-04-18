@@ -25,7 +25,7 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: 'https://mirlo.space/search?query={query}',
     homepageUrl: 'https://mirlo.space',
     artistPayoutPercent: '86-90%',
-    aiPolicy: 'unknown', // No AI music policy
+    aiPolicy: 'banned', // AI-generated music explicitly prohibited (mirlo.space/pages/content-policy)
   },
   ampwall: {
     id: 'ampwall',
@@ -39,7 +39,7 @@ export const sources: Record<SourceId, Source> = {
     searchOnly: true,
     homepageUrl: 'https://ampwall.com',
     artistPayoutPercent: '92-95%',
-    aiPolicy: 'unknown', // Positioned as "responsible" but no explicit AI ban
+    aiPolicy: 'banned', // AI-generated music strictly prohibited (ampwall.com/content-policy)
   },
   bandwagon: {
     id: 'bandwagon',
@@ -51,7 +51,7 @@ export const sources: Record<SourceId, Source> = {
     hasEmbed: false,
     searchUrlTemplate: 'https://bandwagon.fm/artists?q={query}',
     homepageUrl: 'https://bandwagon.fm',
-    aiPolicy: 'unknown', // No public AI policy found
+    aiPolicy: 'banned', // AI-generated content prohibited (bandwagon.fm/acceptable-use)
   },
   faircamp: {
     id: 'faircamp',

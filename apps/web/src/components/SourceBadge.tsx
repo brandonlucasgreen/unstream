@@ -11,6 +11,9 @@ interface SourceBadgeProps {
 
 const AI_POLICY_TOOLTIPS: Partial<Record<string, string>> = {
   bandcamp: 'Bandcamp explicitly banned AI-generated music in January 2026.',
+  ampwall: 'Ampwall strictly prohibits AI-generated music and AI-created images (ampwall.com/content-policy).',
+  mirlo: 'Mirlo prohibits AI-generated music (mirlo.space/pages/content-policy).',
+  bandwagon: 'Bandwagon prohibits AI-generated content, but allows electronic/algorithmic music (bandwagon.fm/acceptable-use).',
   qobuz: 'Qobuz has an AI Charter, detects/tags AI content, and excludes it from human-curated recommendations.',
 };
 
