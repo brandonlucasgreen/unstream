@@ -141,17 +141,7 @@ struct ArtistResultView: View {
                 }
             }
 
-            // Open in browser button
-            Button(action: { openInUnstream(artist: artist.name) }) {
-                HStack {
-                    Image(systemName: "arrow.up.right.square")
-                    Text("Open in browser")
-                }
-                .font(.caption)
-                .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.small)
+
 
             // Report issue link
             Button(action: { reportIssue(artist: artist) }) {
@@ -283,16 +273,6 @@ struct ArtistResultView: View {
         #else
         // SFSafariViewController crashes on non-http(s) URLs; hand mailto off to the system.
         UIApplication.shared.open(url)
-        #endif
-    }
-
-    private func openInUnstream(artist: String) {
-        guard let encodedQuery = artist.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "https://unstream.stream/?q=\(encodedQuery)") else { return }
-        #if os(macOS)
-        NSWorkspace.shared.open(url)
-        #else
-        safariItem = SafariURL(url: url)
         #endif
     }
 
