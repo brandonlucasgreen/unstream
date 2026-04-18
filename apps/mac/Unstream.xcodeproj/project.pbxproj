@@ -717,3 +717,4 @@
 	};
 	rootObject = 92F0EC298B5852597D2AC7A5 /* Project object */;
 }
+				6FDAA62519174D2D98B0818F /* SafariView.swift */,
