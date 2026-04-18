@@ -54,5 +54,12 @@
     "description": "An iOS app is in the works — search for artists, save your favorites, and get release alerts on your iPhone and iPad. Stay tuned.",
     "date": "2026-04-11",
     "announced": false
+  },
+  {
+    "id": "ai-policy-indicator",
+    "title": "AI music policy badges",
+    "description": "See which platforms ban or restrict AI-generated music right on the search results. Badges for banned (🚫) and AI-cautious (🛡️) platforms, with a legend at the bottom of each result.",
+    "date": "2026-04-17",
+    "announced": false
   }
 ]
