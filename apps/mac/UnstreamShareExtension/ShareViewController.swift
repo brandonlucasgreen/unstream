@@ -29,7 +29,11 @@ struct PlatformMeta {
     let icon: String
     let payoutPercent: String?
     let isSocial: Bool
+    var isManualSearch: Bool = false
 }
+
+// Platforms that only produce generic search URLs, not real artist pages
+private let manualSearchPlatforms: Set<String> = ["hoopla", "freegal"]
 
 private let allPlatformMeta: [String: PlatformMeta] = [
     "bandcamp":     .init(name: "Bandcamp",        icon: "🎵", payoutPercent: "80–85%", isSocial: false),
@@ -40,8 +44,8 @@ private let allPlatformMeta: [String: PlatformMeta] = [
     "patreon":      .init(name: "Patreon",         icon: "🎨", payoutPercent: "86–90%", isSocial: false),
     "buymeacoffee": .init(name: "Buy Me a Coffee", icon: "☕", payoutPercent: "~92%",   isSocial: false),
     "kofi":         .init(name: "Ko-fi",           icon: "🍵", payoutPercent: "92–97%", isSocial: false),
-    "hoopla":       .init(name: "Hoopla",          icon: "🎧", payoutPercent: nil,       isSocial: false),
-    "freegal":      .init(name: "Freegal",         icon: "🎵", payoutPercent: nil,       isSocial: false),
+    "hoopla":       .init(name: "Hoopla",          icon: "🎧", payoutPercent: nil,       isSocial: false, isManualSearch: true),
+    "freegal":      .init(name: "Freegal",         icon: "🎵", payoutPercent: nil,       isSocial: false, isManualSearch: true),
     "qobuz":        .init(name: "Qobuz",           icon: "💿", payoutPercent: "~70%",   isSocial: false),
     "beatport":     .init(name: "Beatport",        icon: "🎛️", payoutPercent: "55–70%", isSocial: false),
     "even":         .init(name: "EVEN",            icon: "🎤", payoutPercent: "~80%",   isSocial: false),
@@ -148,17 +152,18 @@ struct ShareSearchView: View {
         VStack(spacing: 0) {
             HStack {
                 Text("Unstream")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold))
                 Spacer()
                 Button("Done", action: onDismiss)
-                    .font(.system(size: 15, weight: .medium))
+                    .font(.system(size: 17, weight: .medium))
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
 
             Divider()
             mainContent
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color(.systemBackground))
     }
 
@@ -207,7 +212,10 @@ private struct ResultsView: View {
     let onSave: () -> Void
 
     private var primary: [PlatformLinkData] {
-        platforms.filter { allPlatformMeta[$0.sourceId]?.isSocial != true }
+        platforms.filter {
+            allPlatformMeta[$0.sourceId]?.isSocial != true &&
+            !manualSearchPlatforms.contains($0.sourceId)
+        }
     }
 
     private var socialCount: Int {
