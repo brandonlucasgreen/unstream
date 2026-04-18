@@ -281,7 +281,7 @@ struct SavedPlatformBadge: View {
     @Environment(\.colorScheme) var colorScheme
 
     #if os(iOS)
-    @Environment(\.openURL) private var openURL
+    @State private var safariItem: SafariURL?
     #endif
 
     private let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube"]
@@ -343,6 +343,9 @@ struct SavedPlatformBadge: View {
         #if os(macOS)
         .help("Open \(platform.displayName)")
         #endif
+        #if os(iOS)
+        .safariSheet(safariItem: $safariItem)
+        #endif
     }
 
     @ViewBuilder
@@ -365,7 +368,7 @@ struct SavedPlatformBadge: View {
         #if os(macOS)
         NSWorkspace.shared.open(url)
         #else
-        openURL(url)
+        safariItem = SafariURL(url: url)
         #endif
     }
 }
@@ -374,7 +377,7 @@ struct NewReleaseBadge: View {
     let release: NewRelease
 
     #if os(iOS)
-    @Environment(\.openURL) private var openURL
+    @State private var safariItem: SafariURL?
     #endif
 
     #if os(iOS)
@@ -406,6 +409,9 @@ struct NewReleaseBadge: View {
         #if os(macOS)
         .help("Open \(release.releaseName) on \(release.platform.capitalized)")
         #endif
+        #if os(iOS)
+        .safariSheet(safariItem: $safariItem)
+        #endif
     }
 
     private func openRelease() {
@@ -413,7 +419,7 @@ struct NewReleaseBadge: View {
         #if os(macOS)
         NSWorkspace.shared.open(url)
         #else
-        openURL(url)
+        safariItem = SafariURL(url: url)
         #endif
     }
 }

@@ -10,7 +10,7 @@ struct PlatformBadge: View {
     var onOpen: (() -> Void)? = nil
 
     #if os(iOS)
-    @Environment(\.openURL) private var openURL
+    @State private var safariItem: SafariURL?
     #endif
 
     private var isBCFriday: Bool {
@@ -72,6 +72,9 @@ struct PlatformBadge: View {
         #if os(macOS)
         .help(helpText)
         #endif
+        #if os(iOS)
+        .safariSheet(safariItem: $safariItem)
+        #endif
     }
 
     private var displayPayout: String? {
@@ -101,7 +104,7 @@ struct PlatformBadge: View {
             #if os(macOS)
             NSWorkspace.shared.open(url)
             #else
-            openURL(url)
+            safariItem = SafariURL(url: url)
             #endif
             onOpen?()
         }
