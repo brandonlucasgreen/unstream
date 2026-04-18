@@ -29,11 +29,21 @@ struct PlatformMeta {
     let icon: String
     let payoutPercent: String?
     let isSocial: Bool
-    var isManualSearch: Bool = false
 }
 
-// Platforms that only produce generic search URLs, not real artist pages
-private let manualSearchPlatforms: Set<String> = ["hoopla", "freegal"]
+// Returns true when the API has produced a generic search URL rather than a real artist page.
+// These links only appear when an artist hasn't claimed their profile; claimed profiles always
+// supply direct URLs, so this check lets those through while hiding useless search placeholders.
+private func isSearchOnlyURL(sourceId: String, url: String) -> Bool {
+    switch sourceId {
+    case "kofi":         return !url.contains("ko-fi.com/")
+    case "buymeacoffee": return url.contains("explore-creators")
+    case "ampwall":      return url.contains("explore?searchStyle")
+    case "hoopla":       return url.contains("/search?")
+    case "freegal":      return url.contains("/search-page/")
+    default:             return false
+    }
+}
 
 private let allPlatformMeta: [String: PlatformMeta] = [
     "bandcamp":     .init(name: "Bandcamp",        icon: "🎵", payoutPercent: "80–85%", isSocial: false),
@@ -44,8 +54,8 @@ private let allPlatformMeta: [String: PlatformMeta] = [
     "patreon":      .init(name: "Patreon",         icon: "🎨", payoutPercent: "86–90%", isSocial: false),
     "buymeacoffee": .init(name: "Buy Me a Coffee", icon: "☕", payoutPercent: "~92%",   isSocial: false),
     "kofi":         .init(name: "Ko-fi",           icon: "🍵", payoutPercent: "92–97%", isSocial: false),
-    "hoopla":       .init(name: "Hoopla",          icon: "🎧", payoutPercent: nil,       isSocial: false, isManualSearch: true),
-    "freegal":      .init(name: "Freegal",         icon: "🎵", payoutPercent: nil,       isSocial: false, isManualSearch: true),
+    "hoopla":       .init(name: "Hoopla",          icon: "🎧", payoutPercent: nil,       isSocial: false),
+    "freegal":      .init(name: "Freegal",         icon: "🎵", payoutPercent: nil,       isSocial: false),
     "qobuz":        .init(name: "Qobuz",           icon: "💿", payoutPercent: "~70%",   isSocial: false),
     "beatport":     .init(name: "Beatport",        icon: "🎛️", payoutPercent: "55–70%", isSocial: false),
     "even":         .init(name: "EVEN",            icon: "🎤", payoutPercent: "~80%",   isSocial: false),
@@ -214,7 +224,7 @@ private struct ResultsView: View {
     private var primary: [PlatformLinkData] {
         platforms.filter {
             allPlatformMeta[$0.sourceId]?.isSocial != true &&
-            !manualSearchPlatforms.contains($0.sourceId)
+            !isSearchOnlyURL(sourceId: $0.sourceId, url: $0.url)
         }
     }
 
