@@ -39,6 +39,7 @@
 		A3526462820B7494F5463BE2 /* UnstreamApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 913EEE8809001930E4F88F8C /* UnstreamApp.swift */; };
 		A8FD43FE100F214CA8E6241C /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE9E59C365D8F116C435B8BC /* EmptyStateView.swift */; };
 		A91A7A297319DD5233D5CAC3 /* ArtistResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94E30B61F5B6C06CA39DB0E2 /* ArtistResultView.swift */; };
+				D94BE1F5B5714834B4B654D5 /* SafariView.swift in Sources */,
 		AA1111111111111111111111 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222222222222222222222 /* KeychainHelper.swift */; };
 		AA3333333333333333333333 /* PlexService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4444444444444444444444 /* PlexService.swift */; };
 		B1BACADB228F567C2A0806F6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 529125F63F2294A642A38108 /* Assets.xcassets */; };
@@ -55,6 +56,7 @@
 		EAD31F1949071C4F694741C3 /* TipJarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752695EB82D70EEE00B921FA /* TipJarView.swift */; };
 		F20D83D3642078C9B2C45ED0 /* NowPlaying.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC8C8A39D8800BDBA893E0EA /* NowPlaying.swift */; };
 		F998779FA5383D13C309A824 /* PlatformBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC8A2405B5A74531E19338D9 /* PlatformBadge.swift */; };
+		D94BE1F5B5714834B4B654D5 /* SafariView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF41A4123839408D8320055C /* SafariView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -136,6 +138,7 @@
 		F8C60F297D83E962E0D769E7 /* SupportListTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportListTab.swift; sourceTree = "<group>"; };
 		PP222222222222222222222222 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		PP444444444444444444444444 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		AF41A4123839408D8320055C /* SafariView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
