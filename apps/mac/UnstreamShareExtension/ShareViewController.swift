@@ -110,11 +110,11 @@ class ShareViewController: UIViewController {
 
         let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         if let appURL = URL(string: "unstream://search?q=\(encodedQuery)") {
-            openURL(appURL)
-        }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
-            self?.close()
+            extensionContext?.open(appURL) { [weak self] _ in
+                DispatchQueue.main.async { self?.close() }
+            }
+        } else {
+            close()
         }
     }
 
@@ -233,21 +233,6 @@ class ShareViewController: UIViewController {
     }
 
     // MARK: - Helpers
-
-    /// Open a URL from a share extension via the responder chain.
-    /// This is the standard workaround since extensionContext?.open() is not
-    /// available in share extensions.
-    private func openURL(_ url: URL) {
-        var responder: UIResponder? = self
-        while let r = responder {
-            let selector = sel_registerName("openURL:")
-            if r.responds(to: selector) {
-                r.perform(selector, with: url)
-                return
-            }
-            responder = r.next
-        }
-    }
 
     private func close() {
         extensionContext?.completeRequest(returningItems: nil)
