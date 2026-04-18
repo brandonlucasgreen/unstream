@@ -1,12 +1,38 @@
 import UIKit
 import UniformTypeIdentifiers
+import UserNotifications
 
 class ShareViewController: UIViewController {
 
+    private let activityIndicator = UIActivityIndicatorView(style: .medium)
+    private let statusLabel = UILabel()
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.isHidden = true
+        setupUI()
         handleSharedItems()
+    }
+
+    private func setupUI() {
+        view.backgroundColor = .systemBackground
+
+        let stack = UIStackView(arrangedSubviews: [activityIndicator, statusLabel])
+        stack.axis = .vertical
+        stack.spacing = 10
+        stack.alignment = .center
+        stack.translatesAutoresizingMaskIntoConstraints = false
+
+        statusLabel.text = "Opening Unstream…"
+        statusLabel.font = .systemFont(ofSize: 15, weight: .medium)
+        statusLabel.textColor = .label
+
+        activityIndicator.startAnimating()
+
+        view.addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            stack.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
     }
 
     private func handleSharedItems() {
@@ -66,7 +92,6 @@ class ShareViewController: UIViewController {
     }
 
     private func handleSharedContent(url: URL?, text: String?) {
-        // Try direct extraction from URL
         let artistFromURL = url.flatMap { extractArtistFromURL($0) }
 
         if let artist = artistFromURL {
@@ -74,14 +99,12 @@ class ShareViewController: UIViewController {
             return
         }
 
-        // Try text extraction
         let artistFromText = text.flatMap { extractArtistFromText($0) }
         if let artist = artistFromText {
             saveAndOpen(query: artist)
             return
         }
 
-        // For Apple Music album/song URLs, try the iTunes Lookup API
         if let url = url, isAppleMusicURL(url), let itunesID = extractAppleMusicID(url) {
             lookupAppleMusicArtist(id: itunesID) { [weak self] artist in
                 DispatchQueue.main.async {
@@ -92,7 +115,6 @@ class ShareViewController: UIViewController {
             return
         }
 
-        // Last resort: use the raw URL
         saveAndOpen(query: url?.absoluteString ?? "")
     }
 
@@ -102,6 +124,8 @@ class ShareViewController: UIViewController {
             return
         }
 
+        statusLabel.text = "Searching for \(query)…"
+
         if let sharedDefaults = UserDefaults(suiteName: "group.lol.bgreen.unstream") {
             sharedDefaults.set(query, forKey: "pendingSearch")
             sharedDefaults.set(Date().timeIntervalSince1970, forKey: "pendingSearchTimestamp")
@@ -109,12 +133,42 @@ class ShareViewController: UIViewController {
         }
 
         let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        if let appURL = URL(string: "unstream://search?q=\(encodedQuery)") {
-            extensionContext?.open(appURL) { [weak self] _ in
-                DispatchQueue.main.async { self?.close() }
-            }
-        } else {
+        guard let appURL = URL(string: "unstream://search?q=\(encodedQuery)") else {
             close()
+            return
+        }
+
+        // Brief pause so the UI settles and the extension is properly active before
+        // attempting to switch to the main app.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            self?.extensionContext?.open(appURL) { [weak self] success in
+                DispatchQueue.main.async {
+                    if !success {
+                        // extensionContext.open() is not guaranteed to work for
+                        // com.apple.share-services extensions. Fire an immediate
+                        // notification so the user can reach Unstream in one tap.
+                        self?.scheduleSearchNotification(query: query)
+                    }
+                    self?.close()
+                }
+            }
+        }
+    }
+
+    // MARK: - Notification fallback
+
+    private func scheduleSearchNotification(query: String) {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            guard settings.authorizationStatus == .authorized else { return }
+
+            let content = UNMutableNotificationContent()
+            content.title = "Open in Unstream"
+            content.body = "Tap to search for \(query)"
+            content.sound = .default
+
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)
+            let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+            UNUserNotificationCenter.current().add(request)
         }
     }
 
@@ -125,10 +179,7 @@ class ShareViewController: UIViewController {
         return host == "music.apple.com" || host.hasSuffix(".music.apple.com")
     }
 
-    /// Extract the numeric ID from an Apple Music URL path
-    /// e.g. /us/album/step-into-the-ocean/1751803047 → "1751803047"
     private func extractAppleMusicID(_ url: URL) -> String? {
-        // The ID is the last numeric path component
         for component in url.pathComponents.reversed() {
             if component.allSatisfy(\.isNumber) && !component.isEmpty {
                 return component
@@ -137,8 +188,6 @@ class ShareViewController: UIViewController {
         return nil
     }
 
-    /// Look up an Apple Music item by its iTunes ID to get the artist name.
-    /// Uses the public iTunes Search API — no authentication needed.
     private func lookupAppleMusicArtist(id: String, completion: @escaping (String?) -> Void) {
         let lookupURL = URL(string: "https://itunes.apple.com/lookup?id=\(id)")!
         let task = URLSession.shared.dataTask(with: lookupURL) { data, _, error in
@@ -161,7 +210,6 @@ class ShareViewController: UIViewController {
         let host = url.host?.lowercased() ?? ""
         let pathComponents = url.pathComponents
 
-        // Bandcamp: artistname.bandcamp.com
         if host.hasSuffix(".bandcamp.com") {
             let artist = host.replacingOccurrences(of: ".bandcamp.com", with: "")
             if !artist.isEmpty && artist != "www" && artist != "daily" {
@@ -169,21 +217,17 @@ class ShareViewController: UIViewController {
             }
         }
 
-        // Spotify: can't resolve IDs client-side
         if host == "open.spotify.com" { return nil }
 
-        // Apple Music: only direct /artist/ links can be extracted from URL
         if isAppleMusicURL(url) {
             if let artistIndex = pathComponents.firstIndex(of: "artist"),
                artistIndex + 1 < pathComponents.count {
                 return pathComponents[artistIndex + 1]
                     .replacingOccurrences(of: "-", with: " ")
             }
-            // Album/song: handled by iTunes Lookup in handleSharedContent
             return nil
         }
 
-        // SoundCloud: soundcloud.com/artistname
         if host == "soundcloud.com" || host == "www.soundcloud.com" {
             if pathComponents.count >= 2 {
                 let artist = pathComponents[1]
@@ -196,7 +240,6 @@ class ShareViewController: UIViewController {
         if host == "music.youtube.com" { return nil }
         if host == "tidal.com" || host == "listen.tidal.com" { return nil }
 
-        // Mirlo: mirlo.space/artistname
         if host == "mirlo.space" || host == "www.mirlo.space" {
             if pathComponents.count >= 2 {
                 let artist = pathComponents[1]
