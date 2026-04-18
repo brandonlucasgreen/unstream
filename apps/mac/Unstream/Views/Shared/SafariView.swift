@@ -33,4 +33,10 @@ struct SafariSheetModifier: ViewModifier {
         }
     }
 }
+
+extension View {
+    func safariSheet(safariItem: Binding<SafariURL?>) -> some View {
+        modifier(SafariSheetModifier(safariItem: safariItem))
+    }
+}
 #endif
