@@ -728,13 +728,13 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
               )}
               {verifiedPlatforms.some(p => sources[p.sourceId]?.aiPolicy === 'banned') && (
                 <span className="flex items-center gap-1">
-                  <span className="text-xs">🚫</span>
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/></svg>
                   AI-generated music banned
                 </span>
               )}
               {verifiedPlatforms.some(p => sources[p.sourceId]?.aiPolicy === 'anti-ai') && (
                 <span className="flex items-center gap-1">
-                  <span className="text-xs">🛡️</span>
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
                   AI content restricted/tagged
                 </span>
               )}

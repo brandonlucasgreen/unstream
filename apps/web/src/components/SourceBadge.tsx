@@ -100,10 +100,14 @@ export function SourceBadge({ source, url, isDirectLink }: SourceBadgeProps) {
           <span
             className="ai-policy-badge relative text-[10px] font-semibold px-1 py-0.5 rounded cursor-help"
             style={{
-              backgroundColor: source.aiPolicy === 'banned' ? '#ef444430' : '#3b82f630',
+              backgroundColor: source.aiPolicy === 'banned' ? '#22c55e30' : '#f59e0b30',
             }}
           >
-            {source.aiPolicy === 'banned' ? '🚫' : '🛡️'}
+            {source.aiPolicy === 'banned' ? (
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/></svg>
+            ) : (
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
+            )}
             <span className="ai-policy-tooltip">
               {AI_POLICY_TOOLTIPS[source.id] ??
                 (source.aiPolicy === 'banned'
