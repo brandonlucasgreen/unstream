@@ -41,7 +41,7 @@ struct ArtistResultView: View {
     @EnvironmentObject var appState: AppState
 
     #if os(iOS)
-    @Environment(\.openURL) private var openURL
+    @State private var safariItem: SafariURL?
     #endif
 
     private var isSaved: Bool {
@@ -141,17 +141,7 @@ struct ArtistResultView: View {
                 }
             }
 
-            // Open in browser button
-            Button(action: { openInUnstream(artist: artist.name) }) {
-                HStack {
-                    Image(systemName: "arrow.up.right.square")
-                    Text("Open in browser")
-                }
-                .font(.caption)
-                .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.small)
+
 
             // Report issue link
             Button(action: { reportIssue(artist: artist) }) {
@@ -169,6 +159,9 @@ struct ArtistResultView: View {
         .padding(10)
         .background(cardBackgroundColor)
         .cornerRadius(8)
+        #if os(iOS)
+        .safariSheet(safariItem: $safariItem)
+        #endif
     }
 
     // MARK: - Subviews
@@ -258,16 +251,6 @@ struct ArtistResultView: View {
         return "Here's how you can support \(artist.name) directly: \(url)"
     }
 
-    private func openInUnstream(artist: String) {
-        guard let encodedQuery = artist.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "https://unstream.stream/?q=\(encodedQuery)") else { return }
-        #if os(macOS)
-        NSWorkspace.shared.open(url)
-        #else
-        openURL(url)
-        #endif
-    }
-
     private func reportIssue(artist: ArtistResult) {
         let platformList = artist.platforms.map { "- \($0.sourceId): \($0.url ?? "N/A")" }.joined(separator: "\n")
         let subject = "Issue Report: \(artist.name)"
@@ -288,7 +271,8 @@ struct ArtistResultView: View {
         #if os(macOS)
         NSWorkspace.shared.open(url)
         #else
-        openURL(url)
+        // Open mailto links in Safari sheet so user can compose in-app
+        safariItem = SafariURL(url: url)
         #endif
     }
 

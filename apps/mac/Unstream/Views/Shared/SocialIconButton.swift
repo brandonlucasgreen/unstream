@@ -10,7 +10,7 @@ struct SocialIconButton: View {
     @Environment(\.colorScheme) var colorScheme
 
     #if os(iOS)
-    @Environment(\.openURL) private var openURL
+    @State private var safariItem: SafariURL?
     #endif
 
     // Platforms that have brand SVG icons
@@ -47,6 +47,9 @@ struct SocialIconButton: View {
         #if os(macOS)
         .help("Open \(result.displayName)")
         #endif
+        #if os(iOS)
+        .safariSheet(safariItem: $safariItem)
+        #endif
     }
 
     private var iconColor: Color {
@@ -62,7 +65,7 @@ struct SocialIconButton: View {
             #if os(macOS)
             NSWorkspace.shared.open(url)
             #else
-            openURL(url)
+            safariItem = SafariURL(url: url)
             #endif
             onOpen?()
         }

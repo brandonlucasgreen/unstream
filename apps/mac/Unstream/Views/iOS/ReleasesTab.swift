@@ -78,12 +78,12 @@ struct ReleasesTab: View {
 
 private struct ReleaseRow: View {
     let release: NewRelease
-    @Environment(\.openURL) private var openURL
+    @State private var safariItem: SafariURL?
 
     var body: some View {
         Button {
             if let url = URL(string: release.releaseUrl) {
-                openURL(url)
+                safariItem = SafariURL(url: url)
             }
         } label: {
             HStack(spacing: 12) {
@@ -114,6 +114,7 @@ private struct ReleaseRow: View {
             .cornerRadius(10)
         }
         .buttonStyle(.plain)
+        .safariSheet(safariItem: $safariItem)
     }
 }
 #endif
