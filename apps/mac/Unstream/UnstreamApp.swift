@@ -50,6 +50,25 @@ class AppStateContainer: ObservableObject {
         #endif
     }
 
+    /// Check for an artist the share extension queued for saving (iOS).
+    func checkPendingSave() {
+        guard let defaults = UserDefaults(suiteName: "group.lol.bgreen.unstream"),
+              let data = defaults.data(forKey: "pendingSaveArtist") else { return }
+
+        defaults.removeObject(forKey: "pendingSaveArtist")
+        defaults.synchronize()
+
+        struct PendingPlatform: Decodable { let sourceId: String; let url: String }
+        struct PendingArtist: Decodable { let name: String; let imageUrl: String?; let platforms: [PendingPlatform] }
+
+        guard let pending = try? JSONDecoder().decode(PendingArtist.self, from: data) else { return }
+        supportListManager.addEntryFromExtension(
+            name: pending.name,
+            imageUrl: pending.imageUrl,
+            platforms: pending.platforms.map { ($0.sourceId, $0.url) }
+        )
+    }
+
     /// Check for a pending search from the share extension (iOS)
     func checkPendingSearch() {
         guard let sharedDefaults = UserDefaults(suiteName: "group.lol.bgreen.unstream"),
@@ -113,10 +132,12 @@ struct UnstreamApp: App {
                 }
                 .onAppear {
                     container.checkPendingSearch()
+                    container.checkPendingSave()
                 }
                 .onChange(of: scenePhase) { newPhase in
                     if newPhase == .active {
                         container.checkPendingSearch()
+                        container.checkPendingSave()
                     }
                 }
         }
