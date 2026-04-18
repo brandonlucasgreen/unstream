@@ -715,6 +715,31 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
               </div>
             )}
           </div>
+
+          {/* Badge legend — explains payout % and AI policy icons */}
+          {/* Check if any visible platform has aiPolicy or artistPayoutPercent */}
+          {verifiedPlatforms.some(p => sources[p.sourceId]?.artistPayoutPercent || sources[p.sourceId]?.aiPolicy) && (
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-text-muted pt-2 mt-2 border-t border-border/50">
+              {verifiedPlatforms.some(p => sources[p.sourceId]?.artistPayoutPercent) && (
+                <span className="flex items-center gap-1">
+                  <span className="px-1 py-0.5 rounded bg-bg-secondary text-[10px] font-semibold">%</span>
+                  Artist's share of each sale
+                </span>
+              )}
+              {verifiedPlatforms.some(p => sources[p.sourceId]?.aiPolicy === 'banned') && (
+                <span className="flex items-center gap-1">
+                  <span className="text-xs">🚫</span>
+                  AI-generated music banned
+                </span>
+              )}
+              {verifiedPlatforms.some(p => sources[p.sourceId]?.aiPolicy === 'anti-ai') && (
+                <span className="flex items-center gap-1">
+                  <span className="text-xs">🛡️</span>
+                  AI content restricted/tagged
+                </span>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

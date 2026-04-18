@@ -37,6 +37,7 @@ export interface Source {
   searchOnly?: boolean; // True if we can't verify the artist exists (shows "Search X" instead)
   homepageUrl: string;
   artistPayoutPercent?: string; // e.g., "80-85%" - artist's share of sales on this platform
+  aiPolicy?: 'banned' | 'anti-ai' | 'disclosed' | 'unknown' | 'self-hosted'; // AI-generated content policy
 }
 
 // Latest release info

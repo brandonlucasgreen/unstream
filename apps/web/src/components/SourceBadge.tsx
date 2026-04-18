@@ -9,6 +9,14 @@ interface SourceBadgeProps {
   isDirectLink?: boolean;
 }
 
+const AI_POLICY_TOOLTIPS: Partial<Record<string, string>> = {
+  bandcamp: 'Bandcamp explicitly banned AI-generated music in January 2026.',
+  ampwall: 'Ampwall strictly prohibits AI-generated music and AI-created images (ampwall.com/content-policy).',
+  mirlo: 'Mirlo prohibits AI-generated music (mirlo.space/pages/content-policy).',
+  bandwagon: 'Bandwagon prohibits AI-generated content, but allows electronic/algorithmic music (bandwagon.fm/acceptable-use).',
+  qobuz: 'Qobuz has an AI Charter, detects/tags AI content, and excludes it from human-curated recommendations.',
+};
+
 export function SourceBadge({ source, url, isDirectLink }: SourceBadgeProps) {
   // If we have a direct link, show as verified even if source is normally searchOnly
   const isSearchOnly = isDirectLink ? false : (source.searchOnly ?? false);
@@ -39,6 +47,7 @@ export function SourceBadge({ source, url, isDirectLink }: SourceBadgeProps) {
   const isBCFriday = source.id === 'bandcamp' && isBandcampFriday();
   const displayPayout = isBCFriday ? '~97%' : source.artistPayoutPercent;
   const hasPayoutPercent = !!source.artistPayoutPercent;
+  const hasAiPolicy = source.aiPolicy === 'banned' || source.aiPolicy === 'anti-ai';
 
   // Dark colors (EVEN #000000, Discogs #333333) are unreadable on dark backgrounds.
   // Use CSS variables so the badge text is legible in both themes.
@@ -86,6 +95,22 @@ export function SourceBadge({ source, url, isDirectLink }: SourceBadgeProps) {
           <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
+        )}
+        {hasAiPolicy && (
+          <span
+            className="ai-policy-badge relative text-[10px] font-semibold px-1 py-0.5 rounded cursor-help"
+            style={{
+              backgroundColor: source.aiPolicy === 'banned' ? '#ef444430' : '#3b82f630',
+            }}
+          >
+            {source.aiPolicy === 'banned' ? '🚫' : '🛡️'}
+            <span className="ai-policy-tooltip">
+              {AI_POLICY_TOOLTIPS[source.id] ??
+                (source.aiPolicy === 'banned'
+                  ? 'This platform has banned AI-generated music.'
+                  : 'This platform restricts or tags AI-generated music.')}
+            </span>
+          </span>
         )}
       </span>
     </a>
