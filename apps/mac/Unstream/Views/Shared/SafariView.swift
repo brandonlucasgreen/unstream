@@ -16,10 +16,16 @@ struct SafariView: UIViewControllerRepresentable {
     }
 }
 
-/// Wrapper to make URL identifiable for sheet presentation
+/// Wrapper to make URL identifiable for sheet presentation.
+/// Only http/https URLs are accepted — SFSafariViewController crashes on other schemes.
 struct SafariURL: Identifiable {
     let id = UUID()
     let url: URL
+
+    init?(url: URL) {
+        guard url.scheme == "http" || url.scheme == "https" else { return nil }
+        self.url = url
+    }
 }
 
 /// Modifier that presents an in-app Safari sheet when a URL is set.
