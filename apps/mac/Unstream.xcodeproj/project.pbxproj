@@ -215,6 +215,7 @@
 				2724397667CCEE30A098B9CE /* ColorExtensions.swift */,
 				BE9E59C365D8F116C435B8BC /* EmptyStateView.swift */,
 				CC8A2405B5A74531E19338D9 /* PlatformBadge.swift */,
+				6FDAA62519174D2D98B0818F /* SafariView.swift */,
 				7EFEA3443AD56B9950B43AAE /* SocialIconButton.swift */,
 				89D2DBDD53C2C9158EA698C4 /* SupportListView.swift */,
 				752695EB82D70EEE00B921FA /* TipJarView.swift */,
