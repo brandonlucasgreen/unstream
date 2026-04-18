@@ -345,12 +345,13 @@ async function setupReleaseAlerts() {
   const { releaseCheckState = {} } = await chrome.storage.local.get('releaseCheckState');
   const lastCheck = releaseCheckState.lastCheckDate;
   const now = Date.now();
+  const thirtyDays = 30 * 24 * 60 * 60 * 1000;
   const sevenDays = 7 * 24 * 60 * 60 * 1000;
 
-  // Prune expired releases (older than 7 days)
+  // Prune expired releases (older than 30 days)
   if (releaseCheckState.newReleases && releaseCheckState.newReleases.length > 0) {
     releaseCheckState.newReleases = releaseCheckState.newReleases.filter(
-      r => now - new Date(r.detectedAt).getTime() < sevenDays
+      r => now - new Date(r.detectedAt).getTime() < thirtyDays
     );
     await chrome.storage.local.set({ releaseCheckState });
   }
@@ -515,11 +516,11 @@ async function getNewReleases() {
   const { releaseCheckState = {} } = await chrome.storage.local.get('releaseCheckState');
   const releases = releaseCheckState.newReleases || [];
 
-  // Filter to only active releases (within 7 days of detection)
+  // Filter to only active releases (within 30 days of detection)
   const now = Date.now();
-  const sevenDays = 7 * 24 * 60 * 60 * 1000;
+  const thirtyDays = 30 * 24 * 60 * 60 * 1000;
   const activeReleases = releases.filter(
-    r => now - new Date(r.detectedAt).getTime() < sevenDays
+    r => now - new Date(r.detectedAt).getTime() < thirtyDays
   );
 
   return activeReleases;

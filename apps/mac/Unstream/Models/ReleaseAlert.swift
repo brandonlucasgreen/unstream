@@ -10,9 +10,9 @@ struct NewRelease: Codable, Identifiable {
     let platform: String  // "bandcamp", "faircamp", "mirlo", or "qobuz"
     let detectedAt: Date
 
-    /// Returns true if this release should still be displayed (within 7 days of detection)
+    /// Returns true if this release should still be displayed (within 30 days of detection)
     var isActive: Bool {
-        Date().timeIntervalSince(detectedAt) < 7 * 24 * 60 * 60
+        Date().timeIntervalSince(detectedAt) < 30 * 24 * 60 * 60
     }
 
     init(artistName: String, releaseName: String, releaseDate: Date, releaseUrl: String, platform: String) {
@@ -83,7 +83,7 @@ struct ReleaseCheckState: Codable {
         return releases.contains { $0.releaseName.lowercased() == releaseName.lowercased() }
     }
 
-    /// Remove expired new releases (older than 7 days)
+    /// Remove expired new releases (older than 30 days)
     mutating func pruneExpiredReleases() {
         newReleases = newReleases.filter { $0.isActive }
     }

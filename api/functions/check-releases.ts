@@ -71,12 +71,12 @@ function parseDateToISO(dateStr: string): string | null {
   return null;
 }
 
-// Check if release is within the last 8 days (slightly lenient for timezone/timing differences)
-function isWithinLastWeek(dateStr: string): boolean {
+// Check if release is within the last 30 days (slightly lenient for timezone/timing differences)
+function isWithinLastMonth(dateStr: string): boolean {
   const releaseDate = new Date(dateStr);
   const now = new Date();
   const daysDiff = (now.getTime() - releaseDate.getTime()) / (1000 * 60 * 60 * 24);
-  return daysDiff >= 0 && daysDiff <= 8;
+  return daysDiff >= 0 && daysDiff <= 31;
 }
 
 // Check Bandcamp for latest release
@@ -372,10 +372,10 @@ async function checkAllPlatforms(platforms: PlatformUrls): Promise<ReleaseResult
     platforms.qobuz ? checkQobuz(platforms.qobuz) : Promise.resolve(null),
   ]);
 
-  // Collect successful results that are within the last 7 days
+  // Collect successful results that are within the last 30 days
   for (const check of checks) {
     if (check.status === 'fulfilled' && check.value) {
-      if (isWithinLastWeek(check.value.releaseDate)) {
+      if (isWithinLastMonth(check.value.releaseDate)) {
         results.push(check.value);
       }
     }
