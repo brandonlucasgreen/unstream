@@ -29,6 +29,8 @@ targets:
           - "Platform/macOS/**"
           - "Views/macOS/**"
           - "Views/iOS/**"
+          - "Info-macOS.plist"
+          - "Info-iOS.plist"
       - path: Unstream/Platform/macOS
         destinationFilters: [macOS]
       - path: Unstream/Views/macOS
@@ -40,47 +42,18 @@ targets:
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: lol.bgreen.Unstream
       PRODUCT_NAME: Unstream
-      INFOPLIST_FILE: Unstream/Info.plist
+      "INFOPLIST_FILE[sdk=macosx*]": Unstream/Info-macOS.plist
+      "INFOPLIST_FILE[sdk=iphoneos*]": Unstream/Info-iOS.plist
+      "INFOPLIST_FILE[sdk=iphonesimulator*]": Unstream/Info-iOS.plist
       CODE_SIGN_STYLE: Automatic
       DEVELOPMENT_TEAM: "CV926C8KS8"
-      CODE_SIGN_ENTITLEMENTS:
-        "[sdk=macosx*]": Unstream/Unstream-macOS.entitlements
-        "[sdk=iphoneos*]": Unstream/Unstream-iOS.entitlements
-        "[sdk=iphonesimulator*]": Unstream/Unstream-iOS.entitlements
+      "CODE_SIGN_ENTITLEMENTS[sdk=macosx*]": Unstream/Unstream-macOS.entitlements
+      "CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]": Unstream/Unstream-iOS.entitlements
+      "CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]": Unstream/Unstream-iOS.entitlements
       ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     dependencies:
       - target: UnstreamShareExtension
         destinationFilters: [iOS]
-    info:
-      path: Unstream/Info.plist
-      properties:
-        CFBundleName: Unstream
-        CFBundleDisplayName: Unstream
-        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
-        CFBundleVersion: "9"
-        CFBundleShortVersionString: "3.0.0"
-        CFBundlePackageType: APPL
-        CFBundleExecutable: $(EXECUTABLE_NAME)
-        NSHighResolutionCapable: true
-        NSHumanReadableCopyright: "Copyright 2025-2026 brandon lucas green"
-        NSAppleEventsUsageDescription: "Unstream needs to check what music is playing so it can find the artist on ethical platforms."
-        CFBundleURLTypes:
-          - CFBundleURLSchemes:
-              - unstream
-            CFBundleURLName: lol.bgreen.Unstream
-        BGTaskSchedulerPermittedIdentifiers:
-          - lol.bgreen.Unstream.releaseCheck
-        UILaunchScreen:
-          UIColorName: ""
-        UISupportedInterfaceOrientations:
-          - UIInterfaceOrientationPortrait
-          - UIInterfaceOrientationLandscapeLeft
-          - UIInterfaceOrientationLandscapeRight
-        UISupportedInterfaceOrientations~ipad:
-          - UIInterfaceOrientationPortrait
-          - UIInterfaceOrientationPortraitUpsideDown
-          - UIInterfaceOrientationLandscapeLeft
-          - UIInterfaceOrientationLandscapeRight
 
   UnstreamShareExtension:
     type: app-extension
