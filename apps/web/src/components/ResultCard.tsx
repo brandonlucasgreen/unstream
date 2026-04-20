@@ -40,6 +40,9 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
   const [reportText, setReportText] = useState('');
   const [shareCopied, setShareCopied] = useState(false);
 
+  // Fallback to 'other' source for unknown/dynamic sourceIds (e.g. other_*)
+  const getSource = (sourceId: SourceId) => sources[sourceId] ?? sources['other'];
+
   // Helper to check if a URL is a direct link vs a search URL
   const isDirectLink = (url: string, sourceId: SourceId): boolean => {
     // If the source isn't searchOnly, it's always direct
@@ -52,7 +55,7 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
   // Separate verified matches from search-only links
   // A platform is verified if it's not searchOnly OR if we have a direct link to it
   const verifiedPlatforms = result.platforms.filter(p =>
-    !sources[p.sourceId]?.searchOnly || isDirectLink(p.url, p.sourceId)
+    !getSource(p.sourceId)?.searchOnly || isDirectLink(p.url, p.sourceId)
   );
 
   // Collect platforms that have latest release info
@@ -122,7 +125,7 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
   };
 
   const searchOnlyPlatforms = result.platforms.filter(p =>
-    sources[p.sourceId]?.searchOnly && !isDirectLink(p.url, p.sourceId)
+    getSource(p.sourceId)?.searchOnly && !isDirectLink(p.url, p.sourceId)
   );
 
   const handleReportSubmit = (e: React.MouseEvent) => {
@@ -158,6 +161,10 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
     }
   };
 
+  const allKnownSourceIds = new Set(
+    Object.values(sourceCategories).flatMap(cat => cat.sources as SourceId[])
+  );
+
   // Group verified platforms by category
   const categorizedPlatforms = {
     marketplace: verifiedPlatforms.filter(p =>
@@ -177,6 +184,10 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
     ),
     social: verifiedPlatforms.filter(p =>
       sourceCategories.social.sources.includes(p.sourceId)
+    ),
+    // Catch-all for artist-added custom links (other, other_*, or any unknown sourceId)
+    curated: verifiedPlatforms.filter(p =>
+      !allKnownSourceIds.has(p.sourceId) || sourceCategories.curated.sources.includes(p.sourceId)
     ),
   };
 
@@ -409,17 +420,17 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium transition-colors hover:opacity-80"
                         style={{
-                          backgroundColor: `${sources[platform.sourceId].color}20`,
-                          color: sources[platform.sourceId].color,
+                          backgroundColor: `${getSource(platform.sourceId).color}20`,
+                          color: getSource(platform.sourceId).color,
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          analytics.trackPlatformClick(sources[platform.sourceId].name);
+                          analytics.trackPlatformClick(platform.displayName ?? getSource(platform.sourceId).name);
                           if (result.claimedSlug) analytics.trackArtistLinkClick(result.claimedSlug, platform.sourceId);
                         }}
                       >
-                        <span>{sources[platform.sourceId].icon}</span>
-                        <span>{sources[platform.sourceId].name}</span>
+                        <span>{getSource(platform.sourceId).icon}</span>
+                        <span>{platform.displayName ?? getSource(platform.sourceId).name}</span>
                       </a>
                     ))}
                   </div>
@@ -480,9 +491,10 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
                 {categorizedPlatforms.marketplace.map(platform => (
                   <SourceBadge
                     key={platform.sourceId}
-                    source={sources[platform.sourceId]}
+                    source={getSource(platform.sourceId)}
                     url={platform.url}
                     isDirectLink={isDirectLink(platform.url, platform.sourceId)}
+                    displayName={platform.displayName}
                   />
                 ))}
               </div>
@@ -498,9 +510,10 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
                 {categorizedPlatforms.patronage.map(platform => (
                   <SourceBadge
                     key={platform.sourceId}
-                    source={sources[platform.sourceId]}
+                    source={getSource(platform.sourceId)}
                     url={platform.url}
                     isDirectLink={isDirectLink(platform.url, platform.sourceId)}
+                    displayName={platform.displayName}
                   />
                 ))}
               </div>
@@ -516,9 +529,10 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
                 {categorizedPlatforms.decentralized.map(platform => (
                   <SourceBadge
                     key={platform.sourceId}
-                    source={sources[platform.sourceId]}
+                    source={getSource(platform.sourceId)}
                     url={platform.url}
                     isDirectLink={isDirectLink(platform.url, platform.sourceId)}
+                    displayName={platform.displayName}
                   />
                 ))}
               </div>
@@ -534,9 +548,10 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
                 {categorizedPlatforms.library.map(platform => (
                   <SourceBadge
                     key={platform.sourceId}
-                    source={sources[platform.sourceId]}
+                    source={getSource(platform.sourceId)}
                     url={platform.url}
                     isDirectLink={isDirectLink(platform.url, platform.sourceId)}
+                    displayName={platform.displayName}
                   />
                 ))}
               </div>
@@ -552,9 +567,29 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
                 {categorizedPlatforms.official.map(platform => (
                   <SourceBadge
                     key={platform.sourceId}
-                    source={sources[platform.sourceId]}
+                    source={getSource(platform.sourceId)}
                     url={platform.url}
                     isDirectLink={isDirectLink(platform.url, platform.sourceId)}
+                    displayName={platform.displayName}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {categorizedPlatforms.curated.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="text-xs font-medium text-text-muted uppercase tracking-wider">
+                Links
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {categorizedPlatforms.curated.map(platform => (
+                  <SourceBadge
+                    key={platform.sourceId}
+                    source={getSource(platform.sourceId)}
+                    url={platform.url}
+                    isDirectLink={isDirectLink(platform.url, platform.sourceId)}
+                    displayName={platform.displayName}
                   />
                 ))}
               </div>
@@ -575,10 +610,10 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-8 h-8 flex items-center justify-center rounded-full bg-bg-secondary hover:bg-bg-tertiary transition-colors"
-                    title={sources[platform.sourceId].name}
+                    title={platform.displayName ?? getSource(platform.sourceId).name}
                     onClick={(e) => {
                       e.stopPropagation();
-                      analytics.trackPlatformClick(sources[platform.sourceId].name);
+                      analytics.trackPlatformClick(platform.displayName ?? getSource(platform.sourceId).name);
                       if (result.claimedSlug) analytics.trackArtistLinkClick(result.claimedSlug, platform.sourceId);
                     }}
                   >
@@ -596,8 +631,9 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
               {searchOnlyPlatforms.map(platform => (
                 <SourceBadge
                   key={platform.sourceId}
-                  source={sources[platform.sourceId]}
+                  source={getSource(platform.sourceId)}
                   url={platform.url}
+                  displayName={platform.displayName}
                 />
               ))}
             </div>
@@ -718,21 +754,21 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
 
           {/* Badge legend — explains payout % and AI policy icons */}
           {/* Check if any visible platform has aiPolicy or artistPayoutPercent */}
-          {verifiedPlatforms.some(p => sources[p.sourceId]?.artistPayoutPercent || sources[p.sourceId]?.aiPolicy) && (
+          {verifiedPlatforms.some(p => getSource(p.sourceId)?.artistPayoutPercent || getSource(p.sourceId)?.aiPolicy) && (
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-text-muted pt-2 mt-2 border-t border-border/50">
-              {verifiedPlatforms.some(p => sources[p.sourceId]?.artistPayoutPercent) && (
+              {verifiedPlatforms.some(p => getSource(p.sourceId)?.artistPayoutPercent) && (
                 <span className="flex items-center gap-1">
                   <span className="px-1 py-0.5 rounded bg-bg-secondary text-[10px] font-semibold">%</span>
                   Artist's share of each sale
                 </span>
               )}
-              {verifiedPlatforms.some(p => sources[p.sourceId]?.aiPolicy === 'banned') && (
+              {verifiedPlatforms.some(p => getSource(p.sourceId)?.aiPolicy === 'banned') && (
                 <span className="flex items-center gap-1">
                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/></svg>
                   AI-generated music banned
                 </span>
               )}
-              {verifiedPlatforms.some(p => sources[p.sourceId]?.aiPolicy === 'anti-ai') && (
+              {verifiedPlatforms.some(p => getSource(p.sourceId)?.aiPolicy === 'anti-ai') && (
                 <span className="flex items-center gap-1">
                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
                   AI content restricted/tagged

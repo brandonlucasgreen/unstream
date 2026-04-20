@@ -23,7 +23,8 @@ export type SourceId =
   | 'threads'
   | 'bluesky'
   | 'mastodon'
-  | 'peertube';
+  | 'peertube'
+  | 'other';
 
 export interface Source {
   id: SourceId;
@@ -31,7 +32,7 @@ export interface Source {
   description: string;
   color: string;
   icon: string;
-  category: 'marketplace' | 'patronage' | 'library' | 'decentralized' | 'official' | 'social';
+  category: 'marketplace' | 'patronage' | 'library' | 'decentralized' | 'official' | 'social' | 'curated';
   hasEmbed: boolean;
   searchUrlTemplate: string;
   searchOnly?: boolean; // True if we can't verify the artist exists (shows "Search X" instead)
