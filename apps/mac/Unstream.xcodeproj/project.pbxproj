@@ -38,6 +38,7 @@
 		8961565967B20B3F28A7877E /* GlobalHotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B52C116B5CC91BC40D028AF /* GlobalHotkeyManager.swift */; platformFilters = (macos, ); };
 		8A4181366EB270C58A708C65 /* SearchBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45AC0E531396E8C63A2001CF /* SearchBarView.swift */; platformFilters = (macos, ); };
 		8C94768621D55383151FD59F /* SearchResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1581BE8FAF07C7C9D3CD99F5 /* SearchResponse.swift */; };
+		AA11BB22CC33DD44EE55FF66 /* IndieArtist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99AA11BB22CC33DD44EE55FF /* IndieArtist.swift */; };
 		917C407BBA300BE70B9BDEFB /* ScrobbleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEEE83E95439F19BFC679216 /* ScrobbleManager.swift */; platformFilters = (macos, ); };
 		A3526462820B7494F5463BE2 /* UnstreamApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 913EEE8809001930E4F88F8C /* UnstreamApp.swift */; };
 		A8FD43FE100F214CA8E6241C /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE9E59C365D8F116C435B8BC /* EmptyStateView.swift */; };
@@ -87,6 +88,7 @@
 /* Begin PBXFileReference section */
 		1003A79CD2A20BF7227C6FB0 /* SupportEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportEntry.swift; sourceTree = "<group>"; };
 		1581BE8FAF07C7C9D3CD99F5 /* SearchResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResponse.swift; sourceTree = "<group>"; };
+		99AA11BB22CC33DD44EE55FF /* IndieArtist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndieArtist.swift; sourceTree = "<group>"; };
 		1CDD15E71A80A31952A7720C /* ShortcutRecorderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutRecorderView.swift; sourceTree = "<group>"; };
 		1D967BFF6EECB9BFC4835ABA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		1F71936662EEAC06B0C1F008 /* ReleaseAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseAlert.swift; sourceTree = "<group>"; };
@@ -262,6 +264,7 @@
 			isa = PBXGroup;
 			children = (
 				DC148A11F868801384A78672 /* AppState.swift */,
+				99AA11BB22CC33DD44EE55FF /* IndieArtist.swift */,
 				BC8C8A39D8800BDBA893E0EA /* NowPlaying.swift */,
 				E488821D948022DCF94F9759 /* PlatformCatalog.swift */,
 				1F71936662EEAC06B0C1F008 /* ReleaseAlert.swift */,
@@ -426,6 +429,7 @@
 				A8FD43FE100F214CA8E6241C /* EmptyStateView.swift in Sources */,
 				194D5CB6D2373174426884C5 /* FaircampReleaseChecker.swift in Sources */,
 				8961565967B20B3F28A7877E /* GlobalHotkeyManager.swift in Sources */,
+				AA11BB22CC33DD44EE55FF66 /* IndieArtist.swift in Sources */,
 				4195335F3B43DDF10D2131CD /* KeychainHelper.swift in Sources */,
 				7FA2720BFA00323DC8E66A9A /* ListenBrainzService.swift in Sources */,
 				DAF5726D4B93EA321E5D4643 /* MediaObserver.swift in Sources */,
