@@ -1,16 +1,6 @@
 import Foundation
 import SwiftUI
 
-// MARK: - Model
-
-struct IndieArtist: Codable, Identifiable, Equatable {
-    let slug: String
-    let name: String
-    let imageUrl: String?
-
-    var id: String { slug }
-}
-
 // MARK: - Service
 
 @MainActor
