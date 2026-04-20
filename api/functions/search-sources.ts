@@ -1502,6 +1502,7 @@ export async function handler(event: { queryStringParameters?: Record<string, st
           platforms: dbArtist.platforms.map(p => ({
             sourceId: p.sourceId as SourceId,
             url: p.url,
+            displayName: p.displayName,
             latestRelease: p.latestRelease,
           })),
           matchConfidence: 'claimed',

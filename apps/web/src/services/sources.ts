@@ -293,6 +293,17 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: '',
     homepageUrl: 'https://joinpeertube.org',
   },
+  other: {
+    id: 'other',
+    name: 'Link',
+    description: 'Custom link added by artist',
+    color: '#888888',
+    icon: '🔗',
+    category: 'curated',
+    hasEmbed: false,
+    searchUrlTemplate: '',
+    homepageUrl: '',
+  },
 };
 
 export const sourceCategories = {
@@ -325,6 +336,11 @@ export const sourceCategories = {
     name: 'Social',
     description: 'Artist social media profiles',
     sources: ['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'mastodon', 'peertube'] as SourceId[],
+  },
+  curated: {
+    name: 'Links',
+    description: 'Custom links added by the artist',
+    sources: ['other'] as SourceId[],
   },
 };
 

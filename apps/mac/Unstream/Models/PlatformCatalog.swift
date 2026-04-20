@@ -47,6 +47,8 @@ let platformCatalog: [String: PlatformConfig] = [
     "bluesky": PlatformConfig(name: "Bluesky", icon: "cloud", color: "#0085FF", searchOnly: false),
     "mastodon": PlatformConfig(name: "Mastodon", icon: "bubble.left.and.bubble.right", color: "#6364FF", searchOnly: false),
     "peertube": PlatformConfig(name: "PeerTube", icon: "play.circle", color: "#F1680D", searchOnly: false),
+    // Fallback for artist-added custom links (other, other_*)
+    "other": PlatformConfig(name: "Link", icon: "globe", color: "#888888", searchOnly: false),
 ]
 
 /// Social platform IDs for filtering
