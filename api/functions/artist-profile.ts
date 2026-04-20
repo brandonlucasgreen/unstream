@@ -291,7 +291,15 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
     }
 
     // Insert new links
-    const validLinks = (body.links || []).filter(l => l.platform && l.url);
+    const validLinks = (body.links || []).filter(l => {
+      if (!l.platform || !l.url) return false;
+      try {
+        const parsed = new URL(l.url);
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+      } catch {
+        return false;
+      }
+    });
     if (validLinks.length > 0) {
       // Assign unique platform IDs for "other" links to satisfy unique(artist_id, platform)
       let otherCount = 0;
