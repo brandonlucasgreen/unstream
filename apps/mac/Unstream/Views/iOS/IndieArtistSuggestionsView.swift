@@ -33,19 +33,8 @@ struct IndieArtistSuggestionsView: View {
     private var gridContent: some View {
         VStack(alignment: .leading, spacing: 16) {
             if isBandcampFriday() {
-                HStack(spacing: 6) {
-                    Image(systemName: "sparkles")
-                        .foregroundColor(Color(hex: "#1DA0C3") ?? .blue)
-                    Text("It's Bandcamp Friday!")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(Color(hex: "#1DA0C3") ?? .blue)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background((Color(hex: "#1DA0C3") ?? .blue).opacity(0.1))
-                .cornerRadius(8)
-                .frame(maxWidth: .infinity, alignment: .center)
+                BandcampFridayBadge()
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
 
             VStack(alignment: .leading, spacing: 4) {
@@ -81,18 +70,7 @@ struct IndieArtistSuggestionsView: View {
                 .multilineTextAlignment(.center)
 
             if isBandcampFriday() {
-                HStack(spacing: 6) {
-                    Image(systemName: "sparkles")
-                        .foregroundColor(Color(hex: "#1DA0C3") ?? .blue)
-                    Text("It's Bandcamp Friday!")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(Color(hex: "#1DA0C3") ?? .blue)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background((Color(hex: "#1DA0C3") ?? .blue).opacity(0.1))
-                .cornerRadius(8)
+                BandcampFridayBadge()
             }
         }
         .frame(maxWidth: .infinity, alignment: .center)
@@ -152,6 +130,24 @@ struct IndieArtistCard: View {
                 .foregroundColor(.secondary)
         }
         .frame(width: 140, height: 140)
+    }
+}
+
+private struct BandcampFridayBadge: View {
+    var body: some View {
+        let accent = Color(hex: "#1DA0C3") ?? .blue
+        HStack(spacing: 6) {
+            Image(systemName: "sparkles")
+                .foregroundColor(accent)
+            Text("It's Bandcamp Friday!")
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundColor(accent)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(accent.opacity(0.1))
+        .cornerRadius(8)
     }
 }
 #endif
