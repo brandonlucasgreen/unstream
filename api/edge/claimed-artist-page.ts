@@ -199,42 +199,102 @@ export default async function handler(request: Request, context: Context) {
     a { color: inherit; }
     .container { max-width: 640px; margin: 0 auto; padding: 0 24px; width: 100%; }
     .page-content { position: relative; flex: 1; display: flex; flex-direction: column; }
-    .theme-toggle { position: absolute; top: 16px; right: 16px; background: none; border: none; cursor: pointer; color: var(--muted); padding: 8px; border-radius: 8px; z-index: 1; }
-    .theme-toggle:hover { color: var(--text); background: var(--bg2); }
     @keyframes bc-pulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+    .site-header { padding: 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .site-header .brand { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 700; color: var(--text); text-decoration: none; flex-shrink: 0; transition: opacity 0.15s; }
+    .site-header .brand:hover { opacity: 0.8; }
+    .site-header .brand svg { flex-shrink: 0; }
+    .site-header .nav-right { display: flex; align-items: center; gap: 12px; font-size: 14px; }
+    .site-header .auth-email { color: var(--muted); display: none; }
+    @media (min-width: 640px) { .site-header .auth-email.visible { display: inline; } }
+    .site-header .nav-link { color: var(--muted); text-decoration: none; transition: color 0.15s; background: none; border: none; cursor: pointer; font-family: inherit; font-size: 14px; padding: 0; }
+    .site-header .nav-link:hover { color: var(--text); }
+    .site-header .nav-accent { color: var(--accent); text-decoration: none; font-weight: 500; }
+    .site-header .nav-accent:hover { text-decoration: underline; }
+    .site-header .auth-signed-in { display: none; align-items: center; gap: 12px; }
+    .site-header .auth-signed-in.visible { display: flex; }
+    .site-header .auth-signed-out.hidden { display: none; }
+    .theme-toggle { background: none; border: none; cursor: pointer; color: var(--muted); padding: 8px; border-radius: 8px; }
+    .theme-toggle:hover { color: var(--text); background: var(--bg2); }
     .theme-toggle svg { display: none; }
     .theme-toggle .icon-system { display: block; }
     .theme-toggle[data-pref="light"] .icon-system { display: none; }
     .theme-toggle[data-pref="light"] .icon-sun { display: block; }
     .theme-toggle[data-pref="dark"] .icon-system { display: none; }
     .theme-toggle[data-pref="dark"] .icon-moon { display: block; }
-    .auth-bar { display: none; background: var(--bg2); border-bottom: 1px solid var(--border); padding: 8px 16px; font-size: 14px; }
-    .auth-bar.visible { display: flex; align-items: center; justify-content: space-between; }
-    .auth-bar a { color: var(--accent); text-decoration: none; font-weight: 500; }
-    .auth-bar a:hover { text-decoration: underline; }
-    .auth-bar .auth-left { display: flex; align-items: center; gap: 12px; }
-    .auth-bar .auth-left span { color: var(--muted); }
-    .auth-bar button { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; font-family: inherit; }
-    .auth-bar button:hover { color: var(--text); }
   </style>
 </head>
 <body>
-  <div class="auth-bar" id="auth-bar">
-    <div class="auth-left">
-      <span>Logged in as <strong id="auth-email" style="color:var(--text)"></strong></span>
-      <a href="/artist-dashboard">Dashboard</a>
+  <header class="site-header">
+    <a href="/" class="brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 110 110" aria-hidden="true">
+        <defs><filter id="gs"><feColorMatrix type="saturate" values="0"/></filter></defs>
+        <g transform="translate(22,22) scale(1.8333)" filter="url(#gs)">
+          <path fill="#50A5E6" d="M30 22c-3 0-6.688 7.094-7 10-.421 3.915 2 4 2 4h11V26s-3.438-4-6-4z"/>
+          <ellipse transform="rotate(-60 27.574 28.49)" fill="#1C6399" cx="27.574" cy="28.489" rx="5.848" ry="1.638"/>
+          <path fill="#F9CA55" d="M20.086 0c1.181 0 2.138.957 2.138 2.138 0 .789.668 10.824.668 10.824L17.948 18V2.138C17.948.957 18.905 0 20.086 0z"/>
+          <path fill="#FFDC5D" d="M18.875 4.323c0-1.099.852-1.989 1.903-1.989 1.051 0 1.903.891 1.903 1.989 0 0 .535 5.942 1.192 9.37.878 1.866 1.369 4.682 1.261 6.248.054.398 5.625 5.006 5.625 5.006-.281 1.813-2.259 6.155-4.759 8.159l-3.521-2.924c-2.885-.404-4.458-3.331-4.458-4.264 0-2.984.854-21.595.854-21.595z"/>
+          <path fill="#50A5E6" d="M6 22c3 0 6.688 7.094 7 10 .421 3.915-2 4-2 4H0V26s3.438-4 6-4z"/>
+          <ellipse transform="rotate(-30 8.424 28.489)" fill="#1C6399" cx="8.426" cy="28.489" rx="1.638" ry="5.848"/>
+          <path fill="#F9CA55" d="M16.061.011c-1.266-.127-2.333.864-2.333 2.103 0 .78-.184 10.319-.184 10.319L17.895 18l.062-15.765c0-1.106-.795-2.114-1.896-2.224z"/>
+          <path fill="#FFDC5D" d="M17.125 4.323c0-1.099-.852-1.989-1.903-1.989-1.051 0-1.903.891-1.903 1.989 0 0-.535 5.942-1.192 9.37-.878 1.866-1.369 4.682-1.261 6.248-.054.398-5.625 5.006-5.625 5.006C5.522 26.76 7.5 31.102 10 33.106l3.521-2.924c2.885-.404 4.458-3.331 4.458-4.264 0-2.984-.854-21.595-.854-21.595z"/>
+          <path fill="#F9CA55" d="M17.958 25.823c-.414 0-.75-.336-.75-.75V2.792c0-.414.336-.75.75-.75s.75.336.75.75v22.282c.001.413-.335.749-.75.749z"/>
+        </g>
+        <path d="M14,52 A41,41 0 0,1 96,52" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"/>
+        <line x1="14" y1="52" x2="14" y2="64" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
+        <line x1="96" y1="52" x2="96" y2="64" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
+        <rect x="3" y="60" width="22" height="28" rx="9" fill="currentColor"/>
+        <rect x="85" y="60" width="22" height="28" rx="9" fill="currentColor"/>
+      </svg>
+      Unstream
+    </a>
+    <div class="nav-right">
+      <span class="auth-email" id="auth-email"></span>
+      <div class="auth-signed-in" id="auth-signed-in">
+        <a href="/artist-dashboard" class="nav-accent">Dashboard</a>
+        <button class="nav-link" id="auth-signout-btn">Sign out</button>
+      </div>
+      <a href="/artist-login" class="nav-link auth-signed-out" id="auth-login-link">Artist login</a>
+      <button class="theme-toggle" id="theme-toggle-btn" aria-label="Toggle theme">
+        <svg class="icon-system" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        <svg class="icon-sun" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        <svg class="icon-moon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+      </button>
     </div>
-    <button onclick="(function(){for(var k in localStorage){if(k.match(/^sb-.*-auth-token$/)){localStorage.removeItem(k)}}document.getElementById('auth-bar').classList.remove('visible');window.location.href='/artist-login'})()">Sign out</button>
-  </div>
+  </header>
   <script>
-    (function(){for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.match(/^sb-.*-auth-token$/)){try{var d=JSON.parse(localStorage.getItem(k));if(d&&d.access_token){document.getElementById('auth-bar').classList.add('visible');try{var p=JSON.parse(atob(d.access_token.split('.')[1]));if(p.email)document.getElementById('auth-email').textContent=p.email}catch(e){}}}catch(e){}break}}})();
+    (function(){
+      for(var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        if(k&&k.match(/^sb-.*-auth-token$/)){
+          try{
+            var d=JSON.parse(localStorage.getItem(k));
+            if(d&&d.access_token){
+              document.getElementById('auth-signed-in').classList.add('visible');
+              document.getElementById('auth-login-link').classList.add('hidden');
+              try{
+                var p=JSON.parse(atob(d.access_token.split('.')[1]));
+                if(p.email){
+                  var em=document.getElementById('auth-email');
+                  em.textContent=p.email;
+                  em.classList.add('visible');
+                }
+              }catch(e){}
+            }
+          }catch(e){}
+          break;
+        }
+      }
+      var so=document.getElementById('auth-signout-btn');
+      if(so){
+        so.onclick=function(){
+          for(var k in localStorage){if(k.match(/^sb-.*-auth-token$/)){localStorage.removeItem(k)}}
+          window.location.href='/artist-login';
+        };
+      }
+    })();
   </script>
   <div class="page-content">
-  <button class="theme-toggle" id="theme-toggle-btn" aria-label="Toggle theme">
-    <svg class="icon-system" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-    <svg class="icon-sun" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-    <svg class="icon-moon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-  </button>
   <script>
     (function(){
       var btn=document.getElementById('theme-toggle-btn');
@@ -314,20 +374,24 @@ export default async function handler(request: Request, context: Context) {
   </div>
   <!-- Footer -->
   <footer style="margin-top:auto;padding:24px 16px;border-top:1px solid var(--footer-border)">
-    <div style="max-width:896px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:12px;font-size:14px;color:var(--muted)">
+    <div style="max-width:896px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-size:14px;color:var(--muted)">
       <a href="https://bgreen.lol" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Made with love in Massachusetts, USA</a>
       <nav style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px">
-        <a href="/artist-login" style="color:var(--muted);text-decoration:none">Artist login</a>
+        <a href="/artists" style="color:var(--muted);text-decoration:none">Indie Artist Index</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
-        <a href="/artists" style="color:var(--muted);text-decoration:none">Index</a>
+        <a href="/guides" style="color:var(--muted);text-decoration:none">Guides</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
-        <a href="https://unstream.featurebase.app/roadmap" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Roadmap</a>
+        <a href="/changelog" style="color:var(--muted);text-decoration:none">Changelog</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
-        <a href="mailto:support@unstream.stream" style="color:var(--muted);text-decoration:none">Support</a>
+        <a href="https://github.com/users/brandonlucasgreen/projects/4" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Roadmap</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
-        <a href="https://liberapay.com/brandonlucasgreen/donate" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Donate</a>
+        <a href="https://github.com/brandonlucasgreen/unstream" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Codebase</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
-        <a href="/privacy-policy" style="color:var(--muted);text-decoration:none">Privacy</a>
+        <a href="/support" style="color:var(--muted);text-decoration:none">Support</a>
+        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <a href="https://letterbird.co/hi-d2078591" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Contact</a>
+        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <a href="/privacy-policy" style="color:var(--muted);text-decoration:none">Privacy policy</a>
       </nav>
     </div>
   </footer>
