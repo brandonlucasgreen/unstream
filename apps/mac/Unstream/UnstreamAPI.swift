@@ -65,6 +65,26 @@ actor UnstreamAPI {
         }
     }
 
+    func fetchArtistDirectory() async throws -> [IndieArtist] {
+        guard let url = URL(string: "\(baseURL)/artist-directory") else {
+            throw APIError.invalidURL
+        }
+
+        let (data, response) = try await session.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.requestFailed
+        }
+
+        struct DirectoryResponse: Decodable {
+            let artists: [IndieArtist]
+        }
+
+        let decoded = try JSONDecoder().decode(DirectoryResponse.self, from: data)
+        return decoded.artists
+    }
+
     /// Normalize string for comparison by removing all non-alphanumeric characters
     private func normalizeForComparison(_ str: String) -> String {
         return str.lowercased().filter { $0.isLetter || $0.isNumber }
