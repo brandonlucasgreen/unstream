@@ -69,15 +69,17 @@ Under `apps/mac/Unstream/`:
 
 ## Testing
 
-Swift unit tests for `IndieArtistDirectoryService`:
+The iOS app currently has no Swift test target (`apps/mac/Unstream.xcodeproj` ships an app target and a share-extension target only). Setting up a test target is out of scope for this feature.
 
-- Cache round-trip: write directory → reinitialize service → reads same artists
-- Sample size: directory with < 30 artists returns all of them; directory with > 30 returns exactly 30
-- `reshuffle()` produces a different ordering when called repeatedly (seeded RNG to make this deterministic)
-- Load failure with existing cache returns cached `artists` and keeps `loadState` as `.loaded`
-- Load failure with no cache sets `loadState = .failed` and leaves `artists` empty
+Verification is manual on a real device or simulator:
 
-No UI tests for the grid view itself — the existing iOS test scope is unit tests for services/models only.
+- **Fresh install:** open the Search tab. Within ~2s, the grid populates with 30 artist tiles. No spinner is acceptable as long as the empty state isn't shown indefinitely.
+- **Repeat launch:** kill and relaunch the app while online. The grid appears instantly (cache-served), then refreshes silently in the background. The displayed sample does not change.
+- **Pull-to-refresh:** swipe down on the grid. The 30 displayed artists change to a new random subset.
+- **Tap behavior:** tap any tile. The search bar populates with that artist's name and search results appear, replacing the grid.
+- **Clear search:** clear the search text. The grid reappears with the same sample as before the search.
+- **Offline cold start:** turn on airplane mode, delete and reinstall the app, open it. The empty-state hero (music-note icon + prompt) appears instead of an empty grid.
+- **Offline with cache:** turn on airplane mode after at least one successful launch. The cached grid still appears.
 
 ## Out of scope
 
