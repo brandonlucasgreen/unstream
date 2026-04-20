@@ -107,10 +107,23 @@ export function applyMergeOverrides(
       override.platform_urls.map(u => u.replace(/\/+$/, '').toLowerCase())
     );
 
+    // Generic search/explore URLs (e.g. buymeacoffee.com/explore-creators,
+    // duckduckgo.com site-search) appear in every query's results, so they
+    // must not participate in the relevance match or every search would
+    // trigger the override.
+    const relevanceUrls = new Set(
+      override.platform_urls
+        .filter(u => {
+          const sid = sourceIdFromUrl(u);
+          return sid ? !isSearchOnlyLink({ sourceId: sid, url: u }) : true;
+        })
+        .map(u => u.replace(/\/+$/, '').toLowerCase())
+    );
+
     // Step 1: Check if this override is relevant to the current search.
-    // Only apply if at least one override URL appears in the search results.
-    const hasRelevantResult = aggregated.some(r =>
-      r.platforms.some(p => overrideUrls.has(p.url.replace(/\/+$/, '').toLowerCase()))
+    // Only apply if at least one real override URL appears in the search results.
+    const hasRelevantResult = relevanceUrls.size > 0 && aggregated.some(r =>
+      r.platforms.some(p => relevanceUrls.has(p.url.replace(/\/+$/, '').toLowerCase()))
     );
     if (!hasRelevantResult) continue;
 

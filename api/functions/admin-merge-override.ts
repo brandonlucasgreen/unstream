@@ -3,6 +3,7 @@
 
 import { getClient } from './db';
 import { authenticateAdmin } from './middleware';
+import { isSearchOnlyLink, sourceIdFromUrl } from './search-utils';
 
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
@@ -73,6 +74,21 @@ export async function handler(event: {
     };
   }
 
+  // Strip generic search/explore URLs — they appear in every query's results
+  // and would make the override's relevance check match unrelated searches.
+  const filteredPlatformUrls = platform_urls.filter(url => {
+    const sid = sourceIdFromUrl(url);
+    return sid ? !isSearchOnlyLink({ sourceId: sid, url }) : true;
+  });
+
+  if (filteredPlatformUrls.length < 2) {
+    return {
+      statusCode: 400,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ error: 'At least 2 non-search platform_urls are required' }),
+    };
+  }
+
   const client = getClient();
   if (!client) {
     return {
@@ -86,7 +102,7 @@ export async function handler(event: {
     .from('artist_merge_overrides')
     .insert({
       group_name: group_name.trim(),
-      platform_urls,
+      platform_urls: filteredPlatformUrls,
       excluded_urls: excluded_urls || [],
       canonical_image_url: canonical_image_url || null,
       notes: notes || null,
