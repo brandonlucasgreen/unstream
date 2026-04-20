@@ -22,7 +22,7 @@ struct IndieArtistSuggestionsView: View {
                 gridContent
             }
         }
-        .task {
+        .task(id: directory.sample.isEmpty) {
             await directory.loadIfNeeded()
         }
         .refreshable {

@@ -29,6 +29,7 @@ class IndieArtistDirectoryService: ObservableObject {
     private let api: UnstreamAPI
     private let sampleSize = 30
     private let cacheFileName = "indie-artist-directory.json"
+    private var isFetching = false
 
     init(api: UnstreamAPI = UnstreamAPI()) {
         self.api = api
@@ -43,8 +44,9 @@ class IndieArtistDirectoryService: ObservableObject {
     /// silently in the background. Does NOT reshuffle an existing sample — only
     /// `refresh()` (pull-to-refresh) does that.
     func loadIfNeeded() async {
-        if loadState == .loading { return }
+        guard !isFetching else { return }
         let hadSample = !sample.isEmpty
+        isFetching = true
         loadState = .loading
         do {
             let fetched = try await api.fetchArtistDirectory()
@@ -62,10 +64,17 @@ class IndieArtistDirectoryService: ObservableObject {
                 self.loadState = .loaded
             }
         }
+        isFetching = false
     }
 
     /// Pull-to-refresh: re-fetches and reshuffles regardless of fetch outcome.
     func refresh() async {
+        guard !isFetching else {
+            // Already fetching — reshuffle from whatever we have
+            self.sample = pickSample(from: artists)
+            return
+        }
+        isFetching = true
         do {
             let fetched = try await api.fetchArtistDirectory()
             self.artists = fetched
@@ -77,6 +86,7 @@ class IndieArtistDirectoryService: ObservableObject {
         if !artists.isEmpty {
             self.loadState = .loaded
         }
+        isFetching = false
     }
 
     private func pickSample(from source: [IndieArtist]) -> [IndieArtist] {

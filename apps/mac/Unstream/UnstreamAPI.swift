@@ -78,11 +78,11 @@ actor UnstreamAPI {
         }
 
         struct DirectoryResponse: Decodable {
-            let artists: [IndieArtist]
+            let artists: [IndieArtist]?
         }
 
         let decoded = try JSONDecoder().decode(DirectoryResponse.self, from: data)
-        return decoded.artists
+        return decoded.artists ?? []
     }
 
     /// Normalize string for comparison by removing all non-alphanumeric characters
