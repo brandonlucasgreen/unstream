@@ -21,6 +21,9 @@ class AppStateContainer: ObservableObject {
     let appState = AppState()
     let supportListManager: SupportListManager
     let releaseAlertManager: ReleaseAlertManager
+    #if os(iOS)
+    let indieArtistDirectory = IndieArtistDirectoryService()
+    #endif
 
     #if os(macOS)
     let mediaObserver = MediaObserver()
@@ -127,6 +130,7 @@ struct UnstreamApp: App {
                 .environmentObject(container.appState)
                 .environmentObject(container.supportListManager)
                 .environmentObject(container.releaseAlertManager)
+                .environmentObject(container.indieArtistDirectory)
                 .onOpenURL { url in
                     handleIncomingURL(url)
                 }
