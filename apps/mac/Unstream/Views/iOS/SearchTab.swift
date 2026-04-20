@@ -32,34 +32,7 @@ struct SearchTab: View {
                         .environmentObject(supportListManager)
                         .environmentObject(appState)
                     } else {
-                        // Empty state
-                        VStack(spacing: 16) {
-                            Image(systemName: "music.note.house")
-                                .font(.system(size: 48))
-                                .foregroundColor(.secondary.opacity(0.5))
-
-                            Text("Search for an artist to find them\non ethical music platforms")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                                .multilineTextAlignment(.center)
-
-                            if isBandcampFriday() {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "sparkles")
-                                        .foregroundColor(Color(hex: "#1DA0C3") ?? .blue)
-                                    Text("It's Bandcamp Friday!")
-                                        .font(.subheadline)
-                                        .fontWeight(.medium)
-                                        .foregroundColor(Color(hex: "#1DA0C3") ?? .blue)
-                                }
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background((Color(hex: "#1DA0C3") ?? .blue).opacity(0.1))
-                                .cornerRadius(8)
-                            }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.top, 60)
+                        IndieArtistSuggestionsView()
                     }
                 }
                 .padding()
