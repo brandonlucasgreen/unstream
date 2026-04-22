@@ -142,7 +142,7 @@ actor UnstreamAPI {
                 }
             }
 
-            return ArtistResult(id: result.id, name: result.name, type: result.type, imageUrl: result.imageUrl, platforms: newPlatforms, claimedSlug: result.claimedSlug, matchConfidence: result.matchConfidence)
+            return ArtistResult(id: result.id, name: result.name, type: result.type, imageUrl: result.imageUrl, platforms: newPlatforms, claimedSlug: result.claimedSlug, matchConfidence: result.matchConfidence, location: result.location)
         }
     }
 
