@@ -482,9 +482,58 @@ function mergeLocations(...sources: (ArtistLocation | null | undefined)[]): Arti
   return (result.city || result.country) ? result : undefined;
 }
 
+// Search Bandcamp for an artist by name and return the first matching artist/label URL.
+// Mirrors the Phase 1 Bandcamp scrape but runs server-side within Phase 2 enrichment,
+// so no client-supplied URLs are involved.
+async function searchBandcampForArtistUrl(artistName: string): Promise<string | null> {
+  try {
+    const searchUrl = `https://bandcamp.com/search?q=${encodeURIComponent(artistName)}&item_type=b`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    const response = await globalThis.fetch(searchUrl, {
+      signal: controller.signal,
+      headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36' },
+    });
+    clearTimeout(timeout);
+    if (!response.ok) return null;
+    const html = await response.text();
+
+    // Parse the first artist/label result whose name closely matches the query
+    const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const normalizedQuery = normalize(artistName);
+
+    // Match searchresult blocks: extract itemtype, URL, and display name
+    const blockPattern = /<li[^>]+class="[^"]*searchresult[^"]*"[^>]*>([\s\S]*?)<\/li>/g;
+    let block: RegExpExecArray | null;
+    while ((block = blockPattern.exec(html)) !== null) {
+      const blockHtml = block[1];
+      const typeMatch = blockHtml.match(/class="[^"]*itemtype[^"]*"[^>]*>\s*([^<]+)\s*</);
+      const linkMatch = blockHtml.match(/class="[^"]*heading[^"]*"[^>]*>\s*<a[^>]+href="([^"?]+)/);
+      const nameMatch = blockHtml.match(/class="[^"]*heading[^"]*"[^>]*>\s*<a[^>]*>([^<]+)</);
+      if (!typeMatch || !linkMatch || !nameMatch) continue;
+
+      const itemType = typeMatch[1].trim().toLowerCase();
+      if (itemType !== 'artist' && itemType !== 'label') continue;
+
+      const name = nameMatch[1].trim();
+      const url = linkMatch[1];
+      const normalizedName = normalize(name);
+
+      // Accept if names are equal or one contains the other (handles minor punctuation differences)
+      if (normalizedName === normalizedQuery ||
+          normalizedName.includes(normalizedQuery) ||
+          normalizedQuery.includes(normalizedName)) {
+        return url;
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 // Fetch location from a Bandcamp artist profile page.
-// The URL must come from MusicBrainz platform relations (not user input) and is
-// validated against the SSRF allowlist as defense-in-depth.
+// Validated against the SSRF allowlist as defense-in-depth.
 async function fetchBandcampLocation(bandcampUrl: string): Promise<ArtistLocation | null> {
   if (!isUrlHostnameAllowed(bandcampUrl)) return null;
   try {
@@ -761,21 +810,31 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       }
     }
 
-    // Derive Bandcamp URL from MB's own platform relations (avoids client-supplied URL).
-    // Mirlo slug is derived from the artist name, same as the Phase 1 Mirlo search.
+    // Derive Bandcamp URL from MB's own platform relations if available (most authoritative).
+    // Falls back to a live Bandcamp search by the MB-confirmed artist name so we always
+    // try to find location even when MB's Bandcamp link is absent or stale.
     const mbBandcampUrl = platformUrls.find(u => {
       try { return new URL(u).hostname.endsWith('.bandcamp.com'); } catch { return false; }
     });
     const mirloSlug = artist.name.toLowerCase().replace(/\s+/g, '');
 
     // Fetch additional social links from Discogs, official site, PeerTube, Wikipedia,
-    // and platform locations (Bandcamp, Mirlo) in parallel
+    // and platform locations (Bandcamp, Mirlo) in parallel.
+    // Bandcamp location: prefers MB relation URL; falls back to live Bandcamp search by name.
     const [discogsSocialLinks, officialSiteResult, peertubeLink, wikipediaResult, bandcampLocation, mirloLocation] = await Promise.all([
       discogsUrl ? fetchDiscogsSocialLinks(discogsUrl) : Promise.resolve([]),
       officialUrl ? fetchOfficialSiteSocialLinks(officialUrl) : Promise.resolve({ socialLinks: [], linktreeUrl: null, discoveredPlatforms: [] }),
       searchPeerTubeChannels(artist.name),
       wikipediaUrl ? fetchWikipediaSummary(wikipediaUrl) : Promise.resolve(null),
-      mbBandcampUrl ? fetchBandcampLocation(mbBandcampUrl) : Promise.resolve(null),
+      (async () => {
+        // Try MB relation URL first; if absent or returns no location, search Bandcamp directly
+        if (mbBandcampUrl) {
+          const loc = await fetchBandcampLocation(mbBandcampUrl);
+          if (loc) return loc;
+        }
+        const searchedUrl = await searchBandcampForArtistUrl(artist.name);
+        return searchedUrl ? fetchBandcampLocation(searchedUrl) : null;
+      })(),
       fetchMirloLocation(mirloSlug),
     ]);
 
