@@ -13,14 +13,13 @@ interface LinkEntry {
   displayName?: string;
 }
 
-// All platforms available for adding, plus "other"
+// All platforms available for adding (sourced from the shared catalog).
+// The "other" entry is overridden here so its dropdown label reads "Other"
+// instead of the search-result label "Link".
 const ALL_PLATFORMS: { id: string; name: string; category: string }[] = [
   ...(Object.values(sources) as { id: SourceId; name: string; category: string }[])
+    .filter(s => s.id !== 'other')
     .map(s => ({ id: s.id, name: s.name, category: s.category })),
-  { id: 'peertube', name: 'PeerTube', category: 'social' },
-  { id: 'newsletter', name: 'Newsletter', category: 'social' },
-  { id: 'wikipedia', name: 'Wikipedia', category: 'official' },
-  { id: 'liberapay', name: 'Liberapay', category: 'patronage' },
   { id: 'other', name: 'Other', category: 'other' },
 ];
 
