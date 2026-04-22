@@ -277,9 +277,9 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
           <h3 className="font-medium text-base text-text-primary truncate">
             {result.name}
           </h3>
-          {result.type === 'artist' && (result.location?.city || result.location?.country) && (
+          {result.type === 'artist' && (result.location?.city || result.location?.country || result.location?.countryCode) && (
             <p className="text-text-muted text-xs truncate">
-              {[result.location.city, result.location.country].filter(Boolean).join(', ')}
+              {[result.location?.city, result.location?.country ?? result.location?.countryCode].filter(Boolean).join(', ')}
             </p>
           )}
           {result.artist && (
