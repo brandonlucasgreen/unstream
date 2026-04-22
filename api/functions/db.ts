@@ -73,6 +73,7 @@ interface ArtistResult {
   platforms: PlatformLink[];
   matchConfidence?: 'verified' | 'unverified' | 'claimed';
   profile?: ArtistProfile;
+  location?: { city?: string; country?: string; countryCode?: string };
 }
 
 // --- DB Row Types ---
@@ -86,6 +87,9 @@ interface ArtistRow {
   source: string;
   updated_at: string;
   last_enriched_at: string | null;
+  city: string | null;
+  country: string | null;
+  country_code: string | null;
 }
 
 interface LinkRow {
@@ -195,6 +199,14 @@ export async function getArtistBySlug(slug: string): Promise<ArtistResult | null
       }
     }
 
+    const location = (row.city || row.country || row.country_code)
+      ? {
+          ...(row.city ? { city: row.city } : {}),
+          ...(row.country ? { country: row.country } : {}),
+          ...(row.country_code ? { countryCode: row.country_code } : {}),
+        }
+      : undefined;
+
     return {
       id: row.slug,
       name: row.name,
@@ -203,6 +215,7 @@ export async function getArtistBySlug(slug: string): Promise<ArtistResult | null
       platforms,
       matchConfidence: (row.match_confidence as ArtistResult['matchConfidence']) || undefined,
       profile,
+      location,
     };
   } catch (error) {
     console.error('[DB] getArtistBySlug error:', error);
@@ -309,6 +322,7 @@ export async function persistEnrichment(
     hasPre2005Release: boolean;
     socialLinks: { platform: string; url: string }[];
     discoveredPlatforms?: { platform: string; url: string }[];
+    location?: { city?: string; country?: string; countryCode?: string };
   }
 ): Promise<void> {
   const client = getClient();
@@ -384,13 +398,27 @@ export async function persistEnrichment(
       }
     }
 
-    // Mark artist as enriched
+    // Mark artist as enriched; persist location if discovered
+    const artistUpdate: {
+      last_enriched_at: string;
+      city?: string | null;
+      country?: string | null;
+      country_code?: string | null;
+    } = { last_enriched_at: new Date().toISOString() };
+
+    if (mbData.location) {
+      artistUpdate.city = mbData.location.city ?? null;
+      artistUpdate.country = mbData.location.country ?? null;
+      artistUpdate.country_code = mbData.location.countryCode ?? null;
+    }
+
     await client
       .from('artists')
-      .update({ last_enriched_at: new Date().toISOString() })
+      .update(artistUpdate)
       .eq('id', artistId);
 
-    console.log(`[DB] Enriched "${artistName}" with ${enrichmentLinks.length} MusicBrainz links`);
+    const locationLog = mbData.location ? ` + location` : '';
+    console.log(`[DB] Enriched "${artistName}" with ${enrichmentLinks.length} MusicBrainz links${locationLog}`);
   } catch (error) {
     console.error(`[DB] Error enriching "${artistName}":`, error);
   }
