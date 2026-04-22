@@ -11,6 +11,22 @@ struct SocialLink: Codable {
     let url: String
 }
 
+struct ArtistLocation: Codable, Hashable {
+    let city: String?
+    let country: String?
+    let countryCode: String?
+
+    var displayText: String? {
+        let region = country ?? countryCode
+        switch (city, region) {
+        case let (city?, region?): return "\(city), \(region)"
+        case let (city?, nil): return city
+        case let (nil, region?): return region
+        default: return nil
+        }
+    }
+}
+
 struct MusicBrainzResponse: Codable {
     let query: String
     let artistName: String?
@@ -28,6 +44,7 @@ struct ArtistResult: Codable, Identifiable {
     let platforms: [PlatformResult]
     let claimedSlug: String?
     let matchConfidence: String?
+    let location: ArtistLocation?
 
     /// Platforms that have verified artist presence (excluding social)
     var verifiedPlatforms: [PlatformResult] {

@@ -132,7 +132,8 @@ class SupportListManager: ObservableObject {
                     artistName: entry.artistName,
                     imageUrl: artistResult.imageUrl ?? entry.imageUrl,
                     platforms: allPlatforms,
-                    dateAdded: entry.dateAdded
+                    dateAdded: entry.dateAdded,
+                    location: artistResult.location ?? entry.location
                 )
 
                 // Replace the entry in the array

@@ -47,6 +47,7 @@ const elements = {
   searchInput: document.getElementById('search-input'),
   searchBtn: document.getElementById('search-btn'),
   artistName: document.getElementById('artist-name'),
+  artistLocation: document.getElementById('artist-location'),
   trackTitle: document.getElementById('track-title'),
   sourceBadge: document.getElementById('source-badge'),
   // Saved tab
@@ -65,7 +66,18 @@ const elements = {
 let currentArtist = null;
 let currentResults = null;
 let currentSocialLinks = null;
+let currentLocation = null;
 let newReleases = [];
+
+// Format ArtistLocation object to "City, Country" string
+function formatLocation(location) {
+  if (!location) return '';
+  const region = location.country || location.countryCode;
+  if (location.city && region) return `${location.city}, ${region}`;
+  if (location.city) return location.city;
+  if (region) return region;
+  return '';
+}
 
 // Initialize popup
 async function init() {
@@ -90,7 +102,9 @@ async function init() {
 // Show now playing
 function showNowPlaying(track) {
   currentArtist = track.artist;
+  currentLocation = null;
   elements.artistName.textContent = track.artist;
+  elements.artistLocation.textContent = '';
   elements.trackTitle.textContent = track.title || '';
   elements.sourceBadge.textContent = track.source;
 
@@ -105,6 +119,8 @@ function showNowPlaying(track) {
 function hideNowPlaying() {
   currentArtist = null;
   currentResults = null;
+  currentLocation = null;
+  elements.artistLocation.textContent = '';
   elements.nowPlaying.classList.add('hidden');
   elements.idleState.classList.remove('hidden');
   elements.resultsSection.classList.add('hidden');
@@ -150,6 +166,12 @@ function renderResults(results) {
   // Extract claimedSlug for analytics tracking
   const claimedResult = results.find(r => r.type === 'artist' && r.claimedSlug);
   const claimedSlug = claimedResult?.claimedSlug || null;
+
+  // Extract location: prefer claimed result, otherwise first artist-type result with location
+  const locationResult = (claimedResult?.location ? claimedResult : null)
+    || results.find(r => r.type === 'artist' && r.location);
+  currentLocation = locationResult?.location || null;
+  elements.artistLocation.textContent = formatLocation(currentLocation);
 
   const allPlatforms = [];
   for (const result of results) {
@@ -332,7 +354,7 @@ async function toggleSaveArtist() {
     delete savedArtistsData[currentArtist];
   } else {
     savedArtists.push(currentArtist);
-    const artistData = { platforms: [], socialLinks: [] };
+    const artistData = { platforms: [], socialLinks: [], location: currentLocation || null };
 
     // Save platforms
     if (currentResults && currentResults.length > 0) {
@@ -382,6 +404,7 @@ async function loadSavedArtists() {
     const artistData = savedArtistsData[artist] || {};
     const platforms = artistData.platforms || [];
     const socialLinks = artistData.socialLinks || [];
+    const location = artistData.location || null;
 
     const card = document.createElement('div');
     card.className = 'saved-artist-card';
@@ -390,6 +413,9 @@ async function loadSavedArtists() {
     const header = document.createElement('div');
     header.className = 'saved-artist-header';
 
+    const nameWrap = document.createElement('div');
+    nameWrap.className = 'saved-artist-name-wrap';
+
     const nameSpan = document.createElement('span');
     nameSpan.className = 'saved-artist-name';
     nameSpan.textContent = artist;
@@ -397,6 +423,15 @@ async function loadSavedArtists() {
       switchToTab('discover');
       searchArtist(artist);
     });
+    nameWrap.appendChild(nameSpan);
+
+    const locationText = formatLocation(location);
+    if (locationText) {
+      const locationSpan = document.createElement('div');
+      locationSpan.className = 'saved-artist-location';
+      locationSpan.textContent = locationText;
+      nameWrap.appendChild(locationSpan);
+    }
 
     const removeBtn = document.createElement('button');
     removeBtn.className = 'saved-artist-remove';
@@ -404,7 +439,7 @@ async function loadSavedArtists() {
     removeBtn.textContent = '\u00D7';
     removeBtn.addEventListener('click', () => removeSavedArtist(artist));
 
-    header.appendChild(nameSpan);
+    header.appendChild(nameWrap);
     header.appendChild(removeBtn);
     card.appendChild(header);
 

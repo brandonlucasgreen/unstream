@@ -174,8 +174,16 @@ struct SupportEntryView: View {
                 // Artist photo
                 artistPhoto
 
-                Text(entry.artistName)
-                    .font(.system(size: 14, weight: .semibold))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(entry.artistName)
+                        .font(.system(size: 14, weight: .semibold))
+
+                    if let locationText = entry.location?.displayText {
+                        Text(locationText)
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                    }
+                }
 
                 Spacer()
 

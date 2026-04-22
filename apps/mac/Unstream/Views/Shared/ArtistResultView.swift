@@ -67,8 +67,16 @@ struct ArtistResultView: View {
                     artistPhoto
                 }
 
-                Text(artist.name)
-                    .font(.system(size: 14, weight: .semibold))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(artist.name)
+                        .font(.system(size: 14, weight: .semibold))
+
+                    if let locationText = artist.location?.displayText {
+                        Text(locationText)
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                    }
+                }
 
                 Spacer()
 

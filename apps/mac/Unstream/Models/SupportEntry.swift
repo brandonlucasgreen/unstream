@@ -7,13 +7,15 @@ struct SupportEntry: Codable, Identifiable {
     let imageUrl: String?
     let platforms: [SavedPlatform]
     let dateAdded: Date
+    let location: ArtistLocation?
 
-    init(id: UUID = UUID(), artistName: String, imageUrl: String?, platforms: [SavedPlatform], dateAdded: Date = Date()) {
+    init(id: UUID = UUID(), artistName: String, imageUrl: String?, platforms: [SavedPlatform], dateAdded: Date = Date(), location: ArtistLocation? = nil) {
         self.id = id
         self.artistName = artistName
         self.imageUrl = imageUrl
         self.platforms = platforms
         self.dateAdded = dateAdded
+        self.location = location
     }
 
     /// Create a SupportEntry from an ArtistResult
@@ -41,6 +43,7 @@ struct SupportEntry: Codable, Identifiable {
 
         self.platforms = allPlatforms
         self.dateAdded = Date()
+        self.location = artist.location
     }
 }
 

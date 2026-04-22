@@ -141,6 +141,24 @@ body {
   text-overflow: ellipsis;
 }
 
+.artist-location {
+  font-size: 12px;
+  color: #9CA3AF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.artist-location:empty {
+  display: none;
+}
+
+.saved-artist-location {
+  font-size: 12px;
+  color: #9CA3AF;
+  margin-top: 2px;
+}
+
 .source-badge {
   font-size: 11px;
   padding: 4px 8px;
@@ -435,6 +453,13 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
+}
+
+.saved-artist-name-wrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
 }
 
 .saved-artist-name {
