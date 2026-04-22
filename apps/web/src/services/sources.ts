@@ -519,12 +519,23 @@ export async function fetchMusicBrainzData(query: string): Promise<import('../ty
 }
 
 // Merge MusicBrainz data with existing search results
-// Adds officialsite, discogs, hoopla, and freegal platforms to matching artist results
+// Adds officialsite, discogs, hoopla, and freegal platforms to matching artist results.
+// When artistName is null (MB had no match), applies location-only enrichment matched by query.
 export function mergeWithMusicBrainzData(
   results: import('../types').SearchResult[],
   mbData: import('../types').MusicBrainzData
 ): import('../types').SearchResult[] {
-  if (!mbData.artistName) return results;
+  // MB-miss path: no confirmed identity, but may still have location from Bandcamp/Mirlo fallback
+  if (!mbData.artistName) {
+    if (!mbData.location) return results;
+    const queryNorm = normalizeForComparison(mbData.query);
+    const exactIdx = results.findIndex(r => r.type === 'artist' && normalizeForComparison(r.name) === queryNorm);
+    const bestIdx = exactIdx !== -1 ? exactIdx : results.findIndex(r => r.type === 'artist');
+    if (bestIdx === -1) return results;
+    return results.map((r, i) =>
+      i === bestIdx && !r.location ? { ...r, location: mbData.location } : r
+    );
+  }
 
   const mbNormalized = normalizeForComparison(mbData.artistName);
 
@@ -677,6 +688,7 @@ export function mergeWithMusicBrainzData(
       platforms: newPlatforms,
       wikipediaSummary: mbData.wikipediaSummary || undefined,
       wikipediaUrl: mbData.wikipediaUrl || undefined,
+      location: mbData.location || result.location,
     };
   });
 }
