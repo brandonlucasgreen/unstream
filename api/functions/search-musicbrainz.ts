@@ -485,11 +485,11 @@ function mergeLocations(...sources: (ArtistLocation | null | undefined)[]): Arti
 // Search Bandcamp for an artist by name and return the first matching artist/label URL.
 // Mirrors the Phase 1 Bandcamp scrape but runs server-side within Phase 2 enrichment,
 // so no client-supplied URLs are involved.
-async function searchBandcampForArtistUrl(artistName: string): Promise<string | null> {
+async function searchBandcampForArtistUrl(artistName: string, timeoutMs = 4000): Promise<string | null> {
   try {
     const searchUrl = `https://bandcamp.com/search?q=${encodeURIComponent(artistName)}&item_type=b`;
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
     const response = await globalThis.fetch(searchUrl, {
       signal: controller.signal,
       headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36' },
@@ -534,11 +534,11 @@ async function searchBandcampForArtistUrl(artistName: string): Promise<string | 
 
 // Fetch location from a Bandcamp artist profile page.
 // Validated against the SSRF allowlist as defense-in-depth.
-async function fetchBandcampLocation(bandcampUrl: string): Promise<ArtistLocation | null> {
+async function fetchBandcampLocation(bandcampUrl: string, timeoutMs = 4000): Promise<ArtistLocation | null> {
   if (!isUrlHostnameAllowed(bandcampUrl)) return null;
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
     const response = await globalThis.fetch(bandcampUrl, {
       signal: controller.signal,
       headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36' },
@@ -575,12 +575,12 @@ async function fetchBandcampLocation(bandcampUrl: string): Promise<ArtistLocatio
 
 // Spike: fetch artist location from Mirlo REST API.
 // Constructs URL internally from artist slug — no user input involved.
-async function fetchMirloLocation(artistSlug: string): Promise<ArtistLocation | null> {
+async function fetchMirloLocation(artistSlug: string, timeoutMs = 4000): Promise<ArtistLocation | null> {
   if (!artistSlug) return null;
   try {
     const apiUrl = `https://api.mirlo.space/v1/artists?urlSlug=${encodeURIComponent(artistSlug)}`;
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
     const response = await globalThis.fetch(apiUrl, {
       signal: controller.signal,
       headers: { 'User-Agent': 'Unstream/1.0 (https://unstream.stream)' },
@@ -594,6 +594,21 @@ async function fetchMirloLocation(artistSlug: string): Promise<ArtistLocation | 
   } catch {
     return null;
   }
+}
+
+// Fallback enrichment when MusicBrainz has no match: look up location via Bandcamp and Mirlo.
+// Uses shorter timeouts (3s each) so the total adds at most ~6s to the Phase 2 response time.
+async function enrichLocationFallback(query: string): Promise<ArtistLocation | undefined> {
+  const mirloSlug = query.toLowerCase().replace(/\s+/g, '');
+  const FALLBACK_TIMEOUT = 3000;
+
+  const bandcampUrl = await searchBandcampForArtistUrl(query, FALLBACK_TIMEOUT);
+  const [bandcampLocation, mirloLocation] = await Promise.all([
+    bandcampUrl ? fetchBandcampLocation(bandcampUrl, FALLBACK_TIMEOUT) : Promise.resolve(null),
+    fetchMirloLocation(mirloSlug, FALLBACK_TIMEOUT),
+  ]);
+
+  return mergeLocations(bandcampLocation, mirloLocation);
 }
 
 // Search MusicBrainz for artist info including official website, Discogs, social links, and release history
@@ -630,11 +645,17 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     const data = await response.json() as { artists?: { id: string; name: string; score: number }[] };
     const artists = data.artists || [];
 
-    if (artists.length === 0) return emptyResult;
+    if (artists.length === 0) {
+      console.log(`[MusicBrainz] No results for "${query}", falling back to Bandcamp/Mirlo location`);
+      return { ...emptyResult, location: await enrichLocationFallback(query) };
+    }
 
     const artist = artists[0];
     // Only consider exact/near-exact matches
-    if (artist.score < 95) return emptyResult;
+    if (artist.score < 95) {
+      console.log(`[MusicBrainz] Low confidence match for "${query}" (score ${artist.score}), falling back to Bandcamp/Mirlo location`);
+      return { ...emptyResult, location: await enrichLocationFallback(query) };
+    }
 
     // Verify the returned artist name actually matches the query
     // This prevents "Synthetic Ruby" from matching just "Ruby"
@@ -645,8 +666,8 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       artistNormalized.includes(queryNormalized) && queryNormalized.length > artistNormalized.length * 0.7;
 
     if (!isNameMatch) {
-      console.log(`[MusicBrainz] Skipping "${artist.name}" - doesn't match query "${query}"`);
-      return emptyResult;
+      console.log(`[MusicBrainz] Skipping "${artist.name}" - doesn't match query "${query}", falling back to Bandcamp/Mirlo location`);
+      return { ...emptyResult, location: await enrichLocationFallback(query) };
     }
 
     // Wait 1.1 seconds to respect MusicBrainz rate limit (1 req/sec)
