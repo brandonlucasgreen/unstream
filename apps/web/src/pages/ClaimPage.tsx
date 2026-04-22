@@ -54,6 +54,8 @@ export function ClaimPage() {
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
   const [customImageUrl, setCustomImageUrl] = useState<string | null>(null);
   const [fetchingAvatar, setFetchingAvatar] = useState<string | null>(null); // platform being fetched
+  const [city, setCity] = useState('');
+  const [country, setCountry] = useState('');
 
   // Manual review state
   const [manualReviewMessage, setManualReviewMessage] = useState('');
@@ -90,6 +92,10 @@ export function ClaimPage() {
           (p: { sourceId: string }) => p.sourceId === 'officialsite'
         );
         if (officialSite?.url) setWebsiteUrl(officialSite.url);
+        // Pre-fill location from enrichment so the artist can confirm/correct
+        if (data?.location?.city) setCity(data.location.city);
+        const enrichedCountry = data?.location?.country || data?.location?.countryCode;
+        if (enrichedCountry) setCountry(enrichedCountry);
       })
       .catch(() => {});
   }, [slug]);
@@ -279,6 +285,7 @@ export function ClaimPage() {
         body: JSON.stringify({
           slug,
           links: confirmedLinks,
+          location: { city, country },
           ...(customImageUrl ? { customImageUrl } : {}),
         }),
       });
@@ -654,6 +661,32 @@ export function ClaimPage() {
                       </div>
                     )}
                   </div>
+                </div>
+              </section>
+
+              {/* Location section */}
+              <section className="space-y-2">
+                <h2 className="text-sm font-medium">Location</h2>
+                <p className="text-xs text-text-muted">
+                  We pre-filled this from public data where we could. Correct it if it's wrong or leave blank to skip.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={e => setCity(e.target.value.slice(0, 100))}
+                    placeholder="City"
+                    aria-label="City"
+                    className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary"
+                  />
+                  <input
+                    type="text"
+                    value={country}
+                    onChange={e => setCountry(e.target.value.slice(0, 100))}
+                    placeholder="Country"
+                    aria-label="Country"
+                    className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary"
+                  />
                 </div>
               </section>
 

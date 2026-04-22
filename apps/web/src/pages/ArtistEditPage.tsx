@@ -91,6 +91,8 @@ interface FormState {
   customImageUrl: string | null;
   fetchingAvatar: string | null;
   links: LinkEntry[];
+  city: string;
+  country: string;
 }
 
 type FormAction =
@@ -122,6 +124,8 @@ const initialFormState: FormState = {
   customImageUrl: null,
   fetchingAvatar: null,
   links: [],
+  city: '',
+  country: '',
 };
 
 export function ArtistEditPage() {
@@ -172,6 +176,8 @@ export function ArtistEditPage() {
             bio: data.profile?.bio ?? '',
             featuredEmbed: data.profile?.featuredEmbed ?? '',
             links: existingLinks,
+            city: data.location?.city ?? '',
+            country: data.location?.country ?? data.location?.countryCode ?? '',
             loading: false,
           },
         });
@@ -299,6 +305,7 @@ export function ArtistEditPage() {
           bio: form.bio,
           featuredEmbed: form.featuredEmbed || null,
           customImageUrl: form.customImageUrl,
+          location: { city: form.city, country: form.country },
           links: validLinks.map(l => ({
             platform: l.platform,
             url: l.url,
@@ -493,6 +500,34 @@ export function ArtistEditPage() {
               placeholder="Tell fans about your music..."
               className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary resize-none"
             />
+          </section>
+
+          {/* Location */}
+          <section className="space-y-2">
+            <label className="block text-sm font-medium">Location</label>
+            <p className="text-xs text-text-muted">
+              Helps fans find you and disambiguates you from other artists with the same name.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <input
+                id="city"
+                type="text"
+                value={form.city}
+                onChange={e => set('city', e.target.value.slice(0, 100))}
+                placeholder="City"
+                aria-label="City"
+                className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary"
+              />
+              <input
+                id="country"
+                type="text"
+                value={form.country}
+                onChange={e => set('country', e.target.value.slice(0, 100))}
+                placeholder="Country"
+                aria-label="Country"
+                className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary"
+              />
+            </div>
           </section>
 
           {/* Featured Embed */}
