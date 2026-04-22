@@ -237,15 +237,15 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
   // enrichment-discovered locations. Artist's answer overrides MB enrichment,
   // so we clear country_code whenever the artist sets country — the alpha-2
   // fallback only makes sense when there's no full country name.
-  if (body.location !== undefined) {
+  if (body.location != null) {
     const locationUpdate: { city?: string | null; country?: string | null; country_code?: null; updated_at: string } = {
       updated_at: new Date().toISOString(),
     };
-    if (body.location.city !== undefined) {
+    if (typeof body.location.city === 'string') {
       const city = body.location.city.trim().slice(0, 100);
       locationUpdate.city = city || null;
     }
-    if (body.location.country !== undefined) {
+    if (typeof body.location.country === 'string') {
       const country = body.location.country.trim().slice(0, 100);
       locationUpdate.country = country || null;
       locationUpdate.country_code = null;
