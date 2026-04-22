@@ -1507,6 +1507,7 @@ export async function handler(event: { queryStringParameters?: Record<string, st
           })),
           matchConfidence: 'claimed',
           claimedSlug: slug,
+          ...(dbArtist.location ? { location: dbArtist.location } : {}),
         };
       }
     } catch (err) {
