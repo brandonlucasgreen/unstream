@@ -24,6 +24,9 @@ export type SourceId =
   | 'bluesky'
   | 'mastodon'
   | 'peertube'
+  | 'newsletter'
+  | 'wikipedia'
+  | 'liberapay'
   | 'other';
 
 export interface Source {
