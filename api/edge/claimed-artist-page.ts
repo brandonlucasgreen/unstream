@@ -399,7 +399,7 @@ export default async function handler(request: Request, context: Context) {
 
   <script>
     var embedTheme = 'dark';
-    var artistName = ${JSON.stringify(artist.name)};
+    var artistName = ${JSON.stringify(artist.name).replace(/</g, '\\u003c')};
     function setEmbedTheme(t) {
       embedTheme = t;
       document.querySelectorAll('.theme-btn').forEach(function(b) {
