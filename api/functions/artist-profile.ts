@@ -126,7 +126,16 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Authentication required' }) };
   }
 
-  let body: { slug: string; newSlug?: string; newName?: string; bio?: string; featuredEmbed?: string | null; customImageUrl?: string | null; links?: LinkUpdate[] };
+  let body: {
+    slug: string;
+    newSlug?: string;
+    newName?: string;
+    bio?: string;
+    featuredEmbed?: string | null;
+    customImageUrl?: string | null;
+    links?: LinkUpdate[];
+    location?: { city?: string; country?: string };
+  };
   try {
     body = JSON.parse(event.body || '{}');
   } catch {
@@ -221,6 +230,36 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update name' }) };
     }
     console.log(`[Profile] Name changed: "${artist.name}" → "${newName}" for slug "${finalSlug}"`);
+  }
+
+  // --- Update location (city, country) ---
+  // Stored on artists (not artist_profiles) so unclaimed artists can also carry
+  // enrichment-discovered locations. Artist's answer overrides MB enrichment,
+  // so we clear country_code whenever the artist sets country — the alpha-2
+  // fallback only makes sense when there's no full country name.
+  if (body.location !== undefined) {
+    const locationUpdate: { city?: string | null; country?: string | null; country_code?: null; updated_at: string } = {
+      updated_at: new Date().toISOString(),
+    };
+    if (body.location.city !== undefined) {
+      const city = body.location.city.trim().slice(0, 100);
+      locationUpdate.city = city || null;
+    }
+    if (body.location.country !== undefined) {
+      const country = body.location.country.trim().slice(0, 100);
+      locationUpdate.country = country || null;
+      locationUpdate.country_code = null;
+    }
+
+    const { error: locationError } = await client
+      .from('artists')
+      .update(locationUpdate)
+      .eq('id', artist.id);
+
+    if (locationError) {
+      console.error('[Profile] Location update failed:', locationError);
+      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update location' }) };
+    }
   }
 
   // --- Update bio ---
