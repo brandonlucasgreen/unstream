@@ -677,6 +677,7 @@ export function mergeWithMusicBrainzData(
       platforms: newPlatforms,
       wikipediaSummary: mbData.wikipediaSummary || undefined,
       wikipediaUrl: mbData.wikipediaUrl || undefined,
+      location: mbData.location || result.location,
     };
   });
 }

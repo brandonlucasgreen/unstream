@@ -58,6 +58,12 @@ export interface PlatformLink {
   latestRelease?: LatestRelease;
 }
 
+export interface ArtistLocation {
+  city?: string;
+  country?: string;
+  countryCode?: string;
+}
+
 // Search result from the unified API
 export interface SearchResult {
   id: string;
@@ -75,6 +81,8 @@ export interface SearchResult {
   // Wikipedia bio summary from MusicBrainz enrichment
   wikipediaSummary?: string;
   wikipediaUrl?: string;
+  // Geographic location from MusicBrainz, Bandcamp, or Mirlo enrichment
+  location?: ArtistLocation;
 }
 
 // API response from /api/search/sources
@@ -101,6 +109,7 @@ export interface MusicBrainzData {
   platformUrls?: string[];
   wikipediaSummary?: string | null;
   wikipediaUrl?: string | null;
+  location?: ArtistLocation;
 }
 
 // Search state

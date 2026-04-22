@@ -17,6 +17,12 @@ interface DiscoveredPlatformLink {
   url: string;
 }
 
+interface ArtistLocation {
+  city?: string;
+  country?: string;
+  countryCode?: string;
+}
+
 // MusicBrainz search response for lazy loading
 interface MusicBrainzSearchResponse {
   query: string;
@@ -29,6 +35,7 @@ interface MusicBrainzSearchResponse {
   platformUrls: string[]; // Known platform URLs from MusicBrainz relations (bandcamp, mirlo, etc.)
   wikipediaSummary: string | null;
   wikipediaUrl: string | null;
+  location?: ArtistLocation;
 }
 
 // Known Mastodon/Fediverse instances (non-exhaustive, but covers popular ones)
@@ -150,7 +157,7 @@ async function fetchWikipediaSummary(wikipediaUrl: string): Promise<{ extract: s
 import { cacheGetOrFetch, artistCacheKey } from './cache';
 import { persistEnrichment } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
-import { validateQuery } from './middleware';
+import { validateQuery, isUrlHostnameAllowed } from './middleware';
 
 // Cache TTL for MusicBrainz lookups (30 minutes)
 const MUSICBRAINZ_CACHE_TTL = 30 * 60;
@@ -453,6 +460,93 @@ async function searchPeerTubeChannels(artistName: string): Promise<SocialLink | 
   }
 }
 
+// Parse a raw location string that may be "City, Country" or just "Country".
+// Returns an ArtistLocation with city and/or country split out.
+function parseLocationString(raw: string): ArtistLocation {
+  const parts = raw.split(',').map(s => s.trim()).filter(Boolean);
+  if (parts.length >= 2) {
+    return { city: parts.slice(0, -1).join(', '), country: parts[parts.length - 1] };
+  }
+  return { country: parts[0] };
+}
+
+// Merge location objects: fields from `primary` take precedence; missing fields filled from `fallback`.
+function mergeLocations(...sources: (ArtistLocation | null | undefined)[]): ArtistLocation | undefined {
+  const result: ArtistLocation = {};
+  for (const src of sources) {
+    if (!src) continue;
+    if (!result.city && src.city) result.city = src.city;
+    if (!result.country && src.country) result.country = src.country;
+    if (!result.countryCode && src.countryCode) result.countryCode = src.countryCode;
+  }
+  return (result.city || result.country) ? result : undefined;
+}
+
+// Fetch location from a Bandcamp artist profile page.
+// The URL must come from MusicBrainz platform relations (not user input) and is
+// validated against the SSRF allowlist as defense-in-depth.
+async function fetchBandcampLocation(bandcampUrl: string): Promise<ArtistLocation | null> {
+  if (!isUrlHostnameAllowed(bandcampUrl)) return null;
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    const response = await globalThis.fetch(bandcampUrl, {
+      signal: controller.signal,
+      headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36' },
+    });
+    clearTimeout(timeout);
+    if (!response.ok) return null;
+    const html = await response.text();
+
+    // Iterate all JSON-LD blocks; find the MusicGroup entry which carries the artist location
+    const jsonLdPattern = /<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g;
+    let jsonLdMatch: RegExpExecArray | null;
+    while ((jsonLdMatch = jsonLdPattern.exec(html)) !== null) {
+      try {
+        const parsed = JSON.parse(jsonLdMatch[1]);
+        const entries = Array.isArray(parsed) ? parsed : [parsed];
+        for (const entry of entries) {
+          if (entry?.['@type'] === 'MusicGroup') {
+            const raw = entry?.foundingLocation?.name || entry?.location?.name;
+            if (raw) return parseLocationString(raw);
+          }
+        }
+      } catch { /* skip malformed blocks */ }
+    }
+
+    // Fall back to location element in artist header (Bandcamp uses <p class="location ...">)
+    const locationMatch = html.match(/<(?:p|div|span)[^>]+class="[^"]*\blocation\b[^"]*"[^>]*>([^<]+)<\/(?:p|div|span)>/);
+    if (locationMatch) return parseLocationString(locationMatch[1].trim());
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// Spike: fetch artist location from Mirlo REST API.
+// Constructs URL internally from artist slug — no user input involved.
+async function fetchMirloLocation(artistSlug: string): Promise<ArtistLocation | null> {
+  if (!artistSlug) return null;
+  try {
+    const apiUrl = `https://api.mirlo.space/v1/artists?urlSlug=${encodeURIComponent(artistSlug)}`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    const response = await globalThis.fetch(apiUrl, {
+      signal: controller.signal,
+      headers: { 'User-Agent': 'Unstream/1.0 (https://unstream.stream)' },
+    });
+    clearTimeout(timeout);
+    if (!response.ok) return null;
+    const data = await response.json() as { results?: { location?: string }[] };
+    const raw = data.results?.[0]?.location;
+    if (raw) return parseLocationString(raw);
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 // Search MusicBrainz for artist info including official website, Discogs, social links, and release history
 async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchResponse> {
   const emptyResult: MusicBrainzSearchResponse = {
@@ -466,6 +560,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     platformUrls: [],
     wikipediaSummary: null,
     wikipediaUrl: null,
+    location: undefined,
   };
 
   try {
@@ -525,13 +620,37 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     const seenPlatforms = new Set<SocialPlatform>();
     const platformUrls: string[] = [];
 
+    let mbLocation: ArtistLocation | undefined;
+
     if (artistResponse.ok) {
       const artistData = await artistResponse.json() as {
-        relations?: {
-          type: string;
-          url?: { resource: string };
-        }[];
+        relations?: { type: string; url?: { resource: string } }[];
+        area?: { name: string; type?: string; 'iso-3166-1-codes'?: string[] };
+        'begin-area'?: { name: string; type?: string };
       };
+
+      // Parse location from area / begin-area fields.
+      // MB area types: 'Country', 'Subdivision', 'City', 'Municipality', 'District', 'Island'.
+      // Only treat area as country when type says so; otherwise treat it as city.
+      const cityTypes = new Set(['City', 'Municipality', 'District', 'Subdivision', 'Island']);
+      if (artistData.area) {
+        if (artistData.area.type === 'Country') {
+          mbLocation = {
+            country: artistData.area.name,
+            countryCode: artistData.area['iso-3166-1-codes']?.[0],
+          };
+        } else if (artistData.area.type && cityTypes.has(artistData.area.type)) {
+          mbLocation = { city: artistData.area.name };
+        }
+      }
+      if (artistData['begin-area'] && artistData['begin-area'].name !== artistData.area?.name) {
+        const beginType = artistData['begin-area'].type;
+        if (beginType && cityTypes.has(beginType)) {
+          mbLocation = { ...mbLocation, city: artistData['begin-area'].name };
+        } else if (beginType === 'Country' && !mbLocation?.country) {
+          mbLocation = { ...mbLocation, country: artistData['begin-area'].name };
+        }
+      }
 
       const relations = artistData.relations || [];
 
@@ -628,13 +747,26 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       }
     }
 
-    // Fetch additional social links from Discogs, official site, PeerTube, and Wikipedia in parallel
-    const [discogsSocialLinks, officialSiteResult, peertubeLink, wikipediaResult] = await Promise.all([
+    // Derive Bandcamp URL from MB's own platform relations (avoids client-supplied URL).
+    // Mirlo slug is derived from the artist name, same as the Phase 1 Mirlo search.
+    const mbBandcampUrl = platformUrls.find(u => {
+      try { return new URL(u).hostname.endsWith('.bandcamp.com'); } catch { return false; }
+    });
+    const mirloSlug = artist.name.toLowerCase().replace(/\s+/g, '');
+
+    // Fetch additional social links from Discogs, official site, PeerTube, Wikipedia,
+    // and platform locations (Bandcamp, Mirlo) in parallel
+    const [discogsSocialLinks, officialSiteResult, peertubeLink, wikipediaResult, bandcampLocation, mirloLocation] = await Promise.all([
       discogsUrl ? fetchDiscogsSocialLinks(discogsUrl) : Promise.resolve([]),
       officialUrl ? fetchOfficialSiteSocialLinks(officialUrl) : Promise.resolve({ socialLinks: [], linktreeUrl: null, discoveredPlatforms: [] }),
       searchPeerTubeChannels(artist.name),
       wikipediaUrl ? fetchWikipediaSummary(wikipediaUrl) : Promise.resolve(null),
+      mbBandcampUrl ? fetchBandcampLocation(mbBandcampUrl) : Promise.resolve(null),
+      fetchMirloLocation(mirloSlug),
     ]);
+
+    // Merge locations: MusicBrainz is authoritative; Bandcamp and Mirlo fill in missing fields
+    const location = mergeLocations(mbLocation, bandcampLocation, mirloLocation);
 
     // If we found a Linktree URL from MusicBrainz or official site, scrape it for additional links
     // Prefer MusicBrainz Linktree (more authoritative), fall back to official site
@@ -662,6 +794,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       platformUrls,
       wikipediaSummary: wikipediaResult?.extract || null,
       wikipediaUrl: wikipediaResult?.pageUrl || wikipediaUrl,
+      location,
     };
   } catch (error: unknown) {
     const err = error as { name?: string; message?: string };
