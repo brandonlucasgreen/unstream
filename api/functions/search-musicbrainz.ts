@@ -645,7 +645,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       }
       if (artistData['begin-area'] && artistData['begin-area'].name !== artistData.area?.name) {
         const beginType = artistData['begin-area'].type;
-        if (beginType && cityTypes.has(beginType)) {
+        if (beginType && cityTypes.has(beginType) && !mbLocation?.city) {
           mbLocation = { ...mbLocation, city: artistData['begin-area'].name };
         } else if (beginType === 'Country' && !mbLocation?.country) {
           mbLocation = { ...mbLocation, country: artistData['begin-area'].name };
