@@ -930,10 +930,13 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       console.log(`[MusicBrainz] Cache hit for "${normalizedQuery}"`);
     }
 
-    // Persist enrichment to the artist database
-    if (result.artistName) {
+    // Persist enrichment to the artist database.
+    // Also persist on MB-miss if we at least captured location (from the
+    // Bandcamp/Mirlo fallback), keyed on the normalized query's slug.
+    const persistName = result.artistName || (result.location ? normalizedQuery : null);
+    if (persistName) {
       try {
-        await persistEnrichment(result.artistName, result);
+        await persistEnrichment(persistName, result);
       } catch (err) {
         console.error('[DB] Background enrichment persist failed:', err);
       }

@@ -57,6 +57,13 @@ export interface AggregatedResult {
   claimedSlug?: string;
   // Set to true when this result was merged via a manual override — protects it from later splitting
   overrideMerged?: boolean;
+  // Artist location — populated from the DB for claimed artists and from
+  // Phase 2 MusicBrainz/Bandcamp/Mirlo enrichment for unclaimed artists.
+  location?: {
+    city?: string;
+    country?: string;
+    countryCode?: string;
+  };
 }
 
 export interface SearchResponse {
