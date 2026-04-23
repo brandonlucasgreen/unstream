@@ -114,58 +114,60 @@ export function ArtistDashboardPage() {
                   key={profile.id}
                   className="p-4 rounded-lg bg-bg-secondary border border-border"
                 >
-                  <div className="flex items-center gap-4">
-                    {profile.imageUrl ? (
-                      <img
-                        src={profile.imageUrl}
-                        alt={profile.name}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 rounded-full bg-bg-hover flex items-center justify-center text-text-muted text-lg">
-                        {profile.name.charAt(0).toUpperCase()}
-                      </div>
-                    )}
+                  <div className="flex gap-4">
+                    <div className="flex-shrink-0">
+                      {profile.imageUrl ? (
+                        <img
+                          src={profile.imageUrl}
+                          alt={profile.name}
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-bg-hover flex items-center justify-center text-text-muted text-lg">
+                          {profile.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold truncate">{profile.name}</p>
-                      <p className="text-sm text-text-muted">
+                      <p className="text-sm text-text-muted truncate">
                         unstream.stream/a/{profile.slug}
                       </p>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <Link
-                        to={`/artist-edit/${profile.slug}`}
-                        className="px-3 py-1.5 rounded-lg bg-accent-primary text-white text-sm font-medium hover:bg-accent-primary/90 transition-colors"
-                      >
-                        Edit
-                      </Link>
-                      <Link
-                        to={`/a/${profile.slug}`}
-                        className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors"
-                      >
-                        View
-                      </Link>
-                      <button
-                        onClick={() => handleShareProfile(profile.slug)}
-                        className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors flex items-center gap-1.5"
-                        title="Share your artist page"
-                      >
-                        {copiedSlug === profile.slug ? (
-                          <>
-                            <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                            Copied!
-                          </>
-                        ) : (
-                          <>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                            </svg>
-                            Share
-                          </>
-                        )}
-                      </button>
+                      <div className="flex items-center gap-2 mt-3">
+                        <Link
+                          to={`/artist-edit/${profile.slug}`}
+                          className="px-3 py-1.5 rounded-lg bg-accent-primary text-white text-sm font-medium hover:bg-accent-primary/90 transition-colors"
+                        >
+                          Edit
+                        </Link>
+                        <Link
+                          to={`/a/${profile.slug}`}
+                          className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors"
+                        >
+                          View
+                        </Link>
+                        <button
+                          onClick={() => handleShareProfile(profile.slug)}
+                          className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors flex items-center gap-1.5"
+                          title="Share your artist page"
+                        >
+                          {copiedSlug === profile.slug ? (
+                            <>
+                              <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              Copied!
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                              </svg>
+                              Share
+                            </>
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
                   <ArtistAnalytics slug={profile.slug} />
