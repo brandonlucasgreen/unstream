@@ -104,6 +104,14 @@ export default async function handler(request: Request, context: Context) {
   const pageUrl = `https://unstream.stream/a/${slug}`;
   const description = bio || `Support ${artist.name} directly on platforms that pay artists fairly.`;
 
+  const locationRegion = artist.country || artist.country_code;
+  const locationText = artist.city && locationRegion
+    ? `${artist.city}, ${locationRegion}`
+    : artist.city || locationRegion || '';
+  const locationHtml = locationText
+    ? `<div style="margin-top:6px;color:var(--muted);font-size:14px">${escapeHtml(locationText)}</div>`
+    : '';
+
   // Separate main platforms from social; "other" and unknown platforms go to main
   const mainPlatforms = platforms.filter((p: { platform: string }) => {
     const info = PLATFORM_INFO[p.platform];
@@ -165,6 +173,7 @@ export default async function handler(request: Request, context: Context) {
     ...(imageUrl ? { image: imageUrl } : {}),
     ...(bio ? { description: profile.bio } : {}),
     ...(sameAsUrls.length > 0 ? { sameAs: sameAsUrls } : {}),
+    ...(locationText ? { foundingLocation: { '@type': 'Place', name: locationText } } : {}),
   };
 
   const html = `<!DOCTYPE html>
@@ -327,6 +336,7 @@ export default async function handler(request: Request, context: Context) {
         Verified
       </span>
     </div>
+    ${locationHtml}
   </div>
 
   <!-- Platform Links -->
