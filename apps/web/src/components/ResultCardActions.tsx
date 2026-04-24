@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import type { SearchResult } from '../types';
-import { getSource } from './ResultCardUtils';
+import { getSource, isDirectLink } from './ResultCardUtils';
 import { analytics } from '../services/analytics';
 
 interface ResultCardActionsProps {
@@ -30,7 +30,7 @@ export function ResultCardActions({ result }: ResultCardActionsProps) {
   };
 
   const verifiedPlatforms = result.platforms.filter(p =>
-    !getSource(p.sourceId)?.searchOnly
+    !getSource(p.sourceId)?.searchOnly || isDirectLink(p.url, p.sourceId)
   );
 
   return (
