@@ -1,10 +1,15 @@
 import { StrictMode, Suspense, lazy } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import * as Sentry from '@sentry/react'
 import { AuthProvider } from './contexts/AuthContext'
 import './index.css'
 import App from './App.tsx'
 import { ArtistPage } from './pages/ArtistPage.tsx'
+import { initSentry } from './services/sentry.ts'
+
+// Initialize Sentry (no-op if DSN not configured)
+initSentry()
 
 // Lazy-load non-critical pages to reduce initial bundle size
 const ClaimPage = lazy(() => import('./pages/ClaimPage.tsx').then(m => ({ default: m.ClaimPage })))
@@ -36,34 +41,36 @@ function LoadingFallback() {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AuthProvider>
-      <BrowserRouter>
-        <Suspense fallback={<LoadingFallback />}>
-          <Routes>
-            <Route path="/" element={<App />} />
-            <Route path="/artist/:slug" element={<ArtistPage />} />
-            <Route path="/a/:slug" element={<ArtistPage />} />
-            <Route path="/claim/:slug" element={<ClaimPage />} />
-            <Route path="/artist-login" element={<ArtistLoginPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="/artist-dashboard" element={<ArtistDashboardPage />} />
-            <Route path="/artist-edit/:slug" element={<ArtistEditPage />} />
-            <Route path="/artists" element={<ArtistDirectoryPage />} />
-            <Route path="/roadmap" element={<RoadmapPage />} />
-            <Route path="/support" element={<SupportPage />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-            <Route path="/guides" element={<GuidesIndexPage />} />
-            <Route path="/guides/:slug" element={<GuidePage />} />
-            <Route path="/admin/merge" element={<AdminMergePage />} />
-            <Route path="/admin/verify" element={<AdminVerifyPage />} />
-            <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
-            <Route path="/developers" element={<DevelopersPage />} />
-            <Route path="/extension" element={<ExtensionPage />} />
-            <Route path="/import" element={<ImportPage />} />
-            <Route path="/changelog" element={<ChangelogPage />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
-    </AuthProvider>
+    <Sentry.ErrorBoundary fallback={<LoadingFallback />}>
+      <AuthProvider>
+        <BrowserRouter>
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
+              <Route path="/" element={<App />} />
+              <Route path="/artist/:slug" element={<ArtistPage />} />
+              <Route path="/a/:slug" element={<ArtistPage />} />
+              <Route path="/claim/:slug" element={<ClaimPage />} />
+              <Route path="/artist-login" element={<ArtistLoginPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/artist-dashboard" element={<ArtistDashboardPage />} />
+              <Route path="/artist-edit/:slug" element={<ArtistEditPage />} />
+              <Route path="/artists" element={<ArtistDirectoryPage />} />
+              <Route path="/roadmap" element={<RoadmapPage />} />
+              <Route path="/support" element={<SupportPage />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+              <Route path="/guides" element={<GuidesIndexPage />} />
+              <Route path="/guides/:slug" element={<GuidePage />} />
+              <Route path="/admin/merge" element={<AdminMergePage />} />
+              <Route path="/admin/verify" element={<AdminVerifyPage />} />
+              <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
+              <Route path="/developers" element={<DevelopersPage />} />
+              <Route path="/extension" element={<ExtensionPage />} />
+              <Route path="/import" element={<ImportPage />} />
+              <Route path="/changelog" element={<ChangelogPage />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </AuthProvider>
+    </Sentry.ErrorBoundary>
   </StrictMode>,
 )

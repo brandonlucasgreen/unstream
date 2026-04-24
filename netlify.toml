@@ -7,7 +7,7 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' cloud.umami.is letterbird.co; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://cloud.umami.is https://api-gateway.umami.dev https://letterbird.co; img-src 'self' https: data:; frame-src https:; object-src 'none'; base-uri 'self'"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' cloud.umami.is letterbird.co; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://cloud.umami.is https://api-gateway.umami.dev https://letterbird.co https://*.ingest.sentry.io; img-src 'self' https: data:; frame-src https:; object-src 'none'; base-uri 'self'"
 
 [[edge_functions]]
   path = "/"
