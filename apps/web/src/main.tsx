@@ -5,6 +5,10 @@ import { AuthProvider } from './contexts/AuthContext'
 import './index.css'
 import App from './App.tsx'
 import { ArtistPage } from './pages/ArtistPage.tsx'
+import { initSentry } from './services/sentry.ts'
+
+// Initialize Sentry (no-op if DSN not configured)
+initSentry()
 
 // Lazy-load non-critical pages to reduce initial bundle size
 const ClaimPage = lazy(() => import('./pages/ClaimPage.tsx').then(m => ({ default: m.ClaimPage })))
