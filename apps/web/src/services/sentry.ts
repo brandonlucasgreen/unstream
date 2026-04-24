@@ -21,15 +21,18 @@ export function initSentry(): void {
     return
   }
 
+  // Validate DSN format
+  if (!dsn.startsWith('https://')) {
+    console.warn('Sentry DSN format invalid. Expected to start with https://')
+  }
+
   Sentry.init({
     dsn,
     environment,
     release: version,
-    
+
     // Basic React Router integration for context
-    integrations: [
-      Sentry.browserTracingIntegration(),
-    ],
+    integrations: [],
 
     // Sample rate for error events (100% - capture all errors)
     tracesSampleRate: 0.0, // No performance monitoring by default
@@ -41,7 +44,7 @@ export function initSentry(): void {
     // Filter out known non-critical errors
     beforeSend(event, hint) {
       // Don't send errors in development (let console handles it)
-      if (environment === 'development') {
+      if (import.meta.env.DEV) {
         return null
       }
 
@@ -55,11 +58,7 @@ export function initSentry(): void {
     },
   })
 
-  console.log('Sentry initialized', {
-    environment,
-    version,
-    dsn: dsn.substring(0, 10) + '...',
-  })
+  console.log('Sentry initialized (env: ' + environment + ')')
 }
 
 /**
@@ -67,15 +66,12 @@ export function initSentry(): void {
  * Only works in development to avoid sending test errors to Sentry
  */
 export function captureTestError(): void {
-  const environment = import.meta.env.VITE_SENTRY_ENV || import.meta.env.MODE
-
-  if (environment !== 'development') {
-    console.warn('captureTestError should only be used in development')
+  if (!import.meta.env.DEV) {
     return
   }
 
   try {
-    throw new Error(`[Sentry Test] This is a test error from ${environment}. If you see this in Sentry, the setup worked!`)
+    throw new Error(`[Sentry Test] This is a test error from ${import.meta.env.VITE_SENTRY_ENV || import.meta.env.MODE}. If you see this in Sentry, the setup worked!`)
   } catch (error) {
     Sentry.captureException(error)
   }
