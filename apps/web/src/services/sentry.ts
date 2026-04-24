@@ -54,12 +54,6 @@ export function initSentry(): void {
       return event
     },
   })
-
-  console.log('Sentry initialized', {
-    environment,
-    version,
-    dsn: dsn.substring(0, 10) + '...',
-  })
 }
 
 /**
