@@ -65,8 +65,4 @@ export function SocialIcon({ platform, className = 'w-4 h-4' }: { platform: Sour
   }
 }
 
-const SOCIAL_PLATFORMS = new Set(['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'mastodon', 'peertube', 'newsletter']);
 
-export function hasSocialIcon(platform: string): boolean {
-  return SOCIAL_PLATFORMS.has(platform);
-}
