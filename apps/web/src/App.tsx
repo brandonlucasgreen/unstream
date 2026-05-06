@@ -410,7 +410,7 @@ function App() {
 
                 <div className="grid md:grid-cols-2 gap-6">
                   {Object.entries(sourceCategories)
-                    .filter(([key]) => key !== 'social' && key !== 'official') // Social links and official sites are discovered per-artist
+                    .filter(([key]) => key !== 'social' && key !== 'official' && key !== 'curated') // Social links, official sites, and custom links are discovered per-artist
                     .map(([key, category]) => (
                     <div key={key}>
                       <h3 className="font-semibold text-text-primary mb-1">{category.name}</h3>
@@ -418,6 +418,10 @@ function App() {
                       <div className="flex flex-wrap gap-2">
                         {category.sources.map(sourceId => {
                           const source = sources[sourceId];
+                          // Sources with very dark brand colors need lighter text in dark mode
+                          const isDarkColor = parseInt(source.color.slice(1, 3), 16) + parseInt(source.color.slice(3, 5), 16) + parseInt(source.color.slice(5, 7), 16) < 128;
+                          const textColor = isDarkColor ? 'var(--color-text-primary)' : source.color;
+                          const bgColor = isDarkColor ? 'var(--color-bg-hover)' : `${source.color}15`;
                           return (
                             <a
                               key={sourceId}
@@ -426,11 +430,11 @@ function App() {
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all hover:scale-105 hover:shadow-md"
                               style={{
-                                backgroundColor: `${source.color}15`,
-                                color: source.color,
+                                backgroundColor: bgColor,
+                                color: textColor,
                               }}
                             >
-                              <PlatformIcon sourceId={source.id} color={source.color} emoji={source.icon} />
+                              <PlatformIcon sourceId={source.id} color={isDarkColor ? '#888888' : source.color} emoji={source.icon} />
                               <span>{source.name}</span>
                             </a>
                           );
