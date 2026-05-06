@@ -39,14 +39,14 @@
     "title": "Public API v1",
     "description": "Developers can now build on top of Unstream. The public API supports artist search, artist lookup, URL resolution, and a full platform list — with API key auth and tiered rate limiting.",
     "date": "2026-04-11",
-    "announced": false
+    "announced": true
   },
   {
     "id": "noscript-search",
     "title": "No-JavaScript search",
     "description": "Unstream now works without JavaScript. The search experience is fully server-rendered for accessibility, crawlers, and anyone who prefers a leaner web.",
     "date": "2026-04-11",
-    "announced": false
+    "announced": true
   },
   {
     "id": "ios-app",
