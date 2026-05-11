@@ -626,14 +626,22 @@ export function createOrphanedQobuzStandalones(
   qobuzMatches: Map<string, string>,
 ): void {
   const attachedUrls = new Set<string>();
+  // Also track names of existing results to avoid creating duplicates
+  // when Qobuz was attached but later removed as a dead link
+  const existingNames = new Set<string>();
   for (const r of aggregated) {
     for (const p of r.platforms) {
       if (p.sourceId === 'qobuz') attachedUrls.add(p.url);
     }
+    existingNames.add(normalizeForComparison(r.name));
   }
 
   for (const [qobuzName, qobuzUrl] of qobuzMatches) {
     if (attachedUrls.has(qobuzUrl)) continue;
+    // Don't create a standalone if a result with the same name already exists
+    // (Qobuz may have been attached then removed as a dead link)
+    const normalizedQobuzName = normalizeForComparison(qobuzName);
+    if (existingNames.has(normalizedQobuzName)) continue;
 
     const displayName = qobuzDisplayName(qobuzUrl, qobuzName);
     const standaloneId = `qobuz-standalone-${qobuzName}`;
