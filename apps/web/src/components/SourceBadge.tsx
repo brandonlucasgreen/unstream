@@ -72,50 +72,48 @@ export function SourceBadge({ source, url, isDirectLink, displayName }: SourceBa
       <span className="flex items-center gap-1">
         {label}
         {hasPayoutPercent ? (
-          <>
-            <span
-              className={`payout-badge relative text-[10px] font-semibold px-1 py-0.5 rounded cursor-help${isBCFriday ? ' bandcamp-friday-payout' : ''}`}
-              style={{
-                backgroundColor: isBCFriday ? '#1da0c320' : `${source.color}30`,
-              }}
-            >
-              {displayPayout}
-              <span className="payout-tooltip">
-                {isBCFriday
-                  ? "It's Bandcamp Friday! Bandcamp waives their revenue share today, so artists get ~97% of every sale."
-                  : 'This is the approximate percentage of a sale the artist receives on this platform.'}
-              </span>
+          <span
+            className={`payout-badge relative text-[10px] font-semibold px-1 py-0.5 rounded cursor-help${isBCFriday ? ' bandcamp-friday-payout' : ''}`}
+            style={{
+              backgroundColor: isBCFriday ? '#1da0c320' : `${source.color}30`,
+            }}
+          >
+            {displayPayout}
+            <span className="payout-tooltip">
+              {isBCFriday
+                ? "It's Bandcamp Friday! Bandcamp waives their revenue share today, so artists get ~97% of every sale."
+                : 'This is the approximate percentage of a sale the artist receives on this platform.'}
             </span>
-            {isBCFriday && (
-              <span className="bandcamp-friday-label">
-                BC Friday!
-              </span>
-            )}
-          </>
-
+          </span>
         ) : (
           <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
         )}
+        {/* Show AI policy indicators only on hover to reduce visual clutter */}
         {hasAiPolicy && (
           <span
-            className="ai-policy-badge relative text-[10px] font-semibold px-1 py-0.5 rounded cursor-help"
+            className="ai-policy-badge relative text-[10px] font-medium px-1 py-0.5 rounded opacity-0 hover:opacity-100 transition-opacity"
             style={{
               backgroundColor: source.aiPolicy === 'banned' ? '#22c55e30' : '#f59e0b30',
             }}
           >
             {source.aiPolicy === 'banned' ? (
-              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/></svg>
+              <span className="inline-flex items-center gap-0.5">
+                <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/></svg>
+                AI banned
+              </span>
             ) : (
-              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
+              <span className="inline-flex items-center gap-0.5">
+                <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
+                AI restricted
+              </span>
             )}
-            <span className="ai-policy-tooltip">
-              {AI_POLICY_TOOLTIPS[source.id] ??
-                (source.aiPolicy === 'banned'
-                  ? 'This platform has banned AI-generated music.'
-                  : 'This platform restricts or tags AI-generated music.')}
-            </span>
+            {AI_POLICY_TOOLTIPS[source.id] && (
+              <span className="ai-policy-tooltip text-[9px] absolute z-10 bg-black/90 text-white px-1.5 py-0.5 rounded w-32 -mt-6 ml-1">
+                {AI_POLICY_TOOLTIPS[source.id]}
+              </span>
+            )}
           </span>
         )}
       </span>

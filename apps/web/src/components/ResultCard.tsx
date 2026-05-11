@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import type { SearchResult } from '../types';
-import { SourceBadge } from './SourceBadge';
 import { analytics } from '../services/analytics';
 import { ResultCardHeader } from './ResultCardHeader';
 import { ResultCardRelease } from './ResultCardRelease';
@@ -8,8 +7,6 @@ import { ResultCardPlatforms } from './ResultCardPlatforms';
 import { ResultCardSocial } from './ResultCardSocial';
 import { ResultCardActions } from './ResultCardActions';
 import {
-  getSource,
-  isDirectLink,
   categorizePlatforms,
   allKnownSourceIds,
   getReleaseInfo,
@@ -46,10 +43,6 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
 
   const categorized = categorizePlatforms(verifiedPlatforms, allKnownSourceIds);
 
-  const searchOnlyPlatforms = result.platforms.filter(p =>
-    getSource(p.sourceId)?.searchOnly && !isDirectLink(p.url, p.sourceId)
-  );
-
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
     const url = window.location.href;
@@ -67,7 +60,6 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
   };
 
   const hasRelease = !!latestRelease && platformsWithRelease.length > 0;
-  const hasMarketplaceNoRelease = categorized.marketplace.length > 0 && !hasRelease;
 
   return (
     <div className="result-card group">
@@ -97,69 +89,52 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
             </div>
           )}
 
-          {/* Wikipedia bio summary */}
-          {result.type === 'artist' && result.wikipediaSummary && (
-            <div className="space-y-1">
-              <p className="text-sm text-text-secondary leading-relaxed">
-                {result.wikipediaSummary.length > 200
-                  ? result.wikipediaSummary.substring(0, 200).replace(/\s+\S*$/, '') + '...'
-                  : result.wikipediaSummary}
-                {result.wikipediaUrl && (
-                  <>
-                    {' '}
-                    <a href={result.wikipediaUrl} target="_blank" rel="noopener noreferrer"
-                       className="text-accent-primary hover:underline text-xs"
-                       onClick={(e) => e.stopPropagation()}>
-                      Wikipedia
-                    </a>
-                  </>
-                )}
-              </p>
-            </div>
+          {/* Featured Release - now subordinate to platform results */}
+          {hasRelease && (
+            <ResultCardRelease
+              result={result}
+              latestRelease={latestRelease}
+              platformsWithRelease={platformsWithRelease}
+              canPlay={canPlay}
+              previewUrl={previewUrl}
+            />
           )}
 
-          {/* Featured Release */}
-          <ResultCardRelease
-            result={result}
-            latestRelease={latestRelease}
-            platformsWithRelease={platformsWithRelease}
-            canPlay={canPlay}
-            previewUrl={previewUrl}
-          />
-
-          {/* Music Marketplaces */}
+          {/* Music Marketplaces - Primary content block */}
           <ResultCardPlatforms
             platforms={categorized.marketplace}
-            category="Music Marketplaces"
-            showPreview={hasMarketplaceNoRelease && canPlay}
-            resultName={result.name}
-            canPlay={canPlay}
-            previewUrl={previewUrl}
+            category="Support this artist"
+            compact
           />
 
           <ResultCardPlatforms
             platforms={categorized.patronage}
-            category="Patronage Platforms"
+            category="Patronage"
+            compact
           />
 
           <ResultCardPlatforms
             platforms={categorized.decentralized}
             category="Decentralized"
+            compact
           />
 
           <ResultCardPlatforms
             platforms={categorized.library}
             category="Library Services"
+            compact
           />
 
           <ResultCardPlatforms
             platforms={categorized.official}
             category="Official"
+            compact
           />
 
           <ResultCardPlatforms
             platforms={categorized.curated}
-            category="Links"
+            category="Other Links"
+            compact
           />
 
           {/* Social links */}
@@ -168,22 +143,7 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
             claimedSlug={result.claimedSlug}
           />
 
-          {/* Search-only platforms */}
-          {searchOnlyPlatforms.length > 0 && (
-            <div className="pt-2 mt-2 border-t border-border/50 flex items-center flex-wrap">
-              <span className="text-sm text-text-secondary py-1">Also try: </span>
-              {searchOnlyPlatforms.map(platform => (
-                <SourceBadge
-                  key={platform.sourceId}
-                  source={getSource(platform.sourceId)}
-                  url={platform.url}
-                  displayName={platform.displayName}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Actions: app promo, claim, report, legend */}
+          {/* Actions: claim, report, app promo */}
           <ResultCardActions result={result} />
         </div>
       )}
