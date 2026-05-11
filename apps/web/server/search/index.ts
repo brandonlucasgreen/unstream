@@ -1,6 +1,8 @@
 import type { AggregatedResult, PlatformResult } from '../shared-types';
 import { generateResultId, normalizeForComparison, parseReleaseDate, textMatchScore } from '../shared-utils';
-import { getBandcampLatestRelease, searchBandcamp, searchBandcampForAlbum } from './bandcamp';
+// Bandcamp scraping disabled (anti-bot protection). We now use MusicBrainz for direct
+// Bandcamp URLs and fallback search links when MB has none.
+import { getBandcampLatestRelease, searchBandcampForAlbum } from './bandcamp';
 import { searchBandwagon } from './bandwagon';
 import { searchBeatport } from './beatport';
 import { searchEven } from './even';
@@ -54,8 +56,7 @@ function aggregateResults(allResults: PlatformResult[], query?: string): Aggrega
 }
 
 export async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
-  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, patreonResults, qobuzResults, musicbrainzResults, beatportResults, evenResults] = await Promise.allSettled([
-    searchBandcamp(query),
+  const [bandwagonResults, mirloResults, faircampResults, patreonResults, qobuzResults, musicbrainzResults, beatportResults, evenResults] = await Promise.allSettled([
     searchBandwagon(query),
     searchMirlo(query),
     searchFaircamp(query),
@@ -68,9 +69,6 @@ export async function searchAllPlatforms(query: string): Promise<AggregatedResul
 
   const allResults: PlatformResult[] = [];
 
-  if (bandcampResults.status === 'fulfilled') {
-    allResults.push(...bandcampResults.value.filter(r => r.type === 'artist'));
-  }
   if (mirloResults.status === 'fulfilled') {
     allResults.push(...mirloResults.value.filter(r => r.type === 'artist'));
   }
@@ -90,21 +88,27 @@ export async function searchAllPlatforms(query: string): Promise<AggregatedResul
   // Add additional platforms to matching artist results
   for (const result of aggregated) {
     if (result.type === 'artist') {
-      // Search-only platform links for artists found on Bandcamp
-      if (result.platforms.some(p => p.sourceId === 'bandcamp')) {
+      // Search-only platform links for all artist results (no longer gated on Bandcamp presence)
+      result.platforms.push({
+        sourceId: 'ampwall',
+        url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(result.name)}`,
+      });
+      // Ko-fi (DuckDuckGo site search since Ko-fi has no native search)
+      result.platforms.push({
+        sourceId: 'kofi',
+        url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(result.name)}`,
+      });
+      // Buy Me a Coffee has no query search, link to explore
+      result.platforms.push({
+        sourceId: 'buymeacoffee',
+        url: 'https://buymeacoffee.com/explore-creators',
+      });
+
+      // Fallback Bandcamp search link when no direct Bandcamp URL from MusicBrainz
+      if (!result.platforms.some(p => p.sourceId === 'bandcamp')) {
         result.platforms.push({
-          sourceId: 'ampwall',
-          url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(result.name)}`,
-        });
-        // Ko-fi (DuckDuckGo site search since Ko-fi has no native search)
-        result.platforms.push({
-          sourceId: 'kofi',
-          url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(result.name)}`,
-        });
-        // Buy Me a Coffee has no query search, link to explore
-        result.platforms.push({
-          sourceId: 'buymeacoffee',
-          url: 'https://buymeacoffee.com/explore-creators',
+          sourceId: 'bandcamp',
+          url: `https://bandcamp.com/search?q=${encodeURIComponent(result.name)}`,
         });
       }
 
@@ -130,7 +134,7 @@ export async function searchAllPlatforms(query: string): Promise<AggregatedResul
       }
 
       // Sort platforms: verified matches first, search-only platforms last
-      const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee']);
+      const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee', 'bandcamp']);
       result.platforms.sort((a, b) => {
         const aIsSearchOnly = searchOnlyPlatforms.has(a.sourceId);
         const bIsSearchOnly = searchOnlyPlatforms.has(b.sourceId);
