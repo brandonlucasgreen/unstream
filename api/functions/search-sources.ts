@@ -1687,6 +1687,65 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
     applyEnrichmentToResults(aggregated, mbData);
   }
 
+  // Phase 2.2: Create MB fallback result for artists not found on any platform
+  // If MusicBrainz has a high-confidence match but no platform result matches,
+  // create a result with search-only platforms + MB enrichment data.
+  // This ensures prominent artists (like King Gizzard & the Lizard Wizard)
+  // are findable even when they're not on our indie platforms or Qobuz matching fails.
+  if (mbData && mbData.artistName !== null) {
+    const mbNorm = normalizeForComparison(mbData.artistName);
+    const existingMatch = aggregated.some(r =>
+      r.type === 'artist' && normalizeForComparison(r.name) === mbNorm
+    );
+    if (!existingMatch) {
+      const mbPlatforms = [];
+      // Add Bandcamp direct URL from MB if available, otherwise search fallback
+      if (mbData.bandcampUrl) {
+        mbPlatforms.push({ sourceId: 'bandcamp' as SourceId, url: mbData.bandcampUrl });
+      } else {
+        mbPlatforms.push({ sourceId: 'bandcamp' as SourceId, url: `https://bandcamp.com/search?q=${encodeURIComponent(mbData.artistName)}` });
+      }
+      mbPlatforms.push(
+        { sourceId: 'ampwall' as SourceId, url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(mbData.artistName)}` },
+        { sourceId: 'kofi' as SourceId, url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(mbData.artistName)}` },
+        { sourceId: 'buymeacoffee' as SourceId, url: 'https://buymeacoffee.com/explore-creators' },
+      );
+      // Add official site, Discogs, social links from enrichment
+      if (mbData.officialUrl) {
+        mbPlatforms.push({ sourceId: 'officialsite' as SourceId, url: mbData.officialUrl });
+      }
+      if (mbData.discogsUrl) {
+        mbPlatforms.push({ sourceId: 'discogs' as SourceId, url: mbData.discogsUrl });
+      }
+      if (mbData.socialLinks && mbData.socialLinks.length > 0) {
+        for (const social of mbData.socialLinks) {
+          if (!mbPlatforms.some(p => p.sourceId === social.platform)) {
+            mbPlatforms.push({ sourceId: social.platform as SourceId, url: social.url });
+          }
+        }
+      }
+      // Sort: direct links before search-only
+      const searchOnly = new Set(['ampwall', 'kofi', 'buymeacoffee', 'bandcamp']);
+      mbPlatforms.sort((a, b) => {
+        const aSearch = searchOnly.has(a.sourceId) && (a.url.includes('/search?') || a.url.includes('duckduckgo') || a.url.includes('/explore')) ? 1 : 0;
+        const bSearch = searchOnly.has(b.sourceId) && (b.url.includes('/search?') || b.url.includes('duckduckgo') || b.url.includes('/explore')) ? 1 : 0;
+        return aSearch - bSearch;
+      });
+
+      const mbResult: AggregatedResult = {
+        id: `mb-${mbNorm}`,
+        name: mbData.artistName,
+        type: 'artist',
+        platforms: mbPlatforms,
+        matchConfidence: 'unverified',
+        location: mbData.location,
+        wikipediaSummary: mbData.wikipediaSummary || undefined,
+        wikipediaUrl: mbData.wikipediaUrl || undefined,
+      };
+      aggregated.push(mbResult);
+    }
+  }
+
   // Phase 2.5: Apply manual merge overrides before release-based disambiguation.
   // Overrides authoritatively create their own result and strip their URLs
   // from all other results — no reservation needed.
