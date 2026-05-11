@@ -47,6 +47,7 @@ import {
   fetchBandcampLocation,
   fetchMirloLocation,
   enrichLocationFallback,
+  fetchWikipediaSummary,
 } from '../search/enrichment';
 
 // Helper to fetch with timeout
@@ -465,6 +466,7 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // MusicBrainz enriched result interface with full enrichment data
 interface EnrichedMusicBrainzResult {
+  query: string;
   artistName: string | null;
   officialUrl: string | null;
   discogsUrl: string | null;
@@ -481,6 +483,7 @@ interface EnrichedMusicBrainzResult {
 // Search MusicBrainz with full enrichment - fetches social links, location, Wikipedia, etc.
 async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResult> {
   const emptyResult: EnrichedMusicBrainzResult = {
+    query,
     artistName: null,
     officialUrl: null,
     discogsUrl: null,
@@ -731,6 +734,7 @@ async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResu
     );
 
     return {
+      query,
       artistName: artist.name,
       officialUrl,
       discogsUrl,
@@ -1638,33 +1642,10 @@ function applyEnrichmentToResults(
   result.location = mbData.location || result.location;
 }
 
-// Search with enrichment timeout wrapper - runs enrichment in parallel with main search
-async function searchWithEnrichmentTimeout(query: string): Promise<{ results: AggregatedResult[]; enrichmentTimeout: boolean }> {
-  const ENRICHMENT_TIMEOUT = 8000;
-
-  const enrichmentPromise = searchMusicBrainz(query);
-  const timeoutPromise = new Promise((resolve) => {
-    setTimeout(() => resolve(null), ENRICHMENT_TIMEOUT);
-  });
-
-  const enrichmentResult = await Promise.race([enrichmentPromise, timeoutPromise]) as EnrichedMusicBrainzResult | null;
-
-  const results = await searchAllPlatforms(query);
-
-  if (enrichmentResult && enrichmentResult.artistName !== null) {
-    applyEnrichmentToResults(results, enrichmentResult);
-  }
-
-  return {
-    results,
-    enrichmentTimeout: enrichmentResult === null,
-  };
-}
-
 // Main search orchestrator
 // ---------------------------------------------------------------------------
 
-async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
+async function searchAllPlatforms(query: string): Promise<{ results: AggregatedResult[]; enrichmentApplied: boolean }> {
   // Phase 1: Search all platforms in parallel and aggregate Bandcamp/Mirlo results
   const [bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, qobuzResults, ampwallResults, beatportResults, evenResults, musicbrainzResult] = await Promise.allSettled([
     searchBandwagon(query),
@@ -1698,9 +1679,13 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   const aggregated = aggregateResults(allResults, query);
 
   // Phase 2: Attach Qobuz + search-only links, create Qobuz-only results
-  // Note: enrichment data (social links, location, etc.) is applied later in searchWithEnrichmentTimeout
   attachQobuzAndSearchLinks(aggregated, qobuzMatches, ampwallMatches, mbData);
   createQobuzOnlyResults(aggregated, qobuzMatches);
+
+  // Phase 2.1: Apply MusicBrainz enrichment (social links, location, Wikipedia, Bandcamp)
+  if (mbData && mbData.artistName !== null) {
+    applyEnrichmentToResults(aggregated, mbData);
+  }
 
   // Phase 2.5: Apply manual merge overrides before release-based disambiguation.
   // Overrides authoritatively create their own result and strip their URLs
@@ -1724,7 +1709,8 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   await attachNameOnlyPlatforms(merged, nameOnlyMaps);
   // Re-merge: new results from Phase 4 may overlap with existing Qobuz standalones
   const finalMerged = mergeByReleaseOverlap(merged);
-  return filterAndSort(finalMerged, query);
+  const finalResults = filterAndSort(finalMerged, query);
+  return { results: finalResults, enrichmentApplied: mbData !== null && mbData.artistName !== null };
 }
 
 // Search a Bandcamp artist page for a specific album title
@@ -1826,8 +1812,8 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       console.error('[DB] Claimed artist lookup failed:', err);
     }
 
-    const enrichmentResult = await searchWithEnrichmentTimeout(normalizedQuery);
-    const results = enrichmentResult.results;
+    const searchResult = await searchAllPlatforms(normalizedQuery);
+    const results = searchResult.results;
 
     // If we have a claimed artist, put it first and remove any duplicate from live results
     if (claimedResult) {
@@ -1847,9 +1833,9 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     const response: SearchResponse = {
       query, // Return original query for display
       results,
-      // Signal client whether enrichment timed out (true = enrichment completed and merged, false = still pending)
-      // Client will only call fetchMusicBrainzData() if enrichment didn't complete in time
-      hasPendingEnrichment: enrichmentResult.enrichmentTimeout,
+      // Signal client whether enrichment is still pending (true = MB enrichment failed/timed out,
+      // client should call /api/search/musicbrainz as fallback; false = enrichment was applied server-side)
+      hasPendingEnrichment: !searchResult.enrichmentApplied,
     };
 
     return {

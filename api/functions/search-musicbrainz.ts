@@ -1,10 +1,11 @@
 // MusicBrainz enrichment server function
 // Imports shared functions from enrichment.ts, keeps Netlify handler here
 
-import { cacheGetOrFetch, artistCacheKey } from './cache';
+import { cacheGetOrFetch } from './cache';
 import { persistEnrichment } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { validateQuery, isUrlHostnameAllowed } from './middleware';
+import { normalizeAccents, normalizeSearchQuery } from './search-utils';
 
 // Import all shared enrichment functions and types
 import {
@@ -13,8 +14,6 @@ import {
   DiscoveredPlatform,
   DiscoveredPlatformLink,
   ArtistLocation,
-  KNOWN_MASTODON_INSTANCES,
-  KNOWN_PEERTUBE_INSTANCES,
   isMastodonInstance,
   isPeerTubeInstance,
   convertMastodonHandleToUrl,
@@ -37,17 +36,6 @@ import {
 
 // Cache TTL for MusicBrainz lookups (30 minutes)
 const MUSICBRAINZ_CACHE_TTL = 30 * 60;
-
-// Normalize accented characters to their ASCII equivalents
-// e.g., "Tanerélle" -> "Tanerelle", "Björk" -> "Bjork"
-function normalizeAccents(str: string): string {
-  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-}
-
-// Normalize a search query for API calls
-function normalizeSearchQuery(query: string): string {
-  return normalizeAccents(query);
-}
 
 // MusicBrainz search response for the API
 interface MusicBrainzSearchResponse {
@@ -124,9 +112,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     }
 
     // Wait 1.1 seconds to respect MusicBrainz rate limit (1 req/sec)
-    // Using shared delay from enrichment module
-    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-    await delay(1100);
+    await new Promise(resolve => setTimeout(resolve, 1100));
 
     // Fetch artist details with URL relations
     const artistUrl = `https://musicbrainz.org/ws/2/artist/${artist.id}?inc=url-rels&fmt=json`;
@@ -257,7 +243,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     }
 
     // Wait again before next request
-    await delay(1100);
+    await new Promise(resolve => setTimeout(resolve, 1100));
 
     // Check if artist has pre-2005 releases (for Hoopla/Freegal eligibility)
     const releasesUrl = `https://musicbrainz.org/ws/2/release-group/?artist=${artist.id}&fmt=json&limit=20`;
