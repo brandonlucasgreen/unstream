@@ -697,7 +697,7 @@ export function mergeWithMusicBrainzData(
         newPlatforms.push({ sourceId: 'bandcamp', url: bandcampUrl });
       }
     }
-    const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee']);
+    const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee', 'bandcamp']);
     const officialPlatforms = new Set(['officialsite', 'discogs', 'hoopla', 'freegal']);
     const socialPlatforms = new Set(['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'mastodon', 'peertube']);
     newPlatforms.sort((a, b) => {

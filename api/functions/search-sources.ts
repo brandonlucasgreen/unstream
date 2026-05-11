@@ -474,13 +474,14 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
 
     await delay(1100);
 
-    // Fetch artist details with URL relations
+    // Fetch artist details with URL relations (3s timeout to avoid blocking)
     const artistUrl = `https://musicbrainz.org/ws/2/artist/${artist.id}?inc=url-rels&fmt=json`;
 
     const artistResponse = await globalThis.fetch(artistUrl, {
       headers: {
         'User-Agent': 'Unstream/1.0 (https://github.com/unstream - ethical music finder)',
       },
+      signal: AbortSignal.timeout(3000),
     });
 
     let officialUrl: string | undefined;
