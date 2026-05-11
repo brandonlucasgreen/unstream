@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import type { SearchResult } from '../types';
-import { getSource, isDirectLink } from './ResultCardUtils';
+import { getSource } from './ResultCardUtils';
 import { analytics } from '../services/analytics';
 
 interface ResultCardActionsProps {
@@ -29,17 +29,13 @@ export function ResultCardActions({ result }: ResultCardActionsProps) {
     setReportText('');
   };
 
-  const verifiedPlatforms = result.platforms.filter(p =>
-    !getSource(p.sourceId)?.searchOnly || isDirectLink(p.url, p.sourceId)
-  );
-
   return (
     <>
       {/* App promo */}
       {result.type === 'artist' && (
-        <div className="p-3 rounded-lg bg-accent-primary/5 border border-accent-primary/10">
+        <div className="p-3 rounded-lg bg-bg-secondary border border-border mt-2">
           <div className="flex items-center gap-2 mb-2.5">
-            <svg className="w-4 h-4 text-accent-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-text-secondary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
             </svg>
             <p className="text-xs text-text-secondary">
@@ -62,7 +58,7 @@ export function ResultCardActions({ result }: ResultCardActionsProps) {
               href="https://chromewebstore.google.com/detail/unstream-support-music-di/ghoiopeidkganjdebkgkehaofnmjofkf"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-secondary text-text-primary text-xs font-medium hover:bg-bg-tertiary border border-border transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-tertiary text-text-primary text-xs font-medium hover:bg-bg-secondary border border-border transition-colors"
               onClick={() => analytics.trackDownload()}
             >
               <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
@@ -74,7 +70,7 @@ export function ResultCardActions({ result }: ResultCardActionsProps) {
               href="https://addons.mozilla.org/en-US/firefox/addon/unstream/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-secondary text-text-primary text-xs font-medium hover:bg-bg-tertiary border border-border transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-tertiary text-text-primary text-xs font-medium hover:bg-bg-secondary border border-border transition-colors"
               onClick={() => analytics.trackDownload()}
             >
               <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
@@ -86,7 +82,7 @@ export function ResultCardActions({ result }: ResultCardActionsProps) {
         </div>
       )}
 
-      {/* Claim + Report */}
+      {/* Claim + Report — below app promo */}
       <div className="pt-3 mt-3 border-t border-border/50">
         {showReportForm ? (
           <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
@@ -147,30 +143,6 @@ export function ResultCardActions({ result }: ResultCardActionsProps) {
           </div>
         )}
       </div>
-
-      {/* Badge legend */}
-      {verifiedPlatforms.some(p => getSource(p.sourceId)?.artistPayoutPercent || getSource(p.sourceId)?.aiPolicy) && (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-text-muted pt-2 mt-2 border-t border-border/50">
-          {verifiedPlatforms.some(p => getSource(p.sourceId)?.artistPayoutPercent) && (
-            <span className="flex items-center gap-1">
-              <span className="px-1 py-0.5 rounded bg-bg-secondary text-[10px] font-semibold">%</span>
-              Artist's share of each sale
-            </span>
-          )}
-          {verifiedPlatforms.some(p => getSource(p.sourceId)?.aiPolicy === 'banned') && (
-            <span className="flex items-center gap-1">
-              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/></svg>
-              AI-generated music banned
-            </span>
-          )}
-          {verifiedPlatforms.some(p => getSource(p.sourceId)?.aiPolicy === 'anti-ai') && (
-            <span className="flex items-center gap-1">
-              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
-              AI content restricted/tagged
-            </span>
-          )}
-        </div>
-      )}
     </>
   );
 }
