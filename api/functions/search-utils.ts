@@ -423,26 +423,32 @@ export function attachQobuzAndSearchLinks(
     if (result.type !== 'artist') continue;
     const normalizedName = normalizeForComparison(result.name);
 
-    // Ampwall: prefer API match, fall back to search URL for Bandcamp artists
+    // Ampwall: prefer API match, fall back to search URL for all artists
     if (ampwallMatches.has(normalizedName)) {
       const url = ampwallMatches.get(normalizedName)!;
       if (!usedPlatformUrls.has(url)) {
         result.platforms.push({ sourceId: 'ampwall', url });
         usedPlatformUrls.add(url);
       }
-    } else if (result.platforms.some(p => p.sourceId === 'bandcamp')) {
+    } else {
       result.platforms.push({
         sourceId: 'ampwall',
         url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(result.name)}`,
       });
     }
 
-    // Ko-fi and BuyMeACoffee search links for Bandcamp artists
-    if (result.platforms.some(p => p.sourceId === 'bandcamp')) {
-      result.platforms.push(
-        { sourceId: 'kofi', url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(result.name)}` },
-        { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
-      );
+    // Ko-fi and BuyMeACoffee search links for all artists
+    result.platforms.push(
+      { sourceId: 'kofi', url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(result.name)}` },
+      { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
+    );
+
+    // Fallback Bandcamp search link when no direct Bandcamp URL from MusicBrainz
+    if (!result.platforms.some(p => p.sourceId === 'bandcamp')) {
+      result.platforms.push({
+        sourceId: 'bandcamp',
+        url: `https://bandcamp.com/search?q=${encodeURIComponent(result.name)}`,
+      });
     }
 
     // Qobuz: attach ALL name variations (e.g. "morice", "morice1", "morice2")

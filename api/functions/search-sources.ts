@@ -48,91 +48,12 @@ async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutM
 // Cache TTL for platform searches (30 minutes)
 const PLATFORM_CACHE_TTL = 30 * 60;
 
-// Search Bandcamp by scraping search results page (PRIMARY SOURCE)
+// Search Bandcamp by scraping search results page (DISABLED)
+// Bandcamp's anti-bot protection blocks server-side scraping, returning
+// challenge pages or 403s. We now rely on MusicBrainz enrichment for direct
+// Bandcamp URLs, and the client-side search fallback for manual discovery.
 async function searchBandcamp(query: string): Promise<PlatformResult[]> {
-  const cacheKey = artistCacheKey('bandcamp', query);
-
-  const { data } = await cacheGetOrFetch<PlatformResult[]>(
-    cacheKey,
-    async () => {
-      const results: PlatformResult[] = [];
-      const searchUrl = `https://bandcamp.com/search?q=${encodeURIComponent(query)}`;
-
-      try {
-        const response = await fetchWithTimeout(searchUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-          },
-        }, 5000);
-
-        if (!response.ok) return results;
-
-        const html = await response.text();
-        const root = parse(html);
-        const resultItems = root.querySelectorAll('.searchresult');
-
-        for (let i = 0; i < Math.min(10, resultItems.length); i++) {
-          const item = resultItems[i];
-          const resultType = item.querySelector('.result-info .itemtype')?.textContent?.trim().toLowerCase();
-          const heading = item.querySelector('.result-info .heading a');
-          const name = heading?.textContent?.trim();
-          const url = heading?.getAttribute('href')?.split('?')[0];
-
-          const subhead = item.querySelector('.result-info .subhead')?.textContent?.trim();
-          let artist: string | undefined;
-          if (subhead && subhead.startsWith('by ')) {
-            artist = subhead.substring(3).trim();
-          }
-
-          const img = item.querySelector('.art img');
-          const imageUrl = img?.getAttribute('src');
-
-          if (name && url) {
-            let type: 'artist' | 'album' | 'track' = 'artist';
-            if (resultType === 'album') type = 'album';
-            else if (resultType === 'track') type = 'track';
-
-            // Filter: only include results where name matches the query
-            // This filters out Bandcamp's fuzzy matches (e.g., "Dory Miller" for "Cory Miller")
-            const nameToCheck = type === 'artist' ? name : (artist || name);
-            if (!namesMatch(nameToCheck, query)) {
-              console.log(`[Bandcamp] Filtering out fuzzy match: "${nameToCheck}" doesn't match query "${query}"`);
-              continue;
-            }
-
-            // Filter out fan profiles: bandcamp.com/username (path-based)
-            // Only keep artist pages: artist.bandcamp.com (subdomain-based)
-            try {
-              const parsedUrl = new URL(url);
-              if (parsedUrl.hostname === 'bandcamp.com') {
-                console.log(`[Bandcamp] Filtering out fan profile: "${name}" at ${url}`);
-                continue;
-              }
-            } catch { /* invalid URL, skip */ }
-
-            results.push({
-              sourceId: 'bandcamp',
-              name,
-              artist,
-              type,
-              url,
-              imageUrl: imageUrl || undefined,
-            });
-          }
-        }
-      } catch (error: unknown) {
-        const err = error as { name?: string; message?: string };
-        if (err.name !== 'AbortError') {
-          console.error('Bandcamp search error:', err.message);
-        }
-      }
-
-      return results;
-    },
-    PLATFORM_CACHE_TTL
-  );
-
-  return data;
+  return [];
 }
 
 // Fetch latest release from a Bandcamp artist page, then get release date from album page
@@ -553,13 +474,14 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
 
     await delay(1100);
 
-    // Fetch artist details with URL relations
+    // Fetch artist details with URL relations (3s timeout to avoid blocking)
     const artistUrl = `https://musicbrainz.org/ws/2/artist/${artist.id}?inc=url-rels&fmt=json`;
 
     const artistResponse = await globalThis.fetch(artistUrl, {
       headers: {
         'User-Agent': 'Unstream/1.0 (https://github.com/unstream - ethical music finder)',
       },
+      signal: AbortSignal.timeout(3000),
     });
 
     let officialUrl: string | undefined;
@@ -1356,8 +1278,7 @@ async function attachNameOnlyPlatforms(
 
 async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   // Phase 1: Search all platforms in parallel and aggregate Bandcamp/Mirlo results
-  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, qobuzResults, ampwallResults, beatportResults, evenResults] = await Promise.allSettled([
-    searchBandcamp(query),
+  const [bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, qobuzResults, ampwallResults, beatportResults, evenResults] = await Promise.allSettled([
     searchBandwagon(query),
     searchMirlo(query),
     searchFaircamp(query),
@@ -1370,7 +1291,6 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   ]);
 
   const allResults: PlatformResult[] = [];
-  if (bandcampResults.status === 'fulfilled') allResults.push(...bandcampResults.value.filter(r => r.type === 'artist'));
   if (mirloResults.status === 'fulfilled') allResults.push(...mirloResults.value.filter(r => r.type === 'artist'));
 
   const nameOnlyMaps: [string, Map<string, string>][] = [

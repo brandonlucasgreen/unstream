@@ -9,6 +9,7 @@ export const sources: Record<SourceId, Source> = {
     icon: '🎵',
     category: 'marketplace',
     hasEmbed: true,
+    searchOnly: true,
     searchUrlTemplate: 'https://bandcamp.com/search?q={query}',
     homepageUrl: 'https://bandcamp.com',
     artistPayoutPercent: '80-85%',
@@ -685,8 +686,18 @@ export function mergeWithMusicBrainzData(
       }
     }
 
-    // Re-sort platforms: verified first, search-only in middle, official/library, then social last
-    const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee']);
+    // Add Bandcamp URL from MusicBrainz platform relations if available
+    // Bandcamp scraping is disabled server-side (anti-bot protection), so MB
+    // relations are our primary source for direct Bandcamp links.
+    if (mbData.platformUrls && mbData.platformUrls.length > 0) {
+      const bandcampUrl = mbData.platformUrls.find(u => {
+        try { return new URL(u).hostname.endsWith('.bandcamp.com'); } catch { return false; }
+      });
+      if (bandcampUrl && !newPlatforms.some(p => p.sourceId === 'bandcamp')) {
+        newPlatforms.push({ sourceId: 'bandcamp', url: bandcampUrl });
+      }
+    }
+    const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee', 'bandcamp']);
     const officialPlatforms = new Set(['officialsite', 'discogs', 'hoopla', 'freegal']);
     const socialPlatforms = new Set(['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'mastodon', 'peertube']);
     newPlatforms.sort((a, b) => {

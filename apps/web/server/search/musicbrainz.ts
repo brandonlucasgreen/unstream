@@ -6,7 +6,8 @@ const USER_AGENT = 'Unstream/1.0 (https://github.com/unstream - ethical music fi
 const MIN_SCORE = 95;
 const MB_RATE_LIMIT_MS = 1100;
 
-// Search MusicBrainz for major artists and return Hoopla/Freegal links if they have pre-2005 releases
+// Search MusicBrainz for major artists and return Hoopla/Freegal links if they have pre-2005 releases.
+// Also extracts Bandcamp URLs from MB relations (primary source since Bandcamp scraping is blocked).
 export async function searchMusicBrainz(query: string): Promise<PlatformResult[]> {
   const results: PlatformResult[] = [];
 
@@ -29,6 +30,46 @@ export async function searchMusicBrainz(query: string): Promise<PlatformResult[]
 
     const artist = artists[0];
     if (artist.score < MIN_SCORE) return results;
+
+    await delay(MB_RATE_LIMIT_MS);
+
+    // Fetch artist details with URL relations to extract Bandcamp links
+    const artistUrl = `https://musicbrainz.org/ws/2/artist/${artist.id}?inc=url-rels&fmt=json`;
+
+    const artistResponse = await globalThis.fetch(artistUrl, {
+      headers: { 'User-Agent': USER_AGENT },
+    });
+
+    if (artistResponse.ok) {
+      const artistData = await artistResponse.json() as {
+        relations?: { type: string; url?: { resource: string } }[];
+      };
+
+      const relations = artistData.relations || [];
+
+      // Extract Bandcamp URLs from MB relations (bandcamp relation type or streaming music URLs)
+      const platformRelTypes = new Set([
+        'bandcamp', 'streaming music', 'purchase for download',
+        'download for free', 'free streaming',
+      ]);
+
+      for (const rel of relations) {
+        if (rel.url?.resource && platformRelTypes.has(rel.type)) {
+          const url = rel.url.resource;
+          // Only include *.bandcamp.com URLs (ignore other platforms)
+          if (url.includes('.bandcamp.com')) {
+            console.log(`[MusicBrainz] Found Bandcamp URL for "${artist.name}": ${url}`);
+            results.push({
+              sourceId: 'bandcamp',
+              name: artist.name,
+              type: 'artist',
+              url,
+            });
+            break; // Only need one Bandcamp URL
+          }
+        }
+      }
+    }
 
     await delay(MB_RATE_LIMIT_MS);
 

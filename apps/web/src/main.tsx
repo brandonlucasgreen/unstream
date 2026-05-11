@@ -1,15 +1,14 @@
 import { StrictMode, Suspense, lazy } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import * as Sentry from '@sentry/react'
+import { Sentry } from './services/sentry.ts'
 import { AuthProvider } from './contexts/AuthContext'
 import './index.css'
 import App from './App.tsx'
 import { ArtistPage } from './pages/ArtistPage.tsx'
-import { initSentry } from './services/sentry.ts'
 
-// Initialize Sentry (no-op if DSN not configured)
-initSentry()
+// Initialize Sentry asynchronously to avoid blocking initial render
+import('./services/sentry.ts').then(({ initSentry }) => initSentry())
 
 // Lazy-load non-critical pages to reduce initial bundle size
 const ClaimPage = lazy(() => import('./pages/ClaimPage.tsx').then(m => ({ default: m.ClaimPage })))
