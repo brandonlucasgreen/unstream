@@ -689,12 +689,19 @@ export function mergeWithMusicBrainzData(
     // Add Bandcamp URL from MusicBrainz platform relations if available
     // Bandcamp scraping is disabled server-side (anti-bot protection), so MB
     // relations are our primary source for direct Bandcamp links.
+    // If the server already added a search-only Bandcamp fallback, replace it with the real URL.
     if (mbData.platformUrls && mbData.platformUrls.length > 0) {
       const bandcampUrl = mbData.platformUrls.find(u => {
         try { return new URL(u).hostname.endsWith('.bandcamp.com'); } catch { return false; }
       });
-      if (bandcampUrl && !newPlatforms.some(p => p.sourceId === 'bandcamp')) {
-        newPlatforms.push({ sourceId: 'bandcamp', url: bandcampUrl });
+      if (bandcampUrl) {
+        const existingBandcamp = newPlatforms.findIndex(p => p.sourceId === 'bandcamp');
+        if (existingBandcamp !== -1) {
+          // Replace search-only fallback with real Bandcamp URL
+          newPlatforms[existingBandcamp] = { sourceId: 'bandcamp', url: bandcampUrl };
+        } else {
+          newPlatforms.push({ sourceId: 'bandcamp', url: bandcampUrl });
+        }
       }
     }
     const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee', 'bandcamp']);

@@ -448,6 +448,7 @@ interface MusicBrainzResult {
   artistName: string;
   officialUrl?: string;  // From "official homepage" relation
   discogsUrl?: string;   // From "discogs" relation
+  bandcampUrl?: string;  // From "bandcamp" relation
   hasPre2005Release: boolean;
 }
 
@@ -486,6 +487,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
 
     let officialUrl: string | undefined;
     let discogsUrl: string | undefined;
+    let bandcampUrl: string | undefined;
 
     if (artistResponse.ok) {
       const artistData = await artistResponse.json() as {
@@ -510,6 +512,25 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
         if (rel.type === 'discogs' && rel.url?.resource) {
           discogsUrl = rel.url.resource;
           break;
+        }
+      }
+
+      // Look for Bandcamp link from MB relations
+      // Bandcamp scraping is disabled (anti-bot), so MB is our primary source for direct links
+      for (const rel of relations) {
+        if (rel.type === 'bandcamp' && rel.url?.resource) {
+          bandcampUrl = rel.url.resource;
+          break;
+        }
+        // Also check other platform relations that might contain Bandcamp URLs
+        if (!bandcampUrl && rel.url?.resource) {
+          try {
+            const hostname = new URL(rel.url.resource).hostname;
+            if (hostname.endsWith('.bandcamp.com')) {
+              bandcampUrl = rel.url.resource;
+              break;
+            }
+          } catch {}
         }
       }
     }
@@ -547,6 +568,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
       artistName: artist.name,
       officialUrl,
       discogsUrl,
+      bandcampUrl,
       hasPre2005Release,
     };
   } catch (error: unknown) {
@@ -1278,7 +1300,7 @@ async function attachNameOnlyPlatforms(
 
 async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   // Phase 1: Search all platforms in parallel and aggregate Bandcamp/Mirlo results
-  const [bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, qobuzResults, ampwallResults, beatportResults, evenResults] = await Promise.allSettled([
+  const [bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, qobuzResults, ampwallResults, beatportResults, evenResults, musicbrainzResult] = await Promise.allSettled([
     searchBandwagon(query),
     searchMirlo(query),
     searchFaircamp(query),
@@ -1288,6 +1310,7 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
     searchAmpwall(query),
     searchBeatport(query),
     searchEven(query),
+    searchMusicBrainz(query),
   ]);
 
   const allResults: PlatformResult[] = [];
@@ -1304,10 +1327,12 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   const qobuzMatches = qobuzResults.status === 'fulfilled' ? qobuzResults.value : new Map<string, string>();
   const ampwallMatches = ampwallResults.status === 'fulfilled' ? ampwallResults.value : new Map<string, string>();
 
+  const mbData = musicbrainzResult.status === 'fulfilled' ? musicbrainzResult.value : null;
+
   const aggregated = aggregateResults(allResults, query);
 
   // Phase 2: Attach Qobuz + search-only links, create Qobuz-only results
-  attachQobuzAndSearchLinks(aggregated, qobuzMatches, ampwallMatches);
+  attachQobuzAndSearchLinks(aggregated, qobuzMatches, ampwallMatches, mbData);
   createQobuzOnlyResults(aggregated, qobuzMatches);
 
   // Phase 2.5: Apply manual merge overrides before release-based disambiguation.
