@@ -416,6 +416,7 @@ export function attachQobuzAndSearchLinks(
   aggregated: AggregatedResult[],
   qobuzMatches: Map<string, string>,
   ampwallMatches: Map<string, string>,
+  mbData?: { artistName: string; bandcampUrl?: string } | null,
 ): void {
   const usedPlatformUrls = new Set<string>();
 
@@ -443,12 +444,22 @@ export function attachQobuzAndSearchLinks(
       { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
     );
 
-    // Fallback Bandcamp search link when no direct Bandcamp URL from MusicBrainz
+    // Bandcamp: prefer direct URL from MusicBrainz relations, fall back to search link
     if (!result.platforms.some(p => p.sourceId === 'bandcamp')) {
-      result.platforms.push({
-        sourceId: 'bandcamp',
-        url: `https://bandcamp.com/search?q=${encodeURIComponent(result.name)}`,
-      });
+      // Check if MusicBrainz has a direct Bandcamp URL for this artist
+      const mbBandcampUrl = mbData?.bandcampUrl &&
+        normalizeForComparison(mbData.artistName) === normalizedName
+        ? mbData.bandcampUrl
+        : undefined;
+
+      if (mbBandcampUrl) {
+        result.platforms.push({ sourceId: 'bandcamp', url: mbBandcampUrl });
+      } else {
+        result.platforms.push({
+          sourceId: 'bandcamp',
+          url: `https://bandcamp.com/search?q=${encodeURIComponent(result.name)}`,
+        });
+      }
     }
 
     // Qobuz: attach ALL name variations (e.g. "morice", "morice1", "morice2")
