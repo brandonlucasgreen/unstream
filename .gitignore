@@ -65,3 +65,4 @@ data/guides/guides-manifest.json
 
 # Fartrun reports
 apps/web/.fartrun/
+.netlify/db/
