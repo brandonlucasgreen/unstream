@@ -17,7 +17,18 @@ export type SourceId =
   | 'beatport'
   | 'even'
   | 'officialsite'
-  | 'discogs';
+  | 'discogs'
+  | 'hoopla'
+  | 'freegal'
+  | 'instagram'
+  | 'facebook'
+  | 'tiktok'
+  | 'youtube'
+  | 'threads'
+  | 'bluesky'
+  | 'mastodon'
+  | 'peertube'
+  | 'other';
 
 export interface LatestRelease {
   title: string;
@@ -46,6 +57,7 @@ export interface AggregatedResult {
   platforms: {
     sourceId: SourceId;
     url: string;
+    displayName?: string;
     latestRelease?: LatestRelease;
     allReleaseTitles?: string[]; // For disambiguation - all release titles (normalized)
   }[];
@@ -64,6 +76,8 @@ export interface AggregatedResult {
     country?: string;
     countryCode?: string;
   };
+  wikipediaSummary?: string;
+  wikipediaUrl?: string;
 }
 
 export interface SearchResponse {

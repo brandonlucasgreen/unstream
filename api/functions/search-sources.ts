@@ -29,6 +29,27 @@ import {
   displayNameFromSlug,
 } from './search-utils';
 
+// Import shared enrichment functions
+import {
+  SocialLink,
+  DiscoveredPlatformLink,
+  ArtistLocation,
+  SocialPlatform,
+  parseSocialUrl,
+  fetchDiscogsSocialLinks,
+  fetchOfficialSiteSocialLinks,
+  mergeSocialLinks,
+  searchPeerTubeChannels,
+  fetchLinktreeLinks,
+  parseLocationString,
+  mergeLocations,
+  searchBandcampForArtistUrl,
+  fetchBandcampLocation,
+  fetchMirloLocation,
+  enrichLocationFallback,
+  fetchWikipediaSummary,
+} from '../search/enrichment';
+
 // Helper to fetch with timeout
 async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs: number = 3000): Promise<Response> {
   const controller = new AbortController();
@@ -443,18 +464,41 @@ async function searchBandwagon(query: string): Promise<Map<string, string>> {
 // Helper to delay execution (for rate limiting)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// MusicBrainz result interface for official website and Discogs lookup
-interface MusicBrainzResult {
-  artistName: string;
-  officialUrl?: string;  // From "official homepage" relation
-  discogsUrl?: string;   // From "discogs" relation
-  bandcampUrl?: string;  // From "bandcamp" relation
+// MusicBrainz enriched result interface with full enrichment data
+interface EnrichedMusicBrainzResult {
+  query: string;
+  artistName: string | null;
+  officialUrl: string | null;
+  discogsUrl: string | null;
+  bandcampUrl: string | null;
   hasPre2005Release: boolean;
+  socialLinks: SocialLink[];
+  discoveredPlatforms: DiscoveredPlatformLink[];
+  platformUrls: string[];
+  wikipediaSummary: string | null;
+  wikipediaUrl: string | null;
+  location: ArtistLocation | undefined;
 }
 
-// Search MusicBrainz for artist info including official website, Discogs, and release history
-async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | null> {
+// Search MusicBrainz with full enrichment - fetches social links, location, Wikipedia, etc.
+async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResult> {
+  const emptyResult: EnrichedMusicBrainzResult = {
+    query,
+    artistName: null,
+    officialUrl: null,
+    discogsUrl: null,
+    bandcampUrl: null,
+    hasPre2005Release: false,
+    socialLinks: [],
+    discoveredPlatforms: [],
+    platformUrls: [],
+    wikipediaSummary: null,
+    wikipediaUrl: null,
+    location: undefined,
+  };
+
   try {
+    // Search for artist
     const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=artist:${encodeURIComponent(query)}&fmt=json&limit=1`;
 
     const response = await globalThis.fetch(searchUrl, {
@@ -463,39 +507,94 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
       },
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.log('MusicBrainz artist search failed:', response.status);
+      return emptyResult;
+    }
 
     const data = await response.json() as { artists?: { id: string; name: string; score: number }[] };
     const artists = data.artists || [];
 
-    if (artists.length === 0) return null;
+    if (artists.length === 0) {
+      console.log(`[MusicBrainz] No results for "${query}", falling back to Bandcamp/Mirlo location`);
+      return { ...emptyResult, location: await enrichLocationFallback(query) };
+    }
 
     const artist = artists[0];
-    if (artist.score < 95) return null;
+    // Only consider exact/near-exact matches
+    if (artist.score < 95) {
+      console.log(`[MusicBrainz] Low confidence match for "${query}" (score ${artist.score}), falling back to Bandcamp/Mirlo location`);
+      return { ...emptyResult, location: await enrichLocationFallback(query) };
+    }
 
+    // Verify the returned artist name actually matches the query
+    const queryNormalized = query.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const artistNormalized = artist.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const isNameMatch = queryNormalized === artistNormalized ||
+      queryNormalized.includes(artistNormalized) && artistNormalized.length > queryNormalized.length * 0.7 ||
+      artistNormalized.includes(queryNormalized) && queryNormalized.length > artistNormalized.length * 0.7;
+
+    if (!isNameMatch) {
+      console.log(`[MusicBrainz] Skipping "${artist.name}" - doesn't match query "${query}", falling back to Bandcamp/Mirlo location`);
+      return { ...emptyResult, location: await enrichLocationFallback(query) };
+    }
+
+    // Wait 1.1 seconds to respect MusicBrainz rate limit
     await delay(1100);
 
-    // Fetch artist details with URL relations (3s timeout to avoid blocking)
+    // Fetch artist details with URL relations
     const artistUrl = `https://musicbrainz.org/ws/2/artist/${artist.id}?inc=url-rels&fmt=json`;
 
     const artistResponse = await globalThis.fetch(artistUrl, {
       headers: {
         'User-Agent': 'Unstream/1.0 (https://github.com/unstream - ethical music finder)',
       },
-      signal: AbortSignal.timeout(3000),
     });
 
-    let officialUrl: string | undefined;
-    let discogsUrl: string | undefined;
-    let bandcampUrl: string | undefined;
+    let officialUrl: string | null = null;
+    let discogsUrl: string | null = null;
+    let bandcampUrl: string | null = null;
+    let linktreeUrl: string | null = null;
+    let wikipediaUrl: string | null = null;
+    const socialLinks: SocialLink[] = [];
+    const seenPlatforms = new Set<SocialPlatform>();
+    const platformUrls: string[] = [];
+
+    let mbLocation: ArtistLocation | undefined;
 
     if (artistResponse.ok) {
       const artistData = await artistResponse.json() as {
-        relations?: {
-          type: string;
-          url?: { resource: string };
-        }[];
+        relations?: { type: string; url?: { resource: string } }[];
+        country?: string;
+        area?: { name: string; type?: string | null; 'iso-3166-1-codes'?: string[] };
+        'begin-area'?: { name: string; type?: string | null };
       };
+
+      // Parse location from area / begin-area fields
+      const topLevelCountryCode = artistData.country;
+      if (artistData.area) {
+        if (artistData.area.type === 'Country') {
+          mbLocation = {
+            country: artistData.area.name,
+            countryCode: artistData.area['iso-3166-1-codes']?.[0] ?? topLevelCountryCode,
+          };
+        } else {
+          mbLocation = {
+            city: artistData.area.name,
+            countryCode: topLevelCountryCode,
+          };
+        }
+      } else if (topLevelCountryCode) {
+        mbLocation = { countryCode: topLevelCountryCode };
+      }
+      if (artistData['begin-area'] && artistData['begin-area'].name !== artistData.area?.name) {
+        const beginType = artistData['begin-area'].type;
+        if (beginType === 'Country' && !mbLocation?.country) {
+          mbLocation = { ...mbLocation, country: artistData['begin-area'].name };
+        } else if (beginType !== 'Country') {
+          mbLocation = { ...mbLocation, city: artistData['begin-area'].name };
+        }
+      }
 
       const relations = artistData.relations || [];
 
@@ -515,14 +614,12 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
         }
       }
 
-      // Look for Bandcamp link from MB relations
-      // Bandcamp scraping is disabled (anti-bot), so MB is our primary source for direct links
+      // Look for Bandcamp link
       for (const rel of relations) {
         if (rel.type === 'bandcamp' && rel.url?.resource) {
           bandcampUrl = rel.url.resource;
           break;
         }
-        // Also check other platform relations that might contain Bandcamp URLs
         if (!bandcampUrl && rel.url?.resource) {
           try {
             const hostname = new URL(rel.url.resource).hostname;
@@ -533,11 +630,50 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
           } catch {}
         }
       }
+
+      // Look for English Wikipedia link
+      for (const rel of relations) {
+        if (rel.type === 'wikipedia' && rel.url?.resource && rel.url.resource.includes('en.wikipedia.org')) {
+          wikipediaUrl = rel.url.resource;
+          break;
+        }
+      }
+
+      // Extract social links from 'social network' and 'youtube' relation types
+      for (const rel of relations) {
+        if ((rel.type === 'social network' || rel.type === 'youtube') && rel.url?.resource) {
+          const url = rel.url.resource;
+          if (url.includes('linktr.ee') && !linktreeUrl) {
+            linktreeUrl = url;
+            console.log(`[MusicBrainz] Found Linktree: ${linktreeUrl}`);
+            continue;
+          }
+          const socialLink = parseSocialUrl(url);
+          if (socialLink && !seenPlatforms.has(socialLink.platform)) {
+            seenPlatforms.add(socialLink.platform);
+            socialLinks.push(socialLink);
+          }
+        }
+      }
+
+      // Extract platform URLs for disambiguation
+      const platformRelTypes = new Set([
+        'bandcamp', 'streaming music', 'purchase for download',
+        'download for free', 'free streaming',
+      ]);
+      for (const rel of relations) {
+        if (rel.url?.resource && platformRelTypes.has(rel.type)) {
+          platformUrls.push(rel.url.resource);
+        }
+      }
+      if (platformUrls.length > 0) {
+        console.log(`[MusicBrainz] Found ${platformUrls.length} platform URLs`);
+      }
     }
 
     await delay(1100);
 
-    // Check if artist has pre-2005 releases (for Hoopla/Freegal eligibility)
+    // Check if artist has pre-2005 releases
     const releasesUrl = `https://musicbrainz.org/ws/2/release-group/?artist=${artist.id}&fmt=json&limit=20`;
 
     const releasesResponse = await globalThis.fetch(releasesUrl, {
@@ -564,17 +700,57 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzResult | nul
       }
     }
 
+    // Fetch enrichment data in parallel
+    const mirloSlug = artist.name.toLowerCase().replace(/\s+/g, '');
+    const [discogsSocialLinks, officialSiteResult, peertubeLink, wikipediaResult, bandcampLocation, mirloLocation] = await Promise.all([
+      discogsUrl ? fetchDiscogsSocialLinks(discogsUrl) : Promise.resolve([]),
+      officialUrl ? fetchOfficialSiteSocialLinks(officialUrl) : Promise.resolve({ socialLinks: [], linktreeUrl: null, discoveredPlatforms: [] }),
+      searchPeerTubeChannels(artist.name),
+      wikipediaUrl ? fetchWikipediaSummary(wikipediaUrl) : Promise.resolve(null),
+      bandcampUrl ? fetchBandcampLocation(bandcampUrl) : Promise.resolve(null),
+      fetchMirloLocation(mirloSlug),
+    ]);
+
+    // Merge locations
+    const location = mergeLocations(mbLocation, bandcampLocation, mirloLocation);
+
+    // Scrape Linktree if found
+    let linktreeSocialLinks: SocialLink[] = [];
+    if (linktreeUrl || officialSiteResult.linktreeUrl) {
+      const finalLinktreeUrl = linktreeUrl || officialSiteResult.linktreeUrl;
+      linktreeSocialLinks = await fetchLinktreeLinks(finalLinktreeUrl);
+    }
+
+    // Collect PeerTube link
+    const peertubeLinks: SocialLink[] = peertubeLink ? [peertubeLink] : [];
+
+    // Merge all social links
+    const allSocialLinks = mergeSocialLinks(
+      socialLinks,
+      discogsSocialLinks,
+      officialSiteResult.socialLinks,
+      linktreeSocialLinks,
+      peertubeLinks
+    );
+
     return {
+      query,
       artistName: artist.name,
       officialUrl,
       discogsUrl,
       bandcampUrl,
       hasPre2005Release,
+      socialLinks: allSocialLinks,
+      discoveredPlatforms: officialSiteResult.discoveredPlatforms,
+      platformUrls,
+      wikipediaSummary: wikipediaResult?.extract || null,
+      wikipediaUrl: wikipediaResult?.pageUrl || wikipediaUrl,
+      location,
     };
   } catch (error: unknown) {
     const err = error as { name?: string; message?: string };
     console.error('MusicBrainz search error:', err.name, err.message);
-    return null;
+    return emptyResult;
   }
 }
 
@@ -1295,10 +1471,181 @@ async function attachNameOnlyPlatforms(
 }
 
 // ---------------------------------------------------------------------------
+// Apply enrichment data to aggregated results (adds officialsite, discogs, social links, etc.)
+function applyEnrichmentToResults(
+  aggregated: AggregatedResult[],
+  mbData: EnrichedMusicBrainzResult
+): void {
+  if (!mbData.artistName) {
+    // MB-miss path: no confirmed identity, but may still have location from Bandcamp/Mirlo fallback
+    if (!mbData.location) return;
+    const queryNorm = normalizeForComparison(mbData.query);
+    const exactIdx = aggregated.findIndex(r => r.type === 'artist' && normalizeForComparison(r.name) === queryNorm);
+    const bestIdx = exactIdx !== -1 ? exactIdx : aggregated.findIndex(r => r.type === 'artist');
+    if (bestIdx === -1) return;
+    aggregated[bestIdx].location = mbData.location;
+    return;
+  }
+
+  const mbNormalized = normalizeForComparison(mbData.artistName);
+
+  // Find which results match the MusicBrainz artist name
+  const matchingIndices: number[] = [];
+  for (let i = 0; i < aggregated.length; i++) {
+    const result = aggregated[i];
+    if (result.type !== 'artist') continue;
+    const resultNormalized = normalizeForComparison(result.name);
+    const isMatch =
+      resultNormalized === mbNormalized ||
+      (resultNormalized.includes(mbNormalized) && mbNormalized.length > resultNormalized.length * 0.7) ||
+      (mbNormalized.includes(resultNormalized) && resultNormalized.length > mbNormalized.length * 0.7);
+    if (isMatch) matchingIndices.push(i);
+  }
+
+  // Disambiguate using MB platform URLs
+  let bestMatchIndex = -1;
+  if (matchingIndices.length === 1) {
+    bestMatchIndex = matchingIndices[0];
+  } else if (matchingIndices.length > 1) {
+    const mbPlatformUrls = mbData.platformUrls || [];
+
+    if (mbPlatformUrls.length > 0) {
+      const normalizedMbUrls = new Set(mbPlatformUrls.map(u => u.replace(/\/+$/, '').toLowerCase()));
+
+      for (const idx of matchingIndices) {
+        const r = aggregated[idx];
+        const hasDirectMatch = r.platforms.some(p => {
+          const normalized = p.url.replace(/\/+$/, '').toLowerCase();
+          return normalizedMbUrls.has(normalized);
+        });
+        if (hasDirectMatch) {
+          bestMatchIndex = idx;
+          break;
+        }
+      }
+    }
+
+    if (bestMatchIndex === -1) {
+      let bestScore = -1;
+      for (const idx of matchingIndices) {
+        const r = aggregated[idx];
+        const confidenceScore = r.matchConfidence === 'claimed' ? 100 : r.matchConfidence === 'verified' ? 50 : 0;
+        const platformScore = r.platforms.filter(p => !['kofi', 'buymeacoffee', 'ampwall'].includes(p.sourceId)).length;
+        const score = confidenceScore + platformScore;
+        if (score > bestScore) {
+          bestScore = score;
+          bestMatchIndex = idx;
+        }
+      }
+    }
+  }
+
+  if (bestMatchIndex === -1) return;
+
+  const result = aggregated[bestMatchIndex];
+  const newPlatforms = [...result.platforms];
+
+  // Add official site if available and not already present
+  if (mbData.officialUrl && !newPlatforms.some(p => p.sourceId === 'officialsite')) {
+    newPlatforms.push({ sourceId: 'officialsite' as SourceId, url: mbData.officialUrl });
+  }
+
+  // Add Discogs if available and not already present
+  if (mbData.discogsUrl && !newPlatforms.some(p => p.sourceId === 'discogs')) {
+    newPlatforms.push({ sourceId: 'discogs' as SourceId, url: mbData.discogsUrl });
+  }
+
+  // Add library services for artists with pre-2005 releases
+  if (mbData.hasPre2005Release) {
+    if (!newPlatforms.some(p => p.sourceId === 'hoopla')) {
+      newPlatforms.push({
+        sourceId: 'hoopla' as SourceId,
+        url: `https://www.hoopladigital.com/search?q=${encodeURIComponent(result.name)}&type=music`,
+      });
+    }
+    if (!newPlatforms.some(p => p.sourceId === 'freegal')) {
+      newPlatforms.push({
+        sourceId: 'freegal' as SourceId,
+        url: `https://www.freegalmusic.com/search-page/${encodeURIComponent(result.name)}`,
+      });
+    }
+  }
+
+  // Add social links if available
+  if (mbData.socialLinks && mbData.socialLinks.length > 0) {
+    for (const social of mbData.socialLinks) {
+      const existingIndex = newPlatforms.findIndex(p => p.sourceId === social.platform);
+      if (existingIndex === -1) {
+        newPlatforms.push({ sourceId: social.platform as SourceId, url: social.url });
+      } else {
+        const existingUrl = newPlatforms[existingIndex].url.toLowerCase();
+        const isExistingSearchUrl = existingUrl.includes('duckduckgo.com') ||
+          existingUrl.includes('/search') ||
+          existingUrl.includes('?q=') ||
+          existingUrl.includes('?query=') ||
+          existingUrl.includes('/explore');
+        if (isExistingSearchUrl) {
+          newPlatforms[existingIndex] = { sourceId: social.platform as SourceId, url: social.url };
+        }
+      }
+    }
+  }
+
+  // Add Bandcamp URL from MB platform relations if available
+  if (mbData.platformUrls && mbData.platformUrls.length > 0) {
+    const bandcampUrl = mbData.platformUrls.find(u => {
+      try { return new URL(u).hostname.endsWith('.bandcamp.com'); } catch { return false; }
+    });
+    if (bandcampUrl) {
+      const existingBandcamp = newPlatforms.findIndex(p => p.sourceId === 'bandcamp');
+      if (existingBandcamp !== -1) {
+        newPlatforms[existingBandcamp] = { sourceId: 'bandcamp' as SourceId, url: bandcampUrl };
+      } else {
+        newPlatforms.push({ sourceId: 'bandcamp' as SourceId, url: bandcampUrl });
+      }
+    }
+  }
+
+  // Sort platforms: real platforms first, then official, then social, then search-only
+  const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee', 'bandcamp']);
+  const officialPlatforms = new Set(['officialsite', 'discogs', 'hoopla', 'freegal']);
+  const socialPlatforms = new Set(['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'mastodon', 'peertube']);
+
+  newPlatforms.sort((a, b) => {
+    const aIsSocial = socialPlatforms.has(a.sourceId);
+    const bIsSocial = socialPlatforms.has(b.sourceId);
+    if (aIsSocial && !bIsSocial) return 1;
+    if (!aIsSocial && bIsSocial) return -1;
+    if (aIsSocial && bIsSocial) {
+      const order = ['instagram', 'tiktok', 'youtube', 'peertube', 'threads', 'bluesky', 'mastodon', 'facebook'];
+      return order.indexOf(a.sourceId) - order.indexOf(b.sourceId);
+    }
+
+    const aIsOfficial = officialPlatforms.has(a.sourceId);
+    const bIsOfficial = officialPlatforms.has(b.sourceId);
+    if (aIsOfficial && bIsOfficial) {
+      const order = ['officialsite', 'discogs', 'hoopla', 'freegal'];
+      return order.indexOf(a.sourceId) - order.indexOf(b.sourceId);
+    }
+    if (aIsOfficial) return 1;
+    if (bIsOfficial) return -1;
+    const aIsSearchOnly = searchOnlyPlatforms.has(a.sourceId);
+    const bIsSearchOnly = searchOnlyPlatforms.has(b.sourceId);
+    if (aIsSearchOnly && !bIsSearchOnly) return 1;
+    if (!aIsSearchOnly && bIsSearchOnly) return -1;
+    return 0;
+  });
+
+  result.platforms = newPlatforms;
+  result.wikipediaSummary = mbData.wikipediaSummary || undefined;
+  result.wikipediaUrl = mbData.wikipediaUrl || undefined;
+  result.location = mbData.location || result.location;
+}
+
 // Main search orchestrator
 // ---------------------------------------------------------------------------
 
-async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
+async function searchAllPlatforms(query: string): Promise<{ results: AggregatedResult[]; enrichmentApplied: boolean }> {
   // Phase 1: Search all platforms in parallel and aggregate Bandcamp/Mirlo results
   const [bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, qobuzResults, ampwallResults, beatportResults, evenResults, musicbrainzResult] = await Promise.allSettled([
     searchBandwagon(query),
@@ -1335,6 +1682,11 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   attachQobuzAndSearchLinks(aggregated, qobuzMatches, ampwallMatches, mbData);
   createQobuzOnlyResults(aggregated, qobuzMatches);
 
+  // Phase 2.1: Apply MusicBrainz enrichment (social links, location, Wikipedia, Bandcamp)
+  if (mbData && mbData.artistName !== null) {
+    applyEnrichmentToResults(aggregated, mbData);
+  }
+
   // Phase 2.5: Apply manual merge overrides before release-based disambiguation.
   // Overrides authoritatively create their own result and strip their URLs
   // from all other results — no reservation needed.
@@ -1357,7 +1709,8 @@ async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
   await attachNameOnlyPlatforms(merged, nameOnlyMaps);
   // Re-merge: new results from Phase 4 may overlap with existing Qobuz standalones
   const finalMerged = mergeByReleaseOverlap(merged);
-  return filterAndSort(finalMerged, query);
+  const finalResults = filterAndSort(finalMerged, query);
+  return { results: finalResults, enrichmentApplied: mbData !== null && mbData.artistName !== null };
 }
 
 // Search a Bandcamp artist page for a specific album title
@@ -1459,7 +1812,8 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       console.error('[DB] Claimed artist lookup failed:', err);
     }
 
-    const results = await searchAllPlatforms(normalizedQuery);
+    const searchResult = await searchAllPlatforms(normalizedQuery);
+    const results = searchResult.results;
 
     // If we have a claimed artist, put it first and remove any duplicate from live results
     if (claimedResult) {
@@ -1479,8 +1833,9 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     const response: SearchResponse = {
       query, // Return original query for display
       results,
-      // Signal client to fetch MusicBrainz data for enrichment (Official Site, Discogs, Hoopla, Freegal)
-      hasPendingEnrichment: results.length > 0,
+      // Signal client whether enrichment is still pending (true = MB enrichment failed/timed out,
+      // client should call /api/search/musicbrainz as fallback; false = enrichment was applied server-side)
+      hasPendingEnrichment: !searchResult.enrichmentApplied,
     };
 
     return {
