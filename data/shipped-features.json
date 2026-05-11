@@ -53,7 +53,7 @@
     "title": "iOS app coming soon",
     "description": "An iOS app is in the works — search for artists, save your favorites, and get release alerts on your iPhone and iPad. Stay tuned.",
     "date": "2026-04-11",
-    "announced": false
+    "announced": true
   },
   {
     "id": "ai-policy-indicator",
