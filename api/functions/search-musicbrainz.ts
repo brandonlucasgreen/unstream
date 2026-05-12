@@ -278,6 +278,9 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     const mbBandcampUrl = platformUrls.find(u => {
       try { return new URL(u).hostname.endsWith('.bandcamp.com'); } catch { return false; }
     });
+    const mbSubvertUrl = platformUrls.find(u => {
+      try { return new URL(u).hostname === 'www.subvert.fm' || new URL(u).hostname === 'subvert.fm'; } catch { return false; }
+    });
     const mirloSlug = artist.name.toLowerCase().replace(/\s+/g, '');
 
     // Fetch additional social links from Discogs, official site, PeerTube, Wikipedia,
@@ -318,6 +321,12 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     // PeerTube from Sepia Search comes last so official site / Linktree links take priority
     const allSocialLinks = mergeSocialLinks(socialLinks, discogsSocialLinks, officialSiteResult.socialLinks, linktreeSocialLinks, peertubeLinks);
 
+    // Merge discovered platforms from official site + MusicBrainz Subvert URL
+    const allDiscoveredPlatforms = [...officialSiteResult.discoveredPlatforms];
+    if (mbSubvertUrl && !allDiscoveredPlatforms.some(p => p.platform === 'subvert')) {
+      allDiscoveredPlatforms.push({ platform: 'subvert', url: mbSubvertUrl });
+    }
+
     return {
       query,
       artistName: artist.name,
@@ -325,7 +334,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       discogsUrl,
       hasPre2005Release,
       socialLinks: allSocialLinks,
-      discoveredPlatforms: officialSiteResult.discoveredPlatforms,
+      discoveredPlatforms: allDiscoveredPlatforms,
       platformUrls,
       wikipediaSummary: wikipediaResult?.extract || null,
       wikipediaUrl: wikipediaResult?.pageUrl || wikipediaUrl,

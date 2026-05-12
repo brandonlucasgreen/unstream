@@ -132,6 +132,11 @@ struct PlatformBadge: View {
                 latestRelease: nil
             ), isSubtle: true)
             PlatformBadge(result: PlatformResult(
+                sourceId: "subvert",
+                url: nil,
+                latestRelease: nil
+            ), isSubtle: true)
+            PlatformBadge(result: PlatformResult(
                 sourceId: "kofi",
                 url: nil,
                 latestRelease: nil

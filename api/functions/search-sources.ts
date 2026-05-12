@@ -1604,10 +1604,18 @@ function applyEnrichmentToResults(
         newPlatforms.push({ sourceId: 'bandcamp' as SourceId, url: bandcampUrl });
       }
     }
+
+    // Add Subvert URL from MB platform relations if available
+    const subvertUrl = mbData.platformUrls.find(u => {
+      try { const h = new URL(u).hostname; return h === 'www.subvert.fm' || h === 'subvert.fm'; } catch { return false; }
+    });
+    if (subvertUrl) {
+      newPlatforms.push({ sourceId: 'subvert' as SourceId, url: subvertUrl });
+    }
   }
 
   // Sort platforms: real platforms first, then official, then social, then search-only
-  const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee', 'bandcamp']);
+  const searchOnlyPlatforms = new Set(['ampwall', 'subvert', 'kofi', 'buymeacoffee', 'bandcamp']);
   const officialPlatforms = new Set(['officialsite', 'discogs', 'hoopla', 'freegal']);
   const socialPlatforms = new Set(['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'mastodon', 'peertube']);
 
@@ -1707,6 +1715,7 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
       }
       mbPlatforms.push(
         { sourceId: 'ampwall' as SourceId, url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(mbData.artistName)}` },
+        { sourceId: 'subvert' as SourceId, url: `https://www.subvert.fm/discover?q=${encodeURIComponent(mbData.artistName)}&type=artist` },
         { sourceId: 'kofi' as SourceId, url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(mbData.artistName)}` },
         { sourceId: 'buymeacoffee' as SourceId, url: 'https://buymeacoffee.com/explore-creators' },
       );
@@ -1725,10 +1734,10 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
         }
       }
       // Sort: direct links before search-only
-      const searchOnly = new Set(['ampwall', 'kofi', 'buymeacoffee', 'bandcamp']);
+      const searchOnly = new Set(['ampwall', 'subvert', 'kofi', 'buymeacoffee', 'bandcamp']);
       mbPlatforms.sort((a, b) => {
-        const aSearch = searchOnly.has(a.sourceId) && (a.url.includes('/search?') || a.url.includes('duckduckgo') || a.url.includes('/explore')) ? 1 : 0;
-        const bSearch = searchOnly.has(b.sourceId) && (b.url.includes('/search?') || b.url.includes('duckduckgo') || b.url.includes('/explore')) ? 1 : 0;
+        const aSearch = searchOnly.has(a.sourceId) && (a.url.includes('/search?') || a.url.includes('duckduckgo') || a.url.includes('/explore') || a.url.includes('/discover')) ? 1 : 0;
+        const bSearch = searchOnly.has(b.sourceId) && (b.url.includes('/search?') || b.url.includes('duckduckgo') || b.url.includes('/explore') || b.url.includes('/discover')) ? 1 : 0;
         return aSearch - bSearch;
       });
 

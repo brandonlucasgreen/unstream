@@ -3,6 +3,7 @@ export type SourceId =
   | 'bandcamp'
   | 'mirlo'
   | 'ampwall'
+  | 'subvert'
   | 'bandwagon'
   | 'faircamp'
   | 'patreon'

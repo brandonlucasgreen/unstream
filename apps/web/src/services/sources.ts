@@ -42,6 +42,20 @@ export const sources: Record<SourceId, Source> = {
     artistPayoutPercent: '92-95%',
     aiPolicy: 'banned', // AI-generated music strictly prohibited (ampwall.com/content-policy)
   },
+  subvert: {
+    id: 'subvert',
+    name: 'Subvert',
+    description: 'Collectively owned music marketplace — 0% platform fees',
+    color: '#f97316',
+    icon: '✊',
+    category: 'marketplace',
+    hasEmbed: false,
+    searchUrlTemplate: 'https://www.subvert.fm/discover?q={query}&type=artist',
+    searchOnly: true,
+    homepageUrl: 'https://www.subvert.fm',
+    artistPayoutPercent: '~100%',
+    aiPolicy: 'anti-ai', // Cooperative that actively opposes AI-generated music
+  },
   bandwagon: {
     id: 'bandwagon',
     name: 'Bandwagon',
