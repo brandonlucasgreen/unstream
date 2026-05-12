@@ -17,7 +17,7 @@ export interface SocialLink {
 }
 
 // Discovered music platform types (found when scraping official websites)
-export type DiscoveredPlatform = 'ampwall' | 'artcore' | 'nina';
+export type DiscoveredPlatform = 'ampwall' | 'artcore' | 'nina' | 'subvert';
 
 export interface DiscoveredPlatformLink {
   platform: DiscoveredPlatform;
@@ -330,6 +330,14 @@ export async function fetchOfficialSiteSocialLinks(officialUrl: string): Promise
         seenDiscoveredPlatforms.add('nina');
         discoveredPlatforms.push({ platform: 'nina', url });
         console.log(`[Official Site] Found Nina: ${url}`);
+        continue;
+      }
+
+      // Check for Subvert artist page
+      if (url.includes('subvert.fm') && !seenDiscoveredPlatforms.has('subvert')) {
+        seenDiscoveredPlatforms.add('subvert');
+        discoveredPlatforms.push({ platform: 'subvert', url });
+        console.log(`[Official Site] Found Subvert: ${url}`);
         continue;
       }
 
