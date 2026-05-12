@@ -272,6 +272,13 @@ export function ArtistEditPage() {
       return;
     }
 
+    // Auto-prepend https:// if missing
+    for (const link of form.links) {
+      if (link.url.trim() && !link.url.match(/^https?:\/\//i)) {
+        link.url = 'https://' + link.url;
+      }
+    }
+
     const validLinks = form.links.filter(l => l.url.trim());
     for (const link of validLinks) {
       try {

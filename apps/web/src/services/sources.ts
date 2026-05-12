@@ -53,7 +53,7 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: 'https://www.subvert.fm/discover?q={query}&type=artist',
     searchOnly: true,
     homepageUrl: 'https://www.subvert.fm',
-    artistPayoutPercent: '~100%',
+    artistPayoutPercent: '97%',
     aiPolicy: 'anti-ai', // Cooperative that actively opposes AI-generated music
   },
   bandwagon: {
