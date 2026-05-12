@@ -15,7 +15,7 @@ const PLATFORM_INFO: Record<string, { name: string; color: string; icon: string;
   bandcamp: { name: 'Bandcamp', color: '#1da0c3', icon: '🎵', category: 'marketplace', payoutPercent: '80-85%' },
   mirlo: { name: 'Mirlo', color: '#6366f1', icon: '🪺', category: 'marketplace', payoutPercent: '86-90%' },
   ampwall: { name: 'Ampwall', color: '#ef4444', icon: '🔊', category: 'marketplace', payoutPercent: '92-95%' },
-  subvert: { name: 'Subvert', color: '#f97316', icon: '✊', category: 'marketplace', payoutPercent: '~100%' },
+  subvert: { name: 'Subvert', color: '#f97316', icon: '✊', category: 'marketplace', payoutPercent: '97%' },
   bandwagon: { name: 'Bandwagon', color: '#8b5cf6', icon: '🚐', category: 'decentralized' },
   faircamp: { name: 'Faircamp', color: '#22c55e', icon: '🏕️', category: 'decentralized', payoutPercent: '90-97%' },
   patreon: { name: 'Patreon', color: '#ff424d', icon: '🎨', category: 'patronage', payoutPercent: '86-90%' },

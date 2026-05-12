@@ -50,7 +50,7 @@ private let allPlatformMeta: [String: PlatformMeta] = [
     "bandcamp":     .init(name: "Bandcamp",        icon: "🎵", payoutPercent: "80–85%", isSocial: false),
     "mirlo":        .init(name: "Mirlo",           icon: "🪺", payoutPercent: "86–90%", isSocial: false),
     "ampwall":      .init(name: "Ampwall",         icon: "🔊", payoutPercent: "92–95%", isSocial: false),
-    "subvert":      .init(name: "Subvert",         icon: "✊", payoutPercent: "~100%",  isSocial: false),
+    "subvert":      .init(name: "Subvert",         icon: "✊", payoutPercent: "97%",  isSocial: false),
     "bandwagon":    .init(name: "Bandwagon",       icon: "🚐", payoutPercent: nil,       isSocial: false),
     "faircamp":     .init(name: "Faircamp",        icon: "🏕️", payoutPercent: "90–97%", isSocial: false),
     "patreon":      .init(name: "Patreon",         icon: "🎨", payoutPercent: "86–90%", isSocial: false),

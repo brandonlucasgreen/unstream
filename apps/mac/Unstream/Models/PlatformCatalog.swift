@@ -33,7 +33,7 @@ let platformCatalog: [String: PlatformConfig] = [
     "patreon": PlatformConfig(name: "Patreon", icon: "heart", color: "#FF424D", searchOnly: false, artistPayoutPercent: "86-90%"),
     // Search-only platforms
     "ampwall": PlatformConfig(name: "Ampwall", icon: "waveform", color: "#EF4444", searchOnly: true, artistPayoutPercent: "92-95%"),
-    "subvert": PlatformConfig(name: "Subvert", icon: "fist.raised", color: "#F97316", searchOnly: true, artistPayoutPercent: "~100%"),
+    "subvert": PlatformConfig(name: "Subvert", icon: "fist.raised", color: "#F97316", searchOnly: true, artistPayoutPercent: "97%"),
     "kofi": PlatformConfig(name: "Ko-fi", icon: "cup.and.saucer", color: "#29ABE0", searchOnly: true, artistPayoutPercent: "92-97%"),
     "buymeacoffee": PlatformConfig(name: "Buy Me a Coffee", icon: "cup.and.saucer", color: "#FFDD00", searchOnly: true, artistPayoutPercent: "~92%"),
     // Official
