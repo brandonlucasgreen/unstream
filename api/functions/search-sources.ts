@@ -1736,8 +1736,8 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
       // Sort: direct links before search-only
       const searchOnly = new Set(['ampwall', 'subvert', 'kofi', 'buymeacoffee', 'bandcamp']);
       mbPlatforms.sort((a, b) => {
-        const aSearch = searchOnly.has(a.sourceId) && (a.url.includes('/search?') || a.url.includes('duckduckgo') || a.url.includes('/explore')) ? 1 : 0;
-        const bSearch = searchOnly.has(b.sourceId) && (b.url.includes('/search?') || b.url.includes('duckduckgo') || b.url.includes('/explore')) ? 1 : 0;
+        const aSearch = searchOnly.has(a.sourceId) && (a.url.includes('/search?') || a.url.includes('duckduckgo') || a.url.includes('/explore') || a.url.includes('/discover')) ? 1 : 0;
+        const bSearch = searchOnly.has(b.sourceId) && (b.url.includes('/search?') || b.url.includes('duckduckgo') || b.url.includes('/explore') || b.url.includes('/discover')) ? 1 : 0;
         return aSearch - bSearch;
       });
 
