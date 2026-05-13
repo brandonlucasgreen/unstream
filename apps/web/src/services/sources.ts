@@ -27,7 +27,8 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: 'https://mirlo.space/search?query={query}',
     homepageUrl: 'https://mirlo.space',
     artistPayoutPercent: '86-90%',
-    aiPolicy: 'formal', // AI policy exists but URL not yet confirmed
+    aiPolicy: 'formal',
+    aiPolicyUrl: 'https://mirlo.space/pages/content-policy',
   },
   ampwall: {
     id: 'ampwall',
