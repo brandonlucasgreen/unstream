@@ -42,7 +42,7 @@ export function SourceBadge({ source, url, isDirectLink, displayName }: SourceBa
   const displayPayout = isBCFriday ? '~97%' : source.artistPayoutPercent;
   const hasPayoutPercent = !!source.artistPayoutPercent;
   // Only show AI policy badges on marketplaces
-  const hasAiPolicy = source.category === 'marketplace' && (source.aiPolicy === 'formal' || source.aiPolicy === 'discouraged');
+  const hasAiPolicy = (source.category === 'marketplace' || source.category === 'decentralized') && (source.aiPolicy === 'formal' || source.aiPolicy === 'discouraged');
 
   // Dark colors (EVEN #000000, Discogs #333333) are unreadable on dark backgrounds.
   // Use CSS variables so the badge text is legible in both themes.

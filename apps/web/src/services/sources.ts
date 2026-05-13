@@ -70,6 +70,8 @@ export const sources: Record<SourceId, Source> = {
     hasEmbed: false,
     searchUrlTemplate: 'https://bandwagon.fm/artists?q={query}',
     homepageUrl: 'https://bandwagon.fm',
+    aiPolicy: 'formal',
+    aiPolicyUrl: 'https://bandwagon.fm/acceptable-use',
   },
   faircamp: {
     id: 'faircamp',
