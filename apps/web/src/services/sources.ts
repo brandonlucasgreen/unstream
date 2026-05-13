@@ -358,7 +358,7 @@ export const sourceCategories = {
   marketplace: {
     name: 'Music Marketplaces',
     description: 'Buy music directly from artists',
-    sources: ['bandcamp', 'mirlo', 'ampwall', 'qobuz', 'beatport', 'even', 'jamcoop', 'discogs'] as SourceId[],
+    sources: ['bandcamp', 'mirlo', 'ampwall', 'subvert', 'qobuz', 'beatport', 'even', 'jamcoop', 'discogs'] as SourceId[],
   },
   patronage: {
     name: 'Patronage Platforms',
