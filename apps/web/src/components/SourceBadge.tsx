@@ -17,6 +17,7 @@ const AI_POLICY_TOOLTIPS: Partial<Record<string, string>> = {
   mirlo: 'Mirlo prohibits AI-generated music (mirlo.space/pages/content-policy).',
   bandwagon: 'Bandwagon prohibits AI-generated content, but allows electronic/algorithmic music (bandwagon.fm/acceptable-use).',
   qobuz: 'Qobuz has an AI Charter, detects/tags AI content, and excludes it from human-curated recommendations.',
+  beatport: 'Beatport detects and tags AI-generated content, and excludes it from human-curated recommendations.',
 };
 
 export function SourceBadge({ source, url, isDirectLink, displayName }: SourceBadgeProps) {
@@ -50,7 +51,7 @@ export function SourceBadge({ source, url, isDirectLink, displayName }: SourceBa
   const isBCFriday = source.id === 'bandcamp' && isBandcampFriday();
   const displayPayout = isBCFriday ? '~97%' : source.artistPayoutPercent;
   const hasPayoutPercent = !!source.artistPayoutPercent;
-  const hasAiPolicy = source.aiPolicy === 'banned' || source.aiPolicy === 'anti-ai';
+  const hasAiPolicy = source.aiPolicy === 'banned' || source.aiPolicy === 'discouraged';
 
   // Dark colors (EVEN #000000, Discogs #333333) are unreadable on dark backgrounds.
   // Use CSS variables so the badge text is legible in both themes.
@@ -96,7 +97,7 @@ export function SourceBadge({ source, url, isDirectLink, displayName }: SourceBa
           <span
             className="ai-policy-badge relative text-[10px] font-medium px-1 py-0.5 rounded"
             style={{
-              backgroundColor: source.aiPolicy === 'banned' ? '#22c55e30' : '#f59e0b30',
+              backgroundColor: source.aiPolicy === 'banned' ? '#22c55e30' : source.aiPolicy === 'discouraged' ? '#f59e0b30' : '#f59e0b30',
             }}
           >
             {source.aiPolicy === 'banned' ? (
@@ -104,12 +105,12 @@ export function SourceBadge({ source, url, isDirectLink, displayName }: SourceBa
                 <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/></svg>
                 AI banned
               </span>
-            ) : (
+            ) : source.aiPolicy === 'discouraged' ? (
               <span className="inline-flex items-center gap-0.5">
-                <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
-                AI restricted
+                <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/></svg>
+                AI discouraged
               </span>
-            )}
+            ) : null}
             {AI_POLICY_TOOLTIPS[source.id] && (
               <span className="ai-policy-tooltip text-[9px] absolute z-10 bg-black/90 text-white px-1.5 py-0.5 rounded w-32 -mt-6 ml-1">
                 {AI_POLICY_TOOLTIPS[source.id]}
