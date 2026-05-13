@@ -42,7 +42,8 @@ export interface Source {
   searchOnly?: boolean; // True if we can't verify the artist exists (shows "Search X" instead)
   homepageUrl: string;
   artistPayoutPercent?: string; // e.g., "80-85%" - artist's share of sales on this platform
-  aiPolicy?: 'banned' | 'anti-ai' | 'disclosed' | 'unknown' | 'self-hosted'; // AI-generated content policy
+  aiPolicy?: 'formal' | 'discouraged'; // AI-generated content policy (marketplaces only)
+  aiPolicyUrl?: string; // Link to platform's AI music policy page
 }
 
 // Latest release info

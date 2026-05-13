@@ -10,15 +10,6 @@ interface SourceBadgeProps {
   displayName?: string;
 }
 
-const AI_POLICY_TOOLTIPS: Partial<Record<string, string>> = {
-  bandcamp: 'Bandcamp explicitly banned AI-generated music in January 2026.',
-  ampwall: 'Ampwall strictly prohibits AI-generated music and AI-created images (ampwall.com/content-policy).',
-  subvert: 'Subvert is a collectively owned music cooperative that actively opposes AI-generated music. Artists keep ~97% of every sale (payment processing applies).',
-  mirlo: 'Mirlo prohibits AI-generated music (mirlo.space/pages/content-policy).',
-  bandwagon: 'Bandwagon prohibits AI-generated content, but allows electronic/algorithmic music (bandwagon.fm/acceptable-use).',
-  qobuz: 'Qobuz has an AI Charter, detects/tags AI content, and excludes it from human-curated recommendations.',
-};
-
 export function SourceBadge({ source, url, isDirectLink, displayName }: SourceBadgeProps) {
   const label = displayName ?? source.name;
   // If we have a direct link, show as verified even if source is normally searchOnly
@@ -50,7 +41,8 @@ export function SourceBadge({ source, url, isDirectLink, displayName }: SourceBa
   const isBCFriday = source.id === 'bandcamp' && isBandcampFriday();
   const displayPayout = isBCFriday ? '~97%' : source.artistPayoutPercent;
   const hasPayoutPercent = !!source.artistPayoutPercent;
-  const hasAiPolicy = source.aiPolicy === 'banned' || source.aiPolicy === 'anti-ai';
+  // Only show AI policy badges on marketplaces
+  const hasAiPolicy = (source.category === 'marketplace' || source.category === 'decentralized') && (source.aiPolicy === 'formal' || source.aiPolicy === 'discouraged');
 
   // Dark colors (EVEN #000000, Discogs #333333) are unreadable on dark backgrounds.
   // Use CSS variables so the badge text is legible in both themes.
@@ -91,31 +83,33 @@ export function SourceBadge({ source, url, isDirectLink, displayName }: SourceBa
             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
         )}
-        {/* Show AI policy indicators directly — these are a key differentiator */}
+        {/* Show AI policy indicators on marketplace badges only */}
         {hasAiPolicy && (
-          <span
-            className="ai-policy-badge relative text-[10px] font-medium px-1 py-0.5 rounded"
-            style={{
-              backgroundColor: source.aiPolicy === 'banned' ? '#22c55e30' : '#f59e0b30',
-            }}
-          >
-            {source.aiPolicy === 'banned' ? (
-              <span className="inline-flex items-center gap-0.5">
-                <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/></svg>
-                AI banned
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-0.5">
-                <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
-                AI restricted
-              </span>
-            )}
-            {AI_POLICY_TOOLTIPS[source.id] && (
-              <span className="ai-policy-tooltip text-[9px] absolute z-10 bg-black/90 text-white px-1.5 py-0.5 rounded w-32 -mt-6 ml-1">
-                {AI_POLICY_TOOLTIPS[source.id]}
-              </span>
-            )}
-          </span>
+          source.aiPolicy === 'formal' ? (
+            <a
+              href={source.aiPolicyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ai-policy-badge text-[10px] font-medium px-1 py-0.5 rounded inline-flex items-center gap-0.5 no-underline"
+              style={{ backgroundColor: '#22c55e30' }}
+              onClick={(e) => { e.stopPropagation(); analytics.trackPlatformClick(`${label} AI policy`); }}
+            >
+              <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/></svg>
+              AI policy
+            </a>
+          ) : (
+            <a
+              href={source.aiPolicyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ai-policy-badge text-[10px] font-medium px-1 py-0.5 rounded inline-flex items-center gap-0.5 no-underline"
+              style={{ backgroundColor: '#f59e0b30' }}
+              onClick={(e) => { e.stopPropagation(); analytics.trackPlatformClick(`${label} AI policy`); }}
+            >
+              <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/></svg>
+              AI discouraged
+            </a>
+          )
         )}
       </span>
     </a>

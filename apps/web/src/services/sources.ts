@@ -13,7 +13,8 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: 'https://bandcamp.com/search?q={query}',
     homepageUrl: 'https://bandcamp.com',
     artistPayoutPercent: '80-85%',
-    aiPolicy: 'banned', // Explicitly banned AI-generated music Jan 2026
+    aiPolicy: 'formal',
+    aiPolicyUrl: 'https://blog.bandcamp.com/2026/01/13/keeping-bandcamp-human/',
   },
   mirlo: {
     id: 'mirlo',
@@ -26,7 +27,8 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: 'https://mirlo.space/search?query={query}',
     homepageUrl: 'https://mirlo.space',
     artistPayoutPercent: '86-90%',
-    aiPolicy: 'banned', // AI-generated music explicitly prohibited (mirlo.space/pages/content-policy)
+    aiPolicy: 'formal',
+    aiPolicyUrl: 'https://mirlo.space/pages/content-policy',
   },
   ampwall: {
     id: 'ampwall',
@@ -40,7 +42,8 @@ export const sources: Record<SourceId, Source> = {
     searchOnly: true,
     homepageUrl: 'https://ampwall.com',
     artistPayoutPercent: '92-95%',
-    aiPolicy: 'banned', // AI-generated music strictly prohibited (ampwall.com/content-policy)
+    aiPolicy: 'formal',
+    aiPolicyUrl: 'https://ampwall.com/content-policy',
   },
   subvert: {
     id: 'subvert',
@@ -54,7 +57,8 @@ export const sources: Record<SourceId, Source> = {
     searchOnly: true,
     homepageUrl: 'https://www.subvert.fm',
     artistPayoutPercent: '97%',
-    aiPolicy: 'anti-ai', // Cooperative that actively opposes AI-generated music
+    aiPolicy: 'formal',
+    aiPolicyUrl: 'https://www.subvert.fm/pages/ai-policy',
   },
   bandwagon: {
     id: 'bandwagon',
@@ -66,7 +70,8 @@ export const sources: Record<SourceId, Source> = {
     hasEmbed: false,
     searchUrlTemplate: 'https://bandwagon.fm/artists?q={query}',
     homepageUrl: 'https://bandwagon.fm',
-    aiPolicy: 'banned', // AI-generated content prohibited (bandwagon.fm/acceptable-use)
+    aiPolicy: 'formal',
+    aiPolicyUrl: 'https://bandwagon.fm/acceptable-use',
   },
   faircamp: {
     id: 'faircamp',
@@ -79,7 +84,6 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: 'https://duckduckgo.com/?q=site:*.faircamp+{query}',
     homepageUrl: 'https://simonrepp.com/faircamp',
     artistPayoutPercent: '90-97%',
-    aiPolicy: 'self-hosted', // Creator controls their own static site
   },
   patreon: {
     id: 'patreon',
@@ -92,7 +96,6 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: 'https://www.patreon.com/search?q={query}',
     homepageUrl: 'https://www.patreon.com',
     artistPayoutPercent: '86-90%',
-    aiPolicy: 'unknown', // No AI music policy
   },
   buymeacoffee: {
     id: 'buymeacoffee',
@@ -106,7 +109,6 @@ export const sources: Record<SourceId, Source> = {
     searchOnly: true,
     homepageUrl: 'https://buymeacoffee.com',
     artistPayoutPercent: '~92%',
-    aiPolicy: 'unknown', // No AI policy
   },
   kofi: {
     id: 'kofi',
@@ -120,7 +122,6 @@ export const sources: Record<SourceId, Source> = {
     searchOnly: true,
     homepageUrl: 'https://ko-fi.com',
     artistPayoutPercent: '92-97%',
-    aiPolicy: 'unknown', // No AI policy
   },
   hoopla: {
     id: 'hoopla',
@@ -155,7 +156,8 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: 'https://www.qobuz.com/us-en/search/artists/{query}',
     homepageUrl: 'https://www.qobuz.com',
     artistPayoutPercent: '~70%',
-    aiPolicy: 'anti-ai', // Has AI Charter, detects/tags AI content, excludes from human-curated recs
+    aiPolicy: 'formal',
+    aiPolicyUrl: 'https://community.qobuz.com/ai-charter',
   },
   beatport: {
     id: 'beatport',
@@ -168,7 +170,8 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: 'https://www.beatport.com/search?q={query}',
     homepageUrl: 'https://www.beatport.com',
     artistPayoutPercent: '55-70%',
-    aiPolicy: 'unknown', // No explicit public AI policy
+    aiPolicy: 'discouraged',
+    aiPolicyUrl: 'https://greenroomsupport.beatport.com/hc/en-us/articles/19093504988820-Content-Policy',
   },
   even: {
     id: 'even',
@@ -181,7 +184,6 @@ export const sources: Record<SourceId, Source> = {
     searchUrlTemplate: 'https://even.biz/search?q={query}',
     homepageUrl: 'https://even.biz',
     artistPayoutPercent: '~80%',
-    aiPolicy: 'unknown', // No public AI policy found
   },
   jamcoop: {
     id: 'jamcoop',
@@ -193,7 +195,6 @@ export const sources: Record<SourceId, Source> = {
     hasEmbed: false,
     searchUrlTemplate: 'https://jam.coop/artists',
     homepageUrl: 'https://jam.coop',
-    aiPolicy: 'unknown', // No public AI policy found
   },
   officialsite: {
     id: 'officialsite',
@@ -205,7 +206,6 @@ export const sources: Record<SourceId, Source> = {
     hasEmbed: false,
     searchUrlTemplate: '',
     homepageUrl: '',
-    aiPolicy: 'self-hosted', // Artist's own website
   },
   discogs: {
     id: 'discogs',
@@ -217,7 +217,6 @@ export const sources: Record<SourceId, Source> = {
     hasEmbed: false,
     searchUrlTemplate: 'https://www.discogs.com/search/?q={query}&type=artist',
     homepageUrl: 'https://www.discogs.com',
-    aiPolicy: 'unknown', // No AI content policy for physical media sales
   },
   // Social platforms
   instagram: {
