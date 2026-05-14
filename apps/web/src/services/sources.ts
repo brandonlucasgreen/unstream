@@ -49,7 +49,7 @@ export const sources: Record<SourceId, Source> = {
     id: 'subvert',
     name: 'Subvert',
     description: 'Collectively owned music marketplace — 0% platform fees',
-    color: '#f97316',
+    color: '#D9DBDD',
     icon: '✊',
     category: 'marketplace',
     hasEmbed: false,
