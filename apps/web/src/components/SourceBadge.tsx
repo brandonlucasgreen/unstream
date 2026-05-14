@@ -1,6 +1,7 @@
 import type { Source } from '../types';
 import { analytics } from '../services/analytics';
 import { isBandcampFriday } from '../utils/bandcamp-friday';
+import { badgeColors } from '../utils/colors';
 import { PlatformIcon } from './PlatformIcon';
 
 interface SourceBadgeProps {
@@ -41,13 +42,11 @@ export function SourceBadge({ source, url, isDirectLink, displayName }: SourceBa
   const isBCFriday = source.id === 'bandcamp' && isBandcampFriday();
   const displayPayout = isBCFriday ? '~97%' : source.artistPayoutPercent;
   const hasPayoutPercent = !!source.artistPayoutPercent;
-  // Only show AI policy badges on marketplaces
+  // Only show AI policy badges on marketplaces and decentralized platforms
   const hasAiPolicy = (source.category === 'marketplace' || source.category === 'decentralized') && (source.aiPolicy === 'formal' || source.aiPolicy === 'discouraged');
 
-  // Dark colors (EVEN #000000, Discogs #333333) are unreadable on dark backgrounds.
-  // Use CSS variables so the badge text is legible in both themes.
-  const isDarkColor = source.color <= '#444444';
-  const textColor = isDarkColor ? 'var(--badge-dark-text, #999999)' : source.color;
+  // Theme-aware colors: dark/light/medium brand colors all get readable text + bg
+  const { textColor, bgColor } = badgeColors(source.color);
 
   return (
     <a
@@ -56,7 +55,7 @@ export function SourceBadge({ source, url, isDirectLink, displayName }: SourceBa
       rel="noopener noreferrer"
       className="source-badge hover:opacity-80"
       style={{
-        backgroundColor: `${source.color}20`,
+        backgroundColor: bgColor,
         color: textColor,
       }}
       onClick={() => analytics.trackPlatformClick(label)}
@@ -83,7 +82,7 @@ export function SourceBadge({ source, url, isDirectLink, displayName }: SourceBa
             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
         )}
-        {/* Show AI policy indicators on marketplace badges only */}
+        {/* Show AI policy indicators on marketplace and decentralized badges */}
         {hasAiPolicy && (
           source.aiPolicy === 'formal' ? (
             <a
