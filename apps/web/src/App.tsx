@@ -256,7 +256,7 @@ function App() {
               href="https://chromewebstore.google.com/detail/unstream-support-music-di/ghoiopeidkganjdebkgkehaofnmjofkf"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-surface border border-border text-text-primary hover:bg-surface-secondary transition-colors font-medium"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#34A853] text-white hover:bg-[#2d9249] transition-colors font-medium shadow-lg shadow-[#34A853]/20"
               onClick={() => analytics.trackDownloadChrome()}
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -268,7 +268,7 @@ function App() {
               href="https://addons.mozilla.org/en-US/firefox/addon/unstream/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-surface border border-border text-text-primary hover:bg-surface-secondary transition-colors font-medium"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#FF6611] text-white hover:bg-[#e55b0e] transition-colors font-medium shadow-lg shadow-[#FF6611]/20"
               onClick={() => analytics.trackDownloadFirefox()}
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -280,7 +280,7 @@ function App() {
               href="https://www.icloud.com/shortcuts/73296296361e4f609087746e7f046d47"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-surface border border-border text-text-primary hover:bg-surface-secondary transition-colors font-medium"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#007AFF] text-white hover:bg-[#0066d6] transition-colors font-medium shadow-lg shadow-[#007AFF]/20"
               onClick={() => analytics.trackDownloadIosShortcut()}
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
