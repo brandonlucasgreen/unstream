@@ -291,7 +291,7 @@ function App() {
                   Install iOS Shortcut
                 </a>
               </div>
-              <p className="text-text-muted text-sm mt-1 text-center md:text-left">Safari extension coming soon!</p>
+
             </div>
             <div className="flex-shrink-0">
               <img
