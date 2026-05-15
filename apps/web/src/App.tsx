@@ -240,11 +240,11 @@ function App() {
             </p>
           </div>
 
-          {/* Download CTAs */}
-          <div className="flex flex-wrap justify-center items-center gap-3">
+          {/* Download CTAs — 2x2 grid */}
+          <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
             <a
               href="https://github.com/brandonlucasgreen/unstream/releases/latest"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-accent-primary text-white hover:bg-accent-primary/90 transition-colors font-medium shadow-lg shadow-accent-primary/20"
+              className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#9CA3AF] text-white hover:bg-[#8B92A0] transition-colors font-medium shadow-lg shadow-[#9CA3AF]/20"
               onClick={() => analytics.trackDownload()}
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -256,7 +256,7 @@ function App() {
               href="https://chromewebstore.google.com/detail/unstream-support-music-di/ghoiopeidkganjdebkgkehaofnmjofkf"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#34A853] text-white hover:bg-[#2d9249] transition-colors font-medium shadow-lg shadow-[#34A853]/20"
+              className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#34A853] text-white hover:bg-[#2d9249] transition-colors font-medium shadow-lg shadow-[#34A853]/20"
               onClick={() => analytics.trackDownloadChrome()}
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -268,7 +268,7 @@ function App() {
               href="https://addons.mozilla.org/en-US/firefox/addon/unstream/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#FF6611] text-white hover:bg-[#e55b0e] transition-colors font-medium shadow-lg shadow-[#FF6611]/20"
+              className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#FF6611] text-white hover:bg-[#e55b0e] transition-colors font-medium shadow-lg shadow-[#FF6611]/20"
               onClick={() => analytics.trackDownloadFirefox()}
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -280,7 +280,7 @@ function App() {
               href="https://www.icloud.com/shortcuts/73296296361e4f609087746e7f046d47"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#007AFF] text-white hover:bg-[#0066d6] transition-colors font-medium shadow-lg shadow-[#007AFF]/20"
+              className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#007AFF] text-white hover:bg-[#0066d6] transition-colors font-medium shadow-lg shadow-[#007AFF]/20"
               onClick={() => analytics.trackDownloadIosShortcut()}
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -416,11 +416,11 @@ function App() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex-shrink-0">
+                  <div className="flex-shrink-0 w-full md:w-auto flex justify-center md:justify-start">
                     <img
                       src="/unstream-mac-teaser.png"
                       alt="Unstream for macOS showing artist platforms in the menu bar"
-                      className="w-64 md:w-80 rounded-xl shadow-2xl border border-border"
+                      className="w-full md:w-80 rounded-xl shadow-2xl border border-border"
                     />
                   </div>
                 </div>
