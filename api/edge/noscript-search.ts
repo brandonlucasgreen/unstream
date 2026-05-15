@@ -1,4 +1,5 @@
 import { Context } from "https://edge.netlify.com";
+import { PLATFORMS } from "../shared/platform-registry.ts";
 
 interface PlatformLink {
   sourceId: string;
@@ -22,31 +23,11 @@ interface SearchResult {
   matchConfidence?: 'verified' | 'unverified';
 }
 
-const PLATFORM_INFO: Record<string, { name: string; icon: string; category: string; searchOnly?: boolean; payoutPercent?: string }> = {
-  bandcamp: { name: 'Bandcamp', icon: '🎵', category: 'marketplace', payoutPercent: '80-85%' },
-  mirlo: { name: 'Mirlo', icon: '🪺', category: 'marketplace', payoutPercent: '86-90%' },
-  ampwall: { name: 'Ampwall', icon: '🔊', category: 'marketplace', searchOnly: true, payoutPercent: '92-95%' },
-  subvert: { name: 'Subvert', icon: '✊', category: 'marketplace', searchOnly: true, payoutPercent: '97%' },
-  bandwagon: { name: 'Bandwagon', icon: '🚐', category: 'decentralized' },
-  faircamp: { name: 'Faircamp', icon: '🏕️', category: 'decentralized', payoutPercent: '90-97%' },
-  patreon: { name: 'Patreon', icon: '🎨', category: 'patronage', payoutPercent: '86-90%' },
-  buymeacoffee: { name: 'Buy Me a Coffee', icon: '☕', category: 'patronage', searchOnly: true, payoutPercent: '~92%' },
-  kofi: { name: 'Ko-fi', icon: '🍵', category: 'patronage', searchOnly: true, payoutPercent: '92-97%' },
-  hoopla: { name: 'Hoopla', icon: '🎧', category: 'library' },
-  freegal: { name: 'Freegal', icon: '🎵', category: 'library' },
-  qobuz: { name: 'Qobuz', icon: '💿', category: 'marketplace', payoutPercent: '~70%' },
-  jamcoop: { name: 'Jam.coop', icon: '🎸', category: 'marketplace' },
-  officialsite: { name: 'Official Site', icon: '🌐', category: 'official' },
-  discogs: { name: 'Discogs', icon: '💿', category: 'marketplace' },
-  instagram: { name: 'Instagram', icon: '📷', category: 'social' },
-  facebook: { name: 'Facebook', icon: '👤', category: 'social' },
-  tiktok: { name: 'TikTok', icon: '🎬', category: 'social' },
-  youtube: { name: 'YouTube', icon: '▶️', category: 'social' },
-  threads: { name: 'Threads', icon: '🧵', category: 'social' },
-  bluesky: { name: 'Bluesky', icon: '🦋', category: 'social' },
-  mastodon: { name: 'Mastodon', icon: '🐘', category: 'social' },
-  peertube: { name: 'PeerTube', icon: '🎥', category: 'social' },
-};
+// Derive PLATFORM_INFO from shared registry
+const PLATFORM_INFO: Record<string, { name: string; icon: string; category: string; searchOnly?: boolean; payoutPercent?: string }> = {};
+for (const [id, p] of Object.entries(PLATFORMS)) {
+  PLATFORM_INFO[id] = { name: p.name, icon: p.icon, category: p.category, ...(p.searchOnly && { searchOnly: p.searchOnly }), ...(p.payoutPercent && { payoutPercent: p.payoutPercent }) };
+}
 
 const CATEGORY_ORDER = ['marketplace', 'patronage', 'library', 'decentralized', 'official'];
 const CATEGORY_LABELS: Record<string, string> = {

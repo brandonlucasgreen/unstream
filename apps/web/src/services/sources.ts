@@ -1,3 +1,6 @@
+// NOTE: Platform name, color, icon, and category are defined in api/shared/platform-registry.ts
+// as the single source of truth. When updating these fields, update the shared registry too.
+// The sources below add client-only fields (description, searchUrlTemplate, hasEmbed, aiPolicy, etc.).
 import type { Source, SourceId, SearchResponse, SearchResult } from '../types';
 
 export const sources: Record<SourceId, Source> = {

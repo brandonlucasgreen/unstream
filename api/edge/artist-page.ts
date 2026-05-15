@@ -1,4 +1,5 @@
 import { Context } from "https://edge.netlify.com";
+import { PLATFORMS } from "../shared/platform-registry.ts";
 
 interface PlatformLink {
   sourceId: string;
@@ -32,32 +33,11 @@ function isBandcampFriday(): boolean {
   return BANDCAMP_FRIDAY_DATES.includes(pacificDate);
 }
 
-// Platform display names and colors for static rendering
-const PLATFORM_INFO: Record<string, { name: string; color: string; icon: string; category: string; searchOnly?: boolean; payoutPercent?: string }> = {
-  bandcamp: { name: 'Bandcamp', color: '#1da0c3', icon: '🎵', category: 'marketplace', payoutPercent: '80-85%' },
-  mirlo: { name: 'Mirlo', color: '#6366f1', icon: '🪺', category: 'marketplace', payoutPercent: '86-90%' },
-  ampwall: { name: 'Ampwall', color: '#ef4444', icon: '🔊', category: 'marketplace', searchOnly: true, payoutPercent: '92-95%' },
-  subvert: { name: 'Subvert', color: '#f97316', icon: '✊', category: 'marketplace', searchOnly: true, payoutPercent: '97%' },
-  bandwagon: { name: 'Bandwagon', color: '#8b5cf6', icon: '🚐', category: 'decentralized' },
-  faircamp: { name: 'Faircamp', color: '#22c55e', icon: '🏕️', category: 'decentralized', payoutPercent: '90-97%' },
-  patreon: { name: 'Patreon', color: '#ff424d', icon: '🎨', category: 'patronage', payoutPercent: '86-90%' },
-  buymeacoffee: { name: 'Buy Me a Coffee', color: '#ffdd00', icon: '☕', category: 'patronage', searchOnly: true, payoutPercent: '~92%' },
-  kofi: { name: 'Ko-fi', color: '#29abe0', icon: '🍵', category: 'patronage', searchOnly: true, payoutPercent: '92-97%' },
-  hoopla: { name: 'Hoopla', color: '#9333ea', icon: '🎧', category: 'library' },
-  freegal: { name: 'Freegal', color: '#e91e63', icon: '🎵', category: 'library' },
-  qobuz: { name: 'Qobuz', color: '#0070f3', icon: '💿', category: 'marketplace', payoutPercent: '~70%' },
-  jamcoop: { name: 'Jam.coop', color: '#e11d48', icon: '🎸', category: 'marketplace' },
-  officialsite: { name: 'Official Site', color: '#71717a', icon: '🌐', category: 'official' },
-  discogs: { name: 'Discogs', color: '#333333', icon: '💿', category: 'marketplace' },
-  instagram: { name: 'Instagram', color: '#E4405F', icon: 'social', category: 'social' },
-  facebook: { name: 'Facebook', color: '#1877F2', icon: 'social', category: 'social' },
-  tiktok: { name: 'TikTok', color: '#E0E0E0', icon: 'social', category: 'social' },
-  youtube: { name: 'YouTube', color: '#FF0000', icon: 'social', category: 'social' },
-  threads: { name: 'Threads', color: '#E0E0E0', icon: 'social', category: 'social' },
-  bluesky: { name: 'Bluesky', color: '#0085FF', icon: 'social', category: 'social' },
-  mastodon: { name: 'Mastodon', color: '#6364FF', icon: 'social', category: 'social' },
-  peertube: { name: 'PeerTube', color: '#F1680D', icon: 'social', category: 'social' },
-};
+// Derive PLATFORM_INFO from shared registry
+const PLATFORM_INFO: Record<string, { name: string; color: string; icon: string; category: string; searchOnly?: boolean; payoutPercent?: string }> = {};
+for (const [id, p] of Object.entries(PLATFORMS)) {
+  PLATFORM_INFO[id] = { name: p.name, color: p.color, icon: p.icon, category: p.category, ...(p.searchOnly && { searchOnly: p.searchOnly }), ...(p.payoutPercent && { payoutPercent: p.payoutPercent }) };
+}
 
 const SOCIAL_ICONS: Record<string, string> = {
   instagram: '<svg width="16" height="16" viewBox="0 0 24 24" fill="#E4405F"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>',
