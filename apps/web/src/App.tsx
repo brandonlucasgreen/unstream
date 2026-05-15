@@ -509,7 +509,7 @@ function App() {
             <p className="text-text-secondary mb-6 text-center md:text-left">
               Can't find the artist you want to support? Have a feature idea? Reach out below.
             </p>
-            <div ref={letterbirdRef} style={{ minHeight: '700px', overflow: 'visible' }}></div>
+            <div ref={letterbirdRef}></div>
           </div>
         </div>
       </section>
