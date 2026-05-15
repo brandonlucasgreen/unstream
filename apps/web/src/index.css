@@ -152,3 +152,11 @@ html[data-theme="light"] {
     50% { opacity: 1; }
   }
 }
+
+/* Letterbird embed — force iframe to display full height */
+[data-letterbirduser] iframe,
+.letterbird-contact iframe {
+  height: 700px !important;
+  min-height: 700px !important;
+  overflow: visible !important;
+}
