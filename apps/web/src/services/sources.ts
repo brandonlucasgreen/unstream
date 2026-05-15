@@ -50,7 +50,7 @@ export const sources: Record<SourceId, Source> = {
     name: 'Subvert',
     description: 'Collectively owned music marketplace — 0% platform fees',
     color: '#D9DBDD',
-    icon: '✊',
+    icon: '🌐',
     category: 'marketplace',
     hasEmbed: false,
     searchUrlTemplate: 'https://www.subvert.fm/discover?q={query}&type=artist',
@@ -201,7 +201,7 @@ export const sources: Record<SourceId, Source> = {
     name: 'Official Site',
     description: 'Artist\'s official website',
     color: '#71717a',
-    icon: '🌐',
+    icon: '⭐',
     category: 'official',
     hasEmbed: false,
     searchUrlTemplate: '',
@@ -365,15 +365,15 @@ export const sourceCategories = {
     description: 'Support artists directly',
     sources: ['patreon', 'buymeacoffee', 'kofi', 'liberapay'] as SourceId[],
   },
+  decentralized: {
+    name: 'Self-hosted & Decentralized',
+    description: 'ActivityPub and self-hosted platforms',
+    sources: ['bandwagon', 'faircamp'] as SourceId[],
+  },
   library: {
     name: 'Library Services',
     description: 'Access through your local library',
     sources: ['hoopla', 'freegal'] as SourceId[],
-  },
-  decentralized: {
-    name: 'Decentralized',
-    description: 'ActivityPub and self-hosted platforms',
-    sources: ['bandwagon', 'faircamp'] as SourceId[],
   },
   official: {
     name: 'Official',
