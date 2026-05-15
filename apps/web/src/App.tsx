@@ -12,6 +12,7 @@ import { Footer } from './components/Footer';
 import { PlatformIcon } from './components/PlatformIcon';
 import { faqSections } from './data/faq';
 import { markdownToHtml } from './utils/markdownLight';
+import { badgeColors } from './utils/colors';
 import './index.css';
 
 function CollapsibleSection({ title, content, defaultOpen = false }: {
@@ -418,10 +419,7 @@ function App() {
                       <div className="flex flex-wrap gap-2">
                         {category.sources.map(sourceId => {
                           const source = sources[sourceId];
-                          // Sources with very dark brand colors need lighter text in dark mode
-                          const isDarkColor = parseInt(source.color.slice(1, 3), 16) + parseInt(source.color.slice(3, 5), 16) + parseInt(source.color.slice(5, 7), 16) < 128;
-                          const textColor = isDarkColor ? 'var(--color-text-primary)' : source.color;
-                          const bgColor = isDarkColor ? 'var(--color-bg-hover)' : `${source.color}15`;
+                          const { textColor, bgColor } = badgeColors(source.color);
                           return (
                             <a
                               key={sourceId}
@@ -434,7 +432,7 @@ function App() {
                                 color: textColor,
                               }}
                             >
-                              <PlatformIcon sourceId={source.id} color={isDarkColor ? '#888888' : source.color} emoji={source.icon} />
+                              <PlatformIcon sourceId={source.id} color={textColor} emoji={source.icon} />
                               <span>{source.name}</span>
                             </a>
                           );
