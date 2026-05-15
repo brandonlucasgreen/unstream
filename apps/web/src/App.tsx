@@ -411,7 +411,7 @@ function App() {
                         <div className="text-2xl">🎵</div>
                         <div>
                           <h3 className="font-semibold text-text-primary mb-1">Scrobbling</h3>
-                          <p className="text-text-muted text-sm">The browser extension scrobbles what you&rsquo;re listening to on Spotify Web and other streaming sites to ListenBrainz, so Unstream always knows your current artist.</p>
+                          <p className="text-text-muted text-sm">The browser extension detects what you&rsquo;re listening to on Spotify Web and other streaming sites and scrobbles it to ListenBrainz.</p>
                         </div>
                       </div>
                     </div>
