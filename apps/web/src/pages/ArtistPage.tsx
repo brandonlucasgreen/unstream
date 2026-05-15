@@ -62,6 +62,7 @@ export function ArtistPage() {
   useEffect(() => {
     if (!slug) return;
 
+    const artistSlug = slug;
     let cancelled = false;
 
     async function loadArtist() {
@@ -70,7 +71,7 @@ export function ArtistPage() {
 
       // Try pre-generated data first
       try {
-        const res = await fetch(`/data/artists/${slug}.json`);
+        const res = await fetch(`/data/artists/${artistSlug}.json`);
         if (res.ok) {
           const data: SearchResult[] = await res.json();
           if (!cancelled && data.length > 0) {
@@ -88,7 +89,7 @@ export function ArtistPage() {
       // Fallback: fetch from API for claimed artists (no pre-generated JSON)
       // This ensures artists can view their claimed profiles even without pre-built JSON
       try {
-        const response = await fetch(`/api/artist?slug=${encodeURIComponent(slug)}`);
+        const response = await fetch(`/api/artist?slug=${encodeURIComponent(artistSlug)}`);
         if (response.ok && !cancelled) {
           const data: SearchResult = await response.json();
           // Convert single artist result to array format
@@ -106,7 +107,7 @@ export function ArtistPage() {
       }
 
       // Last resort: live search using the slug as query
-      const query = slug!.replace(/-/g, ' ');
+      const query = artistSlug.replace(/-/g, ' ');
       try {
         const response = await searchPlatforms(query);
         if (cancelled) return;
