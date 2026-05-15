@@ -95,6 +95,10 @@ async function init() {
   await loadNewReleases();
   await loadLastCheckTime();
 
+  // Initialize artist notification toggle state
+  const { artistNotifications } = await chrome.storage.sync.get('artistNotifications');
+  document.getElementById('artist-notifications-toggle').checked = artistNotifications !== false; // default enabled
+
   // Setup event listeners
   setupEventListeners();
 }
@@ -760,6 +764,12 @@ function setupEventListeners() {
 
   // Check now button
   elements.checkNowBtn.addEventListener('click', checkReleasesNow);
+
+  // Artist notifications toggle
+  const notifToggle = document.getElementById('artist-notifications-toggle');
+  notifToggle.addEventListener('change', async (e) => {
+    await chrome.storage.sync.set({ artistNotifications: e.target.checked });
+  });
 
   // Manual search
   elements.searchBtn.addEventListener('click', () => {
