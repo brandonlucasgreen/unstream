@@ -236,7 +236,7 @@ function App() {
               Directly support the artist you&rsquo;re listening to right now
             </h1>
             <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto">
-              Unstream helps you find the places where music artists you love &amp; listen to keep up to 97% of every sale &mdash; not fractions of a penny from streams.
+              Unstream finds the places where your favorite music artists &mdash; not tech companies &mdash; keep up to 97% of every sale.
             </p>
           </div>
 
@@ -381,7 +381,7 @@ function App() {
               {/* App Features */}
               <div className="bg-surface-secondary rounded-2xl p-6 md:p-8 border border-border">
                 <h2 className="font-display text-2xl md:text-3xl font-semibold text-text-primary mb-6 text-center md:text-left">
-                  Unstream keeps track of your listening and who you support
+                  Keep track of artists you want to support
                 </h2>
                 <div className="flex flex-col md:flex-row items-start gap-8">
                   <div className="flex-1">
