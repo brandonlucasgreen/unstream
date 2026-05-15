@@ -241,7 +241,7 @@ function App() {
           </div>
 
           {/* Download CTAs — 2x2 grid */}
-          <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
+          <div className="grid grid-cols-2 gap-3 max-w-lg mx-auto">
             <a
               href="https://github.com/brandonlucasgreen/unstream/releases/latest"
               className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#9CA3AF] text-white hover:bg-[#8B92A0] transition-colors font-medium shadow-lg shadow-[#9CA3AF]/20"
