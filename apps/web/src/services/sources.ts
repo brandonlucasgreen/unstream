@@ -365,15 +365,15 @@ export const sourceCategories = {
     description: 'Support artists directly',
     sources: ['patreon', 'buymeacoffee', 'kofi', 'liberapay'] as SourceId[],
   },
+  decentralized: {
+    name: 'Self-hosted & Decentralized',
+    description: 'ActivityPub and self-hosted platforms',
+    sources: ['bandwagon', 'faircamp'] as SourceId[],
+  },
   library: {
     name: 'Library Services',
     description: 'Access through your local library',
     sources: ['hoopla', 'freegal'] as SourceId[],
-  },
-  decentralized: {
-    name: 'Decentralized',
-    description: 'ActivityPub and self-hosted platforms',
-    sources: ['bandwagon', 'faircamp'] as SourceId[],
   },
   official: {
     name: 'Official',
