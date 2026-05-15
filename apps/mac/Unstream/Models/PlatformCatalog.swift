@@ -27,17 +27,17 @@ let platformCatalog: [String: PlatformConfig] = [
     "bandwagon": PlatformConfig(name: "Bandwagon", icon: "car", color: "#FF6B35", searchOnly: false),
     "faircamp": PlatformConfig(name: "Faircamp", icon: "tent", color: "#2D5A27", searchOnly: false, artistPayoutPercent: "90-97%"),
     "qobuz": PlatformConfig(name: "Qobuz", icon: "hifispeaker", color: "#4169E1", searchOnly: false, artistPayoutPercent: "~70%"),
-    "jamcoop": PlatformConfig(name: "Jam.coop", icon: "guitars", color: "#E11D48", searchOnly: false),
+    "jamcoop": PlatformConfig(name: "Jam.coop", icon: "guitars", color: "#D97706", searchOnly: false),
     "freegal": PlatformConfig(name: "Freegal", icon: "building.columns", color: "#00A651", searchOnly: false),
     "hoopla": PlatformConfig(name: "Hoopla", icon: "books.vertical", color: "#E31837", searchOnly: false),
     "patreon": PlatformConfig(name: "Patreon", icon: "heart", color: "#FF424D", searchOnly: false, artistPayoutPercent: "86-90%"),
     // Search-only platforms
-    "ampwall": PlatformConfig(name: "Ampwall", icon: "waveform", color: "#EF4444", searchOnly: true, artistPayoutPercent: "92-95%"),
-    "subvert": PlatformConfig(name: "Subvert", icon: "fist.raised", color: "#F97316", searchOnly: true, artistPayoutPercent: "97%"),
+    "ampwall": PlatformConfig(name: "Ampwall", icon: "waveform", color: "#1E1E24", searchOnly: true, artistPayoutPercent: "92-95%"),
+    "subvert": PlatformConfig(name: "Subvert", icon: "globe", color: "#D9DBDD", searchOnly: true, artistPayoutPercent: "97%"),
     "kofi": PlatformConfig(name: "Ko-fi", icon: "cup.and.saucer", color: "#29ABE0", searchOnly: true, artistPayoutPercent: "92-97%"),
     "buymeacoffee": PlatformConfig(name: "Buy Me a Coffee", icon: "cup.and.saucer", color: "#FFDD00", searchOnly: true, artistPayoutPercent: "~92%"),
     // Official
-    "officialsite": PlatformConfig(name: "Official Site", icon: "globe", color: "#71717A", searchOnly: false),
+    "officialsite": PlatformConfig(name: "Official Site", icon: "star", color: "#71717A", searchOnly: false),
     "discogs": PlatformConfig(name: "Discogs", icon: "opticaldisc", color: "#333333", searchOnly: false),
     // Social platforms
     "instagram": PlatformConfig(name: "Instagram", icon: "camera", color: "#E4405F", searchOnly: false),

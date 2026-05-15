@@ -1,5 +1,6 @@
 import { Context } from "https://edge.netlify.com";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { PLATFORMS } from "../shared/platform-registry.ts";
 
 // UPDATE ANNUALLY: Bandcamp Friday dates from https://daily.bandcamp.com/features/bandcamp-fridays
 const BANDCAMP_FRIDAY_DATES = [
@@ -11,34 +12,11 @@ function isBandcampFriday(): boolean {
   return BANDCAMP_FRIDAY_DATES.includes(pacificDate);
 }
 
-const PLATFORM_INFO: Record<string, { name: string; color: string; icon: string; category: string; payoutPercent?: string }> = {
-  bandcamp: { name: 'Bandcamp', color: '#1da0c3', icon: '🎵', category: 'marketplace', payoutPercent: '80-85%' },
-  mirlo: { name: 'Mirlo', color: '#6366f1', icon: '🪺', category: 'marketplace', payoutPercent: '86-90%' },
-  ampwall: { name: 'Ampwall', color: '#ef4444', icon: '🔊', category: 'marketplace', payoutPercent: '92-95%' },
-  subvert: { name: 'Subvert', color: '#f97316', icon: '✊', category: 'marketplace', payoutPercent: '97%' },
-  bandwagon: { name: 'Bandwagon', color: '#8b5cf6', icon: '🚐', category: 'decentralized' },
-  faircamp: { name: 'Faircamp', color: '#22c55e', icon: '🏕️', category: 'decentralized', payoutPercent: '90-97%' },
-  patreon: { name: 'Patreon', color: '#ff424d', icon: '🎨', category: 'patronage', payoutPercent: '86-90%' },
-  qobuz: { name: 'Qobuz', color: '#0070f3', icon: '💿', category: 'marketplace', payoutPercent: '~70%' },
-  jamcoop: { name: 'Jam.coop', color: '#e11d48', icon: '🎸', category: 'marketplace' },
-  officialsite: { name: 'Official Site', color: '#71717a', icon: '🌐', category: 'official' },
-  discogs: { name: 'Discogs', color: '#333333', icon: '💿', category: 'marketplace' },
-  hoopla: { name: 'Hoopla', color: '#9333ea', icon: '🎧', category: 'library' },
-  freegal: { name: 'Freegal', color: '#e91e63', icon: '🎵', category: 'library' },
-  funkwhale: { name: 'Funkwhale', color: '#0084c7', icon: '🐋', category: 'decentralized' },
-  internetarchive: { name: 'Internet Archive', color: '#428bca', icon: '🏛️', category: 'library' },
-  instagram: { name: 'Instagram', color: '#E4405F', icon: '📷', category: 'social' },
-  facebook: { name: 'Facebook', color: '#1877F2', icon: '📘', category: 'social' },
-  tiktok: { name: 'TikTok', color: '#E0E0E0', icon: '🎬', category: 'social' },
-  youtube: { name: 'YouTube', color: '#FF0000', icon: '▶️', category: 'social' },
-  threads: { name: 'Threads', color: '#E0E0E0', icon: '🧵', category: 'social' },
-  bluesky: { name: 'Bluesky', color: '#0085FF', icon: '🦋', category: 'social' },
-  mastodon: { name: 'Mastodon', color: '#6364FF', icon: '🦣', category: 'social' },
-  peertube: { name: 'PeerTube', color: '#F1680D', icon: '▶️', category: 'social' },
-  newsletter: { name: 'Newsletter', color: '#666', icon: '📧', category: 'social' },
-  wikipedia: { name: 'Wikipedia', color: '#636466', icon: '📖', category: 'social' },
-  liberapay: { name: 'Liberapay', color: '#F6C915', icon: '🤝', category: 'patronage' },
-};
+// Derive PLATFORM_INFO from shared registry (name, color, icon, category, payoutPercent)
+const PLATFORM_INFO: Record<string, { name: string; color: string; icon: string; category: string; payoutPercent?: string }> = {};
+for (const [id, p] of Object.entries(PLATFORMS)) {
+  PLATFORM_INFO[id] = { name: p.name, color: p.color, icon: p.icon, category: p.category, ...(p.payoutPercent && { payoutPercent: p.payoutPercent }) };
+}
 
 function escapeHtml(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
