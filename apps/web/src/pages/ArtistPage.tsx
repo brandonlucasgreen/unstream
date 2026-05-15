@@ -82,10 +82,30 @@ export function ArtistPage() {
           }
         }
       } catch {
-        // Fall through to live search
+        // Fall through to live fetch
       }
 
-      // Fallback: live search using the slug as query
+      // Fallback: fetch from API for claimed artists (no pre-generated JSON)
+      // This ensures artists can view their claimed profiles even without pre-built JSON
+      try {
+        const response = await fetch(`/api/artist?slug=${encodeURIComponent(slug)}`);
+        if (response.ok && !cancelled) {
+          const data: SearchResult = await response.json();
+          // Convert single artist result to array format
+          const resultsArray: SearchResult[] = data ? [data] : [];
+          setResults(resultsArray);
+          if (resultsArray.length > 0) {
+            const firstArtist = resultsArray.find(r => r.type === 'artist');
+            if (firstArtist) setArtistName(firstArtist.name);
+          }
+          setIsLoading(false);
+          return;
+        }
+      } catch {
+        // Fall through to search
+      }
+
+      // Last resort: live search using the slug as query
       const query = slug!.replace(/-/g, ' ');
       try {
         const response = await searchPlatforms(query);
