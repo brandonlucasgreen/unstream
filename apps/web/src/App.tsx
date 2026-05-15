@@ -414,6 +414,13 @@ function App() {
                           <p className="text-text-muted text-sm">The browser extension detects what you&rsquo;re listening to on Spotify Web and other streaming sites and scrobbles it to ListenBrainz.</p>
                         </div>
                       </div>
+                      <div className="flex gap-3">
+                        <div className="text-2xl">🔒</div>
+                        <div>
+                          <h3 className="font-semibold text-text-primary mb-1">Fully anonymous</h3>
+                          <p className="text-text-muted text-sm">No account required. No personal data collected. Only anonymized searches and clicks &mdash; nothing else.</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div className="flex-shrink-0 w-full md:w-auto flex justify-center md:justify-start">
