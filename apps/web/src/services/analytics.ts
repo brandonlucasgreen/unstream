@@ -45,8 +45,23 @@ function trackAppEvent(
 }
 
 export const analytics = {
-  // General events (Umami only)
-  trackDownload: () => trackEvent('download'),
+  // Download events (Umami + product analytics)
+  trackDownload: () => {
+    trackEvent('download');
+    trackAppEvent('download', { platform: 'macos' });
+  },
+  trackDownloadChrome: () => {
+    trackEvent('download-chrome');
+    trackAppEvent('download', { platform: 'chrome' });
+  },
+  trackDownloadFirefox: () => {
+    trackEvent('download-firefox');
+    trackAppEvent('download', { platform: 'firefox' });
+  },
+  trackDownloadIosShortcut: () => {
+    trackEvent('download-ios-shortcut');
+    trackAppEvent('download', { platform: 'ios-shortcut' });
+  },
   trackReportIssue: () => trackEvent('report-issue'),
 
   // Search initiated (Umami + product analytics — fires before results arrive)
