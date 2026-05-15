@@ -24,6 +24,9 @@ class AppState: ObservableObject {
     private var lastFetchTime: Date? = nil
     private let minFetchInterval: TimeInterval = 30 // Don't re-fetch same artist within 30 seconds
 
+    // Called after Phase 1 results arrive for a newly detected now-playing artist
+    var onArtistResultsReady: ((String, [ArtistResult]) async -> Void)?
+
     // Display mode
     enum DisplayMode {
         case empty
@@ -150,6 +153,9 @@ class AppState: ObservableObject {
                 isLoadingNowPlaying = false
                 trackSearchAppearances(results)
                 print("[AppState] Got \(results.count) results for \(artist)")
+                if let callback = onArtistResultsReady {
+                    await callback(artist, results)
+                }
 
                 // Phase 2: Enrich with MusicBrainz data in the background
                 if hasPendingEnrichment {

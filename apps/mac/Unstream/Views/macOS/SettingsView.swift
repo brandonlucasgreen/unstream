@@ -19,6 +19,7 @@ struct SettingsView: View {
     var releaseAlertManager: ReleaseAlertManager?
 
     @AppStorage("musicListeningEnabled") private var musicListeningEnabled = true
+    @AppStorage("artistNotificationsEnabled") private var artistNotificationsEnabled = true
     @AppStorage("checkForUpdatesAutomatically") private var checkForUpdatesAutomatically = true
     @AppStorage("listenBrainzEnabled") private var listenBrainzEnabled = false
     @State private var launchAtLogin = false
@@ -100,6 +101,14 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Toggle("Music app listening", isOn: $musicListeningEnabled)
                 Text("Automatically detect what's playing in Music or Spotify")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            // Artist Notifications
+            VStack(alignment: .leading, spacing: 4) {
+                Toggle("Artist detection notifications", isOn: $artistNotificationsEnabled)
+                Text("Show a notification when a new artist is detected while playing music")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }

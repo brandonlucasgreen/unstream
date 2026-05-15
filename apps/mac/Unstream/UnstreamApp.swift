@@ -28,6 +28,7 @@ class AppStateContainer: ObservableObject {
     #if os(macOS)
     let mediaObserver = MediaObserver()
     let scrobbleManager = ScrobbleManager.shared
+    let nowPlayingNotificationManager = NowPlayingNotificationManager()
     #endif
 
     private var cancellables = Set<AnyCancellable>()
@@ -40,6 +41,11 @@ class AppStateContainer: ObservableObject {
         self.releaseAlertManager = releaseAlert
 
         #if os(macOS)
+        // Wire artist detection notifications
+        appState.onArtistResultsReady = { [weak self] artist, results in
+            await self?.nowPlayingNotificationManager.handleArtistDetected(artist, results: results)
+        }
+
         // Set up media observer to update app state
         mediaObserver.$currentTrack
             .sink { [weak self] nowPlaying in
@@ -347,17 +353,31 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         completionHandler([.banner, .sound])
     }
 
-    // Notification click - open URL directly
+    // Notification click
     nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        if let releaseUrl = response.notification.request.content.userInfo["releaseUrl"] as? String,
-           let url = URL(string: releaseUrl) {
+        let userInfo = response.notification.request.content.userInfo
+        if let action = userInfo["action"] as? String, action == "openPopover" {
+            DispatchQueue.main.async {
+                AppDelegate.shared?.showPopover()
+            }
+        } else if let releaseUrl = userInfo["releaseUrl"] as? String,
+                  let url = URL(string: releaseUrl) {
             NSWorkspace.shared.open(url)
         }
         completionHandler()
+    }
+
+    func showPopover() {
+        NSApp.activate(ignoringOtherApps: true)
+        guard let button = AppDelegate.statusItem?.button else { return }
+        if !popover.isShown {
+            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            popover.contentViewController?.view.window?.makeKey()
+        }
     }
 
     // Open settings window
