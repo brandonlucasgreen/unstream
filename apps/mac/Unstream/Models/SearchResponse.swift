@@ -51,6 +51,12 @@ struct ArtistResult: Codable, Identifiable {
         platforms.filter { !$0.isSearchOnly && !$0.isSocial }
     }
 
+    /// Marketplace platforms where fans can directly support the artist
+    /// Only includes platforms in the 'marketplace' category (from the API platform registry)
+    var marketplacePlatforms: [PlatformResult] {
+        platforms.filter { marketplacePlatformIds.contains($0.sourceId) }
+    }
+
     /// Platforms where we can only search (not verified)
     var searchOnlyPlatforms: [PlatformResult] {
         platforms.filter { $0.isSearchOnly }

@@ -59,17 +59,17 @@ class MediaObserver: ObservableObject {
 
         print("[MediaObserver] Checking automation permissions...")
 
-        // This simple script should trigger the permission dialog if not granted
-        let testScript = "tell application \"System Events\" to return name of first process"
+        // Test AppleScript access by querying Music.app directly (avoids System Events sandbox issues)
+        let testScript = "tell application \"Music\" to return name of current playlist"
 
         if let script = NSAppleScript(source: testScript) {
             var errorDict: NSDictionary?
-            let result = script.executeAndReturnError(&errorDict)
+            let _ = script.executeAndReturnError(&errorDict)
 
             if let error = errorDict {
                 let errorNum = error["NSAppleScriptErrorNumber"] as? Int ?? 0
                 let errorMsg = error["NSAppleScriptErrorMessage"] as? String ?? "Unknown error"
-                print("[MediaObserver] Permission check failed: \(errorNum) - \(errorMsg)")
+                print("[MediaObserver] Permission check result: \(errorNum) - \(errorMsg)")
 
                 if errorNum == -1743 {
                     // Permission denied
@@ -78,11 +78,12 @@ class MediaObserver: ObservableObject {
                     }
                     print("[MediaObserver] ERROR: Automation permission denied!")
                     print("[MediaObserver] Please go to System Settings > Privacy & Security > Automation")
-                    print("[MediaObserver] And enable 'Unstream' to control 'System Events' and 'Music'")
+                    print("[MediaObserver] And enable 'Unstream' to control 'Music'")
                     return
                 }
+                // Other errors (like -128 user canceled, or Music not running) are OK — permissions are granted
             } else {
-                print("[MediaObserver] System Events access OK: \(result.stringValue ?? "success")")
+                print("[MediaObserver] Music.app access OK")
             }
         }
 
@@ -189,12 +190,12 @@ class MediaObserver: ObservableObject {
         }
     }
 
+    private func isAppRunning(_ bundleId: String) -> Bool {
+        NSWorkspace.shared.runningApplications.contains { $0.bundleIdentifier == bundleId }
+    }
+
     private func getMusicAppNowPlaying() -> (artist: String?, title: String?, album: String?, duration: Double?)? {
-        // First check if Music is running using System Events
-        let checkScript = "tell application \"System Events\" to return (exists process \"Music\")"
-        guard let result = runAppleScript(checkScript, silent: true), result == "true" else {
-            return nil // Music not running or can't check
-        }
+        guard isAppRunning("com.apple.Music") else { return nil }
 
         // Check if music is playing and get track info including duration
         let infoScript = """
@@ -225,10 +226,7 @@ class MediaObserver: ObservableObject {
     }
 
     private func getSpotifyNowPlaying() -> (artist: String?, title: String?, album: String?, duration: Double?)? {
-        let checkScript = "tell application \"System Events\" to return (exists process \"Spotify\")"
-        guard let result = runAppleScript(checkScript, silent: true), result == "true" else {
-            return nil
-        }
+        guard isAppRunning("com.spotify.client") else { return nil }
 
         // Spotify returns duration in milliseconds, so we convert to seconds
         let infoScript = """
@@ -253,10 +251,7 @@ class MediaObserver: ObservableObject {
     }
 
     private func getRadiccioNowPlaying() -> (artist: String?, title: String?, album: String?, duration: Double?)? {
-        let checkScript = "tell application \"System Events\" to return (exists process \"Radiccio\")"
-        guard let result = runAppleScript(checkScript, silent: true), result == "true" else {
-            return nil
-        }
+        guard isAppRunning("com.radiccio.mac") else { return nil }
 
         let infoScript = """
             tell application "Radiccio"
@@ -281,10 +276,7 @@ class MediaObserver: ObservableObject {
     }
 
     private func getParachordNowPlaying() -> (artist: String?, title: String?, album: String?, duration: Double?)? {
-        let checkScript = "tell application \"System Events\" to return (exists process \"Parachord\")"
-        guard let result = runAppleScript(checkScript, silent: true), result == "true" else {
-            return nil
-        }
+        guard isAppRunning("com.parachord.desktop") else { return nil }
 
         // Parachord is an Electron app with a WebSocket API on port 9876.
         // Connect as an "embed" client and request playback state.

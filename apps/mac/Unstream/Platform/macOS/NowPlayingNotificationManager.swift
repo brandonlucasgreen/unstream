@@ -45,14 +45,14 @@ class NowPlayingNotificationManager {
 
     private func sendNotification(for artist: String, results: [ArtistResult]) async {
         guard let topResult = results.first else { return }
-        let platforms = topResult.verifiedPlatforms
+        let platforms = topResult.marketplacePlatforms
         guard !platforms.isEmpty else { return }
 
         let artistSlug = topResult.claimedSlug ?? slugify(artist)
         let artistUrl = "https://unstream.stream/a/\(artistSlug)"
 
         let content = UNMutableNotificationContent()
-        content.title = artist
+        content.title = "Now playing: \(artist)"
         content.body = buildBody(platforms: platforms)
         content.sound = .default
         content.userInfo = ["artistUrl": artistUrl]
@@ -74,12 +74,12 @@ class NowPlayingNotificationManager {
     private func buildBody(platforms: [PlatformResult]) -> String {
         switch platforms.count {
         case 1:
-            return "Available on \(platforms[0].displayName)"
+            return "Support directly on \(platforms[0].displayName)"
         case 2:
-            return "Available on \(platforms[0].displayName) and \(platforms[1].displayName)"
+            return "Support directly on \(platforms[0].displayName) and \(platforms[1].displayName)"
         default:
-            let extra = platforms.count - 2
-            return "Available on \(platforms[0].displayName), \(platforms[1].displayName), and \(extra) more"
+            let extra = platforms.count - 1
+            return "Support directly on \(platforms[0].displayName) and \(extra) other platforms"
         }
     }
 }
