@@ -400,20 +400,19 @@ async function maybeNotifyArtist(artistName, results) {
   // Check if notifications are enabled
   if (!await artistNotificationsEnabled()) return;
 
-  // Check session-based duplicate suppression
-  const normalizedName = artistName.toLowerCase();
-  if (notifiedArtists.has(normalizedName)) return;
-
-  // Format notification content
+  // Format notification content (also computes the URL-safe slug)
   const notification = formatArtistNotification(artistName, results);
   if (!notification) return; // No platforms found — skip
 
+  // Check session-based duplicate suppression using slug
+  if (notifiedArtists.has(notification.slug)) return;
+
   // Mark as notified for this session
-  notifiedArtists.add(normalizedName);
+  notifiedArtists.add(notification.slug);
 
   // Send browser notification
   try {
-    await chrome.notifications.create(`artist-${normalizedName}`, {
+    await chrome.notifications.create(`artist-${notification.slug}`, {
       type: 'basic',
       iconUrl: chrome.runtime.getURL('icons/icon128.png'),
       title: notification.title,
