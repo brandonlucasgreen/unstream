@@ -53,4 +53,7 @@ let platformCatalog: [String: PlatformConfig] = [
 ]
 
 /// Social platform IDs for filtering
-let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube"]
+let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube", "newsletter"]
+
+/// Marketplace platform IDs — storefronts where fans can directly buy/support
+let marketplacePlatformIds: Set<String> = ["bandcamp", "mirlo", "ampwall", "subvert", "qobuz", "beatport", "even", "jamcoop", "discogs"]
