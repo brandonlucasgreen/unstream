@@ -378,11 +378,11 @@ function formatArtistNotification(artistName, results) {
 
   let message;
   if (platformCount === 1) {
-    message = `Directly support ${artistName} on ${platformNames[0]}.`;
+    message = `Support directly on ${platformNames[0]}.`;
   } else if (platformCount === 2) {
-    message = `Directly support ${artistName} on ${platformNames[0]} and ${platformNames[1]}.`;
+    message = `Support directly on ${platformNames[0]} and ${platformNames[1]}.`;
   } else {
-    message = `Directly support ${artistName} on ${platformCount} platforms including ${platformNames[0]} and ${platformNames[1]}.`;
+    message = `Support directly on ${platformCount} platforms including ${platformNames[0]} and ${platformNames[1]}.`;
   }
 
   return {
