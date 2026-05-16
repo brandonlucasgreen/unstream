@@ -46,25 +46,33 @@ class NowPlayingNotificationManager {
     private func sendNotification(for artist: String, results: [ArtistResult]) async {
         guard let topResult = results.first else { return }
         let platforms = topResult.verifiedPlatforms
+        guard !platforms.isEmpty else { return }
+
+        let artistSlug = topResult.claimedSlug ?? slugify(artist)
+        let artistUrl = "https://unstream.stream/a/\(artistSlug)"
 
         let content = UNMutableNotificationContent()
         content.title = artist
         content.body = buildBody(platforms: platforms)
         content.sound = .default
-        content.userInfo = ["action": "openPopover"]
+        content.userInfo = ["artistUrl": artistUrl]
 
         let request = UNNotificationRequest(
-            identifier: "nowPlaying-\(artist.lowercased())",
+            identifier: "nowPlaying-\(artistSlug)",
             content: content,
             trigger: nil
         )
         try? await UNUserNotificationCenter.current().add(request)
     }
 
+    private func slugify(_ name: String) -> String {
+        name.lowercased()
+            .replacingOccurrences(of: "[^a-z0-9]+", with: "-", options: .regularExpression)
+            .trimmingCharacters(in: CharacterSet(charactersIn: "-"))
+    }
+
     private func buildBody(platforms: [PlatformResult]) -> String {
         switch platforms.count {
-        case 0:
-            return "Tap to find where to support them"
         case 1:
             return "Available on \(platforms[0].displayName)"
         case 2:

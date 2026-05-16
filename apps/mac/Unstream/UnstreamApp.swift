@@ -353,31 +353,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         completionHandler([.banner, .sound])
     }
 
-    // Notification click
+    // Notification click — open artist page or release URL in browser
     nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         let userInfo = response.notification.request.content.userInfo
-        if let action = userInfo["action"] as? String, action == "openPopover" {
-            DispatchQueue.main.async {
-                AppDelegate.shared?.showPopover()
-            }
-        } else if let releaseUrl = userInfo["releaseUrl"] as? String,
-                  let url = URL(string: releaseUrl) {
+        let urlString = (userInfo["artistUrl"] as? String) ?? (userInfo["releaseUrl"] as? String)
+        if let urlString, let url = URL(string: urlString) {
             NSWorkspace.shared.open(url)
         }
         completionHandler()
-    }
-
-    func showPopover() {
-        NSApp.activate(ignoringOtherApps: true)
-        guard let button = AppDelegate.statusItem?.button else { return }
-        if !popover.isShown {
-            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-            popover.contentViewController?.view.window?.makeKey()
-        }
     }
 
     // Open settings window
