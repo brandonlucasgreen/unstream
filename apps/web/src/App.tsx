@@ -30,7 +30,7 @@ function App() {
 
   // PWA standalone detection — hide hero/download section when in app mode
   // Initialize synchronously to avoid flash of wrong content
-  const [isStandalone, setIsStandalone] = useState(() =>
+  const [isStandalone] = useState(() =>
     typeof window !== 'undefined' &&
     (window.matchMedia('(display-mode: standalone)').matches ||
      (navigator as any).standalone === true)

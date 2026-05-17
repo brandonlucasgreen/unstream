@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 export function usePWA() {
-  const [isStandalone, setIsStandalone] = useState(() =>
+  const [isStandalone] = useState(() =>
     typeof window !== 'undefined' &&
     (window.matchMedia('(display-mode: standalone)').matches ||
      (navigator as any).standalone === true)
