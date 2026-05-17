@@ -32,6 +32,8 @@ export function Footer() {
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <Link to="/support" className="hover:text-text-primary transition-colors">Support</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
+          <Link to="/faq" className="hover:text-text-primary transition-colors">FAQ</Link>
+          <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <a
             href="https://letterbird.co/hi-d2078591"
             target="_blank"
