@@ -5,6 +5,7 @@ export function DownloadGrid() {
   const {
     isStandalone,
     isIOS,
+    isAndroid,
     isMobile,
     isPWAInstallable,
     showIOSOverlay,
