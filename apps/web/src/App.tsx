@@ -217,7 +217,9 @@ function App() {
       {/* Search section */}
       <main className="px-4 pb-16">
         <div className="max-w-4xl mx-auto">
+                    {!isStandalone && (
           <p className="text-text-secondary text-center mb-4">Search for any artist to see where they keep the most money:</p>
+          )}
           <SearchBar
             onSearch={handleSearch}
             isLoading={isLoading || isResolving}

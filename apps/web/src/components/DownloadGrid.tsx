@@ -18,11 +18,11 @@ export function DownloadGrid() {
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-3 max-w-lg mx-auto">
+      <div className="grid grid-cols-2 gap-3 max-w-lg mx-auto items-stretch">
         {/* Top-left: macOS / Install button */}
         {isIOS && isMobile ? (
           <button
-            className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#9CA3AF] text-white hover:bg-[#8B92A0] transition-colors font-medium shadow-lg shadow-[#9CA3AF]/20"
+            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#9CA3AF] text-white hover:bg-[#8B92A0] transition-colors font-medium shadow-lg shadow-[#9CA3AF]/20"
             onClick={handleIOSInstallClick}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,7 +32,7 @@ export function DownloadGrid() {
           </button>
         ) : isAndroid && isMobile && isPWAInstallable ? (
           <button
-            className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#9CA3AF] text-white hover:bg-[#8B92A0] transition-colors font-medium shadow-lg shadow-[#9CA3AF]/20"
+            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#9CA3AF] text-white hover:bg-[#8B92A0] transition-colors font-medium shadow-lg shadow-[#9CA3AF]/20"
             onClick={handleInstallClick}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -43,7 +43,7 @@ export function DownloadGrid() {
         ) : (
           <a
             href="https://github.com/brandonlucasgreen/unstream/releases/latest"
-            className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#9CA3AF] text-white hover:bg-[#8B92A0] transition-colors font-medium shadow-lg shadow-[#9CA3AF]/20"
+            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#9CA3AF] text-white hover:bg-[#8B92A0] transition-colors font-medium shadow-lg shadow-[#9CA3AF]/20"
             onClick={() => analytics.trackDownload()}
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -58,7 +58,7 @@ export function DownloadGrid() {
           href="https://www.icloud.com/shortcuts/73296296361e4f609087746e7f046d47"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#007AFF] text-white hover:bg-[#0066d6] transition-colors font-medium shadow-lg shadow-[#007AFF]/20"
+          className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#007AFF] text-white hover:bg-[#0066d6] transition-colors font-medium shadow-lg shadow-[#007AFF]/20"
           onClick={() => analytics.trackDownloadIosShortcut()}
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -72,7 +72,7 @@ export function DownloadGrid() {
           href="https://chromewebstore.google.com/detail/unstream-support-music-di/ghoiopeidkganjdebkgkehaofnmjofkf"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#34A853] text-white hover:bg-[#2d9249] transition-colors font-medium shadow-lg shadow-[#34A853]/20"
+          className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#34A853] text-white hover:bg-[#2d9249] transition-colors font-medium shadow-lg shadow-[#34A853]/20"
           onClick={() => analytics.trackDownloadChrome()}
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -86,7 +86,7 @@ export function DownloadGrid() {
           href="https://addons.mozilla.org/en-US/firefox/addon/unstream/"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#FF6611] text-white hover:bg-[#e55b0e] transition-colors font-medium shadow-lg shadow-[#FF6611]/20"
+          className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#FF6611] text-white hover:bg-[#e55b0e] transition-colors font-medium shadow-lg shadow-[#FF6611]/20"
           onClick={() => analytics.trackDownloadFirefox()}
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
