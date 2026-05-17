@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 
 export function usePWA() {
-  const [isStandalone, setIsStandalone] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(() =>
+    typeof window !== 'undefined' &&
+    (window.matchMedia('(display-mode: standalone)').matches ||
+     (navigator as any).standalone === true)
+  );
   const [isIOS, setIsIOS] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -9,11 +13,6 @@ export function usePWA() {
   const [showIOSOverlay, setShowIOSOverlay] = useState(false);
 
   useEffect(() => {
-    // Detect standalone/PWA mode
-    const standalone = window.matchMedia('(display-mode: standalone)').matches 
-      || (navigator as any).standalone === true;
-    setIsStandalone(standalone);
-
     // Detect platform
     const ua = navigator.userAgent;
     const ios = /iPad|iPhone|iPod/.test(ua);

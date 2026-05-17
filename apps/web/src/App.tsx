@@ -29,10 +29,12 @@ function App() {
   const [selectedForMerge, setSelectedForMerge] = useState<Set<string>>(new Set());
 
   // PWA standalone detection — hide hero/download section when in app mode
-  const [isStandalone, setIsStandalone] = useState(false);
-  useEffect(() => {
-    setIsStandalone(window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true);
-  }, []);
+  // Initialize synchronously to avoid flash of wrong content
+  const [isStandalone, setIsStandalone] = useState(() =>
+    typeof window !== 'undefined' &&
+    (window.matchMedia('(display-mode: standalone)').matches ||
+     (navigator as any).standalone === true)
+  );
 
   // Track current search to handle race conditions
   const currentSearchRef = useRef<number>(0);
