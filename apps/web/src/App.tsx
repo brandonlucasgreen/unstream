@@ -196,9 +196,8 @@ function App() {
     <div className="min-h-screen">
 
       <Header />
-      {/* Hero — App downloads first (hidden in PWA mode) */}
-      {!isStandalone && (
-      <div className="pt-6 pb-8 px-4">
+      {/* Hero — heading always visible, download buttons hidden in PWA mode */}
+      <div className={isStandalone ? "pt-12 pb-6 px-4" : "pt-6 pb-8 px-4"}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="font-display text-4xl md:text-5xl font-bold mb-4 text-text-primary">
@@ -212,14 +211,11 @@ function App() {
           <DownloadGrid />
         </div>
       </div>
-      )}
 
       {/* Search section */}
       <main className="px-4 pb-16">
         <div className="max-w-4xl mx-auto">
-          {!isStandalone && (
-          <p className="text-text-secondary text-center mb-4">Curious about an artist you love? Search Unstream right here:</p>
-          )}
+          <p className="text-text-secondary text-center mb-4">Search for any artist to see where they keep the most money:</p>
           <SearchBar
             onSearch={handleSearch}
             isLoading={isLoading || isResolving}
@@ -299,7 +295,8 @@ function App() {
             </div>
           )}
 
-          {/* Features + Sources */}
+          {/* Features + Sources — only show on marketing site, not in PWA mode */}
+          {!isStandalone && (
           <div className="mt-16 space-y-12">
 
               {/* App Features */}
@@ -371,7 +368,7 @@ function App() {
 
                 <div className="grid md:grid-cols-2 gap-6">
                   {Object.entries(sourceCategories)
-                    .filter(([key]) => key !== 'social' && key !== 'official' && key !== 'curated') // Social links, official sites, and custom links are discovered per-artist
+                    .filter(([key]) => key !== 'social' && key !== 'official' && key !== 'curated')
                     .map(([key, category]) => (
                     <div key={key}>
                       <h3 className="font-semibold text-text-primary mb-1">{category.name}</h3>
@@ -407,14 +404,15 @@ function App() {
                 </p>
               </div>
 
-              {/* FAQ link — full FAQ now at /faq */}
-              <div className="text-center mt-8">
-                <a href="/faq" className="text-accent-secondary hover:underline font-medium">
-                  Frequently asked questions →
-                </a>
-              </div>
-
             </div>
+          )}
+
+          {/* FAQ link — always visible */}
+          <div className="text-center mt-8">
+            <a href="/faq" className="text-accent-secondary hover:underline font-medium">
+              Frequently asked questions →
+            </a>
+          </div>
         </div>
       </main>
 
