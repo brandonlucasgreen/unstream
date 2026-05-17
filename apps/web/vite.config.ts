@@ -68,7 +68,7 @@ export default defineConfig({
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/unstream\.stream\/api\//,
-            handler: 'StaleWhileRevalidate',
+            handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
               expiration: {
