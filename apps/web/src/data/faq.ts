@@ -70,15 +70,15 @@ We also link to a number of alternative services that can help you reduce your d
   },
   {
     title: "I am ethically opposed to AI in music. Is AI at all used in Unstream?",
-    content: `No AI is implemented in the Unstream app. The app neither uses AI models to recommend artists nor is intended to promote artists creating AI-generated music.`
+    content: `No AI is implemented in the Unstream app. The app neither uses AI models to recommend artists nor is intended to promote artists creating AI-generated music.\n\nUnstream does show AI policy badges for platforms that have formal written policies about AI-generated music (like Bandcamp, Subvert, and Mirlo). These badges make it easy to see which platforms are taking a stand to protect human artistry — but they're informational only, and Unstream itself doesn't use AI in any way.`
   },
   {
     title: "Is there a Windows app / iOS app / Android app / Chrome extension / Firefox extension for Unstream?",
-    content: `Not yet, but I may consider building any or all of these in the future! Feel free to suggest or up-vote any of these ideas on the [Unstream roadmap](https://github.com/users/brandonlucasgreen/projects/4).`
+    content: `Yes! Unstream is available on [macOS](https://apps.apple.com/app/unstream/id6743129755), [iOS](https://apps.apple.com/app/unstream/id6743129755), [Chrome](https://chromewebstore.google.com/detail/unstream/ekgpnodajpmdfcbdnbmgcichhbaipnmc), [Firefox](https://addons.mozilla.org/en-US/firefox/addon/unstream/), and [the web](https://unstream.stream).`
   },
   {
     title: "I'd like to request a feature or improvement. How can I do that?",
-    content: `Head over to the [Unstream roadmap](https://github.com/users/brandonlucasgreen/projects/4) to see what's planned, or [open an issue](https://github.com/brandonlucasgreen/unstream/issues) to suggest something new.`
+    content: `Feel free to [open an issue](https://github.com/brandonlucasgreen/unstream/issues) on GitHub to suggest something new.`
   },
   {
     title: "I'm having an issue using Unstream. How can I report it?",
