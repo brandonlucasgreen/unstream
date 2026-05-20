@@ -27,7 +27,18 @@ let currentArtist = null;
 let lastSearchTime = 0;
 
 // Artist notification state (session-scoped — resets on browser restart)
+// Cap at 200 to prevent unbounded growth
+const MAX_NOTIFIED_ARTISTS = 200;
 const notifiedArtists = new Set();
+
+function addNotifiedArtist(slug) {
+  if (notifiedArtists.size >= MAX_NOTIFIED_ARTISTS) {
+    // Evict oldest entry
+    const first = notifiedArtists.values().next().value;
+    notifiedArtists.delete(first);
+  }
+  notifiedArtists.add(slug);
+}
 
 // Listen for messages from content scripts and popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -385,10 +396,15 @@ function formatArtistNotification(artistName, results) {
     message = `Support directly on ${platformCount} platforms including ${platformNames[0]} and ${platformNames[1]}.`;
   }
 
+  // Use claimedSlug if available (stable, URL-safe), otherwise slugify artist name.
+  // Always use claimedSlug as the canonical key to avoid duplicate notifications
+  // when the same artist appears with and without a claimed profile.
+  const slug = primaryResult.claimedSlug || artistName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
   return {
     title: `Now playing: ${artistName}`,
     message,
-    slug: primaryResult.claimedSlug || artistName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+    slug,
   };
 }
 
@@ -408,7 +424,7 @@ async function maybeNotifyArtist(artistName, results) {
   if (notifiedArtists.has(notification.slug)) return;
 
   // Mark as notified for this session
-  notifiedArtists.add(notification.slug);
+  addNotifiedArtist(notification.slug);
 
   // Send browser notification
   try {
@@ -648,8 +664,8 @@ async function sendReleaseNotification(release) {
 chrome.notifications.onClicked.addListener(async (notificationId) => {
   if (notificationId.startsWith('artist-')) {
     const slugOrName = notificationId.replace('artist-', '');
-    const url = `https://unstream.stream/a/${slugOrName}`;
-    chrome.tabs.create({ url });
+    const url = `https://unstream.stream/a/${encodeURIComponent(slugOrName)}`;
+    await chrome.tabs.create({ url });
   } else if (notificationId.startsWith('release-')) {
     const releaseId = notificationId.replace('release-', '');
     const releases = await getNewReleases();
