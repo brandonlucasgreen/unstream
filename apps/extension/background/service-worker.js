@@ -26,6 +26,20 @@ const RELEASE_CHECK_INTERVAL_MINUTES = 7 * 24 * 60; // 7 days in minutes
 let currentArtist = null;
 let lastSearchTime = 0;
 
+// Artist notification state (session-scoped — resets on browser restart)
+// Cap at 200 to prevent unbounded growth
+const MAX_NOTIFIED_ARTISTS = 200;
+const notifiedArtists = new Set();
+
+function addNotifiedArtist(slug) {
+  if (notifiedArtists.size >= MAX_NOTIFIED_ARTISTS) {
+    // Evict oldest entry
+    const first = notifiedArtists.values().next().value;
+    notifiedArtists.delete(first);
+  }
+  notifiedArtists.add(slug);
+}
+
 // Listen for messages from content scripts and popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'MUSIC_DETECTED') {
@@ -151,6 +165,9 @@ async function handleMusicDetection(data) {
     // Update badge based on results
     if (results.length > 0) {
       updateBadge('found', results.length);
+
+      // Send artist detection notification if enabled
+      await maybeNotifyArtist(artist, results);
     } else {
       updateBadge('none');
     }
@@ -335,9 +352,97 @@ restoreState();
 pruneStaleCache();
 setupReleaseAlerts();
 
+// ========================================
+// Artist Detection Notification System
+// ========================================
+
+/**
+ * Check if artist notifications are enabled (default: true).
+ * Existing users are opted in on upgrade.
+ */
+async function artistNotificationsEnabled() {
+  const { artistNotifications } = await chrome.storage.sync.get('artistNotifications');
+  // Default to enabled (true) — undefined means not set yet, treat as enabled
+  return artistNotifications !== false;
+}
+
+/**
+ * Format notification copy for an artist detection.
+ * Shows artist name, total platform count, and up to 2 named platforms.
+ * Skips notification if no support platforms found.
+ */
+function formatArtistNotification(artistName, results) {
+  // Find the artist result (type === 'artist')
+  const artistResult = results.find(r => r.type === 'artist');
+
+  // Get platform count and names
+  // Use the first (best) result's platforms if it's an artist, otherwise the first result
+  const primaryResult = artistResult || results[0];
+  if (!primaryResult || !primaryResult.platforms || primaryResult.platforms.length === 0) {
+    return null; // No platforms — don't notify
+  }
+
+  const platformCount = primaryResult.platforms.length;
+  const platformNames = primaryResult.platforms
+    .slice(0, 2)
+    .map(p => p.name || p.sourceId);
+
+  let message;
+  if (platformCount === 1) {
+    message = `Support directly on ${platformNames[0]}.`;
+  } else if (platformCount === 2) {
+    message = `Support directly on ${platformNames[0]} and ${platformNames[1]}.`;
+  } else {
+    message = `Support directly on ${platformCount} platforms including ${platformNames[0]} and ${platformNames[1]}.`;
+  }
+
+  // Use claimedSlug if available (stable, URL-safe), otherwise slugify artist name.
+  // Always use claimedSlug as the canonical key to avoid duplicate notifications
+  // when the same artist appears with and without a claimed profile.
+  const slug = primaryResult.claimedSlug || artistName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+  return {
+    title: `Now playing: ${artistName}`,
+    message,
+    slug,
+  };
+}
+
+/**
+ * Maybe send an artist detection notification.
+ * Respects: enabled setting, session-based duplicate suppression, platform availability.
+ */
+async function maybeNotifyArtist(artistName, results) {
+  // Check if notifications are enabled
+  if (!await artistNotificationsEnabled()) return;
+
+  // Format notification content (also computes the URL-safe slug)
+  const notification = formatArtistNotification(artistName, results);
+  if (!notification) return; // No platforms found — skip
+
+  // Check session-based duplicate suppression using slug
+  if (notifiedArtists.has(notification.slug)) return;
+
+  // Mark as notified for this session
+  addNotifiedArtist(notification.slug);
+
+  // Send browser notification
+  try {
+    await chrome.notifications.create(`artist-${notification.slug}`, {
+      type: 'basic',
+      iconUrl: chrome.runtime.getURL('icons/icon128.png'),
+      title: notification.title,
+      message: notification.message,
+      priority: 2,
+    });
+  } catch (error) {
+    console.error('Failed to send artist notification:', error);
+  }
+}
+
 // =====================
 // Release Alert System
-// =====================
+// ======================
 
 // Setup release alert scheduling
 async function setupReleaseAlerts() {
@@ -557,7 +662,11 @@ async function sendReleaseNotification(release) {
 
 // Handle notification clicks
 chrome.notifications.onClicked.addListener(async (notificationId) => {
-  if (notificationId.startsWith('release-')) {
+  if (notificationId.startsWith('artist-')) {
+    const slugOrName = notificationId.replace('artist-', '');
+    const url = `https://unstream.stream/a/${encodeURIComponent(slugOrName)}`;
+    await chrome.tabs.create({ url });
+  } else if (notificationId.startsWith('release-')) {
     const releaseId = notificationId.replace('release-', '');
     const releases = await getNewReleases();
     const release = releases.find(r => r.id === releaseId);
