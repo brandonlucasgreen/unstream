@@ -60,6 +60,6 @@
     "title": "AI music policy badges",
     "description": "See which platforms ban or restrict AI-generated music right on the search results. Badges for banned (🚫) and AI-cautious (🛡️) platforms, with a legend at the bottom of each result.",
     "date": "2026-04-17",
-    "announced": false
+    "announced": true
   }
 ]
