@@ -49,6 +49,9 @@ apps/mac/**/xcuserdata/
 # Extension release zips (build artifacts)
 *.zip
 
+# Top-level build directory (legacy location — new builds go to dist/)
+/build/
+
 # Conductor
 .conductor/
 
