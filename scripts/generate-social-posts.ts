@@ -862,7 +862,7 @@ async function createBufferPost(opts: CreatePostOpts) {
   };
 
   if (opts.imageUrl) {
-    input.assets = { images: [{ url: opts.imageUrl }] };
+    input.assets = [{ image: { url: opts.imageUrl } }];
   }
 
   if (opts.metadata) {
