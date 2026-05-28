@@ -29,6 +29,8 @@ const INDEXING_CRAWLERS = [
   'Googlebot',
   'bingbot',
   'YandexBot',
+  'DuckDuckBot',
+  'Baiduspider',
 ];
 
 // Check if request is from a social media crawler (OG previews only)
