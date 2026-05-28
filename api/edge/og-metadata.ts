@@ -1,7 +1,7 @@
 import { Context } from "https://edge.netlify.com";
 
-// Social media crawler user agents
-const CRAWLER_USER_AGENTS = [
+// Social media crawler user agents (for OG tag previews only)
+const SOCIAL_CRAWLER_USER_AGENTS = [
   'facebookexternalhit',
   'Facebot',
   'Twitterbot',
@@ -12,7 +12,6 @@ const CRAWLER_USER_AGENTS = [
   'WhatsApp',
   'Discordbot',
   'Applebot',
-  'Googlebot',
   'Mastodon',
   'Pleroma',
   'Misskey',
@@ -25,11 +24,25 @@ const CRAWLER_USER_AGENTS = [
   'redditbot',
 ];
 
-// Check if request is from a social media crawler
-function isCrawler(userAgent: string | null): boolean {
+// Indexing crawlers (need actual page content, not just OG tags)
+const INDEXING_CRAWLERS = [
+  'Googlebot',
+  'bingbot',
+  'YandexBot',
+];
+
+// Check if request is from a social media crawler (OG previews only)
+function isSocialCrawler(userAgent: string | null): boolean {
   if (!userAgent) return false;
   const ua = userAgent.toLowerCase();
-  return CRAWLER_USER_AGENTS.some(crawler => ua.includes(crawler.toLowerCase()));
+  return SOCIAL_CRAWLER_USER_AGENTS.some(crawler => ua.includes(crawler.toLowerCase()));
+}
+
+// Check if request is from an indexing crawler (needs real page content)
+function isIndexingCrawler(userAgent: string | null): boolean {
+  if (!userAgent) return false;
+  const ua = userAgent.toLowerCase();
+  return INDEXING_CRAWLERS.some(crawler => ua.includes(crawler.toLowerCase()));
 }
 
 // Perform search to get first artist image
@@ -64,7 +77,7 @@ async function getFirstArtistImage(query: string, baseUrl: string): Promise<{ im
   }
 }
 
-// Generate HTML with OG meta tags
+// Generate HTML with OG meta tags (no meta refresh — crawlers read OG tags directly)
 function generateOgHtml(query: string, imageUrl?: string, artistName?: string): string {
   const displayName = artistName || query;
   const title = `${displayName} on Unstream - Find music on alternative platforms`;
@@ -94,12 +107,9 @@ function generateOgHtml(query: string, imageUrl?: string, artistName?: string): 
   <meta name="twitter:url" content="https://unstream.stream/?q=${encodeURIComponent(query)}">
   <meta name="twitter:title" content="${title}">
   <meta name="twitter:description" content="${description}">
-
-  <!-- Redirect to actual app for browsers that render this -->
-  <meta http-equiv="refresh" content="0;url=/?q=${encodeURIComponent(query)}">
 </head>
 <body>
-  <p>Redirecting to Unstream...</p>
+  <p>Unstream — find music on platforms that pay artists fairly.</p>
 </body>
 </html>`;
 }
@@ -109,27 +119,34 @@ export default async function handler(request: Request, context: Context) {
   const query = url.searchParams.get('q');
   const userAgent = request.headers.get('user-agent');
 
-  // Only intercept if:
-  // 1. This is the root path (or index)
-  // 2. There's a ?q= parameter
-  // 3. Request is from a social media crawler
-  if (!query || !isCrawler(userAgent)) {
-    // Pass through to normal app
+  if (!query) {
+    // No search query — pass through to normal app
     return context.next();
   }
 
-  // For crawlers, fetch artist info and return OG-enriched HTML
-  const baseUrl = `${url.protocol}//${url.host}`;
-  const { imageUrl, artistName } = await getFirstArtistImage(query, baseUrl);
+  // For indexing crawlers (Googlebot, bingbot): pass through to SPA
+  // Previously, meta http-equiv="refresh" caused Google to report redirect errors.
+  // Indexing crawlers need the actual page content to index, not just OG tags.
+  if (isIndexingCrawler(userAgent)) {
+    return context.next();
+  }
 
-  const html = generateOgHtml(query, imageUrl, artistName);
+  // For social media crawlers: return OG-enriched HTML without meta refresh
+  if (isSocialCrawler(userAgent)) {
+    const baseUrl = `${url.protocol}//${url.host}`;
+    const { imageUrl, artistName } = await getFirstArtistImage(query, baseUrl);
+    const html = generateOgHtml(query, imageUrl, artistName);
 
-  return new Response(html, {
-    headers: {
-      'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
-    },
-  });
+    return new Response(html, {
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'public, max-age=3600',
+      },
+    });
+  }
+
+  // For regular browsers: pass through to SPA app (client-side routing handles ?q= natively)
+  return context.next();
 }
 
 export const config = {
