@@ -140,10 +140,43 @@ export async function handler(event: {
 // UUID regex for identifying UUID-format identifiers
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+// Convert a slug like "kingtriumph" to possible variants like "king-triumph".
+// The search API may return IDs without hyphens that the DB stores with hyphens.
+function slugVariants(slug: string): string[] {
+  const variants = [slug];
+  // Insert hyphens at camelCase boundaries: "kingtriumph" → "king-triumph"
+  const hyphenated = slug.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+  if (hyphenated !== slug) variants.push(hyphenated);
+  return variants;
+}
+
+// Try all slug variants to find an existing artist row.
+async function findBySlugVariants(
+  client: ReturnType<typeof getServiceClient>,
+  identifier: string,
+): Promise<{ id: string; name: string; slug: string; image_url: string | null } | null> {
+  const variants = slugVariants(identifier);
+  for (const variant of variants) {
+    const { data } = await client
+      .from('artists')
+      .select('id, name, slug, image_url')
+      .eq('slug', variant)
+      .single();
+    if (data) return data;
+  }
+  // Case-insensitive fallback
+  const { data: ciData } = await client
+    .from('artists')
+    .select('id, name, slug, image_url')
+    .ilike('slug', identifier)
+    .single();
+  return ciData;
+}
+
 // Resolve an artist identifier (UUID or slug) to a database row.
 // If the artist doesn't exist yet, create a minimal row from the provided metadata.
 async function resolveOrCreateArtist(
-  client: ReturnType<typeof getClient>,
+  client: ReturnType<typeof getServiceClient>,
   identifier: string,
   name?: string,
   imageUrl?: string,
@@ -158,22 +191,19 @@ async function resolveOrCreateArtist(
     if (data) return data;
   }
 
-  // Try slug
-  const { data: existing } = await client
-    .from('artists')
-    .select('id, name, slug, image_url')
-    .eq('slug', identifier)
-    .single();
-
+  // Try slug variants (exact, then hyphenated, then case-insensitive)
+  const existing = await findBySlugVariants(client, identifier);
   if (existing) return existing;
 
   // Artist not in DB — create a minimal row so we can save them.
-  // Use the slug as the identifier and the provided name/imageUrl.
   const artistName = name || identifier.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  // Use the hyphenated variant as slug if it looks better (e.g. "king-triumph" over "kingtriumph")
+  const variants = slugVariants(identifier);
+  const bestSlug = variants.length > 1 ? variants[1] : identifier;
   const { data: created, error: createError } = await client
     .from('artists')
     .insert({
-      slug: identifier,
+      slug: bestSlug,
       name: artistName,
       image_url: imageUrl || null,
       match_confidence: 'unverified',
@@ -188,7 +218,7 @@ async function resolveOrCreateArtist(
       const { data: retryData } = await client
         .from('artists')
         .select('id, name, slug, image_url')
-        .eq('slug', identifier)
+        .eq('slug', bestSlug)
         .single();
       return retryData;
     }
@@ -199,7 +229,7 @@ async function resolveOrCreateArtist(
 }
 
 // Resolve an artist identifier (UUID or slug) to a database row — lookup only, no creation.
-async function resolveArtist(client: ReturnType<typeof getClient>, identifier: string): Promise<{ id: string; name: string; slug: string; image_url: string | null } | null> {
+async function resolveArtist(client: ReturnType<typeof getServiceClient>, identifier: string): Promise<{ id: string; name: string; slug: string; image_url: string | null } | null> {
   // Try UUID first
   if (UUID_RE.test(identifier)) {
     const { data } = await client
@@ -207,16 +237,12 @@ async function resolveArtist(client: ReturnType<typeof getClient>, identifier: s
       .select('id, name, slug, image_url')
       .eq('id', identifier)
       .single();
-    return data;
+    if (data) return data;
   }
-  // Fall back to slug
-  const { data } = await client
-    .from('artists')
-    .select('id, name, slug, image_url')
-    .eq('slug', identifier)
-    .single();
-  return data;
-}
+
+  // Try slug variants (exact, then hyphenated, then case-insensitive)
+  return findBySlugVariants(client, identifier);
+}}
 
 async function handleSave(user: { userId: string; email: string }, body: Record<string, unknown>, client: ReturnType<typeof getClient> & { from: (table: string) => any }) {
   const artistIdentifier = body.artistId as string;
