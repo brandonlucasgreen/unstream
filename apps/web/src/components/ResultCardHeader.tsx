@@ -11,8 +11,6 @@ interface ResultCardHeaderProps {
   onToggleExpand: () => void;
   onShare: (e: React.MouseEvent) => void;
   shareCopied: boolean;
-  onSave?: (e: React.MouseEvent) => void;
-  saved?: boolean;
 }
 
 export function ResultCardHeader({
@@ -24,8 +22,6 @@ export function ResultCardHeader({
   onToggleExpand,
   onShare,
   shareCopied,
-  onSave,
-  saved = false,
 }: ResultCardHeaderProps) {
   const [imageError, setImageError] = useState(false);
 
@@ -116,29 +112,6 @@ export function ResultCardHeader({
 
       {/* Action buttons + expand arrow */}
       <div className="flex-shrink-0 flex items-center gap-1">
-        {/* Save button */}
-        {onSave && (
-          <button
-            onClick={(e) => { e.stopPropagation(); onSave(e); }}
-            className={`p-2 rounded-lg transition-colors ${
-              saved
-                ? 'text-accent-secondary bg-accent-secondary/10 hover:bg-accent-secondary/20'
-                : 'text-text-muted hover:text-accent-secondary hover:bg-bg-secondary'
-            }`}
-            title={saved ? 'Remove from saved' : 'Save artist'}
-          >
-            <svg
-              className={`w-5 h-5 transition-all ${
-                saved ? 'fill-accent-secondary scale-110' : 'fill-transparent'
-              }`}
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-          </button>
-        )}
         {/* Share button */}
         <button
           onClick={onShare}
