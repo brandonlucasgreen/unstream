@@ -97,17 +97,19 @@ export function ArtistDirectoryPage() {
                           href={`/a/${artist.slug}`}
                           className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg hover:bg-bg-secondary border border-transparent hover:border-border transition-colors"
                         >
-                          {artist.imageUrl ? (
-                            <img
-                              src={artist.imageUrl}
-                              alt=""
-                              className="w-9 h-9 rounded-full object-cover bg-bg-secondary flex-shrink-0"
-                            />
-                          ) : (
-                            <div className="w-9 h-9 rounded-full bg-bg-secondary flex-shrink-0 flex items-center justify-center font-semibold text-sm text-text-muted">
+                          <div className="w-9 h-9 rounded-full bg-bg-secondary flex-shrink-0 flex items-center justify-center font-semibold text-sm text-text-muted overflow-hidden">
+                            {artist.imageUrl ? (
+                              <img
+                                src={artist.imageUrl}
+                                alt=""
+                                className="w-full h-full object-cover rounded-full"
+                                onError={(e) => { const el = e.target as HTMLImageElement; el.style.display = 'none'; el.parentElement!.querySelector('.fallback')?.classList.remove('hidden'); }}
+                              />
+                            ) : null}
+                            <span className={artist.imageUrl ? 'hidden fallback' : ''}>
                               {artist.name[0]?.toUpperCase() || '?'}
-                            </div>
-                          )}
+                            </span>
+                          </div>
                           <span className="text-sm font-medium">{artist.name}</span>
                           <svg className="ml-auto flex-shrink-0 w-3.5 h-3.5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
