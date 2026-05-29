@@ -8,6 +8,7 @@ import { Footer } from '../components/Footer';
 import type { SearchResult } from '../types';
 import { searchPlatforms, fetchMusicBrainzData, mergeWithMusicBrainzData } from '../services/sources';
 import { analytics } from '../services/analytics';
+import { useAuth } from '../contexts/AuthContext';
 
 export function ArtistPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -21,6 +22,26 @@ export function ArtistPage() {
   const [artistName, setArtistName] = useState('');
   const [claimBannerDismissed, setClaimBannerDismissed] = useState(false);
   const [claimShareCopied, setClaimShareCopied] = useState(false);
+  const { session, isArtistSaved, saveArtist, removeSavedArtist } = useAuth();
+
+  // Get the first artist result for save button
+  const primaryArtist = results.find(r => r.type === 'artist');
+  const isSaved = primaryArtist ? isArtistSaved(primaryArtist.id) : false;
+
+  const handleSaveArtist = async () => {
+    if (!primaryArtist || !primaryArtist.id) return;
+
+    if (isSaved) {
+      await removeSavedArtist(primaryArtist.id);
+    } else {
+      if (!session) {
+        localStorage.setItem('pendingSave', JSON.stringify({ artistId: primaryArtist.id }));
+        window.location.href = '/login';
+        return;
+      }
+      await saveArtist(primaryArtist.id);
+    }
+  };
 
   const handleClaimShare = async () => {
     const url = `https://unstream.stream/a/${slug}`;
@@ -302,6 +323,32 @@ export function ArtistPage() {
                       <span>Loading more sources...</span>
                     </div>
                   )}
+                </div>
+                <div className="flex items-center justify-between px-4 pb-2">
+                  {primaryArtist && (
+                    <button
+                      onClick={handleSaveArtist}
+                      disabled={!primaryArtist.id}
+                      className={`flex items-center gap-1.5 text-sm transition-colors ${
+                        isSaved ? 'text-accent-secondary' : 'text-text-muted hover:text-accent-secondary'
+                      } disabled:opacity-50 disabled:cursor-not-allowed`
+                      }
+                    >
+                      <svg
+                        className={`w-4 h-4 transition-all ${
+                          isSaved ? 'fill-accent-secondary' : 'fill-transparent stroke-current'
+                        }`
+                        }
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                      {isSaved ? 'Saved' : 'Save'}
+                    </button>
+                  )}
+                  <div />
                 </div>
                 {results.map((result) => (
                   <ResultCard

@@ -11,6 +11,7 @@ import {
   allKnownSourceIds,
   getReleaseInfo,
 } from './ResultCardUtils';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ResultCardProps {
   result: SearchResult;
@@ -22,6 +23,7 @@ interface ResultCardProps {
 
 export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected, onToggleSelect }: ResultCardProps) {
   const searchTracked = useRef(false);
+  const { session, isArtistSaved, saveArtist, removeSavedArtist } = useAuth();
 
   useEffect(() => {
     if (!searchTracked.current && result.type === 'artist' && result.claimedSlug) {
@@ -32,6 +34,14 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
 
   const [expanded, setExpanded] = useState(defaultExpanded);
   const [shareCopied, setShareCopied] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  // Initialize saved state
+  useEffect(() => {
+    if (result.type === 'artist' && result.id) {
+      setSaved(isArtistSaved(result.id));
+    }
+  }, [result.type, result.id, isArtistSaved]);
 
   const {
     latestRelease,
@@ -42,6 +52,27 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
   } = getReleaseInfo(result);
 
   const categorized = categorizePlatforms(verifiedPlatforms, allKnownSourceIds);
+
+  const handleSave = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (result.type !== 'artist' || !result.id) return;
+
+    if (saved) {
+      await removeSavedArtist(result.id);
+      setSaved(false);
+    } else {
+      if (!session) {
+        // Store pending save in localStorage and redirect to login
+        localStorage.setItem('pendingSave', JSON.stringify({ artistId: result.id }));
+        window.location.href = '/login';
+        return;
+      }
+      await saveArtist(result.id);
+      setSaved(true);
+    }
+  };
 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -143,8 +174,31 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
             claimedSlug={result.claimedSlug}
           />
 
-          {/* Actions: claim, report, app promo */}
-          <ResultCardActions result={result} />
+          {/* Actions: claim, report, app promo, save */}
+          <div className="pt-3 mt-3 border-t border-border/50 flex items-center justify-between">
+            <ResultCardActions result={result} />
+
+            {/* Save button - right side */}
+            <button
+              onClick={handleSave}
+              disabled={result.type !== 'artist'}
+              className={`flex items-center gap-1.5 text-xs transition-colors ${
+                saved ? 'text-accent-secondary' : 'text-text-muted hover:text-accent-secondary'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              <svg
+                className={`w-4 h-4 transition-all ${
+                  saved ? 'fill-accent-secondary' : 'fill-transparent stroke-current'
+                }`}
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              {saved ? 'Saved' : 'Save'}
+            </button>
+          </div>
         </div>
       )}
     </div>
