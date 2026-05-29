@@ -239,10 +239,10 @@ export default async function handler(request: Request, context: Context) {
     <div class="nav-right">
       <span class="auth-email" id="auth-email"></span>
       <div class="auth-signed-in" id="auth-signed-in">
-        <a href="/artist-dashboard" class="nav-accent">Dashboard</a>
+        <a href="/dashboard" class="nav-accent">Dashboard</a>
         <button class="nav-link" id="auth-signout-btn">Sign out</button>
       </div>
-      <a href="/artist-login" class="nav-link auth-signed-out" id="auth-login-link">Artist login</a>
+      <a href="/login" class="nav-link auth-signed-out" id="auth-login-link">Login</a>
       <button class="theme-toggle" id="theme-toggle-btn" aria-label="Toggle theme">
         <svg class="icon-system" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
         <svg class="icon-sun" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
@@ -277,7 +277,7 @@ export default async function handler(request: Request, context: Context) {
       if(so){
         so.onclick=function(){
           for(var k in localStorage){if(k.match(/^sb-.*-auth-token$/)){localStorage.removeItem(k)}}
-          window.location.href='/artist-login';
+          window.location.href='/login';
         };
       }
     })();

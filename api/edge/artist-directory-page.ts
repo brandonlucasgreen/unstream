@@ -155,7 +155,7 @@ export default async function handler(request: Request, context: Context) {
       Unstream
     </a>
     <div style="display:flex;align-items:center;gap:12px;font-size:14px">
-      <a href="/artist-login" style="color:var(--muted);text-decoration:none;transition:color 0.15s">Artist login</a>
+      <a href="/login" style="color:var(--muted);text-decoration:none;transition:color 0.15s">Login</a>
       <button class="theme-toggle" data-pref="" onclick="(function(b){var c=['system','light','dark'];var cur=localStorage.getItem('unstream-theme')||'system';var i=(c.indexOf(cur)+1)%3;var n=c[i];localStorage.setItem('unstream-theme',n);b.setAttribute('data-pref',n==='system'?'':n);if(n==='light')document.documentElement.setAttribute('data-theme','light');else if(n==='dark'){document.documentElement.removeAttribute('data-theme');document.documentElement.setAttribute('data-theme','dark');}else{document.documentElement.removeAttribute('data-theme');if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches)document.documentElement.setAttribute('data-theme','light');};})(this)">
         <svg class="icon-system" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
         <svg class="icon-sun" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>

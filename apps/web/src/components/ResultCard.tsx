@@ -93,7 +93,26 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
   const hasRelease = !!latestRelease && platformsWithRelease.length > 0;
 
   return (
-    <div className="result-card group">
+    <div className="result-card group relative">
+      {/* Save button - top right corner */}
+      {result.type === 'artist' && (
+        <button
+          onClick={handleSave}
+          className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-bg/80 backdrop-blur-sm border border-border/50 hover:border-accent-secondary/50 transition-all"
+          title={saved ? 'Remove from saved' : 'Save artist'}
+        >
+          <svg
+            className={`w-5 h-5 transition-all ${
+              saved ? 'fill-accent-secondary text-accent-secondary scale-110' : 'fill-transparent text-text-muted'
+            }`}
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+        </button>
+      )}
       <ResultCardHeader
         result={result}
         isAdmin={isAdmin}
@@ -174,30 +193,9 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
             claimedSlug={result.claimedSlug}
           />
 
-          {/* Actions: claim, report, app promo, save */}
+          {/* Actions: claim, report, app promo */}
           <div className="pt-3 mt-3 border-t border-border/50 flex items-center justify-between">
             <ResultCardActions result={result} />
-
-            {/* Save button - right side */}
-            <button
-              onClick={handleSave}
-              disabled={result.type !== 'artist'}
-              className={`flex items-center gap-1.5 text-xs transition-colors ${
-                saved ? 'text-accent-secondary' : 'text-text-muted hover:text-accent-secondary'
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
-            >
-              <svg
-                className={`w-4 h-4 transition-all ${
-                  saved ? 'fill-accent-secondary' : 'fill-transparent stroke-current'
-                }`}
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-              {saved ? 'Saved' : 'Save'}
-            </button>
           </div>
         </div>
       )}
