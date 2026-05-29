@@ -62,6 +62,9 @@ export function ArtistPage() {
   // Derive display name from slug as initial value
   const displayName = artistName || (slug?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || '');
 
+  // Is this a claimed artist profile? (single claimed result = dedicated profile page)
+  const isClaimedArtist = results.length === 1 && results[0].type === 'artist' && results[0].matchConfidence === 'claimed';
+
   // Update page title and meta tags
   useEffect(() => {
     if (displayName) {
@@ -243,14 +246,16 @@ export function ArtistPage() {
 
       <Header />
 
-      {/* Search */}
       <main className="px-4 pb-16">
         <div className="max-w-4xl mx-auto">
-          <SearchBar
-            onSearch={handleSearch}
-            isLoading={isLoading}
-            initialQuery={displayName}
-          />
+          {/* Search bar — only show for unclaimed/search results, not dedicated profiles */}
+          {!isClaimedArtist && (
+            <SearchBar
+              onSearch={handleSearch}
+              isLoading={isLoading}
+              initialQuery={displayName}
+            />
+          )}
 
           {/* Post-claim success banner */}
           {justClaimed && !claimBannerDismissed && (
@@ -313,7 +318,24 @@ export function ArtistPage() {
                 <div className="animate-spin rounded-full h-12 w-12 border-2 border-accent-primary border-t-transparent mb-4"></div>
                 <p className="text-text-muted">Searching platforms...</p>
               </div>
+            ) : isClaimedArtist ? (
+              /* Claimed artist profile — clean layout, no search chrome */
+              <div className="space-y-4">
+                {isEnriching && (
+                  <div className="flex items-center gap-2 text-text-muted text-sm mb-2">
+                    <div className="w-3 h-3 border-2 border-accent-secondary border-t-transparent rounded-full animate-spin"></div>
+                    <span>Loading more sources...</span>
+                  </div>
+                )}
+                {results.map((result) => (
+                  <ResultCard
+                    key={result.id}
+                    result={result}
+                  />
+                ))}
+              </div>
             ) : results.length > 0 ? (
+              /* Search results — with count header and save button */
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <p className="text-text-muted text-sm">
@@ -369,8 +391,8 @@ export function ArtistPage() {
             ) : null}
           </div>
 
-          {/* Claim prompt */}
-          {!isLoading && results.length > 0 && (
+          {/* Claim prompt — only show for non-claimed artists */}
+          {!isLoading && results.length > 0 && !isClaimedArtist && (
             <div className="mt-6 p-4 rounded-lg border border-border bg-bg-secondary/50 text-center">
               <p className="text-sm text-text-muted">
                 Are you {displayName}?{' '}
