@@ -23,7 +23,7 @@ interface ResultCardProps {
 
 export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: ResultCardProps) {
   const searchTracked = useRef(false);
-  const { session, isArtistSaved, saveArtist, removeSavedArtist } = useAuth();
+  const { /* session, saveArtist, removeSavedArtist */ } = useAuth();
 
   useEffect(() => {
     if (!searchTracked.current && result.type === 'artist' && result.claimedSlug) {
@@ -33,15 +33,17 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: Resu
   }, [result.type, result.claimedSlug]);
 
   const [shareCopied, setShareCopied] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [/* saved, setSaved */] = useState(false);
   const [showLoginInterstitial, setShowLoginInterstitial] = useState(false);
 
-  // Initialize saved state
+  // Save button hidden — bugs being investigated
+  /*
   useEffect(() => {
     if (result.type === 'artist' && result.id) {
       setSaved(isArtistSaved(result.id));
     }
   }, [result.type, result.id, isArtistSaved]);
+  */
 
   const {
     latestRelease,
@@ -53,6 +55,8 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: Resu
 
   const categorized = categorizePlatforms(verifiedPlatforms, allKnownSourceIds);
 
+  // Save button hidden — bugs being investigated
+  /*
   const handleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
@@ -71,6 +75,7 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: Resu
       setSaved(true);
     }
   };
+  */
 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -99,8 +104,9 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: Resu
         onToggleSelect={onToggleSelect}
         onShare={handleShare}
         shareCopied={shareCopied}
-        isSaved={saved}
-        onSave={handleSave}
+        // isSaved/onSave removed — Save button hidden while bugs investigated
+        // isSaved={saved}
+        // onSave={handleSave}
       />
 
         <div className="px-4 pb-4 pt-2 border-t border-border space-y-4">
