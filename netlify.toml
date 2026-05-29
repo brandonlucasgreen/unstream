@@ -69,7 +69,7 @@
   status = 200
 
 [[redirects]]
-  from = "./api/artist-auth"
+  from = "/api/artist-auth"
   to = "/.netlify/functions/artist-auth"
   status = 200
 
