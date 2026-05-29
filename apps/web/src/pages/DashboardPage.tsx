@@ -23,6 +23,7 @@ interface SavedArtist {
   imageUrl?: string;
   notes?: string;
   addedAt: string;
+  claimed?: boolean;
 }
 
 export function DashboardPage() {
@@ -289,21 +290,27 @@ export function DashboardPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold truncate">{artist.name}</p>
-                        <p className="text-sm text-text-muted truncate">
-                          unstream.stream/a/{artist.slug}
-                        </p>
+                        {artist.claimed && artist.slug ? (
+                          <p className="text-sm text-text-muted truncate">
+                            unstream.stream/a/{artist.slug}
+                          </p>
+                        ) : (
+                          <p className="text-sm text-text-muted">Saved from search</p>
+                        )}
                         {artist.notes && (
                           <p className="text-xs text-text-muted mt-2 line-clamp-2">
                             {artist.notes}
                           </p>
                         )}
                         <div className="flex items-center gap-2 mt-3">
-                          <Link
-                            to={`/a/${artist.slug}`}
-                            className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors"
-                          >
-                            View
-                          </Link>
+                          {artist.claimed && artist.slug && (
+                            <Link
+                              to={`/a/${artist.slug}`}
+                              className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors"
+                            >
+                              View
+                            </Link>
+                          )}
                           <button
                             onClick={() => handleRemoveSavedArtist(artist.artistId)}
                             className="px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 text-sm hover:bg-red-500/10 transition-colors flex items-center gap-1.5"
