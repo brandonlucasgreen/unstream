@@ -1104,17 +1104,18 @@ async function searchQobuz(query: string): Promise<Map<string, { url: string; im
         const root = parse(html);
 
         // Extract artist cards: each card has a link to /interpreter/ and an image
-        const artistCards = root.querySelectorAll('.FollowingCard, .CoverModel');
         const interpreterImages = new Map<string, string>();
 
-        // Method 1: Find images near interpreter links in the parsed HTML
+        // Method: Find CoverModelImage elements and walk up to find the interpreter link
         for (const img of root.querySelectorAll('img.CoverModelImage')) {
           const imgSrc = img.getAttribute('src') || img.getAttribute('data-src') || '';
           if (!imgSrc || !imgSrc.includes('/images/artists/')) continue;
-          // Find the closest interpreter link sibling/parent
-          const parent = img.closest('div') || img.parentNode;
-          if (parent) {
-            const link = parent.querySelector('a[href*="/interpreter/"]');
+          // Walk up parents to find the interpreter link
+          let el = img as ReturnType<typeof root.querySelector>;
+          for (let i = 0; i < 5; i++) {
+            el = el?.parentNode as ReturnType<typeof root.querySelector>;
+            if (!el) break;
+            const link = el.querySelector<ReturnType<typeof root.querySelector>>('a[href*="/interpreter/"]');
             if (link) {
               const href = link.getAttribute('href') || '';
               const interpMatch = href.match(/\/interpreter\/([^/]+)\/\d+/);
@@ -1122,6 +1123,7 @@ async function searchQobuz(query: string): Promise<Map<string, { url: string; im
                 const fullUrl = imgSrc.startsWith('//') ? `https:${imgSrc}` : imgSrc;
                 interpreterImages.set(interpMatch[1], fullUrl);
               }
+              break;
             }
           }
         }
