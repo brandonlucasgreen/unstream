@@ -196,15 +196,6 @@ export function LoginPage() {
                   <p className="text-center text-xs text-text-muted">
                     Don't have a password yet? Use the sign-in link, then set one from your dashboard.
                   </p>
-
-                  <div className="pt-4 border-t border-border">
-                    <Link
-                      to="/"
-                      className="text-sm text-accent-primary hover:underline block text-center"
-                    >
-                      Search for an artist
-                    </Link>
-                  </div>
                 </>
               )}
             </>

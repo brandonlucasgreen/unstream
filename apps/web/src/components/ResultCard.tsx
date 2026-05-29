@@ -94,29 +94,6 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
 
   return (
     <div className="result-card group relative">
-      {/* Save button - top right corner */}
-      {onSave && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onSave(e); }}
-          className={`absolute top-2 right-2 z-10 w-9 h-9 flex items-center justify-center rounded-full transition-all ${
-            saved
-              ? 'bg-accent-secondary/15 text-accent-secondary'
-              : 'bg-bg/70 backdrop-blur-sm text-text-muted hover:text-accent-secondary hover:bg-accent-secondary/10'
-          }`}
-          title={saved ? 'Remove from saved' : 'Save artist'}
-        >
-          <svg
-            className={`w-5 h-5 transition-all ${
-              saved ? 'fill-accent-secondary scale-110' : 'fill-transparent'
-            }`}
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-          </svg>
-        </button>
-      )}
       <ResultCardHeader
         result={result}
         isAdmin={isAdmin}
@@ -199,7 +176,7 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
 
           {/* Actions: claim, report, app promo */}
           <div className="pt-3 mt-3 border-t border-border/50 flex items-center justify-between">
-            <ResultCardActions result={result} />
+            <ResultCardActions result={result} isSaved={saved} onToggleSave={handleSave} />
           </div>
         </div>
       )}
