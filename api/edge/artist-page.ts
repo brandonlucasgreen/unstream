@@ -351,11 +351,6 @@ export default async function handler(request: Request, context: Context) {
     return context.next();
   }
 
-  // Serve SSR HTML only to crawlers/bots; real browsers get the React app
-  const userAgent = request.headers.get('user-agent') || '';
-  const isBot = /bot|crawler|spider|slurp|mediapartners|preview|fetch|curl|python|java|httpclient/i.test(userAgent);
-  if (!isBot) return context.next();
-
   const slug = pathMatch[1];
   const origin = `${url.protocol}//${url.host}`;
 
