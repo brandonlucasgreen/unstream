@@ -276,17 +276,19 @@ export function DashboardPage() {
                   >
                     <div className="flex gap-4">
                       <div className="flex-shrink-0">
-                        {artist.imageUrl ? (
-                          <img
-                            src={artist.imageUrl}
-                            alt={artist.name}
-                            className="w-16 h-16 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-16 h-16 rounded-full bg-bg-hover flex items-center justify-center text-text-muted text-xl">
+                        <div className="w-16 h-16 rounded-full bg-bg-hover flex items-center justify-center text-text-muted text-xl flex-shrink-0 overflow-hidden">
+                          {artist.imageUrl ? (
+                            <img
+                              src={artist.imageUrl}
+                              alt={artist.name}
+                              className="w-full h-full object-cover rounded-full"
+                              onError={(e) => { const el = e.target as HTMLImageElement; el.style.display = 'none'; el.parentElement!.querySelector('.fallback')?.classList.remove('hidden'); }}
+                            />
+                          ) : null}
+                          <span className={artist.imageUrl ? 'hidden fallback' : ''}>
                             {artist.name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
+                          </span>
+                        </div>
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold truncate">{artist.name}</p>
@@ -303,12 +305,19 @@ export function DashboardPage() {
                           </p>
                         )}
                         <div className="flex items-center gap-2 mt-3">
-                          {artist.claimed && artist.slug && (
+                          {artist.claimed && artist.slug ? (
                             <Link
                               to={`/a/${artist.slug}`}
                               className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors"
                             >
                               View
+                            </Link>
+                          ) : (
+                            <Link
+                              to={`/?q=${encodeURIComponent(artist.name)}`}
+                              className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors"
+                            >
+                              Search
                             </Link>
                           )}
                           <button
