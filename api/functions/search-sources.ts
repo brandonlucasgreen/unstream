@@ -1890,7 +1890,7 @@ export async function handler(event: { queryStringParameters?: Record<string, st
           id: `claimed-${slug}`,
           name: dbArtist.name,
           type: 'artist',
-          imageUrl: dbArtist.imageUrl,
+          imageUrl: dbArtist.profile?.customImageUrl || dbArtist.imageUrl,
           platforms: dbArtist.platforms.map(p => ({
             sourceId: p.sourceId as SourceId,
             url: p.url,

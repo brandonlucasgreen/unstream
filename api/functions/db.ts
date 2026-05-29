@@ -256,7 +256,7 @@ export async function getArtistBySlug(slug: string): Promise<ArtistResult | null
       id: row.slug,
       name: row.name,
       type: 'artist',
-      imageUrl: row.image_url || undefined,
+      imageUrl: profile?.customImageUrl || row.image_url || undefined,
       platforms,
       matchConfidence: (row.match_confidence as ArtistResult['matchConfidence']) || undefined,
       profile,
