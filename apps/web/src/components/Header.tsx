@@ -63,7 +63,7 @@ export function Header() {
 
   async function handleSignOut() {
     await signOut();
-    navigate('/artist-login');
+    navigate('/login');
   }
 
   return (
@@ -88,7 +88,7 @@ export function Header() {
                 </Link>
               )}
               <Link
-                to="/artist-dashboard"
+                to="/dashboard"
                 className="text-accent-primary hover:underline font-medium"
               >
                 Dashboard
@@ -102,10 +102,10 @@ export function Header() {
             </>
           ) : (
             <Link
-              to="/artist-login"
+              to="/login"
               className="text-text-muted hover:text-text-primary transition-colors"
             >
-              Artist login
+              Login
             </Link>
           )
         )}

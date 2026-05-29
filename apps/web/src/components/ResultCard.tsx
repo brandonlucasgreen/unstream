@@ -4,6 +4,7 @@ import { analytics } from '../services/analytics';
 import { ResultCardHeader } from './ResultCardHeader';
 import { ResultCardRelease } from './ResultCardRelease';
 import { ResultCardPlatforms } from './ResultCardPlatforms';
+import { LoginInterstitial } from './LoginInterstitial';
 import { ResultCardSocial } from './ResultCardSocial';
 import { ResultCardActions } from './ResultCardActions';
 import {
@@ -11,17 +12,18 @@ import {
   allKnownSourceIds,
   getReleaseInfo,
 } from './ResultCardUtils';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ResultCardProps {
   result: SearchResult;
-  defaultExpanded?: boolean;
   isAdmin?: boolean;
   isSelected?: boolean;
   onToggleSelect?: (id: string) => void;
 }
 
-export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected, onToggleSelect }: ResultCardProps) {
+export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: ResultCardProps) {
   const searchTracked = useRef(false);
+  const { session, isArtistSaved, saveArtist, removeSavedArtist } = useAuth();
 
   useEffect(() => {
     if (!searchTracked.current && result.type === 'artist' && result.claimedSlug) {
@@ -30,8 +32,16 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
     }
   }, [result.type, result.claimedSlug]);
 
-  const [expanded, setExpanded] = useState(defaultExpanded);
   const [shareCopied, setShareCopied] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [showLoginInterstitial, setShowLoginInterstitial] = useState(false);
+
+  // Initialize saved state
+  useEffect(() => {
+    if (result.type === 'artist' && result.id) {
+      setSaved(isArtistSaved(result.id));
+    }
+  }, [result.type, result.id, isArtistSaved]);
 
   const {
     latestRelease,
@@ -42,6 +52,25 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
   } = getReleaseInfo(result);
 
   const categorized = categorizePlatforms(verifiedPlatforms, allKnownSourceIds);
+
+  const handleSave = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (result.type !== 'artist' || !result.id) return;
+
+    if (saved) {
+      await removeSavedArtist(result.id);
+      setSaved(false);
+    } else {
+      if (!session) {
+        setShowLoginInterstitial(true);
+        return;
+      }
+      await saveArtist(result.id);
+      setSaved(true);
+    }
+  };
 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -62,20 +91,19 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
   const hasRelease = !!latestRelease && platformsWithRelease.length > 0;
 
   return (
-    <div className="result-card group">
+    <div className="result-card group relative">
       <ResultCardHeader
         result={result}
         isAdmin={isAdmin}
         isSelected={isSelected}
         onToggleSelect={onToggleSelect}
-        expanded={expanded}
-        onToggleExpand={() => setExpanded(!expanded)}
         onShare={handleShare}
         shareCopied={shareCopied}
+        isSaved={saved}
+        onSave={handleSave}
       />
 
-      {expanded && (
-        <div className="px-4 pb-4 pt-2 border-t border-border space-y-4 animate-in slide-in-from-top-2 duration-200">
+        <div className="px-4 pb-4 pt-2 border-t border-border space-y-4">
           {/* Unverified match warning */}
           {result.matchConfidence === 'unverified' && (
             <div className="flex items-start gap-2 p-2 rounded bg-yellow-500/5 border border-yellow-500/20 text-yellow-600 text-xs">
@@ -143,9 +171,15 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
             claimedSlug={result.claimedSlug}
           />
 
-          {/* Actions: claim, report, app promo */}
+          {/* Actions: claim, report */}
           <ResultCardActions result={result} />
         </div>
+      {showLoginInterstitial && (
+        <LoginInterstitial
+          artistId={result.id}
+          artistName={result.name}
+          onClose={() => setShowLoginInterstitial(false)}
+        />
       )}
     </div>
   );

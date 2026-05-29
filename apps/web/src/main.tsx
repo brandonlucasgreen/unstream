@@ -1,6 +1,6 @@
 import { StrictMode, Suspense, lazy } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Sentry } from './services/sentry.ts'
 import { AuthProvider } from './contexts/AuthContext'
 import './index.css'
@@ -12,8 +12,8 @@ import('./services/sentry.ts').then(({ initSentry }) => initSentry())
 
 // Lazy-load non-critical pages to reduce initial bundle size
 const ClaimPage = lazy(() => import('./pages/ClaimPage.tsx').then(m => ({ default: m.ClaimPage })))
-const ArtistLoginPage = lazy(() => import('./pages/ArtistLoginPage.tsx').then(m => ({ default: m.ArtistLoginPage })))
-const ArtistDashboardPage = lazy(() => import('./pages/ArtistDashboardPage.tsx').then(m => ({ default: m.ArtistDashboardPage })))
+const LoginPage = lazy(() => import('./pages/LoginPage.tsx').then(m => ({ default: m.LoginPage })))
+const DashboardPage = lazy(() => import('./pages/DashboardPage.tsx').then(m => ({ default: m.DashboardPage })))
 const ArtistEditPage = lazy(() => import('./pages/ArtistEditPage.tsx').then(m => ({ default: m.ArtistEditPage })))
 const ArtistDirectoryPage = lazy(() => import('./pages/ArtistDirectoryPage.tsx').then(m => ({ default: m.ArtistDirectoryPage })))
 const RoadmapPage = lazy(() => import('./pages/RoadmapPage.tsx').then(m => ({ default: m.RoadmapPage })))
@@ -30,6 +30,15 @@ const ExtensionPage = lazy(() => import('./pages/ExtensionPage.tsx').then(m => (
 const ImportPage = lazy(() => import('./pages/ImportPage.tsx').then(m => ({ default: m.ImportPage })))
 const FaqPage = lazy(() => import('./pages/FaqPage.tsx').then(m => ({ default: m.FaqPage })))
 const AdminAnalyticsPage = lazy(() => import('./pages/AdminAnalyticsPage.tsx').then(m => ({ default: m.AdminAnalyticsPage })))
+
+// Redirect components for old routes
+function ArtistLoginRedirect() {
+  return <Navigate to="/login" replace />
+}
+
+function ArtistDashboardRedirect() {
+  return <Navigate to="/dashboard" replace />
+}
 
 function LoadingFallback() {
   return (
@@ -50,9 +59,11 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/artist/:slug" element={<ArtistPage />} />
               <Route path="/a/:slug" element={<ArtistPage />} />
               <Route path="/claim/:slug" element={<ClaimPage />} />
-              <Route path="/artist-login" element={<ArtistLoginPage />} />
+              <Route path="/artist-login" element={<ArtistLoginRedirect />} />
+              <Route path="/artist-dashboard" element={<ArtistDashboardRedirect />} />
+              <Route path="/login" element={<LoginPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/artist-dashboard" element={<ArtistDashboardPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/artist-edit/:slug" element={<ArtistEditPage />} />
               <Route path="/artists" element={<ArtistDirectoryPage />} />
               <Route path="/roadmap" element={<RoadmapPage />} />

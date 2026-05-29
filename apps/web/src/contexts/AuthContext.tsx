@@ -4,6 +4,15 @@ import { getSupabaseClient, waitForMagicLinkSession } from '../services/auth';
 
 const ADMIN_EMAIL = 'info@kidlightbulbs.com';
 
+interface SavedArtist {
+  artistId: string;
+  name: string;
+  slug: string;
+  imageUrl?: string;
+  notes?: string;
+  addedAt: string;
+}
+
 interface AuthContextValue {
   session: Session | null;
   user: User | null;
@@ -11,6 +20,14 @@ interface AuthContextValue {
   isLoading: boolean;
   hasPassword: boolean;
   signOut: () => Promise<void>;
+  signInWithMagicLink: (email: string) => Promise<void>;
+  signInWithPassword: (email: string, password: string) => Promise<void>;
+  savedArtists: SavedArtist[];
+  savedArtistIds: Set<string>;
+  isArtistSaved: (artistId: string) => boolean;
+  saveArtist: (artistId: string, notes?: string) => Promise<void>;
+  removeSavedArtist: (artistId: string) => Promise<void>;
+  loadSavedArtists: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -19,6 +36,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [savedArtists, setSavedArtists] = useState<SavedArtist[]>([]);
+  const [savedArtistIds, setSavedArtistIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const supabase = getSupabaseClient();
@@ -38,6 +57,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!cancelled && magicSession) {
           setSession(magicSession);
           setUser(magicSession.user);
+          // Load saved artists after login
+          if (!cancelled) {
+            await loadSavedArtists(magicSession);
+          }
         }
       } else {
         // Check for existing session
@@ -45,10 +68,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!cancelled && data.session) {
           setSession(data.session);
           setUser(data.session.user);
+          // Load saved artists on restore
+          if (!cancelled) {
+            await loadSavedArtists(data.session);
+          }
         }
       }
 
       if (!cancelled) setIsLoading(false);
+    }
+
+    // Load saved artists helper
+    async function loadSavedArtists(sess: Session) {
+      try {
+        const response = await fetch('/api/saved-artists', {
+          headers: { 'Authorization': `Bearer ${sess.access_token}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setSavedArtists(data.savedArtists || []);
+          setSavedArtistIds(new Set(data.savedArtists?.map((a: SavedArtist) => a.artistId) || []));
+        }
+      } catch {
+        console.error('Failed to load saved artists on init');
+      }
     }
 
     init();
@@ -58,6 +101,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!cancelled) {
         setSession(newSession);
         setUser(newSession?.user ?? null);
+        if (newSession) {
+          // Load saved artists on login
+          loadSavedArtists(newSession);
+        } else {
+          setSavedArtists([]);
+          setSavedArtistIds(new Set());
+        }
       }
     });
 
@@ -72,14 +122,146 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (supabase) {
       await supabase.auth.signOut();
     }
+    setSavedArtists([]);
+    setSavedArtistIds(new Set());
     // onAuthStateChange listener will clear session/user
   }, []);
+
+  const handleSignInWithMagicLink = useCallback(async (email: string) => {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw new Error('Auth not available');
+    const { error } = await supabase.auth.signInWithOtp({ email });
+    if (error) throw error;
+  }, []);
+
+  const handleSignInWithPassword = useCallback(async (email: string, password: string) => {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw new Error('Auth not available');
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+  }, []);
+
+  const isArtistSaved = useCallback((artistId: string) => savedArtistIds.has(artistId), [savedArtistIds]);
+
+  const saveArtist = useCallback(async (artistId: string, notes?: string) => {
+    if (!session) return;
+
+    // Skip if already saved (dedup)
+    if (savedArtistIds.has(artistId)) return;
+
+    // Optimistic update
+    setSavedArtistIds(prev => new Set(prev).add(artistId));
+
+    try {
+      const response = await fetch('/api/saved-artists', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ artistId, notes }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSavedArtists(prev => [...prev, data.savedArtist]);
+      } else {
+        // Rollback on error: remove from both Set and array
+        setSavedArtistIds(prev => {
+          const next = new Set(prev);
+          next.delete(artistId);
+          return next;
+        });
+        setSavedArtists(prev => prev.filter(a => a.artistId !== artistId));
+      }
+    } catch {
+      // Rollback on network error
+      setSavedArtistIds(prev => {
+        const next = new Set(prev);
+        next.delete(artistId);
+        return next;
+      });
+      setSavedArtists(prev => prev.filter(a => a.artistId !== artistId));
+    }
+  }, [session, savedArtistIds]);
+
+  const removeSavedArtist = useCallback(async (artistId: string) => {
+    if (!session) return;
+
+    // Snapshot for rollback
+    const removedFromList = savedArtists.find(a => a.artistId === artistId);
+
+    // Optimistic update: remove from both Set and array
+    setSavedArtistIds(prev => {
+      const next = new Set(prev);
+      next.delete(artistId);
+      return next;
+    });
+    setSavedArtists(prev => prev.filter(a => a.artistId !== artistId));
+
+    try {
+      const response = await fetch('/api/saved-artists', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ action: 'remove', artistId }),
+      });
+
+      if (!response.ok) {
+        // Rollback on error: restore both Set and array
+        setSavedArtistIds(prev => new Set(prev).add(artistId));
+        if (removedFromList) {
+          setSavedArtists(prev => [...prev, removedFromList]);
+        }
+      }
+    } catch {
+      // Rollback on network error
+      setSavedArtistIds(prev => new Set(prev).add(artistId));
+      if (removedFromList) {
+        setSavedArtists(prev => [...prev, removedFromList]);
+      }
+    }
+  }, [session, savedArtists]);
+
+  // Check localStorage for pending save (from unauthenticated clicks)
+  useEffect(() => {
+    if (session) {
+      const pendingSave = localStorage.getItem('pendingSave');
+      if (pendingSave) {
+        try {
+          const { artistId, notes } = JSON.parse(pendingSave);
+          localStorage.removeItem('pendingSave'); // Clear immediately to prevent retries
+          saveArtist(artistId, notes);
+        } catch {
+          localStorage.removeItem('pendingSave');
+        }
+      }
+    }
+  }, [session, saveArtist]);
+
+  const loadSavedArtists = useCallback(async () => {
+    if (!session) return;
+    try {
+      const response = await fetch('/api/saved-artists', {
+        headers: { 'Authorization': `Bearer ${session.access_token}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setSavedArtists(data.savedArtists || []);
+        setSavedArtistIds(new Set((data.savedArtists || []).map((a: SavedArtist) => a.artistId)));
+      }
+    } catch {
+      console.error('Failed to load saved artists');
+    }
+  }, [session]);
 
   const isAdmin = !!user?.email && user.email.toLowerCase() === ADMIN_EMAIL;
   const hasPassword = !!user?.user_metadata?.has_password;
 
   return (
-    <AuthContext.Provider value={{ session, user, isAdmin, isLoading, hasPassword, signOut: handleSignOut }}>
+    <AuthContext.Provider value={{ session, user, isAdmin, isLoading, hasPassword, signOut: handleSignOut, signInWithMagicLink: handleSignInWithMagicLink, signInWithPassword: handleSignInWithPassword, savedArtists, savedArtistIds, isArtistSaved, saveArtist, removeSavedArtist, loadSavedArtists }}>
       {children}
     </AuthContext.Provider>
   );

@@ -243,9 +243,9 @@ function generateArtistPageHtml(
   <div class="auth-bar" id="auth-bar">
     <div class="auth-left">
       <span>Logged in as <strong id="auth-email" style="color:var(--text)"></strong></span>
-      <a href="/artist-dashboard">Dashboard</a>
+      <a href="/dashboard">Dashboard</a>
     </div>
-    <button onclick="(function(){for(var k in localStorage){if(k.match(/^sb-.*-auth-token$/)){localStorage.removeItem(k)}}document.getElementById('auth-bar').classList.remove('visible');window.location.href='/artist-login'})()">Sign out</button>
+    <button onclick="(function(){for(var k in localStorage){if(k.match(/^sb-.*-auth-token$/)){localStorage.removeItem(k)}}document.getElementById('auth-bar').classList.remove('visible');window.location.href='/login'})()">Sign out</button>
   </div>
   <script>
     (function(){for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.match(/^sb-.*-auth-token$/)){try{var d=JSON.parse(localStorage.getItem(k));if(d&&d.access_token){document.getElementById('auth-bar').classList.add('visible');try{var p=JSON.parse(atob(d.access_token.split('.')[1]));if(p.email)document.getElementById('auth-email').textContent=p.email}catch(e){}}}catch(e){}break}}})();
@@ -300,7 +300,7 @@ function generateArtistPageHtml(
     <div style="max-width:896px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:12px;font-size:14px;color:var(--muted)">
       <a href="https://bgreen.lol" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Made with love in Massachusetts, USA</a>
       <nav style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px">
-        <a href="/artist-login" style="color:var(--muted);text-decoration:none">Artist login</a>
+        <a href="/login" style="color:var(--muted);text-decoration:none">Login</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
         <a href="/artists" style="color:var(--muted);text-decoration:none">Index</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>

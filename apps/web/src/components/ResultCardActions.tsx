@@ -31,7 +31,7 @@ export function ResultCardActions({ result }: ResultCardActionsProps) {
 
   return (
     <>
-      {/* Claim + Report */}
+      {/* Claim + Report + Save */}
       <div className="pt-3 mt-3 border-t border-border/50">
         {showReportForm ? (
           <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
