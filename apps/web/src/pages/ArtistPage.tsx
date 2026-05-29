@@ -95,7 +95,7 @@ export function ArtistPage() {
       // Try pre-generated data first
       try {
         const res = await fetch(`/data/artists/${artistSlug}.json`);
-        if (res.ok) {
+        if (res.ok && res.headers.get('content-type')?.includes('json')) {
           const data: SearchResult[] = await res.json();
           if (!cancelled && data.length > 0) {
             setResults(data);
