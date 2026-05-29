@@ -428,7 +428,7 @@ export function aggregateResults(allResults: PlatformResult[], query?: string): 
 
 export function attachQobuzAndSearchLinks(
   aggregated: AggregatedResult[],
-  qobuzMatches: Map<string, string>,
+  qobuzMatches: Map<string, { url: string; imageUrl?: string }>,
   ampwallMatches: Map<string, string>,
   mbData?: { artistName: string; bandcampUrl?: string } | null,
 ): void {
@@ -478,9 +478,13 @@ export function attachQobuzAndSearchLinks(
 
     // Qobuz: attach ALL name variations (e.g. "morice", "morice1", "morice2")
     // Disambiguation will sort out which actually match based on releases
-    for (const [qobuzName, qobuzUrl] of qobuzMatches) {
+    for (const [qobuzName, qobuzData] of qobuzMatches) {
       if (isQobuzVariation(qobuzName, normalizedName)) {
-        result.platforms.push({ sourceId: 'qobuz', url: qobuzUrl });
+        result.platforms.push({ sourceId: 'qobuz', url: qobuzData.url });
+        // Use Qobuz image if the result doesn't already have one
+        if (qobuzData.imageUrl && !result.imageUrl) {
+          result.imageUrl = qobuzData.imageUrl;
+        }
       }
     }
 
@@ -496,7 +500,7 @@ export function attachQobuzAndSearchLinks(
 // Create new results for Qobuz artists not on Bandcamp/Mirlo
 export function createQobuzOnlyResults(
   aggregated: AggregatedResult[],
-  qobuzMatches: Map<string, string>,
+  qobuzMatches: Map<string, { url: string; imageUrl?: string }>,
 ): void {
   const usedQobuzMatches = new Set<string>();
   const aggregatedBaseNames = new Set<string>();
@@ -509,17 +513,18 @@ export function createQobuzOnlyResults(
     }
   }
 
-  for (const [normalizedName, url] of qobuzMatches) {
+  for (const [normalizedName, qobuzData] of qobuzMatches) {
     const baseNameWithoutNumbers = normalizedName.replace(/\d+$/, '');
     if (usedQobuzMatches.has(normalizedName) || aggregatedBaseNames.has(baseNameWithoutNumbers)) continue;
 
-    const displayName = qobuzDisplayName(url, normalizedName);
+    const displayName = qobuzDisplayName(qobuzData.url, normalizedName);
     aggregated.push({
       id: `qobuz-${normalizedName}`,
       name: displayName,
       type: 'artist',
+      imageUrl: qobuzData.imageUrl,
       platforms: [
-        { sourceId: 'qobuz', url },
+        { sourceId: 'qobuz', url: qobuzData.url },
         { sourceId: 'ampwall', url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(displayName)}` },
         { sourceId: 'kofi', url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(displayName)}` },
         { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
@@ -623,7 +628,7 @@ export function deduplicateQobuzUrls(aggregated: AggregatedResult[]): void {
 // Re-create standalone results for Qobuz profiles removed from all results
 export function createOrphanedQobuzStandalones(
   aggregated: AggregatedResult[],
-  qobuzMatches: Map<string, string>,
+  qobuzMatches: Map<string, { url: string; imageUrl?: string }>,
 ): void {
   const attachedUrls = new Set<string>();
   // Also track names of existing results to avoid creating duplicates
@@ -636,14 +641,14 @@ export function createOrphanedQobuzStandalones(
     existingNames.add(normalizeForComparison(r.name));
   }
 
-  for (const [qobuzName, qobuzUrl] of qobuzMatches) {
-    if (attachedUrls.has(qobuzUrl)) continue;
+  for (const [qobuzName, qobuzData] of qobuzMatches) {
+    if (attachedUrls.has(qobuzData.url)) continue;
     // Don't create a standalone if a result with the same name already exists
     // (Qobuz may have been attached then removed as a dead link)
     const normalizedQobuzName = normalizeForComparison(qobuzName);
     if (existingNames.has(normalizedQobuzName)) continue;
 
-    const displayName = qobuzDisplayName(qobuzUrl, qobuzName);
+    const displayName = qobuzDisplayName(qobuzData.url, qobuzName);
     const standaloneId = `qobuz-standalone-${qobuzName}`;
     if (aggregated.some(r => r.id === standaloneId)) continue;
 
@@ -652,8 +657,9 @@ export function createOrphanedQobuzStandalones(
       id: standaloneId,
       name: displayName,
       type: 'artist',
+      imageUrl: qobuzData.imageUrl,
       platforms: [
-        { sourceId: 'qobuz', url: qobuzUrl },
+        { sourceId: 'qobuz', url: qobuzData.url },
         { sourceId: 'ampwall', url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(displayName)}` },
         { sourceId: 'kofi', url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(displayName)}` },
         { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },

@@ -234,9 +234,9 @@ describe('attachQobuzAndSearchLinks', () => {
     const results = [makeResult('Morice', [
       { sourceId: 'bandcamp', url: 'https://morice.bandcamp.com' },
     ])];
-    const qobuzMatches = new Map([
-      ['morice', 'https://qobuz.com/interpreter/morice/1'],
-      ['morice1', 'https://qobuz.com/interpreter/morice/2'],
+        const qobuzMatches = new Map([
+      ['morice', { url: 'https://qobuz.com/interpreter/morice/1' }],
+      ['morice1', { url: 'https://qobuz.com/interpreter/morice/2' }],
     ]);
 
     attachQobuzAndSearchLinks(results, qobuzMatches, new Map());
@@ -290,7 +290,7 @@ describe('createQobuzOnlyResults', () => {
       makeResult('Existing', [{ sourceId: 'bandcamp', url: 'https://existing.bandcamp.com' }]),
     ];
     const qobuzMatches = new Map([
-      ['newartist', 'https://qobuz.com/interpreter/new-artist/123'],
+      ['newartist', { url: 'https://qobuz.com/interpreter/new-artist/123' }],
     ]);
 
     createQobuzOnlyResults(results, qobuzMatches);
@@ -309,7 +309,7 @@ describe('createQobuzOnlyResults', () => {
       ]),
     ];
     const qobuzMatches = new Map([
-      ['artist', 'https://qobuz.com/interpreter/artist/1'],
+      ['artist', { url: 'https://qobuz.com/interpreter/artist/1' }],
     ]);
 
     createQobuzOnlyResults(results, qobuzMatches);

@@ -1082,13 +1082,13 @@ async function searchAmpwall(query: string): Promise<Map<string, string>> {
   return new Map(data);
 }
 
-async function searchQobuz(query: string): Promise<Map<string, string>> {
+async function searchQobuz(query: string): Promise<Map<string, { url: string; imageUrl?: string }>> {
   const cacheKey = artistCacheKey('qobuz', query);
 
-  const { data } = await cacheGetOrFetch<[string, string][]>(
+  const { data } = await cacheGetOrFetch<[string, { url: string; imageUrl?: string }][]>(
     cacheKey,
     async () => {
-      const results: [string, string][] = [];
+      const results: [string, { url: string; imageUrl?: string }][] = [];
 
       try {
         const searchUrl = `https://www.qobuz.com/us-en/search/artists/${encodeURIComponent(query)}`;
@@ -1101,6 +1101,33 @@ async function searchQobuz(query: string): Promise<Map<string, string>> {
         if (!response.ok) return results;
 
         const html = await response.text();
+        const root = parse(html);
+
+        // Extract artist cards: each card has a link to /interpreter/ and an image
+        const artistCards = root.querySelectorAll('.FollowingCard, .CoverModel');
+        const interpreterImages = new Map<string, string>();
+
+        // Method 1: Find images near interpreter links in the parsed HTML
+        for (const img of root.querySelectorAll('img.CoverModelImage')) {
+          const imgSrc = img.getAttribute('src') || img.getAttribute('data-src') || '';
+          if (!imgSrc || !imgSrc.includes('/images/artists/')) continue;
+          // Find the closest interpreter link sibling/parent
+          const parent = img.closest('div') || img.parentNode;
+          if (parent) {
+            const link = parent.querySelector('a[href*="/interpreter/"]');
+            if (link) {
+              const href = link.getAttribute('href') || '';
+              const interpMatch = href.match(/\/interpreter\/([^/]+)\/\d+/);
+              if (interpMatch) {
+                const fullUrl = imgSrc.startsWith('//') ? `https:${imgSrc}` : imgSrc;
+                interpreterImages.set(interpMatch[1], fullUrl);
+              }
+            }
+          }
+        }
+
+        // Method 2: Also try regex-based extraction as fallback
+        // Find all interpreter links and their preceding CoverModelImage src
         const interpreterRegex = /href="(\/us-en\/interpreter\/([^/]+)\/(\d+))"/g;
         let match;
         const queryNormalized = normalizeForComparison(query);
@@ -1110,12 +1137,8 @@ async function searchQobuz(query: string): Promise<Map<string, string>> {
           const [, path, slug] = match;
           const slugNormalized = slug.replace(/-/g, '');
 
-          // Strict matching: only allow exact match, query prefix, or numeric suffix variations
-          // This prevents "Mo-Rice" from matching "Morice El Blanco" or "Patrick Moriceau"
           const isMatch = slugNormalized === queryNormalized ||
-              // Query is longer than slug (e.g., searching "morice" matches slug "mo")
               queryNormalized.startsWith(slugNormalized) ||
-              // Slug is query + numeric suffix only (e.g., "morice" matches "morice2" but not "moriceelblanco")
               (slugNormalized.startsWith(queryNormalized) && /^\d*$/.test(slugNormalized.slice(queryNormalized.length)));
 
           if (isMatch) {
@@ -1124,7 +1147,8 @@ async function searchQobuz(query: string): Promise<Map<string, string>> {
 
             if (!seen.has(normalizedName)) {
               seen.add(normalizedName);
-              results.push([normalizedName, `https://www.qobuz.com${path}`]);
+              const imageUrl = interpreterImages.get(slug) || undefined;
+              results.push([normalizedName, { url: `https://www.qobuz.com${path}`, imageUrl }]);
             }
           }
         }
@@ -1679,7 +1703,7 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
     ['beatport', beatportResults.status === 'fulfilled' ? beatportResults.value : new Map()],
     ['even', evenResults.status === 'fulfilled' ? evenResults.value : new Map()],
   ];
-  const qobuzMatches = qobuzResults.status === 'fulfilled' ? qobuzResults.value : new Map<string, string>();
+  const qobuzMatches = qobuzResults.status === 'fulfilled' ? qobuzResults.value : new Map<string, { url: string; imageUrl?: string }>();
   const ampwallMatches = ampwallResults.status === 'fulfilled' ? ampwallResults.value : new Map<string, string>();
 
   const mbData = musicbrainzResult.status === 'fulfilled' ? musicbrainzResult.value : null;
