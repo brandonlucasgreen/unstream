@@ -58,11 +58,11 @@ export function LoginInterstitial({ artistId, artistName, onClose }: LoginInters
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 dark:bg-black/40 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="bg-bg border border-border rounded-t-xl sm:rounded-xl p-6 w-full max-w-sm shadow-xl animate-in slide-in-from-bottom-4 duration-200"
+        className="bg-bg-primary border border-border rounded-t-xl sm:rounded-xl p-6 w-full max-w-sm shadow-xl animate-in slide-in-from-bottom-4 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {magicSent ? (
