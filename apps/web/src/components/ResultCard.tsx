@@ -67,7 +67,7 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: Resu
         setShowLoginInterstitial(true);
         return;
       }
-      await saveArtist(result.id);
+      await saveArtist(result.id, undefined, result.name, result.imageUrl);
       setSaved(true);
     }
   };

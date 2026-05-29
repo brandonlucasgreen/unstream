@@ -140,7 +140,65 @@ export async function handler(event: {
 // UUID regex for identifying UUID-format identifiers
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-// Resolve an artist identifier (UUID or slug) to a database row
+// Resolve an artist identifier (UUID or slug) to a database row.
+// If the artist doesn't exist yet, create a minimal row from the provided metadata.
+async function resolveOrCreateArtist(
+  client: ReturnType<typeof getClient>,
+  identifier: string,
+  name?: string,
+  imageUrl?: string,
+): Promise<{ id: string; name: string; slug: string; image_url: string | null } | null> {
+  // Try UUID first
+  if (UUID_RE.test(identifier)) {
+    const { data } = await client
+      .from('artists')
+      .select('id, name, slug, image_url')
+      .eq('id', identifier)
+      .single();
+    if (data) return data;
+  }
+
+  // Try slug
+  const { data: existing } = await client
+    .from('artists')
+    .select('id, name, slug, image_url')
+    .eq('slug', identifier)
+    .single();
+
+  if (existing) return existing;
+
+  // Artist not in DB — create a minimal row so we can save them.
+  // Use the slug as the identifier and the provided name/imageUrl.
+  const artistName = name || identifier.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  const { data: created, error: createError } = await client
+    .from('artists')
+    .insert({
+      slug: identifier,
+      name: artistName,
+      image_url: imageUrl || null,
+      match_confidence: 'unverified',
+    })
+    .select('id, name, slug, image_url')
+    .single();
+
+  if (createError) {
+    console.error('[saved-artists] Error creating artist row:', createError);
+    // If insert failed due to unique constraint (race condition), try fetching again
+    if (createError.code === '23505') {
+      const { data: retryData } = await client
+        .from('artists')
+        .select('id, name, slug, image_url')
+        .eq('slug', identifier)
+        .single();
+      return retryData;
+    }
+    return null;
+  }
+
+  return created;
+}
+
+// Resolve an artist identifier (UUID or slug) to a database row — lookup only, no creation.
 async function resolveArtist(client: ReturnType<typeof getClient>, identifier: string): Promise<{ id: string; name: string; slug: string; image_url: string | null } | null> {
   // Try UUID first
   if (UUID_RE.test(identifier)) {
@@ -162,15 +220,17 @@ async function resolveArtist(client: ReturnType<typeof getClient>, identifier: s
 
 async function handleSave(user: { userId: string; email: string }, body: Record<string, unknown>, client: ReturnType<typeof getClient> & { from: (table: string) => any }) {
   const artistIdentifier = body.artistId as string;
+  const artistName = body.name as string | undefined;
+  const artistImageUrl = body.imageUrl as string | undefined;
   if (!artistIdentifier) {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'artistId is required' }) };
   }
 
   try {
-    // Resolve slug or UUID to artist
-    const artist = await resolveArtist(client, artistIdentifier);
+    // Resolve slug/UUID to artist, or create a minimal row if not found
+    const artist = await resolveOrCreateArtist(client, artistIdentifier, artistName, artistImageUrl);
     if (!artist) {
-      return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Artist not found' }) };
+      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to resolve or create artist' }) };
     }
 
     // Upsert — idempotent if already saved

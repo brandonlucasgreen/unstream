@@ -25,7 +25,7 @@ interface AuthContextValue {
   savedArtists: SavedArtist[];
   savedArtistIds: Set<string>;
   isArtistSaved: (artistId: string) => boolean;
-  saveArtist: (artistId: string, notes?: string) => Promise<void>;
+  saveArtist: (artistId: string, notes?: string, artistName?: string, artistImageUrl?: string) => Promise<void>;
   removeSavedArtist: (artistId: string) => Promise<void>;
   loadSavedArtists: () => Promise<void>;
 }
@@ -143,7 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const isArtistSaved = useCallback((artistId: string) => savedArtistIds.has(artistId), [savedArtistIds]);
 
-  const saveArtist = useCallback(async (artistId: string, notes?: string) => {
+  const saveArtist = useCallback(async (artistId: string, notes?: string, artistName?: string, artistImageUrl?: string) => {
     if (!session) return;
 
     // Skip if already saved (dedup)
@@ -159,7 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ artistId, notes }),
+        body: JSON.stringify({ artistId, notes, name: artistName, imageUrl: artistImageUrl }),
       });
 
       if (response.ok) {

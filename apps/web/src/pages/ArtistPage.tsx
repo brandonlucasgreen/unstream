@@ -41,7 +41,7 @@ export function ArtistPage() {
         setShowLoginInterstitial(true);
         return;
       }
-      await saveArtist(primaryArtist.id);
+      await saveArtist(primaryArtist.id, undefined, primaryArtist.name, primaryArtist.imageUrl);
     }
   };
 
