@@ -7,10 +7,10 @@ interface ResultCardHeaderProps {
   isAdmin?: boolean;
   isSelected?: boolean;
   onToggleSelect?: (id: string) => void;
-  expanded: boolean;
-  onToggleExpand: () => void;
   onShare: (e: React.MouseEvent) => void;
   shareCopied: boolean;
+  isSaved?: boolean;
+  onSave?: (e: React.MouseEvent) => void;
 }
 
 export function ResultCardHeader({
@@ -18,17 +18,16 @@ export function ResultCardHeader({
   isAdmin,
   isSelected,
   onToggleSelect,
-  expanded,
-  onToggleExpand,
   onShare,
   shareCopied,
+  isSaved,
+  onSave,
 }: ResultCardHeaderProps) {
   const [imageError, setImageError] = useState(false);
 
   return (
     <div
-      className="flex gap-4 p-4 cursor-pointer"
-      onClick={onToggleExpand}
+      className="flex gap-4 p-4"
     >
       {/* Admin merge checkbox */}
       {isAdmin && result.type === 'artist' && result.matchConfidence !== 'claimed' && onToggleSelect && (
@@ -110,8 +109,24 @@ export function ResultCardHeader({
         )}
       </div>
 
-      {/* Action buttons + expand arrow */}
+      {/* Action buttons */}
       <div className="flex-shrink-0 flex items-center gap-2">
+        {/* Save button */}
+        {isSaved !== undefined && onSave && result.type === 'artist' && result.id && (
+          <button
+            onClick={onSave}
+            className={`text-xs font-medium px-2 py-1 rounded-lg transition-colors flex items-center gap-1.5 ${
+              isSaved
+                ? 'bg-accent-secondary/15 text-accent-secondary hover:bg-accent-secondary/20'
+                : 'text-text-muted hover:text-text-primary hover:bg-bg-secondary'
+            }`}
+          >
+            <svg className="w-3.5 h-3.5" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            {isSaved ? 'Saved' : 'Save'}
+          </button>
+        )}
         {/* Share button */}
         <button
           onClick={onShare}
@@ -134,15 +149,6 @@ export function ResultCardHeader({
             </>
           )}
         </button>
-        {/* Expand/collapse arrow */}
-        <svg
-          className={`w-5 h-5 text-text-muted transition-transform ${expanded ? 'rotate-180' : ''}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
       </div>
     </div>
   );

@@ -6,11 +6,9 @@ import { analytics } from '../services/analytics';
 
 interface ResultCardActionsProps {
   result: SearchResult;
-  isSaved: boolean;
-  onToggleSave: (e: React.MouseEvent) => void;
 }
 
-export function ResultCardActions({ result, isSaved, onToggleSave }: ResultCardActionsProps) {
+export function ResultCardActions({ result }: ResultCardActionsProps) {
   const [showReportForm, setShowReportForm] = useState(false);
   const [reportText, setReportText] = useState('');
 
@@ -66,23 +64,7 @@ export function ResultCardActions({ result, isSaved, onToggleSave }: ResultCardA
           </div>
         ) : (
           <div className="flex items-center justify-between">
-            {/* Save - left */}
-            {result.type === 'artist' && result.id && (
-              <button
-                onClick={onToggleSave}
-                className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
-                  isSaved
-                    ? 'bg-accent-secondary/15 text-accent-secondary hover:bg-accent-secondary/20'
-                    : 'bg-bg-secondary text-text-secondary hover:bg-bg-secondary/70 hover:text-text-primary'
-                }`}
-              >
-                <svg className="w-3.5 h-3.5" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                {isSaved ? 'Saved' : 'Save'}
-              </button>
-            )}
-            {/* Claim - center */}
+            {/* Claim - left */}
             {result.type === 'artist' && result.matchConfidence !== 'claimed' ? (
               <Link
                 to={`/claim/${result.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`}

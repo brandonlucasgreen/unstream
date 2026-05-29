@@ -16,13 +16,12 @@ import { useAuth } from '../contexts/AuthContext';
 
 interface ResultCardProps {
   result: SearchResult;
-  defaultExpanded?: boolean;
   isAdmin?: boolean;
   isSelected?: boolean;
   onToggleSelect?: (id: string) => void;
 }
 
-export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected, onToggleSelect }: ResultCardProps) {
+export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: ResultCardProps) {
   const searchTracked = useRef(false);
   const { session, isArtistSaved, saveArtist, removeSavedArtist } = useAuth();
 
@@ -33,7 +32,6 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
     }
   }, [result.type, result.claimedSlug]);
 
-  const [expanded, setExpanded] = useState(defaultExpanded);
   const [shareCopied, setShareCopied] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showLoginInterstitial, setShowLoginInterstitial] = useState(false);
@@ -99,14 +97,13 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
         isAdmin={isAdmin}
         isSelected={isSelected}
         onToggleSelect={onToggleSelect}
-        expanded={expanded}
-        onToggleExpand={() => setExpanded(!expanded)}
         onShare={handleShare}
         shareCopied={shareCopied}
+        isSaved={saved}
+        onSave={handleSave}
       />
 
-      {expanded && (
-        <div className="px-4 pb-4 pt-2 border-t border-border space-y-4 animate-in slide-in-from-top-2 duration-200">
+        <div className="px-4 pb-4 pt-2 border-t border-border space-y-4">
           {/* Unverified match warning */}
           {result.matchConfidence === 'unverified' && (
             <div className="flex items-start gap-2 p-2 rounded bg-yellow-500/5 border border-yellow-500/20 text-yellow-600 text-xs">
@@ -174,12 +171,9 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
             claimedSlug={result.claimedSlug}
           />
 
-          {/* Actions: claim, report, app promo */}
-          <div className="pt-3 mt-3 border-t border-border/50 flex items-center justify-between">
-            <ResultCardActions result={result} isSaved={saved} onToggleSave={handleSave} />
-          </div>
+          {/* Actions: claim, report */}
+          <ResultCardActions result={result} />
         </div>
-      )}
       {showLoginInterstitial && (
         <LoginInterstitial
           artistId={result.id}
