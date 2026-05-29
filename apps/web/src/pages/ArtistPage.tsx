@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { SearchBar } from '../components/SearchBar';
 import { ResultCard } from '../components/ResultCard';
+import { LoginInterstitial } from '../components/LoginInterstitial';
 
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
@@ -28,6 +29,8 @@ export function ArtistPage() {
   const primaryArtist = results.find(r => r.type === 'artist');
   const isSaved = primaryArtist ? isArtistSaved(primaryArtist.id) : false;
 
+  const [showLoginInterstitial, setShowLoginInterstitial] = useState(false);
+
   const handleSaveArtist = async () => {
     if (!primaryArtist || !primaryArtist.id) return;
 
@@ -35,8 +38,7 @@ export function ArtistPage() {
       await removeSavedArtist(primaryArtist.id);
     } else {
       if (!session) {
-        localStorage.setItem('pendingSave', JSON.stringify({ artistId: primaryArtist.id }));
-        window.location.href = '/login';
+        setShowLoginInterstitial(true);
         return;
       }
       await saveArtist(primaryArtist.id);
@@ -392,6 +394,13 @@ export function ArtistPage() {
       </main>
 
       <Footer />
+      {showLoginInterstitial && primaryArtist && (
+        <LoginInterstitial
+          artistId={primaryArtist.id}
+          artistName={primaryArtist.name}
+          onClose={() => setShowLoginInterstitial(false)}
+        />
+      )}
     </div>
   );
 }

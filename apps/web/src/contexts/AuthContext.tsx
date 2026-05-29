@@ -20,6 +20,8 @@ interface AuthContextValue {
   isLoading: boolean;
   hasPassword: boolean;
   signOut: () => Promise<void>;
+  signInWithMagicLink: (email: string) => Promise<void>;
+  signInWithPassword: (email: string, password: string) => Promise<void>;
   savedArtists: SavedArtist[];
   savedArtistIds: Set<string>;
   isArtistSaved: (artistId: string) => boolean;
@@ -123,6 +125,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSavedArtists([]);
     setSavedArtistIds(new Set());
     // onAuthStateChange listener will clear session/user
+  }, []);
+
+  const handleSignInWithMagicLink = useCallback(async (email: string) => {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw new Error('Auth not available');
+    const { error } = await supabase.auth.signInWithOtp({ email });
+    if (error) throw error;
+  }, []);
+
+  const handleSignInWithPassword = useCallback(async (email: string, password: string) => {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw new Error('Auth not available');
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
   }, []);
 
   const isArtistSaved = useCallback((artistId: string) => savedArtistIds.has(artistId), [savedArtistIds]);
@@ -245,7 +261,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasPassword = !!user?.user_metadata?.has_password;
 
   return (
-    <AuthContext.Provider value={{ session, user, isAdmin, isLoading, hasPassword, signOut: handleSignOut, savedArtists, savedArtistIds, isArtistSaved, saveArtist, removeSavedArtist, loadSavedArtists }}>
+    <AuthContext.Provider value={{ session, user, isAdmin, isLoading, hasPassword, signOut: handleSignOut, signInWithMagicLink: handleSignInWithMagicLink, signInWithPassword: handleSignInWithPassword, savedArtists, savedArtistIds, isArtistSaved, saveArtist, removeSavedArtist, loadSavedArtists }}>
       {children}
     </AuthContext.Provider>
   );

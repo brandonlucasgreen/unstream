@@ -4,6 +4,7 @@ import { analytics } from '../services/analytics';
 import { ResultCardHeader } from './ResultCardHeader';
 import { ResultCardRelease } from './ResultCardRelease';
 import { ResultCardPlatforms } from './ResultCardPlatforms';
+import { LoginInterstitial } from './LoginInterstitial';
 import { ResultCardSocial } from './ResultCardSocial';
 import { ResultCardActions } from './ResultCardActions';
 import {
@@ -35,6 +36,7 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
   const [expanded, setExpanded] = useState(defaultExpanded);
   const [shareCopied, setShareCopied] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [showLoginInterstitial, setShowLoginInterstitial] = useState(false);
 
   // Initialize saved state
   useEffect(() => {
@@ -64,9 +66,7 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
       setSaved(false);
     } else {
       if (!session) {
-        // Store pending save in localStorage and redirect to login
-        localStorage.setItem('pendingSave', JSON.stringify({ artistId: result.id }));
-        window.location.href = '/login';
+        setShowLoginInterstitial(true);
         return;
       }
       await saveArtist(result.id);
@@ -93,26 +93,7 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
   const hasRelease = !!latestRelease && platformsWithRelease.length > 0;
 
   return (
-    <div className="result-card group relative">
-      {/* Save button - top right corner */}
-      {result.type === 'artist' && (
-        <button
-          onClick={handleSave}
-          className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-bg/80 backdrop-blur-sm border border-border/50 hover:border-accent-secondary/50 transition-all"
-          title={saved ? 'Remove from saved' : 'Save artist'}
-        >
-          <svg
-            className={`w-5 h-5 transition-all ${
-              saved ? 'fill-accent-secondary text-accent-secondary scale-110' : 'fill-transparent text-text-muted'
-            }`}
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-          </svg>
-        </button>
-      )}
+    <div className="result-card group">
       <ResultCardHeader
         result={result}
         isAdmin={isAdmin}
@@ -122,6 +103,8 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
         onToggleExpand={() => setExpanded(!expanded)}
         onShare={handleShare}
         shareCopied={shareCopied}
+        onSave={result.type === 'artist' ? handleSave : undefined}
+        saved={saved}
       />
 
       {expanded && (
@@ -198,6 +181,13 @@ export function ResultCard({ result, defaultExpanded = true, isAdmin, isSelected
             <ResultCardActions result={result} />
           </div>
         </div>
+      )}
+      {showLoginInterstitial && (
+        <LoginInterstitial
+          artistId={result.id}
+          artistName={result.name}
+          onClose={() => setShowLoginInterstitial(false)}
+        />
       )}
     </div>
   );
