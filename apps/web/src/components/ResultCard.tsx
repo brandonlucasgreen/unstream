@@ -6,7 +6,7 @@ import { ResultCardRelease } from './ResultCardRelease';
 import { ResultCardPlatforms } from './ResultCardPlatforms';
 import { LoginInterstitial } from './LoginInterstitial';
 import { ResultCardSocial } from './ResultCardSocial';
-import { ResultCardActions } from './ResultCardActions';
+
 import {
   categorizePlatforms,
   allKnownSourceIds,
@@ -23,7 +23,7 @@ interface ResultCardProps {
 
 export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: ResultCardProps) {
   const searchTracked = useRef(false);
-  const { /* session, saveArtist, removeSavedArtist */ } = useAuth();
+  const { session, isArtistSaved, saveArtist, removeSavedArtist } = useAuth();
 
   useEffect(() => {
     if (!searchTracked.current && result.type === 'artist' && result.claimedSlug) {
@@ -33,30 +33,15 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: Resu
   }, [result.type, result.claimedSlug]);
 
   const [shareCopied, setShareCopied] = useState(false);
-  const [/* saved, setSaved */] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [showLoginInterstitial, setShowLoginInterstitial] = useState(false);
 
-  // Save button hidden — bugs being investigated
-  /*
   useEffect(() => {
     if (result.type === 'artist' && result.id) {
       setSaved(isArtistSaved(result.id));
     }
   }, [result.type, result.id, isArtistSaved]);
-  */
 
-  const {
-    latestRelease,
-    platformsWithRelease,
-    canPlay,
-    previewUrl,
-    verifiedPlatforms,
-  } = getReleaseInfo(result);
-
-  const categorized = categorizePlatforms(verifiedPlatforms, allKnownSourceIds);
-
-  // Save button hidden — bugs being investigated
-  /*
   const handleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
@@ -75,7 +60,6 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: Resu
       setSaved(true);
     }
   };
-  */
 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -93,6 +77,16 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: Resu
     }
   };
 
+  const {
+    latestRelease,
+    platformsWithRelease,
+    canPlay,
+    previewUrl,
+    verifiedPlatforms,
+  } = getReleaseInfo(result);
+
+  const categorized = categorizePlatforms(verifiedPlatforms, allKnownSourceIds);
+
   const hasRelease = !!latestRelease && platformsWithRelease.length > 0;
 
   return (
@@ -104,9 +98,8 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: Resu
         onToggleSelect={onToggleSelect}
         onShare={handleShare}
         shareCopied={shareCopied}
-        // isSaved/onSave removed — Save button hidden while bugs investigated
-        // isSaved={saved}
-        // onSave={handleSave}
+        isSaved={saved}
+        onSave={handleSave}
       />
 
         <div className="px-4 pb-4 pt-2 border-t border-border space-y-4">
@@ -118,68 +111,66 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: Resu
               </svg>
               <span>
                 <strong>Unverified match:</strong> We couldn't confirm this is the same "{result.name}" as the other results.
-                This may be a different artist with the same name.
               </span>
             </div>
           )}
 
-          {/* Featured Release - now subordinate to platform results */}
+          {/* Audio player / release info */}
           {hasRelease && (
             <ResultCardRelease
               result={result}
-              latestRelease={latestRelease}
+              latestRelease={latestRelease!}
               platformsWithRelease={platformsWithRelease}
               canPlay={canPlay}
               previewUrl={previewUrl}
             />
           )}
 
-          {/* Music Marketplaces - Primary content block */}
-          <ResultCardPlatforms
-            platforms={categorized.marketplace}
-            category="Support this artist"
-            compact
-          />
-
-          <ResultCardPlatforms
-            platforms={categorized.patronage}
-            category="Patronage"
-            compact
-          />
-
-          <ResultCardPlatforms
-            platforms={categorized.decentralized}
-            category="Decentralized"
-            compact
-          />
-
-          <ResultCardPlatforms
-            platforms={categorized.library}
-            category="Library Services"
-            compact
-          />
-
-          <ResultCardPlatforms
-            platforms={categorized.official}
-            category="Official"
-            compact
-          />
-
-          <ResultCardPlatforms
-            platforms={categorized.curated}
-            category="Other Links"
-            compact
-          />
-
-          {/* Social links */}
-          <ResultCardSocial
-            platforms={categorized.social}
-            claimedSlug={result.claimedSlug}
-          />
-
-          {/* Actions: claim, report */}
-          <ResultCardActions result={result} />
+          {/* Platform links */}
+          {categorized.marketplace.length > 0 && (
+            <ResultCardPlatforms
+              platforms={categorized.marketplace}
+              category="marketplace"
+            />
+          )}
+          {categorized.patronage.length > 0 && (
+            <ResultCardPlatforms
+              platforms={categorized.patronage}
+              category="patronage"
+            />
+          )}
+          {categorized.decentralized.length > 0 && (
+            <ResultCardPlatforms
+              platforms={categorized.decentralized}
+              category="decentralized"
+            />
+          )}
+          {categorized.library.length > 0 && (
+            <ResultCardPlatforms
+              platforms={categorized.library}
+              category="library"
+            />
+          )}
+          {categorized.official.length > 0 && (
+            <ResultCardPlatforms
+              platforms={categorized.official}
+              category="official"
+            />
+          )}
+          {categorized.social.length > 0 && (
+            <ResultCardSocial
+              platforms={categorized.social}
+              claimedSlug={result.claimedSlug}
+            />
+          )}
+          {categorized.curated.length > 0 && (
+            <ResultCardPlatforms
+              platforms={categorized.curated}
+              category="curated"
+            />
+          )}
         </div>
+
       {showLoginInterstitial && (
         <LoginInterstitial
           artistId={result.id}

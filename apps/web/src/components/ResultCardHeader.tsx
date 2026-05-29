@@ -9,9 +9,8 @@ interface ResultCardHeaderProps {
   onToggleSelect?: (id: string) => void;
   onShare: (e: React.MouseEvent) => void;
   shareCopied: boolean;
-  // isSaved/onSave temporarily unused — Save button hidden while bugs investigated
-  // isSaved?: boolean;
-  // onSave?: (e: React.MouseEvent) => void;
+  isSaved?: boolean;
+  onSave?: (e: React.MouseEvent) => void;
 }
 
 export function ResultCardHeader({
@@ -21,8 +20,8 @@ export function ResultCardHeader({
   onToggleSelect,
   onShare,
   shareCopied,
-  // isSaved,
-  // onSave,
+  isSaved,
+  onSave,
 }: ResultCardHeaderProps) {
   const [imageError, setImageError] = useState(false);
 
@@ -112,8 +111,7 @@ export function ResultCardHeader({
 
       {/* Action buttons */}
       <div className="flex-shrink-0 flex items-center gap-2">
-        {/* Save button — temporarily hidden while saving bugs are investigated */}
-        {/* {isSaved !== undefined && onSave && result.type === 'artist' && result.id && (
+        {isSaved !== undefined && onSave && result.type === 'artist' && result.id && (
           <button
             onClick={onSave}
             className={`text-xs font-medium px-2 py-1 rounded-lg transition-colors flex items-center gap-1.5 ${
@@ -127,7 +125,7 @@ export function ResultCardHeader({
             </svg>
             {isSaved ? 'Saved' : 'Save'}
           </button>
-        )} */}
+        )}
         {/* Share button */}
         <button
           onClick={onShare}

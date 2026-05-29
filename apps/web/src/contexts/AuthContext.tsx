@@ -11,6 +11,7 @@ interface SavedArtist {
   imageUrl?: string;
   notes?: string;
   addedAt: string;
+  claimed?: boolean;
 }
 
 interface AuthContextValue {
