@@ -130,6 +130,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const saveArtist = useCallback(async (artistId: string, notes?: string) => {
     if (!session) return;
 
+    // Skip if already saved (dedup)
+    if (savedArtistIds.has(artistId)) return;
+
     // Optimistic update
     setSavedArtistIds(prev => new Set(prev).add(artistId));
 
@@ -147,59 +150,74 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = await response.json();
         setSavedArtists(prev => [...prev, data.savedArtist]);
       } else {
-        // Rollback on error
+        // Rollback on error: remove from both Set and array
         setSavedArtistIds(prev => {
           const next = new Set(prev);
           next.delete(artistId);
           return next;
         });
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || 'Failed to save artist');
+        setSavedArtists(prev => prev.filter(a => a.artistId !== artistId));
       }
-    } catch (error) {
-      console.error('Failed to save artist:', error);
+    } catch {
+      // Rollback on network error
+      setSavedArtistIds(prev => {
+        const next = new Set(prev);
+        next.delete(artistId);
+        return next;
+      });
+      setSavedArtists(prev => prev.filter(a => a.artistId !== artistId));
     }
-  }, [session]);
+  }, [session, savedArtistIds]);
 
   const removeSavedArtist = useCallback(async (artistId: string) => {
     if (!session) return;
 
-    // Optimistic update
+    // Snapshot for rollback
+    const removedFromList = savedArtists.find(a => a.artistId === artistId);
+
+    // Optimistic update: remove from both Set and array
     setSavedArtistIds(prev => {
       const next = new Set(prev);
       next.delete(artistId);
       return next;
     });
+    setSavedArtists(prev => prev.filter(a => a.artistId !== artistId));
 
     try {
       const response = await fetch('/api/saved-artists', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify({ action: 'remove', artistId }),
       });
 
-      if (response.ok) {
-        setSavedArtists(prev => prev.filter(a => a.artistId !== artistId));
-      } else {
-        // Rollback on error
+      if (!response.ok) {
+        // Rollback on error: restore both Set and array
         setSavedArtistIds(prev => new Set(prev).add(artistId));
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || 'Failed to remove artist');
+        if (removedFromList) {
+          setSavedArtists(prev => [...prev, removedFromList]);
+        }
       }
-    } catch (error) {
-      console.error('Failed to remove artist:', error);
+    } catch {
+      // Rollback on network error
+      setSavedArtistIds(prev => new Set(prev).add(artistId));
+      if (removedFromList) {
+        setSavedArtists(prev => [...prev, removedFromList]);
+      }
     }
-  }, [session]);
+  }, [session, savedArtists]);
 
-  // Check localStorage for pending save
+  // Check localStorage for pending save (from unauthenticated clicks)
   useEffect(() => {
     if (session) {
       const pendingSave = localStorage.getItem('pendingSave');
       if (pendingSave) {
         try {
           const { artistId, notes } = JSON.parse(pendingSave);
+          localStorage.removeItem('pendingSave'); // Clear immediately to prevent retries
           saveArtist(artistId, notes);
-          localStorage.removeItem('pendingSave');
-          // Show toast via window event or store - for now, we just save
         } catch {
           localStorage.removeItem('pendingSave');
         }
@@ -209,23 +227,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadSavedArtists = useCallback(async () => {
     if (!session) return;
-    await loadSavedArtistsInternal(session);
-  }, [session]);
-
-  async function loadSavedArtistsInternal(sess: Session) {
     try {
       const response = await fetch('/api/saved-artists', {
-        headers: { 'Authorization': `Bearer ${sess.access_token}` },
+        headers: { 'Authorization': `Bearer ${session.access_token}` },
       });
       if (response.ok) {
         const data = await response.json();
         setSavedArtists(data.savedArtists || []);
-        setSavedArtistIds(new Set(data.savedArtists?.map((a: SavedArtist) => a.artistId) || []));
+        setSavedArtistIds(new Set((data.savedArtists || []).map((a: SavedArtist) => a.artistId)));
       }
     } catch {
       console.error('Failed to load saved artists');
     }
-  }
+  }, [session]);
 
   const isAdmin = !!user?.email && user.email.toLowerCase() === ADMIN_EMAIL;
   const hasPassword = !!user?.user_metadata?.has_password;

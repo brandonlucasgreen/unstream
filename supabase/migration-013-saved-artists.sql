@@ -14,6 +14,9 @@ CREATE TABLE saved_artists (
 -- Index for efficient user lookups
 CREATE INDEX idx_saved_artists_user_id ON saved_artists(user_id);
 
+-- Composite index for save/remove/check queries
+CREATE INDEX idx_saved_artists_user_artist ON saved_artists(user_id, artist_id);
+
 -- Row-Level Security
 ALTER TABLE saved_artists ENABLE ROW LEVEL SECURITY;
 

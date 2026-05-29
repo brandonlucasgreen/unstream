@@ -137,10 +137,16 @@ export async function handler(event: {
   return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
 }
 
+// Validate that a string is a UUID
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function isValidUUID(id: string): boolean {
+  return UUID_RE.test(id);
+}
+
 async function handleSave(user: { userId: string; email: string }, body: Record<string, unknown>, client: ReturnType<typeof getClient> & { from: (table: string) => any }) {
   const artistId = body.artistId as string;
-  if (!artistId) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'artistId is required' }) };
+  if (!artistId || !isValidUUID(artistId)) {
+    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Valid artistId (UUID) is required' }) };
   }
 
   try {
@@ -194,8 +200,8 @@ async function handleSave(user: { userId: string; email: string }, body: Record<
 
 async function handleRemove(user: { userId: string; email: string }, body: Record<string, unknown>, client: ReturnType<typeof getClient> & { from: (table: string) => any }) {
   const artistId = body.artistId as string;
-  if (!artistId) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'artistId is required' }) };
+  if (!artistId || !isValidUUID(artistId)) {
+    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Valid artistId (UUID) is required' }) };
   }
 
   try {
@@ -230,6 +236,11 @@ async function handleCheck(user: { userId: string; email: string }, body: Record
   // Cap at 100 IDs
   if (artistIds.length > 100) {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Maximum 100 artist IDs allowed' }) };
+  }
+
+  // Validate all are UUIDs
+  if (artistIds.some(id => typeof id !== 'string' || !isValidUUID(id))) {
+    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'All artistIds must be valid UUIDs' }) };
   }
 
   try {
