@@ -145,11 +145,56 @@ export async function getArtistBySlug(slug: string): Promise<ArtistResult | null
   if (!client) return null;
 
   try {
-    const { data: artist, error: artistError } = await client
+    // Try exact match first
+    let { data: artist, error: artistError } = await client
       .from('artists')
       .select('*')
       .eq('slug', slug)
       .single();
+
+    // If no exact match, try case-insensitive and hyphen-variant matches
+    if (artistError || !artist) {
+      // Try case-insensitive match (e.g. "KingTriumph" → "kingtriumph")
+      const { data: ciData } = await client
+        .from('artists')
+        .select('*')
+        .ilike('slug', slug)
+        .single();
+      if (ciData) {
+        artist = ciData;
+        artistError = null;
+      }
+    }
+
+    // Try hyphenated variant (e.g. "king-triumph" → "kingtriumph")
+    if ((artistError || !artist) && slug.includes('-')) {
+      const noHyphens = slug.replace(/-/g, '');
+      const { data: nhData } = await client
+        .from('artists')
+        .select('*')
+        .eq('slug', noHyphens)
+        .single();
+      if (nhData) {
+        artist = nhData;
+        artistError = null;
+      }
+    }
+
+    // Try adding hyphens at camelCase boundaries (e.g. "kingtriumph" → "king-triumph")
+    if ((artistError || !artist) && !slug.includes('-')) {
+      const hyphenated = slug.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+      if (hyphenated !== slug) {
+        const { data: hyData } = await client
+          .from('artists')
+          .select('*')
+          .eq('slug', hyphenated)
+          .single();
+        if (hyData) {
+          artist = hyData;
+          artistError = null;
+        }
+      }
+    }
 
     if (artistError || !artist) return null;
 
