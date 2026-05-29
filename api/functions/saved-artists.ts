@@ -90,7 +90,7 @@ export async function handler(event: {
       }
 
       const savedArtists = (saved || []).map(row => ({
-        artistId: row.artist_id,
+        artistId: (row as any).artists?.slug || row.artist_id,
         name: (row as any).artists?.name || 'Unknown',
         slug: (row as any).artists?.slug || '',
         imageUrl: (row as any).artists?.image_url || null,
@@ -137,26 +137,38 @@ export async function handler(event: {
   return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
 }
 
-// Validate that a string is a UUID
+// UUID regex for identifying UUID-format identifiers
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-function isValidUUID(id: string): boolean {
-  return UUID_RE.test(id);
+
+// Resolve an artist identifier (UUID or slug) to a database row
+async function resolveArtist(client: ReturnType<typeof getClient>, identifier: string): Promise<{ id: string; name: string; slug: string; image_url: string | null } | null> {
+  // Try UUID first
+  if (UUID_RE.test(identifier)) {
+    const { data } = await client
+      .from('artists')
+      .select('id, name, slug, image_url')
+      .eq('id', identifier)
+      .single();
+    return data;
+  }
+  // Fall back to slug
+  const { data } = await client
+    .from('artists')
+    .select('id, name, slug, image_url')
+    .eq('slug', identifier)
+    .single();
+  return data;
 }
 
 async function handleSave(user: { userId: string; email: string }, body: Record<string, unknown>, client: ReturnType<typeof getClient> & { from: (table: string) => any }) {
-  const artistId = body.artistId as string;
-  if (!artistId || !isValidUUID(artistId)) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Valid artistId (UUID) is required' }) };
+  const artistIdentifier = body.artistId as string;
+  if (!artistIdentifier) {
+    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'artistId is required' }) };
   }
 
   try {
-    // Verify artist exists
-    const { data: artist } = await client
-      .from('artists')
-      .select('id, name, slug, image_url')
-      .eq('id', artistId)
-      .single();
-
+    // Resolve slug or UUID to artist
+    const artist = await resolveArtist(client, artistIdentifier);
     if (!artist) {
       return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Artist not found' }) };
     }
@@ -166,7 +178,7 @@ async function handleSave(user: { userId: string; email: string }, body: Record<
       .from('saved_artists')
       .upsert({
         user_id: user.userId,
-        artist_id: artistId,
+        artist_id: artist.id,
         notes: (body.notes as string) || null,
       }, { onConflict: 'user_id,artist_id' })
       .select()
@@ -183,7 +195,7 @@ async function handleSave(user: { userId: string; email: string }, body: Record<
       body: JSON.stringify({
         success: true,
         savedArtist: {
-          artistId: saved.artist_id,
+          artistId: artist.slug,
           name: artist.name,
           slug: artist.slug,
           imageUrl: artist.image_url || null,
@@ -199,17 +211,23 @@ async function handleSave(user: { userId: string; email: string }, body: Record<
 }
 
 async function handleRemove(user: { userId: string; email: string }, body: Record<string, unknown>, client: ReturnType<typeof getClient> & { from: (table: string) => any }) {
-  const artistId = body.artistId as string;
-  if (!artistId || !isValidUUID(artistId)) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Valid artistId (UUID) is required' }) };
+  const artistIdentifier = body.artistId as string;
+  if (!artistIdentifier) {
+    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'artistId is required' }) };
   }
 
   try {
+    // Resolve slug or UUID to artist
+    const artist = await resolveArtist(client, artistIdentifier);
+    if (!artist) {
+      return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Artist not found' }) };
+    }
+
     const { error: deleteError } = await client
       .from('saved_artists')
       .delete()
       .eq('user_id', user.userId)
-      .eq('artist_id', artistId);
+      .eq('artist_id', artist.id);
 
     if (deleteError) {
       console.error('[saved-artists] Error removing saved artist:', deleteError);
@@ -238,24 +256,43 @@ async function handleCheck(user: { userId: string; email: string }, body: Record
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Maximum 100 artist IDs allowed' }) };
   }
 
-  // Validate all are UUIDs
-  if (artistIds.some(id => typeof id !== 'string' || !isValidUUID(id))) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'All artistIds must be valid UUIDs' }) };
-  }
-
   try {
+    // Resolve all identifiers (UUIDs and/or slugs) to database UUIDs
+    const resolvedIds: string[] = [];
+    const unresolved: string[] = [];
+
+    for (const id of artistIds) {
+      if (typeof id !== 'string') {
+        unresolved.push(id);
+        continue;
+      }
+      // If it looks like a UUID, use it directly
+      if (UUID_RE.test(id)) {
+        resolvedIds.push(id);
+      } else {
+        // Resolve slug to UUID
+        const artist = await resolveArtist(client, id);
+        if (artist) {
+          resolvedIds.push(artist.id);
+        } else {
+          unresolved.push(id);
+        }
+      }
+    }
+
     const { data: saved, error: checkError } = await client
       .from('saved_artists')
-      .select('artist_id')
+      .select('artist_id, artists!inner(slug)')
       .eq('user_id', user.userId)
-      .in('artist_id', artistIds);
+      .in('artist_id', resolvedIds);
 
     if (checkError) {
       console.error('[saved-artists] Error checking saved artists:', checkError);
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to check saved artists' }) };
     }
 
-    const savedArtistIds = (saved || []).map((row: { artist_id: string }) => row.artist_id);
+    // Return slugs (matching what the frontend uses as result.id)
+    const savedArtistIds = (saved || []).map((row: any) => row.artists?.slug || row.artist_id);
 
     return {
       statusCode: 200,
