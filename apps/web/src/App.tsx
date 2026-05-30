@@ -199,8 +199,22 @@ function App() {
 
       <Header />
 
+      {/* Hero — heading always visible, download buttons hidden in PWA mode */}
+      <div className={isStandalone ? "pt-12 pb-6 px-4" : "pt-6 pb-8 px-4"}>
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="font-display text-4xl md:text-5xl font-bold mb-4 text-text-primary">
+              Directly support the artist you&rsquo;re listening to right now
+            </h1>
+            <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto">
+              Unstream finds the places where your favorite music artists &mdash; not big tech companies &mdash; keep up to 97% of every sale.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Search section */}
-      <main className={isStandalone ? "pt-12 pb-16 px-4" : "pt-6 pb-16 px-4"}>
+      <main className="px-4 pb-16">
         <div className="max-w-4xl mx-auto">
           <SearchBar
             onSearch={handleSearch}
@@ -209,18 +223,9 @@ function App() {
             onReset={hasSearched ? handleGoHome : undefined}
           />
 
-          {/* Hero — heading and download buttons, hidden in PWA mode */}
+          {/* Download buttons — below search, hidden in PWA mode */}
           {!isStandalone && (
-          <div className="pb-8">
-            <div className="text-center mb-8">
-              <h1 className="font-display text-4xl md:text-5xl font-bold mb-4 text-text-primary">
-                Directly support the artist you&rsquo;re listening to right now
-              </h1>
-              <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto">
-                Unstream finds the places where your favorite music artists &mdash; not big tech companies &mdash; keep up to 97% of every sale.
-              </p>
-            </div>
-
+          <div className="mt-8">
             <DownloadGrid />
           </div>
           )}
