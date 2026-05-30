@@ -194,7 +194,7 @@ export function LoginPage() {
                   </button>
 
                   <p className="text-center text-xs text-text-muted">
-                    Don't have an account yet? Search for an artist you like and click "Save" to sign up.
+                    Don't have an account yet? <a href="https://unstream.stream" className="text-accent-primary hover:underline">Search for an artist</a> you like and click Save.
                   </p>
                 </>
               )}
