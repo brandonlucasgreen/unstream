@@ -163,8 +163,9 @@ export function DashboardPage() {
   const handleToggleSupport = async (artist: SavedArtist) => {
     const newSupported = !artist.supported;
     const slug = artist.artistId;
+    const originalSupported = artist.supported;
+    const originalSupportedAt = artist.supportedAt;
 
-    // Optimistic update
     setSavedArtists(prev => prev.map(a =>
       a.artistId === slug ? { ...a, supported: newSupported, supportedAt: newSupported ? new Date().toISOString() : undefined } : a
     ));
@@ -185,14 +186,12 @@ export function DashboardPage() {
       }
 
       const data = await response.json();
-      // Sync server state
       setSavedArtists(prev => prev.map(a =>
         a.artistId === slug ? { ...a, supported: data.savedArtist.supported, supportedAt: data.savedArtist.supportedAt } : a
       ));
     } catch {
-      // Revert on error
       setSavedArtists(prev => prev.map(a =>
-        a.artistId === slug ? { ...a, supported: !newSupported, supportedAt: !newSupported ? a.supportedAt : undefined } : a
+        a.artistId === slug ? { ...a, supported: originalSupported, supportedAt: originalSupportedAt } : a
       ));
       setToast({ message: 'Failed to update support status. Please try again.', type: 'error' });
     } finally {
