@@ -6,6 +6,7 @@ import { ResultCardRelease } from './ResultCardRelease';
 import { ResultCardPlatforms } from './ResultCardPlatforms';
 import { LoginInterstitial } from './LoginInterstitial';
 import { ResultCardSocial } from './ResultCardSocial';
+import { ResultCardActions } from './ResultCardActions';
 
 import {
   categorizePlatforms,
@@ -169,6 +170,8 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: Resu
               category="curated"
             />
           )}
+
+          <ResultCardActions result={result} />
         </div>
 
       {showLoginInterstitial && (
