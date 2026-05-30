@@ -198,10 +198,11 @@ function App() {
     <div className="min-h-screen">
 
       <Header />
+
       {/* Hero — heading always visible, download buttons hidden in PWA mode */}
-      <div className={isStandalone ? "pt-12 pb-6 px-4" : "pt-6 pb-8 px-4"}>
+      <div className={isStandalone ? "pt-12 px-4" : "pt-6 px-4"}>
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
+          <div className="text-center mb-[30px]">
             <h1 className="font-display text-4xl md:text-5xl font-bold mb-4 text-text-primary">
               Directly support the artist you&rsquo;re listening to right now
             </h1>
@@ -209,23 +210,25 @@ function App() {
               Unstream finds the places where your favorite music artists &mdash; not big tech companies &mdash; keep up to 97% of every sale.
             </p>
           </div>
-
-          <DownloadGrid />
         </div>
       </div>
 
       {/* Search section */}
       <main className="px-4 pb-16">
         <div className="max-w-4xl mx-auto">
-                    {!isStandalone && (
-          <p className="text-text-secondary text-center mb-4">Search for any artist to see where they keep the most money:</p>
-          )}
           <SearchBar
             onSearch={handleSearch}
             isLoading={isLoading || isResolving}
             initialQuery={resolvedQuery}
             onReset={hasSearched ? handleGoHome : undefined}
           />
+
+          {/* Download buttons — below search, hidden in PWA mode */}
+          {!isStandalone && (
+          <div className="mt-[30px]">
+            <DownloadGrid />
+          </div>
+          )}
 
           {/* Resolving URL state */}
           {isResolving && (
