@@ -200,7 +200,7 @@ function App() {
       <Header />
 
       {/* Hero — heading always visible, download buttons hidden in PWA mode */}
-      <div className={isStandalone ? "pt-12 pb-6 px-4" : "pt-6 pb-8 px-4"}>
+      <div className={isStandalone ? "pt-12 pb-2 px-4" : "pt-6 pb-2 px-4"}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="font-display text-4xl md:text-5xl font-bold mb-4 text-text-primary">
