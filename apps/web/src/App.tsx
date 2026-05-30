@@ -200,9 +200,9 @@ function App() {
       <Header />
 
       {/* Hero — heading always visible, download buttons hidden in PWA mode */}
-      <div className={isStandalone ? "pt-12 pb-4 px-4" : "pt-6 pb-4 px-4"}>
+      <div className={isStandalone ? "pt-12 px-4" : "pt-6 px-4"}>
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
+          <div className="text-center mb-[30px]">
             <h1 className="font-display text-4xl md:text-5xl font-bold mb-4 text-text-primary">
               Directly support the artist you&rsquo;re listening to right now
             </h1>
@@ -225,7 +225,7 @@ function App() {
 
           {/* Download buttons — below search, hidden in PWA mode */}
           {!isStandalone && (
-          <div className="mt-4">
+          <div className="mt-[30px]">
             <DownloadGrid />
           </div>
           )}
