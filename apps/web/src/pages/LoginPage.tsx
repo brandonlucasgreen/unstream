@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { signInWithMagicLink, signInWithPassword, resetPasswordForEmail } from '../services/auth';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -194,7 +194,7 @@ export function LoginPage() {
                   </button>
 
                   <p className="text-center text-xs text-text-muted">
-                    Don't have a password yet? Use the sign-in link, then set one from your dashboard.
+                    Don't have an account yet? Search for an artist you like and click "Save" to sign up.
                   </p>
                 </>
               )}
@@ -237,11 +237,7 @@ export function LoginPage() {
 
           <div className="text-center space-y-2">
             <p className="text-xs text-text-muted">
-              Not on Unstream yet?{' '}
-              <Link to="/" className="text-accent-primary hover:underline">
-                Search for your artist
-              </Link>{' '}
-              and claim their profile to get started.
+              Artists: Click the "Claim" button on your listing to customize your links, fix inaccuracies, and more.
             </p>
           </div>
         </div>

@@ -117,7 +117,7 @@ export function ResultCardHeader({
             className={`text-xs font-medium px-2 py-1 rounded-lg transition-colors flex items-center gap-1.5 ${
               isSaved
                 ? 'bg-accent-secondary/15 text-accent-secondary hover:bg-accent-secondary/20'
-                : 'text-text-muted hover:text-text-primary hover:bg-bg-secondary'
+                : 'text-text-secondary hover:text-text-primary hover:bg-bg-secondary'
             }`}
           >
             <svg className="w-3.5 h-3.5" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
@@ -129,7 +129,7 @@ export function ResultCardHeader({
         {/* Share button */}
         <button
           onClick={onShare}
-          className="text-xs font-medium px-2 py-1 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors flex items-center gap-1.5"
+          className="text-xs font-medium px-2 py-1 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-secondary transition-colors flex items-center gap-1.5"
           title="Share this result"
         >
           {shareCopied ? (

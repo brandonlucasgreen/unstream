@@ -85,7 +85,7 @@ export function LoginInterstitial({ artistId, artistName, onClose }: LoginInters
           </div>
         ) : (
           <>
-            <h3 className="font-semibold text-text-primary mb-1">Sign in to save this artist</h3>
+            <h3 className="font-semibold text-text-primary mb-1">Sign up or log in to save this artist</h3>
             <p className="text-sm text-text-secondary mb-4">
               With Unstream, keep track of artists you want to support, get new release alerts, and more.
             </p>
