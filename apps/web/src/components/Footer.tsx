@@ -13,15 +13,6 @@ export function Footer() {
           <Link to="/changelog" className="hover:text-text-primary transition-colors">Changelog</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <a
-            href="https://github.com/users/brandonlucasgreen/projects/4"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-text-primary transition-colors"
-          >
-            Roadmap
-          </a>
-          <span className="text-text-muted/40 text-xs">&#x2022;</span>
-          <a
             href="https://github.com/brandonlucasgreen/unstream"
             target="_blank"
             rel="noopener noreferrer"
