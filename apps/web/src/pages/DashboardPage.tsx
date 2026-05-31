@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 import { Header } from '../components/Header';
@@ -205,10 +205,15 @@ export function DashboardPage() {
     navigate(`/?q=${encodeURIComponent(query)}`);
   };
 
+  // Redirect to login if not authenticated
+  if (!authLoading && !session) {
+    return <Navigate to="/login" replace />;
+  }
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-bg-primary flex items-center justify-center">
-        <div className="text-text-muted">Loading your profiles...</div>
+        <div className="text-text-muted">Loading...</div>
       </div>
     );
   }
