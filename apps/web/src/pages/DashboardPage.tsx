@@ -131,6 +131,16 @@ export function DashboardPage() {
         return next;
       });
 
+      // Adjust page if the current page would be empty after removal
+      // Use a microtask to ensure state has updated before checking
+      const remaining = savedArtists.filter(a => a.artistId !== artistId);
+      const totalPagesAfter = Math.ceil(remaining.length / PAGE_SIZE);
+      if (currentPage > totalPagesAfter && totalPagesAfter > 0) {
+        setCurrentPage(totalPagesAfter);
+      } else if (remaining.length === 0) {
+        setCurrentPage(1);
+      }
+
       // Show undo toast
       setUndoToast({
         message: 'Removed from saved',
