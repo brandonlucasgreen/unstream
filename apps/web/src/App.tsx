@@ -428,7 +428,8 @@ function App() {
         </div>
       </main>
 
-      {/* Contact Form */}
+      {/* Contact Form — hidden in PWA mode */}
+      {!isStandalone && (
       <section className="px-4 pb-16">
         <div className="max-w-4xl mx-auto">
           <div className="bg-surface-secondary rounded-2xl p-6 md:p-8 border border-border">
@@ -442,6 +443,7 @@ function App() {
           </div>
         </div>
       </section>
+      )}
 
       <Footer />
     </div>
