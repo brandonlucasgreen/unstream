@@ -1,3 +1,4 @@
+import React from 'react';
 import { analytics } from '../services/analytics';
 import { usePWA } from '../hooks/usePWA';
 
@@ -27,7 +28,7 @@ export function DownloadGrid() {
     bg: string;
     hoverBg: string;
     shadow: string;
-    icon: JSX.Element;
+    icon: React.ReactNode;
     label: string;
     target?: string;
     rel?: string;
