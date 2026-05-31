@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -42,6 +42,8 @@ export function DashboardPage() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [undoToast, setUndoToast] = useState<{ message: string; artistId: string; onUndo: () => void } | null>(null);
   const [supportingSlug, setSupportingSlug] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
 
   useEffect(() => {
     if (authLoading) return;
@@ -119,7 +121,15 @@ export function DashboardPage() {
       }
 
       // Optimistically remove from list
-      setSavedArtists(prev => prev.filter(a => a.artistId !== artistId));
+      setSavedArtists(prev => {
+        const next = prev.filter(a => a.artistId !== artistId);
+        // If current page is now empty, go to previous page
+        const totalPages = Math.ceil(next.length / PAGE_SIZE);
+        if (currentPage > totalPages && totalPages > 0) {
+          setCurrentPage(totalPages);
+        }
+        return next;
+      });
 
       // Show undo toast
       setUndoToast({
@@ -204,6 +214,16 @@ export function DashboardPage() {
   const handleDashboardSearch = (query: string) => {
     navigate(`/?q=${encodeURIComponent(query)}`);
   };
+
+  // Pagination helpers
+  const totalPages = Math.ceil(savedArtists.length / PAGE_SIZE);
+  const clampedPage = Math.min(currentPage, Math.max(1, totalPages));
+  const paginatedArtists = savedArtists.slice((clampedPage - 1) * PAGE_SIZE, clampedPage * PAGE_SIZE);
+
+  const goToPage = useCallback((page: number) => {
+    const clamped = Math.min(Math.max(1, page), totalPages);
+    if (clamped !== clampedPage) setCurrentPage(clamped);
+  }, [totalPages, clampedPage]);
 
   // Redirect to login if not authenticated
   if (!authLoading && !session) {
@@ -324,8 +344,9 @@ export function DashboardPage() {
                 </Link>
               </div>
             ) : (
+              <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {savedArtists.map(artist => (
+                {paginatedArtists.map(artist => (
                   <div
                     key={artist.artistId}
                     className="p-4 rounded-lg bg-bg-secondary border border-border hover:border-border-hover transition-colors"
@@ -411,6 +432,30 @@ export function DashboardPage() {
                   </div>
                 ))}
               </div>
+
+              {/* Pagination controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-6">
+                  <button
+                    onClick={() => goToPage(clampedPage - 1)}
+                    disabled={clampedPage === 1}
+                    className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-sm text-text-muted px-2">
+                    {clampedPage} / {totalPages}
+                  </span>
+                  <button
+                    onClick={() => goToPage(clampedPage + 1)}
+                    disabled={clampedPage === totalPages}
+                    className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+              </>
             )}
           </section>
         </div>
