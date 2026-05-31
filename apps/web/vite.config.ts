@@ -67,6 +67,11 @@ export default defineConfig({
       workbox: {
         skipWaiting: true,
         clientsClaim: true,
+        navigateFallbackDenylist: [
+          // Edge function routes that serve static HTML — don't let SW intercept them
+          /^\/a\//,
+          /^\/artist\//,
+        ],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/unstream\.stream\/api\//,
