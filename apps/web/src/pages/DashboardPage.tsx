@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 import { Header } from '../components/Header';
+import { ArtistAnalytics } from '../components/ArtistAnalytics';
 import { Footer } from '../components/Footer';
 
 interface ClaimedProfile {
@@ -281,6 +282,7 @@ export function DashboardPage() {
                         </div>
                       </div>
                     </div>
+                    <ArtistAnalytics slug={profile.slug} />
                   </div>
                 ))}
               </div>
@@ -382,14 +384,14 @@ export function DashboardPage() {
                             )}
                             {artist.supported ? 'Supported ✓' : 'Mark supported'}
                           </button>
-                          <button
+                            <button
                             onClick={() => handleRemoveSavedArtist(artist.artistId)}
-                            className="px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 text-sm hover:bg-red-500/10 transition-colors flex items-center gap-1.5"
+                            className="p-1.5 rounded-lg border border-border text-text-muted hover:text-red-400 hover:border-red-500/30 transition-colors"
+                            title="Remove"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.862 21H9.138a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
-                            Remove
                           </button>
                         </div>
                       </div>
