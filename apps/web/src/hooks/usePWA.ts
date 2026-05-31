@@ -9,17 +9,26 @@ export function usePWA() {
   const [isIOS, setIsIOS] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isMac, setIsMac] = useState(false);
+  const [isChrome, setIsChrome] = useState(false);
+  const [isFirefox, setIsFirefox] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
   const [showIOSOverlay, setShowIOSOverlay] = useState(false);
 
   useEffect(() => {
-    // Detect platform
+    // Detect platform & browser
     const ua = navigator.userAgent;
     const ios = /iPad|iPhone|iPod/.test(ua);
     const android = /Android/.test(ua);
+    const mac = /Macintosh|Mac OS X/.test(ua) && !ios; // exclude iPad/iPhone
+    const chrome = /Chrome\//.test(ua) && !/Edge|Edg|OPR|Firefox/.test(ua);
+    const firefox = /Firefox\//.test(ua);
     setIsIOS(ios);
     setIsAndroid(android);
     setIsMobile(ios || android);
+    setIsMac(mac);
+    setIsChrome(chrome);
+    setIsFirefox(firefox);
 
     // Listen for beforeinstallprompt (Android)
     const handleInstallPrompt = (e: Event) => {
@@ -51,6 +60,9 @@ export function usePWA() {
     isIOS,
     isAndroid,
     isMobile,
+    isMac,
+    isChrome,
+    isFirefox,
     isPWAInstallable: !!installPrompt,
     showIOSOverlay,
     setShowIOSOverlay,
