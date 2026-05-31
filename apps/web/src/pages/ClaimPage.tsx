@@ -148,7 +148,10 @@ export function ClaimPage() {
       if (!response.ok) {
         if (data.alreadyVerified) {
           // Profile is already verified — skip to done
+<<<<<<< HEAD
           setAlreadyVerified(true);
+=======
+>>>>>>> 3b9dff5 (fix(UNS-80): prevent claim re-start from wiping verified_at, add error handling)
           setStep('done');
           setLoading(false);
           return;
