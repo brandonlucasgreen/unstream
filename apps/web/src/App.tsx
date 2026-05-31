@@ -41,6 +41,13 @@ function App() {
     if (session) loadSavedArtists();
   }, [session]);
 
+  // PWA: redirect logged-in users to dashboard on app launch
+  useEffect(() => {
+    if (isStandalone && session && !searchParams.get('q') && !searchParams.get('url')) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isStandalone, session]);
+
   // Track current search to handle race conditions
   const currentSearchRef = useRef<number>(0);
   // Track if we just went home to prevent re-triggering search from stale URL
