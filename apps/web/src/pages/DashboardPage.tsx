@@ -121,15 +121,17 @@ export function DashboardPage() {
       }
 
       // Optimistically remove from list
-      setSavedArtists(prev => {
-        const next = prev.filter(a => a.artistId !== artistId);
-        // If current page is now empty, go to previous page
-        const totalPages = Math.ceil(next.length / PAGE_SIZE);
-        if (currentPage > totalPages && totalPages > 0) {
-          setCurrentPage(totalPages);
-        }
-        return next;
-      });
+      setSavedArtists(prev => prev.filter(a => a.artistId !== artistId));
+
+      // Adjust page if the current page would be empty after removal
+      // Use a microtask to ensure state has updated before checking
+      const remaining = savedArtists.filter(a => a.artistId !== artistId);
+      const totalPagesAfter = Math.ceil(remaining.length / PAGE_SIZE);
+      if (currentPage > totalPagesAfter && totalPagesAfter > 0) {
+        setCurrentPage(totalPagesAfter);
+      } else if (remaining.length === 0) {
+        setCurrentPage(1);
+      }
 
       // Show undo toast
       setUndoToast({
