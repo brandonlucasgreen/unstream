@@ -16,7 +16,7 @@ export function ArtistPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const isProfileRoute = location.pathname.startsWith('/a/');
+  const isProfileRoute = location.pathname.startsWith('/a/') || location.pathname.startsWith('/artist/');
   const justClaimed = searchParams.get('claimed') !== null;
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
