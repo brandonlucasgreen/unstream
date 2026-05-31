@@ -41,10 +41,10 @@ function UnstreamLogo({ dark }: { dark: boolean }) {
 export function Header() {
   const { theme, preference, cycleTheme } = useTheme();
   const navigate = useNavigate();
-  const { session, user, isAdmin, isLoading, signOut } = useAuth();
+  const { session, user, isAdmin, signOut } = useAuth();
   const [pendingVerifyCount, setPendingVerifyCount] = useState(0);
 
-  // Fetch pending verification count for admins
+  // Fetch pending verification count for admins — only on admin-relevant pages
   useEffect(() => {
     if (!isAdmin || !session?.access_token) return;
 
@@ -73,41 +73,39 @@ export function Header() {
         Unstream
       </Link>
       <div className="flex items-center gap-3 text-sm">
-        {!isLoading && (
-          session ? (
-            <>
-              <span className="text-text-muted hidden sm:inline">
-                {user?.email}
-              </span>
-              {isAdmin && pendingVerifyCount > 0 && (
-                <Link
-                  to="/admin/verify"
-                  className="text-accent-primary hover:underline font-medium"
-                >
-                  Verify ({pendingVerifyCount})
-                </Link>
-              )}
+        {session ? (
+          <>
+            <span className="text-text-muted hidden sm:inline">
+              {user?.email}
+            </span>
+            {isAdmin && pendingVerifyCount > 0 && (
               <Link
-                to="/dashboard"
+                to="/admin/verify"
                 className="text-accent-primary hover:underline font-medium"
               >
-                Dashboard
+                Verify ({pendingVerifyCount})
               </Link>
-              <button
-                onClick={handleSignOut}
-                className="text-text-muted hover:text-text-primary transition-colors"
-              >
-                Sign out
-              </button>
-            </>
-          ) : (
+            )}
             <Link
-              to="/login"
+              to="/dashboard"
+              className="text-accent-primary hover:underline font-medium"
+            >
+              Dashboard
+            </Link>
+            <button
+              onClick={handleSignOut}
               className="text-text-muted hover:text-text-primary transition-colors"
             >
-              Login
-            </Link>
-          )
+              Sign out
+            </button>
+          </>
+        ) : (
+          <Link
+            to="/login"
+            className="text-text-muted hover:text-text-primary transition-colors"
+          >
+            Login
+          </Link>
         )}
         <ThemeToggle preference={preference} onCycle={cycleTheme} />
       </div>
