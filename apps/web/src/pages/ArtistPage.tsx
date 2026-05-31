@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { SearchBar } from '../components/SearchBar';
 import { ResultCard } from '../components/ResultCard';
 import { LoginInterstitial } from '../components/LoginInterstitial';
@@ -14,7 +14,9 @@ import { useAuth } from '../contexts/AuthContext';
 export function ArtistPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
+  const isProfileRoute = location.pathname.startsWith('/a/');
   const justClaimed = searchParams.get('claimed') !== null;
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -133,35 +135,44 @@ export function ArtistPage() {
       }
 
       // Last resort: live search using the slug as query
-      const query = artistSlug.replace(/-/g, ' ');
-      try {
-        const response = await searchPlatforms(query);
-        if (cancelled) return;
+      // Skip live search on profile routes (/a/:slug) — only use pre-generated JSON and API
+      if (!isProfileRoute) {
+        const query = artistSlug.replace(/-/g, ' ');
+        try {
+          const response = await searchPlatforms(query);
+          if (cancelled) return;
 
-        setResults(response.results);
-        if (response.results.length > 0) {
-          const firstArtist = response.results.find(r => r.type === 'artist');
-          if (firstArtist) setArtistName(firstArtist.name);
-        }
-        setIsLoading(false);
+          setResults(response.results);
+          if (response.results.length > 0) {
+            const firstArtist = response.results.find(r => r.type === 'artist');
+            if (firstArtist) setArtistName(firstArtist.name);
+          }
+          setIsLoading(false);
 
-        // MusicBrainz enrichment
-        if (response.hasPendingEnrichment && response.results.length > 0) {
-          setIsEnriching(true);
-          try {
-            const mbData = await fetchMusicBrainzData(query);
-            if (!cancelled && mbData) {
-              setResults(prev => mergeWithMusicBrainzData(prev, mbData));
+          // MusicBrainz enrichment
+          if (response.hasPendingEnrichment && response.results.length > 0) {
+            setIsEnriching(true);
+            try {
+              const mbData = await fetchMusicBrainzData(query);
+              if (!cancelled && mbData) {
+                setResults(prev => mergeWithMusicBrainzData(prev, mbData));
+              }
+            } catch {
+              // Silent failure for enrichment
+            } finally {
+              if (!cancelled) setIsEnriching(false);
             }
-          } catch {
-            // Silent failure for enrichment
-          } finally {
-            if (!cancelled) setIsEnriching(false);
+          }
+        } catch {
+          if (!cancelled) {
+            setError('Failed to load artist data. Please try again.');
+            setIsLoading(false);
           }
         }
-      } catch {
+      } else {
+        // Profile route: no data found from JSON or API
         if (!cancelled) {
-          setError('Failed to load artist data. Please try again.');
+          setError('Artist profile not found.');
           setIsLoading(false);
         }
       }
@@ -169,7 +180,7 @@ export function ArtistPage() {
 
     loadArtist();
     return () => { cancelled = true; };
-  }, [slug]);
+  }, [slug, isProfileRoute]);
 
   const handleSearch = useCallback((query: string) => {
     analytics.trackSearch();
@@ -248,8 +259,20 @@ export function ArtistPage() {
 
       <main className="px-4 pb-16">
         <div className="max-w-4xl mx-auto">
-          {/* Search bar — only show for unclaimed/search results, not dedicated profiles */}
-          {!isClaimedArtist && (
+          {/* Back to artists link on profile routes */}
+          {isProfileRoute && (
+            <Link
+              to="/artists"
+              className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-accent-primary transition-colors mb-4"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to artists
+            </Link>
+          )}
+          {/* Search bar — only show for search results, not dedicated profile routes or claimed artists */}
+          {!isProfileRoute && !isClaimedArtist && (
             <SearchBar
               onSearch={handleSearch}
               isLoading={isLoading}
@@ -316,7 +339,7 @@ export function ArtistPage() {
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-16">
                 <div className="animate-spin rounded-full h-12 w-12 border-2 border-accent-primary border-t-transparent mb-4"></div>
-                <p className="text-text-muted">Searching platforms...</p>
+                <p className="text-text-muted">{isProfileRoute ? 'Loading profile...' : 'Searching platforms...'}</p>
               </div>
             ) : isClaimedArtist ? (
               /* Claimed artist profile — clean layout, no search chrome */
