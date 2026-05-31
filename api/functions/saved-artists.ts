@@ -1,10 +1,12 @@
 // API endpoint: /api/saved-artists
 // GET  — list user's saved artists with artist details
-// POST — save an artist, remove a saved artist, or bulk-check
+// POST — save an artist, remove a saved artist, bulk-check, or toggle supported
 //   Action is determined by the `action` field in the POST body:
-//   action: "save" (default) — save an artist
-//   action: "remove"       — remove a saved artist
-//   action: "check"         — bulk check which artists are saved
+//   action: "save"      (default) — save an artist
+//   action: "remove"              — remove a saved artist
+//   action: "check"               — bulk check which artists are saved
+//   action: "support"             — mark a saved artist as supported
+//   action: "unsupport"           — unmark a saved artist as supported
 //
 // Saving an artist does NOT create a row in the `artists` table.
 // Unclaimed artists don't get /a/ profile pages — only claimed ones do.
@@ -82,6 +84,8 @@ export async function handler(event: {
           artist_image_url,
           notes,
           added_at,
+          supported,
+          supported_at,
           artists!left (id, name, slug, image_url)
         `)
         .eq('user_id', user.userId);
@@ -102,6 +106,8 @@ export async function handler(event: {
           imageUrl: artistRow?.image_url || row.artist_image_url || null,
           notes: row.notes,
           addedAt: row.added_at,
+          supported: row.supported,
+          supportedAt: row.supported_at,
           claimed,
         };
       });
@@ -138,6 +144,12 @@ export async function handler(event: {
     }
     if (action === 'remove') {
       return handleRemove(user, body, client);
+    }
+    if (action === 'support') {
+      return handleSupport(user, body, client);
+    }
+    if (action === 'unsupport') {
+      return handleUnsupport(user, body, client);
     }
     return handleSave(user, body, client);
   }
@@ -287,6 +299,118 @@ async function handleCheck(user: { userId: string; email: string }, body: Record
     };
   } catch (error) {
     console.error('[saved-artists] Check error:', error);
+    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+  }
+}
+
+async function handleSupport(user: { userId: string; email: string }, body: Record<string, unknown>, client: ReturnType<typeof getServiceClient>) {
+  const artistSlug = (body.artistId as string) || (body.slug as string);
+  if (!artistSlug) {
+    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'artistId is required' }) };
+  }
+
+  try {
+    // Idempotent: set supported=true even if already true
+    const { data: updated, error: updateError } = await client
+      .from('saved_artists')
+      .update({ supported: true, supported_at: new Date().toISOString() })
+      .eq('user_id', user.userId)
+      .eq('artist_slug', artistSlug)
+      .select(`
+        id, user_id, artist_id, artist_slug, artist_name, artist_image_url,
+        notes, added_at, supported, supported_at,
+        artists!left (id, name, slug, image_url)
+      `)
+      .single();
+
+    if (updateError) {
+      console.error('[saved-artists] Error supporting artist:', updateError);
+      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to support artist' }) };
+    }
+
+    if (!updated) {
+      return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Saved artist not found' }) };
+    }
+
+    const artistRow = (updated as any).artists;
+    const claimed = !!artistRow;
+
+    return {
+      statusCode: 200,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({
+        success: true,
+        savedArtist: {
+          artistId: artistRow?.slug || updated.artist_slug || updated.artist_id,
+          name: artistRow?.name || updated.artist_name || 'Unknown',
+          slug: artistRow?.slug || updated.artist_slug || '',
+          imageUrl: artistRow?.image_url || updated.artist_image_url || null,
+          notes: updated.notes,
+          addedAt: updated.added_at,
+          supported: updated.supported,
+          supportedAt: updated.supported_at,
+          claimed,
+        },
+      }),
+    };
+  } catch (error) {
+    console.error('[saved-artists] Support error:', error);
+    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+  }
+}
+
+async function handleUnsupport(user: { userId: string; email: string }, body: Record<string, unknown>, client: ReturnType<typeof getServiceClient>) {
+  const artistSlug = (body.artistId as string) || (body.slug as string);
+  if (!artistSlug) {
+    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'artistId is required' }) };
+  }
+
+  try {
+    // Idempotent: set supported=false even if already false
+    const { data: updated, error: updateError } = await client
+      .from('saved_artists')
+      .update({ supported: false, supported_at: null })
+      .eq('user_id', user.userId)
+      .eq('artist_slug', artistSlug)
+      .select(`
+        id, user_id, artist_id, artist_slug, artist_name, artist_image_url,
+        notes, added_at, supported, supported_at,
+        artists!left (id, name, slug, image_url)
+      `)
+      .single();
+
+    if (updateError) {
+      console.error('[saved-artists] Error unsupporting artist:', updateError);
+      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to unsupport artist' }) };
+    }
+
+    if (!updated) {
+      return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Saved artist not found' }) };
+    }
+
+    const artistRow = (updated as any).artists;
+    const claimed = !!artistRow;
+
+    return {
+      statusCode: 200,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({
+        success: true,
+        savedArtist: {
+          artistId: artistRow?.slug || updated.artist_slug || updated.artist_id,
+          name: artistRow?.name || updated.artist_name || 'Unknown',
+          slug: artistRow?.slug || updated.artist_slug || '',
+          imageUrl: artistRow?.image_url || updated.artist_image_url || null,
+          notes: updated.notes,
+          addedAt: updated.added_at,
+          supported: updated.supported,
+          supportedAt: updated.supported_at,
+          claimed,
+        },
+      }),
+    };
+  } catch (error) {
+    console.error('[saved-artists] Unsupport error:', error);
     return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
   }
 }

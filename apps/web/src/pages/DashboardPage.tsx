@@ -24,6 +24,8 @@ interface SavedArtist {
   notes?: string;
   addedAt: string;
   claimed?: boolean;
+  supported: boolean;
+  supportedAt?: string;
 }
 
 export function DashboardPage() {
@@ -37,6 +39,7 @@ export function DashboardPage() {
   // Toast state
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [undoToast, setUndoToast] = useState<{ message: string; artistId: string; onUndo: () => void } | null>(null);
+  const [supportingSlug, setSupportingSlug] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -155,6 +158,45 @@ export function DashboardPage() {
   const handleRemoveClaimedProfile = async (_profileId: string, _artistId: string, _slug: string) => {
     // For now, just show a message - actual removal would require additional API
     setToast({ message: 'Profile management coming soon!', type: 'info' });
+  };
+
+  const handleToggleSupport = async (artist: SavedArtist) => {
+    const newSupported = !artist.supported;
+    const slug = artist.artistId;
+    const originalSupported = artist.supported;
+    const originalSupportedAt = artist.supportedAt;
+
+    setSavedArtists(prev => prev.map(a =>
+      a.artistId === slug ? { ...a, supported: newSupported, supportedAt: newSupported ? new Date().toISOString() : undefined } : a
+    ));
+
+    setSupportingSlug(slug);
+    try {
+      const response = await fetch('/api/saved-artists', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session!.access_token}`,
+        },
+        body: JSON.stringify({ action: newSupported ? 'support' : 'unsupport', artistId: slug }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update support status');
+      }
+
+      const data = await response.json();
+      setSavedArtists(prev => prev.map(a =>
+        a.artistId === slug ? { ...a, supported: data.savedArtist.supported, supportedAt: data.savedArtist.supportedAt } : a
+      ));
+    } catch {
+      setSavedArtists(prev => prev.map(a =>
+        a.artistId === slug ? { ...a, supported: originalSupported, supportedAt: originalSupportedAt } : a
+      ));
+      setToast({ message: 'Failed to update support status. Please try again.', type: 'error' });
+    } finally {
+      setSupportingSlug(null);
+    }
   };
 
   if (authLoading || loading) {
@@ -304,7 +346,7 @@ export function DashboardPage() {
                             {artist.notes}
                           </p>
                         )}
-                        <div className="flex items-center gap-2 mt-3">
+                        <div className="flex items-center gap-2 mt-3 flex-wrap">
                           {artist.claimed && artist.slug ? (
                             <Link
                               to={`/a/${artist.slug}`}
@@ -320,6 +362,26 @@ export function DashboardPage() {
                               Search
                             </Link>
                           )}
+                          <button
+                            onClick={() => handleToggleSupport(artist)}
+                            disabled={supportingSlug === artist.artistId}
+                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                              artist.supported
+                                ? 'bg-accent-secondary/15 border border-accent-secondary/40 text-accent-secondary hover:bg-accent-secondary/25'
+                                : 'border border-border text-text-muted hover:text-text-primary hover:border-border-hover'
+                            } ${supportingSlug === artist.artistId ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          >
+                            {artist.supported ? (
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            ) : (
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" strokeWidth={2} />
+                              </svg>
+                            )}
+                            {artist.supported ? 'Supported ✓' : 'Mark supported'}
+                          </button>
                           <button
                             onClick={() => handleRemoveSavedArtist(artist.artistId)}
                             className="px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 text-sm hover:bg-red-500/10 transition-colors flex items-center gap-1.5"
