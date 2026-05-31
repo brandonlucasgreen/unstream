@@ -23,7 +23,7 @@ export function SupportPage() {
 
           <div className="bg-surface-secondary rounded-2xl p-8 border border-border mb-8">
             <a
-              href="https://liberapay.com/unstream"
+              href="https://liberapay.com/brandonlucasgreen"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-[#F6C915] text-gray-900 hover:bg-[#E5BA14] transition-colors font-semibold text-lg shadow-lg"
