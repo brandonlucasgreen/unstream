@@ -323,7 +323,13 @@ export function ArtistEditPage() {
 
       const data = await response.json();
       if (!response.ok) {
-        set('error', data.error || 'Failed to save changes');
+        if (response.status === 403 && data.error?.includes('not yet verified')) {
+          set('error', 'Your profile hasn\'t been verified yet. Please complete the claim flow first at /claim/' + form.currentSlug);
+        } else if (response.status === 403) {
+          set('error', 'You don\'t have permission to edit this profile.');
+        } else {
+          set('error', data.error || 'Failed to save changes');
+        }
         set('saving', false);
         return;
       }

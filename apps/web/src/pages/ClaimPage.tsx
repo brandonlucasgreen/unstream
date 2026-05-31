@@ -145,6 +145,12 @@ export function ClaimPage() {
 
       const data = await response.json();
       if (!response.ok) {
+        if (data.alreadyVerified) {
+          // Profile is already verified — skip to done
+          setStep('done');
+          setLoading(false);
+          return;
+        }
         setError(data.error || 'Failed to start claim');
         setLoading(false);
         return;
@@ -273,7 +279,13 @@ export function ClaimPage() {
 
       const data = await response.json();
       if (!response.ok) {
-        setError(data.error || 'Failed to save changes');
+        if (response.status === 403 && data.error?.includes('not yet verified')) {
+          setError('Your profile hasn\'t been verified yet. Please go back and complete the website verification step first.');
+        } else if (response.status === 403) {
+          setError('You don\'t have permission to edit this profile.');
+        } else {
+          setError(data.error || 'Failed to save changes');
+        }
         setLoading(false);
         return;
       }
