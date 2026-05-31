@@ -29,6 +29,7 @@ interface AuthContextValue {
   saveArtist: (artistId: string, notes?: string, artistName?: string, artistImageUrl?: string) => Promise<void>;
   removeSavedArtist: (artistId: string) => Promise<void>;
   loadSavedArtists: () => Promise<void>;
+  artistsLoaded: boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -39,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [savedArtists, setSavedArtists] = useState<SavedArtist[]>([]);
   const [savedArtistIds, setSavedArtistIds] = useState<Set<string>>(new Set());
+  const [artistsLoaded, setArtistsLoaded] = useState(false);
 
   useEffect(() => {
     const supabase = getSupabaseClient();
@@ -58,41 +60,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!cancelled && magicSession) {
           setSession(magicSession);
           setUser(magicSession.user);
-          // Load saved artists after login
-          if (!cancelled) {
-            await loadSavedArtists(magicSession);
-          }
         }
       } else {
-        // Check for existing session
+        // Check for existing session — fast, no domain data
         const { data } = await supabase!.auth.getSession();
         if (!cancelled && data.session) {
           setSession(data.session);
           setUser(data.session.user);
-          // Load saved artists on restore
-          if (!cancelled) {
-            await loadSavedArtists(data.session);
-          }
         }
       }
 
       if (!cancelled) setIsLoading(false);
-    }
-
-    // Load saved artists helper
-    async function loadSavedArtists(sess: Session) {
-      try {
-        const response = await fetch('/api/saved-artists', {
-          headers: { 'Authorization': `Bearer ${sess.access_token}` },
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setSavedArtists(data.savedArtists || []);
-          setSavedArtistIds(new Set(data.savedArtists?.map((a: SavedArtist) => a.artistId) || []));
-        }
-      } catch {
-        console.error('Failed to load saved artists on init');
-      }
     }
 
     init();
@@ -102,12 +80,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!cancelled) {
         setSession(newSession);
         setUser(newSession?.user ?? null);
-        if (newSession) {
-          // Load saved artists on login
-          loadSavedArtists(newSession);
-        } else {
+        // Clear saved artists on sign out
+        if (!newSession) {
           setSavedArtists([]);
           setSavedArtistIds(new Set());
+          setArtistsLoaded(false);
         }
       }
     });
@@ -244,6 +221,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadSavedArtists = useCallback(async () => {
     if (!session) return;
+    if (artistsLoaded) return; // Don't re-fetch if already loaded
     try {
       const response = await fetch('/api/saved-artists', {
         headers: { 'Authorization': `Bearer ${session.access_token}` },
@@ -252,17 +230,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = await response.json();
         setSavedArtists(data.savedArtists || []);
         setSavedArtistIds(new Set((data.savedArtists || []).map((a: SavedArtist) => a.artistId)));
+        setArtistsLoaded(true);
       }
     } catch {
       console.error('Failed to load saved artists');
     }
-  }, [session]);
+  }, [session, artistsLoaded]);
 
   const isAdmin = !!user?.email && user.email.toLowerCase() === ADMIN_EMAIL;
   const hasPassword = !!user?.user_metadata?.has_password;
 
   return (
-    <AuthContext.Provider value={{ session, user, isAdmin, isLoading, hasPassword, signOut: handleSignOut, signInWithMagicLink: handleSignInWithMagicLink, signInWithPassword: handleSignInWithPassword, savedArtists, savedArtistIds, isArtistSaved, saveArtist, removeSavedArtist, loadSavedArtists }}>
+    <AuthContext.Provider value={{ session, user, isAdmin, isLoading, hasPassword, signOut: handleSignOut, signInWithMagicLink: handleSignInWithMagicLink, signInWithPassword: handleSignInWithPassword, savedArtists, savedArtistIds, isArtistSaved, saveArtist, removeSavedArtist, loadSavedArtists, artistsLoaded }}>
       {children}
     </AuthContext.Provider>
   );

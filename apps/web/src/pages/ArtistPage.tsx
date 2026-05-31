@@ -25,7 +25,12 @@ export function ArtistPage() {
   const [artistName, setArtistName] = useState('');
   const [claimBannerDismissed, setClaimBannerDismissed] = useState(false);
   const [claimShareCopied, setClaimShareCopied] = useState(false);
-  const { session, isArtistSaved, saveArtist, removeSavedArtist } = useAuth();
+  const { session, isArtistSaved, saveArtist, removeSavedArtist, loadSavedArtists } = useAuth();
+
+  // Load saved artists on demand so save button state is correct
+  useEffect(() => {
+    if (session) loadSavedArtists();
+  }, [session]);
 
   // Get the first artist result for save button
   const primaryArtist = results.find(r => r.type === 'artist');

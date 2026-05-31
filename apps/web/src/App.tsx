@@ -15,7 +15,7 @@ import { badgeColors } from './utils/colors';
 import './index.css';
 
 function App() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, session, loadSavedArtists } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -35,6 +35,11 @@ function App() {
     (window.matchMedia('(display-mode: standalone)').matches ||
      (navigator as any).standalone === true)
   );
+
+  // Load saved artists when session is available (needed for ResultCard save buttons)
+  useEffect(() => {
+    if (session) loadSavedArtists();
+  }, [session]);
 
   // Track current search to handle race conditions
   const currentSearchRef = useRef<number>(0);

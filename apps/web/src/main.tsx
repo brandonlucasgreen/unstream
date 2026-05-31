@@ -42,8 +42,21 @@ function ArtistDashboardRedirect() {
 
 function LoadingFallback() {
   return (
-    <div className="min-h-screen bg-bg-primary flex items-center justify-center">
-      <div className="text-text-muted">Loading...</div>
+    <div className="min-h-screen bg-bg-primary">
+      <div className="p-4 border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 bg-surface-secondary rounded animate-pulse" />
+          <div className="w-20 h-5 bg-surface-secondary rounded animate-pulse" />
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-5 bg-surface-secondary rounded animate-pulse" />
+          <div className="w-8 h-8 bg-surface-secondary rounded-full animate-pulse" />
+        </div>
+      </div>
+      <div className="max-w-4xl mx-auto px-4 py-16">
+        <div className="w-48 h-6 bg-surface-secondary rounded animate-pulse mb-4" />
+        <div className="w-64 h-4 bg-surface-secondary rounded animate-pulse" />
+      </div>
     </div>
   )
 }
