@@ -408,6 +408,22 @@ export async function handler(event: {
       };
     }
 
+    // Check for existing profile — don't wipe a verified profile on re-start
+    const { data: existingClaimProfile } = await client
+      .from('artist_profiles')
+      .select('verified_at')
+      .eq('artist_id', artist.id)
+      .single();
+
+    if (existingClaimProfile?.verified_at) {
+      // Already verified — don't allow re-starting the claim flow
+      return {
+        statusCode: 409,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: 'This artist profile is already verified. You can edit it from your dashboard.', alreadyVerified: true }),
+      };
+    }
+
     // Use the email provided by the frontend, or fall back to the authenticated user's email.
     // The frontend email may be empty if the page reloaded after magic link redirect.
     const email = (body.email || authUser.email || '').toLowerCase().trim();
@@ -567,19 +583,33 @@ export async function handler(event: {
     const discoveredLinks = identifyPlatformLinks(links);
 
     // Mark profile as verified
-    await client
+    const { error: verifyUpdateError } = await client
       .from('artist_profiles')
       .update({ verified_at: new Date().toISOString() })
       .eq('id', profile.id);
 
+    if (verifyUpdateError) {
+      console.error('[Claim] Failed to set verified_at:', verifyUpdateError);
+      return {
+        statusCode: 500,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: 'Verification passed but we couldn\'t update your profile. Please try again.' }),
+      };
+    }
+
     // Update artist to claimed
-    await client
+    const { error: artistUpdateError } = await client
       .from('artists')
       .update({
         match_confidence: 'claimed',
         source: 'claimed',
       })
       .eq('id', artist.id);
+
+    if (artistUpdateError) {
+      console.error('[Claim] Failed to update artist match_confidence:', artistUpdateError);
+      // Non-fatal — profile is verified, just the artist table update failed
+    }
 
     // Add website as officialsite link
     const { data: existingLinks } = await client
