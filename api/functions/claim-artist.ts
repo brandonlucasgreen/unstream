@@ -409,13 +409,13 @@ export async function handler(event: {
     }
 
     // Check for existing profile — don't wipe a verified profile on re-start
-    const { data: existingProfile } = await client
+    const { data: existingClaimProfile } = await client
       .from('artist_profiles')
       .select('verified_at')
       .eq('artist_id', artist.id)
       .single();
 
-    if (existingProfile?.verified_at) {
+    if (existingClaimProfile?.verified_at) {
       // Already verified — don't allow re-starting the claim flow
       return {
         statusCode: 409,
