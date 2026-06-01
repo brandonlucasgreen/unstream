@@ -16,14 +16,14 @@
   {
     "id": "verified-artist-claims",
     "title": "Claim your artist page",
-    "description": "Indie artists can now claim and verify their page for free \u2014 every artist we feature in our daily posts has one. Claim yours and get all your direct-support links in one place.",
+    "description": "Indie artists can now claim and verify their page for free — every artist we feature in our daily posts has one. Claim yours and get all your direct-support links in one place.",
     "date": "2026-03-22",
     "announced": true
   },
   {
     "id": "listenbrainz-scrobbling",
     "title": "ListenBrainz scrobbling",
-    "description": "The Mac app now scrobbles to ListenBrainz \u2014 open-source music tracking that actually respects your data.",
+    "description": "The Mac app now scrobbles to ListenBrainz — open-source music tracking that actually respects your data.",
     "date": "2026-03-22",
     "announced": true
   },
@@ -37,7 +37,7 @@
   {
     "id": "public-api",
     "title": "Public API v1",
-    "description": "Developers can now build on top of Unstream. The public API supports artist search, artist lookup, URL resolution, and a full platform list \u2014 with API key auth and tiered rate limiting.",
+    "description": "Developers can now build on top of Unstream. The public API supports artist search, artist lookup, URL resolution, and a full platform list — with API key auth and tiered rate limiting.",
     "date": "2026-04-11",
     "announced": true
   },
@@ -51,14 +51,14 @@
   {
     "id": "ios-app",
     "title": "iOS app coming soon",
-    "description": "An iOS app is in the works \u2014 search for artists, save your favorites, and get release alerts on your iPhone and iPad. Stay tuned.",
+    "description": "An iOS app is in the works — search for artists, save your favorites, and get release alerts on your iPhone and iPad. Stay tuned.",
     "date": "2026-04-11",
     "announced": true
   },
   {
     "id": "ai-policy-indicator",
     "title": "AI music policy badges",
-    "description": "See which platforms ban or restrict AI-generated music right on the search results. Badges for banned (\ud83d\udeab) and AI-cautious (\ud83d\udee1\ufe0f) platforms, with a legend at the bottom of each result.",
+    "description": "See which platforms ban or restrict AI-generated music right on the search results. Badges for banned (🚫) and AI-cautious (🛡️) platforms, with a legend at the bottom of each result.",
     "date": "2026-04-17",
     "announced": true
   },
@@ -67,6 +67,6 @@
     "title": "Browser extension notifications",
     "description": "When the extension detects a new artist during playback, it sends a browser notification showing where to support them directly.",
     "date": "2026-05-22",
-    "announced": false
+    "announced": true
   }
 ]
