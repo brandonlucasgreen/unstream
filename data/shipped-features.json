@@ -68,5 +68,26 @@
     "description": "When the extension detects a new artist during playback, it sends a browser notification showing where to support them directly.",
     "date": "2026-05-22",
     "announced": true
+  },
+  {
+    "id": "pwa-save-artists",
+    "title": "Save artists on web",
+    "description": "You can now save artists you care about on unstream.stream — sign in and tap the heart on any artist page to keep them in your dashboard.",
+    "date": "2026-05-31",
+    "announced": false
+  },
+  {
+    "id": "pwa-dashboard-search",
+    "title": "Search from your dashboard",
+    "description": "Find a new artist without leaving the app. The Saved Artists section on your dashboard has its own search bar that takes you straight to results.",
+    "date": "2026-05-31",
+    "announced": false
+  },
+  {
+    "id": "pwa-simplified-ui",
+    "title": "Add Unstream to your Home Screen",
+    "description": "Unstream is now a Progressive Web App. Add it to your Home Screen on iOS or Android for a full-screen, app-like experience — no browser chrome, faster loads, and offline-ready.",
+    "date": "2026-05-31",
+    "announced": false
   }
 ]
