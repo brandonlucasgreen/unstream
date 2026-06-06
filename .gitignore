@@ -69,3 +69,10 @@ data/guides/guides-manifest.json
 # Fartrun reports
 apps/web/.fartrun/
 .netlify/db/
+
+# Next.js build artifacts
+.next/
+next-env.d.ts
+
+# Supabase CLI temp
+supabase/.temp/
