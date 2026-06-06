@@ -39,9 +39,10 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: Resu
 
   useEffect(() => {
     if (result.type === 'artist' && result.id) {
-      setSaved(isArtistSaved(result.id));
+      // Match the slug we use for save so the saved state stays in sync
+      setSaved(isArtistSaved(result.claimedSlug || result.id));
     }
-  }, [result.type, result.id, isArtistSaved]);
+  }, [result.type, result.id, result.claimedSlug, isArtistSaved]);
 
   const handleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -49,15 +50,21 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: Resu
 
     if (result.type !== 'artist' || !result.id) return;
 
+    // Prefer the verified /a/{slug} over the synthetic search-result id.
+    // For verified-but-not-claimed artists the result id is a "nameonly-..." key
+    // that won't match a row in the artists table, so findExistingArtist fails
+    // and the saved record falls back to "Saved from Search".
+    const saveId = result.claimedSlug || result.id;
+
     if (saved) {
-      await removeSavedArtist(result.id);
+      await removeSavedArtist(saveId);
       setSaved(false);
     } else {
       if (!session) {
         setShowLoginInterstitial(true);
         return;
       }
-      await saveArtist(result.id, undefined, result.name, result.imageUrl);
+      await saveArtist(saveId, undefined, result.name, result.imageUrl);
       setSaved(true);
     }
   };
@@ -176,7 +183,7 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: Resu
 
       {showLoginInterstitial && (
         <LoginInterstitial
-          artistId={result.id}
+          artistId={result.claimedSlug || result.id}
           artistName={result.name}
           onClose={() => setShowLoginInterstitial(false)}
         />
