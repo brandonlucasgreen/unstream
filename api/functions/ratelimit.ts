@@ -358,6 +358,35 @@ export async function checkApiRateLimit(
 }
 
 /**
+ * Deduplicates Sentry captureMessage calls by key. Once a key has been
+ * captured, subsequent calls with the same key within `ttlSeconds` return
+ * false (skip the capture). This prevents high-volume Sentry noise from
+ * zero-result searches, repeated platform failures, etc.
+ *
+ * Returns true if the capture should proceed (this is the first occurrence
+ * in the TTL window), false if it should be skipped (already captured
+ * within the window).
+ *
+ * If Redis is not configured, returns true (capture always proceeds) so
+ * Sentry still works in local dev.
+ */
+export async function checkSentryDedup(key: string, ttlSeconds: number): Promise<boolean> {
+  const r = getRedis();
+  if (!r) return true; // Redis unavailable → don't gate Sentry on it
+  try {
+    const cacheKey = `sentry:dedup:${key}`;
+    const seen = await r.get(cacheKey);
+    if (seen) return false;
+    await r.set(cacheKey, '1', { ex: ttlSeconds });
+    return true;
+  } catch (err) {
+    // On Redis error, don't block Sentry capture — fail open
+    console.warn('[RateLimit] checkSentryDedup error, allowing capture:', err);
+    return true;
+  }
+}
+
+/**
  * Extract client IP from Netlify function event headers.
  */
 export function getClientIp(headers: Record<string, string | undefined>): string {
