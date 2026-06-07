@@ -15,7 +15,8 @@
     "test:unit": "cd apps/web && npx vitest run tests/unit",
     "test:integration": "cd apps/web && npx vitest run tests/integration",
     "lint": "cd apps/web && npx eslint .",
-    "preview": "cd apps/web && npx vite preview"
+    "preview": "cd apps/web && npx vite preview",
+    "sentry:sourcemaps": "bash scripts/sentry-sourcemaps.sh"
   },
   "dependencies": {
     "@sentry/node": "^10.56.0",
