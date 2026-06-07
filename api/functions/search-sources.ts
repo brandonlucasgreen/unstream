@@ -1,4 +1,5 @@
 import { parse } from 'node-html-parser';
+import { Sentry } from '../lib/sentry';
 import { cacheGetOrFetch, artistCacheKey } from './cache';
 import { persistSearchResults, getArtistBySlug, artistSlug, getMergeOverrides } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
@@ -1694,6 +1695,30 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
     searchMusicBrainz(query),
   ]);
 
+  // UC6: Capture partial platform failures for monitoring
+  const platformSettledResults: [string, PromiseSettledResult<unknown>][] = [
+    ['bandwagon', bandwagonResults],
+    ['mirlo', mirloResults],
+    ['faircamp', faircampResults],
+    ['jamcoop', jamcoopResults],
+    ['patreon', patreonResults],
+    ['qobuz', qobuzResults],
+    ['ampwall', ampwallResults],
+    ['beatport', beatportResults],
+    ['even', evenResults],
+    ['musicbrainz', musicbrainzResult],
+  ];
+  for (const [platform, result] of platformSettledResults) {
+    if (result.status === 'rejected') {
+      const error = result.reason as Error;
+      Sentry.captureMessage('Search platform failed', {
+        level: 'warning',
+        extra: { platform, query, errorMessage: error?.message || String(result.reason) },
+        tags: { platform },
+      });
+    }
+  }
+
   const allResults: PlatformResult[] = [];
   if (mirloResults.status === 'fulfilled') allResults.push(...mirloResults.value.filter(r => r.type === 'artist'));
 
@@ -1909,9 +1934,16 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     const searchResult = await searchAllPlatforms(normalizedQuery);
     const results = searchResult.results;
 
-    // TODO(UNS-86): Sentry.captureMessage('Search returned 0 results') + 'Search platform failed' — requires server-side Sentry init
-    // These would capture zero-result searches and partial platform failures for monitoring.
-    // See: https://linear.app/unstream/issue/UNS-86
+    // UC5: Capture zero-result searches for monitoring (volume signal for coverage gaps)
+    if (results.length === 0) {
+      Sentry.captureMessage('Search returned 0 results', {
+        level: 'info',
+        extra: {
+          query,
+          normalizedQuery,
+        },
+      });
+    }
 
     // If we have a claimed artist, put it first and remove any duplicate from live results
     if (claimedResult) {

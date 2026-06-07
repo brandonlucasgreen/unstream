@@ -4,6 +4,7 @@
 //   action: 'verify' — scrape website, verify link-back, discover platform links
 
 import { createClient } from '@supabase/supabase-js';
+import { Sentry } from '../lib/sentry';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 
@@ -109,7 +110,11 @@ interface ScrapeError {
 async function scrapeWebsite(websiteUrl: string): Promise<{ result: ScrapeResult | null; error?: ScrapeError }> {
   const urlCheck = isUrlSafeToFetch(websiteUrl);
   if (!urlCheck.safe) {
-    // TODO(UNS-86): Sentry.captureMessage('Claim verify: SSRF block triggered') — requires server-side Sentry init
+    Sentry.captureMessage('Claim verify: SSRF block triggered', {
+      level: 'info',
+      extra: { websiteUrl, reason: urlCheck.reason },
+      tags: { ssrfReason: urlCheck.reason || 'unknown' },
+    });
     console.warn(`[Claim] SSRF blocked: ${websiteUrl} — ${urlCheck.reason}`);
     return { result: null, error: { type: 'ssrf_blocked', message: urlCheck.reason || 'URL not allowed' } };
   }
@@ -535,8 +540,17 @@ export async function handler(event: {
 
     // Check that the website actually belongs to this artist
     // The page must reference the artist name in its title, text, or meta tags
-    // TODO(UNS-86): Sentry.captureMessage('Claim verify: page does not reference artist name') — requires server-side Sentry init
     if (!pageReferencesArtist(html, artist.name)) {
+      Sentry.captureMessage('Claim verify: page does not reference artist name', {
+        level: 'warning',
+        extra: {
+          artistSlug: slug,
+          artistName: artist.name,
+          websiteUrl: profile.website_url,
+          htmlLength: html.length,
+          linksFound: links.length,
+        },
+      });
       console.log(`[Claim] Website ${profile.website_url} does not reference artist "${artist.name}"`);
       return {
         statusCode: 422,
@@ -570,8 +584,12 @@ export async function handler(event: {
       }
     }
 
-    // TODO(UNS-86): Sentry.captureMessage('Claim verify: unstream link-back not found') — requires server-side Sentry init
     if (!hasUnstreamLink) {
+      Sentry.captureMessage('Claim verify: unstream link-back not found', {
+        level: 'warning',
+        extra: { artistSlug: slug, artistName: artist.name, websiteUrl: profile.website_url, linksFound: links.length },
+        tags: { failureMode: 'missing_linkback' },
+      });
       return {
         statusCode: 422,
         headers: CORS_HEADERS,
@@ -790,7 +808,10 @@ export async function handler(event: {
       };
     }
 
-    // TODO(UNS-86): Sentry.captureMessage('Manual verification request submitted') — requires server-side Sentry init
+    Sentry.captureMessage('Manual verification request submitted', {
+      level: 'info',
+      extra: { artistSlug: slug, artistName: artist.name, userId, messageLength: message?.trim().length || 0 },
+    });
     console.log(`[Claim] Manual verification request submitted for "${artist.name}" by ${userEmail}`);
 
     return {
