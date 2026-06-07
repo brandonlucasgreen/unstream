@@ -33,7 +33,10 @@ export function initSentry(): void {
   Sentry.init({
     dsn,
     environment: process.env.SENTRY_ENV || process.env.NODE_ENV || 'development',
-    release: process.env.COMMIT_SHA || 'unknown',
+    // Netlify provides COMMIT_REF (branch/ref) in all deploys; COMMIT_SHA is
+    // not standard. Fall back through COMMIT_REF → COMMIT_SHA → 'unknown'
+    // so version tracking works reliably on Netlify.
+    release: process.env.COMMIT_REF || process.env.COMMIT_SHA || 'unknown',
     tracesSampleRate: 0.0, // no performance tracing — only error/message events
   });
 
