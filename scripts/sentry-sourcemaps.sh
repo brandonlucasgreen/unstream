@@ -11,7 +11,11 @@
 #   SENTRY_AUTH_TOKEN — auth token with `project:releases` and `org:read` scopes
 #   SENTRY_ORG        — Sentry organization slug
 #   SENTRY_PROJECT    — Sentry project slug
-#   SENTRY_RELEASE    — release name (used by both upload and api/lib/sentry.ts)
+# Optional:
+#   SENTRY_RELEASE    — release name override. If unset, falls back through
+#                       COMMIT_REF (Netlify) → COMMIT_SHA → 'unknown' (same chain
+#                       as api/lib/sentry.ts), so the upload and runtime init
+#                       always tag the same release.
 #
 # See api/.env.example for documentation.
 
@@ -23,10 +27,17 @@ if [ -z "${SENTRY_AUTH_TOKEN:-}" ]; then
   exit 0
 fi
 
-if [ -z "${SENTRY_ORG:-}" ] || [ -z "${SENTRY_PROJECT:-}" ] || [ -z "${SENTRY_RELEASE:-}" ]; then
-  echo "[sentry-sourcemaps] ERROR: SENTRY_AUTH_TOKEN is set but one of SENTRY_ORG / SENTRY_PROJECT / SENTRY_RELEASE is missing." >&2
+if [ -z "${SENTRY_ORG:-}" ] || [ -z "${SENTRY_PROJECT:-}" ]; then
+  echo "[sentry-sourcemaps] ERROR: SENTRY_AUTH_TOKEN is set but one of SENTRY_ORG / SENTRY_PROJECT is missing." >&2
   echo "[sentry-sourcemaps] Aborting to avoid uploading source maps with incomplete metadata." >&2
   exit 1
+fi
+
+# Mirror the release env var priority chain from api/lib/sentry.ts so the upload
+# and the runtime Sentry.init() tag the same release.
+EFFECTIVE_RELEASE="${SENTRY_RELEASE:-${COMMIT_REF:-${COMMIT_SHA:-unknown}}}"
+if [ -z "${SENTRY_RELEASE:-}" ]; then
+  echo "[sentry-sourcemaps] SENTRY_RELEASE not set, using '${EFFECTIVE_RELEASE}' (from COMMIT_REF/CHA fallback chain)."
 fi
 
 # Resolve repo root regardless of where the script is invoked from.
@@ -40,7 +51,7 @@ if [ ! -d "$SOURCE_DIR" ]; then
 fi
 
 echo "[sentry-sourcemaps] Uploading source maps for $SOURCE_DIR"
-echo "[sentry-sourcemaps] Org: $SENTRY_ORG  Project: $SENTRY_PROJECT  Release: $SENTRY_RELEASE"
+echo "[sentry-sourcemaps] Org: $SENTRY_ORG  Project: $SENTRY_PROJECT  Release: $EFFECTIVE_RELEASE"
 
 # npx --yes avoids requiring a permanent install of @sentry/cli.
 # set +e so we capture the exit code for a clearer log line on failure.
@@ -49,7 +60,7 @@ npx --yes @sentry/cli@latest sourcemaps upload \
   --org="$SENTRY_ORG" \
   --project="$SENTRY_PROJECT" \
   --auth-token="$SENTRY_AUTH_TOKEN" \
-  --release="$SENTRY_RELEASE" \
+  --release="$EFFECTIVE_RELEASE" \
   "$SOURCE_DIR"
 EXIT=$?
 set -e
