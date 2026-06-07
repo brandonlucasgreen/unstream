@@ -2,7 +2,7 @@ import { parse } from 'node-html-parser';
 import { Sentry } from '../lib/sentry';
 import { cacheGetOrFetch, artistCacheKey } from './cache';
 import { persistSearchResults, getArtistBySlug, artistSlug, getMergeOverrides } from './db';
-import { checkRateLimit, getClientIp } from './ratelimit';
+import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
 import {
   type SourceId,
@@ -1711,11 +1711,16 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
   for (const [platform, result] of platformSettledResults) {
     if (result.status === 'rejected') {
       const error = result.reason as Error;
-      Sentry.captureMessage('Search platform failed', {
-        level: 'warning',
-        extra: { platform, query, errorMessage: error?.message || String(result.reason) },
-        tags: { platform },
-      });
+      const errorMessage = error?.message || String(result.reason);
+      // Dedupe: only capture once per (platform, error message) pair per 24h
+      const shouldCapture = await checkSentryDedup(`uc6:${platform}:${errorMessage}`, 24 * 60 * 60);
+      if (shouldCapture) {
+        Sentry.captureMessage('Search platform failed', {
+          level: 'warning',
+          extra: { platform, query, errorMessage },
+          tags: { platform },
+        });
+      }
     }
   }
 
@@ -1936,13 +1941,17 @@ export async function handler(event: { queryStringParameters?: Record<string, st
 
     // UC5: Capture zero-result searches for monitoring (volume signal for coverage gaps)
     if (results.length === 0) {
-      Sentry.captureMessage('Search returned 0 results', {
-        level: 'info',
-        extra: {
-          query,
-          normalizedQuery,
-        },
-      });
+      // Dedupe: only capture once per unique normalized query per 24h
+      const shouldCapture = await checkSentryDedup(`uc5:${normalizedQuery}`, 24 * 60 * 60);
+      if (shouldCapture) {
+        Sentry.captureMessage('Search returned 0 results', {
+          level: 'info',
+          extra: {
+            query,
+            normalizedQuery,
+          },
+        });
+      }
     }
 
     // If we have a claimed artist, put it first and remove any duplicate from live results
