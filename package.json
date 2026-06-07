@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@sentry/node": "^10.56.0",
-    "@sentry/react": "^10.50.0",
+    "@sentry/react": "^10.56.0",
     "@supabase/supabase-js": "^2.99.1",
     "@tailwindcss/typography": "^0.5.19",
     "@upstash/ratelimit": "^2.0.8",
