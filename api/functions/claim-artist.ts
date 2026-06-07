@@ -109,6 +109,7 @@ interface ScrapeError {
 async function scrapeWebsite(websiteUrl: string): Promise<{ result: ScrapeResult | null; error?: ScrapeError }> {
   const urlCheck = isUrlSafeToFetch(websiteUrl);
   if (!urlCheck.safe) {
+    // TODO(UNS-86): Sentry.captureMessage('Claim verify: SSRF block triggered') — requires server-side Sentry init
     console.warn(`[Claim] SSRF blocked: ${websiteUrl} — ${urlCheck.reason}`);
     return { result: null, error: { type: 'ssrf_blocked', message: urlCheck.reason || 'URL not allowed' } };
   }
@@ -534,6 +535,7 @@ export async function handler(event: {
 
     // Check that the website actually belongs to this artist
     // The page must reference the artist name in its title, text, or meta tags
+    // TODO(UNS-86): Sentry.captureMessage('Claim verify: page does not reference artist name') — requires server-side Sentry init
     if (!pageReferencesArtist(html, artist.name)) {
       console.log(`[Claim] Website ${profile.website_url} does not reference artist "${artist.name}"`);
       return {
@@ -568,6 +570,7 @@ export async function handler(event: {
       }
     }
 
+    // TODO(UNS-86): Sentry.captureMessage('Claim verify: unstream link-back not found') — requires server-side Sentry init
     if (!hasUnstreamLink) {
       return {
         statusCode: 422,
@@ -787,6 +790,7 @@ export async function handler(event: {
       };
     }
 
+    // TODO(UNS-86): Sentry.captureMessage('Manual verification request submitted') — requires server-side Sentry init
     console.log(`[Claim] Manual verification request submitted for "${artist.name}" by ${userEmail}`);
 
     return {
