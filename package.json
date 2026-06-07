@@ -15,7 +15,8 @@
     "test:unit": "cd apps/web && npx vitest run tests/unit",
     "test:integration": "cd apps/web && npx vitest run tests/integration",
     "lint": "cd apps/web && npx eslint .",
-    "preview": "cd apps/web && npx vite preview"
+    "preview": "cd apps/web && npx vite preview",
+    "sentry:sourcemaps": "npx --yes @sentry/cli sourcemaps upload --org=$SENTRY_ORG --project=$SENTRY_PROJECT --auth-token=$SENTRY_AUTH_TOKEN --release=$SENTRY_RELEASE api/functions"
   },
   "dependencies": {
     "@sentry/node": "^10.56.0",
