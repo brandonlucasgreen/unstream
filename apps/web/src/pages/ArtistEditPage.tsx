@@ -1,5 +1,6 @@
 import { useReducer, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { sources } from '../services/sources';
 
@@ -181,7 +182,8 @@ export function ArtistEditPage() {
             loading: false,
           },
         });
-      } catch {
+      } catch (e) {
+        Sentry.captureException(e, { extra: { context: 'artistEdit.loadArtist' } });
         dispatch({ type: 'LOAD_DATA', data: { error: 'Failed to load artist data', loading: false } });
       }
     }
@@ -234,7 +236,8 @@ export function ArtistEditPage() {
       } else {
         set('error', data.error || 'Could not find a profile photo on that page');
       }
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'artistEdit.fetchAvatar' } });
       set('error', 'Network error. Please try again.');
     }
     set('fetchingAvatar', null);
@@ -345,7 +348,8 @@ export function ArtistEditPage() {
       } else {
         set('success', 'Changes saved!');
       }
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'artistEdit.saveProfile' } });
       set('error', 'Network error. Please try again.');
     }
     set('saving', false);

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 
 import { Header } from '../components/Header';
@@ -64,7 +65,8 @@ export function ArtistDashboardPage() {
 
         const data = await response.json();
         setProfiles(data.profiles || []);
-      } catch {
+      } catch (e) {
+        Sentry.captureException(e, { extra: { context: 'artistDashboard.loadProfiles' } });
         setError('Failed to load your profiles. Please try again.');
       }
       setLoading(false);

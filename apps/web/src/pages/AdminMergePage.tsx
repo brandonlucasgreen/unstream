@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import type { SearchResult } from '../types';
 import { sources } from '../services/sources';
@@ -100,6 +101,7 @@ export function AdminMergePage() {
 
       navigate('/', { replace: true });
     } catch (err) {
+      Sentry.captureException(err, { extra: { context: 'admin.mergeOverride' } });
       setError(err instanceof Error ? err.message : 'Failed to save merge override.');
     } finally {
       setSaving(false);

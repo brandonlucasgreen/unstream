@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
+import * as Sentry from '@sentry/react';
 import { getSupabaseClient, waitForMagicLinkSession } from '../services/auth';
 
 const ADMIN_EMAIL = 'info@kidlightbulbs.com';
@@ -152,7 +153,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         setSavedArtists(prev => prev.filter(a => a.artistId !== artistId));
       }
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'auth.saveArtist' } });
       // Rollback on network error
       setSavedArtistIds(prev => {
         const next = new Set(prev);
@@ -194,7 +196,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setSavedArtists(prev => [...prev, removedFromList]);
         }
       }
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'auth.removeSavedArtist' } });
       // Rollback on network error
       setSavedArtistIds(prev => new Set(prev).add(artistId));
       if (removedFromList) {
@@ -232,7 +235,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSavedArtistIds(new Set((data.savedArtists || []).map((a: SavedArtist) => a.artistId)));
         setArtistsLoaded(true);
       }
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'auth.loadSavedArtists' } });
       console.error('Failed to load saved artists');
     }
   }, [session, artistsLoaded]);

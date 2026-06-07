@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import * as Sentry from '@sentry/react';
 import type { EmbedData } from './ResultCardTypes';
 
 interface ResultCardPreviewProps {
@@ -38,6 +39,7 @@ export function ResultCardPreview({ resultName, canPlay, previewUrl }: ResultCar
       setEmbedData(data);
       setShowPlayer(true);
     } catch (err) {
+      Sentry.captureException(err, { extra: { context: 'resultCard.embedPreview' } });
       console.error('Embed error:', err);
       setEmbedError(true);
     } finally {

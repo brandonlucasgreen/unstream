@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface LoginInterstitialProps {
@@ -28,7 +29,8 @@ export function LoginInterstitial({ artistId, artistName, onClose }: LoginInters
       localStorage.setItem('pendingSave', JSON.stringify({ artistId }));
       await signInWithMagicLink(email.trim());
       setMagicSent(true);
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'auth.magicLinkInterstitial' } });
       setError('Failed to send magic link. Try again.');
       localStorage.removeItem('pendingSave');
     } finally {
@@ -48,7 +50,8 @@ export function LoginInterstitial({ artistId, artistName, onClose }: LoginInters
       localStorage.setItem('pendingSave', JSON.stringify({ artistId }));
       await signInWithPassword(email.trim(), password);
       onClose(); // AuthContext will pick up the pending save
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'auth.passwordInterstitial' } });
       setError('Invalid email or password');
       localStorage.removeItem('pendingSave');
     } finally {

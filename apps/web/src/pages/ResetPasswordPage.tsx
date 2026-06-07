@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import * as Sentry from '@sentry/react';
 import { updatePassword } from '../services/auth';
 import { useAuth } from '../contexts/AuthContext';
 import { Header } from '../components/Header';
@@ -37,7 +38,8 @@ export function ResetPasswordPage() {
         setSuccess(true);
         setTimeout(() => navigate('/artist-dashboard', { replace: true }), 2000);
       }
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'auth.resetPasswordSubmit' } });
       setError('Something went wrong. Please try again.');
     }
     setLoading(false);

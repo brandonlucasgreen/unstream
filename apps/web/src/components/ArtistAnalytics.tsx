@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { sources } from '../services/sources';
 import type { SourceId } from '../types';
@@ -43,7 +44,7 @@ export function ArtistAnalytics({ slug }: { slug: string }) {
         return res.json();
       })
       .then(setData)
-      .catch(() => setError('Unable to load analytics'))
+      .catch(e => { Sentry.captureException(e, { extra: { context: 'artistDashboard.analytics' } }); setError('Unable to load analytics') })
       .finally(() => setLoading(false));
   }, [slug, period, session?.access_token]);
 

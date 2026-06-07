@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import * as Sentry from '@sentry/react';
 import { SearchBar } from './components/SearchBar';
 import { ResultCard } from './components/ResultCard';
 
@@ -161,7 +162,7 @@ function App() {
             setResults(prev => mergeWithMusicBrainzData(prev, mbData));
           }
         } catch (enrichErr) {
-          // Silent failure for enrichment - don't show error to user
+          Sentry.captureException(enrichErr, { extra: { context: 'search.musicbrainzEnrichment' } });
           console.error('MusicBrainz enrichment failed:', enrichErr);
         } finally {
           if (currentSearchRef.current === searchId) {
@@ -170,6 +171,7 @@ function App() {
         }
       }
     } catch (err) {
+      Sentry.captureException(err, { extra: { context: 'search.platformSearch' } });
       if (currentSearchRef.current === searchId) {
         setError('Failed to search. Please try again.');
         setIsLoading(false);
