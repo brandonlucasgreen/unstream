@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import * as Sentry from '@sentry/react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -42,7 +43,7 @@ export function GuidePage() {
           if (descTag) descTag.setAttribute('content', guideMeta.description);
         }
       })
-      .catch(() => setError(true));
+      .catch((e) => { Sentry.captureException(e, { extra: { context: 'guide.fetchContent' } }); setError(true) });
 
     return () => {
       document.title = 'Unstream - Support Artists Directly';

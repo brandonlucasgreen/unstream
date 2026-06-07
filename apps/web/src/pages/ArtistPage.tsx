@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import * as Sentry from '@sentry/react';
 import { SearchBar } from '../components/SearchBar';
 import { ResultCard } from '../components/ResultCard';
 import { LoginInterstitial } from '../components/LoginInterstitial';
@@ -115,7 +116,8 @@ export function ArtistPage() {
             return;
           }
         }
-      } catch {
+      } catch (e) {
+        Sentry.captureException(e, { extra: { context: 'artistPage.fetchCachedData' } });
         // Fall through to live fetch
       }
 
@@ -135,7 +137,8 @@ export function ArtistPage() {
           setIsLoading(false);
           return;
         }
-      } catch {
+      } catch (e) {
+        Sentry.captureException(e, { extra: { context: 'artistPage.fetchApiData' } });
         // Fall through to search
       }
 
@@ -162,13 +165,14 @@ export function ArtistPage() {
               if (!cancelled && mbData) {
                 setResults(prev => mergeWithMusicBrainzData(prev, mbData));
               }
-            } catch {
-              // Silent failure for enrichment
+            } catch (e) {
+              Sentry.captureException(e, { extra: { context: 'artistPage.musicbrainzEnrichment' } });
             } finally {
               if (!cancelled) setIsEnriching(false);
             }
           }
-        } catch {
+        } catch (e) {
+          Sentry.captureException(e, { extra: { context: 'artistPage.searchArtist' } });
           if (!cancelled) {
             setError('Failed to load artist data. Please try again.');
             setIsLoading(false);

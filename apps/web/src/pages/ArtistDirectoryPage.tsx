@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import * as Sentry from '@sentry/react';
 
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
@@ -24,7 +25,8 @@ export function ArtistDirectoryPage() {
             break;
           }
           if (attempt === 0 && res.status >= 500) continue;
-        } catch {
+        } catch (e) {
+          Sentry.captureException(e, { extra: { context: 'artistDirectory.fetch' } });
           if (attempt === 0) continue;
         }
         break;

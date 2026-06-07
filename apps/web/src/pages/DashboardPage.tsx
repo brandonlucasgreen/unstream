@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
+import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 
 import { Header } from '../components/Header';
@@ -81,7 +82,8 @@ export function DashboardPage() {
 
         const savedData = await savedResponse.json();
         setSavedArtists(savedData.savedArtists || []);
-      } catch {
+      } catch (e) {
+        Sentry.captureException(e, { extra: { context: 'dashboard.loadData' } });
         setError('Failed to load your profiles. Please try again.');
       }
       setLoading(false);
@@ -147,7 +149,8 @@ export function DashboardPage() {
         artistId,
         onUndo: () => handleUndoRemove(artistId),
       });
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'dashboard.removeSavedArtist' } });
       setError('Failed to remove artist. Please try again.');
     }
   };
@@ -172,7 +175,8 @@ export function DashboardPage() {
       const data = await response.json();
       setSavedArtists(prev => [...prev, data.savedArtist]);
       setToast({ message: 'Artist restored!', type: 'success' });
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'dashboard.undoRemove' } });
       setError('Failed to restore artist. Please try again.');
     }
   };
@@ -211,7 +215,8 @@ export function DashboardPage() {
       setSavedArtists(prev => prev.map(a =>
         a.artistId === slug ? { ...a, supported: data.savedArtist.supported, supportedAt: data.savedArtist.supportedAt } : a
       ));
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'dashboard.toggleSupport' } });
       setSavedArtists(prev => prev.map(a =>
         a.artistId === slug ? { ...a, supported: originalSupported, supportedAt: originalSupportedAt } : a
       ));

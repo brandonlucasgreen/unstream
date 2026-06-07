@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import * as Sentry from '@sentry/react';
 import { Link } from 'react-router-dom';
 
 import { Header } from '../components/Header';
@@ -37,7 +38,7 @@ export function GuidesIndexPage() {
         const sorted = data.sort((a, b) => b.published.localeCompare(a.published));
         setGuides(sorted);
       })
-      .catch(() => setGuides([]))
+      .catch((e) => { Sentry.captureException(e, { extra: { context: 'guides.fetchManifest' } }); setGuides([]) })
       .finally(() => setLoading(false));
   }, []);
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { Header } from '../components/Header';
 
@@ -43,6 +44,7 @@ export function AdminVerifyPage() {
       const data = await response.json();
       setRequests(data.requests || []);
     } catch (err) {
+      Sentry.captureException(err, { extra: { context: 'admin.verify.fetchRequests' } });
       setError(err instanceof Error ? err.message : 'Failed to load verification requests.');
     } finally {
       setLoading(false);
@@ -88,6 +90,7 @@ export function AdminVerifyPage() {
         return next;
       });
     } catch (err) {
+      Sentry.captureException(err, { extra: { context: `admin.verify.${action}` } });
       setError(err instanceof Error ? err.message : `Failed to ${action} request.`);
     } finally {
       setActionLoading(null);

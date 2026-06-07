@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import * as Sentry from '@sentry/react';
 import { signInWithMagicLink, signInWithPassword, resetPasswordForEmail } from '../services/auth';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -34,7 +35,8 @@ export function LoginPage() {
         setError(authError);
       }
       setLoading(false);
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'auth.passwordLogin' } });
       setError('Network error. Please try again.');
       setLoading(false);
     }
@@ -54,7 +56,8 @@ export function LoginPage() {
         setView('magicLinkSent');
       }
       setLoading(false);
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'auth.magicLink' } });
       setError('Network error. Please try again.');
       setLoading(false);
     }
@@ -79,7 +82,8 @@ export function LoginPage() {
         setView('resetSent');
       }
       setLoading(false);
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'auth.resetPassword' } });
       setError('Network error. Please try again.');
       setLoading(false);
     }

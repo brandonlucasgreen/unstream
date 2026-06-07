@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
@@ -281,7 +282,7 @@ export function AdminAnalyticsPage() {
         return res.json();
       })
       .then((d: DashboardData) => setData(d))
-      .catch(e => setError(e.message))
+      .catch(e => { Sentry.captureException(e, { extra: { context: 'admin.analyticsDashboard' } }); setError(e.message) })
       .finally(() => setLoading(false));
   }, [authLoading, isAdmin, session, navigate]);
 

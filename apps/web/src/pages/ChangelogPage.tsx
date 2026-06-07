@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import * as Sentry from '@sentry/react';
 
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
@@ -31,7 +32,7 @@ export function ChangelogPage() {
         const sorted = [...data].sort((a, b) => b.date.localeCompare(a.date));
         setEntries(sorted);
       })
-      .catch(() => setEntries([]))
+      .catch((e) => { Sentry.captureException(e, { extra: { context: 'changelog.fetchEntries' } }); setEntries([]) })
       .finally(() => setLoading(false));
 
     return () => {

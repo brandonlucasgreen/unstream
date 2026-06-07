@@ -2,6 +2,7 @@
 // as the single source of truth. When updating these fields, update the shared registry too.
 // The sources below add client-only fields (description, searchUrlTemplate, hasEmbed, aiPolicy, etc.).
 import type { Source, SourceId, SearchResponse, SearchResult } from '../types';
+import * as Sentry from '@sentry/react';
 
 export const sources: Record<SourceId, Source> = {
   bandcamp: {
@@ -502,6 +503,7 @@ async function searchSingle(query: string): Promise<SearchResponse> {
     }
     return await response.json();
   } catch (error) {
+    Sentry.captureException(error, { extra: { context: 'search.platformSearch' } });
     console.error('Failed to search platforms:', error);
     return {
       query,
@@ -550,6 +552,7 @@ export async function resolveArtistUrl(url: string): Promise<ResolveResult | nul
     }
     return await response.json();
   } catch (error) {
+    Sentry.captureException(error, { extra: { context: 'search.resolveUrl' } });
     console.error('Failed to resolve URL:', error);
     return null;
   }
@@ -564,6 +567,7 @@ export async function fetchMusicBrainzData(query: string): Promise<import('../ty
     }
     return await response.json();
   } catch (error) {
+    Sentry.captureException(error, { extra: { context: 'search.musicbrainzEnrichment' } });
     console.error('Failed to fetch MusicBrainz data:', error);
     return null;
   }

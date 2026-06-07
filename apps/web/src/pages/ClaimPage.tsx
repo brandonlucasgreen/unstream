@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import * as Sentry from '@sentry/react';
 import { signInWithMagicLink } from '../services/auth';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -79,7 +80,7 @@ export function ClaimPage() {
         const enrichedCountry = data?.location?.country || data?.location?.countryCode;
         if (enrichedCountry) setCountry(enrichedCountry);
       })
-      .catch(() => {});
+      .catch((e) => { Sentry.captureException(e, { extra: { context: 'claim.fetchArtistInfo' } }); })
   }, [slug]);
 
   function getAuthToken(): string | null {
@@ -160,7 +161,8 @@ export function ClaimPage() {
 
       setVerifyUrl(data.verifyUrl);
       setStep('verify');
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'claim.startClaim' } });
       setError('Network error. Please try again.');
     }
     setLoading(false);
@@ -209,7 +211,8 @@ export function ClaimPage() {
       }
       setCurrentImageUrl(data.imageUrl || null);
       setStep('review');
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'claim.verify' } });
       setError('Network error. Please try again.');
     }
     setLoading(false);
@@ -242,7 +245,8 @@ export function ClaimPage() {
       } else {
         setError(data.error || 'Could not find a profile photo on that page');
       }
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'claim.fetchAvatar' } });
       setError('Network error. Please try again.');
     }
     setFetchingAvatar(null);
@@ -293,7 +297,8 @@ export function ClaimPage() {
       }
 
       window.location.href = `/a/${data.slug || slug}?claimed`;
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'claim.confirmReview' } });
       setError('Network error. Please try again.');
     }
     setLoading(false);
@@ -335,7 +340,8 @@ export function ClaimPage() {
       }
 
       setStep('manual-review-submitted');
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'claim.manualReview' } });
       setError('Network error. Please try again.');
     }
     setManualReviewSubmitting(false);

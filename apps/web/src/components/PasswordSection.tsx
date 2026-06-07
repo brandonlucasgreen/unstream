@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import * as Sentry from '@sentry/react';
 import { updatePassword } from '../services/auth';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -37,7 +38,8 @@ export function PasswordSection() {
         setConfirmPassword('');
         setExpanded(false);
       }
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'auth.updatePassword' } });
       setError('Something went wrong. Please try again.');
     }
     setLoading(false);
