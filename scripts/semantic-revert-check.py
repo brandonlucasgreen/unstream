@@ -80,9 +80,12 @@ def gh_api(url: str, token: str, method: str = "GET", data: dict | None = None) 
         req.add_header("Content-Type", "application/json")
     try:
         with urlopen(req) as resp:
-            return json.loads(resp.read().decode())
+            body = resp.read().decode()
+            if not body:
+                return {}
+            return json.loads(body)
     except HTTPError as exc:
-        if exc.code == 404:
+        if exc.code in (204, 404):
             return {}
         raise
 
@@ -401,11 +404,14 @@ def post_or_update_comment(
 
 def delete_comment(repo: str, comment_id: int, token: str) -> None:
     """Delete a comment by ID."""
-    gh_api(
-        f"https://api.github.com/repos/{repo}/issues/comments/{comment_id}",
-        token,
-        method="DELETE",
-    )
+    try:
+        gh_api(
+            f"https://api.github.com/repos/{repo}/issues/comments/{comment_id}",
+            token,
+            method="DELETE",
+        )
+    except HTTPError as exc:
+        print(f"Warning: Could not delete stale comment {comment_id}: {exc}")
 
 
 # ---------------------------------------------------------------------------
@@ -457,21 +463,24 @@ def main():
 
         # Clean up any existing comment from a previous run that found issues
         if token and not dry_run:
-            api_base = f"https://api.github.com/repos/{repo}"
-            page = 1
-            while page <= 10:
-                comments = gh_api(
-                    f"{api_base}/issues/{pr_number}/comments?per_page=100&page={page}",
-                    token,
-                )
-                if not comments:
-                    break
-                for comment in comments:
-                    if MARKER in comment.get("body", ""):
-                        print(f"Removing stale comment (id={comment['id']}).")
-                        delete_comment(repo, comment["id"], token)
+            try:
+                api_base = f"https://api.github.com/repos/{repo}"
+                page = 1
+                while page <= 10:
+                    comments = gh_api(
+                        f"{api_base}/issues/{pr_number}/comments?per_page=100&page={page}",
+                        token,
+                    )
+                    if not comments:
                         break
-                page += 1
+                    for comment in comments:
+                        if MARKER in comment.get("body", ""):
+                            print(f"Removing stale comment (id={comment['id']}).")
+                            delete_comment(repo, comment["id"], token)
+                            break
+                    page += 1
+            except Exception as exc:
+                print(f"Warning: Could not clean up stale comments: {exc}")
         return
 
     print(f"Found {len(findings)} potential semantic revert(s):")
