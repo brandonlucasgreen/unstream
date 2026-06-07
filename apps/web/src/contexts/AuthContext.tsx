@@ -79,6 +79,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Listen for auth state changes (sign in, sign out, token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
       if (!cancelled) {
+        if (newSession === null && session !== null) {
+          Sentry.captureMessage('Auth session ended unexpectedly', {
+            level: 'info',
+            extra: { previousUserId: session?.user?.id, previousExpiry: session?.expires_at },
+            tags: { context: 'auth.session' },
+          });
+        }
         setSession(newSession);
         setUser(newSession?.user ?? null);
         // Clear saved artists on sign out
@@ -110,7 +117,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const supabase = getSupabaseClient();
     if (!supabase) throw new Error('Auth not available');
     const { error } = await supabase.auth.signInWithOtp({ email });
-    if (error) throw error;
+    if (error) {
+      Sentry.captureMessage('Magic link sign-in failed', {
+        level: 'warning',
+        extra: { errorMessage: error.message, errorCode: error.status },
+        tags: { context: 'auth.magicLink' },
+      });
+      throw error;
+    }
   }, []);
 
   const handleSignInWithPassword = useCallback(async (email: string, password: string) => {
@@ -145,6 +159,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = await response.json();
         setSavedArtists(prev => [...prev, data.savedArtist]);
       } else {
+        Sentry.captureMessage('Save artist failed (rolled back)', {
+          level: 'warning',
+          extra: { artistId, artistName, hasSession: !!session },
+          tags: { context: 'auth.saveArtist' },
+        });
         // Rollback on error: remove from both Set and array
         setSavedArtistIds(prev => {
           const next = new Set(prev);
@@ -155,6 +174,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (e) {
       Sentry.captureException(e, { extra: { context: 'auth.saveArtist' } });
+      Sentry.captureMessage('Save artist failed (rolled back)', {
+        level: 'warning',
+        extra: { artistId, artistName, hasSession: !!session },
+        tags: { context: 'auth.saveArtist' },
+      });
       // Rollback on network error
       setSavedArtistIds(prev => {
         const next = new Set(prev);
@@ -190,6 +214,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
+        Sentry.captureMessage('Remove artist failed (rolled back)', {
+          level: 'warning',
+          extra: { artistId, artistName: removedFromList?.name, hasSession: !!session },
+          tags: { context: 'auth.removeSavedArtist' },
+        });
         // Rollback on error: restore both Set and array
         setSavedArtistIds(prev => new Set(prev).add(artistId));
         if (removedFromList) {
@@ -198,6 +227,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (e) {
       Sentry.captureException(e, { extra: { context: 'auth.removeSavedArtist' } });
+      Sentry.captureMessage('Remove artist failed (rolled back)', {
+        level: 'warning',
+        extra: { artistId, artistName: removedFromList?.name, hasSession: !!session },
+        tags: { context: 'auth.removeSavedArtist' },
+      });
       // Rollback on network error
       setSavedArtistIds(prev => new Set(prev).add(artistId));
       if (removedFromList) {
@@ -234,6 +268,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSavedArtists(data.savedArtists || []);
         setSavedArtistIds(new Set((data.savedArtists || []).map((a: SavedArtist) => a.artistId)));
         setArtistsLoaded(true);
+      } else {
+        Sentry.captureMessage('Dashboard saved-artists load failed', {
+          level: 'warning',
+          extra: { statusCode: response.status, hasSession: !!session },
+          tags: { context: 'auth.loadSavedArtists' },
+        });
       }
     } catch (e) {
       Sentry.captureException(e, { extra: { context: 'auth.loadSavedArtists' } });

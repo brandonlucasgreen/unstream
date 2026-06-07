@@ -1909,6 +1909,10 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     const searchResult = await searchAllPlatforms(normalizedQuery);
     const results = searchResult.results;
 
+    // TODO(UNS-86): Sentry.captureMessage('Search returned 0 results') + 'Search platform failed' — requires server-side Sentry init
+    // These would capture zero-result searches and partial platform failures for monitoring.
+    // See: https://linear.app/unstream/issue/UNS-86
+
     // If we have a claimed artist, put it first and remove any duplicate from live results
     if (claimedResult) {
       const claimedName = normalizeForComparison(claimedResult.name);
