@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build && npm run sentry:sourcemaps"
+  command = "npm run build"
   publish = "apps/web/dist"
   functions = "api/functions"
   edge_functions = "api/edge"
