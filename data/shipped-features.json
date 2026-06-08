@@ -74,7 +74,7 @@
     "title": "Save artists on web",
     "description": "You can now save artists you care about on unstream.stream — sign in and tap the heart on any artist page to keep them in your dashboard.",
     "date": "2026-05-31",
-    "announced": false
+    "announced": true
   },
   {
     "id": "pwa-dashboard-search",
