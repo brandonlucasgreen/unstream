@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 interface ClaimDoneStepProps {
   slug: string | undefined;
   discoveredLinks: number;
@@ -19,12 +21,12 @@ export function ClaimDoneStep({ slug, discoveredLinks, alreadyVerified }: ClaimD
           {discoveredLinks === 1 ? ' link' : ' links'} from your website.
         </p>
       )}
-      <a
-        href={`/a/${slug}?claimed`}
+      <Link
+        to={`/a/${slug}?claimed`}
         className="inline-block px-6 py-2 rounded-lg bg-accent-primary text-white font-medium hover:bg-accent-primary/90 transition-colors"
       >
         View your artist page
-      </a>
+      </Link>
     </div>
   );
 }
