@@ -20,7 +20,8 @@ export function ArtistDirectoryPage() {
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
           const res = await fetch('/api/artist-directory');
-          if (res.ok) {
+          const ctype = res.headers.get('content-type') || '';
+          if (res.ok && ctype.includes('application/json')) {
             const data = await res.json();
             setArtists(data.artists || []);
             break;
