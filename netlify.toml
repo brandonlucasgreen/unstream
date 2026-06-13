@@ -74,6 +74,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/saved-artists/sync"
+  to = "/.netlify/functions/saved-artists-sync"
+  status = 200
+
+[[redirects]]
   from = "/api/saved-artists"
   to = "/.netlify/functions/saved-artists"
   status = 200
