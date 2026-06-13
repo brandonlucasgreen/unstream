@@ -213,8 +213,19 @@ async function handleSave(user: { userId: string; email: string }, body: Record<
       artist_image_url: imageUrl,
       notes: (body.notes as string) || null,
     };
-    if (body.last_modified !== undefined) upsertPayload.last_modified = body.last_modified;
-    if (body.device_id !== undefined) upsertPayload.device_id = body.device_id;
+    if (body.last_modified !== undefined) {
+      if (typeof body.last_modified === 'string') {
+        const parsed = new Date(body.last_modified);
+        if (!isNaN(parsed.getTime())) {
+          upsertPayload.last_modified = body.last_modified;
+        }
+      }
+    }
+    if (body.device_id !== undefined) {
+      if (typeof body.device_id === 'string') {
+        upsertPayload.device_id = body.device_id.slice(0, 128);
+      }
+    }
 
     const { data: saved, error: upsertError } = await client
       .from('saved_artists')

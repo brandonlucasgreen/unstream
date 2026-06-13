@@ -11,7 +11,7 @@ ALTER TABLE saved_artists ADD COLUMN IF NOT EXISTS device_id TEXT;
 
 -- Index for efficient "give me everything since X" pull queries
 CREATE INDEX IF NOT EXISTS idx_saved_artists_user_last_modified
-  ON saved_artists (user_id, last_modified DESC);
+  ON saved_artists (user_id, last_modified ASC);
 
 -- Trigger: bump last_modified on every UPDATE so edits to notes/supported
 -- propagate through the sync endpoint.

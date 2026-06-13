@@ -146,4 +146,74 @@ describe('saved-artists API - Validation logic', () => {
       expect(upsertPayload.device_id).toBeUndefined();
     });
   });
+
+  describe('UNS-93: last_modified input validation', () => {
+    it('non-parseable last_modified string is silently dropped (DB default applies)', () => {
+      const body: Record<string, unknown> = { artistId: 'radiohead', last_modified: 'not-a-date' };
+      const upsertPayload: Record<string, unknown> = {};
+      if (body.last_modified !== undefined) {
+        if (typeof body.last_modified === 'string') {
+          const parsed = new Date(body.last_modified);
+          if (!isNaN(parsed.getTime())) {
+            upsertPayload.last_modified = body.last_modified;
+          }
+        }
+      }
+      expect(upsertPayload.last_modified).toBeUndefined();
+    });
+
+    it('non-string last_modified (number) is silently dropped', () => {
+      const body: Record<string, unknown> = { artistId: 'radiohead', last_modified: 12345 };
+      const upsertPayload: Record<string, unknown> = {};
+      if (body.last_modified !== undefined) {
+        if (typeof body.last_modified === 'string') {
+          const parsed = new Date(body.last_modified);
+          if (!isNaN(parsed.getTime())) {
+            upsertPayload.last_modified = body.last_modified;
+          }
+        }
+      }
+      expect(upsertPayload.last_modified).toBeUndefined();
+    });
+
+    it('valid ISO-8601 last_modified string is accepted', () => {
+      const body: Record<string, unknown> = { artistId: 'radiohead', last_modified: '2099-01-01T00:00:00Z' };
+      const upsertPayload: Record<string, unknown> = {};
+      if (body.last_modified !== undefined) {
+        if (typeof body.last_modified === 'string') {
+          const parsed = new Date(body.last_modified);
+          if (!isNaN(parsed.getTime())) {
+            upsertPayload.last_modified = body.last_modified;
+          }
+        }
+      }
+      expect(upsertPayload.last_modified).toBe('2099-01-01T00:00:00Z');
+    });
+  });
+
+  describe('UNS-93: device_id input validation', () => {
+    it('device_id longer than 128 chars is truncated', () => {
+      const longDeviceId = 'x'.repeat(200);
+      const body: Record<string, unknown> = { artistId: 'radiohead', device_id: longDeviceId };
+      const upsertPayload: Record<string, unknown> = {};
+      if (body.device_id !== undefined) {
+        if (typeof body.device_id === 'string') {
+          upsertPayload.device_id = body.device_id.slice(0, 128);
+        }
+      }
+      expect((upsertPayload.device_id as string).length).toBeLessThanOrEqual(128);
+      expect(upsertPayload.device_id).toBe('x'.repeat(128));
+    });
+
+    it('non-string device_id (number) is silently dropped', () => {
+      const body: Record<string, unknown> = { artistId: 'radiohead', device_id: 12345 };
+      const upsertPayload: Record<string, unknown> = {};
+      if (body.device_id !== undefined) {
+        if (typeof body.device_id === 'string') {
+          upsertPayload.device_id = body.device_id.slice(0, 128);
+        }
+      }
+      expect(upsertPayload.device_id).toBeUndefined();
+    });
+  });
 });
