@@ -139,6 +139,31 @@ Tests use Vitest. Unit tests are in `apps/web/tests/unit/`, integration tests in
 
 Pushes to `main` trigger Netlify builds. The build command generates the guides manifest and dispatch feed, runs typechecking and unit tests, builds the Vite app, and generates the sitemap. Functions deploy from `api/functions/`, edge functions from `api/edge/`. Edge routes, `/api/*` redirects, and security headers/CSP are configured in `netlify.toml`. GitHub Actions (`.github/workflows/`) handle scheduled social posts and a semantic-revert check.
 
+## Engineering principles
+
+Default to **simple, boring code that a human can read once and understand.** The owner is not an engineer and reviews at the product level, so the codebase has to stay legible to whoever (human or agent) touches it next. When in doubt, choose the more obvious option over the clever one.
+
+- **Boring beats clever.** Prefer plain, explicit code over abstraction, metaprogramming, or "smart" one-liners. Don't add layers, generics, or config flags for flexibility nobody has asked for. Solve the problem in front of you.
+- **Match the surrounding code.** Follow the naming, structure, and idioms already in the file/module. Consistency matters more than personal preference. Reuse existing helpers (e.g. `api/functions/middleware.ts`, `api/shared/platform-registry.ts`, `apps/web/src/services/*`) instead of reinventing them.
+- **Small, focused units.** Keep functions and components short and single-purpose — see how `ResultCard*` and `Claim*Step` are split. If a file is growing a second responsibility, split it.
+- **Name things for what they do.** Clear names and a short comment for non-obvious *why* beat dense code with no explanation. Don't comment the obvious.
+- **No dead weight.** Don't leave commented-out code, unused exports, speculative "might need later" branches, or TODOs without follow-through. Delete what isn't used.
+- **Scale through clarity, not premature optimization.** Write the straightforward version first; optimize only with a concrete reason (a real hot path, a measured cost). Note the trade-off when you do.
+- **Fail loudly and handle errors explicitly.** Validate inputs at boundaries, surface errors (Sentry is wired up — use it), and avoid silent catches that swallow problems.
+
+### Security practices
+
+Treat security as part of "done," not a later pass. Flag anything you can't fully resolve rather than leaving it silent.
+
+- **Validate and sanitize all external input** at the boundary — query params, request bodies, URL params, webhook payloads. Never trust client-supplied data.
+- **SSRF protection is mandatory** for any code that fetches an external URL (resolver, enrichment, embed paths). Route outbound fetches through the existing SSRF guards in `api/functions/middleware.ts`; don't add a raw `fetch(userUrl)`.
+- **Respect the CORS/auth model.** Public endpoints stay restricted to `unstream.stream`; API-key requests get permissive CORS because the key is the authorization. Use the shared middleware rather than hand-rolling headers.
+- **RLS on every table.** New Supabase tables/columns ship with RLS policies in a numbered migration. Never rely on client-side checks alone for authorization.
+- **No secrets in code or logs.** Use environment variables. Don't log API keys, tokens, magic-link codes, or personal data. API keys are stored hashed, not in plaintext — keep it that way.
+- **Verify signed/authenticated requests** where the pattern exists (e.g. Discord interaction signature verification with tweetnacl). Don't bypass it for convenience.
+- **Keep CSP and security headers intact.** When touching `netlify.toml`, don't loosen CSP or headers without a clear reason; explain any change.
+- **Least privilege.** Check admin/ownership before privileged actions (merges, verification, profile edits) on the server, not just in the UI.
+
 ## Working with the project owner
 
 The project owner is a highly experienced product manager with deep familiarity with web technologies, product strategy, UX, and the alternative music platform ecosystem. He can provide detailed product requirements, evaluate trade-offs, review UI/UX decisions, and navigate the codebase at a conceptual level.
