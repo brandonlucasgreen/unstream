@@ -86,6 +86,8 @@ export async function handler(event: {
           added_at,
           supported,
           supported_at,
+          last_modified,
+          device_id,
           artists!left (id, name, slug, image_url)
         `)
         .eq('user_id', user.userId);
@@ -108,6 +110,8 @@ export async function handler(event: {
           addedAt: row.added_at,
           supported: row.supported,
           supportedAt: row.supported_at,
+          lastModified: row.last_modified,
+          deviceId: row.device_id,
           claimed,
         };
       });
@@ -198,16 +202,23 @@ async function handleSave(user: { userId: string; email: string }, body: Record<
     const slug = existingArtist?.slug || artistSlug;
 
     // Upsert — idempotent if already saved
+    // UNS-93: accept optional last_modified and device_id for sync.
+    // On UPDATE the trigger overwrites last_modified with now(); client value
+    // is preserved only on INSERT.
+    const upsertPayload: Record<string, unknown> = {
+      user_id: user.userId,
+      artist_id: artistId,
+      artist_slug: slug,
+      artist_name: name,
+      artist_image_url: imageUrl,
+      notes: (body.notes as string) || null,
+    };
+    if (body.last_modified !== undefined) upsertPayload.last_modified = body.last_modified;
+    if (body.device_id !== undefined) upsertPayload.device_id = body.device_id;
+
     const { data: saved, error: upsertError } = await client
       .from('saved_artists')
-      .upsert({
-        user_id: user.userId,
-        artist_id: artistId,
-        artist_slug: slug,
-        artist_name: name,
-        artist_image_url: imageUrl,
-        notes: (body.notes as string) || null,
-      }, { onConflict: 'user_id,artist_slug' })
+      .upsert(upsertPayload, { onConflict: 'user_id,artist_slug' })
       .select()
       .single();
 
@@ -228,6 +239,8 @@ async function handleSave(user: { userId: string; email: string }, body: Record<
           imageUrl,
           notes: saved.notes,
           addedAt: saved.added_at,
+          lastModified: saved.last_modified,
+          deviceId: saved.device_id,
         },
       }),
     };
@@ -318,7 +331,7 @@ async function handleSupport(user: { userId: string; email: string }, body: Reco
       .eq('artist_slug', artistSlug)
       .select(`
         id, user_id, artist_id, artist_slug, artist_name, artist_image_url,
-        notes, added_at, supported, supported_at,
+        notes, added_at, supported, supported_at, last_modified, device_id,
         artists!left (id, name, slug, image_url)
       `)
       .single();
@@ -349,6 +362,8 @@ async function handleSupport(user: { userId: string; email: string }, body: Reco
           addedAt: updated.added_at,
           supported: updated.supported,
           supportedAt: updated.supported_at,
+          lastModified: updated.last_modified,
+          deviceId: updated.device_id,
           claimed,
         },
       }),
@@ -374,7 +389,7 @@ async function handleUnsupport(user: { userId: string; email: string }, body: Re
       .eq('artist_slug', artistSlug)
       .select(`
         id, user_id, artist_id, artist_slug, artist_name, artist_image_url,
-        notes, added_at, supported, supported_at,
+        notes, added_at, supported, supported_at, last_modified, device_id,
         artists!left (id, name, slug, image_url)
       `)
       .single();
@@ -405,6 +420,8 @@ async function handleUnsupport(user: { userId: string; email: string }, body: Re
           addedAt: updated.added_at,
           supported: updated.supported,
           supportedAt: updated.supported_at,
+          lastModified: updated.last_modified,
+          deviceId: updated.device_id,
           claimed,
         },
       }),

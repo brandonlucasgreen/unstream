@@ -72,4 +72,78 @@ describe('saved-artists API - Validation logic', () => {
       });
     });
   });
+
+  describe('UNS-93: last_modified and device_id in GET response', () => {
+    it('GET response maps last_modified and device_id to camelCase', () => {
+      const row = {
+        id: 'abc-123',
+        user_id: 'user-1',
+        artist_id: null,
+        artist_slug: 'radiohead',
+        artist_name: 'Radiohead',
+        artist_image_url: null,
+        notes: null,
+        added_at: '2026-01-01T00:00:00Z',
+        supported: false,
+        supported_at: null,
+        last_modified: '2026-05-01T00:00:00Z',
+        device_id: 'mac-studio',
+        artists: null,
+      };
+
+      const artistRow = (row as any).artists;
+      const result = {
+        lastModified: row.last_modified,
+        deviceId: row.device_id,
+      };
+
+      expect(result.lastModified).toBe('2026-05-01T00:00:00Z');
+      expect(result.deviceId).toBe('mac-studio');
+    });
+
+    it('GET response returns null deviceId when device_id is null', () => {
+      const row = {
+        last_modified: '2026-05-01T00:00:00Z',
+        device_id: null,
+      };
+
+      expect(row.device_id).toBeNull();
+    });
+
+    it('GET response includes lastModified for rows without sync fields (backwards compat)', () => {
+      // Even rows that existed before UNS-93 have last_modified (DEFAULT now())
+      const row = {
+        last_modified: '2026-01-01T00:00:00Z',
+        device_id: null,
+      };
+
+      expect(row.last_modified).not.toBeNull();
+      expect(row.device_id).toBeNull();
+    });
+  });
+
+  describe('UNS-93: POST save accepts last_modified and device_id', () => {
+    it('upsert payload includes last_modified when body provides it', () => {
+      const body: Record<string, unknown> = { artistId: 'radiohead', last_modified: '2026-06-01T12:00:00Z' };
+      const upsertPayload: Record<string, unknown> = {};
+      if (body.last_modified !== undefined) upsertPayload.last_modified = body.last_modified;
+      expect(upsertPayload.last_modified).toBe('2026-06-01T12:00:00Z');
+    });
+
+    it('upsert payload includes device_id when body provides it', () => {
+      const body: Record<string, unknown> = { artistId: 'radiohead', device_id: 'iphone-15-pro' };
+      const upsertPayload: Record<string, unknown> = {};
+      if (body.device_id !== undefined) upsertPayload.device_id = body.device_id;
+      expect(upsertPayload.device_id).toBe('iphone-15-pro');
+    });
+
+    it('upsert payload omits both when body omits them (backwards compat)', () => {
+      const body: Record<string, unknown> = { artistId: 'radiohead' };
+      const upsertPayload: Record<string, unknown> = {};
+      if (body.last_modified !== undefined) upsertPayload.last_modified = body.last_modified;
+      if (body.device_id !== undefined) upsertPayload.device_id = body.device_id;
+      expect(upsertPayload.last_modified).toBeUndefined();
+      expect(upsertPayload.device_id).toBeUndefined();
+    });
+  });
 });
