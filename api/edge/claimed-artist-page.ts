@@ -1,7 +1,7 @@
 import { Context } from "https://edge.netlify.com";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { PLATFORMS } from "../shared/platform-registry.ts";
-import { BANDCAMP_FRIDAY_DATES, isBandcampFriday } from "../shared/bandcamp-friday.ts";
+import { isBandcampFriday } from "../shared/bandcamp-friday.ts";
 
 // Derive PLATFORM_INFO from shared registry (name, color, icon, category, payoutPercent)
 const PLATFORM_INFO: Record<string, { name: string; color: string; icon: string; category: string; payoutPercent?: string }> = {};
