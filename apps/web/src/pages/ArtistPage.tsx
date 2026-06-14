@@ -366,8 +366,53 @@ export function ArtistPage() {
                   />
                 ))}
               </div>
+            ) : isProfileRoute && results.length > 0 ? (
+              /* Unclaimed artist on profile route (/a/{slug}) — clean profile layout, no search chrome.
+                 Routing was already correct (UNS-94), but unclaimed profiles were rendering the
+                 search-results branch with "Found N results" + Save button — which the user reads
+                 as a search results page (UNS-97/UNS-98). Use the same quiet layout as the claimed
+                 branch, with a small inline Save button above the result card. */
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  {isEnriching && (
+                    <div className="flex items-center gap-2 text-text-muted text-sm">
+                      <div className="w-3 h-3 border-2 border-accent-secondary border-t-transparent rounded-full animate-spin"></div>
+                      <span>Loading more sources...</span>
+                    </div>
+                  )}
+                  {primaryArtist && (
+                    <button
+                      onClick={handleSaveArtist}
+                      disabled={!primaryArtist.id}
+                      aria-label={isSaved ? `Unsave ${primaryArtist.name}` : `Save ${primaryArtist.name}`}
+                      title={isSaved ? 'Saved' : 'Save artist'}
+                      className={`inline-flex items-center gap-1.5 text-sm transition-colors ${
+                        isSaved ? 'text-accent-secondary' : 'text-text-muted hover:text-accent-secondary'
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      <svg
+                        className={`w-4 h-4 transition-all ${
+                          isSaved ? 'fill-accent-secondary' : 'fill-transparent stroke-current'
+                        }`}
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                      {isSaved ? 'Saved' : 'Save'}
+                    </button>
+                  )}
+                </div>
+                {results.map((result) => (
+                  <ResultCard
+                    key={result.id}
+                    result={result}
+                  />
+                ))}
+              </div>
             ) : results.length > 0 ? (
-              /* Search results — with count header and save button */
+              /* Search results — with count header and save button. UNCHANGED. */
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <p className="text-text-muted text-sm">
