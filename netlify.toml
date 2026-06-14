@@ -80,6 +80,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/artist-page"
+  to = "/.netlify/functions/artist-page"
+  status = 200
+
+[[redirects]]
   from = "/api/artist-profile"
   to = "/.netlify/functions/artist-profile"
   status = 200

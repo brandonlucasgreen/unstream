@@ -104,6 +104,68 @@ interface LinkRow {
   display_order: number | null;
 }
 
+// --- Artist Profile Bundle ---
+
+export interface ArtistProfileRow {
+  bio: string | null;
+  custom_image_url: string | null;
+  featured_embed: string | null;
+  verified_at: string | null;
+}
+
+export interface ArtistProfileBundle {
+  artist: ArtistRow;
+  profile: ArtistProfileRow | null;
+  links: LinkRow[];
+}
+
+/**
+ * Fetch the artist row + profile row + links for a claimed artist.
+ * Returns null if the artist doesn't exist or isn't claimed.
+ */
+export async function getArtistProfileBySlug(slug: string): Promise<ArtistProfileBundle | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  try {
+    // Find the artist row first
+    const { data: artist, error: artistError } = await client
+      .from('artists')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+
+    if (artistError || !artist) return null;
+    if (artist.match_confidence !== 'claimed') return null;
+
+    const artistRow = artist as ArtistRow;
+    const artistId = artistRow.id;
+
+    // Fetch profile and links in parallel
+    const [profileResult, linksResult] = await Promise.all([
+      client
+        .from('artist_profiles')
+        .select('bio, custom_image_url, featured_embed, verified_at')
+        .eq('artist_id', artistId)
+        .single(),
+      client
+        .from('artist_links')
+        .select('*')
+        .eq('artist_id', artistId)
+        .order('display_order', { ascending: true, nullsFirst: false }),
+    ]);
+
+    return {
+      artist: artistRow,
+      profile: (profileResult.data as ArtistProfileRow | null) ?? null,
+      links: (linksResult.data as LinkRow[]) || [],
+    };
+  } catch (error) {
+    console.error('[DB] getArtistProfileBySlug error:', error);
+    return null;
+  }
+}
+
 // --- Merge Overrides ---
 
 export interface MergeOverrideRow {

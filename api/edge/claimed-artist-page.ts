@@ -1,16 +1,7 @@
 import { Context } from "https://edge.netlify.com";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { PLATFORMS } from "../shared/platform-registry.ts";
-
-// UPDATE ANNUALLY: Bandcamp Friday dates from https://daily.bandcamp.com/features/bandcamp-fridays
-const BANDCAMP_FRIDAY_DATES = [
-  '2026-03-06', '2026-05-02', '2026-08-07',
-  '2026-09-04', '2026-10-02', '2026-11-06', '2026-12-04',
-];
-function isBandcampFriday(): boolean {
-  const pacificDate = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
-  return BANDCAMP_FRIDAY_DATES.includes(pacificDate);
-}
+import { isBandcampFriday } from "../shared/bandcamp-friday.ts";
 
 // Derive PLATFORM_INFO from shared registry (name, color, icon, category, payoutPercent)
 const PLATFORM_INFO: Record<string, { name: string; color: string; icon: string; category: string; payoutPercent?: string }> = {};
