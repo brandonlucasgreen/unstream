@@ -142,13 +142,12 @@ export function ArtistDashboardPage() {
                         >
                           Edit
                         </Link>
-                        {/* Hard nav: /a/{slug} is edge-rendered (rich profile). See UNS-97. */}
-                        <a
-                          href={`/a/${profile.slug}`}
+                        <Link
+                          to={`/a/${profile.slug}`}
                           className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors"
                         >
                           View
-                        </a>
+                        </Link>
                         <button
                           onClick={() => handleShareProfile(profile.slug)}
                           className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors flex items-center gap-1.5"
