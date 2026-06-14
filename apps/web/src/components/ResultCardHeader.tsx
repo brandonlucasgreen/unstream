@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import type { SearchResult } from '../types';
 import { typeLabel, typeIcon } from './ResultCardUtils';
 
@@ -77,13 +76,17 @@ export function ResultCardHeader({
                 </svg>
                 Verified
               </span>
-              <Link
-                to={`/a/${result.claimedSlug || result.id}`}
+              {/* Hard navigation (not React Router <Link>): claimed /a/{slug} pages are
+                  server-rendered by the claimed-artist-page edge function. A client-side
+                  transition would mount the SPA's ArtistPage (a plain result card) instead
+                  of the rich profile layout — the UNS-97 bug. */}
+              <a
+                href={`/a/${result.claimedSlug || result.id}`}
                 className="text-xs px-1.5 py-0.5 rounded bg-bg-hover text-text-secondary hover:text-text-primary transition-colors"
                 onClick={(e) => e.stopPropagation()}
               >
                 View profile
-              </Link>
+              </a>
             </>
           )}
           {result.matchConfidence === 'unverified' && (

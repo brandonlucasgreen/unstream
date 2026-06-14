@@ -168,7 +168,6 @@ All API routes are Netlify Functions proxied via `netlify.toml` redirects:
 | `/` | `og-metadata` | Homepage OG tags |
 | `/artist/*` | `artist-page` | Pre-generated artist page OG tags |
 | `/a/*` | `claimed-artist-page` | Claimed artist profile OG tags |
-| `/artists` | `artist-directory-page` | Artist directory OG tags |
 | `/guides/*` | `guide-page` | Guide page OG tags |
 
 ### Database (Supabase)
