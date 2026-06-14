@@ -375,12 +375,13 @@ export function ArtistEditPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold">Edit {form.artistName}</h1>
-              <Link
-                to={`/a/${form.currentSlug}`}
+              {/* Hard nav: /a/{slug} is edge-rendered (rich profile). See UNS-97. */}
+              <a
+                href={`/a/${form.currentSlug}`}
                 className="text-sm text-accent-primary hover:underline"
               >
                 View live profile
-              </Link>
+              </a>
             </div>
             <Link
               to="/artist-dashboard"

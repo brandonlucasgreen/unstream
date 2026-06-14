@@ -310,12 +310,13 @@ export function DashboardPage() {
                           >
                             Edit
                           </Link>
-                          <Link
-                            to={`/a/${profile.slug}`}
+                          {/* Hard nav: /a/{slug} is edge-rendered (rich profile). See UNS-97. */}
+                          <a
+                            href={`/a/${profile.slug}`}
                             className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors"
                           >
                             View
-                          </Link>
+                          </a>
                           <button
                             onClick={() => handleRemoveClaimedProfile(profile.id, profile.artistId, profile.slug)}
                             className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-red-400 hover:border-red-500/30 transition-colors"
@@ -398,12 +399,13 @@ export function DashboardPage() {
                         )}
                         <div className="flex items-center gap-2 mt-3 flex-wrap">
                           {artist.claimed && artist.slug ? (
-                            <Link
-                              to={`/a/${artist.slug}`}
+                            // Hard nav: claimed /a/{slug} is edge-rendered (rich profile). See UNS-97.
+                            <a
+                              href={`/a/${artist.slug}`}
                               className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors"
                             >
                               View
-                            </Link>
+                            </a>
                           ) : (
                             <Link
                               to={`/?q=${encodeURIComponent(artist.name)}`}
