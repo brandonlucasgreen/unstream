@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 
 import { Header } from '../components/Header';
@@ -95,14 +96,13 @@ export function ArtistDirectoryPage() {
                     <h2 className="text-xl font-bold pb-2 border-b border-border mb-1">{letter}</h2>
                     <div className="grid gap-0.5">
                       {grouped[letter].map(artist => (
-                        // Hard navigation (not React Router <Link>): /a/{slug} is server-rendered
-                        // by the claimed-artist-page edge function. A client-side transition would
-                        // mount the SPA's ArtistPage (a plain result card) instead of the rich
-                        // profile layout, which is the UNS-97 bug. A real anchor lets the edge
-                        // function own the page so the profile renders identically to a direct visit.
-                        <a
+                        // React Router <Link>: SPA's ArtistPage handles /a/{slug} client-side.
+                        // Plain <a href> here caused UNS-99's broken back button on Safari 26
+                        // (MPA <-> SPA boundary + PWA service worker). The rich profile layout
+                        // is in the edge function today; UNS-100 ports it into React.
+                        <Link
                           key={artist.slug}
-                          href={`/a/${artist.slug}`}
+                          to={`/a/${artist.slug}`}
                           className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg hover:bg-bg-secondary border border-transparent hover:border-border transition-colors"
                         >
                           <div className="w-9 h-9 rounded-full bg-bg-secondary flex-shrink-0 flex items-center justify-center font-semibold text-sm text-text-muted overflow-hidden">
@@ -122,7 +122,7 @@ export function ArtistDirectoryPage() {
                           <svg className="ml-auto flex-shrink-0 w-3.5 h-3.5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
-                        </a>
+                        </Link>
                       ))}
                     </div>
                   </div>
