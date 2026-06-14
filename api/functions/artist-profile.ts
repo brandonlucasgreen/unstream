@@ -39,7 +39,7 @@ interface LinkUpdate {
 }
 
 // Allowed embed domains for featured releases
-const ALLOWED_EMBED_DOMAINS = [
+export const ALLOWED_EMBED_DOMAINS = [
   'bandcamp.com',
   'youtube.com',
   'youtube-nocookie.com',
@@ -51,7 +51,7 @@ const ALLOWED_EMBED_DOMAINS = [
   'embed.tidal.com',
 ];
 
-function sanitizeEmbed(raw: string | null): string | null {
+export function sanitizeEmbed(raw: string | null): string | null {
   if (!raw || !raw.trim()) return null;
 
   // Extract iframe src and validate it's a proper URL
