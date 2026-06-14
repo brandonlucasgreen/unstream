@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { Link, useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { SearchBar } from '../components/SearchBar';
 import { ResultCard } from '../components/ResultCard';
@@ -15,9 +15,12 @@ import { useAuth } from '../contexts/AuthContext';
 export function ArtistPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams] = useSearchParams();
-  const isProfileRoute = location.pathname.startsWith('/a/') || location.pathname.startsWith('/artist/');
+  // useParams() is route-synchronous on mount; useLocation() can return a stale
+  // pathname during route transitions (e.g., /artists -> /a/{slug}), which would
+  // make isProfileRoute briefly false, trigger the search-fallback fetch cascade,
+  // and race the API fetch. Reading from useParams() avoids that.
+  const isProfileRoute = !!slug;
   const justClaimed = searchParams.get('claimed') !== null;
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
