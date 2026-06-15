@@ -30,7 +30,8 @@ export function RichArtistProfile({ payload, slug }: RichArtistProfileProps) {
   const [maxLinks, setMaxLinks] = useState(6);
   const [copied, setCopied] = useState(false);
 
-  const embedCode = `<script src="https://unstream.stream/embed.js" data-unstream-slug="${slug}" data-theme="${embedTheme}" data-max-links="${maxLinks}" async><\/script>`;
+  const embedCode = `<div class="unstream-widget" data-artist="${artist.name}" data-theme="${embedTheme}" data-max-links="${maxLinks}"></div>
+<script src="https://unstream.stream/widget.js" async></script>`;
 
   const handleCopy = useCallback(async () => {
     try {
@@ -239,9 +240,10 @@ export function RichArtistProfile({ payload, slug }: RichArtistProfileProps) {
                 </div>
               </div>
 
-              {/* Static card preview — the embed widget is rendered client-side by /embed.js
-                  on the consumer's site, so a live iframe preview isn't possible here. Show
-                  a static preview of what the embed will look like. */}
+              {/* Static card preview — the embed widget is rendered client-side by /widget.js
+                  on the consumer's site (see https://bgreen.lol/music/ for a live example), so
+                  a live iframe preview isn't possible here. Show a static preview of what the
+                  embed will look like. */}
               <div className="bg-bg-primary rounded-lg p-4 mb-3 border border-border">
                 <div className="text-xs text-text-muted uppercase tracking-wider mb-2">
                   Embed preview

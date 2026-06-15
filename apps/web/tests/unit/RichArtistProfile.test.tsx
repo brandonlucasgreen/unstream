@@ -156,12 +156,14 @@ describe('RichArtistProfile', () => {
     expect(screen.queryByText('Follow')).toBeNull();
   });
 
-  it('renders the embed widget with the slug in the code snippet', () => {
+  it('renders the embed widget with the artist name in the code snippet', () => {
     render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" />);
     fireEvent.click(screen.getByText('Embed this profile on your website'));
     const codeBlock = document.querySelector('pre');
     expect(codeBlock).toBeTruthy();
-    expect(codeBlock!.textContent).toContain('data-unstream-slug="kid-lightbulbs"');
+    expect(codeBlock!.textContent).toContain('data-artist="Kid Lightbulbs"');
+    expect(codeBlock!.textContent).toContain('/widget.js');
+    expect(codeBlock!.textContent).toContain('class="unstream-widget"');
   });
 
   it('updates the embed code when theme or link count changes', () => {
