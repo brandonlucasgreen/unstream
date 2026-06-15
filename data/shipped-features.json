@@ -81,7 +81,7 @@
     "title": "Search from your dashboard",
     "description": "Find a new artist without leaving the app. The Saved Artists section on your dashboard has its own search bar that takes you straight to results.",
     "date": "2026-05-31",
-    "announced": false
+    "announced": true
   },
   {
     "id": "pwa-simplified-ui",
