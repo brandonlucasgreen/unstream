@@ -37,8 +37,8 @@ export function RichArtistProfile({ payload, slug }: RichArtistProfileProps) {
       await navigator.clipboard.writeText(embedCode);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // clipboard API not available
+    } catch (err) {
+      console.warn('[RichArtistProfile] clipboard.writeText failed:', err);
     }
   }, [embedCode]);
 
@@ -46,15 +46,13 @@ export function RichArtistProfile({ payload, slug }: RichArtistProfileProps) {
     analytics.trackArtistLinkClick(slug, platform);
   }, [slug]);
 
-  const resolvedImageUrl = imageUrl;
-
   return (
     <div>
       {/* Hero */}
       <div className="pt-12 pb-8 text-center">
-        {resolvedImageUrl && (
+        {imageUrl && (
           <img
-            src={resolvedImageUrl}
+            src={imageUrl}
             alt={artist.name}
             className="w-32 h-32 rounded-full object-cover border-2 border-border mx-auto mb-4"
           />
@@ -241,14 +239,36 @@ export function RichArtistProfile({ payload, slug }: RichArtistProfileProps) {
                 </div>
               </div>
 
-              {/* Embed preview */}
-              <div className="bg-bg-primary rounded-lg p-4 mb-3 flex justify-center">
-                <iframe
-                  src={`/embed?slug=${slug}&theme=${embedTheme}&max=${maxLinks}`}
-                  className="w-full max-w-md border-0"
-                  title="Embed preview"
-                  loading="lazy"
-                />
+              {/* Static card preview — the embed widget is rendered client-side by /embed.js
+                  on the consumer's site, so a live iframe preview isn't possible here. Show
+                  a static preview of what the embed will look like. */}
+              <div className="bg-bg-primary rounded-lg p-4 mb-3 border border-border">
+                <div className="text-xs text-text-muted uppercase tracking-wider mb-2">
+                  Embed preview
+                </div>
+                <div className="text-sm font-medium text-text-primary mb-2">
+                  {artist.name}
+                </div>
+                <div className="flex flex-col gap-1">
+                  {links.slice(0, maxLinks).map((link) => (
+                    <div
+                      key={link.platform + link.url}
+                      className="flex items-center justify-between text-xs py-1.5 px-2 rounded border border-border"
+                    >
+                      <span className="text-text-primary">
+                        {link.displayName || link.platform}
+                      </span>
+                      {link.payoutPercent && (
+                        <span className="text-text-muted">
+                          {link.payoutPercent} to artist
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-text-muted mt-2">
+                  The actual embed renders this content via JavaScript on your website.
+                </p>
               </div>
 
               {/* Code block */}
