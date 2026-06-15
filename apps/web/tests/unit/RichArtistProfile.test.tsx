@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
-import { RichArtistProfile } from './RichArtistProfile';
-import type { ArtistPagePayload } from '../types/artist-page';
+import { RichArtistProfile } from 'src/components/RichArtistProfile';
+import type { ArtistPagePayload } from 'src/types/artist-page';
 
 const basePayload: ArtistPagePayload = {
   artist: {
