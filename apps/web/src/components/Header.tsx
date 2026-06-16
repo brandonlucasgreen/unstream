@@ -47,9 +47,10 @@ export function Header() {
   // Fetch pending verification count for admins — only on admin-relevant pages
   useEffect(() => {
     if (!isAdmin || !session?.access_token) return;
-
+    const controller = new AbortController();
     fetch('/api/admin/verify', {
       headers: { 'Authorization': `Bearer ${session.access_token}` },
+      signal: controller.signal,
     })
       .then(res => res.ok ? res.json() : null)
       .then(data => {
@@ -58,7 +59,8 @@ export function Header() {
           setPendingVerifyCount(pending);
         }
       })
-      .catch(() => { /* silent */ });
+      .catch(() => { /* aborted or network error */ });
+    return () => controller.abort();
   }, [isAdmin, session?.access_token]);
 
   async function handleSignOut() {

@@ -336,19 +336,6 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
           )}
         </div>
       </div>
-
-      {/* Powered by Unstream */}
-      <div className="py-6 px-4 text-center">
-        <a
-          href="https://unstream.stream"
-          className="text-text-primary no-underline font-bold text-lg"
-        >
-          Powered by Unstream
-        </a>
-        <p className="text-sm text-text-muted mt-1">
-          Find music on platforms that pay artists fairly.
-        </p>
-      </div>
     </div>
   );
 }

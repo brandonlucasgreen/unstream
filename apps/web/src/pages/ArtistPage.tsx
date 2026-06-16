@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
@@ -25,7 +25,10 @@ export function ArtistPage() {
   const { session, isArtistSaved, saveArtist, removeSavedArtist, loadSavedArtists } = useAuth();
 
   useEffect(() => {
-    if (session) loadSavedArtists();
+    if (!session) return;
+    const controller = new AbortController();
+    loadSavedArtists(controller.signal);
+    return () => controller.abort();
   }, [session]);
 
   useEffect(() => {
@@ -53,6 +56,15 @@ export function ArtistPage() {
   useEffect(() => {
     if (slug) analytics.trackArtistPageView(slug);
   }, [slug]);
+
+  // bfcache: skip title/meta reset on back-forward restore
+  useEffect(() => {
+    function onPageShow(e: PageTransitionEvent) {
+      if (e.persisted) return;
+    }
+    window.addEventListener('pageshow', onPageShow);
+    return () => window.removeEventListener('pageshow', onPageShow);
+  }, []);
 
   useEffect(() => {
     if (payload?.artist.name) {
@@ -96,16 +108,6 @@ export function ArtistPage() {
       <Header />
       <main className="px-4 pb-16">
         <div className="max-w-4xl mx-auto">
-          <Link
-            to="/artists"
-            className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-accent-primary transition-colors mb-4"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to artists
-          </Link>
-
           {isLoading ? (
             <LoadingProfile />
           ) : notFound || !payload ? (
