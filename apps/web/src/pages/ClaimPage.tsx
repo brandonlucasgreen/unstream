@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { signInWithMagicLink } from '../services/auth';
 import { useAuth } from '../contexts/AuthContext';
@@ -20,6 +20,7 @@ import type { ClaimStep, ReviewLink } from '../components/ClaimPageTypes';
 
 export function ClaimPage() {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
 
   const [step, setStep] = useState<ClaimStep>('email');
   const [email, setEmail] = useState('');
@@ -296,7 +297,7 @@ export function ClaimPage() {
         return;
       }
 
-      window.location.href = `/a/${data.slug || slug}?claimed`;
+      navigate(`/a/${data.slug || slug}?claimed`);
     } catch (e) {
       Sentry.captureException(e, { extra: { context: 'claim.confirmReview' } });
       setError('Network error. Please try again.');
