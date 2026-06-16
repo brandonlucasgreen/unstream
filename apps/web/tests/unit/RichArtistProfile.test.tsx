@@ -198,4 +198,51 @@ describe('RichArtistProfile', () => {
       expect(screen.getByText('Copied!')).toBeTruthy();
     });
   });
+
+  it('renders the post-claim banner when justClaimed is true', () => {
+    render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" justClaimed />);
+    expect(screen.getByText(/You're verified! Welcome to Unstream\./)).toBeTruthy();
+  });
+
+  it('does not render the post-claim banner when justClaimed is false or absent', () => {
+    render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" />);
+    expect(screen.queryByText(/You're verified!/)).toBeNull();
+  });
+
+  it('dismisses the post-claim banner when the ✕ button is clicked', () => {
+    render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" justClaimed />);
+    expect(screen.getByText(/You're verified!/)).toBeTruthy();
+    fireEvent.click(screen.getByLabelText('Dismiss'));
+    expect(screen.queryByText(/You're verified!/)).toBeNull();
+  });
+
+  it('renders the save button when onSave is provided', () => {
+    render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" onSave={vi.fn()} />);
+    expect(screen.getByText('Save')).toBeTruthy();
+  });
+
+  it('renders Saved state when isSaved is true', () => {
+    render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" onSave={vi.fn()} onUnsave={vi.fn()} isSaved />);
+    expect(screen.getByText('Saved')).toBeTruthy();
+  });
+
+  it('calls onSave when save button is clicked', () => {
+    const onSave = vi.fn();
+    render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" onSave={onSave} />);
+    fireEvent.click(screen.getByText('Save'));
+    expect(onSave).toHaveBeenCalled();
+  });
+
+  it('calls onUnsave when saved button is clicked', () => {
+    const onUnsave = vi.fn();
+    render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" onSave={vi.fn()} onUnsave={onUnsave} isSaved />);
+    fireEvent.click(screen.getByText('Saved'));
+    expect(onUnsave).toHaveBeenCalled();
+  });
+
+  it('disables save button when disabledSave is true', () => {
+    render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" onSave={vi.fn()} disabledSave />);
+    const btn = screen.getByText('Save').closest('button');
+    expect(btn?.disabled).toBe(true);
+  });
 });

@@ -9,6 +9,11 @@ import type { SourceId } from '../types';
 interface RichArtistProfileProps {
   payload: ArtistPagePayload;
   slug: string;
+  justClaimed?: boolean;
+  onSave?: () => void;
+  onUnsave?: () => void;
+  isSaved?: boolean;
+  disabledSave?: boolean;
 }
 
 function getLocationText(artist: ArtistPagePayload['artist']): string {
@@ -19,7 +24,7 @@ function getLocationText(artist: ArtistPagePayload['artist']): string {
   return '';
 }
 
-export function RichArtistProfile({ payload, slug }: RichArtistProfileProps) {
+export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave, isSaved = false, disabledSave = false }: RichArtistProfileProps) {
   const { artist, profile, links, socialLinks } = payload;
   const imageUrl = profile?.customImageUrl || artist.imageUrl;
   const locationText = getLocationText(artist);
@@ -29,6 +34,7 @@ export function RichArtistProfile({ payload, slug }: RichArtistProfileProps) {
   const [embedTheme, setEmbedTheme] = useState<'dark' | 'light'>('dark');
   const [maxLinks, setMaxLinks] = useState(6);
   const [copied, setCopied] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
 
   const embedCode = `<div class="unstream-widget" data-artist="${artist.name}" data-theme="${embedTheme}" data-max-links="${maxLinks}"></div>
 <script src="https://unstream.stream/widget.js" async></script>`;
@@ -49,6 +55,23 @@ export function RichArtistProfile({ payload, slug }: RichArtistProfileProps) {
 
   return (
     <div>
+      {/* Post-claim banner */}
+      {justClaimed && !bannerDismissed && (
+        <div className="mb-6 p-4 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-green-400">🎉</span>
+            <span className="text-sm font-medium text-text-primary">You're verified! Welcome to Unstream.</span>
+          </div>
+          <button
+            onClick={() => setBannerDismissed(true)}
+            className="text-text-muted hover:text-text-primary transition-colors text-lg leading-none"
+            aria-label="Dismiss"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Hero */}
       <div className="pt-12 pb-8 text-center">
         {imageUrl && (
@@ -69,6 +92,27 @@ export function RichArtistProfile({ payload, slug }: RichArtistProfileProps) {
               </svg>
               Verified
             </span>
+          )}
+          {onSave && (
+            <button
+              onClick={isSaved ? onUnsave : onSave}
+              disabled={disabledSave}
+              aria-label={isSaved ? `Unsave ${artist.name}` : `Save ${artist.name}`}
+              title={isSaved ? 'Saved' : 'Save artist'}
+              className={`inline-flex items-center gap-1 text-sm transition-colors ${
+                isSaved ? 'text-accent-secondary' : 'text-text-muted hover:text-accent-secondary'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              <svg
+                className={`w-4 h-4 transition-all ${isSaved ? 'fill-accent-secondary' : 'fill-transparent stroke-current'}`}
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              {isSaved ? 'Saved' : 'Save'}
+            </button>
           )}
         </div>
         {locationText && (
