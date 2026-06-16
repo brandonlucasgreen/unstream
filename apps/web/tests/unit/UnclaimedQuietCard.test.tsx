@@ -153,8 +153,8 @@ describe('UnclaimedQuietCard', () => {
     expect(onUnsave).toHaveBeenCalled();
   });
 
-  it('renders Powered by Unstream footer', () => {
+  it('does not render Powered by Unstream footer', () => {
     render(<UnclaimedQuietCard payload={unclaimedPayload} slug="some-artist" />);
-    expect(screen.getByText('Powered by Unstream')).toBeTruthy();
+    expect(screen.queryByText('Powered by Unstream')).toBeNull();
   });
 });

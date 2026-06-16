@@ -251,12 +251,11 @@ describe('ArtistPage', () => {
     });
   });
 
-  it('renders "Back to artists" link', () => {
+  it('does not render "Back to artists" link', () => {
     mockUseParams.mockReturnValue({ slug: 'kid-lightbulbs' });
     vi.spyOn(global, 'fetch').mockReturnValue(new Promise(() => {}));
     render(<ArtistPage />);
-    const link = screen.getByText('Back to artists');
-    expect(link).toBeTruthy();
+    expect(screen.queryByText('Back to artists')).toBeNull();
   });
 
   it('cancels fetch on slug change', async () => {

@@ -29,7 +29,7 @@ interface AuthContextValue {
   isArtistSaved: (artistId: string) => boolean;
   saveArtist: (artistId: string, notes?: string, artistName?: string, artistImageUrl?: string) => Promise<void>;
   removeSavedArtist: (artistId: string) => Promise<void>;
-  loadSavedArtists: () => Promise<void>;
+  loadSavedArtists: (signal?: AbortSignal) => Promise<void>;
   artistsLoaded: boolean;
 }
 
@@ -256,12 +256,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [session, saveArtist]);
 
-  const loadSavedArtists = useCallback(async () => {
+  const loadSavedArtists = useCallback(async (signal?: AbortSignal) => {
     if (!session) return;
-    if (artistsLoaded) return; // Don't re-fetch if already loaded
+    if (artistsLoaded) return;
     try {
       const response = await fetch('/api/saved-artists', {
         headers: { 'Authorization': `Bearer ${session.access_token}` },
+        signal,
       });
       if (response.ok) {
         const data = await response.json();
@@ -276,6 +277,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
       }
     } catch (e) {
+      if (signal?.aborted) return;
       Sentry.captureException(e, { extra: { context: 'auth.loadSavedArtists' } });
       console.error('Failed to load saved artists');
     }
