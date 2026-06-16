@@ -57,15 +57,6 @@ export function ArtistPage() {
     if (slug) analytics.trackArtistPageView(slug);
   }, [slug]);
 
-  // bfcache: skip title/meta reset on back-forward restore
-  useEffect(() => {
-    function onPageShow(e: PageTransitionEvent) {
-      if (e.persisted) return;
-    }
-    window.addEventListener('pageshow', onPageShow);
-    return () => window.removeEventListener('pageshow', onPageShow);
-  }, []);
-
   useEffect(() => {
     if (payload?.artist.name) {
       document.title = `${payload.artist.name} on Bandcamp & alternative platforms | Unstream`;
