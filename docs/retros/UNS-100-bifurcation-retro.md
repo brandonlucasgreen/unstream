@@ -4,7 +4,7 @@
 **Linear:** UNS-100 (closed 2026-06-17)
 **Author:** Wayne
 **Reviewers:** Brandon
-**Severity:** Process lesson, not an incident. No production damage. But the symptom — a 2-month bug loop on a single route — was real.
+**Severity:** Process lesson, not an incident. No production damage. But the symptom — a recurring bug loop on a single route dating back to May 31, with the active fix cycle (UNS-100 series) running roughly 2026-06-13 → 2026-06-17 — was real.
 
 ## TL;DR
 
@@ -16,13 +16,13 @@
 
 | PR / issue | Date | What it tried to fix | What it actually did |
 |---|---|---|---|
-| UNS-94 (PR #264) | early 2026 | `<Link to>` everywhere — SPA wins on direct visits | SPA-internal navigation worked, but rich profile was still in edge function → conflict on `/a/{slug}` (claimed) |
+| UNS-94 (PR #264) | 2026-06-10 | `<Link to>` everywhere — SPA wins on direct visits | SPA-internal navigation worked, but rich profile was still in edge function → conflict on `/a/{slug}` (claimed) |
 | UNS-98 (PR #268, never merged) | 2026-06-14 | Drop `/artists` edge function | Would have left `/a/*` dual-rendered (claimed → edge fn, unclaimed → SPA) |
 | UNS-97 (PR #269) | 2026-06-14 | Drop `/artists` edge function (re-attempt) | Worked, but also reverted `<Link to>` back to `<a href>` → MPA↔SPA boundary restored, UNS-99 surfaced |
 | UNS-99 (PR #271, hotfix) | 2026-06-14 | Targeted revert of the `<a href>` reversion | SPA-internal click back button worked, but UNS-97 (claimed artists showing search-result card) was back |
-| UNS-71 (Done earlier) | 2026-Q1 | Same symptom: back button broken | Fixed in isolation, regressed |
-| UNS-70 (Done earlier) | 2026-Q1 | Same symptom: claimed artists showing search pages | Fixed in isolation, regressed |
-| UNS-73 (Done earlier) | 2026-Q1 | Slow render of static pages | Treated as performance; was actually the dual-renderer handoff cost |
+| UNS-71 (Done) | 2026-05-31 (PR #237) | Same symptom: back button broken | Fixed in isolation, regressed later when UNS-97 reverted the `<Link to>` |
+| UNS-70 (Done) | 2026-05-31 (PR #236) | Same symptom: claimed artists showing search pages | Fixed in isolation, regressed later when UNS-97 restored the dual-renderer |
+| UNS-73 (Done, no code change) | pre-2026-05-31 | Slow render of static pages | Closed as performance; the actual cause was the dual-renderer handoff cost |
 
 **Pattern:** every fix moved the line somewhere else. None of them fixed the bifurcation.
 
