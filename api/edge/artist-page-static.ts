@@ -274,9 +274,6 @@ export default async function handler(request: Request, context: Context) {
 <body>
   <header class="site-header">
     <a href="/" class="brand">${LOGO_SVG} Unstream</a>
-    <div class="nav-right">
-      <a href="/login" class="nav-link">Login</a>
-    </div>
   </header>
 
   <div class="page-content">
@@ -377,9 +374,6 @@ export default async function handler(request: Request, context: Context) {
 <body>
   <header class="site-header">
     <a href="/" class="brand">${LOGO_SVG} Unstream</a>
-    <div class="nav-right">
-      <a href="/login" class="nav-link">Login</a>
-    </div>
   </header>
 
   <div class="page-content">
