@@ -106,7 +106,7 @@ const CSS = `
 export default async function handler(request: Request, context: Context) {
   try {
     const url = new URL(request.url);
-    const slug = url.pathname.replace(/^\/a\//, '').replace(/\/$/, '');
+    const slug = url.pathname.replace(/^\/(a|artist)\//, '').replace(/\/$/, '');
 
     if (!slug) return context.next();
 
@@ -274,9 +274,6 @@ export default async function handler(request: Request, context: Context) {
 <body>
   <header class="site-header">
     <a href="/" class="brand">${LOGO_SVG} Unstream</a>
-    <div class="nav-right">
-      <a href="/login" class="nav-link">Login</a>
-    </div>
   </header>
 
   <div class="page-content">
@@ -377,9 +374,6 @@ export default async function handler(request: Request, context: Context) {
 <body>
   <header class="site-header">
     <a href="/" class="brand">${LOGO_SVG} Unstream</a>
-    <div class="nav-right">
-      <a href="/login" class="nav-link">Login</a>
-    </div>
   </header>
 
   <div class="page-content">

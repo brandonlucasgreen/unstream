@@ -97,7 +97,7 @@ Two-phase. Phase 1 calls `/api/search/sources` for fast results from all platfor
 `api/shared/platform-registry.ts` is the single source of truth for supported platforms, their categories (marketplace, patronage, decentralized, library, official, social), and payout percentages. Add or change platforms there rather than hardcoding elsewhere. The web app mirrors presentation config in `apps/web/src/services/sources.ts`.
 
 ### Artist profiles
-Artists claim profiles via `/claim/:slug` (email magic link or password auth, with a manual-review fallback path). The claim flow is a multi-step wizard split across `Claim*Step.tsx` components. Claimed profiles are edited at `/artist-edit/:slug` (bio, photo, links, location, featured release embed). Claimed pages render at `/a/:slug` (SSR via `claimed-artist-page` edge function). Analytics (searches, views, clicks) appear on the artist dashboard.
+Artists claim profiles via `/claim/:slug` (email magic link or password auth, with a manual-review fallback path). The claim flow is a multi-step wizard split across `Claim*Step.tsx` components. Claimed profiles are edited at `/artist-edit/:slug` (bio, photo, links, location, featured release embed). Artist pages (both claimed and unclaimed) render at `/a/:slug` and `/artist/:slug` via the `artist-page-static` edge function. Analytics (searches, views, clicks) appear on the artist dashboard.
 
 ### Saved & supported artists
 Signed-in fans can save artists and mark artists as supported (migrations 013–015). Backed by `saved-artists.ts` function and surfaced in the dashboard / app clients.
@@ -109,7 +109,7 @@ A versioned REST API for third parties, documented in `docs/openapi.yaml` and su
 Slash-command bot: `discord-interaction.ts` verifies signatures (tweetnacl) and dispatches to `discord-search-background.ts` for async search responses. Commands are registered with `scripts/discord-register-commands.ts`.
 
 ### Edge functions (SSR/SEO)
-Edge functions in `api/edge/` handle SSR for SEO, routed in `netlify.toml`: `og-metadata` (`/`), `artist-page` (`/artist/*`), `artist-page-static` (`/a/*`), `guide-page` (`/guides/*`), `noscript-search` (`/search`). (`/artists` is SPA-only after UNS-98; the `artist-directory-page` edge function was removed.)
+Edge functions in `api/edge/` handle SSR for SEO, routed in `netlify.toml`: `og-metadata` (`/`), `artist-page-static` (`/artist/*` and `/a/*`), `guide-page` (`/guides/*`), `noscript-search` (`/search`). (`/artists` is SPA-only after UNS-98; the `artist-directory-page` edge function was removed.)
 
 ### Guides
 Markdown files in `data/guides/` with YAML frontmatter (title, description, pillar, published/draft). A manifest is generated at build time (`scripts/generate-guides-manifest.ts`). Pillars: artist-economics, platform-discovery, how-to, builder.
