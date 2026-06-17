@@ -70,6 +70,7 @@ export default defineConfig({
         navigateFallbackDenylist: [
           // Edge function routes that serve static HTML — don't let SW intercept them
           /^\/a\//,
+          /^\/artist\//,
         ],
         runtimeCaching: [
           {
