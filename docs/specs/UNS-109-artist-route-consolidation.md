@@ -75,7 +75,7 @@ The legacy edge function. After this change, nothing references it. Delete the f
 - All test coverage for the old function transfers to `artist-page-static` (which already shipped with 316/322 tests passing in #277).
 - The old function's only unique feature that `artist-page-static` lacks is the theme toggle and the auth localStorage reader — both removed by design (see "What we lose" below).
 
-**Sanity-check before deleting:** `grep -rn "artist-page\b" /Users/brandonlucasgreen/projects/unstream/ --include="*.ts" --include="*.toml" --include="*.md"` should return zero hits after this PR. Run it locally to confirm.
+**Sanity-check before deleting:** `grep -rn "artist-page\b" --include="*.ts" --include="*.toml" --include="*.md"` should return zero hits after this PR. Run it locally to confirm.
 
 ### 4. `CLAUDE.md` — update the edge functions list
 
