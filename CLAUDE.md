@@ -150,6 +150,7 @@ Default to **simple, boring code that a human can read once and understand.** Th
 - **No dead weight.** Don't leave commented-out code, unused exports, speculative "might need later" branches, or TODOs without follow-through. Delete what isn't used.
 - **Scale through clarity, not premature optimization.** Write the straightforward version first; optimize only with a concrete reason (a real hot path, a measured cost). Note the trade-off when you do.
 - **Fail loudly and handle errors explicitly.** Validate inputs at boundaries, surface errors (Sentry is wired up — use it), and avoid silent catches that swallow problems.
+- **One route, one renderer.** If a URL is server-rendered by an edge function, it is not also client-rendered by the SPA. Pick one. The "two renderers for one URL" pattern causes back-button / bfcache breakage and creates bug loops where every fix is a partial revert of the previous fix. See `docs/retros/UNS-100-bifurcation-retro.md` for the full lesson (UNS-70/71/73/94/97/99/100 series). When you need both SEO/no-JS HTML *and* React interactivity, use a pure-SSR edge function as the no-JS/crawler fallback and the SPA as the in-app renderer, and ensure the SPA never tries to "take over" from the static response.
 
 ### Security practices
 
