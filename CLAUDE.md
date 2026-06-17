@@ -109,7 +109,7 @@ A versioned REST API for third parties, documented in `docs/openapi.yaml` and su
 Slash-command bot: `discord-interaction.ts` verifies signatures (tweetnacl) and dispatches to `discord-search-background.ts` for async search responses. Commands are registered with `scripts/discord-register-commands.ts`.
 
 ### Edge functions (SSR/SEO)
-Edge functions in `api/edge/` handle SSR for SEO, routed in `netlify.toml`: `og-metadata` (`/`), `artist-page` (`/artist/*`), `claimed-artist-page` (`/a/*`), `guide-page` (`/guides/*`), `noscript-search` (`/search`). (`/artists` is SPA-only after UNS-98; the `artist-directory-page` edge function was removed.)
+Edge functions in `api/edge/` handle SSR for SEO, routed in `netlify.toml`: `og-metadata` (`/`), `artist-page` (`/artist/*`), `artist-page-static` (`/a/*`), `guide-page` (`/guides/*`), `noscript-search` (`/search`). (`/artists` is SPA-only after UNS-98; the `artist-directory-page` edge function was removed.)
 
 ### Guides
 Markdown files in `data/guides/` with YAML frontmatter (title, description, pillar, published/draft). A manifest is generated at build time (`scripts/generate-guides-manifest.ts`). Pillars: artist-economics, platform-discovery, how-to, builder.

@@ -19,7 +19,7 @@
 
 [[edge_functions]]
   path = "/a/*"
-  function = "claimed-artist-page"
+  function = "artist-page-static"
 
 [[edge_functions]]
   path = "/search"
