@@ -106,7 +106,7 @@ const CSS = `
 export default async function handler(request: Request, context: Context) {
   try {
     const url = new URL(request.url);
-    const slug = url.pathname.replace(/^\/a\//, '').replace(/\/$/, '');
+    const slug = url.pathname.replace(/^\/(a|artist)\//, '').replace(/\/$/, '');
 
     if (!slug) return context.next();
 
