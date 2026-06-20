@@ -51,6 +51,16 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "EBC6D8D8E755A6A4A061B679"
+               BuildableName = "UnstreamTests.xctest"
+               BlueprintName = "UnstreamTests"
+               ReferencedContainer = "container:Unstream.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

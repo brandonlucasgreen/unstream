@@ -3,18 +3,82 @@ import SwiftUI
 
 struct iOSSettingsTab: View {
     @EnvironmentObject var releaseAlertManager: ReleaseAlertManager
+    @ObservedObject private var auth = AuthService.shared
+    @ObservedObject private var sync = SavedArtistsSync.shared
     @State private var notificationDenied = false
+    @State private var showSignIn = false
+    @State private var foregroundPollTimer: Timer?
+    @State private var foregroundForcePullTimer: Timer?
 
     var body: some View {
         NavigationStack {
             Form {
+                // Account / Auth
+                Section {
+                    if auth.isSignedIn {
+                        HStack {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                            Text(auth.userEmail ?? "Signed in")
+                                .font(.body)
+                            Spacer()
+                        }
+                        Button("Sign Out", role: .destructive) {
+                            Task { await auth.signOut() }
+                        }
+                    } else {
+                        Button(action: { showSignIn = true }) {
+                            HStack {
+                                Image(systemName: "person.crop.circle.badge.plus")
+                                Text("Sign In to Sync")
+                            }
+                        }
+                    }
+                } header: {
+                    Text("Account")
+                } footer: {
+                    Text("Sign in to sync your saved artists across devices.")
+                }
+
+                // Synced saved artists (only when signed in)
+                if auth.isSignedIn {
+                    Section {
+                        if sync.syncedArtists.isEmpty {
+                            if sync.isSyncing {
+                                HStack {
+                                    Spacer()
+                                    ProgressView()
+                                        .scaleEffect(0.7)
+                                    Text("Syncing...")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Spacer()
+                                }
+                            } else {
+                                Text("No saved artists yet")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        } else {
+                            ForEach(sync.syncedArtists) { artist in
+                                SyncedArtistRow(artist: artist) {
+                                    Task { await sync.removeArtist(slug: artist.displaySlug) }
+                                }
+                            }
+                        }
+                    } header: {
+                        Text("Saved Artists (Synced)")
+                    } footer: {
+                        Text("Artists you save on any device appear here automatically.")
+                    }
+                }
+
                 // Release Alerts
                 Section {
                     Toggle("Release Alerts", isOn: Binding(
                         get: { releaseAlertManager.releaseAlertsEnabled },
                         set: { newValue in
                             if newValue {
-                                // Request notification permission before enabling
                                 Task {
                                     let center = UNUserNotificationCenter.current()
                                     let settings = await center.notificationSettings()
@@ -132,7 +196,50 @@ struct iOSSettingsTab: View {
                 }
             }
             .navigationTitle("Settings")
+            .sheet(isPresented: $showSignIn) {
+                SignInView()
+            }
+            .onAppear {
+                if auth.isSignedIn {
+                    Task { await sync.pull() }
+                    startForegroundPoll()
+                }
+            }
+            .onDisappear {
+                stopForegroundPoll()
+            }
+            .onChange(of: auth.isSignedIn) { signedIn in
+                if !signedIn {
+                    stopForegroundPoll()
+                }
+            }
         }
+    }
+
+    // MARK: - 60-second poll while foregrounded
+
+    private func startForegroundPoll() {
+        stopForegroundPoll()
+        foregroundPollTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
+            Task { @MainActor in
+                await sync.pull()
+            }
+        }
+        // Periodic force-pull every 5 minutes as a safety net for
+        // cross-device removals (tombstones cover the common case,
+        // but a full refresh catches any edge cases during long sessions).
+        foregroundForcePullTimer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { _ in
+            Task { @MainActor in
+                await sync.pull(force: true)
+            }
+        }
+    }
+
+    private func stopForegroundPoll() {
+        foregroundPollTimer?.invalidate()
+        foregroundPollTimer = nil
+        foregroundForcePullTimer?.invalidate()
+        foregroundForcePullTimer = nil
     }
 }
 #endif

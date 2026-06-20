@@ -76,6 +76,8 @@ export async function handler(event: {
       supported_at,
       last_modified,
       device_id,
+      deleted,
+      deleted_at,
       artists!left (id, name, slug, image_url)
     `)
     .eq('user_id', user.userId)
@@ -117,6 +119,7 @@ export async function handler(event: {
         lastModified: row.last_modified,
         deviceId: row.device_id,
         claimed,
+        deleted: row.deleted ?? false,
       };
     });
 

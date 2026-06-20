@@ -9,8 +9,12 @@ struct PopoverView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var supportListManager: SupportListManager
     @EnvironmentObject var releaseAlertManager: ReleaseAlertManager
-
+    @ObservedObject private var auth = AuthService.shared
+    @ObservedObject private var sync = SavedArtistsSync.shared
     @State private var selectedTab: PopoverTab = .search
+    @State private var showSignIn = false
+    @State private var menuPollTimer: Timer?
+    @State private var menuForcePullTimer: Timer?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -36,6 +40,23 @@ struct PopoverView: View {
             .padding(.horizontal)
             .padding(.top, 8)
 
+            // Auth bar (shown when signed in or has synced artists)
+            if auth.isSignedIn {
+                Divider()
+                HStack(spacing: 6) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.green)
+                        .font(.system(size: 10))
+                    Text(auth.userEmail ?? "Signed in")
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                    Spacer()
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 4)
+            }
+
             // Search bar (only visible on search tab)
             if selectedTab == .search {
                 SearchBarView()
@@ -48,10 +69,41 @@ struct PopoverView: View {
             ScrollView {
                 VStack(spacing: 12) {
                     if selectedTab == .supportList {
-                        SupportListView(
-                            supportListManager: supportListManager,
-                            releaseAlertManager: releaseAlertManager
-                        )
+                        // Synced artists from server (if signed in)
+                        if auth.isSignedIn {
+                            SyncedArtistsView()
+                                .onAppear {
+                                    startMenuPoll()
+                                }
+                                .onDisappear {
+                                    stopMenuPoll()
+                                }
+                        } else {
+                            // Sign-in prompt
+                            VStack(spacing: 10) {
+                                Image(systemName: "person.crop.circle.badge.questionmark")
+                                    .font(.title2)
+                                    .foregroundColor(.secondary)
+                                Text("Sign in to sync saved artists")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Button("Sign In") {
+                                    showSignIn = true
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .controlSize(.small)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 20)
+
+                            Divider()
+
+                            // Local saved artists (offline, no sync)
+                            SupportListView(
+                                supportListManager: supportListManager,
+                                releaseAlertManager: releaseAlertManager
+                            )
+                        }
                     } else {
                         // Search tab content
                         switch appState.displayMode {
@@ -107,6 +159,31 @@ struct PopoverView: View {
 
             // Footer
             HStack {
+                // Sign in/out button
+                if auth.isSignedIn {
+                    Button(action: { Task { await auth.signOut() } }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "rectangle.portrait.and.arrow.right")
+                                .font(.system(size: 10))
+                            Text("Sign Out")
+                                .font(.system(size: 10))
+                        }
+                        .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    Button(action: { showSignIn = true }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "person.crop.circle.badge.plus")
+                                .font(.system(size: 10))
+                            Text("Sign In")
+                                .font(.system(size: 10))
+                        }
+                        .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+
                 Spacer()
 
                 Menu {
@@ -149,6 +226,43 @@ struct PopoverView: View {
             .padding(.vertical, 8)
         }
         .frame(width: 320)
+        .sheet(isPresented: $showSignIn) {
+            SignInView()
+        }
+        .onDisappear {
+            stopMenuPoll()
+        }
+        .onChange(of: auth.isSignedIn) { signedIn in
+            if !signedIn {
+                stopMenuPoll()
+            }
+        }
+    }
+
+    // MARK: - 60-second poll while menu is open
+
+    private func startMenuPoll() {
+        stopMenuPoll()
+        menuPollTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
+            Task { @MainActor in
+                await sync.pull()
+            }
+        }
+        // Periodic force-pull every 5 minutes as a safety net for
+        // cross-device removals (tombstones cover the common case,
+        // but a full refresh catches any edge cases during long sessions).
+        menuForcePullTimer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { _ in
+            Task { @MainActor in
+                await sync.pull(force: true)
+            }
+        }
+    }
+
+    private func stopMenuPoll() {
+        menuPollTimer?.invalidate()
+        menuPollTimer = nil
+        menuForcePullTimer?.invalidate()
+        menuForcePullTimer = nil
     }
 }
 
