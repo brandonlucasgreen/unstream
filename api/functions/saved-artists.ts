@@ -202,9 +202,12 @@ async function handleSave(user: { userId: string; email: string }, body: Record<
     const slug = existingArtist?.slug || artistSlug;
 
     // Upsert — idempotent if already saved
-    // UNS-93: accept optional last_modified and device_id for sync.
-    // On UPDATE the trigger overwrites last_modified with now(); client value
-    // is preserved only on INSERT.
+    // UNS-93: accept optional device_id for sync.
+    // UNS-112: stamp last_modified server-side as the authoritative timestamp
+    // so clock skew between client and server doesn't hide saves from incremental pulls.
+    // The DB trigger overwrites last_modified on UPDATE, but setting it on INSERT
+    // ensures the row is immediately visible to ?since= queries using server time.
+    const serverNow = new Date().toISOString();
     const upsertPayload: Record<string, unknown> = {
       user_id: user.userId,
       artist_id: artistId,
@@ -212,15 +215,11 @@ async function handleSave(user: { userId: string; email: string }, body: Record<
       artist_name: name,
       artist_image_url: imageUrl,
       notes: (body.notes as string) || null,
+      last_modified: serverNow,
+      // Clear tombstone if re-saving a previously-removed artist
+      deleted: false,
+      deleted_at: null,
     };
-    if (body.last_modified !== undefined) {
-      if (typeof body.last_modified === 'string') {
-        const parsed = new Date(body.last_modified);
-        if (!isNaN(parsed.getTime())) {
-          upsertPayload.last_modified = body.last_modified;
-        }
-      }
-    }
     if (body.device_id !== undefined) {
       if (typeof body.device_id === 'string') {
         upsertPayload.device_id = body.device_id.slice(0, 128);
@@ -243,6 +242,7 @@ async function handleSave(user: { userId: string; email: string }, body: Record<
       headers: CORS_HEADERS,
       body: JSON.stringify({
         success: true,
+        server_time: serverNow,
         savedArtist: {
           artistId: slug,
           name,
@@ -268,21 +268,25 @@ async function handleRemove(user: { userId: string; email: string }, body: Recor
   }
 
   try {
-    const { error: deleteError } = await client
+    // UNS-112: soft-delete (tombstone) instead of hard DELETE so
+    // incremental pulls (?since=) can propagate removals to other devices.
+    const removeTime = new Date().toISOString();
+    const { error: updateError } = await client
       .from('saved_artists')
-      .delete()
+      .update({ deleted: true, deleted_at: removeTime, last_modified: removeTime })
       .eq('user_id', user.userId)
-      .eq('artist_slug', artistSlug);
+      .eq('artist_slug', artistSlug)
+      .eq('deleted', false);
 
-    if (deleteError) {
-      console.error('[saved-artists] Error removing saved artist:', deleteError);
+    if (updateError) {
+      console.error('[saved-artists] Error removing saved artist:', updateError);
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to remove saved artist' }) };
     }
 
     return {
       statusCode: 200,
       headers: CORS_HEADERS,
-      body: JSON.stringify({ success: true }),
+      body: JSON.stringify({ success: true, server_time: removeTime }),
     };
   } catch (error) {
     console.error('[saved-artists] Remove error:', error);
