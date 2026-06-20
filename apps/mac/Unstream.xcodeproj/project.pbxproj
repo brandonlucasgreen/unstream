@@ -11,6 +11,7 @@
 		25881F48E622E19B77281290 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F7DF80FB5FAEF74A6F2200 /* SignInView.swift */; };
 		3385E641D2DE09112BB991FA /* Supabase in Sources */ = {isa = PBXBuildFile; productRef = 22204F03FE25486AD3DFCB46 /* Supabase */; };
 		46B5A1100AFDB0968A050BDA /* DeviceIDManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D272ED2720E789B5FFD7CA55 /* DeviceIDManager.swift */; };
+		4885A7356F74E3810B9278DC /* SavedArtistsSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C49D55C25BD65E0A714D434 /* SavedArtistsSyncTests.swift */; };
 		6B09B42A6AC4B94063BA9B71 /* SyncedArtistsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBC08EA8D8FEA404D011C0D7 /* SyncedArtistsView.swift */; };
 		74B410AF24C0386EE62DED36 /* SavedArtistsSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EF02E48D3B560D8F9EBEEA1 /* SavedArtistsSync.swift */; };
 		D7E74AB17D700D829A51EA3A /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64AD10B917A98485CDEAF2B5 /* AuthService.swift */; };
@@ -95,6 +96,7 @@
 /* Begin PBXFileReference section */
 		03F7DF80FB5FAEF74A6F2200 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
 		5EF02E48D3B560D8F9EBEEA1 /* SavedArtistsSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedArtistsSync.swift; sourceTree = "<group>"; };
+		4C49D55C25BD65E0A714D434 /* SavedArtistsSyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedArtistsSyncTests.swift; sourceTree = "<group>"; };
 		64AD10B917A98485CDEAF2B5 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		BBC08EA8D8FEA404D011C0D7 /* SyncedArtistsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncedArtistsView.swift; sourceTree = "<group>"; };
 		D272ED2720E789B5FFD7CA55 /* DeviceIDManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIDManager.swift; sourceTree = "<group>"; };
@@ -145,6 +147,7 @@
 		BE9E59C365D8F116C435B8BC /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		BE9F88505AF840EC94B5C0BC /* FaircampReleaseChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaircampReleaseChecker.swift; sourceTree = "<group>"; };
 		C2ACE9E0FA5F270656066467 /* UnstreamShareExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = UnstreamShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		766B8B814BC6BC061A302D06 /* UnstreamTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cxx-bundle; path = UnstreamTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC8A2405B5A74531E19338D9 /* PlatformBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformBadge.swift; sourceTree = "<group>"; };
 		D144E8586F19DBA63C2F37B1 /* SafariView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariView.swift; sourceTree = "<group>"; };
 		DC148A11F868801384A78672 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
@@ -251,6 +254,7 @@
 			children = (
 				8289E4D1EE687D809E62C8B8 /* Unstream */,
 				97F4DADF79FF443DD2ECB86F /* UnstreamShareExtension */,
+				393D9EFD7035AC6EBE2D3097 /* UnstreamTests */,
 				E27DFAC60C2E3DEB8AD07F76 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -264,6 +268,14 @@
 				590FD31A0B703B21FFCCBEA7 /* ShareViewController.swift */,
 			);
 			path = UnstreamShareExtension;
+			sourceTree = "<group>";
+		};
+		393D9EFD7035AC6EBE2D3097 /* UnstreamTests */ = {
+			isa = PBXGroup;
+			children = (
+				4C49D55C25BD65E0A714D434 /* SavedArtistsSyncTests.swift */,
+			);
+			path = UnstreamTests;
 			sourceTree = "<group>";
 		};
 		990B6FFF44AB5ACA6B926B4C /* macOS */ = {
@@ -308,6 +320,7 @@
 			children = (
 				607E17AC019A1B8698E64ACC /* Unstream.app */,
 				C2ACE9E0FA5F270656066467 /* UnstreamShareExtension.appex */,
+				766B8B814BC6BC061A302D06 /* UnstreamTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -366,6 +379,24 @@
 			productReference = C2ACE9E0FA5F270656066467 /* UnstreamShareExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		EBC6D8D8E755A6A4A061B679 /* UnstreamTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8CBAFC0FC4A54EC28427D379 /* Build configuration list for PBXNativeTarget "UnstreamTests" */;
+			buildPhases = (
+				D0249AF1C15825350A58F2E9 /* Sources */,
+				3DCD49957FDB82A10EA749AB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = UnstreamTests;
+			packageProductDependencies = (
+			);
+			productName = UnstreamTests;
+			productReference = 766B8B814BC6BC061A302D06 /* UnstreamTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -401,6 +432,7 @@
 			targets = (
 				47EAA15AC0EA29029489E759 /* Unstream */,
 				50FDF92E61EA31C4052D0F8B /* UnstreamShareExtension */,
+				EBC6D8D8E755A6A4A061B679 /* UnstreamTests */,
 			);
 			packageReferences = (
 				F42013B6E7EC3A273B1D81C0 /* XCRemoteSwiftPackageReference "supabase-swift" */,
@@ -427,6 +459,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3DCD49957FDB82A10EA749AB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -435,6 +474,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				E4239CF7D84048CD92446197 /* ShareViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D0249AF1C15825350A58F2E9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4885A7356F74E3810B9278DC /* SavedArtistsSyncTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -547,6 +594,48 @@
 				PRODUCT_NAME = UnstreamShare;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		426D245F49E2F659D86BE2F2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = CV926C8KS8;
+				INFOPLIST_FILE = UnstreamTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = lol.bgreen.UnstreamTests;
+				PRODUCT_NAME = UnstreamTests;
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Unstream.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Unstream";
+			};
+			name = Debug;
+		};
+		A522C86EE42FE0DBD419590E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = CV926C8KS8;
+				INFOPLIST_FILE = UnstreamTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = lol.bgreen.UnstreamTests;
+				PRODUCT_NAME = UnstreamTests;
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Unstream.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Unstream";
 			};
 			name = Release;
 		};
@@ -751,6 +840,15 @@
 			buildConfigurations = (
 				017948A6C58452F4C74CAECC /* Debug */,
 				1A9363B8038A05F762A9FB07 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		8CBAFC0FC4A54EC28427D379 /* Build configuration list for PBXNativeTarget "UnstreamTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				426D245F49E2F659D86BE2F2 /* Debug */,
+				A522C86EE42FE0DBD419590E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

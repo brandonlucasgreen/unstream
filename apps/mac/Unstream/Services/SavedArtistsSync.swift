@@ -59,15 +59,20 @@ class SavedArtistsSync: ObservableObject {
             let decoded = try JSONDecoder().decode(SyncResponse.self, from: data)
 
             if force {
-                syncedArtists = decoded.artists
+                syncedArtists = decoded.artists.filter { !$0.deleted ?? false }
             } else {
-                // Merge: replace existing entries by slug, append new ones
+                // Merge: replace existing entries by slug, append new ones.
+                // Tombstones (deleted == true) remove the entry instead of adding it.
                 var bySlug: [String: SyncedArtist] = [:]
                 for artist in syncedArtists {
                     bySlug[artist.slug] = artist
                 }
                 for artist in decoded.artists {
-                    bySlug[artist.slug] = artist
+                    if artist.deleted == true {
+                        bySlug.removeValue(forKey: artist.slug)
+                    } else {
+                        bySlug[artist.slug] = artist
+                    }
                 }
                 syncedArtists = Array(bySlug.values).sorted { $0.name < $1.name }
             }
@@ -105,9 +110,15 @@ class SavedArtistsSync: ObservableObject {
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
 
         do {
-            let (_, response) = try await session.data(for: request)
+            let (data, response) = try await session.data(for: request)
             if let http = response as? HTTPURLResponse,
                (200...299).contains(http.statusCode) {
+                // Update sync cursor from the server's authoritative time
+                // so subsequent incremental pulls don't miss this save.
+                if let responseBody = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let serverTime = responseBody["server_time"] as? String {
+                    lastSyncTime = serverTime
+                }
                 // Refresh pull to get the server's authoritative version
                 await pull()
             }
@@ -139,9 +150,14 @@ class SavedArtistsSync: ObservableObject {
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
 
         do {
-            let (_, response) = try await session.data(for: request)
+            let (data, response) = try await session.data(for: request)
             if let http = response as? HTTPURLResponse,
                (200...299).contains(http.statusCode) {
+                // Update sync cursor from the server's authoritative time
+                if let responseBody = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let serverTime = responseBody["server_time"] as? String {
+                    lastSyncTime = serverTime
+                }
                 // Remove from local list immediately
                 syncedArtists.removeAll { $0.slug == slug }
             }
@@ -164,7 +180,9 @@ struct SyncResponse: Codable {
 }
 
 struct SyncedArtist: Codable, Identifiable, Hashable {
-    let id: Int?
+    // Server's saved_artists.id is a UUID (text in JSON), not an Int.
+    // Optional handles null/absent; String matches the wire format.
+    let id: String?
     let artistId: String
     let name: String
     let slug: String
@@ -173,6 +191,7 @@ struct SyncedArtist: Codable, Identifiable, Hashable {
     let lastModified: String?
     let deviceId: String?
     let claimed: Bool?
+    let deleted: Bool?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -184,6 +203,7 @@ struct SyncedArtist: Codable, Identifiable, Hashable {
         case lastModified
         case deviceId
         case claimed
+        case deleted
     }
 
     var displaySlug: String {
