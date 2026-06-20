@@ -457,9 +457,15 @@ body {
 
 .saved-artist-name-wrap {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   min-width: 0;
   flex: 1;
+}
+
+.saved-artist-name-wrap .name-location {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .saved-artist-name {
@@ -471,6 +477,15 @@ body {
 
 .saved-artist-name:hover {
   color: #60A5FA;
+}
+
+.saved-artist-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 8px;
+  flex-shrink: 0;
 }
 
 .saved-artist-remove {
@@ -694,6 +709,165 @@ body {
   color: #9CA3AF;
   border-radius: 3px;
   vertical-align: middle;
+}
+
+/* Auth Form */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.auth-input {
+  padding: 10px 12px;
+  background: #374151;
+  border: 1px solid #4B5563;
+  border-radius: 8px;
+  color: #F9FAFB;
+  font-size: 14px;
+}
+
+.auth-input::placeholder {
+  color: #6B7280;
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: #60A5FA;
+}
+
+.auth-submit {
+  padding: 10px 16px;
+  background: #3B82F6;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.auth-submit:hover {
+  background: #2563EB;
+}
+
+.auth-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-error {
+  font-size: 12px;
+  color: #EF4444;
+  text-align: center;
+}
+
+.auth-magic-link {
+  background: none;
+  border: none;
+  color: #60A5FA;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 0;
+  text-align: center;
+  width: 100%;
+}
+
+.auth-magic-link:hover {
+  color: #93BBFD;
+  text-decoration: underline;
+}
+
+.auth-magic-link:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.magic-link-sent {
+  text-align: center;
+  padding: 16px 0;
+  color: #9CA3AF;
+  font-size: 13px;
+}
+
+.magic-link-sent .empty-icon {
+  font-size: 28px;
+}
+
+.magic-link-sent p {
+  margin-top: 8px;
+}
+
+/* Auth bar (logged-in state) */
+.auth-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.auth-email-display {
+  font-size: 13px;
+  color: #9CA3AF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.auth-sign-out {
+  background: none;
+  border: 1px solid #4B5563;
+  border-radius: 6px;
+  color: #9CA3AF;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 10px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.auth-sign-out:hover {
+  background: #374151;
+  color: #EF4444;
+  border-color: #EF4444;
+}
+
+/* Sync now button */
+.sync-now-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 16px;
+  background: #374151;
+  border: 1px solid #4B5563;
+  border-radius: 8px;
+  color: #F9FAFB;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 12px;
+}
+
+.sync-now-btn:hover {
+  background: #4B5563;
+}
+
+.sync-now-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sync-now-btn.syncing {
+  background: #3B82F6;
+  border-color: #3B82F6;
 }
 
 /* Loading state */
