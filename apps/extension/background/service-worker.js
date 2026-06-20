@@ -1,7 +1,8 @@
 // Unstream Chrome Extension - Service Worker
-// Handles API calls, caching, badge updates, and release alerts
+// Handles API calls, caching, badge updates, release alerts, and auth
 
 import { ALLOWED_RELEASE_DOMAINS } from '../lib/constants.js';
+import { getStoredSession, handleMagicLinkCallback, getAccessToken, signOut } from '../lib/supabase.js';
 
 const API_BASE = 'https://unstream.stream/api';
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
@@ -79,6 +80,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   } else if (message.type === 'DISMISS_RELEASE') {
     dismissRelease(message.releaseId).then(sendResponse);
+    return true;
+  } else if (message.type === 'AUTH_GET_SESSION') {
+    getStoredSession().then(session => sendResponse({ session })).catch(() => sendResponse({ session: null }));
+    return true;
+  } else if (message.type === 'AUTH_MAGIC_LINK_CALLBACK') {
+    handleMagicLinkCallback(message.url).then(session => sendResponse({ session })).catch(() => sendResponse({ session: null }));
+    return true;
+  } else if (message.type === 'AUTH_SIGN_OUT') {
+    signOut().then(() => sendResponse({ success: true })).catch(() => sendResponse({ success: true }));
+    return true;
+  } else if (message.type === 'AUTH_GET_TOKEN') {
+    getAccessToken().then(token => sendResponse({ token })).catch(() => sendResponse({ token: null }));
     return true;
   }
 });

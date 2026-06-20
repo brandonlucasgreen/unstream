@@ -101,6 +101,37 @@
 
       <!-- Saved Tab -->
       <div id="tab-saved" class="tab-panel">
+        <!-- Auth Section (shown when signed out) -->
+        <section id="auth-section" class="section hidden">
+          <h2 class="section-title">Log in to sync your saved artists</h2>
+          <form id="auth-form" class="auth-form">
+            <input type="email" id="auth-email" class="auth-input" placeholder="Email" required autocomplete="email">
+            <input type="password" id="auth-password" class="auth-input" placeholder="Password" autocomplete="current-password">
+            <button type="submit" id="auth-submit" class="auth-submit">Sign in</button>
+            <div id="auth-error" class="auth-error hidden"></div>
+          </form>
+          <button id="auth-magic-link" class="auth-magic-link">Send magic link instead</button>
+          <div id="magic-link-sent" class="magic-link-sent hidden">
+            <span class="empty-icon">📧</span>
+            <p>Check your email for a sign-in link.</p>
+          </div>
+        </section>
+
+        <!-- Logged-in indicator (shown when signed in) -->
+        <section id="auth-logged-in" class="section hidden">
+          <div class="auth-bar">
+            <span id="auth-email-display" class="auth-email-display"></span>
+            <button id="auth-sign-out" class="auth-sign-out">Sign out</button>
+          </div>
+          <button id="sync-now-btn" class="sync-now-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+            Sync now
+          </button>
+        </section>
+
         <!-- New Releases Section -->
         <section id="releases-section" class="section hidden">
           <h2 class="section-title">

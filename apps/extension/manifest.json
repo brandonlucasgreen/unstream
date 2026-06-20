@@ -84,7 +84,8 @@
     "storage",
     "activeTab",
     "alarms",
-    "notifications"
+    "notifications",
+    "identity"
   ],
   "host_permissions": [
     "https://unstream.stream/*",

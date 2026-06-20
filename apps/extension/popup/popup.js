@@ -2,6 +2,9 @@
 
 import { isBandcampFriday } from '../lib/bandcamp-friday.js';
 import { ALLOWED_RELEASE_DOMAINS, SOURCE_CONFIG, PAYOUT_PERCENTAGES } from '../lib/constants.js';
+import { signInWithPassword, signInWithOtp, signOut, getStoredSession, getAccessToken, getDeviceId } from '../lib/supabase.js';
+
+const API_BASE = 'https://unstream.stream/api';
 
 function isAllowedReleaseUrl(url) {
   try {
@@ -50,6 +53,19 @@ const elements = {
   artistLocation: document.getElementById('artist-location'),
   trackTitle: document.getElementById('track-title'),
   sourceBadge: document.getElementById('source-badge'),
+  // Auth
+  authSection: document.getElementById('auth-section'),
+  authForm: document.getElementById('auth-form'),
+  authEmail: document.getElementById('auth-email'),
+  authPassword: document.getElementById('auth-password'),
+  authSubmit: document.getElementById('auth-submit'),
+  authError: document.getElementById('auth-error'),
+  authMagicLink: document.getElementById('auth-magic-link'),
+  magicLinkSent: document.getElementById('magic-link-sent'),
+  authLoggedIn: document.getElementById('auth-logged-in'),
+  authEmailDisplay: document.getElementById('auth-email-display'),
+  authSignOut: document.getElementById('auth-sign-out'),
+  syncNowBtn: document.getElementById('sync-now-btn'),
   // Saved tab
   releasesSection: document.getElementById('releases-section'),
   newReleases: document.getElementById('new-releases'),
@@ -68,6 +84,307 @@ let currentResults = null;
 let currentSocialLinks = null;
 let currentLocation = null;
 let newReleases = [];
+let authSession = null; // null = unknown/loading, false = signed out, object = signed in
+
+// ---- Auth ----
+
+async function initAuth() {
+  try {
+    const { session } = await chrome.runtime.sendMessage({ type: 'AUTH_GET_SESSION' });
+    if (session && session.user) {
+      authSession = session;
+      showLoggedInState(session.user);
+    } else {
+      authSession = false;
+      showLoggedOutState();
+    }
+  } catch {
+    // Service worker may be starting up — try reading from storage directly
+    try {
+      const session = await getStoredSession();
+      if (session && session.user) {
+        authSession = session;
+        showLoggedInState(session.user);
+      } else {
+        authSession = false;
+        showLoggedOutState();
+      }
+    } catch {
+      authSession = false;
+      showLoggedOutState();
+    }
+  }
+}
+
+function showLoggedInState(user) {
+  elements.authSection.classList.add('hidden');
+  elements.authLoggedIn.classList.remove('hidden');
+  elements.authEmailDisplay.textContent = user.email || 'Signed in';
+  elements.syncNowBtn.disabled = false;
+  elements.syncNowBtn.textContent = '';
+  // Rebuild the sync button content
+  elements.syncNowBtn.innerHTML = '';
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('width', '14');
+  svg.setAttribute('height', '14');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '2');
+  const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+  polyline.setAttribute('points', '23 4 23 10 17 10');
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', 'M20.49 15a9 9 0 1 1-2.12-9.36L23 10');
+  svg.appendChild(polyline);
+  svg.appendChild(path);
+  elements.syncNowBtn.appendChild(svg);
+  elements.syncNowBtn.appendChild(document.createTextNode(' Sync now'));
+  // Update save button to show sync state
+  updateSaveButton();
+}
+
+function showLoggedOutState() {
+  elements.authSection.classList.remove('hidden');
+  elements.authLoggedIn.classList.add('hidden');
+  elements.authForm.reset();
+  elements.authError.classList.add('hidden');
+  elements.magicLinkSent.classList.add('hidden');
+  elements.authSubmit.disabled = false;
+  elements.authMagicLink.disabled = false;
+}
+
+async function handleSignIn(e) {
+  e.preventDefault();
+  const email = elements.authEmail.value.trim();
+  const password = elements.authPassword.value;
+
+  if (!email) return;
+
+  elements.authSubmit.disabled = true;
+  elements.authError.classList.add('hidden');
+
+  if (password) {
+    // Password sign-in
+    const result = await signInWithPassword(email, password);
+    if (result.error) {
+      elements.authError.textContent = result.error;
+      elements.authError.classList.remove('hidden');
+      elements.authSubmit.disabled = false;
+      return;
+    }
+    authSession = result.session;
+    showLoggedInState(result.session.user);
+    // Trigger initial sync
+    syncSavedArtists();
+  } else {
+    // Magic link — redirect to OAuth flow
+    elements.authSubmit.disabled = false;
+    await handleMagicLink(email);
+  }
+}
+
+async function handleMagicLink(email) {
+  if (!email) return;
+
+  elements.authMagicLink.disabled = true;
+  elements.authError.classList.add('hidden');
+
+  // Send the magic link email — the user will click the link in their email
+  // which opens unstream.stream and establishes a session there.
+  // The extension picks up the session on next popup open.
+  const result = await signInWithOtp(email);
+
+  if (result.error) {
+    elements.authError.textContent = result.error;
+    elements.authError.classList.remove('hidden');
+    elements.authMagicLink.disabled = false;
+    return;
+  }
+
+  // Show "check your email" message
+  elements.magicLinkSent.classList.remove('hidden');
+  elements.authForm.classList.add('hidden');
+  elements.authMagicLink.classList.add('hidden');
+
+  elements.authMagicLink.disabled = false;
+}
+
+async function handleSignOut() {
+  await signOut();
+  authSession = false;
+  showLoggedOutState();
+  // Clear synced artists — keep only local-only saves
+  await clearSyncedArtists();
+  loadSavedArtists();
+}
+
+async function clearSyncedArtists() {
+  // Remove artists that came from server sync, keeping locally-saved ones
+  const { syncedArtistSlugs = [] } = await chrome.storage.local.get('syncedArtistSlugs');
+  if (syncedArtistSlugs.length === 0) return;
+
+  const { savedArtists = [], savedArtistsData = {} } = await chrome.storage.local.get(['savedArtists', 'savedArtistsData']);
+  const remaining = savedArtists.filter(name => !syncedArtistSlugs.includes(name));
+  const remainingData = {};
+  for (const name of remaining) {
+    if (savedArtistsData[name]) remainingData[name] = savedArtistsData[name];
+  }
+
+  await chrome.storage.local.set({ savedArtists: remaining, savedArtistsData: remainingData });
+  await chrome.storage.local.remove('syncedArtistSlugs');
+  await chrome.storage.local.remove('lastSyncTime');
+}
+
+// ---- Saved Artists Sync ----
+
+async function syncSavedArtists() {
+  if (!authSession) return;
+
+  elements.syncNowBtn.disabled = true;
+  elements.syncNowBtn.classList.add('syncing');
+  elements.syncNowBtn.textContent = 'Syncing...';
+
+  try {
+    const token = authSession.access_token || await getAccessToken();
+    if (!token) return;
+
+    const { lastSyncTime } = await chrome.storage.local.get('lastSyncTime');
+    const since = lastSyncTime || '1970-01-01T00:00:00Z';
+
+    const response = await fetch(`${API_BASE}/saved-artists/sync?since=${encodeURIComponent(since)}`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+
+    if (!response.ok) {
+      console.error('Sync failed:', response.status);
+      return;
+    }
+
+    const data = await response.json();
+    const serverArtists = data.artists || [];
+
+    if (serverArtists.length === 0 && !lastSyncTime) {
+      // First sync, no server artists — just save the sync timestamp
+      await chrome.storage.local.set({ lastSyncTime: data.server_time });
+      // Reset the sync button but don't reload the list (nothing changed)
+      return;
+    }
+
+    // Merge server artists into local state
+    const { savedArtists = [], savedArtistsData = {} } = await chrome.storage.local.get(['savedArtists', 'savedArtistsData']);
+    const syncedSlugs = [];
+
+    for (const artist of serverArtists) {
+      const slug = artist.slug || artist.artistId;
+      if (!slug) continue;
+
+      syncedSlugs.push(slug);
+
+      // Add to local list if not present
+      if (!savedArtists.includes(slug)) {
+        savedArtists.push(slug);
+      }
+
+      // Build artist data from server record
+      savedArtistsData[slug] = {
+        platforms: (artist.claimed && artist.slug) ? [{ sourceId: 'unstream', url: `https://unstream.stream/a/${artist.slug}` }] : [],
+        socialLinks: [],
+        location: null,
+        imageUrl: artist.imageUrl || null,
+        name: artist.name || slug,
+        slug: artist.slug || '',
+        claimed: artist.claimed || false,
+        supported: artist.supported || false,
+        lastModified: artist.lastModified || null,
+      };
+    }
+
+    await chrome.storage.local.set({
+      savedArtists,
+      savedArtistsData,
+      syncedArtistSlugs: syncedSlugs,
+      lastSyncTime: data.server_time,
+    });
+
+    // Reload the saved artists display
+    loadSavedArtists();
+  } catch (error) {
+    console.error('Sync error:', error);
+  } finally {
+    elements.syncNowBtn.disabled = false;
+    elements.syncNowBtn.classList.remove('syncing');
+    // Reset button content
+    elements.syncNowBtn.innerHTML = '';
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '14');
+    svg.setAttribute('height', '14');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '2');
+    const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+    polyline.setAttribute('points', '23 4 23 10 17 10');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M20.49 15a9 9 0 1 1-2.12-9.36L23 10');
+    svg.appendChild(polyline);
+    svg.appendChild(path);
+    elements.syncNowBtn.appendChild(svg);
+    elements.syncNowBtn.appendChild(document.createTextNode(' Sync now'));
+  }
+}
+
+// Save an artist to the server (when logged in)
+async function saveArtistToServer(artistName, artistData) {
+  if (!authSession) return;
+
+  const token = authSession.access_token || await getAccessToken();
+  if (!token) return;
+
+  const deviceId = await getDeviceId();
+
+  try {
+    await fetch(`${API_BASE}/saved-artists`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        artistId: artistName,
+        name: artistData.name || artistName,
+        imageUrl: artistData.imageUrl || null,
+        last_modified: new Date().toISOString(),
+        device_id: deviceId,
+      }),
+    });
+  } catch {
+    // Silent — local save is still preserved
+  }
+}
+
+// Remove an artist from the server (when logged in)
+async function removeArtistFromServer(artistName) {
+  if (!authSession) return;
+
+  const token = authSession.access_token || await getAccessToken();
+  if (!token) return;
+
+  try {
+    await fetch(`${API_BASE}/saved-artists`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        action: 'remove',
+        artistId: artistName,
+      }),
+    });
+  } catch {
+    // Silent — local removal is still preserved
+  }
+}
 
 // Format ArtistLocation object to "City, Country" string
 function formatLocation(location) {
@@ -81,6 +398,9 @@ function formatLocation(location) {
 
 // Initialize popup
 async function init() {
+  // Initialize auth state
+  await initAuth();
+
   // Get current track from storage
   const { currentTrack } = await chrome.storage.local.get('currentTrack');
 
@@ -356,6 +676,8 @@ async function toggleSaveArtist() {
   if (index >= 0) {
     savedArtists.splice(index, 1);
     delete savedArtistsData[currentArtist];
+    // Remove from server if logged in
+    removeArtistFromServer(currentArtist);
   } else {
     savedArtists.push(currentArtist);
     const artistData = { platforms: [], socialLinks: [], location: currentLocation || null };
@@ -377,6 +699,8 @@ async function toggleSaveArtist() {
     }
 
     savedArtistsData[currentArtist] = artistData;
+    // Save to server if logged in
+    saveArtistToServer(currentArtist, artistData);
   }
 
   await chrome.storage.local.set({ savedArtists, savedArtistsData });
@@ -409,6 +733,7 @@ async function loadSavedArtists() {
     const platforms = artistData.platforms || [];
     const socialLinks = artistData.socialLinks || [];
     const location = artistData.location || null;
+    const imageUrl = artistData.imageUrl || null;
 
     const card = document.createElement('div');
     card.className = 'saved-artist-card';
@@ -420,22 +745,38 @@ async function loadSavedArtists() {
     const nameWrap = document.createElement('div');
     nameWrap.className = 'saved-artist-name-wrap';
 
+    // Artist image (if available from server sync)
+    if (imageUrl) {
+      const img = document.createElement('img');
+      img.src = imageUrl;
+      img.alt = '';
+      img.className = 'saved-artist-img';
+      img.loading = 'lazy';
+      nameWrap.appendChild(img);
+    }
+
+    const nameLocationWrap = document.createElement('div');
+    nameLocationWrap.className = 'name-location';
+
     const nameSpan = document.createElement('span');
     nameSpan.className = 'saved-artist-name';
-    nameSpan.textContent = artist;
+    // Use the synced name if available, otherwise fall back to the key
+    nameSpan.textContent = artistData.name || artist;
     nameSpan.addEventListener('click', () => {
       switchToTab('discover');
       searchArtist(artist);
     });
-    nameWrap.appendChild(nameSpan);
+    nameLocationWrap.appendChild(nameSpan);
 
     const locationText = formatLocation(location);
     if (locationText) {
       const locationSpan = document.createElement('div');
       locationSpan.className = 'saved-artist-location';
       locationSpan.textContent = locationText;
-      nameWrap.appendChild(locationSpan);
+      nameLocationWrap.appendChild(locationSpan);
     }
+
+    nameWrap.appendChild(nameLocationWrap);
 
     const removeBtn = document.createElement('button');
     removeBtn.className = 'saved-artist-remove';
@@ -524,6 +865,8 @@ async function removeSavedArtist(artist) {
     savedArtists.splice(index, 1);
     delete savedArtistsData[artist];
     await chrome.storage.local.set({ savedArtists, savedArtistsData });
+    // Remove from server if logged in
+    removeArtistFromServer(artist);
     loadSavedArtists();
     updateSaveButton();
   }
@@ -782,6 +1125,22 @@ function setupEventListeners() {
     }
   });
 
+  // Auth form submission
+  elements.authForm.addEventListener('submit', handleSignIn);
+
+  // Magic link button
+  elements.authMagicLink.addEventListener('click', () => {
+    const email = elements.authEmail.value.trim();
+    if (email) {
+      handleMagicLink(email);
+    }
+  });
+
+  // Sign out button
+  elements.authSignOut.addEventListener('click', handleSignOut);
+
+  // Sync now button
+  elements.syncNowBtn.addEventListener('click', syncSavedArtists);
 }
 
 // Initialize
