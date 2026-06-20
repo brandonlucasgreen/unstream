@@ -57,8 +57,17 @@ class SavedArtistsSync: ObservableObject {
         do {
             let (data, response) = try await session.data(for: request)
 
-            guard let http = response as? HTTPURLResponse,
-                  (200...299).contains(http.statusCode) else {
+            if let http = response as? HTTPURLResponse {
+                if http.statusCode == 401 {
+                    syncError = "Session expired — sign in again"
+                    isSyncing = false
+                    return
+                } else if !(200...299).contains(http.statusCode) {
+                    syncError = "Couldn't sync — tap to retry"
+                    isSyncing = false
+                    return
+                }
+            } else {
                 isSyncing = false
                 return
             }
@@ -118,16 +127,19 @@ class SavedArtistsSync: ObservableObject {
 
         do {
             let (data, response) = try await session.data(for: request)
-            if let http = response as? HTTPURLResponse,
-               (200...299).contains(http.statusCode) {
-                // Update sync cursor from the server's authoritative time
-                // so subsequent incremental pulls don't miss this save.
-                if let responseBody = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                   let serverTime = responseBody["server_time"] as? String {
-                    lastSyncTime = serverTime
+            if let http = response as? HTTPURLResponse {
+                if http.statusCode == 401 {
+                    syncError = "Session expired — sign in again"
+                } else if (200...299).contains(http.statusCode) {
+                    // Update sync cursor from the server's authoritative time
+                    // so subsequent incremental pulls don't miss this save.
+                    if let responseBody = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let serverTime = responseBody["server_time"] as? String {
+                        lastSyncTime = serverTime
+                    }
+                    // Refresh pull to get the server's authoritative version
+                    await pull()
                 }
-                // Refresh pull to get the server's authoritative version
-                await pull()
             }
         } catch {
             syncError = "Couldn't save — try again"
@@ -158,15 +170,18 @@ class SavedArtistsSync: ObservableObject {
 
         do {
             let (data, response) = try await session.data(for: request)
-            if let http = response as? HTTPURLResponse,
-               (200...299).contains(http.statusCode) {
-                // Update sync cursor from the server's authoritative time
-                if let responseBody = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                   let serverTime = responseBody["server_time"] as? String {
-                    lastSyncTime = serverTime
+            if let http = response as? HTTPURLResponse {
+                if http.statusCode == 401 {
+                    syncError = "Session expired — sign in again"
+                } else if (200...299).contains(http.statusCode) {
+                    // Update sync cursor from the server's authoritative time
+                    if let responseBody = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let serverTime = responseBody["server_time"] as? String {
+                        lastSyncTime = serverTime
+                    }
+                    // Remove from local list immediately
+                    syncedArtists.removeAll { $0.slug == slug }
                 }
-                // Remove from local list immediately
-                syncedArtists.removeAll { $0.slug == slug }
             }
         } catch {
             syncError = "Couldn't remove — try again"
