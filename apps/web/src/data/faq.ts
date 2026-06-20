@@ -26,14 +26,15 @@ We also link to a number of alternative services that can help you reduce your d
   },
   {
     title: "How much money does the artist get when I buy their music?",
-    content: `- **Faircamp sites:** varies, based on the artist's preferred payment method (typically ~90-97% of sale price)
-- **Ampwall:** ~92-95% of sale price [(source)](https://ampwall.com/selling)
-- **Mirlo:** ~86-90% of sale price [(source)](https://mirlo.space/pages/about)
-- **Bandcamp:** ~80-85% of sale price [(source)](https://bandcamp.com/fair_trade_music_policy)
-- **Qobuz:** ~70% of sale price [(source)](https://www.reddit.com/r/audiophile/comments/esy440/comment/ffcxlql/)
-- **Patreon:** ~86-90% of sales or memberships [(source)](https://support.patreon.com/hc/en-us/articles/11111747095181-Creator-fees-overview)
-- **Buy Me a Coffee:** ~92% of sales or memberships [(source)](https://help.buymeacoffee.com/en/articles/8105744-how-to-calculate-charges-on-your-payment)
-- **Ko-fi:** ~97% of tips, ~92% of sales [(source)](https://help.ko-fi.com/hc/en-us/articles/360002506494-Does-Ko-fi-take-a-fee)
+    content: `- Faircamp sites: varies, based on the artist's preferred payment method (typically ~90-97% of sale price)
+- **Subvert:** **97%** of sale price [(source)](https://www.subvert.fm/docs/faq)
+- **Ampwall:** **92-95%** of sale price [(source)](https://ampwall.com/selling)
+- **Mirlo:** **86-90%** of sale price [(source)](https://mirlo.space/pages/about)
+- **Bandcamp:** **80-85%** of sale price [(source)](https://bandcamp.com/fair_trade_music_policy)
+- **Qobuz:** **70%** of sale price [(source)](https://www.reddit.com/r/audiophile/comments/esy440/comment/ffcxlql/)
+- **Patreon:** **86-90%** of sales or memberships [(source)](https://support.patreon.com/hc/en-us/articles/11111747095181-Creator-fees-overview)
+- **Buy Me a Coffee:** **92%** of sales or memberships [(source)](https://help.buymeacoffee.com/en/articles/8105744-how-to-calculate-charges-on-your-payment)
+- **Ko-fi:** **97%** of tips / **92%** of sales [(source)](https://help.ko-fi.com/en/articles/360002506494-Does-Ko-fi-take-a-fee)
 
 *More info:* All online transactions involving a credit card transaction incur credit card fees, which are typically ~2.9% of the purchase price, plus an additional 30 cents. This is always applied on top of a platform's fee, which is why the above percentage values vary a bit.`
   },
@@ -70,7 +71,7 @@ We also link to a number of alternative services that can help you reduce your d
   },
   {
     title: "I am ethically opposed to AI in music. Is AI at all used in Unstream?",
-    content: `No AI is implemented in the Unstream app. The app neither uses AI models to recommend artists nor is intended to promote artists creating AI-generated music.\n\nUnstream does show AI policy badges for platforms that have formal written policies about AI-generated music (like Bandcamp, Subvert, and Mirlo). These badges make it easy to see which platforms are taking a stand to protect human artistry — but they're informational only, and Unstream itself doesn't use AI in any way.`
+    content: `No AI features are implemented in the Unstream app. The app neither uses AI models to recommend artists nor is intended to promote artists creating AI-generated music.\n\nUnstream shows policy badges for platforms that have formal written policies about AI-generated music (like Bandcamp, Subvert, and Mirlo). These informational badges make it easy to see which platforms are taking a stand to protect human artistry.\n\nParts of Unstream were built and maintained with the help of AI coding tools like Claude Code and OpenCode.`
   },
   {
     title: "Is there a Windows app / iOS app / Android app / Chrome extension / Firefox extension for Unstream?",
