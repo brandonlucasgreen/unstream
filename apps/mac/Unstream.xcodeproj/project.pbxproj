@@ -77,6 +77,13 @@
 			remoteGlobalIDString = 50FDF92E61EA31C4052D0F8B;
 			remoteInfo = UnstreamShareExtension;
 		};
+		6C0B4C0B2DE054040747F7C2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 92F0EC298B5852597D2AC7A5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 47EAA15AC0EA29029489E759;
+			remoteInfo = Unstream;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -389,6 +396,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				8EBD553059CF075CCEE7E55A /* PBXTargetDependency */,
 			);
 			name = UnstreamTests;
 			packageProductDependencies = (
@@ -555,6 +563,11 @@
 			);
 			target = 50FDF92E61EA31C4052D0F8B /* UnstreamShareExtension */;
 			targetProxy = 2B3CD56DE802B9A4FB70813D /* PBXContainerItemProxy */;
+		};
+		8EBD553059CF075CCEE7E55A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 47EAA15AC0EA29029489E759 /* Unstream */;
+			targetProxy = 6C0B4C0B2DE054040747F7C2 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
