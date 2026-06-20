@@ -8,11 +8,17 @@
 --
 -- The sync endpoint includes tombstones in ?since= results so clients can prune
 -- their in-memory lists. A periodic force-pull (every 5 min) is the backstop.
+--
+-- UNS-129 (closed): the composite (user_id, last_modified) index for the hot
+-- sync path is already created by migration-016
+-- (`idx_saved_artists_user_last_modified` on `saved_artists (user_id, last_modified)`).
+-- No change needed here.
 
 ALTER TABLE saved_artists ADD COLUMN IF NOT EXISTS deleted boolean NOT NULL DEFAULT false;
 ALTER TABLE saved_artists ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
 
--- Index for efficient tombstone queries during sync
+-- Index for tombstone queries: e.g. "show me all tombstones for this user
+-- older than 30 days" (the GC query, UNS-128).
 CREATE INDEX IF NOT EXISTS idx_saved_artists_user_deleted
   ON saved_artists (user_id, deleted);
 
