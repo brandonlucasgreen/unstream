@@ -139,6 +139,8 @@ class SavedArtistsSync: ObservableObject {
                     }
                     // Refresh pull to get the server's authoritative version
                     await pull()
+                } else {
+                    syncError = "Couldn't save — try again"
                 }
             }
         } catch {
@@ -181,6 +183,8 @@ class SavedArtistsSync: ObservableObject {
                     }
                     // Remove from local list immediately
                     syncedArtists.removeAll { $0.slug == slug }
+                } else {
+                    syncError = "Couldn't remove — try again"
                 }
             }
         } catch {
