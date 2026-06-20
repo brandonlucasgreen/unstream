@@ -11,7 +11,6 @@ class AuthService: ObservableObject {
 
     // Public anon key — safe to embed, RLS is the real gatekeeper.
     private let supabaseURL = URL(string: "https://bwogclqzpsbvqbyhhqbz.supabase.co")!
-    private let supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3b2djbHF6cHNidnFieWhocWJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMTMyODcsImV4cCI6MjA4ODg4OTI4N30.AUcgWjqcsIbcTm-RkjaY2jtVMYmAHaPVE52oGeOsblM"
 
     let client: SupabaseClient
 
@@ -20,7 +19,8 @@ class AuthService: ObservableObject {
     @Published var errorMessage: String?
 
     private init() {
-        client = SupabaseClient(supabaseURL: supabaseURL, supabaseKey: supabaseAnonKey)
+        let anonKey = Bundle.main.infoDictionary?["SUPABASE_ANON_KEY"] as? String ?? ""
+        client = SupabaseClient(supabaseURL: supabaseURL, supabaseKey: anonKey)
 
         Task {
             migrateOldKeychainTokens()

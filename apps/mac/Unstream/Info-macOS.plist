@@ -43,5 +43,7 @@
 	<string>Copyright 2025-2026 brandon lucas green</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>SUPABASE_ANON_KEY</key>
+	<string>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3b2djbHF6cHNidnFieWhocWJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMTMyODcsImV4cCI6MjA4ODg4OTI4N30.AUcgWjqcsIbcTm-RkjaY2jtVMYmAHaPVE52oGeOsblM</string>
 </dict>
 </plist>

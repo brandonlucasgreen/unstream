@@ -635,8 +635,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = lol.bgreen.UnstreamTests;
 				PRODUCT_NAME = UnstreamTests;
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Unstream.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Unstream";
 			};
@@ -656,8 +656,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = lol.bgreen.UnstreamTests;
 				PRODUCT_NAME = UnstreamTests;
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Unstream.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Unstream";
 			};

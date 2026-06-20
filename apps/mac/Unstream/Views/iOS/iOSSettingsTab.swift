@@ -7,8 +7,7 @@ struct iOSSettingsTab: View {
     @ObservedObject private var sync = SavedArtistsSync.shared
     @State private var notificationDenied = false
     @State private var showSignIn = false
-    @State private var foregroundPollTimer: Timer?
-    @State private var foregroundForcePullTimer: Timer?
+    @State private var pollTask: Task<Void, Never>?
 
     var body: some View {
         NavigationStack {
@@ -220,26 +219,21 @@ struct iOSSettingsTab: View {
 
     private func startForegroundPoll() {
         stopForegroundPoll()
-        foregroundPollTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
-            Task { @MainActor in
-                await sync.pull()
-            }
-        }
-        // Periodic force-pull every 5 minutes as a safety net for
-        // cross-device removals (tombstones cover the common case,
-        // but a full refresh catches any edge cases during long sessions).
-        foregroundForcePullTimer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { _ in
-            Task { @MainActor in
-                await sync.pull(force: true)
+        var iterationCount = 0
+        pollTask = Task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(60))
+                guard !Task.isCancelled else { break }
+                iterationCount += 1
+                let force = iterationCount % 5 == 0  // every 5th iteration = 5 minutes
+                await sync.pull(force: force)
             }
         }
     }
 
     private func stopForegroundPoll() {
-        foregroundPollTimer?.invalidate()
-        foregroundPollTimer = nil
-        foregroundForcePullTimer?.invalidate()
-        foregroundForcePullTimer = nil
+        pollTask?.cancel()
+        pollTask = nil
     }
 }
 #endif
