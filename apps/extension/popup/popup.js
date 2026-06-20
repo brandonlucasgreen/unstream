@@ -80,11 +80,67 @@ const elements = {
 
 // State
 let currentArtist = null;
+let currentArtistSlug = null; // resolved slug for current artist
 let currentResults = null;
 let currentSocialLinks = null;
 let currentLocation = null;
 let newReleases = [];
 let authSession = null; // null = unknown/loading, false = signed out, object = signed in
+
+// Slug lookup cache: { artistName → slug }
+const SLUG_CACHE_KEY = 'artistSlugCache';
+
+// Look up the canonical slug for an artist name via the search API.
+// This mirrors what the web app does (claimedSlug || result.id).
+// Results are cached in chrome.storage.local so we don't re-fetch on every save.
+async function lookupSlug(artistName) {
+  if (!artistName) return null;
+
+  // Check cache
+  const { [SLUG_CACHE_KEY]: slugCache = {} } = await chrome.storage.local.get(SLUG_CACHE_KEY);
+  const normalizedName = artistName.toLowerCase().trim();
+
+  if (slugCache[normalizedName]) {
+    return slugCache[normalizedName];
+  }
+
+  try {
+    const response = await chrome.runtime.sendMessage({
+      type: 'GET_RESULTS',
+      artist: artistName,
+    });
+
+    if (!response || response.error) return null;
+
+    const results = response.results || [];
+    // Find the best-matching artist result
+    const match = results.find(r =>
+      r.type === 'artist' && r.name && r.name.toLowerCase() === normalizedName
+    ) || results.find(r =>
+      r.type === 'artist' && r.name && r.name.toLowerCase().includes(normalizedName)
+    );
+
+    if (match) {
+      const slug = match.claimedSlug || match.id;
+      if (slug) {
+        // Persist to cache
+        slugCache[normalizedName] = slug;
+        await chrome.storage.local.set({ [SLUG_CACHE_KEY]: slugCache });
+        return slug;
+      }
+    }
+  } catch {
+    // Network error — fall back to slugifying locally
+  }
+
+  // Fallback: slugify the display name the same way the server does
+  const fallbackSlug = artistName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  if (fallbackSlug) {
+    slugCache[normalizedName] = fallbackSlug;
+    await chrome.storage.local.set({ [SLUG_CACHE_KEY]: slugCache });
+  }
+  return fallbackSlug || null;
+}
 
 // ---- Auth ----
 
@@ -271,7 +327,7 @@ async function syncSavedArtists() {
     }
 
     // Merge server artists into local state
-    const { savedArtists = [], savedArtistsData = {} } = await chrome.storage.local.get(['savedArtists', 'savedArtistsData']);
+    const { savedArtists = [], savedArtistsData = {}, syncedArtistSlugs: prevSynced = [] } = await chrome.storage.local.get(['savedArtists', 'savedArtistsData', 'syncedArtistSlugs']);
     const syncedSlugs = [];
 
     for (const artist of serverArtists) {
@@ -299,10 +355,13 @@ async function syncSavedArtists() {
       };
     }
 
+    // Union with previously synced slugs so incremental syncs don't lose history
+    const mergedSlugs = new Set([...prevSynced, ...syncedSlugs]);
+
     await chrome.storage.local.set({
       savedArtists,
       savedArtistsData,
-      syncedArtistSlugs: syncedSlugs,
+      syncedArtistSlugs: [...mergedSlugs],
       lastSyncTime: data.server_time,
     });
 
@@ -334,8 +393,9 @@ async function syncSavedArtists() {
 }
 
 // Save an artist to the server (when logged in)
-async function saveArtistToServer(artistName, artistData) {
-  if (!authSession) return;
+// artistSlug should be the canonical slug (from lookupSlug), not a display name
+async function saveArtistToServer(artistSlug, artistData) {
+  if (!authSession) return; // TODO: queue saves fired before initAuth completes
 
   const token = authSession.access_token || await getAccessToken();
   if (!token) return;
@@ -350,8 +410,8 @@ async function saveArtistToServer(artistName, artistData) {
         'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({
-        artistId: artistName,
-        name: artistData.name || artistName,
+        artistId: artistSlug,
+        name: artistData.name || artistSlug,
         imageUrl: artistData.imageUrl || null,
         last_modified: new Date().toISOString(),
         device_id: deviceId,
@@ -363,7 +423,8 @@ async function saveArtistToServer(artistName, artistData) {
 }
 
 // Remove an artist from the server (when logged in)
-async function removeArtistFromServer(artistName) {
+// artistSlug should be the canonical slug
+async function removeArtistFromServer(artistSlug) {
   if (!authSession) return;
 
   const token = authSession.access_token || await getAccessToken();
@@ -378,7 +439,7 @@ async function removeArtistFromServer(artistName) {
       },
       body: JSON.stringify({
         action: 'remove',
-        artistId: artistName,
+        artistId: artistSlug,
       }),
     });
   } catch {
@@ -426,6 +487,7 @@ async function init() {
 // Show now playing
 function showNowPlaying(track) {
   currentArtist = track.artist;
+  currentArtistSlug = null; // will be resolved asynchronously
   currentLocation = null;
   elements.artistName.textContent = track.artist;
   elements.artistLocation.textContent = '';
@@ -437,11 +499,18 @@ function showNowPlaying(track) {
   elements.actionsSection.classList.remove('hidden');
 
   updateSaveButton();
+
+  // Resolve the canonical slug for this artist
+  lookupSlug(track.artist).then(slug => {
+    currentArtistSlug = slug;
+    updateSaveButton();
+  });
 }
 
 // Hide now playing
 function hideNowPlaying() {
   currentArtist = null;
+  currentArtistSlug = null;
   currentResults = null;
   currentLocation = null;
   elements.artistLocation.textContent = '';
@@ -649,7 +718,9 @@ async function updateSaveButton() {
   if (!currentArtist) return;
 
   const { savedArtists = [] } = await chrome.storage.local.get('savedArtists');
-  const isSaved = savedArtists.includes(currentArtist);
+  // Check by slug if resolved, otherwise fall back to display name
+  const key = currentArtistSlug || currentArtist;
+  const isSaved = savedArtists.includes(key) || savedArtists.includes(currentArtist);
 
   const starSpan = document.createElement('span');
   starSpan.className = 'star';
@@ -669,18 +740,33 @@ async function updateSaveButton() {
 async function toggleSaveArtist() {
   if (!currentArtist) return;
 
-  const { savedArtists = [] } = await chrome.storage.local.get('savedArtists');
-  const { savedArtistsData = {} } = await chrome.storage.local.get('savedArtistsData');
-  const index = savedArtists.indexOf(currentArtist);
+  // Resolve slug if not yet available
+  const slug = currentArtistSlug || await lookupSlug(currentArtist);
+  if (slug) currentArtistSlug = slug;
+
+  const key = slug || currentArtist; // use slug as canonical key, display name as fallback
+  const { savedArtists = [], savedArtistsData = {} } = await chrome.storage.local.get(['savedArtists', 'savedArtistsData']);
+
+  // Check both slug and display name for backward compat with pre-migration data
+  const existingIndex = savedArtists.indexOf(key);
+  const legacyIndex = key !== currentArtist ? savedArtists.indexOf(currentArtist) : -1;
+  const index = existingIndex !== -1 ? existingIndex : legacyIndex;
 
   if (index >= 0) {
+    const removedKey = savedArtists[index];
     savedArtists.splice(index, 1);
-    delete savedArtistsData[currentArtist];
+    delete savedArtistsData[removedKey];
     // Remove from server if logged in
-    removeArtistFromServer(currentArtist);
+    removeArtistFromServer(removedKey);
   } else {
-    savedArtists.push(currentArtist);
-    const artistData = { platforms: [], socialLinks: [], location: currentLocation || null };
+    savedArtists.push(key);
+    const artistData = {
+      platforms: [],
+      socialLinks: [],
+      location: currentLocation || null,
+      name: currentArtist, // preserve display name for rendering
+      slug: slug || '',
+    };
 
     // Save platforms
     if (currentResults && currentResults.length > 0) {
@@ -698,9 +784,15 @@ async function toggleSaveArtist() {
       artistData.socialLinks = currentSocialLinks;
     }
 
-    savedArtistsData[currentArtist] = artistData;
+    // Save image URL from the claimed/first result if available
+    const bestResult = currentResults && currentResults.find(r => r.type === 'artist');
+    if (bestResult && bestResult.imageUrl) {
+      artistData.imageUrl = bestResult.imageUrl;
+    }
+
+    savedArtistsData[key] = artistData;
     // Save to server if logged in
-    saveArtistToServer(currentArtist, artistData);
+    saveArtistToServer(key, artistData);
   }
 
   await chrome.storage.local.set({ savedArtists, savedArtistsData });
@@ -746,9 +838,11 @@ async function loadSavedArtists() {
     nameWrap.className = 'saved-artist-name-wrap';
 
     // Artist image (if available from server sync)
-    if (imageUrl) {
+    // Restrict to https:// only for defense-in-depth
+    const safeImageUrl = imageUrl && imageUrl.startsWith('https://') ? imageUrl : '';
+    if (safeImageUrl) {
       const img = document.createElement('img');
-      img.src = imageUrl;
+      img.src = safeImageUrl;
       img.alt = '';
       img.className = 'saved-artist-img';
       img.loading = 'lazy';

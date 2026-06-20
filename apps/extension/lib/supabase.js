@@ -26,8 +26,8 @@ export async function getStoredSession() {
   const result = await chrome.storage.local.get(SESSION_KEY);
   const session = result[SESSION_KEY];
   if (!session || !session.access_token) return null;
-  // Check expiry (with 60s buffer)
-  if (session.expires_at && session.expires_at * 1000 < Date.now() - 60000) {
+  // Check expiry (refresh 60s before it actually expires)
+  if (session.expires_at && session.expires_at * 1000 < Date.now() + 60000) {
     // Token expired — try refresh
     const refreshed = await refreshSession(session);
     if (refreshed) return refreshed;
