@@ -324,7 +324,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             }
         }
 
-        // Handle auth deeplink callbacks on macOS (from ASWebAuthenticationSession)
+        // Handle auth deeplink callbacks on macOS via custom URL scheme
         // The AppDelegate handles NSAppleEventManager events for custom URL schemes.
         NSAppleEventManager.shared().setEventHandler(
             self,
