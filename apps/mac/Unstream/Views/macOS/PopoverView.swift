@@ -232,6 +232,11 @@ struct PopoverView: View {
         .onDisappear {
             stopMenuPoll()
         }
+        .onChange(of: auth.isSignedIn) { _, signedIn in
+            if !signedIn {
+                stopMenuPoll()
+            }
+        }
     }
 
     // MARK: - 60-second poll while menu is open

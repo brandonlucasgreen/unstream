@@ -66,7 +66,7 @@ class SavedArtistsSync: ObservableObject {
             let decoded = try JSONDecoder().decode(SyncResponse.self, from: data)
 
             if force {
-                syncedArtists = decoded.artists.filter { $0.deleted != true }
+                syncedArtists = decoded.artists.filter { $0.deleted != true }.sorted { $0.name < $1.name }
             } else {
                 // Merge: replace existing entries by slug, append new ones.
                 // Tombstones (deleted == true) remove the entry instead of adding it.
@@ -112,7 +112,6 @@ class SavedArtistsSync: ObservableObject {
             "name": name,
             "imageUrl": imageUrl ?? "",
             "device_id": DeviceIDManager.current,
-            "last_modified": ISO8601DateFormatter().string(from: Date()),
         ]
 
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
@@ -153,7 +152,6 @@ class SavedArtistsSync: ObservableObject {
             "action": "remove",
             "artistId": slug,
             "device_id": DeviceIDManager.current,
-            "last_modified": ISO8601DateFormatter().string(from: Date()),
         ]
 
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)

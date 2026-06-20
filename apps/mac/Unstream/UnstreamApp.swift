@@ -161,7 +161,7 @@ struct UnstreamApp: App {
     #if os(iOS)
     private func handleIncomingURL(_ url: URL) {
         // Auth callback: unstream://auth/callback#access_token=...
-        if url.scheme == "unstream" && url.host == "auth" {
+        if url.scheme == "unstream" && url.host == "auth" && url.path == "/callback" {
             Task { @MainActor in
                 await AuthService.shared.handleAuthCallback(url: url)
             }
@@ -362,7 +362,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
               let url = URL(string: urlString) else { return }
 
         // Auth callback: unstream://auth/callback#access_token=...
-        if url.scheme == "unstream" && url.host == "auth" {
+        if url.scheme == "unstream" && url.host == "auth" && url.path == "/callback" {
             Task { @MainActor in
                 await AuthService.shared.handleAuthCallback(url: url)
             }

@@ -208,6 +208,11 @@ struct iOSSettingsTab: View {
             .onDisappear {
                 stopForegroundPoll()
             }
+            .onChange(of: auth.isSignedIn) { _, signedIn in
+                if !signedIn {
+                    stopForegroundPoll()
+                }
+            }
         }
     }
 

@@ -109,8 +109,9 @@ class AuthService: ObservableObject {
 
     // MARK: - Deeplink handling
 
-    /// Handle the callback URL from ASWebAuthenticationSession.
-    /// The URL contains the auth tokens as query/hash params.
+    /// Handle the callback URL from a custom URL scheme deeplink.
+    /// The URL contains the auth tokens as query/hash params; PKCE code-verifier
+    /// validates the token contents.
     func handleAuthCallback(url: URL) async {
         isLoading = true
         errorMessage = nil
