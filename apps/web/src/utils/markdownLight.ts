@@ -24,10 +24,10 @@ export function markdownToHtml(md: string): string {
       // Links: [text](url)
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-accent-primary hover:underline">$1</a>')
       // Bold+italic: ***text*** or ___text___
-      .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+      .replace(/\*\*\*(.+?)\*\*\*/g, '<strong class="text-text-primary"><em>$1</em></strong>')
       // Bold: **text** or __text__
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/__(.+?)__/g, '<strong>$1</strong>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong class="text-text-primary">$1</strong>')
+      .replace(/__(.+?)__/g, '<strong class="text-text-primary">$1</strong>')
       // Italic: *text* or _text_
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/_(.+?)_/g, '<em>$1</em>')
