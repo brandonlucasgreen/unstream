@@ -108,6 +108,9 @@ struct SignInView: View {
         }
         .padding()
         .frame(maxWidth: 320)
+        .onAppear {
+            auth.errorMessage = nil
+        }
     }
 
     private func signIn() {

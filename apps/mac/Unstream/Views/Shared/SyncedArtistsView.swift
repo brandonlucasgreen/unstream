@@ -6,10 +6,6 @@ struct SyncedArtistsView: View {
     @ObservedObject var sync = SavedArtistsSync.shared
     @ObservedObject var auth = AuthService.shared
 
-    #if os(iOS)
-    @State private var safariItem: SafariURL?
-    #endif
-
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             if !auth.isSignedIn {
@@ -71,6 +67,27 @@ struct SyncedArtistsView: View {
 
     private var artistList: some View {
         VStack(spacing: 6) {
+            if let error = sync.syncError {
+                HStack(spacing: 6) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.system(size: 10))
+                        .foregroundColor(.orange)
+                    Text(error)
+                        .font(.system(size: 10))
+                        .foregroundColor(.orange)
+                    Spacer()
+                    Button("Retry") {
+                        sync.syncError = nil
+                        Task { await sync.pull() }
+                    }
+                    .font(.system(size: 10))
+                    .buttonStyle(.plain)
+                    .foregroundColor(.accentColor)
+                }
+                .padding(.horizontal, 4)
+                .padding(.vertical, 4)
+            }
+
             if sync.isSyncing {
                 HStack(spacing: 6) {
                     ProgressView()
