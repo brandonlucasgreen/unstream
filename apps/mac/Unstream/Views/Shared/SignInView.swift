@@ -32,13 +32,17 @@ struct SignInView: View {
             VStack(spacing: 10) {
                 TextField("Email", text: $email)
                     .textFieldStyle(.roundedBorder)
+                    #if os(iOS)
                     .autocapitalization(.none)
                     .keyboardType(.emailAddress)
                     .textContentType(.emailAddress)
+                    #endif
 
                 SecureField("Password", text: $password)
                     .textFieldStyle(.roundedBorder)
+                    #if os(iOS)
                     .textContentType(.password)
+                    #endif
             }
 
             // Error message

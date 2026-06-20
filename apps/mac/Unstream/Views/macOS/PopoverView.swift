@@ -232,7 +232,7 @@ struct PopoverView: View {
         .onDisappear {
             stopMenuPoll()
         }
-        .onChange(of: auth.isSignedIn) { _, signedIn in
+        .onChange(of: auth.isSignedIn) { signedIn in
             if !signedIn {
                 stopMenuPoll()
             }

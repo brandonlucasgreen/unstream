@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		0038D14301F153EF60346193 /* SocialIconButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFEA3443AD56B9950B43AAE /* SocialIconButton.swift */; };
 		25881F48E622E19B77281290 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F7DF80FB5FAEF74A6F2200 /* SignInView.swift */; };
-		3385E641D2DE09112BB991FA /* Supabase in Sources */ = {isa = PBXBuildFile; productRef = 22204F03FE25486AD3DFCB46 /* Supabase */; };
+		3385E641D2DE09112BB991FA /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 22204F03FE25486AD3DFCB46 /* Supabase */; };
 		46B5A1100AFDB0968A050BDA /* DeviceIDManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D272ED2720E789B5FFD7CA55 /* DeviceIDManager.swift */; };
 		4885A7356F74E3810B9278DC /* SavedArtistsSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C49D55C25BD65E0A714D434 /* SavedArtistsSyncTests.swift */; };
 		6B09B42A6AC4B94063BA9B71 /* SyncedArtistsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBC08EA8D8FEA404D011C0D7 /* SyncedArtistsView.swift */; };
@@ -352,6 +352,7 @@
 			buildConfigurationList = 32B25C0D3A375BEF2011C7A7 /* Build configuration list for PBXNativeTarget "Unstream" */;
 			buildPhases = (
 				B2ADBA91CD353B098DE7ABB2 /* Sources */,
+				3636648646F04690BD6A54A9 /* Frameworks */,
 				F099278857F2EF3E8C69EC4E /* Resources */,
 				A62E17CD759D88190B419CA8 /* Embed Foundation Extensions */,
 			);
@@ -448,6 +449,17 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXFrameworksBuildPhase section */
+		3636648646F04690BD6A54A9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3385E641D2DE09112BB991FA /* Supabase in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
 /* Begin PBXResourcesBuildPhase section */
 		BB5FAD69F1488B10485C48A0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
@@ -541,7 +553,6 @@
 				7182754E06D41AE6FB47653A /* SupportListManager.swift in Sources */,
 				BEE6889852F609316894074E /* SupportListTab.swift in Sources */,
 				2DAD19C15BCCBCC785AC823F /* SupportListView.swift in Sources */,
-				3385E641D2DE09112BB991FA /* Supabase in Sources */,
 				6B09B42A6AC4B94063BA9B71 /* SyncedArtistsView.swift in Sources */,
 				0F9D0A7FD89742003BD8D140 /* TipJarStore.swift in Sources */,
 				EAD31F1949071C4F694741C3 /* TipJarView.swift in Sources */,
