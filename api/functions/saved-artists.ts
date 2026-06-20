@@ -90,7 +90,8 @@ export async function handler(event: {
           device_id,
           artists!left (id, name, slug, image_url)
         `)
-        .eq('user_id', user.userId);
+        .eq('user_id', user.userId)
+        .eq('deleted', false);
 
       if (savedError) {
         console.error('[saved-artists] Error fetching saved artists:', savedError);
@@ -311,6 +312,7 @@ async function handleCheck(user: { userId: string; email: string }, body: Record
       .from('saved_artists')
       .select('artist_slug')
       .eq('user_id', user.userId)
+      .eq('deleted', false)
       .in('artist_slug', artistSlugs);
 
     if (checkError) {
@@ -344,6 +346,7 @@ async function handleSupport(user: { userId: string; email: string }, body: Reco
       .update({ supported: true, supported_at: new Date().toISOString() })
       .eq('user_id', user.userId)
       .eq('artist_slug', artistSlug)
+      .eq('deleted', false)
       .select(`
         id, user_id, artist_id, artist_slug, artist_name, artist_image_url,
         notes, added_at, supported, supported_at, last_modified, device_id,
@@ -402,6 +405,7 @@ async function handleUnsupport(user: { userId: string; email: string }, body: Re
       .update({ supported: false, supported_at: null })
       .eq('user_id', user.userId)
       .eq('artist_slug', artistSlug)
+      .eq('deleted', false)
       .select(`
         id, user_id, artist_id, artist_slug, artist_name, artist_image_url,
         notes, added_at, supported, supported_at, last_modified, device_id,
