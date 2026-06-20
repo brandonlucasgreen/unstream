@@ -8,6 +8,7 @@ struct iOSSettingsTab: View {
     @State private var notificationDenied = false
     @State private var showSignIn = false
     @State private var foregroundPollTimer: Timer?
+    @State private var foregroundForcePullTimer: Timer?
 
     var body: some View {
         NavigationStack {
@@ -219,11 +220,21 @@ struct iOSSettingsTab: View {
                 await sync.pull()
             }
         }
+        // Periodic force-pull every 5 minutes as a safety net for
+        // cross-device removals (tombstones cover the common case,
+        // but a full refresh catches any edge cases during long sessions).
+        foregroundForcePullTimer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { _ in
+            Task { @MainActor in
+                await sync.pull(force: true)
+            }
+        }
     }
 
     private func stopForegroundPoll() {
         foregroundPollTimer?.invalidate()
         foregroundPollTimer = nil
+        foregroundForcePullTimer?.invalidate()
+        foregroundForcePullTimer = nil
     }
 }
 #endif

@@ -14,6 +14,7 @@ struct PopoverView: View {
     @State private var selectedTab: PopoverTab = .search
     @State private var showSignIn = false
     @State private var menuPollTimer: Timer?
+    @State private var menuForcePullTimer: Timer?
     @State private var hasFetchedSync = false
 
     var body: some View {
@@ -255,11 +256,21 @@ struct PopoverView: View {
                 await sync.pull()
             }
         }
+        // Periodic force-pull every 5 minutes as a safety net for
+        // cross-device removals (tombstones cover the common case,
+        // but a full refresh catches any edge cases during long sessions).
+        menuForcePullTimer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { _ in
+            Task { @MainActor in
+                await sync.pull(force: true)
+            }
+        }
     }
 
     private func stopMenuPoll() {
         menuPollTimer?.invalidate()
         menuPollTimer = nil
+        menuForcePullTimer?.invalidate()
+        menuForcePullTimer = nil
     }
 }
 
