@@ -11,9 +11,6 @@ class AuthService: ObservableObject {
 
     // Public anon key — safe to embed, RLS is the real gatekeeper.
     private let supabaseURL = URL(string: "https://bwogclqzpsbvqbyhhqbz.supabase.co")!
-    private var supabaseAnonKey: String {
-        Bundle.main.infoDictionary?["SUPABASE_ANON_KEY"] as? String ?? ""
-    }
 
     let client: SupabaseClient
 
