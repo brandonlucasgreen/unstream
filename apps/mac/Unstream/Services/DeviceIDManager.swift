@@ -12,7 +12,10 @@ enum DeviceIDManager {
             return existing
         }
         let new = UUID().uuidString
-        KeychainHelper.save(key: key, value: new)
+        let saved = KeychainHelper.save(key: key, value: new)
+        if !saved {
+            print("[DeviceID] Failed to persist device ID to keychain — will regenerate on next launch")
+        }
         return new
     }()
 }
