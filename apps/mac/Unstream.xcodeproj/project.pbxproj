@@ -8,6 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		0038D14301F153EF60346193 /* SocialIconButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFEA3443AD56B9950B43AAE /* SocialIconButton.swift */; };
+		25881F48E622E19B77281290 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F7DF80FB5FAEF74A6F2200 /* SignInView.swift */; };
+		3385E641D2DE09112BB991FA /* Supabase in Sources */ = {isa = PBXBuildFile; productRef = 22204F03FE25486AD3DFCB46 /* Supabase */; };
+		46B5A1100AFDB0968A050BDA /* DeviceIDManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D272ED2720E789B5FFD7CA55 /* DeviceIDManager.swift */; };
+		6B09B42A6AC4B94063BA9B71 /* SyncedArtistsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBC08EA8D8FEA404D011C0D7 /* SyncedArtistsView.swift */; };
+		74B410AF24C0386EE62DED36 /* SavedArtistsSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EF02E48D3B560D8F9EBEEA1 /* SavedArtistsSync.swift */; };
+		D7E74AB17D700D829A51EA3A /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64AD10B917A98485CDEAF2B5 /* AuthService.swift */; };
 		0EC3D68464514744CE3AA448 /* BandcampReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43017BB6FDE57EBD35755D7B /* BandcampReleaseChecker.swift */; };
 		0F9D0A7FD89742003BD8D140 /* TipJarStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C40AC0CB901A9F09846258C /* TipJarStore.swift */; };
 		1132043919606896183DF5BC /* IndieArtist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752DBE41E6259FE62017B41D /* IndieArtist.swift */; };
@@ -87,6 +93,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		03F7DF80FB5FAEF74A6F2200 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
+		5EF02E48D3B560D8F9EBEEA1 /* SavedArtistsSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedArtistsSync.swift; sourceTree = "<group>"; };
+		64AD10B917A98485CDEAF2B5 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
+		BBC08EA8D8FEA404D011C0D7 /* SyncedArtistsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncedArtistsView.swift; sourceTree = "<group>"; };
+		D272ED2720E789B5FFD7CA55 /* DeviceIDManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIDManager.swift; sourceTree = "<group>"; };
 		1003A79CD2A20BF7227C6FB0 /* SupportEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportEntry.swift; sourceTree = "<group>"; };
 		1581BE8FAF07C7C9D3CD99F5 /* SearchResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResponse.swift; sourceTree = "<group>"; };
 		1CDD15E71A80A31952A7720C /* ShortcutRecorderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutRecorderView.swift; sourceTree = "<group>"; };
@@ -160,7 +171,9 @@
 		42BD41F06A4ADEB36BC79147 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				64AD10B917A98485CDEAF2B5 /* AuthService.swift */,
 				43017BB6FDE57EBD35755D7B /* BandcampReleaseChecker.swift */,
+				D272ED2720E789B5FFD7CA55 /* DeviceIDManager.swift */,
 				BE9F88505AF840EC94B5C0BC /* FaircampReleaseChecker.swift */,
 				A4CEC5CEC07C87673B1F5A61 /* IndieArtistDirectoryService.swift */,
 				84D714AAE0DE5A5032D0C0F3 /* KeychainHelper.swift */,
@@ -168,6 +181,7 @@
 				4789F4D2A41CB1D13D629844 /* PlexService.swift */,
 				E6904B96B5E95C5FF26DABC1 /* QobuzReleaseChecker.swift */,
 				673FC4B1F41A233725896DB8 /* ReleaseCheckAPI.swift */,
+				5EF02E48D3B560D8F9EBEEA1 /* SavedArtistsSync.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -223,8 +237,10 @@
 				BE9E59C365D8F116C435B8BC /* EmptyStateView.swift */,
 				CC8A2405B5A74531E19338D9 /* PlatformBadge.swift */,
 				D144E8586F19DBA63C2F37B1 /* SafariView.swift */,
+				03F7DF80FB5FAEF74A6F2200 /* SignInView.swift */,
 				7EFEA3443AD56B9950B43AAE /* SocialIconButton.swift */,
 				89D2DBDD53C2C9158EA698C4 /* SupportListView.swift */,
+				BBC08EA8D8FEA404D011C0D7 /* SyncedArtistsView.swift */,
 				752695EB82D70EEE00B921FA /* TipJarView.swift */,
 			);
 			path = Shared;
@@ -326,6 +342,7 @@
 			);
 			name = Unstream;
 			packageProductDependencies = (
+				22204F03FE25486AD3DFCB46 /* Supabase */,
 			);
 			productName = Unstream;
 			productReference = 607E17AC019A1B8698E64ACC /* Unstream.app */;
@@ -385,6 +402,9 @@
 				47EAA15AC0EA29029489E759 /* Unstream */,
 				50FDF92E61EA31C4052D0F8B /* UnstreamShareExtension */,
 			);
+			packageReferences = (
+				F42013B6E7EC3A273B1D81C0 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
 		};
 /* End PBXProject section */
 
@@ -423,11 +443,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				DEAB976819E6E900B9C1114A /* AppState.swift in Sources */,
+				D7E74AB17D700D829A51EA3A /* AuthService.swift in Sources */,
 				A91A7A297319DD5233D5CAC3 /* ArtistResultView.swift in Sources */,
 				B8D05D430D492713FB2E97EF /* BandcampFriday.swift in Sources */,
 				0EC3D68464514744CE3AA448 /* BandcampReleaseChecker.swift in Sources */,
 				584FBF6DA0057BC30EB4C786 /* BrandIcons.swift in Sources */,
 				26D515CC48F859D85DD6CD60 /* ColorExtensions.swift in Sources */,
+				46B5A1100AFDB0968A050BDA /* DeviceIDManager.swift in Sources */,
 				A8FD43FE100F214CA8E6241C /* EmptyStateView.swift in Sources */,
 				194D5CB6D2373174426884C5 /* FaircampReleaseChecker.swift in Sources */,
 				8961565967B20B3F28A7877E /* GlobalHotkeyManager.swift in Sources */,
@@ -450,6 +472,7 @@
 				B824ABE933F7CD456A903C9A /* ReleaseAlertManager.swift in Sources */,
 				30E246B538D9B06340964314 /* ReleaseCheckAPI.swift in Sources */,
 				8916C6D428EE94E16E491566 /* ReleasesTab.swift in Sources */,
+				74B410AF24C0386EE62DED36 /* SavedArtistsSync.swift in Sources */,
 				75EF27233764A8174CBE4753 /* SafariView.swift in Sources */,
 				917C407BBA300BE70B9BDEFB /* ScrobbleManager.swift in Sources */,
 				8A4181366EB270C58A708C65 /* SearchBarView.swift in Sources */,
@@ -457,11 +480,14 @@
 				11B4891578B50BCF51D68613 /* SearchTab.swift in Sources */,
 				7F078F17D544C2F32A801E60 /* SettingsView.swift in Sources */,
 				461E318C0B5687BD71C42E75 /* ShortcutRecorderView.swift in Sources */,
+				25881F48E622E19B77281290 /* SignInView.swift in Sources */,
 				0038D14301F153EF60346193 /* SocialIconButton.swift in Sources */,
 				2FD47D4336B60E85FE2E82E7 /* SupportEntry.swift in Sources */,
 				7182754E06D41AE6FB47653A /* SupportListManager.swift in Sources */,
 				BEE6889852F609316894074E /* SupportListTab.swift in Sources */,
 				2DAD19C15BCCBCC785AC823F /* SupportListView.swift in Sources */,
+				3385E641D2DE09112BB991FA /* Supabase in Sources */,
+				6B09B42A6AC4B94063BA9B71 /* SyncedArtistsView.swift in Sources */,
 				0F9D0A7FD89742003BD8D140 /* TipJarStore.swift in Sources */,
 				EAD31F1949071C4F694741C3 /* TipJarView.swift in Sources */,
 				45220D6B5414D8728BE175C4 /* UnstreamAPI.swift in Sources */,
@@ -730,6 +756,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		F42013B6E7EC3A273B1D81C0 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift.git";
+			requirement = {
+				kind = exactVersion;
+				version = 2.44.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		22204F03FE25486AD3DFCB46 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F42013B6E7EC3A273B1D81C0 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 92F0EC298B5852597D2AC7A5 /* Project object */;
 }

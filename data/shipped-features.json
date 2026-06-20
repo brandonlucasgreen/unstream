@@ -16,14 +16,14 @@
   {
     "id": "verified-artist-claims",
     "title": "Claim your artist page",
-    "description": "Indie artists can now claim and verify their page for free — every artist we feature in our daily posts has one. Claim yours and get all your direct-support links in one place.",
+    "description": "Indie artists can now claim and verify their page for free \u2014 every artist we feature in our daily posts has one. Claim yours and get all your direct-support links in one place.",
     "date": "2026-03-22",
     "announced": true
   },
   {
     "id": "listenbrainz-scrobbling",
     "title": "ListenBrainz scrobbling",
-    "description": "The Mac app now scrobbles to ListenBrainz — open-source music tracking that actually respects your data.",
+    "description": "The Mac app now scrobbles to ListenBrainz \u2014 open-source music tracking that actually respects your data.",
     "date": "2026-03-22",
     "announced": true
   },
@@ -37,7 +37,7 @@
   {
     "id": "public-api",
     "title": "Public API v1",
-    "description": "Developers can now build on top of Unstream. The public API supports artist search, artist lookup, URL resolution, and a full platform list — with API key auth and tiered rate limiting.",
+    "description": "Developers can now build on top of Unstream. The public API supports artist search, artist lookup, URL resolution, and a full platform list \u2014 with API key auth and tiered rate limiting.",
     "date": "2026-04-11",
     "announced": true
   },
@@ -51,14 +51,14 @@
   {
     "id": "ios-app",
     "title": "iOS app coming soon",
-    "description": "An iOS app is in the works — search for artists, save your favorites, and get release alerts on your iPhone and iPad. Stay tuned.",
+    "description": "An iOS app is in the works \u2014 search for artists, save your favorites, and get release alerts on your iPhone and iPad. Stay tuned.",
     "date": "2026-04-11",
     "announced": true
   },
   {
     "id": "ai-policy-indicator",
     "title": "AI music policy badges",
-    "description": "See which platforms ban or restrict AI-generated music right on the search results. Badges for banned (🚫) and AI-cautious (🛡️) platforms, with a legend at the bottom of each result.",
+    "description": "See which platforms ban or restrict AI-generated music right on the search results. Badges for banned (\ud83d\udeab) and AI-cautious (\ud83d\udee1\ufe0f) platforms, with a legend at the bottom of each result.",
     "date": "2026-04-17",
     "announced": true
   },
@@ -72,7 +72,7 @@
   {
     "id": "pwa-save-artists",
     "title": "Save artists on web",
-    "description": "You can now save artists you care about on unstream.stream — sign in and tap the heart on any artist page to keep them in your dashboard.",
+    "description": "You can now save artists you care about on unstream.stream \u2014 sign in and tap the heart on any artist page to keep them in your dashboard.",
     "date": "2026-05-31",
     "announced": true
   },
@@ -86,8 +86,15 @@
   {
     "id": "pwa-simplified-ui",
     "title": "Add Unstream to your Home Screen",
-    "description": "Unstream is now a Progressive Web App. Add it to your Home Screen on iOS or Android for a full-screen, app-like experience — no browser chrome, faster loads, and offline-ready.",
+    "description": "Unstream is now a Progressive Web App. Add it to your Home Screen on iOS or Android for a full-screen, app-like experience \u2014 no browser chrome, faster loads, and offline-ready.",
     "date": "2026-05-31",
+    "announced": false
+  },
+  {
+    "id": "mac-ios-sync",
+    "title": "Sync saved artists on Mac and iOS",
+    "description": "Sign in on the Mac menu bar app or iOS app to sync your saved artists across devices. Saved artists from the web, extension, and native apps all stay in sync.",
+    "date": "2026-06-20",
     "announced": false
   }
 ]
