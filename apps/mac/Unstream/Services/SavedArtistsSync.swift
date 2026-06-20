@@ -13,10 +13,16 @@ class SavedArtistsSync: ObservableObject {
 
     @Published var syncedArtists: [SyncedArtist] = []
     @Published var isSyncing: Bool = false
-    @Published var lastSyncTime: String?
+    @Published var syncError: String?
 
+    private let lastSyncKey = "sync.lastSyncTime"
     private let baseURL = "https://unstream.stream/api"
     private let session: URLSession
+
+    var lastSyncTime: String? {
+        get { UserDefaults.standard.string(forKey: lastSyncKey) }
+        set { UserDefaults.standard.setValue(newValue, forKey: lastSyncKey) }
+    }
 
     private init() {
         let config = URLSessionConfiguration.default
@@ -29,9 +35,10 @@ class SavedArtistsSync: ObservableObject {
     /// Fetch artists modified since the last sync cursor.
     /// Pass `force = true` to do a full pull (no cursor).
     func pull(force: Bool = false) async {
-        guard let token = AuthService.shared.accessToken else { return }
+        guard let token = try? await AuthService.shared.currentAccessToken() else { return }
 
         isSyncing = true
+        syncError = nil
 
         var urlString = "\(baseURL)/saved-artists/sync"
         if !force, let since = lastSyncTime {
@@ -59,7 +66,7 @@ class SavedArtistsSync: ObservableObject {
             let decoded = try JSONDecoder().decode(SyncResponse.self, from: data)
 
             if force {
-                syncedArtists = decoded.artists.filter { !$0.deleted ?? false }
+                syncedArtists = decoded.artists.filter { $0.deleted != true }
             } else {
                 // Merge: replace existing entries by slug, append new ones.
                 // Tombstones (deleted == true) remove the entry instead of adding it.
@@ -79,6 +86,7 @@ class SavedArtistsSync: ObservableObject {
 
             lastSyncTime = decoded.serverTime
         } catch {
+            syncError = "Couldn't sync — tap to retry"
             print("[Sync] Pull failed: \(error)")
         }
 
@@ -89,7 +97,7 @@ class SavedArtistsSync: ObservableObject {
 
     /// Save an artist to the server.
     func saveArtist(slug: String, name: String, imageUrl: String?) async {
-        guard let token = AuthService.shared.accessToken else { return }
+        guard let token = try? await AuthService.shared.currentAccessToken() else { return }
 
         guard let url = URL(string: "\(baseURL)/saved-artists") else { return }
 
@@ -123,6 +131,7 @@ class SavedArtistsSync: ObservableObject {
                 await pull()
             }
         } catch {
+            syncError = "Couldn't save — try again"
             print("[Sync] Save failed: \(error)")
         }
     }
@@ -131,7 +140,7 @@ class SavedArtistsSync: ObservableObject {
 
     /// Remove a saved artist from the server.
     func removeArtist(slug: String) async {
-        guard let token = AuthService.shared.accessToken else { return }
+        guard let token = try? await AuthService.shared.currentAccessToken() else { return }
 
         guard let url = URL(string: "\(baseURL)/saved-artists") else { return }
 
@@ -162,6 +171,7 @@ class SavedArtistsSync: ObservableObject {
                 syncedArtists.removeAll { $0.slug == slug }
             }
         } catch {
+            syncError = "Couldn't remove — try again"
             print("[Sync] Remove failed: \(error)")
         }
     }
@@ -180,9 +190,10 @@ struct SyncResponse: Codable {
 }
 
 struct SyncedArtist: Codable, Identifiable, Hashable {
-    // Server's saved_artists.id is a UUID (text in JSON), not an Int.
-    // Optional handles null/absent; String matches the wire format.
-    let id: String?
+    // Server's saved_artists.id is a UUID (text in JSON).
+    // Non-optional: if the server ever omits it, the decoder fails loudly
+    // at the parse boundary instead of silently at UI time.
+    let id: String
     let artistId: String
     let name: String
     let slug: String

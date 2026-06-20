@@ -15,7 +15,6 @@ struct PopoverView: View {
     @State private var showSignIn = false
     @State private var menuPollTimer: Timer?
     @State private var menuForcePullTimer: Timer?
-    @State private var hasFetchedSync = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -53,12 +52,6 @@ struct PopoverView: View {
                         .foregroundColor(.secondary)
                         .lineLimit(1)
                     Spacer()
-                    Button("Sign Out") {
-                        Task { await auth.signOut() }
-                    }
-                    .font(.system(size: 10))
-                    .buttonStyle(.plain)
-                    .foregroundColor(.secondary)
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 4)
@@ -235,12 +228,6 @@ struct PopoverView: View {
         .frame(width: 320)
         .sheet(isPresented: $showSignIn) {
             SignInView()
-        }
-        .onAppear {
-            if auth.isSignedIn && !hasFetchedSync {
-                hasFetchedSync = true
-                Task { await sync.pull() }
-            }
         }
         .onDisappear {
             stopMenuPoll()

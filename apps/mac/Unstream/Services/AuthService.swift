@@ -142,6 +142,17 @@ class AuthService: ObservableObject {
         session?.accessToken
     }
 
+    // MARK: - Refresh-aware token access
+
+    /// Returns a valid access token, refreshing the session if needed.
+    /// Use this instead of `accessToken` for network calls.
+    func currentAccessToken() async throws -> String? {
+        guard session != nil else { return nil }
+        let validSession = try await client.auth.session
+        session = validSession
+        return validSession.accessToken
+    }
+
     // MARK: - Keychain migration
 
     /// One-time migration: if auth tokens were previously stored via KeychainHelper

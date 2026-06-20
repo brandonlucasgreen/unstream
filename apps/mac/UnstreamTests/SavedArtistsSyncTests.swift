@@ -106,10 +106,10 @@ final class SavedArtistsSyncTests: XCTestCase {
         let jsonData = Self.fixtureJSON.data(using: .utf8)!
         let decoded = try JSONDecoder().decode(SyncResponse.self, from: jsonData)
 
-        // Identifiable conformance: id is String? — works with SwiftUI ForEach
+        // Identifiable conformance: id is String (non-optional)
         let ids = decoded.artists.map(\.id)
         XCTAssertEqual(ids.count, 3)
-        XCTAssertNotNil(ids[0])
+        XCTAssertEqual(ids[0], "a1b2c3d4-e5f6-7890-abcd-ef1234567890")
     }
 
     func testTombstoneFiltering() throws {
