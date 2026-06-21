@@ -430,7 +430,7 @@ export function DashboardPage() {
                                 <circle cx="12" cy="12" r="10" strokeWidth={2} />
                               </svg>
                             )}
-                            {artist.supported ? 'Supported ✓' : 'Mark supported'}
+                            {artist.supported ? 'Supported' : 'Support'}
                           </button>
                             <button
                             onClick={() => handleRemoveSavedArtist(artist.artistId)}
