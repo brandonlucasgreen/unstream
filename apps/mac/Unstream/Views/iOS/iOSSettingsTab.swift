@@ -208,7 +208,10 @@ struct iOSSettingsTab: View {
                 stopForegroundPoll()
             }
             .onChange(of: auth.isSignedIn) { signedIn in
-                if !signedIn {
+                if signedIn {
+                    Task { await sync.pull() }
+                    startForegroundPoll()
+                } else {
                     stopForegroundPoll()
                 }
             }
