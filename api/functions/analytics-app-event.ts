@@ -21,6 +21,7 @@ const VALID_EVENT_TYPES = new Set([
   'extension_activated',
   'page_view',
   'release_alert',
+  'download',
 ]);
 
 const VALID_APPS = new Set(['web', 'extension', 'mac']);

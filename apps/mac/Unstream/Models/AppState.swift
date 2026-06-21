@@ -78,12 +78,14 @@ class AppState: ObservableObject {
         hasSearched = true
         isSearching = true
         searchError = nil
+        api.trackAppEvent(eventType: "search")
 
         do {
             // Phase 1: Get initial results — show them immediately
             let (results, hasPendingEnrichment) = try await api.searchArtist(query)
             searchResults = results
             isSearching = false
+            api.trackAppEvent(eventType: "search", context: ["has_results": results.count > 0, "result_count": results.count])
             trackSearchAppearances(results)
 
             // Phase 2: Enrich with MusicBrainz data in the background
@@ -146,11 +148,13 @@ class AppState: ObservableObject {
             do {
                 print("[AppState] Fetching platforms for: \(artist)")
                 // Phase 1: Get initial results — show them immediately
+                api.trackAppEvent(eventType: "search")
                 let (results, hasPendingEnrichment) = try await api.searchArtist(artist)
                 nowPlayingResults = results
                 lastFetchedArtist = artist
                 lastFetchTime = Date()
                 isLoadingNowPlaying = false
+                api.trackAppEvent(eventType: "search", context: ["has_results": results.count > 0, "result_count": results.count])
                 trackSearchAppearances(results)
                 print("[AppState] Got \(results.count) results for \(artist)")
                 if let callback = onArtistResultsReady {
@@ -184,10 +188,11 @@ class AppState: ObservableObject {
         }
     }
 
-    /// Track a platform link click for a claimed artist
+    /// Track a platform link click for a claimed artist + product analytics
     func trackLinkClick(artist: ArtistResult, platformId: String) {
         if let slug = artist.claimedSlug {
             api.trackAnalyticsEvent(slug: slug, metric: "click:\(platformId)")
         }
+        api.trackAppEvent(eventType: "platform_click", context: ["platform": platformId])
     }
 }
