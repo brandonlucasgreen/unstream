@@ -283,7 +283,7 @@ export default async function handler(request: Request, context: Context) {
     <div class="container" style="padding-top:48px;padding-bottom:32px;text-align:center">
       <div class="avatar-wrap">
         ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${artistName}" onerror="this.style.display='none';this.parentElement.querySelector('.avatar-fallback').style.display='flex'">` : ''}
-        <span class="avatar-fallback" style="display:${imageUrl ? 'none' : 'flex'}">${artist.name[0]?.toUpperCase() || '?'}</span>
+        <span class="avatar-fallback" style="display:${imageUrl ? 'none' : 'flex'}">${escapeHtml((artist.name[0] || '?').toUpperCase())}</span>
       </div>
       <div style="display:flex;align-items:center;justify-content:center;gap:8px">
         <h1 style="font-size:28px;font-weight:700">${artistName}</h1>
@@ -386,7 +386,7 @@ export default async function handler(request: Request, context: Context) {
     <div class="container" style="padding-top:48px;padding-bottom:32px;text-align:center">
       <div class="avatar-wrap">
         ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${artistName}" onerror="this.style.display='none';this.parentElement.querySelector('.avatar-fallback').style.display='flex'">` : ''}
-        <span class="avatar-fallback" style="display:${imageUrl ? 'none' : 'flex'}">${artist.name[0]?.toUpperCase() || '?'}</span>
+        <span class="avatar-fallback" style="display:${imageUrl ? 'none' : 'flex'}">${escapeHtml((artist.name[0] || '?').toUpperCase())}</span>
       </div>
       <h1 style="font-size:28px;font-weight:700">${artistName}</h1>
       ${locationHtml}
