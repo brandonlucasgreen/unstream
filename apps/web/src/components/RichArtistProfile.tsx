@@ -74,13 +74,19 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
 
       {/* Hero */}
       <div className="pt-12 pb-8 text-center">
-        {imageUrl && (
-          <img
-            src={imageUrl}
-            alt={artist.name}
-            className="w-32 h-32 rounded-full object-cover border-2 border-border mx-auto mb-4"
-          />
-        )}
+        <div className="w-32 h-32 rounded-full border-2 border-border mx-auto mb-4 flex items-center justify-center overflow-hidden bg-bg-secondary">
+          {imageUrl && (
+            <img
+              src={imageUrl}
+              alt={artist.name}
+              className="w-full h-full object-cover rounded-full"
+              onError={(e) => { const el = e.target as HTMLImageElement; el.style.display = 'none'; el.parentElement!.querySelector('.fallback')?.classList.remove('hidden'); }}
+            />
+          )}
+          <span className={imageUrl ? 'hidden fallback' : ''} style={{ fontSize: '48px', fontWeight: 600, color: 'var(--text-muted)' }}>
+            {artist.name[0]?.toUpperCase() || '?'}
+          </span>
+        </div>
         <div className="flex items-center justify-center gap-2">
           <h1 className="font-display text-[28px] font-bold text-text-primary">
             {artist.name}

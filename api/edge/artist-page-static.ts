@@ -101,6 +101,9 @@ const CSS = `
   .site-header .nav-accent:hover { text-decoration: underline; }
   .claim-cta { display: inline-block; margin-top: 24px; padding: 10px 24px; border-radius: 12px; background: var(--accent); color: #fff; font-weight: 600; font-size: 15px; text-decoration: none; }
   .claim-cta:hover { opacity: 0.9; }
+  .avatar-wrap { width:128px;height:128px;border-radius:50%;border:2px solid var(--border);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--bg2) }
+  .avatar-wrap img { width:100%;height:100%;object-fit:cover }
+  .avatar-fallback { font-size:48px;font-weight:600;color:var(--muted) }
 `;
 
 export default async function handler(request: Request, context: Context) {
@@ -278,7 +281,10 @@ export default async function handler(request: Request, context: Context) {
 
   <div class="page-content">
     <div class="container" style="padding-top:48px;padding-bottom:32px;text-align:center">
-      ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${artistName}" style="width:128px;height:128px;border-radius:50%;object-fit:cover;border:2px solid var(--border);margin-bottom:16px">` : ''}
+      <div class="avatar-wrap">
+        ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${artistName}" onerror="this.style.display='none';this.parentElement.querySelector('.avatar-fallback').style.display='flex'">` : ''}
+        <span class="avatar-fallback" style="display:${imageUrl ? 'none' : 'flex'}">${artist.name[0]?.toUpperCase() || '?'}</span>
+      </div>
       <div style="display:flex;align-items:center;justify-content:center;gap:8px">
         <h1 style="font-size:28px;font-weight:700">${artistName}</h1>
         <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:500;background:rgba(255,107,53,0.15);color:var(--accent)">
@@ -378,7 +384,10 @@ export default async function handler(request: Request, context: Context) {
 
   <div class="page-content">
     <div class="container" style="padding-top:48px;padding-bottom:32px;text-align:center">
-      ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${artistName}" style="width:128px;height:128px;border-radius:50%;object-fit:cover;border:2px solid var(--border);margin-bottom:16px">` : ''}
+      <div class="avatar-wrap">
+        ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${artistName}" onerror="this.style.display='none';this.parentElement.querySelector('.avatar-fallback').style.display='flex'">` : ''}
+        <span class="avatar-fallback" style="display:${imageUrl ? 'none' : 'flex'}">${artist.name[0]?.toUpperCase() || '?'}</span>
+      </div>
       <h1 style="font-size:28px;font-weight:700">${artistName}</h1>
       ${locationHtml}
     </div>
