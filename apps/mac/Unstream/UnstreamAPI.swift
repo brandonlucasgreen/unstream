@@ -160,6 +160,20 @@ actor UnstreamAPI {
         }
     }
 
+    /// Fire-and-forget product analytics event (app_events table).
+    /// Mirrors the web client's trackAppEvent — sends event_type + app + context.
+    nonisolated func trackAppEvent(eventType: String, context: [String: Any] = [:]) {
+        guard let url = URL(string: "\(baseURL)/analytics/app-event") else { return }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let body: [String: Any] = ["event_type": eventType, "app": "mac", "context": context]
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        Task.detached(priority: .utility) { [session] in
+            _ = try? await session.data(for: request)
+        }
+    }
+
     func cacheResults(query: String, results: [ArtistResult]) {
         cache[query.lowercased()] = (results, Date())
     }
