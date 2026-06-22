@@ -8,7 +8,6 @@ struct SignInView: View {
 
     @State private var email = ""
     @State private var password = ""
-    @State private var magicLinkSent = false
     @State private var showSignUp = false
 
     var body: some View {
@@ -52,17 +51,6 @@ struct SignInView: View {
                     .foregroundColor(.red)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
-            }
-
-            // Magic link sent confirmation
-            if magicLinkSent {
-                HStack(spacing: 6) {
-                    Image(systemName: "envelope.badge")
-                        .foregroundColor(.green)
-                    Text("Magic link sent! Check your email.")
-                        .font(.caption)
-                        .foregroundColor(.green)
-                }
             }
 
             // Buttons
@@ -118,7 +106,6 @@ struct SignInView: View {
     }
 
     private func signIn() {
-        magicLinkSent = false
         Task {
             await auth.signInWithEmail(email: email, password: password)
             if auth.isSignedIn {
@@ -128,24 +115,17 @@ struct SignInView: View {
     }
 
     private func signUp() {
-        magicLinkSent = false
         Task {
             await auth.signUpWithEmail(email: email, password: password)
         }
     }
 
     private func sendMagicLink() {
-        Task {
-            await auth.sendMagicLink(email: email)
-            if auth.errorMessage == nil {
-                magicLinkSent = true
-            }
-        }
+        auth.sendMagicLink(email: email)
     }
 
     private func toggleSignUp() {
         showSignUp.toggle()
-        magicLinkSent = false
         auth.errorMessage = nil
     }
 }

@@ -1,4 +1,5 @@
 import Foundation
+import AuthenticationServices
 import Supabase
 
 /// Manages Supabase auth state for the Unstream app.
@@ -17,6 +18,10 @@ class AuthService: ObservableObject {
     @Published var session: Session?
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
+
+    #if os(macOS)
+    private var authPresentationAnchor: AuthPresentationAnchor?
+    #endif
 
     private init() {
         let anonKey = Bundle.main.infoDictionary?["SUPABASE_ANON_KEY"] as? String ?? ""
@@ -91,27 +96,51 @@ class AuthService: ObservableObject {
 
     // MARK: - Magic Link
 
-    func sendMagicLink(email: String) async {
+    /// Starts a magic-link sign-in via `ASWebAuthenticationSession`.
+    ///
+    /// Uses the Supabase SDK's `signInWithOAuth(provider: .email)` which opens
+    /// the hosted email auth page in a web view. The session validates the
+    /// calling app and binds the callback to the original PKCE request,
+    /// closing the custom-URL-scheme interception risk on macOS.
+    func sendMagicLink(email: String) {
         isLoading = true
         errorMessage = nil
 
-        do {
-            try await client.auth.signInWithOTP(
-                email: email,
-                redirectTo: URL(string: "unstream://auth/callback")
-            )
-        } catch {
-            errorMessage = error.localizedDescription
-        }
+        let redirectURL = URL(string: "unstream://auth/callback")!
 
-        isLoading = false
+        #if os(macOS)
+        let anchor = AuthPresentationAnchor()
+        authPresentationAnchor = anchor
+        #endif
+
+        Task {
+            do {
+                let result = try await client.auth.signInWithOAuth(
+                    provider: .email,
+                    redirectTo: redirectURL,
+                    queryParams: [("email", email)]
+                ) { @Sendable session in
+                    session.prefersEphemeralWebBrowserSession = true
+                    #if os(macOS)
+                    session.presentationContextProvider = anchor
+                    #endif
+                }
+                session = result
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
+            #if os(macOS)
+            authPresentationAnchor = nil
+            #endif
+        }
     }
 
     // MARK: - Deeplink handling
 
-    /// Handle the callback URL from a custom URL scheme deeplink.
-    /// The URL contains the auth tokens as query/hash params; PKCE code-verifier
-    /// validates the token contents.
+    /// Handles an auth callback URL received outside `ASWebAuthenticationSession`
+    /// (e.g. via universal link or residual custom-scheme delivery).
+    /// The PKCE code-verifier in the SDK validates the token contents.
     func handleAuthCallback(url: URL) async {
         isLoading = true
         errorMessage = nil
@@ -177,3 +206,16 @@ class AuthService: ObservableObject {
         UserDefaults.standard.set(true, forKey: migrationFlag)
     }
 }
+
+// MARK: - ASWebAuthenticationPresentationContextProviding
+
+#if os(macOS)
+/// Provides a presentation anchor for `ASWebAuthenticationSession` on macOS.
+/// Returns the app's key window so the web auth sheet attaches to the
+/// running app rather than a detached empty window.
+final class AuthPresentationAnchor: NSObject, ASWebAuthenticationPresentationContextProviding, @unchecked Sendable {
+    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        MainActor.assumeIsolated { NSApp.keyWindow ?? ASPresentationAnchor() }
+    }
+}
+#endif
