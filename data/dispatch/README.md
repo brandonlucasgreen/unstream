@@ -1,42 +1,38 @@
 # The Unstream Dispatch
 
-A weekly briefing of music industry news, written by Gail (Unstream's music industry researcher) and published as an RSS feed at `/dispatch.xml`.
-
-## Publishing rule (non-negotiable)
-
-Dispatches are committed **directly to `main`** and pushed. No pull requests. No feature branches. No `draft: true` unless Brandon has explicitly asked for a draft in that week's instruction. Any refinements happen as follow-up commits to `main` after Brandon has read the dispatch in his RSS reader.
-
-If a scheduled session's harness has pre-assigned a development branch for commits (e.g. `claude/...`), ignore that default for dispatch work — `PROMPT.md` and this README supersede it.
+A weekly briefing of music industry news, delivered to the `#unstream-dispatch` Discord channel (`1494159048461910138`).
 
 ## How it works
 
-1. A scheduled Claude Code **routine** (created via `/schedule`) runs every Friday.
-2. The routine reads `PROMPT.md` in this directory, does the research using web search, and writes a new markdown file at `data/dispatch/YYYY-Www.md`.
-3. The routine commits the file directly to `main` and pushes. **Not** via a PR.
-4. Netlify rebuilds on push. `scripts/generate-dispatch-feed.ts` regenerates `apps/web/public/dispatch.xml` from all entries in this directory.
-5. Brandon reads the new dispatch in his RSS reader and makes any refinements as follow-up commits to `main`.
+1. The cron job `8e17d673-…` runs every Friday (Fridays 7 AM ET per `HEARTBEAT.md`).
+2. The cron job spawns Katy in `mode: "run"` with the brief defined inline in the cron job definition itself.
+3. Katy's output is delivered to `#unstream-dispatch` only — NOT to DM.
+4. The cron job is defined in OpenClaw; the brief lives in the cron job's `payload.message` field.
 
-## Dispatch format
+## Historical context
 
-Each dispatch is a markdown file named `YYYY-Www.md` (ISO week number — e.g. `2026-W16.md`).
+The dispatch used to be:
 
-Required frontmatter:
+- **2026-04-17 and earlier:** committed to `main` as a markdown file (`data/dispatch/YYYY-Www.md`), published as an RSS feed at `unstream.stream/dispatch.xml` by `scripts/generate-dispatch-feed.ts` on Netlify rebuild. Files from that era (e.g. `2026-W16.md`) and the old prompt (`PROMPT.md.bak-pre-discord-2026-04-17`) are kept in this directory for the historical record.
+- **2026-04-17 → present:** delivered to Discord only. RSS publishing was retired.
+- **2026-06-18:** the agent slot was reorganized. The old slot ID (which used to write the dispatch) was renamed to `Stewart` (legal/finance/tax research, dormant) and a new `Roald` (ops/infra/security) slot was created on the reclaimed ID. Katy continues to own the dispatch under her own (unchanged) slot ID. See `MEMORY.md` "Agent roster" for the current slot layout.
 
-```yaml
----
-title: "Week of April 17, 2026"
-week: 2026-W16
-published: 2026-04-17
-summary: "One-line teaser for the feed"
----
-```
+The previous `PROMPT.md` and the old "commit directly to main" workflow described in the pre-2026-04-17 docs are dead. The current brief lives in the cron job definition; if you're a future agent reading this for context, look at the cron job `8e17d673-…` for the actual prompt.
 
-Body is markdown. The body becomes the `<content:encoded>` of the RSS item.
+## Dispatch format (legacy / RSS)
 
-The `draft: true` frontmatter field exists to support manual hold-backs — e.g. Brandon authoring a dispatch ahead of time and not wanting it in the feed yet. Scheduled sessions should **never** set `draft: true` on their own. The correct workflow for a scheduled session is: commit the finished dispatch to `main` and let it publish. Corrections happen as follow-up commits, not as staged drafts.
+The pre-Discord dispatches used this format:
 
-## Publishing pipeline
+- File: `data/dispatch/YYYY-Www.md` (ISO week number)
+- Required frontmatter:
+  ```yaml
+  ---
+  title: "Week of April 17, 2026"
+  week: 2026-W16
+  published: 2026-04-17
+  summary: "One-line teaser for the feed"
+  ---
+  ```
+- Body is markdown. Body becomes the `<content:encoded>` of the RSS item.
 
-- Markdown in → RSS out. No web UI in v1 — entries are read in RSS readers.
-- Web UI at `/dispatch/:week` is planned for a future version. The frontmatter and file structure here are designed to plug into it without migration.
-- The feed URL is public at `https://unstream.stream/dispatch.xml`.
+The `scripts/generate-dispatch-feed.ts` script and the Netlify rebuild pipeline still work, but new dispatches are no longer written to this directory. The historical files (`2026-W16.md`, etc.) are kept so the RSS feed at `unstream.stream/dispatch.xml` continues to render the archive.
