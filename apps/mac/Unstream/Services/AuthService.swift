@@ -98,9 +98,10 @@ class AuthService: ObservableObject {
 
     /// Starts a magic-link sign-in via `ASWebAuthenticationSession`.
     ///
-    /// Uses the Supabase SDK's `signInWithOAuth(provider: .email)` which opens
-    /// the hosted email auth page in a web view. The session validates the
-    /// calling app and binds the callback to the original PKCE request,
+    /// Gets the OAuth authorize URL for `provider: .email` (Supabase's hosted
+    /// email auth page) via `getOAuthSignInURL`, then opens it in an
+    /// `ASWebAuthenticationSession` with PKCE. The web session validates the
+    /// caller and binds the callback to the original code challenge,
     /// closing the custom-URL-scheme interception risk on macOS.
     func sendMagicLink(email: String) {
         isLoading = true
@@ -115,16 +116,18 @@ class AuthService: ObservableObject {
 
         Task {
             do {
-                let result = try await client.auth.signInWithOAuth(
+                let authURL = try client.auth.getOAuthSignInURL(
                     provider: .email,
                     redirectTo: redirectURL,
                     queryParams: [("email", email)]
-                ) { @Sendable session in
-                    session.prefersEphemeralWebBrowserSession = true
-                    #if os(macOS)
-                    session.presentationContextProvider = anchor
-                    #endif
-                }
+                )
+
+                let callbackURL = try await openWebAuthSession(
+                    url: authURL,
+                    callbackScheme: redirectURL.scheme!
+                )
+
+                let result = try await client.auth.session(from: callbackURL)
                 session = result
             } catch {
                 errorMessage = error.localizedDescription
@@ -133,6 +136,33 @@ class AuthService: ObservableObject {
             #if os(macOS)
             authPresentationAnchor = nil
             #endif
+        }
+    }
+
+    /// Opens a URL in `ASWebAuthenticationSession` and returns the callback URL.
+    @MainActor
+    private func openWebAuthSession(url: URL, callbackScheme: String) async throws -> URL {
+        try await withCheckedThrowingContinuation { continuation in
+            let webSession = ASWebAuthenticationSession(
+                url: url,
+                callbackURLScheme: callbackScheme
+            ) { callbackURL, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else if let callbackURL {
+                    continuation.resume(returning: callbackURL)
+                } else {
+                    continuation.resume(throwing: URLError(.unknown))
+                }
+            }
+
+            webSession.prefersEphemeralWebBrowserSession = true
+
+            #if os(macOS)
+            webSession.presentationContextProvider = authPresentationAnchor
+            #endif
+
+            webSession.start()
         }
     }
 
@@ -214,8 +244,9 @@ class AuthService: ObservableObject {
 /// Returns the app's key window so the web auth sheet attaches to the
 /// running app rather than a detached empty window.
 final class AuthPresentationAnchor: NSObject, ASWebAuthenticationPresentationContextProviding, @unchecked Sendable {
+    @MainActor
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        MainActor.assumeIsolated { NSApp.keyWindow ?? ASPresentationAnchor() }
+        NSApp.keyWindow ?? ASPresentationAnchor()
     }
 }
 #endif

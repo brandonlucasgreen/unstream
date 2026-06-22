@@ -75,6 +75,12 @@ struct SignInView: View {
                 .buttonStyle(.bordered)
                 .disabled(email.isEmpty || auth.isLoading)
 
+                Text("A sign-in window will open — complete the steps there to continue.")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+
                 Button(action: toggleSignUp) {
                     Text(showSignUp ? "Already have an account? Sign In" : "Need an account? Sign Up")
                         .font(.caption)
