@@ -8,7 +8,6 @@ struct SignInView: View {
 
     @State private var email = ""
     @State private var password = ""
-    @State private var magicLinkSent = false
     @State private var showSignUp = false
 
     var body: some View {
@@ -54,17 +53,6 @@ struct SignInView: View {
                     .frame(maxWidth: .infinity)
             }
 
-            // Magic link sent confirmation
-            if magicLinkSent {
-                HStack(spacing: 6) {
-                    Image(systemName: "envelope.badge")
-                        .foregroundColor(.green)
-                    Text("Magic link sent! Check your email.")
-                        .font(.caption)
-                        .foregroundColor(.green)
-                }
-            }
-
             // Buttons
             VStack(spacing: 8) {
                 Button(action: signIn) {
@@ -86,6 +74,12 @@ struct SignInView: View {
                 }
                 .buttonStyle(.bordered)
                 .disabled(email.isEmpty || auth.isLoading)
+
+                Text("A sign-in window will open — complete the steps there to continue.")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
 
                 Button(action: toggleSignUp) {
                     Text(showSignUp ? "Already have an account? Sign In" : "Need an account? Sign Up")
@@ -118,7 +112,6 @@ struct SignInView: View {
     }
 
     private func signIn() {
-        magicLinkSent = false
         Task {
             await auth.signInWithEmail(email: email, password: password)
             if auth.isSignedIn {
@@ -128,24 +121,17 @@ struct SignInView: View {
     }
 
     private func signUp() {
-        magicLinkSent = false
         Task {
             await auth.signUpWithEmail(email: email, password: password)
         }
     }
 
     private func sendMagicLink() {
-        Task {
-            await auth.sendMagicLink(email: email)
-            if auth.errorMessage == nil {
-                magicLinkSent = true
-            }
-        }
+        auth.sendMagicLink(email: email)
     }
 
     private func toggleSignUp() {
         showSignUp.toggle()
-        magicLinkSent = false
         auth.errorMessage = nil
     }
 }

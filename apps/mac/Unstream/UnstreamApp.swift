@@ -138,7 +138,7 @@ struct UnstreamApp: App {
                 .environmentObject(container.releaseAlertManager)
                 .environmentObject(container.indieArtistDirectory)
                 .onOpenURL { url in
-                    handleIncomingURL(url)
+                    handleNonAuthIncomingURL(url)
                 }
                 .onAppear {
                     container.checkPendingSearch()
@@ -159,15 +159,7 @@ struct UnstreamApp: App {
     }
 
     #if os(iOS)
-    private func handleIncomingURL(_ url: URL) {
-        // Auth callback: unstream://auth/callback#access_token=...
-        if url.scheme == "unstream" && url.host == "auth" && url.path == "/callback" {
-            Task { @MainActor in
-                await AuthService.shared.handleAuthCallback(url: url)
-            }
-            return
-        }
-
+    private func handleNonAuthIncomingURL(_ url: URL) {
         // Search deeplink: unstream://search?q=...
         guard url.scheme == "unstream",
               url.host == "search",
@@ -324,14 +316,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             }
         }
 
-        // Handle auth deeplink callbacks on macOS via custom URL scheme
-        // The AppDelegate handles NSAppleEventManager events for custom URL schemes.
-        NSAppleEventManager.shared().setEventHandler(
-            self,
-            andSelector: #selector(handleAppleEvent(_:)),
-            forEventClass: AEEventClass(kInternetEventClass),
-            andEventID: AEEventID(kAEGetURL)
-        )
+        // Auth callbacks are handled by ASWebAuthenticationSession in AuthService;
+        // no NSAppleEventManager handler needed.
 
         // Initialize welcome launcher
         _ = WelcomeWindowLauncher.shared
@@ -352,20 +338,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     func applicationWillTerminate(_ notification: Notification) {
         if let monitor = eventMonitor {
             NSEvent.removeMonitor(monitor)
-        }
-        NSAppleEventManager.shared().removeEventHandler(forEventClass: AEEventClass(kInternetEventClass), andEventID: AEEventID(kAEGetURL))
-    }
-
-    // Handle custom URL scheme events (unstream://) on macOS
-    @objc func handleAppleEvent(_ event: NSAppleEventDescriptor) {
-        guard let urlString = event.paramDescriptor(forKeyword: AEKeyword(keyDirectObject))?.stringValue,
-              let url = URL(string: urlString) else { return }
-
-        // Auth callback: unstream://auth/callback#access_token=...
-        if url.scheme == "unstream" && url.host == "auth" && url.path == "/callback" {
-            Task { @MainActor in
-                await AuthService.shared.handleAuthCallback(url: url)
-            }
         }
     }
 
