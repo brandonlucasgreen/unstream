@@ -4,5 +4,5 @@
 -- an admin could rubber-stamp a request from a non-owner.
 
 ALTER TABLE verification_requests
-  ADD COLUMN IF NOT EXISTS ownership_verified_by TEXT,
+  ADD COLUMN IF NOT EXISTS ownership_verified_by UUID,
   ADD COLUMN IF NOT EXISTS ownership_verified_at TIMESTAMPTZ;

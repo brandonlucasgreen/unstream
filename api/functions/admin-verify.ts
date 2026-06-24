@@ -44,10 +44,9 @@ export async function handler(event: {
       .select(`
         id, email, message, status, reviewer_notes, created_at, reviewed_at,
         artist_id, user_id,
-        artists(name, slug),
-        artist_profiles(verified_at)
+        artists(name, slug)
       `)
-      .order('status', { ascending: true }) // 'pending' sorts before others alphabetically
+      .order('status', { ascending: true })
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -57,6 +56,31 @@ export async function handler(event: {
         headers: CORS_HEADERS,
         body: JSON.stringify({ error: 'Failed to fetch verification requests' }),
       };
+    }
+
+    // Fetch artist_profiles separately — no FK between verification_requests
+    // and artist_profiles, so PostgREST can't embed them.
+    const artistIds = (data || []).map((r: { artist_id: string }) => r.artist_id);
+    const profileMap = new Map<string, string | null>();
+
+    if (artistIds.length > 0) {
+      const { data: profiles, error: profileError } = await client
+        .from('artist_profiles')
+        .select('artist_id, verified_at')
+        .in('artist_id', artistIds);
+
+      if (profileError) {
+        console.error('[Admin] Failed to fetch artist profiles:', profileError);
+        return {
+          statusCode: 500,
+          headers: CORS_HEADERS,
+          body: JSON.stringify({ error: 'Failed to fetch artist profiles' }),
+        };
+      }
+
+      for (const p of (profiles || []) as { artist_id: string; verified_at: string | null }[]) {
+        profileMap.set(p.artist_id, p.verified_at);
+      }
     }
 
     const requests = (data || []).map((r: {
@@ -70,10 +94,8 @@ export async function handler(event: {
       artist_id: string;
       user_id: string;
       artists: { name: string; slug: string } | { name: string; slug: string }[] | null;
-      artist_profiles: { verified_at: string | null } | { verified_at: string | null }[] | null;
     }) => {
       const artist = Array.isArray(r.artists) ? r.artists[0] : r.artists;
-      const profile = Array.isArray(r.artist_profiles) ? r.artist_profiles[0] : r.artist_profiles;
       return {
         id: r.id,
         artist_name: artist?.name ?? '(unknown)',
@@ -85,7 +107,7 @@ export async function handler(event: {
         reviewer_notes: r.reviewer_notes,
         created_at: r.created_at,
         reviewed_at: r.reviewed_at,
-        link_back_completed: !!profile?.verified_at,
+        link_back_completed: !!profileMap.get(r.artist_id),
       };
     });
 
@@ -279,7 +301,6 @@ export async function handler(event: {
         requestId,
         artistId: request.artist_id,
         adminId: admin.userId,
-        adminEmail: admin.email,
       },
     });
   } else {
