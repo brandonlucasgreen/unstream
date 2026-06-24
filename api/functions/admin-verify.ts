@@ -3,6 +3,7 @@
 
 import { getClient } from './db';
 import { authenticateAdmin, buildCorsHeaders } from './middleware';
+import { Sentry } from '../lib/sentry';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -40,7 +41,12 @@ export async function handler(event: {
   if (event.httpMethod === 'GET') {
     const { data, error } = await client
       .from('verification_requests')
-      .select('id, email, message, status, reviewer_notes, created_at, reviewed_at, artist_id, user_id, artists(name, slug)')
+      .select(`
+        id, email, message, status, reviewer_notes, created_at, reviewed_at,
+        artist_id, user_id,
+        artists(name, slug),
+        artist_profiles(verified_at)
+      `)
       .order('status', { ascending: true }) // 'pending' sorts before others alphabetically
       .order('created_at', { ascending: false });
 
@@ -64,8 +70,10 @@ export async function handler(event: {
       artist_id: string;
       user_id: string;
       artists: { name: string; slug: string } | { name: string; slug: string }[] | null;
+      artist_profiles: { verified_at: string | null } | { verified_at: string | null }[] | null;
     }) => {
       const artist = Array.isArray(r.artists) ? r.artists[0] : r.artists;
+      const profile = Array.isArray(r.artist_profiles) ? r.artist_profiles[0] : r.artist_profiles;
       return {
         id: r.id,
         artist_name: artist?.name ?? '(unknown)',
@@ -77,6 +85,7 @@ export async function handler(event: {
         reviewer_notes: r.reviewer_notes,
         created_at: r.created_at,
         reviewed_at: r.reviewed_at,
+        link_back_completed: !!profile?.verified_at,
       };
     });
 
@@ -100,6 +109,7 @@ export async function handler(event: {
     action?: 'approve' | 'reject';
     requestId?: string;
     reviewerNotes?: string;
+    ownershipVerified?: boolean;
   };
 
   try {
@@ -112,7 +122,7 @@ export async function handler(event: {
     };
   }
 
-  const { action, requestId, reviewerNotes } = body;
+  const { action, requestId, reviewerNotes, ownershipVerified } = body;
 
   if (reviewerNotes && reviewerNotes.length > 2000) {
     return {
@@ -172,6 +182,15 @@ export async function handler(event: {
   const now = new Date().toISOString();
 
   if (action === 'approve') {
+    // Security gate: admin must explicitly confirm they verified ownership.
+    if (!ownershipVerified) {
+      return {
+        statusCode: 400,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: 'Approval requires ownership verification' }),
+      };
+    }
+
     // An artist_profiles row may not exist yet if the user submitted a manual
     // review without first attempting the automated link-back claim flow.
     const { data: existingProfile, error: profileLookupError } = await client
@@ -240,6 +259,8 @@ export async function handler(event: {
         status: 'approved',
         reviewed_at: now,
         reviewer_notes: reviewerNotes || null,
+        ownership_verified_by: admin.userId,
+        ownership_verified_at: now,
       })
       .eq('id', requestId);
 
@@ -251,6 +272,16 @@ export async function handler(event: {
         body: JSON.stringify({ error: 'Failed to update verification request' }),
       };
     }
+
+    Sentry.captureMessage('Verification request approved', {
+      level: 'info',
+      extra: {
+        requestId,
+        artistId: request.artist_id,
+        adminId: admin.userId,
+        adminEmail: admin.email,
+      },
+    });
   } else {
     // Reject: just update the request status
     const { error: updateError } = await client

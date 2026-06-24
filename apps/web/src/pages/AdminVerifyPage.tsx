@@ -14,6 +14,7 @@ interface VerificationRequest {
   reviewer_notes: string | null;
   created_at: string;
   reviewed_at: string | null;
+  link_back_completed: boolean;
 }
 
 export function AdminVerifyPage() {
@@ -23,6 +24,7 @@ export function AdminVerifyPage() {
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [reviewerNotes, setReviewerNotes] = useState<Record<string, string>>({});
+  const [ownershipChecked, setOwnershipChecked] = useState<Record<string, boolean>>({});
 
   const fetchRequests = useCallback(async () => {
     if (!session?.access_token) return;
@@ -73,6 +75,7 @@ export function AdminVerifyPage() {
           action,
           requestId,
           reviewerNotes: reviewerNotes[requestId]?.trim() || undefined,
+          ownershipVerified: action === 'approve' ? true : undefined,
         }),
       });
 
@@ -83,8 +86,13 @@ export function AdminVerifyPage() {
 
       // Refresh the list
       await fetchRequests();
-      // Clear notes for this request
+      // Clear notes and checkbox for this request
       setReviewerNotes(prev => {
+        const next = { ...prev };
+        delete next[requestId];
+        return next;
+      });
+      setOwnershipChecked(prev => {
         const next = { ...prev };
         delete next[requestId];
         return next;
@@ -170,6 +178,11 @@ export function AdminVerifyPage() {
                             </a>
                           </p>
                         )}
+                        <p className={`text-xs ${req.link_back_completed ? 'text-green-400' : 'text-yellow-400'}`}>
+                          {req.link_back_completed
+                            ? '✓ link-back completed'
+                            : '⚠ link-back not completed — manual verification required'}
+                        </p>
                         {req.message && (
                           <div className="mt-2 p-3 rounded-lg bg-bg-secondary text-text-secondary text-sm">
                             <span className="text-text-muted block mb-1">Proof/message:</span>
@@ -186,10 +199,20 @@ export function AdminVerifyPage() {
                         className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border/50 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50 resize-none"
                       />
 
+                      <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={ownershipChecked[req.id] || false}
+                          onChange={(e) => setOwnershipChecked(prev => ({ ...prev, [req.id]: e.target.checked }))}
+                          className="h-4 w-4 rounded border-border"
+                        />
+                        I have verified the submitter is the artist owner
+                      </label>
+
                       <div className="flex gap-3">
                         <button
                           onClick={() => handleAction(req.id, 'approve')}
-                          disabled={actionLoading === req.id}
+                          disabled={actionLoading === req.id || !ownershipChecked[req.id]}
                           className="px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {actionLoading === req.id ? 'Processing...' : 'Approve'}
