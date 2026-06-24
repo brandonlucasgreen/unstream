@@ -3,6 +3,7 @@
 
 import { getClient } from './db';
 import { authenticateAdmin, buildCorsHeaders } from './middleware';
+import { Sentry } from '../lib/sentry';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -40,8 +41,12 @@ export async function handler(event: {
   if (event.httpMethod === 'GET') {
     const { data, error } = await client
       .from('verification_requests')
-      .select('id, email, message, status, reviewer_notes, created_at, reviewed_at, artist_id, user_id, artists(name, slug)')
-      .order('status', { ascending: true }) // 'pending' sorts before others alphabetically
+      .select(`
+        id, email, message, status, reviewer_notes, created_at, reviewed_at,
+        artist_id, user_id,
+        artists(name, slug)
+      `)
+      .order('status', { ascending: true })
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -51,6 +56,31 @@ export async function handler(event: {
         headers: CORS_HEADERS,
         body: JSON.stringify({ error: 'Failed to fetch verification requests' }),
       };
+    }
+
+    // Fetch artist_profiles separately — no FK between verification_requests
+    // and artist_profiles, so PostgREST can't embed them.
+    const artistIds = (data || []).map((r: { artist_id: string }) => r.artist_id);
+    const profileMap = new Map<string, string | null>();
+
+    if (artistIds.length > 0) {
+      const { data: profiles, error: profileError } = await client
+        .from('artist_profiles')
+        .select('artist_id, verified_at')
+        .in('artist_id', artistIds);
+
+      if (profileError) {
+        console.error('[Admin] Failed to fetch artist profiles:', profileError);
+        return {
+          statusCode: 500,
+          headers: CORS_HEADERS,
+          body: JSON.stringify({ error: 'Failed to fetch artist profiles' }),
+        };
+      }
+
+      for (const p of (profiles || []) as { artist_id: string; verified_at: string | null }[]) {
+        profileMap.set(p.artist_id, p.verified_at);
+      }
     }
 
     const requests = (data || []).map((r: {
@@ -77,6 +107,7 @@ export async function handler(event: {
         reviewer_notes: r.reviewer_notes,
         created_at: r.created_at,
         reviewed_at: r.reviewed_at,
+        link_back_completed: !!profileMap.get(r.artist_id),
       };
     });
 
@@ -100,6 +131,7 @@ export async function handler(event: {
     action?: 'approve' | 'reject';
     requestId?: string;
     reviewerNotes?: string;
+    ownershipVerified?: boolean;
   };
 
   try {
@@ -112,7 +144,7 @@ export async function handler(event: {
     };
   }
 
-  const { action, requestId, reviewerNotes } = body;
+  const { action, requestId, reviewerNotes, ownershipVerified } = body;
 
   if (reviewerNotes && reviewerNotes.length > 2000) {
     return {
@@ -172,11 +204,21 @@ export async function handler(event: {
   const now = new Date().toISOString();
 
   if (action === 'approve') {
+    // Security gate: admin must explicitly confirm they verified ownership.
+    if (!ownershipVerified) {
+      return {
+        statusCode: 400,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: 'Approval requires ownership verification' }),
+      };
+    }
+
     // An artist_profiles row may not exist yet if the user submitted a manual
     // review without first attempting the automated link-back claim flow.
+    // Re-check ownership hasn't changed since the request was submitted.
     const { data: existingProfile, error: profileLookupError } = await client
       .from('artist_profiles')
-      .select('id')
+      .select('id, user_id, verified_at')
       .eq('artist_id', request.artist_id)
       .maybeSingle();
 
@@ -186,6 +228,14 @@ export async function handler(event: {
         statusCode: 500,
         headers: CORS_HEADERS,
         body: JSON.stringify({ error: 'Failed to look up artist profile' }),
+      };
+    }
+
+    if (existingProfile?.verified_at && existingProfile.user_id !== request.user_id) {
+      return {
+        statusCode: 409,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: 'Artist was claimed by another user while this request was pending' }),
       };
     }
 
@@ -240,6 +290,8 @@ export async function handler(event: {
         status: 'approved',
         reviewed_at: now,
         reviewer_notes: reviewerNotes || null,
+        ownership_verified_by: admin.userId,
+        ownership_verified_at: now,
       })
       .eq('id', requestId);
 
@@ -251,6 +303,15 @@ export async function handler(event: {
         body: JSON.stringify({ error: 'Failed to update verification request' }),
       };
     }
+
+    Sentry.captureMessage('Verification request approved', {
+      level: 'info',
+      extra: {
+        requestId,
+        artistId: request.artist_id,
+        adminId: admin.userId,
+      },
+    });
   } else {
     // Reject: just update the request status
     const { error: updateError } = await client
