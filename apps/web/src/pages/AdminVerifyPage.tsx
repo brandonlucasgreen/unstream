@@ -75,7 +75,7 @@ export function AdminVerifyPage() {
           action,
           requestId,
           reviewerNotes: reviewerNotes[requestId]?.trim() || undefined,
-          ownershipVerified: action === 'approve' ? true : undefined,
+          ownershipVerified: action === 'approve' ? ownershipChecked[requestId] === true : undefined,
         }),
       });
 

@@ -163,6 +163,134 @@ describe('admin-verify: approve action', () => {
   });
 });
 
+// ---------- Admin re-check: artist already claimed by different user ----------
+
+describe('admin-verify: approve with stale request (artist already claimed)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockAuthenticateAdmin.mockResolvedValue(ADMIN);
+  });
+
+  it('returns 409 when artist_profiles already has a different user_id', async () => {
+    const client = makeClientMock();
+    // Override the artist_profiles maybeSingle to return a profile
+    // owned by a DIFFERENT user than the request
+    client.from.mockImplementation((table: string) => {
+      if (table === 'verification_requests') {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn(() => ({
+            single: vi.fn().mockResolvedValue({ data: PENDING_REQUEST, error: null }),
+          })),
+          update: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({ error: null }),
+          }),
+          order: vi.fn().mockReturnThis(),
+        };
+      }
+      if (table === 'artist_profiles') {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({
+            data: {
+              id: 'profile-123',
+              user_id: '99999999-9999-9999-9999-999999999999', // different user
+              verified_at: '2026-06-10T00:00:00Z',
+            },
+            error: null,
+          }),
+          insert: vi.fn().mockResolvedValue({ error: null }),
+          update: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({ error: null }),
+          }),
+        };
+      }
+      if (table === 'artists') {
+        return {
+          update: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({ error: null }),
+          }),
+        };
+      }
+      return {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockReturnThis(),
+      };
+    });
+
+    mockGetClient.mockReturnValue(client);
+
+    const res = await handler(makeEvent({
+      action: 'approve',
+      requestId: PENDING_REQUEST.id,
+      ownershipVerified: true,
+    }));
+
+    expect(res.statusCode).toBe(409);
+    expect(JSON.parse(res.body).error).toContain('claimed by another user');
+  });
+
+  it('allows approve when artist_profiles has the same user_id', async () => {
+    const client = makeClientMock();
+    client.from.mockImplementation((table: string) => {
+      if (table === 'verification_requests') {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn(() => ({
+            single: vi.fn().mockResolvedValue({ data: PENDING_REQUEST, error: null }),
+          })),
+          update: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({ error: null }),
+          }),
+          order: vi.fn().mockReturnThis(),
+        };
+      }
+      if (table === 'artist_profiles') {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({
+            data: {
+              id: 'profile-123',
+              user_id: PENDING_REQUEST.user_id, // same user
+              verified_at: '2026-06-10T00:00:00Z',
+            },
+            error: null,
+          }),
+          insert: vi.fn().mockResolvedValue({ error: null }),
+          update: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({ error: null }),
+          }),
+        };
+      }
+      if (table === 'artists') {
+        return {
+          update: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({ error: null }),
+          }),
+        };
+      }
+      return {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockReturnThis(),
+      };
+    });
+
+    mockGetClient.mockReturnValue(client);
+
+    const res = await handler(makeEvent({
+      action: 'approve',
+      requestId: PENDING_REQUEST.id,
+      ownershipVerified: true,
+    }));
+
+    expect(res.statusCode).toBe(200);
+  });
+});
+
 // ---------- GET path tests ----------
 
 function makeGetClientMock(opts?: {

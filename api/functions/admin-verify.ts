@@ -215,9 +215,10 @@ export async function handler(event: {
 
     // An artist_profiles row may not exist yet if the user submitted a manual
     // review without first attempting the automated link-back claim flow.
+    // Re-check ownership hasn't changed since the request was submitted.
     const { data: existingProfile, error: profileLookupError } = await client
       .from('artist_profiles')
-      .select('id')
+      .select('id, user_id, verified_at')
       .eq('artist_id', request.artist_id)
       .maybeSingle();
 
@@ -227,6 +228,14 @@ export async function handler(event: {
         statusCode: 500,
         headers: CORS_HEADERS,
         body: JSON.stringify({ error: 'Failed to look up artist profile' }),
+      };
+    }
+
+    if (existingProfile?.verified_at && existingProfile.user_id !== request.user_id) {
+      return {
+        statusCode: 409,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: 'Artist was claimed by another user while this request was pending' }),
       };
     }
 
