@@ -51,6 +51,7 @@ describe('me-username handler', () => {
           data: { user: { id: 'user-1', email: 'test@example.com' } },
           error: null,
         }),
+        signInWithPassword: vi.fn(),
       },
     });
   });
