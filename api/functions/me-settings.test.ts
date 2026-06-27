@@ -1,34 +1,39 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// Mock the db module so getClient returns a mock Supabase client
-const mockFrom = vi.fn();
-const mockAuthAdmin = {
-  getUserById: vi.fn(),
-  updateUserById: vi.fn(),
-};
-const mockAuthGetUser = vi.fn();
-const mockCreateClient = vi.fn(() => ({
-  auth: {
-    getUser: mockAuthGetUser,
-    signInWithPassword: vi.fn(),
-  },
-}));
-const mockCheckRateLimit = vi.fn(() => Promise.resolve({ limited: false }));
-const mockGetClientIp = vi.fn(() => '127.0.0.1');
+// vi.mock factories are hoisted above imports, so mock values must be
+// declared with vi.hoisted() to be available when the factory runs.
+const mocks = vi.hoisted(() => {
+  return {
+    mockFrom: vi.fn(),
+    mockAuthAdmin: {
+      getUserById: vi.fn(),
+      updateUserById: vi.fn(),
+    },
+    mockAuthGetUser: vi.fn(),
+    mockCreateClient: vi.fn(() => ({
+      auth: {
+        getUser: vi.fn(),
+        signInWithPassword: vi.fn(),
+      },
+    })),
+    mockCheckRateLimit: vi.fn(() => Promise.resolve({ limited: false })),
+    mockGetClientIp: vi.fn(() => '127.0.0.1'),
+  };
+});
 
 vi.mock('./db', () => ({
   getClient: () => ({
-    from: mockFrom,
-    auth: { admin: mockAuthAdmin },
+    from: mocks.mockFrom,
+    auth: { admin: mocks.mockAuthAdmin },
   }),
 }));
 vi.mock('@supabase/supabase-js', () => ({
-  createClient: mockCreateClient,
+  createClient: mocks.mockCreateClient,
 }));
 vi.mock('./ratelimit', () => ({
-  checkRateLimit: mockCheckRateLimit,
-  getClientIp: mockGetClientIp,
+  checkRateLimit: mocks.mockCheckRateLimit,
+  getClientIp: mocks.mockGetClientIp,
 }));
 
 import { handler } from './me-settings';
@@ -45,10 +50,16 @@ describe('me-settings handler', () => {
     process.env.SUPABASE_URL = 'https://test.supabase.co';
     process.env.SUPABASE_ANON_KEY = 'anon-key';
     process.env.SUPABASE_SERVICE_KEY = 'service-key';
-    mockCheckRateLimit.mockResolvedValue({ limited: false });
-    mockAuthGetUser.mockResolvedValue({
+    mocks.mockCheckRateLimit.mockResolvedValue({ limited: false });
+    mocks.mockAuthGetUser.mockResolvedValue({
       data: { user: { id: 'user-1', email: 'test@example.com' } },
       error: null,
+    });
+    mocks.mockCreateClient.mockReturnValue({
+      auth: {
+        getUser: mocks.mockAuthGetUser,
+        signInWithPassword: vi.fn(),
+      },
     });
   });
 
@@ -62,11 +73,11 @@ describe('me-settings handler', () => {
   });
 
   it('returns settings with username, email, and hasPassword', async () => {
-    mockAuthAdmin.getUserById.mockResolvedValue({
+    mocks.mockAuthAdmin.getUserById.mockResolvedValue({
       data: { user: { email: 'test@example.com', user_metadata: { has_password: true } } },
       error: null,
     });
-    mockFrom.mockReturnValue({
+    mocks.mockFrom.mockReturnValue({
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
           maybeSingle: vi.fn(() => Promise.resolve({ data: { username: 'kidlightbulbs' }, error: null })),
@@ -83,11 +94,11 @@ describe('me-settings handler', () => {
   });
 
   it('returns null username when user has no username row', async () => {
-    mockAuthAdmin.getUserById.mockResolvedValue({
+    mocks.mockAuthAdmin.getUserById.mockResolvedValue({
       data: { user: { email: 'test@example.com', user_metadata: {} } },
       error: null,
     });
-    mockFrom.mockReturnValue({
+    mocks.mockFrom.mockReturnValue({
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
           maybeSingle: vi.fn(() => Promise.resolve({ data: null, error: null })),

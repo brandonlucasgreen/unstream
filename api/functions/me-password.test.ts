@@ -1,34 +1,40 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-const mockAuthAdmin = {
-  getUserById: vi.fn(),
-  updateUserById: vi.fn(),
-};
-const mockSignInWithPassword = vi.fn();
-const mockCreateClient = vi.fn(() => ({
-  auth: {
-    getUser: vi.fn().mockResolvedValue({
-      data: { user: { id: 'user-1', email: 'test@example.com' } },
-      error: null,
-    }),
-    signInWithPassword: mockSignInWithPassword,
-  },
-}));
-const mockCheckRateLimit = vi.fn(() => Promise.resolve({ limited: false }));
-const mockGetClientIp = vi.fn(() => '127.0.0.1');
+// vi.mock factories are hoisted above imports, so mock values must be
+// declared with vi.hoisted() to be available when the factory runs.
+const mocks = vi.hoisted(() => {
+  return {
+    mockAuthAdmin: {
+      getUserById: vi.fn(),
+      updateUserById: vi.fn(),
+    },
+    mockSignInWithPassword: vi.fn(),
+    mockCreateClient: vi.fn(() => ({
+      auth: {
+        getUser: vi.fn().mockResolvedValue({
+          data: { user: { id: 'user-1', email: 'test@example.com' } },
+          error: null,
+        }),
+        signInWithPassword: vi.fn(),
+      },
+    })),
+    mockCheckRateLimit: vi.fn(() => Promise.resolve({ limited: false })),
+    mockGetClientIp: vi.fn(() => '127.0.0.1'),
+  };
+});
 
 vi.mock('./db', () => ({
   getClient: () => ({
-    auth: { admin: mockAuthAdmin },
+    auth: { admin: mocks.mockAuthAdmin },
   }),
 }));
 vi.mock('@supabase/supabase-js', () => ({
-  createClient: mockCreateClient,
+  createClient: mocks.mockCreateClient,
 }));
 vi.mock('./ratelimit', () => ({
-  checkRateLimit: mockCheckRateLimit,
-  getClientIp: mockGetClientIp,
+  checkRateLimit: mocks.mockCheckRateLimit,
+  getClientIp: mocks.mockGetClientIp,
 }));
 
 import { handler } from './me-password';
@@ -45,14 +51,14 @@ describe('me-password handler', () => {
     process.env.SUPABASE_URL = 'https://test.supabase.co';
     process.env.SUPABASE_ANON_KEY = 'anon-key';
     process.env.SUPABASE_SERVICE_KEY = 'service-key';
-    mockCheckRateLimit.mockResolvedValue({ limited: false });
-    mockCreateClient.mockReturnValue({
+    mocks.mockCheckRateLimit.mockResolvedValue({ limited: false });
+    mocks.mockCreateClient.mockReturnValue({
       auth: {
         getUser: vi.fn().mockResolvedValue({
           data: { user: { id: 'user-1', email: 'test@example.com' } },
           error: null,
         }),
-        signInWithPassword: mockSignInWithPassword,
+        signInWithPassword: mocks.mockSignInWithPassword,
       },
     });
   });
@@ -78,7 +84,7 @@ describe('me-password handler', () => {
   });
 
   it('rejects wrong current password', async () => {
-    mockSignInWithPassword.mockResolvedValue({ error: { message: 'Invalid credentials' } });
+    mocks.mockSignInWithPassword.mockResolvedValue({ error: { message: 'Invalid credentials' } });
 
     const res = await handler(validEvent);
     expect(res!.statusCode).toBe(400);
@@ -86,31 +92,30 @@ describe('me-password handler', () => {
   });
 
   it('uses strict rate limit tier', async () => {
-    mockSignInWithPassword.mockResolvedValue({ error: null });
-    mockAuthAdmin.updateUserById.mockResolvedValue({ error: null });
+    mocks.mockSignInWithPassword.mockResolvedValue({ error: null });
+    mocks.mockAuthAdmin.updateUserById.mockResolvedValue({ error: null });
 
     await handler(validEvent);
-    expect(mockCheckRateLimit).toHaveBeenCalledWith(expect.any(String), 'strict', expect.any(Object));
+    expect(mocks.mockCheckRateLimit).toHaveBeenCalledWith(expect.any(String), 'strict', expect.any(Object));
   });
 
   it('updates password with user_metadata (snake_case) on success', async () => {
-    mockSignInWithPassword.mockResolvedValue({ error: null });
-    mockAuthAdmin.updateUserById.mockResolvedValue({ error: null });
+    mocks.mockSignInWithPassword.mockResolvedValue({ error: null });
+    mocks.mockAuthAdmin.updateUserById.mockResolvedValue({ error: null });
 
     const res = await handler(validEvent);
     expect(res!.statusCode).toBe(200);
     expect(JSON.parse(res!.body).success).toBe(true);
 
-    // Verify the admin API was called with user_metadata (not userMetadata)
-    expect(mockAuthAdmin.updateUserById).toHaveBeenCalledWith('user-1', {
+    expect(mocks.mockAuthAdmin.updateUserById).toHaveBeenCalledWith('user-1', {
       password: 'newpass123',
       user_metadata: { has_password: true },
     });
   });
 
   it('returns 500 when update fails', async () => {
-    mockSignInWithPassword.mockResolvedValue({ error: null });
-    mockAuthAdmin.updateUserById.mockResolvedValue({ error: { message: 'DB error' } });
+    mocks.mockSignInWithPassword.mockResolvedValue({ error: null });
+    mocks.mockAuthAdmin.updateUserById.mockResolvedValue({ error: { message: 'DB error' } });
 
     const res = await handler(validEvent);
     expect(res!.statusCode).toBe(500);
@@ -123,7 +128,7 @@ describe('me-password handler', () => {
 
   it('never logs password values', async () => {
     const consoleSpy = vi.spyOn(console, 'log');
-    mockSignInWithPassword.mockResolvedValue({ error: { message: 'fail' } });
+    mocks.mockSignInWithPassword.mockResolvedValue({ error: { message: 'fail' } });
 
     await handler(validEvent);
     const allCalls = consoleSpy.mock.calls.flat().join(' ');

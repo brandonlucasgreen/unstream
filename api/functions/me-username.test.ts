@@ -1,27 +1,33 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-const mockFrom = vi.fn();
-const mockCreateClient = vi.fn(() => ({
-  auth: {
-    getUser: vi.fn(),
-    signInWithPassword: vi.fn(),
-  },
-})) as any;
-const mockCheckRateLimit = vi.fn(() => Promise.resolve({ limited: false }));
-const mockGetClientIp = vi.fn(() => '127.0.0.1');
+// vi.mock factories are hoisted above imports, so mock values must be
+// declared with vi.hoisted() to be available when the factory runs.
+const mocks = vi.hoisted(() => {
+  return {
+    mockFrom: vi.fn(),
+    mockCreateClient: vi.fn(() => ({
+      auth: {
+        getUser: vi.fn(),
+        signInWithPassword: vi.fn(),
+      },
+    })),
+    mockCheckRateLimit: vi.fn(() => Promise.resolve({ limited: false })),
+    mockGetClientIp: vi.fn(() => '127.0.0.1'),
+  };
+});
 
 vi.mock('./db', () => ({
   getClient: () => ({
-    from: mockFrom,
+    from: mocks.mockFrom,
   }),
 }));
 vi.mock('@supabase/supabase-js', () => ({
-  createClient: mockCreateClient,
+  createClient: mocks.mockCreateClient,
 }));
 vi.mock('./ratelimit', () => ({
-  checkRateLimit: mockCheckRateLimit,
-  getClientIp: mockGetClientIp,
+  checkRateLimit: mocks.mockCheckRateLimit,
+  getClientIp: mocks.mockGetClientIp,
 }));
 
 import { handler } from './me-username';
@@ -38,9 +44,8 @@ describe('me-username handler', () => {
     process.env.SUPABASE_URL = 'https://test.supabase.co';
     process.env.SUPABASE_ANON_KEY = 'anon-key';
     process.env.SUPABASE_SERVICE_KEY = 'service-key';
-    mockCheckRateLimit.mockResolvedValue({ limited: false });
-    // Default auth mock
-    mockCreateClient.mockReturnValue({
+    mocks.mockCheckRateLimit.mockResolvedValue({ limited: false });
+    mocks.mockCreateClient.mockReturnValue({
       auth: {
         getUser: vi.fn().mockResolvedValue({
           data: { user: { id: 'user-1', email: 'test@example.com' } },
@@ -72,7 +77,7 @@ describe('me-username handler', () => {
   });
 
   it('returns 200 with same username when unchanged (no-op)', async () => {
-    mockFrom.mockReturnValue({
+    mocks.mockFrom.mockReturnValue({
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
           maybeSingle: vi.fn(() => Promise.resolve({ data: { username: 'newuser' }, error: null })),
@@ -86,12 +91,10 @@ describe('me-username handler', () => {
   });
 
   it('returns 409 when username is taken', async () => {
-    // First select: user's existing username (different from requested)
-    // Second select: conflict check finds a row
     const maybeSingle1 = vi.fn(() => Promise.resolve({ data: { username: 'oldname' }, error: null }));
     const maybeSingle2 = vi.fn(() => Promise.resolve({ data: { user_id: 'other-user' }, error: null }));
 
-    mockFrom.mockReturnValueOnce({
+    mocks.mockFrom.mockReturnValueOnce({
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
           maybeSingle: maybeSingle1,
@@ -117,7 +120,7 @@ describe('me-username handler', () => {
     const maybeSingle2 = vi.fn(() => Promise.resolve({ data: null, error: null }));
     const upsertFn = vi.fn(() => Promise.resolve({ error: null }));
 
-    mockFrom.mockReturnValueOnce({
+    mocks.mockFrom.mockReturnValueOnce({
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
           maybeSingle: maybeSingle1,
