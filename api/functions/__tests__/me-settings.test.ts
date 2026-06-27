@@ -22,7 +22,7 @@ const mocks = vi.hoisted(() => {
   };
 });
 
-vi.mock('./db', () => ({
+vi.mock('../db', () => ({
   getClient: () => ({
     from: mocks.mockFrom,
     auth: { admin: mocks.mockAuthAdmin },
@@ -31,12 +31,12 @@ vi.mock('./db', () => ({
 vi.mock('@supabase/supabase-js', () => ({
   createClient: mocks.mockCreateClient,
 }));
-vi.mock('./ratelimit', () => ({
+vi.mock('../ratelimit', () => ({
   checkRateLimit: mocks.mockCheckRateLimit,
   getClientIp: mocks.mockGetClientIp,
 }));
 
-import { handler } from './me-settings';
+import { handler } from '../me-settings';
 
 describe('me-settings handler', () => {
   const validEvent = {
