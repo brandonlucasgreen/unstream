@@ -26,8 +26,8 @@
     "functions/me-settings.ts",
     "functions/me-username.ts",
     "functions/me-password.ts",
-    "functions/me-settings.test.ts",
-    "functions/me-username.test.ts",
-    "functions/me-password.test.ts"
+    "functions/__tests__/me-settings.test.ts",
+    "functions/__tests__/me-username.test.ts",
+    "functions/__tests__/me-password.test.ts"
   ]
 }
