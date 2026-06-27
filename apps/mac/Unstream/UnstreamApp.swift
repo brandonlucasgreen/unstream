@@ -299,6 +299,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         popover.contentSize = NSSize(width: 320, height: 480)
         popover.behavior = .transient
         popover.animates = true
+        popover.delegate = self
 
         // Create the SwiftUI content view with all the environment objects
         let container = AppStateContainer.shared
@@ -416,6 +417,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     // Prevent app reopen from creating duplicates
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         return false
+    }
+}
+
+// MARK: - Popover close notification
+
+extension Notification.Name {
+    static let popoverDidClose = Notification.Name("unstreamPopoverDidClose")
+}
+
+extension AppDelegate: NSPopoverDelegate {
+    func popoverDidClose(_ notification: Notification) {
+        AuthService.shared.cancelPendingAuth()
+        NotificationCenter.default.post(name: .popoverDidClose, object: nil)
     }
 }
 

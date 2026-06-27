@@ -70,7 +70,12 @@ struct PopoverView: View {
                     if selectedTab == .supportList {
                         // Synced artists from server (if signed in)
                         if auth.isSignedIn {
-                            SyncedArtistsView()
+                            SyncedArtistsView(onSearchArtist: { name in
+                                appState.searchQuery = name
+                                appState.clearResults()
+                                Task { await appState.performSearch() }
+                                selectedTab = .search
+                            })
                                 .onAppear {
                                     startMenuPoll()
                                 }
@@ -228,8 +233,18 @@ struct PopoverView: View {
         .sheet(isPresented: $showSignIn) {
             SignInView()
         }
+        .onAppear {
+            // Reset sheet state on every open — NSPopover hides (not destroys) its content
+            // view, so onDisappear isn't reliable; onAppear fires on each show.
+            showSignIn = false
+        }
         .onDisappear {
             stopMenuPoll()
+            showSignIn = false
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .popoverDidClose)) { _ in
+            // NSPopoverDelegate fires this unconditionally when the popover closes.
+            showSignIn = false
         }
         .onChange(of: auth.isSignedIn) { signedIn in
             if !signedIn {

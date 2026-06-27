@@ -858,7 +858,7 @@ async function loadSavedArtists() {
     nameSpan.textContent = artistData.name || artist;
     nameSpan.addEventListener('click', () => {
       switchToTab('discover');
-      searchArtist(artist);
+      searchArtist(artistData.name || artist);
     });
     nameLocationWrap.appendChild(nameSpan);
 
@@ -881,43 +881,6 @@ async function loadSavedArtists() {
     header.appendChild(nameWrap);
     header.appendChild(removeBtn);
     card.appendChild(header);
-
-    // Platform links
-    if (platforms.length > 0) {
-      const platformsDiv = document.createElement('div');
-      platformsDiv.className = 'saved-artist-platforms';
-
-      // Filter to non-social, non-search platforms
-      const relevantPlatforms = platforms.filter(p =>
-        !isSocialSource(p.sourceId) && !isSearchOnlySource(p.sourceId, p.url)
-      );
-
-      // Deduplicate by sourceId
-      const seen = new Set();
-      const uniquePlatforms = relevantPlatforms.filter(p => {
-        if (seen.has(p.sourceId)) return false;
-        seen.add(p.sourceId);
-        return true;
-      });
-
-      uniquePlatforms.slice(0, 5).forEach(p => {
-        const config = SOURCE_CONFIG[p.sourceId] || { icon: '🔗', name: p.sourceId };
-        const link = document.createElement('a');
-        link.href = p.url;
-        link.target = '_blank';
-        link.className = 'platform-link';
-
-        const iconSpan = document.createElement('span');
-        iconSpan.className = 'platform-icon';
-        iconSpan.textContent = config.icon;
-
-        link.appendChild(iconSpan);
-        link.appendChild(document.createTextNode(config.name));
-        platformsDiv.appendChild(link);
-      });
-
-      card.appendChild(platformsDiv);
-    }
 
     // Social links
     if (socialLinks.length > 0) {

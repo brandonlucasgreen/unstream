@@ -239,7 +239,7 @@ struct SyncedArtist: Codable, Identifiable, Hashable {
     }
 
     var profileURL: URL? {
-        guard !slug.isEmpty else { return nil }
+        guard claimed == true, !slug.isEmpty else { return nil }
         return URL(string: "https://unstream.stream/a/\(slug)")
     }
 }
