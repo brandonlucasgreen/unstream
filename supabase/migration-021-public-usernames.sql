@@ -55,17 +55,19 @@ CREATE POLICY "Anyone can read usernames"
   ON public.usernames FOR SELECT
   USING (true);
 
--- Backfill: set user_metadata.has_password = true for users who already have a password.
+-- Backfill: set raw_user_meta_data.has_password = true for users who already have a password.
 -- This ensures the settings page correctly shows the password change form for pre-existing
 -- password users who signed up before the has_password flag existed.
 -- Re-runnable: only updates users that don't already have the flag set.
+-- NOTE: GoTrue's auth.users table stores metadata in `raw_user_meta_data` (jsonb).
+-- `user_metadata` only exists in the API response shape, not as a column on the table.
 UPDATE auth.users
-SET user_metadata = jsonb_set(
-  COALESCE(user_metadata, '{}'::jsonb),
+SET raw_user_meta_data = jsonb_set(
+  COALESCE(raw_user_meta_data, '{}'::jsonb),
   '{has_password}',
   'true'::jsonb
 )
 WHERE encrypted_password IS NOT NULL
-  AND COALESCE(user_metadata, '{}'::jsonb)->>'has_password' IS NULL;
+  AND COALESCE(raw_user_meta_data, '{}'::jsonb)->>'has_password' IS NULL;
 
 COMMENT ON TABLE public.usernames IS 'User-chosen public handles for sharing saved artists (UNS-31). Replaces the auth.users.username column from migration 020.';
