@@ -21,6 +21,7 @@ class AuthService: ObservableObject {
 
     #if os(macOS)
     private var authPresentationAnchor: AuthPresentationAnchor?
+    private var pendingWebSession: ASWebAuthenticationSession?
     #endif
 
     private init() {
@@ -160,11 +161,26 @@ class AuthService: ObservableObject {
 
             #if os(macOS)
             webSession.presentationContextProvider = authPresentationAnchor
+            pendingWebSession = webSession
             #endif
 
             webSession.start()
         }
     }
+
+    #if os(macOS)
+    /// Cancels any in-flight ASWebAuthenticationSession and resets loading state.
+    /// Called when the popover closes so the sign-in sheet doesn't reopen locked.
+    func cancelPendingAuth() {
+        let session = pendingWebSession
+        pendingWebSession = nil
+        session?.cancel()
+        if isLoading {
+            isLoading = false
+            errorMessage = nil
+        }
+    }
+    #endif
 
     // MARK: - Deeplink handling
 

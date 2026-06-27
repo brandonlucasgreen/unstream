@@ -5,6 +5,8 @@ import SwiftUI
 struct SyncedArtistsView: View {
     @ObservedObject var sync = SavedArtistsSync.shared
     @ObservedObject var auth = AuthService.shared
+    /// Called with the artist display name when an unclaimed artist row is tapped.
+    var onSearchArtist: ((String) -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -100,11 +102,11 @@ struct SyncedArtistsView: View {
             }
 
             ForEach(sync.syncedArtists) { artist in
-                SyncedArtistRow(artist: artist) {
-                    Task {
-                        await sync.removeArtist(slug: artist.displaySlug)
-                    }
-                }
+                SyncedArtistRow(
+                    artist: artist,
+                    onOpen: artist.claimed == true ? nil : { onSearchArtist?(artist.name) },
+                    onRemove: { Task { await sync.removeArtist(slug: artist.displaySlug) } }
+                )
             }
         }
     }
@@ -112,6 +114,7 @@ struct SyncedArtistsView: View {
 
 struct SyncedArtistRow: View {
     let artist: SyncedArtist
+    var onOpen: (() -> Void)? = nil
     let onRemove: () -> Void
 
     #if os(iOS)
@@ -156,16 +159,22 @@ struct SyncedArtistRow: View {
 
             Spacer()
 
-            // Open artist page
-            if let profileURL = artist.profileURL {
-                Button(action: { openURL(profileURL) }) {
+            // Open artist page (claimed) or search (unclaimed)
+            if artist.profileURL != nil || onOpen != nil {
+                Button(action: {
+                    if let onOpen {
+                        onOpen()
+                    } else if let profileURL = artist.profileURL {
+                        openURL(profileURL)
+                    }
+                }) {
                     Image(systemName: "arrow.up.right.square")
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
                 }
                 .buttonStyle(.plain)
                 #if os(macOS)
-                .help("Open artist page")
+                .help(artist.claimed == true ? "Open artist page" : "Search for artist")
                 #endif
             }
 
