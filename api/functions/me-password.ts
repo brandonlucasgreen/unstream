@@ -4,8 +4,13 @@
 // Never logs passwords at any level.
 
 import { createClient } from '@supabase/supabase-js';
+import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 
+// CORS: matches the hand-rolled pattern in saved-artists.ts (permissive origin).
+// The shared middleware (buildCorsHeaders) restricts to unstream.stream for
+// non-API-key requests, which would break local dev and other origins using
+// Bearer auth. This is existing CORS debt — see saved-artists.ts for the same pattern.
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',
@@ -37,7 +42,8 @@ export async function handler(event: {
   }
 
   const ip = getClientIp(event.headers);
-  const rl = await checkRateLimit(ip, 'standard', CORS_HEADERS);
+  // Strict tier (10/min) — auth-sensitive endpoint
+  const rl = await checkRateLimit(ip, 'strict', CORS_HEADERS);
   if (rl.limited) return rl.response;
 
   if (event.httpMethod !== 'POST') {
@@ -86,11 +92,12 @@ export async function handler(event: {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Current password is incorrect' }) };
   }
 
-  // Update the password using the service role (admin API) for reliability.
-  const serviceClient = createClient(url, serviceKey);
+  // Update the password using the service role (admin API).
+  // Use user_metadata (snake_case) — userMetadata is silently ignored by the admin API.
+  const serviceClient = getClient() ?? createClient(url, serviceKey);
   const { error: updateError } = await serviceClient.auth.admin.updateUserById(user.userId, {
     password: newPassword,
-    userMetadata: { has_password: true },
+    user_metadata: { has_password: true },
   });
 
   if (updateError) {

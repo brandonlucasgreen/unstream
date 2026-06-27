@@ -4,8 +4,13 @@
 // Returns the new username on success, or a friendly error on failure.
 
 import { createClient } from '@supabase/supabase-js';
+import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 
+// CORS: matches the hand-rolled pattern in saved-artists.ts (permissive origin).
+// The shared middleware (buildCorsHeaders) restricts to unstream.stream for
+// non-API-key requests, which would break local dev and other origins using
+// Bearer auth. This is existing CORS debt — see saved-artists.ts for the same pattern.
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',
@@ -46,9 +51,8 @@ export async function handler(event: {
     return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
   }
 
-  const url = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_KEY;
-  if (!url || !serviceKey) {
+  const client = getClient();
+  if (!client) {
     return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
   }
 
@@ -78,43 +82,43 @@ export async function handler(event: {
     };
   }
 
-  const serviceClient = createClient(url, serviceKey);
-
   try {
     // Check if the user already has this username (no-op case)
-    const { data: existing } = await serviceClient
-      .from('auth.users')
+    const { data: existing } = await client
+      .from('usernames')
       .select('username')
-      .eq('id', user.userId)
-      .single();
+      .eq('user_id', user.userId)
+      .maybeSingle();
 
     if (existing?.username === username) {
       return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ username }) };
     }
 
-    // Check for collision before attempting the update
-    const { data: conflict } = await serviceClient
-      .from('auth.users')
-      .select('id')
+    // Check for collision before attempting the upsert
+    const { data: conflict } = await client
+      .from('usernames')
+      .select('user_id')
       .eq('username', username)
-      .neq('id', user.userId)
+      .neq('user_id', user.userId)
       .maybeSingle();
 
     if (conflict) {
       return { statusCode: 409, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Username is already taken' }) };
     }
 
-    const { error: updateError } = await serviceClient
-      .from('auth.users')
-      .update({ username })
-      .eq('id', user.userId);
+    // Upsert: insert or update the user's username row
+    const { error: upsertError } = await client
+      .from('usernames')
+      .upsert(
+        { user_id: user.userId, username, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id' }
+      );
 
-    if (updateError) {
-      // Handle unique constraint violation as a friendly duplicate error
-      if (updateError.code === '23505') {
+    if (upsertError) {
+      if (upsertError.code === '23505') {
         return { statusCode: 409, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Username is already taken' }) };
       }
-      console.error('[me-username] Error updating username:', updateError.message);
+      console.error('[me-username] Error updating username:', upsertError.message);
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update username' }) };
     }
 

@@ -3,8 +3,13 @@
 // Used by the /settings page to populate the form on load.
 
 import { createClient } from '@supabase/supabase-js';
+import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 
+// CORS: matches the hand-rolled pattern in saved-artists.ts (permissive origin).
+// The shared middleware (buildCorsHeaders) restricts to unstream.stream for
+// non-API-key requests, which would break local dev and other origins using
+// Bearer auth. This is existing CORS debt — see saved-artists.ts for the same pattern.
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',
@@ -43,9 +48,8 @@ export async function handler(event: {
     return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
   }
 
-  const url = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_KEY;
-  if (!url || !serviceKey) {
+  const client = getClient();
+  if (!client) {
     return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
   }
 
@@ -54,32 +58,35 @@ export async function handler(event: {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authenticated' }) };
   }
 
-  const serviceClient = createClient(url, serviceKey);
-
   try {
-    const { data, error } = await serviceClient
-      .from('auth.users')
-      .select('username, email')
-      .eq('id', user.userId)
-      .single();
+    // Read username from public.usernames (PostgREST-accessible table)
+    const { data: usernameRow, error: usernameError } = await client
+      .from('usernames')
+      .select('username')
+      .eq('user_id', user.userId)
+      .maybeSingle();
 
-    if (error || !data) {
-      console.error('[me-settings] Error fetching user data:', error?.message);
+    if (usernameError) {
+      console.error('[me-settings] Error fetching username:', usernameError.message);
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to load settings' }) };
     }
 
-    // Determine if the user has a password set.
-    // We check user_metadata.has_password which is set when a password is created or updated.
-    // Users who signed up via magic link only won't have this flag.
-    const { data: authData } = await serviceClient.auth.admin.getUserById(user.userId);
-    const hasPassword = !!authData?.user?.user_metadata?.has_password;
+    // Read email + has_password flag via admin API (auth.users is not PostgREST-accessible)
+    const { data: authData, error: authError } = await client.auth.admin.getUserById(user.userId);
+
+    if (authError || !authData.user) {
+      console.error('[me-settings] Error fetching auth user:', authError?.message);
+      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to load settings' }) };
+    }
+
+    const hasPassword = !!authData.user.user_metadata?.has_password;
 
     return {
       statusCode: 200,
       headers: CORS_HEADERS,
       body: JSON.stringify({
-        username: data.username || null,
-        email: data.email,
+        username: usernameRow?.username || null,
+        email: authData.user.email || user.email,
         hasPassword,
       }),
     };
