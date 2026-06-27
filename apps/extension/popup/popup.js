@@ -822,7 +822,6 @@ async function loadSavedArtists() {
   const fragment = document.createDocumentFragment();
   savedArtists.forEach(artist => {
     const artistData = savedArtistsData[artist] || {};
-    const platforms = artistData.platforms || [];
     const socialLinks = artistData.socialLinks || [];
     const location = artistData.location || null;
     const imageUrl = artistData.imageUrl || null;

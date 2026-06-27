@@ -504,34 +504,6 @@ body {
   color: #EF4444;
 }
 
-.saved-artist-platforms {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.platform-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  background: #4B5563;
-  border-radius: 4px;
-  font-size: 11px;
-  color: #D1D5DB;
-  text-decoration: none;
-  transition: all 0.2s;
-}
-
-.platform-link:hover {
-  background: #6B7280;
-  color: #F9FAFB;
-}
-
-.platform-icon {
-  font-size: 12px;
-}
-
 /* Saved Artist Social Links */
 .saved-artist-social {
   display: flex;
