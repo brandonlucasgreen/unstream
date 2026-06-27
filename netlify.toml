@@ -80,6 +80,21 @@
   status = 200
 
 [[redirects]]
+  from = "/api/me/settings"
+  to = "/.netlify/functions/me-settings"
+  status = 200
+
+[[redirects]]
+  from = "/api/me/username"
+  to = "/.netlify/functions/me-username"
+  status = 200
+
+[[redirects]]
+  from = "/api/me/password"
+  to = "/.netlify/functions/me-password"
+  status = 200
+
+[[redirects]]
   from = "/api/artist-page"
   to = "/.netlify/functions/artist-page"
   status = 200

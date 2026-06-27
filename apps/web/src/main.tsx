@@ -29,6 +29,7 @@ const ChangelogPage = lazy(() => import('./pages/ChangelogPage.tsx').then(m => (
 const ExtensionPage = lazy(() => import('./pages/ExtensionPage.tsx').then(m => ({ default: m.ExtensionPage })))
 const ImportPage = lazy(() => import('./pages/ImportPage.tsx').then(m => ({ default: m.ImportPage })))
 const FaqPage = lazy(() => import('./pages/FaqPage.tsx').then(m => ({ default: m.FaqPage })))
+const SettingsPage = lazy(() => import('./pages/SettingsPage.tsx').then(m => ({ default: m.SettingsPage })))
 const AdminAnalyticsPage = lazy(() => import('./pages/AdminAnalyticsPage.tsx').then(m => ({ default: m.AdminAnalyticsPage })))
 
 // Redirect components for old routes
@@ -92,6 +93,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/import" element={<ImportPage />} />
               <Route path="/changelog" element={<ChangelogPage />} />
               <Route path="/faq" element={<FaqPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
             </Routes>
           </Suspense>
         </BrowserRouter>

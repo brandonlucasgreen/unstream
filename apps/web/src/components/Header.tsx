@@ -94,6 +94,12 @@ export function Header() {
             >
               Dashboard
             </Link>
+            <Link
+              to="/settings"
+              className="text-text-muted hover:text-text-primary transition-colors"
+            >
+              Settings
+            </Link>
             <button
               onClick={handleSignOut}
               className="text-text-muted hover:text-text-primary transition-colors"
