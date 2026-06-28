@@ -1,0 +1,22 @@
+-- Migration 023: Drop the anon SELECT policy on public.usernames (PR #295 round-2 review #11).
+--
+-- migration-021 originally created:
+--   CREATE POLICY "Anyone can read usernames"
+--     ON public.usernames FOR SELECT
+--   USING (true);
+-- This policy exposes user_id (auth UUID), username, and saved_artists_public
+-- (added by migration 022) to anyone with the public anon key. RLS is row-level,
+-- not column-level, so USING (true) means "every row is selectable by anon."
+--
+-- All read paths (u-handle.ts edge function, public-saved-artists.ts,
+-- me-settings.ts, me-username.ts) use the service-role client which bypasses
+-- RLS, so the anon policy has no legitimate consumer.
+--
+-- PR #295 round-2 (#11) fixed the source by editing migration-021 to remove
+-- the CREATE POLICY block — but that edit is a no-op for already-deployed
+-- environments. Migrations don't re-run when their files change. This
+-- migration actually drops the policy from production.
+--
+-- Owner-scoped policies (auth.uid() = user_id) remain in place from 021.
+
+DROP POLICY IF EXISTS "Anyone can read usernames" ON public.usernames;

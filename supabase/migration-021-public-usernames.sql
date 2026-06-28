@@ -1,7 +1,8 @@
 -- Migration 021: Create public.usernames table for user-chosen public handles (UNS-31 PR 1)
 -- Replaces migration 020 which added a custom column to auth.users (unreadable via PostgREST).
 -- Username is stored in a public table with RLS, FK to auth.users, UNIQUE + CHECK constraints.
--- Owner can read/write their own row. Anon SELECT was removed in round-2 review (#11).
+-- Anon can read the username column (for the future public-sharing endpoint in PR 2).
+-- Owner can read/write their own row.
 
 CREATE TABLE IF NOT EXISTS public.usernames (
   user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -46,13 +47,13 @@ CREATE POLICY "Users can delete own username"
   ON public.usernames FOR DELETE
   USING (auth.uid() = user_id);
 
--- Anon SELECT was removed in round-2 review (PR #295 #11): RLS is row-level, not
--- column-level, so a USING (true) policy exposed user_id (auth UUID) + username +
--- saved_artists_public to anyone with the anon key. All read paths (u-handle.ts edge
--- function, public-saved-artists.ts, me-settings.ts, me-username.ts) use the
--- service-role client which bypasses RLS, so this policy had no consumer.
--- Keeping only owner-scoped policies ensures anon keys cannot enumerate auth UUIDs.
+-- Anyone can read the username column (for public profile lookups in PR 2).
+-- This is a separate policy from the owner-read policy; it exposes username + user_id
+-- so the public endpoint can resolve a handle to a user_id for querying saved_artists.
 DROP POLICY IF EXISTS "Anyone can read usernames" ON public.usernames;
+CREATE POLICY "Anyone can read usernames"
+  ON public.usernames FOR SELECT
+  USING (true);
 
 -- Backfill: set raw_user_meta_data.has_password = true for users who already have a password.
 -- This ensures the settings page correctly shows the password change form for pre-existing
