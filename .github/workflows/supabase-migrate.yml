@@ -1,0 +1,45 @@
+name: Supabase migrations
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed migrations
+        id: changes
+        run: |
+          changed=$(git diff --name-only HEAD~1 HEAD -- supabase/migrations/ 2>/dev/null || true)
+          if [ -z "$changed" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No migration changes detected. Skipping."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Changed migration files:"
+            echo "$changed"
+          fi
+
+      - name: Setup Supabase CLI
+        if: steps.changes.outputs.changed == 'true'
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Push migrations
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: supabase db push --linked --password "$SUPABASE_DB_PASSWORD"

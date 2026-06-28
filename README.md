@@ -82,6 +82,30 @@ npm run generate:data       # Generate artist page data via APIs
 npm run generate:social     # Generate social media posts
 ```
 
+### Database migrations
+
+Migration SQL files live in `supabase/migrations/` with timestamp-prefixed names (e.g. `20260628090000_drop-anon-policy.sql`). The older `supabase/migration-NNN-*.sql` files are historical copies kept for reference — new migrations should only be added to `supabase/migrations/`.
+
+**Automatic deployment:** A GitHub Actions workflow (`.github/workflows/supabase-migrate.yml`) runs `supabase db push --linked` on every push to `main` that changes files under `supabase/migrations/`. Migrations are applied to the production Supabase project automatically — no manual SQL editor needed.
+
+The workflow can also be triggered manually from the GitHub Actions tab ("Run workflow").
+
+**Required GitHub secrets:**
+
+- `SUPABASE_ACCESS_TOKEN` — Supabase CLI access token (`sbp_...` format)
+- `SUPABASE_DB_PASSWORD` — Postgres password for the linked project
+
+**If a migration fails:** the workflow shows red and maintainers get an email notification. Fix the migration in a follow-up PR — do not manually re-run it via the Supabase SQL editor.
+
+**Local dry-run:**
+
+```bash
+npm run migrate:dry-run    # Show what would be applied without touching the DB
+npm run migrate:list       # List local vs remote migration state
+```
+
+When adding a new migration, create a file in `supabase/migrations/` named `YYYYMMDDHHMMSS_short_description.sql`. Use `IF NOT EXISTS` / `DROP ... IF EXISTS` guards so the migration is idempotent.
+
 ## Tech stack
 
 - **Frontend**: React 19, Tailwind CSS v4, Vite, TypeScript

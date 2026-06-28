@@ -64,7 +64,7 @@ unstream/
 │   ├── social-posts/           # Generated/scheduled social post history
 │   ├── artist-list.json        # Wikidata-sourced artist list
 │   └── shipped-features.json   # Changelog/roadmap data
-├── supabase/                   # schema.sql + numbered migration-NNN-*.sql files
+├── supabase/                   # schema.sql + migrations/ (timestamp-prefixed) + historical migration-NNN-*.sql
 ├── docs/                       # Specs, content drafts, OpenAPI spec, product/architecture docs
 └── netlify.toml                # Edge function routes, /api/* redirects, headers/CSP
 ```
@@ -129,7 +129,9 @@ Supabase Auth with magic links and password sign-in. Auth state is managed via `
 
 ## Database / migrations
 
-Schema lives in `supabase/schema.sql`; changes are applied as numbered `migration-NNN-*.sql` files (currently through 015). When adding a table or column, write a new migration file, include RLS policies, and explain the change. Don't edit historical migrations.
+Schema lives in `supabase/schema.sql`; changes are applied as timestamp-prefixed migration files in `supabase/migrations/` (e.g. `20260628090000_drop-anon-policy.sql`). The older `supabase/migration-NNN-*.sql` files are historical copies kept for reference. When adding a table or column, create a new migration in `supabase/migrations/`, include RLS policies, and explain the change. Use `IF NOT EXISTS` / `DROP ... IF EXISTS` guards for idempotency. Don't edit historical migrations.
+
+**Auto-deploy:** A GitHub Actions workflow (`.github/workflows/supabase-migrate.yml`) runs `supabase db push --linked` on every push to `main` that changes `supabase/migrations/`. Migrations deploy automatically — no manual SQL editor needed. Required GitHub secrets: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`. Local dry-run: `npm run migrate:dry-run`.
 
 ## Testing
 
@@ -137,7 +139,7 @@ Tests use Vitest. Unit tests are in `apps/web/tests/unit/`, integration tests in
 
 ## Deployment
 
-Pushes to `main` trigger Netlify builds. The build command generates the guides manifest and dispatch feed, runs typechecking and unit tests, builds the Vite app, and generates the sitemap. Functions deploy from `api/functions/`, edge functions from `api/edge/`. Edge routes, `/api/*` redirects, and security headers/CSP are configured in `netlify.toml`. GitHub Actions (`.github/workflows/`) handle scheduled social posts and a semantic-revert check.
+Pushes to `main` trigger Netlify builds. The build command generates the guides manifest and dispatch feed, runs typechecking and unit tests, builds the Vite app, and generates the sitemap. Functions deploy from `api/functions/`, edge functions from `api/edge/`. Edge routes, `/api/*` redirects, and security headers/CSP are configured in `netlify.toml`. GitHub Actions (`.github/workflows/`) handle scheduled social posts, a semantic-revert check, and automatic Supabase migration deployment.
 
 ## Engineering principles
 

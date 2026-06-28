@@ -19,7 +19,9 @@
     "test:integration": "cd apps/web && npx vitest run tests/integration",
     "lint": "cd apps/web && npx eslint .",
     "preview": "cd apps/web && npx vite preview",
-    "sentry:sourcemaps": "bash scripts/sentry-sourcemaps.sh"
+    "sentry:sourcemaps": "bash scripts/sentry-sourcemaps.sh",
+    "migrate:dry-run": "supabase db push --dry-run --linked",
+    "migrate:list": "supabase migration list --linked"}
   },
   "dependencies": {
     "@sentry/node": "^10.56.0",
