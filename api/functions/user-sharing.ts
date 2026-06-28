@@ -129,19 +129,8 @@ export async function handler(event: {
       }
 
       if (wantPublic) {
-        // Enable sharing: upsert user_public_ids row + set flag
-        const { error: upsertIdError } = await client
-          .from('user_public_ids')
-          .upsert(
-            { user_id: user.userId, public_handle: handle },
-            { onConflict: 'user_id' }
-          );
-
-        if (upsertIdError) {
-          console.error('[user-sharing] Error upserting user_public_ids:', upsertIdError.message);
-          return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to enable sharing' }) };
-        }
-
+        // Enable sharing: set the saved_artists_public flag on usernames.
+        // public.usernames is the single source of truth for handle resolution.
         const { error: flagError } = await client
           .from('usernames')
           .update({ saved_artists_public: true })
@@ -162,12 +151,7 @@ export async function handler(event: {
           }),
         };
       } else {
-        // Disable sharing: delete user_public_ids row + clear flag
-        await client
-          .from('user_public_ids')
-          .delete()
-          .eq('user_id', user.userId);
-
+        // Disable sharing: clear the saved_artists_public flag.
         const { error: flagError } = await client
           .from('usernames')
           .update({ saved_artists_public: false })

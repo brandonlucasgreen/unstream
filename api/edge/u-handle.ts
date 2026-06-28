@@ -63,7 +63,7 @@ export default async function handler(request: Request, context: Context) {
         .from('usernames')
         .select('user_id, username, saved_artists_public')
         .eq('username', handle)
-        .single()
+        .maybeSingle()
         .abortSignal(controller.signal);
 
       if (!unameData) {
@@ -112,7 +112,7 @@ export default async function handler(request: Request, context: Context) {
           const name = artistRow?.name || row.artist_name || 'Unknown';
           const imageUrl = artistRow?.image_url || row.artist_image_url || '';
           const supported = row.supported === true;
-          const profileUrl = slug ? `https://unstream.stream/a/${slug}` : '#';
+          const profileUrl = slug ? `https://unstream.stream/a/${escapeHtml(slug)}` : '#';
           const avatarHtml = imageUrl
             ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(name)}" class="artist-avatar" onerror="this.style.display='none';this.parentElement.querySelector('.avatar-fallback').style.display='flex'"><span class="artist-avatar avatar-fallback" style="display:none">${escapeHtml(name[0]?.toUpperCase() || '?')}</span>`
             : `<span class="artist-avatar">${escapeHtml(name[0]?.toUpperCase() || '?')}</span>`;

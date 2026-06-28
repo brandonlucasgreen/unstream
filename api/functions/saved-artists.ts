@@ -194,6 +194,14 @@ async function handleSave(user: { userId: string; email: string }, body: Record<
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'artistId (slug) is required' }) };
   }
 
+  // Defense in depth: reject slugs that don't match the canonical artist slug format.
+  // Matches migration 021's username_format regex and the artists.slug convention.
+  // This prevents stored XSS via malicious slugs reaching the edge function SSR.
+  const SLUG_REGEX = /^[a-z0-9](?:[a-z0-9-]{1,18}[a-z0-9])$/;
+  if (!SLUG_REGEX.test(artistSlug)) {
+    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid artist slug format' }) };
+  }
+
   try {
     // Check if this artist already has a row in the artists table (claimed/verified)
     const existingArtist = await findExistingArtist(client, artistSlug);

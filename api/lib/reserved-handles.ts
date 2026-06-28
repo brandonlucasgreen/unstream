@@ -1,6 +1,6 @@
 // Reserved handles that cannot be used as public usernames.
 // Shared between the DB CHECK constraint (via migration) and server-side validation.
-// Keep in sync with supabase/migration-022-public-sharing.sql.
+// Keep in sync with the reserved-handle list used by isReservedHandle() in user-sharing.ts.
 
 export const RESERVED_HANDLES = [
   'admin', 'api', 'settings', 'login', 'signup', 'signin', 'register',

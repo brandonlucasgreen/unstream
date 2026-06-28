@@ -148,26 +148,21 @@ describe('user-sharing handler', () => {
     expect(JSON.parse(res!.body).error).toContain('Set a username');
   });
 
-  it('POST enables sharing (upsert + flag)', async () => {
+  it('POST enables sharing (flag only)', async () => {
     const maybeSingle = vi.fn(() => Promise.resolve({
       data: { username: 'testuser', saved_artists_public: false },
       error: null,
     }));
-    const upsertFn = vi.fn(() => Promise.resolve({ error: null }));
     const updateFn = vi.fn(() => ({ eq: vi.fn(() => Promise.resolve({ error: null })) }));
 
     // 1st call: select username row
-    // 2nd call: upsert user_public_ids
-    // 3rd call: update saved_artists_public flag
-    // 4th call: re-fetch for sharing check (after upsert)
+    // 2nd call: update saved_artists_public flag
     mocks.mockFrom.mockReturnValueOnce({
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
           maybeSingle,
         })),
       })),
-    }).mockReturnValueOnce({
-      upsert: upsertFn,
     }).mockReturnValueOnce({
       update: updateFn,
     });
@@ -181,16 +176,14 @@ describe('user-sharing handler', () => {
     const body = JSON.parse(res!.body);
     expect(body.public).toBe(true);
     expect(body.public_handle).toBe('testuser');
-    expect(upsertFn).toHaveBeenCalled();
     expect(updateFn).toHaveBeenCalled();
   });
 
-  it('POST disables sharing (delete + flag)', async () => {
+  it('POST disables sharing (flag only)', async () => {
     const maybeSingle = vi.fn(() => Promise.resolve({
       data: { username: 'testuser', saved_artists_public: true },
       error: null,
     }));
-    const deleteFn = vi.fn(() => ({ eq: vi.fn(() => Promise.resolve({ error: null })) }));
     const updateFn = vi.fn(() => ({ eq: vi.fn(() => Promise.resolve({ error: null })) }));
 
     mocks.mockFrom.mockReturnValueOnce({
@@ -199,8 +192,6 @@ describe('user-sharing handler', () => {
           maybeSingle,
         })),
       })),
-    }).mockReturnValueOnce({
-      delete: deleteFn,
     }).mockReturnValueOnce({
       update: updateFn,
     });
@@ -214,7 +205,6 @@ describe('user-sharing handler', () => {
     const body = JSON.parse(res!.body);
     expect(body.public).toBe(false);
     expect(body.public_handle).toBeNull();
-    expect(deleteFn).toHaveBeenCalled();
     expect(updateFn).toHaveBeenCalled();
   });
 

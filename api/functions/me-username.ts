@@ -122,29 +122,6 @@ export async function handler(event: {
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update username' }) };
     }
 
-    // Sync user_public_ids.public_handle if the user has sharing enabled.
-    // This is a rename — update the handle so old /u/{old_handle} stops resolving
-    // and /u/{new_handle} works. We do this in the same request (not a DB trigger)
-    // to keep the logic explicit and testable.
-    const { data: sharingRow } = await client
-      .from('usernames')
-      .select('saved_artists_public')
-      .eq('user_id', user.userId)
-      .maybeSingle();
-
-    if (sharingRow?.saved_artists_public) {
-      const { error: syncError } = await client
-        .from('user_public_ids')
-        .update({ public_handle: username })
-        .eq('user_id', user.userId);
-
-      if (syncError) {
-        // Log but don't fail the username change — the flag is still set,
-        // and the public endpoint will 404 on the stale handle until this syncs.
-        console.error('[me-username] Error syncing user_public_ids.public_handle:', syncError.message);
-      }
-    }
-
     return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ username }) };
   } catch (error) {
     console.error('[me-username] Error:', error);

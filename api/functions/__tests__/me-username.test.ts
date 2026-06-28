@@ -120,9 +120,6 @@ describe('me-username handler', () => {
     const maybeSingle1 = vi.fn(() => Promise.resolve({ data: { username: 'oldname' }, error: null }));
     const maybeSingle2 = vi.fn(() => Promise.resolve({ data: null, error: null }));
     const upsertFn = vi.fn(() => Promise.resolve({ error: null }));
-    // After upsert, me-username now checks if sharing is enabled to sync user_public_ids.
-    // Return null (no sharing row) so the sync branch is skipped.
-    const maybeSingle3 = vi.fn(() => Promise.resolve({ data: null, error: null }));
 
     mocks.mockFrom.mockReturnValueOnce({
       select: vi.fn(() => ({
@@ -140,12 +137,6 @@ describe('me-username handler', () => {
       })),
     }).mockReturnValueOnce({
       upsert: upsertFn,
-    }).mockReturnValueOnce({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          maybeSingle: maybeSingle3,
-        })),
-      })),
     });
 
     const res = await handler(validEvent);
