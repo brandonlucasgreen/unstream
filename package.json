@@ -20,8 +20,8 @@
     "lint": "cd apps/web && npx eslint .",
     "preview": "cd apps/web && npx vite preview",
     "sentry:sourcemaps": "bash scripts/sentry-sourcemaps.sh",
-    "migrate:dry-run": "supabase db push --dry-run --linked",
-    "migrate:list": "supabase migration list --linked"}
+    "migrate:dry-run": "supabase db push --dry-run --project-ref bwogclqzpsbvqbyhhqbz",
+    "migrate:list": "supabase migration list --project-ref bwogclqzpsbvqbyhhqbz"}
   },
   "dependencies": {
     "@sentry/node": "^10.56.0",
