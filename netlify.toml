@@ -29,6 +29,10 @@
   path = "/guides/*"
   function = "guide-page"
 
+[[edge_functions]]
+  path = "/u/*"
+  function = "u-handle"
+
 [[redirects]]
   from = "/api/artist-directory"
   to = "/.netlify/functions/artist-directory"
@@ -92,6 +96,16 @@
 [[redirects]]
   from = "/api/me/password"
   to = "/.netlify/functions/me-password"
+  status = 200
+
+[[redirects]]
+  from = "/api/me/saved-artists-sharing"
+  to = "/.netlify/functions/user-sharing"
+  status = 200
+
+[[redirects]]
+  from = "/api/public/saved-artists/*"
+  to = "/.netlify/functions/public-saved-artists"
   status = 200
 
 [[redirects]]

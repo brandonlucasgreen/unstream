@@ -96,5 +96,12 @@
     "description": "Sign in on the Mac menu bar app or iOS app to sync your saved artists across devices. Saved artists from the web, extension, and native apps all stay in sync.",
     "date": "2026-06-20",
     "announced": false
+  },
+  {
+    "id": "share-saved-artists",
+    "title": "Share your saved artists list",
+    "description": "Make your saved artists list public and share a link with friends — they can browse who you support on Unstream without signing in. Set a username in Settings, then toggle sharing from your dashboard.",
+    "date": "2026-06-27",
+    "announced": false
   }
 ]
