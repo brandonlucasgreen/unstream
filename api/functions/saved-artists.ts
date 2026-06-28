@@ -20,6 +20,30 @@ function getServiceClient() {
   return getClient();
 }
 
+// Fire-and-forget CDN cache purge by tag. Same pattern as artist-profile.ts.
+// No-op (with warning) if env vars aren't set (local dev/tests).
+function purgeCacheTag(handle: string): void {
+  const siteId = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
+  const token = process.env.NETLIFY_API_TOKEN;
+  if (!siteId || !token) {
+    console.warn(`[saved-artists] NETLIFY_SITE_ID or NETLIFY_API_TOKEN not set, skipping CDN purge for user-share-${handle}`);
+    return;
+  }
+  fetch('https://api.netlify.com/api/v1/purge', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      site_id: siteId,
+      cache_tags: [`user-share-${handle}`],
+    }),
+  })
+    .then(() => console.log(`[saved-artists] Purged CDN cache for user-share-${handle}`))
+    .catch((e) => console.error(`[saved-artists] CDN cache purge failed for user-share-${handle}:`, e));
+}
+
 async function authenticateRequest(authHeader: string | undefined): Promise<{ userId: string; email: string } | null> {
   if (!authHeader?.startsWith('Bearer ')) {
     console.log('[saved-artists] Missing or invalid Authorization header');
@@ -290,6 +314,22 @@ async function handleRemove(user: { userId: string; email: string }, body: Recor
     if (updateError) {
       console.error('[saved-artists] Error removing saved artist:', updateError);
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to remove saved artist' }) };
+    }
+
+    // If the user has public sharing enabled, purge the CDN cache for their page
+    // so the removed artist disappears immediately instead of serving stale for ~5 min.
+    try {
+      const { data: uname } = await client
+        .from('usernames')
+        .select('username, saved_artists_public')
+        .eq('user_id', user.userId)
+        .maybeSingle();
+
+      if (uname?.saved_artists_public && uname.username) {
+        purgeCacheTag(uname.username);
+      }
+    } catch (e) {
+      console.error('[saved-artists] CDN purge lookup failed:', e);
     }
 
     return {

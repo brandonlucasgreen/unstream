@@ -11,6 +11,12 @@
 -- The reserved-handle guard is enforced server-side by isReservedHandle() in
 -- user-sharing.ts (the only path that flips saved_artists_public to true),
 -- and migration 021's CHECK constraints on usernames.username.
+--
+-- Round-2 review #11 also removed the anon SELECT policy from migration 021's
+-- usernames table. RLS is row-level, not column-level, so the USING (true) policy
+-- leaked user_id (auth UUID) + saved_artists_public to anyone with the anon key.
+-- All read paths use the service-role client (bypasses RLS), so the policy had no
+-- consumer. Only owner-scoped policies remain on usernames.
 
 -- Add saved_artists_public flag to the existing usernames table.
 -- Default false — users must explicitly opt in to sharing.

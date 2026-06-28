@@ -15,6 +15,30 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 };
 
+// Fire-and-forget CDN cache purge by tag. Uses the same Netlify env vars as
+// artist-profile.ts. No-op (with warning) if env vars aren't set (local dev/tests).
+function purgeCacheTag(handle: string): void {
+  const siteId = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
+  const token = process.env.NETLIFY_API_TOKEN;
+  if (!siteId || !token) {
+    console.warn(`[user-sharing] NETLIFY_SITE_ID or NETLIFY_API_TOKEN not set, skipping CDN purge for user-share-${handle}`);
+    return;
+  }
+  fetch('https://api.netlify.com/api/v1/purge', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      site_id: siteId,
+      cache_tags: [`user-share-${handle}`],
+    }),
+  })
+    .then(() => console.log(`[user-sharing] Purged CDN cache for user-share-${handle}`))
+    .catch((e) => console.error(`[user-sharing] CDN cache purge failed for user-share-${handle}:`, e));
+}
+
 async function authenticateRequest(authHeader: string | undefined): Promise<{ userId: string; email: string } | null> {
   if (!authHeader?.startsWith('Bearer ')) return null;
   const token = authHeader.slice(7);
@@ -161,6 +185,10 @@ export async function handler(event: {
           console.error('[user-sharing] Error clearing saved_artists_public:', flagError.message);
           return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to disable sharing' }) };
         }
+
+        // Purge CDN cache for this user's shared page so it stops serving publicly.
+        // Fire-and-forget — a Netlify API blip must not fail the user's disable action.
+        purgeCacheTag(handle);
 
         return {
           statusCode: 200,

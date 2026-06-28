@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => {
     })),
     mockCheckRateLimit: vi.fn(() => Promise.resolve({ limited: false })),
     mockGetClientIp: vi.fn(() => '127.0.0.1'),
+    mockFetch: vi.fn(() => Promise.resolve({ ok: true })),
   };
 });
 
@@ -41,6 +42,9 @@ describe('user-sharing handler', () => {
     process.env.SUPABASE_URL = 'https://test.supabase.co';
     process.env.SUPABASE_ANON_KEY = 'anon-key';
     process.env.SUPABASE_SERVICE_KEY = 'service-key';
+    process.env.NETLIFY_SITE_ID = 'test-site-id';
+    process.env.NETLIFY_API_TOKEN = 'test-token';
+    global.fetch = mocks.mockFetch as any;
     mocks.mockCheckRateLimit.mockResolvedValue({ limited: false });
     mocks.mockCreateClient.mockReturnValue({
       auth: {
@@ -206,6 +210,66 @@ describe('user-sharing handler', () => {
     expect(body.public).toBe(false);
     expect(body.public_handle).toBeNull();
     expect(updateFn).toHaveBeenCalled();
+  });
+
+  it('POST purge CDN cache on disable sharing', async () => {
+    const maybeSingle = vi.fn(() => Promise.resolve({
+      data: { username: 'testuser', saved_artists_public: true },
+      error: null,
+    }));
+    const updateFn = vi.fn(() => ({ eq: vi.fn(() => Promise.resolve({ error: null })) }));
+
+    mocks.mockFrom.mockReturnValueOnce({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          maybeSingle,
+        })),
+      })),
+    }).mockReturnValueOnce({
+      update: updateFn,
+    });
+
+    await handler({
+      ...validEvent,
+      httpMethod: 'POST',
+      body: JSON.stringify({ public: false }),
+    });
+
+    // CDN purge should have been called with the user-share tag
+    expect(mocks.mockFetch).toHaveBeenCalledWith(
+      'https://api.netlify.com/api/v1/purge',
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.stringContaining('user-share-testuser'),
+      }),
+    );
+  });
+
+  it('POST does NOT purge CDN cache when enabling sharing', async () => {
+    const maybeSingle = vi.fn(() => Promise.resolve({
+      data: { username: 'testuser', saved_artists_public: false },
+      error: null,
+    }));
+    const updateFn = vi.fn(() => ({ eq: vi.fn(() => Promise.resolve({ error: null })) }));
+
+    mocks.mockFrom.mockReturnValueOnce({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          maybeSingle,
+        })),
+      })),
+    }).mockReturnValueOnce({
+      update: updateFn,
+    });
+
+    await handler({
+      ...validEvent,
+      httpMethod: 'POST',
+      body: JSON.stringify({ public: true }),
+    });
+
+    // CDN purge should NOT have been called when enabling sharing
+    expect(mocks.mockFetch).not.toHaveBeenCalled();
   });
 
   it('POST rejects reserved handle', async () => {
