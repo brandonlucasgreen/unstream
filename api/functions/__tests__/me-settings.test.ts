@@ -72,7 +72,7 @@ describe('me-settings handler', () => {
     expect(res!.statusCode).toBe(401);
   });
 
-  it('returns settings with username, email, and hasPassword', async () => {
+  it('returns settings with username, location, email, and hasPassword', async () => {
     mocks.mockAuthAdmin.getUserById.mockResolvedValue({
       data: { user: { email: 'test@example.com', user_metadata: { has_password: true } } },
       error: null,
@@ -80,7 +80,7 @@ describe('me-settings handler', () => {
     mocks.mockFrom.mockReturnValue({
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
-          maybeSingle: vi.fn(() => Promise.resolve({ data: { username: 'kidlightbulbs' }, error: null })),
+          maybeSingle: vi.fn(() => Promise.resolve({ data: { username: 'kidlightbulbs', location: 'Brooklyn, NY' }, error: null })),
         })),
       })),
     });
@@ -89,11 +89,12 @@ describe('me-settings handler', () => {
     expect(res!.statusCode).toBe(200);
     const body = JSON.parse(res!.body);
     expect(body.username).toBe('kidlightbulbs');
+    expect(body.location).toBe('Brooklyn, NY');
     expect(body.email).toBe('test@example.com');
     expect(body.hasPassword).toBe(true);
   });
 
-  it('returns null username when user has no username row', async () => {
+  it('returns null username and location when user has no username row', async () => {
     mocks.mockAuthAdmin.getUserById.mockResolvedValue({
       data: { user: { email: 'test@example.com', user_metadata: {} } },
       error: null,
@@ -110,6 +111,7 @@ describe('me-settings handler', () => {
     expect(res!.statusCode).toBe(200);
     const body = JSON.parse(res!.body);
     expect(body.username).toBe(null);
+    expect(body.location).toBe(null);
     expect(body.hasPassword).toBe(false);
   });
 

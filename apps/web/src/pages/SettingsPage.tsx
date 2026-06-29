@@ -5,10 +5,13 @@ import { useAuth } from '../contexts/AuthContext';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { UsernameField } from '../components/UsernameField';
+import { LocationField } from '../components/LocationField';
 import { PasswordChangeForm } from '../components/PasswordChangeForm';
+import { SharingControls } from '../components/SharingControls';
 
 interface Settings {
   username: string | null;
+  location: string | null;
   email: string;
   hasPassword: boolean;
 }
@@ -81,6 +84,17 @@ export function SettingsPage() {
               accessToken={session!.access_token}
               onSaved={(username) => setSettings(prev => prev ? { ...prev, username } : prev)}
             />
+            <LocationField
+              currentLocation={settings?.location ?? null}
+              accessToken={session!.access_token}
+              onSaved={(location) => setSettings(prev => prev ? { ...prev, location } : prev)}
+            />
+          </section>
+
+          {/* Sharing section */}
+          <section className="p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
+            <h2 className="text-lg font-semibold">Sharing</h2>
+            <SharingControls />
           </section>
 
           {/* Password section */}

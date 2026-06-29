@@ -12,6 +12,7 @@ interface SavedArtistPublic {
 
 interface PublicSharingData {
   owner_display_name: string;
+  owner_location: string | null;
   saved_artists: SavedArtistPublic[];
 }
 
@@ -97,7 +98,9 @@ export function PublicSavedArtistsPage() {
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold">{data.owner_display_name}'s saved artists</h1>
-            <p className="text-text-muted text-sm mt-2">A listener's saved artists on Unstream</p>
+            {data.owner_location && (
+              <p className="text-text-primary text-sm mt-2">{data.owner_location}</p>
+            )}
             <button
               onClick={handleCopy}
               className={`mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${

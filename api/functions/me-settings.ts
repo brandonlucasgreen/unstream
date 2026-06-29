@@ -59,10 +59,10 @@ export async function handler(event: {
   }
 
   try {
-    // Read username from public.usernames (PostgREST-accessible table)
+    // Read username + location from public.usernames (PostgREST-accessible table)
     const { data: usernameRow, error: usernameError } = await client
       .from('usernames')
-      .select('username')
+      .select('username, location')
       .eq('user_id', user.userId)
       .maybeSingle();
 
@@ -86,6 +86,7 @@ export async function handler(event: {
       headers: CORS_HEADERS,
       body: JSON.stringify({
         username: usernameRow?.username || null,
+        location: usernameRow?.location ?? null,
         email: authData.user.email || user.email,
         hasPassword,
       }),
