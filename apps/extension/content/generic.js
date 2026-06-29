@@ -26,7 +26,8 @@
     'gaana.com': 'gaana',
     'wynk.in': 'wynk',
     'boomplay.com': 'boomplay',
-    'resonate.is': 'resonate'
+    'resonate.is': 'resonate',
+    'fairplayer.band': 'fairplayer'
   };
 
   function getSourceName() {

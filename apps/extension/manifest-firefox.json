@@ -85,7 +85,9 @@
         "https://gaana.com/*",
         "https://wynk.in/*",
         "https://www.boomplay.com/*",
-        "https://stream.resonate.coop/*"
+        "https://stream.resonate.coop/*",
+        "https://fairplayer.band/*",
+        "https://*.fairplayer.band/*"
       ],
       "js": ["content/common.js", "content/generic.js"],
       "run_at": "document_idle"
