@@ -105,10 +105,18 @@ describe('me-location handler', () => {
     expect(JSON.parse(res!.body).location).toBe(null);
   });
 
-  it('POST upserts location for existing row', async () => {
-    const upsertFn = vi.fn(() => Promise.resolve({ error: null }));
+  it('POST updates location for existing row', async () => {
+    const selectFn = vi.fn(() => ({
+      eq: vi.fn(() => ({
+        maybeSingle: vi.fn(() => Promise.resolve({ data: { user_id: 'user-1' }, error: null })),
+      })),
+    }));
+    const updateFn = vi.fn(() => ({
+      eq: vi.fn(() => Promise.resolve({ error: null, count: 1 })),
+    }));
     mocks.mockFrom.mockReturnValue({
-      upsert: upsertFn,
+      select: selectFn,
+      update: updateFn,
     });
 
     const res = await handler({
@@ -118,17 +126,22 @@ describe('me-location handler', () => {
     });
     expect(res!.statusCode).toBe(200);
     expect(JSON.parse(res!.body).location).toBe('Paris, France');
-    expect(upsertFn).toHaveBeenCalled();
-    expect(upsertFn).toHaveBeenCalledWith(
-      { user_id: 'user-1', location: 'Paris, France' },
-      { onConflict: 'user_id' }
-    );
+    expect(selectFn).toHaveBeenCalledWith('user_id');
+    expect(updateFn).toHaveBeenCalledWith({ location: 'Paris, France' }, { count: 'exact' });
   });
 
   it('POST trims whitespace', async () => {
-    const upsertFn = vi.fn(() => Promise.resolve({ error: null }));
+    const selectFn = vi.fn(() => ({
+      eq: vi.fn(() => ({
+        maybeSingle: vi.fn(() => Promise.resolve({ data: { user_id: 'user-1' }, error: null })),
+      })),
+    }));
+    const updateFn = vi.fn(() => ({
+      eq: vi.fn(() => Promise.resolve({ error: null, count: 1 })),
+    }));
     mocks.mockFrom.mockReturnValue({
-      upsert: upsertFn,
+      select: selectFn,
+      update: updateFn,
     });
 
     const res = await handler({
@@ -141,9 +154,17 @@ describe('me-location handler', () => {
   });
 
   it('POST clears location when empty string', async () => {
-    const upsertFn = vi.fn(() => Promise.resolve({ error: null }));
+    const selectFn = vi.fn(() => ({
+      eq: vi.fn(() => ({
+        maybeSingle: vi.fn(() => Promise.resolve({ data: { user_id: 'user-1' }, error: null })),
+      })),
+    }));
+    const updateFn = vi.fn(() => ({
+      eq: vi.fn(() => Promise.resolve({ error: null, count: 1 })),
+    }));
     mocks.mockFrom.mockReturnValue({
-      upsert: upsertFn,
+      select: selectFn,
+      update: updateFn,
     });
 
     const res = await handler({
@@ -156,9 +177,17 @@ describe('me-location handler', () => {
   });
 
   it('POST clears location when null (existing row)', async () => {
-    const upsertFn = vi.fn(() => Promise.resolve({ error: null }));
+    const selectFn = vi.fn(() => ({
+      eq: vi.fn(() => ({
+        maybeSingle: vi.fn(() => Promise.resolve({ data: { user_id: 'user-1' }, error: null })),
+      })),
+    }));
+    const updateFn = vi.fn(() => ({
+      eq: vi.fn(() => Promise.resolve({ error: null })),
+    }));
     mocks.mockFrom.mockReturnValue({
-      upsert: upsertFn,
+      select: selectFn,
+      update: updateFn,
     });
 
     const res = await handler({
@@ -168,10 +197,7 @@ describe('me-location handler', () => {
     });
     expect(res!.statusCode).toBe(200);
     expect(JSON.parse(res!.body).location).toBe(null);
-    expect(upsertFn).toHaveBeenCalledWith(
-      { user_id: 'user-1', location: null },
-      { onConflict: 'user_id' }
-    );
+    expect(updateFn).toHaveBeenCalledWith({ location: null });
   });
 
   it('POST rejects location over 100 chars', async () => {
@@ -199,12 +225,13 @@ describe('me-location handler', () => {
   // fails with Postgres error 23502. The handler must detect this and respond
   // gracefully instead of returning a false success.
 
-  it('POST returns 400 when setting location without a username row (23502)', async () => {
-    const upsertFn = vi.fn(() => Promise.resolve({
-      error: { code: '23502', message: 'null value in column "username" violates not-null constraint' },
-    }));
+  it('POST returns 400 when setting location without a username row', async () => {
     mocks.mockFrom.mockReturnValue({
-      upsert: upsertFn,
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          maybeSingle: vi.fn(() => Promise.resolve({ data: null, error: null })),
+        })),
+      })),
     });
 
     const res = await handler({
@@ -216,12 +243,13 @@ describe('me-location handler', () => {
     expect(JSON.parse(res!.body).error).toContain('username');
   });
 
-  it('POST returns 200 when clearing location without a username row (23502)', async () => {
-    const upsertFn = vi.fn(() => Promise.resolve({
-      error: { code: '23502', message: 'null value in column "username" violates not-null constraint' },
-    }));
+  it('POST returns 200 when clearing location without a username row', async () => {
     mocks.mockFrom.mockReturnValue({
-      upsert: upsertFn,
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          maybeSingle: vi.fn(() => Promise.resolve({ data: null, error: null })),
+        })),
+      })),
     });
 
     const res = await handler({
@@ -232,5 +260,30 @@ describe('me-location handler', () => {
     // Location is already effectively null — desired state achieved.
     expect(res!.statusCode).toBe(200);
     expect(JSON.parse(res!.body).location).toBe(null);
+  });
+
+  // TOCTOU race: SELECT found a row but it was deleted before UPDATE.
+  // UPDATE matches zero rows → count: 0, error: null. Must return 409, not 200.
+  it('POST returns 409 when row vanishes between SELECT and UPDATE (TOCTOU)', async () => {
+    const selectFn = vi.fn(() => ({
+      eq: vi.fn(() => ({
+        maybeSingle: vi.fn(() => Promise.resolve({ data: { user_id: 'user-1' }, error: null })),
+      })),
+    }));
+    const updateFn = vi.fn(() => ({
+      eq: vi.fn(() => Promise.resolve({ error: null, count: 0 })),
+    }));
+    mocks.mockFrom.mockReturnValue({
+      select: selectFn,
+      update: updateFn,
+    });
+
+    const res = await handler({
+      ...validEvent,
+      httpMethod: 'POST',
+      body: JSON.stringify({ location: 'Berlin' }),
+    });
+    expect(res!.statusCode).toBe(409);
+    expect(JSON.parse(res!.body).error).toContain('Username row missing');
   });
 });
