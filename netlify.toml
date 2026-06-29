@@ -94,6 +94,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/me/location"
+  to = "/.netlify/functions/me-location"
+  status = 200
+
+[[redirects]]
   from = "/api/me/password"
   to = "/.netlify/functions/me-password"
   status = 200

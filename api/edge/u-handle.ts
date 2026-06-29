@@ -58,10 +58,10 @@ export default async function handler(request: Request, context: Context) {
     let savedArtists: any[];
 
     try {
-      // Look up the username row to check sharing flag + get user_id
+      // Look up the username row to check sharing flag + get user_id + location
       const { data: unameData } = await supabase
         .from('usernames')
-        .select('user_id, username, saved_artists_public')
+        .select('user_id, username, saved_artists_public, location')
         .eq('username', handle)
         .maybeSingle()
         .abortSignal(controller.signal);
@@ -102,6 +102,7 @@ export default async function handler(request: Request, context: Context) {
     clearTimeout(timeoutId);
 
     const ownerName = escapeHtml(usernameRow.username);
+    const ownerLocation = usernameRow.location ? escapeHtml(usernameRow.location) : null;
     const pageUrl = `https://unstream.stream/u/${handle}`;
 
     // Build artist cards HTML
@@ -161,7 +162,7 @@ export default async function handler(request: Request, context: Context) {
   <div class="page-content">
     <div class="container" style="padding-top:48px;padding-bottom:16px;text-align:center">
       <h1 style="font-size:24px;font-weight:700">${ownerName}'s saved artists</h1>
-      <p style="color:var(--muted);font-size:14px;margin-top:8px">A listener's saved artists on Unstream</p>
+      ${ownerLocation ? `<p style="color:var(--text);font-size:14px;margin-top:4px">${ownerLocation}</p>` : ''}
       <div data-share-mount style="margin-top:24px">
         <button class="copy-btn" id="copy-url-btn" data-url="${pageUrl}">
           <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>

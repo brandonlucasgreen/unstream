@@ -63,7 +63,7 @@ describe('public-saved-artists handler', () => {
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
           maybeSingle: vi.fn(() => Promise.resolve({
-            data: { user_id: 'user-1', username: 'testuser', saved_artists_public: false },
+            data: { user_id: 'user-1', username: 'testuser', saved_artists_public: false, location: null },
             error: null,
           })),
         })),
@@ -78,7 +78,7 @@ describe('public-saved-artists handler', () => {
     // First call: usernames lookup
     // Second call: saved_artists lookup
     const maybeSingle = vi.fn(() => Promise.resolve({
-      data: { user_id: 'user-1', username: 'testuser', saved_artists_public: true },
+      data: { user_id: 'user-1', username: 'testuser', saved_artists_public: true, location: 'Brooklyn, NY' },
       error: null,
     }));
     const savedSelect = vi.fn(() => ({
@@ -119,6 +119,7 @@ describe('public-saved-artists handler', () => {
     expect(res!.statusCode).toBe(200);
     const body = JSON.parse(res!.body);
     expect(body.owner_display_name).toBe('testuser');
+    expect(body.owner_location).toBe('Brooklyn, NY');
     expect(body.saved_artists).toHaveLength(2);
     expect(body.saved_artists[0].slug).toBe('band-1');
     expect(body.saved_artists[0].supported).toBe(true);
@@ -135,7 +136,7 @@ describe('public-saved-artists handler', () => {
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
           maybeSingle: vi.fn(() => Promise.resolve({
-            data: { user_id: 'user-1', username: 'testuser', saved_artists_public: true },
+            data: { user_id: 'user-1', username: 'testuser', saved_artists_public: true, location: null },
             error: null,
           })),
         })),

@@ -7,7 +7,6 @@ import { Header } from '../components/Header';
 import { ArtistAnalytics } from '../components/ArtistAnalytics';
 import { Footer } from '../components/Footer';
 import { SearchBar } from '../components/SearchBar';
-import { SharingControls } from '../components/SharingControls';
 
 interface ClaimedProfile {
   id: string;
@@ -474,9 +473,6 @@ export function DashboardPage() {
               </>
             )}
           </section>
-
-          {/* Sharing Controls — below saved artists per spec */}
-          <SharingControls />
         </div>
       </main>
 

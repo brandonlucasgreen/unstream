@@ -45,10 +45,10 @@ export async function handler(event: {
   }
 
   try {
-    // Look up the username row to get user_id + check sharing flag
+    // Look up the username row to get user_id + check sharing flag + location
     const { data: usernameRow, error: usernameError } = await client
       .from('usernames')
-      .select('user_id, username, saved_artists_public')
+      .select('user_id, username, saved_artists_public, location')
       .eq('username', handle)
       .maybeSingle();
 
@@ -69,6 +69,7 @@ export async function handler(event: {
 
     const userId = usernameRow.user_id;
     const ownerDisplayName = usernameRow.username;
+    const ownerLocation = usernameRow.location ?? null;
 
     // Fetch saved artists for this user (non-deleted only)
     const { data: saved, error: savedError } = await client
@@ -104,6 +105,7 @@ export async function handler(event: {
       headers: CORS_HEADERS,
       body: JSON.stringify({
         owner_display_name: ownerDisplayName,
+        owner_location: ownerLocation,
         saved_artists: savedArtists,
       }),
     };
