@@ -90,13 +90,20 @@ export async function handler(event: {
     // Allow null to clear the field
     if (raw === null) {
       try {
-        const { error: updateError } = await client
+        const { error: upsertError } = await client
           .from('usernames')
-          .update({ location: null })
-          .eq('user_id', user.userId);
+          .upsert(
+          { user_id: user.userId, location: null },
+          { onConflict: 'user_id' }
+        );
 
-        if (updateError) {
-          console.error('[me-location] Error clearing location:', updateError.message);
+        if (upsertError) {
+          // No usernames row exists — username column is NOT NULL, so insert fails.
+          // Location is already effectively null, so this is the desired state.
+          if (upsertError.code === '23502') {
+            return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ location: null }) };
+          }
+          console.error('[me-location] Error clearing location:', upsertError.message);
           return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update location' }) };
         }
 
@@ -114,13 +121,20 @@ export async function handler(event: {
     }
 
     try {
-      const { error: updateError } = await client
+      const { error: upsertError } = await client
         .from('usernames')
-        .update({ location: trimmed || null })
-        .eq('user_id', user.userId);
+        .upsert(
+          { user_id: user.userId, location: trimmed || null },
+          { onConflict: 'user_id' }
+        );
 
-      if (updateError) {
-        console.error('[me-location] Error updating location:', updateError.message);
+      if (upsertError) {
+        // No usernames row — username column is NOT NULL, so insert fails.
+        // User must set a username before they can set a location.
+        if (upsertError.code === '23502') {
+          return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Set a username before setting your location.' }) };
+        }
+        console.error('[me-location] Error updating location:', upsertError.message);
         return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update location' }) };
       }
 

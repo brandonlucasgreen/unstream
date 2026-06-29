@@ -105,10 +105,10 @@ describe('me-location handler', () => {
     expect(JSON.parse(res!.body).location).toBe(null);
   });
 
-  it('POST updates location', async () => {
-    const updateFn = vi.fn(() => Promise.resolve({ error: null }));
+  it('POST upserts location for existing row', async () => {
+    const upsertFn = vi.fn(() => Promise.resolve({ error: null }));
     mocks.mockFrom.mockReturnValue({
-      update: vi.fn(() => ({ eq: updateFn })),
+      upsert: upsertFn,
     });
 
     const res = await handler({
@@ -118,13 +118,17 @@ describe('me-location handler', () => {
     });
     expect(res!.statusCode).toBe(200);
     expect(JSON.parse(res!.body).location).toBe('Paris, France');
-    expect(updateFn).toHaveBeenCalled();
+    expect(upsertFn).toHaveBeenCalled();
+    expect(upsertFn).toHaveBeenCalledWith(
+      { user_id: 'user-1', location: 'Paris, France' },
+      { onConflict: 'user_id' }
+    );
   });
 
   it('POST trims whitespace', async () => {
-    const updateFn = vi.fn(() => Promise.resolve({ error: null }));
+    const upsertFn = vi.fn(() => Promise.resolve({ error: null }));
     mocks.mockFrom.mockReturnValue({
-      update: vi.fn(() => ({ eq: updateFn })),
+      upsert: upsertFn,
     });
 
     const res = await handler({
@@ -137,9 +141,9 @@ describe('me-location handler', () => {
   });
 
   it('POST clears location when empty string', async () => {
-    const updateFn = vi.fn(() => Promise.resolve({ error: null }));
+    const upsertFn = vi.fn(() => Promise.resolve({ error: null }));
     mocks.mockFrom.mockReturnValue({
-      update: vi.fn(() => ({ eq: updateFn })),
+      upsert: upsertFn,
     });
 
     const res = await handler({
@@ -151,10 +155,10 @@ describe('me-location handler', () => {
     expect(JSON.parse(res!.body).location).toBe(null);
   });
 
-  it('POST clears location when null', async () => {
-    const updateFn = vi.fn(() => Promise.resolve({ error: null }));
+  it('POST clears location when null (existing row)', async () => {
+    const upsertFn = vi.fn(() => Promise.resolve({ error: null }));
     mocks.mockFrom.mockReturnValue({
-      update: vi.fn(() => ({ eq: updateFn })),
+      upsert: upsertFn,
     });
 
     const res = await handler({
@@ -164,6 +168,10 @@ describe('me-location handler', () => {
     });
     expect(res!.statusCode).toBe(200);
     expect(JSON.parse(res!.body).location).toBe(null);
+    expect(upsertFn).toHaveBeenCalledWith(
+      { user_id: 'user-1', location: null },
+      { onConflict: 'user_id' }
+    );
   });
 
   it('POST rejects location over 100 chars', async () => {
@@ -184,5 +192,45 @@ describe('me-location handler', () => {
   it('returns 404 for non-GET/POST methods', async () => {
     const res = await handler({ ...validEvent, httpMethod: 'DELETE' });
     expect(res!.statusCode).toBe(404);
+  });
+
+  // Regression tests: users without a usernames row (UNS-144 round 2)
+  // The `usernames` table has `username` as NOT NULL, so upserting without it
+  // fails with Postgres error 23502. The handler must detect this and respond
+  // gracefully instead of returning a false success.
+
+  it('POST returns 400 when setting location without a username row (23502)', async () => {
+    const upsertFn = vi.fn(() => Promise.resolve({
+      error: { code: '23502', message: 'null value in column "username" violates not-null constraint' },
+    }));
+    mocks.mockFrom.mockReturnValue({
+      upsert: upsertFn,
+    });
+
+    const res = await handler({
+      ...validEvent,
+      httpMethod: 'POST',
+      body: JSON.stringify({ location: 'Boston' }),
+    });
+    expect(res!.statusCode).toBe(400);
+    expect(JSON.parse(res!.body).error).toContain('username');
+  });
+
+  it('POST returns 200 when clearing location without a username row (23502)', async () => {
+    const upsertFn = vi.fn(() => Promise.resolve({
+      error: { code: '23502', message: 'null value in column "username" violates not-null constraint' },
+    }));
+    mocks.mockFrom.mockReturnValue({
+      upsert: upsertFn,
+    });
+
+    const res = await handler({
+      ...validEvent,
+      httpMethod: 'POST',
+      body: JSON.stringify({ location: null }),
+    });
+    // Location is already effectively null — desired state achieved.
+    expect(res!.statusCode).toBe(200);
+    expect(JSON.parse(res!.body).location).toBe(null);
   });
 });
