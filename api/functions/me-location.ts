@@ -78,6 +78,25 @@ export async function handler(event: {
     }
   }
 
+  // Shared helper: ensure the caller has a usernames row before mutating it.
+  // The `username` column is NOT NULL, so an upsert insert without it fails with 23502.
+  // A clean UPDATE is used when the row exists; only the absence of a row triggers the
+  // "set username first" error.
+  async function hasUsernameRow(): Promise<boolean | { statusCode: number; headers: typeof CORS_HEADERS; body: string }> {
+    const { data: existing, error } = await client
+      .from('usernames')
+      .select('user_id')
+      .eq('user_id', user.userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error('[me-location] Error checking usernames row:', error.message);
+      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update location' }) };
+    }
+
+    return !!existing;
+  }
+
   if (event.httpMethod === 'POST') {
     let body: Record<string, unknown>;
     try {
@@ -90,20 +109,20 @@ export async function handler(event: {
     // Allow null to clear the field
     if (raw === null) {
       try {
-        const { error: upsertError } = await client
-          .from('usernames')
-          .upsert(
-          { user_id: user.userId, location: null },
-          { onConflict: 'user_id' }
-        );
+        const rowCheck = await hasUsernameRow();
+        if (typeof rowCheck !== 'boolean') return rowCheck;
+        if (!rowCheck) {
+          // Location is already effectively null — desired state achieved.
+          return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ location: null }) };
+        }
 
-        if (upsertError) {
-          // No usernames row exists — username column is NOT NULL, so insert fails.
-          // Location is already effectively null, so this is the desired state.
-          if (upsertError.code === '23502') {
-            return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ location: null }) };
-          }
-          console.error('[me-location] Error clearing location:', upsertError.message);
+        const { error: updateError } = await client
+          .from('usernames')
+          .update({ location: null })
+          .eq('user_id', user.userId);
+
+        if (updateError) {
+          console.error('[me-location] Error clearing location:', updateError.message);
           return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update location' }) };
         }
 
@@ -121,20 +140,19 @@ export async function handler(event: {
     }
 
     try {
-      const { error: upsertError } = await client
-        .from('usernames')
-        .upsert(
-          { user_id: user.userId, location: trimmed || null },
-          { onConflict: 'user_id' }
-        );
+      const rowCheck = await hasUsernameRow();
+      if (typeof rowCheck !== 'boolean') return rowCheck;
+      if (!rowCheck) {
+        return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Set a username before setting your location.' }) };
+      }
 
-      if (upsertError) {
-        // No usernames row — username column is NOT NULL, so insert fails.
-        // User must set a username before they can set a location.
-        if (upsertError.code === '23502') {
-          return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Set a username before setting your location.' }) };
-        }
-        console.error('[me-location] Error updating location:', upsertError.message);
+      const { error: updateError } = await client
+        .from('usernames')
+        .update({ location: trimmed || null })
+        .eq('user_id', user.userId);
+
+      if (updateError) {
+        console.error('[me-location] Error updating location:', updateError.message);
         return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update location' }) };
       }
 
