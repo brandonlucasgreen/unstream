@@ -1,6 +1,22 @@
 -- Migration 002: Artist Profiles & Claim Flow
 -- Run this in your Supabase SQL editor after enabling Supabase Auth.
 
+-- Foundation: ensure the artists table exists (originally created via dashboard before migrations)
+CREATE TABLE IF NOT EXISTS public.artists (
+  id uuid primary key default gen_random_uuid(),
+  slug text unique not null,
+  name text not null,
+  image_url text,
+  match_confidence text check (match_confidence in ('verified', 'unverified')),
+  source text not null default 'auto',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  last_enriched_at timestamptz
+);
+
+create index if not exists idx_artists_slug on public.artists(slug);
+create index if not exists idx_artists_updated on public.artists(updated_at);
+
 -- Update match_confidence to support 'claimed'
 alter table artists drop constraint if exists artists_match_confidence_check;
 alter table artists add constraint artists_match_confidence_check
