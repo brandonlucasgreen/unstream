@@ -13,11 +13,19 @@ schemes:
       targets:
         Unstream: all
         UnstreamShareExtension: all
+    test:
+      targets:
+        - UnstreamTests
     archive:
       config: Release
 
 settings:
   SWIFT_VERSION: "5.9"
+
+packages:
+  Supabase:
+    url: https://github.com/supabase/supabase-swift.git
+    exactVersion: 2.44.1
 
 targets:
   Unstream:
@@ -54,6 +62,8 @@ targets:
     dependencies:
       - target: UnstreamShareExtension
         destinationFilters: [iOS]
+      - package: Supabase
+        product: Supabase
 
   UnstreamShareExtension:
     type: app-extension
@@ -75,8 +85,8 @@ targets:
         CFBundleName: UnstreamShare
         CFBundleDisplayName: Share to Unstream
         CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
-        CFBundleVersion: "10"
-        CFBundleShortVersionString: "3.1.0"
+        CFBundleVersion: "11"
+        CFBundleShortVersionString: "3.2.0"
         CFBundlePackageType: XPC!
         NSExtension:
           NSExtensionAttributes:
@@ -84,3 +94,20 @@ targets:
               NSExtensionActivationSupportsWebURLWithMaxCount: 1
           NSExtensionPointIdentifier: com.apple.share-services
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
+
+  UnstreamTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - UnstreamTests
+    dependencies:
+      - target: Unstream
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: lol.bgreen.UnstreamTests
+      PRODUCT_NAME: UnstreamTests
+      INFOPLIST_FILE: UnstreamTests/Info.plist
+      DEVELOPMENT_TEAM: "CV926C8KS8"
+      # macOS app executable lives in Contents/MacOS; xcodegen's auto TEST_HOST
+      # omits BUNDLE_EXECUTABLE_FOLDER_PATH and resolves to the wrong path.
+      TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Unstream.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Unstream"
+      BUNDLE_LOADER: "$(TEST_HOST)"
