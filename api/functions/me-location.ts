@@ -146,14 +146,20 @@ export async function handler(event: {
         return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Set a username before setting your location.' }) };
       }
 
-      const { error: updateError } = await client
+      const { error: updateError, count: updateCount } = await client
         .from('usernames')
-        .update({ location: trimmed || null })
+        .update({ location: trimmed || null }, { count: 'exact' })
         .eq('user_id', user.userId);
 
       if (updateError) {
         console.error('[me-location] Error updating location:', updateError.message);
         return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update location' }) };
+      }
+
+      // TOCTOU: row existed at SELECT but was deleted before UPDATE. Don't
+      // claim success when nothing persisted.
+      if (updateCount === 0) {
+        return { statusCode: 409, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Username row missing — please set your username before changing your location.' }) };
       }
 
       return {

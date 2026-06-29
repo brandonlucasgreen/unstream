@@ -112,7 +112,7 @@ describe('me-location handler', () => {
       })),
     }));
     const updateFn = vi.fn(() => ({
-      eq: vi.fn(() => Promise.resolve({ error: null })),
+      eq: vi.fn(() => Promise.resolve({ error: null, count: 1 })),
     }));
     mocks.mockFrom.mockReturnValue({
       select: selectFn,
@@ -127,7 +127,7 @@ describe('me-location handler', () => {
     expect(res!.statusCode).toBe(200);
     expect(JSON.parse(res!.body).location).toBe('Paris, France');
     expect(selectFn).toHaveBeenCalledWith('user_id');
-    expect(updateFn).toHaveBeenCalledWith({ location: 'Paris, France' });
+    expect(updateFn).toHaveBeenCalledWith({ location: 'Paris, France' }, { count: 'exact' });
   });
 
   it('POST trims whitespace', async () => {
@@ -137,7 +137,7 @@ describe('me-location handler', () => {
       })),
     }));
     const updateFn = vi.fn(() => ({
-      eq: vi.fn(() => Promise.resolve({ error: null })),
+      eq: vi.fn(() => Promise.resolve({ error: null, count: 1 })),
     }));
     mocks.mockFrom.mockReturnValue({
       select: selectFn,
@@ -160,7 +160,7 @@ describe('me-location handler', () => {
       })),
     }));
     const updateFn = vi.fn(() => ({
-      eq: vi.fn(() => Promise.resolve({ error: null })),
+      eq: vi.fn(() => Promise.resolve({ error: null, count: 1 })),
     }));
     mocks.mockFrom.mockReturnValue({
       select: selectFn,
@@ -260,5 +260,30 @@ describe('me-location handler', () => {
     // Location is already effectively null — desired state achieved.
     expect(res!.statusCode).toBe(200);
     expect(JSON.parse(res!.body).location).toBe(null);
+  });
+
+  // TOCTOU race: SELECT found a row but it was deleted before UPDATE.
+  // UPDATE matches zero rows → count: 0, error: null. Must return 409, not 200.
+  it('POST returns 409 when row vanishes between SELECT and UPDATE (TOCTOU)', async () => {
+    const selectFn = vi.fn(() => ({
+      eq: vi.fn(() => ({
+        maybeSingle: vi.fn(() => Promise.resolve({ data: { user_id: 'user-1' }, error: null })),
+      })),
+    }));
+    const updateFn = vi.fn(() => ({
+      eq: vi.fn(() => Promise.resolve({ error: null, count: 0 })),
+    }));
+    mocks.mockFrom.mockReturnValue({
+      select: selectFn,
+      update: updateFn,
+    });
+
+    const res = await handler({
+      ...validEvent,
+      httpMethod: 'POST',
+      body: JSON.stringify({ location: 'Berlin' }),
+    });
+    expect(res!.statusCode).toBe(409);
+    expect(JSON.parse(res!.body).error).toContain('Username row missing');
   });
 });
