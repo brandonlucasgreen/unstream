@@ -95,7 +95,7 @@
     "title": "Sync saved artists on Mac and iOS",
     "description": "Sign in on the Mac menu bar app or iOS app to sync your saved artists across devices. Saved artists from the web, extension, and native apps all stay in sync.",
     "date": "2026-06-20",
-    "announced": false
+    "announced": true
   },
   {
     "id": "share-saved-artists",
