@@ -102,6 +102,6 @@
     "title": "Share your saved artists list",
     "description": "Make your saved artists list public and share a link with friends — they can browse who you support on Unstream without signing in. Set a username in Settings, then toggle sharing from your dashboard.",
     "date": "2026-06-27",
-    "announced": false
+    "announced": true
   }
 ]
