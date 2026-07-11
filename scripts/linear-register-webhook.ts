@@ -3,7 +3,9 @@
 //   LINEAR_API_KEY=... npx tsx scripts/linear-register-webhook.ts
 //
 // Optional: LINEAR_TEAM_ID=... to scope the webhook to a single team
-// (omit to receive Issue events from every team in the workspace).
+// (omit to receive Issue events from every public team in the workspace —
+// Linear's webhookCreate mutation requires either a teamId or an explicit
+// allPublicTeams: true; there's no implicit "whole workspace" default).
 //
 // Requires a workspace-admin personal API key, or an OAuth app token with
 // the `admin` scope — per Linear's docs, only admins can create webhooks.
@@ -21,12 +23,14 @@ if (!LINEAR_API_KEY) {
 }
 
 async function registerWebhook() {
-  const input: { url: string; resourceTypes: string[]; teamId?: string } = {
+  const input: { url: string; resourceTypes: string[]; teamId?: string; allPublicTeams?: boolean } = {
     url: WEBHOOK_URL,
     resourceTypes: ['Issue'],
   };
   if (LINEAR_TEAM_ID) {
     input.teamId = LINEAR_TEAM_ID;
+  } else {
+    input.allPublicTeams = true;
   }
 
   const response = await fetch('https://api.linear.app/graphql', {
