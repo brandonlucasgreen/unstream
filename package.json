@@ -11,8 +11,6 @@
     "generate:data": "tsx scripts/generate-artist-data.ts",
     "generate:social": "tsx scripts/generate-social-posts.ts",
     "sync:bandcamp-dates": "npx tsx scripts/sync-bandcamp-dates.ts",
-    "register:agentmail-webhook": "npx tsx scripts/agentmail-register-webhook.ts",
-    "register:linear-webhook": "npx tsx scripts/linear-register-webhook.ts",
     "test:web": "cd apps/web && npx vitest run",
     "test:api": "npx vitest run api/functions/",
     "test": "npm run test:web && npm run test:api",
@@ -38,7 +36,6 @@
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.11.0",
     "remark-gfm": "^4.0.1",
-    "svix": "^1.96.1",
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
