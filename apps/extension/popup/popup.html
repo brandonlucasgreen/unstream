@@ -48,6 +48,15 @@
           </div>
         </section>
 
+        <!-- Detect on this site (shown on scriptable, non-allowlist sites) -->
+        <section id="detect-site-section" class="section hidden">
+          <div class="detect-card">
+            <div id="detect-title" class="detect-title"></div>
+            <p id="detect-desc" class="detect-desc"></p>
+            <button id="detect-enable-btn" class="detect-enable-btn hidden"></button>
+          </div>
+        </section>
+
         <!-- Results Section -->
         <section id="results-section" class="section hidden">
           <h2 class="section-title">Support this artist</h2>
@@ -163,6 +172,14 @@
             <input type="checkbox" id="artist-notifications-toggle" checked>
             <span class="toggle-switch"></span>
           </label>
+        </section>
+
+        <!-- Custom Sites -->
+        <section id="custom-sites-section" class="section">
+          <h2 class="section-title">Custom Sites</h2>
+          <p class="setting-description">Sites you've turned on playback detection for. Open Unstream on a site that plays music to add one.</p>
+          <div id="custom-sites-list" class="custom-sites-list"></div>
+          <p id="no-custom-sites" class="setting-description no-custom-sites">No custom sites yet.</p>
         </section>
 
         <!-- Release Alerts Settings -->
