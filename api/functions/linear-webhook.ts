@@ -54,6 +54,11 @@ export async function handler(event: {
 
   const signature = event.headers['linear-signature'];
   if (!signature || !isValidSignature(event.body, signature)) {
+    // TEMPORARY debug instrumentation — remove once the live-test issue is resolved.
+    Sentry.captureMessage('linear-webhook DEBUG: signature check failed', {
+      level: 'info',
+      extra: { hasSignatureHeader: !!signature, headerKeys: Object.keys(event.headers) },
+    });
     return { statusCode: 401, body: 'Invalid signature' };
   }
 
@@ -65,13 +70,28 @@ export async function handler(event: {
   }
 
   if (payload.webhookTimestamp && Math.abs(Date.now() - payload.webhookTimestamp) > MAX_TIMESTAMP_SKEW_MS) {
+    // TEMPORARY debug instrumentation — remove once the live-test issue is resolved.
+    Sentry.captureMessage('linear-webhook DEBUG: stale timestamp check failed', {
+      level: 'info',
+      extra: { webhookTimestamp: payload.webhookTimestamp, now: Date.now(), diffMs: Date.now() - payload.webhookTimestamp },
+    });
     return { statusCode: 401, body: 'Stale timestamp' };
   }
 
   if (payload.type !== 'Issue' || payload.action !== 'create') {
-    // Acknowledge other event types without acting on them.
+    // TEMPORARY debug instrumentation — remove once the live-test issue is resolved.
+    Sentry.captureMessage('linear-webhook DEBUG: event ignored', {
+      level: 'info',
+      extra: { type: payload.type, action: payload.action },
+    });
     return { statusCode: 200, body: 'Ignored' };
   }
+
+  // TEMPORARY debug instrumentation — remove once the live-test issue is resolved.
+  Sentry.captureMessage('linear-webhook DEBUG: dispatching to background function', {
+    level: 'info',
+    extra: { identifier: payload.data?.identifier, title: payload.data?.title },
+  });
 
   const siteUrl = process.env.URL || 'https://unstream.stream';
 
