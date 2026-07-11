@@ -163,6 +163,11 @@
   to = "/.netlify/functions/discord-interaction"
   status = 200
 
+[[redirects]]
+  from = "/api/agentmail-webhook"
+  to = "/.netlify/functions/agentmail-webhook"
+  status = 200
+
 # V1 Public API routes
 [[redirects]]
   from = "/api/v1/search"
