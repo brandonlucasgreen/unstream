@@ -3,6 +3,15 @@
 import { isBandcampFriday } from '../lib/bandcamp-friday.js';
 import { ALLOWED_RELEASE_DOMAINS, SOURCE_CONFIG, PAYOUT_PERCENTAGES } from '../lib/constants.js';
 import { signInWithPassword, signInWithOtp, signOut, getStoredSession, getAccessToken, getDeviceId } from '../lib/supabase.js';
+import {
+  getCustomSites,
+  enableSite,
+  disableSite,
+  originPattern,
+  isScriptableUrl,
+  isBuiltInSite,
+  MAX_CUSTOM_SITES,
+} from '../lib/custom-sites.js';
 
 const API_BASE = 'https://unstream.stream/api';
 
@@ -39,6 +48,10 @@ const elements = {
   // Discover tab
   nowPlaying: document.getElementById('now-playing'),
   idleState: document.getElementById('idle-state'),
+  detectSiteSection: document.getElementById('detect-site-section'),
+  detectTitle: document.getElementById('detect-title'),
+  detectDesc: document.getElementById('detect-desc'),
+  detectEnableBtn: document.getElementById('detect-enable-btn'),
   resultsSection: document.getElementById('results-section'),
   resultsGrid: document.getElementById('results-grid'),
   socialSection: document.getElementById('social-section'),
@@ -76,6 +89,8 @@ const elements = {
   releaseAlertsSection: document.getElementById('release-alerts-section'),
   checkNowBtn: document.getElementById('check-now-btn'),
   lastCheckTime: document.getElementById('last-check-time'),
+  customSitesList: document.getElementById('custom-sites-list'),
+  noCustomSites: document.getElementById('no-custom-sites'),
 };
 
 // State
@@ -86,6 +101,11 @@ let currentSocialLinks = null;
 let currentLocation = null;
 let newReleases = [];
 let authSession = null; // null = unknown/loading, false = signed out, object = signed in
+
+// Active-tab origin the "Enable" button will request, captured up front so the
+// permission request runs directly inside the user's click (no await before it,
+// which would break the required user gesture). { origin, tabId } or null.
+let detectTarget = null;
 
 // Slug lookup cache: { artistName → slug }
 const SLUG_CACHE_KEY = 'artistSlugCache';
@@ -457,6 +477,141 @@ function formatLocation(location) {
   return '';
 }
 
+// ---- Custom Sites (user-opted per-site detection, UNS-152) ----
+
+async function getActiveTab() {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  return tab || null;
+}
+
+// Decide what (if anything) to show in the "detect on this site" card for the
+// active tab: an Enable prompt on unsupported sites, or a gentle "watching but
+// nothing detected yet" note on sites already enabled that aren't reporting.
+async function setupDetectionControl() {
+  detectTarget = null;
+  elements.detectSiteSection.classList.add('hidden');
+  elements.detectEnableBtn.classList.add('hidden');
+
+  const tab = await getActiveTab();
+  // Hide on privileged pages (chrome://, about:, extension pages) and on
+  // built-in allowlist sites where detection already runs.
+  if (!tab || !tab.url || !isScriptableUrl(tab.url) || isBuiltInSite(tab.url)) return;
+
+  const origin = originPattern(tab.url);
+  const host = new URL(tab.url).hostname;
+  const sites = await getCustomSites();
+
+  if (sites.includes(origin)) {
+    // Already enabled. If nothing is playing/detected, explain the idle state
+    // rather than silently showing nothing.
+    const { currentTrack } = await chrome.storage.local.get('currentTrack');
+    const hasFreshTrack = currentTrack && Date.now() - currentTrack.timestamp < 5 * 60 * 1000;
+    if (!hasFreshTrack) showDetectIdleNote();
+    return;
+  }
+
+  showDetectEnablePrompt(host, origin, tab.id, sites.length);
+}
+
+function showDetectEnablePrompt(host, origin, tabId, siteCount) {
+  elements.detectTitle.textContent = 'Detect music on this site?';
+
+  if (siteCount >= MAX_CUSTOM_SITES) {
+    elements.detectDesc.textContent = `You've reached the limit of ${MAX_CUSTOM_SITES} custom sites. Remove one in Settings to add another.`;
+    elements.detectEnableBtn.classList.add('hidden');
+  } else {
+    elements.detectDesc.textContent = "Unstream isn't watching this site yet. Turn on detection to find artists you're playing here.";
+    elements.detectEnableBtn.textContent = `Enable on ${host}`;
+    elements.detectEnableBtn.disabled = false;
+    elements.detectEnableBtn.classList.remove('hidden');
+    detectTarget = { origin, tabId };
+  }
+
+  elements.detectSiteSection.classList.remove('hidden');
+}
+
+function showDetectIdleNote() {
+  elements.detectTitle.textContent = 'Watching this site';
+  elements.detectDesc.textContent = "Unstream is watching this site but hasn't picked up any track info. This site may not share what's playing in a way Unstream can read.";
+  elements.detectEnableBtn.classList.add('hidden');
+  elements.detectSiteSection.classList.remove('hidden');
+}
+
+// Handle the Enable click. Requests the host permission FIRST (directly in the
+// user gesture), then registers and injects the generic detector.
+async function handleEnableSite() {
+  if (!detectTarget) return;
+  const { origin, tabId } = detectTarget;
+
+  const granted = await chrome.permissions.request({ origins: [origin] });
+  if (!granted) return; // user declined — leave everything untouched
+
+  elements.detectEnableBtn.disabled = true;
+
+  const result = await enableSite(origin);
+  if (!result.ok) {
+    // Hit the sanity cap — surface it and revoke the just-granted permission.
+    await chrome.permissions.remove({ origins: [origin] });
+    await setupDetectionControl();
+    return;
+  }
+
+  // Inject into the already-open tab so the user doesn't have to reload.
+  try {
+    await chrome.scripting.executeScript({
+      target: { tabId },
+      files: ['content/common.js', 'content/generic.js'],
+    });
+  } catch {
+    // Some pages block injection; the persistent registration still applies on reload.
+  }
+
+  await setupDetectionControl();
+  await loadCustomSites();
+}
+
+// Render the managed list of enabled custom sites in Settings.
+async function loadCustomSites() {
+  const sites = await getCustomSites();
+
+  if (sites.length === 0) {
+    elements.customSitesList.replaceChildren();
+    elements.noCustomSites.style.display = 'block';
+    return;
+  }
+
+  elements.noCustomSites.style.display = 'none';
+
+  const fragment = document.createDocumentFragment();
+  for (const origin of sites) {
+    const item = document.createElement('div');
+    item.className = 'custom-site-item';
+
+    const hostSpan = document.createElement('span');
+    hostSpan.className = 'custom-site-host';
+    // Show the bare host (strip scheme and the trailing "/*").
+    hostSpan.textContent = origin.replace(/^https?:\/\//, '').replace(/\/\*$/, '');
+    hostSpan.title = origin;
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'custom-site-remove';
+    removeBtn.textContent = 'Remove';
+    removeBtn.addEventListener('click', () => removeCustomSite(origin));
+
+    item.appendChild(hostSpan);
+    item.appendChild(removeBtn);
+    fragment.appendChild(item);
+  }
+
+  elements.customSitesList.replaceChildren(fragment);
+}
+
+async function removeCustomSite(origin) {
+  await disableSite(origin);
+  await loadCustomSites();
+  await setupDetectionControl();
+}
+
 // Initialize popup
 async function init() {
   // Initialize auth state
@@ -470,6 +625,10 @@ async function init() {
     await loadResults(currentTrack.artist);
     await loadEnrichment(currentTrack.artist);
   }
+
+  // Show per-site detection control for the active tab, and the managed list
+  await setupDetectionControl();
+  await loadCustomSites();
 
   // Load saved artists and releases
   await loadSavedArtists();
@@ -1197,6 +1356,9 @@ function setupEventListeners() {
 
   // Sync now button
   elements.syncNowBtn.addEventListener('click', syncSavedArtists);
+
+  // Enable per-site detection
+  elements.detectEnableBtn.addEventListener('click', handleEnableSite);
 }
 
 // Initialize

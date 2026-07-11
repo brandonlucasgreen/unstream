@@ -3,6 +3,7 @@
 
 import { ALLOWED_RELEASE_DOMAINS } from '../lib/constants.js';
 import { getStoredSession, handleMagicLinkCallback, getAccessToken, signOut } from '../lib/supabase.js';
+import { reconcileCustomSites } from '../lib/custom-sites.js';
 
 const API_BASE = 'https://unstream.stream/api';
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
@@ -364,6 +365,13 @@ async function restoreState() {
 restoreState();
 pruneStaleCache();
 setupReleaseAlerts();
+
+// Keep user-enabled custom sites (UNS-152) in sync across restarts: re-register
+// any missing content scripts and prune origins whose permission was revoked
+// out-of-band via browser settings.
+chrome.runtime.onInstalled.addListener(() => { reconcileCustomSites(); });
+chrome.runtime.onStartup.addListener(() => { reconcileCustomSites(); });
+reconcileCustomSites();
 
 // ========================================
 // Artist Detection Notification System
