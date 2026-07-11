@@ -258,6 +258,40 @@ export function DownloadGrid() {
         })}
       </div>
 
+      {/* Mobile only: link to the alternative download destinations shown on desktop */}
+      {!showAll && (
+        <p className="text-sm text-text-secondary text-center mt-3">
+          Also available for{' '}
+          <a
+            href="https://github.com/brandonlucasgreen/unstream/releases/latest"
+            className="text-accent-primary hover:underline"
+            onClick={() => analytics.trackDownload()}
+          >
+            macOS
+          </a>
+          ,{' '}
+          <a
+            href="https://chromewebstore.google.com/detail/unstream-support-music-di/ghoiopeidkganjdebkgkehaofnmjofkf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent-primary hover:underline"
+            onClick={() => analytics.trackDownloadChrome()}
+          >
+            Chrome
+          </a>{' '}
+          and{' '}
+          <a
+            href="https://addons.mozilla.org/en-US/firefox/addon/unstream/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent-primary hover:underline"
+            onClick={() => analytics.trackDownloadFirefox()}
+          >
+            Firefox
+          </a>
+        </p>
+      )}
+
       {/* iOS "Add to Home Screen" overlay */}
       {showIOSOverlay && (
         <div
