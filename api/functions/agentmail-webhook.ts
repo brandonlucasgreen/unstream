@@ -15,7 +15,7 @@ interface AgentMailWebhookPayload {
     message_id: string;
     thread_id: string;
     inbox_id: string;
-    from_: string[];
+    from: string;
     to?: string[];
     subject?: string;
     text?: string;
@@ -62,14 +62,19 @@ export async function handler(event: {
 
   const siteUrl = process.env.URL || 'https://unstream.stream';
 
-  // Fire-and-forget dispatch — respond fast so AgentMail doesn't retry the delivery.
-  fetch(`${siteUrl}/.netlify/functions/agentmail-triage-background`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload.message),
-  }).catch((error) => {
+  // Await the dispatch call itself (not the background function's full run) —
+  // Netlify background functions accept the job and respond immediately, but an
+  // un-awaited fetch can be killed when this handler returns and Lambda freezes
+  // the execution environment, silently dropping the dispatch.
+  try {
+    await fetch(`${siteUrl}/.netlify/functions/agentmail-triage-background`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload.message),
+    });
+  } catch (error) {
     Sentry.captureException(error, { tags: { source: 'agentmail-webhook' } });
-  });
+  }
 
   return { statusCode: 200, body: 'OK' };
 }

@@ -21,7 +21,7 @@ interface AgentMailMessage {
   message_id?: string;
   thread_id?: string;
   inbox_id?: string;
-  from_?: string[];
+  from?: string;
   to?: string[];
   subject?: string;
   text?: string;
@@ -29,7 +29,7 @@ interface AgentMailMessage {
 }
 
 function buildPrompt(message: AgentMailMessage): string {
-  const from = message.from_?.join(', ') || 'unknown sender';
+  const from = message.from || 'unknown sender';
   const subject = message.subject || '(no subject)';
   const body =
     message.text ||
