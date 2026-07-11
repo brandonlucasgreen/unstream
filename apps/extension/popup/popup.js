@@ -502,10 +502,24 @@ async function setupDetectionControl() {
   const sites = await getCustomSites();
 
   if (sites.includes(origin)) {
-    // Already enabled. If nothing is playing/detected, explain the idle state
-    // rather than silently showing nothing.
+    const hasPermission = await chrome.permissions.contains({ origins: [origin] });
+    if (!hasPermission) {
+      // Permission was revoked out-of-band (e.g. via the browser's own site
+      // settings) since we last reconciled — the stored entry is stale. Prune
+      // it and fall through to the enable prompt instead of claiming we're
+      // still watching.
+      await disableSite(origin);
+      showDetectEnablePrompt(host, origin, tab.id, sites.length - 1);
+      return;
+    }
+
+    // Already enabled. If nothing is playing/detected on THIS tab, explain the
+    // idle state rather than silently showing nothing (or showing it based on
+    // a track that was actually detected on some other tab).
     const { currentTrack } = await chrome.storage.local.get('currentTrack');
-    const hasFreshTrack = currentTrack && Date.now() - currentTrack.timestamp < 5 * 60 * 1000;
+    const hasFreshTrack = currentTrack
+      && currentTrack.tabId === tab.id
+      && Date.now() - currentTrack.timestamp < 5 * 60 * 1000;
     if (!hasFreshTrack) showDetectIdleNote();
     return;
   }

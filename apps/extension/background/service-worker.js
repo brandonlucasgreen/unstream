@@ -45,7 +45,7 @@ function addNotifiedArtist(slug) {
 // Listen for messages from content scripts and popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'MUSIC_DETECTED') {
-    handleMusicDetection(message.data);
+    handleMusicDetection(message.data, sender.tab?.id);
   } else if (message.type === 'GET_CURRENT_ARTIST') {
     // If in-memory state was lost (service worker restart), restore from storage
     if (currentArtist === null) {
@@ -131,7 +131,7 @@ async function trackAppEvent(event_type, context = {}) {
 }
 
 // Handle music detection from content scripts
-async function handleMusicDetection(data) {
+async function handleMusicDetection(data, tabId) {
   const { artist, title, source } = data;
 
   if (!artist) return;
@@ -148,9 +148,10 @@ async function handleMusicDetection(data) {
   // Update badge to show music detected
   updateBadge('detecting');
 
-  // Store current artist info
+  // Store current artist info. tabId lets the popup verify a "fresh" track
+  // actually came from the tab it's currently looking at, not some other tab.
   await chrome.storage.local.set({
-    currentTrack: { artist, title, source, timestamp: now }
+    currentTrack: { artist, title, source, timestamp: now, tabId: tabId ?? null }
   });
 
   // Track extension activation with streaming service
@@ -371,6 +372,11 @@ setupReleaseAlerts();
 // out-of-band via browser settings.
 chrome.runtime.onInstalled.addListener(() => { reconcileCustomSites(); });
 chrome.runtime.onStartup.addListener(() => { reconcileCustomSites(); });
+// Also reconcile immediately when a permission is revoked (e.g. via the
+// browser's site/extension settings) instead of waiting for the next
+// install/startup, so a stale registration doesn't linger for the rest of
+// the browsing session.
+chrome.permissions.onRemoved.addListener(() => { reconcileCustomSites(); });
 reconcileCustomSites();
 
 // ========================================
