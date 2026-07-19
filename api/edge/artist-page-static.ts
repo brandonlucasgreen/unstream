@@ -85,7 +85,7 @@ const CSS = `
     :root { --bg: #ffffff; --bg2: #f5f5f5; --text: #1a1a1a; --muted: #555; --border: #e0e0e0; --accent: #e55a2b; --footer-border: #e0e0e0; }
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Golos Text', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+  body { font-family: 'SN Pro', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
   a { color: inherit; }
   .container { max-width: 640px; margin: 0 auto; padding: 0 24px; width: 100%; }
   .page-content { position: relative; flex: 1; display: flex; flex-direction: column; }
@@ -271,7 +271,7 @@ export default async function handler(request: Request, context: Context) {
   ${imageUrl ? `<meta name="twitter:image" content="${escapeHtml(imageUrl)}">` : ''}
   <link rel="canonical" href="${pageUrl}">
   <script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>
-  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=SN+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>${CSS}</style>
 </head>
 <body>
@@ -374,7 +374,7 @@ export default async function handler(request: Request, context: Context) {
   ${imageUrl ? `<meta name="twitter:image" content="${escapeHtml(imageUrl)}">` : ''}
   <link rel="canonical" href="${pageUrl}">
   <script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>
-  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=SN+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>${CSS}</style>
 </head>
 <body>
