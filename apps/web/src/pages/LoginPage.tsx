@@ -6,6 +6,8 @@ import { useAuth } from '../contexts/AuthContext';
 
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
+import { PageSkeleton } from '../components/PageSkeleton';
+import { FormSkeleton } from '../components/LoadingSkeletons';
 
 type ViewMode = 'form' | 'magicLinkSent' | 'resetSent';
 
@@ -91,9 +93,9 @@ export function LoginPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-bg-primary flex items-center justify-center">
-        <div className="text-text-muted">Loading...</div>
-      </div>
+      <PageSkeleton label="Loading sign in" maxWidth="max-w-md">
+        <FormSkeleton sections={1} fields={2} />
+      </PageSkeleton>
     );
   }
 

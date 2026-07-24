@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { sources } from '../services/sources';
+import { SkeletonScreen } from './Skeleton';
+import { StatTilesSkeleton } from './LoadingSkeletons';
 import type { SourceId } from '../types';
 
 type Period = '7d' | '30d' | '90d' | 'all';
@@ -65,7 +67,11 @@ export function ArtistAnalytics({ slug }: { slug: string }) {
         </select>
       </div>
 
-      {loading && <p className="text-xs text-text-muted">Loading...</p>}
+      {loading && (
+        <SkeletonScreen label="Loading analytics">
+          <StatTilesSkeleton />
+        </SkeletonScreen>
+      )}
       {error && <p className="text-xs text-red-400">{error}</p>}
 
       {data && !loading && (

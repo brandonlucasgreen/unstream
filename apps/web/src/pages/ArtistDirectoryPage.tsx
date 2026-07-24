@@ -4,6 +4,8 @@ import * as Sentry from '@sentry/react';
 
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
+import { Skeleton, SkeletonScreen } from '../components/Skeleton';
+import { ArtistRowsSkeleton } from '../components/LoadingSkeletons';
 
 interface DirectoryArtist {
   slug: string;
@@ -68,9 +70,15 @@ export function ArtistDirectoryPage() {
         </div>
 
         {loading ? (
-          <div className="flex-1 flex items-center justify-center">
-            <span className="text-text-muted">Loading...</span>
-          </div>
+          <SkeletonScreen label="Loading the artist index" className="max-w-3xl mx-auto w-full px-6 pb-12">
+            <div className="flex flex-wrap gap-1.5 justify-center mb-8">
+              {Array.from({ length: 12 }, (_, i) => (
+                <Skeleton key={i} className="w-8 h-8 rounded-lg" />
+              ))}
+            </div>
+            <Skeleton className="h-6 w-8 mb-3" />
+            <ArtistRowsSkeleton count={8} />
+          </SkeletonScreen>
         ) : (
           <>
             {/* Letter navigation */}

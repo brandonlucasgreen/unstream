@@ -8,6 +8,8 @@ import { UsernameField } from '../components/UsernameField';
 import { LocationField } from '../components/LocationField';
 import { PasswordChangeForm } from '../components/PasswordChangeForm';
 import { SharingControls } from '../components/SharingControls';
+import { PageSkeleton } from '../components/PageSkeleton';
+import { FormSkeleton } from '../components/LoadingSkeletons';
 
 interface Settings {
   username: string | null;
@@ -53,9 +55,9 @@ export function SettingsPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-bg-primary flex items-center justify-center">
-        <div className="text-text-muted">Loading...</div>
-      </div>
+      <PageSkeleton label="Loading your settings">
+        <FormSkeleton sections={3} />
+      </PageSkeleton>
     );
   }
 

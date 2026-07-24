@@ -7,6 +7,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import './index.css'
 import App from './App.tsx'
 import { ArtistPage } from './pages/ArtistPage.tsx'
+import { AppLoadingFallback, AppErrorFallback } from './components/AppFallback'
 
 initSentry()
 
@@ -42,33 +43,12 @@ function ArtistDashboardRedirect() {
   return <Navigate to="/dashboard" replace />
 }
 
-function LoadingFallback() {
-  return (
-    <div className="min-h-screen bg-bg-primary">
-      <div className="p-4 border-b border-border flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-surface-secondary rounded animate-pulse" />
-          <div className="w-20 h-5 bg-surface-secondary rounded animate-pulse" />
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-5 bg-surface-secondary rounded animate-pulse" />
-          <div className="w-8 h-8 bg-surface-secondary rounded-full animate-pulse" />
-        </div>
-      </div>
-      <div className="max-w-4xl mx-auto px-4 py-16">
-        <div className="w-48 h-6 bg-surface-secondary rounded animate-pulse mb-4" />
-        <div className="w-64 h-4 bg-surface-secondary rounded animate-pulse" />
-      </div>
-    </div>
-  )
-}
-
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Sentry.ErrorBoundary fallback={<LoadingFallback />}>
+    <Sentry.ErrorBoundary fallback={<AppErrorFallback />}>
       <AuthProvider>
         <BrowserRouter>
-          <Suspense fallback={<LoadingFallback />}>
+          <Suspense fallback={<AppLoadingFallback />}>
             <Routes>
               <Route path="/" element={<App />} />
               <Route path="/artist/:slug" element={<ArtistPage />} />

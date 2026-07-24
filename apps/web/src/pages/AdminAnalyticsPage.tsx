@@ -4,6 +4,9 @@ import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
+import { Skeleton } from '../components/Skeleton';
+import { PageSkeleton } from '../components/PageSkeleton';
+import { StatTilesSkeleton } from '../components/LoadingSkeletons';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -288,9 +291,14 @@ export function AdminAnalyticsPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-text-muted">Loading…</p>
-      </div>
+      <PageSkeleton label="Loading analytics" maxWidth="max-w-5xl">
+        <div className="space-y-8">
+          <Skeleton className="h-7 w-40" />
+          <StatTilesSkeleton bars={5} />
+          <Skeleton className="h-56 w-full rounded-lg" />
+          <StatTilesSkeleton bars={4} />
+        </div>
+      </PageSkeleton>
     );
   }
 

@@ -7,6 +7,8 @@ import { Header } from '../components/Header';
 import { ArtistAnalytics } from '../components/ArtistAnalytics';
 import { PasswordSection } from '../components/PasswordSection';
 import { Footer } from '../components/Footer';
+import { PageSkeleton } from '../components/PageSkeleton';
+import { DashboardSkeleton } from '../components/LoadingSkeletons';
 
 interface ClaimedProfile {
   id: string;
@@ -76,9 +78,9 @@ export function ArtistDashboardPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-bg-primary flex items-center justify-center">
-        <div className="text-text-muted">Loading your profiles...</div>
-      </div>
+      <PageSkeleton label="Loading your profiles">
+        <DashboardSkeleton />
+      </PageSkeleton>
     );
   }
 
