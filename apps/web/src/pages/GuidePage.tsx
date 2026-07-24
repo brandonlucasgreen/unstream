@@ -6,6 +6,8 @@ import remarkGfm from 'remark-gfm';
 
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
+import { Skeleton, SkeletonScreen } from '../components/Skeleton';
+import { ArticleSkeleton } from '../components/LoadingSkeletons';
 
 interface GuideMeta {
   slug: string;
@@ -71,6 +73,12 @@ export function GuidePage() {
       <Header />
       <div className="pt-6 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">
+          {!meta && (
+            <div className="flex flex-col items-center gap-3">
+              <Skeleton className="h-9 w-3/4 max-w-md" />
+              <Skeleton className="h-4 w-2/3 max-w-sm" />
+            </div>
+          )}
           {meta && (
             <>
               <h1 className="font-display text-3xl md:text-4xl font-semibold text-text-primary mb-2">
@@ -88,7 +96,9 @@ export function GuidePage() {
       <main className="px-4 pb-16">
         <div className="max-w-2xl mx-auto">
           {content === null ? (
-            <p className="text-text-muted text-center">Loading...</p>
+            <SkeletonScreen label="Loading guide">
+              <ArticleSkeleton />
+            </SkeletonScreen>
           ) : (
             <>
               {meta && (

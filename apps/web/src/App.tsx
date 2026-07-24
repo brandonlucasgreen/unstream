@@ -5,6 +5,8 @@ import { SearchBar } from './components/SearchBar';
 import { ResultCard } from './components/ResultCard';
 
 import { Header } from './components/Header';
+import { LoadingLabel, SkeletonScreen } from './components/Skeleton';
+import { SearchResultsSkeleton } from './components/LoadingSkeletons';
 import type { SearchResult } from './types';
 import { sources, sourceCategories, searchPlatforms, resolveArtistUrl, fetchMusicBrainzData, mergeWithMusicBrainzData } from './services/sources';
 import { analytics } from './services/analytics';
@@ -246,9 +248,8 @@ function App() {
 
           {/* Resolving URL state */}
           {isResolving && (
-            <div className="mt-8 flex flex-col items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent-secondary border-t-transparent mb-3"></div>
-              <p className="text-text-muted">Resolving artist from link...</p>
+            <div className="mt-8 flex items-center justify-center py-8">
+              <LoadingLabel>Resolving artist from link...</LoadingLabel>
             </div>
           )}
 
@@ -263,22 +264,19 @@ function App() {
           {hasSearched && !error && (
             <div className="mt-8">
               {isLoading ? (
-                <div className="flex flex-col items-center justify-center py-16">
-                  <div className="animate-spin rounded-full h-12 w-12 border-2 border-accent-primary border-t-transparent mb-4"></div>
-                  <p className="text-text-muted">Searching platforms...</p>
-                </div>
+                <SkeletonScreen label="Searching platforms">
+                  <div className="space-y-4">
+                    <LoadingLabel>Searching platforms...</LoadingLabel>
+                    <SearchResultsSkeleton />
+                  </div>
+                </SkeletonScreen>
               ) : results.length > 0 ? (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <p className="text-text-muted text-sm">
                       Found {results.length} result{results.length !== 1 ? 's' : ''}
                     </p>
-                    {isEnriching && (
-                      <div className="flex items-center gap-2 text-text-muted text-sm">
-                        <div className="w-3 h-3 border-2 border-accent-secondary border-t-transparent rounded-full animate-spin"></div>
-                        <span>Loading more sources...</span>
-                      </div>
-                    )}
+                    {isEnriching && <LoadingLabel>Loading more sources...</LoadingLabel>}
                   </div>
                   {results.map((result) => (
                     <ResultCard

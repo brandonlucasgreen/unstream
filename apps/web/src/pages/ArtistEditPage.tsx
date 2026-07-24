@@ -6,6 +6,8 @@ import { sources } from '../services/sources';
 
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
+import { PageSkeleton } from '../components/PageSkeleton';
+import { FormSkeleton } from '../components/LoadingSkeletons';
 import type { SourceId } from '../types';
 
 interface LinkEntry {
@@ -357,9 +359,9 @@ export function ArtistEditPage() {
 
   if (form.loading) {
     return (
-      <div className="min-h-screen bg-bg-primary flex items-center justify-center">
-        <div className="text-text-muted">Loading...</div>
-      </div>
+      <PageSkeleton label="Loading artist profile">
+        <FormSkeleton sections={3} fields={2} />
+      </PageSkeleton>
     );
   }
 

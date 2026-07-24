@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
+import { SkeletonScreen } from '../components/Skeleton';
+import { ArticleListSkeleton } from '../components/LoadingSkeletons';
 
 interface GuideEntry {
   slug: string;
@@ -58,7 +60,9 @@ export function GuidesIndexPage() {
       <main className="px-4 pb-16">
         <div className="max-w-3xl mx-auto">
           {loading ? (
-            <p className="text-text-muted text-center">Loading...</p>
+            <SkeletonScreen label="Loading guides">
+              <ArticleListSkeleton />
+            </SkeletonScreen>
           ) : guides.length === 0 ? (
             <p className="text-text-muted text-center">No guides yet. Check back soon.</p>
           ) : (

@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
+import { PageSkeleton } from '../components/PageSkeleton';
+import { ArtistRowsSkeleton } from '../components/LoadingSkeletons';
+import { Skeleton } from '../components/Skeleton';
 
 interface SavedArtistPublic {
   slug: string;
@@ -62,9 +65,13 @@ export function PublicSavedArtistsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg-primary flex items-center justify-center">
-        <div className="text-text-muted">Loading…</div>
-      </div>
+      <PageSkeleton label="Loading saved artists">
+        <div className="flex flex-col items-center mb-8">
+          <Skeleton className="h-7 w-64 mb-3" />
+          <Skeleton className="h-9 w-36 rounded-lg" />
+        </div>
+        <ArtistRowsSkeleton count={6} />
+      </PageSkeleton>
     );
   }
 

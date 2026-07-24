@@ -3,6 +3,8 @@ import * as Sentry from '@sentry/react';
 
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
+import { Skeleton, SkeletonScreen } from '../components/Skeleton';
+import { ArticleListSkeleton } from '../components/LoadingSkeletons';
 
 interface ChangelogEntry {
   id: string;
@@ -67,7 +69,10 @@ export function ChangelogPage() {
       <main className="px-4 pb-16">
         <div className="max-w-2xl mx-auto">
           {loading ? (
-            <p className="text-text-muted text-center">Loading...</p>
+            <SkeletonScreen label="Loading the changelog">
+              <Skeleton className="h-3 w-28 mb-4" />
+              <ArticleListSkeleton count={3} />
+            </SkeletonScreen>
           ) : entries.length === 0 ? (
             <p className="text-text-muted text-center">Nothing here yet.</p>
           ) : (

@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { Header } from '../components/Header';
+import { SkeletonScreen } from '../components/Skeleton';
+import { FormSkeleton } from '../components/LoadingSkeletons';
 
 interface VerificationRequest {
   id: string;
@@ -132,9 +134,9 @@ export function AdminVerifyPage() {
           )}
 
           {loading ? (
-            <div className="flex items-center justify-center py-16">
-              <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent-primary border-t-transparent"></div>
-            </div>
+            <SkeletonScreen label="Loading verification requests">
+              <FormSkeleton sections={2} fields={2} />
+            </SkeletonScreen>
           ) : (
             <>
               {/* Pending requests */}
