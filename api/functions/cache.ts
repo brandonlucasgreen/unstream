@@ -63,11 +63,16 @@ export async function cacheSet<T>(key: string, value: T, ttlSeconds: number = DE
 /**
  * Helper: Get from cache or fetch from source
  * Handles the common pattern of cache-aside
+ *
+ * Pass `shouldCache` when the fetch can return a value meaning "the upstream did not
+ * answer" as opposed to "the upstream answered with nothing". Caching the former turns
+ * one transient failure into a full TTL of wrong answers for that key.
  */
 export async function cacheGetOrFetch<T>(
   key: string,
   fetchFn: () => Promise<T>,
-  ttlSeconds: number = DEFAULT_TTL
+  ttlSeconds: number = DEFAULT_TTL,
+  shouldCache?: (data: T) => boolean
 ): Promise<{ data: T; cached: boolean }> {
   // Try cache first
   const cached = await cacheGet<T>(key);
@@ -79,7 +84,9 @@ export async function cacheGetOrFetch<T>(
   const data = await fetchFn();
 
   // Cache for next time (don't await - fire and forget)
-  cacheSet(key, data, ttlSeconds).catch(() => {});
+  if (!shouldCache || shouldCache(data)) {
+    cacheSet(key, data, ttlSeconds).catch(() => {});
+  }
 
   return { data, cached: false };
 }
