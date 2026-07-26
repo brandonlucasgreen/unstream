@@ -989,6 +989,9 @@ async function searchJamcoop(query: string): Promise<Map<string, string>> {
 
 async function searchPatreon(query: string): Promise<Map<string, string>> {
   const cacheKey = artistCacheKey('patreon', query);
+  // Set when the upstream did not answer. A failure must not be cached as
+  // "this artist isn't on patreon" -- see the shouldCache predicate below.
+  let fetchFailed = false;
 
   const { data } = await cacheGetOrFetch<[string, string][]>(
     cacheKey,
@@ -1005,7 +1008,7 @@ async function searchPatreon(query: string): Promise<Map<string, string>> {
           },
         }, 5000);
 
-        if (!response.ok) return results;
+        if (!response.ok) { fetchFailed = true; return results; }
 
         const data = await response.json() as {
           data?: {
@@ -1044,6 +1047,7 @@ async function searchPatreon(query: string): Promise<Map<string, string>> {
         }
       } catch (error: unknown) {
         const err = error as { name?: string; message?: string };
+        fetchFailed = true;
         if (err.name !== 'AbortError') {
           console.error('Patreon search error:', err.message);
         }
@@ -1051,7 +1055,9 @@ async function searchPatreon(query: string): Promise<Map<string, string>> {
 
       return results;
     },
-    PLATFORM_CACHE_TTL
+    PLATFORM_CACHE_TTL,
+    // Never cache the empty result of a failed fetch.
+    () => !fetchFailed,
   );
 
   return new Map(data);
@@ -1063,7 +1069,8 @@ const AMPWALL_CACHE_TTL = 30 * 60;
 
 async function searchAmpwall(query: string): Promise<Map<string, string>> {
   const cacheKey = artistCacheKey('ampwall', query);
-
+  // No shouldCache guard here: this is still a stub with no outbound request, so it
+  // cannot fail and its empty result is a genuine answer rather than a hidden error.
   const { data, cached } = await cacheGetOrFetch<[string, string][]>(
     cacheKey,
     async () => {
@@ -1104,6 +1111,9 @@ async function searchAmpwall(query: string): Promise<Map<string, string>> {
 
 async function searchQobuz(query: string): Promise<Map<string, { url: string; imageUrl?: string }>> {
   const cacheKey = artistCacheKey('qobuz', query);
+  // Set when the upstream did not answer. A failure must not be cached as
+  // "this artist isn't on qobuz" -- see the shouldCache predicate below.
+  let fetchFailed = false;
 
   const { data } = await cacheGetOrFetch<[string, { url: string; imageUrl?: string }][]>(
     cacheKey,
@@ -1118,7 +1128,7 @@ async function searchQobuz(query: string): Promise<Map<string, { url: string; im
           },
         }, 5000);
 
-        if (!response.ok) return results;
+        if (!response.ok) { fetchFailed = true; return results; }
 
         const html = await response.text();
         const root = parse(html);
@@ -1176,6 +1186,7 @@ async function searchQobuz(query: string): Promise<Map<string, { url: string; im
         }
       } catch (error: unknown) {
         const err = error as { name?: string; message?: string };
+        fetchFailed = true;
         if (err.name !== 'AbortError') {
           console.error('Qobuz search error:', err.message);
         }
@@ -1183,7 +1194,9 @@ async function searchQobuz(query: string): Promise<Map<string, { url: string; im
 
       return results;
     },
-    PLATFORM_CACHE_TTL
+    PLATFORM_CACHE_TTL,
+    // Never cache the empty result of a failed fetch.
+    () => !fetchFailed,
   );
 
   return new Map(data);
@@ -1192,6 +1205,9 @@ async function searchQobuz(query: string): Promise<Map<string, { url: string; im
 // Search Beatport via __NEXT_DATA__ JSON embedded in search page
 async function searchBeatport(query: string): Promise<Map<string, string>> {
   const cacheKey = artistCacheKey('beatport', query);
+  // Set when the upstream did not answer. A failure must not be cached as
+  // "this artist isn't on beatport" -- see the shouldCache predicate below.
+  let fetchFailed = false;
 
   const { data } = await cacheGetOrFetch<[string, string][]>(
     cacheKey,
@@ -1206,7 +1222,7 @@ async function searchBeatport(query: string): Promise<Map<string, string>> {
           },
         }, 5000);
 
-        if (!response.ok) return results;
+        if (!response.ok) { fetchFailed = true; return results; }
 
         const html = await response.text();
         const root = parse(html);
@@ -1248,6 +1264,7 @@ async function searchBeatport(query: string): Promise<Map<string, string>> {
         }
       } catch (error: unknown) {
         const err = error as { name?: string; message?: string };
+        fetchFailed = true;
         if (err.name !== 'AbortError') {
           console.error('Beatport search error:', err.message);
         }
@@ -1255,7 +1272,9 @@ async function searchBeatport(query: string): Promise<Map<string, string>> {
 
       return results;
     },
-    PLATFORM_CACHE_TTL
+    PLATFORM_CACHE_TTL,
+    // Never cache the empty result of a failed fetch.
+    () => !fetchFailed,
   );
 
   return new Map(data);
@@ -1264,6 +1283,9 @@ async function searchBeatport(query: string): Promise<Map<string, string>> {
 // Search EVEN via Algolia API (direct-to-fan marketplace)
 async function searchEven(query: string): Promise<Map<string, string>> {
   const cacheKey = artistCacheKey('even', query);
+  // Set when the upstream did not answer. A failure must not be cached as
+  // "this artist isn't on even" -- see the shouldCache predicate below.
+  let fetchFailed = false;
 
   const { data } = await cacheGetOrFetch<[string, string][]>(
     cacheKey,
@@ -1288,7 +1310,7 @@ async function searchEven(query: string): Promise<Map<string, string>> {
           body: JSON.stringify({ query, hitsPerPage: 10 }),
         }, 5000);
 
-        if (!response.ok) return results;
+        if (!response.ok) { fetchFailed = true; return results; }
 
         const json = await response.json();
         const queryNormalized = normalizeForComparison(query);
@@ -1313,6 +1335,7 @@ async function searchEven(query: string): Promise<Map<string, string>> {
         }
       } catch (error: unknown) {
         const err = error as { name?: string; message?: string };
+        fetchFailed = true;
         if (err.name !== 'AbortError') {
           console.error('EVEN search error:', err.message);
         }
@@ -1320,7 +1343,9 @@ async function searchEven(query: string): Promise<Map<string, string>> {
 
       return results;
     },
-    PLATFORM_CACHE_TTL
+    PLATFORM_CACHE_TTL,
+    // Never cache the empty result of a failed fetch.
+    () => !fetchFailed,
   );
 
   return new Map(data);
