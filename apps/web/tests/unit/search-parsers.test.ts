@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   isBandcampChallenge,
   parseBandcampBandIdentity,
+  parseBandcampImage,
   parseBandcampPageLocation,
   parseBandcampReleaseCounts,
   parseBandcampSearchResults,
@@ -177,6 +178,37 @@ describe('parseBandcampPageLocation', () => {
 
   it('returns null for an empty element', () => {
     expect(parseBandcampPageLocation('<p class="location">   </p>')).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// parseBandcampImage
+// ---------------------------------------------------------------------------
+
+describe('parseBandcampImage', () => {
+  it('reads the artist photo from og:image', () => {
+    const html = `<meta property="og:image" content="https://f4.bcbits.com/img/0040867508_23.jpg">`;
+    expect(parseBandcampImage(html)).toBe('https://f4.bcbits.com/img/0040867508_23.jpg');
+  });
+
+  it('returns null when there is no og:image', () => {
+    expect(parseBandcampImage('<html><body>no meta here</body></html>')).toBeNull();
+  });
+
+  it("treats Bandcamp's blank.gif placeholder as no image", () => {
+    // Otherwise every artist without a photo gets a 1x1 transparent gif as their avatar.
+    const html = `<meta property="og:image" content="https://f4.bcbits.com/img/blank.gif">`;
+    expect(parseBandcampImage(html)).toBeNull();
+  });
+
+  it('rejects a non-https value rather than emitting a mixed-content URL', () => {
+    const html = `<meta property="og:image" content="http://f4.bcbits.com/img/1.jpg">`;
+    expect(parseBandcampImage(html)).toBeNull();
+  });
+
+  it('trims surrounding whitespace', () => {
+    const html = `<meta property="og:image" content="  https://f4.bcbits.com/img/2.jpg  ">`;
+    expect(parseBandcampImage(html)).toBe('https://f4.bcbits.com/img/2.jpg');
   });
 });
 

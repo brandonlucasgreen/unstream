@@ -216,6 +216,25 @@ export function parseBandcampPageLocation(html: string): string | null {
   return raw.length > 0 && raw.length <= 120 ? raw : null;
 }
 
+/**
+ * Read the artist photo from a Bandcamp page's og:image.
+ *
+ * Verified band-level rather than album art: radiohead/music yields
+ * f4.bcbits.com/img/0040867508_23.jpg, which is exactly the image production already
+ * shows for Radiohead. Free — the probe has this HTML in hand.
+ *
+ * Matters because the artist image has been coming from the Qobuz match, and Qobuz's
+ * search path is robots-disallowed and being retired. Bandcamp is the replacement.
+ */
+export function parseBandcampImage(html: string): string | null {
+  const match = html.match(/<meta property="og:image" content="([^"]+)"/);
+  if (!match) return null;
+  const url = match[1].trim();
+  // Bandcamp uses blank.gif as a placeholder; treat it as no image.
+  if (!url.startsWith('https://') || url.includes('/blank.gif')) return null;
+  return url;
+}
+
 /** Parse Bandcamp /music page HTML to extract release titles */
 export function parseBandcampReleaseTitles(html: string): string[] {
   const root = parse(html);
