@@ -552,7 +552,7 @@ async function checkForNewReleases() {
     // Build platforms dict
     const platforms = {};
     for (const p of artistData.platforms) {
-      if (['bandcamp', 'faircamp', 'mirlo', 'qobuz'].includes(p.sourceId)) {
+      if (['bandcamp', 'faircamp', 'mirlo'].includes(p.sourceId)) {
         platforms[p.sourceId] = p.url;
       }
     }

@@ -83,6 +83,18 @@ describe('normalizeForComparison', () => {
     expect(normalizeForComparison('Björk')).toBe('bjork');
   });
 
+  // Regression guard: hand-rolling this as `.toLowerCase().replace(/[^a-z0-9]/g, '')`
+  // *deletes* the accented letter rather than folding it, which silently broke MusicBrainz
+  // name matching for every accented artist — MB's "Tanerélle" became "tanerlle" while the
+  // already-normalized query was "tanerelle", so enrichment (and the Qobuz link) was dropped.
+  // Always call normalizeForComparison; never reimplement it inline.
+  it('folds accents rather than deleting them, unlike a naive charclass strip', () => {
+    const naive = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    expect(naive('Tanerélle')).toBe('tanerlle');            // the trap
+    expect(normalizeForComparison('Tanerélle')).toBe('tanerelle'); // correct
+    expect(normalizeForComparison('Tanerélle')).toBe(normalizeForComparison('Tanerelle'));
+  });
+
   it('handles empty and whitespace-only strings', () => {
     expect(normalizeForComparison('')).toBe('');
     expect(normalizeForComparison('   ')).toBe('');

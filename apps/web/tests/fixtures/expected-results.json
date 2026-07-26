@@ -6,8 +6,12 @@
       "results": [
         {
           "name": "Kid Lightbulbs",
-          "requiredPlatforms": ["bandcamp"],
-          "urlPatterns": { "bandcamp": "kidlightbulbs.bandcamp.com" }
+          "requiredPlatforms": [
+            "bandcamp"
+          ],
+          "urlPatterns": {
+            "bandcamp": "kidlightbulbs.bandcamp.com"
+          }
         }
       ]
     }
@@ -19,7 +23,10 @@
       "results": [
         {
           "name": "Radiohead",
-          "requiredPlatforms": ["bandcamp", "qobuz"]
+          "requiredPlatforms": [
+            "bandcamp",
+            "qobuz"
+          ]
         }
       ]
     }
@@ -31,7 +38,9 @@
       "results": [
         {
           "name": "Four Tet",
-          "requiredPlatforms": ["bandcamp"]
+          "requiredPlatforms": [
+            "bandcamp"
+          ]
         }
       ]
     }
@@ -42,7 +51,10 @@
       "minResults": 1,
       "results": [
         {
-          "nameContains": "Taner"
+          "nameContains": "Taner",
+          "requiredPlatforms": [
+            "discogs"
+          ]
         }
       ]
     }
@@ -58,24 +70,32 @@
     }
   },
   {
+    "query": "Mo-Rice",
+    "assertions": {
+      "minResults": 1,
+      "results": [
+        {
+          "name": "Mo-Rice",
+          "requiredPlatforms": [
+            "bandcamp"
+          ],
+          "urlPatterns": {
+            "bandcamp": "mo-rice.bandcamp.com"
+          }
+        }
+      ]
+    }
+  },
+  {
     "query": "Sonic Walker",
     "assertions": {
       "minResults": 1,
       "results": [
         {
           "name": "Sonic Walker",
-          "requiredPlatforms": ["bandcamp"]
-        }
-      ]
-    }
-  },
-  {
-    "query": "Morice",
-    "assertions": {
-      "minResults": 1,
-      "results": [
-        {
-          "nameContains": "Morice"
+          "requiredPlatforms": [
+            "bandcamp"
+          ]
         }
       ]
     }
@@ -87,8 +107,12 @@
       "results": [
         {
           "name": "Ben-G!",
-          "requiredPlatforms": ["beatport"],
-          "urlPatterns": { "beatport": "beatport.com/artist" }
+          "requiredPlatforms": [
+            "beatport"
+          ],
+          "urlPatterns": {
+            "beatport": "beatport.com/artist"
+          }
         }
       ]
     }
@@ -100,8 +124,12 @@
       "results": [
         {
           "name": "French Montana",
-          "requiredPlatforms": ["even"],
-          "urlPatterns": { "even": "even.biz/artists/" }
+          "requiredPlatforms": [
+            "even"
+          ],
+          "urlPatterns": {
+            "even": "even.biz/artists/"
+          }
         }
       ]
     }

@@ -145,7 +145,7 @@ struct iOSSettingsTab: View {
                 } header: {
                     Text("Notifications")
                 } footer: {
-                    Text("Checks your saved artists weekly for new releases on Bandcamp, Faircamp, Mirlo, and Qobuz.")
+                    Text("Checks your saved artists weekly for new releases on Bandcamp, Faircamp, and Mirlo.")
                 }
 
                 // Tip Jar

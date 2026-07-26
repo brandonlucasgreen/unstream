@@ -427,6 +427,30 @@ export function normalizeForComparison(str: string): string {
 }
 
 /**
+ * Pick the best Qobuz artist link out of a set of MusicBrainz relation URLs.
+ *
+ * MusicBrainz stores two shapes for the same artist. Prefer the www one — it is the
+ * human-readable web page — and fall back to open.qobuz.com when that is all MB has.
+ * Mirrors pickQobuzUrl in api/functions/search-utils.ts.
+ */
+export function pickQobuzUrl(platformUrls: string[]): string | null {
+  let openQobuzUrl: string | null = null;
+
+  for (const url of platformUrls) {
+    let hostname: string;
+    try {
+      hostname = new URL(url).hostname;
+    } catch {
+      continue;
+    }
+    if (hostname === 'www.qobuz.com' || hostname === 'qobuz.com') return url;
+    if (hostname === 'open.qobuz.com' && !openQobuzUrl) openQobuzUrl = url;
+  }
+
+  return openQobuzUrl;
+}
+
+/**
  * Score how well a result name matches the query (higher = better)
  */
 export function textMatchScore(name: string, normQuery: string): number {
@@ -722,6 +746,14 @@ export function mergeWithMusicBrainzData(
         } else {
           newPlatforms.push({ sourceId: 'bandcamp', url: bandcampUrl });
         }
+      }
+
+      // Add Qobuz URL from MB relations. MB is our only source of Qobuz links — the
+      // artist URL needs an unguessable numeric ID and every Qobuz search path is
+      // robots-disallowed. Mirrors pickQobuzUrl in api/functions/search-utils.ts.
+      const qobuzUrl = pickQobuzUrl(mbData.platformUrls);
+      if (qobuzUrl && !newPlatforms.some(p => p.sourceId === 'qobuz')) {
+        newPlatforms.push({ sourceId: 'qobuz', url: qobuzUrl });
       }
     }
     const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee', 'bandcamp']);

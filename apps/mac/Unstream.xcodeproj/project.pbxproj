@@ -51,7 +51,6 @@
 		B1BACADB228F567C2A0806F6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 529125F63F2294A642A38108 /* Assets.xcassets */; };
 		B824ABE933F7CD456A903C9A /* ReleaseAlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB06541602FC51167DB50DC9 /* ReleaseAlertManager.swift */; };
 		B8D05D430D492713FB2E97EF /* BandcampFriday.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4745357EE3AD119D3F7B059 /* BandcampFriday.swift */; };
-		BB206A0B929BB295A35820A8 /* QobuzReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6904B96B5E95C5FF26DABC1 /* QobuzReleaseChecker.swift */; };
 		BDD1E7A826216311FD1D8231 /* UnstreamTips.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 75A0258B88C9087A92AF57F5 /* UnstreamTips.storekit */; };
 		BEE6889852F609316894074E /* SupportListTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8C60F297D83E962E0D769E7 /* SupportListTab.swift */; platformFilters = (ios, ); };
 		BF58D857FC19F2147E12C7D5 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD675AEFDCED8AD330E47C5A /* SignInView.swift */; };
@@ -161,7 +160,6 @@
 		DC148A11F868801384A78672 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		E330692CA1EC213166D9351F /* SearchTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTab.swift; sourceTree = "<group>"; };
 		E488821D948022DCF94F9759 /* PlatformCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformCatalog.swift; sourceTree = "<group>"; };
-		E6904B96B5E95C5FF26DABC1 /* QobuzReleaseChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QobuzReleaseChecker.swift; sourceTree = "<group>"; };
 		E82B185A730210A472CD947F /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		EEEE83E95439F19BFC679216 /* ScrobbleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrobbleManager.swift; sourceTree = "<group>"; };
 		EF4E58F91C106A97A5179125 /* PopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverView.swift; sourceTree = "<group>"; };
@@ -201,7 +199,6 @@
 				84D714AAE0DE5A5032D0C0F3 /* KeychainHelper.swift */,
 				397ABE663954D6016159C13E /* MirloReleaseChecker.swift */,
 				4789F4D2A41CB1D13D629844 /* PlexService.swift */,
-				E6904B96B5E95C5FF26DABC1 /* QobuzReleaseChecker.swift */,
 				673FC4B1F41A233725896DB8 /* ReleaseCheckAPI.swift */,
 				B733B6764210C3CAE08F12E0 /* SavedArtistsSync.swift */,
 			);
@@ -531,7 +528,6 @@
 				259CF8CA44756A194690A76D /* PlatformCatalog.swift in Sources */,
 				403B91A1AEA2E2A4CD41C357 /* PlexService.swift in Sources */,
 				CC626E6B835C52240F626B7C /* PopoverView.swift in Sources */,
-				BB206A0B929BB295A35820A8 /* QobuzReleaseChecker.swift in Sources */,
 				1C82AF206862EABE1F4F856E /* ReleaseAlert.swift in Sources */,
 				B824ABE933F7CD456A903C9A /* ReleaseAlertManager.swift in Sources */,
 				30E246B538D9B06340964314 /* ReleaseCheckAPI.swift in Sources */,

@@ -198,7 +198,9 @@ export const ALLOWED_OUTBOUND_HOSTNAMES = new Set([
   '*.bandcamp.com',       // artist.bandcamp.com subdomains
   'mirlo.space',
   '*.mirlo.space',
-  'www.qobuz.com',
+  // No qobuz.com: nothing fetches Qobuz any more. Its search paths are robots-disallowed
+  // and its artist links now come from MusicBrainz relations, which we display but never
+  // fetch. See docs/specs/qobuz-coverage-research.md.
   'www.bandwagon.fm',
   'jam.coop',
   'ampwall.com',

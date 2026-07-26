@@ -10,7 +10,6 @@ import { searchFaircamp } from './faircamp';
 import { searchMirlo } from './mirlo';
 import { searchMusicBrainz } from './musicbrainz';
 import { searchPatreon } from './patreon';
-import { getQobuzLatestRelease, searchQobuz } from './qobuz';
 
 function aggregateResults(allResults: PlatformResult[], query?: string): AggregatedResult[] {
   const resultMap = new Map<string, AggregatedResult>();
@@ -56,12 +55,11 @@ function aggregateResults(allResults: PlatformResult[], query?: string): Aggrega
 }
 
 export async function searchAllPlatforms(query: string): Promise<AggregatedResult[]> {
-  const [bandwagonResults, mirloResults, faircampResults, patreonResults, qobuzResults, musicbrainzResults, beatportResults, evenResults] = await Promise.allSettled([
+  const [bandwagonResults, mirloResults, faircampResults, patreonResults, musicbrainzResults, beatportResults, evenResults] = await Promise.allSettled([
     searchBandwagon(query),
     searchMirlo(query),
     searchFaircamp(query),
     searchPatreon(query),
-    searchQobuz(query),
     searchMusicBrainz(query),
     searchBeatport(query),
     searchEven(query),
@@ -79,7 +77,6 @@ export async function searchAllPlatforms(query: string): Promise<AggregatedResul
   const bandwagonMatches = bandwagonResults.status === 'fulfilled' ? bandwagonResults.value : new Map<string, string>();
   const faircampMatches = faircampResults.status === 'fulfilled' ? faircampResults.value : new Map<string, string>();
   const patreonMatches = patreonResults.status === 'fulfilled' ? patreonResults.value : new Map<string, string>();
-  const qobuzMatches = qobuzResults.status === 'fulfilled' ? qobuzResults.value : new Map<string, string>();
   const beatportMatches = beatportResults.status === 'fulfilled' ? beatportResults.value : new Map<string, string>();
   const evenMatches = evenResults.status === 'fulfilled' ? evenResults.value : new Map<string, string>();
 
@@ -123,9 +120,6 @@ export async function searchAllPlatforms(query: string): Promise<AggregatedResul
       if (patreonMatches.has(normalizedName)) {
         result.platforms.push({ sourceId: 'patreon', url: patreonMatches.get(normalizedName)! });
       }
-      if (qobuzMatches.has(normalizedName)) {
-        result.platforms.push({ sourceId: 'qobuz', url: qobuzMatches.get(normalizedName)! });
-      }
       if (beatportMatches.has(normalizedName)) {
         result.platforms.push({ sourceId: 'beatport', url: beatportMatches.get(normalizedName)! });
       }
@@ -145,7 +139,7 @@ export async function searchAllPlatforms(query: string): Promise<AggregatedResul
     }
   }
 
-  // Fetch latest releases for Bandcamp and Qobuz artist pages in parallel
+  // Fetch latest releases for Bandcamp artist pages in parallel
   const releasePromises: Promise<void>[] = [];
   for (const result of aggregated) {
     if (result.type === 'artist') {
@@ -154,15 +148,6 @@ export async function searchAllPlatforms(query: string): Promise<AggregatedResul
         releasePromises.push(
           getBandcampLatestRelease(bandcampPlatform.url).then(release => {
             if (release) bandcampPlatform.latestRelease = release;
-          })
-        );
-      }
-
-      const qobuzPlatform = result.platforms.find(p => p.sourceId === 'qobuz');
-      if (qobuzPlatform) {
-        releasePromises.push(
-          getQobuzLatestRelease(qobuzPlatform.url).then(release => {
-            if (release) qobuzPlatform.latestRelease = release;
           })
         );
       }
