@@ -67,12 +67,20 @@ export async function cacheSet<T>(key: string, value: T, ttlSeconds: number = DE
  * Pass `shouldCache` when the fetch can return a value meaning "the upstream did not
  * answer" as opposed to "the upstream answered with nothing". Caching the former turns
  * one transient failure into a full TTL of wrong answers for that key.
+ *
+ * `failureTtlSeconds` then decides what happens to those uncacheable values. Omit it and
+ * they are not cached at all — correct, but it means a genuinely down upstream is retried
+ * on every request, and callers that wait on a fixed timeout pay that timeout every time.
+ * Give it a short value (~60s) for the useful middle ground: a hiccup heals in a minute
+ * instead of persisting for the full TTL, while an outage still costs one slow request per
+ * minute rather than one per search.
  */
 export async function cacheGetOrFetch<T>(
   key: string,
   fetchFn: () => Promise<T>,
   ttlSeconds: number = DEFAULT_TTL,
-  shouldCache?: (data: T) => boolean
+  shouldCache?: (data: T) => boolean,
+  failureTtlSeconds?: number
 ): Promise<{ data: T; cached: boolean }> {
   // Try cache first
   const cached = await cacheGet<T>(key);
@@ -86,6 +94,8 @@ export async function cacheGetOrFetch<T>(
   // Cache for next time (don't await - fire and forget)
   if (!shouldCache || shouldCache(data)) {
     cacheSet(key, data, ttlSeconds).catch(() => {});
+  } else if (failureTtlSeconds && failureTtlSeconds > 0) {
+    cacheSet(key, data, failureTtlSeconds).catch(() => {});
   }
 
   return { data, cached: false };

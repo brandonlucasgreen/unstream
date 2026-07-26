@@ -56,4 +56,28 @@ describe('cacheGetOrFetch shouldCache predicate', () => {
       cacheGetOrFetch('t:throw', async () => { throw new Error('boom'); }, 60, () => true),
     ).rejects.toThrow('boom');
   });
+
+  it('still returns the value when a failure TTL is supplied', async () => {
+    // The failure TTL only changes how long an uncacheable value is remembered; it must
+    // never change what this call returns.
+    const result = await cacheGetOrFetch('t:ftl', async () => null, 1800, d => d !== null, 60);
+    expect(result.data).toBeNull();
+    expect(result.cached).toBe(false);
+  });
+
+  it('accepts a failure TTL without disturbing the cacheable path', async () => {
+    const predicate = vi.fn((d: { v: number }) => d.v > 0);
+    const result = await cacheGetOrFetch('t:ftl-ok', async () => ({ v: 3 }), 1800, predicate, 60);
+    expect(result.data).toEqual({ v: 3 });
+    expect(predicate).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores a zero or negative failure TTL', async () => {
+    // Guards the `failureTtlSeconds > 0` check — a 0 must mean "do not cache" rather
+    // than being passed to Redis as an immediate-expiry write.
+    for (const ttl of [0, -5]) {
+      const result = await cacheGetOrFetch(`t:ftl-${ttl}`, async () => null, 1800, d => d !== null, ttl);
+      expect(result.data).toBeNull();
+    }
+  });
 });
