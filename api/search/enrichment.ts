@@ -1,9 +1,12 @@
 // Shared enrichment functions for MusicBrainz data extraction
 // These functions are used both by the MusicBrainz Netlify function and search-sources.ts
 
+import { Sentry } from '../lib/sentry';
 import { cacheGetOrFetch, artistCacheKey } from '../functions/cache';
 import { persistEnrichment } from '../functions/db';
 import { isUrlHostnameAllowed } from '../functions/middleware';
+import { checkSentryDedup } from '../functions/ratelimit';
+import { isBandcampChallenge } from '../functions/search-parsers';
 
 // Social platform types
 export type SocialPlatform =
@@ -466,6 +469,11 @@ export function mergeLocations(...sources: (ArtistLocation | null | undefined)[]
 // Search Bandcamp for an artist by name and return the first matching artist/label URL.
 // Mirrors the Phase 1 Bandcamp scrape but runs server-side within Phase 2 enrichment,
 // so no client-supplied URLs are involved.
+//
+// NOTE: bandcamp.com/search is behind a Fastly bot challenge and is `Disallow`ed in
+// Bandcamp's robots.txt, so this currently always returns null. It is superseded by the
+// slug-probe lookup — see docs/specs/bandcamp-coverage-research.md. Until that lands, the
+// challenge is detected and reported rather than being silently read as "not on Bandcamp".
 export async function searchBandcampForArtistUrl(artistName: string, timeoutMs = 4000): Promise<string | null> {
   try {
     const searchUrl = `https://bandcamp.com/search?q=${encodeURIComponent(artistName)}&item_type=b`;
@@ -478,6 +486,24 @@ export async function searchBandcampForArtistUrl(artistName: string, timeoutMs =
     clearTimeout(timeout);
     if (!response.ok) return null;
     const html = await response.text();
+
+    // A challenge page arrives as HTTP 200, so it would otherwise parse to zero
+    // results and be mistaken for a genuine "no such artist" answer.
+    if (isBandcampChallenge(html)) {
+      const shouldCapture = await checkSentryDedup('uns152:bandcamp-search-challenge', 6 * 60 * 60);
+      if (shouldCapture) {
+        Sentry.captureMessage('Bandcamp search blocked by bot challenge', {
+          level: 'warning',
+          extra: {
+            searchUrl,
+            responseBytes: html.length,
+            note: 'HTTP 200 challenge page — results are unavailable, not empty. Superseded by slug-probe lookup.',
+          },
+          tags: { platform: 'bandcamp' },
+        });
+      }
+      return null;
+    }
 
     // Parse the first artist/label result whose name closely matches the query
     const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');

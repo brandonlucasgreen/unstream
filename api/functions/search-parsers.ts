@@ -13,6 +13,24 @@ import {
 // Bandcamp
 // ---------------------------------------------------------------------------
 
+/**
+ * True if this HTML is a Fastly bot-challenge interstitial rather than real content.
+ *
+ * Bandcamp serves the challenge with HTTP 200, so an `!response.ok` check never
+ * catches it. Without this, a challenge parses to zero results and is
+ * indistinguishable from "the artist genuinely isn't on Bandcamp" — a wrong
+ * confident answer rather than a visible failure.
+ *
+ * Fastly's challenge page loads its assets from a `/_fs-ch-<token>/` path and
+ * carries a restrictive inline CSP; the asset path is the stable marker.
+ */
+export function isBandcampChallenge(html: string): boolean {
+  if (!html) return false;
+  // Challenge pages are small; real Bandcamp pages are 100KB+. Cheap pre-filter.
+  if (html.length > 20_000) return false;
+  return html.includes('/_fs-ch-');
+}
+
 /** Parse Bandcamp search results HTML into PlatformResult[] */
 export function parseBandcampSearchResults(html: string, query: string): PlatformResult[] {
   const results: PlatformResult[] = [];
