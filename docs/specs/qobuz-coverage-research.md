@@ -166,13 +166,119 @@ worth recording so the next person does not re-litigate them:
 | #324 | Qobuz link deleted when its release lookup merely timed out | **close — mooted by this decision** |
 | #325 | Artist photo sourced from Bandcamp instead of Qobuz | open |
 
-## 7. Remaining work
+## 7. Implementation plan (not yet done)
 
-1. **Remove `searchQobuz`** and the fan-out entry, plus the now-dead validators and Qobuz release
-   fetchers. Depends on #325 landing first so photos survive.
-2. **Attach MusicBrainz's Qobuz URL as a platform.** It is currently used only for disambiguation
-   (`search-sources.ts` ~1617), never attached — so removing the search without this would drop
-   Qobuz entirely.
-3. **Measure Wikidata `P7071` coverage** against real search traffic before deciding whether to add
-   it as a second source.
-4. **Consider asking Qobuz** about sanctioned access, as with Bandcamp.
+PR #325 has landed, so artist photos now come from Bandcamp and the removal is unblocked.
+
+> **Read this first.** An automated attempt at step 2 corrupted both files. A brace-walking script
+> mis-identified function boundaries — braces inside strings and regexes — reported
+> `searchQobuz: 1 line` for a 95-line function, and produced 31 syntax errors. It was reverted; main
+> is clean.
+>
+> **`search-sources.ts` (~2,050 lines) and `search-utils.ts` (~900 lines) must be hand-edited.** Do
+> not script structural edits to them. This is the second scripted-edit failure in these two files;
+> the first injected a variable into six unrelated `catch` blocks.
+
+Line numbers below are against `0845da2` (main after #325). Verify them before editing.
+
+### Step 1 — Attach MusicBrainz's Qobuz URL (do this FIRST)
+
+**Why first:** `mbData.platformUrls` is currently used only for *disambiguation*
+(`search-sources.ts:1617`) and never attached as a platform. Removing the search without this makes
+Qobuz **disappear** rather than narrow to major artists. Ship the two steps together; if they must be
+split, this one goes first.
+
+In `applyEnrichmentToResults`, immediately before the `// Add Subvert URL from MB platform relations`
+block (`search-sources.ts` ~1719), mirroring the Bandcamp block directly above it at 1704:
+
+```ts
+// Add Qobuz URL from MB platform relations. This is now the ONLY source of Qobuz links:
+// the dedicated search hit /*/search/artists/, which is Disallow'ed in Qobuz's robots.txt,
+// and artist URLs need an unguessable numeric ID so there is no probe fallback.
+// MusicBrainz relations are authoritative, so no release verification is needed.
+const qobuzUrl = mbData.platformUrls.find(u => {
+  try { return new URL(u).hostname.endsWith('qobuz.com'); } catch { return false; }
+});
+if (qobuzUrl && !newPlatforms.some(p => p.sourceId === 'qobuz')) {
+  newPlatforms.push({ sourceId: 'qobuz' as SourceId, url: qobuzUrl });
+}
+```
+
+`endsWith('qobuz.com')` deliberately covers both shapes MusicBrainz uses —
+`www.qobuz.com/us-en/interpreter/…` and `open.qobuz.com/artist/…`.
+
+This edit was written and verified before the revert; it is known good.
+
+### Step 2 — Remove the robots-disallowed Qobuz search
+
+Delete, in `api/functions/search-sources.ts`:
+
+| What | Lines | Note |
+|---|---|---|
+| `getQobuzLatestRelease` | 265–389 | 125 lines |
+| `getQobuzReleaseTitles` | 391–442 | 52 lines |
+| `searchQobuz` | 1123–1217 | 95 lines — the robots-disallowed fetch |
+| `searchQobuz(query),` in the fan-out | 1775 | |
+| `['qobuz', qobuzResults],` | 1790 | |
+| `const qobuzMatches = …` | 1824 | |
+| `createQobuzOnlyResults(aggregated, qobuzMatches);` | 1833 | |
+| `createOrphanedQobuzStandalones(aggregated, qobuzMatches);` | 1914 | easy to miss — it is far below the others |
+
+Also remove `qobuzResults` from the `Promise.allSettled` destructuring at ~1774 (the array is
+positional — miscounting here silently shifts every other platform's results, so re-check each name
+against its `searchX(query)` call).
+
+Replace the Qobuz block in `fetchReleasesForDisambiguation` (~1401) with a comment. **Useful side
+effect:** with no Qobuz platform ever entering the `completed` set, #324's guard means
+`removeDeadQobuzLinks` now *keeps* MB-sourced links instead of deleting them for having no release
+data. That is the desired behaviour and the reason #324 turned out to be worth merging after all.
+
+In `api/functions/search-utils.ts`:
+
+- `attachQobuzAndSearchLinks` (467–537) → rename to `attachSearchLinks`; drop the `qobuzMatches`
+  parameter and the Qobuz-attaching branch at 517–528. Keep everything else — it also attaches
+  Ampwall, Ko-fi, Buy Me a Coffee and the Bandcamp fallback link.
+- Delete `createQobuzOnlyResults` (539–578) and `createOrphanedQobuzStandalones` (692–733).
+- **Keep** `removeDeadQobuzLinks` (610), `isQobuzVariation` (364) and `qobuzDisplayName` (395) for
+  now — they are harmless, and deleting them plus their tests is pure cleanup that does not need to
+  ride along with a behaviour change.
+
+### Step 3 — Tests
+
+`apps/web/tests/unit/disambiguation.test.ts` and `identifiers.test.ts` reference the removed
+functions. Expect to delete the `createQobuzOnlyResults` describe block (~336) and update the
+`attachQobuzAndSearchLinks` call at ~291 to the new name and signature.
+
+### Verification
+
+`api/tsconfig.json` covers only six files, so **`npm run build` will not typecheck any of this.** Use
+the explicit baseline:
+
+```bash
+npx tsc --noEmit --strict --target ES2022 --lib ES2022 --module ESNext \
+  --moduleResolution bundler --types node --skipLibCheck --verbatimModuleSyntax \
+  --moduleDetection force --noUnusedLocals --noUnusedParameters \
+  api/functions/search-sources.ts api/functions/search-utils.ts
+```
+
+Main's baseline is **28 errors**. Any number above that is yours. Then `npx tsc -b`,
+`npx vitest run api/functions/`, `npm run test:unit`.
+
+Finally, confirm the outcome against real artists — a major-label artist should keep a Qobuz link via
+MusicBrainz, and an indie artist should simply not have one:
+
+```
+/api/search/sources?query=Radiohead    -> expect a qobuz platform (MB relation)
+/api/search/sources?query=Low%20Hum    -> expect no qobuz platform, and that this is correct
+```
+
+Both should have an artist photo from Bandcamp regardless.
+
+## 8. Later
+
+1. **Measure Wikidata `P7071` coverage** against real search traffic before adding it as a second
+   source. The properties exist (`P7071`, `P11578`) and Unstream already pulls from Wikidata, but
+   coverage is unmeasured — a spot check on one entity did not find it.
+2. **Consider asking Qobuz** about sanctioned access, as with Bandcamp.
+3. Delete `removeDeadQobuzLinks`, `isQobuzVariation`, `qobuzDisplayName` and their tests once the
+   removal has settled.
