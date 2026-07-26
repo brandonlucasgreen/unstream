@@ -32,7 +32,7 @@ import {
   fetchMirloLocation,
   enrichLocationFallback,
 } from '../search/enrichment';
-import { findBandcampArtistUrl } from '../search/bandcamp-probe';
+import { findBandcampArtist } from '../search/bandcamp-probe';
 
 // Cache TTL for MusicBrainz lookups (30 minutes)
 const MUSICBRAINZ_CACHE_TTL = 30 * 60;
@@ -114,8 +114,11 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     // Wait 1.1 seconds to respect MusicBrainz rate limit (1 req/sec)
     await new Promise(resolve => setTimeout(resolve, 1100));
 
-    // Fetch artist details with URL relations
-    const artistUrl = `https://musicbrainz.org/ws/2/artist/${artist.id}?inc=url-rels&fmt=json`;
+    // Fetch URL relations AND release groups in a single lookup. These used to be two
+    // requests with a mandatory 1.1s gap between them; `inc=url-rels+release-groups`
+    // returns both, saving a round trip plus the gap (~1.6s measured). The release
+    // groups carry `first-release-date`, which is all the pre-2005 check needs.
+    const artistUrl = `https://musicbrainz.org/ws/2/artist/${artist.id}?inc=url-rels+release-groups&fmt=json`;
 
     const artistResponse = await globalThis.fetch(artistUrl, {
       headers: {
@@ -132,6 +135,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     const platformUrls: string[] = [];
 
     let mbLocation: ArtistLocation | undefined;
+    let hasPre2005Release = false;
 
     if (artistResponse.ok) {
       const artistData = await artistResponse.json() as {
@@ -140,7 +144,19 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
         country?: string;
         area?: { name: string; type?: string | null; 'iso-3166-1-codes'?: string[] };
         'begin-area'?: { name: string; type?: string | null };
+        // Present because of inc=release-groups; feeds the pre-2005 check below.
+        'release-groups'?: { 'first-release-date'?: string }[];
       };
+
+      // Hoopla/Freegal eligibility: any release group first issued before 2005.
+      for (const rg of artistData['release-groups'] || []) {
+        const firstReleaseDate = rg['first-release-date'];
+        if (!firstReleaseDate) continue;
+        if (parseInt(firstReleaseDate.substring(0, 4), 10) < 2005) {
+          hasPre2005Release = true;
+          break;
+        }
+      }
 
       // Parse location from area / begin-area fields.
       // MB area types: 'Country', 'Subdivision', 'City', 'Municipality', 'District', 'Island'.
@@ -242,36 +258,6 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       }
     }
 
-    // Wait again before next request
-    await new Promise(resolve => setTimeout(resolve, 1100));
-
-    // Check if artist has pre-2005 releases (for Hoopla/Freegal eligibility)
-    const releasesUrl = `https://musicbrainz.org/ws/2/release-group/?artist=${artist.id}&fmt=json&limit=20`;
-
-    const releasesResponse = await globalThis.fetch(releasesUrl, {
-      headers: {
-        'User-Agent': 'Unstream/1.0 (https://github.com/unstream - ethical music finder)',
-      },
-    });
-
-    let hasPre2005Release = false;
-
-    if (releasesResponse.ok) {
-      const releasesData = await releasesResponse.json() as { 'release-groups'?: { 'first-release-date'?: string }[] };
-      const releaseGroups = releasesData['release-groups'] || [];
-
-      for (const rg of releaseGroups) {
-        const firstReleaseDate = rg['first-release-date'];
-        if (firstReleaseDate) {
-          const year = parseInt(firstReleaseDate.substring(0, 4), 10);
-          if (year < 2005) {
-            hasPre2005Release = true;
-            break;
-          }
-        }
-      }
-    }
-
     // Derive Bandcamp URL from MB's own platform relations if available (most authoritative).
     // Falls back to a live Bandcamp search by the MB-confirmed artist name so we always
     // try to find location even when MB's Bandcamp link is absent or stale.
@@ -292,15 +278,16 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       searchPeerTubeChannels(artist.name),
       wikipediaUrl ? fetchWikipediaSummary(wikipediaUrl) : Promise.resolve(null),
       (async () => {
-        // Try MB relation URL first; if absent or returns no location, probe Bandcamp directly.
-        // These three steps run sequentially, so keep the probe budget tight — location is
-        // best-effort enrichment and this whole lambda shares the function's 10s ceiling.
+        // Prefer MusicBrainz's own relation URL, then fall back to the probe.
+        // The probe reads location out of the /music page it already fetched, so this
+        // is at most two sequential requests rather than three — the third fetch used
+        // to push the worst case past the function's 10s ceiling.
         if (mbBandcampUrl) {
           const loc = await fetchBandcampLocation(mbBandcampUrl);
           if (loc) return loc;
         }
-        const searchedUrl = await findBandcampArtistUrl(artist.name, 2500);
-        return searchedUrl ? fetchBandcampLocation(searchedUrl) : null;
+        const match = await findBandcampArtist(artist.name, 2500);
+        return match?.location ? parseLocationString(match.location) : null;
       })(),
       fetchMirloLocation(mirloSlug),
     ]);
