@@ -1,5 +1,6 @@
 import { parse } from 'node-html-parser';
 import { Sentry } from '../lib/sentry';
+import { findBandcampArtist } from '../search/bandcamp-probe';
 import { cacheGetOrFetch, artistCacheKey } from './cache';
 import { persistSearchResults, getArtistBySlug, artistSlug, getMergeOverrides } from './db';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
@@ -69,12 +70,25 @@ async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutM
 // Cache TTL for platform searches (30 minutes)
 const PLATFORM_CACHE_TTL = 30 * 60;
 
-// Search Bandcamp by scraping search results page (DISABLED)
-// Bandcamp's anti-bot protection blocks server-side scraping, returning
-// challenge pages or 403s. We now rely on MusicBrainz enrichment for direct
-// Bandcamp URLs, and the client-side search fallback for manual discovery.
+// Find the artist on Bandcamp by probing candidate subdomains.
+//
+// bandcamp.com/search is behind a bot challenge and is Disallow'ed in Bandcamp's
+// robots.txt, so this used to return [] and Phase 1 surfaced no Bandcamp results at
+// all — the only Bandcamp link came from a MusicBrainz relation, or a generic
+// "go search Bandcamp yourself" fallback added in attachQobuzAndSearchLinks.
+//
+// The probe covers roughly twice as many artists as MusicBrainz relations alone, and
+// its result is cached (negatives included), so a repeat query costs one DB read.
+// See docs/specs/bandcamp-coverage-research.md.
 async function searchBandcamp(query: string): Promise<PlatformResult[]> {
-  return [];
+  const match = await findBandcampArtist(query, 3000);
+  if (!match) return [];
+  return [{
+    sourceId: 'bandcamp',
+    name: match.bandName ?? query,
+    type: 'artist',
+    url: match.url,
+  }];
 }
 
 // Fetch latest release from a Bandcamp artist page, then get release date from album page
@@ -1681,7 +1695,8 @@ function applyEnrichmentToResults(
 
 async function searchAllPlatforms(query: string): Promise<{ results: AggregatedResult[]; enrichmentApplied: boolean }> {
   // Phase 1: Search all platforms in parallel and aggregate Bandcamp/Mirlo results
-  const [bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, qobuzResults, ampwallResults, beatportResults, evenResults, musicbrainzResult] = await Promise.allSettled([
+  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, qobuzResults, ampwallResults, beatportResults, evenResults, musicbrainzResult] = await Promise.allSettled([
+    searchBandcamp(query),
     searchBandwagon(query),
     searchMirlo(query),
     searchFaircamp(query),
@@ -1696,6 +1711,7 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
 
   // UC6: Capture partial platform failures for monitoring
   const platformSettledResults: [string, PromiseSettledResult<unknown>][] = [
+    ['bandcamp', bandcampResults],
     ['bandwagon', bandwagonResults],
     ['mirlo', mirloResults],
     ['faircamp', faircampResults],
@@ -1724,6 +1740,7 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
   }
 
   const allResults: PlatformResult[] = [];
+  if (bandcampResults.status === 'fulfilled') allResults.push(...bandcampResults.value.filter(r => r.type === 'artist'));
   if (mirloResults.status === 'fulfilled') allResults.push(...mirloResults.value.filter(r => r.type === 'artist'));
 
   const nameOnlyMaps: [string, Map<string, string>][] = [

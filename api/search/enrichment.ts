@@ -2,7 +2,7 @@
 // These functions are used both by the MusicBrainz Netlify function and search-sources.ts
 
 import { isUrlHostnameAllowed } from '../functions/middleware';
-import { findBandcampArtistUrl } from './bandcamp-probe';
+import { findBandcampArtist } from './bandcamp-probe';
 
 // Social platform types
 export type SocialPlatform =
@@ -464,7 +464,9 @@ export function mergeLocations(...sources: (ArtistLocation | null | undefined)[]
 
 // Fetch location from a Bandcamp artist profile page.
 // Validated against the SSRF allowlist as defense-in-depth.
-export async function fetchBandcampLocation(bandcampUrl: string, timeoutMs = 4000): Promise<ArtistLocation | null> {
+// Default cap of 2.5s: this is one page fetch, measured at ~670ms, and it sits on a
+// sequential path inside a function with a 10s ceiling.
+export async function fetchBandcampLocation(bandcampUrl: string, timeoutMs = 2500): Promise<ArtistLocation | null> {
   if (!isUrlHostnameAllowed(bandcampUrl)) return null;
   try {
     const controller = new AbortController();
@@ -533,16 +535,21 @@ export async function fetchMirloLocation(artistSlug: string, timeoutMs = 4000): 
 }
 
 // Fallback enrichment when MusicBrainz has no match: look up location via Bandcamp and Mirlo.
-// Uses shorter timeouts (3s each) so the total adds at most ~6s to the Phase 2 response time.
+// Both run in parallel with a 3s cap, so this adds at most ~3s to Phase 2 — the Bandcamp
+// side used to be two sequential requests, but the probe now reads location out of the
+// /music page it already fetched.
 export async function enrichLocationFallback(query: string): Promise<ArtistLocation | undefined> {
   const mirloSlug = query.toLowerCase().replace(/\s+/g, '');
   const FALLBACK_TIMEOUT = 3000;
 
-  const bandcampUrl = await findBandcampArtistUrl(query, FALLBACK_TIMEOUT);
-  const [bandcampLocation, mirloLocation] = await Promise.all([
-    bandcampUrl ? fetchBandcampLocation(bandcampUrl, FALLBACK_TIMEOUT) : Promise.resolve(null),
+  const [bandcampMatch, mirloLocation] = await Promise.all([
+    findBandcampArtist(query, FALLBACK_TIMEOUT),
     fetchMirloLocation(mirloSlug, FALLBACK_TIMEOUT),
   ]);
+
+  const bandcampLocation = bandcampMatch?.location
+    ? parseLocationString(bandcampMatch.location)
+    : null;
 
   return mergeLocations(bandcampLocation, mirloLocation);
 }

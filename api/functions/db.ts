@@ -208,6 +208,8 @@ export interface BandcampProbeRow {
   track_count: number;
   matched_slug: string | null;
   verdict: 'accepted' | 'absent' | 'rejected_empty' | 'rejected_name' | 'pending_review';
+  /** Raw location string from the probed /music page, e.g. "Oxford, UK". */
+  location: string | null;
   checked_at: string;
 }
 
@@ -230,7 +232,7 @@ export async function getBandcampProbe(queryNorm: string): Promise<BandcampProbe
   try {
     const { data, error } = await client
       .from('bandcamp_slug_probes')
-      .select('query_norm, artist_url, band_name, band_id, album_count, track_count, matched_slug, verdict, checked_at')
+      .select('query_norm, artist_url, band_name, band_id, album_count, track_count, matched_slug, verdict, location, checked_at')
       .eq('query_norm', queryNorm)
       .maybeSingle();
 
