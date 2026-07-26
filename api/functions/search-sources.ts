@@ -70,6 +70,11 @@ async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutM
 // Cache TTL for platform searches (30 minutes)
 const PLATFORM_CACHE_TTL = 30 * 60;
 
+// How long a FAILED platform search is remembered. Deliberately far shorter than
+// PLATFORM_CACHE_TTL: long enough that an outage doesn't make every search wait out
+// the upstream timeout, short enough that a transient blip clears in a minute.
+const PLATFORM_FAILURE_CACHE_TTL = 60;
+
 // Find the artist on Bandcamp by probing candidate subdomains.
 //
 // bandcamp.com/search is behind a bot challenge and is Disallow'ed in Bandcamp's
@@ -1056,8 +1061,10 @@ async function searchPatreon(query: string): Promise<Map<string, string>> {
       return results;
     },
     PLATFORM_CACHE_TTL,
-    // Never cache the empty result of a failed fetch.
+    // A failed fetch must not be cached as "artist not on this platform"...
     () => !fetchFailed,
+    // ...but remember it briefly so an outage doesn't cost every search the timeout.
+    PLATFORM_FAILURE_CACHE_TTL,
   );
 
   return new Map(data);
@@ -1195,8 +1202,10 @@ async function searchQobuz(query: string): Promise<Map<string, { url: string; im
       return results;
     },
     PLATFORM_CACHE_TTL,
-    // Never cache the empty result of a failed fetch.
+    // A failed fetch must not be cached as "artist not on this platform"...
     () => !fetchFailed,
+    // ...but remember it briefly so an outage doesn't cost every search the timeout.
+    PLATFORM_FAILURE_CACHE_TTL,
   );
 
   return new Map(data);
@@ -1273,8 +1282,10 @@ async function searchBeatport(query: string): Promise<Map<string, string>> {
       return results;
     },
     PLATFORM_CACHE_TTL,
-    // Never cache the empty result of a failed fetch.
+    // A failed fetch must not be cached as "artist not on this platform"...
     () => !fetchFailed,
+    // ...but remember it briefly so an outage doesn't cost every search the timeout.
+    PLATFORM_FAILURE_CACHE_TTL,
   );
 
   return new Map(data);
@@ -1344,8 +1355,10 @@ async function searchEven(query: string): Promise<Map<string, string>> {
       return results;
     },
     PLATFORM_CACHE_TTL,
-    // Never cache the empty result of a failed fetch.
+    // A failed fetch must not be cached as "artist not on this platform"...
     () => !fetchFailed,
+    // ...but remember it briefly so an outage doesn't cost every search the timeout.
+    PLATFORM_FAILURE_CACHE_TTL,
   );
 
   return new Map(data);
