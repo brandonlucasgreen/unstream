@@ -1,9 +1,10 @@
 // MusicBrainz enrichment server function
 // Imports shared functions from enrichment.ts, keeps Netlify handler here
 
+import { Sentry } from '../lib/sentry';
 import { cacheGetOrFetch, artistCacheKey } from './cache';
 import { persistEnrichment } from './db';
-import { checkRateLimit, getClientIp } from './ratelimit';
+import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery, isUrlHostnameAllowed } from './middleware';
 import { normalizeAccents, normalizeSearchQuery } from './search-utils';
 
@@ -52,8 +53,14 @@ interface MusicBrainzSearchResponse {
   location?: ArtistLocation;
 }
 
-// Search MusicBrainz for artist info including official website, Discogs, social links, and release history
-async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchResponse> {
+// Search MusicBrainz for artist info including official website, Discogs, social links, and release history.
+//
+// Returns null when MusicBrainz itself did not answer (non-2xx). That is deliberately
+// distinct from "MusicBrainz has no such artist", which returns a populated empty
+// result: the caller must not cache the former. Caching an upstream failure turned a
+// single MusicBrainz hiccup into 30 minutes of "this artist has no links" for that
+// query — the same mistake as reading a bot-challenge page as "not on Bandcamp".
+async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchResponse | null> {
   const emptyResult: MusicBrainzSearchResponse = {
     query,
     artistName: null,
@@ -79,8 +86,9 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     });
 
     if (!response.ok) {
+      // Upstream did not answer — signal "unknown" so this is not cached.
       console.log('MusicBrainz artist search failed:', response.status);
-      return emptyResult;
+      return null;
     }
 
     const data = await response.json() as { artists?: { id: string; name: string; score: number }[] };
@@ -330,10 +338,29 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       location,
     };
   } catch (error: unknown) {
+    // A network error or timeout is also "we don't know" rather than "no such artist",
+    // so it must not be cached either.
     const err = error as { name?: string; message?: string };
     console.error('MusicBrainz search error:', err.name, err.message);
-    return emptyResult;
+    return null;
   }
+}
+
+/** Response shape used when MusicBrainz did not answer. Nothing is cached for it. */
+function unavailableResult(query: string): MusicBrainzSearchResponse {
+  return {
+    query,
+    artistName: null,
+    officialUrl: null,
+    discogsUrl: null,
+    hasPre2005Release: false,
+    socialLinks: [],
+    discoveredPlatforms: [],
+    platformUrls: [],
+    wikipediaSummary: null,
+    wikipediaUrl: null,
+    location: undefined,
+  };
 }
 
 // Netlify function handler
@@ -359,14 +386,37 @@ export async function handler(event: { queryStringParameters?: Record<string, st
 
     // Use Redis cache to avoid hitting MusicBrainz rate limits
     const cacheKey = artistCacheKey('musicbrainz', normalizedQuery);
-    const { data: result, cached } = await cacheGetOrFetch<MusicBrainzSearchResponse>(
+    const { data: result, cached } = await cacheGetOrFetch<MusicBrainzSearchResponse | null>(
       cacheKey,
       () => searchMusicBrainz(normalizedQuery),
-      MUSICBRAINZ_CACHE_TTL
+      MUSICBRAINZ_CACHE_TTL,
+      // null means MusicBrainz did not answer. Never cache that — otherwise one
+      // hiccup makes an artist look link-less for the full 30 minute TTL.
+      data => data !== null,
     );
 
     if (cached) {
       console.log(`[MusicBrainz] Cache hit for "${normalizedQuery}"`);
+    }
+
+    if (result === null) {
+      const shouldCapture = await checkSentryDedup('uns152:musicbrainz-unavailable', 30 * 60);
+      if (shouldCapture) {
+        Sentry.captureMessage('MusicBrainz did not answer; enrichment skipped', {
+          level: 'warning',
+          extra: { query: normalizedQuery, note: 'Result deliberately not cached.' },
+        });
+      }
+      return {
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          // Do not let the CDN cache an unavailable upstream either.
+          'Cache-Control': 'no-store',
+        },
+        body: JSON.stringify(unavailableResult(query)),
+      };
     }
 
     // Persist enrichment to the artist database.
