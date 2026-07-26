@@ -32,6 +32,7 @@ import {
   parseBandcampBandIdentity,
   parseBandcampPageLocation,
   parseBandcampReleaseCounts,
+  parseBandcampReleaseTitles,
 } from '../functions/search-parsers';
 
 /**
@@ -62,6 +63,14 @@ export interface BandcampProbeResult {
    * Free — the page is already in hand — so callers never need a second fetch just for it.
    */
   location?: string;
+  /**
+   * Normalized release titles from the same /music response.
+   *
+   * Also free, and load-bearing: disambiguation fetches Bandcamp and Qobuz release data
+   * inside one fixed 4s race, so a Bandcamp platform arriving without titles forces two
+   * more requests into that budget and starves the Qobuz ones.
+   */
+  releaseTitles?: string[];
 }
 
 const DEFAULT_BUDGET_MS = 5000;
@@ -72,6 +81,7 @@ interface CandidateOutcome {
   identity?: { id: number; name: string };
   counts: { albums: number; tracks: number };
   location?: string;
+  releaseTitles?: string[];
   /** Bandcamp asked us to back off. Stop the whole round, don't try more candidates. */
   rateLimited?: boolean;
 }
@@ -135,7 +145,8 @@ async function probeCandidate(slug: string, timeoutMs: number): Promise<Candidat
 
   const counts = parseBandcampReleaseCounts(html);
   const location = parseBandcampPageLocation(html) ?? undefined;
-  return { verdict: 'accepted', identity, counts, location };
+  const releaseTitles = parseBandcampReleaseTitles(html);
+  return { verdict: 'accepted', identity, counts, location, releaseTitles };
 }
 
 /**
@@ -231,6 +242,7 @@ export async function probeBandcampArtist(
       trackCount: counts.tracks,
       matchedSlug: slug,
       location: outcome.location,
+      releaseTitles: outcome.releaseTitles,
     };
   }
 
@@ -246,6 +258,8 @@ export interface BandcampArtistMatch {
   bandName: string | null;
   /** Raw location string as Bandcamp renders it, e.g. "Oxford, UK". */
   location: string | null;
+  /** Normalized release titles, so disambiguation need not refetch /music. */
+  releaseTitles: string[];
 }
 
 /**
@@ -271,7 +285,12 @@ export async function findBandcampArtist(
   const cached = await getBandcampProbe(queryNorm);
   if (cached) {
     return cached.artist_url
-      ? { url: cached.artist_url, bandName: cached.band_name, location: cached.location }
+      ? {
+          url: cached.artist_url,
+          bandName: cached.band_name,
+          location: cached.location,
+          releaseTitles: cached.release_titles ?? [],
+        }
       : null;
   }
 
@@ -290,10 +309,16 @@ export async function findBandcampArtist(
     matched_slug: result.matchedSlug ?? null,
     verdict: result.verdict,
     location: result.location ?? null,
+    release_titles: result.releaseTitles ?? null,
   });
 
   return result.artistUrl
-    ? { url: result.artistUrl, bandName: result.bandName ?? null, location: result.location ?? null }
+    ? {
+        url: result.artistUrl,
+        bandName: result.bandName ?? null,
+        location: result.location ?? null,
+        releaseTitles: result.releaseTitles ?? [],
+      }
     : null;
 }
 

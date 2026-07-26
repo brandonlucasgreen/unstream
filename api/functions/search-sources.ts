@@ -88,6 +88,12 @@ async function searchBandcamp(query: string): Promise<PlatformResult[]> {
     name: match.bandName ?? query,
     type: 'artist',
     url: match.url,
+    // Carried from the /music page the probe already read. This must be populated:
+    // fetchReleasesForDisambiguation shares one 4s budget across all its release
+    // fetches, so a Bandcamp platform with no titles forces two more requests into
+    // that budget and starves the Qobuz ones — which drops the Qobuz link, and with
+    // it the artist image.
+    allReleaseTitles: match.releaseTitles.length > 0 ? match.releaseTitles : undefined,
   }];
 }
 
@@ -1333,7 +1339,11 @@ async function fetchReleasesForDisambiguation(aggregated: AggregatedResult[]): P
     const bc = result.platforms.find(p => p.sourceId === 'bandcamp');
     if (bc) {
       promises.push(getBandcampLatestRelease(bc.url).then(r => { if (r) bc.latestRelease = r; }));
-      promises.push(getBandcampReleaseTitles(bc.url).then(t => { if (t.length > 0) bc.allReleaseTitles = t; }));
+      // Skip when the probe already supplied titles. All of these fetches share one
+      // 4s race below, so redundant Bandcamp requests directly cost Qobuz its data.
+      if (!bc.allReleaseTitles || bc.allReleaseTitles.length === 0) {
+        promises.push(getBandcampReleaseTitles(bc.url).then(t => { if (t.length > 0) bc.allReleaseTitles = t; }));
+      }
     }
 
     const qz = result.platforms.find(p => p.sourceId === 'qobuz');
