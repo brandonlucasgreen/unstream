@@ -74,6 +74,15 @@ export interface BandcampProbeResult {
   releaseTitles?: string[];
   /** Artist photo from the page's og:image. Replaced Qobuz as the image source. */
   imageUrl?: string;
+  /**
+   * Slug candidates actually attempted, in order.
+   *
+   * Cached so a negative can be reused only for queries whose candidates it covers.
+   * `query_norm` strips punctuation, so "Morice" (['morice']) and "Mo-Rice"
+   * (['morice', 'mo-rice']) share a cache row — without this the first spelling's
+   * miss answers for the second and hides a real artist.
+   */
+  probedSlugs: string[];
 }
 
 const DEFAULT_BUDGET_MS = 5000;
@@ -168,14 +177,17 @@ export async function probeBandcampArtist(
   const candidates = bandcampSlugCandidates(query);
   const empty = { albumCount: 0, trackCount: 0 };
   if (candidates.length === 0) {
-    return { verdict: 'absent', artistUrl: null, ...empty };
+    return { verdict: 'absent', artistUrl: null, ...empty, probedSlugs: [] };
   }
 
   const deadline = Date.now() + budgetMs;
   // Rejections are remembered so a later 'absent' can't overwrite a more
   // specific reason; 'undecided' outranks both so we never cache a false miss.
-  let fallback: BandcampProbeResult = { verdict: 'absent', artistUrl: null, ...empty };
+  let fallback: BandcampProbeResult = { verdict: 'absent', artistUrl: null, ...empty, probedSlugs: [] };
   let sawUndecided = false;
+  // Only the slugs we really requested. A round cut short by budget or a 429 must not
+  // claim coverage it does not have.
+  const probedSlugs: string[] = [];
 
   for (const slug of candidates) {
     const remaining = deadline - Date.now();
@@ -186,6 +198,7 @@ export async function probeBandcampArtist(
     }
 
     let outcome: CandidateOutcome | null;
+    probedSlugs.push(slug);
     try {
       outcome = await probeCandidate(slug, remaining);
     } catch {
@@ -199,7 +212,7 @@ export async function probeBandcampArtist(
     // Back off immediately rather than spending the remaining candidates on a
     // service that has just told us to stop.
     if (outcome.rateLimited) {
-      return { verdict: 'undecided', artistUrl: null, ...empty };
+      return { verdict: 'undecided', artistUrl: null, ...empty, probedSlugs };
     }
 
     if (outcome.verdict === 'undecided' || !outcome.identity) {
@@ -219,6 +232,7 @@ export async function probeBandcampArtist(
           albumCount: counts.albums,
           trackCount: counts.tracks,
           matchedSlug: slug,
+          probedSlugs,
         };
       }
       continue;
@@ -234,6 +248,7 @@ export async function probeBandcampArtist(
         albumCount: 0,
         trackCount: 0,
         matchedSlug: slug,
+        probedSlugs,
       };
       continue;
     }
@@ -249,13 +264,14 @@ export async function probeBandcampArtist(
       location: outcome.location,
       releaseTitles: outcome.releaseTitles,
       imageUrl: outcome.imageUrl,
+      probedSlugs,
     };
   }
 
   if (sawUndecided && fallback.verdict === 'absent') {
-    return { verdict: 'undecided', artistUrl: null, ...empty };
+    return { verdict: 'undecided', artistUrl: null, ...empty, probedSlugs };
   }
-  return fallback;
+  return { ...fallback, probedSlugs };
 }
 
 /** What a cached lookup yields for an artist that is on Bandcamp. */
@@ -290,7 +306,10 @@ export async function findBandcampArtist(
   const queryNorm = normalizeForComparison(query);
   if (!queryNorm) return null;
 
-  const cached = await getBandcampProbe(queryNorm);
+  // The cache key drops punctuation, so it cannot distinguish "Morice" from
+  // "Mo-Rice" — but their candidate sets differ. Pass the candidates so a negative
+  // recorded for a narrower set is not reused for a wider one.
+  const cached = await getBandcampProbe(queryNorm, bandcampSlugCandidates(query));
   if (cached) {
     return cached.artist_url
       ? {
@@ -320,6 +339,7 @@ export async function findBandcampArtist(
     location: result.location ?? null,
     release_titles: result.releaseTitles ?? null,
     image_url: result.imageUrl ?? null,
+    probed_slugs: result.probedSlugs,
   });
 
   return result.artistUrl
