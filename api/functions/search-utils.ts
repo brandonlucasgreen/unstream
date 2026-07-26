@@ -328,12 +328,6 @@ export function extractPlatformIdentifier(url: string, sourceId: SourceId): stri
       const match = urlObj.hostname.match(/^([^.]+)\.bandcamp\.com$/);
       return match ? match[1] : urlObj.hostname;
     }
-    if (sourceId === 'qobuz') {
-      // For Qobuz, the artist ID is the unique identifier
-      // e.g., "496181" from "/us-en/interpreter/cory-miller/496181"
-      const match = urlObj.pathname.match(/\/interpreter\/[^/]+\/(\d+)/);
-      return match ? match[1] : urlObj.pathname;
-    }
     // For other platforms, use the full path
     return urlObj.pathname;
   } catch {
@@ -359,11 +353,31 @@ export const RELIABLE_RELEASE_PLATFORMS = new Set(['bandcamp']);
 // Curated platforms where presence is strong verification signal
 export const CURATED_PLATFORMS = new Set(['mirlo', 'faircamp', 'jamcoop']);
 
+/**
+ * Pick the best Qobuz artist link out of a set of MusicBrainz relation URLs.
+ *
+ * MusicBrainz is our only source of Qobuz links: a Qobuz artist URL needs a numeric ID
+ * that cannot be derived from the artist name, and every Qobuz search path is Disallow'ed
+ * in their robots.txt. See docs/specs/qobuz-coverage-research.md.
+ *
+ * MB stores two shapes for the same artist. Prefer the www one — it is the human-readable
+ * web page — and fall back to open.qobuz.com when that is all MB has.
+ */
+export function pickQobuzUrl(platformUrls: string[]): string | null {
+  let openQobuzUrl: string | null = null;
 
-// Check if a Qobuz name is a variation of a base name (e.g. "mattyoung1" for "mattyoung")
-export function isQobuzVariation(qobuzName: string, baseName: string): boolean {
-  return qobuzName === baseName ||
-    (qobuzName.startsWith(baseName) && /^\d+$/.test(qobuzName.slice(baseName.length)));
+  for (const url of platformUrls) {
+    let hostname: string;
+    try {
+      hostname = new URL(url).hostname;
+    } catch {
+      continue;
+    }
+    if (hostname === 'www.qobuz.com' || hostname === 'qobuz.com') return url;
+    if (hostname === 'open.qobuz.com' && !openQobuzUrl) openQobuzUrl = url;
+  }
+
+  return openQobuzUrl;
 }
 
 // Collect all release titles from a result's platforms into a Set
@@ -378,7 +392,7 @@ export function collectReleaseTitles(result: AggregatedResult): Set<string> {
 
 // Reconstruct a display name from a URL slug (e.g. "ben-g" → "Ben G").
 // Strips trailing numeric suffixes that platforms use for disambiguation
-// (e.g. Qobuz "ben-g-1" → "Ben G", not "Ben G 1").
+// (e.g. "ben-g-1" → "Ben G", not "Ben G 1").
 // If an original query is provided and its normalized form matches,
 // prefer the query since it preserves special characters (e.g. "Ben-G!").
 export function displayNameFromSlug(slug: string, originalQuery?: string): string {
@@ -389,14 +403,6 @@ export function displayNameFromSlug(slug: string, originalQuery?: string): strin
     return originalQuery;
   }
   return reconstructed;
-}
-
-// Extract display name from a Qobuz URL slug
-export function qobuzDisplayName(url: string, fallback: string, originalQuery?: string): string {
-  const match = url.match(/\/interpreter\/([^/]+)\//);
-  return match
-    ? displayNameFromSlug(match[1], originalQuery)
-    : fallback;
 }
 
 // ---------------------------------------------------------------------------
@@ -461,12 +467,11 @@ export function aggregateResults(allResults: PlatformResult[], query?: string): 
 }
 
 // ---------------------------------------------------------------------------
-// Phase 2: Attach Qobuz, Ampwall, and search-only links to aggregated results
+// Phase 2: Attach Ampwall and search-only links to aggregated results
 // ---------------------------------------------------------------------------
 
-export function attachQobuzAndSearchLinks(
+export function attachAmpwallAndSearchLinks(
   aggregated: AggregatedResult[],
-  qobuzMatches: Map<string, { url: string; imageUrl?: string }>,
   ampwallMatches: Map<string, string>,
   mbData?: { artistName: string; bandcampUrl?: string } | null,
 ): void {
@@ -514,18 +519,6 @@ export function attachQobuzAndSearchLinks(
       }
     }
 
-    // Qobuz: attach ALL name variations (e.g. "morice", "morice1", "morice2")
-    // Disambiguation will sort out which actually match based on releases
-    for (const [qobuzName, qobuzData] of qobuzMatches) {
-      if (isQobuzVariation(qobuzName, normalizedName)) {
-        result.platforms.push({ sourceId: 'qobuz', url: qobuzData.url });
-        // Use Qobuz image if the result doesn't already have one
-        if (qobuzData.imageUrl && !result.imageUrl) {
-          result.imageUrl = qobuzData.imageUrl;
-        }
-      }
-    }
-
     // Sort: real platforms first, search-only last
     result.platforms.sort((a, b) => {
       const aSearch = isSearchOnlyLink(a) ? 1 : 0;
@@ -535,201 +528,9 @@ export function attachQobuzAndSearchLinks(
   }
 }
 
-// Create new results for Qobuz artists not on Bandcamp/Mirlo
-export function createQobuzOnlyResults(
-  aggregated: AggregatedResult[],
-  qobuzMatches: Map<string, { url: string; imageUrl?: string }>,
-): void {
-  const usedQobuzMatches = new Set<string>();
-  const aggregatedBaseNames = new Set<string>();
-
-  for (const result of aggregated) {
-    const normalizedName = normalizeForComparison(result.name);
-    aggregatedBaseNames.add(normalizedName);
-    for (const [qobuzName] of qobuzMatches) {
-      if (isQobuzVariation(qobuzName, normalizedName)) usedQobuzMatches.add(qobuzName);
-    }
-  }
-
-  for (const [normalizedName, qobuzData] of qobuzMatches) {
-    const baseNameWithoutNumbers = normalizedName.replace(/\d+$/, '');
-    if (usedQobuzMatches.has(normalizedName) || aggregatedBaseNames.has(baseNameWithoutNumbers)) continue;
-
-    const displayName = qobuzDisplayName(qobuzData.url, normalizedName);
-    aggregated.push({
-      id: `qobuz-${normalizedName}`,
-      name: displayName,
-      type: 'artist',
-      imageUrl: qobuzData.imageUrl,
-      platforms: [
-        { sourceId: 'qobuz', url: qobuzData.url },
-        { sourceId: 'ampwall', url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(displayName)}` },
-        { sourceId: 'kofi', url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(displayName)}` },
-        { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
-      ],
-    });
-    console.log(`[Qobuz-only] Created result for "${displayName}" from Qobuz match`);
-  }
-}
-
 // ---------------------------------------------------------------------------
 // Phase 3 pure functions
 // ---------------------------------------------------------------------------
-
-// Prefer Bandcamp over Qobuz for the featured release (better payouts + preview)
-export function preferBandcampFeaturedRelease(aggregated: AggregatedResult[]): void {
-  for (const result of aggregated) {
-    const bc = result.platforms.find(p => p.sourceId === 'bandcamp');
-    const qz = result.platforms.find(p => p.sourceId === 'qobuz');
-    if (!bc?.latestRelease || !qz?.latestRelease) continue;
-
-    const bcTitle = normalizeForComparison(bc.latestRelease.title);
-    const qzTitle = normalizeForComparison(qz.latestRelease.title);
-    if (bcTitle === qzTitle || bcTitle.includes(qzTitle) || qzTitle.includes(bcTitle)) {
-      console.log(`[Release Priority] Preferring Bandcamp over Qobuz for "${result.name}" - "${bc.latestRelease.title}"`);
-      delete qz.latestRelease;
-    }
-  }
-}
-
-// Remove Qobuz platforms with no releases (dead/placeholder pages)
-/** One entry in an AggregatedResult's platform list. */
-export type AggregatedPlatform = AggregatedResult['platforms'][number];
-
-/**
- * Drop Qobuz links that have no releases behind them — they are usually a name-only
- * match on a different artist.
- *
- * `releaseLookupsCompleted` holds the platform entries whose release lookups actually
- * finished. Pass it. Without it, a Qobuz link is deleted whenever its lookup merely
- * *didn't finish*, which is not the same thing as Qobuz having nothing: those lookups
- * share one fixed 4s race in fetchReleasesForDisambiguation, so any artist whose Qobuz
- * pages are slow to answer loses its link — and with it the artist image, which comes
- * from the Qobuz match. Absence of data is not evidence of absence.
- */
-export function removeDeadQobuzLinks(
-  aggregated: AggregatedResult[],
-  releaseLookupsCompleted?: ReadonlySet<AggregatedPlatform>,
-): void {
-  for (const result of aggregated) {
-    if (result.overrideMerged) continue;
-    result.platforms = result.platforms.filter(p => {
-      if (p.sourceId !== 'qobuz') return true;
-      const hasReleases = p.latestRelease || (p.allReleaseTitles && p.allReleaseTitles.length > 0);
-      if (hasReleases) return true;
-
-      // No release data. Only conclude Qobuz has nothing if we finished looking.
-      if (releaseLookupsCompleted && !releaseLookupsCompleted.has(p)) {
-        console.log(`[Cleanup] Keeping Qobuz link for "${result.name}" — release lookup did not finish: ${p.url}`);
-        return true;
-      }
-
-      console.log(`[Cleanup] Removing dead Qobuz link for "${result.name}": ${p.url}`);
-      return false;
-    });
-  }
-}
-
-// Remove Qobuz from results where releases don't match Bandcamp (different artists)
-export function crossPlatformReleaseComparison(aggregated: AggregatedResult[]): void {
-  for (const result of aggregated) {
-    if (result.overrideMerged) continue;
-    const bc = result.platforms.find(p => p.sourceId === 'bandcamp');
-    if (!bc?.allReleaseTitles || bc.allReleaseTitles.length === 0) continue;
-
-    const bcTitles = new Set(bc.allReleaseTitles);
-    const indicesToRemove: number[] = [];
-
-    result.platforms.forEach((p, idx) => {
-      if (p.sourceId !== 'qobuz' || !p.allReleaseTitles || p.allReleaseTitles.length === 0) return;
-
-      const matchCount = p.allReleaseTitles.filter(t => bcTitles.has(t)).length;
-      const minCatalog = Math.min(bcTitles.size, p.allReleaseTitles.length);
-      const threshold = Math.max(1, Math.ceil(minCatalog * 0.3));
-
-      if (matchCount < threshold) {
-        console.log(`[Cross-Platform] Removing Qobuz from "${result.name}" - only ${matchCount}/${threshold} matching releases`);
-        indicesToRemove.push(idx);
-      }
-    });
-
-    if (indicesToRemove.length > 0) {
-      result.platforms = result.platforms.filter((_, idx) => !indicesToRemove.includes(idx));
-    }
-  }
-}
-
-// If the same Qobuz URL appears on multiple results, keep only on the best match
-export function deduplicateQobuzUrls(aggregated: AggregatedResult[]): void {
-  const qobuzUrlToResults = new Map<string, { result: AggregatedResult; matchCount: number }[]>();
-
-  for (const result of aggregated) {
-    const bcTitles = new Set(
-      result.platforms.find(p => p.sourceId === 'bandcamp')?.allReleaseTitles || []
-    );
-    for (const p of result.platforms) {
-      if (p.sourceId !== 'qobuz') continue;
-      const matchCount = bcTitles.size > 0 && p.allReleaseTitles?.length
-        ? p.allReleaseTitles.filter(t => bcTitles.has(t)).length
-        : 0;
-      if (!qobuzUrlToResults.has(p.url)) qobuzUrlToResults.set(p.url, []);
-      qobuzUrlToResults.get(p.url)!.push({ result, matchCount });
-    }
-  }
-
-  for (const [qobuzUrl, matches] of qobuzUrlToResults) {
-    if (matches.length <= 1) continue;
-    matches.sort((a, b) => b.matchCount - a.matchCount);
-    for (let i = 1; i < matches.length; i++) {
-      if (matches[i].result.overrideMerged) continue;
-      console.log(`[Qobuz Dedup] Removing ${qobuzUrl} from "${matches[i].result.name}" (${matches[i].matchCount} matches) - keeping on "${matches[0].result.name}" (${matches[0].matchCount} matches)`);
-      matches[i].result.platforms = matches[i].result.platforms.filter(p => p.url !== qobuzUrl);
-    }
-  }
-}
-
-// Re-create standalone results for Qobuz profiles removed from all results
-export function createOrphanedQobuzStandalones(
-  aggregated: AggregatedResult[],
-  qobuzMatches: Map<string, { url: string; imageUrl?: string }>,
-): void {
-  const attachedUrls = new Set<string>();
-  // Also track names of existing results to avoid creating duplicates
-  // when Qobuz was attached but later removed as a dead link
-  const existingNames = new Set<string>();
-  for (const r of aggregated) {
-    for (const p of r.platforms) {
-      if (p.sourceId === 'qobuz') attachedUrls.add(p.url);
-    }
-    existingNames.add(normalizeForComparison(r.name));
-  }
-
-  for (const [qobuzName, qobuzData] of qobuzMatches) {
-    if (attachedUrls.has(qobuzData.url)) continue;
-    // Don't create a standalone if a result with the same name already exists
-    // (Qobuz may have been attached then removed as a dead link)
-    const normalizedQobuzName = normalizeForComparison(qobuzName);
-    if (existingNames.has(normalizedQobuzName)) continue;
-
-    const displayName = qobuzDisplayName(qobuzData.url, qobuzName);
-    const standaloneId = `qobuz-standalone-${qobuzName}`;
-    if (aggregated.some(r => r.id === standaloneId)) continue;
-
-    console.log(`[Qobuz Standalone] Creating separate result for "${displayName}" - removed from all Bandcamp results`);
-    aggregated.push({
-      id: standaloneId,
-      name: displayName,
-      type: 'artist',
-      imageUrl: qobuzData.imageUrl,
-      platforms: [
-        { sourceId: 'qobuz', url: qobuzData.url },
-        { sourceId: 'ampwall', url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(displayName)}` },
-        { sourceId: 'kofi', url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(displayName)}` },
-        { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
-      ],
-    });
-  }
-}
 
 // Split results where Bandcamp has releases that don't match other platforms
 export function splitSuspiciousPlatforms(aggregated: AggregatedResult[]): AggregatedResult[] {

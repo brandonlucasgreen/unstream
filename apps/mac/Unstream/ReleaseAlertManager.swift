@@ -213,10 +213,6 @@ class ReleaseAlertManager: ObservableObject {
             if let mirloUrl = entry.platforms.first(where: { $0.sourceId == "mirlo" })?.url {
                 platforms["mirlo"] = mirloUrl
             }
-            if let qobuzUrl = entry.platforms.first(where: { $0.sourceId == "qobuz" })?.url {
-                platforms["qobuz"] = qobuzUrl
-            }
-
             // Skip if no supported platforms
             guard !platforms.isEmpty else { continue }
 

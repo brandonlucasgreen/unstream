@@ -1,13 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
-  attachQobuzAndSearchLinks,
-  createQobuzOnlyResults,
-  crossPlatformReleaseComparison,
+  attachAmpwallAndSearchLinks,
   splitSuspiciousPlatforms,
   mergeByReleaseOverlap,
-  deduplicateQobuzUrls,
-  removeDeadQobuzLinks,
-  preferBandcampFeaturedRelease,
   filterAndSort,
   normalizeForComparison,
   applyMergeOverrides,
@@ -30,49 +25,11 @@ function makeResult(
   };
 }
 
-describe('crossPlatformReleaseComparison', () => {
-  it('removes Qobuz when releases dont match Bandcamp', () => {
-    const results = [makeResult('Matt Young', [
-      { sourceId: 'bandcamp', url: 'https://a.bandcamp.com', allReleaseTitles: ['album a', 'album b', 'album c'] },
-      { sourceId: 'qobuz', url: 'https://qobuz.com/1', allReleaseTitles: ['album x', 'album y', 'album z'] },
-    ])];
-
-    crossPlatformReleaseComparison(results);
-
-    const qobuz = results[0].platforms.find(p => p.sourceId === 'qobuz');
-    expect(qobuz).toBeUndefined();
-  });
-
-  it('keeps Qobuz when releases match Bandcamp', () => {
-    const results = [makeResult('Artist', [
-      { sourceId: 'bandcamp', url: 'https://a.bandcamp.com', allReleaseTitles: ['shared album', 'album b'] },
-      { sourceId: 'qobuz', url: 'https://qobuz.com/1', allReleaseTitles: ['shared album', 'album c'] },
-    ])];
-
-    crossPlatformReleaseComparison(results);
-
-    const qobuz = results[0].platforms.find(p => p.sourceId === 'qobuz');
-    expect(qobuz).toBeDefined();
-  });
-
-  it('keeps Qobuz with no release data (benefit of the doubt)', () => {
-    const results = [makeResult('Artist', [
-      { sourceId: 'bandcamp', url: 'https://a.bandcamp.com', allReleaseTitles: ['album a'] },
-      { sourceId: 'qobuz', url: 'https://qobuz.com/1' },
-    ])];
-
-    crossPlatformReleaseComparison(results);
-
-    const qobuz = results[0].platforms.find(p => p.sourceId === 'qobuz');
-    expect(qobuz).toBeDefined();
-  });
-});
-
 describe('splitSuspiciousPlatforms', () => {
   it('splits Bandcamp with non-matching releases into separate result', () => {
     const results = [makeResult('Matt Young', [
       { sourceId: 'bandcamp', url: 'https://a.bandcamp.com', allReleaseTitles: ['different album'] },
-      { sourceId: 'qobuz', url: 'https://qobuz.com/1', latestRelease: { title: 'Other Album', type: 'album', url: 'https://qobuz.com/1/album' }, allReleaseTitles: ['other album'] },
+      { sourceId: 'faircamp', url: 'https://a.faircamp.net', latestRelease: { title: 'Other Album', type: 'album', url: 'https://a.faircamp.net/other-album' }, allReleaseTitles: ['other album'] },
     ])];
 
     const disambiguated = splitSuspiciousPlatforms(results);
@@ -88,7 +45,7 @@ describe('splitSuspiciousPlatforms', () => {
   it('keeps Bandcamp with matching releases on the same result', () => {
     const results = [makeResult('Artist', [
       { sourceId: 'bandcamp', url: 'https://a.bandcamp.com', allReleaseTitles: ['shared album'] },
-      { sourceId: 'qobuz', url: 'https://qobuz.com/1', latestRelease: { title: 'Shared Album', type: 'album', url: 'https://qobuz.com/1/album' }, allReleaseTitles: ['shared album'] },
+      { sourceId: 'faircamp', url: 'https://a.faircamp.net', latestRelease: { title: 'Shared Album', type: 'album', url: 'https://a.faircamp.net/shared-album' }, allReleaseTitles: ['shared album'] },
     ])];
 
     const disambiguated = splitSuspiciousPlatforms(results);
@@ -127,7 +84,7 @@ describe('mergeByReleaseOverlap', () => {
         { sourceId: 'bandcamp', url: 'https://a.bandcamp.com', allReleaseTitles: ['shared album', 'album b'] },
       ], { id: 'artist-1' }),
       makeResult('Artist', [
-        { sourceId: 'qobuz', url: 'https://qobuz.com/1', allReleaseTitles: ['shared album', 'album c'] },
+        { sourceId: 'faircamp', url: 'https://a.faircamp.net', allReleaseTitles: ['shared album', 'album c'] },
       ], { id: 'artist-2' }),
     ];
 
@@ -158,7 +115,7 @@ describe('mergeByReleaseOverlap', () => {
         { sourceId: 'bandcamp', url: 'https://a.bandcamp.com', allReleaseTitles: ['album a'] },
       ], { id: 'matt-1' }),
       makeResult('Matt Young', [
-        { sourceId: 'qobuz', url: 'https://qobuz.com/1', allReleaseTitles: ['album x'] },
+        { sourceId: 'faircamp', url: 'https://a.faircamp.net', allReleaseTitles: ['album x'] },
       ], { id: 'matt-2' }),
     ];
 
@@ -168,138 +125,13 @@ describe('mergeByReleaseOverlap', () => {
   });
 });
 
-describe('deduplicateQobuzUrls', () => {
-  it('keeps Qobuz only on the best-matching result', () => {
-    const qobuzUrl = 'https://qobuz.com/interpreter/artist/123';
-    const results = [
-      makeResult('Artist', [
-        { sourceId: 'bandcamp', url: 'https://a.bandcamp.com', allReleaseTitles: ['shared', 'other'] },
-        { sourceId: 'qobuz', url: qobuzUrl, allReleaseTitles: ['shared', 'qobuz only'] },
-      ], { id: 'a1' }),
-      makeResult('Artist', [
-        { sourceId: 'bandcamp', url: 'https://b.bandcamp.com', allReleaseTitles: ['unrelated'] },
-        { sourceId: 'qobuz', url: qobuzUrl, allReleaseTitles: ['shared', 'qobuz only'] },
-      ], { id: 'a2' }),
-    ];
-
-    deduplicateQobuzUrls(results);
-
-    const r1Qobuz = results[0].platforms.find(p => p.sourceId === 'qobuz');
-    const r2Qobuz = results[1].platforms.find(p => p.sourceId === 'qobuz');
-    expect(r1Qobuz).toBeDefined(); // best match (1 overlap)
-    expect(r2Qobuz).toBeUndefined(); // removed (0 overlap)
-  });
-});
-
-describe('removeDeadQobuzLinks', () => {
-  it('removes Qobuz platforms with no releases', () => {
-    const results = [makeResult('Artist', [
-      { sourceId: 'bandcamp', url: 'https://a.bandcamp.com' },
-      { sourceId: 'qobuz', url: 'https://qobuz.com/1' },
-    ])];
-
-    removeDeadQobuzLinks(results);
-
-    expect(results[0].platforms).toHaveLength(1);
-    expect(results[0].platforms[0].sourceId).toBe('bandcamp');
-  });
-
-  it('keeps Qobuz with releases', () => {
-    const results = [makeResult('Artist', [
-      { sourceId: 'qobuz', url: 'https://qobuz.com/1', allReleaseTitles: ['album'] },
-    ])];
-
-    removeDeadQobuzLinks(results);
-
-    expect(results[0].platforms).toHaveLength(1);
-  });
-
-  it('keeps a release-less Qobuz link when its lookup never finished', () => {
-    // The regression this guards: release lookups share one fixed 4s race, so a slow
-    // Qobuz response left the link with no data and it was deleted as "dead" — taking
-    // the artist image with it, since that comes from the Qobuz match.
-    const results = [makeResult('Artist', [
-      { sourceId: 'bandcamp', url: 'https://a.bandcamp.com' },
-      { sourceId: 'qobuz', url: 'https://qobuz.com/1' },
-    ])];
-    const completed = new Set<never>(); // nothing finished
-
-    removeDeadQobuzLinks(results, completed);
-
-    expect(results[0].platforms.map(p => p.sourceId)).toEqual(['bandcamp', 'qobuz']);
-  });
-
-  it('still removes a release-less Qobuz link when its lookup DID finish', () => {
-    const results = [makeResult('Artist', [
-      { sourceId: 'bandcamp', url: 'https://a.bandcamp.com' },
-      { sourceId: 'qobuz', url: 'https://qobuz.com/1' },
-    ])];
-    const qobuzPlatform = results[0].platforms.find(p => p.sourceId === 'qobuz')!;
-
-    removeDeadQobuzLinks(results, new Set([qobuzPlatform]));
-
-    expect(results[0].platforms.map(p => p.sourceId)).toEqual(['bandcamp']);
-  });
-
-  it('keeps Qobuz with releases regardless of whether the lookup finished', () => {
-    const results = [makeResult('Artist', [
-      { sourceId: 'qobuz', url: 'https://qobuz.com/1', allReleaseTitles: ['album'] },
-    ])];
-
-    removeDeadQobuzLinks(results, new Set<never>());
-
-    expect(results[0].platforms).toHaveLength(1);
-  });
-
-  it('without the set, behaves exactly as before (deletes on missing data)', () => {
-    // Backward compatibility: existing callers that pass no set keep the old semantics.
-    const results = [makeResult('Artist', [
-      { sourceId: 'bandcamp', url: 'https://a.bandcamp.com' },
-      { sourceId: 'qobuz', url: 'https://qobuz.com/1' },
-    ])];
-
-    removeDeadQobuzLinks(results);
-
-    expect(results[0].platforms.map(p => p.sourceId)).toEqual(['bandcamp']);
-  });
-});
-
-describe('preferBandcampFeaturedRelease', () => {
-  it('clears Qobuz latest release when it matches Bandcamp', () => {
-    const results = [makeResult('Artist', [
-      { sourceId: 'bandcamp', url: 'https://a.bandcamp.com', latestRelease: { title: 'My Album', type: 'album', url: 'https://a.bandcamp.com/album/my-album' } },
-      { sourceId: 'qobuz', url: 'https://qobuz.com/1', latestRelease: { title: 'My Album', type: 'album', url: 'https://qobuz.com/album' } },
-    ])];
-
-    preferBandcampFeaturedRelease(results);
-
-    expect(results[0].platforms[0].latestRelease).toBeDefined();
-    expect(results[0].platforms[1].latestRelease).toBeUndefined();
-  });
-});
-
-describe('attachQobuzAndSearchLinks', () => {
-  it('attaches Qobuz variations to matching results', () => {
-    const results = [makeResult('Morice', [
-      { sourceId: 'bandcamp', url: 'https://morice.bandcamp.com' },
-    ])];
-        const qobuzMatches = new Map([
-      ['morice', { url: 'https://qobuz.com/interpreter/morice/1' }],
-      ['morice1', { url: 'https://qobuz.com/interpreter/morice/2' }],
-    ]);
-
-    attachQobuzAndSearchLinks(results, qobuzMatches, new Map());
-
-    const qobuzPlatforms = results[0].platforms.filter(p => p.sourceId === 'qobuz');
-    expect(qobuzPlatforms).toHaveLength(2);
-  });
-
+describe('attachAmpwallAndSearchLinks', () => {
   it('adds search-only links for Bandcamp artists', () => {
     const results = [makeResult('Artist', [
       { sourceId: 'bandcamp', url: 'https://artist.bandcamp.com' },
     ])];
 
-    attachQobuzAndSearchLinks(results, new Map(), new Map());
+    attachAmpwallAndSearchLinks(results, new Map());
 
     const kofi = results[0].platforms.find(p => p.sourceId === 'kofi');
     const bmc = results[0].platforms.find(p => p.sourceId === 'buymeacoffee');
@@ -315,7 +147,7 @@ describe('attachQobuzAndSearchLinks', () => {
       { sourceId: 'bandcamp', url: 'https://artist.bandcamp.com' },
     ])];
 
-    attachQobuzAndSearchLinks(results, new Map(), new Map([['artist', 'https://ampwall.com/artist/artist']]));
+    attachAmpwallAndSearchLinks(results, new Map([['artist', 'https://ampwall.com/artist/artist']]));
 
     const ampwall = results[0].platforms.find(p => p.sourceId === 'ampwall');
     expect(ampwall!.url).toBe('https://ampwall.com/artist/artist');
@@ -326,70 +158,10 @@ describe('attachQobuzAndSearchLinks', () => {
       { sourceId: 'bandcamp', url: 'https://artist.bandcamp.com' },
     ])];
 
-    attachQobuzAndSearchLinks(results, new Map(), new Map());
+    attachAmpwallAndSearchLinks(results, new Map());
 
     const platformIds = results[0].platforms.map(p => p.sourceId);
     expect(platformIds[0]).toBe('bandcamp');
-  });
-});
-
-describe('createQobuzOnlyResults', () => {
-  it('creates new results for unmatched Qobuz artists', () => {
-    const results: AggregatedResult[] = [
-      makeResult('Existing', [{ sourceId: 'bandcamp', url: 'https://existing.bandcamp.com' }]),
-    ];
-    const qobuzMatches = new Map([
-      ['newartist', { url: 'https://qobuz.com/interpreter/new-artist/123' }],
-    ]);
-
-    createQobuzOnlyResults(results, qobuzMatches);
-
-    expect(results).toHaveLength(2);
-    const newResult = results.find(r => r.id === 'qobuz-newartist');
-    expect(newResult).toBeDefined();
-    expect(newResult!.platforms[0].sourceId).toBe('qobuz');
-  });
-
-  it('does not create results for already-attached Qobuz matches', () => {
-    const results: AggregatedResult[] = [
-      makeResult('Artist', [
-        { sourceId: 'bandcamp', url: 'https://a.bandcamp.com' },
-        { sourceId: 'qobuz', url: 'https://qobuz.com/interpreter/artist/1' },
-      ]),
-    ];
-    const qobuzMatches = new Map([
-      ['artist', { url: 'https://qobuz.com/interpreter/artist/1' }],
-    ]);
-
-    createQobuzOnlyResults(results, qobuzMatches);
-
-    expect(results).toHaveLength(1);
-  });
-});
-
-describe('crossPlatformReleaseComparison threshold boundary', () => {
-  it('requires 1 match for catalogs of 3 or fewer (ceil(3*0.3)=1)', () => {
-    const results = [makeResult('Artist', [
-      { sourceId: 'bandcamp', url: 'https://a.bandcamp.com', allReleaseTitles: ['a', 'b', 'c'] },
-      { sourceId: 'qobuz', url: 'https://qobuz.com/1', allReleaseTitles: ['a', 'x', 'y'] },
-    ])];
-
-    crossPlatformReleaseComparison(results);
-
-    // 1 match ('a') meets threshold of ceil(min(3,3)*0.3)=1 → kept
-    expect(results[0].platforms.find(p => p.sourceId === 'qobuz')).toBeDefined();
-  });
-
-  it('requires 2 matches for catalogs of 4 (ceil(4*0.3)=2)', () => {
-    const results = [makeResult('Artist', [
-      { sourceId: 'bandcamp', url: 'https://a.bandcamp.com', allReleaseTitles: ['a', 'b', 'c', 'd'] },
-      { sourceId: 'qobuz', url: 'https://qobuz.com/1', allReleaseTitles: ['a', 'x', 'y', 'z'] },
-    ])];
-
-    crossPlatformReleaseComparison(results);
-
-    // 1 match ('a') < threshold of ceil(min(4,4)*0.3)=2 → removed
-    expect(results[0].platforms.find(p => p.sourceId === 'qobuz')).toBeUndefined();
   });
 });
 
@@ -576,18 +348,6 @@ describe('applyMergeOverrides', () => {
 
     expect(results).toHaveLength(1);
     expect(results[0].overrideMerged).toBe(true);
-  });
-
-  it('override-merged results are not split by crossPlatformReleaseComparison', () => {
-    const results = [makeResult('Gooseworx', [
-      { sourceId: 'bandcamp', url: 'https://gooseworx.bandcamp.com', allReleaseTitles: ['album a', 'album b'] },
-      { sourceId: 'qobuz', url: 'https://qobuz.com/gooseworx', allReleaseTitles: ['album x', 'album y'] },
-    ], { overrideMerged: true })];
-
-    crossPlatformReleaseComparison(results);
-
-    // Qobuz should NOT be removed despite zero release overlap
-    expect(results[0].platforms.find(p => p.sourceId === 'qobuz')).toBeDefined();
   });
 
   it('override-merged results are not split by splitSuspiciousPlatforms', () => {

@@ -67,12 +67,12 @@ export interface BandcampProbeResult {
   /**
    * Normalized release titles from the same /music response.
    *
-   * Also free, and load-bearing: disambiguation fetches Bandcamp and Qobuz release data
-   * inside one fixed 4s race, so a Bandcamp platform arriving without titles forces two
-   * more requests into that budget and starves the Qobuz ones.
+   * Also free, and load-bearing: disambiguation fetches release data inside one fixed 4s
+   * race, so a Bandcamp platform arriving without titles forces two more requests into
+   * that budget and starves every other artist's lookups.
    */
   releaseTitles?: string[];
-  /** Artist photo from the page's og:image. Replaces Qobuz as the image source. */
+  /** Artist photo from the page's og:image. Replaced Qobuz as the image source. */
   imageUrl?: string;
 }
 

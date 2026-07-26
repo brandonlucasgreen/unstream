@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import {
   generateResultId,
   extractPlatformIdentifier,
-  isQobuzVariation,
   isSearchOnlyLink,
-  qobuzDisplayName,
+  displayNameFromSlug,
+  pickQobuzUrl,
 } from '../../../../api/functions/search-utils';
 
 describe('generateResultId', () => {
@@ -33,32 +33,8 @@ describe('extractPlatformIdentifier', () => {
     expect(extractPlatformIdentifier('https://mattyoungmusictx.bandcamp.com', 'bandcamp')).toBe('mattyoungmusictx');
   });
 
-  it('extracts Qobuz artist ID', () => {
-    expect(extractPlatformIdentifier('https://www.qobuz.com/us-en/interpreter/cory-miller/496181', 'qobuz')).toBe('496181');
-  });
-
   it('returns pathname for other platforms', () => {
     expect(extractPlatformIdentifier('https://mirlo.space/artist/123', 'mirlo')).toBe('/artist/123');
-  });
-});
-
-describe('isQobuzVariation', () => {
-  it('matches exact name', () => {
-    expect(isQobuzVariation('mattyoung', 'mattyoung')).toBe(true);
-  });
-
-  it('matches name + numeric suffix', () => {
-    expect(isQobuzVariation('mattyoung1', 'mattyoung')).toBe(true);
-    expect(isQobuzVariation('mattyoung2', 'mattyoung')).toBe(true);
-    expect(isQobuzVariation('morice2', 'morice')).toBe(true);
-  });
-
-  it('rejects non-numeric suffixes', () => {
-    expect(isQobuzVariation('mattyoungmusic', 'mattyoung')).toBe(false);
-  });
-
-  it('rejects unrelated names', () => {
-    expect(isQobuzVariation('matthias', 'mattyoung')).toBe(false);
   });
 });
 
@@ -88,15 +64,56 @@ describe('isSearchOnlyLink', () => {
   });
 });
 
-describe('qobuzDisplayName', () => {
-  it('extracts display name from Qobuz URL slug', () => {
-    expect(qobuzDisplayName('https://www.qobuz.com/us-en/interpreter/matt-young/123', 'fallback'))
-      .toBe('Matt Young');
-    expect(qobuzDisplayName('https://www.qobuz.com/us-en/interpreter/kid-lightbulbs/456', 'fallback'))
-      .toBe('Kid Lightbulbs');
+describe('displayNameFromSlug', () => {
+  it('reconstructs a display name from a URL slug', () => {
+    expect(displayNameFromSlug('matt-young')).toBe('Matt Young');
+    expect(displayNameFromSlug('kid-lightbulbs')).toBe('Kid Lightbulbs');
   });
 
-  it('returns fallback when URL has no interpreter pattern', () => {
-    expect(qobuzDisplayName('https://qobuz.com/other', 'fallback')).toBe('fallback');
+  it('strips trailing numeric disambiguation suffixes', () => {
+    expect(displayNameFromSlug('ben-g-1')).toBe('Ben G');
+  });
+
+  it('prefers the original query when it normalizes to the same name', () => {
+    expect(displayNameFromSlug('ben-g', 'Ben-G!')).toBe('Ben-G!');
+  });
+});
+
+// MusicBrainz relations are the only source of Qobuz links now that the search scrape
+// is retired, so this picker is the whole of Qobuz coverage.
+// See docs/specs/qobuz-coverage-research.md.
+describe('pickQobuzUrl', () => {
+  it('returns null when no relation is a Qobuz URL', () => {
+    expect(pickQobuzUrl([])).toBeNull();
+    expect(pickQobuzUrl(['https://radiohead.bandcamp.com', 'https://mirlo.space/x'])).toBeNull();
+  });
+
+  it('picks the www.qobuz.com interpreter page', () => {
+    expect(pickQobuzUrl([
+      'https://radiohead.bandcamp.com',
+      'https://www.qobuz.com/us-en/interpreter/radiohead/43840',
+    ])).toBe('https://www.qobuz.com/us-en/interpreter/radiohead/43840');
+  });
+
+  it('prefers www.qobuz.com over open.qobuz.com regardless of order', () => {
+    // MusicBrainz stores both shapes for the same artist (e.g. Aphex Twin).
+    const wwwUrl = 'https://www.qobuz.com/us-en/interpreter/aphex-twin/53267';
+    const openUrl = 'https://open.qobuz.com/artist/53267';
+    expect(pickQobuzUrl([openUrl, wwwUrl])).toBe(wwwUrl);
+    expect(pickQobuzUrl([wwwUrl, openUrl])).toBe(wwwUrl);
+  });
+
+  it('falls back to open.qobuz.com when that is all MusicBrainz has', () => {
+    expect(pickQobuzUrl(['https://open.qobuz.com/artist/53267']))
+      .toBe('https://open.qobuz.com/artist/53267');
+  });
+
+  it('ignores unparseable URLs instead of throwing', () => {
+    expect(pickQobuzUrl(['not a url', 'https://www.qobuz.com/us-en/interpreter/x/1']))
+      .toBe('https://www.qobuz.com/us-en/interpreter/x/1');
+  });
+
+  it('does not match lookalike hostnames', () => {
+    expect(pickQobuzUrl(['https://qobuz.com.evil.example/artist/1'])).toBeNull();
   });
 });

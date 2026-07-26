@@ -14,7 +14,7 @@ actor ReleaseCheckAPI {
     /// Check for new releases for an artist
     /// - Parameters:
     ///   - artistName: The artist's name
-    ///   - platforms: Dictionary of platform URLs (bandcamp, faircamp, mirlo, qobuz)
+    ///   - platforms: Dictionary of platform URLs (bandcamp, faircamp, mirlo)
     /// - Returns: The release check result, or nil if no recent release found
     func checkReleases(artistName: String, platforms: [String: String]) async throws -> ReleaseCheckResult? {
         guard let url = URL(string: baseURL) else {
