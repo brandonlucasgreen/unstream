@@ -538,7 +538,7 @@ export async function enrichLocationFallback(query: string): Promise<ArtistLocat
   const mirloSlug = query.toLowerCase().replace(/\s+/g, '');
   const FALLBACK_TIMEOUT = 3000;
 
-  const bandcampUrl = await findBandcampArtistUrl(query);
+  const bandcampUrl = await findBandcampArtistUrl(query, FALLBACK_TIMEOUT);
   const [bandcampLocation, mirloLocation] = await Promise.all([
     bandcampUrl ? fetchBandcampLocation(bandcampUrl, FALLBACK_TIMEOUT) : Promise.resolve(null),
     fetchMirloLocation(mirloSlug, FALLBACK_TIMEOUT),

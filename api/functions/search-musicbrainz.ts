@@ -292,12 +292,14 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       searchPeerTubeChannels(artist.name),
       wikipediaUrl ? fetchWikipediaSummary(wikipediaUrl) : Promise.resolve(null),
       (async () => {
-        // Try MB relation URL first; if absent or returns no location, search Bandcamp directly
+        // Try MB relation URL first; if absent or returns no location, probe Bandcamp directly.
+        // These three steps run sequentially, so keep the probe budget tight — location is
+        // best-effort enrichment and this whole lambda shares the function's 10s ceiling.
         if (mbBandcampUrl) {
           const loc = await fetchBandcampLocation(mbBandcampUrl);
           if (loc) return loc;
         }
-        const searchedUrl = await findBandcampArtistUrl(artist.name);
+        const searchedUrl = await findBandcampArtistUrl(artist.name, 2500);
         return searchedUrl ? fetchBandcampLocation(searchedUrl) : null;
       })(),
       fetchMirloLocation(mirloSlug),

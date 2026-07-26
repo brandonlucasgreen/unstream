@@ -215,15 +215,23 @@ export async function probeBandcampArtist(
  * cached too, so repeated searches for an artist who isn't on Bandcamp are free
  * after the first. Undecided outcomes are never cached, so a transient failure
  * doesn't become a permanent miss.
+ *
+ * `budgetMs` caps the whole probe round, not each request. Callers running inside
+ * a Netlify function's 10s ceiling should pass their own budget rather than take
+ * the default — measured latency is 270-980ms, but the cap is what bounds the bad
+ * case if Bandcamp is slow.
  */
-export async function findBandcampArtistUrl(query: string): Promise<string | null> {
+export async function findBandcampArtistUrl(
+  query: string,
+  budgetMs = DEFAULT_BUDGET_MS,
+): Promise<string | null> {
   const queryNorm = normalizeForComparison(query);
   if (!queryNorm) return null;
 
   const cached = await getBandcampProbe(queryNorm);
   if (cached) return cached.artist_url;
 
-  const result = await probeBandcampArtist(query);
+  const result = await probeBandcampArtist(query, budgetMs);
 
   // Don't know != not there. Leave the cache empty so we retry next time.
   if (result.verdict === 'undecided') return null;
