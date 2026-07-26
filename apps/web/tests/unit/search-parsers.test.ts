@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  isBandcampChallenge,
   parseBandcampSearchResults,
   parseMirloArtistPage,
   parseQobuzSearchResults,
@@ -9,6 +10,51 @@ import {
   parseFaircampReleaseTitles,
   parsePatreonSearchResults,
 } from '../../../../api/functions/search-parsers';
+
+// ---------------------------------------------------------------------------
+// isBandcampChallenge
+// ---------------------------------------------------------------------------
+
+describe('isBandcampChallenge', () => {
+  // Trimmed from a real blocked response: HTTP 200, ~3KB, Fastly challenge assets.
+  const challengeHTML = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; object-src 'none';" />
+    <link href="/_fs-ch-1T1wmsGaOgGaSxcX/assets/inter-var.woff2" rel="preload" as="font" crossorigin />
+    <link href="/_fs-ch-1T1wmsGaOgGaSxcX/assets/styles.css" rel="stylesheet" />
+  </head>
+  <body><div id="challenge"></div></body>
+</html>`;
+
+  it('detects a Fastly challenge interstitial', () => {
+    expect(isBandcampChallenge(challengeHTML)).toBe(true);
+  });
+
+  it('does not flag real search-results HTML', () => {
+    const real = `
+      <div class="searchresult">
+        <div class="result-info">
+          <div class="itemtype">ARTIST</div>
+          <div class="heading"><a href="https://kidlightbulbs.bandcamp.com">Kid Lightbulbs</a></div>
+        </div>
+      </div>`;
+    expect(isBandcampChallenge(real)).toBe(false);
+  });
+
+  it('handles empty and whitespace input without throwing', () => {
+    expect(isBandcampChallenge('')).toBe(false);
+    expect(isBandcampChallenge('   ')).toBe(false);
+  });
+
+  it('does not flag a large real page that happens to contain the marker text', () => {
+    // Real Bandcamp pages are 100KB+. The size pre-filter keeps a stray mention
+    // (e.g. inside user-supplied bio text) from disabling a working scrape.
+    const big = `<html><body>${'x'.repeat(30_000)}/_fs-ch-nope</body></html>`;
+    expect(isBandcampChallenge(big)).toBe(false);
+  });
+});
 
 // ---------------------------------------------------------------------------
 // parseBandcampSearchResults
