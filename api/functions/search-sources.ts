@@ -100,6 +100,9 @@ async function searchBandcamp(query: string): Promise<PlatformResult[]> {
     // that budget and starves the Qobuz ones — which drops the Qobuz link, and with
     // it the artist image.
     allReleaseTitles: match.releaseTitles.length > 0 ? match.releaseTitles : undefined,
+    // Artist photo. aggregateResults carries imageUrl from a PlatformResult, so this
+    // gives results a picture without depending on the Qobuz match.
+    imageUrl: match.imageUrl ?? undefined,
   }];
 }
 

@@ -30,6 +30,7 @@ import {
 import {
   isBandcampChallenge,
   parseBandcampBandIdentity,
+  parseBandcampImage,
   parseBandcampPageLocation,
   parseBandcampReleaseCounts,
   parseBandcampReleaseTitles,
@@ -71,6 +72,8 @@ export interface BandcampProbeResult {
    * more requests into that budget and starves the Qobuz ones.
    */
   releaseTitles?: string[];
+  /** Artist photo from the page's og:image. Replaces Qobuz as the image source. */
+  imageUrl?: string;
 }
 
 const DEFAULT_BUDGET_MS = 5000;
@@ -82,6 +85,7 @@ interface CandidateOutcome {
   counts: { albums: number; tracks: number };
   location?: string;
   releaseTitles?: string[];
+  imageUrl?: string;
   /** Bandcamp asked us to back off. Stop the whole round, don't try more candidates. */
   rateLimited?: boolean;
 }
@@ -146,7 +150,8 @@ async function probeCandidate(slug: string, timeoutMs: number): Promise<Candidat
   const counts = parseBandcampReleaseCounts(html);
   const location = parseBandcampPageLocation(html) ?? undefined;
   const releaseTitles = parseBandcampReleaseTitles(html);
-  return { verdict: 'accepted', identity, counts, location, releaseTitles };
+  const imageUrl = parseBandcampImage(html) ?? undefined;
+  return { verdict: 'accepted', identity, counts, location, releaseTitles, imageUrl };
 }
 
 /**
@@ -243,6 +248,7 @@ export async function probeBandcampArtist(
       matchedSlug: slug,
       location: outcome.location,
       releaseTitles: outcome.releaseTitles,
+      imageUrl: outcome.imageUrl,
     };
   }
 
@@ -260,6 +266,8 @@ export interface BandcampArtistMatch {
   location: string | null;
   /** Normalized release titles, so disambiguation need not refetch /music. */
   releaseTitles: string[];
+  /** Artist photo (og:image), or null when the page shows none. */
+  imageUrl: string | null;
 }
 
 /**
@@ -290,6 +298,7 @@ export async function findBandcampArtist(
           bandName: cached.band_name,
           location: cached.location,
           releaseTitles: cached.release_titles ?? [],
+          imageUrl: cached.image_url,
         }
       : null;
   }
@@ -310,6 +319,7 @@ export async function findBandcampArtist(
     verdict: result.verdict,
     location: result.location ?? null,
     release_titles: result.releaseTitles ?? null,
+    image_url: result.imageUrl ?? null,
   });
 
   return result.artistUrl
@@ -318,6 +328,7 @@ export async function findBandcampArtist(
         bandName: result.bandName ?? null,
         location: result.location ?? null,
         releaseTitles: result.releaseTitles ?? [],
+        imageUrl: result.imageUrl ?? null,
       }
     : null;
 }

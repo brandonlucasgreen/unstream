@@ -212,6 +212,8 @@ export interface BandcampProbeRow {
   location: string | null;
   /** Normalized release titles from the probed /music page. */
   release_titles: string[] | null;
+  /** Artist photo from the probed page's og:image. */
+  image_url: string | null;
   checked_at: string;
 }
 
@@ -234,7 +236,7 @@ export async function getBandcampProbe(queryNorm: string): Promise<BandcampProbe
   try {
     const { data, error } = await client
       .from('bandcamp_slug_probes')
-      .select('query_norm, artist_url, band_name, band_id, album_count, track_count, matched_slug, verdict, location, release_titles, checked_at')
+      .select('query_norm, artist_url, band_name, band_id, album_count, track_count, matched_slug, verdict, location, release_titles, image_url, checked_at')
       .eq('query_norm', queryNorm)
       .maybeSingle();
 
