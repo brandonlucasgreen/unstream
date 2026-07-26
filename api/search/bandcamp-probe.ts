@@ -30,6 +30,7 @@ import {
 import {
   isBandcampChallenge,
   parseBandcampBandIdentity,
+  parseBandcampPageLocation,
   parseBandcampReleaseCounts,
 } from '../functions/search-parsers';
 
@@ -56,6 +57,11 @@ export interface BandcampProbeResult {
   albumCount: number;
   trackCount: number;
   matchedSlug?: string;
+  /**
+   * Raw location string from the same /music response, e.g. "Northampton, Massachusetts".
+   * Free — the page is already in hand — so callers never need a second fetch just for it.
+   */
+  location?: string;
 }
 
 const DEFAULT_BUDGET_MS = 5000;
@@ -65,6 +71,9 @@ interface CandidateOutcome {
   verdict: Exclude<BandcampProbeVerdict, 'absent'>;
   identity?: { id: number; name: string };
   counts: { albums: number; tracks: number };
+  location?: string;
+  /** Bandcamp asked us to back off. Stop the whole round, don't try more candidates. */
+  rateLimited?: boolean;
 }
 
 /** Fetch and classify a single candidate slug. Returns null if the slug has no account. */
@@ -89,6 +98,21 @@ async function probeCandidate(slug: string, timeoutMs: number): Promise<Candidat
 
   // No such account. This is a real answer, not a failure.
   if (response.status === 404) return null;
+
+  // Bandcamp does rate-limit, and firing the remaining candidates into an active
+  // 429 is both rude and pointless. Flag it so the caller abandons the round.
+  if (response.status === 429 || response.status === 503) {
+    const shouldCapture = await checkSentryDedup('uns152:bandcamp-rate-limited', 60 * 60);
+    if (shouldCapture) {
+      Sentry.captureMessage('Bandcamp rate-limited the probe', {
+        level: 'warning',
+        extra: { url, status: response.status, retryAfter: response.headers.get('retry-after') },
+        tags: { platform: 'bandcamp' },
+      });
+    }
+    return { verdict: 'undecided', counts: { albums: 0, tracks: 0 }, rateLimited: true };
+  }
+
   if (!response.ok) return { verdict: 'undecided', counts: { albums: 0, tracks: 0 } };
 
   const html = await response.text();
@@ -110,7 +134,8 @@ async function probeCandidate(slug: string, timeoutMs: number): Promise<Candidat
   if (!identity) return { verdict: 'undecided', counts: { albums: 0, tracks: 0 } };
 
   const counts = parseBandcampReleaseCounts(html);
-  return { verdict: 'accepted', identity, counts };
+  const location = parseBandcampPageLocation(html) ?? undefined;
+  return { verdict: 'accepted', identity, counts, location };
 }
 
 /**
@@ -154,6 +179,12 @@ export async function probeBandcampArtist(
     }
 
     if (outcome === null) continue; // 404 — try the next candidate
+
+    // Back off immediately rather than spending the remaining candidates on a
+    // service that has just told us to stop.
+    if (outcome.rateLimited) {
+      return { verdict: 'undecided', artistUrl: null, ...empty };
+    }
 
     if (outcome.verdict === 'undecided' || !outcome.identity) {
       sawUndecided = true;
@@ -199,6 +230,7 @@ export async function probeBandcampArtist(
       albumCount: counts.albums,
       trackCount: counts.tracks,
       matchedSlug: slug,
+      location: outcome.location,
     };
   }
 
@@ -208,8 +240,16 @@ export async function probeBandcampArtist(
   return fallback;
 }
 
+/** What a cached lookup yields for an artist that is on Bandcamp. */
+export interface BandcampArtistMatch {
+  url: string;
+  bandName: string | null;
+  /** Raw location string as Bandcamp renders it, e.g. "Oxford, UK". */
+  location: string | null;
+}
+
 /**
- * Cached artist-URL lookup. Replaces the blocked bandcamp.com/search scrape.
+ * Cached artist lookup. Replaces the blocked bandcamp.com/search scrape.
  *
  * Every distinct query costs at most one round of probes, ever — negatives are
  * cached too, so repeated searches for an artist who isn't on Bandcamp are free
@@ -221,15 +261,19 @@ export async function probeBandcampArtist(
  * the default — measured latency is 270-980ms, but the cap is what bounds the bad
  * case if Bandcamp is slow.
  */
-export async function findBandcampArtistUrl(
+export async function findBandcampArtist(
   query: string,
   budgetMs = DEFAULT_BUDGET_MS,
-): Promise<string | null> {
+): Promise<BandcampArtistMatch | null> {
   const queryNorm = normalizeForComparison(query);
   if (!queryNorm) return null;
 
   const cached = await getBandcampProbe(queryNorm);
-  if (cached) return cached.artist_url;
+  if (cached) {
+    return cached.artist_url
+      ? { url: cached.artist_url, bandName: cached.band_name, location: cached.location }
+      : null;
+  }
 
   const result = await probeBandcampArtist(query, budgetMs);
 
@@ -245,7 +289,18 @@ export async function findBandcampArtistUrl(
     track_count: result.trackCount,
     matched_slug: result.matchedSlug ?? null,
     verdict: result.verdict,
+    location: result.location ?? null,
   });
 
-  return result.artistUrl;
+  return result.artistUrl
+    ? { url: result.artistUrl, bandName: result.bandName ?? null, location: result.location ?? null }
+    : null;
+}
+
+/** Convenience wrapper for callers that only want the URL. */
+export async function findBandcampArtistUrl(
+  query: string,
+  budgetMs = DEFAULT_BUDGET_MS,
+): Promise<string | null> {
+  return (await findBandcampArtist(query, budgetMs))?.url ?? null;
 }

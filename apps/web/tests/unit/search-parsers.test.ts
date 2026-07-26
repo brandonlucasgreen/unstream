@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   isBandcampChallenge,
   parseBandcampBandIdentity,
+  parseBandcampPageLocation,
   parseBandcampReleaseCounts,
   parseBandcampSearchResults,
   parseMirloArtistPage,
@@ -138,6 +139,44 @@ describe('parseBandcampReleaseCounts', () => {
       <a href="/album/somewhere-else">nav link</a>
       <li class="music-grid-item" data-item-id="album-7"></li>`;
     expect(parseBandcampReleaseCounts(withNav)).toEqual({ albums: 1, tracks: 0 });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// parseBandcampPageLocation
+// ---------------------------------------------------------------------------
+
+describe('parseBandcampPageLocation', () => {
+  it('reads the location element from a band page', () => {
+    const html = `<div id="band-name-location">
+      <span class="title">Boy Harsher</span>
+      <span class="location secondaryText">Northampton, Massachusetts</span>
+    </div>`;
+    expect(parseBandcampPageLocation(html)).toBe('Northampton, Massachusetts');
+  });
+
+  it('collapses surrounding whitespace and newlines', () => {
+    const html = `<p class="location">\n   Oxford,    UK  \n</p>`;
+    expect(parseBandcampPageLocation(html)).toBe('Oxford, UK');
+  });
+
+  it('returns null when no location element is present', () => {
+    // Legitimate: some artists set no location, and Bandcamp's own discover API
+    // reports none for them either.
+    expect(parseBandcampPageLocation('<div class="title">Some Band</div>')).toBeNull();
+  });
+
+  it('ignores a class that merely contains "location" as a substring', () => {
+    expect(parseBandcampPageLocation('<p class="relocation-notice">moved</p>')).toBeNull();
+  });
+
+  it('rejects absurdly long matches rather than returning page junk', () => {
+    const html = `<p class="location">${'x'.repeat(200)}</p>`;
+    expect(parseBandcampPageLocation(html)).toBeNull();
+  });
+
+  it('returns null for an empty element', () => {
+    expect(parseBandcampPageLocation('<p class="location">   </p>')).toBeNull();
   });
 });
 
