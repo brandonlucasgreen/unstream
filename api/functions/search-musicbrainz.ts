@@ -28,11 +28,11 @@ import {
   searchPeerTubeChannels,
   parseLocationString,
   mergeLocations,
-  searchBandcampForArtistUrl,
   fetchBandcampLocation,
   fetchMirloLocation,
   enrichLocationFallback,
 } from '../search/enrichment';
+import { findBandcampArtistUrl } from '../search/bandcamp-probe';
 
 // Cache TTL for MusicBrainz lookups (30 minutes)
 const MUSICBRAINZ_CACHE_TTL = 30 * 60;
@@ -297,7 +297,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
           const loc = await fetchBandcampLocation(mbBandcampUrl);
           if (loc) return loc;
         }
-        const searchedUrl = await searchBandcampForArtistUrl(artist.name);
+        const searchedUrl = await findBandcampArtistUrl(artist.name);
         return searchedUrl ? fetchBandcampLocation(searchedUrl) : null;
       })(),
       fetchMirloLocation(mirloSlug),

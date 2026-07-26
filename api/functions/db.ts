@@ -197,6 +197,86 @@ export async function getMergeOverrides(): Promise<MergeOverrideRow[]> {
   }
 }
 
+// --- Bandcamp slug-probe cache (UNS-152) ---
+
+export interface BandcampProbeRow {
+  query_norm: string;
+  artist_url: string | null;
+  band_name: string | null;
+  band_id: number | null;
+  album_count: number;
+  track_count: number;
+  matched_slug: string | null;
+  verdict: 'accepted' | 'absent' | 'rejected_empty' | 'rejected_name' | 'pending_review';
+  checked_at: string;
+}
+
+// Positives are stable — a Bandcamp URL rarely moves. Negatives expire, because
+// an artist who wasn't on Bandcamp in March may well be by September.
+const NEGATIVE_PROBE_TTL_DAYS = 30;
+
+/**
+ * Read a cached probe outcome. Returns null when there is no usable cache entry,
+ * which is the caller's signal to probe.
+ *
+ * A stale negative returns null (re-probe); an accepted result never expires.
+ * `pending_review` rows return as-is so an unverified account is neither
+ * surfaced nor endlessly re-probed while it waits on /admin/verify.
+ */
+export async function getBandcampProbe(queryNorm: string): Promise<BandcampProbeRow | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  try {
+    const { data, error } = await client
+      .from('bandcamp_slug_probes')
+      .select('query_norm, artist_url, band_name, band_id, album_count, track_count, matched_slug, verdict, checked_at')
+      .eq('query_norm', queryNorm)
+      .maybeSingle();
+
+    if (error) {
+      console.error('[DB] Failed to read bandcamp probe cache:', error);
+      return null;
+    }
+    if (!data) return null;
+
+    const row = data as BandcampProbeRow;
+    if (row.verdict === 'accepted' || row.verdict === 'pending_review') return row;
+
+    const ageMs = Date.now() - new Date(row.checked_at).getTime();
+    if (ageMs > NEGATIVE_PROBE_TTL_DAYS * 24 * 60 * 60 * 1000) return null;
+    return row;
+  } catch (error) {
+    console.error('[DB] getBandcampProbe error:', error);
+    return null;
+  }
+}
+
+/**
+ * Persist a probe outcome, positive or negative.
+ *
+ * Callers must never pass an undecided outcome. A network error, timeout or bot
+ * challenge means we don't know — writing that as a negative would turn a
+ * transient outage into a permanent "this artist isn't on Bandcamp". The DB's
+ * own CHECK constraint has no 'undecided' value, so this is enforced twice.
+ */
+export async function putBandcampProbe(
+  row: Omit<BandcampProbeRow, 'checked_at'>,
+): Promise<void> {
+  const client = getClient();
+  if (!client) return;
+
+  try {
+    const { error } = await client
+      .from('bandcamp_slug_probes')
+      .upsert({ ...row, checked_at: new Date().toISOString() }, { onConflict: 'query_norm' });
+
+    if (error) console.error('[DB] Failed to write bandcamp probe cache:', error);
+  } catch (error) {
+    console.error('[DB] putBandcampProbe error:', error);
+  }
+}
+
 // --- Read Operations ---
 
 /**

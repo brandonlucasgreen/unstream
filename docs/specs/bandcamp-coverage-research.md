@@ -360,6 +360,49 @@ And note what this implies for Layer B: **the index needs no verification at all
 indexes albums, so an empty squatter cannot appear in it, and its records are authoritative. The
 squatter problem is a Layer-A problem only.
 
+## 5c. Layer A verified against live Bandcamp (26 July)
+
+Running the shipped `probeBandcampArtist` against real Bandcamp, not a sample:
+
+| Query | Verdict | Albums/Tracks | Result |
+|---|---|---|---|
+| Boy Harsher | `accepted` | 15/1 | `boyharsher` |
+| Radiohead | `accepted` | 15/0 | `radiohead` |
+| Sufjan Stevens | `accepted` | 15/1 | `sufjanstevens` |
+| The Mountain Goats | `accepted` | 14/2 | `themountaingoats` |
+| Explosions in the Sky | `accepted` | 13/0 | `explosionsinthesky` |
+| Robyn Hitchcock | `accepted` | 16/0 | `robynhitchcock` |
+| Nirvana | `accepted` | 2/0 | `nirvana` |
+| **Beyonce** | `rejected_empty` | 0/0 | squatter caught |
+| **Jack White** | `rejected_empty` | 0/0 | squatter caught (real one is `officialjackwhite`) |
+| **Panda Bear** | `rejected_empty` | 0/0 | real one is `pandabearmusic` |
+| **Butcher Brown** | `rejected_empty` | 0/0 | real one is `butcherbrownmusic` |
+| **MESH** | `rejected_empty` | 0/0 | `mesh` is "M.E.S.H." with no releases; real one is `meshphilly` |
+| **The Beths** | `rejected_name` | 0/0 | `thebeths` is "no content" |
+| **King Gizzard & The Lizard Wizard** | `absent` | 0/0 | real one is the truncated `kinggizzard` |
+| zzzznotarealartist999 | `absent` | 0/0 | correct |
+
+Every failure mode declines cleanly. **No case returned a wrong URL** — the squatter gate and name
+check between them turn every near-miss into an honest "nothing here" rather than a bad link.
+
+### The §5a recall figures were an undercount
+
+Several artists whose base slug §5a scored as a *miss* are in fact accepted here: `shearling`
+(2 albums), `rezn` (3), `loathe` (6), `robynhitchcock` (16), `themountaingoats` (14),
+`sufjanstevens` (15). The reason: **many artists hold more than one real Bandcamp account** — a
+plain-name one and an `…official` / `…music` variant. §5a compared the generated slug against the
+single URL discover happened to return, so a valid non-empty alternative counted as a failure.
+
+This is the same effect as the 41.7% "mismatches that still resolved correctly" — not only
+redirects, but genuinely multiple valid presences. Real-world accept rate is therefore at the
+upper end of the 66–80% range, better for well-known artists.
+
+**One honest consequence:** where both exist, Layer A may return the *secondary* account —
+`shearling` (2 albums) rather than `shearlingofficial` (more). That's a valid page for the artist,
+not a wrong answer, but it isn't necessarily their canonical or most complete one. Layer B's index
+returns whatever discover considers canonical, which is another reason to check the index first and
+fall back to probing, exactly as §6.4 orders it.
+
 ## 6. Recommended architecture
 
 The shift is from **per-query live scrape** to **local index + live fallback**. This is faster and
@@ -443,10 +486,11 @@ Stating these plainly rather than discovering them later:
 
 - **Track-only artists are invisible to discover.** `include_result_types` accepts only `["a"]`.
   The subdomain probe is the only path to them.
-- **Label subdomains hide artists.** `mountaingoats.bandcamp.com` doesn't exist because The
-  Mountain Goats release on a label's subdomain. Discover surfaces these as the *label's*
-  `band_name`, so artist-level attribution needs `album_artist` (present in the payload) as a
-  secondary signal.
+- **Label subdomains hide artists.** Discover surfaces these as the *label's* `band_name`, so
+  artist-level attribution needs `album_artist` (present in the payload) as a secondary signal.
+  (Correction: an earlier draft used The Mountain Goats as the example. That was wrong — probing
+  the *base* slug `themountaingoats` finds them with 14 albums. The stripped-"the" variant
+  `mountaingoats` is what 404s. Verified 26 July.)
 - **Slug guessing has a real false-positive rate.** `thebeths` proves it. Name verification is
   mandatory, not optional.
 - **The cursor is opaque and undocumented.** It could change shape without notice. Checkpoint by
