@@ -46,6 +46,10 @@ export interface PlatformResult {
   url: string;
   imageUrl?: string;
   latestRelease?: LatestRelease;
+  // Normalized release titles, when the source already had them in hand. Lets
+  // fetchReleasesForDisambiguation skip a refetch — that step shares one 4s budget
+  // across platforms, so a redundant request costs another platform its data.
+  allReleaseTitles?: string[];
 }
 
 export interface AggregatedResult {
@@ -413,7 +417,7 @@ export function aggregateResults(allResults: PlatformResult[], query?: string): 
       const existingPlatform = existing.platforms.find(p => p.sourceId === result.sourceId);
 
       if (!existingPlatform) {
-        existing.platforms.push({ sourceId: result.sourceId, url: result.url });
+        existing.platforms.push({ sourceId: result.sourceId, url: result.url, allReleaseTitles: result.allReleaseTitles });
       } else {
         // Same platform type — split if different URL (different artist on same platform)
         const existingPlatformId = extractPlatformIdentifier(existingPlatform.url, existingPlatform.sourceId);
@@ -426,7 +430,7 @@ export function aggregateResults(allResults: PlatformResult[], query?: string): 
               artist: result.artist,
               type: result.type,
               imageUrl: result.imageUrl,
-              platforms: [{ sourceId: result.sourceId, url: result.url }],
+              platforms: [{ sourceId: result.sourceId, url: result.url, allReleaseTitles: result.allReleaseTitles }],
             });
             console.log(`[Aggregation] Created separate entry for "${result.name}" - different ${result.sourceId} profile: ${platformId}`);
           }
@@ -440,7 +444,7 @@ export function aggregateResults(allResults: PlatformResult[], query?: string): 
         artist: result.artist,
         type: result.type,
         imageUrl: result.imageUrl,
-        platforms: [{ sourceId: result.sourceId, url: result.url }],
+        platforms: [{ sourceId: result.sourceId, url: result.url, allReleaseTitles: result.allReleaseTitles }],
       });
     }
   }
