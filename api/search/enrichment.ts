@@ -585,7 +585,11 @@ export async function fetchBandcampLocation(bandcampUrl: string, timeoutMs = 400
 export async function fetchMirloLocation(artistSlug: string, timeoutMs = 4000): Promise<ArtistLocation | null> {
   if (!artistSlug) return null;
   try {
-    const apiUrl = `https://api.mirlo.space/v1/artists?urlSlug=${encodeURIComponent(artistSlug)}`;
+    // Must be the by-slug endpoint. The list form (`/v1/artists?urlSlug=…`) silently
+    // IGNORES the filter and returns the first page of all artists, so reading
+    // results[0] handed every artist on the site the same location — "Holyoke, MA",
+    // whoever happens to be first. This endpoint 404s when the artist isn't on Mirlo.
+    const apiUrl = `https://api.mirlo.space/v1/artists/${encodeURIComponent(artistSlug)}`;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
     const response = await globalThis.fetch(apiUrl, {
@@ -594,8 +598,10 @@ export async function fetchMirloLocation(artistSlug: string, timeoutMs = 4000): 
     });
     clearTimeout(timeout);
     if (!response.ok) return null;
-    const data = await response.json() as { results?: { location?: string }[] };
-    const raw = data.results?.[0]?.location;
+    const data = await response.json() as { result?: { urlSlug?: string; location?: string } };
+    // Belt and braces: only trust the location if the slug really came back to us.
+    if (!data.result || data.result.urlSlug !== artistSlug) return null;
+    const raw = data.result.location;
     if (raw) return parseLocationString(raw);
     return null;
   } catch {

@@ -1,7 +1,7 @@
 // MusicBrainz enrichment server function
 // Imports shared functions from enrichment.ts, keeps Netlify handler here
 
-import { cacheGetOrFetch } from './cache';
+import { cacheGetOrFetch, artistCacheKey } from './cache';
 import { persistEnrichment } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { validateQuery, isUrlHostnameAllowed } from './middleware';
