@@ -21,6 +21,7 @@ import {
   createQobuzOnlyResults,
   preferBandcampFeaturedRelease,
   removeDeadQobuzLinks,
+  type AggregatedPlatform,
   crossPlatformReleaseComparison,
   deduplicateQobuzUrls,
   createOrphanedQobuzStandalones,
@@ -1368,8 +1369,18 @@ async function searchEven(query: string): Promise<Map<string, string>> {
 // Phase 3: Fetch releases & disambiguate
 // ---------------------------------------------------------------------------
 
-async function fetchReleasesForDisambiguation(aggregated: AggregatedResult[]): Promise<void> {
+/**
+ * Fetch release data used for disambiguation, bounded by one shared 4s race.
+ *
+ * Returns the platform entries whose release lookups actually finished. That set is what
+ * lets removeDeadQobuzLinks tell "Qobuz has no releases" apart from "Qobuz didn't answer
+ * in time" — losing this race must not look like an empty catalogue.
+ */
+async function fetchReleasesForDisambiguation(
+  aggregated: AggregatedResult[],
+): Promise<Set<AggregatedPlatform>> {
   const promises: Promise<void>[] = [];
+  const completed = new Set<AggregatedPlatform>();
 
   for (const result of aggregated) {
     if (result.type !== 'artist') continue;
@@ -1386,8 +1397,14 @@ async function fetchReleasesForDisambiguation(aggregated: AggregatedResult[]): P
 
     const qz = result.platforms.find(p => p.sourceId === 'qobuz');
     if (qz) {
-      promises.push(getQobuzLatestRelease(qz.url).then(r => { if (r) qz.latestRelease = r; }));
-      promises.push(getQobuzReleaseTitles(qz.url).then(t => { if (t.length > 0) qz.allReleaseTitles = t; }));
+      // Marked complete only once BOTH lookups settle. If just one came back empty we
+      // still don't know whether Qobuz has releases.
+      promises.push(
+        Promise.allSettled([
+          getQobuzLatestRelease(qz.url).then(r => { if (r) qz.latestRelease = r; }),
+          getQobuzReleaseTitles(qz.url).then(t => { if (t.length > 0) qz.allReleaseTitles = t; }),
+        ]).then(() => { completed.add(qz); }),
+      );
     }
   }
 
@@ -1395,6 +1412,8 @@ async function fetchReleasesForDisambiguation(aggregated: AggregatedResult[]): P
     Promise.allSettled(promises),
     new Promise(resolve => setTimeout(resolve, 4000)),
   ]);
+
+  return completed;
 }
 
 // ---------------------------------------------------------------------------
@@ -1884,9 +1903,9 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
   }
 
   // Phase 3: Fetch releases, then disambiguate using release data
-  await fetchReleasesForDisambiguation(aggregated);
+  const releaseLookupsCompleted = await fetchReleasesForDisambiguation(aggregated);
   preferBandcampFeaturedRelease(aggregated);
-  removeDeadQobuzLinks(aggregated);
+  removeDeadQobuzLinks(aggregated, releaseLookupsCompleted);
   crossPlatformReleaseComparison(aggregated);
   deduplicateQobuzUrls(aggregated);
   createOrphanedQobuzStandalones(aggregated, qobuzMatches);

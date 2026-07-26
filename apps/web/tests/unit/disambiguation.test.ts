@@ -213,6 +213,55 @@ describe('removeDeadQobuzLinks', () => {
 
     expect(results[0].platforms).toHaveLength(1);
   });
+
+  it('keeps a release-less Qobuz link when its lookup never finished', () => {
+    // The regression this guards: release lookups share one fixed 4s race, so a slow
+    // Qobuz response left the link with no data and it was deleted as "dead" — taking
+    // the artist image with it, since that comes from the Qobuz match.
+    const results = [makeResult('Artist', [
+      { sourceId: 'bandcamp', url: 'https://a.bandcamp.com' },
+      { sourceId: 'qobuz', url: 'https://qobuz.com/1' },
+    ])];
+    const completed = new Set<never>(); // nothing finished
+
+    removeDeadQobuzLinks(results, completed);
+
+    expect(results[0].platforms.map(p => p.sourceId)).toEqual(['bandcamp', 'qobuz']);
+  });
+
+  it('still removes a release-less Qobuz link when its lookup DID finish', () => {
+    const results = [makeResult('Artist', [
+      { sourceId: 'bandcamp', url: 'https://a.bandcamp.com' },
+      { sourceId: 'qobuz', url: 'https://qobuz.com/1' },
+    ])];
+    const qobuzPlatform = results[0].platforms.find(p => p.sourceId === 'qobuz')!;
+
+    removeDeadQobuzLinks(results, new Set([qobuzPlatform]));
+
+    expect(results[0].platforms.map(p => p.sourceId)).toEqual(['bandcamp']);
+  });
+
+  it('keeps Qobuz with releases regardless of whether the lookup finished', () => {
+    const results = [makeResult('Artist', [
+      { sourceId: 'qobuz', url: 'https://qobuz.com/1', allReleaseTitles: ['album'] },
+    ])];
+
+    removeDeadQobuzLinks(results, new Set<never>());
+
+    expect(results[0].platforms).toHaveLength(1);
+  });
+
+  it('without the set, behaves exactly as before (deletes on missing data)', () => {
+    // Backward compatibility: existing callers that pass no set keep the old semantics.
+    const results = [makeResult('Artist', [
+      { sourceId: 'bandcamp', url: 'https://a.bandcamp.com' },
+      { sourceId: 'qobuz', url: 'https://qobuz.com/1' },
+    ])];
+
+    removeDeadQobuzLinks(results);
+
+    expect(results[0].platforms.map(p => p.sourceId)).toEqual(['bandcamp']);
+  });
 });
 
 describe('preferBandcampFeaturedRelease', () => {

@@ -593,14 +593,39 @@ export function preferBandcampFeaturedRelease(aggregated: AggregatedResult[]): v
 }
 
 // Remove Qobuz platforms with no releases (dead/placeholder pages)
-export function removeDeadQobuzLinks(aggregated: AggregatedResult[]): void {
+/** One entry in an AggregatedResult's platform list. */
+export type AggregatedPlatform = AggregatedResult['platforms'][number];
+
+/**
+ * Drop Qobuz links that have no releases behind them — they are usually a name-only
+ * match on a different artist.
+ *
+ * `releaseLookupsCompleted` holds the platform entries whose release lookups actually
+ * finished. Pass it. Without it, a Qobuz link is deleted whenever its lookup merely
+ * *didn't finish*, which is not the same thing as Qobuz having nothing: those lookups
+ * share one fixed 4s race in fetchReleasesForDisambiguation, so any artist whose Qobuz
+ * pages are slow to answer loses its link — and with it the artist image, which comes
+ * from the Qobuz match. Absence of data is not evidence of absence.
+ */
+export function removeDeadQobuzLinks(
+  aggregated: AggregatedResult[],
+  releaseLookupsCompleted?: ReadonlySet<AggregatedPlatform>,
+): void {
   for (const result of aggregated) {
     if (result.overrideMerged) continue;
     result.platforms = result.platforms.filter(p => {
       if (p.sourceId !== 'qobuz') return true;
       const hasReleases = p.latestRelease || (p.allReleaseTitles && p.allReleaseTitles.length > 0);
-      if (!hasReleases) console.log(`[Cleanup] Removing dead Qobuz link for "${result.name}": ${p.url}`);
-      return hasReleases;
+      if (hasReleases) return true;
+
+      // No release data. Only conclude Qobuz has nothing if we finished looking.
+      if (releaseLookupsCompleted && !releaseLookupsCompleted.has(p)) {
+        console.log(`[Cleanup] Keeping Qobuz link for "${result.name}" — release lookup did not finish: ${p.url}`);
+        return true;
+      }
+
+      console.log(`[Cleanup] Removing dead Qobuz link for "${result.name}": ${p.url}`);
+      return false;
     });
   }
 }
