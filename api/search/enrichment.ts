@@ -1,12 +1,8 @@
 // Shared enrichment functions for MusicBrainz data extraction
 // These functions are used both by the MusicBrainz Netlify function and search-sources.ts
 
-import { Sentry } from '../lib/sentry';
-import { cacheGetOrFetch, artistCacheKey } from '../functions/cache';
-import { persistEnrichment } from '../functions/db';
 import { isUrlHostnameAllowed } from '../functions/middleware';
-import { checkSentryDedup } from '../functions/ratelimit';
-import { isBandcampChallenge } from '../functions/search-parsers';
+import { findBandcampArtistUrl } from './bandcamp-probe';
 
 // Social platform types
 export type SocialPlatform =
@@ -466,79 +462,6 @@ export function mergeLocations(...sources: (ArtistLocation | null | undefined)[]
   return (result.city || result.country) ? result : undefined;
 }
 
-// Search Bandcamp for an artist by name and return the first matching artist/label URL.
-// Mirrors the Phase 1 Bandcamp scrape but runs server-side within Phase 2 enrichment,
-// so no client-supplied URLs are involved.
-//
-// NOTE: bandcamp.com/search is behind a Fastly bot challenge and is `Disallow`ed in
-// Bandcamp's robots.txt, so this currently always returns null. It is superseded by the
-// slug-probe lookup — see docs/specs/bandcamp-coverage-research.md. Until that lands, the
-// challenge is detected and reported rather than being silently read as "not on Bandcamp".
-export async function searchBandcampForArtistUrl(artistName: string, timeoutMs = 4000): Promise<string | null> {
-  try {
-    const searchUrl = `https://bandcamp.com/search?q=${encodeURIComponent(artistName)}&item_type=b`;
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), timeoutMs);
-    const response = await globalThis.fetch(searchUrl, {
-      signal: controller.signal,
-      headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36' },
-    });
-    clearTimeout(timeout);
-    if (!response.ok) return null;
-    const html = await response.text();
-
-    // A challenge page arrives as HTTP 200, so it would otherwise parse to zero
-    // results and be mistaken for a genuine "no such artist" answer.
-    if (isBandcampChallenge(html)) {
-      const shouldCapture = await checkSentryDedup('uns152:bandcamp-search-challenge', 6 * 60 * 60);
-      if (shouldCapture) {
-        Sentry.captureMessage('Bandcamp search blocked by bot challenge', {
-          level: 'warning',
-          extra: {
-            searchUrl,
-            responseBytes: html.length,
-            note: 'HTTP 200 challenge page — results are unavailable, not empty. Superseded by slug-probe lookup.',
-          },
-          tags: { platform: 'bandcamp' },
-        });
-      }
-      return null;
-    }
-
-    // Parse the first artist/label result whose name closely matches the query
-    const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const normalizedQuery = normalize(artistName);
-
-    // Match searchresult blocks: extract itemtype, URL, and display name
-    const blockPattern = /<li[^>]+class="[^"]*searchresult[^"]*"[^>]*>([\s\S]*?)<\/li>/g;
-    let block: RegExpExecArray | null;
-    while ((block = blockPattern.exec(html)) !== null) {
-      const blockHtml = block[1];
-      const typeMatch = blockHtml.match(/class="[^"]*itemtype[^"]*"[^>]*>\s*([^<]+)\s*</);
-      const linkMatch = blockHtml.match(/class="[^"]*heading[^"]*"[^>]*>\s*<a[^>]+href="([^"?]+)/);
-      const nameMatch = blockHtml.match(/class="[^"]*heading[^"]*"[^>]*>\s*<a[^>]*>([^<]+)</);
-      if (!typeMatch || !linkMatch || !nameMatch) continue;
-
-      const itemType = typeMatch[1].trim().toLowerCase();
-      if (itemType !== 'artist' && itemType !== 'label') continue;
-
-      const name = nameMatch[1].trim();
-      const url = linkMatch[1];
-      const normalizedName = normalize(name);
-
-      // Accept if names are equal or one contains the other (handles minor punctuation differences)
-      if (normalizedName === normalizedQuery ||
-          normalizedName.includes(normalizedQuery) ||
-          normalizedQuery.includes(normalizedName)) {
-        return url;
-      }
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
 // Fetch location from a Bandcamp artist profile page.
 // Validated against the SSRF allowlist as defense-in-depth.
 export async function fetchBandcampLocation(bandcampUrl: string, timeoutMs = 4000): Promise<ArtistLocation | null> {
@@ -615,7 +538,7 @@ export async function enrichLocationFallback(query: string): Promise<ArtistLocat
   const mirloSlug = query.toLowerCase().replace(/\s+/g, '');
   const FALLBACK_TIMEOUT = 3000;
 
-  const bandcampUrl = await searchBandcampForArtistUrl(query, FALLBACK_TIMEOUT);
+  const bandcampUrl = await findBandcampArtistUrl(query, FALLBACK_TIMEOUT);
   const [bandcampLocation, mirloLocation] = await Promise.all([
     bandcampUrl ? fetchBandcampLocation(bandcampUrl, FALLBACK_TIMEOUT) : Promise.resolve(null),
     fetchMirloLocation(mirloSlug, FALLBACK_TIMEOUT),

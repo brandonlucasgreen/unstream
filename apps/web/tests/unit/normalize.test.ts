@@ -5,7 +5,51 @@ import {
   normalizeForComparison,
   namesMatch,
   textMatchScore,
+  bandcampSlugCandidates,
 } from '../../../../api/functions/search-utils';
+
+describe('bandcampSlugCandidates', () => {
+  it('generates base, strip-"the", and hyphenated variants in that order', () => {
+    // Order matters: recall is 66.3% / 69.3% / 71.1% cumulative, so the base
+    // slug must be probed first.
+    expect(bandcampSlugCandidates('The Beths')).toEqual(['thebeths', 'beths', 'the-beths']);
+  });
+
+  it('collapses duplicates when variants coincide', () => {
+    // No leading "the", single word -> base and strip-"the" are identical.
+    expect(bandcampSlugCandidates('Radiohead')).toEqual(['radiohead']);
+  });
+
+  it('stops at three candidates', () => {
+    expect(bandcampSlugCandidates('The Mountain Goats').length).toBeLessThanOrEqual(3);
+  });
+
+  it('normalizes accents so Björk reaches bjork', () => {
+    expect(bandcampSlugCandidates('Björk')).toEqual(['bjork']);
+  });
+
+  it('only strips a leading "the", not one mid-name', () => {
+    const candidates = bandcampSlugCandidates('Explosions in the Sky');
+    expect(candidates[0]).toBe('explosionsinthesky');
+    expect(candidates).not.toContain('explosionsinsky');
+  });
+
+  it('drops candidates under three characters', () => {
+    // Bandcamp subdomains are at least 3 chars, so a 2-char guess is wasted work.
+    expect(bandcampSlugCandidates('U2')).toEqual([]);
+  });
+
+  it('handles punctuation and ampersands without emitting empty segments', () => {
+    const candidates = bandcampSlugCandidates('King Gizzard & The Lizard Wizard');
+    expect(candidates[0]).toBe('kinggizzardthelizardwizard');
+    expect(candidates.every(c => !c.startsWith('-') && !c.endsWith('-'))).toBe(true);
+    expect(candidates.every(c => !c.includes('--'))).toBe(true);
+  });
+
+  it('returns nothing for input with no alphanumerics', () => {
+    expect(bandcampSlugCandidates('!!! ???')).toEqual([]);
+  });
+});
 
 describe('normalizeAccents', () => {
   it('removes accents from characters', () => {

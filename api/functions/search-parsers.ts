@@ -146,6 +146,55 @@ export function parseQobuzSearchResults(html: string, query: string): [string, s
 // Bandcamp releases
 // ---------------------------------------------------------------------------
 
+/**
+ * Read a Bandcamp page's own claim about which band it belongs to.
+ *
+ * Every Bandcamp page carries `data-band="{"id":...,"name":"..."}"`. This is the
+ * authoritative identity check when probing a guessed subdomain — a slug
+ * existing does not mean it is the right artist. `thebeths.bandcamp.com`
+ * resolves but is an unrelated account named "no content".
+ */
+export function parseBandcampBandIdentity(html: string): { id: number; name: string } | null {
+  const match = html.match(/data-band="([^"]*)"/);
+  if (!match) return null;
+  try {
+    // The attribute value is HTML-escaped JSON.
+    const decoded = match[1]
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&amp;/g, '&');
+    const parsed = JSON.parse(decoded) as { id?: unknown; name?: unknown };
+    if (typeof parsed.id !== 'number' || typeof parsed.name !== 'string') return null;
+    return { id: parsed.id, name: parsed.name };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Count releases on a Bandcamp /music page, split by type.
+ *
+ * Zero albums AND zero tracks is the parked-squatter signature. Accounts at
+ * `beyonce`, `sufjan` and `jackwhite` all exist and all return a matching
+ * data-band name, but hold no releases — so a name check alone would surface
+ * them as genuine artist pages.
+ */
+export function parseBandcampReleaseCounts(html: string): { albums: number; tracks: number } {
+  const root = parse(html);
+  const albums = new Set<string>();
+  const tracks = new Set<string>();
+
+  for (const item of root.querySelectorAll('.music-grid-item')) {
+    // e.g. data-item-id="album-1507079760" / "track-526682361"
+    const id = item.getAttribute('data-item-id');
+    if (!id) continue;
+    if (id.startsWith('album-')) albums.add(id);
+    else if (id.startsWith('track-')) tracks.add(id);
+  }
+
+  return { albums: albums.size, tracks: tracks.size };
+}
+
 /** Parse Bandcamp /music page HTML to extract release titles */
 export function parseBandcampReleaseTitles(html: string): string[] {
   const root = parse(html);

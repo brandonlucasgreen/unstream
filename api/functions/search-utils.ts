@@ -231,6 +231,40 @@ export function normalizeForComparison(str: string): string {
   return normalizeAccents(str).toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
+/**
+ * Candidate `<slug>.bandcamp.com` subdomains for an artist name, most likely first.
+ *
+ * Bandcamp's search page is blocked and robots-disallowed, so artist URLs are
+ * found by probing these candidates and verifying the resulting page. Measured
+ * recall against 3,018 known artists (docs/specs/bandcamp-coverage-research.md):
+ *
+ *   1 candidate  (base)          66.3%
+ *   2 candidates (+strip "the")  69.3%
+ *   3 candidates (+hyphenated)   71.1%
+ *
+ * The curve then flattens hard — eleven candidates reach only 74.8%, so probes
+ * 4+ cost 8x the requests for under four points. Three is the deliberate stop.
+ * (True recall is higher than these figures, ~80%, because Bandcamp itself
+ * redirects some alias slugs to the right artist.)
+ */
+export function bandcampSlugCandidates(name: string): string[] {
+  const base = normalizeForComparison(name);
+  const withoutThe = normalizeForComparison(name.replace(/^\s*the\s+/i, ''));
+  const hyphenated = normalizeAccents(name)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  const candidates: string[] = [];
+  for (const candidate of [base, withoutThe, hyphenated]) {
+    // Bandcamp subdomains are at least 3 characters; skip empties and dupes.
+    if (candidate.length >= 3 && !candidates.includes(candidate)) {
+      candidates.push(candidate);
+    }
+  }
+  return candidates;
+}
+
 // Check if two names are similar enough to be considered a match
 // Returns true if names match closely (same name, or one contains the other)
 export function namesMatch(name1: string, name2: string): boolean {

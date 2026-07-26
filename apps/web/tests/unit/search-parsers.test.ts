@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
   isBandcampChallenge,
+  parseBandcampBandIdentity,
+  parseBandcampReleaseCounts,
   parseBandcampSearchResults,
   parseMirloArtistPage,
   parseQobuzSearchResults,
@@ -53,6 +55,89 @@ describe('isBandcampChallenge', () => {
     // (e.g. inside user-supplied bio text) from disabling a working scrape.
     const big = `<html><body>${'x'.repeat(30_000)}/_fs-ch-nope</body></html>`;
     expect(isBandcampChallenge(big)).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// parseBandcampBandIdentity
+// ---------------------------------------------------------------------------
+
+describe('parseBandcampBandIdentity', () => {
+  it('reads id and name from the HTML-escaped data-band attribute', () => {
+    const html = `<div data-band="{&quot;id&quot;:2295933907,&quot;name&quot;:&quot;Boy Harsher&quot;}"></div>`;
+    expect(parseBandcampBandIdentity(html)).toEqual({ id: 2295933907, name: 'Boy Harsher' });
+  });
+
+  it('surfaces a squatted account under its real name', () => {
+    // thebeths.bandcamp.com resolves, but belongs to an account called "no content".
+    // Returning the true name is what lets the caller reject it.
+    const html = `<div data-band="{&quot;id&quot;:3801769277,&quot;name&quot;:&quot;no content&quot;}"></div>`;
+    expect(parseBandcampBandIdentity(html)?.name).toBe('no content');
+  });
+
+  it('decodes escaped apostrophes and ampersands in names', () => {
+    const html = `<div data-band="{&quot;id&quot;:1,&quot;name&quot;:&quot;Sam &amp; Dave&#39;s Band&quot;}"></div>`;
+    expect(parseBandcampBandIdentity(html)?.name).toBe("Sam & Dave's Band");
+  });
+
+  it('returns null when the attribute is absent', () => {
+    expect(parseBandcampBandIdentity('<html><body>nothing here</body></html>')).toBeNull();
+  });
+
+  it('returns null on malformed JSON rather than throwing', () => {
+    expect(parseBandcampBandIdentity('<div data-band="{not json}"></div>')).toBeNull();
+  });
+
+  it('returns null when id or name has the wrong type', () => {
+    const badId = `<div data-band="{&quot;id&quot;:&quot;123&quot;,&quot;name&quot;:&quot;X&quot;}"></div>`;
+    const noName = `<div data-band="{&quot;id&quot;:123}"></div>`;
+    expect(parseBandcampBandIdentity(badId)).toBeNull();
+    expect(parseBandcampBandIdentity(noName)).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// parseBandcampReleaseCounts
+// ---------------------------------------------------------------------------
+
+describe('parseBandcampReleaseCounts', () => {
+  const musicPage = `
+    <ol class="music-grid">
+      <li class="music-grid-item" data-item-id="album-1507079760"><p class="title">GET MEAN</p></li>
+      <li class="music-grid-item" data-item-id="album-181024544"><p class="title">Careful</p></li>
+      <li class="music-grid-item" data-item-id="track-748933878"><p class="title">Jeans</p></li>
+    </ol>`;
+
+  it('counts albums and tracks separately', () => {
+    expect(parseBandcampReleaseCounts(musicPage)).toEqual({ albums: 2, tracks: 1 });
+  });
+
+  it('reports zero for a parked account with no releases', () => {
+    // The squatter signature: beyonce / sufjan / jackwhite all look like this.
+    expect(parseBandcampReleaseCounts('<ol class="music-grid"></ol>')).toEqual({ albums: 0, tracks: 0 });
+  });
+
+  it('deduplicates repeated item ids', () => {
+    const dupes = `
+      <li class="music-grid-item" data-item-id="album-1"></li>
+      <li class="music-grid-item" data-item-id="album-1"></li>`;
+    expect(parseBandcampReleaseCounts(dupes)).toEqual({ albums: 1, tracks: 0 });
+  });
+
+  it('ignores grid items with no data-item-id and unknown prefixes', () => {
+    const odd = `
+      <li class="music-grid-item"></li>
+      <li class="music-grid-item" data-item-id="merch-99"></li>
+      <li class="music-grid-item" data-item-id="album-7"></li>`;
+    expect(parseBandcampReleaseCounts(odd)).toEqual({ albums: 1, tracks: 0 });
+  });
+
+  it('ignores album links outside the music grid', () => {
+    // Artist pages link to albums in navigation and footers; only grid items count.
+    const withNav = `
+      <a href="/album/somewhere-else">nav link</a>
+      <li class="music-grid-item" data-item-id="album-7"></li>`;
+    expect(parseBandcampReleaseCounts(withNav)).toEqual({ albums: 1, tracks: 0 });
   });
 });
 

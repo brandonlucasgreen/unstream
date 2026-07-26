@@ -44,7 +44,6 @@ import {
   fetchLinktreeLinks,
   parseLocationString,
   mergeLocations,
-  searchBandcampForArtistUrl,
   fetchBandcampLocation,
   fetchMirloLocation,
   enrichLocationFallback,
