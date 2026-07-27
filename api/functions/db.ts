@@ -334,59 +334,45 @@ export async function getArtistBySlug(slug: string): Promise<ArtistResult | null
   const client = getClient();
   if (!client) return null;
 
+  // Stored slugs only ever contain [a-z0-9-] (see artistSlug). Anything else
+  // can't match a real artist, and rejecting it here keeps the slug safe to
+  // interpolate into the PostgREST or() filter below (no ilike wildcards or
+  // filter-syntax characters).
+  if (!/^[A-Za-z0-9-]+$/.test(slug)) return null;
+
   try {
-    // Try exact match first
-    let { data: artist, error: artistError } = await client
+    // The lookup tolerates three slug variants, checked in priority order:
+    //   1. exact match, 2. case-insensitive (e.g. "KingTriumph"),
+    //   3. hyphens stripped ("king-triumph" → "kingtriumph"),
+    //   4. hyphens added at camelCase boundaries ("kingTriumph" → "king-triumph").
+    // They're fetched in ONE query — the old one-query-per-variant fallback
+    // chain cost up to 4 sequential round-trips on every miss, and this
+    // function runs at the front of every search.
+    const noHyphens = slug.includes('-') ? slug.replace(/-/g, '') : null;
+    const camelHyphenated = !slug.includes('-')
+      ? slug.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
+      : null;
+
+    const orFilters = [`slug.ilike.${slug}`]; // ilike without wildcards = case-insensitive match, covers exact too
+    if (noHyphens) orFilters.push(`slug.eq.${noHyphens}`);
+    if (camelHyphenated && camelHyphenated !== slug) orFilters.push(`slug.eq.${camelHyphenated}`);
+
+    const { data: candidates, error: artistError } = await client
       .from('artists')
       .select('*')
-      .eq('slug', slug)
-      .single();
+      .or(orFilters.join(','));
 
-    // If no exact match, try case-insensitive and hyphen-variant matches
-    if (artistError || !artist) {
-      // Try case-insensitive match (e.g. "KingTriumph" → "kingtriumph")
-      const { data: ciData } = await client
-        .from('artists')
-        .select('*')
-        .ilike('slug', slug)
-        .single();
-      if (ciData) {
-        artist = ciData;
-        artistError = null;
-      }
-    }
+    if (artistError || !candidates || candidates.length === 0) return null;
 
-    // Try hyphenated variant (e.g. "king-triumph" → "kingtriumph")
-    if ((artistError || !artist) && slug.includes('-')) {
-      const noHyphens = slug.replace(/-/g, '');
-      const { data: nhData } = await client
-        .from('artists')
-        .select('*')
-        .eq('slug', noHyphens)
-        .single();
-      if (nhData) {
-        artist = nhData;
-        artistError = null;
-      }
-    }
+    const rows = candidates as ArtistRow[];
+    const lowerSlug = slug.toLowerCase();
+    const artist =
+      rows.find(r => r.slug === slug) ||
+      rows.find(r => r.slug.toLowerCase() === lowerSlug) ||
+      (noHyphens ? rows.find(r => r.slug === noHyphens) : undefined) ||
+      (camelHyphenated ? rows.find(r => r.slug === camelHyphenated) : undefined);
 
-    // Try adding hyphens at camelCase boundaries (e.g. "kingtriumph" → "king-triumph")
-    if ((artistError || !artist) && !slug.includes('-')) {
-      const hyphenated = slug.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-      if (hyphenated !== slug) {
-        const { data: hyData } = await client
-          .from('artists')
-          .select('*')
-          .eq('slug', hyphenated)
-          .single();
-        if (hyData) {
-          artist = hyData;
-          artistError = null;
-        }
-      }
-    }
-
-    if (artistError || !artist) return null;
+    if (!artist) return null;
 
     const row = artist as ArtistRow;
 
@@ -399,11 +385,21 @@ export async function getArtistBySlug(slug: string): Promise<ArtistResult | null
       }
     }
 
-    const { data: links, error: linksError } = await client
-      .from('artist_links')
-      .select('*')
-      .eq('artist_id', row.id)
-      .order('display_order', { ascending: true, nullsFirst: false });
+    // Links and (for claimed artists) profile data are independent — fetch in parallel
+    const [{ data: links, error: linksError }, { data: profileData }] = await Promise.all([
+      client
+        .from('artist_links')
+        .select('*')
+        .eq('artist_id', row.id)
+        .order('display_order', { ascending: true, nullsFirst: false }),
+      row.match_confidence === 'claimed'
+        ? client
+            .from('artist_profiles')
+            .select('bio, custom_image_url, website_url, featured_embed, verified_at')
+            .eq('artist_id', row.id)
+            .single()
+        : Promise.resolve({ data: null }),
+    ]);
 
     if (linksError) return null;
 
@@ -414,15 +410,8 @@ export async function getArtistBySlug(slug: string): Promise<ArtistResult | null
       ...(link.latest_release ? { latestRelease: link.latest_release as PlatformLink['latestRelease'] } : {}),
     }));
 
-    // Fetch profile data for claimed artists
     let profile: ArtistProfile | undefined;
     if (row.match_confidence === 'claimed') {
-      const { data: profileData } = await client
-        .from('artist_profiles')
-        .select('bio, custom_image_url, website_url, featured_embed, verified_at')
-        .eq('artist_id', row.id)
-        .single();
-
       if (profileData) {
         profile = {
           bio: profileData.bio || undefined,
@@ -468,8 +457,11 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
   const client = getClient();
   if (!client) return;
 
-  for (const result of results) {
-    if (result.type !== 'artist') continue;
+  // This runs before the search response is sent, so wall-clock time matters:
+  // artists persist concurrently, and each artist's links go up in one bulk
+  // upsert instead of one round-trip per link.
+  await Promise.all(results.map(async result => {
+    if (result.type !== 'artist') return;
 
     // Filter out excluded platforms and non-direct links
     const validPlatforms = result.platforms.filter(
@@ -477,7 +469,7 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
     );
 
     // Only persist artists with at least 1 real direct link
-    if (validPlatforms.length === 0) continue;
+    if (validPlatforms.length === 0) return;
 
     const slug = artistSlug(result.name);
 
@@ -491,7 +483,7 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
 
       if (existing?.match_confidence === 'claimed') {
         console.log(`[DB] Skipping persist for claimed artist "${result.name}"`);
-        continue;
+        return;
       }
 
       // Upsert artist — always store as unverified until claimed
@@ -513,37 +505,41 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
 
       if (artistError || !artist) {
         console.error(`[DB] Failed to upsert artist "${result.name}":`, artistError);
-        continue;
+        return;
       }
 
       const artistId = artist.id;
 
-      // Upsert links (only valid platforms)
-      const linkRows = validPlatforms.map((platform, index) => ({
-        artist_id: artistId,
-        platform: platform.sourceId,
-        url: platform.url,
-        source: 'search',
-        is_direct: true,
-        latest_release: platform.latestRelease || null,
-        display_order: index,
-      }));
+      // Bulk-upsert links (only valid platforms) in a single request.
+      // Deduped by platform (last wins, matching the old one-at-a-time loop) —
+      // Postgres rejects a bulk upsert that touches the same conflict key twice.
+      const linkRowsByPlatform = new Map(validPlatforms.map((platform, index) => [
+        platform.sourceId,
+        {
+          artist_id: artistId,
+          platform: platform.sourceId,
+          url: platform.url,
+          source: 'search',
+          is_direct: true,
+          latest_release: platform.latestRelease || null,
+          display_order: index,
+        },
+      ]));
+      const linkRows = [...linkRowsByPlatform.values()];
 
-      for (const row of linkRows) {
-        const { error: linkError } = await client
-          .from('artist_links')
-          .upsert(row, { onConflict: 'artist_id,platform' });
+      const { error: linkError } = await client
+        .from('artist_links')
+        .upsert(linkRows, { onConflict: 'artist_id,platform' });
 
-        if (linkError) {
-          console.error(`[DB] Failed to upsert link ${row.platform} for "${result.name}":`, linkError);
-        }
+      if (linkError) {
+        console.error(`[DB] Failed to upsert links for "${result.name}":`, linkError);
       }
 
       console.log(`[DB] Persisted "${result.name}" with ${linkRows.length} links`);
     } catch (error) {
       console.error(`[DB] Error persisting "${result.name}":`, error);
     }
-  }
+  }));
 }
 
 /**

@@ -42,8 +42,12 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
     return { statusCode: 204, headers, body: '' };
   }
 
+  // Rate-limit check (Redis) and token validation (Supabase Auth) are both
+  // network round-trips with no data dependency — run them concurrently.
   const ip = getClientIp(event.headers);
-  const rl = await checkRateLimit(ip, 'standard', headers);
+  const rlPromise = checkRateLimit(ip, 'standard', headers);
+  const userPromise = authenticateRequest(event.headers.authorization).catch(() => null);
+  const rl = await rlPromise;
   if (rl.limited) return rl.response;
 
   const client = getServiceClient();
@@ -79,11 +83,13 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
 
   // GET: Return claimed profiles for authenticated user
   if (event.httpMethod === 'GET') {
-    const user = await authenticateRequest(event.headers.authorization);
+    const user = await userPromise;
     if (!user) {
       return { statusCode: 401, headers, body: JSON.stringify({ error: 'Not authenticated' }) };
     }
 
+    // The artists rows are embedded via the artist_id FK so profiles + artist
+    // details arrive in one round-trip instead of two sequential queries.
     const { data: profiles, error } = await client
       .from('artist_profiles')
       .select(`
@@ -94,7 +100,8 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
         custom_image_url,
         website_url,
         verified_at,
-        claimed_at
+        claimed_at,
+        artists (id, name, slug, image_url)
       `)
       .eq('user_id', user.userId)
       .not('verified_at', 'is', null)
@@ -108,28 +115,17 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
     // Backfill: if any profiles have empty email, update with the authenticated user's email.
     // This fixes profiles created when the claim page lost the email on magic link redirect.
     if (user.email && profiles && profiles.length > 0) {
-      for (const p of profiles) {
-        if (!p.email) {
-          await client
-            .from('artist_profiles')
-            .update({ email: user.email.toLowerCase().trim() })
-            .eq('id', p.id);
-          console.log(`[artist-auth] Backfilled email for profile ${p.id}`);
-        }
-      }
+      await Promise.all(profiles.filter(p => !p.email).map(async p => {
+        await client
+          .from('artist_profiles')
+          .update({ email: user.email.toLowerCase().trim() })
+          .eq('id', p.id);
+        console.log(`[artist-auth] Backfilled email for profile ${p.id}`);
+      }));
     }
 
-    // Fetch artist details for each profile
-    const artistIds = (profiles || []).map(p => p.artist_id);
-    const { data: artists } = await client
-      .from('artists')
-      .select('id, name, slug, image_url')
-      .in('id', artistIds);
-
-    const artistMap = new Map((artists || []).map(a => [a.id, a]));
-
     const claimedProfiles = (profiles || []).map(p => {
-      const artist = artistMap.get(p.artist_id);
+      const artist = (p as { artists?: { name?: string; slug?: string; image_url?: string } }).artists;
       return {
         id: p.id,
         artistId: p.artist_id,

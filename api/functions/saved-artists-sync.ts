@@ -41,8 +41,12 @@ export async function handler(event: {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   }
 
+  // Rate-limit check (Redis) and token validation (Supabase Auth) are both
+  // network round-trips with no data dependency — run them concurrently.
   const ip = getClientIp(event.headers);
-  const rl = await checkRateLimit(ip, 'standard', CORS_HEADERS);
+  const rlPromise = checkRateLimit(ip, 'standard', CORS_HEADERS);
+  const userPromise = authenticateRequest(event.headers.authorization).catch(() => null);
+  const rl = await rlPromise;
   if (rl.limited) return rl.response;
 
   const client = getClient();
@@ -54,7 +58,7 @@ export async function handler(event: {
     return { statusCode: 405, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
-  const user = await authenticateRequest(event.headers.authorization);
+  const user = await userPromise;
   if (!user) {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authenticated' }) };
   }

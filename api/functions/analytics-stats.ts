@@ -41,12 +41,15 @@ export async function handler(event: {
     return { statusCode: 405, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
+  // Rate-limit check (Redis) and token validation (Supabase Auth) are both
+  // network round-trips with no data dependency — run them concurrently.
   const ip = getClientIp(event.headers || {});
-  const rl = await checkRateLimit(ip, 'standard', CORS_HEADERS);
+  const rlPromise = checkRateLimit(ip, 'standard', CORS_HEADERS);
+  const authPromise = authenticateRequest(event.headers?.authorization || event.headers?.Authorization).catch(() => null);
+  const rl = await rlPromise;
   if (rl.limited) return rl.response;
 
-  // Authenticate
-  const auth = await authenticateRequest(event.headers?.authorization || event.headers?.Authorization);
+  const auth = await authPromise;
   if (!auth) {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Unauthorized' }) };
   }
@@ -67,24 +70,28 @@ export async function handler(event: {
     return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Server configuration error' }) };
   }
 
-  // Resolve artist and verify ownership
-  const { data: artist } = await client
-    .from('artists')
-    .select('id')
-    .eq('slug', slug)
-    .single();
+  // Resolve artist and verify ownership. The two lookups are independent —
+  // the ownership check joins artists by slug via the artist_id FK — so they
+  // run in parallel instead of back-to-back. 404 (no artist) still takes
+  // precedence over 403 (not the owner).
+  const [{ data: artist }, { data: profile }] = await Promise.all([
+    client
+      .from('artists')
+      .select('id')
+      .eq('slug', slug)
+      .single(),
+    client
+      .from('artist_profiles')
+      .select('id, artists!inner(id)')
+      .eq('user_id', auth.userId)
+      .eq('artists.slug', slug)
+      .not('verified_at', 'is', null)
+      .maybeSingle(),
+  ]);
 
   if (!artist) {
     return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Artist not found' }) };
   }
-
-  const { data: profile } = await client
-    .from('artist_profiles')
-    .select('id')
-    .eq('artist_id', artist.id)
-    .eq('user_id', auth.userId)
-    .not('verified_at', 'is', null)
-    .single();
 
   if (!profile) {
     return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authorized to view analytics for this artist' }) };

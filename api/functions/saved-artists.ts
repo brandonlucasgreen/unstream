@@ -80,8 +80,12 @@ export async function handler(event: {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   }
 
+  // Rate-limit check (Redis) and token validation (Supabase Auth) are both
+  // network round-trips with no data dependency — run them concurrently.
   const ip = getClientIp(event.headers);
-  const rl = await checkRateLimit(ip, 'standard', CORS_HEADERS);
+  const rlPromise = checkRateLimit(ip, 'standard', CORS_HEADERS);
+  const userPromise = authenticateRequest(event.headers.authorization).catch(() => null);
+  const rl = await rlPromise;
   if (rl.limited) return rl.response;
 
   const client = getServiceClient();
@@ -91,7 +95,7 @@ export async function handler(event: {
 
   // GET: List user's saved artists (auth required)
   if (event.httpMethod === 'GET') {
-    const user = await authenticateRequest(event.headers.authorization);
+    const user = await userPromise;
     if (!user) {
       return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authenticated' }) };
     }
@@ -154,7 +158,7 @@ export async function handler(event: {
 
   // POST: Route by action field
   if (event.httpMethod === 'POST') {
-    const user = await authenticateRequest(event.headers.authorization);
+    const user = await userPromise;
     if (!user) {
       return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authenticated' }) };
     }
@@ -192,21 +196,20 @@ async function findExistingArtist(
   client: ReturnType<typeof getServiceClient>,
   slug: string,
 ): Promise<{ id: string; name: string; slug: string; image_url: string | null } | null> {
-  // Exact slug match first
-  const { data: exact } = await client
-    .from('artists')
-    .select('id, name, slug, image_url')
-    .eq('slug', slug)
-    .single();
-  if (exact) return exact;
-
-  // Case-insensitive fallback
-  const { data: ciData } = await client
-    .from('artists')
-    .select('id, name, slug, image_url')
-    .ilike('slug', slug)
-    .single();
-  return ciData;
+  // Exact and case-insensitive lookups run in parallel; exact match wins.
+  const [{ data: exact }, { data: ciData }] = await Promise.all([
+    client
+      .from('artists')
+      .select('id, name, slug, image_url')
+      .eq('slug', slug)
+      .single(),
+    client
+      .from('artists')
+      .select('id, name, slug, image_url')
+      .ilike('slug', slug)
+      .single(),
+  ]);
+  return exact || ciData;
 }
 
 async function handleSave(user: { userId: string; email: string }, body: Record<string, unknown>, client: ReturnType<typeof getServiceClient>) {
@@ -303,13 +306,26 @@ async function handleRemove(user: { userId: string; email: string }, body: Recor
   try {
     // UNS-112: soft-delete (tombstone) instead of hard DELETE so
     // incremental pulls (?since=) can propagate removals to other devices.
+    // The sharing lookup (read-only) runs concurrently with the tombstone write;
+    // the CDN purge itself only fires once the write has succeeded.
     const removeTime = new Date().toISOString();
-    const { error: updateError } = await client
-      .from('saved_artists')
-      .update({ deleted: true, deleted_at: removeTime, last_modified: removeTime })
-      .eq('user_id', user.userId)
-      .eq('artist_slug', artistSlug)
-      .eq('deleted', false);
+    const [{ error: updateError }, unameResult] = await Promise.all([
+      client
+        .from('saved_artists')
+        .update({ deleted: true, deleted_at: removeTime, last_modified: removeTime })
+        .eq('user_id', user.userId)
+        .eq('artist_slug', artistSlug)
+        .eq('deleted', false),
+      client
+        .from('usernames')
+        .select('username, saved_artists_public')
+        .eq('user_id', user.userId)
+        .maybeSingle()
+        .then(res => res, (e: unknown) => {
+          console.error('[saved-artists] CDN purge lookup failed:', e);
+          return { data: null };
+        }),
+    ]);
 
     if (updateError) {
       console.error('[saved-artists] Error removing saved artist:', updateError);
@@ -318,18 +334,9 @@ async function handleRemove(user: { userId: string; email: string }, body: Recor
 
     // If the user has public sharing enabled, purge the CDN cache for their page
     // so the removed artist disappears immediately instead of serving stale for ~5 min.
-    try {
-      const { data: uname } = await client
-        .from('usernames')
-        .select('username, saved_artists_public')
-        .eq('user_id', user.userId)
-        .maybeSingle();
-
-      if (uname?.saved_artists_public && uname.username) {
-        purgeCacheTag(uname.username);
-      }
-    } catch (e) {
-      console.error('[saved-artists] CDN purge lookup failed:', e);
+    const uname = unameResult.data;
+    if (uname?.saved_artists_public && uname.username) {
+      purgeCacheTag(uname.username);
     }
 
     return {

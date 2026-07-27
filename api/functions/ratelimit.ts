@@ -186,27 +186,29 @@ export async function checkRateLimit(
   if (!limiter) return { limited: false };
 
   try {
-    // Check daily quota first to avoid consuming per-minute tokens on exhausted quotas
-    if (dailyLimiter) {
-      const dailyResult = await dailyLimiter.limit(identifier);
-      if (!dailyResult.success) {
-        console.log(`[RateLimit] Blocked ${tier} daily quota for ${identifier}`);
-        return {
-          limited: true,
-          response: {
-            statusCode: 429,
-            headers: {
-              ...corsHeaders,
-              'Retry-After': String(Math.ceil(dailyResult.reset / 1000 - Date.now() / 1000)),
-            },
-            body: JSON.stringify({ error: 'Daily request limit exceeded. Please try again tomorrow.' }),
-          },
-        };
-      }
-    }
+    // Run the daily and per-minute checks in parallel — each is a Redis round-trip,
+    // and this check sits in front of every API request. The cost is that a request
+    // already over its daily quota also consumes a per-minute token, which is
+    // harmless: the request is rejected either way.
+    const [dailyResult, result] = await Promise.all([
+      dailyLimiter ? dailyLimiter.limit(identifier) : Promise.resolve(null),
+      limiter.limit(identifier),
+    ]);
 
-    // Check per-minute limit
-    const result = await limiter.limit(identifier);
+    if (dailyResult && !dailyResult.success) {
+      console.log(`[RateLimit] Blocked ${tier} daily quota for ${identifier}`);
+      return {
+        limited: true,
+        response: {
+          statusCode: 429,
+          headers: {
+            ...corsHeaders,
+            'Retry-After': String(Math.ceil(dailyResult.reset / 1000 - Date.now() / 1000)),
+          },
+          body: JSON.stringify({ error: 'Daily request limit exceeded. Please try again tomorrow.' }),
+        },
+      };
+    }
 
     if (!result.success) {
       console.log(`[RateLimit] Blocked ${tier} request from ${identifier}`);
@@ -286,30 +288,31 @@ export async function checkApiRateLimit(
   if (!perMin) return { limited: false, rateLimitInfo: { limit: perMinLimit, remaining: perMinLimit, reset: Math.ceil(Date.now() / 1000) + 60 } };
 
   try {
-    // Check daily quota first (skip for internal tier which is unlimited).
-    // This avoids consuming per-minute tokens on requests that are already over daily quota.
-    if (daily && dailyLimit > 0) {
-      const dailyResult = await daily.limit(keyId);
-      if (!dailyResult.success) {
-        console.log(`[RateLimit] Blocked ${apiKeyInfo.tier} daily quota for key ${apiKeyInfo.keyPrefix}`);
-        return {
-          limited: true,
-          response: {
-            statusCode: 429,
-            headers: {
-              ...corsHeaders,
-              'Retry-After': String(Math.ceil(dailyResult.reset / 1000 - Date.now() / 1000)),
-              'X-RateLimit-Limit': String(dailyLimit),
-              'X-RateLimit-Remaining': '0',
-              'X-RateLimit-Reset': String(Math.ceil(dailyResult.reset / 1000)),
-            },
-            body: JSON.stringify({ error: 'Daily request limit exceeded. Please try again tomorrow.' }),
-          },
-        };
-      }
-    }
+    // Daily and per-minute checks run in parallel (each is a Redis round-trip).
+    // Internal tier has no daily limiter. Same tradeoff as checkRateLimit: a
+    // daily-blocked request also consumes a per-minute token, harmlessly.
+    const [dailyResult, perMinResult] = await Promise.all([
+      daily && dailyLimit > 0 ? daily.limit(keyId) : Promise.resolve(null),
+      perMin.limit(keyId),
+    ]);
 
-    const perMinResult = await perMin.limit(keyId);
+    if (dailyResult && !dailyResult.success) {
+      console.log(`[RateLimit] Blocked ${apiKeyInfo.tier} daily quota for key ${apiKeyInfo.keyPrefix}`);
+      return {
+        limited: true,
+        response: {
+          statusCode: 429,
+          headers: {
+            ...corsHeaders,
+            'Retry-After': String(Math.ceil(dailyResult.reset / 1000 - Date.now() / 1000)),
+            'X-RateLimit-Limit': String(dailyLimit),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': String(Math.ceil(dailyResult.reset / 1000)),
+          },
+          body: JSON.stringify({ error: 'Daily request limit exceeded. Please try again tomorrow.' }),
+        },
+      };
+    }
 
     if (!perMinResult.success) {
       console.log(`[RateLimit] Blocked ${apiKeyInfo.tier} API request from key ${apiKeyInfo.keyPrefix}`);

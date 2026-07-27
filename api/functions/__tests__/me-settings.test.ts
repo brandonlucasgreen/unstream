@@ -73,8 +73,10 @@ describe('me-settings handler', () => {
   });
 
   it('returns settings with username, location, email, and hasPassword', async () => {
-    mocks.mockAuthAdmin.getUserById.mockResolvedValue({
-      data: { user: { email: 'test@example.com', user_metadata: { has_password: true } } },
+    // has_password comes from the token-validation response (auth.getUser),
+    // not a separate admin.getUserById lookup.
+    mocks.mockAuthGetUser.mockResolvedValue({
+      data: { user: { id: 'user-1', email: 'test@example.com', user_metadata: { has_password: true } } },
       error: null,
     });
     mocks.mockFrom.mockReturnValue({
@@ -95,10 +97,6 @@ describe('me-settings handler', () => {
   });
 
   it('returns null username and location when user has no username row', async () => {
-    mocks.mockAuthAdmin.getUserById.mockResolvedValue({
-      data: { user: { email: 'test@example.com', user_metadata: {} } },
-      error: null,
-    });
     mocks.mockFrom.mockReturnValue({
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
