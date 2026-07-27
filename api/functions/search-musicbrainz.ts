@@ -6,7 +6,7 @@ import { cacheGetOrFetch, artistCacheKey } from './cache';
 import { persistEnrichment } from './db';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery, isUrlHostnameAllowed } from './middleware';
-import { normalizeAccents, normalizeSearchQuery } from './search-utils';
+import { normalizeAccents, normalizeForComparison, normalizeSearchQuery } from './search-utils';
 
 // Import all shared enrichment functions and types
 import {
@@ -108,8 +108,14 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
 
     // Verify the returned artist name actually matches the query
     // This prevents "Synthetic Ruby" from matching just "Ruby"
-    const queryNormalized = query.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const artistNormalized = artist.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    //
+    // Must use normalizeForComparison, which strips accents. A bare
+    // .replace(/[^a-z0-9]/g, '') *deletes* accented letters instead: MusicBrainz returns
+    // "Tanerélle" -> "tanerlle" while the query arrives already accent-normalized as
+    // "Tanerelle" -> "tanerelle", so every accented artist name failed this check and
+    // lost all MB enrichment.
+    const queryNormalized = normalizeForComparison(query);
+    const artistNormalized = normalizeForComparison(artist.name);
     const isNameMatch = queryNormalized === artistNormalized ||
       queryNormalized.includes(artistNormalized) && artistNormalized.length > queryNormalized.length * 0.7 ||
       artistNormalized.includes(queryNormalized) && queryNormalized.length > artistNormalized.length * 0.7;

@@ -6,7 +6,6 @@ import {
   type PlatformResult,
   normalizeForComparison,
   namesMatch,
-  displayNameFromSlug,
 } from './search-utils';
 
 // ---------------------------------------------------------------------------
@@ -106,40 +105,6 @@ export function parseMirloArtistPage(html: string, normalizedQuery: string, arti
     url: artistUrl,
     imageUrl,
   };
-}
-
-// ---------------------------------------------------------------------------
-// Qobuz
-// ---------------------------------------------------------------------------
-
-/** Parse Qobuz search page HTML to extract artist interpreter links */
-export function parseQobuzSearchResults(html: string, query: string): [string, string][] {
-  const results: [string, string][] = [];
-  const interpreterRegex = /href="(\/us-en\/interpreter\/([^/]+)\/(\d+))"/g;
-  let match;
-  const queryNormalized = normalizeForComparison(query);
-  const seen = new Set<string>();
-
-  while ((match = interpreterRegex.exec(html)) !== null && results.length < 10) {
-    const [, path, slug] = match;
-    const slugNormalized = slug.replace(/-/g, '');
-
-    const isMatch = slugNormalized === queryNormalized ||
-        queryNormalized.startsWith(slugNormalized) ||
-        (slugNormalized.startsWith(queryNormalized) && /^\d*$/.test(slugNormalized.slice(queryNormalized.length)));
-
-    if (isMatch) {
-      const artistName = displayNameFromSlug(slug, query);
-      const normalizedName = normalizeForComparison(artistName);
-
-      if (!seen.has(normalizedName)) {
-        seen.add(normalizedName);
-        results.push([normalizedName, `https://www.qobuz.com${path}`]);
-      }
-    }
-  }
-
-  return results;
 }
 
 // ---------------------------------------------------------------------------
@@ -264,8 +229,8 @@ export function parseBandcampPageLocation(html: string): string | null {
  * f4.bcbits.com/img/0040867508_23.jpg, which is exactly the image production already
  * shows for Radiohead. Free — the probe has this HTML in hand.
  *
- * Matters because the artist image has been coming from the Qobuz match, and Qobuz's
- * search path is robots-disallowed and being retired. Bandcamp is the replacement.
+ * This is the only source of the artist image: it used to come from the Qobuz match,
+ * whose search path is robots-disallowed and has been retired.
  */
 export function parseBandcampImage(html: string): string | null {
   const match = html.match(/<meta property="og:image" content="([^"]+)"/);

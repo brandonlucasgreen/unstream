@@ -17,14 +17,8 @@ import {
   CURATED_PLATFORMS,
   collectReleaseTitles,
   aggregateResults,
-  attachQobuzAndSearchLinks,
-  createQobuzOnlyResults,
-  preferBandcampFeaturedRelease,
-  removeDeadQobuzLinks,
-  type AggregatedPlatform,
-  crossPlatformReleaseComparison,
-  deduplicateQobuzUrls,
-  createOrphanedQobuzStandalones,
+  attachAmpwallAndSearchLinks,
+  pickQobuzUrl,
   splitSuspiciousPlatforms,
   mergeByReleaseOverlap,
   filterAndSort,
@@ -81,7 +75,7 @@ const PLATFORM_FAILURE_CACHE_TTL = 60;
 // bandcamp.com/search is behind a bot challenge and is Disallow'ed in Bandcamp's
 // robots.txt, so this used to return [] and Phase 1 surfaced no Bandcamp results at
 // all — the only Bandcamp link came from a MusicBrainz relation, or a generic
-// "go search Bandcamp yourself" fallback added in attachQobuzAndSearchLinks.
+// "go search Bandcamp yourself" fallback added in attachAmpwallAndSearchLinks.
 //
 // The probe covers roughly twice as many artists as MusicBrainz relations alone, and
 // its result is cached (negatives included), so a repeat query costs one DB read.
@@ -94,14 +88,11 @@ async function searchBandcamp(query: string): Promise<PlatformResult[]> {
     name: match.bandName ?? query,
     type: 'artist',
     url: match.url,
-    // Carried from the /music page the probe already read. This must be populated:
-    // fetchReleasesForDisambiguation shares one 4s budget across all its release
-    // fetches, so a Bandcamp platform with no titles forces two more requests into
-    // that budget and starves the Qobuz ones — which drops the Qobuz link, and with
-    // it the artist image.
+    // Carried from the /music page the probe already read, sparing
+    // fetchReleasesForDisambiguation two more requests against its shared 4s budget.
     allReleaseTitles: match.releaseTitles.length > 0 ? match.releaseTitles : undefined,
-    // Artist photo. aggregateResults carries imageUrl from a PlatformResult, so this
-    // gives results a picture without depending on the Qobuz match.
+    // Artist photo. aggregateResults carries imageUrl from a PlatformResult, so this is
+    // what gives results a picture (Bandcamp replaced Qobuz as the image source in #325).
     imageUrl: match.imageUrl ?? undefined,
   }];
 }
@@ -222,224 +213,6 @@ async function getBandcampReleaseTitles(artistUrl: string): Promise<string[]> {
   }
 }
 
-// Fetch release date from a Qobuz album page
-async function getQobuzAlbumReleaseDate(albumUrl: string): Promise<string | undefined> {
-  try {
-    const response = await fetchWithTimeout(albumUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      },
-    }, 2000);
-
-    if (!response.ok) return undefined;
-
-    const html = await response.text();
-
-    // Look for release date in various formats
-    // Qobuz often has it in JSON-LD or meta tags
-    const dateMatch = html.match(/"releaseDate"[:\s]*"(\d{4}-\d{2}-\d{2})"/) ||
-                      html.match(/"release_date_original"[:\s]*"(\d{4}-\d{2}-\d{2})"/) ||
-                      html.match(/Release date[:\s]*<[^>]*>(\d{4}-\d{2}-\d{2})/i) ||
-                      html.match(/Released[:\s]*(\d{4}-\d{2}-\d{2})/i);
-
-    if (dateMatch) {
-      return dateMatch[1];
-    }
-
-    // Try to find year at least
-    const yearMatch = html.match(/"release_date_original"[:\s]*"(\d{4})/) ||
-                      html.match(/Released[:\s]*(\d{4})/i);
-    if (yearMatch) {
-      return `${yearMatch[1]}-01-01`; // Use Jan 1 as placeholder
-    }
-
-    return undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-// Fetch latest release from a Qobuz artist page
-// Qobuz is client-side rendered, so we extract album info from URL patterns
-// We collect all albums and fetch their dates to find the chronologically most recent
-async function getQobuzLatestRelease(artistUrl: string): Promise<LatestRelease | undefined> {
-  try {
-    // Extract artist name from URL for validation
-    // URL format: /us-en/interpreter/{artist-slug}/{id}
-    const artistSlugMatch = artistUrl.match(/\/interpreter\/([^/]+)\//);
-    if (!artistSlugMatch) return undefined;
-    const artistSlug = artistSlugMatch[1].replace(/-/g, '').toLowerCase();
-
-    const response = await fetchWithTimeout(artistUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      },
-    }, 3000);
-
-    if (!response.ok) return undefined;
-
-    const html = await response.text();
-
-    // Qobuz album URLs are in format: /us-en/album/{album-name-slug}/{id}
-    // Album IDs can be numeric or alphanumeric
-    // Collect ALL valid albums from this artist
-    const albumRegex = /href="(\/us-en\/album\/([^/]+)\/([a-zA-Z0-9]+))"/g;
-    let match;
-    const validAlbums: { path: string; slug: string; id: string }[] = [];
-    const seenPaths = new Set<string>();
-
-    // Artist slug without numbers for matching (e.g., "morice1" -> "morice")
-    const artistBase = artistSlug.replace(/\d+$/, '');
-
-    while ((match = albumRegex.exec(html)) !== null) {
-      const [, path, albumSlug, albumId] = match;
-
-      // Skip duplicates
-      if (seenPaths.has(path)) continue;
-      seenPaths.add(path);
-
-      const normalizedSlug = albumSlug.replace(/-/g, '').toLowerCase();
-
-      // Validate: album slug should contain the artist name
-      // This filters out "trending" or "recommended" albums shown on empty artist pages
-      if (normalizedSlug.includes(artistBase) || normalizedSlug.includes(artistSlug)) {
-        validAlbums.push({ path, slug: albumSlug, id: albumId });
-      }
-
-      // Limit to first 10 albums to avoid too many requests
-      if (validAlbums.length >= 10) break;
-    }
-
-    if (validAlbums.length === 0) return undefined;
-
-    // If only one album, just return it
-    if (validAlbums.length === 1) {
-      const album = validAlbums[0];
-      const fullUrl = `https://www.qobuz.com${album.path}`;
-      const releaseDate = await getQobuzAlbumReleaseDate(fullUrl);
-
-      return {
-        title: displayNameFromSlug(album.slug),
-        type: 'album',
-        url: fullUrl,
-        imageUrl: undefined,
-        releaseDate,
-      };
-    }
-
-    // Fetch release dates for all albums in parallel (limit to 5 to be respectful)
-    const albumsToCheck = validAlbums.slice(0, 5);
-    const datePromises = albumsToCheck.map(async (album) => {
-      const fullUrl = `https://www.qobuz.com${album.path}`;
-      const releaseDate = await getQobuzAlbumReleaseDate(fullUrl);
-      return { album, fullUrl, releaseDate };
-    });
-
-    const results = await Promise.allSettled(datePromises);
-
-    // Find the album with the most recent release date
-    let latestAlbum: { album: typeof validAlbums[0]; fullUrl: string; releaseDate?: string } | undefined;
-    let latestDate: Date | undefined;
-
-    for (const result of results) {
-      if (result.status !== 'fulfilled') continue;
-      const { album, fullUrl, releaseDate } = result.value;
-
-      if (releaseDate) {
-        const date = new Date(releaseDate);
-        if (!isNaN(date.getTime())) {
-          if (!latestDate || date > latestDate) {
-            latestDate = date;
-            latestAlbum = { album, fullUrl, releaseDate };
-          }
-        }
-      } else if (!latestAlbum) {
-        // Keep first album as fallback if no dates found
-        latestAlbum = { album, fullUrl, releaseDate: undefined };
-      }
-    }
-
-    if (!latestAlbum) {
-      // Fallback to first album if all date fetches failed
-      const album = validAlbums[0];
-      return {
-        title: displayNameFromSlug(album.slug),
-        type: 'album',
-        url: `https://www.qobuz.com${album.path}`,
-        imageUrl: undefined,
-        releaseDate: undefined,
-      };
-    }
-
-    return {
-      title: latestAlbum.album.slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
-      type: 'album',
-      url: latestAlbum.fullUrl,
-      imageUrl: undefined,
-      releaseDate: latestAlbum.releaseDate,
-    };
-  } catch (error: unknown) {
-    const err = error as { name?: string; message?: string };
-    if (err.name !== 'AbortError') {
-      console.error('Qobuz latest release fetch error:', err.message);
-    }
-    return undefined;
-  }
-}
-
-// Fetch all release titles from a Qobuz artist page for disambiguation
-async function getQobuzReleaseTitles(artistUrl: string): Promise<string[]> {
-  try {
-    // Extract artist name from URL for validation
-    const artistSlugMatch = artistUrl.match(/\/interpreter\/([^/]+)\//);
-    if (!artistSlugMatch) return [];
-    const artistSlug = artistSlugMatch[1].replace(/-/g, '').toLowerCase();
-    const artistBase = artistSlug.replace(/\d+$/, ''); // Remove trailing numbers
-
-    const response = await fetchWithTimeout(artistUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      },
-    }, 3000);
-
-    if (!response.ok) return [];
-
-    const html = await response.text();
-    const titles: string[] = [];
-
-    // Extract all album slugs from the page
-    // Qobuz album URLs: /us-en/album/{album-name-slug}/{id}
-    const albumRegex = /href="\/us-en\/album\/([^/]+)\/[a-zA-Z0-9]+"/g;
-    let match;
-    const seen = new Set<string>();
-
-    while ((match = albumRegex.exec(html)) !== null && titles.length < 20) {
-      const slug = match[1];
-      if (seen.has(slug)) continue;
-      seen.add(slug);
-
-      // Convert slug to normalized title (remove hyphens, lowercase)
-      let normalized = slug.replace(/-/g, '').toLowerCase();
-
-      // Validate: album slug should contain the artist name
-      // This filters out "trending" or "recommended" albums shown on empty artist pages
-      if (!normalized.includes(artistBase) && !normalized.includes(artistSlug)) {
-        continue; // Skip albums that don't belong to this artist
-      }
-
-      // Strip artist name from the title for better cross-platform matching
-      // Qobuz slugs are like "ruined-castle-kid-lightbulbs" but Bandcamp titles are just "ruinedcastle"
-      normalized = normalized.replace(artistSlug, '').replace(artistBase, '');
-
-      titles.push(normalized);
-    }
-
-    return titles;
-  } catch {
-    return [];
-  }
-}
-
 // Search Bandwagon for artists by scraping search results
 async function searchBandwagon(query: string): Promise<Map<string, string>> {
   const results = new Map<string, string>();
@@ -500,6 +273,7 @@ interface EnrichedMusicBrainzResult {
   officialUrl: string | null;
   discogsUrl: string | null;
   bandcampUrl: string | null;
+  qobuzUrl: string | null;
   hasPre2005Release: boolean;
   socialLinks: SocialLink[];
   discoveredPlatforms: DiscoveredPlatformLink[];
@@ -517,6 +291,7 @@ async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResu
     officialUrl: null,
     discogsUrl: null,
     bandcampUrl: null,
+    qobuzUrl: null,
     hasPre2005Release: false,
     socialLinks: [],
     discoveredPlatforms: [],
@@ -556,9 +331,16 @@ async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResu
       return { ...emptyResult, location: await enrichLocationFallback(query) };
     }
 
-    // Verify the returned artist name actually matches the query
-    const queryNormalized = query.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const artistNormalized = artist.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    // Verify the returned artist name actually matches the query.
+    //
+    // Must use normalizeForComparison, which strips accents. A bare
+    // .replace(/[^a-z0-9]/g, '') *deletes* accented letters instead: MusicBrainz returns
+    // "Tanerélle" -> "tanerlle" while the query arrives already accent-normalized as
+    // "Tanerelle" -> "tanerelle", so every accented artist name failed this check and
+    // lost all MB enrichment — including their Qobuz link, which MB is now the only
+    // source of.
+    const queryNormalized = normalizeForComparison(query);
+    const artistNormalized = normalizeForComparison(artist.name);
     const isNameMatch = queryNormalized === artistNormalized ||
       queryNormalized.includes(artistNormalized) && artistNormalized.length > queryNormalized.length * 0.7 ||
       artistNormalized.includes(queryNormalized) && queryNormalized.length > artistNormalized.length * 0.7;
@@ -583,6 +365,7 @@ async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResu
     let officialUrl: string | null = null;
     let discogsUrl: string | null = null;
     let bandcampUrl: string | null = null;
+    let qobuzUrl: string | null = null;
     let linktreeUrl: string | null = null;
     let wikipediaUrl: string | null = null;
     const socialLinks: SocialLink[] = [];
@@ -698,6 +481,10 @@ async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResu
       if (platformUrls.length > 0) {
         console.log(`[MusicBrainz] Found ${platformUrls.length} platform URLs`);
       }
+      qobuzUrl = pickQobuzUrl(platformUrls);
+      if (qobuzUrl) {
+        console.log(`[MusicBrainz] Found Qobuz link: ${qobuzUrl}`);
+      }
     }
 
     await delay(1100);
@@ -768,6 +555,7 @@ async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResu
       officialUrl,
       discogsUrl,
       bandcampUrl,
+      qobuzUrl,
       hasPre2005Release,
       socialLinks: allSocialLinks,
       discoveredPlatforms: officialSiteResult.discoveredPlatforms,
@@ -1120,101 +908,6 @@ async function searchAmpwall(query: string): Promise<Map<string, string>> {
   return new Map(data);
 }
 
-async function searchQobuz(query: string): Promise<Map<string, { url: string; imageUrl?: string }>> {
-  const cacheKey = artistCacheKey('qobuz', query);
-  // Set when the upstream did not answer. A failure must not be cached as
-  // "this artist isn't on qobuz" -- see the shouldCache predicate below.
-  let fetchFailed = false;
-
-  const { data } = await cacheGetOrFetch<[string, { url: string; imageUrl?: string }][]>(
-    cacheKey,
-    async () => {
-      const results: [string, { url: string; imageUrl?: string }][] = [];
-
-      try {
-        const searchUrl = `https://www.qobuz.com/us-en/search/artists/${encodeURIComponent(query)}`;
-        const response = await fetchWithTimeout(searchUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-          },
-        }, 5000);
-
-        if (!response.ok) { fetchFailed = true; return results; }
-
-        const html = await response.text();
-        const root = parse(html);
-
-        // Extract artist cards: each card has a link to /interpreter/ and an image
-        const interpreterImages = new Map<string, string>();
-
-        // Method: Find CoverModelImage elements and walk up to find the interpreter link
-        for (const img of root.querySelectorAll('img.CoverModelImage')) {
-          const imgSrc = img.getAttribute('src') || img.getAttribute('data-src') || '';
-          if (!imgSrc || !imgSrc.includes('/images/artists/')) continue;
-          // Walk up parents to find the interpreter link
-          let el = img as ReturnType<typeof root.querySelector>;
-          for (let i = 0; i < 5; i++) {
-            el = el?.parentNode as ReturnType<typeof root.querySelector>;
-            if (!el) break;
-            const link = el.querySelector<ReturnType<typeof root.querySelector>>('a[href*="/interpreter/"]');
-            if (link) {
-              const href = link.getAttribute('href') || '';
-              const interpMatch = href.match(/\/interpreter\/([^/]+)\/\d+/);
-              if (interpMatch) {
-                const fullUrl = imgSrc.startsWith('//') ? `https:${imgSrc}` : imgSrc;
-                interpreterImages.set(interpMatch[1], fullUrl);
-              }
-              break;
-            }
-          }
-        }
-
-        // Method 2: Also try regex-based extraction as fallback
-        // Find all interpreter links and their preceding CoverModelImage src
-        const interpreterRegex = /href="(\/us-en\/interpreter\/([^/]+)\/(\d+))"/g;
-        let match;
-        const queryNormalized = normalizeForComparison(query);
-        const seen = new Set<string>();
-
-        while ((match = interpreterRegex.exec(html)) !== null && results.length < 10) {
-          const [, path, slug] = match;
-          const slugNormalized = slug.replace(/-/g, '');
-
-          const isMatch = slugNormalized === queryNormalized ||
-              queryNormalized.startsWith(slugNormalized) ||
-              (slugNormalized.startsWith(queryNormalized) && /^\d*$/.test(slugNormalized.slice(queryNormalized.length)));
-
-          if (isMatch) {
-            const artistName = displayNameFromSlug(slug, query);
-            const normalizedName = normalizeForComparison(artistName);
-
-            if (!seen.has(normalizedName)) {
-              seen.add(normalizedName);
-              const imageUrl = interpreterImages.get(slug) || undefined;
-              results.push([normalizedName, { url: `https://www.qobuz.com${path}`, imageUrl }]);
-            }
-          }
-        }
-      } catch (error: unknown) {
-        const err = error as { name?: string; message?: string };
-        fetchFailed = true;
-        if (err.name !== 'AbortError') {
-          console.error('Qobuz search error:', err.message);
-        }
-      }
-
-      return results;
-    },
-    PLATFORM_CACHE_TTL,
-    // A failed fetch must not be cached as "artist not on this platform"...
-    () => !fetchFailed,
-    // ...but remember it briefly so an outage doesn't cost every search the timeout.
-    PLATFORM_FAILURE_CACHE_TTL,
-  );
-
-  return new Map(data);
-}
-
 // Search Beatport via __NEXT_DATA__ JSON embedded in search page
 async function searchBeatport(query: string): Promise<Map<string, string>> {
   const cacheKey = artistCacheKey('beatport', query);
@@ -1373,17 +1066,12 @@ async function searchEven(query: string): Promise<Map<string, string>> {
 // ---------------------------------------------------------------------------
 
 /**
- * Fetch release data used for disambiguation, bounded by one shared 4s race.
- *
- * Returns the platform entries whose release lookups actually finished. That set is what
- * lets removeDeadQobuzLinks tell "Qobuz has no releases" apart from "Qobuz didn't answer
- * in time" — losing this race must not look like an empty catalogue.
+ * Fetch Bandcamp release data used for disambiguation, bounded by one shared 4s race.
  */
 async function fetchReleasesForDisambiguation(
   aggregated: AggregatedResult[],
-): Promise<Set<AggregatedPlatform>> {
+): Promise<void> {
   const promises: Promise<void>[] = [];
-  const completed = new Set<AggregatedPlatform>();
 
   for (const result of aggregated) {
     if (result.type !== 'artist') continue;
@@ -1391,23 +1079,11 @@ async function fetchReleasesForDisambiguation(
     const bc = result.platforms.find(p => p.sourceId === 'bandcamp');
     if (bc) {
       promises.push(getBandcampLatestRelease(bc.url).then(r => { if (r) bc.latestRelease = r; }));
-      // Skip when the probe already supplied titles. All of these fetches share one
-      // 4s race below, so redundant Bandcamp requests directly cost Qobuz its data.
+      // Skip when the probe already supplied titles — these fetches share one 4s race,
+      // so a redundant request costs another artist its release data.
       if (!bc.allReleaseTitles || bc.allReleaseTitles.length === 0) {
         promises.push(getBandcampReleaseTitles(bc.url).then(t => { if (t.length > 0) bc.allReleaseTitles = t; }));
       }
-    }
-
-    const qz = result.platforms.find(p => p.sourceId === 'qobuz');
-    if (qz) {
-      // Marked complete only once BOTH lookups settle. If just one came back empty we
-      // still don't know whether Qobuz has releases.
-      promises.push(
-        Promise.allSettled([
-          getQobuzLatestRelease(qz.url).then(r => { if (r) qz.latestRelease = r; }),
-          getQobuzReleaseTitles(qz.url).then(t => { if (t.length > 0) qz.allReleaseTitles = t; }),
-        ]).then(() => { completed.add(qz); }),
-      );
     }
   }
 
@@ -1415,8 +1091,6 @@ async function fetchReleasesForDisambiguation(
     Promise.allSettled(promises),
     new Promise(resolve => setTimeout(resolve, 4000)),
   ]);
-
-  return completed;
 }
 
 // ---------------------------------------------------------------------------
@@ -1665,6 +1339,13 @@ function applyEnrichmentToResults(
     newPlatforms.push({ sourceId: 'discogs' as SourceId, url: mbData.discogsUrl });
   }
 
+  // Add Qobuz if available and not already present. MB relations are the only source of
+  // Qobuz links — the artist URL needs an unguessable numeric ID and every Qobuz search
+  // path is robots-disallowed. Authoritative by construction, so no validation needed.
+  if (mbData.qobuzUrl && !newPlatforms.some(p => p.sourceId === 'qobuz')) {
+    newPlatforms.push({ sourceId: 'qobuz' as SourceId, url: mbData.qobuzUrl });
+  }
+
   // Add library services for artists with pre-2005 releases
   if (mbData.hasPre2005Release) {
     if (!newPlatforms.some(p => p.sourceId === 'hoopla')) {
@@ -1765,14 +1446,13 @@ function applyEnrichmentToResults(
 
 async function searchAllPlatforms(query: string): Promise<{ results: AggregatedResult[]; enrichmentApplied: boolean }> {
   // Phase 1: Search all platforms in parallel and aggregate Bandcamp/Mirlo results
-  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, qobuzResults, ampwallResults, beatportResults, evenResults, musicbrainzResult] = await Promise.allSettled([
+  const [bandcampResults, bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, ampwallResults, beatportResults, evenResults, musicbrainzResult] = await Promise.allSettled([
     searchBandcamp(query),
     searchBandwagon(query),
     searchMirlo(query),
     searchFaircamp(query),
     searchJamcoop(query),
     searchPatreon(query),
-    searchQobuz(query),
     searchAmpwall(query),
     searchBeatport(query),
     searchEven(query),
@@ -1787,7 +1467,6 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
     ['faircamp', faircampResults],
     ['jamcoop', jamcoopResults],
     ['patreon', patreonResults],
-    ['qobuz', qobuzResults],
     ['ampwall', ampwallResults],
     ['beatport', beatportResults],
     ['even', evenResults],
@@ -1821,16 +1500,14 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
     ['beatport', beatportResults.status === 'fulfilled' ? beatportResults.value : new Map()],
     ['even', evenResults.status === 'fulfilled' ? evenResults.value : new Map()],
   ];
-  const qobuzMatches = qobuzResults.status === 'fulfilled' ? qobuzResults.value : new Map<string, { url: string; imageUrl?: string }>();
   const ampwallMatches = ampwallResults.status === 'fulfilled' ? ampwallResults.value : new Map<string, string>();
 
   const mbData = musicbrainzResult.status === 'fulfilled' ? musicbrainzResult.value : null;
 
   const aggregated = aggregateResults(allResults, query);
 
-  // Phase 2: Attach Qobuz + search-only links, create Qobuz-only results
-  attachQobuzAndSearchLinks(aggregated, qobuzMatches, ampwallMatches, mbData);
-  createQobuzOnlyResults(aggregated, qobuzMatches);
+  // Phase 2: Attach Ampwall + search-only links
+  attachAmpwallAndSearchLinks(aggregated, ampwallMatches, mbData);
 
   // Phase 2.1: Apply MusicBrainz enrichment (social links, location, Wikipedia, Bandcamp)
   if (mbData && mbData.artistName !== null) {
@@ -1841,7 +1518,7 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
   // If MusicBrainz has a high-confidence match but no platform result matches,
   // create a result with search-only platforms + MB enrichment data.
   // This ensures prominent artists (like King Gizzard & the Lizard Wizard)
-  // are findable even when they're not on our indie platforms or Qobuz matching fails.
+  // are findable even when they're not on any of our indie platforms.
   if (mbData && mbData.artistName !== null) {
     const mbNorm = normalizeForComparison(mbData.artistName);
     const existingMatch = aggregated.some(r =>
@@ -1867,6 +1544,9 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
       }
       if (mbData.discogsUrl) {
         mbPlatforms.push({ sourceId: 'discogs' as SourceId, url: mbData.discogsUrl });
+      }
+      if (mbData.qobuzUrl) {
+        mbPlatforms.push({ sourceId: 'qobuz' as SourceId, url: mbData.qobuzUrl });
       }
       if (mbData.socialLinks && mbData.socialLinks.length > 0) {
         for (const social of mbData.socialLinks) {
@@ -1906,18 +1586,13 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
   }
 
   // Phase 3: Fetch releases, then disambiguate using release data
-  const releaseLookupsCompleted = await fetchReleasesForDisambiguation(aggregated);
-  preferBandcampFeaturedRelease(aggregated);
-  removeDeadQobuzLinks(aggregated, releaseLookupsCompleted);
-  crossPlatformReleaseComparison(aggregated);
-  deduplicateQobuzUrls(aggregated);
-  createOrphanedQobuzStandalones(aggregated, qobuzMatches);
+  await fetchReleasesForDisambiguation(aggregated);
   const disambiguated = splitSuspiciousPlatforms(aggregated);
   const merged = mergeByReleaseOverlap(disambiguated);
 
   // Phase 4: Attach deferred name-only platforms, filter, and sort
   await attachNameOnlyPlatforms(merged, nameOnlyMaps);
-  // Re-merge: new results from Phase 4 may overlap with existing Qobuz standalones
+  // Re-merge: new results from Phase 4 may overlap with existing ones
   const finalMerged = mergeByReleaseOverlap(merged);
   const finalResults = filterAndSort(finalMerged, query);
   return { results: finalResults, enrichmentApplied: mbData !== null && mbData.artistName !== null };

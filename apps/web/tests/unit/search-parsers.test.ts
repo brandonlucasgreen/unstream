@@ -7,7 +7,6 @@ import {
   parseBandcampReleaseCounts,
   parseBandcampSearchResults,
   parseMirloArtistPage,
-  parseQobuzSearchResults,
   parseBandcampReleaseTitles,
   parseBandwagonSearchResults,
   parseJamcoopDirectory,
@@ -445,72 +444,6 @@ describe('parseMirloArtistPage', () => {
     const result = parseMirloArtistPage(html, 'test', 'https://mirlo.space/test');
     expect(result).not.toBeNull();
     expect(result!.imageUrl).toBeUndefined();
-  });
-});
-
-// ---------------------------------------------------------------------------
-// parseQobuzSearchResults
-// ---------------------------------------------------------------------------
-
-describe('parseQobuzSearchResults', () => {
-  it('extracts interpreter links from Qobuz HTML', () => {
-    const html = `
-      <a href="/us-en/interpreter/kid-lightbulbs/12345">Kid Lightbulbs</a>
-      <a href="/us-en/interpreter/kid-lightbulbs-2/67890">Kid Lightbulbs 2</a>
-    `;
-    const results = parseQobuzSearchResults(html, 'Kid Lightbulbs');
-    expect(results.length).toBeGreaterThanOrEqual(1);
-    expect(results[0][1]).toBe('https://www.qobuz.com/us-en/interpreter/kid-lightbulbs/12345');
-  });
-
-  it('matches numeric suffix variations (morice, morice2)', () => {
-    const html = `
-      <a href="/us-en/interpreter/morice/111">Morice</a>
-      <a href="/us-en/interpreter/morice-2/222">Morice 2</a>
-    `;
-    const results = parseQobuzSearchResults(html, 'Morice');
-    // "morice" exact match
-    expect(results.some(([, url]) => url.includes('/morice/111'))).toBe(true);
-  });
-
-  it('rejects non-matching artists', () => {
-    const html = `
-      <a href="/us-en/interpreter/totally-different/999">Totally Different</a>
-    `;
-    const results = parseQobuzSearchResults(html, 'Kid Lightbulbs');
-    expect(results).toHaveLength(0);
-  });
-
-  it('rejects partial name matches that are not numeric suffixes', () => {
-    const html = `
-      <a href="/us-en/interpreter/morice-el-blanco/333">Morice El Blanco</a>
-    `;
-    const results = parseQobuzSearchResults(html, 'Morice');
-    // "moriceelblanco" starts with "morice" but suffix is not purely numeric
-    expect(results).toHaveLength(0);
-  });
-
-  it('deduplicates by normalized name', () => {
-    const html = `
-      <a href="/us-en/interpreter/matt-young/111">Matt Young</a>
-      <a href="/us-en/interpreter/matt-young/111">Matt Young</a>
-    `;
-    const results = parseQobuzSearchResults(html, 'Matt Young');
-    expect(results).toHaveLength(1);
-  });
-
-  it('limits to 10 results', () => {
-    let html = '';
-    for (let i = 0; i < 15; i++) {
-      html += `<a href="/us-en/interpreter/test${i}/00${i}">Test${i}</a>\n`;
-    }
-    const results = parseQobuzSearchResults(html, 'test');
-    expect(results.length).toBeLessThanOrEqual(10);
-  });
-
-  it('handles empty HTML', () => {
-    const results = parseQobuzSearchResults('<html></html>', 'test');
-    expect(results).toEqual([]);
   });
 });
 

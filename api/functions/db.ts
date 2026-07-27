@@ -214,6 +214,16 @@ export interface BandcampProbeRow {
   release_titles: string[] | null;
   /** Artist photo from the probed page's og:image. */
   image_url: string | null;
+  /**
+   * Slug candidates actually attempted in this probe round.
+   *
+   * `query_norm` strips punctuation, so "Morice" and "Mo-Rice" share one row —
+   * but they generate different candidate sets (['morice'] vs
+   * ['morice', 'mo-rice']). Without this, a negative recorded for the shorter
+   * set is wrongly reused for the longer one, hiding a real artist. NULL means a
+   * legacy row whose candidates are unknown.
+   */
+  probed_slugs: string[] | null;
   checked_at: string;
 }
 
@@ -222,21 +232,46 @@ export interface BandcampProbeRow {
 const NEGATIVE_PROBE_TTL_DAYS = 30;
 
 /**
+ * True when a cached negative may be reused for a query that would probe `candidates`.
+ *
+ * A negative only means "none of the slugs we tried resolved". It says nothing about a
+ * slug that was never tried — so it is reusable only if it covers every candidate the
+ * current query would attempt. This is what keeps "Morice" (candidates ['morice'])
+ * from answering for "Mo-Rice" (['morice', 'mo-rice']), which share a `query_norm`.
+ *
+ * A NULL `probed_slugs` is a pre-migration row: unknown coverage, so treat it as not
+ * covering anything and let it be re-probed once.
+ */
+export function negativeCoversCandidates(
+  probedSlugs: string[] | null,
+  candidates: string[],
+): boolean {
+  if (!probedSlugs) return false;
+  return candidates.every(c => probedSlugs.includes(c));
+}
+
+/**
  * Read a cached probe outcome. Returns null when there is no usable cache entry,
  * which is the caller's signal to probe.
  *
  * A stale negative returns null (re-probe); an accepted result never expires.
  * `pending_review` rows return as-is so an unverified account is neither
  * surfaced nor endlessly re-probed while it waits on /admin/verify.
+ *
+ * Pass `candidates` — the slugs this query would probe. A negative that does not
+ * cover all of them is treated as a miss; see negativeCoversCandidates.
  */
-export async function getBandcampProbe(queryNorm: string): Promise<BandcampProbeRow | null> {
+export async function getBandcampProbe(
+  queryNorm: string,
+  candidates: string[] = [],
+): Promise<BandcampProbeRow | null> {
   const client = getClient();
   if (!client) return null;
 
   try {
     const { data, error } = await client
       .from('bandcamp_slug_probes')
-      .select('query_norm, artist_url, band_name, band_id, album_count, track_count, matched_slug, verdict, location, release_titles, image_url, checked_at')
+      .select('query_norm, artist_url, band_name, band_id, album_count, track_count, matched_slug, verdict, location, release_titles, image_url, probed_slugs, checked_at')
       .eq('query_norm', queryNorm)
       .maybeSingle();
 
@@ -251,6 +286,13 @@ export async function getBandcampProbe(queryNorm: string): Promise<BandcampProbe
 
     const ageMs = Date.now() - new Date(row.checked_at).getTime();
     if (ageMs > NEGATIVE_PROBE_TTL_DAYS * 24 * 60 * 60 * 1000) return null;
+
+    // A negative from a narrower candidate set must not answer for a wider one.
+    if (candidates.length > 0 && !negativeCoversCandidates(row.probed_slugs, candidates)) {
+      console.log(`[DB] Re-probing "${queryNorm}": cached negative covered ${JSON.stringify(row.probed_slugs)}, query needs ${JSON.stringify(candidates)}`);
+      return null;
+    }
+
     return row;
   } catch (error) {
     console.error('[DB] getBandcampProbe error:', error);

@@ -4,14 +4,13 @@ interface PlatformUrls {
   bandcamp?: string;
   faircamp?: string;
   mirlo?: string;
-  qobuz?: string;
 }
 
 interface ReleaseResult {
   releaseName: string;
   releaseDate: string; // ISO format
   releaseUrl: string;
-  platform: 'bandcamp' | 'faircamp' | 'mirlo' | 'qobuz';
+  platform: 'bandcamp' | 'faircamp' | 'mirlo';
 }
 
 interface CheckReleasesRequest {
@@ -274,92 +273,6 @@ async function checkMirlo(mirloUrl: string): Promise<ReleaseResult | null> {
   }
 }
 
-// Check Qobuz via album search
-async function checkQobuz(qobuzUrl: string): Promise<ReleaseResult | null> {
-  try {
-    // Extract artist name from URL (e.g., "/interpreter/artist-name/12345" -> "artist name")
-    const slugMatch = qobuzUrl.match(/\/interpreter\/([^/]+)\/\d+/);
-    if (!slugMatch) return null;
-
-    const artistSlug = slugMatch[1];
-    const artistName = artistSlug.replace(/-/g, ' ');
-
-    // Search for albums by this artist, sorted by release date
-    const encodedArtist = encodeURIComponent(artistName);
-    const searchUrl = `https://www.qobuz.com/us-en/search/albums/${encodedArtist}?ssf%5Bs%5D=main_catalog_date_desc`;
-
-    const response = await fetchWithTimeout(searchUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      },
-    });
-
-    if (!response.ok) return null;
-
-    const html = await response.text();
-
-    // Parse the first album from search results
-    // Pattern: <a class="CoverModelOverlay" href="/us-en/album/{slug}/{id}" title="More details on {title} by {artist}."
-    const cardPattern = /<a\s+class="CoverModelOverlay"\s+href="(\/us-en\/album\/[^"]+)"\s+title="More details on ([^"]+) by ([^"]+)\."/;
-    const match = html.match(cardPattern);
-
-    if (!match) return null;
-
-    const [, albumPath, albumTitle, matchedArtist] = match;
-
-    // Verify artist matches (case-insensitive, partial match allowed)
-    const normalizedSearch = artistName.toLowerCase().trim();
-    const normalizedMatched = matchedArtist.toLowerCase().trim();
-    if (!normalizedMatched.includes(normalizedSearch) && !normalizedSearch.includes(normalizedMatched)) {
-      return null;
-    }
-
-    // Find release date in the HTML after the album link
-    const linkIndex = html.indexOf(albumPath);
-    const searchRegion = html.substring(linkIndex, linkIndex + 500);
-
-    // Try various date patterns
-    const monthDayYearPattern = /(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(\d{1,2}),?\s+(\d{4})/i;
-    const isoPattern = /(\d{4})-(\d{2})-(\d{2})/;
-
-    let releaseDate: string | null = null;
-
-    const monthMatch = searchRegion.match(monthDayYearPattern);
-    if (monthMatch) {
-      releaseDate = parseDateToISO(`${monthMatch[1]} ${monthMatch[2]}, ${monthMatch[3]}`);
-    }
-
-    if (!releaseDate) {
-      const isoMatch = searchRegion.match(isoPattern);
-      if (isoMatch) {
-        releaseDate = isoMatch[0];
-      }
-    }
-
-    if (!releaseDate) return null;
-
-    // Decode HTML entities in title
-    const decodedTitle = albumTitle
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/&apos;/g, "'")
-      .trim();
-
-    return {
-      releaseName: decodedTitle,
-      releaseDate,
-      releaseUrl: `https://www.qobuz.com${albumPath}`,
-      platform: 'qobuz',
-    };
-  } catch (error) {
-    console.error('Qobuz check error:', error);
-    return null;
-  }
-}
-
 // Main check function - checks all platforms and returns the best result
 async function checkAllPlatforms(platforms: PlatformUrls): Promise<ReleaseResult | null> {
   const results: ReleaseResult[] = [];
@@ -369,7 +282,6 @@ async function checkAllPlatforms(platforms: PlatformUrls): Promise<ReleaseResult
     platforms.bandcamp ? checkBandcamp(platforms.bandcamp) : Promise.resolve(null),
     platforms.faircamp ? checkFaircamp(platforms.faircamp) : Promise.resolve(null),
     platforms.mirlo ? checkMirlo(platforms.mirlo) : Promise.resolve(null),
-    platforms.qobuz ? checkQobuz(platforms.qobuz) : Promise.resolve(null),
   ]);
 
   // Collect successful results that are within the last 30 days
@@ -383,8 +295,8 @@ async function checkAllPlatforms(platforms: PlatformUrls): Promise<ReleaseResult
 
   if (results.length === 0) return null;
 
-  // Priority order: Mirlo > Faircamp > Bandcamp > Qobuz
-  const priorityOrder: ReleaseResult['platform'][] = ['mirlo', 'faircamp', 'bandcamp', 'qobuz'];
+  // Priority order: Mirlo > Faircamp > Bandcamp
+  const priorityOrder: ReleaseResult['platform'][] = ['mirlo', 'faircamp', 'bandcamp'];
 
   // Find the highest priority platform with a release
   for (const platform of priorityOrder) {
@@ -457,8 +369,7 @@ export async function handler(event: {
   // Check if at least one platform URL is provided
   const hasPlatform = request.platforms.bandcamp ||
                       request.platforms.faircamp ||
-                      request.platforms.mirlo ||
-                      request.platforms.qobuz;
+                      request.platforms.mirlo;
 
   if (!hasPlatform) {
     return {

@@ -454,4 +454,56 @@ describe('mergeWithMusicBrainzData', () => {
     // Second result should NOT get enrichment
     expect(merged[1].platforms.find(p => p.sourceId === 'kofi')).toBeUndefined();
   });
+
+  // MusicBrainz relations are the only source of Qobuz links now that the dedicated
+  // Qobuz search is retired. See docs/specs/qobuz-coverage-research.md.
+  it('attaches a Qobuz link from MusicBrainz relations', () => {
+    const results = [makeArtistResult('Radiohead', [
+      { sourceId: 'bandcamp', url: 'https://radiohead.bandcamp.com' },
+    ])];
+    const mbData = makeMBData({
+      artistName: 'Radiohead',
+      platformUrls: [
+        'https://radiohead.bandcamp.com',
+        'https://open.qobuz.com/artist/43840',
+        'https://www.qobuz.com/us-en/interpreter/radiohead/43840',
+      ],
+    });
+
+    const merged = mergeWithMusicBrainzData(results, mbData);
+
+    expect(merged[0].platforms.find(p => p.sourceId === 'qobuz')?.url)
+      .toBe('https://www.qobuz.com/us-en/interpreter/radiohead/43840');
+  });
+
+  it('does not overwrite a Qobuz link the result already has', () => {
+    const results = [makeArtistResult('Radiohead', [
+      { sourceId: 'bandcamp', url: 'https://radiohead.bandcamp.com' },
+      { sourceId: 'qobuz', url: 'https://www.qobuz.com/us-en/interpreter/radiohead/claimed' },
+    ])];
+    const mbData = makeMBData({
+      artistName: 'Radiohead',
+      platformUrls: ['https://www.qobuz.com/us-en/interpreter/radiohead/43840'],
+    });
+
+    const merged = mergeWithMusicBrainzData(results, mbData);
+
+    const qobuz = merged[0].platforms.filter(p => p.sourceId === 'qobuz');
+    expect(qobuz).toHaveLength(1);
+    expect(qobuz[0].url).toBe('https://www.qobuz.com/us-en/interpreter/radiohead/claimed');
+  });
+
+  it('adds no Qobuz platform when MusicBrainz has no Qobuz relation', () => {
+    const results = [makeArtistResult('Radiohead', [
+      { sourceId: 'bandcamp', url: 'https://radiohead.bandcamp.com' },
+    ])];
+    const mbData = makeMBData({
+      artistName: 'Radiohead',
+      platformUrls: ['https://radiohead.bandcamp.com'],
+    });
+
+    const merged = mergeWithMusicBrainzData(results, mbData);
+
+    expect(merged[0].platforms.find(p => p.sourceId === 'qobuz')).toBeUndefined();
+  });
 });
