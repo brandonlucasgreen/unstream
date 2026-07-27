@@ -24,6 +24,9 @@ import {
   filterAndSort,
   applyMergeOverrides,
   displayNameFromSlug,
+  isBandcampSearchLink,
+  bandcampSubdomainOf,
+  bandcampSubdomainConflicts,
 } from './search-utils';
 
 // Import shared enrichment functions
@@ -41,6 +44,7 @@ import {
   parseLocationString,
   mergeLocations,
   fetchBandcampLocation,
+  checkBandcampSubdomain,
   fetchMirloLocation,
   enrichLocationFallback,
   fetchWikipediaSummary,
@@ -273,6 +277,15 @@ interface EnrichedMusicBrainzResult {
   officialUrl: string | null;
   discogsUrl: string | null;
   bandcampUrl: string | null;
+  /**
+   * The Bandcamp subdomain MusicBrainz says belongs to this artist, recorded even when
+   * the account behind it has been retired and `bandcampUrl` was therefore dropped.
+   *
+   * MB is authoritative about *which* account is the artist's, independent of whether
+   * that account still exists — so a probe hit on a different subdomain is evidence of
+   * a different artist, not a better link. See `bandcampSubdomainConflicts`.
+   */
+  bandcampSubdomain: string | null;
   qobuzUrl: string | null;
   hasPre2005Release: boolean;
   socialLinks: SocialLink[];
@@ -291,6 +304,7 @@ async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResu
     officialUrl: null,
     discogsUrl: null,
     bandcampUrl: null,
+    bandcampSubdomain: null,
     qobuzUrl: null,
     hasPre2005Release: false,
     socialLinks: [],
@@ -370,7 +384,7 @@ async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResu
     let wikipediaUrl: string | null = null;
     const socialLinks: SocialLink[] = [];
     const seenPlatforms = new Set<SocialPlatform>();
-    const platformUrls: string[] = [];
+    let platformUrls: string[] = [];
 
     let mbLocation: ArtistLocation | undefined;
 
@@ -518,14 +532,39 @@ async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResu
 
     // Fetch enrichment data in parallel
     const mirloSlug = artist.name.toLowerCase().replace(/\s+/g, '');
-    const [discogsSocialLinks, officialSiteResult, peertubeLink, wikipediaResult, bandcampLocation, mirloLocation] = await Promise.all([
+    const [discogsSocialLinks, officialSiteResult, peertubeLink, wikipediaResult, bandcampLocation, mirloLocation, bandcampStatus] = await Promise.all([
       discogsUrl ? fetchDiscogsSocialLinks(discogsUrl) : Promise.resolve([]),
       officialUrl ? fetchOfficialSiteSocialLinks(officialUrl) : Promise.resolve({ socialLinks: [], linktreeUrl: null, discoveredPlatforms: [] }),
       searchPeerTubeChannels(artist.name),
       wikipediaUrl ? fetchWikipediaSummary(wikipediaUrl) : Promise.resolve(null),
       bandcampUrl ? fetchBandcampLocation(bandcampUrl) : Promise.resolve(null),
       fetchMirloLocation(mirloSlug),
+      // Rides in this existing parallel block, so a confirmed-dead link costs no
+      // extra wall-clock — and only runs at all when MB actually has a Bandcamp rel.
+      bandcampUrl ? checkBandcampSubdomain(bandcampUrl) : Promise.resolve('unknown' as const),
     ]);
+
+    // Drop a retired subdomain here, at the single point where MB's Bandcamp link enters
+    // the pipeline, rather than at each of the four places that later read it. Only a
+    // confirmed 'dead' is dropped; 'unknown' keeps the old behaviour of trusting MB.
+    // Captured before the dead-link drop below: the identity claim outlives the account.
+    const mbClaimedBandcampUrl = bandcampUrl;
+
+    if (bandcampUrl && bandcampStatus === 'dead') {
+      console.log(`[MusicBrainz] Dropping retired Bandcamp subdomain for "${artist.name}": ${bandcampUrl}`);
+      platformUrls = platformUrls.filter(u => u !== bandcampUrl);
+      // MB is the only place this artist's Bandcamp account is recorded, and the record
+      // is stale. Worth knowing about: the fix is an edit upstream, not in our code.
+      const shouldCapture = await checkSentryDedup(`dead-bandcamp:${bandcampUrl}`, 7 * 24 * 60 * 60);
+      if (shouldCapture) {
+        Sentry.captureMessage('MusicBrainz Bandcamp relation points at a retired subdomain', {
+          level: 'info',
+          extra: { artist: artist.name, bandcampUrl, query },
+          tags: { platform: 'bandcamp' },
+        });
+      }
+      bandcampUrl = null;
+    }
 
     // Merge locations
     const location = mergeLocations(mbLocation, bandcampLocation, mirloLocation);
@@ -555,6 +594,7 @@ async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResu
       officialUrl,
       discogsUrl,
       bandcampUrl,
+      bandcampSubdomain: bandcampSubdomainOf(mbClaimedBandcampUrl),
       qobuzUrl,
       hasPre2005Release,
       socialLinks: allSocialLinks,
@@ -1283,7 +1323,17 @@ function applyEnrichmentToResults(
       resultNormalized === mbNormalized ||
       (resultNormalized.includes(mbNormalized) && mbNormalized.length > resultNormalized.length * 0.7) ||
       (mbNormalized.includes(resultNormalized) && resultNormalized.length > mbNormalized.length * 0.7);
-    if (isMatch) matchingIndices.push(i);
+    if (!isMatch) continue;
+
+    // Same name, different Bandcamp account — a homonym, not this artist. Enriching it
+    // would graft the MB artist's location, socials and Wikipedia entry onto a stranger.
+    const bandcampPlatform = result.platforms.find(p => p.sourceId === 'bandcamp');
+    if (bandcampSubdomainConflicts(mbData.bandcampSubdomain, bandcampPlatform?.url)) {
+      console.log(`[MusicBrainz] "${result.name}" is on a different Bandcamp account than MB lists for "${mbData.artistName}" — not enriching`);
+      continue;
+    }
+
+    matchingIndices.push(i);
   }
 
   // Disambiguate using MB platform URLs
@@ -1389,11 +1439,16 @@ function applyEnrichmentToResults(
     });
     if (bandcampUrl) {
       const existingBandcamp = newPlatforms.findIndex(p => p.sourceId === 'bandcamp');
-      if (existingBandcamp !== -1) {
-        newPlatforms[existingBandcamp] = { sourceId: 'bandcamp' as SourceId, url: bandcampUrl };
-      } else {
+      if (existingBandcamp === -1) {
         newPlatforms.push({ sourceId: 'bandcamp' as SourceId, url: bandcampUrl });
+      } else if (isBandcampSearchLink(newPlatforms[existingBandcamp].url)) {
+        // Only a "go search Bandcamp yourself" placeholder is worth replacing.
+        newPlatforms[existingBandcamp] = { sourceId: 'bandcamp' as SourceId, url: bandcampUrl };
       }
+      // Otherwise the existing link came from the probe, which fetched the page and
+      // verified the account's identity against the query. An MB relation is a stored
+      // string nobody re-checked. Overwriting the verified one with it was how a fan
+      // searching "Honeycrush" got sent to a Bandcamp signup form.
     }
 
     // Add Subvert URL from MB platform relations if available
@@ -1526,8 +1581,13 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
   // are findable even when they're not on any of our indie platforms.
   if (mbData && mbData.artistName !== null) {
     const mbNorm = normalizeForComparison(mbData.artistName);
+    // A homonym on a different Bandcamp account does not count as covering this artist.
+    // Without that exclusion, refusing to enrich the impostor in Phase 2.1 would delete
+    // the real artist from the response entirely rather than listing them separately.
     const existingMatch = aggregated.some(r =>
-      r.type === 'artist' && normalizeForComparison(r.name) === mbNorm
+      r.type === 'artist' &&
+      normalizeForComparison(r.name) === mbNorm &&
+      !bandcampSubdomainConflicts(mbData.bandcampSubdomain, r.platforms.find(p => p.sourceId === 'bandcamp')?.url)
     );
     if (!existingMatch) {
       const mbPlatforms = [];

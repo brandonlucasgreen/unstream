@@ -1,6 +1,7 @@
 // Shared enrichment functions for MusicBrainz data extraction
 // These functions are used both by the MusicBrainz Netlify function and search-sources.ts
 
+import { cacheGetOrFetch } from '../functions/cache';
 import { isUrlHostnameAllowed } from '../functions/middleware';
 import { findBandcampArtist } from './bandcamp-probe';
 
@@ -460,6 +461,76 @@ export function mergeLocations(...sources: (ArtistLocation | null | undefined)[]
     if (!result.countryCode && src.countryCode) result.countryCode = src.countryCode;
   }
   return (result.city || result.country) ? result : undefined;
+}
+
+/**
+ * Whether a Bandcamp subdomain still hosts an account.
+ *
+ * `unknown` is a first-class answer, not a synonym for `live`. Callers must not
+ * treat it as either verdict — see the tri-state rule in CLAUDE.md.
+ */
+export type BandcampSubdomainStatus = 'live' | 'dead' | 'unknown';
+
+/** Retired subdomains stay retired; a live one rarely vanishes. Both are safe to hold for a week. */
+const SUBDOMAIN_STATUS_TTL_SECONDS = 7 * 24 * 60 * 60;
+
+/**
+ * Check whether a Bandcamp artist URL still resolves to a real account.
+ *
+ * A retired subdomain does not 404 — it answers `303` with
+ * `Location: https://bandcamp.com/signup?new_domain=<slug>`, so an unchecked link
+ * drops the fan on a signup form. MusicBrainz relations outlive the accounts they
+ * point at, which is exactly how the Honeycrush report happened: MB still lists
+ * `honeyyycrush.bandcamp.com`, retired some time ago.
+ *
+ * Only that one redirect counts as `dead`. A 200, any other redirect, a non-2xx, a
+ * timeout or a network error all return `live`/`unknown` and leave the link alone —
+ * a Bandcamp outage must degrade to "show the link anyway", never to stripping good
+ * links off every result.
+ *
+ * One HEAD, no body: measured at ~200ms for a dead subdomain and ~300-450ms for a live
+ * one. Verdicts are cached per URL (not per query) because this is a property of the
+ * subdomain; `unknown` is deliberately never cached.
+ */
+export async function checkBandcampSubdomain(
+  bandcampUrl: string,
+  timeoutMs = 2500,
+): Promise<BandcampSubdomainStatus> {
+  if (!isUrlHostnameAllowed(bandcampUrl)) return 'unknown';
+
+  const key = `bandcamp-subdomain:${bandcampUrl.replace(/\/+$/, '').toLowerCase()}`;
+  const { data } = await cacheGetOrFetch<BandcampSubdomainStatus>(
+    key,
+    async () => {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const response = await globalThis.fetch(bandcampUrl, {
+          method: 'HEAD',
+          redirect: 'manual',
+          signal: controller.signal,
+          headers: { 'User-Agent': 'Unstream/1.0 (+https://unstream.stream)' },
+        });
+        const location = response.headers.get('location') ?? '';
+        // The one signal that means "this account is gone".
+        if (location.startsWith('https://bandcamp.com/signup')) return 'dead';
+        // A 2xx, or a redirect to anywhere else on Bandcamp, means the account is there.
+        if (response.ok) return 'live';
+        if (response.status >= 300 && response.status < 400) return 'live';
+        // 429, 5xx, bot challenge: Bandcamp did not answer the question we asked.
+        return 'unknown';
+      } catch {
+        // Timeout or network error. We did not find out.
+        return 'unknown';
+      } finally {
+        clearTimeout(timeout);
+      }
+    },
+    SUBDOMAIN_STATUS_TTL_SECONDS,
+    status => status !== 'unknown',
+  );
+
+  return data;
 }
 
 // Fetch location from a Bandcamp artist profile page.

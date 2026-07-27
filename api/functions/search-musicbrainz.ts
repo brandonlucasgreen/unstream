@@ -30,6 +30,7 @@ import {
   parseLocationString,
   mergeLocations,
   fetchBandcampLocation,
+  checkBandcampSubdomain,
   fetchMirloLocation,
   enrichLocationFallback,
 } from '../search/enrichment';
@@ -146,7 +147,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     let wikipediaUrl: string | null = null;
     const socialLinks: SocialLink[] = [];
     const seenPlatforms = new Set<SocialPlatform>();
-    const platformUrls: string[] = [];
+    let platformUrls: string[] = [];
 
     let mbLocation: ArtistLocation | undefined;
     let hasPre2005Release = false;
@@ -286,7 +287,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     // Fetch additional social links from Discogs, official site, PeerTube, Wikipedia,
     // and platform locations (Bandcamp, Mirlo) in parallel.
     // Bandcamp location: prefers MB relation URL; falls back to live Bandcamp search by name.
-    const [discogsSocialLinks, officialSiteResult, peertubeLink, wikipediaResult, bandcampLocation, mirloLocation] = await Promise.all([
+    const [discogsSocialLinks, officialSiteResult, peertubeLink, wikipediaResult, bandcampLocation, mirloLocation, bandcampStatus] = await Promise.all([
       discogsUrl ? fetchDiscogsSocialLinks(discogsUrl) : Promise.resolve([]),
       officialUrl ? fetchOfficialSiteSocialLinks(officialUrl) : Promise.resolve({ socialLinks: [], linktreeUrl: null, discoveredPlatforms: [] }),
       searchPeerTubeChannels(artist.name),
@@ -304,7 +305,17 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
         return match?.location ? parseLocationString(match.location) : null;
       })(),
       fetchMirloLocation(mirloSlug),
+      mbBandcampUrl ? checkBandcampSubdomain(mbBandcampUrl) : Promise.resolve('unknown' as const),
     ]);
+
+    // Phase 1 strips retired subdomains at the same point; this is the Phase 2 path the
+    // client falls back to when server-side enrichment didn't land in time. Both have to
+    // do it, or the dead link simply arrives a second later. Only a confirmed 'dead' is
+    // dropped — 'unknown' keeps trusting MB, so a Bandcamp outage changes nothing.
+    if (mbBandcampUrl && bandcampStatus === 'dead') {
+      console.log(`[MusicBrainz] Dropping retired Bandcamp subdomain for "${artist.name}": ${mbBandcampUrl}`);
+      platformUrls = platformUrls.filter(u => u !== mbBandcampUrl);
+    }
 
     // Merge locations: MusicBrainz is authoritative; Bandcamp and Mirlo fill in missing fields
     const location = mergeLocations(mbLocation, bandcampLocation, mirloLocation);
