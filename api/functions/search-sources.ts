@@ -1445,6 +1445,11 @@ function applyEnrichmentToResults(
 // ---------------------------------------------------------------------------
 
 async function searchAllPlatforms(query: string): Promise<{ results: AggregatedResult[]; enrichmentApplied: boolean }> {
+  // Merge overrides come from Supabase and are needed in Phase 2.5 — start the
+  // fetch now so it rides along with the platform fan-out instead of adding a
+  // round-trip afterwards. getMergeOverrides catches its own errors ([] on failure).
+  const overridesPromise = getMergeOverrides();
+
   // Phase 1: Search all platforms in parallel and aggregate Bandcamp/Mirlo results
   const [bandcampResults, bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, ampwallResults, beatportResults, evenResults, musicbrainzResult] = await Promise.allSettled([
     searchBandcamp(query),
@@ -1580,7 +1585,7 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
   // Phase 2.5: Apply manual merge overrides before release-based disambiguation.
   // Overrides authoritatively create their own result and strip their URLs
   // from all other results — no reservation needed.
-  const overrides = await getMergeOverrides();
+  const overrides = await overridesPromise;
   if (overrides.length > 0) {
     applyMergeOverrides(aggregated, overrides);
   }
@@ -1671,16 +1676,17 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     // Normalize the query to handle accented characters (e.g., "Tanerélle" -> "Tanerelle")
     const normalizedQuery = normalizeSearchQuery(query);
 
-    // Check if there's a claimed artist in the DB matching this query
+    // Check if there's a claimed artist in the DB matching this query.
+    // The lookup runs concurrently with the platform fan-out below — it's a
+    // Supabase read that used to add its round-trips ahead of the search.
     const slug = artistSlug(normalizedQuery);
-    let claimedResult: AggregatedResult | null = null;
-    try {
-      const dbArtist = await getArtistBySlug(slug);
-      if (dbArtist && dbArtist.matchConfidence === 'claimed') {
-        claimedResult = {
+    const claimedPromise: Promise<AggregatedResult | null> = getArtistBySlug(slug)
+      .then(dbArtist => {
+        if (!dbArtist || dbArtist.matchConfidence !== 'claimed') return null;
+        return {
           id: `claimed-${slug}`,
           name: dbArtist.name,
-          type: 'artist',
+          type: 'artist' as const,
           imageUrl: dbArtist.profile?.customImageUrl || dbArtist.imageUrl,
           platforms: dbArtist.platforms.map(p => ({
             sourceId: p.sourceId as SourceId,
@@ -1688,16 +1694,18 @@ export async function handler(event: { queryStringParameters?: Record<string, st
             displayName: p.displayName,
             latestRelease: p.latestRelease,
           })),
-          matchConfidence: 'claimed',
+          matchConfidence: 'claimed' as const,
           claimedSlug: slug,
           ...(dbArtist.location ? { location: dbArtist.location } : {}),
         };
-      }
-    } catch (err) {
-      console.error('[DB] Claimed artist lookup failed:', err);
-    }
+      })
+      .catch(err => {
+        console.error('[DB] Claimed artist lookup failed:', err);
+        return null;
+      });
 
     const searchResult = await searchAllPlatforms(normalizedQuery);
+    const claimedResult = await claimedPromise;
     const results = searchResult.results;
 
     // UC5: Capture zero-result searches for monitoring (volume signal for coverage gaps)

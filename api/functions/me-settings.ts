@@ -17,7 +17,10 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
 };
 
-async function authenticateRequest(authHeader: string | undefined): Promise<{ userId: string; email: string } | null> {
+// getUser(token) validates the token against the auth server and returns the
+// user's *current* record (not the stale token claims), so email and
+// user_metadata here are as fresh as a separate admin.getUserById lookup.
+async function authenticateRequest(authHeader: string | undefined): Promise<{ userId: string; email: string; hasPassword: boolean } | null> {
   if (!authHeader?.startsWith('Bearer ')) return null;
   const token = authHeader.slice(7);
 
@@ -28,7 +31,11 @@ async function authenticateRequest(authHeader: string | undefined): Promise<{ us
   const anonClient = createClient(url, anonKey);
   const { data, error } = await anonClient.auth.getUser(token);
   if (error || !data.user) return null;
-  return { userId: data.user.id, email: data.user.email || '' };
+  return {
+    userId: data.user.id,
+    email: data.user.email || '',
+    hasPassword: !!data.user.user_metadata?.has_password,
+  };
 }
 
 export async function handler(event: {
@@ -40,8 +47,12 @@ export async function handler(event: {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   }
 
+  // Rate-limit check (Redis) and token validation (Supabase Auth) are both
+  // network round-trips with no data dependency — run them concurrently.
   const ip = getClientIp(event.headers);
-  const rl = await checkRateLimit(ip, 'standard', CORS_HEADERS);
+  const rlPromise = checkRateLimit(ip, 'standard', CORS_HEADERS);
+  const userPromise = authenticateRequest(event.headers.authorization).catch(() => null);
+  const rl = await rlPromise;
   if (rl.limited) return rl.response;
 
   if (event.httpMethod !== 'GET') {
@@ -53,13 +64,14 @@ export async function handler(event: {
     return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
   }
 
-  const user = await authenticateRequest(event.headers.authorization);
+  const user = await userPromise;
   if (!user) {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authenticated' }) };
   }
 
   try {
-    // Read username + location from public.usernames (PostgREST-accessible table)
+    // Read username + location from public.usernames (PostgREST-accessible table).
+    // Email and has_password already came back with the token validation above.
     const { data: usernameRow, error: usernameError } = await client
       .from('usernames')
       .select('username, location')
@@ -71,24 +83,14 @@ export async function handler(event: {
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to load settings' }) };
     }
 
-    // Read email + has_password flag via admin API (auth.users is not PostgREST-accessible)
-    const { data: authData, error: authError } = await client.auth.admin.getUserById(user.userId);
-
-    if (authError || !authData.user) {
-      console.error('[me-settings] Error fetching auth user:', authError?.message);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to load settings' }) };
-    }
-
-    const hasPassword = !!authData.user.user_metadata?.has_password;
-
     return {
       statusCode: 200,
       headers: CORS_HEADERS,
       body: JSON.stringify({
         username: usernameRow?.username || null,
         location: usernameRow?.location ?? null,
-        email: authData.user.email || user.email,
-        hasPassword,
+        email: user.email,
+        hasPassword: user.hasPassword,
       }),
     };
   } catch (error) {
