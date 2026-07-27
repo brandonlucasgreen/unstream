@@ -3,6 +3,7 @@
 
 import { createHash, randomUUID, timingSafeEqual } from 'crypto';
 import { createClient } from '@supabase/supabase-js';
+import { jwtVerify, createRemoteJWKSet, decodeProtectedHeader, errors as joseErrors } from 'jose';
 import { getClient } from './db';
 
 // ---------------------------------------------------------------------------
@@ -74,6 +75,106 @@ export async function authenticateBearer(
   if (error || !data.user || !data.user.email) return null;
 
   return { userId: data.user.id, email: data.user.email };
+}
+
+// ---------------------------------------------------------------------------
+// Authentication — local JWT verification (fast path)
+// ---------------------------------------------------------------------------
+
+// Supabase signs access tokens either with the project's shared HS256 secret
+// (legacy default — the "JWT Secret" under Settings → API, exposed here as
+// SUPABASE_JWT_SECRET) or with asymmetric keys published at the project's
+// JWKS endpoint. The JWKS client caches keys in module scope, so warm
+// invocations verify with zero network calls.
+let jwks: ReturnType<typeof createRemoteJWKSet> | null = null;
+
+function getJwks(supabaseUrl: string): ReturnType<typeof createRemoteJWKSet> {
+  if (!jwks) {
+    jwks = createRemoteJWKSet(new URL(`${supabaseUrl}/auth/v1/.well-known/jwks.json`));
+  }
+  return jwks;
+}
+
+interface BearerUser {
+  userId: string;
+  email: string;
+}
+
+/**
+ * Verify a Supabase access token locally, without an auth-server round-trip.
+ *
+ * 'unavailable' means we couldn't check — missing SUPABASE_JWT_SECRET for an
+ * HS256 token, JWKS unreachable, or an unknown key id (key rotation) — as
+ * opposed to null, which means the token is definitively bad (garbage, bad
+ * signature, expired, wrong audience/issuer). Callers treat 'unavailable' as
+ * "ask the auth server instead" so a config gap never locks users out.
+ */
+async function verifyJwtLocally(token: string): Promise<BearerUser | null | 'unavailable'> {
+  const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, '');
+  if (!supabaseUrl) return 'unavailable';
+
+  let alg: string | undefined;
+  try {
+    alg = decodeProtectedHeader(token).alg;
+  } catch {
+    return null; // not a JWT at all
+  }
+
+  // aud/iss checks keep non-user tokens (anon key, service key, tokens from
+  // another project) from passing as a signed-in user — matching what the
+  // auth server would reject.
+  const claims = { issuer: `${supabaseUrl}/auth/v1`, audience: 'authenticated' };
+
+  try {
+    let payload;
+    if (alg === 'HS256') {
+      const secret = process.env.SUPABASE_JWT_SECRET;
+      if (!secret) return 'unavailable';
+      ({ payload } = await jwtVerify(token, new TextEncoder().encode(secret), { ...claims, algorithms: ['HS256'] }));
+    } else {
+      ({ payload } = await jwtVerify(token, getJwks(supabaseUrl), { ...claims, algorithms: ['RS256', 'ES256'] }));
+    }
+    if (!payload.sub) return null;
+    return { userId: payload.sub, email: typeof payload.email === 'string' ? payload.email : '' };
+  } catch (err) {
+    // ERR_JWKS_* covers fetch failures, timeouts, and unknown key ids — all
+    // "couldn't check", not "bad token". Any other JOSE error is a real
+    // verification failure. Anything else (e.g. a network TypeError) is
+    // infrastructure, so fall back rather than reject.
+    const code = (err as { code?: string }).code || '';
+    if (code.startsWith('ERR_JWKS')) return 'unavailable';
+    if (err instanceof joseErrors.JOSEError) return null;
+    return 'unavailable';
+  }
+}
+
+/**
+ * Fast-path Bearer authentication for hot, latency-sensitive endpoints
+ * (dashboard, saved artists, sync). Verifies the JWT locally and only calls
+ * the auth server when local verification isn't possible.
+ *
+ * Trade-off (accepted in PR #331): a session revoked server-side (sign-out,
+ * banned user) keeps working until the access token expires (~1 hour).
+ * Use authenticateBearer where a fresh server-side check matters more than
+ * latency — admin actions, API-key issuance.
+ */
+export async function authenticateBearerFast(
+  authHeader: string | undefined,
+): Promise<BearerUser | null> {
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  const token = authHeader.slice(7);
+
+  const local = await verifyJwtLocally(token);
+  if (local !== 'unavailable') return local;
+
+  const url = process.env.SUPABASE_URL;
+  const anonKey = process.env.SUPABASE_ANON_KEY;
+  if (!url || !anonKey) return null;
+
+  const anonClient = createClient(url, anonKey);
+  const { data, error } = await anonClient.auth.getUser(token);
+  if (error || !data.user) return null;
+  return { userId: data.user.id, email: data.user.email || '' };
 }
 
 /**

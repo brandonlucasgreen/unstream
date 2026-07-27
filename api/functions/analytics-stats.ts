@@ -1,9 +1,9 @@
 // GET /api/analytics/stats?slug={slug}&period=7d|30d|90d|all
 // Authenticated endpoint returning aggregated analytics for a verified artist.
 
-import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
+import { authenticateBearerFast } from './middleware';
 
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
@@ -13,20 +13,6 @@ const CORS_HEADERS = {
 };
 
 const VALID_PERIODS = new Set(['7d', '30d', '90d', 'all']);
-
-async function authenticateRequest(authHeader: string | undefined): Promise<{ userId: string } | null> {
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const token = authHeader.slice(7);
-
-  const url = process.env.SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return null;
-
-  const anonClient = createClient(url, anonKey);
-  const { data, error } = await anonClient.auth.getUser(token);
-  if (error || !data.user) return null;
-  return { userId: data.user.id };
-}
 
 export async function handler(event: {
   httpMethod: string;
@@ -45,7 +31,7 @@ export async function handler(event: {
   // network round-trips with no data dependency — run them concurrently.
   const ip = getClientIp(event.headers || {});
   const rlPromise = checkRateLimit(ip, 'standard', CORS_HEADERS);
-  const authPromise = authenticateRequest(event.headers?.authorization || event.headers?.Authorization).catch(() => null);
+  const authPromise = authenticateBearerFast(event.headers?.authorization || event.headers?.Authorization).catch(() => null);
   const rl = await rlPromise;
   if (rl.limited) return rl.response;
 

@@ -2,32 +2,12 @@
 // GET  — returns claimed profiles for the authenticated user
 // POST — now a no-op (Supabase handles magic link login directly)
 
-import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
+import { authenticateBearerFast } from './middleware';
 
 function getServiceClient() {
   return getClient();
-}
-
-async function authenticateRequest(authHeader: string | undefined): Promise<{ userId: string; email: string } | null> {
-  if (!authHeader?.startsWith('Bearer ')) {
-    console.log('[artist-auth] Missing or invalid Authorization header');
-    return null;
-  }
-  const token = authHeader.slice(7);
-
-  const url = process.env.SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return null;
-
-  const anonClient = createClient(url, anonKey);
-  const { data, error } = await anonClient.auth.getUser(token);
-  if (error || !data.user) {
-    console.log(`[artist-auth] Token validation failed: ${error?.message || 'no user'}`);
-    return null;
-  }
-  return { userId: data.user.id, email: data.user.email || '' };
 }
 
 export async function handler(event: { httpMethod: string; headers: Record<string, string | undefined>; body: string | null }) {
@@ -46,7 +26,7 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
   // network round-trips with no data dependency — run them concurrently.
   const ip = getClientIp(event.headers);
   const rlPromise = checkRateLimit(ip, 'standard', headers);
-  const userPromise = authenticateRequest(event.headers.authorization).catch(() => null);
+  const userPromise = authenticateBearerFast(event.headers.authorization).catch(() => null);
   const rl = await rlPromise;
   if (rl.limited) return rl.response;
 

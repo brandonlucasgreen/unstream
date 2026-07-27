@@ -12,9 +12,9 @@
 // Unclaimed artists don't get /a/ profile pages — only claimed ones do.
 // We store the search result data (slug, name, imageUrl) directly in saved_artists.
 
-import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
+import { authenticateBearerFast } from './middleware';
 
 function getServiceClient() {
   return getClient();
@@ -44,26 +44,6 @@ function purgeCacheTag(handle: string): void {
     .catch((e) => console.error(`[saved-artists] CDN cache purge failed for user-share-${handle}:`, e));
 }
 
-async function authenticateRequest(authHeader: string | undefined): Promise<{ userId: string; email: string } | null> {
-  if (!authHeader?.startsWith('Bearer ')) {
-    console.log('[saved-artists] Missing or invalid Authorization header');
-    return null;
-  }
-  const token = authHeader.slice(7);
-
-  const url = process.env.SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return null;
-
-  const anonClient = createClient(url, anonKey);
-  const { data, error } = await anonClient.auth.getUser(token);
-  if (error || !data.user) {
-    console.log(`[saved-artists] Token validation failed: ${error?.message || 'no user'}`);
-    return null;
-  }
-  return { userId: data.user.id, email: data.user.email || '' };
-}
-
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',
@@ -84,7 +64,7 @@ export async function handler(event: {
   // network round-trips with no data dependency — run them concurrently.
   const ip = getClientIp(event.headers);
   const rlPromise = checkRateLimit(ip, 'standard', CORS_HEADERS);
-  const userPromise = authenticateRequest(event.headers.authorization).catch(() => null);
+  const userPromise = authenticateBearerFast(event.headers.authorization).catch(() => null);
   const rl = await rlPromise;
   if (rl.limited) return rl.response;
 
