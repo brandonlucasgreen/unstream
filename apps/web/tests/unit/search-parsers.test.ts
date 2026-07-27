@@ -141,6 +141,44 @@ describe('parseBandcampReleaseCounts', () => {
       <li class="music-grid-item" data-item-id="album-7"></li>`;
     expect(parseBandcampReleaseCounts(withNav)).toEqual({ albums: 1, tracks: 0 });
   });
+
+  // A single-release artist's /music 303s to that release, and the album page has
+  // no grid at all. Trimmed from the real prairiez.bandcamp.com response, which
+  // was being rejected as an empty squatter.
+  const singleReleasePage = `
+    <div id="discography" class="sidebar" style="display:none">
+      <h3 class="title"><a href="/music" class="link-and-title primaryText">discography</a></h3>
+      <ul>
+        <li>
+          <div><a class="thumbthumb " href="/album/subtitles-for-blushing"><img src="x.jpg"></a></div>
+          <div class="trackTitle"><a href="/album/subtitles-for-blushing">Subtitles For Blushing</a></div>
+          <div class="trackYear secondaryText">May 2025</div>
+        </li>
+      </ul>
+    </div>`;
+
+  it('counts the sidebar discography when a single-release page has no grid', () => {
+    expect(parseBandcampReleaseCounts(singleReleasePage)).toEqual({ albums: 1, tracks: 0 });
+  });
+
+  it('classifies a sidebar track separately from a sidebar album', () => {
+    const trackOnly = singleReleasePage.replace(/\/album\//g, '/track/');
+    expect(parseBandcampReleaseCounts(trackOnly)).toEqual({ albums: 0, tracks: 1 });
+  });
+
+  it('still reports zero when neither a grid nor a sidebar discography is present', () => {
+    // The squatter signature must survive the fallback: beyonce has no grid AND
+    // no sidebar, so it stays rejected.
+    expect(parseBandcampReleaseCounts('<div id="pgBd"><div class="title">Beyonce</div></div>')).toEqual({
+      albums: 0,
+      tracks: 0,
+    });
+  });
+
+  it('prefers the grid over the sidebar when both are present', () => {
+    const both = musicPage + singleReleasePage;
+    expect(parseBandcampReleaseCounts(both)).toEqual({ albums: 2, tracks: 1 });
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -510,6 +548,18 @@ describe('parseBandcampReleaseTitles', () => {
   it('handles empty page', () => {
     const titles = parseBandcampReleaseTitles('<html></html>');
     expect(titles).toEqual([]);
+  });
+
+  it('reads the sidebar discography when a single-release page has no grid', () => {
+    // Without this the artist is accepted but arrives with no titles, which makes
+    // disambiguation re-fetch the page the probe already read.
+    const html = `
+      <div id="discography" class="sidebar">
+        <ul><li>
+          <div class="trackTitle"><a href="/album/subtitles-for-blushing">Subtitles For Blushing</a></div>
+        </li></ul>
+      </div>`;
+    expect(parseBandcampReleaseTitles(html)).toEqual(['subtitlesforblushing']);
   });
 });
 

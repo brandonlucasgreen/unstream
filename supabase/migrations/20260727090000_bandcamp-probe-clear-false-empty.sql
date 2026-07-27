@@ -1,0 +1,22 @@
+-- Migration 028: clear cached `rejected_empty` probe verdicts
+--
+-- parseBandcampReleaseCounts only counted `.music-grid-item` elements, but a
+-- single-release artist's /music 303s to that release and the album page it
+-- lands on has no grid at all — the discography sits in a `#discography`
+-- sidebar. Those artists scored 0 albums / 0 tracks and were classified as
+-- parked squatters.
+--
+-- Measured 2026-07-26: 5 of 13 sampled `rejected_empty` verdicts were real
+-- artists, Massive Attack and Yoko Kanno among them. See
+-- docs/specs/bandcamp-coverage-research.md §10.3.
+--
+-- `rejected_empty` is a cacheable verdict, so every one of those false
+-- negatives is stored and will keep being served until the row is removed.
+-- The parser fix cannot reach them on its own.
+--
+-- Safe to run: this table is a cache. Deleted rows are re-probed on the next
+-- search for that query, at most one round of requests each. Only
+-- `rejected_empty` is cleared — `accepted`, `absent` and `rejected_name`
+-- verdicts are unaffected by the parser change.
+
+delete from public.bandcamp_slug_probes where verdict = 'rejected_empty';

@@ -1,7 +1,7 @@
 // Pure HTML parsing functions extracted from search-sources.ts for testability.
 // These contain no I/O — they take HTML strings and return structured results.
 
-import { parse } from 'node-html-parser';
+import { parse, type HTMLElement } from 'node-html-parser';
 import {
   type PlatformResult,
   normalizeForComparison,
@@ -172,12 +172,43 @@ export function parseBandcampBandIdentity(html: string): { id: number; name: str
 }
 
 /**
+ * Releases listed in the sidebar discography of a Bandcamp album or track page.
+ *
+ * Bandcamp serves two layouts at `<slug>.bandcamp.com/music`. An artist with
+ * several releases gets the `.music-grid-item` grid. An artist with a single
+ * release gets a 303 to that release, and the album page it lands on has **no
+ * grid at all** — the discography lives in a `#discography` sidebar instead:
+ *
+ *   <div id="discography" class="sidebar">
+ *     <li><div class="trackTitle"><a href="/album/…">Subtitles For Blushing</a></div></li>
+ *
+ * Reading it is what stops a one-release artist from being mistaken for an empty
+ * squatter. Measured on 2026-07-26: 5 of 13 `rejected_empty` verdicts were real
+ * artists in this layout, Massive Attack and Yoko Kanno among them.
+ */
+function parseBandcampSidebarDiscography(root: HTMLElement): { href: string; title: string }[] {
+  const sidebar = root.querySelector('#discography');
+  if (!sidebar) return [];
+
+  const entries: { href: string; title: string }[] = [];
+  for (const link of sidebar.querySelectorAll('.trackTitle a')) {
+    const href = link.getAttribute('href');
+    if (!href) continue;
+    entries.push({ href, title: link.textContent?.trim() ?? '' });
+  }
+  return entries;
+}
+
+/**
  * Count releases on a Bandcamp /music page, split by type.
  *
  * Zero albums AND zero tracks is the parked-squatter signature. Accounts at
  * `beyonce`, `sufjan` and `jackwhite` all exist and all return a matching
  * data-band name, but hold no releases — so a name check alone would surface
  * them as genuine artist pages.
+ *
+ * Handles both page layouts. The sidebar is only consulted when the grid is
+ * empty, so a normal discography page behaves exactly as before.
  */
 export function parseBandcampReleaseCounts(html: string): { albums: number; tracks: number } {
   const root = parse(html);
@@ -190,6 +221,16 @@ export function parseBandcampReleaseCounts(html: string): { albums: number; trac
     if (!id) continue;
     if (id.startsWith('album-')) albums.add(id);
     else if (id.startsWith('track-')) tracks.add(id);
+  }
+
+  if (albums.size > 0 || tracks.size > 0) {
+    return { albums: albums.size, tracks: tracks.size };
+  }
+
+  // No grid. Either a genuinely empty account, or the single-release layout.
+  for (const entry of parseBandcampSidebarDiscography(root)) {
+    if (entry.href.includes('/album/')) albums.add(entry.href);
+    else if (entry.href.includes('/track/')) tracks.add(entry.href);
   }
 
   return { albums: albums.size, tracks: tracks.size };
@@ -235,7 +276,14 @@ export function parseBandcampImage(html: string): string | null {
   return url;
 }
 
-/** Parse Bandcamp /music page HTML to extract release titles */
+/**
+ * Parse Bandcamp /music page HTML to extract release titles.
+ *
+ * Falls back to the sidebar discography for the single-release layout, for the
+ * same reason parseBandcampReleaseCounts does — and because a Bandcamp result
+ * arriving with no titles forces disambiguation to spend its shared 4s release
+ * budget re-fetching a page the probe already read.
+ */
 export function parseBandcampReleaseTitles(html: string): string[] {
   const root = parse(html);
   const titles: string[] = [];
@@ -247,6 +295,13 @@ export function parseBandcampReleaseTitles(html: string): string[] {
     if (title) {
       titles.push(normalizeForComparison(title));
     }
+    if (titles.length >= 20) break;
+  }
+
+  if (titles.length > 0) return titles;
+
+  for (const entry of parseBandcampSidebarDiscography(root)) {
+    if (entry.title) titles.push(normalizeForComparison(entry.title));
     if (titles.length >= 20) break;
   }
 
