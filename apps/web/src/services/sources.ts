@@ -706,10 +706,19 @@ export function mergeWithMusicBrainzData(
       }
     }
 
-    // Add Bandcamp URL from MusicBrainz platform relations if available
-    // Bandcamp scraping is disabled server-side (anti-bot protection), so MB
-    // relations are our primary source for direct Bandcamp links.
-    // If the server already added a search-only Bandcamp fallback, replace it with the real URL.
+    // Add the Bandcamp URL from MusicBrainz's platform relations, if it has one.
+    //
+    // This replacement is load-bearing, not cosmetic. Phase 1's Bandcamp link comes
+    // from the slug probe, which derives a subdomain from the artist's name and
+    // verifies it by page identity and release count. Those guards catch squatters,
+    // but they cannot catch two real artists sharing a name: measured 2026-07-26,
+    // the probe returns a different artist about 4% of the time (e.g. `abhorrence`,
+    // Pennsylvania, when the artist is `abhorrencefin`, Helsinki).
+    //
+    // MusicBrainz relations are human-curated, so where one exists it is ground
+    // truth and must win over the probe's guess. Don't reduce this to "only fill in
+    // when Bandcamp is missing" — overwriting is the point.
+    // See docs/specs/bandcamp-coverage-research.md §10.4.
     if (mbData.platformUrls && mbData.platformUrls.length > 0) {
       const bandcampUrl = mbData.platformUrls.find(u => {
         try { return new URL(u).hostname.endsWith('.bandcamp.com'); } catch { return false; }
@@ -717,7 +726,6 @@ export function mergeWithMusicBrainzData(
       if (bandcampUrl) {
         const existingBandcamp = newPlatforms.findIndex(p => p.sourceId === 'bandcamp');
         if (existingBandcamp !== -1) {
-          // Replace search-only fallback with real Bandcamp URL
           newPlatforms[existingBandcamp] = { sourceId: 'bandcamp', url: bandcampUrl };
         } else {
           newPlatforms.push({ sourceId: 'bandcamp', url: bandcampUrl });

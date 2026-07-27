@@ -691,15 +691,47 @@ non-empty. **Neither guard can catch this, because the failure is not squatting 
 artists sharing a name.** This is the `nirvana` case from §5b, now measured at ~4% of accepted
 results rather than assumed rare.
 
-Two things follow:
+This is the strongest argument yet for §5b's cross-source resolver, and for §6.4's ordering (index
+first, probe second). Discover returns whatever Bandcamp treats as canonical for the *indexed*
+artist; slug-guessing returns whoever holds the shortest slug.
 
-1. This is the strongest argument yet for §5b's cross-source resolver, and for §6.4's ordering
-   (index first, probe second). Discover returns whatever Bandcamp treats as canonical for the
-   *indexed* artist; slug-guessing returns whoever holds the shortest slug.
-2. **A claimed artist's self-declared `artist_links` should outrank the probe unconditionally.** It
-   is free, already in the database, and is the artist's own statement. Worth checking whether the
-   search path currently prefers it — if the probe's Phase 1 result wins, Unstream is showing three
-   of its own claimed artists a stranger's Bandcamp page.
+#### Correction (checked 2026-07-27): none of these three reach users
+
+The paragraph above originally ended by warning that Unstream was "showing three of its own claimed
+artists a stranger's Bandcamp page," and recommended making `artist_links` outrank the probe. **That
+was asserted, not tested, and it is wrong.** Queried against production:
+
+```
+/api/search/sources?query=Tear        → claimed "Tear"       → tearperth.bandcamp.com
+/api/search/sources?query=Bonsoir     → claimed "Bonsoir"    → lifestylers.bandcamp.com
+/api/search/sources?query=Abhorrence  → claimed "Abhorrence" → abhorrencefin.bandcamp.com
+```
+
+All three already return the artist's own declared link and nothing else. **Two independent
+mitigations were already in place**, and between them they cover every case where a fix is even
+possible:
+
+1. **Claimed artists** (`api/functions/search-sources.ts`) — a claimed DB record is prepended to the
+   results and live results matching its name are filtered out, so the probe's card is dropped
+   entirely. This is why all three examples are clean.
+2. **MusicBrainz relations** (`apps/web/src/services/sources.ts`) — Phase 2 *replaces* any existing
+   Bandcamp platform with MB's relation URL. So even unclaimed, `abhorrence` would be corrected to
+   `abhorrencefin` about a second after Phase 1 paints.
+
+**So the residual exposure is precisely: unclaimed artist + no MusicBrainz Bandcamp relation +
+same-name collision.** Tear and Bonsoir both sit in that set (`no_bandcamp_rel`) and are only saved
+by being claimed. That intersection has no free signal in it — by definition no source has an
+opinion — so there is nothing cheap left to build. The options are §5b's cross-source resolver
+(release-title overlap, Phase 2, routed to `/admin/verify`) or Layer B's index.
+
+The one thing worth doing immediately was cheap: mitigation 2 survived only as a side effect of a
+comment describing the *old* disabled scraper ("MB relations are our primary source for direct
+Bandcamp links" — no longer true; the probe finds 80% versus MB's 35%). A refactor reading that
+comment could reasonably have downgraded the overwrite to a fill-in-if-missing and silently
+reintroduced the bug. The comment now states why the overwrite is load-bearing.
+
+**Method note.** This is the second time in two days that a mechanism was named as a cause before
+being tested — see the Anna von Hausswolff sequence. The check took one `curl` per artist.
 
 ### 10.5 Layer B scope: full sweep, but **not next**
 
@@ -720,16 +752,17 @@ a 9% gain. Partition the sweep for **checkpointing** (§6.2), not for scope.
 | Work | Gain | Cost |
 |---|---|---|
 | 1. Fix the false-reject parser (§10.3) | +3pp, and stops caching false negatives | hours; no new requests |
-| 2. Prefer self-declared `artist_links` over the probe (§10.4) | fixes 3 wrong-artist links | hours; no new requests |
-| 3. Cross-source resolver for same-name ambiguity (§5b) | reduces the residual ~4% wrong-artist rate | days |
+| 2. ~~Prefer self-declared `artist_links`~~ | — **already in place**, see the §10.4 correction | done |
+| 3. Cross-source resolver for same-name ambiguity (§5b) | the only remaining lever on the ~4% wrong-artist rate | days |
 | 4. **Layer B full sweep** | **+9pp (non-derivable slugs), plus canonical-URL preference and bulk `band_location`** | ~12,500 requests, ~8.7 GB, plus permanent maintenance |
 
-Items 1 and 2 recover more correctness than Layer B does, cost a day between them, and add zero load
-to Bandcamp. Layer B's real justification is not raw coverage — Layer A already achieves 83% recall
-against ground truth — it is **name→canonical-URL resolution**, which is also what fixes the
-wrong-artist class properly and what makes the artist-location database possible.
+Item 1 recovers more correctness per hour than anything else here and adds zero load to Bandcamp.
+Item 2 turned out to need no work. Layer B's real justification is not raw coverage — Layer A already
+achieves 83% recall against ground truth — it is **name→canonical-URL resolution**, which is also
+what fixes the wrong-artist class properly and what makes the artist-location database possible.
 
-**Recommendation: do 1 and 2 first, then build Layer B as a full partitioned sweep.** And revise
+**Recommendation: do 1, then decide between 3 and 4** — they attack the same residual from different
+directions, and 4 subsumes 3 for any artist that has albums in the index. And revise
 §6.2's throttling assumptions — Bandcamp *does* rate-limit (429), which the original 10-request
 sample missed. Budget for `Retry-After` backoff and resumable per-partition checkpoints, and treat
 4 req/s as an untested ceiling rather than a plan.
