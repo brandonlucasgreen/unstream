@@ -521,3 +521,265 @@ Don't block the build on it.
 5. **Refresh cadence** — is daily `slice: "new"` enough, or do you also want a periodic full
    re-sweep to catch renames and deletions? Renamed artists will otherwise go stale.
 6. **Outreach** — want the Bandcamp email drafted alongside the implementation?
+
+---
+
+## 10. Coverage re-measured against real traffic (26 July, second run)
+
+> The earlier §"coverage after #319" run sampled `data/artist-list.json` (Wikidata-notable artists)
+> and got MusicBrainz 9% / Layer A 19% / either 21%. That sample over-represents major-label acts who
+> were never on Bandcamp, so this run was scheduled to redo it against real search traffic. It also
+> resolves the open `rejected_empty` question — and turned up two bugs that the earlier tests, which
+> had no ground truth, could not have found.
+>
+> Bandcamp's rate limit had reset. **Zero 429s and zero `undecided` verdicts across ~200 requests**
+> at 2.5s between artists. MusicBrainz was clean too: 0 `unavailable` in 69 artists at 1.35s spacing,
+> versus 13% errors last time.
+
+### 10.0 First: `app_events` does not store the query
+
+The plan was to pull most-searched artist names from `app_events` where `event_type = 'search'`.
+**That data does not exist.** 9,664 search events are stored, and the `context` column holds only
+`{ has_results, result_count }` — the query string is deliberately never recorded
+(`supabase/migrations/20260412000000_app-events.sql`, `apps/web/src/services/analytics.ts:75`).
+That is a sound privacy choice, not a gap to fill, but it means **Unstream cannot currently answer
+"what do people search for?" from analytics.**
+
+Three imperfect proxies exist. All three are reported below, because they bracket the answer rather
+than agree on it:
+
+| Sample | n | What it actually is | Bias |
+|---|---|---|---|
+| **A** `data/artist-list.json` | 100 | Wikidata-notable artists | **Down.** Major-label acts, many never on Bandcamp |
+| **B** `artist_analytics` `metric='search'` | 69 | Artists that appeared in results *and* have a claimed profile | **Up, strongly.** See below |
+| **C** `bandcamp_slug_probes.query_norm` | 24 | **Literal queries users typed**, from the Layer A cache | Unbiased by construction, but tiny and partly my own test traffic |
+
+**Sample B's bias is structural and large.** `trackArtistSearchAppearance` fires only when
+`result.claimedSlug` is set (`apps/web/src/components/ResultCard.tsx:31`), so the table can only ever
+contain artists who claimed an Unstream profile. Measured: **68 of the 69 are `source: 'claimed'`.**
+Artists who find Unstream and claim a profile are overwhelmingly Bandcamp-native indies. Sample B is
+therefore a near-best case, not a typical one.
+
+**Sample C is the one to build on.** `bandcamp_slug_probes` is, as a side effect of #319, the only
+place Unstream stores literal search text. It is small today (36 rows, ~a third of them my own
+verification queries) but it accumulates. In a few weeks it is the clean instrument for this
+measurement — no new tracking required.
+
+### 10.1 Headline coverage, sample B (real traffic, claimed-artist cohort, n=69)
+
+| Source | Found a Bandcamp URL | vs sample A |
+|---|---|---|
+| MusicBrainz `url-rels` | **24 / 69 = 35%** | 9% |
+| Layer A probe | **55 / 69 = 80%** | 19% |
+| **Either** | **59 / 69 = 86%** | 21% |
+| Neither | 10 / 69 = 14% | 79% |
+
+Attribution: 20 both · 4 MB-only · **35 probe-only** · **1 disagreement**.
+
+Probe verdicts: 55 `accepted`, 8 `absent`, 6 `rejected_empty`, 0 `rejected_name`, 0 `undecided`.
+MusicBrainz: 24 found, 26 no Bandcamp relation, 19 no artist match, 0 unavailable.
+
+**Layer A's marginal gain over MusicBrainz alone is 35 artists — 51 percentage points**, versus the
+12pp measured on sample A. On the cohort Unstream actually serves, the probe is not a supplement to
+MusicBrainz; it is the primary source, and MusicBrainz is the supplement.
+
+For sample C (literal typed queries, 24 rows after excluding known test queries): 9 accepted (37.5%),
+9 absent, 6 `rejected_empty` — rising to ~46% once the false rejects in §10.3 are counted.
+
+**So the honest range for "does Unstream find this artist on Bandcamp" is roughly 40–85%**, depending
+on how indie the querying population is, with sample C's ~40% the closest thing to a typical figure
+and 86% the ceiling for the claimed-artist cohort. **Do not quote a single number.**
+
+### 10.2 Ground truth: 96% of this cohort *is* on Bandcamp
+
+Sample B's artists are claimed profiles, so they have self-declared platform links in
+`artist_links` — the artist's own statement of where they are. **66 of 69 (96%) declared a Bandcamp
+URL.**
+
+That converts the coverage figures into a recall figure against known truth:
+
+| | of 66 artists known to be on Bandcamp |
+|---|---|
+| Layer A found them | 55 = **83%** |
+| MusicBrainz found them | 24 = 36% |
+| Layer A after the §10.3 fix | 58 = **88%** |
+
+83% recall against ground truth is at the top of the 66–80% band §5a predicted, confirming the
+"§5a undercounted" correction.
+
+The 12 artists Layer A missed despite a self-declared Bandcamp page split into three groups, and the
+split is what should decide Layer B:
+
+| Miss type | Artists | Real slug vs. query |
+|---|---|---|
+| **Slug not derivable from the name** (6) | sknob, Court Lee, JAMIEvx, Stan Stewart (×2), M. Walker, Env!sioN | `vincentknobil`, `courstellation`, `diym`, `muz4now`, `schmeeglez`, `envis10n` |
+| **False reject** (3) | Prairiez, Gizz Van Buskirk, bloodless girls | correct slug, wrongly scored 0/0 — §10.3 |
+| **Variant slug + a same-name empty account** (3) | SideBanks, Trans Panic | real: `side-banks`, `transpanicpunk`; probe found empty `sidebanks`, `transpanic` |
+
+**No slug heuristic will ever reach the first group.** `schmeeglez` for "M. Walker" is not a
+transformation, it is a different word. That group — 6/69 ≈ **9% of traffic** — is precisely and only
+what Layer B's index solves.
+
+One small candidate-generation gap worth noting: `bandcampSlugCandidates('SideBanks')` returns just
+`["sidebanks"]`. The hyphenated variant is derived from spaces, so camelCase names lose their word
+boundary and never produce `side-banks`. Cheap to fix if it's worth it; low volume.
+
+### 10.3 `rejected_empty`: the rate is real, but **38% of the rejections are false** — confirmed bug
+
+The open question was whether the 34% `rejected_empty` rate on sample A hid false rejects. **It does.**
+
+Checked 13 rejected accounts (6 from sample B, 7 real production rejections from the probe cache) by
+re-fetching `/music` and comparing `parseBandcampReleaseCounts`'s view against raw hrefs:
+
+| Slug | parsed | `music-grid-item` | album hrefs | Verdict |
+|---|---|---|---|---|
+| `prairiez` | 0a/0t | **0** | 8 | **FALSE REJECT** |
+| `gizzvanbuskirk` | 0a/0t | **0** | 8 | **FALSE REJECT** |
+| `bloodlessgirls` | 0a/0t | **0** | 7 | **FALSE REJECT** |
+| `massive-attack` | 0a/0t | **0** | 11 | **FALSE REJECT** |
+| `yoko-kanno` | 0a/0t | **0** | 11 | **FALSE REJECT** |
+| `transpanic`, `sidebanks`, `johnnysycamore`, `pseudosun`, `beyonce`, `bonobo`, `chatgpt`, `tanerelle` | 0a/0t | 0 | 0 | genuine empty |
+
+**5 of 13 = 38% of `rejected_empty` verdicts are wrong.**
+
+**Mechanism — it is the redirecting-root layout §5a already documented, applied to counting rather
+than location.** For a single-release artist, `/music` does not serve a discography grid:
+
+```
+GET https://prairiez.bandcamp.com/music
+→ HTTP 303 → https://prairiez.bandcamp.com/album/subtitles-for-blushing
+→ music-grid-item: 0        (the grid layout is absent entirely)
+→ sidebar_disco: {"music_grid":true,"discography_real_size":1}
+```
+
+`parseBandcampReleaseCounts` only counts `.music-grid-item[data-item-id]`, so an artist whose
+`/music` redirects to their one album scores 0 albums and 0 tracks and is classified as a parked
+squatter. Then — and this is the damaging part — `rejected_empty` **is** a cacheable verdict, so the
+false negative is written to `bandcamp_slug_probes` and persists.
+
+**The fix is precise, and the two layouts are cleanly distinguishable.** Verified on 7 pages:
+
+| Page shape | `music-grid-item` | `discography_real_size` |
+|---|---|---|
+| grid root (`boyharsher`, `stressdolls`) | 16, 12 | absent |
+| redirected-to-album (all 5 false rejects) | 0 | **present, = 1** |
+
+So: when the counts come back 0/0, check for `discography_real_size` (or equivalently for a
+`data-tralbum` album page) before concluding the account is empty. This is a parser-level change in
+`parseBandcampReleaseCounts` plus a unit test per layout — no new requests, since the page is already
+in hand.
+
+**Cost of not fixing it:** 3pp of coverage on sample B, and it lands hardest on single-release
+artists — the exact long-tail cohort the project exists for. It also silently drops **Massive
+Attack** and **Yoko Kanno**, so it is not only a long-tail problem.
+
+### 10.4 New finding: Layer A returns the *wrong artist* about 4% of the time
+
+§5c concluded "No case returned a wrong URL." **That was true of the cases tested, and it is wrong as
+a general claim** — those tests had no ground truth to check against. Comparing the probe's answer to
+the artist's own declared link, 3 of 69 (4.3%) disagree, and in each case the probe has found a
+different act with the same name:
+
+| Unstream artist | Artist's own link | Probe returned | Reality |
+|---|---|---|---|
+| **Tear** | `tearperth` — "Tear", **Perth, Australia**, 11 releases | `tear` — "TeaR", **Tangerang, Indonesia**, 2 releases | **Wrong artist.** Perth matches the artist's stored city |
+| **Bonsoir** | `lifestylers` — "Lifestyler Music", 16 releases | `bonsoir` — "Bonsoir", **San Diego CA**, 7 releases | **Wrong artist** (different act, same name) |
+| **Abhorrence** | `abhorrencefin` — "Abhorrence", **Helsinki**, 4 releases | `abhorrence` — "Abhorrence", **Elizabethtown PA**, 7 releases | Genuine same-name ambiguity, two real bands |
+
+Both guards behave exactly as designed and both are satisfied: the name matches, and the account is
+non-empty. **Neither guard can catch this, because the failure is not squatting — it is two real
+artists sharing a name.** This is the `nirvana` case from §5b, now measured at ~4% of accepted
+results rather than assumed rare.
+
+This is the strongest argument yet for §5b's cross-source resolver, and for §6.4's ordering (index
+first, probe second). Discover returns whatever Bandcamp treats as canonical for the *indexed*
+artist; slug-guessing returns whoever holds the shortest slug.
+
+#### Correction (checked 2026-07-27): none of these three reach users
+
+The paragraph above originally ended by warning that Unstream was "showing three of its own claimed
+artists a stranger's Bandcamp page," and recommended making `artist_links` outrank the probe. **That
+was asserted, not tested, and it is wrong.** Queried against production:
+
+```
+/api/search/sources?query=Tear        → claimed "Tear"       → tearperth.bandcamp.com
+/api/search/sources?query=Bonsoir     → claimed "Bonsoir"    → lifestylers.bandcamp.com
+/api/search/sources?query=Abhorrence  → claimed "Abhorrence" → abhorrencefin.bandcamp.com
+```
+
+All three already return the artist's own declared link and nothing else. **Two independent
+mitigations were already in place**, and between them they cover every case where a fix is even
+possible:
+
+1. **Claimed artists** (`api/functions/search-sources.ts`) — a claimed DB record is prepended to the
+   results and live results matching its name are filtered out, so the probe's card is dropped
+   entirely. This is why all three examples are clean.
+2. **MusicBrainz relations** (`apps/web/src/services/sources.ts`) — Phase 2 *replaces* any existing
+   Bandcamp platform with MB's relation URL. So even unclaimed, `abhorrence` would be corrected to
+   `abhorrencefin` about a second after Phase 1 paints.
+
+**So the residual exposure is precisely: unclaimed artist + no MusicBrainz Bandcamp relation +
+same-name collision.** Tear and Bonsoir both sit in that set (`no_bandcamp_rel`) and are only saved
+by being claimed. That intersection has no free signal in it — by definition no source has an
+opinion — so there is nothing cheap left to build. The options are §5b's cross-source resolver
+(release-title overlap, Phase 2, routed to `/admin/verify`) or Layer B's index.
+
+The one thing worth doing immediately was cheap: mitigation 2 survived only as a side effect of a
+comment describing the *old* disabled scraper ("MB relations are our primary source for direct
+Bandcamp links" — no longer true; the probe finds 80% versus MB's 35%). A refactor reading that
+comment could reasonably have downgraded the overwrite to a fill-in-if-missing and silently
+reintroduced the bug. The comment now states why the overwrite is load-bearing.
+
+**Method note.** This is the second time in two days that a mechanism was named as a cause before
+being tested — see the Anna von Hausswolff sequence. The check took one `curl` per artist.
+
+### 10.5 Layer B scope: full sweep, but **not next**
+
+The question was full 6.26M-album sweep versus a targeted seed from the genres and locations real
+traffic hits. **A targeted seed will not work, and the full sweep is not the highest-value next
+step.**
+
+**Why a targeted seed fails.** Layer B's only unique job is the 6 non-derivable-slug artists in
+§10.2 — nothing else in the residual needs an index. Those artists are not clustered: within a
+69-artist sample the relevant locations are San Diego, Perth, Helsinki, Tangerang, Elizabethtown PA,
+and 50 of 69 have no location recorded at all. Slug non-derivability is a property of how an
+individual artist named their account, and is uncorrelated with genre or geography. There is no small
+set of partitions that captures it, so a seed would deliver an unknown and unmeasurable fraction of
+a 9% gain. Partition the sweep for **checkpointing** (§6.2), not for scope.
+
+**Why it is not next.** Ranked by value per unit of work:
+
+| Work | Gain | Cost |
+|---|---|---|
+| 1. Fix the false-reject parser (§10.3) | +3pp, and stops caching false negatives | hours; no new requests |
+| 2. ~~Prefer self-declared `artist_links`~~ | — **already in place**, see the §10.4 correction | done |
+| 3. Cross-source resolver for same-name ambiguity (§5b) | the only remaining lever on the ~4% wrong-artist rate | days |
+| 4. **Layer B full sweep** | **+9pp (non-derivable slugs), plus canonical-URL preference and bulk `band_location`** | ~12,500 requests, ~8.7 GB, plus permanent maintenance |
+
+Item 1 recovers more correctness per hour than anything else here and adds zero load to Bandcamp.
+Item 2 turned out to need no work. Layer B's real justification is not raw coverage — Layer A already
+achieves 83% recall against ground truth — it is **name→canonical-URL resolution**, which is also
+what fixes the wrong-artist class properly and what makes the artist-location database possible.
+
+**Recommendation: do 1, then decide between 3 and 4** — they attack the same residual from different
+directions, and 4 subsumes 3 for any artist that has albums in the index. And revise
+§6.2's throttling assumptions — Bandcamp *does* rate-limit (429), which the original 10-request
+sample missed. Budget for `Retry-After` backoff and resumable per-partition checkpoints, and treat
+4 req/s as an untested ceiling rather than a plan.
+
+### 10.6 Measurement notes for whoever re-runs this
+
+- **Throttling that worked:** 2.5s between artists (each artist may fire up to 3 requests inside one
+  `probeBandcampArtist` call), abort the whole run on the first `undecided`. ~200 requests, no 429s.
+  MusicBrainz at 1.35s spacing with up-to-3 retries on 503: 0 unavailable in 138 calls.
+- `probeBandcampArtist` writes nothing to Supabase — only `findBandcampArtist` does. Use the former
+  for measurement so the run cannot poison the production probe cache.
+- **Layer A's URL does reach users.** Confirmed live during this run:
+  `GET /api/search/sources?query=radiohead` returns a platform with `sourceId: "bandcamp"` and
+  `radiohead.bandcamp.com`, and the result `imageUrl` is `f4.bcbits.com` (Bandcamp art). The
+  "probe URL is discarded" defect was real in #319 and was fixed in #320; coverage figures here are
+  user-visible, not theoretical.
+- Searching MusicBrainz by artist name alone matches on name only, so it can return a *different*
+  artist (it gave `abhorrencefin` for the Pennsylvania Abhorrence). Production goes through
+  `search-musicbrainz.ts`'s own disambiguation; a name-only harness will slightly overstate MB
+  disagreement.
