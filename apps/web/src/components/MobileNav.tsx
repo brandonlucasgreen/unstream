@@ -36,7 +36,12 @@ export function MobileNav({
 
     // Move focus into the drawer, and lock the page behind it so the content
     // doesn't scroll under the overlay.
-    closeRef.current?.focus();
+    //
+    // preventScroll is load-bearing: the panel is still transformed off-screen
+    // when this runs, so a scrolling focus makes the browser scroll the clipped
+    // overlay sideways to reveal the button. That snaps the panel into place and
+    // drags the overlay's contents with it, fighting the slide-in animation.
+    closeRef.current?.focus({ preventScroll: true });
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
@@ -53,7 +58,7 @@ export function MobileNav({
 
   function close() {
     setOpen(false);
-    triggerRef.current?.focus();
+    triggerRef.current?.focus({ preventScroll: true });
   }
 
   return (
@@ -78,7 +83,7 @@ export function MobileNav({
       >
         <div
           onClick={close}
-          className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-200 motion-reduce:transition-none ${
+          className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-250 motion-reduce:transition-none ${
             open ? 'opacity-100' : 'opacity-0'
           }`}
         />
@@ -86,7 +91,7 @@ export function MobileNav({
         <nav
           id="mobile-nav"
           aria-label="Main menu"
-          className={`absolute inset-y-0 right-0 flex w-72 max-w-[85vw] flex-col border-l border-border bg-bg-primary shadow-2xl transition-transform duration-200 ease-out motion-reduce:transition-none ${
+          className={`absolute inset-y-0 right-0 flex w-72 max-w-[85vw] flex-col border-l border-border bg-bg-primary shadow-2xl transition-transform duration-250 ease-out motion-reduce:transition-none ${
             open ? 'translate-x-0' : 'translate-x-full'
           }`}
         >

@@ -126,4 +126,20 @@ describe('MobileNav', () => {
     fireEvent.click(screen.getByLabelText('Close menu'));
     expect(document.activeElement).toBe(trigger());
   });
+
+  // A scrolling focus makes the browser scroll the clipped overlay sideways to
+  // reveal the still-off-screen panel, which snaps it into place and fights the
+  // slide-in. Both focus calls must opt out.
+  it('focuses without scrolling', () => {
+    const focus = vi.spyOn(HTMLButtonElement.prototype, 'focus');
+    render(<MobileNav items={loggedInItems} />);
+
+    fireEvent.click(trigger());
+    expect(focus).toHaveBeenLastCalledWith({ preventScroll: true });
+
+    fireEvent.click(screen.getByLabelText('Close menu'));
+    expect(focus).toHaveBeenLastCalledWith({ preventScroll: true });
+
+    focus.mockRestore();
+  });
 });
