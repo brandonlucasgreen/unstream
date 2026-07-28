@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ThemeToggle } from './ThemeToggle';
-import { useTheme } from '../hooks/useTheme';
+import { MobileNav, type NavItem } from './MobileNav';
 import { useAuth } from '../contexts/AuthContext';
 
-function UnstreamLogo({ dark }: { dark: boolean }) {
-  const color = dark ? 'white' : '#1a1a1a';
+function UnstreamLogo() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -29,17 +27,16 @@ function UnstreamLogo({ dark }: { dark: boolean }) {
         <path fill="#FFDC5D" d="M17.125 4.323c0-1.099-.852-1.989-1.903-1.989-1.051 0-1.903.891-1.903 1.989 0 0-.535 5.942-1.192 9.37-.878 1.866-1.369 4.682-1.261 6.248-.054.398-5.625 5.006-5.625 5.006C5.522 26.76 7.5 31.102 10 33.106l3.521-2.924c2.885-.404 4.458-3.331 4.458-4.264 0-2.984-.854-21.595-.854-21.595z"/>
         <path fill="#F9CA55" d="M17.958 25.823c-.414 0-.75-.336-.75-.75V2.792c0-.414.336-.75.75-.75s.75.336.75.75v22.282c.001.413-.335.749-.75.749z"/>
       </g>
-      <path d="M14,52 A41,41 0 0,1 96,52" fill="none" stroke={color} strokeWidth="8" strokeLinecap="round"/>
-      <line x1="14" y1="52" x2="14" y2="64" stroke={color} strokeWidth="7" strokeLinecap="round"/>
-      <line x1="96" y1="52" x2="96" y2="64" stroke={color} strokeWidth="7" strokeLinecap="round"/>
-      <rect x="3" y="60" width="22" height="28" rx="9" fill={color}/>
-      <rect x="85" y="60" width="22" height="28" rx="9" fill={color}/>
+      <path d="M14,52 A41,41 0 0,1 96,52" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round"/>
+      <line x1="14" y1="52" x2="14" y2="64" stroke="currentColor" strokeWidth="7" strokeLinecap="round"/>
+      <line x1="96" y1="52" x2="96" y2="64" stroke="currentColor" strokeWidth="7" strokeLinecap="round"/>
+      <rect x="3" y="60" width="22" height="28" rx="9" fill="currentColor"/>
+      <rect x="85" y="60" width="22" height="28" rx="9" fill="currentColor"/>
     </svg>
   );
 }
 
 export function Header() {
-  const { theme, preference, cycleTheme } = useTheme();
   const navigate = useNavigate();
   const { session, user, isAdmin, signOut } = useAuth();
   const [pendingVerifyCount, setPendingVerifyCount] = useState(0);
@@ -68,55 +65,57 @@ export function Header() {
     navigate('/login');
   }
 
+  // Shared by the inline desktop nav and the mobile hamburger menu, so new
+  // items only need adding in one place.
+  const navItems: NavItem[] = session
+    ? [
+        ...(isAdmin && pendingVerifyCount > 0
+          ? [{ to: '/admin/verify', label: `Verify (${pendingVerifyCount})`, emphasis: true }]
+          : []),
+        { to: '/dashboard', label: 'Dashboard', emphasis: true },
+        { to: '/settings', label: 'Settings' },
+      ]
+    : [{ to: '/login', label: 'Login' }];
+
   return (
     <header className="p-4 border-b border-border flex items-center justify-between gap-4">
       <Link to="/" className="text-xl font-bold text-text-primary hover:opacity-80 transition-opacity shrink-0 flex items-center gap-2">
-        <UnstreamLogo dark={theme === 'dark'} />
+        <UnstreamLogo />
         Unstream
       </Link>
-      <div className="flex items-center gap-3 text-sm">
-        {session ? (
-          <>
-            <span className="text-text-muted hidden sm:inline">
-              {user?.email}
-            </span>
-            {isAdmin && pendingVerifyCount > 0 && (
-              <Link
-                to="/admin/verify"
-                className="text-accent-primary hover:underline font-medium"
-              >
-                Verify ({pendingVerifyCount})
-              </Link>
-            )}
-            <Link
-              to="/dashboard"
-              className="text-accent-primary hover:underline font-medium"
-            >
-              Dashboard
-            </Link>
-            <Link
-              to="/settings"
-              className="text-text-muted hover:text-text-primary transition-colors"
-            >
-              Settings
-            </Link>
-            <button
-              onClick={handleSignOut}
-              className="text-text-muted hover:text-text-primary transition-colors"
-            >
-              Sign out
-            </button>
-          </>
-        ) : (
+
+      <nav className="hidden sm:flex items-center gap-3 text-sm">
+        {session && (
+          <span className="text-text-muted hidden md:inline">
+            {user?.email}
+          </span>
+        )}
+        {navItems.map(item => (
           <Link
-            to="/login"
+            key={item.to}
+            to={item.to}
+            className={item.emphasis
+              ? 'text-accent-primary hover:underline font-medium'
+              : 'text-text-muted hover:text-text-primary transition-colors'}
+          >
+            {item.label}
+          </Link>
+        ))}
+        {session && (
+          <button
+            onClick={handleSignOut}
             className="text-text-muted hover:text-text-primary transition-colors"
           >
-            Login
-          </Link>
+            Sign out
+          </button>
         )}
-        <ThemeToggle preference={preference} onCycle={cycleTheme} />
-      </div>
+      </nav>
+
+      <MobileNav
+        items={navItems}
+        email={session ? user?.email : undefined}
+        onSignOut={session ? handleSignOut : undefined}
+      />
     </header>
   );
 }
