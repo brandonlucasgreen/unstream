@@ -19,8 +19,19 @@ const loggedInItems: NavItem[] = [
   { to: '/settings', label: 'Settings' },
 ];
 
-function openMenu() {
-  fireEvent.click(screen.getByLabelText('Open menu'));
+function trigger() {
+  return screen.getByLabelText('Open menu');
+}
+
+// The drawer stays mounted so it can animate shut, so "closed" means inert and
+// translated off-screen rather than absent from the DOM.
+function drawer() {
+  return screen.getByLabelText('Main menu');
+}
+function isOpen() {
+  return trigger().getAttribute('aria-expanded') === 'true'
+    && !drawer().parentElement?.hasAttribute('inert')
+    && drawer().className.includes('translate-x-0');
 }
 
 describe('MobileNav', () => {
@@ -28,26 +39,33 @@ describe('MobileNav', () => {
     cleanup();
   });
 
-  it('hides the menu items until the hamburger is clicked', () => {
+  it('starts closed, with the drawer inert and off-screen', () => {
     render(<MobileNav items={loggedInItems} />);
-    expect(screen.queryByText('Dashboard')).toBeNull();
 
-    openMenu();
-    expect(screen.getByText('Dashboard')).toBeTruthy();
+    expect(isOpen()).toBe(false);
+    expect(drawer().className).toContain('translate-x-full');
+    expect(drawer().parentElement?.hasAttribute('inert')).toBe(true);
+  });
+
+  it('slides open when the hamburger is clicked', () => {
+    render(<MobileNav items={loggedInItems} />);
+
+    fireEvent.click(trigger());
+    expect(isOpen()).toBe(true);
   });
 
   it('shows only Login when signed out', () => {
     render(<MobileNav items={loggedOutItems} />);
-    openMenu();
+    fireEvent.click(trigger());
 
-    expect(screen.getByText('Login')).toBeTruthy();
+    expect(screen.getByText('Login').getAttribute('href')).toBe('/login');
     expect(screen.queryByText('Sign out')).toBeNull();
     expect(screen.queryByText('Settings')).toBeNull();
   });
 
   it('shows the account links, email and sign out when signed in', () => {
     render(<MobileNav items={loggedInItems} email="fan@example.com" onSignOut={() => {}} />);
-    openMenu();
+    fireEvent.click(trigger());
 
     expect(screen.getByText('fan@example.com')).toBeTruthy();
     expect(screen.getByText('Dashboard').getAttribute('href')).toBe('/dashboard');
@@ -55,41 +73,57 @@ describe('MobileNav', () => {
     expect(screen.getByText('Sign out')).toBeTruthy();
   });
 
-  it('calls onSignOut and closes the menu', () => {
+  it('calls onSignOut and closes', () => {
     const onSignOut = vi.fn();
     render(<MobileNav items={loggedInItems} onSignOut={onSignOut} />);
-    openMenu();
+    fireEvent.click(trigger());
 
     fireEvent.click(screen.getByText('Sign out'));
     expect(onSignOut).toHaveBeenCalledOnce();
-    expect(screen.queryByText('Dashboard')).toBeNull();
+    expect(isOpen()).toBe(false);
   });
 
-  it('closes when a link is clicked, so a same-route tap does not leave it open', () => {
+  it('closes when a link is tapped, so a same-route tap does not leave it open', () => {
     render(<MobileNav items={loggedInItems} />);
-    openMenu();
+    fireEvent.click(trigger());
 
     fireEvent.click(screen.getByText('Settings'));
-    expect(screen.queryByText('Settings')).toBeNull();
+    expect(isOpen()).toBe(false);
   });
 
-  it('closes on Escape and on a click outside', () => {
+  it('closes on Escape, on the close button and on a backdrop tap', () => {
     render(<MobileNav items={loggedInItems} />);
 
-    openMenu();
+    fireEvent.click(trigger());
     fireEvent.keyDown(document, { key: 'Escape' });
-    expect(screen.queryByText('Dashboard')).toBeNull();
+    expect(isOpen()).toBe(false);
 
-    openMenu();
-    fireEvent.mouseDown(document.body);
-    expect(screen.queryByText('Dashboard')).toBeNull();
+    fireEvent.click(trigger());
+    fireEvent.click(screen.getByLabelText('Close menu'));
+    expect(isOpen()).toBe(false);
+
+    fireEvent.click(trigger());
+    fireEvent.click(drawer().previousElementSibling as Element);
+    expect(isOpen()).toBe(false);
   });
 
-  it('reflects open state for screen readers', () => {
+  it('locks page scroll while open and restores it on close', () => {
     render(<MobileNav items={loggedInItems} />);
-    expect(screen.getByLabelText('Open menu').getAttribute('aria-expanded')).toBe('false');
 
-    openMenu();
-    expect(screen.getByLabelText('Close menu').getAttribute('aria-expanded')).toBe('true');
+    fireEvent.click(trigger());
+    expect(document.body.style.overflow).toBe('hidden');
+
+    fireEvent.click(screen.getByLabelText('Close menu'));
+    expect(document.body.style.overflow).toBe('');
+  });
+
+  it('moves focus to the close button on open and back to the hamburger on close', () => {
+    render(<MobileNav items={loggedInItems} />);
+
+    fireEvent.click(trigger());
+    expect(document.activeElement).toBe(screen.getByLabelText('Close menu'));
+
+    fireEvent.click(screen.getByLabelText('Close menu'));
+    expect(document.activeElement).toBe(trigger());
   });
 });

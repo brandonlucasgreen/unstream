@@ -77,8 +77,11 @@ export function Header() {
       ]
     : [{ to: '/login', label: 'Login' }];
 
+  // The sticky header keeps a solid background rather than a blurred one: a
+  // backdrop-filter would become the containing block for MobileNav's fixed
+  // overlay and trap the drawer inside the header instead of covering the page.
   return (
-    <header className="p-4 border-b border-border flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-40 p-4 border-b border-border bg-bg-primary flex items-center justify-between gap-4">
       <Link to="/" className="text-xl font-bold text-text-primary hover:opacity-80 transition-opacity shrink-0 flex items-center gap-2">
         <UnstreamLogo />
         Unstream

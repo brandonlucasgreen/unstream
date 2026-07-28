@@ -9,8 +9,14 @@ export type NavItem = {
 };
 
 /**
- * Hamburger menu that houses the header nav on small screens. The desktop
- * header renders the same items inline, so this is hidden from `sm` up.
+ * Full-height drawer that houses the header nav on small screens: a hamburger
+ * in the header slides a panel in from the right over the page content. The
+ * desktop header renders the same items inline, so all of this is hidden from
+ * `sm` up.
+ *
+ * The drawer stays mounted and animates via transforms so it slides both open
+ * and shut. `inert` keeps the closed panel out of the tab order and the
+ * accessibility tree, which conditional rendering would otherwise handle.
  */
 export function MobileNav({
   items,
@@ -22,84 +28,117 @@ export function MobileNav({
   onSignOut?: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!open) return;
 
+    // Move focus into the drawer, and lock the page behind it so the content
+    // doesn't scroll under the overlay.
+    closeRef.current?.focus();
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') setOpen(false);
     }
-    function handlePointerDown(event: Event) {
-      if (!containerRef.current?.contains(event.target as Node)) setOpen(false);
-    }
-
     document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('touchstart', handlePointerDown);
+
     return () => {
+      document.body.style.overflow = previousOverflow;
       document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('touchstart', handlePointerDown);
     };
   }, [open]);
 
+  function close() {
+    setOpen(false);
+    triggerRef.current?.focus();
+  }
+
   return (
-    <div ref={containerRef} className="relative sm:hidden">
+    <>
       <button
+        ref={triggerRef}
         type="button"
-        onClick={() => setOpen(!open)}
-        className="-mr-2 p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors"
-        aria-label={open ? 'Close menu' : 'Open menu'}
+        onClick={() => setOpen(true)}
+        className="-mr-2 p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors sm:hidden"
+        aria-label="Open menu"
         aria-expanded={open}
         aria-controls="mobile-nav"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          {open ? (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          ) : (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7h16M4 12h16M4 17h16" />
-          )}
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7h16M4 12h16M4 17h16" />
         </svg>
       </button>
 
-      {open && (
+      <div
+        className={`fixed inset-0 z-50 overflow-hidden sm:hidden ${open ? '' : 'pointer-events-none'}`}
+        inert={!open}
+      >
+        <div
+          onClick={close}
+          className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-200 motion-reduce:transition-none ${
+            open ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
+
         <nav
           id="mobile-nav"
           aria-label="Main menu"
-          className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-xl border border-border bg-bg-card shadow-lg"
+          className={`absolute inset-y-0 right-0 flex w-72 max-w-[85vw] flex-col border-l border-border bg-bg-primary shadow-2xl transition-transform duration-200 ease-out motion-reduce:transition-none ${
+            open ? 'translate-x-0' : 'translate-x-full'
+          }`}
         >
-          {email && (
-            <p className="truncate border-b border-border px-4 py-2 text-xs text-text-muted">
-              {email}
-            </p>
-          )}
-          {items.map(item => (
-            <Link
-              key={item.to}
-              to={item.to}
-              onClick={() => setOpen(false)}
-              className={`block px-4 py-3 text-sm hover:bg-bg-hover transition-colors ${
-                item.emphasis ? 'text-accent-primary font-medium' : 'text-text-primary'
-              }`}
+          {/* Close button sits where the hamburger was, so the drawer reads as
+              opening out of the header rather than landing on top of it. */}
+          <div className="flex items-center justify-end p-4">
+            <button
+              ref={closeRef}
+              type="button"
+              onClick={close}
+              className="-mr-2 p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors"
+              aria-label="Close menu"
             >
-              {item.label}
-            </Link>
-          ))}
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {email && (
+            <p className="truncate px-6 pb-4 text-xs text-text-muted">{email}</p>
+          )}
+
+          <div className="flex flex-col border-t border-border">
+            {items.map(item => (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={close}
+                className={`border-b border-border px-6 py-4 text-base hover:bg-bg-hover transition-colors ${
+                  item.emphasis ? 'text-accent-primary font-medium' : 'text-text-primary'
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+
           {onSignOut && (
             <button
               type="button"
               onClick={() => {
-                setOpen(false);
+                close();
                 onSignOut();
               }}
-              className="block w-full px-4 py-3 text-left text-sm text-text-muted hover:bg-bg-hover hover:text-text-primary transition-colors"
+              className="mt-auto border-t border-border px-6 py-4 text-left text-base text-text-muted hover:bg-bg-hover hover:text-text-primary transition-colors"
             >
               Sign out
             </button>
           )}
         </nav>
-      )}
-    </div>
+      </div>
+    </>
   );
 }
