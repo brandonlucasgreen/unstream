@@ -59,7 +59,8 @@ export async function handler(event: NetlifyEvent) {
   // Call the core search logic, wrapping the response in v1 envelope.
   // Pass x-internal-skip-ratelimit to prevent double rate limiting (v1 wrapper already checked).
   const coreResult = await coreSearchHandler({
-    queryStringParameters: { query },
+    // mode passes through untouched; the core handler treats anything but 'exact' as fuzzy.
+    queryStringParameters: { query, ...(event.queryStringParameters?.mode ? { mode: event.queryStringParameters.mode } : {}) },
     headers: { ...event.headers, 'x-internal-skip-ratelimit': process.env.INTERNAL_FUNCTION_SECRET ?? '' } as Record<string, string>,
   });
 

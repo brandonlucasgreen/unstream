@@ -124,8 +124,10 @@ class ShareSearchViewModel: ObservableObject {
     private func performSearch(artist: String) async {
         savePendingSearch(artist)
 
+        // mode=exact: the artist name comes from the shared page's metadata,
+        // so a partial-name match would be a different artist.
         guard let encoded = artist.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "https://unstream.stream/api/search/sources?query=\(encoded)") else {
+              let url = URL(string: "https://unstream.stream/api/search/sources?query=\(encoded)&mode=exact") else {
             searchState = .networkError
             return
         }

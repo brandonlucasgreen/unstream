@@ -62,7 +62,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
     sendResponse({ artist: currentArtist });
   } else if (message.type === 'GET_RESULTS') {
-    getResults(message.artist).then(sendResponse);
+    getResults(message.artist, message.mode).then(sendResponse);
     return true; // Keep channel open for async response
   } else if (message.type === 'GET_ENRICHMENT') {
     getEnrichment(message.artist).then(sendResponse);
@@ -201,9 +201,12 @@ function handleMusicStopped() {
   updateBadge('idle');
 }
 
-// Search for artist via Unstream API
-async function searchArtist(artist) {
-  const url = `${API_BASE}/search/sources?query=${encodeURIComponent(artist)}`;
+// Search for artist via Unstream API.
+// mode=exact is the extension's default: queries here come from track metadata,
+// so a partial-name match would be a different artist than the one playing.
+// Only the popup's manual search box passes 'fuzzy'.
+async function searchArtist(artist, mode = 'exact') {
+  const url = `${API_BASE}/search/sources?query=${encodeURIComponent(artist)}&mode=${mode}`;
 
   const response = await fetch(url);
   if (!response.ok) {
@@ -213,9 +216,10 @@ async function searchArtist(artist) {
   return response.json();
 }
 
-// Get results from cache or API
-async function getResults(artist) {
-  const cacheKey = `cache:${artist}`;
+// Get results from cache or API. Exact and fuzzy results are cached separately —
+// the fuzzy set for a name is a superset and must not answer a detection lookup.
+async function getResults(artist, mode = 'exact') {
+  const cacheKey = mode === 'fuzzy' ? `cache:fuzzy:${artist}` : `cache:${artist}`;
   const cached = await chrome.storage.local.get(cacheKey);
 
   if (cached[cacheKey]) {
@@ -227,7 +231,7 @@ async function getResults(artist) {
 
   // Fetch fresh
   try {
-    const data = await searchArtist(artist);
+    const data = await searchArtist(artist, mode);
     const results = data.results || [];
     await chrome.storage.local.set({
       [cacheKey]: { results, timestamp: Date.now() }

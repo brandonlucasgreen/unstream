@@ -81,8 +81,10 @@ class AppState: ObservableObject {
         api.trackAppEvent(eventType: "search")
 
         do {
-            // Phase 1: Get initial results — show them immediately
-            let (results, hasPendingEnrichment) = try await api.searchArtist(query)
+            // Phase 1: Get initial results — show them immediately.
+            // Typed search is fuzzy so partial names can find artists;
+            // now-playing detection below stays exact.
+            let (results, hasPendingEnrichment) = try await api.searchArtist(query, mode: .fuzzy)
             searchResults = results
             isSearching = false
             api.trackAppEvent(eventType: "search", context: ["has_results": results.count > 0, "result_count": results.count])
@@ -93,7 +95,7 @@ class AppState: ObservableObject {
                 if let mbData = try await api.fetchMusicBrainzData(query) {
                     let enrichedResults = await api.mergeWithMusicBrainzData(results: results, mbData: mbData)
                     searchResults = enrichedResults
-                    await api.cacheResults(query: query, results: enrichedResults)
+                    await api.cacheResults(query: query, results: enrichedResults, mode: .fuzzy)
                 }
             }
         } catch {

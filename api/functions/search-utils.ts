@@ -90,6 +90,38 @@ export interface SearchResponse {
   hasPendingEnrichment?: boolean;
 }
 
+/**
+ * How strictly the query should be matched against artist names.
+ *
+ * 'fuzzy' (the default) is for humans typing: partial names discover artists
+ * ("argent" finds The Argent Grub). 'exact' is for playback detection, where
+ * the query IS the artist's name from track metadata and a partial match would
+ * be a different artist: detecting Argent must never return The Argent Grub.
+ */
+export type SearchMode = 'exact' | 'fuzzy';
+
+/** The name is the query, tolerating only leading-article variance. */
+export function isExactNameMatch(name: string, query: string): boolean {
+  return normalizeForComparison(name) === normalizeForComparison(query) ||
+    namesEqualIgnoringArticles(name, query);
+}
+
+/** Restrict a name-only match map to entries that ARE the query (mode=exact). */
+export function filterNameOnlyMapToExact(
+  map: Map<string, NameOnlyEntry>,
+  query: string,
+): Map<string, NameOnlyEntry> {
+  const queryNorm = normalizeForComparison(query);
+  const filtered = new Map<string, NameOnlyEntry>();
+  for (const [normalizedName, entry] of map) {
+    if (normalizedName === queryNorm ||
+        (entry.displayName && isExactNameMatch(entry.displayName, query))) {
+      filtered.set(normalizedName, entry);
+    }
+  }
+  return filtered;
+}
+
 // A name-only platform hit: a URL plus the display name the platform showed for it.
 // Keyed by normalized name in the maps the fetchers return; the display name is kept
 // so results created from these hits carry the artist's real name instead of a

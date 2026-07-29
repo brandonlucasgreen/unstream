@@ -9,6 +9,9 @@ import {
   textMatchScore,
   collectMbSuggestions,
   bandcampSlugCandidates,
+  isExactNameMatch,
+  filterNameOnlyMapToExact,
+  type NameOnlyEntry,
 } from '../../../../api/functions/search-utils';
 
 describe('bandcampSlugCandidates', () => {
@@ -190,6 +193,38 @@ describe('looksLikeOpaqueId', () => {
     expect(looksLikeOpaqueId('ben-g')).toBe(false);
     // Short hex-looking words are usually words.
     expect(looksLikeOpaqueId('decade')).toBe(false);
+  });
+});
+
+describe('isExactNameMatch', () => {
+  it('accepts identical and article-variant names', () => {
+    expect(isExactNameMatch('Kid Lightbulbs', 'kid lightbulbs')).toBe(true);
+    expect(isExactNameMatch('The Argent Grub', 'Argent Grub')).toBe(true);
+  });
+
+  it('rejects partial matches — this is what mode=exact means', () => {
+    expect(isExactNameMatch('The Argent Grub', 'argent')).toBe(false);
+    expect(isExactNameMatch('Rod Argent', 'Argent')).toBe(false);
+  });
+});
+
+describe('filterNameOnlyMapToExact', () => {
+  it('keeps only entries that are the query, tolerating a leading article', () => {
+    const map = new Map<string, NameOnlyEntry>([
+      ['argent', { url: 'https://bandwagon.fm/@argent', displayName: 'Argent' }],
+      ['argentgrub', { url: 'https://bandwagon.fm/@theargentgrub', displayName: 'Argent Grub' }],
+      ['rodargent', { url: 'https://bandwagon.fm/@rodargent', displayName: 'Rod Argent' }],
+    ]);
+    expect([...filterNameOnlyMapToExact(map, 'argent').keys()]).toEqual(['argent']);
+    expect([...filterNameOnlyMapToExact(map, 'the argent grub').keys()]).toEqual(['argentgrub']);
+  });
+
+  it('matches by normalized key when no display name is present', () => {
+    const map = new Map<string, NameOnlyEntry>([
+      ['kidlightbulbs', { url: 'https://example.com/kidlightbulbs' }],
+      ['kidlightbulbsband', { url: 'https://example.com/other' }],
+    ]);
+    expect([...filterNameOnlyMapToExact(map, 'Kid Lightbulbs').keys()]).toEqual(['kidlightbulbs']);
   });
 });
 
