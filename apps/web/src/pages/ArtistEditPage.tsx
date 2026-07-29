@@ -10,6 +10,11 @@ import { PageSkeleton } from '../components/PageSkeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
 import type { SourceId } from '../types';
 
+// A divider entry is a horizontal rule on the public artist page, not a link.
+// It lives in this list so it can be reordered alongside the links; the API
+// stores it as a position in the link order (see api/shared/link-dividers.ts).
+const DIVIDER_PLATFORM = 'divider';
+
 interface LinkEntry {
   platform: string;
   url: string;
@@ -159,13 +164,24 @@ export function ArtistEditPage() {
         }
 
         const data = await response.json();
-        const existingLinks: LinkEntry[] = (data.platforms || []).map(
+        const storedLinks: LinkEntry[] = (data.platforms || []).map(
           (p: { sourceId: string; url: string; displayName?: string }) => ({
             platform: p.sourceId.startsWith('other') ? 'other' : p.sourceId,
             url: p.url,
             displayName: p.displayName || '',
           })
         );
+
+        // Dividers are stored as positions in the link order ("2" means after
+        // the second link), so put them back into the editable list.
+        const dividerPositions: number[] = data.profile?.linkDividers || [];
+        const existingLinks: LinkEntry[] = [];
+        storedLinks.forEach((link, index) => {
+          if (dividerPositions.includes(index)) {
+            existingLinks.push({ platform: DIVIDER_PLATFORM, url: '' });
+          }
+          existingLinks.push(link);
+        });
 
         dispatch({
           type: 'LOAD_DATA',
@@ -200,6 +216,10 @@ export function ArtistEditPage() {
 
   function addOtherLink() {
     set('links', [...form.links, { platform: 'other', url: '', displayName: '' }]);
+  }
+
+  function addDivider() {
+    set('links', [...form.links, { platform: DIVIDER_PLATFORM, url: '' }]);
   }
 
   function updateLink(index: number, field: 'platform' | 'url' | 'displayName', value: string) {
@@ -284,8 +304,10 @@ export function ArtistEditPage() {
       }
     }
 
-    const validLinks = form.links.filter(l => l.url.trim());
+    // Dividers ride along in the same ordered list — they have no URL to check.
+    const validLinks = form.links.filter(l => l.platform === DIVIDER_PLATFORM || l.url.trim());
     for (const link of validLinks) {
+      if (link.platform === DIVIDER_PLATFORM) continue;
       try {
         new URL(link.url);
       } catch {
@@ -318,11 +340,13 @@ export function ArtistEditPage() {
           featuredEmbed: form.featuredEmbed || null,
           customImageUrl: form.customImageUrl,
           location: { city: form.city, country: form.country },
-          links: validLinks.map(l => ({
-            platform: l.platform,
-            url: l.url,
-            displayName: l.displayName || undefined,
-          })),
+          links: validLinks.map(l => l.platform === DIVIDER_PLATFORM
+            ? { platform: DIVIDER_PLATFORM }
+            : {
+                platform: l.platform,
+                url: l.url,
+                displayName: l.displayName || undefined,
+              }),
         }),
       });
 
@@ -599,11 +623,22 @@ export function ArtistEditPage() {
                 >
                   + Add other link
                 </button>
+                <button
+                  onClick={addDivider}
+                  className="text-sm text-text-muted hover:text-text-primary transition-colors"
+                  title="Add a horizontal divider to group your links"
+                >
+                  + Add divider
+                </button>
               </div>
             </div>
 
             <p className="text-xs text-text-muted">
               Unstream highlights platforms where artists earn a larger share. We recommend prioritizing direct-support platforms like Bandcamp, Mirlo, and Faircamp over major streaming services.
+            </p>
+
+            <p className="text-xs text-text-muted">
+              Dividers draw a horizontal line between links on your artist page, so you can group them. Move them with the arrows like any other row — social links always appear in their own "Follow" section, so a divider next to one moves to the nearest gap.
             </p>
 
             {form.links.length === 0 && (
@@ -616,6 +651,7 @@ export function ArtistEditPage() {
               {form.links.map((link, index) => {
                 const streamingWarning = getStreamingWarning(link.url);
                 const isOther = link.platform === 'other';
+                const isDivider = link.platform === DIVIDER_PLATFORM;
 
                 return (
                   <div key={index} className="space-y-1">
@@ -642,7 +678,13 @@ export function ArtistEditPage() {
                         </button>
                       </div>
 
-                      {isOther ? (
+                      {isDivider ? (
+                        /* Divider: renders as a horizontal rule on the public page */
+                        <div className="flex-1 flex items-center gap-3 min-w-0">
+                          <span className="text-xs uppercase tracking-wider text-text-muted">Divider</span>
+                          <span className="flex-1 border-t border-border" />
+                        </div>
+                      ) : isOther ? (
                         /* Custom link: name input + URL */
                         <div className="flex-1 flex items-center gap-2 min-w-0">
                           <input
@@ -693,7 +735,7 @@ export function ArtistEditPage() {
                       <button
                         onClick={() => removeLink(index)}
                         className="text-text-muted hover:text-red-400 transition-colors p-1"
-                        title="Remove link"
+                        title={isDivider ? 'Remove divider' : 'Remove link'}
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

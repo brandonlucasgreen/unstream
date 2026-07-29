@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { Fragment, useState, useCallback } from 'react';
 import type { ArtistPagePayload } from '../types/artist-page';
 import { sources } from '../services/sources';
 import { analytics } from '../services/analytics';
@@ -26,6 +26,7 @@ function getLocationText(artist: ArtistPagePayload['artist']): string {
 
 export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave, isSaved = false, disabledSave = false }: RichArtistProfileProps) {
   const { artist, profile, links, socialLinks } = payload;
+  const dividerIndexes = new Set(payload.linkDividers ?? []);
   const imageUrl = profile?.customImageUrl || artist.imageUrl;
   const locationText = getLocationText(artist);
 
@@ -154,7 +155,7 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
               Support directly
             </h2>
             <div className="grid gap-2">
-              {links.map((link) => {
+              {links.map((link, index) => {
                 const source = sources[link.platform as SourceId];
                 const isOther = link.platform === 'other' || link.platform.startsWith('other_');
                 const linkName = link.displayName || (isOther ? 'Link' : (source?.name || link.platform));
@@ -162,37 +163,42 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
                 const isBCFriday = link.bandcampFriday;
 
                 return (
-                  <a
-                    key={link.platform + link.url}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-track-platform={link.platform}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors ${
-                      isBCFriday
-                        ? 'border-[#1da0c3]/25 bg-[#1da0c3]/[0.06] hover:bg-[#1da0c3]/10'
-                        : 'border-border hover:bg-bg-hover'
-                    }`}
-                    style={!isBCFriday ? { backgroundColor: `${linkColor}08` } : undefined}
-                    onClick={() => handleLinkClick(link.platform)}
-                  >
-                    <span className="text-xl inline-flex items-center justify-center w-5">
-                      {source && !isOther && source.icon !== '🔗' && typeof source.icon === 'string' && source.icon.length <= 2 ? (
-                        <PlatformIcon sourceId={link.platform as SourceId} color={linkColor} emoji={source.icon} className="w-5 h-5" />
-                      ) : (
-                        <PlatformIcon sourceId={link.platform as SourceId} color={linkColor} emoji={source?.icon || '🔗'} className="w-5 h-5" />
-                      )}
-                    </span>
-                    <span className="flex-1 font-medium text-text-primary">{linkName}</span>
-                    {link.payoutPercent && (
-                      <span className="text-xs text-text-muted">{link.payoutPercent} to artist</span>
+                  <Fragment key={link.platform + link.url}>
+                    {/* Group divider placed by the artist */}
+                    {dividerIndexes.has(index) && (
+                      <hr className="border-0 border-t border-border my-1" />
                     )}
-                    {isBCFriday && (
-                      <span className="text-[11px] font-bold text-[#1da0c3] animate-pulse">
-                        Bandcamp Friday!
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-track-platform={link.platform}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors ${
+                        isBCFriday
+                          ? 'border-[#1da0c3]/25 bg-[#1da0c3]/[0.06] hover:bg-[#1da0c3]/10'
+                          : 'border-border hover:bg-bg-hover'
+                      }`}
+                      style={!isBCFriday ? { backgroundColor: `${linkColor}08` } : undefined}
+                      onClick={() => handleLinkClick(link.platform)}
+                    >
+                      <span className="text-xl inline-flex items-center justify-center w-5">
+                        {source && !isOther && source.icon !== '🔗' && typeof source.icon === 'string' && source.icon.length <= 2 ? (
+                          <PlatformIcon sourceId={link.platform as SourceId} color={linkColor} emoji={source.icon} className="w-5 h-5" />
+                        ) : (
+                          <PlatformIcon sourceId={link.platform as SourceId} color={linkColor} emoji={source?.icon || '🔗'} className="w-5 h-5" />
+                        )}
                       </span>
-                    )}
-                  </a>
+                      <span className="flex-1 font-medium text-text-primary">{linkName}</span>
+                      {link.payoutPercent && (
+                        <span className="text-xs text-text-muted">{link.payoutPercent} to artist</span>
+                      )}
+                      {isBCFriday && (
+                        <span className="text-[11px] font-bold text-[#1da0c3] animate-pulse">
+                          Bandcamp Friday!
+                        </span>
+                      )}
+                    </a>
+                  </Fragment>
                 );
               })}
             </div>

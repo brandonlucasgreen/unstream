@@ -144,6 +144,18 @@ describe('RichArtistProfile', () => {
     expect(screen.getByText('Bandcamp Friday!')).toBeTruthy();
   });
 
+  it('renders no dividers when linkDividers is absent', () => {
+    render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" />);
+    expect(document.querySelectorAll('hr').length).toBe(0);
+  });
+
+  it('renders a divider above the link index it points at', () => {
+    render(<RichArtistProfile payload={{ ...basePayload, linkDividers: [1] }} slug="kid-lightbulbs" />);
+    const divider = document.querySelector('hr');
+    expect(divider).toBeTruthy();
+    expect(divider!.nextElementSibling?.getAttribute('data-track-platform')).toBe('patreon');
+  });
+
   it('renders the social links section only when socialLinks.length > 0', () => {
     render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" />);
     expect(screen.getByText('Follow')).toBeTruthy();

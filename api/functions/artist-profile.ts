@@ -32,11 +32,20 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'PUT, OPTIONS',
 };
 
+// A `platform: 'divider'` entry is a position marker in the artist's link
+// order, not a link — it carries no URL and is stored on the profile
+// (artist_profiles.link_dividers) rather than as an artist_links row.
 interface LinkUpdate {
   platform: string;
-  url: string;
+  url?: string;
   displayName?: string;
 }
+
+export const DIVIDER_PLATFORM = 'divider';
+
+// Cap dividers per profile. Every gap in a link list is a legitimate divider
+// position, so this only rules out a payload that isn't a real link list.
+const MAX_DIVIDERS = 20;
 
 // Allowed embed domains for featured releases
 export const ALLOWED_EMBED_DOMAINS = [
@@ -329,8 +338,11 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update links' }) };
     }
 
-    // Insert new links
-    const validLinks = (body.links || []).filter(l => {
+    // Split the submitted order into links and divider positions. The editor
+    // sends one ordered list containing both, so the artist's arrangement of
+    // links and dividers stays a single source of truth.
+    const entries = (body.links || []).filter(l => {
+      if (l.platform === DIVIDER_PLATFORM) return true;
       if (!l.platform || !l.url) return false;
       try {
         const parsed = new URL(l.url);
@@ -339,6 +351,35 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
         return false;
       }
     });
+
+    const validLinks = entries.filter(l => l.platform !== DIVIDER_PLATFORM) as (LinkUpdate & { url: string })[];
+
+    // Positions count preceding links. Leading (0), trailing (=== link count),
+    // and repeated positions are dropped — a rule with nothing on one side
+    // reads as a bug rather than as grouping.
+    const dividerPositions: number[] = [];
+    let linksSoFar = 0;
+    for (const entry of entries) {
+      if (entry.platform !== DIVIDER_PLATFORM) {
+        linksSoFar++;
+      } else if (linksSoFar > 0 && !dividerPositions.includes(linksSoFar)) {
+        dividerPositions.push(linksSoFar);
+      }
+    }
+    const finalDividers = dividerPositions
+      .filter(p => p < validLinks.length)
+      .slice(0, MAX_DIVIDERS);
+
+    const { error: dividerError } = await client
+      .from('artist_profiles')
+      .update({ link_dividers: finalDividers.length > 0 ? finalDividers : null, updated_at: new Date().toISOString() })
+      .eq('id', profile.id);
+
+    if (dividerError) {
+      console.error('[Profile] Divider update failed:', dividerError);
+      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update links' }) };
+    }
+
     if (validLinks.length > 0) {
       // Assign unique platform IDs for "other" links to satisfy unique(artist_id, platform)
       let otherCount = 0;
@@ -366,7 +407,7 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
       }
     }
 
-    console.log(`[Profile] Updated ${validLinks.length} links for artist "${artist.name}"`);
+    console.log(`[Profile] Updated ${validLinks.length} links and ${finalDividers.length} dividers for artist "${artist.name}"`);
   }
 
   // --- Bust caches ---
