@@ -8,6 +8,7 @@ import {
   looksLikeOpaqueId,
   textMatchScore,
   collectMbSuggestions,
+  isCacheableMbResult,
   bandcampSlugCandidates,
   isExactNameMatch,
   filterNameOnlyMapToExact,
@@ -267,5 +268,26 @@ describe('collectMbSuggestions', () => {
 
   it('returns nothing for an empty query', () => {
     expect(collectMbSuggestions(argentArtists, '!!!')).toEqual([]);
+  });
+});
+
+describe('isCacheableMbResult', () => {
+  const base = { searchFailed: false, artistName: 'Radiohead', enrichmentComplete: true };
+
+  it('caches a complete enrichment', () => {
+    expect(isCacheableMbResult(base)).toBe(true);
+  });
+
+  it('caches a genuine no-match (MB really does not know the artist)', () => {
+    expect(isCacheableMbResult({ ...base, artistName: null, enrichmentComplete: true })).toBe(true);
+  });
+
+  it('never caches a failed search', () => {
+    expect(isCacheableMbResult({ ...base, searchFailed: true })).toBe(false);
+  });
+
+  it('never caches a partial enrichment — identity matched but url-rels fetch failed', () => {
+    // Caching this would pin "this artist has no official site" for the TTL.
+    expect(isCacheableMbResult({ ...base, enrichmentComplete: false })).toBe(false);
   });
 });

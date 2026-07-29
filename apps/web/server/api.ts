@@ -31,7 +31,10 @@ export async function handleApiRequest(req: IncomingMessage, res: ServerResponse
 
     try {
       const results = await searchAllPlatforms(query);
-      sendJson(res, 200, { query, results, hasPendingEnrichment: results.length > 0 });
+      // Always pending: the dev search never applies MB enrichment server-side,
+      // and the client's Phase 2 (including its zero-result fallback card) should
+      // behave in dev the way it does in production.
+      sendJson(res, 200, { query, results, hasPendingEnrichment: true });
     } catch (error) {
       console.error('Search error:', error);
       sendJson(res, 500, { error: 'Failed to search', query, results: [] });

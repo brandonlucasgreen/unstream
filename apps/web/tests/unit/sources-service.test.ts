@@ -5,6 +5,7 @@ import {
   textMatchScore,
   mergeSearchResponses,
   mergeWithMusicBrainzData,
+  buildMusicBrainzFallbackResult,
 } from '../../src/services/sources';
 import type { SearchResponse, SearchResult, MusicBrainzData } from '../../src/types';
 
@@ -505,5 +506,52 @@ describe('mergeWithMusicBrainzData', () => {
     const merged = mergeWithMusicBrainzData(results, mbData);
 
     expect(merged[0].platforms.find(p => p.sourceId === 'qobuz')).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildMusicBrainzFallbackResult
+// ---------------------------------------------------------------------------
+
+describe('buildMusicBrainzFallbackResult', () => {
+  const mbData: MusicBrainzData = {
+    query: 'radiohead',
+    artistName: 'Radiohead',
+    officialUrl: 'http://www.radiohead.com/',
+    discogsUrl: 'https://www.discogs.com/artist/3840',
+    hasPre2005Release: true,
+    socialLinks: [
+      { platform: 'instagram', url: 'https://www.instagram.com/radiohead/' },
+      { platform: 'youtube', url: 'https://www.youtube.com/channel/x' },
+    ],
+    location: { city: 'Abingdon-on-Thames', countryCode: 'GB' },
+  };
+
+  it('builds a card with official site, discogs, socials, and search links', () => {
+    const result = buildMusicBrainzFallbackResult(mbData);
+    expect(result).not.toBeNull();
+    expect(result!.name).toBe('Radiohead');
+    expect(result!.type).toBe('artist');
+    expect(result!.matchConfidence).toBe('unverified');
+    const ids = result!.platforms.map(p => p.sourceId);
+    expect(ids.slice(0, 4)).toEqual(['officialsite', 'discogs', 'instagram', 'youtube']);
+    expect(ids).toContain('bandcamp');
+    expect(result!.location?.city).toBe('Abingdon-on-Thames');
+  });
+
+  it('returns null when MusicBrainz had no match', () => {
+    expect(buildMusicBrainzFallbackResult({ ...mbData, artistName: null })).toBeNull();
+  });
+
+  it('omits absent links without leaving gaps', () => {
+    const bare = buildMusicBrainzFallbackResult({
+      ...mbData,
+      officialUrl: null,
+      discogsUrl: null,
+      socialLinks: [],
+    });
+    const ids = bare!.platforms.map(p => p.sourceId);
+    expect(ids[0]).toBe('bandcamp');
+    expect(ids).not.toContain('officialsite');
   });
 });

@@ -21,6 +21,7 @@ import {
   filterNameOnlyMapToExact,
   looksLikeOpaqueId,
   collectMbSuggestions,
+  isCacheableMbResult,
   CURATED_PLATFORMS,
   collectReleaseTitles,
   aggregateResults,
@@ -361,10 +362,36 @@ interface EnrichedMusicBrainzResult {
    * only — they are verified against Bandcamp before becoming results.
    */
   suggestedNames: string[];
+  /** The MB search itself failed (network / non-2xx). We know nothing. */
+  searchFailed: boolean;
+  /**
+   * The url-rels lookup for the matched artist succeeded. When false with a
+   * non-null artistName, the identity is known but officialUrl/socialLinks may
+   * be missing purely because a fetch failed — the response must say
+   * enrichment is still pending, or the client never retries and the artist
+   * renders bare (this is how Radiohead shipped without its official site).
+   */
+  enrichmentComplete: boolean;
+}
+
+// Cached wrapper around the MusicBrainz enrichment fetch. MB data for an
+// artist changes rarely, and the uncached path costs 2+ rate-limit delays plus
+// several fetches — the single slowest leg of the fan-out. Failures and
+// partial enrichments are never cached (see isCacheableMbResult).
+async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResult> {
+  const cacheKey = artistCacheKey('mb-enriched', query);
+  const { data } = await cacheGetOrFetch<EnrichedMusicBrainzResult>(
+    cacheKey,
+    () => fetchMusicBrainzEnrichment(query),
+    PLATFORM_CACHE_TTL,
+    isCacheableMbResult,
+    PLATFORM_FAILURE_CACHE_TTL,
+  );
+  return data;
 }
 
 // Search MusicBrainz with full enrichment - fetches social links, location, Wikipedia, etc.
-async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResult> {
+async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicBrainzResult> {
   const emptyResult: EnrichedMusicBrainzResult = {
     query,
     artistName: null,
@@ -381,6 +408,8 @@ async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResu
     wikipediaUrl: null,
     location: undefined,
     suggestedNames: [],
+    searchFailed: false,
+    enrichmentComplete: true,
   };
 
   try {
@@ -397,7 +426,7 @@ async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResu
 
     if (!response.ok) {
       console.log('MusicBrainz artist search failed:', response.status);
-      return emptyResult;
+      return { ...emptyResult, searchFailed: true };
     }
 
     const data = await response.json() as { artists?: { id: string; name: string; score: number }[] };
@@ -684,11 +713,13 @@ async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResu
       wikipediaUrl: wikipediaResult?.pageUrl || wikipediaUrl,
       location,
       suggestedNames: collectMbSuggestions(artists, query, artist.name),
+      searchFailed: false,
+      enrichmentComplete: artistResponse.ok,
     };
   } catch (error: unknown) {
     const err = error as { name?: string; message?: string };
     console.error('MusicBrainz search error:', err.name, err.message);
-    return emptyResult;
+    return { ...emptyResult, searchFailed: true };
   }
 }
 
@@ -1813,7 +1844,12 @@ async function searchAllPlatforms(query: string, mode: SearchMode): Promise<{ re
   // Re-merge: new results from Phase 4 may overlap with existing ones
   const finalMerged = mergeByReleaseOverlap(merged);
   const finalResults = filterAndSort(finalMerged, query);
-  return { results: finalResults, enrichmentApplied: mbData !== null && mbData.artistName !== null };
+  // Enrichment counts as applied only when the identity matched AND the
+  // url-rels data actually arrived. Claiming completion on a partial fetch is
+  // how artists shipped without their official site: the client saw
+  // hasPendingEnrichment: false and never called Phase 2 to fill the gap.
+  const enrichmentApplied = mbData !== null && mbData.artistName !== null && mbData.enrichmentComplete;
+  return { results: finalResults, enrichmentApplied };
 }
 
 // Search a Bandcamp artist page for a specific album title
@@ -2001,12 +2037,22 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       hasPendingEnrichment: !searchResult.enrichmentApplied,
     };
 
+    // Complete responses get a longer CDN life; incomplete ones (enrichment
+    // still pending) a short one, so a degraded answer isn't what repeat
+    // searchers see for the next five minutes. Both SWR windows are bounded —
+    // the old bare `stale-while-revalidate` allowed indefinitely stale
+    // responses to keep being served, which let buggy results linger long
+    // after the code that produced them was fixed.
+    const cacheControl = response.hasPendingEnrichment
+      ? 's-maxage=60, stale-while-revalidate=300'
+      : 's-maxage=300, stale-while-revalidate=3600';
+
     return {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 's-maxage=60, stale-while-revalidate',
+        'Cache-Control': cacheControl,
       },
       body: JSON.stringify(response),
     };
