@@ -259,7 +259,7 @@ function App() {
           searches. Leaving it up pushed the first result below the fold on a
           phone. The marketing byline is dropped entirely in PWA mode. */}
       {!hasSearched && (
-      <div className={isStandalone ? "pt-12 px-4" : "pt-6 px-4"}>
+      <div className={isStandalone ? "pt-20 px-4" : "pt-14 px-4"}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-[30px]">
             <h1 className="font-display text-4xl md:text-5xl font-bold mb-4 text-text-primary">
