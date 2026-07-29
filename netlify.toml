@@ -44,6 +44,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/suggest"
+  to = "/.netlify/functions/search-suggest"
+  status = 200
+
+[[redirects]]
   from = "/api/search/musicbrainz"
   to = "/.netlify/functions/search-musicbrainz"
   status = 200

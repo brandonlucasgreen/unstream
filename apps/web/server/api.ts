@@ -39,6 +39,15 @@ export async function handleApiRequest(req: IncomingMessage, res: ServerResponse
     return true;
   }
 
+  if (url.pathname === '/api/suggest') {
+    // Dev-only stub. Production suggestions come from the Supabase artists
+    // table (api/functions/search-suggest.ts), which the dev server doesn't
+    // talk to — an empty list keeps the typeahead silently inert in dev.
+    const query = url.searchParams.get('query') || '';
+    sendJson(res, 200, { query, suggestions: [] });
+    return true;
+  }
+
   if (url.pathname === '/api/search/musicbrainz') {
     if (req.method !== 'GET') {
       sendJson(res, 405, { error: 'Method not allowed' });

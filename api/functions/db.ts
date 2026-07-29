@@ -453,6 +453,78 @@ export async function getArtistBySlug(slug: string): Promise<ArtistResult | null
  * Persist artist search results to the database.
  * Only persists artist-type results. Runs as fire-and-forget after search.
  */
+// --- Typeahead suggestions ---
+
+export interface ArtistSuggestion {
+  slug: string;
+  name: string;
+  imageUrl: string | null;
+}
+
+/**
+ * Rank raw suggestion rows for a typeahead term: prefix matches first, then
+ * shorter names, then alphabetical. Pure and exported for tests.
+ */
+export function rankArtistSuggestions(
+  rows: { slug: string; name: string; image_url: string | null }[],
+  term: string,
+  limit: number,
+): ArtistSuggestion[] {
+  const termLower = term.toLowerCase();
+  const seen = new Set<string>();
+  return rows
+    .filter(r => {
+      if (!r.slug || !r.name || seen.has(r.slug)) return false;
+      seen.add(r.slug);
+      return true;
+    })
+    .sort((a, b) => {
+      const aPrefix = a.name.toLowerCase().startsWith(termLower) ? 0 : 1;
+      const bPrefix = b.name.toLowerCase().startsWith(termLower) ? 0 : 1;
+      if (aPrefix !== bPrefix) return aPrefix - bPrefix;
+      if (a.name.length !== b.name.length) return a.name.length - b.name.length;
+      return a.name.localeCompare(b.name);
+    })
+    .slice(0, limit)
+    .map(r => ({ slug: r.slug, name: r.name, imageUrl: r.image_url }));
+}
+
+/**
+ * Name-substring lookup over artists Unstream has already resolved, for
+ * search-as-you-type. Only verified/claimed rows are suggested — the artists
+ * table accumulates whatever people search, and 'unverified' is where the
+ * junk lives.
+ *
+ * Backed by the pg_trgm GIN index on artists.name (migration
+ * 20260729071000_artist-name-trgm.sql); without it this ILIKE is a seq scan.
+ *
+ * Returns null when the DB could not be asked (no client, query error) —
+ * callers must not cache that as "no suggestions".
+ */
+export async function suggestArtists(term: string, limit = 8): Promise<ArtistSuggestion[] | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  // Strip ILIKE wildcards so user input can't change the match shape
+  // (same reasoning as the slug guard in getArtistBySlug).
+  const cleaned = term.replace(/[%_,()]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (cleaned.length < 2) return [];
+
+  const { data, error } = await client
+    .from('artists')
+    .select('slug, name, image_url')
+    .ilike('name', `%${cleaned}%`)
+    .or('match_confidence.eq.verified,match_confidence.eq.claimed,source.eq.claimed')
+    .limit(40);
+
+  if (error) {
+    console.error('[DB] suggestArtists error:', error);
+    return null;
+  }
+
+  return rankArtistSuggestions(data ?? [], cleaned, limit);
+}
+
 export async function persistSearchResults(results: ArtistResult[]): Promise<void> {
   const client = getClient();
   if (!client) return;
