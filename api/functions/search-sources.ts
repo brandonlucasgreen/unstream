@@ -5,15 +5,19 @@ import { cacheGetOrFetch, artistCacheKey } from './cache';
 import { persistSearchResults, getArtistBySlug, artistSlug, getMergeOverrides } from './db';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
+import { parseMirloArtistSearch } from './search-parsers';
 import {
   type SourceId,
   type LatestRelease,
   type PlatformResult,
   type AggregatedResult,
   type SearchResponse,
+  type NameOnlyEntry,
   normalizeSearchQuery,
   normalizeForComparison,
-  namesMatch,
+  namesEqualIgnoringArticles,
+  looksLikeOpaqueId,
+  collectMbSuggestions,
   CURATED_PLATFORMS,
   collectReleaseTitles,
   aggregateResults,
@@ -99,6 +103,57 @@ async function searchBandcamp(query: string): Promise<PlatformResult[]> {
     // what gives results a picture (Bandcamp replaced Qobuz as the image source in #325).
     imageUrl: match.imageUrl ?? undefined,
   }];
+}
+
+// How many discovered artist names get a Bandcamp probe per search. Each probe is
+// up to three requests once, then cached in Supabase, so this bounds the cold case.
+const MAX_CANDIDATE_PROBES = 3;
+
+// Probe Bandcamp for artist names *other platforms* discovered.
+//
+// searchBandcamp derives its slugs from the query spelling, so it structurally
+// cannot find an artist whose name merely contains the query: "argent" never
+// probes theargentgrub.bandcamp.com. But when Mirlo, Bandwagon, or MusicBrainz
+// report an artist named "The Argent Grub", probing *that name* finds the account.
+// The probe's own identity + release checks still apply, so a candidate name can
+// only ever attach a Bandcamp page that verifiably belongs to it.
+async function probeBandcampForCandidates(
+  query: string,
+  candidateNames: string[],
+  existingBandcampUrls: Set<string>,
+): Promise<PlatformResult[]> {
+  const queryNorm = normalizeForComparison(query);
+  const toProbe: string[] = [];
+  const seen = new Set<string>();
+  for (const name of candidateNames) {
+    const norm = normalizeForComparison(name);
+    // The query itself was already probed by searchBandcamp.
+    if (!norm || norm === queryNorm || seen.has(norm)) continue;
+    seen.add(norm);
+    toProbe.push(name);
+    if (toProbe.length >= MAX_CANDIDATE_PROBES) break;
+  }
+  if (toProbe.length === 0) return [];
+
+  const probes = await Promise.allSettled(toProbe.map(name => findBandcampArtist(name, 2500)));
+
+  const results: PlatformResult[] = [];
+  const seenUrls = new Set(existingBandcampUrls);
+  for (const probe of probes) {
+    if (probe.status !== 'fulfilled' || !probe.value) continue;
+    const match = probe.value;
+    if (!match.bandName || seenUrls.has(match.url)) continue;
+    seenUrls.add(match.url);
+    results.push({
+      sourceId: 'bandcamp',
+      name: match.bandName,
+      type: 'artist',
+      url: match.url,
+      allReleaseTitles: match.releaseTitles.length > 0 ? match.releaseTitles : undefined,
+      imageUrl: match.imageUrl ?? undefined,
+    });
+  }
+  return results;
 }
 
 // Fetch latest release from a Bandcamp artist page, then get release date from album page
@@ -218,8 +273,8 @@ async function getBandcampReleaseTitles(artistUrl: string): Promise<string[]> {
 }
 
 // Search Bandwagon for artists by scraping search results
-async function searchBandwagon(query: string): Promise<Map<string, string>> {
-  const results = new Map<string, string>();
+async function searchBandwagon(query: string): Promise<Map<string, NameOnlyEntry>> {
+  const results = new Map<string, NameOnlyEntry>();
   const searchUrl = `https://bandwagon.fm/artists?q=${encodeURIComponent(query)}`;
 
   try {
@@ -251,7 +306,9 @@ async function searchBandwagon(query: string): Promise<Map<string, string>> {
             normalizedName.includes(queryNormalized) ||
             queryNormalized.includes(normalizedName)) {
           if (!results.has(normalizedName)) {
-            results.set(normalizedName, href);
+            // Keep the artist's real name: Bandwagon URLs can be opaque account
+            // ids (bandwagon.fm/@695d15c1...), so the slug is not a display name.
+            results.set(normalizedName, { url: href, displayName: name });
           }
           if (results.size >= 10) break;
         }
@@ -294,6 +351,12 @@ interface EnrichedMusicBrainzResult {
   wikipediaSummary: string | null;
   wikipediaUrl: string | null;
   location: ArtistLocation | undefined;
+  /**
+   * Partial-match artist names from MB's ranked search results (beyond the top
+   * hit), e.g. "Goodnight Argent" for the query "argent". Discovery candidates
+   * only — they are verified against Bandcamp before becoming results.
+   */
+  suggestedNames: string[];
 }
 
 // Search MusicBrainz with full enrichment - fetches social links, location, Wikipedia, etc.
@@ -313,11 +376,14 @@ async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResu
     wikipediaSummary: null,
     wikipediaUrl: null,
     location: undefined,
+    suggestedNames: [],
   };
 
   try {
-    // Search for artist
-    const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=artist:${encodeURIComponent(query)}&fmt=json&limit=1`;
+    // Search for artist. MB is Lucene-backed and its ranked list is the one real
+    // search engine in the fan-out: the top hit drives enrichment (strict gates
+    // below), the rest become discovery candidates via collectMbSuggestions.
+    const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=artist:${encodeURIComponent(query)}&fmt=json&limit=5`;
 
     const response = await globalThis.fetch(searchUrl, {
       headers: {
@@ -339,10 +405,16 @@ async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResu
     }
 
     const artist = artists[0];
-    // Only consider exact/near-exact matches
+    // Only consider exact/near-exact matches for enrichment. Lower-scored hits are
+    // still worth reporting as discovery candidates — they just don't get to claim
+    // the MB identity (official site, socials, location) for themselves.
     if (artist.score < 95) {
       console.log(`[MusicBrainz] Low confidence match for "${query}" (score ${artist.score}), falling back to Bandcamp/Mirlo location`);
-      return { ...emptyResult, location: await enrichLocationFallback(query) };
+      return {
+        ...emptyResult,
+        suggestedNames: collectMbSuggestions(artists, query),
+        location: await enrichLocationFallback(query),
+      };
     }
 
     // Verify the returned artist name actually matches the query.
@@ -361,7 +433,11 @@ async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResu
 
     if (!isNameMatch) {
       console.log(`[MusicBrainz] Skipping "${artist.name}" - doesn't match query "${query}", falling back to Bandcamp/Mirlo location`);
-      return { ...emptyResult, location: await enrichLocationFallback(query) };
+      return {
+        ...emptyResult,
+        suggestedNames: collectMbSuggestions(artists, query),
+        location: await enrichLocationFallback(query),
+      };
     }
 
     // Wait 1.1 seconds to respect MusicBrainz rate limit
@@ -603,6 +679,7 @@ async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResu
       wikipediaSummary: wikipediaResult?.extract || null,
       wikipediaUrl: wikipediaResult?.pageUrl || wikipediaUrl,
       location,
+      suggestedNames: collectMbSuggestions(artists, query, artist.name),
     };
   } catch (error: unknown) {
     const err = error as { name?: string; message?: string };
@@ -611,46 +688,55 @@ async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResu
   }
 }
 
-// Search Mirlo by checking if artist page exists
+// Search Mirlo through its public artist search API.
+//
+// This used to be a bare probe of mirlo.space/<query-with-spaces-removed>, which
+// could only find an artist whose URL slug happened to equal the query spelling —
+// partial queries and differently-slugged artists were invisible. The API matches
+// server-side (loosely; parseMirloArtistSearch re-filters), so "argent" now finds
+// "The Argent Grub" at mirlo.space/the-argent-grub.
 async function searchMirlo(query: string): Promise<PlatformResult[]> {
-  const results: PlatformResult[] = [];
-  const normalizedQuery = query.toLowerCase().replace(/\s+/g, '');
-  const artistUrl = `https://mirlo.space/${normalizedQuery}`;
+  const cacheKey = artistCacheKey('mirlo', query);
+  // Set when the upstream did not answer. A failure must not be cached as
+  // "this artist isn't on mirlo" -- see the shouldCache predicate below.
+  let fetchFailed = false;
 
-  try {
-    const response = await fetchWithTimeout(artistUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      },
-    }, 3000);
+  const { data } = await cacheGetOrFetch<PlatformResult[]>(
+    cacheKey,
+    async () => {
+      try {
+        const response = await fetchWithTimeout(
+          `https://api.mirlo.space/v1/artists?name=${encodeURIComponent(query)}`,
+          {
+            headers: {
+              'User-Agent': 'Unstream/1.0 (+https://unstream.stream)',
+              'Accept': 'application/json',
+            },
+          },
+          3000,
+        );
 
-    if (!response.ok) return results;
+        if (!response.ok) { fetchFailed = true; return []; }
 
-    const html = await response.text();
-    const ogTitleMatch = html.match(/<meta property="og:title" content="([^"]+)"/);
-    if (ogTitleMatch) {
-      const ogTitle = ogTitleMatch[1].toLowerCase();
-      if (ogTitle !== 'mirlo' && ogTitle.includes(normalizedQuery.substring(0, 4))) {
-        const ogImageMatch = html.match(/<meta property="og:image" content="([^"]+)"/);
-        const imageUrl = ogImageMatch ? ogImageMatch[1] : undefined;
-
-        results.push({
-          sourceId: 'mirlo',
-          name: ogTitleMatch[1],
-          type: 'artist',
-          url: artistUrl,
-          imageUrl,
-        });
+        const json = await response.json();
+        return parseMirloArtistSearch(json, query);
+      } catch (error: unknown) {
+        const err = error as { name?: string; message?: string };
+        fetchFailed = true;
+        if (err.name !== 'AbortError') {
+          console.error('Mirlo search error:', err.message);
+        }
+        return [];
       }
-    }
-  } catch (error: unknown) {
-    const err = error as { name?: string; message?: string };
-    if (err.name !== 'AbortError') {
-      console.error('Mirlo search error:', err.message);
-    }
-  }
+    },
+    PLATFORM_CACHE_TTL,
+    // A failed fetch must not be cached as "artist not on this platform"...
+    () => !fetchFailed,
+    // ...but remember it briefly so an outage doesn't cost every search the timeout.
+    PLATFORM_FAILURE_CACHE_TTL,
+  );
 
-  return results;
+  return data;
 }
 
 // Faircamp webring directory cache
@@ -679,8 +765,8 @@ async function getFaircampDirectory(): Promise<Record<string, { title: string; a
   }
 }
 
-async function searchFaircamp(query: string): Promise<Map<string, string>> {
-  const results = new Map<string, string>();
+async function searchFaircamp(query: string): Promise<Map<string, NameOnlyEntry>> {
+  const results = new Map<string, NameOnlyEntry>();
   const queryLower = query.toLowerCase();
 
   try {
@@ -690,7 +776,7 @@ async function searchFaircamp(query: string): Promise<Map<string, string>> {
       for (const artist of info.artists || []) {
         if (artist.toLowerCase().includes(queryLower) || queryLower.includes(artist.toLowerCase())) {
           const normalizedArtist = artist.toLowerCase().replace(/[^a-z0-9]/g, '');
-          results.set(normalizedArtist, `https://${domain}`);
+          results.set(normalizedArtist, { url: `https://${domain}`, displayName: artist });
         }
       }
       if (results.size >= 10) break;
@@ -800,8 +886,8 @@ async function getJamcoopDirectory(): Promise<Map<string, { name: string; url: s
   }
 }
 
-async function searchJamcoop(query: string): Promise<Map<string, string>> {
-  const results = new Map<string, string>();
+async function searchJamcoop(query: string): Promise<Map<string, NameOnlyEntry>> {
+  const results = new Map<string, NameOnlyEntry>();
   const queryNormalized = normalizeForComparison(query);
 
   try {
@@ -812,7 +898,7 @@ async function searchJamcoop(query: string): Promise<Map<string, string>> {
       if (normalizedName === queryNormalized ||
           normalizedName.includes(queryNormalized) ||
           queryNormalized.includes(normalizedName)) {
-        results.set(normalizedName, artist.url);
+        results.set(normalizedName, { url: artist.url, displayName: artist.name });
       }
       if (results.size >= 10) break;
     }
@@ -824,16 +910,16 @@ async function searchJamcoop(query: string): Promise<Map<string, string>> {
   return results;
 }
 
-async function searchPatreon(query: string): Promise<Map<string, string>> {
+async function searchPatreon(query: string): Promise<Map<string, NameOnlyEntry>> {
   const cacheKey = artistCacheKey('patreon', query);
   // Set when the upstream did not answer. A failure must not be cached as
   // "this artist isn't on patreon" -- see the shouldCache predicate below.
   let fetchFailed = false;
 
-  const { data } = await cacheGetOrFetch<[string, string][]>(
+  const { data } = await cacheGetOrFetch<[string, NameOnlyEntry | string][]>(
     cacheKey,
     async () => {
-      const results: [string, string][] = [];
+      const results: [string, NameOnlyEntry][] = [];
       const seen = new Set<string>();
 
       try {
@@ -868,14 +954,14 @@ async function searchPatreon(query: string): Promise<Map<string, string>> {
               const normalizedName = normalizeForComparison(creatorName);
               if (!seen.has(normalizedName)) {
                 seen.add(normalizedName);
-                results.push([normalizedName, url]);
+                results.push([normalizedName, { url, displayName: creatorName }]);
               }
               const urlSlug = url.split('/').pop();
               if (urlSlug) {
                 const normalizedSlug = normalizeForComparison(urlSlug);
                 if (!seen.has(normalizedSlug)) {
                   seen.add(normalizedSlug);
-                  results.push([normalizedSlug, url]);
+                  results.push([normalizedSlug, { url, displayName: creatorName }]);
                 }
               }
             }
@@ -899,7 +985,16 @@ async function searchPatreon(query: string): Promise<Map<string, string>> {
     PLATFORM_FAILURE_CACHE_TTL,
   );
 
-  return new Map(data);
+  return coerceNameOnlyCache(data);
+}
+
+// Cache entries written before display names were carried hold a bare URL string.
+// Coerce them so a deploy doesn't invalidate every warm entry; the string form
+// ages out with the 30-minute platform TTL.
+function coerceNameOnlyCache(data: [string, NameOnlyEntry | string][]): Map<string, NameOnlyEntry> {
+  return new Map(data.map(([name, entry]) =>
+    [name, typeof entry === 'string' ? { url: entry } : entry] as [string, NameOnlyEntry]
+  ));
 }
 
 // Search Ampwall with Redis caching to minimize API load
@@ -949,16 +1044,16 @@ async function searchAmpwall(query: string): Promise<Map<string, string>> {
 }
 
 // Search Beatport via __NEXT_DATA__ JSON embedded in search page
-async function searchBeatport(query: string): Promise<Map<string, string>> {
+async function searchBeatport(query: string): Promise<Map<string, NameOnlyEntry>> {
   const cacheKey = artistCacheKey('beatport', query);
   // Set when the upstream did not answer. A failure must not be cached as
   // "this artist isn't on beatport" -- see the shouldCache predicate below.
   let fetchFailed = false;
 
-  const { data } = await cacheGetOrFetch<[string, string][]>(
+  const { data } = await cacheGetOrFetch<[string, NameOnlyEntry | string][]>(
     cacheKey,
     async () => {
-      const results: [string, string][] = [];
+      const results: [string, NameOnlyEntry][] = [];
 
       try {
         const searchUrl = `https://www.beatport.com/search?q=${encodeURIComponent(query)}`;
@@ -1005,7 +1100,10 @@ async function searchBeatport(query: string): Promise<Map<string, string>> {
           if (isMatch && !seen.has(normalizedName)) {
             seen.add(normalizedName);
             const slug = artist_name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-            results.push([normalizedName, `https://www.beatport.com/artist/${slug}/${artist_id}`]);
+            results.push([normalizedName, {
+              url: `https://www.beatport.com/artist/${slug}/${artist_id}`,
+              displayName: artist_name,
+            }]);
           }
         }
       } catch (error: unknown) {
@@ -1025,20 +1123,20 @@ async function searchBeatport(query: string): Promise<Map<string, string>> {
     PLATFORM_FAILURE_CACHE_TTL,
   );
 
-  return new Map(data);
+  return coerceNameOnlyCache(data);
 }
 
 // Search EVEN via Algolia API (direct-to-fan marketplace)
-async function searchEven(query: string): Promise<Map<string, string>> {
+async function searchEven(query: string): Promise<Map<string, NameOnlyEntry>> {
   const cacheKey = artistCacheKey('even', query);
   // Set when the upstream did not answer. A failure must not be cached as
   // "this artist isn't on even" -- see the shouldCache predicate below.
   let fetchFailed = false;
 
-  const { data } = await cacheGetOrFetch<[string, string][]>(
+  const { data } = await cacheGetOrFetch<[string, NameOnlyEntry | string][]>(
     cacheKey,
     async () => {
-      const results: [string, string][] = [];
+      const results: [string, NameOnlyEntry][] = [];
 
       try {
         const algoliaAppId = process.env.ALGOLIA_APP_ID || 'S64VD9CU46';
@@ -1078,7 +1176,7 @@ async function searchEven(query: string): Promise<Map<string, string>> {
 
           if (isMatch && !seen.has(normalizedName)) {
             seen.add(normalizedName);
-            results.push([normalizedName, `https://even.biz/artists/${slug}`]);
+            results.push([normalizedName, { url: `https://even.biz/artists/${slug}`, displayName: name }]);
           }
         }
       } catch (error: unknown) {
@@ -1098,7 +1196,7 @@ async function searchEven(query: string): Promise<Map<string, string>> {
     PLATFORM_FAILURE_CACHE_TTL,
   );
 
-  return new Map(data);
+  return coerceNameOnlyCache(data);
 }
 
 // ---------------------------------------------------------------------------
@@ -1139,7 +1237,7 @@ async function fetchReleasesForDisambiguation(
 
 async function attachNameOnlyPlatforms(
   merged: AggregatedResult[],
-  nameOnlyMaps: [string, Map<string, string>][],
+  nameOnlyMaps: [string, Map<string, NameOnlyEntry>][],
 ): Promise<void> {
   // Step 1: Group all name-only platform matches by normalized artist name.
   // This ensures Faircamp + Jamcoop + Bandwagon for the same artist travel together.
@@ -1147,15 +1245,19 @@ async function attachNameOnlyPlatforms(
   const groupedByName = new Map<string, { sourceId: string; url: string }[]>();
   const displayNames = new Map<string, string>(); // normalizedName -> best display name
   for (const [platformId, matchMap] of nameOnlyMaps) {
-    for (const [normalizedName, platformUrl] of matchMap) {
+    for (const [normalizedName, entry] of matchMap) {
       if (!groupedByName.has(normalizedName)) groupedByName.set(normalizedName, []);
-      groupedByName.get(normalizedName)!.push({ sourceId: platformId, url: platformUrl });
-      // Try to extract a display name from the URL path
-      if (!displayNames.has(normalizedName)) {
+      groupedByName.get(normalizedName)!.push({ sourceId: platformId, url: entry.url });
+      // Prefer the name the platform actually displayed; reconstruct from the URL
+      // slug only as a fallback, and never from an opaque account id — that's how
+      // "@695d15c12f0f56fdced0a5e6" once shipped as a result name.
+      if (entry.displayName) {
+        displayNames.set(normalizedName, entry.displayName);
+      } else if (!displayNames.has(normalizedName)) {
         try {
-          const urlObj = new URL(platformUrl);
+          const urlObj = new URL(entry.url);
           const slug = urlObj.pathname.split('/').filter(Boolean).pop() || '';
-          if (slug) {
+          if (slug && !looksLikeOpaqueId(slug)) {
             displayNames.set(normalizedName, displayNameFromSlug(slug));
           }
         } catch { /* ignore */ }
@@ -1165,9 +1267,21 @@ async function attachNameOnlyPlatforms(
 
   // Step 2: For each artist name group, attach or create a new result
   for (const [normalizedName, platforms] of groupedByName) {
-    const matching = merged.filter(
+    let matching = merged.filter(
       r => r.type === 'artist' && normalizeForComparison(r.name) === normalizedName
     );
+    // No exact-name result: platforms disagree about leading articles often enough
+    // ("Argent Grub" on Bandwagon, "The Argent Grub" on Bandcamp) that a hit is
+    // also accepted when the names differ only by one. Anything looser than that
+    // (substring, prefix) would attach one artist's links to another.
+    if (matching.length === 0) {
+      const displayName = displayNames.get(normalizedName);
+      if (displayName) {
+        matching = merged.filter(
+          r => r.type === 'artist' && namesEqualIgnoringArticles(r.name, displayName)
+        );
+      }
+    }
 
     // Filter out platforms already present on any matching result
     const toAttach = platforms.filter(
@@ -1552,7 +1666,7 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
   if (bandcampResults.status === 'fulfilled') allResults.push(...bandcampResults.value.filter(r => r.type === 'artist'));
   if (mirloResults.status === 'fulfilled') allResults.push(...mirloResults.value.filter(r => r.type === 'artist'));
 
-  const nameOnlyMaps: [string, Map<string, string>][] = [
+  const nameOnlyMaps: [string, Map<string, NameOnlyEntry>][] = [
     ['bandwagon', bandwagonResults.status === 'fulfilled' ? bandwagonResults.value : new Map()],
     ['faircamp', faircampResults.status === 'fulfilled' ? faircampResults.value : new Map()],
     ['jamcoop', jamcoopResults.status === 'fulfilled' ? jamcoopResults.value : new Map()],
@@ -1563,6 +1677,27 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
   const ampwallMatches = ampwallResults.status === 'fulfilled' ? ampwallResults.value : new Map<string, string>();
 
   const mbData = musicbrainzResult.status === 'fulfilled' ? musicbrainzResult.value : null;
+
+  // Phase 1.5: Probe Bandcamp for artist names the fan-out discovered.
+  // Candidate order encodes trust: Mirlo and Bandwagon hits are confirmed platform
+  // presences; MB suggestions are name-similarity only. Only the first
+  // MAX_CANDIDATE_PROBES distinct names are probed.
+  const candidateNames: string[] = [];
+  if (mirloResults.status === 'fulfilled') {
+    candidateNames.push(...mirloResults.value.map(r => r.name));
+  }
+  if (bandwagonResults.status === 'fulfilled') {
+    for (const entry of bandwagonResults.value.values()) {
+      if (entry.displayName) candidateNames.push(entry.displayName);
+    }
+  }
+  if (mbData) candidateNames.push(...mbData.suggestedNames);
+
+  const existingBandcampUrls = new Set(
+    (bandcampResults.status === 'fulfilled' ? bandcampResults.value : []).map(r => r.url)
+  );
+  const discoveredBandcamp = await probeBandcampForCandidates(query, candidateNames, existingBandcampUrls);
+  allResults.push(...discoveredBandcamp);
 
   const aggregated = aggregateResults(allResults, query);
 

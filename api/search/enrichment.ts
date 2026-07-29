@@ -39,9 +39,29 @@ const KNOWN_MASTODON_INSTANCES = [
   'sfba.social', 'universeodon.com', 'c.im', 'toot.cafe',
 ];
 
+// The hostname of a URL, or null when it isn't parseable as one.
+function hostnameOf(url: string): string | null {
+  try {
+    return new URL(url).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+// True when the URL's host IS the instance (or a subdomain of it). Must compare
+// hostnames, not substrings of the whole URL: the instance list contains short
+// domains like "c.im", and a substring check matched it inside the URL-encoded
+// query string of a Wix asset URL ("...%2C.imageEncoding..."), shipping that
+// asset URL as an artist's "Mastodon profile".
+function hostMatchesInstance(url: string, instances: string[]): boolean {
+  const host = hostnameOf(url);
+  if (!host) return false;
+  return instances.some(instance => host === instance || host.endsWith(`.${instance}`));
+}
+
 // Check if a URL belongs to a known Mastodon instance
-export function isMastodonInstance(urlLower: string): boolean {
-  return KNOWN_MASTODON_INSTANCES.some(instance => urlLower.includes(instance));
+export function isMastodonInstance(url: string): boolean {
+  return hostMatchesInstance(url, KNOWN_MASTODON_INSTANCES);
 }
 
 // Known PeerTube instances (non-exhaustive, covers popular + music-focused ones)
@@ -57,8 +77,8 @@ const KNOWN_PEERTUBE_INSTANCES = [
 ];
 
 // Check if a URL belongs to a known PeerTube instance
-export function isPeerTubeInstance(urlLower: string): boolean {
-  return KNOWN_PEERTUBE_INSTANCES.some(instance => urlLower.includes(instance));
+export function isPeerTubeInstance(url: string): boolean {
+  return hostMatchesInstance(url, KNOWN_PEERTUBE_INSTANCES);
 }
 
 // Convert a Mastodon handle (@user@server) to a URL

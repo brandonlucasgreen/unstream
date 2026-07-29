@@ -7,6 +7,7 @@ import {
   parseBandcampReleaseCounts,
   parseBandcampSearchResults,
   parseMirloArtistPage,
+  parseMirloArtistSearch,
   parseBandcampReleaseTitles,
   parseBandwagonSearchResults,
   parseJamcoopDirectory,
@@ -749,5 +750,76 @@ describe('parsePatreonSearchResults', () => {
     }
     const results = parsePatreonSearchResults({ data: campaigns });
     expect(results.length).toBeLessThanOrEqual(20);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// parseMirloArtistSearch
+// ---------------------------------------------------------------------------
+
+describe('parseMirloArtistSearch', () => {
+  const artist = (name: string, urlSlug: string, extra: Record<string, unknown> = {}) =>
+    ({ name, urlSlug, ...extra });
+
+  it('keeps an artist whose name contains the query (the "argent" case)', () => {
+    const data = { results: [artist('The Argent Grub', 'the-argent-grub')] };
+    const results = parseMirloArtistSearch(data, 'argent');
+    expect(results).toEqual([{
+      sourceId: 'mirlo',
+      name: 'The Argent Grub',
+      type: 'artist',
+      url: 'https://mirlo.space/the-argent-grub',
+    }]);
+  });
+
+  it('keeps an exact match and an artist name contained in the query', () => {
+    const data = { results: [artist('Kid Lightbulbs', 'kidlightbulbs')] };
+    expect(parseMirloArtistSearch(data, 'Kid Lightbulbs')).toHaveLength(1);
+    expect(parseMirloArtistSearch(data, 'Kid Lightbulbs Band')).toHaveLength(1);
+  });
+
+  it("drops Mirlo's loose substring fuzz that doesn't relate to the query", () => {
+    // Mirlo's ?name= filter returns "Other Nothing" for the query "the".
+    const data = { results: [artist('Botfly Mother', 'botfly-mother')] };
+    expect(parseMirloArtistSearch(data, 'argent')).toEqual([]);
+  });
+
+  it('drops disabled and deleted artists', () => {
+    const data = {
+      results: [
+        artist('Argent One', 'argent-one', { enabled: false }),
+        artist('Argent Two', 'argent-two', { deletedAt: '2026-01-01T00:00:00Z' }),
+        artist('Argent Three', 'argent-three'),
+      ],
+    };
+    const results = parseMirloArtistSearch(data, 'argent');
+    expect(results.map(r => r.name)).toEqual(['Argent Three']);
+  });
+
+  it('drops entries with malformed slugs or missing fields', () => {
+    const data = {
+      results: [
+        artist('Argent Bad', 'weird/slug?x=1'),
+        { name: 'Argent NoSlug' },
+        { urlSlug: 'no-name' },
+        artist('Argent Good', 'argent-good'),
+      ],
+    };
+    const results = parseMirloArtistSearch(data, 'argent');
+    expect(results.map(r => r.name)).toEqual(['Argent Good']);
+  });
+
+  it('caps results at 5', () => {
+    const data = {
+      results: Array.from({ length: 8 }, (_, i) => artist(`Argent ${i}`, `argent-${i}`)),
+    };
+    expect(parseMirloArtistSearch(data, 'argent')).toHaveLength(5);
+  });
+
+  it('handles junk input without throwing', () => {
+    expect(parseMirloArtistSearch(null, 'argent')).toEqual([]);
+    expect(parseMirloArtistSearch({}, 'argent')).toEqual([]);
+    expect(parseMirloArtistSearch({ results: 'nope' }, 'argent')).toEqual([]);
+    expect(parseMirloArtistSearch({ results: [artist('A', 'a')] }, '!!!')).toEqual([]);
   });
 });
