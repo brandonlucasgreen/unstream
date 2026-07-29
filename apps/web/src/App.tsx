@@ -118,6 +118,15 @@ function App() {
       setResolvedQuery(queryParam);
       handleSearch(queryParam);
     }
+    // Bare / with results still on screen: the user clicked the Unstream logo,
+    // which reads as "go home", or used the back button to a URL with no query.
+    // Same source-of-truth rule as above — no ?q= means nothing to show. This
+    // resets state only; the URL is already where we want it, so it must not
+    // write to searchParams (setting an already-empty query can no-op, which
+    // would leave justWentHomeRef armed and swallow the next real search).
+    else if (!urlParam && !queryParam && hasSearched && !isResolving) {
+      resetSearchState();
+    }
   }, [searchParams, isResolving, hasSearched, setSearchParams]);
 
   // Load Letterbird contact form embed
@@ -195,11 +204,10 @@ function App() {
     }
   }, [setSearchParams]);
 
-  const handleGoHome = useCallback(() => {
-    // Mark that we're going home to prevent useEffect from re-triggering. That
-    // run is swallowed rather than filtered by lastSearchedRef, because the
-    // effect can still see the stale ?q= in the same batch as the reset.
-    justWentHomeRef.current = true;
+  // Clear everything a search produced, without touching the URL. Split out of
+  // handleGoHome so the effect above can reset in response to the URL losing its
+  // ?q= (logo click, back button) rather than only on an in-page Clear.
+  const resetSearchState = useCallback(() => {
     lastSearchedRef.current = '';
     setResults([]);
     setHasSearched(false);
@@ -207,9 +215,17 @@ function App() {
     setResolvedQuery('');
     setIsEnriching(false);
     setSelectedForMerge(new Set());
+  }, []);
+
+  const handleGoHome = useCallback(() => {
+    // Mark that we're going home to prevent useEffect from re-triggering. That
+    // run is swallowed rather than filtered by lastSearchedRef, because the
+    // effect can still see the stale ?q= in the same batch as the reset.
+    justWentHomeRef.current = true;
+    resetSearchState();
     // Clear the URL params when going home
     setSearchParams({}, { replace: true });
-  }, [setSearchParams]);
+  }, [resetSearchState, setSearchParams]);
 
   const handleToggleSelect = useCallback((id: string) => {
     setSelectedForMerge(prev => {
