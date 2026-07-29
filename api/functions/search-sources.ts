@@ -2,7 +2,7 @@ import { parse } from 'node-html-parser';
 import { Sentry } from '../lib/sentry';
 import { findBandcampArtist } from '../search/bandcamp-probe';
 import { cacheGetOrFetch, artistCacheKey } from './cache';
-import { persistSearchResults, getArtistBySlug, artistSlug, getMergeOverrides, findClaimedArtistSlugsByName } from './db';
+import { persistSearchResults, getArtistBySlug, artistSlug, getMergeOverrides, findKnownArtistSlugsByName } from './db';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
 import { parseMirloArtistSearch } from './search-parsers';
@@ -28,7 +28,7 @@ import {
   mergeByReleaseOverlap,
   filterAndSort,
   applyMergeOverrides,
-  mergeClaimedIntoResults,
+  mergeStoredArtistsIntoResults,
   displayNameFromSlug,
   isBandcampSearchLink,
   bandcampSubdomainOf,
@@ -1881,15 +1881,22 @@ async function searchBandcampForAlbum(artistUrl: string, albumTitle: string): Pr
   }
 }
 
-// Shape a DB claimed-artist row into a result card. Null unless the artist is
-// actually claimed — an auto-discovered row must not masquerade as a profile.
-function toClaimedResult(
+// Shape a DB artist row into a result card. Claimed rows become full profile
+// cards (custom image, /a/ page link); verified rows become plain result cards
+// with the links a past search persisted. Unverified rows are rejected — that
+// confidence level is where junk from name-only matches accumulates.
+function toStoredResult(
   dbArtist: Awaited<ReturnType<typeof getArtistBySlug>>,
   slug: string,
 ): AggregatedResult | null {
-  if (!dbArtist || dbArtist.matchConfidence !== 'claimed') return null;
+  if (!dbArtist) return null;
+  const claimed = dbArtist.matchConfidence === 'claimed';
+  if (!claimed && dbArtist.matchConfidence !== 'verified') return null;
   return {
-    id: `claimed-${slug}`,
+    // The known- prefix marks a card served from the DB rather than resolved
+    // live; the persist step skips these so re-serving stored data can't
+    // refresh updated_at and mask genuine staleness.
+    id: claimed ? `claimed-${slug}` : `known-${slug}`,
     name: dbArtist.name,
     type: 'artist' as const,
     imageUrl: dbArtist.profile?.customImageUrl || dbArtist.imageUrl,
@@ -1899,8 +1906,8 @@ function toClaimedResult(
       displayName: p.displayName,
       latestRelease: p.latestRelease,
     })),
-    matchConfidence: 'claimed' as const,
-    claimedSlug: slug,
+    matchConfidence: claimed ? ('claimed' as const) : ('verified' as const),
+    ...(claimed ? { claimedSlug: slug } : {}),
     ...(dbArtist.location ? { location: dbArtist.location } : {}),
   };
 }
@@ -1932,36 +1939,37 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     // Normalize the query to handle accented characters (e.g., "Tanerélle" -> "Tanerelle")
     const normalizedQuery = normalizeSearchQuery(query);
 
-    // Claimed artists are looked up two ways, both concurrent with the platform
-    // fan-out: by exact slug of the query (covers queries that ARE the artist's
-    // name, including slug-ish spellings), and by name-contains (covers partial
-    // queries — "lightbulbs" must find the claimed kid-lightbulbs profile, not
-    // lose to a generic scraped card).
+    // Known artists are looked up two ways, both concurrent with the platform
+    // fan-out: claimed profiles by exact slug of the query (covers queries that
+    // ARE the artist's name), and any known artist by name-contains — a partial
+    // query like "patrick" must surface Patrick Hardy when a past search already
+    // resolved and persisted him, and "lightbulbs" must surface the claimed
+    // kid-lightbulbs profile instead of a generic scraped card.
     const slug = artistSlug(normalizedQuery);
     const claimedExactPromise: Promise<AggregatedResult | null> = getArtistBySlug(slug)
-      .then(dbArtist => toClaimedResult(dbArtist, slug))
+      .then(dbArtist => dbArtist?.matchConfidence === 'claimed' ? toStoredResult(dbArtist, slug) : null)
       .catch(err => {
         console.error('[DB] Claimed artist lookup failed:', err);
         return null;
       });
-    const claimedByNamePromise: Promise<AggregatedResult[]> = findClaimedArtistSlugsByName(normalizedQuery)
+    const knownByNamePromise: Promise<AggregatedResult[]> = findKnownArtistSlugsByName(normalizedQuery)
       .then(slugs => Promise.all(
         slugs.map(s =>
-          getArtistBySlug(s)
-            .then(dbArtist => toClaimedResult(dbArtist, s))
+          getArtistBySlug(s, { allowStale: true })
+            .then(dbArtist => toStoredResult(dbArtist, s))
             .catch(() => null)
         )
       ))
       .then(list => list.filter((r): r is AggregatedResult => r !== null))
       .catch(err => {
-        console.error('[DB] Claimed artist name search failed:', err);
+        console.error('[DB] Known artist name search failed:', err);
         return [];
       });
 
     const searchResult = await searchAllPlatforms(normalizedQuery);
     const claimedExact = await claimedExactPromise;
-    const claimedByName = await claimedByNamePromise;
-    const claimedArtists = claimedExact ? [claimedExact, ...claimedByName] : claimedByName;
+    const knownByName = await knownByNamePromise;
+    const storedArtists = claimedExact ? [claimedExact, ...knownByName] : knownByName;
     const results = searchResult.results;
 
     // UC5: Capture zero-result searches for monitoring (volume signal for coverage gaps)
@@ -1979,13 +1987,17 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       }
     }
 
-    // Fold claimed profiles in: replace generic same-name results in place,
-    // lead with an exact query match, append the rest.
-    const finalResults = mergeClaimedIntoResults(results, claimedArtists, normalizedQuery);
+    // Fold stored artists in: claimed cards replace generic same-name results
+    // in place, known artists fill holes the platforms missed.
+    const finalResults = mergeStoredArtistsIntoResults(results, storedArtists, normalizedQuery);
 
-    // Persist artist results to the database (skip claimed results, they're already in DB)
+    // Persist artist results to the database. Skip claimed results (already in
+    // DB) and known- cards (served FROM the DB — persisting them back would
+    // refresh updated_at without re-verifying anything).
     try {
-      await persistSearchResults(finalResults.filter(r => r.matchConfidence !== 'claimed'));
+      await persistSearchResults(finalResults.filter(r =>
+        r.matchConfidence !== 'claimed' && !r.id.startsWith('known-')
+      ));
     } catch (err) {
       console.error('[DB] Background persist failed:', err);
     }

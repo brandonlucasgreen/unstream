@@ -330,7 +330,10 @@ export async function putBandcampProbe(
 /**
  * Look up an artist by slug. Returns null if not found or Supabase is not configured.
  */
-export async function getArtistBySlug(slug: string): Promise<ArtistResult | null> {
+export async function getArtistBySlug(
+  slug: string,
+  opts?: { allowStale?: boolean },
+): Promise<ArtistResult | null> {
   const client = getClient();
   if (!client) return null;
 
@@ -376,8 +379,11 @@ export async function getArtistBySlug(slug: string): Promise<ArtistResult | null
 
     const row = artist as ArtistRow;
 
-    // Claimed artists are always fresh; auto-discovered artists expire
-    if (row.match_confidence !== 'claimed') {
+    // Claimed artists are always fresh; auto-discovered artists expire.
+    // allowStale skips the expiry: the partial-name discovery channel would
+    // rather show a known artist with slightly old links than hide them —
+    // platform URLs are stable, and an exact search refreshes the row anyway.
+    if (row.match_confidence !== 'claimed' && !opts?.allowStale) {
       const updatedAt = new Date(row.updated_at).getTime();
       const now = Date.now();
       if (now - updatedAt > FRESHNESS_TTL_MS) {
@@ -454,14 +460,19 @@ export async function getArtistBySlug(slug: string): Promise<ArtistResult | null
  * Only persists artist-type results. Runs as fire-and-forget after search.
  */
 /**
- * Slugs of claimed artists whose display name contains the term.
+ * Slugs of artists Unstream already knows whose display name contains the term.
  *
- * The search handler's exact-slug lookup can only find a claimed profile when
- * the query IS the artist's name — a partial query like "lightbulbs" never
- * resolves the slug "kid-lightbulbs", so the artist's own curated page lost to
- * a generic scraped result. This is the name-contains channel that fixes that.
+ * The search handler's exact-slug lookup can only find an artist when the
+ * query IS their name — a partial query like "lightbulbs" never resolves the
+ * slug "kid-lightbulbs", and "patrick" never resolves "patrick-hardy" even
+ * though a past exact search persisted his full result. This is the
+ * name-contains channel that makes the accumulated artists table searchable.
+ *
+ * Claimed profiles come first (they replace generic results downstream), then
+ * verified rows. 'unverified' rows are deliberately excluded — that's where
+ * junk from name-only matches accumulates.
  */
-export async function findClaimedArtistSlugsByName(term: string, limit = 5): Promise<string[]> {
+export async function findKnownArtistSlugsByName(term: string, limit = 6): Promise<string[]> {
   const client = getClient();
   if (!client) return [];
 
@@ -472,17 +483,21 @@ export async function findClaimedArtistSlugsByName(term: string, limit = 5): Pro
 
   const { data, error } = await client
     .from('artists')
-    .select('slug')
+    .select('slug, match_confidence')
     .ilike('name', `%${cleaned}%`)
-    .eq('match_confidence', 'claimed')
-    .limit(limit);
+    .in('match_confidence', ['claimed', 'verified'])
+    .limit(limit * 2);
 
   if (error) {
-    console.error('[DB] findClaimedArtistSlugsByName error:', error);
+    console.error('[DB] findKnownArtistSlugsByName error:', error);
     return [];
   }
 
-  return (data ?? []).map(r => r.slug).filter(Boolean);
+  return (data ?? [])
+    .sort((a, b) => (a.match_confidence === 'claimed' ? 0 : 1) - (b.match_confidence === 'claimed' ? 0 : 1))
+    .slice(0, limit)
+    .map(r => r.slug)
+    .filter(Boolean);
 }
 
 export async function persistSearchResults(results: ArtistResult[]): Promise<void> {
