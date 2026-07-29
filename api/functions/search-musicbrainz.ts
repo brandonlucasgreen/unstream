@@ -3,10 +3,10 @@
 
 import { Sentry } from '../lib/sentry';
 import { cacheGetOrFetch, artistCacheKey } from './cache';
-import { persistEnrichment } from './db';
+import { persistEnrichment, getLinkSuppressions } from './db';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery, isUrlHostnameAllowed } from './middleware';
-import { normalizeAccents, normalizeForComparison, normalizeSearchQuery } from './search-utils';
+import { normalizeAccents, normalizeForComparison, normalizeSearchQuery, isUrlSuppressed, type LinkSuppression } from './search-utils';
 
 // Import all shared enrichment functions and types
 import {
@@ -380,6 +380,35 @@ function unavailableResult(query: string): MusicBrainzSearchResponse {
   };
 }
 
+/**
+ * Drop links an admin has suppressed for this artist.
+ *
+ * Applied to the response *after* the cache read, never inside the cached
+ * function: a suppression added today must take effect on the next request
+ * rather than waiting out a 30-minute cache entry. Phase 1 does the same at the
+ * end of its own pipeline (applyLinkSuppressions), but this endpoint's links are
+ * merged into the results client-side, so they need their own pass — otherwise a
+ * removed link reappears the moment enrichment lands.
+ */
+function stripSuppressedLinks(
+  result: MusicBrainzSearchResponse,
+  suppressions: LinkSuppression[],
+): MusicBrainzSearchResponse {
+  if (suppressions.length === 0 || !result.artistName) return result;
+
+  const artistName = result.artistName;
+  const suppressed = (url: string) => isUrlSuppressed(url, artistName, suppressions);
+
+  return {
+    ...result,
+    officialUrl: result.officialUrl && suppressed(result.officialUrl) ? null : result.officialUrl,
+    discogsUrl: result.discogsUrl && suppressed(result.discogsUrl) ? null : result.discogsUrl,
+    socialLinks: result.socialLinks.filter(s => !suppressed(s.url)),
+    discoveredPlatforms: result.discoveredPlatforms.filter(p => !suppressed(p.url)),
+    platformUrls: result.platformUrls.filter(u => !suppressed(u)),
+  };
+}
+
 // Netlify function handler
 export async function handler(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
   const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
@@ -400,6 +429,10 @@ export async function handler(event: { queryStringParameters?: Record<string, st
   try {
     // Normalize the query to handle accented characters (e.g., "Tanerélle" -> "Tanerelle")
     const normalizedQuery = normalizeSearchQuery(query);
+
+    // Rides along with the MusicBrainz round-trips below instead of adding a
+    // serial hop. getLinkSuppressions catches its own errors ([] on failure).
+    const suppressionsPromise = getLinkSuppressions();
 
     // Use Redis cache to avoid hitting MusicBrainz rate limits
     const cacheKey = artistCacheKey('musicbrainz', normalizedQuery);
@@ -436,13 +469,17 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       };
     }
 
+    // Suppressed links are stripped before anything else sees them, so they are
+    // neither returned to the client nor persisted into the artist database.
+    const filtered = stripSuppressedLinks(result, await suppressionsPromise);
+
     // Persist enrichment to the artist database.
     // Also persist on MB-miss if we at least captured location (from the
     // Bandcamp/Mirlo fallback), keyed on the normalized query's slug.
-    const persistName = result.artistName || (result.location ? normalizedQuery : null);
+    const persistName = filtered.artistName || (filtered.location ? normalizedQuery : null);
     if (persistName) {
       try {
-        await persistEnrichment(persistName, result);
+        await persistEnrichment(persistName, filtered);
       } catch (err) {
         console.error('[DB] Background enrichment persist failed:', err);
       }
@@ -455,7 +492,7 @@ export async function handler(event: { queryStringParameters?: Record<string, st
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': 's-maxage=300, stale-while-revalidate',
       },
-      body: JSON.stringify(result),
+      body: JSON.stringify(filtered),
     };
   } catch (error) {
     console.error('MusicBrainz endpoint error:', error);

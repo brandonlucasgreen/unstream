@@ -2,7 +2,7 @@ import { parse } from 'node-html-parser';
 import { Sentry } from '../lib/sentry';
 import { findBandcampArtist } from '../search/bandcamp-probe';
 import { cacheGetOrFetch, artistCacheKey } from './cache';
-import { persistSearchResults, getArtistBySlug, artistSlug, getMergeOverrides, findKnownArtistSlugsByName } from './db';
+import { persistSearchResults, getArtistBySlug, artistSlug, getMergeOverrides, getLinkSuppressions, findKnownArtistSlugsByName } from './db';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
 import { parseMirloArtistSearch } from './search-parsers';
@@ -31,6 +31,7 @@ import {
   mergeByReleaseOverlap,
   filterAndSort,
   applyMergeOverrides,
+  applyLinkSuppressions,
   mergeStoredArtistsIntoResults,
   displayNameFromSlug,
   isBandcampSearchLink,
@@ -1653,6 +1654,8 @@ async function searchAllPlatforms(query: string, mode: SearchMode): Promise<{ re
   // fetch now so it rides along with the platform fan-out instead of adding a
   // round-trip afterwards. getMergeOverrides catches its own errors ([] on failure).
   const overridesPromise = getMergeOverrides();
+  // Same for admin link suppressions, applied last (Phase 5).
+  const suppressionsPromise = getLinkSuppressions();
 
   // Phase 1: Search all platforms in parallel and aggregate Bandcamp/Mirlo results
   const [bandcampResults, bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, ampwallResults, beatportResults, evenResults, musicbrainzResult] = await Promise.allSettled([
@@ -1843,6 +1846,13 @@ async function searchAllPlatforms(query: string, mode: SearchMode): Promise<{ re
   await attachNameOnlyPlatforms(merged, nameOnlyMaps);
   // Re-merge: new results from Phase 4 may overlap with existing ones
   const finalMerged = mergeByReleaseOverlap(merged);
+
+  // Phase 5: Drop admin-suppressed links. Deliberately the last step before
+  // filtering — every earlier phase can add links (probe, enrichment, overrides,
+  // name-only platforms), and a suppression applied mid-pipeline would be undone
+  // by whichever phase ran after it.
+  applyLinkSuppressions(finalMerged, await suppressionsPromise);
+
   const finalResults = filterAndSort(finalMerged, query);
   // Enrichment counts as applied only when the identity matched AND the
   // url-rels data actually arrived. Claiming completion on a partial fetch is

@@ -249,6 +249,105 @@ export function applyMergeOverrides(
 }
 
 // ---------------------------------------------------------------------------
+// Admin link suppressions (remove one wrong platform link from a result)
+// ---------------------------------------------------------------------------
+
+/**
+ * One admin decision: "this URL does not belong on this artist."
+ *
+ * `artist_name_norm` scopes the removal to a single normalized artist name, so a
+ * homonym who genuinely owns the page keeps it — the same reason
+ * `splitSuspiciousPlatforms` exists. A null scope removes the URL everywhere.
+ */
+export interface LinkSuppression {
+  url: string;
+  artist_name_norm: string | null;
+}
+
+/**
+ * A key identifying the *page* a platform URL points at, for suppression matching.
+ *
+ * Scheme and a leading `www.` are dropped, and the trailing slash and case are
+ * normalized, because the same page reaches us in several spellings: probe results
+ * are https, some MusicBrainz relations and older stored `artist_links` rows are
+ * http, and official-site scrapes carry whatever the page linked. A suppression
+ * saved from one spelling has to match all of them, or the removed link quietly
+ * comes back through a different source.
+ *
+ * The query string is kept — it is what distinguishes one search-only link from
+ * another (`?q=artist-a` vs `?q=artist-b`).
+ */
+export function normalizeUrlForMatch(url: string): string {
+  const trimmed = url.trim();
+  try {
+    const parsed = new URL(trimmed);
+    const host = parsed.hostname.replace(/^www\./, '');
+    const path = parsed.pathname.replace(/\/+$/, '');
+    return `${host}${path}${parsed.search}${parsed.hash}`.toLowerCase();
+  } catch {
+    // Not a parseable URL (shouldn't happen — the admin endpoint validates, and
+    // platform URLs come from parsed pages). Fall back to a plain string key so
+    // the comparison stays total rather than throwing mid-pipeline.
+    return trimmed.replace(/\/+$/, '').toLowerCase();
+  }
+}
+
+/**
+ * The host-and-path part of a match key, for coarse SQL prefiltering.
+ *
+ * Deliberately drops the query string so a single `ILIKE %…%` can find rows in
+ * any scheme or `www.` spelling; the exact decision is still
+ * `normalizeUrlForMatch` equality in JS.
+ */
+export function urlMatchPrefilter(url: string): string {
+  return normalizeUrlForMatch(url).split(/[?#]/)[0];
+}
+
+export function isUrlSuppressed(
+  url: string,
+  artistName: string,
+  suppressions: LinkSuppression[],
+): boolean {
+  if (suppressions.length === 0) return false;
+  const urlKey = normalizeUrlForMatch(url);
+  const nameNorm = normalizeForComparison(artistName);
+  return suppressions.some(s =>
+    normalizeUrlForMatch(s.url) === urlKey &&
+    (s.artist_name_norm === null || s.artist_name_norm === nameNorm)
+  );
+}
+
+/**
+ * Strip admin-suppressed links from every result, in place.
+ *
+ * Runs at the very end of the pipeline, after disambiguation and after the
+ * deferred name-only platforms are attached, so a link can't be re-added behind
+ * the suppression. Results left with nothing but search-only links are dropped
+ * by `filterAndSort`, which runs next.
+ */
+export function applyLinkSuppressions(
+  aggregated: AggregatedResult[],
+  suppressions: LinkSuppression[],
+): void {
+  if (suppressions.length === 0) return;
+
+  for (const result of aggregated) {
+    const removed = result.platforms.filter(p => isUrlSuppressed(p.url, result.name, suppressions));
+    if (removed.length === 0) continue;
+
+    result.platforms = result.platforms.filter(p => !removed.includes(p));
+    console.log(`[Suppression] Removed ${removed.length} link(s) from "${result.name}": ${removed.map(p => p.url).join(', ')}`);
+
+    // The result photo has no provenance field, so a suppressed Bandcamp page
+    // would keep supplying the artist image after its link is gone. Bandcamp
+    // images are the only ones served from bcbits.com, so this is safe to key on.
+    if (removed.some(p => p.sourceId === 'bandcamp') && result.imageUrl?.includes('bcbits.com')) {
+      result.imageUrl = undefined;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 // String normalization
 // ---------------------------------------------------------------------------
 

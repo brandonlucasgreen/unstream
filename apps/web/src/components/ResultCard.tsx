@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import type { SearchResult } from '../types';
+import type { PlatformLink, SearchResult } from '../types';
 import { analytics } from '../services/analytics';
 import { ResultCardHeader } from './ResultCardHeader';
 import { ResultCardRelease } from './ResultCardRelease';
@@ -7,6 +7,7 @@ import { ResultCardPlatforms } from './ResultCardPlatforms';
 import { LoginInterstitial } from './LoginInterstitial';
 import { ResultCardSocial } from './ResultCardSocial';
 import { ResultCardActions } from './ResultCardActions';
+import { AdminRemoveLinkDialog } from './AdminRemoveLinkDialog';
 
 import {
   categorizePlatforms,
@@ -20,9 +21,11 @@ interface ResultCardProps {
   isAdmin?: boolean;
   isSelected?: boolean;
   onToggleSelect?: (id: string) => void;
+  /** Admin-only: called after a link is suppressed so the list drops it. */
+  onLinkRemoved?: (resultId: string, url: string) => void;
 }
 
-export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: ResultCardProps) {
+export function ResultCard({ result, isAdmin, isSelected, onToggleSelect, onLinkRemoved }: ResultCardProps) {
   const searchTracked = useRef(false);
   const { session, isArtistSaved, saveArtist, removeSavedArtist } = useAuth();
 
@@ -36,6 +39,11 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: Resu
   const [shareCopied, setShareCopied] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showLoginInterstitial, setShowLoginInterstitial] = useState(false);
+  const [linkToRemove, setLinkToRemove] = useState<PlatformLink | null>(null);
+
+  // Only admins get the per-link remove control, and only when the page can
+  // actually drop the link from its list afterwards.
+  const handleRemoveLink = isAdmin && onLinkRemoved ? setLinkToRemove : undefined;
 
   useEffect(() => {
     if (result.type === 'artist' && result.id) {
@@ -139,47 +147,63 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect }: Resu
             <ResultCardPlatforms
               platforms={categorized.marketplace}
               category="marketplace"
+              onRemoveLink={handleRemoveLink}
             />
           )}
           {categorized.patronage.length > 0 && (
             <ResultCardPlatforms
               platforms={categorized.patronage}
               category="patronage"
+              onRemoveLink={handleRemoveLink}
             />
           )}
           {categorized.decentralized.length > 0 && (
             <ResultCardPlatforms
               platforms={categorized.decentralized}
               category="decentralized"
+              onRemoveLink={handleRemoveLink}
             />
           )}
           {categorized.library.length > 0 && (
             <ResultCardPlatforms
               platforms={categorized.library}
               category="library"
+              onRemoveLink={handleRemoveLink}
             />
           )}
           {categorized.official.length > 0 && (
             <ResultCardPlatforms
               platforms={categorized.official}
               category="official"
+              onRemoveLink={handleRemoveLink}
             />
           )}
           {categorized.social.length > 0 && (
             <ResultCardSocial
               platforms={categorized.social}
               claimedSlug={result.claimedSlug}
+              onRemoveLink={handleRemoveLink}
             />
           )}
           {categorized.curated.length > 0 && (
             <ResultCardPlatforms
               platforms={categorized.curated}
               category="curated"
+              onRemoveLink={handleRemoveLink}
             />
           )}
 
           <ResultCardActions result={result} />
         </div>
+
+      {linkToRemove && (
+        <AdminRemoveLinkDialog
+          artistName={result.name}
+          platform={linkToRemove}
+          onClose={() => setLinkToRemove(null)}
+          onRemoved={(url) => onLinkRemoved?.(result.id, url)}
+        />
+      )}
 
       {showLoginInterstitial && (
         <LoginInterstitial

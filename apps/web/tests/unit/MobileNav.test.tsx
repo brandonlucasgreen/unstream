@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { MobileNav, type NavItem } from 'src/components/MobileNav';
+import { MobileNav, type NavEntry, type NavItem } from 'src/components/MobileNav';
 
 vi.mock('react-router-dom', () => ({
   Link: ({ children, to, onClick, className }: {
@@ -141,5 +141,31 @@ describe('MobileNav', () => {
     expect(focus).toHaveBeenLastCalledWith({ preventScroll: true });
 
     focus.mockRestore();
+  });
+
+  // Admin pages arrive as a group. The drawer shows them as a labelled block of
+  // links rather than another tap-to-expand level.
+  it('renders a nav group as a heading plus its links', () => {
+    const items: NavEntry[] = [
+      {
+        label: 'Admin',
+        emphasis: true,
+        items: [
+          { to: '/admin/verify', label: 'Verify (2)', emphasis: true },
+          { to: '/admin/links', label: 'Removed links' },
+          { to: '/admin/analytics', label: 'Analytics' },
+        ],
+      },
+      ...loggedInItems,
+    ];
+
+    render(<MobileNav items={items} />);
+    fireEvent.click(trigger());
+
+    expect(screen.getByText('Admin')).toBeTruthy();
+    for (const label of ['Verify (2)', 'Removed links', 'Analytics', 'Dashboard', 'Settings']) {
+      expect(screen.getByText(label)).toBeTruthy();
+    }
+    expect(screen.getByText('Removed links').getAttribute('href')).toBe('/admin/links');
   });
 });

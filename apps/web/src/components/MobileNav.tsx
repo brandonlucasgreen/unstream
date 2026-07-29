@@ -8,6 +8,20 @@ export type NavItem = {
   emphasis?: boolean;
 };
 
+/** A labelled set of links — a dropdown on desktop, an indented block here. */
+export type NavGroup = {
+  label: string;
+  items: NavItem[];
+  /** Accent-coloured when something inside needs attention. */
+  emphasis?: boolean;
+};
+
+export type NavEntry = NavItem | NavGroup;
+
+export function isNavGroup(entry: NavEntry): entry is NavGroup {
+  return 'items' in entry;
+}
+
 /**
  * Full-height drawer that houses the header nav on small screens: a hamburger
  * in the header slides a panel in from the right over the page content. The
@@ -23,7 +37,7 @@ export function MobileNav({
   email,
   onSignOut,
 }: {
-  items: NavItem[];
+  items: NavEntry[];
   email?: string;
   onSignOut?: () => void;
 }) {
@@ -115,17 +129,40 @@ export function MobileNav({
             <p className="truncate px-6 pb-4 text-xs text-text-muted">{email}</p>
           )}
 
+          {/* Groups render as a heading plus indented links rather than a
+              collapsible section: the drawer is full-height, so hiding a handful
+              of admin links behind another tap would only add a step. */}
           <div className="flex flex-col border-t border-border">
-            {items.map(item => (
+            {items.map(entry => isNavGroup(entry) ? (
+              <div key={entry.label} className="border-b border-border">
+                <p className={`px-6 pt-4 pb-1 text-xs font-medium uppercase tracking-wider ${
+                  entry.emphasis ? 'text-accent-primary' : 'text-text-muted'
+                }`}>
+                  {entry.label}
+                </p>
+                {entry.items.map(item => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    onClick={close}
+                    className={`block px-6 py-3 text-base hover:bg-bg-hover transition-colors ${
+                      item.emphasis ? 'text-accent-primary font-medium' : 'text-text-primary'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            ) : (
               <Link
-                key={item.to}
-                to={item.to}
+                key={entry.to}
+                to={entry.to}
                 onClick={close}
                 className={`border-b border-border px-6 py-4 text-base hover:bg-bg-hover transition-colors ${
-                  item.emphasis ? 'text-accent-primary font-medium' : 'text-text-primary'
+                  entry.emphasis ? 'text-accent-primary font-medium' : 'text-text-primary'
                 }`}
               >
-                {item.label}
+                {entry.label}
               </Link>
             ))}
           </div>

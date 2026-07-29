@@ -6,9 +6,11 @@ import { analytics } from '../services/analytics';
 interface ResultCardSocialProps {
   platforms: PlatformLink[];
   claimedSlug: string | undefined;
+  /** Admin-only: when set, each icon gets a remove control. */
+  onRemoveLink?: (platform: PlatformLink) => void;
 }
 
-export function ResultCardSocial({ platforms, claimedSlug }: ResultCardSocialProps) {
+export function ResultCardSocial({ platforms, claimedSlug, onRemoveLink }: ResultCardSocialProps) {
   if (platforms.length === 0) return null;
 
   return (
@@ -18,8 +20,8 @@ export function ResultCardSocial({ platforms, claimedSlug }: ResultCardSocialPro
       </h4>
       <div className="flex flex-wrap gap-3">
         {platforms.map(platform => (
+          <span key={platform.sourceId} className="inline-flex items-center gap-1">
           <a
-            key={platform.sourceId}
             href={platform.url}
             target="_blank"
             rel="noopener noreferrer"
@@ -33,6 +35,19 @@ export function ResultCardSocial({ platforms, claimedSlug }: ResultCardSocialPro
           >
             <SocialIcon platform={platform.sourceId} />
           </a>
+          {onRemoveLink && (
+            <button
+              onClick={() => onRemoveLink(platform)}
+              className="text-text-muted hover:text-red-400 transition-colors"
+              title="Remove this link (admin)"
+              aria-label={`Remove the ${getSource(platform.sourceId).name} link`}
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+          </span>
         ))}
       </div>
     </div>

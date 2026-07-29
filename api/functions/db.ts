@@ -2,6 +2,7 @@
 // All operations are optional — if Supabase is not configured, they no-op gracefully.
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { normalizeUrlForMatch, urlMatchPrefilter } from './search-utils';
 
 let supabase: SupabaseClient | null = null;
 
@@ -194,6 +195,112 @@ export async function getMergeOverrides(): Promise<MergeOverrideRow[]> {
   } catch (error) {
     console.error('[DB] getMergeOverrides error:', error);
     return [];
+  }
+}
+
+// --- Platform link suppressions ---
+
+export interface LinkSuppressionRow {
+  id: string;
+  url: string;
+  source_id: string | null;
+  artist_name: string | null;
+  artist_name_norm: string | null;
+  reason: string | null;
+  created_by: string | null;
+  created_at: string;
+}
+
+/**
+ * Admin decisions of the form "this URL does not belong on this artist".
+ *
+ * Returns [] on any failure, like getMergeOverrides — a suppression list that
+ * can't be read must not take the search response down with it. The cost of
+ * failing open is that a known-bad link reappears until the next request.
+ */
+export async function getLinkSuppressions(): Promise<
+  Pick<LinkSuppressionRow, 'url' | 'artist_name_norm'>[]
+> {
+  const client = getClient();
+  if (!client) return [];
+
+  try {
+    const { data, error } = await client
+      .from('platform_link_suppressions')
+      .select('url, artist_name_norm');
+
+    if (error) {
+      console.error('[DB] Failed to fetch link suppressions:', error);
+      return [];
+    }
+
+    return (data as Pick<LinkSuppressionRow, 'url' | 'artist_name_norm'>[]) || [];
+  } catch (error) {
+    console.error('[DB] getLinkSuppressions error:', error);
+    return [];
+  }
+}
+
+/**
+ * Delete stored copies of a link from artist_links.
+ *
+ * Suppressing a link filters it out of search responses, but past searches may
+ * already have persisted it (persistSearchResults / persistEnrichment), and the
+ * artist page reads artist_links directly — so without this the bad link stays
+ * visible at /a/:slug. Scoped to one artist when artistName is given.
+ *
+ * Best-effort: returns the number of rows deleted, 0 on any failure. The
+ * suppression itself is what guarantees the link stays out of search results.
+ */
+export async function deleteStoredLinksForUrl(url: string, artistName: string | null): Promise<number> {
+  const client = getClient();
+  if (!client) return 0;
+
+  const target = normalizeUrlForMatch(url);
+  // Coarse prefilter on host+path so rows stored as http://, https:// or with a
+  // www. prefix are all candidates; ilike treats % and _ as wildcards, and a URL
+  // may legitimately contain either.
+  const pattern = `%${urlMatchPrefilter(url).replace(/[%_\\]/g, m => `\\${m}`)}%`;
+
+  try {
+    let artistId: string | null = null;
+    if (artistName) {
+      const { data: artist } = await client
+        .from('artists')
+        .select('id')
+        .eq('slug', artistSlug(artistName))
+        .single();
+      // No stored artist row means nothing to clean up for this scope.
+      if (!artist) return 0;
+      artistId = (artist as { id: string }).id;
+    }
+
+    let query = client.from('artist_links').select('id, url').ilike('url', pattern);
+    if (artistId) query = query.eq('artist_id', artistId);
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('[DB] Failed to look up stored links for suppression:', error);
+      return 0;
+    }
+
+    // The ilike above is a filter, not the decision — compare match keys so
+    // `.../music` isn't deleted along with `...`.
+    const ids = ((data as { id: string; url: string }[]) || [])
+      .filter(row => normalizeUrlForMatch(row.url) === target)
+      .map(row => row.id);
+    if (ids.length === 0) return 0;
+
+    const { error: deleteError } = await client.from('artist_links').delete().in('id', ids);
+    if (deleteError) {
+      console.error('[DB] Failed to delete stored links for suppression:', deleteError);
+      return 0;
+    }
+
+    return ids.length;
+  } catch (error) {
+    console.error('[DB] deleteStoredLinksForUrl error:', error);
+    return 0;
   }
 }
 
