@@ -455,10 +455,88 @@ export async function getArtistBySlug(
 
 // --- Write Operations ---
 
+// --- Typeahead suggestions ---
+
+export interface ArtistSuggestion {
+  slug: string;
+  name: string;
+  imageUrl: string | null;
+}
+
 /**
- * Persist artist search results to the database.
- * Only persists artist-type results. Runs as fire-and-forget after search.
+ * Rank raw suggestion rows for a typeahead term: prefix matches first, then
+ * shorter names, then alphabetical. Pure and exported for tests.
  */
+export function rankArtistSuggestions(
+  rows: { slug: string; name: string; image_url: string | null }[],
+  term: string,
+  limit: number,
+): ArtistSuggestion[] {
+  const termLower = term.toLowerCase();
+  const seen = new Set<string>();
+  return rows
+    .filter(r => {
+      if (!r.slug || !r.name || seen.has(r.slug)) return false;
+      seen.add(r.slug);
+      return true;
+    })
+    .sort((a, b) => {
+      const aPrefix = a.name.toLowerCase().startsWith(termLower) ? 0 : 1;
+      const bPrefix = b.name.toLowerCase().startsWith(termLower) ? 0 : 1;
+      if (aPrefix !== bPrefix) return aPrefix - bPrefix;
+      if (a.name.length !== b.name.length) return a.name.length - b.name.length;
+      return a.name.localeCompare(b.name);
+    })
+    .slice(0, limit)
+    .map(r => ({ slug: r.slug, name: r.name, imageUrl: r.image_url }));
+}
+
+/**
+ * The exact term suggestArtists matches with: ILIKE wildcards stripped so user
+ * input can't change the match shape (same reasoning as the slug guard in
+ * getArtistBySlug). Exported so callers key caches on THIS string — a cache
+ * key normalized any other way collides across inputs that query differently
+ * ("sufjan-stevens" vs "sufjan stevens"), serving one spelling's results to
+ * the other.
+ */
+export function cleanSuggestTerm(term: string): string {
+  return term.replace(/[%_,()]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Name-substring lookup over artists Unstream has already resolved, for
+ * search-as-you-type. Only verified/claimed rows are suggested — the artists
+ * table accumulates whatever people search, and 'unverified' is where the
+ * junk lives.
+ *
+ * Backed by the pg_trgm GIN index on artists.name (migration
+ * 20260729071000_artist-name-trgm.sql); without it this ILIKE is a seq scan.
+ *
+ * Returns null when the DB could not be asked (no client, query error) —
+ * callers must not cache that as "no suggestions".
+ */
+export async function suggestArtists(term: string, limit = 8): Promise<ArtistSuggestion[] | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  const cleaned = cleanSuggestTerm(term);
+  if (cleaned.length < 2) return [];
+
+  const { data, error } = await client
+    .from('artists')
+    .select('slug, name, image_url')
+    .ilike('name', `%${cleaned}%`)
+    .in('match_confidence', ['claimed', 'verified'])
+    .limit(40);
+
+  if (error) {
+    console.error('[DB] suggestArtists error:', error);
+    return null;
+  }
+
+  return rankArtistSuggestions(data ?? [], cleaned, limit);
+}
+
 /**
  * Slugs of artists Unstream already knows whose display name contains the term.
  *
@@ -512,6 +590,10 @@ export async function findKnownArtistSlugsByName(term: string, limit = 6): Promi
     .filter(Boolean);
 }
 
+/**
+ * Persist artist search results to the database.
+ * Only persists artist-type results. Runs as fire-and-forget after search.
+ */
 export async function persistSearchResults(results: ArtistResult[]): Promise<void> {
   const client = getClient();
   if (!client) return;

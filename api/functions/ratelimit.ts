@@ -30,10 +30,12 @@ function getRedis(): Redis | null {
 // Anonymous / web app tiers
 let standardLimiter: Ratelimit | null = null;   // 30 req/min for general endpoints
 let strictLimiter: Ratelimit | null = null;      // 10 req/min for expensive endpoints
+let lenientLimiter: Ratelimit | null = null;     // 120 req/min for cheap high-frequency endpoints (typeahead)
 
 // Per-day quota limiters (new)
 let standardDailyLimiter: Ratelimit | null = null;  // 1000 req/day for general
 let strictDailyLimiter: Ratelimit | null = null;    // 500 req/day for expensive
+let lenientDailyLimiter: Ratelimit | null = null;   // 5000 req/day for cheap high-frequency
 
 // API key tiers
 let freeLimiter: Ratelimit | null = null;        // 30 req/min
@@ -66,6 +68,33 @@ function getStrictLimiter(): Ratelimit | null {
     prefix: 'rl:strict',
   });
   return strictLimiter;
+}
+
+// High-frequency, low-cost endpoints (typeahead suggestions): fires on every
+// debounced typing pause, so it needs its own bucket — sharing 'standard'
+// would let an actively-searching user 429 themselves out of account actions.
+function getLenientLimiter(): Ratelimit | null {
+  if (lenientLimiter) return lenientLimiter;
+  const r = getRedis();
+  if (!r) return null;
+  lenientLimiter = new Ratelimit({
+    redis: r,
+    limiter: Ratelimit.slidingWindow(120, '1 m'),
+    prefix: 'rl:lenient',
+  });
+  return lenientLimiter;
+}
+
+function getLenientDailyLimiter(): Ratelimit | null {
+  if (lenientDailyLimiter) return lenientDailyLimiter;
+  const r = getRedis();
+  if (!r) return null;
+  lenientDailyLimiter = new Ratelimit({
+    redis: r,
+    limiter: Ratelimit.slidingWindow(5000, '24 h'),
+    prefix: 'rl:daily:lenient',
+  });
+  return lenientDailyLimiter;
 }
 
 function getStandardDailyLimiter(): Ratelimit | null {
@@ -156,7 +185,7 @@ function getProDailyLimiter(): Ratelimit | null {
 // Original rate limit check (for web app / anonymous requests)
 // ---------------------------------------------------------------------------
 
-export type RateLimitTier = 'standard' | 'strict';
+export type RateLimitTier = 'standard' | 'strict' | 'lenient';
 
 interface RateLimitResult {
   limited: boolean;
@@ -179,8 +208,12 @@ export async function checkRateLimit(
   tier: RateLimitTier,
   corsHeaders: Record<string, string>
 ): Promise<RateLimitResult> {
-  const limiter = tier === 'strict' ? getStrictLimiter() : getStandardLimiter();
-  const dailyLimiter = tier === 'strict' ? getStrictDailyLimiter() : getStandardDailyLimiter();
+  const limiter = tier === 'strict' ? getStrictLimiter()
+    : tier === 'lenient' ? getLenientLimiter()
+    : getStandardLimiter();
+  const dailyLimiter = tier === 'strict' ? getStrictDailyLimiter()
+    : tier === 'lenient' ? getLenientDailyLimiter()
+    : getStandardDailyLimiter();
 
   // If Redis isn't configured, allow the request (fail open)
   if (!limiter) return { limited: false };
