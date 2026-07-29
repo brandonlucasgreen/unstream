@@ -597,6 +597,51 @@ export async function fetchMusicBrainzData(query: string): Promise<import('../ty
   }
 }
 
+// Build a result card from MusicBrainz data alone, for searches where no
+// platform returned anything. Mirrors the server-side Phase 2.2 fallback in
+// api/functions/search-sources.ts: a prominent artist who isn't on any indie
+// platform should still get their official site, socials, and search links
+// instead of an empty results page.
+export function buildMusicBrainzFallbackResult(
+  mbData: import('../types').MusicBrainzData
+): import('../types').SearchResult | null {
+  if (!mbData.artistName) return null;
+  const name = mbData.artistName;
+  const encoded = encodeURIComponent(name);
+
+  const platforms: import('../types').PlatformLink[] = [];
+  if (mbData.officialUrl) {
+    platforms.push({ sourceId: 'officialsite', url: mbData.officialUrl });
+  }
+  if (mbData.discogsUrl) {
+    platforms.push({ sourceId: 'discogs', url: mbData.discogsUrl });
+  }
+  for (const social of mbData.socialLinks || []) {
+    if (!platforms.some(p => p.sourceId === social.platform)) {
+      platforms.push({ sourceId: social.platform, url: social.url });
+    }
+  }
+  // Search links last, so real destinations stay on top.
+  platforms.push(
+    { sourceId: 'bandcamp', url: `https://bandcamp.com/search?q=${encoded}` },
+    { sourceId: 'ampwall', url: `https://ampwall.com/explore?searchStyle=search&query=${encoded}` },
+    { sourceId: 'subvert', url: `https://www.subvert.fm/discover?q=${encoded}&type=artist` },
+    { sourceId: 'kofi', url: `https://duckduckgo.com/?q=site:ko-fi.com+${encoded}` },
+    { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
+  );
+
+  return {
+    id: `mb-${normalizeForComparison(name)}`,
+    name,
+    type: 'artist',
+    platforms,
+    matchConfidence: 'unverified',
+    location: mbData.location,
+    wikipediaSummary: mbData.wikipediaSummary || undefined,
+    wikipediaUrl: mbData.wikipediaUrl || undefined,
+  };
+}
+
 // Merge MusicBrainz data with existing search results
 // Adds officialsite, discogs, hoopla, and freegal platforms to matching artist results.
 // When artistName is null (MB had no match), applies location-only enrichment matched by query.

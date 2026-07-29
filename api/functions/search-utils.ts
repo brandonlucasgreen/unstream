@@ -345,6 +345,26 @@ export function textMatchScore(name: string, query: string): number {
 }
 
 /**
+ * Whether a MusicBrainz enrichment outcome is safe to cache.
+ *
+ * Two things must never be remembered as an artist's data: a failed search
+ * (network error, non-2xx — we don't know anything), and a *partial*
+ * enrichment where MB matched the artist but the url-rels fetch failed —
+ * caching that would pin "this artist has no official site / socials" for the
+ * TTL. A genuine no-match (artistName null after a successful search) IS
+ * cacheable; MB really doesn't know them.
+ */
+export function isCacheableMbResult(result: {
+  searchFailed: boolean;
+  artistName: string | null;
+  enrichmentComplete: boolean;
+}): boolean {
+  if (result.searchFailed) return false;
+  if (result.artistName !== null && !result.enrichmentComplete) return false;
+  return true;
+}
+
+/**
  * Pick partial-match artist names out of a MusicBrainz search result list.
  *
  * MB is a real search engine (Lucene), but the pipeline historically read only

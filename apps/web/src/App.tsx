@@ -8,7 +8,7 @@ import { Header } from './components/Header';
 import { LoadingLabel, SkeletonScreen } from './components/Skeleton';
 import { SearchResultsSkeleton } from './components/LoadingSkeletons';
 import type { SearchResult } from './types';
-import { sources, sourceCategories, searchPlatforms, resolveArtistUrl, fetchMusicBrainzData, mergeWithMusicBrainzData } from './services/sources';
+import { sources, sourceCategories, searchPlatforms, resolveArtistUrl, fetchMusicBrainzData, mergeWithMusicBrainzData, buildMusicBrainzFallbackResult } from './services/sources';
 import { analytics } from './services/analytics';
 import { useAuth } from './contexts/AuthContext';
 import { DownloadGrid } from './components/DownloadGrid';
@@ -152,8 +152,11 @@ function App() {
       setIsLoading(false);
       analytics.trackSearchResults(response.results.length > 0, response.results.length);
 
-      // Phase 2: MusicBrainz enrichment (runs in background)
-      if (response.hasPendingEnrichment && response.results.length > 0) {
+      // Phase 2: MusicBrainz enrichment (runs in background). Also runs when
+      // Phase 1 found NOTHING — MusicBrainz may still know the artist, and an
+      // official-site card beats an empty results page. Skipping Phase 2 on
+      // zero results was why major artists could look like they don't exist.
+      if (response.hasPendingEnrichment) {
         setIsEnriching(true);
 
         try {
@@ -161,7 +164,11 @@ function App() {
 
           // Check if this is still the current search before updating
           if (currentSearchRef.current === searchId && mbData) {
-            setResults(prev => mergeWithMusicBrainzData(prev, mbData));
+            setResults(prev => {
+              if (prev.length > 0) return mergeWithMusicBrainzData(prev, mbData);
+              const fallback = buildMusicBrainzFallbackResult(mbData);
+              return fallback ? [fallback] : prev;
+            });
           }
         } catch (enrichErr) {
           Sentry.captureException(enrichErr, { extra: { context: 'search.musicbrainzEnrichment' } });
