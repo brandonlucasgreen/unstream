@@ -2,7 +2,7 @@
 -- Run this in your Supabase SQL editor to set up the tables.
 --
 -- This file is the canonical baseline. Migrations 002, 006, 008, 010,
--- and 019 are reflected here. Run migrations in order on an existing DB;
+-- 019, and 029 are reflected here. Run migrations in order on an existing DB;
 -- use this file for fresh installs.
 --
 -- Migration 008: verification_code → nullable
@@ -134,4 +134,60 @@ create trigger artists_updated_at
 
 create trigger artist_links_updated_at
   before update on artist_links
+  for each row execute function update_updated_at();
+
+-- Artist releases: one row per release per artist (Migration 029)
+create table artist_releases (
+  id uuid primary key default gen_random_uuid(),
+  artist_id uuid not null references artists(id) on delete cascade,
+  title text not null,
+  slug text not null,  -- slugified title, unique per artist
+  release_type text not null check (release_type in ('album', 'single', 'ep', 'compilation')),
+  release_date date,
+  artwork_url text,
+  musicbrainz_id text,  -- MB release group ID for deduplication
+  source text not null default 'auto',  -- 'auto' | 'claimed'
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique(artist_id, slug)
+);
+
+create index idx_artist_releases_artist_id on artist_releases(artist_id);
+  create index idx_artist_releases_musicbrainz_id on artist_releases(musicbrainz_id);
+
+alter table artist_releases enable row level security;
+
+create policy "Public read access" on artist_releases for select using (true);
+create policy "Service insert" on artist_releases for insert to service_role with check (true);
+create policy "Service update" on artist_releases for update to service_role using (true);
+create policy "Service delete" on artist_releases for delete to service_role using (true);
+
+create trigger artist_releases_updated_at
+  before update on artist_releases
+  for each row execute function update_updated_at();
+
+-- Release links: one row per platform link per release (Migration 029)
+create table release_links (
+  id uuid primary key default gen_random_uuid(),
+  release_id uuid not null references artist_releases(id) on delete cascade,
+  platform text not null,
+  url text not null,
+  is_streaming boolean not null default true,  -- true for Spotify/Apple, false for Bandcamp/merch
+  source text not null default 'auto',  -- 'auto' | 'claimed' | 'bandcamp' | 'mirlo' | 'musicbrainz' | 'itunes'
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique(release_id, platform)
+);
+
+create index idx_release_links_release_id on release_links(release_id);
+
+alter table release_links enable row level security;
+
+create policy "Public read access" on release_links for select using (true);
+create policy "Service insert" on release_links for insert to service_role with check (true);
+create policy "Service update" on release_links for update to service_role using (true);
+create policy "Service delete" on release_links for delete to service_role using (true);
+
+create trigger release_links_updated_at
+  before update on release_links
   for each row execute function update_updated_at();

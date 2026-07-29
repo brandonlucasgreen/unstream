@@ -2,6 +2,7 @@
 // All operations are optional — if Supabase is not configured, they no-op gracefully.
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { mapReleaseType, releaseSlug, isStreamingPlatform } from './release-utils';
 
 let supabase: SupabaseClient | null = null;
 
@@ -22,6 +23,112 @@ export function getClient(): SupabaseClient | null {
 // Generate a URL-safe slug from an artist name
 export function artistSlug(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+/**
+ * Persist latest_release data from platform links into artist_releases + release_links.
+ * Called from persistSearchResults — additive to the jsonb latest_release on artist_links.
+ *
+ * Deduplicates by normalized title: multiple platforms with the same release title
+ * become one artist_releases row with multiple release_links rows.
+ * Idempotent via upsert on (artist_id, slug) and (release_id, platform).
+ */
+async function persistReleasesForArtist(
+  client: SupabaseClient,
+  artistId: string,
+  platforms: PlatformLink[],
+): Promise<void> {
+  // Group by normalized title for deduplication across platforms
+  const byNormTitle = new Map<string, { title: string; type: 'album' | 'track'; platform: PlatformLink }[]>();
+  const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+  for (const p of platforms) {
+    if (!p.latestRelease?.title) continue;
+    const norm = normalize(p.latestRelease.title);
+    if (!norm) continue;
+    const existing = byNormTitle.get(norm) || [];
+    existing.push({ title: p.latestRelease.title, type: p.latestRelease.type, platform: p });
+    byNormTitle.set(norm, existing);
+  }
+
+  for (const [, entries] of byNormTitle) {
+    // Prefer 'album' type if any platform reports it
+    const bestType = entries.some(e => e.type === 'album') ? 'album' : entries[0].type;
+    const title = entries[0].title;
+    const slug = releaseSlug(title);
+
+    // Best artwork and date across platforms
+    const artwork = entries.find(e => e.platform.latestRelease?.imageUrl)?.platform.latestRelease?.imageUrl || null;
+    const dateStr = entries.find(e => e.platform.latestRelease?.releaseDate)?.platform.latestRelease?.releaseDate || null;
+
+    // Parse date to YYYY-MM-DD
+    let releaseDate: string | null = null;
+    if (dateStr) {
+      if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+        releaseDate = dateStr.split('T')[0];
+      } else {
+        const m = dateStr.match(/(\w+)\s+(\d{1,2}),?\s+(\d{4})/);
+        if (m) {
+          const d = new Date(`${m[1]} ${m[2]}, ${m[3]}`);
+          if (!isNaN(d.getTime())) releaseDate = d.toISOString().split('T')[0];
+        }
+        if (!releaseDate) {
+          const m2 = dateStr.match(/(\d{1,2})\s+(\w+)\s+(\d{4})/);
+          if (m2) {
+            const d = new Date(`${m2[2]} ${m2[1]}, ${m2[3]}`);
+            if (!isNaN(d.getTime())) releaseDate = d.toISOString().split('T')[0];
+          }
+        }
+      }
+    }
+
+    try {
+      const { data: releaseRow, error: releaseError } = await client
+        .from('artist_releases')
+        .upsert(
+          {
+            artist_id: artistId,
+            title,
+            slug,
+            release_type: mapReleaseType(bestType),
+            release_date: releaseDate,
+            artwork_url: artwork,
+            source: 'auto',
+          },
+          { onConflict: 'artist_id,slug' }
+        )
+        .select('id')
+        .single();
+
+      if (releaseError || !releaseRow) {
+        console.error(`[DB] Failed to upsert release "${title}":`, releaseError?.message);
+        continue;
+      }
+
+      // Upsert release links for each platform that had this release
+      for (const entry of entries) {
+        const lr = entry.platform.latestRelease!;
+        const { error: linkError } = await client
+          .from('release_links')
+          .upsert(
+            {
+              release_id: releaseRow.id,
+              platform: entry.platform.sourceId,
+              url: lr.url || entry.platform.url,
+              is_streaming: isStreamingPlatform(entry.platform.sourceId),
+              source: 'auto',
+            },
+            { onConflict: 'release_id,platform' }
+          );
+
+        if (linkError) {
+          console.error(`[DB] Failed to upsert release_link for "${title}" / "${entry.platform.sourceId}":`, linkError.message);
+        }
+      }
+    } catch (err) {
+      console.error(`[DB] persistReleasesForArtist error for "${title}":`, err);
+    }
+  }
 }
 
 // Determine if a platform URL is a direct link (not a search URL)
@@ -533,6 +640,12 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
 
       if (linkError) {
         console.error(`[DB] Failed to upsert links for "${result.name}":`, linkError);
+      }
+
+      // Also persist releases to artist_releases + release_links (additive to jsonb)
+      const releasesWithLinks = validPlatforms.filter(p => p.latestRelease);
+      if (releasesWithLinks.length > 0) {
+        await persistReleasesForArtist(client, artistId, releasesWithLinks);
       }
 
       console.log(`[DB] Persisted "${result.name}" with ${linkRows.length} links`);
