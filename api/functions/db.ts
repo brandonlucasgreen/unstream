@@ -63,6 +63,9 @@ interface ArtistProfile {
   websiteUrl?: string;
   featuredEmbed?: string;
   verified: boolean;
+  // Divider positions in the artist's link order — see api/shared/link-dividers.ts.
+  // Carried here so the artist edit page can rebuild the arrangement it saved.
+  linkDividers?: number[];
 }
 
 interface ArtistResult {
@@ -112,6 +115,7 @@ export interface ArtistProfileRow {
   custom_image_url: string | null;
   featured_embed: string | null;
   verified_at: string | null;
+  link_dividers: number[] | null;
 }
 
 export interface ArtistProfileBundle {
@@ -146,7 +150,7 @@ export async function getArtistProfileBySlug(slug: string): Promise<ArtistProfil
     const [profileResult, linksResult] = await Promise.all([
       client
         .from('artist_profiles')
-        .select('bio, custom_image_url, featured_embed, verified_at')
+        .select('bio, custom_image_url, featured_embed, verified_at, link_dividers')
         .eq('artist_id', artistId)
         .single(),
       client
@@ -508,7 +512,7 @@ export async function getArtistBySlug(
       row.match_confidence === 'claimed'
         ? client
             .from('artist_profiles')
-            .select('bio, custom_image_url, website_url, featured_embed, verified_at')
+            .select('bio, custom_image_url, website_url, featured_embed, verified_at, link_dividers')
             .eq('artist_id', row.id)
             .single()
         : Promise.resolve({ data: null }),
@@ -532,6 +536,7 @@ export async function getArtistBySlug(
           websiteUrl: profileData.website_url || undefined,
           featuredEmbed: profileData.featured_embed || undefined,
           verified: !!profileData.verified_at,
+          ...(profileData.link_dividers?.length ? { linkDividers: profileData.link_dividers } : {}),
         };
       }
     }

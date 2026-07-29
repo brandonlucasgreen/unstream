@@ -6,6 +6,7 @@ import { getArtistProfileBySlug } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { PLATFORMS } from '../shared/platform-registry';
 import { isBandcampFriday } from '../shared/bandcamp-friday';
+import { mainLinkDividerIndexes } from '../shared/link-dividers';
 import { sanitizeEmbed } from './artist-profile';
 
 const CORS_HEADERS: Record<string, string> = {
@@ -59,10 +60,11 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     const bcFriday = isBandcampFriday();
 
     // Split links into main (non-social) and social
-    const mainLinks = allLinks.filter(l => {
+    const isMainLink = (l: { platform: string }) => {
       const info = PLATFORMS[l.platform];
       return !info || info.category !== 'social';
-    });
+    };
+    const mainLinks = allLinks.filter(isMainLink);
     const socialLinks = allLinks.filter(l => {
       const info = PLATFORMS[l.platform];
       return info?.category === 'social';
@@ -120,6 +122,8 @@ export async function handler(event: { queryStringParameters?: Record<string, st
         verifiedAt: profile.verified_at,
       } : null,
       links,
+      // Indexes into `links` above which a horizontal divider is drawn.
+      linkDividers: mainLinkDividerIndexes(allLinks, isMainLink, profile?.link_dividers),
       socialLinks: social,
       bandcampFriday: bcFriday,
     };

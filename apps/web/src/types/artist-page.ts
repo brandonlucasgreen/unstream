@@ -22,6 +22,9 @@ export interface ArtistPagePayload {
     payoutPercent: string | null;
     bandcampFriday: boolean;
   }>;
+  // Indexes into `links` above which the artist placed a horizontal divider.
+  // Older cached responses may omit it — treat a missing value as no dividers.
+  linkDividers?: number[];
   socialLinks: Array<{
     platform: string;
     url: string;

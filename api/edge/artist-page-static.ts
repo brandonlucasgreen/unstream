@@ -2,6 +2,7 @@ import { Context } from "https://edge.netlify.com";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { PLATFORMS } from "../shared/platform-registry.ts";
 import { isBandcampFriday } from "../shared/bandcamp-friday.ts";
+import { mainLinkDividerIndexes } from "../shared/link-dividers.ts";
 
 // Allowed embed domains for featured releases (must match api/functions/artist-profile.ts)
 const ALLOWED_EMBED_DOMAINS = [
@@ -184,19 +185,28 @@ export default async function handler(request: Request, context: Context) {
     const pageUrl = `https://unstream.stream/a/${slug}`;
 
     // Separate main platforms from social
-    const mainPlatforms = platforms.filter((p: { platform: string }) => {
+    const isMainPlatform = (p: { platform: string }) => {
       const info = PLATFORM_INFO[p.platform];
       return !info || info.category !== 'social';
-    });
+    };
+    const mainPlatforms = platforms.filter(isMainPlatform);
     const socialPlatforms = platforms.filter((p: { platform: string }) => {
       const info = PLATFORM_INFO[p.platform];
       return info?.category === 'social';
     });
 
+    // Artist-placed dividers, translated into indexes in mainPlatforms
+    const dividerIndexes = new Set(
+      isClaimed ? mainLinkDividerIndexes(platforms, isMainPlatform, profile?.link_dividers) : []
+    );
+
     const bcFriday = isBandcampFriday();
 
     // Build platform links HTML (shared by both claimed and unclaimed)
-    const platformLinksHtml = mainPlatforms.map((p: { platform: string; url: string; display_name?: string }) => {
+    const platformLinksHtml = mainPlatforms.map((p: { platform: string; url: string; display_name?: string }, index: number) => {
+      const divider = dividerIndexes.has(index)
+        ? '<hr style="border:0;border-top:1px solid var(--border);margin:4px 0">'
+        : '';
       const info = PLATFORM_INFO[p.platform];
       const isOther = p.platform === 'other' || p.platform.startsWith('other_');
       const linkName = isOther ? escapeHtml(p.display_name || 'Link') : (info?.name || escapeHtml(p.display_name || p.platform));
@@ -206,7 +216,7 @@ export default async function handler(request: Request, context: Context) {
       const payout = isBCFriday ? '~97%' : info?.payoutPercent;
       const payoutLabel = payout ? `<span style="font-size:12px;color:var(--muted)">${payout} to artist</span>` : '';
       const bcFridayLabel = isBCFriday ? '<span style="font-size:11px;font-weight:700;color:#1da0c3;animation:bc-pulse 2s ease-in-out infinite">Bandcamp Friday!</span>' : '';
-      return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid ${isBCFriday ? '#1da0c340' : 'var(--border)'};background:${isBCFriday ? '#1da0c310' : linkColor + '08'};text-decoration:none;color:var(--text);transition:background 0.15s">
+      return `${divider}<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid ${isBCFriday ? '#1da0c340' : 'var(--border)'};background:${isBCFriday ? '#1da0c310' : linkColor + '08'};text-decoration:none;color:var(--text);transition:background 0.15s">
         <span style="font-size:20px;display:inline-flex;align-items:center;justify-content:center">${linkIcon}</span>
         <span style="flex:1;font-weight:500">${linkName}</span>
         ${payoutLabel}${bcFridayLabel}
