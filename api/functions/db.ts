@@ -483,18 +483,30 @@ export async function findKnownArtistSlugsByName(term: string, limit = 6): Promi
 
   const { data, error } = await client
     .from('artists')
-    .select('slug, match_confidence')
+    .select('slug, name, match_confidence')
     .ilike('name', `%${cleaned}%`)
     .in('match_confidence', ['claimed', 'verified'])
-    .limit(limit * 2);
+    .limit(40);
 
   if (error) {
     console.error('[DB] findKnownArtistSlugsByName error:', error);
     return [];
   }
 
+  // Rank before capping — the query itself returns arbitrary rows, and for a
+  // common name fragment ("patrick") the artist someone is typing toward must
+  // not lose their slot to whichever rows Postgres happened to emit first.
+  const termLower = cleaned.toLowerCase();
   return (data ?? [])
-    .sort((a, b) => (a.match_confidence === 'claimed' ? 0 : 1) - (b.match_confidence === 'claimed' ? 0 : 1))
+    .sort((a, b) => {
+      const aClaimed = a.match_confidence === 'claimed' ? 0 : 1;
+      const bClaimed = b.match_confidence === 'claimed' ? 0 : 1;
+      if (aClaimed !== bClaimed) return aClaimed - bClaimed;
+      const aPrefix = a.name.toLowerCase().startsWith(termLower) ? 0 : 1;
+      const bPrefix = b.name.toLowerCase().startsWith(termLower) ? 0 : 1;
+      if (aPrefix !== bPrefix) return aPrefix - bPrefix;
+      return a.name.length - b.name.length;
+    })
     .slice(0, limit)
     .map(r => r.slug)
     .filter(Boolean);
@@ -533,7 +545,12 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
         return;
       }
 
-      // Upsert artist — always store as unverified until claimed
+      // Upsert artist, keeping the pipeline's verdict. This used to hardcode
+      // 'unverified', which made the stored confidence meaningless — every
+      // non-claimed row was 'unverified' forever, so quality filters over the
+      // table (partial-name discovery, typeahead) could never distinguish a
+      // release-corroborated artist from name-match junk. Rows refresh on
+      // every search, so the stored verdict tracks the latest pipeline run.
       const { data: artist, error: artistError } = await client
         .from('artists')
         .upsert(
@@ -541,7 +558,7 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
             slug,
             name: result.name,
             image_url: result.imageUrl || null,
-            match_confidence: 'unverified',
+            match_confidence: result.matchConfidence === 'verified' ? 'verified' : 'unverified',
             source: 'auto',
             updated_at: new Date().toISOString(),
           },
