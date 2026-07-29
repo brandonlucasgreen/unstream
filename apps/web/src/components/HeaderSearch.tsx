@@ -84,7 +84,14 @@ export function HeaderSearch({
         aria-label="Search artists"
         enterKeyHint="search"
         autoFocus={autoFocus}
-        className="w-full bg-bg-secondary border border-border rounded-lg pl-9 pr-3 py-2 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary transition-colors"
+        // text-base (16px) below lg: iOS Safari zooms in on focus for any input
+        // under 16px, which also breaks the page's responsive width until the
+        // user manually zooms back out. Desktop keeps text-sm to match the nav.
+        className={
+          'w-full bg-bg-secondary border border-border rounded-lg pl-9 pr-3 py-2 ' +
+          'text-base lg:text-sm text-text-primary placeholder-text-muted ' +
+          'focus:outline-none focus:border-accent-primary transition-colors'
+        }
         role="combobox"
         aria-expanded={suggest.isOpen}
         aria-controls="header-search-suggestions"
