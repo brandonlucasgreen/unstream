@@ -264,9 +264,43 @@ export interface LinkSuppression {
   artist_name_norm: string | null;
 }
 
-/** Compare two platform URLs ignoring case and trailing slashes. */
+/**
+ * A key identifying the *page* a platform URL points at, for suppression matching.
+ *
+ * Scheme and a leading `www.` are dropped, and the trailing slash and case are
+ * normalized, because the same page reaches us in several spellings: probe results
+ * are https, some MusicBrainz relations and older stored `artist_links` rows are
+ * http, and official-site scrapes carry whatever the page linked. A suppression
+ * saved from one spelling has to match all of them, or the removed link quietly
+ * comes back through a different source.
+ *
+ * The query string is kept — it is what distinguishes one search-only link from
+ * another (`?q=artist-a` vs `?q=artist-b`).
+ */
 export function normalizeUrlForMatch(url: string): string {
-  return url.trim().replace(/\/+$/, '').toLowerCase();
+  const trimmed = url.trim();
+  try {
+    const parsed = new URL(trimmed);
+    const host = parsed.hostname.replace(/^www\./, '');
+    const path = parsed.pathname.replace(/\/+$/, '');
+    return `${host}${path}${parsed.search}${parsed.hash}`.toLowerCase();
+  } catch {
+    // Not a parseable URL (shouldn't happen — the admin endpoint validates, and
+    // platform URLs come from parsed pages). Fall back to a plain string key so
+    // the comparison stays total rather than throwing mid-pipeline.
+    return trimmed.replace(/\/+$/, '').toLowerCase();
+  }
+}
+
+/**
+ * The host-and-path part of a match key, for coarse SQL prefiltering.
+ *
+ * Deliberately drops the query string so a single `ILIKE %…%` can find rows in
+ * any scheme or `www.` spelling; the exact decision is still
+ * `normalizeUrlForMatch` equality in JS.
+ */
+export function urlMatchPrefilter(url: string): string {
+  return normalizeUrlForMatch(url).split(/[?#]/)[0];
 }
 
 export function isUrlSuppressed(

@@ -13,7 +13,9 @@
 
 CREATE TABLE IF NOT EXISTS platform_link_suppressions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  -- Normalized by the API: lowercased, trailing slashes stripped.
+  -- Match key, not a display URL: normalizeUrlForMatch() in search-utils.ts
+  -- lowercases, strips the scheme, a leading www., and trailing slashes, so the
+  -- same page suppresses whichever spelling a source hands back.
   url text NOT NULL,
   -- Platform the link belonged to, for display in the admin list only.
   source_id text,

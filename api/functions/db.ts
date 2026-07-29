@@ -2,6 +2,7 @@
 // All operations are optional — if Supabase is not configured, they no-op gracefully.
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { normalizeUrlForMatch, urlMatchPrefilter } from './search-utils';
 
 let supabase: SupabaseClient | null = null;
 
@@ -255,9 +256,11 @@ export async function deleteStoredLinksForUrl(url: string, artistName: string | 
   const client = getClient();
   if (!client) return 0;
 
-  const target = url.trim().replace(/\/+$/, '').toLowerCase();
-  // ilike treats % and _ as wildcards; a URL may legitimately contain either.
-  const pattern = `${target.replace(/[%_\\]/g, m => `\\${m}`)}%`;
+  const target = normalizeUrlForMatch(url);
+  // Coarse prefilter on host+path so rows stored as http://, https:// or with a
+  // www. prefix are all candidates; ilike treats % and _ as wildcards, and a URL
+  // may legitimately contain either.
+  const pattern = `%${urlMatchPrefilter(url).replace(/[%_\\]/g, m => `\\${m}`)}%`;
 
   try {
     let artistId: string | null = null;
@@ -281,10 +284,10 @@ export async function deleteStoredLinksForUrl(url: string, artistName: string | 
       return 0;
     }
 
-    // The prefix match above is a filter, not the decision — compare normalized
-    // URLs so `.../music` isn't deleted along with `...`.
+    // The ilike above is a filter, not the decision — compare match keys so
+    // `.../music` isn't deleted along with `...`.
     const ids = ((data as { id: string; url: string }[]) || [])
-      .filter(row => row.url.trim().replace(/\/+$/, '').toLowerCase() === target)
+      .filter(row => normalizeUrlForMatch(row.url) === target)
       .map(row => row.id);
     if (ids.length === 0) return 0;
 

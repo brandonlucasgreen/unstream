@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MobileNav, type NavItem } from './MobileNav';
+import { MobileNav, isNavGroup, type NavEntry, type NavGroup } from './MobileNav';
+import { NavDropdown } from './NavDropdown';
 import { useAuth } from '../contexts/AuthContext';
 
 function UnstreamLogo() {
@@ -65,14 +66,31 @@ export function Header() {
     navigate('/login');
   }
 
+  // Every admin destination in one group rather than a growing row of top-level
+  // items. /admin/merge is deliberately absent: it acts on results selected on a
+  // search page and has nothing to show when opened directly.
+  //
+  // The group carries the pending-verification emphasis so a queue waiting for
+  // review is still visible without opening the menu.
+  const adminGroup: NavGroup = {
+    label: 'Admin',
+    emphasis: pendingVerifyCount > 0,
+    items: [
+      {
+        to: '/admin/verify',
+        label: pendingVerifyCount > 0 ? `Verify (${pendingVerifyCount})` : 'Verify',
+        emphasis: pendingVerifyCount > 0,
+      },
+      { to: '/admin/links', label: 'Removed links' },
+      { to: '/admin/analytics', label: 'Analytics' },
+    ],
+  };
+
   // Shared by the inline desktop nav and the mobile hamburger menu, so new
   // items only need adding in one place.
-  const navItems: NavItem[] = session
+  const navItems: NavEntry[] = session
     ? [
-        ...(isAdmin && pendingVerifyCount > 0
-          ? [{ to: '/admin/verify', label: `Verify (${pendingVerifyCount})`, emphasis: true }]
-          : []),
-        ...(isAdmin ? [{ to: '/admin/links', label: 'Links' }] : []),
+        ...(isAdmin ? [adminGroup] : []),
         { to: '/dashboard', label: 'Dashboard', emphasis: true },
         { to: '/settings', label: 'Settings' },
       ]
@@ -94,15 +112,17 @@ export function Header() {
             {user?.email}
           </span>
         )}
-        {navItems.map(item => (
+        {navItems.map(entry => isNavGroup(entry) ? (
+          <NavDropdown key={entry.label} group={entry} />
+        ) : (
           <Link
-            key={item.to}
-            to={item.to}
-            className={item.emphasis
+            key={entry.to}
+            to={entry.to}
+            className={entry.emphasis
               ? 'text-accent-primary hover:underline font-medium'
               : 'text-text-muted hover:text-text-primary transition-colors'}
           >
-            {item.label}
+            {entry.label}
           </Link>
         ))}
         {session && (
