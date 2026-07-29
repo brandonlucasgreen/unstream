@@ -232,19 +232,19 @@ function App() {
       {/* Search section */}
       <main className="px-4 pb-16">
         <div className="max-w-4xl mx-auto">
+          {/* Download buttons — above search, hidden in PWA mode */}
+          {!isStandalone && (
+          <div className="mb-[30px]">
+            <DownloadGrid />
+          </div>
+          )}
+
           <SearchBar
             onSearch={handleSearch}
             isLoading={isLoading || isResolving}
             initialQuery={resolvedQuery}
             onReset={hasSearched ? handleGoHome : undefined}
           />
-
-          {/* Download buttons — below search, hidden in PWA mode */}
-          {!isStandalone && (
-          <div className="mt-[30px]">
-            <DownloadGrid />
-          </div>
-          )}
 
           {/* Resolving URL state */}
           {isResolving && (
