@@ -1,25 +1,11 @@
 // Redis cache utility using Upstash
 // Used to cache external API responses (e.g., Ampwall) to reduce load on partners
+//
+// A Redis outage degrades to "every lookup is a miss", which is safe but means every repeat
+// query re-fetches from the partner. That is a politeness problem as much as a latency one,
+// so failures are reported rather than swallowed — see api/functions/redis.ts.
 
-import { Redis } from '@upstash/redis';
-
-// Initialize Redis client (lazy - only connects when first used)
-let redis: Redis | null = null;
-
-function getRedis(): Redis | null {
-  if (redis) return redis;
-
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-
-  if (!url || !token) {
-    console.warn('[Cache] Upstash Redis not configured - caching disabled');
-    return null;
-  }
-
-  redis = new Redis({ url, token });
-  return redis;
-}
+import { getRedis, reportRedisFailure } from './redis';
 
 // Default TTL: 30 minutes
 const DEFAULT_TTL = 30 * 60;
@@ -38,7 +24,8 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
     }
     return value;
   } catch (error) {
-    console.error(`[Cache] GET error for ${key}:`, error);
+    // Indistinguishable from a miss to the caller, which is why it must be reported.
+    reportRedisFailure(`cacheGet(${key})`, error);
     return null;
   }
 }
@@ -55,7 +42,7 @@ export async function cacheSet<T>(key: string, value: T, ttlSeconds: number = DE
     console.log(`[Cache] SET: ${key} (TTL: ${ttlSeconds}s)`);
     return true;
   } catch (error) {
-    console.error(`[Cache] SET error for ${key}:`, error);
+    reportRedisFailure(`cacheSet(${key})`, error);
     return false;
   }
 }
@@ -113,7 +100,7 @@ export async function cacheDelete(key: string): Promise<boolean> {
     console.log(`[Cache] DEL: ${key}`);
     return true;
   } catch (error) {
-    console.error(`[Cache] DEL error for ${key}:`, error);
+    reportRedisFailure(`cacheDelete(${key})`, error);
     return false;
   }
 }
@@ -141,7 +128,7 @@ export async function cacheDeleteByArtist(artistName: string): Promise<void> {
       console.log(`[Cache] Purged ${keys.length} cached entries for artist "${artistName}"`);
     }
   } catch (error) {
-    console.error(`[Cache] Purge error for artist "${artistName}":`, error);
+    reportRedisFailure(`cacheDeleteByArtist(${artistName})`, error);
   }
 }
 

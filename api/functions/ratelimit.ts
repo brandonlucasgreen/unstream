@@ -2,26 +2,9 @@
 // Provides per-IP and per-API-key rate limiting for API endpoints
 // Supports tiered limits: anonymous (strict), free, pro, internal
 
-import { Redis } from '@upstash/redis';
 import { Ratelimit } from '@upstash/ratelimit';
 import type { ApiKeyInfo } from './middleware';
-
-let redis: Redis | null = null;
-
-function getRedis(): Redis | null {
-  if (redis) return redis;
-
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-
-  if (!url || !token) {
-    console.warn('[RateLimit] Upstash Redis not configured - rate limiting disabled');
-    return null;
-  }
-
-  redis = new Redis({ url, token });
-  return redis;
-}
+import { getRedis, reportRedisFailure } from './redis';
 
 // ---------------------------------------------------------------------------
 // Rate limit tiers
@@ -215,8 +198,10 @@ export async function checkRateLimit(
     : tier === 'lenient' ? getLenientDailyLimiter()
     : getStandardDailyLimiter();
 
-  // If Redis isn't configured, allow the request (fail open)
-  if (!limiter) return { limited: false };
+  // If Redis isn't configured, allow the request (fail open). The getRedis() call is not
+  // redundant: the limiter getters above memoize, so a cached limiter cannot tell us that
+  // the circuit breaker has since opened.
+  if (!limiter || !getRedis()) return { limited: false };
 
   try {
     // Run the daily and per-minute checks in parallel — each is a Redis round-trip,
@@ -261,7 +246,7 @@ export async function checkRateLimit(
     return { limited: false };
   } catch (error) {
     // Fail open — don't block requests if Redis is down
-    console.error('[RateLimit] Check failed, allowing request:', error);
+    reportRedisFailure(`checkRateLimit(${tier})`, error);
     return { limited: false };
   }
 }
@@ -318,7 +303,8 @@ export async function checkApiRateLimit(
   // Use key UUID as identifier for per-key rate limiting (prefix is too short for uniqueness)
   const keyId = `rl:api:${apiKeyInfo.id}`;
 
-  if (!perMin) return { limited: false, rateLimitInfo: { limit: perMinLimit, remaining: perMinLimit, reset: Math.ceil(Date.now() / 1000) + 60 } };
+  // As in checkRateLimit, re-check getRedis() so a memoized limiter can't outlive the circuit.
+  if (!perMin || !getRedis()) return { limited: false, rateLimitInfo: { limit: perMinLimit, remaining: perMinLimit, reset: Math.ceil(Date.now() / 1000) + 60 } };
 
   try {
     // Daily and per-minute checks run in parallel (each is a Redis round-trip).
@@ -388,7 +374,7 @@ export async function checkApiRateLimit(
     };
   } catch (error) {
     // Fail open — don't block requests if Redis is down
-    console.error('[RateLimit] API rate limit check failed, allowing request:', error);
+    reportRedisFailure(`checkApiRateLimit(${apiKeyInfo.tier})`, error);
     return { limited: false, rateLimitInfo: { limit: perMinLimit, remaining: perMinLimit, reset: Math.ceil(Date.now() / 1000) + 60 } };
   }
 }
@@ -417,7 +403,7 @@ export async function checkSentryDedup(key: string, ttlSeconds: number): Promise
     return true;
   } catch (err) {
     // On Redis error, don't block Sentry capture — fail open
-    console.warn('[RateLimit] checkSentryDedup error, allowing capture:', err);
+    reportRedisFailure('checkSentryDedup', err);
     return true;
   }
 }

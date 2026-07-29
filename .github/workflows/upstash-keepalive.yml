@@ -1,0 +1,46 @@
+name: Upstash keepalive
+
+# Upstash deletes free-tier databases after 14 days of inactivity. In July 2026 the Unstream
+# database was reaped, which silently disabled rate limiting AND response caching — pushing
+# production search to 13-30s and re-scraping partner sites on every repeat query.
+#
+# This runs twice a week (max 4-day gap) so the database never approaches that threshold, and
+# it is a separate workflow rather than a step in schedule-social-posts.yml on purpose: a
+# failure over there must not take the keepalive down with it.
+#
+# It is a backstop, not the primary signal. Real traffic keeps the database warm on its own;
+# if this workflow is the only thing touching Redis, that is itself worth knowing.
+
+on:
+  schedule:
+    - cron: '0 6 * * 1,4' # Mondays and Thursdays, 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Upstash Redis
+        env:
+          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+        run: |
+          if [ -z "$UPSTASH_REDIS_REST_URL" ] || [ -z "$UPSTASH_REDIS_REST_TOKEN" ]; then
+            echo "::error::UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN secrets are not set"
+            exit 1
+          fi
+
+          # A SET with an expiry is a write, so it counts as activity and leaves nothing behind.
+          response=$(curl -sS -w '\n%{http_code}' \
+            -H "Authorization: Bearer $UPSTASH_REDIS_REST_TOKEN" \
+            "$UPSTASH_REDIS_REST_URL/set/keepalive/$(date -u +%Y-%m-%dT%H:%M:%SZ)?EX=86400")
+
+          status=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+
+          if [ "$status" != "200" ]; then
+            echo "::error::Upstash ping failed with HTTP $status: $body"
+            exit 1
+          fi
+
+          echo "Upstash ping OK: $body"
