@@ -60,7 +60,7 @@ create table if not exists public.release_links (
   platform text not null,
   url text not null,
   is_streaming boolean not null default true,  -- true for Spotify/Apple, false for Bandcamp/merch
-  source text not null default 'auto',         -- 'auto' | 'claimed' | 'bandcamp' | 'mirlo' | 'musicbrainz' | 'itunes'
+  source text not null default 'auto',         -- 'auto' | 'claimed' (platform provenance is in the 'platform' column)
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique(release_id, platform)

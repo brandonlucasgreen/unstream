@@ -16,6 +16,38 @@ export function releaseSlug(title: string): string {
   return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
+/**
+ * Normalize a release title for deduplication across platforms.
+ * Includes .trim() — without it, "Album Name" and "Album Name " produce
+ * different normalized keys, causing the same release to be stored twice.
+ * Used by db.ts (persistReleasesForArtist) and scripts/migrate-releases.ts.
+ */
+export function normalizeReleaseTitle(title: string): string {
+  return title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+/**
+ * Generate a slug with collision avoidance.
+ * If the base slug from releaseSlug() would collide with an existing release
+ * that has a different title, append a 6-char hash of the title to disambiguate.
+ * Returns the slug to use, and whether a hash suffix was added.
+ */
+export function releaseSlugWithCollision(
+  title: string,
+  existingTitlesBySlug: Map<string, string>,
+): string {
+  const base = releaseSlug(title);
+  const existingTitle = existingTitlesBySlug.get(base);
+  if (existingTitle && existingTitle !== title) {
+    // Collision: a different title produced the same slug. Append a 6-char hash.
+    const hash = Buffer.from(title)
+      .toString('hex')
+      .slice(0, 6);
+    return `${base}-${hash}`;
+  }
+  return base;
+}
+
 /** Streaming platforms where you listen but can't buy directly. */
 export const STREAMING_PLATFORMS = new Set([
   'spotify',

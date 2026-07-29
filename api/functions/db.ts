@@ -2,7 +2,7 @@
 // All operations are optional — if Supabase is not configured, they no-op gracefully.
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { mapReleaseType, releaseSlug, isStreamingPlatform } from './release-utils';
+import { mapReleaseType, releaseSlugWithCollision, isStreamingPlatform, normalizeReleaseTitle } from './release-utils';
 
 let supabase: SupabaseClient | null = null;
 
@@ -38,24 +38,38 @@ async function persistReleasesForArtist(
   artistId: string,
   platforms: PlatformLink[],
 ): Promise<void> {
-  // Group by normalized title for deduplication across platforms
+  // Group by normalized title for deduplication across platforms.
+  // Uses the shared normalizeReleaseTitle (includes .trim()) to avoid
+  // normalization drift between the migration script and the live pipeline.
   const byNormTitle = new Map<string, { title: string; type: 'album' | 'track'; platform: PlatformLink }[]>();
-  const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
   for (const p of platforms) {
     if (!p.latestRelease?.title) continue;
-    const norm = normalize(p.latestRelease.title);
+    const norm = normalizeReleaseTitle(p.latestRelease.title);
     if (!norm) continue;
     const existing = byNormTitle.get(norm) || [];
     existing.push({ title: p.latestRelease.title, type: p.latestRelease.type, platform: p });
     byNormTitle.set(norm, existing);
   }
 
+  // Fetch existing slugs for this artist to detect collisions (issue #3).
+  // Two different titles can produce the same slug (e.g. "Album Name" and
+  // "Album Name." both become "album-name"). The upsert on (artist_id, slug)
+  // would silently clobber the first with the second. We detect this and
+  // append a 6-char hash to disambiguate.
+  const { data: existingReleases } = await client
+    .from('artist_releases')
+    .select('slug,title')
+    .eq('artist_id', artistId);
+  const existingTitlesBySlug = new Map<string, string>(
+    (existingReleases || []).map((r: { slug: string; title: string }) => [r.slug, r.title])
+  );
+
   for (const [, entries] of byNormTitle) {
     // Prefer 'album' type if any platform reports it
     const bestType = entries.some(e => e.type === 'album') ? 'album' : entries[0].type;
     const title = entries[0].title;
-    const slug = releaseSlug(title);
+    const slug = releaseSlugWithCollision(title, existingTitlesBySlug);
 
     // Best artwork and date across platforms
     const artwork = entries.find(e => e.platform.latestRelease?.imageUrl)?.platform.latestRelease?.imageUrl || null;
@@ -105,17 +119,24 @@ async function persistReleasesForArtist(
         continue;
       }
 
-      // Upsert release links for each platform that had this release
+      // Upsert release links for each platform that had this release.
+      // Skip links where lr.url is missing — a release link pointing to the
+      // artist's profile page (the old fallback) is worse than no link.
       for (const entry of entries) {
-        const lr = entry.platform.latestRelease!;
+        if (!entry.platform.latestRelease) continue; // explicit guard (issue #8)
+        const lr = entry.platform.latestRelease;
+        if (!lr.url) continue; // skip if no release-specific URL (issue #5)
+
         const { error: linkError } = await client
           .from('release_links')
           .upsert(
             {
               release_id: releaseRow.id,
               platform: entry.platform.sourceId,
-              url: lr.url || entry.platform.url,
+              url: lr.url,
               is_streaming: isStreamingPlatform(entry.platform.sourceId),
+              // 'source' tracks provenance: 'auto' vs 'claimed' per spec.
+              // The platform name goes in the 'platform' column, not 'source' (issue #4).
               source: 'auto',
             },
             { onConflict: 'release_id,platform' }

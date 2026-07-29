@@ -9,7 +9,7 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { mapReleaseType, releaseSlug as slugify, isStreamingPlatform } from '../api/functions/release-utils';
+import { mapReleaseType, releaseSlugWithCollision, isStreamingPlatform, normalizeReleaseTitle } from '../api/functions/release-utils';
 
 // ── Types matching the jsonb shape on artist_links.latest_release ──────────
 
@@ -39,10 +39,8 @@ interface ArtistRow {
 // Now uses shared releaseSlug from release-utils.ts.
 
 // ── Dedup key: normalized title for matching across platforms ─────────────
-
-function normalizeTitle(title: string): string {
-  return title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-}
+// Uses the shared normalizeReleaseTitle (includes .trim()) to avoid
+// normalization drift between this migration and the live pipeline in db.ts.
 
 // ── Main migration ────────────────────────────────────────────────────────
 
@@ -125,7 +123,7 @@ async function main() {
       const lr = link.latest_release;
       if (!lr || !lr.title) continue;
 
-      const normTitle = normalizeTitle(lr.title);
+      const normTitle = normalizeReleaseTitle(lr.title);
       if (!normTitle) continue;
 
       const existing = releasesByNormTitle.get(normTitle);
@@ -146,8 +144,17 @@ async function main() {
     }
 
     // Insert releases and their links
+    // Fetch existing slugs for this artist to detect collisions (issue #3).
+    const { data: existingReleases } = await client
+      .from('artist_releases')
+      .select('slug,title')
+      .eq('artist_id', artistId);
+    const existingTitlesBySlug = new Map<string, string>(
+      (existingReleases || []).map((r: { slug: string; title: string }) => [r.slug, r.title])
+    );
+
     for (const { title, type, links: releaseLinks } of releasesByNormTitle.values()) {
-      const slug = slugify(title);
+      const slug = releaseSlugWithCollision(title, existingTitlesBySlug);
       const releaseType = mapReleaseType(type);
 
       // Extract the best artwork URL and release date from the links
@@ -214,7 +221,10 @@ async function main() {
       for (const link of releaseLinks) {
         const lr = link.latest_release!;
         const platform = link.platform;
-        const url = lr.url || link.url; // Prefer the release-specific URL, fall back to artist link URL
+        // Skip links where the release-specific URL is missing — a release link
+        // pointing to the artist's profile page is worse than no link (issue #5).
+        if (!lr.url) continue;
+        const url = lr.url;
 
         const { error: linkError } = await client
           .from('release_links')
@@ -224,6 +234,8 @@ async function main() {
               platform,
               url,
               is_streaming: isStreamingPlatform(platform),
+              // 'source' is 'auto' vs 'claimed' per spec. Platform name goes in
+              // the 'platform' column, not 'source' (issue #4).
               source: 'auto',
             },
             { onConflict: 'release_id,platform' }

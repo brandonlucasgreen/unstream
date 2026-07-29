@@ -1,7 +1,13 @@
 import { parse } from 'node-html-parser';
-import { getClient, artistSlug } from './db.js';
-import { mapReleaseType, releaseSlug, isStreamingPlatform, bandcampReleaseType } from './release-utils.js';
+import { isUrlHostnameAllowed } from './middleware.js';
+import { bandcampReleaseType } from './release-utils.js';
 import { checkRateLimit, getClientIp } from './ratelimit.js';
+
+// Note on releaseType mapping: the API returns 'album' | 'track' from the
+// platform parsers, while the DB stores the enum 'album' | 'single' | 'ep' |
+// 'compilation'. mapReleaseType() in release-utils.ts handles the mapping
+// ('track' → 'single', 'album' → 'album'). This endpoint returns the raw
+// platform values; persistence (via db.ts) applies the mapping.
 
 interface PlatformUrls {
   bandcamp?: string;
@@ -26,119 +32,6 @@ interface CheckReleasesResponse {
   artistName: string;
   release: ReleaseResult | null;
   error?: string;
-}
-
-// ── Release persistence (artist_releases + release_links) ─────────────────
-//
-// When check-releases finds a release, it writes to the new release tables
-// in addition to returning the data. The jsonb latest_release on artist_links
-// is still written by persistSearchResults in db.ts for backward compatibility.
-// These tables are additive.
-//
-// Security: before persisting, we validate that the release URL's domain
-// matches a platform link already stored on the artist in artist_links.
-// This prevents arbitrary URL injection via the unauthenticated endpoint.
-
-/**
- * Persist a detected release to artist_releases + release_links.
- * Idempotent: upserts on (artist_id, slug) and (release_id, platform).
- * Fire-and-forget — errors are logged but don't fail the response.
- */
-async function persistRelease(
-  artistName: string,
-  release: ReleaseResult,
-): Promise<void> {
-  const client = getClient();
-  if (!client) return;
-
-  try {
-    const slug = artistSlug(artistName);
-
-    // Look up the artist by slug
-    const { data: artist, error: artistError } = await client
-      .from('artists')
-      .select('id')
-      .eq('slug', slug)
-      .single();
-
-    if (artistError || !artist) {
-      // Artist not in DB — nothing to persist
-      return;
-    }
-
-    const artistId = artist.id;
-
-    // Validate that the release URL's domain matches a platform link already
-    // stored on this artist. This prevents arbitrary URL injection via the
-    // unauthenticated endpoint — only releases from known artist platform URLs
-    // are persisted.
-    const { data: artistLinks } = await client
-      .from('artist_links')
-      .select('platform, url')
-      .eq('artist_id', artistId);
-
-    if (!artistLinks || artistLinks.length === 0) return;
-
-    const releaseDomain = new URL(release.releaseUrl).hostname.replace(/^www\./, '');
-    const hasMatchingLink = artistLinks.some((link: { platform: string; url: string }) => {
-      try {
-        const linkDomain = new URL(link.url).hostname.replace(/^www\./, '');
-        return linkDomain === releaseDomain;
-      } catch {
-        return false;
-      }
-    });
-
-    if (!hasMatchingLink) {
-      console.log(`[check-releases] Skipping persist: release URL domain ${releaseDomain} does not match any artist_link`);
-      return;
-    }
-
-    const relSlug = releaseSlug(release.releaseName);
-    const releaseType = mapReleaseType(release.releaseType);
-
-    // Upsert the release
-    const { data: releaseRow, error: releaseError } = await client
-      .from('artist_releases')
-      .upsert(
-        {
-          artist_id: artistId,
-          title: release.releaseName,
-          slug: relSlug,
-          release_type: releaseType,
-          release_date: release.releaseDate,
-          source: 'auto',
-        },
-        { onConflict: 'artist_id,slug' }
-      )
-      .select('id')
-      .single();
-
-    if (releaseError || !releaseRow) {
-      console.error('[check-releases] Failed to upsert artist_releases:', releaseError?.message);
-      return;
-    }
-
-    // Upsert the release link for this platform
-    const { error: linkError } = await client
-      .from('release_links')
-      .upsert(
-        {
-          release_id: releaseRow.id,
-          platform: release.platform,
-          url: release.releaseUrl,
-          is_streaming: isStreamingPlatform(release.platform),
-          source: release.platform, // 'bandcamp' | 'faircamp' | 'mirlo'
-        },
-        { onConflict: 'release_id,platform' }
-      );
-
-    if (linkError) {
-      console.error('[check-releases] Failed to upsert release_links:', linkError.message);
-    }
-  } catch (err) {
-    console.error('[check-releases] persistRelease error:', err);
-  }
 }
 
 // Helper to fetch with timeout
@@ -466,7 +359,7 @@ export async function handler(event: {
   };
 
   // Rate limit: strict tier (10 req/min, 500/day) — this endpoint fetches
-  // external pages and writes to the DB, so it's expensive.
+  // external pages, so it's expensive.
   const ip = getClientIp(event.headers || {});
   const rl = await checkRateLimit(ip, 'strict', corsHeaders);
   if (rl.limited) return rl.response;
@@ -490,10 +383,7 @@ export async function handler(event: {
   if (!request.artistName || !request.platforms) {
     return {
       statusCode: 400,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'artistName and platforms are required' }),
     };
   }
@@ -506,23 +396,36 @@ export async function handler(event: {
   if (!hasPlatform) {
     return {
       statusCode: 400,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'At least one platform URL is required' }),
     };
+  }
+
+  // SSRF protection: validate every inbound platform URL against the hostname
+  // allowlist before any fetch. This endpoint is called by the Mac app and
+  // browser extension with no auth — without this check, it would be an open proxy.
+  const platformUrls = [
+    request.platforms.bandcamp,
+    request.platforms.faircamp,
+    request.platforms.mirlo,
+  ].filter(Boolean) as string[];
+
+  for (const url of platformUrls) {
+    if (!isUrlHostnameAllowed(url)) {
+      return {
+        statusCode: 400,
+        headers: corsHeaders,
+        body: JSON.stringify({ error: `URL not allowed: ${url}` }),
+      };
+    }
   }
 
   try {
     const release = await checkAllPlatforms(request.platforms);
 
-    // Persist to artist_releases + release_links (fire-and-forget, additive to jsonb)
-    if (release) {
-      persistRelease(request.artistName, release).catch(err =>
-        console.error('[check-releases] Background persist failed:', err)
-      );
-    }
+    // Note: this endpoint is read-only. It does NOT persist to the database.
+    // All writes to artist_releases + release_links go through persistSearchResults
+    // in db.ts, which runs from the authenticated search pipeline.
 
     const response: CheckReleasesResponse = {
       artistName: request.artistName,
