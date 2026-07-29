@@ -104,26 +104,32 @@ export function Header() {
   // For the same reason, don't add a transform or filter to this element.
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-bg-primary">
-      <div className="p-4 flex items-center gap-4">
+      <div className="relative p-4 flex items-center gap-4">
         <Link to="/" className="text-xl font-bold text-text-primary hover:opacity-80 transition-opacity shrink-0 flex items-center gap-2">
           <UnstreamLogo />
           Unstream
         </Link>
 
-        {/* Search is available from every page, not just the homepage. Below md
-            there isn't room for the wordmark, an input and the nav at once, so
-            the magnifier below opens the same component as a second row. */}
-        <div className="hidden md:flex flex-1 min-w-0 justify-center">
-          <div className="w-full max-w-md">
-            <HeaderSearch />
-          </div>
+        {/* Search is available from every page, not just the homepage.
+            Positioned absolutely rather than as a flex child so it sits at the
+            true centre of the header. As a flex child it was only centred within
+            whatever space the sides left over, so a signed-in admin's longer nav
+            pushed it visibly left of centre while a logged-out visitor's did not.
+            The transform is scoped to this wrapper and must NOT be moved onto
+            <header>: a transform there would become the containing block for
+            MobileNav's fixed overlay, trapping the drawer inside the header.
+            Inline from lg only — below that the nav takes so much of the row that
+            a centred bar could only be ~140px wide, so the magnifier opens the
+            same component as a full-width second row instead. */}
+        <div className="hidden lg:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm xl:max-w-md px-4">
+          <HeaderSearch />
         </div>
 
         <div className="flex items-center gap-1 ml-auto">
           <button
             type="button"
             onClick={() => setMobileSearchOpen(open => !open)}
-            className="md:hidden p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors"
+            className="lg:hidden p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors"
             aria-label="Search artists"
             aria-expanded={mobileSearchOpen}
             aria-controls="header-search-row"
@@ -133,14 +139,11 @@ export function Header() {
             </svg>
           </button>
 
+          {/* No email here. It's the widest and least predictable thing on this
+              side (an address can be 15 or 40 characters), which is exactly what
+              made a centred bar collide at laptop widths. It's still in the
+              mobile drawer and on /settings. */}
           <nav className="hidden sm:flex items-center gap-3 text-sm">
-            {session && (
-              // lg rather than md: the email competes with the search bar for
-              // the middle of the header on a laptop-width screen.
-              <span className="text-text-muted hidden lg:inline">
-                {user?.email}
-              </span>
-            )}
             {navItems.map(entry => isNavGroup(entry) ? (
               <NavDropdown key={entry.label} group={entry} />
             ) : (
@@ -173,7 +176,7 @@ export function Header() {
       </div>
 
       {mobileSearchOpen && (
-        <div id="header-search-row" className="md:hidden px-4 pb-4">
+        <div id="header-search-row" className="lg:hidden px-4 pb-4">
           <HeaderSearch autoFocus onClose={() => setMobileSearchOpen(false)} />
         </div>
       )}

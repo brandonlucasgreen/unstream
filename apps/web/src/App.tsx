@@ -15,6 +15,7 @@ import { DownloadGrid } from './components/DownloadGrid';
 import { Footer } from './components/Footer';
 import { PlatformIcon } from './components/PlatformIcon';
 import { badgeColors } from './utils/colors';
+import { DEFAULT_PAGE_TITLE } from './data/seo';
 import './index.css';
 
 function App() {
@@ -61,16 +62,13 @@ function App() {
   const lastSearchedRef = useRef<string>('');
   const letterbirdRef = useRef<HTMLDivElement>(null);
 
-  // Default page title
-  const defaultTitle = 'Unstream - Find where to buy music directly from artists you love';
-
   // Update page title based on search query
   useEffect(() => {
     const query = searchParams.get('q');
     if (query) {
       document.title = `${query} on Unstream - Find where to support them`;
     } else {
-      document.title = defaultTitle;
+      document.title = DEFAULT_PAGE_TITLE;
     }
   }, [searchParams]);
 

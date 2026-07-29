@@ -54,7 +54,7 @@ info "Testing /a/kid-lightbulbs — browser User-Agent"
 RESP=$(curl -s "$BASE/a/kid-lightbulbs" -H "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36")
 check_contains "kid-lightbulbs page contains artist name" "$RESP" "Kid Lightbulbs"
 check_contains "kid-lightbulbs page has OG tags" "$RESP" 'og:title'
-check_not_contains "kid-lightbulbs page is NOT the generic SPA" "$RESP" 'Unstream - Support Artists Directly'
+check_not_contains "kid-lightbulbs page is NOT the generic SPA" "$RESP" 'Unstream - Find the best places online to directly support the music artists you love'
 
 info "Testing /a/kingtriumph — browser User-Agent"
 RESP=$(curl -s "$BASE/a/kingtriumph" -H "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36")

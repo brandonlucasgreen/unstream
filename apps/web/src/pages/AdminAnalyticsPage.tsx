@@ -7,6 +7,7 @@ import { Footer } from '../components/Footer';
 import { Skeleton } from '../components/Skeleton';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { StatTilesSkeleton } from '../components/LoadingSkeletons';
+import { DEFAULT_PAGE_TITLE } from '../data/seo';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -267,7 +268,7 @@ export function AdminAnalyticsPage() {
 
   useEffect(() => {
     document.title = 'Analytics - Unstream Admin';
-    return () => { document.title = 'Unstream - Support Artists Directly'; };
+    return () => { document.title = DEFAULT_PAGE_TITLE; };
   }, []);
 
   useEffect(() => {
