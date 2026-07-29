@@ -828,6 +828,56 @@ export function mergeByReleaseOverlap(disambiguated: AggregatedResult[]): Aggreg
 }
 
 // ---------------------------------------------------------------------------
+// Claimed-profile merge
+// ---------------------------------------------------------------------------
+
+/**
+ * Fold claimed artist profiles into the final search results.
+ *
+ * A claimed profile is the artist's own curated page — when the platforms also
+ * produced a generic result under the same name (or the same name modulo a
+ * leading article), the claimed card replaces it in place, keeping its
+ * relevance position. A claimed artist the platforms missed entirely is
+ * appended. An exact match on the query leads the list, preserving the
+ * longstanding "your own name finds your page first" behavior.
+ */
+export function mergeClaimedIntoResults(
+  results: AggregatedResult[],
+  claimed: AggregatedResult[],
+  query: string,
+): AggregatedResult[] {
+  const queryNorm = normalizeForComparison(query);
+  const merged = [...results];
+  const seenSlugs = new Set<string>();
+
+  for (const artist of claimed) {
+    if (artist.claimedSlug) {
+      // The exact-slug and name-contains lookups can both find the same artist.
+      if (seenSlugs.has(artist.claimedSlug)) continue;
+      seenSlugs.add(artist.claimedSlug);
+    }
+
+    const replaceIdx = merged.findIndex(r =>
+      r.type === 'artist' &&
+      r.matchConfidence !== 'claimed' &&
+      (normalizeForComparison(r.name) === normalizeForComparison(artist.name) ||
+        namesEqualIgnoringArticles(r.name, artist.name))
+    );
+    if (replaceIdx !== -1) merged.splice(replaceIdx, 1);
+
+    if (normalizeForComparison(artist.name) === queryNorm) {
+      merged.unshift(artist);
+    } else if (replaceIdx !== -1) {
+      merged.splice(replaceIdx, 0, artist);
+    } else {
+      merged.push(artist);
+    }
+  }
+
+  return merged;
+}
+
+// ---------------------------------------------------------------------------
 // Phase 4: filterAndSort
 // ---------------------------------------------------------------------------
 

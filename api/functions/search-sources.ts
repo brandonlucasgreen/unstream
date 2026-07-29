@@ -2,7 +2,7 @@ import { parse } from 'node-html-parser';
 import { Sentry } from '../lib/sentry';
 import { findBandcampArtist } from '../search/bandcamp-probe';
 import { cacheGetOrFetch, artistCacheKey } from './cache';
-import { persistSearchResults, getArtistBySlug, artistSlug, getMergeOverrides } from './db';
+import { persistSearchResults, getArtistBySlug, artistSlug, getMergeOverrides, findClaimedArtistSlugsByName } from './db';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
 import { parseMirloArtistSearch } from './search-parsers';
@@ -28,6 +28,7 @@ import {
   mergeByReleaseOverlap,
   filterAndSort,
   applyMergeOverrides,
+  mergeClaimedIntoResults,
   displayNameFromSlug,
   isBandcampSearchLink,
   bandcampSubdomainOf,
@@ -1880,6 +1881,30 @@ async function searchBandcampForAlbum(artistUrl: string, albumTitle: string): Pr
   }
 }
 
+// Shape a DB claimed-artist row into a result card. Null unless the artist is
+// actually claimed — an auto-discovered row must not masquerade as a profile.
+function toClaimedResult(
+  dbArtist: Awaited<ReturnType<typeof getArtistBySlug>>,
+  slug: string,
+): AggregatedResult | null {
+  if (!dbArtist || dbArtist.matchConfidence !== 'claimed') return null;
+  return {
+    id: `claimed-${slug}`,
+    name: dbArtist.name,
+    type: 'artist' as const,
+    imageUrl: dbArtist.profile?.customImageUrl || dbArtist.imageUrl,
+    platforms: dbArtist.platforms.map(p => ({
+      sourceId: p.sourceId as SourceId,
+      url: p.url,
+      displayName: p.displayName,
+      latestRelease: p.latestRelease,
+    })),
+    matchConfidence: 'claimed' as const,
+    claimedSlug: slug,
+    ...(dbArtist.location ? { location: dbArtist.location } : {}),
+  };
+}
+
 // Netlify function handler
 export async function handler(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
   const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
@@ -1907,36 +1932,36 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     // Normalize the query to handle accented characters (e.g., "Tanerélle" -> "Tanerelle")
     const normalizedQuery = normalizeSearchQuery(query);
 
-    // Check if there's a claimed artist in the DB matching this query.
-    // The lookup runs concurrently with the platform fan-out below — it's a
-    // Supabase read that used to add its round-trips ahead of the search.
+    // Claimed artists are looked up two ways, both concurrent with the platform
+    // fan-out: by exact slug of the query (covers queries that ARE the artist's
+    // name, including slug-ish spellings), and by name-contains (covers partial
+    // queries — "lightbulbs" must find the claimed kid-lightbulbs profile, not
+    // lose to a generic scraped card).
     const slug = artistSlug(normalizedQuery);
-    const claimedPromise: Promise<AggregatedResult | null> = getArtistBySlug(slug)
-      .then(dbArtist => {
-        if (!dbArtist || dbArtist.matchConfidence !== 'claimed') return null;
-        return {
-          id: `claimed-${slug}`,
-          name: dbArtist.name,
-          type: 'artist' as const,
-          imageUrl: dbArtist.profile?.customImageUrl || dbArtist.imageUrl,
-          platforms: dbArtist.platforms.map(p => ({
-            sourceId: p.sourceId as SourceId,
-            url: p.url,
-            displayName: p.displayName,
-            latestRelease: p.latestRelease,
-          })),
-          matchConfidence: 'claimed' as const,
-          claimedSlug: slug,
-          ...(dbArtist.location ? { location: dbArtist.location } : {}),
-        };
-      })
+    const claimedExactPromise: Promise<AggregatedResult | null> = getArtistBySlug(slug)
+      .then(dbArtist => toClaimedResult(dbArtist, slug))
       .catch(err => {
         console.error('[DB] Claimed artist lookup failed:', err);
         return null;
       });
+    const claimedByNamePromise: Promise<AggregatedResult[]> = findClaimedArtistSlugsByName(normalizedQuery)
+      .then(slugs => Promise.all(
+        slugs.map(s =>
+          getArtistBySlug(s)
+            .then(dbArtist => toClaimedResult(dbArtist, s))
+            .catch(() => null)
+        )
+      ))
+      .then(list => list.filter((r): r is AggregatedResult => r !== null))
+      .catch(err => {
+        console.error('[DB] Claimed artist name search failed:', err);
+        return [];
+      });
 
     const searchResult = await searchAllPlatforms(normalizedQuery);
-    const claimedResult = await claimedPromise;
+    const claimedExact = await claimedExactPromise;
+    const claimedByName = await claimedByNamePromise;
+    const claimedArtists = claimedExact ? [claimedExact, ...claimedByName] : claimedByName;
     const results = searchResult.results;
 
     // UC5: Capture zero-result searches for monitoring (volume signal for coverage gaps)
@@ -1954,24 +1979,20 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       }
     }
 
-    // If we have a claimed artist, put it first and remove any duplicate from live results
-    if (claimedResult) {
-      const claimedName = normalizeForComparison(claimedResult.name);
-      const filtered = results.filter(r => normalizeForComparison(r.name) !== claimedName);
-      results.length = 0;
-      results.push(claimedResult, ...filtered);
-    }
+    // Fold claimed profiles in: replace generic same-name results in place,
+    // lead with an exact query match, append the rest.
+    const finalResults = mergeClaimedIntoResults(results, claimedArtists, normalizedQuery);
 
     // Persist artist results to the database (skip claimed results, they're already in DB)
     try {
-      await persistSearchResults(results.filter(r => r.matchConfidence !== 'claimed'));
+      await persistSearchResults(finalResults.filter(r => r.matchConfidence !== 'claimed'));
     } catch (err) {
       console.error('[DB] Background persist failed:', err);
     }
 
     const response: SearchResponse = {
       query, // Return original query for display
-      results,
+      results: finalResults,
       // Signal client whether enrichment is still pending (true = MB enrichment failed/timed out,
       // client should call /api/search/musicbrainz as fallback; false = enrichment was applied server-side)
       hasPendingEnrichment: !searchResult.enrichmentApplied,
