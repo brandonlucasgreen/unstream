@@ -85,6 +85,51 @@ export function parseBandcampSearchResults(html: string, query: string): Platfor
 // Mirlo
 // ---------------------------------------------------------------------------
 
+/**
+ * Parse Mirlo's artist search API response (`api.mirlo.space/v1/artists?name=`).
+ *
+ * Mirlo's `name` filter is a loose substring match over more than the visible
+ * name (searching "the" returns "Other Nothing"), so results are re-checked
+ * here: keep an artist only when their name contains the query or the query
+ * contains their name. This is what makes partial searches work — "argent"
+ * keeps "The Argent Grub" — while unrelated fuzz is dropped.
+ */
+export function parseMirloArtistSearch(data: unknown, query: string): PlatformResult[] {
+  const results: PlatformResult[] = [];
+  const queryNorm = normalizeForComparison(query);
+  if (!queryNorm) return results;
+
+  const artists = (data as { results?: unknown[] } | null)?.results;
+  if (!Array.isArray(artists)) return results;
+
+  for (const entry of artists) {
+    const artist = entry as {
+      name?: unknown;
+      urlSlug?: unknown;
+      enabled?: unknown;
+      deletedAt?: unknown;
+    };
+    if (typeof artist.name !== 'string' || typeof artist.urlSlug !== 'string') continue;
+    if (artist.enabled === false || artist.deletedAt) continue;
+    // The slug becomes a URL path segment; anything else is malformed data.
+    if (!/^[a-z0-9._-]+$/i.test(artist.urlSlug)) continue;
+
+    const nameNorm = normalizeForComparison(artist.name);
+    if (!nameNorm) continue;
+    if (!nameNorm.includes(queryNorm) && !queryNorm.includes(nameNorm)) continue;
+
+    results.push({
+      sourceId: 'mirlo',
+      name: artist.name,
+      type: 'artist',
+      url: `https://mirlo.space/${artist.urlSlug}`,
+    });
+    if (results.length >= 5) break;
+  }
+
+  return results;
+}
+
 /** Parse a Mirlo artist page HTML to determine if the artist exists */
 export function parseMirloArtistPage(html: string, normalizedQuery: string, artistUrl: string): PlatformResult | null {
   const ogTitleMatch = html.match(/<meta property="og:title" content="([^"]+)"/);

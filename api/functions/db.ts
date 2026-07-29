@@ -330,7 +330,10 @@ export async function putBandcampProbe(
 /**
  * Look up an artist by slug. Returns null if not found or Supabase is not configured.
  */
-export async function getArtistBySlug(slug: string): Promise<ArtistResult | null> {
+export async function getArtistBySlug(
+  slug: string,
+  opts?: { allowStale?: boolean },
+): Promise<ArtistResult | null> {
   const client = getClient();
   if (!client) return null;
 
@@ -376,8 +379,11 @@ export async function getArtistBySlug(slug: string): Promise<ArtistResult | null
 
     const row = artist as ArtistRow;
 
-    // Claimed artists are always fresh; auto-discovered artists expire
-    if (row.match_confidence !== 'claimed') {
+    // Claimed artists are always fresh; auto-discovered artists expire.
+    // allowStale skips the expiry: the partial-name discovery channel would
+    // rather show a known artist with slightly old links than hide them —
+    // platform URLs are stable, and an exact search refreshes the row anyway.
+    if (row.match_confidence !== 'claimed' && !opts?.allowStale) {
       const updatedAt = new Date(row.updated_at).getTime();
       const now = Date.now();
       if (now - updatedAt > FRESHNESS_TTL_MS) {
@@ -449,10 +455,6 @@ export async function getArtistBySlug(slug: string): Promise<ArtistResult | null
 
 // --- Write Operations ---
 
-/**
- * Persist artist search results to the database.
- * Only persists artist-type results. Runs as fire-and-forget after search.
- */
 // --- Typeahead suggestions ---
 
 export interface ArtistSuggestion {
@@ -514,7 +516,7 @@ export async function suggestArtists(term: string, limit = 8): Promise<ArtistSug
     .from('artists')
     .select('slug, name, image_url')
     .ilike('name', `%${cleaned}%`)
-    .or('match_confidence.eq.verified,match_confidence.eq.claimed,source.eq.claimed')
+    .in('match_confidence', ['claimed', 'verified'])
     .limit(40);
 
   if (error) {
@@ -525,6 +527,63 @@ export async function suggestArtists(term: string, limit = 8): Promise<ArtistSug
   return rankArtistSuggestions(data ?? [], cleaned, limit);
 }
 
+/**
+ * Slugs of artists Unstream already knows whose display name contains the term.
+ *
+ * The search handler's exact-slug lookup can only find an artist when the
+ * query IS their name — a partial query like "lightbulbs" never resolves the
+ * slug "kid-lightbulbs", and "patrick" never resolves "patrick-hardy" even
+ * though a past exact search persisted his full result. This is the
+ * name-contains channel that makes the accumulated artists table searchable.
+ *
+ * Claimed profiles come first (they replace generic results downstream), then
+ * verified rows. 'unverified' rows are deliberately excluded — that's where
+ * junk from name-only matches accumulates.
+ */
+export async function findKnownArtistSlugsByName(term: string, limit = 6): Promise<string[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  // Strip ILIKE wildcards so user input can't change the match shape
+  // (same reasoning as the slug guard in getArtistBySlug).
+  const cleaned = term.replace(/[%_,()]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (cleaned.length < 2) return [];
+
+  const { data, error } = await client
+    .from('artists')
+    .select('slug, name, match_confidence')
+    .ilike('name', `%${cleaned}%`)
+    .in('match_confidence', ['claimed', 'verified'])
+    .limit(40);
+
+  if (error) {
+    console.error('[DB] findKnownArtistSlugsByName error:', error);
+    return [];
+  }
+
+  // Rank before capping — the query itself returns arbitrary rows, and for a
+  // common name fragment ("patrick") the artist someone is typing toward must
+  // not lose their slot to whichever rows Postgres happened to emit first.
+  const termLower = cleaned.toLowerCase();
+  return (data ?? [])
+    .sort((a, b) => {
+      const aClaimed = a.match_confidence === 'claimed' ? 0 : 1;
+      const bClaimed = b.match_confidence === 'claimed' ? 0 : 1;
+      if (aClaimed !== bClaimed) return aClaimed - bClaimed;
+      const aPrefix = a.name.toLowerCase().startsWith(termLower) ? 0 : 1;
+      const bPrefix = b.name.toLowerCase().startsWith(termLower) ? 0 : 1;
+      if (aPrefix !== bPrefix) return aPrefix - bPrefix;
+      return a.name.length - b.name.length;
+    })
+    .slice(0, limit)
+    .map(r => r.slug)
+    .filter(Boolean);
+}
+
+/**
+ * Persist artist search results to the database.
+ * Only persists artist-type results. Runs as fire-and-forget after search.
+ */
 export async function persistSearchResults(results: ArtistResult[]): Promise<void> {
   const client = getClient();
   if (!client) return;
@@ -558,7 +617,12 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
         return;
       }
 
-      // Upsert artist — always store as unverified until claimed
+      // Upsert artist, keeping the pipeline's verdict. This used to hardcode
+      // 'unverified', which made the stored confidence meaningless — every
+      // non-claimed row was 'unverified' forever, so quality filters over the
+      // table (partial-name discovery, typeahead) could never distinguish a
+      // release-corroborated artist from name-match junk. Rows refresh on
+      // every search, so the stored verdict tracks the latest pipeline run.
       const { data: artist, error: artistError } = await client
         .from('artists')
         .upsert(
@@ -566,7 +630,7 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
             slug,
             name: result.name,
             image_url: result.imageUrl || null,
-            match_confidence: 'unverified',
+            match_confidence: result.matchConfidence === 'verified' ? 'verified' : 'unverified',
             source: 'auto',
             updated_at: new Date().toISOString(),
           },

@@ -90,6 +90,15 @@ export interface SearchResponse {
   hasPendingEnrichment?: boolean;
 }
 
+// A name-only platform hit: a URL plus the display name the platform showed for it.
+// Keyed by normalized name in the maps the fetchers return; the display name is kept
+// so results created from these hits carry the artist's real name instead of a
+// reconstruction from the URL slug (which for Bandwagon can be an opaque account id).
+export interface NameOnlyEntry {
+  url: string;
+  displayName?: string;
+}
+
 export interface MergeOverride {
   id: string;
   group_name: string;
@@ -300,6 +309,32 @@ export function namesMatch(name1: string, name2: string): boolean {
   return false;
 }
 
+/**
+ * Whether two names are the same modulo a leading article ("Argent Grub" vs
+ * "The Argent Grub").
+ *
+ * Deliberately much stricter than `namesMatch`: substring matching would also
+ * equate "Argent" with "Rod Argent" and attach one artist's links to another.
+ * Article variance is the only cross-platform naming drift safe to bridge
+ * without release data to corroborate.
+ */
+export function namesEqualIgnoringArticles(name1: string, name2: string): boolean {
+  const strip = (s: string) => normalizeForComparison(s.replace(/^\s*(the|a|an)\s+/i, ''));
+  const n1 = strip(name1);
+  const n2 = strip(name2);
+  return n1.length > 0 && n1 === n2;
+}
+
+/**
+ * Whether a URL slug is an opaque account id rather than a human-readable name
+ * (e.g. Bandwagon's fallback handles like "695d15c12f0f56fdced0a5e6").
+ * Such slugs must never be reconstructed into a display name.
+ */
+export function looksLikeOpaqueId(slug: string): boolean {
+  const bare = slug.replace(/^@/, '');
+  return /^[0-9a-f]{16,}$/i.test(bare) || /^\d{6,}$/.test(bare);
+}
+
 export function textMatchScore(name: string, query: string): number {
   const normName = normalizeForComparison(name);
   const normQuery = normalizeForComparison(query);
@@ -307,6 +342,44 @@ export function textMatchScore(name: string, query: string): number {
   if (normName.startsWith(normQuery)) return 2;
   if (normName.includes(normQuery)) return 1;
   return 0;
+}
+
+/**
+ * Pick partial-match artist names out of a MusicBrainz search result list.
+ *
+ * MB is a real search engine (Lucene), but the pipeline historically read only
+ * its top hit — so an artist whose name merely *contains* the query ("argent"
+ * -> "Goodnight Argent") was invisible. These names are discovery candidates:
+ * they get verified against Bandcamp before they can become results, so the
+ * bar here is deliberately looser than the enrichment gate.
+ *
+ * `excludeName` is the artist already chosen for enrichment; suggesting them
+ * again would duplicate a result.
+ */
+export function collectMbSuggestions(
+  artists: { name: string; score: number }[],
+  query: string,
+  excludeName?: string | null,
+): string[] {
+  const queryNorm = normalizeForComparison(query);
+  const excludeNorm = excludeName ? normalizeForComparison(excludeName) : null;
+  if (!queryNorm) return [];
+
+  const suggestions: string[] = [];
+  const seen = new Set<string>();
+  for (const artist of artists) {
+    // Below 70, MB's matches stop containing the query as a name fragment and
+    // start being token-soup — not worth a probe.
+    if (artist.score < 70) continue;
+    const norm = normalizeForComparison(artist.name);
+    if (!norm || norm === queryNorm || norm === excludeNorm || seen.has(norm)) continue;
+    // Only names the user could plausibly have been typing toward.
+    if (textMatchScore(artist.name, query) === 0) continue;
+    seen.add(norm);
+    suggestions.push(artist.name);
+    if (suggestions.length >= 4) break;
+  }
+  return suggestions;
 }
 
 // ---------------------------------------------------------------------------
@@ -732,6 +805,64 @@ export function mergeByReleaseOverlap(disambiguated: AggregatedResult[]): Aggreg
   }
 
   return Array.from(mergedMap.values());
+}
+
+// ---------------------------------------------------------------------------
+// Stored-artist merge (claimed profiles + previously-resolved artists)
+// ---------------------------------------------------------------------------
+
+/**
+ * Fold artists from the database into the final search results.
+ *
+ * Claimed profiles are the artist's own curated page: when the platforms also
+ * produced a generic result under the same name (or the same name modulo a
+ * leading article), the claimed card replaces it in place, keeping its
+ * relevance position; an exact match on the query leads the list. Non-claimed
+ * stored artists (previously resolved and persisted searches) are gap-fillers
+ * only — they're appended when the name is missing entirely, and never
+ * displace a result the live pipeline just verified, which is fresher.
+ */
+export function mergeStoredArtistsIntoResults(
+  results: AggregatedResult[],
+  stored: AggregatedResult[],
+  query: string,
+): AggregatedResult[] {
+  const queryNorm = normalizeForComparison(query);
+  const merged = [...results];
+  const seenIds = new Set<string>();
+
+  for (const artist of stored) {
+    // The exact-slug and name-contains lookups can both find the same artist.
+    if (seenIds.has(artist.id)) continue;
+    seenIds.add(artist.id);
+
+    const sameNameIdx = merged.findIndex(r =>
+      r.type === 'artist' &&
+      r.matchConfidence !== 'claimed' &&
+      (normalizeForComparison(r.name) === normalizeForComparison(artist.name) ||
+        namesEqualIgnoringArticles(r.name, artist.name))
+    );
+
+    if (artist.matchConfidence !== 'claimed') {
+      // A stored non-claimed artist only fills a hole.
+      if (sameNameIdx === -1 && !merged.some(r => normalizeForComparison(r.name) === normalizeForComparison(artist.name))) {
+        merged.push(artist);
+      }
+      continue;
+    }
+
+    if (sameNameIdx !== -1) merged.splice(sameNameIdx, 1);
+
+    if (normalizeForComparison(artist.name) === queryNorm) {
+      merged.unshift(artist);
+    } else if (sameNameIdx !== -1) {
+      merged.splice(sameNameIdx, 0, artist);
+    } else {
+      merged.push(artist);
+    }
+  }
+
+  return merged;
 }
 
 // ---------------------------------------------------------------------------
