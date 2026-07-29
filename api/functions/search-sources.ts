@@ -13,9 +13,12 @@ import {
   type AggregatedResult,
   type SearchResponse,
   type NameOnlyEntry,
+  type SearchMode,
   normalizeSearchQuery,
   normalizeForComparison,
   namesEqualIgnoringArticles,
+  isExactNameMatch,
+  filterNameOnlyMapToExact,
   looksLikeOpaqueId,
   collectMbSuggestions,
   CURATED_PLATFORMS,
@@ -1613,7 +1616,7 @@ function applyEnrichmentToResults(
 // Main search orchestrator
 // ---------------------------------------------------------------------------
 
-async function searchAllPlatforms(query: string): Promise<{ results: AggregatedResult[]; enrichmentApplied: boolean }> {
+async function searchAllPlatforms(query: string, mode: SearchMode): Promise<{ results: AggregatedResult[]; enrichmentApplied: boolean }> {
   // Merge overrides come from Supabase and are needed in Phase 2.5 — start the
   // fetch now so it rides along with the platform fan-out instead of adding a
   // round-trip afterwards. getMergeOverrides catches its own errors ([] on failure).
@@ -1662,11 +1665,18 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
     }
   }
 
+  // Upstream fetchers (and their caches) always hold the full fuzzy result set;
+  // exact mode narrows here, downstream, so both modes share every cache entry.
+  const exact = mode === 'exact';
+
   const allResults: PlatformResult[] = [];
   if (bandcampResults.status === 'fulfilled') allResults.push(...bandcampResults.value.filter(r => r.type === 'artist'));
-  if (mirloResults.status === 'fulfilled') allResults.push(...mirloResults.value.filter(r => r.type === 'artist'));
+  if (mirloResults.status === 'fulfilled') {
+    const mirloArtists = mirloResults.value.filter(r => r.type === 'artist');
+    allResults.push(...(exact ? mirloArtists.filter(r => isExactNameMatch(r.name, query)) : mirloArtists));
+  }
 
-  const nameOnlyMaps: [string, Map<string, NameOnlyEntry>][] = [
+  const nameOnlyMapsAll: [string, Map<string, NameOnlyEntry>][] = [
     ['bandwagon', bandwagonResults.status === 'fulfilled' ? bandwagonResults.value : new Map()],
     ['faircamp', faircampResults.status === 'fulfilled' ? faircampResults.value : new Map()],
     ['jamcoop', jamcoopResults.status === 'fulfilled' ? jamcoopResults.value : new Map()],
@@ -1674,30 +1684,37 @@ async function searchAllPlatforms(query: string): Promise<{ results: AggregatedR
     ['beatport', beatportResults.status === 'fulfilled' ? beatportResults.value : new Map()],
     ['even', evenResults.status === 'fulfilled' ? evenResults.value : new Map()],
   ];
+  const nameOnlyMaps = exact
+    ? nameOnlyMapsAll.map(([id, m]) => [id, filterNameOnlyMapToExact(m, query)] as [string, Map<string, NameOnlyEntry>])
+    : nameOnlyMapsAll;
   const ampwallMatches = ampwallResults.status === 'fulfilled' ? ampwallResults.value : new Map<string, string>();
 
   const mbData = musicbrainzResult.status === 'fulfilled' ? musicbrainzResult.value : null;
 
   // Phase 1.5: Probe Bandcamp for artist names the fan-out discovered.
+  // Fuzzy mode only — in exact mode a discovered name that isn't the query is by
+  // definition a different artist than the one playing.
   // Candidate order encodes trust: Mirlo and Bandwagon hits are confirmed platform
   // presences; MB suggestions are name-similarity only. Only the first
   // MAX_CANDIDATE_PROBES distinct names are probed.
-  const candidateNames: string[] = [];
-  if (mirloResults.status === 'fulfilled') {
-    candidateNames.push(...mirloResults.value.map(r => r.name));
-  }
-  if (bandwagonResults.status === 'fulfilled') {
-    for (const entry of bandwagonResults.value.values()) {
-      if (entry.displayName) candidateNames.push(entry.displayName);
+  if (!exact) {
+    const candidateNames: string[] = [];
+    if (mirloResults.status === 'fulfilled') {
+      candidateNames.push(...mirloResults.value.map(r => r.name));
     }
-  }
-  if (mbData) candidateNames.push(...mbData.suggestedNames);
+    if (bandwagonResults.status === 'fulfilled') {
+      for (const entry of bandwagonResults.value.values()) {
+        if (entry.displayName) candidateNames.push(entry.displayName);
+      }
+    }
+    if (mbData) candidateNames.push(...mbData.suggestedNames);
 
-  const existingBandcampUrls = new Set(
-    (bandcampResults.status === 'fulfilled' ? bandcampResults.value : []).map(r => r.url)
-  );
-  const discoveredBandcamp = await probeBandcampForCandidates(query, candidateNames, existingBandcampUrls);
-  allResults.push(...discoveredBandcamp);
+    const existingBandcampUrls = new Set(
+      (bandcampResults.status === 'fulfilled' ? bandcampResults.value : []).map(r => r.url)
+    );
+    const discoveredBandcamp = await probeBandcampForCandidates(query, candidateNames, existingBandcampUrls);
+    allResults.push(...discoveredBandcamp);
+  }
 
   const aggregated = aggregateResults(allResults, query);
 
@@ -1867,6 +1884,12 @@ export async function handler(event: { queryStringParameters?: Record<string, st
   }
   const query = queryResult.query;
 
+  // 'exact' is sent by playback-detection clients (extension, Mac app), where the
+  // query is the artist name from track metadata and partial-name discovery would
+  // surface the wrong artist. Anything else — including absence — means a human
+  // typed the query, so fuzzy is the default.
+  const mode: SearchMode = event.queryStringParameters?.mode === 'exact' ? 'exact' : 'fuzzy';
+
   try {
     // Normalize the query to handle accented characters (e.g., "Tanerélle" -> "Tanerelle")
     const normalizedQuery = normalizeSearchQuery(query);
@@ -1899,7 +1922,7 @@ export async function handler(event: { queryStringParameters?: Record<string, st
         return null;
       });
 
-    const searchResult = await searchAllPlatforms(normalizedQuery);
+    const searchResult = await searchAllPlatforms(normalizedQuery, mode);
     const claimedResult = await claimedPromise;
     const results = searchResult.results;
 

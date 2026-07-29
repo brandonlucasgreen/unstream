@@ -91,6 +91,21 @@ paths:
             type: string
             maxLength: 200
           example: "Radiohead"
+        - name: mode
+          in: query
+          required: false
+          description: |
+            Matching mode. `fuzzy` (the default) lets partial queries discover
+            artists — searching "argent" can return "The Argent Grub". Use
+            `exact` when the query is a known artist name (e.g. from playback
+            metadata) and partial matches would be wrong artists; only
+            leading-article variance is tolerated. Any other value is treated
+            as `fuzzy`.
+          schema:
+            type: string
+            enum: [fuzzy, exact]
+            default: fuzzy
+          example: "exact"
       responses:
         '200':
           description: Search results

@@ -694,8 +694,10 @@ function hideNowPlaying() {
   elements.actionsSection.classList.add('hidden');
 }
 
-// Load results for artist
-async function loadResults(artist) {
+// Load results for artist. mode defaults to 'exact' because most lookups here are
+// for the detected now-playing artist; the manual search box passes 'fuzzy' so a
+// partial name can still find the artist.
+async function loadResults(artist, mode = 'exact') {
   const loadingDiv = document.createElement('div');
   loadingDiv.className = 'loading';
   loadingDiv.textContent = 'Loading...';
@@ -706,6 +708,7 @@ async function loadResults(artist) {
     const response = await chrome.runtime.sendMessage({
       type: 'GET_RESULTS',
       artist,
+      mode,
     });
 
     if (!response || response.error) {
@@ -1270,7 +1273,7 @@ async function searchArtist(artist) {
 
   try {
     showNowPlaying({ artist, title: '', source: 'search' });
-    await loadResults(artist);
+    await loadResults(artist, 'fuzzy');
     await loadEnrichment(artist);
   } finally {
     searchInFlight = false;

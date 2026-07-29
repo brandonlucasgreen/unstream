@@ -1,5 +1,15 @@
 import Foundation
 
+/// How strictly the API matches the query against artist names.
+/// `exact` is for lookups where the query IS the artist's name (now-playing
+/// detection, saved-artist refresh) — partial matches would be other artists.
+/// `fuzzy` is for the human-typed search field, where "argent" should be able
+/// to find "The Argent Grub".
+enum SearchMode: String {
+    case exact
+    case fuzzy
+}
+
 actor UnstreamAPI {
     private let baseURL = "https://unstream.stream/api"
     private let session: URLSession
@@ -14,18 +24,20 @@ actor UnstreamAPI {
         self.session = URLSession(configuration: config)
     }
 
-    func searchArtist(_ name: String) async throws -> (results: [ArtistResult], hasPendingEnrichment: Bool) {
+    func searchArtist(_ name: String, mode: SearchMode = .exact) async throws -> (results: [ArtistResult], hasPendingEnrichment: Bool) {
         let query = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return ([], false) }
 
-        // Check cache first
-        if let cached = cache[query.lowercased()],
+        // Check cache first. Keyed by mode too: the fuzzy result set for a name is
+        // a superset and must not answer an exact (detection) lookup.
+        let cacheKey = "\(mode.rawValue):\(query.lowercased())"
+        if let cached = cache[cacheKey],
            Date().timeIntervalSince(cached.timestamp) < cacheDuration {
             return (cached.results, false) // Already enriched if cached
         }
 
         guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "\(baseURL)/search/sources?query=\(encodedQuery)") else {
+              let url = URL(string: "\(baseURL)/search/sources?query=\(encodedQuery)&mode=\(mode.rawValue)") else {
             throw APIError.invalidURL
         }
 
@@ -174,8 +186,8 @@ actor UnstreamAPI {
         }
     }
 
-    func cacheResults(query: String, results: [ArtistResult]) {
-        cache[query.lowercased()] = (results, Date())
+    func cacheResults(query: String, results: [ArtistResult], mode: SearchMode = .exact) {
+        cache["\(mode.rawValue):\(query.lowercased())"] = (results, Date())
     }
 
     func clearCache() {
