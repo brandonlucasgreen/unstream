@@ -105,6 +105,10 @@ export function SearchBar({ onSearch, isLoading, initialQuery, onReset }: Search
   }, [showSuggestions, suggestions, highlightIndex, pickSuggestion, closeSuggestions]);
 
   const handleReset = useCallback(() => {
+    // Cancel any pending debounce/fetch — a stale response landing after the
+    // reset would reopen the dropdown against an empty input.
+    clearTimeout(debounceRef.current);
+    abortRef.current?.abort();
     setQuery('');
     setSuggestions([]);
     closeSuggestions();

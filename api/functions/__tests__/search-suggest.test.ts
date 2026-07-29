@@ -4,9 +4,10 @@ const mocks = vi.hoisted(() => ({
   mockSuggestArtists: vi.fn(),
   mockCheckRateLimit: vi.fn(() => Promise.resolve({ limited: false })),
   mockGetClientIp: vi.fn(() => '127.0.0.1'),
-  // Pass-through cache: always calls the fetcher, records the shouldCache verdict.
+  // Pass-through cache: always calls the fetcher, records key + shouldCache verdict.
   mockCacheGetOrFetch: vi.fn(),
   lastShouldCache: { value: null as boolean | null },
+  lastCacheKey: { value: null as string | null },
 }));
 
 vi.mock('../db', async (importOriginal) => {
@@ -20,19 +21,26 @@ vi.mock('../ratelimit', () => ({
   checkRateLimit: mocks.mockCheckRateLimit,
   getClientIp: mocks.mockGetClientIp,
 }));
-vi.mock('../cache', () => ({
-  cacheGetOrFetch: mocks.mockCacheGetOrFetch,
-}));
+vi.mock('../cache', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../cache')>();
+  return {
+    ...actual, // keep the real artistCacheKey — the collision tests exercise it
+    cacheGetOrFetch: mocks.mockCacheGetOrFetch,
+  };
+});
 
 import { handler } from '../search-suggest';
 import { rankArtistSuggestions } from '../db';
 
 beforeEach(() => {
   mocks.mockSuggestArtists.mockReset();
+  mocks.mockCheckRateLimit.mockClear();
   mocks.lastShouldCache.value = null;
+  mocks.lastCacheKey.value = null;
   mocks.mockCacheGetOrFetch.mockImplementation(
-    async (_key: string, fetchFn: () => Promise<unknown>, _ttl: number, shouldCache?: (d: unknown) => boolean) => {
+    async (key: string, fetchFn: () => Promise<unknown>, _ttl: number, shouldCache?: (d: unknown) => boolean) => {
       const data = await fetchFn();
+      mocks.lastCacheKey.value = key;
       mocks.lastShouldCache.value = shouldCache ? shouldCache(data) : true;
       return { data, cached: false };
     },
@@ -75,6 +83,34 @@ describe('search-suggest handler', () => {
     mocks.mockSuggestArtists.mockResolvedValue([]);
     await handler({ queryStringParameters: { query: 'zzzznobody' } });
     expect(mocks.lastShouldCache.value).toBe(true);
+  });
+
+  it('keys the cache on the same term the DB queries with', async () => {
+    // Regression: the key used normalizeForComparison (strips ALL punctuation)
+    // while the DB matched with hyphens preserved — "sufjan-stevens" and
+    // "sufjan stevens" shared a key but produced different ILIKE patterns, so
+    // whichever ran first answered for both.
+    mocks.mockSuggestArtists.mockResolvedValue([]);
+    await handler({ queryStringParameters: { query: 'sufjan-stevens' } });
+    const hyphenKey = mocks.lastCacheKey.value;
+    expect(mocks.mockSuggestArtists).toHaveBeenLastCalledWith('sufjan-stevens');
+
+    await handler({ queryStringParameters: { query: 'sufjan stevens' } });
+    expect(mocks.lastCacheKey.value).not.toBe(hyphenKey);
+    expect(mocks.mockSuggestArtists).toHaveBeenLastCalledWith('sufjan stevens');
+  });
+
+  it('uses the lenient rate-limit tier, not the shared standard bucket', async () => {
+    mocks.mockSuggestArtists.mockResolvedValue([]);
+    await handler({ queryStringParameters: { query: 'argent' } });
+    expect(mocks.mockCheckRateLimit).toHaveBeenCalledWith('127.0.0.1', 'lenient', expect.anything());
+  });
+
+  it('sends the shared public CORS headers', async () => {
+    mocks.mockSuggestArtists.mockResolvedValue([]);
+    const res = await handler({ queryStringParameters: { query: 'argent' } });
+    expect(res.headers['X-Content-Type-Options']).toBe('nosniff');
+    expect(res.headers['Access-Control-Allow-Origin']).toBe('*');
   });
 });
 

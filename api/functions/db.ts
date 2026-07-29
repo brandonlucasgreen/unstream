@@ -492,6 +492,18 @@ export function rankArtistSuggestions(
 }
 
 /**
+ * The exact term suggestArtists matches with: ILIKE wildcards stripped so user
+ * input can't change the match shape (same reasoning as the slug guard in
+ * getArtistBySlug). Exported so callers key caches on THIS string — a cache
+ * key normalized any other way collides across inputs that query differently
+ * ("sufjan-stevens" vs "sufjan stevens"), serving one spelling's results to
+ * the other.
+ */
+export function cleanSuggestTerm(term: string): string {
+  return term.replace(/[%_,()]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+/**
  * Name-substring lookup over artists Unstream has already resolved, for
  * search-as-you-type. Only verified/claimed rows are suggested — the artists
  * table accumulates whatever people search, and 'unverified' is where the
@@ -507,9 +519,7 @@ export async function suggestArtists(term: string, limit = 8): Promise<ArtistSug
   const client = getClient();
   if (!client) return null;
 
-  // Strip ILIKE wildcards so user input can't change the match shape
-  // (same reasoning as the slug guard in getArtistBySlug).
-  const cleaned = term.replace(/[%_,()]/g, ' ').replace(/\s+/g, ' ').trim();
+  const cleaned = cleanSuggestTerm(term);
   if (cleaned.length < 2) return [];
 
   const { data, error } = await client

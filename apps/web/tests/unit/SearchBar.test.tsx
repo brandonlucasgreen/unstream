@@ -73,6 +73,21 @@ describe('SearchBar typeahead', () => {
     expect(onSearch).toHaveBeenCalledWith('Argent');
   });
 
+  it('reset cancels a pending debounce so a stale fetch cannot reopen the dropdown', async () => {
+    // Regression: handleReset cleared the input but left the debounce timer and
+    // in-flight fetch alive — the response landed ~250ms later and reopened the
+    // suggestion dropdown against an empty input box.
+    render(<SearchBar onSearch={vi.fn()} isLoading={false} onReset={vi.fn()} />);
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'argent' } });
+    // Reset before the debounce fires.
+    fireEvent.click(screen.getByText('Reset'));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+    expect(fetch).not.toHaveBeenCalled();
+    expect(screen.queryByRole('listbox')).toBeNull();
+  });
+
   it('closes the list on Escape and submits the raw query on Enter', async () => {
     const onSearch = vi.fn();
     render(<SearchBar onSearch={onSearch} isLoading={false} />);
