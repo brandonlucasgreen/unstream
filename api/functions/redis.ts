@@ -62,11 +62,32 @@ export function getRedis(): Redis | null {
   return redis;
 }
 
+// The Upstash SDK builds its error messages as
+// `${body.error}, command was: ${JSON.stringify(req.body)}` — so the message carries the full
+// Redis command, including its keys. Rate-limit keys are `${prefix}:${identifier}` and every
+// caller passes the client IP as the identifier, so that message can contain an IP address.
+// Console logs stay inside Netlify, but Sentry is a third party, so the command tail is dropped
+// before the error leaves the process. The reason for cutting the whole tail rather than
+// picking the keys out of it: the shape of req.body is the SDK's business, not ours.
+function redactCommand(error: unknown): Error {
+  const err = error instanceof Error ? error : new Error(String(error));
+  const [head, ...rest] = err.message.split(', command was:');
+  if (rest.length === 0) return err;
+
+  const redacted = new Error(`${head}, command was: [redacted]`);
+  redacted.name = err.name;
+  redacted.stack = err.stack;
+  return redacted;
+}
+
 /**
  * Record a Redis failure: open the circuit briefly, and report to Sentry.
  *
  * Call from the catch block of every Redis operation. Callers should still fail open —
  * this only makes the failure fast and visible, it does not change the outcome.
+ *
+ * `context` is sent to Sentry as-is, so it must not contain an identifier. Pass the operation
+ * and at most a cache key (those are normalized search terms) — never an IP, user id, or email.
  */
 export function reportRedisFailure(context: string, error: unknown): void {
   const now = Date.now();
@@ -77,7 +98,7 @@ export function reportRedisFailure(context: string, error: unknown): void {
   if (now - lastReportedAt < REPORT_INTERVAL_MS) return;
   lastReportedAt = now;
 
-  Sentry.captureException(error instanceof Error ? error : new Error(String(error)), {
+  Sentry.captureException(redactCommand(error), {
     tags: { subsystem: 'redis' },
     extra: { context },
   });

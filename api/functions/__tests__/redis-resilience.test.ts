@@ -115,6 +115,34 @@ describe('Upstash Redis client resilience', () => {
     expect((captured as Error).message).toBe('string rejection');
   });
 
+  it('strips the Upstash command tail so client IPs never reach Sentry', () => {
+    // The SDK appends `, command was: <full JSON command>` to its messages. For a rate-limit
+    // command the Redis key is `${prefix}:${identifier}`, and every caller passes the client
+    // IP as the identifier — so the raw message is not safe to send to a third party.
+    const leaky = new Error(
+      'WRONGPASS invalid or missing auth token, command was: ["EVALSHA","abc123","1","rl:standard:203.0.113.5","30"]',
+    );
+    leaky.name = 'UpstashError';
+
+    reportRedisFailure('checkRateLimit(standard)', leaky);
+
+    const [captured] = mocks.captureException.mock.calls[0] as [Error];
+    expect(captured.message).not.toContain('203.0.113.5');
+    expect(captured.message).not.toContain('rl:standard');
+    // The diagnostically useful part survives.
+    expect(captured.message).toContain('WRONGPASS invalid or missing auth token');
+    expect(captured.message).toContain('[redacted]');
+    expect(captured.name).toBe('UpstashError');
+  });
+
+  it('passes through an error with no command tail untouched', () => {
+    // The common case — a thrown fetch carries no command payload.
+    const error = new Error('fetch failed');
+    reportRedisFailure('cacheGet(artist:mirlo:boy-harsher)', error);
+
+    expect(mocks.captureException.mock.calls[0][0]).toBe(error);
+  });
+
   it('throttles Sentry reports so an outage cannot flood the project', () => {
     vi.useFakeTimers();
 
