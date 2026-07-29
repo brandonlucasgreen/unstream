@@ -4,7 +4,10 @@ import {
   normalizeSearchQuery,
   normalizeForComparison,
   namesMatch,
+  namesEqualIgnoringArticles,
+  looksLikeOpaqueId,
   textMatchScore,
+  collectMbSuggestions,
   bandcampSlugCandidates,
 } from '../../../../api/functions/search-utils';
 
@@ -141,5 +144,93 @@ describe('textMatchScore', () => {
 
   it('returns 0 for no match', () => {
     expect(textMatchScore('Radiohead', 'kid lightbulbs')).toBe(0);
+  });
+});
+
+describe('namesEqualIgnoringArticles', () => {
+  it('matches names differing only by a leading article', () => {
+    expect(namesEqualIgnoringArticles('Argent Grub', 'The Argent Grub')).toBe(true);
+    expect(namesEqualIgnoringArticles('The Beths', 'Beths')).toBe(true);
+    expect(namesEqualIgnoringArticles('A Perfect Circle', 'Perfect Circle')).toBe(true);
+  });
+
+  it('matches identical names', () => {
+    expect(namesEqualIgnoringArticles('Kid Lightbulbs', 'kid lightbulbs')).toBe(true);
+  });
+
+  it('rejects substring relationships that are different artists', () => {
+    // This is why namesMatch is NOT used for name-only attachment.
+    expect(namesEqualIgnoringArticles('Argent', 'Rod Argent')).toBe(false);
+    expect(namesEqualIgnoringArticles('Argent', 'The Argent Grub')).toBe(false);
+  });
+
+  it('does not treat "The..." as part of a longer word', () => {
+    // "Theresa" must not become "resa".
+    expect(namesEqualIgnoringArticles('Theresa', 'resa')).toBe(false);
+  });
+
+  it('rejects empty names', () => {
+    expect(namesEqualIgnoringArticles('The', 'A')).toBe(false);
+  });
+});
+
+describe('looksLikeOpaqueId', () => {
+  it('flags hex account ids like Bandwagon fallback handles', () => {
+    expect(looksLikeOpaqueId('695d15c12f0f56fdced0a5e6')).toBe(true);
+    expect(looksLikeOpaqueId('@695d15c12f0f56fdced0a5e6')).toBe(true);
+  });
+
+  it('flags long numeric ids', () => {
+    expect(looksLikeOpaqueId('123456789')).toBe(true);
+  });
+
+  it('does not flag real artist slugs', () => {
+    expect(looksLikeOpaqueId('the-argent-grub')).toBe(false);
+    expect(looksLikeOpaqueId('kidlightbulbs')).toBe(false);
+    expect(looksLikeOpaqueId('ben-g')).toBe(false);
+    // Short hex-looking words are usually words.
+    expect(looksLikeOpaqueId('decade')).toBe(false);
+  });
+});
+
+describe('collectMbSuggestions', () => {
+  // Real MB response shape for the query "argent" (2026-07).
+  const argentArtists = [
+    { name: 'Argent', score: 100 },
+    { name: 'Rod Argent', score: 88 },
+    { name: 'Argent', score: 78 },
+    { name: 'Argent', score: 78 },
+    { name: 'Goodnight Argent', score: 72 },
+  ];
+
+  it('suggests partial-name matches beyond the top hit', () => {
+    expect(collectMbSuggestions(argentArtists, 'argent', 'Argent'))
+      .toEqual(['Rod Argent', 'Goodnight Argent']);
+  });
+
+  it('excludes the query itself and the enriched artist', () => {
+    const suggestions = collectMbSuggestions(argentArtists, 'argent', 'Argent');
+    expect(suggestions).not.toContain('Argent');
+  });
+
+  it('drops low-scored hits', () => {
+    expect(collectMbSuggestions([{ name: 'Argent Something', score: 50 }], 'argent')).toEqual([]);
+  });
+
+  it('drops hits whose name does not contain the query', () => {
+    expect(collectMbSuggestions([{ name: 'The Zombies', score: 90 }], 'argent')).toEqual([]);
+  });
+
+  it('dedupes by normalized name and caps at 4', () => {
+    const many = Array.from({ length: 8 }, (_, i) => ({ name: `Argent ${i}`, score: 90 }));
+    expect(collectMbSuggestions(many, 'argent')).toHaveLength(4);
+    expect(collectMbSuggestions([
+      { name: 'Rod Argent', score: 90 },
+      { name: 'ROD ARGENT', score: 85 },
+    ], 'argent')).toEqual(['Rod Argent']);
+  });
+
+  it('returns nothing for an empty query', () => {
+    expect(collectMbSuggestions(argentArtists, '!!!')).toEqual([]);
   });
 });
