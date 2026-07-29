@@ -68,9 +68,17 @@ export default defineConfig({
         skipWaiting: true,
         clientsClaim: true,
         navigateFallbackDenylist: [
-          // Edge function routes that serve static HTML — don't let SW intercept them
+          // Edge function routes that serve static HTML — don't let SW intercept them.
+          // Must stay in sync with the [[edge_functions]] list in netlify.toml: anything
+          // missing here gets served the cached SPA shell for returning visitors, so the
+          // edge function silently never runs and the SPA re-fetches the data client-side.
+          // That is invisible to curl and to a fresh browser, which is what made it hard
+          // to spot — /u/* was missing and cost the page ~5s for anyone with the SW installed.
           /^\/a\//,
           /^\/artist\//,
+          /^\/u\//,
+          /^\/guides\//,
+          /^\/search/,
         ],
         runtimeCaching: [
           {
