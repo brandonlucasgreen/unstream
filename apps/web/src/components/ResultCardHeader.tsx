@@ -60,50 +60,26 @@ export function ResultCardHeader({
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          {result.matchConfidence !== 'claimed' && (
-            <span className="text-xs px-1.5 py-0.5 rounded bg-accent-primary/10 text-accent-primary">
+        {result.matchConfidence !== 'claimed' && (
+          <div className="flex flex-wrap items-center gap-2 mb-1">
+            <span className="text-xs px-1.5 py-0.5 rounded bg-accent-primary/10 text-accent-primary whitespace-nowrap">
               {typeLabel[result.type]}
             </span>
-          )}
-          {result.matchConfidence === 'claimed' && (
-            <>
-              <span
-                className="text-xs px-1.5 py-0.5 rounded bg-accent-primary/15 text-accent-primary flex items-center gap-1"
-                title="This artist has verified their Unstream profile"
-              >
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            {result.matchConfidence === 'unverified' && (
+              <span className="text-xs px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-500 flex items-center gap-1 whitespace-nowrap" title="Could not verify this is the same artist - no matching releases found">
+                <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Verified
+                Unverified
               </span>
-              {/* React Router <Link>: SPA-internal navigation keeps history in the SPA
-                  (back button works on Safari 26). The rich profile lives in the edge
-                  function today; UNS-100 ports it into React. The hard-navigation path
-                  was a regression in #269 (UNS-99) — see hotfix/uns-99-restore-link-routing. */}
-              <Link
-                to={`/a/${result.claimedSlug || result.id}`}
-                className="text-xs px-1.5 py-0.5 rounded bg-bg-hover text-text-secondary hover:text-text-primary transition-colors"
-                onClick={(e) => e.stopPropagation()}
-              >
-                View profile
-              </Link>
-            </>
-          )}
-          {result.matchConfidence === 'unverified' && (
-            <span className="text-xs px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-500 flex items-center gap-1" title="Could not verify this is the same artist - no matching releases found">
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Unverified
-            </span>
-          )}
-        </div>
+            )}
+          </div>
+        )}
         <h3 className="font-medium text-base text-text-primary truncate">
           {result.name}
         </h3>
         {result.type === 'artist' && (result.location?.city || result.location?.country || result.location?.countryCode) && (
-          <p className="text-text-muted text-xs truncate">
+          <p className="text-text-muted text-xs">
             {[result.location?.city, result.location?.country ?? result.location?.countryCode].filter(Boolean).join(', ')}
           </p>
         )}
@@ -112,20 +88,36 @@ export function ResultCardHeader({
             by {result.artist}
           </p>
         )}
+        {result.matchConfidence === 'claimed' && (
+          /* React Router <Link>: SPA-internal navigation keeps history in the SPA
+             (back button works on Safari 26). The rich profile lives in the edge
+             function today; UNS-100 ports it into React. The hard-navigation path
+             was a regression in #269 (UNS-99) — see hotfix/uns-99-restore-link-routing. */
+          <Link
+            to={`/a/${result.claimedSlug || result.id}`}
+            className="mt-1 inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-accent-primary/15 text-accent-primary hover:bg-accent-primary/20 transition-colors whitespace-nowrap"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+            View profile
+          </Link>
+        )}
       </div>
 
       {/* Action buttons */}
-      <div className="flex-shrink-0 flex items-center gap-2">
+      <div className="flex-shrink-0 flex flex-col justify-center items-stretch gap-1">
         {isSaved !== undefined && onSave && result.type === 'artist' && result.id && (
           <button
             onClick={onSave}
-            className={`text-xs font-medium px-2 py-1 rounded-lg transition-colors flex items-center gap-1.5 ${
+            className={`text-xs font-medium px-1.5 py-1 rounded-lg transition-colors flex items-center gap-1 whitespace-nowrap ${
               isSaved
                 ? 'bg-accent-secondary/15 text-accent-secondary hover:bg-accent-secondary/20'
                 : 'text-text-secondary hover:text-text-primary hover:bg-bg-secondary'
             }`}
           >
-            <svg className="w-3.5 h-3.5" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3.5 h-3.5 flex-shrink-0" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
             {isSaved ? 'Saved' : 'Save'}
@@ -134,19 +126,19 @@ export function ResultCardHeader({
         {/* Share button */}
         <button
           onClick={onShare}
-          className="text-xs font-medium px-2 py-1 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-secondary transition-colors flex items-center gap-1.5"
+          className="text-xs font-medium px-1.5 py-1 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-secondary transition-colors flex items-center gap-1 whitespace-nowrap"
           title="Share this result"
         >
           {shareCopied ? (
             <>
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               Copied!
             </>
           ) : (
             <>
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
               </svg>
               Share
