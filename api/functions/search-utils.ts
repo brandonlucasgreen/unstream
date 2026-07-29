@@ -249,6 +249,71 @@ export function applyMergeOverrides(
 }
 
 // ---------------------------------------------------------------------------
+// Admin link suppressions (remove one wrong platform link from a result)
+// ---------------------------------------------------------------------------
+
+/**
+ * One admin decision: "this URL does not belong on this artist."
+ *
+ * `artist_name_norm` scopes the removal to a single normalized artist name, so a
+ * homonym who genuinely owns the page keeps it — the same reason
+ * `splitSuspiciousPlatforms` exists. A null scope removes the URL everywhere.
+ */
+export interface LinkSuppression {
+  url: string;
+  artist_name_norm: string | null;
+}
+
+/** Compare two platform URLs ignoring case and trailing slashes. */
+export function normalizeUrlForMatch(url: string): string {
+  return url.trim().replace(/\/+$/, '').toLowerCase();
+}
+
+export function isUrlSuppressed(
+  url: string,
+  artistName: string,
+  suppressions: LinkSuppression[],
+): boolean {
+  if (suppressions.length === 0) return false;
+  const urlKey = normalizeUrlForMatch(url);
+  const nameNorm = normalizeForComparison(artistName);
+  return suppressions.some(s =>
+    normalizeUrlForMatch(s.url) === urlKey &&
+    (s.artist_name_norm === null || s.artist_name_norm === nameNorm)
+  );
+}
+
+/**
+ * Strip admin-suppressed links from every result, in place.
+ *
+ * Runs at the very end of the pipeline, after disambiguation and after the
+ * deferred name-only platforms are attached, so a link can't be re-added behind
+ * the suppression. Results left with nothing but search-only links are dropped
+ * by `filterAndSort`, which runs next.
+ */
+export function applyLinkSuppressions(
+  aggregated: AggregatedResult[],
+  suppressions: LinkSuppression[],
+): void {
+  if (suppressions.length === 0) return;
+
+  for (const result of aggregated) {
+    const removed = result.platforms.filter(p => isUrlSuppressed(p.url, result.name, suppressions));
+    if (removed.length === 0) continue;
+
+    result.platforms = result.platforms.filter(p => !removed.includes(p));
+    console.log(`[Suppression] Removed ${removed.length} link(s) from "${result.name}": ${removed.map(p => p.url).join(', ')}`);
+
+    // The result photo has no provenance field, so a suppressed Bandcamp page
+    // would keep supplying the artist image after its link is gone. Bandcamp
+    // images are the only ones served from bcbits.com, so this is safe to key on.
+    if (removed.some(p => p.sourceId === 'bandcamp') && result.imageUrl?.includes('bcbits.com')) {
+      result.imageUrl = undefined;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 // String normalization
 // ---------------------------------------------------------------------------
 

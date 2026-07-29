@@ -72,6 +72,7 @@ export function Header() {
         ...(isAdmin && pendingVerifyCount > 0
           ? [{ to: '/admin/verify', label: `Verify (${pendingVerifyCount})`, emphasis: true }]
           : []),
+        ...(isAdmin ? [{ to: '/admin/links', label: 'Links' }] : []),
         { to: '/dashboard', label: 'Dashboard', emphasis: true },
         { to: '/settings', label: 'Settings' },
       ]

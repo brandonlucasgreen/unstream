@@ -212,6 +212,17 @@ function App() {
     });
   }, []);
 
+  // Admin removed a link: drop it locally so the card reflects the change now.
+  // The suppression itself is server-side, but the CDN may serve this query's
+  // cached response for a few minutes yet.
+  const handleLinkRemoved = useCallback((resultId: string, url: string) => {
+    setResults(prev => prev.map(r =>
+      r.id === resultId
+        ? { ...r, platforms: r.platforms.filter(p => p.url !== url) }
+        : r
+    ));
+  }, []);
+
   const handleMergeSelected = useCallback(() => {
     const selectedResults = results.filter(r => selectedForMerge.has(r.id));
     navigate('/admin/merge', { state: { results: selectedResults } });
@@ -292,6 +303,7 @@ function App() {
                       isAdmin={isAdmin}
                       isSelected={selectedForMerge.has(result.id)}
                       onToggleSelect={handleToggleSelect}
+                      onLinkRemoved={handleLinkRemoved}
                     />
                   ))}
                 </div>
