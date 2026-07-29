@@ -1,8 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// cacheGetOrFetch no-ops its Redis calls when Upstash is unconfigured, which is the
-// case here — so these tests exercise the shouldCache decision itself: does the
-// fetch get re-run, or was a failure remembered?
+// cacheGetOrFetch is meant to no-op its Redis calls here so these tests exercise the
+// shouldCache decision itself (does the fetch get re-run, or was a failure remembered)
+// rather than real cache state. That was true locally, where Upstash env vars are unset,
+// but the Netlify build environment carries real production Upstash credentials — so
+// without this mock, these tests write real keys ("t:ok", "t:ftl-ok", ...) to production
+// Redis. Two deploys within the ~30 min TTL then hit a real cache HIT on a leftover key
+// from the previous build, which skips the predicate call entirely and fails
+// "accepts a failure TTL without disturbing the cacheable path". Mocking '../redis' makes
+// getRedis() return null unconditionally, matching the file's original assumption.
+vi.mock('../redis', () => ({
+  getRedis: () => null,
+  reportRedisFailure: vi.fn(),
+}));
 
 import { cacheGetOrFetch } from '../cache';
 
