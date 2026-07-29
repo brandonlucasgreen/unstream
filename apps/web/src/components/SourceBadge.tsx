@@ -45,6 +45,11 @@ export function SourceBadge({ source, url, isDirectLink, displayName }: SourceBa
   // Only show AI policy badges on marketplaces and decentralized platforms
   const hasAiPolicy = (source.category === 'marketplace' || source.category === 'decentralized') && (source.aiPolicy === 'formal' || source.aiPolicy === 'discouraged');
 
+  const openAiPolicy = () => {
+    analytics.trackPlatformClick(`${label} AI policy`);
+    if (source.aiPolicyUrl) window.open(source.aiPolicyUrl, '_blank', 'noopener,noreferrer');
+  };
+
   // Theme-aware colors: dark/light/medium brand colors all get readable text + bg
   const { textColor, bgColor } = badgeColors(source.color);
 
@@ -84,7 +89,9 @@ export function SourceBadge({ source, url, isDirectLink, displayName }: SourceBa
         )}
         {/* Show AI policy indicators on marketplace and decentralized badges.
             Rendered as a span (not <a>) because an <a> can't be nested inside
-            the platform link — clicking opens the policy page via window.open. */}
+            the platform link — activating it opens the policy page via window.open.
+            Click and keyboard (Enter/Space) both funnel through openAiPolicy so
+            analytics tracking stays consistent across input methods. */}
         {hasAiPolicy && (
           <span
             role="link"
@@ -94,14 +101,13 @@ export function SourceBadge({ source, url, isDirectLink, displayName }: SourceBa
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              analytics.trackPlatformClick(`${label} AI policy`);
-              if (source.aiPolicyUrl) window.open(source.aiPolicyUrl, '_blank', 'noopener,noreferrer');
+              openAiPolicy();
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 e.stopPropagation();
-                if (source.aiPolicyUrl) window.open(source.aiPolicyUrl, '_blank', 'noopener,noreferrer');
+                openAiPolicy();
               }
             }}
           >
