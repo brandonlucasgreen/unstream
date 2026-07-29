@@ -8,6 +8,7 @@ import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { Skeleton, SkeletonScreen } from '../components/Skeleton';
 import { ArticleSkeleton } from '../components/LoadingSkeletons';
+import { DEFAULT_PAGE_TITLE } from '../data/seo';
 
 interface GuideMeta {
   slug: string;
@@ -48,7 +49,7 @@ export function GuidePage() {
       .catch((e) => { Sentry.captureException(e, { extra: { context: 'guide.fetchContent' } }); setError(true) });
 
     return () => {
-      document.title = 'Unstream - Support Artists Directly';
+      document.title = DEFAULT_PAGE_TITLE;
       const descTag = document.querySelector('meta[name="description"]');
       if (descTag) descTag.setAttribute('content', 'Search any artist and find where to support them directly on alternative platforms like Bandcamp, Mirlo, and more.');
     };

@@ -6,6 +6,7 @@ import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { SkeletonScreen } from '../components/Skeleton';
 import { ArticleListSkeleton } from '../components/LoadingSkeletons';
+import { DEFAULT_PAGE_TITLE } from '../data/seo';
 
 interface GuideEntry {
   slug: string;
@@ -28,7 +29,7 @@ export function GuidesIndexPage() {
     if (descTag) descTag.setAttribute('content', INDEX_DESCRIPTION);
 
     return () => {
-      document.title = 'Unstream - Support Artists Directly';
+      document.title = DEFAULT_PAGE_TITLE;
       if (descTag) descTag.setAttribute('content', 'Search any artist and find where to support them directly on alternative platforms like Bandcamp, Mirlo, and more.');
     };
   }, []);

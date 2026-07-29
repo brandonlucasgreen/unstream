@@ -1,4 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useArtistSuggestions, type ArtistSuggestion } from '../hooks/useArtistSuggestions';
+import { SuggestionList } from './SuggestionList';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -7,120 +9,47 @@ interface SearchBarProps {
   onReset?: () => void;
 }
 
-interface Suggestion {
-  slug: string;
-  name: string;
-  imageUrl: string | null;
-}
-
-const SUGGEST_DEBOUNCE_MS = 250;
-const SUGGEST_MIN_CHARS = 2;
-
 export function SearchBar({ onSearch, isLoading, initialQuery, onReset }: SearchBarProps) {
   const [query, setQuery] = useState(initialQuery || '');
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [highlightIndex, setHighlightIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const abortRef = useRef<AbortController | undefined>(undefined);
 
   // Update query when initialQuery changes (for URL resolution or reset)
   useEffect(() => {
     setQuery(initialQuery || '');
   }, [initialQuery]);
 
-  const closeSuggestions = useCallback(() => {
-    setShowSuggestions(false);
-    setHighlightIndex(-1);
-  }, []);
-
   const submitSearch = useCallback((term: string) => {
-    closeSuggestions();
-    clearTimeout(debounceRef.current);
-    abortRef.current?.abort();
     if (term.trim()) {
       onSearch(term.trim());
     }
-  }, [onSearch, closeSuggestions]);
+  }, [onSearch]);
+
+  const handlePick = useCallback((name: string) => {
+    setQuery(name);
+    submitSearch(name);
+  }, [submitSearch]);
+
+  const suggest = useArtistSuggestions(handlePick);
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
+    suggest.clear();
     submitSearch(query);
-  }, [query, submitSearch]);
+  }, [query, submitSearch, suggest]);
 
   const handleChange = useCallback((value: string) => {
     setQuery(value);
-    setHighlightIndex(-1);
-    clearTimeout(debounceRef.current);
-
-    const term = value.trim();
-    if (term.length < SUGGEST_MIN_CHARS) {
-      abortRef.current?.abort();
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
-
-    debounceRef.current = setTimeout(async () => {
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
-      try {
-        const response = await fetch(`/api/suggest?query=${encodeURIComponent(term)}`, {
-          signal: controller.signal,
-        });
-        if (!response.ok) return;
-        const data = await response.json() as { suggestions?: Suggestion[] };
-        const next = data.suggestions || [];
-        setSuggestions(next);
-        setShowSuggestions(next.length > 0);
-      } catch {
-        // Aborted or network hiccup — typeahead is best-effort, the real
-        // search happens on submit.
-      }
-    }, SUGGEST_DEBOUNCE_MS);
-  }, []);
-
-  const pickSuggestion = useCallback((suggestion: Suggestion) => {
-    setQuery(suggestion.name);
-    submitSearch(suggestion.name);
-  }, [submitSearch]);
-
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (!showSuggestions || suggestions.length === 0) return;
-
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setHighlightIndex(i => (i + 1) % suggestions.length);
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setHighlightIndex(i => (i <= 0 ? suggestions.length - 1 : i - 1));
-    } else if (e.key === 'Enter' && highlightIndex >= 0) {
-      e.preventDefault();
-      pickSuggestion(suggestions[highlightIndex]);
-    } else if (e.key === 'Escape') {
-      closeSuggestions();
-    }
-  }, [showSuggestions, suggestions, highlightIndex, pickSuggestion, closeSuggestions]);
+    suggest.query(value);
+  }, [suggest]);
 
   const handleReset = useCallback(() => {
     // Cancel any pending debounce/fetch — a stale response landing after the
     // reset would reopen the dropdown against an empty input.
-    clearTimeout(debounceRef.current);
-    abortRef.current?.abort();
+    suggest.clear();
     setQuery('');
-    setSuggestions([]);
-    closeSuggestions();
     inputRef.current?.focus();
     onReset?.();
-  }, [onReset, closeSuggestions]);
-
-  // Cancel any in-flight suggestion work on unmount
-  useEffect(() => () => {
-    clearTimeout(debounceRef.current);
-    abortRef.current?.abort();
-  }, []);
+  }, [onReset, suggest]);
 
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-2xl mx-auto">
@@ -131,16 +60,16 @@ export function SearchBar({ onSearch, isLoading, initialQuery, onReset }: Search
             type="text"
             value={query}
             onChange={(e) => handleChange(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onFocus={() => { if (suggestions.length > 0 && query.trim().length >= SUGGEST_MIN_CHARS) setShowSuggestions(true); }}
-            onBlur={closeSuggestions}
+            onKeyDown={suggest.handleKeyDown}
+            onFocus={() => suggest.reopen(query)}
+            onBlur={suggest.close}
             placeholder="Search for artists..."
             className="search-input w-full pr-16"
             disabled={isLoading}
             role="combobox"
-            aria-expanded={showSuggestions}
-            aria-controls="search-suggestions"
-            aria-activedescendant={highlightIndex >= 0 ? `search-suggestion-${highlightIndex}` : undefined}
+            aria-expanded={suggest.isOpen}
+            aria-controls="searchbar-suggestions"
+            aria-activedescendant={suggest.highlightIndex >= 0 ? `searchbar-suggestion-${suggest.highlightIndex}` : undefined}
             aria-autocomplete="list"
           />
           {onReset && (
@@ -152,27 +81,14 @@ export function SearchBar({ onSearch, isLoading, initialQuery, onReset }: Search
               Reset
             </button>
           )}
-          {showSuggestions && (
-            <ul
-              id="search-suggestions"
-              role="listbox"
-              className="absolute z-20 mt-1 w-full rounded border border-border bg-bg-primary shadow-lg overflow-hidden"
-            >
-              {suggestions.map((suggestion, index) => (
-                <li
-                  key={suggestion.slug}
-                  id={`search-suggestion-${index}`}
-                  role="option"
-                  aria-selected={index === highlightIndex}
-                  // onMouseDown so the pick lands before the input's onBlur closes the list
-                  onMouseDown={(e) => { e.preventDefault(); pickSuggestion(suggestion); }}
-                  onMouseEnter={() => setHighlightIndex(index)}
-                  className={`px-4 py-2 cursor-pointer text-left ${index === highlightIndex ? 'bg-bg-secondary' : ''}`}
-                >
-                  {suggestion.name}
-                </li>
-              ))}
-            </ul>
+          {suggest.isOpen && (
+            <SuggestionList
+              idPrefix="searchbar"
+              suggestions={suggest.suggestions}
+              highlightIndex={suggest.highlightIndex}
+              onHighlight={suggest.setHighlightIndex}
+              onPick={(suggestion: ArtistSuggestion) => suggest.pick(suggestion)}
+            />
           )}
         </div>
         <button

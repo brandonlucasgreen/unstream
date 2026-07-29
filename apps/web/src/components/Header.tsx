@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MobileNav, isNavGroup, type NavEntry, type NavGroup } from './MobileNav';
 import { NavDropdown } from './NavDropdown';
+import { HeaderSearch } from './HeaderSearch';
 import { useAuth } from '../contexts/AuthContext';
 
 function UnstreamLogo() {
@@ -41,6 +42,7 @@ export function Header() {
   const navigate = useNavigate();
   const { session, user, isAdmin, signOut } = useAuth();
   const [pendingVerifyCount, setPendingVerifyCount] = useState(0);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   // Fetch pending verification count for admins — only on admin-relevant pages
   useEffect(() => {
@@ -99,47 +101,85 @@ export function Header() {
   // The sticky header keeps a solid background rather than a blurred one: a
   // backdrop-filter would become the containing block for MobileNav's fixed
   // overlay and trap the drawer inside the header instead of covering the page.
+  // For the same reason, don't add a transform or filter to this element.
   return (
-    <header className="sticky top-0 z-40 p-4 border-b border-border bg-bg-primary flex items-center justify-between gap-4">
-      <Link to="/" className="text-xl font-bold text-text-primary hover:opacity-80 transition-opacity shrink-0 flex items-center gap-2">
-        <UnstreamLogo />
-        Unstream
-      </Link>
+    <header className="sticky top-0 z-40 border-b border-border bg-bg-primary">
+      <div className="relative p-4 flex items-center gap-4">
+        <Link to="/" className="text-xl font-bold text-text-primary hover:opacity-80 transition-opacity shrink-0 flex items-center gap-2">
+          <UnstreamLogo />
+          Unstream
+        </Link>
 
-      <nav className="hidden sm:flex items-center gap-3 text-sm">
-        {session && (
-          <span className="text-text-muted hidden md:inline">
-            {user?.email}
-          </span>
-        )}
-        {navItems.map(entry => isNavGroup(entry) ? (
-          <NavDropdown key={entry.label} group={entry} />
-        ) : (
-          <Link
-            key={entry.to}
-            to={entry.to}
-            className={entry.emphasis
-              ? 'text-accent-primary hover:underline font-medium'
-              : 'text-text-muted hover:text-text-primary transition-colors'}
-          >
-            {entry.label}
-          </Link>
-        ))}
-        {session && (
+        {/* Search is available from every page, not just the homepage.
+            Positioned absolutely rather than as a flex child so it sits at the
+            true centre of the header. As a flex child it was only centred within
+            whatever space the sides left over, so a signed-in admin's longer nav
+            pushed it visibly left of centre while a logged-out visitor's did not.
+            The transform is scoped to this wrapper and must NOT be moved onto
+            <header>: a transform there would become the containing block for
+            MobileNav's fixed overlay, trapping the drawer inside the header.
+            Inline from lg only — below that the nav takes so much of the row that
+            a centred bar could only be ~140px wide, so the magnifier opens the
+            same component as a full-width second row instead. */}
+        <div className="hidden lg:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm xl:max-w-md px-4">
+          <HeaderSearch />
+        </div>
+
+        <div className="flex items-center gap-1 ml-auto">
           <button
-            onClick={handleSignOut}
-            className="text-text-muted hover:text-text-primary transition-colors"
+            type="button"
+            onClick={() => setMobileSearchOpen(open => !open)}
+            className="lg:hidden p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors"
+            aria-label="Search artists"
+            aria-expanded={mobileSearchOpen}
+            aria-controls="header-search-row"
           >
-            Sign out
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </button>
-        )}
-      </nav>
 
-      <MobileNav
-        items={navItems}
-        email={session ? user?.email : undefined}
-        onSignOut={session ? handleSignOut : undefined}
-      />
+          {/* No email here. It's the widest and least predictable thing on this
+              side (an address can be 15 or 40 characters), which is exactly what
+              made a centred bar collide at laptop widths. It's still in the
+              mobile drawer and on /settings. */}
+          <nav className="hidden sm:flex items-center gap-3 text-sm">
+            {navItems.map(entry => isNavGroup(entry) ? (
+              <NavDropdown key={entry.label} group={entry} />
+            ) : (
+              <Link
+                key={entry.to}
+                to={entry.to}
+                className={entry.emphasis
+                  ? 'text-accent-primary hover:underline font-medium'
+                  : 'text-text-muted hover:text-text-primary transition-colors'}
+              >
+                {entry.label}
+              </Link>
+            ))}
+            {session && (
+              <button
+                onClick={handleSignOut}
+                className="text-text-muted hover:text-text-primary transition-colors"
+              >
+                Sign out
+              </button>
+            )}
+          </nav>
+
+          <MobileNav
+            items={navItems}
+            email={session ? user?.email : undefined}
+            onSignOut={session ? handleSignOut : undefined}
+          />
+        </div>
+      </div>
+
+      {mobileSearchOpen && (
+        <div id="header-search-row" className="lg:hidden px-4 pb-4">
+          <HeaderSearch autoFocus onClose={() => setMobileSearchOpen(false)} />
+        </div>
+      )}
     </header>
   );
 }

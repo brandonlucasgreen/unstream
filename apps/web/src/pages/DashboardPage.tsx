@@ -6,7 +6,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { Header } from '../components/Header';
 import { ArtistAnalytics } from '../components/ArtistAnalytics';
 import { Footer } from '../components/Footer';
-import { SearchBar } from '../components/SearchBar';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { DashboardSkeleton } from '../components/LoadingSkeletons';
 
@@ -228,10 +227,6 @@ export function DashboardPage() {
     }
   };
 
-  const handleDashboardSearch = (query: string) => {
-    navigate(`/?q=${encodeURIComponent(query)}`);
-  };
-
   // Pagination helpers
   const totalPages = Math.ceil(savedArtists.length / PAGE_SIZE);
   const clampedPage = Math.min(currentPage, Math.max(1, totalPages));
@@ -343,9 +338,6 @@ export function DashboardPage() {
               </svg>
               Saved Artists
             </h2>
-            <div className="mb-4">
-              <SearchBar onSearch={handleDashboardSearch} isLoading={false} />
-            </div>
 
             {savedArtists.length === 0 ? (
               <div className="text-center py-12 rounded-lg border border-border border-dashed">
