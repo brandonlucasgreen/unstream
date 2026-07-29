@@ -453,6 +453,38 @@ export async function getArtistBySlug(slug: string): Promise<ArtistResult | null
  * Persist artist search results to the database.
  * Only persists artist-type results. Runs as fire-and-forget after search.
  */
+/**
+ * Slugs of claimed artists whose display name contains the term.
+ *
+ * The search handler's exact-slug lookup can only find a claimed profile when
+ * the query IS the artist's name — a partial query like "lightbulbs" never
+ * resolves the slug "kid-lightbulbs", so the artist's own curated page lost to
+ * a generic scraped result. This is the name-contains channel that fixes that.
+ */
+export async function findClaimedArtistSlugsByName(term: string, limit = 5): Promise<string[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  // Strip ILIKE wildcards so user input can't change the match shape
+  // (same reasoning as the slug guard in getArtistBySlug).
+  const cleaned = term.replace(/[%_,()]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (cleaned.length < 2) return [];
+
+  const { data, error } = await client
+    .from('artists')
+    .select('slug')
+    .ilike('name', `%${cleaned}%`)
+    .eq('match_confidence', 'claimed')
+    .limit(limit);
+
+  if (error) {
+    console.error('[DB] findClaimedArtistSlugsByName error:', error);
+    return [];
+  }
+
+  return (data ?? []).map(r => r.slug).filter(Boolean);
+}
+
 export async function persistSearchResults(results: ArtistResult[]): Promise<void> {
   const client = getClient();
   if (!client) return;
