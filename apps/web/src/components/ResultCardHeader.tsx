@@ -60,45 +60,21 @@ export function ResultCardHeader({
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <div className="flex flex-wrap items-center gap-2 mb-1">
-          {result.matchConfidence !== 'claimed' && (
+        {result.matchConfidence !== 'claimed' && (
+          <div className="flex flex-wrap items-center gap-2 mb-1">
             <span className="text-xs px-1.5 py-0.5 rounded bg-accent-primary/10 text-accent-primary whitespace-nowrap">
               {typeLabel[result.type]}
             </span>
-          )}
-          {result.matchConfidence === 'claimed' && (
-            <>
-              <span
-                className="text-xs px-1.5 py-0.5 rounded bg-accent-primary/15 text-accent-primary flex items-center gap-1 whitespace-nowrap"
-                title="This artist has verified their Unstream profile"
-              >
-                <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            {result.matchConfidence === 'unverified' && (
+              <span className="text-xs px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-500 flex items-center gap-1 whitespace-nowrap" title="Could not verify this is the same artist - no matching releases found">
+                <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Verified
+                Unverified
               </span>
-              {/* React Router <Link>: SPA-internal navigation keeps history in the SPA
-                  (back button works on Safari 26). The rich profile lives in the edge
-                  function today; UNS-100 ports it into React. The hard-navigation path
-                  was a regression in #269 (UNS-99) — see hotfix/uns-99-restore-link-routing. */}
-              <Link
-                to={`/a/${result.claimedSlug || result.id}`}
-                className="text-xs px-1.5 py-0.5 rounded bg-bg-hover text-text-secondary hover:text-text-primary transition-colors whitespace-nowrap"
-                onClick={(e) => e.stopPropagation()}
-              >
-                View profile
-              </Link>
-            </>
-          )}
-          {result.matchConfidence === 'unverified' && (
-            <span className="text-xs px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-500 flex items-center gap-1 whitespace-nowrap" title="Could not verify this is the same artist - no matching releases found">
-              <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Unverified
-            </span>
-          )}
-        </div>
+            )}
+          </div>
+        )}
         <h3 className="font-medium text-base text-text-primary truncate">
           {result.name}
         </h3>
@@ -111,6 +87,22 @@ export function ResultCardHeader({
           <p className="text-text-secondary text-sm truncate">
             by {result.artist}
           </p>
+        )}
+        {result.matchConfidence === 'claimed' && (
+          /* React Router <Link>: SPA-internal navigation keeps history in the SPA
+             (back button works on Safari 26). The rich profile lives in the edge
+             function today; UNS-100 ports it into React. The hard-navigation path
+             was a regression in #269 (UNS-99) — see hotfix/uns-99-restore-link-routing. */
+          <Link
+            to={`/a/${result.claimedSlug || result.id}`}
+            className="mt-1 inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-accent-primary/15 text-accent-primary hover:bg-accent-primary/20 transition-colors whitespace-nowrap"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+            View profile
+          </Link>
         )}
       </div>
 
