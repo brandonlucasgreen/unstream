@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MobileNav, isNavGroup, type NavEntry, type NavGroup } from './MobileNav';
 import { NavDropdown } from './NavDropdown';
+import { HeaderSearch } from './HeaderSearch';
 import { useAuth } from '../contexts/AuthContext';
 
 function UnstreamLogo() {
@@ -41,6 +42,7 @@ export function Header() {
   const navigate = useNavigate();
   const { session, user, isAdmin, signOut } = useAuth();
   const [pendingVerifyCount, setPendingVerifyCount] = useState(0);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   // Fetch pending verification count for admins — only on admin-relevant pages
   useEffect(() => {
@@ -99,47 +101,82 @@ export function Header() {
   // The sticky header keeps a solid background rather than a blurred one: a
   // backdrop-filter would become the containing block for MobileNav's fixed
   // overlay and trap the drawer inside the header instead of covering the page.
+  // For the same reason, don't add a transform or filter to this element.
   return (
-    <header className="sticky top-0 z-40 p-4 border-b border-border bg-bg-primary flex items-center justify-between gap-4">
-      <Link to="/" className="text-xl font-bold text-text-primary hover:opacity-80 transition-opacity shrink-0 flex items-center gap-2">
-        <UnstreamLogo />
-        Unstream
-      </Link>
+    <header className="sticky top-0 z-40 border-b border-border bg-bg-primary">
+      <div className="p-4 flex items-center gap-4">
+        <Link to="/" className="text-xl font-bold text-text-primary hover:opacity-80 transition-opacity shrink-0 flex items-center gap-2">
+          <UnstreamLogo />
+          Unstream
+        </Link>
 
-      <nav className="hidden sm:flex items-center gap-3 text-sm">
-        {session && (
-          <span className="text-text-muted hidden md:inline">
-            {user?.email}
-          </span>
-        )}
-        {navItems.map(entry => isNavGroup(entry) ? (
-          <NavDropdown key={entry.label} group={entry} />
-        ) : (
-          <Link
-            key={entry.to}
-            to={entry.to}
-            className={entry.emphasis
-              ? 'text-accent-primary hover:underline font-medium'
-              : 'text-text-muted hover:text-text-primary transition-colors'}
-          >
-            {entry.label}
-          </Link>
-        ))}
-        {session && (
+        {/* Search is available from every page, not just the homepage. Below md
+            there isn't room for the wordmark, an input and the nav at once, so
+            the magnifier below opens the same component as a second row. */}
+        <div className="hidden md:flex flex-1 min-w-0 justify-center">
+          <div className="w-full max-w-md">
+            <HeaderSearch />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1 ml-auto">
           <button
-            onClick={handleSignOut}
-            className="text-text-muted hover:text-text-primary transition-colors"
+            type="button"
+            onClick={() => setMobileSearchOpen(open => !open)}
+            className="md:hidden p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors"
+            aria-label="Search artists"
+            aria-expanded={mobileSearchOpen}
+            aria-controls="header-search-row"
           >
-            Sign out
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </button>
-        )}
-      </nav>
 
-      <MobileNav
-        items={navItems}
-        email={session ? user?.email : undefined}
-        onSignOut={session ? handleSignOut : undefined}
-      />
+          <nav className="hidden sm:flex items-center gap-3 text-sm">
+            {session && (
+              // lg rather than md: the email competes with the search bar for
+              // the middle of the header on a laptop-width screen.
+              <span className="text-text-muted hidden lg:inline">
+                {user?.email}
+              </span>
+            )}
+            {navItems.map(entry => isNavGroup(entry) ? (
+              <NavDropdown key={entry.label} group={entry} />
+            ) : (
+              <Link
+                key={entry.to}
+                to={entry.to}
+                className={entry.emphasis
+                  ? 'text-accent-primary hover:underline font-medium'
+                  : 'text-text-muted hover:text-text-primary transition-colors'}
+              >
+                {entry.label}
+              </Link>
+            ))}
+            {session && (
+              <button
+                onClick={handleSignOut}
+                className="text-text-muted hover:text-text-primary transition-colors"
+              >
+                Sign out
+              </button>
+            )}
+          </nav>
+
+          <MobileNav
+            items={navItems}
+            email={session ? user?.email : undefined}
+            onSignOut={session ? handleSignOut : undefined}
+          />
+        </div>
+      </div>
+
+      {mobileSearchOpen && (
+        <div id="header-search-row" className="md:hidden px-4 pb-4">
+          <HeaderSearch autoFocus onClose={() => setMobileSearchOpen(false)} />
+        </div>
+      )}
     </header>
   );
 }

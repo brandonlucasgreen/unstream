@@ -94,6 +94,11 @@ const CSS = `
   .site-header .brand { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 700; color: var(--text); text-decoration: none; flex-shrink: 0; }
   .site-header .brand:hover { opacity: 0.8; }
   .site-header .brand svg { flex-shrink: 0; }
+  .site-header .header-search { display: flex; gap: 8px; flex: 1; max-width: 420px; margin: 0 auto; }
+  .site-header .header-search input { flex: 1; min-width: 0; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 14px; color: var(--text); font-family: inherit; }
+  .site-header .header-search input:focus { outline: none; border-color: var(--accent); }
+  .site-header .header-search button { border: 0; border-radius: 8px; padding: 8px 14px; background: var(--accent); color: #fff; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; }
+  @media (max-width: 640px) { .site-header .header-search { display: none; } }
   .site-header .nav-right { display: flex; align-items: center; gap: 12px; font-size: 14px; }
   .site-header .nav-link { color: var(--muted); text-decoration: none; }
   .site-header .nav-link:hover { color: var(--text); }
@@ -277,6 +282,14 @@ export default async function handler(request: Request, context: Context) {
 <body>
   <header class="site-header">
     <a href="/" class="brand">${LOGO_SVG} Unstream</a>
+    <!-- Plain GET form, no JS: this page is pure SSR, so it can't render the
+         React HeaderSearch. Submitting lands on /?q=… which is where the SPA
+         renders results. Never point this at /search — that URL belongs to the
+         noscript-search edge function. -->
+    <form class="header-search" action="/" method="get" role="search">
+      <input type="text" name="q" placeholder="Search artists..." aria-label="Search artists" enterkeyhint="search">
+      <button type="submit">Search</button>
+    </form>
   </header>
 
   <div class="page-content">
@@ -380,6 +393,14 @@ export default async function handler(request: Request, context: Context) {
 <body>
   <header class="site-header">
     <a href="/" class="brand">${LOGO_SVG} Unstream</a>
+    <!-- Plain GET form, no JS: this page is pure SSR, so it can't render the
+         React HeaderSearch. Submitting lands on /?q=… which is where the SPA
+         renders results. Never point this at /search — that URL belongs to the
+         noscript-search edge function. -->
+    <form class="header-search" action="/" method="get" role="search">
+      <input type="text" name="q" placeholder="Search artists..." aria-label="Search artists" enterkeyhint="search">
+      <button type="submit">Search</button>
+    </form>
   </header>
 
   <div class="page-content">

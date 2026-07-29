@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { SearchBar } from './components/SearchBar';
 import { ResultCard } from './components/ResultCard';
@@ -28,7 +28,6 @@ function App() {
   const [hasSearched, setHasSearched] = useState(false);
   const [resolvedQuery, setResolvedQuery] = useState<string>('');
   const [isResolving, setIsResolving] = useState(false);
-  const [, setIsFromUrl] = useState(false);
   const [selectedForMerge, setSelectedForMerge] = useState<Set<string>>(new Set());
 
   // PWA standalone detection — hide hero/download section when in app mode
@@ -55,6 +54,11 @@ function App() {
   const currentSearchRef = useRef<number>(0);
   // Track if we just went home to prevent re-triggering search from stale URL
   const justWentHomeRef = useRef(false);
+  // The last query we actually searched for. The header search bar navigates to
+  // /?q=… from anywhere in the app, so ?q= has to be able to change on a page
+  // that has already searched — comparing against this is what makes a second
+  // search (and the back button between two searches) work.
+  const lastSearchedRef = useRef<string>('');
   const letterbirdRef = useRef<HTMLDivElement>(null);
 
   // Default page title
@@ -91,7 +95,6 @@ function App() {
       resolveArtistUrl(urlParam).then((result) => {
         if (result) {
           setResolvedQuery(result.artistName);
-          setIsFromUrl(true);
           // Update URL to use q param instead
           setSearchParams({ q: result.artistName }, { replace: true });
           // Trigger search with resolved artist name
@@ -107,10 +110,12 @@ function App() {
         setIsResolving(false);
       });
     }
-    // Handle direct query param (e.g., ?q=radiohead)
-    else if (queryParam && !hasSearched && !isResolving) {
+    // Handle direct query param (e.g., ?q=radiohead). The guard is "is this a
+    // different query than the one we ran" rather than "have we searched at
+    // all": the old !hasSearched check only ever allowed the first search, so a
+    // second search from the header would change the URL and nothing else.
+    else if (queryParam && queryParam !== lastSearchedRef.current && !isResolving) {
       setResolvedQuery(queryParam);
-      setIsFromUrl(true);
       handleSearch(queryParam);
     }
   }, [searchParams, isResolving, hasSearched, setSearchParams]);
@@ -130,6 +135,7 @@ function App() {
     // Generate unique ID for this search to handle race conditions
     const searchId = Date.now();
     currentSearchRef.current = searchId;
+    lastSearchedRef.current = query;
 
     setIsLoading(true);
     setIsEnriching(false);
@@ -190,14 +196,16 @@ function App() {
   }, [setSearchParams]);
 
   const handleGoHome = useCallback(() => {
-    // Mark that we're going home to prevent useEffect from re-triggering
+    // Mark that we're going home to prevent useEffect from re-triggering. That
+    // run is swallowed rather than filtered by lastSearchedRef, because the
+    // effect can still see the stale ?q= in the same batch as the reset.
     justWentHomeRef.current = true;
+    lastSearchedRef.current = '';
     setResults([]);
     setHasSearched(false);
     setError(null);
     setResolvedQuery('');
     setIsEnriching(false);
-    setIsFromUrl(false);
     setSelectedForMerge(new Set());
     // Clear the URL params when going home
     setSearchParams({}, { replace: true });
@@ -233,36 +241,64 @@ function App() {
 
       <Header />
 
-      {/* Hero — heading always visible, download buttons hidden in PWA mode */}
+      {/* Hero — pitch copy, so it gives way to results the moment someone
+          searches. Leaving it up pushed the first result below the fold on a
+          phone. The marketing byline is dropped entirely in PWA mode. */}
+      {!hasSearched && (
       <div className={isStandalone ? "pt-12 px-4" : "pt-6 px-4"}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-[30px]">
             <h1 className="font-display text-4xl md:text-5xl font-bold mb-4 text-text-primary">
               Directly support the artist you&rsquo;re listening to right now
             </h1>
-            <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto">
-              Unstream finds the places where your favorite music artists &mdash; not big tech companies &mdash; keep up to 97% of every sale.
-            </p>
+            {!isStandalone && (
+              <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto">
+                Unstream finds the places where your favorite music artists &mdash; not big tech companies &mdash; keep up to 97% of every sale.
+              </p>
+            )}
           </div>
         </div>
       </div>
+      )}
 
       {/* Search section */}
       <main className="px-4 pb-16">
         <div className="max-w-4xl mx-auto">
-          {/* Download buttons — above search, hidden in PWA mode */}
-          {!isStandalone && (
-          <div className="mb-[30px]">
-            <DownloadGrid />
-          </div>
-          )}
+          {isStandalone ? (
+            /* App home. Search keeps a prominent input here even though the
+               marketing page hands it to the header: there are no download
+               links competing for the CTA, and launching the installed app onto
+               a screen with no input to type in is a dead end. Signed-in users
+               never see this — they're redirected to /dashboard above. */
+            <div className="space-y-6">
+              <SearchBar
+                onSearch={handleSearch}
+                isLoading={isLoading || isResolving}
+                initialQuery={resolvedQuery}
+                onReset={hasSearched ? handleGoHome : undefined}
+              />
+              {!session && (
+                <p className="text-center">
+                  <Link to="/login" className="text-accent-primary hover:underline font-medium">
+                    Sign in to save artists &rarr;
+                  </Link>
+                </p>
+              )}
+            </div>
+          ) : !hasSearched && (
+            <>
+              {/* Download buttons — the homepage's primary CTA now that search
+                  lives in the header on every page. Hidden once there are
+                  results to show, along with the hero above. */}
+              <div className="mb-[30px]">
+                <DownloadGrid />
+              </div>
 
-          <SearchBar
-            onSearch={handleSearch}
-            isLoading={isLoading || isResolving}
-            initialQuery={resolvedQuery}
-            onReset={hasSearched ? handleGoHome : undefined}
-          />
+              <p className="text-center text-text-secondary">
+                Or search artists anytime at the top of the page 🔎
+              </p>
+            </>
+          )}
 
           {/* Resolving URL state */}
           {isResolving && (
@@ -290,11 +326,22 @@ function App() {
                 </SkeletonScreen>
               ) : results.length > 0 ? (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-4">
                     <p className="text-text-muted text-sm">
                       Found {results.length} result{results.length !== 1 ? 's' : ''}
                     </p>
-                    {isEnriching && <LoadingLabel>Loading more sources...</LoadingLabel>}
+                    <div className="flex items-center gap-4">
+                      {isEnriching && <LoadingLabel>Loading more sources...</LoadingLabel>}
+                      {/* In PWA mode the SearchBar's own Reset already does this. */}
+                      {!isStandalone && (
+                        <button
+                          onClick={handleGoHome}
+                          className="text-sm text-text-muted hover:text-text-primary transition-colors shrink-0"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
                   </div>
                   {results.map((result) => (
                     <ResultCard
@@ -313,6 +360,14 @@ function App() {
                   <p className="text-text-muted/70 text-sm mt-2">
                     Try a different search term
                   </p>
+                  {!isStandalone && (
+                    <button
+                      onClick={handleGoHome}
+                      className="mt-4 text-sm text-text-muted hover:text-text-primary transition-colors"
+                    >
+                      Clear
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -445,16 +500,21 @@ function App() {
             </div>
           )}
 
-          {/* FAQ link — always visible */}
+          {/* FAQ link — marketing site only; the footer carries FAQ in app mode */}
+          {!isStandalone && (
           <div className="text-center mt-8">
             <a href="/faq" className="text-accent-secondary hover:underline font-medium">
               Frequently asked questions →
             </a>
           </div>
+          )}
         </div>
       </main>
 
-      {/* Contact Form */}
+      {/* Contact Form — marketing site only. Skipping it in app mode also skips
+          the third-party Letterbird script, since the effect below finds no
+          container to mount into. */}
+      {!isStandalone && (
       <section className="px-4 pb-16">
         <div className="max-w-4xl mx-auto">
           <div className="bg-surface-secondary rounded-2xl p-6 md:p-8 border border-border">
@@ -468,6 +528,7 @@ function App() {
           </div>
         </div>
       </section>
+      )}
 
       <Footer />
     </div>
