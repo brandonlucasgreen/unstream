@@ -2,8 +2,8 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --font-display: "SN Pro", system-ui, sans-serif;
-  --font-body: "SN Pro", system-ui, sans-serif;
+  --font-display: "Stack Sans Headline", system-ui, sans-serif;
+  --font-body: "Stack Sans Headline", system-ui, sans-serif;
   --font-mono: ui-monospace, monospace;
 
   --color-bg-primary: #0d0d0d;
