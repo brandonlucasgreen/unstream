@@ -4,9 +4,10 @@ import type { ArtistSuggestion } from '../hooks/useArtistSuggestions';
  * The typeahead dropdown, shared by the header search and the SearchBar so the
  * ARIA wiring lives in one place.
  *
- * `idPrefix` is load-bearing: the dashboard renders both inputs at once, and a
- * hardcoded id would give the page two elements called `search-suggestions`,
- * pointing every `aria-activedescendant` at whichever one rendered first.
+ * `idPrefix` is load-bearing: in PWA mode the homepage renders both inputs at
+ * once (the header's, plus the app home's prominent SearchBar), and a hardcoded
+ * id would give that page two elements called `search-suggestions`, pointing
+ * every `aria-activedescendant` at whichever one rendered first.
  */
 export function SuggestionList({
   idPrefix,
