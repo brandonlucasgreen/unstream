@@ -1,10 +1,15 @@
 import type { Handler } from '@netlify/functions';
 
-// Desktop app version info - update this when releasing new versions
+// Desktop app version info — update this on every Mac release.
+//
+// This is what the Mac app's automatic update check reads. It sat at 2.1.0 while the
+// app shipped 3.2.0, which went unnoticed because nothing called the checker; as of
+// v3.3.0 it runs at launch, so a stale value here means users are told they're up to
+// date when they aren't. Keep it in step with Info-macOS.plist.
 const VERSION_INFO = {
-  latestVersion: '2.1.0',
+  latestVersion: '3.3.0',
   downloadUrl: 'https://github.com/brandonlucasgreen/unstream/releases/latest',
-  releaseNotes: 'Artist analytics - verified artists can now see search appearances, page views, and link clicks on their dashboard',
+  releaseNotes: 'Keyboard shortcuts, right-click menus, drag-and-drop links, a real Settings window, and "Find on Unstream" in the system Services menu',
 };
 
 export const handler: Handler = async (event) => {
