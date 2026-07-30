@@ -6,6 +6,8 @@ import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
 import { cacheDeleteByArtist } from './cache';
 import { checkRateLimit, getClientIp } from './ratelimit';
+import { Sentry } from '../lib/sentry';
+import { buildLinkRows, DIVIDER_PLATFORM, type LinkEntry } from '../shared/link-dividers';
 
 function getServiceClient() {
   return getClient();
@@ -31,21 +33,6 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'Access-Control-Allow-Methods': 'PUT, OPTIONS',
 };
-
-// A `platform: 'divider'` entry is a position marker in the artist's link
-// order, not a link — it carries no URL and is stored on the profile
-// (artist_profiles.link_dividers) rather than as an artist_links row.
-interface LinkUpdate {
-  platform: string;
-  url?: string;
-  displayName?: string;
-}
-
-export const DIVIDER_PLATFORM = 'divider';
-
-// Cap dividers per profile. Every gap in a link list is a legitimate divider
-// position, so this only rules out a payload that isn't a real link list.
-const MAX_DIVIDERS = 20;
 
 // Allowed embed domains for featured releases
 export const ALLOWED_EMBED_DOMAINS = [
@@ -142,7 +129,10 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
     bio?: string;
     featuredEmbed?: string | null;
     customImageUrl?: string | null;
-    links?: LinkUpdate[];
+    // A `platform: 'divider'` entry is a position marker in the artist's link
+    // order, not a link — it carries no URL and is stored on the profile
+    // (artist_profiles.link_dividers) rather than as an artist_links row.
+    links?: LinkEntry[];
     location?: { city?: string; country?: string };
   };
   try {
@@ -326,21 +316,9 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
 
   // --- Update links ---
   if (body.links !== undefined) {
-    // Delete all existing claimed links for this artist, then re-insert
-    // This handles removals, edits, and additions cleanly
-    const { error: deleteError } = await client
-      .from('artist_links')
-      .delete()
-      .eq('artist_id', artist.id);
-
-    if (deleteError) {
-      console.error('[Profile] Link delete failed:', deleteError);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update links' }) };
-    }
-
-    // Split the submitted order into links and divider positions. The editor
-    // sends one ordered list containing both, so the artist's arrangement of
-    // links and dividers stays a single source of truth.
+    // Keep only entries we can actually store, then let buildLinkRows work out
+    // the storage shape. The editor sends links and dividers as one ordered
+    // list, so the artist's arrangement stays a single source of truth.
     const entries = (body.links || []).filter(l => {
       if (l.platform === DIVIDER_PLATFORM) return true;
       if (!l.platform || !l.url) return false;
@@ -352,62 +330,30 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
       }
     });
 
-    const validLinks = entries.filter(l => l.platform !== DIVIDER_PLATFORM) as (LinkUpdate & { url: string })[];
+    const { links, dividers } = buildLinkRows(entries);
 
-    // Positions count preceding links. Leading (0), trailing (=== link count),
-    // and repeated positions are dropped — a rule with nothing on one side
-    // reads as a bug rather than as grouping.
-    const dividerPositions: number[] = [];
-    let linksSoFar = 0;
-    for (const entry of entries) {
-      if (entry.platform !== DIVIDER_PLATFORM) {
-        linksSoFar++;
-      } else if (linksSoFar > 0 && !dividerPositions.includes(linksSoFar)) {
-        dividerPositions.push(linksSoFar);
-      }
-    }
-    const finalDividers = dividerPositions
-      .filter(p => p < validLinks.length)
-      .slice(0, MAX_DIVIDERS);
+    // One transaction replaces the whole set. This used to be a delete followed
+    // by a separate divider update and insert, which meant a failure partway
+    // through left the artist with zero links and no way to recover them — see
+    // supabase/migrations/20260730013000_atomic-artist-link-replace.sql.
+    const { error: replaceError } = await client.rpc('replace_artist_links', {
+      p_artist_id: artist.id,
+      p_links: links,
+      p_dividers: dividers,
+    });
 
-    const { error: dividerError } = await client
-      .from('artist_profiles')
-      .update({ link_dividers: finalDividers.length > 0 ? finalDividers : null, updated_at: new Date().toISOString() })
-      .eq('id', profile.id);
-
-    if (dividerError) {
-      console.error('[Profile] Divider update failed:', dividerError);
+    if (replaceError) {
+      // Loudly: the artist just tried to save their page and it didn't happen.
+      // Nothing was lost (the function rolls back), but we want to know.
+      console.error('[Profile] Link replace failed:', JSON.stringify(replaceError));
+      Sentry.captureException(new Error(`replace_artist_links failed: ${replaceError.message}`), {
+        tags: { subsystem: 'artist-profile' },
+        extra: { artistId: artist.id, linkCount: links.length, dividerCount: dividers.length },
+      });
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update links' }) };
     }
 
-    if (validLinks.length > 0) {
-      // Assign unique platform IDs for "other" links to satisfy unique(artist_id, platform)
-      let otherCount = 0;
-      const linksToInsert = validLinks.map((link, index) => {
-        const platform = link.platform === 'other' ? `other_${otherCount++}` : link.platform;
-        const displayName = link.displayName?.trim().slice(0, 50) || null;
-        return {
-          artist_id: artist.id,
-          platform,
-          url: link.url,
-          ...(displayName ? { display_name: displayName } : {}),
-          source: 'claimed',
-          is_direct: true,
-          display_order: index,
-        };
-      });
-
-      const { error: insertError } = await client
-        .from('artist_links')
-        .insert(linksToInsert);
-
-      if (insertError) {
-        console.error('[Profile] Link insert failed:', JSON.stringify(insertError));
-        return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to save links' }) };
-      }
-    }
-
-    console.log(`[Profile] Updated ${validLinks.length} links and ${finalDividers.length} dividers for artist "${artist.name}"`);
+    console.log(`[Profile] Updated ${links.length} links and ${dividers.length} dividers for artist "${artist.name}"`);
   }
 
   // --- Bust caches ---
