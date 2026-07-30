@@ -53,11 +53,7 @@ struct SocialIconButton: View {
     }
 
     private var iconColor: Color {
-        let hex = result.color
-        if hex == "#000000" || hex == "#E0E0E0" {
-            return Color(white: 0.7)
-        }
-        return Color(hex: hex) ?? .blue
+        BrandColor.legible(hex: result.color, isDark: colorScheme == .dark)
     }
 
     private func openPlatform() {

@@ -33,6 +33,27 @@
 	</array>
 	<key>LSUIElement</key>
 	<true/>
+	<!-- Services menu entry. NSMessage must match the selector prefix on
+	     ServicesProvider (findOnUnstream:userData:error:). -->
+	<key>NSServices</key>
+	<array>
+		<dict>
+			<key>NSMenuItem</key>
+			<dict>
+				<key>default</key>
+				<string>Find on Unstream</string>
+			</dict>
+			<key>NSMessage</key>
+			<string>findOnUnstream</string>
+			<key>NSPortName</key>
+			<string>Unstream</string>
+			<key>NSSendTypes</key>
+			<array>
+				<string>NSStringPboardType</string>
+				<string>public.utf8-plain-text</string>
+			</array>
+		</dict>
+	</array>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.music</string>
 	<key>NSHighResolutionCapable</key>

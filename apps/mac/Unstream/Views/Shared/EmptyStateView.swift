@@ -6,10 +6,11 @@ struct EmptyStateView: View {
             Image(systemName: "music.note.list")
                 .font(.system(size: 32))
                 .foregroundColor(.secondary.opacity(0.5))
+                .accessibilityHidden(true)
 
             VStack(spacing: 4) {
                 Text("No music playing")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.headline)
                     .foregroundColor(.secondary)
 
                 Text("Search for an artist above, or start playing music to see results.")

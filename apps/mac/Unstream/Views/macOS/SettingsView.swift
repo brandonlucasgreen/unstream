@@ -48,44 +48,23 @@ struct SettingsView: View {
     @StateObject private var shortcutRecorder = ShortcutRecorder()
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Tab bar header
-            HStack(spacing: 0) {
-                ForEach(SettingsTab.allCases, id: \.self) { tab in
-                    Button(action: { selectedTab = tab }) {
-                        HStack(spacing: 5) {
-                            Image(systemName: tab.icon)
-                                .font(.system(size: 11))
-                            Text(tab.rawValue)
-                                .font(.system(size: 12, weight: selectedTab == tab ? .semibold : .regular))
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                        .background(selectedTab == tab ? Color.accentColor.opacity(0.12) : Color.clear)
-                        .foregroundColor(selectedTab == tab ? .accentColor : .secondary)
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding(.horizontal, 12)
-            .padding(.top, 8)
+        // A real TabView inside the Settings scene renders as the standard macOS
+        // settings toolbar tabs, with keyboard navigation and correct active/inactive
+        // styling — the hand-rolled accent-tinted pills had none of that.
+        TabView(selection: $selectedTab) {
+            generalTab
+                .tabItem { Label(SettingsTab.general.rawValue, systemImage: SettingsTab.general.icon) }
+                .tag(SettingsTab.general)
 
-            Divider()
-                .padding(.top, 8)
+            integrationsTab
+                .tabItem { Label(SettingsTab.integrations.rawValue, systemImage: SettingsTab.integrations.icon) }
+                .tag(SettingsTab.integrations)
 
-            // Tab content
-            switch selectedTab {
-            case .general:
-                generalTab
-            case .integrations:
-                integrationsTab
-            case .about:
-                aboutTab
-            }
+            aboutTab
+                .tabItem { Label(SettingsTab.about.rawValue, systemImage: SettingsTab.about.icon) }
+                .tag(SettingsTab.about)
         }
-        .frame(width: 380)
-        .fixedSize(horizontal: false, vertical: true)
+        .frame(width: 480)
         .onAppear {
             launchAtLogin = getLaunchAtLoginStatus()
             loadListenBrainzState()
@@ -96,38 +75,23 @@ struct SettingsView: View {
     // MARK: - General Tab
 
     private var generalTab: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Music Listening
-            VStack(alignment: .leading, spacing: 4) {
+        Form {
+            Section {
                 Toggle("Music app listening", isOn: $musicListeningEnabled)
-                Text("Automatically detect what's playing in Music or Spotify")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-
-            // Artist Notifications
-            VStack(alignment: .leading, spacing: 4) {
+                    .help("Automatically detect what's playing in Music or Spotify")
                 Toggle("Artist detection notifications", isOn: $artistNotificationsEnabled)
-                Text("Show a notification when a new artist is detected while playing music")
+                    .help("Show a notification when a new artist is detected while playing music")
+            } footer: {
+                Text("Unstream watches your music players so it can show where the current artist sells directly.")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
 
-            Divider()
-
-            // Global Keyboard Shortcut
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Keyboard Shortcut")
-                    .font(.headline)
-
-                Text("Set a global shortcut to open Unstream from anywhere.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-
+            Section {
                 HStack {
                     if shortcutRecorder.isRecording {
                         Text("Press shortcut...")
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .font(.callout.weight(.medium))
                             .foregroundColor(.accentColor)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
@@ -142,7 +106,7 @@ struct SettingsView: View {
                         .font(.caption)
                     } else if let shortcut = hotkeyManager.currentShortcut {
                         Text(shortcut.displayString)
-                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .font(.body.weight(.medium))
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
                             .background(
@@ -172,51 +136,39 @@ struct SettingsView: View {
                 if hotkeyManager.currentShortcut != nil {
                     Toggle("Enable shortcut", isOn: $hotkeyManager.isEnabled)
                 }
-            }
-
-            Divider()
-
-            // Launch at Login
-            VStack(alignment: .leading, spacing: 4) {
-                Toggle("Start at login", isOn: $launchAtLogin)
-                    .onChange(of: launchAtLogin) { newValue in
-                        setLaunchAtLogin(newValue)
-                    }
-                Text("Automatically launch Unstream when you log in")
+            } header: {
+                Text("Keyboard Shortcut")
+            } footer: {
+                Text("Set a global shortcut to open Unstream from anywhere.")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
 
-            Spacer()
+            Section {
+                Toggle("Start at login", isOn: $launchAtLogin)
+                    .onChange(of: launchAtLogin) { newValue in
+                        setLaunchAtLogin(newValue)
+                    }
+            } footer: {
+                Text("Automatically launch Unstream when you log in.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
         }
-        .padding()
+        .formStyle(.grouped)
     }
 
     // MARK: - Integrations Tab
 
     private var integrationsTab: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        Form {
             // Release Alerts
             if let alertManager = releaseAlertManager {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text("Release Alerts")
-                            .font(.headline)
-                        if alertManager.releaseAlertsEnabled {
-                            Image(systemName: "bell.fill")
-                                .foregroundColor(.yellow)
-                                .font(.caption)
-                        }
-                    }
-
+                Section {
                     Toggle("Check for new releases weekly", isOn: Binding(
                         get: { alertManager.releaseAlertsEnabled },
                         set: { alertManager.releaseAlertsEnabled = $0 }
                     ))
-
-                    Text("Get notified when your saved artists release new music on Bandcamp or Faircamp.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
 
                     HStack {
                         if let lastCheck = alertManager.lastCheckDate {
@@ -227,18 +179,17 @@ struct SettingsView: View {
 
                         Spacer()
 
+                        if alertManager.isChecking {
+                            ProgressView()
+                                .controlSize(.small)
+                        }
+
                         Button("Check Now") {
                             Task {
                                 await alertManager.checkNow()
                             }
                         }
-                        .font(.caption)
                         .disabled(alertManager.isChecking)
-
-                        if alertManager.isChecking {
-                            ProgressView()
-                                .scaleEffect(0.6)
-                        }
                     }
 
                     #if DEBUG
@@ -280,31 +231,29 @@ struct SettingsView: View {
                             .foregroundColor(.secondary)
                     }
                     #endif
+                } header: {
+                    HStack {
+                        Text("Release Alerts")
+                        if alertManager.releaseAlertsEnabled {
+                            Image(systemName: "bell.fill")
+                                .foregroundColor(.yellow)
+                                .font(.caption)
+                                .accessibilityLabel("Release alerts on")
+                        }
+                    }
+                } footer: {
+                    Text("Get notified when your saved artists release new music on Bandcamp or Faircamp.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
-
-                Divider()
             }
 
             // ListenBrainz Scrobbling
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Scrobbling")
-                        .font(.headline)
-                    if listenBrainzUsername != nil {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
-                            .font(.caption)
-                    }
-                }
-
+            Section {
                 Toggle("Enable ListenBrainz scrobbling", isOn: $listenBrainzEnabled)
                     .onChange(of: listenBrainzEnabled) { newValue in
                         ListenBrainzService.shared.isEnabled = newValue
                     }
-
-                Text("Submit your listening history to ListenBrainz")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
 
                 if listenBrainzEnabled {
                     VStack(alignment: .leading, spacing: 8) {
@@ -349,95 +298,87 @@ struct SettingsView: View {
                         }
                     }
                 }
-            }
-
-            Divider()
-
-            // Plex Integration
-            VStack(alignment: .leading, spacing: 8) {
+            } header: {
                 HStack {
-                    Text("Plex")
-                        .font(.headline)
-                    if plexServerName != nil {
+                    Text("Scrobbling")
+                    if listenBrainzUsername != nil {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundColor(.green)
                             .font(.caption)
+                            .accessibilityLabel("ListenBrainz connected")
                     }
                 }
+            } footer: {
+                Text("Submit your listening history to ListenBrainz.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
 
+            // Plex Integration
+            Section {
                 Toggle("Enable Plex music detection", isOn: $plexEnabled)
                     .onChange(of: plexEnabled) { newValue in
                         PlexService.shared.isEnabled = newValue
                     }
 
-                Text("Detect music playing on your Plex server (Plexamp, Plex Web, etc.)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-
                 if plexEnabled {
-                    VStack(alignment: .leading, spacing: 8) {
-                        if let serverName = plexServerName {
+                    if let serverName = plexServerName {
+                        LabeledContent("Connected to") {
                             HStack {
-                                Text("Connected to: \(serverName)")
-                                    .font(.caption)
+                                Text(serverName)
                                     .foregroundColor(.secondary)
                                 Spacer()
                                 Button("Disconnect") {
                                     disconnectPlex()
                                 }
+                            }
+                        }
+                    } else {
+                        // Form gives these right-aligned native labels; the old version
+                        // hand-rolled them with fixed-width Text + HStack.
+                        TextField("Server URL", text: $plexServerURL, prompt: Text("http://localhost:32400"))
+                        SecureField("Token", text: $plexToken, prompt: Text("Plex auth token"))
+
+                        HStack {
+                            Spacer()
+                            if isValidatingPlex {
+                                ProgressView()
+                                    .controlSize(.small)
+                            }
+                            Button(isValidatingPlex ? "Connecting…" : "Connect") {
+                                validatePlexConnection()
+                            }
+                            .disabled(plexToken.isEmpty || isValidatingPlex)
+                        }
+
+                        if let error = plexValidationError {
+                            Text(error)
                                 .font(.caption)
                                 .foregroundColor(.red)
-                            }
-                        } else {
-                            VStack(alignment: .leading, spacing: 6) {
-                                HStack {
-                                    Text("Server URL")
-                                        .font(.caption)
-                                        .frame(width: 70, alignment: .leading)
-                                    TextField("http://localhost:32400", text: $plexServerURL)
-                                        .textFieldStyle(.roundedBorder)
-                                        .frame(maxWidth: 200)
-                                }
-
-                                HStack {
-                                    Text("Token")
-                                        .font(.caption)
-                                        .frame(width: 70, alignment: .leading)
-                                    SecureField("Plex auth token", text: $plexToken)
-                                        .textFieldStyle(.roundedBorder)
-                                        .frame(maxWidth: 200)
-                                }
-
-                                HStack {
-                                    Button(isValidatingPlex ? "Connecting..." : "Connect") {
-                                        validatePlexConnection()
-                                    }
-                                    .disabled(plexToken.isEmpty || isValidatingPlex)
-
-                                    if isValidatingPlex {
-                                        ProgressView()
-                                            .scaleEffect(0.6)
-                                    }
-                                }
-                            }
-
-                            if let error = plexValidationError {
-                                Text(error)
-                                    .font(.caption)
-                                    .foregroundColor(.red)
-                            }
-
-                            Link("How to find your Plex token",
-                                 destination: URL(string: "https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/")!)
-                                .font(.caption)
                         }
+
+                        Link("How to find your Plex token",
+                             destination: URL(string: "https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/")!)
+                            .font(.caption)
                     }
                 }
+            } header: {
+                HStack {
+                    Text("Plex")
+                    if plexServerName != nil {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.caption)
+                            .accessibilityLabel("Plex connected")
+                    }
+                }
+            } footer: {
+                Text("Detect music playing on your Plex server (Plexamp, Plex Web, etc.).")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
-
-            Spacer()
         }
-        .padding()
+        .formStyle(.grouped)
         .onReceive(NotificationCenter.default.publisher(for: .plexAuthError)) { _ in
             plexServerName = nil
             plexValidationError = "Plex token is invalid or expired. Please reconnect."
@@ -447,9 +388,9 @@ struct SettingsView: View {
     // MARK: - About Tab
 
     private var aboutTab: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        Form {
             // Updates
-            VStack(alignment: .leading, spacing: 8) {
+            Section("Updates") {
                 Toggle("Check for updates automatically", isOn: $checkForUpdatesAutomatically)
 
                 HStack {
@@ -460,8 +401,10 @@ struct SettingsView: View {
 
                     if isCheckingForUpdates {
                         ProgressView()
-                            .scaleEffect(0.7)
+                            .controlSize(.small)
                     }
+
+                    Spacer()
                 }
 
                 if let status = updateStatus {
@@ -490,34 +433,24 @@ struct SettingsView: View {
                 }
             }
 
-            Divider()
-
             // Support Unstream
-            VStack(alignment: .leading, spacing: 8) {
+            Section {
+                TipJarView()
+            } header: {
                 Text("Support Unstream")
-                    .font(.headline)
-
+            } footer: {
                 Text("Unstream is free and open source. If you find it useful, consider supporting development.")
                     .font(.caption)
                     .foregroundColor(.secondary)
-
-                TipJarView()
             }
-
-            Divider()
 
             // About
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Unstream v\(Bundle.main.appVersion)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            Section {
+                LabeledContent("Version", value: Bundle.main.appVersion)
                 Link("Visit unstream.stream", destination: URL(string: "https://unstream.stream")!)
-                    .font(.caption)
             }
-
-            Spacer()
         }
-        .padding()
+        .formStyle(.grouped)
     }
 
     // MARK: - Keyboard Shortcut

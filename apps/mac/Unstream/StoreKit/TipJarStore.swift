@@ -1,3 +1,7 @@
+// iOS only. The Mac app ships as a direct GitHub release and links to Liberapay
+// instead — see TipJarView. Keeping this compiled into the Mac build would ship an
+// unused StoreKit dependency and the tip product IDs it no longer sells.
+#if os(iOS)
 import StoreKit
 import SwiftUI
 
@@ -90,3 +94,5 @@ class TipJarStore: ObservableObject {
         }
     }
 }
+
+#endif

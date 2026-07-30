@@ -52,10 +52,18 @@ struct ArtistResultView: View {
     private let headerIconButtonSize: CGFloat = 44
     private let heartIconSize: CGFloat = 22
     private let shareIconSize: CGFloat = 20
+    // iOS keeps its explicit sizes; macOS uses semantic styles so text follows the
+    // system text-size setting.
+    private let nameFont: Font = .system(size: 14, weight: .semibold)
+    private let locationFont: Font = .system(size: 11)
+    private let reportFont: Font = .system(size: 11)
     #else
     private let headerIconButtonSize: CGFloat = 14
     private let heartIconSize: CGFloat = 14
     private let shareIconSize: CGFloat = 13
+    private let nameFont: Font = .headline
+    private let locationFont: Font = .caption
+    private let reportFont: Font = .caption
     #endif
 
     var body: some View {
@@ -69,14 +77,15 @@ struct ArtistResultView: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(artist.name)
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(nameFont)
 
                     if let locationText = artist.location?.displayText {
                         Text(locationText)
-                            .font(.system(size: 11))
+                            .font(locationFont)
                             .foregroundColor(.secondary)
                     }
                 }
+                .textSelection(.enabled)
 
                 Spacer()
 
@@ -93,6 +102,7 @@ struct ArtistResultView: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(isSaved ? "Remove \(artist.name) from Saved Artists" : "Add \(artist.name) to Saved Artists")
                 #if os(macOS)
                 .help(isSaved ? "Remove from Saved Artists" : "Add to Saved Artists")
                 #endif
@@ -132,6 +142,21 @@ struct ArtistResultView: View {
                 }
             }
 
+            // A result with no links at all — a claimed profile whose owner hasn't added
+            // any yet will do this. Without something here the card is just a name and a
+            // "report an issue" link, which reads as broken.
+            if artist.platforms.isEmpty {
+                HStack(spacing: 6) {
+                    Image(systemName: "link.slash")
+                        .foregroundColor(.secondary)
+                        .accessibilityHidden(true)
+                    Text("No links listed yet.")
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+                .font(locationFont)
+            }
+
             // Search-only platforms section
             if !artist.searchOnlyPlatforms.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
@@ -153,20 +178,33 @@ struct ArtistResultView: View {
 
             // Report issue link
             Button(action: { reportIssue(artist: artist) }) {
-                HStack(spacing: 4) {
-                    Image(systemName: "exclamationmark.triangle")
-                        .font(.system(size: 10))
-                    Text("Report an issue with this result")
-                        .font(.system(size: 11))
-                }
-                .foregroundColor(.secondary)
+                Label("Report an issue with this result", systemImage: "exclamationmark.triangle")
+                    .font(reportFont)
+                    .foregroundColor(.secondary)
             }
             .buttonStyle(.plain)
             .frame(maxWidth: .infinity, alignment: .center)
+            .accessibilityLabel("Report an issue with the result for \(artist.name)")
         }
         .padding(10)
         .background(cardBackgroundColor)
         .cornerRadius(8)
+        .draggable(artistURL)
+        .contextMenu {
+            Button(isSaved ? "Remove from Saved Artists" : "Save Artist") {
+                supportListManager.toggleArtist(artist)
+            }
+
+            Divider()
+
+            Button("Copy Artist Name") { copyToClipboard(text: artist.name) }
+            Button("Copy Unstream Link") { copyToClipboard(url: artistURL) }
+            ShareLink(item: artistURL, message: Text(shareMessage))
+
+            Divider()
+
+            Button("Report an Issue…") { reportIssue(artist: artist) }
+        }
         #if os(iOS)
         .safariSheet(safariItem: $safariItem)
         #endif
@@ -206,10 +244,12 @@ struct ArtistResultView: View {
         }
     }
 
-    @ViewBuilder
+    /// `ShareLink` with a real `URL` rather than a string containing one, so link-aware
+    /// targets (Messages previews, Reading List, Notes) can do something with it. This
+    /// also replaces a hand-anchored `NSSharingServicePicker` that positioned itself off
+    /// `NSApp.keyWindow`, which is the wrong window when the popover is showing.
     private var shareButton: some View {
-        #if os(macOS)
-        Button(action: shareArtistCard) {
+        ShareLink(item: artistURL, message: Text(shareMessage)) {
             Image(systemName: "square.and.arrow.up")
                 .foregroundColor(.secondary)
                 .font(.system(size: shareIconSize))
@@ -217,16 +257,9 @@ struct ArtistResultView: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Share \(artist.name)")
+        #if os(macOS)
         .help("Share this artist")
-        #else
-        let text = shareText
-        ShareLink(item: text) {
-            Image(systemName: "square.and.arrow.up")
-                .foregroundColor(.secondary)
-                .font(.system(size: shareIconSize))
-                .frame(width: headerIconButtonSize, height: headerIconButtonSize)
-                .contentShape(Rectangle())
-        }
         #endif
     }
 
@@ -240,23 +273,28 @@ struct ArtistResultView: View {
         #endif
     }
 
-    private var shareText: String {
-        let url: String
-        if let claimedSlug = artist.claimedSlug {
-            url = "https://unstream.stream/a/\(claimedSlug)"
-        } else if let encodedName = artist.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
-            url = "https://unstream.stream/?q=\(encodedName)"
-        } else {
-            url = "https://unstream.stream"
+    /// Canonical Unstream link for this artist — the claimed profile when there is one,
+    /// otherwise a search permalink.
+    private var artistURL: URL {
+        if let claimedSlug = artist.claimedSlug,
+           let url = URL(string: "https://unstream.stream/a/\(claimedSlug)") {
+            return url
         }
+        if let encodedName = artist.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+           let url = URL(string: "https://unstream.stream/?q=\(encodedName)") {
+            return url
+        }
+        return URL(string: "https://unstream.stream")!
+    }
 
+    /// Prose that accompanies the link when the share target accepts text.
+    private var shareMessage: String {
         if let nowPlaying = appState.nowPlaying,
            nowPlaying.artist?.lowercased() == artist.name.lowercased(),
            let title = nowPlaying.title {
-            return "Listening to \"\(title)\" by \(artist.name) — here's how you can support them directly: \(url)"
+            return "Listening to \"\(title)\" by \(artist.name) — here's how you can support them directly:"
         }
-
-        return "Here's how you can support \(artist.name) directly: \(url)"
+        return "Here's how you can support \(artist.name) directly:"
     }
 
     private func reportIssue(artist: ArtistResult) {
@@ -284,17 +322,6 @@ struct ArtistResultView: View {
         #endif
     }
 
-    #if os(macOS)
-    private func shareArtistCard() {
-        let text = shareText
-        let picker = NSSharingServicePicker(items: [text])
-        if let window = NSApp.keyWindow,
-           let contentView = window.contentView {
-            let rect = NSRect(x: contentView.bounds.midX, y: contentView.bounds.maxY - 50, width: 1, height: 1)
-            picker.show(relativeTo: rect, of: contentView, preferredEdge: .minY)
-        }
-    }
-    #endif
 }
 
 // Simple flow layout for platform badges

@@ -54,31 +54,41 @@ struct NowPlayingView: View {
                     fallbackImage
                 }
 
-                // Track info
+                // Track info. Selectable so the artist/track can be copied — Mac users
+                // expect to be able to lift text out of what they're looking at.
                 VStack(alignment: .leading, spacing: 2) {
                     if let artist = nowPlaying.artist {
                         Text(artist)
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(.headline)
                             .lineLimit(1)
                     }
                     if let title = nowPlaying.title {
                         Text(title)
-                            .font(.system(size: 12))
+                            .font(.callout)
                             .foregroundColor(.secondary)
                             .lineLimit(1)
                     }
                     if let album = nowPlaying.album {
                         Text(album)
-                            .font(.system(size: 11))
+                            .font(.caption)
                             .foregroundColor(.secondary.opacity(0.7))
                             .lineLimit(1)
                     }
                 }
+                .textSelection(.enabled)
 
                 Spacer()
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .contextMenu {
+            if let artist = nowPlaying.artist {
+                Button("Copy Artist Name") { copyToClipboard(text: artist) }
+            }
+            if let title = nowPlaying.title, let artist = nowPlaying.artist {
+                Button("Copy Track") { copyToClipboard(text: "\(artist) — \(title)") }
+            }
+        }
     }
 }
 

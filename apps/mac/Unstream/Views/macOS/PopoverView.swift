@@ -14,52 +14,30 @@ struct PopoverView: View {
     @State private var selectedTab: PopoverTab = .search
     @State private var showSignIn = false
     @State private var pollTask: Task<Void, Never>?
+    @FocusState private var searchFieldFocused: Bool
 
     var body: some View {
         VStack(spacing: 0) {
-            // Tab bar
-            HStack(spacing: 0) {
-                TabButton(
-                    title: "Search",
-                    icon: "magnifyingglass",
-                    isSelected: selectedTab == .search
-                ) {
-                    selectedTab = .search
-                }
-
-                TabButton(
-                    title: "Saved Artists",
-                    icon: "heart.fill",
-                    isSelected: selectedTab == .supportList,
-                    badge: supportListManager.entries.count > 0 ? supportListManager.entries.count : nil
-                ) {
-                    selectedTab = .supportList
-                }
+            // A real segmented control: correct selection emphasis in both appearances
+            // and in an inactive window, which the hand-rolled accent-tinted pills got
+            // wrong (they read as a heavy blue slab in dark mode).
+            Picker("View", selection: $selectedTab) {
+                Text("Search").tag(PopoverTab.search)
+                Text(savedTabTitle).tag(PopoverTab.supportList)
             }
-            .padding(.horizontal)
-            .padding(.top, 8)
-
-            // Auth bar (shown when signed in or has synced artists)
-            if auth.isSignedIn {
-                Divider()
-                HStack(spacing: 6) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
-                        .font(.system(size: 10))
-                    Text(auth.userEmail ?? "Signed in")
-                        .font(.system(size: 10))
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                    Spacer()
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 4)
-            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .padding(.horizontal, 12)
+            .padding(.top, 10)
 
             // Search bar (only visible on search tab)
             if selectedTab == .search {
-                SearchBarView()
-                    .padding()
+                SearchBarView(isFocused: $searchFieldFocused)
+                    .padding(.horizontal, 12)
+                    .padding(.top, 10)
+                    .padding(.bottom, 12)
+            } else {
+                Spacer().frame(height: 10)
             }
 
             Divider()
@@ -165,27 +143,34 @@ struct PopoverView: View {
             HStack {
                 // Sign in/out button
                 if auth.isSignedIn {
+                    // Account identity lives next to the sign-out action rather than in
+                    // a bar above the search field, where it competed with the task.
                     Button(action: { Task { await auth.signOut() } }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "rectangle.portrait.and.arrow.right")
-                                .font(.system(size: 10))
-                            Text("Sign Out")
-                                .font(.system(size: 10))
-                        }
-                        .foregroundColor(.secondary)
+                        Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
+                    .help("Sign out of \(auth.userEmail ?? "Unstream")")
+                    .accessibilityLabel("Sign out of \(auth.userEmail ?? "Unstream")")
+
+                    if let email = auth.userEmail {
+                        Text(email)
+                            .font(.caption2)
+                            .foregroundColor(.secondary.opacity(0.7))
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                            .help("Signed in as \(email)")
+                            .accessibilityHidden(true)
+                    }
                 } else {
                     Button(action: { showSignIn = true }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "person.crop.circle.badge.plus")
-                                .font(.system(size: 10))
-                            Text("Sign In")
-                                .font(.system(size: 10))
-                        }
-                        .foregroundColor(.secondary)
+                        Label("Sign In", systemImage: "person.crop.circle.badge.plus")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
+                    .help("Sign in to sync saved artists")
                 }
 
                 Spacer()
@@ -198,10 +183,6 @@ struct PopoverView: View {
                     }
 
                     Divider()
-
-                    Link(destination: URL(string: "https://github.com/users/brandonlucasgreen/projects/3/views/1")!) {
-                        Label("Roadmap", systemImage: "map")
-                    }
 
                     Link(destination: URL(string: "https://letterbird.co/hi-d2078591")!) {
                         Label("Share Feedback", systemImage: "bubble.left")
@@ -220,16 +201,20 @@ struct PopoverView: View {
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
-                        .font(.system(size: 16))
+                        .font(.title3)
                         .foregroundColor(.secondary)
                 }
                 .menuStyle(.borderlessButton)
                 .menuIndicator(.hidden)
+                .fixedSize()
+                .accessibilityLabel("More options")
+                .help("Settings, feedback, and more")
             }
             .padding(.horizontal)
             .padding(.vertical, 8)
         }
         .frame(width: 320)
+        .background(keyboardShortcuts)
         .sheet(isPresented: $showSignIn) {
             SignInView()
         }
@@ -237,6 +222,10 @@ struct PopoverView: View {
             // Reset sheet state on every open — NSPopover hides (not destroys) its content
             // view, so onDisappear isn't reliable; onAppear fires on each show.
             showSignIn = false
+            focusSearchField()
+        }
+        .onChange(of: selectedTab) { tab in
+            if tab == .search { focusSearchField() }
         }
         .onDisappear {
             stopMenuPoll()
@@ -246,11 +235,56 @@ struct PopoverView: View {
             // NSPopoverDelegate fires this unconditionally when the popover closes.
             showSignIn = false
         }
+        .onReceive(NotificationCenter.default.publisher(for: .showSearchTab)) { _ in
+            selectedTab = .search
+        }
         .onChange(of: auth.isSignedIn) { signedIn in
             if !signedIn {
                 stopMenuPoll()
             }
         }
+    }
+
+    /// The saved count rides in the segment label — a segmented control has no badge
+    /// slot, and the count is useful enough to keep.
+    private var savedTabTitle: String {
+        let count = supportListManager.entries.count
+        return count > 0 ? "Saved (\(count))" : "Saved"
+    }
+
+    // MARK: - Keyboard
+
+    /// The popover's window only becomes key just *after* `show()`, so focusing
+    /// synchronously in `onAppear` gets discarded. Defer one run-loop turn.
+    private func focusSearchField() {
+        DispatchQueue.main.async {
+            searchFieldFocused = true
+        }
+    }
+
+    /// The popover is a hosted view, not a Scene, so there's no `Commands` builder to
+    /// hang shortcuts on. Zero-size buttons are the standard SwiftUI way to register
+    /// key equivalents inside one; they only fire while the popover is the key window.
+    private var keyboardShortcuts: some View {
+        Group {
+            Button("Search") {
+                selectedTab = .search
+                focusSearchField()
+            }
+            .keyboardShortcut("f", modifiers: .command)
+
+            Button("Search Tab") { selectedTab = .search }
+                .keyboardShortcut("1", modifiers: .command)
+
+            Button("Saved Artists Tab") { selectedTab = .supportList }
+                .keyboardShortcut("2", modifiers: .command)
+
+            Button("Close") { AppDelegate.shared?.closePopover() }
+                .keyboardShortcut("w", modifiers: .command)
+        }
+        .frame(width: 0, height: 0)
+        .opacity(0)
+        .accessibilityHidden(true)
     }
 
     // MARK: - 60-second poll while menu is open
@@ -272,40 +306,6 @@ struct PopoverView: View {
     private func stopMenuPoll() {
         pollTask?.cancel()
         pollTask = nil
-    }
-}
-
-struct TabButton: View {
-    let title: String
-    let icon: String
-    let isSelected: Bool
-    var badge: Int? = nil
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.system(size: 11))
-                Text(title)
-                    .font(.system(size: 12, weight: isSelected ? .semibold : .regular))
-                if let badge = badge, badge > 0 {
-                    Text("\(badge)")
-                        .font(.system(size: 9, weight: .medium))
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 2)
-                        .background(Color.secondary.opacity(0.15))
-                        .clipShape(Capsule())
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .background(isSelected ? Color.accentColor.opacity(0.1) : Color.clear)
-            .foregroundColor(isSelected ? .accentColor : .secondary)
-            .cornerRadius(6)
-        }
-        .buttonStyle(.plain)
     }
 }
 
