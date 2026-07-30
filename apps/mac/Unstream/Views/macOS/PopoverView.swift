@@ -184,10 +184,6 @@ struct PopoverView: View {
 
                     Divider()
 
-                    Link(destination: URL(string: "https://github.com/users/brandonlucasgreen/projects/3/views/1")!) {
-                        Label("Roadmap", systemImage: "map")
-                    }
-
                     Link(destination: URL(string: "https://letterbird.co/hi-d2078591")!) {
                         Label("Share Feedback", systemImage: "bubble.left")
                     }
