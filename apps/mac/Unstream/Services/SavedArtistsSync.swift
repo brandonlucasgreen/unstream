@@ -40,8 +40,18 @@ class SavedArtistsSync: ObservableObject {
         isSyncing = true
         syncError = nil
 
+        // A delta pull is only meaningful when there is something to merge into.
+        // `lastSyncTime` lives in UserDefaults and so outlives quit/relaunch,
+        // sign-out and sign-in, while `syncedArtists` is in-memory and starts empty
+        // every launch. Sending the cursor with an empty list asked the server "what
+        // changed since yesterday", got "nothing", merged nothing into nothing, and
+        // showed an empty Saved Artists tab with no error — the list only appeared
+        // after the poll loop's five-minute forced pull. Treat an empty list as
+        // needing a full pull regardless of the cursor.
+        let needsFullPull = force || syncedArtists.isEmpty
+
         var urlString = "\(baseURL)/saved-artists/sync"
-        if !force, let since = lastSyncTime {
+        if !needsFullPull, let since = lastSyncTime {
             let encoded = since.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
             urlString += "?since=\(encoded)"
         }
@@ -74,7 +84,7 @@ class SavedArtistsSync: ObservableObject {
 
             let decoded = try JSONDecoder().decode(SyncResponse.self, from: data)
 
-            if force {
+            if needsFullPull {
                 syncedArtists = decoded.artists.filter { $0.deleted != true }.sorted { $0.name < $1.name }
             } else {
                 // Merge: replace existing entries by slug, append new ones.
