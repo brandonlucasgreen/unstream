@@ -18,52 +18,26 @@ struct PopoverView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Tab bar
-            HStack(spacing: 0) {
-                TabButton(
-                    title: "Search",
-                    icon: "magnifyingglass",
-                    isSelected: selectedTab == .search
-                ) {
-                    selectedTab = .search
-                }
-
-                TabButton(
-                    title: "Saved Artists",
-                    icon: "heart.fill",
-                    isSelected: selectedTab == .supportList,
-                    badge: supportListManager.entries.count > 0 ? supportListManager.entries.count : nil
-                ) {
-                    selectedTab = .supportList
-                }
+            // A real segmented control: correct selection emphasis in both appearances
+            // and in an inactive window, which the hand-rolled accent-tinted pills got
+            // wrong (they read as a heavy blue slab in dark mode).
+            Picker("View", selection: $selectedTab) {
+                Text("Search").tag(PopoverTab.search)
+                Text(savedTabTitle).tag(PopoverTab.supportList)
             }
-            .padding(.horizontal)
-            .padding(.top, 8)
-
-            // Auth bar (shown when signed in or has synced artists)
-            if auth.isSignedIn {
-                Divider()
-                HStack(spacing: 6) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
-                        .font(.caption2)
-                        .accessibilityHidden(true)
-                    Text(auth.userEmail ?? "Signed in")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                    Spacer()
-                }
-                .accessibilityElement(children: .combine)
-                .accessibilityLabel("Signed in as \(auth.userEmail ?? "unknown account")")
-                .padding(.horizontal)
-                .padding(.vertical, 4)
-            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .padding(.horizontal, 12)
+            .padding(.top, 10)
 
             // Search bar (only visible on search tab)
             if selectedTab == .search {
                 SearchBarView(isFocused: $searchFieldFocused)
-                    .padding()
+                    .padding(.horizontal, 12)
+                    .padding(.top, 10)
+                    .padding(.bottom, 12)
+            } else {
+                Spacer().frame(height: 10)
             }
 
             Divider()
@@ -169,13 +143,26 @@ struct PopoverView: View {
             HStack {
                 // Sign in/out button
                 if auth.isSignedIn {
+                    // Account identity lives next to the sign-out action rather than in
+                    // a bar above the search field, where it competed with the task.
                     Button(action: { Task { await auth.signOut() } }) {
                         Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
-                    .help("Sign out of Unstream")
+                    .help("Sign out of \(auth.userEmail ?? "Unstream")")
+                    .accessibilityLabel("Sign out of \(auth.userEmail ?? "Unstream")")
+
+                    if let email = auth.userEmail {
+                        Text(email)
+                            .font(.caption2)
+                            .foregroundColor(.secondary.opacity(0.7))
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                            .help("Signed in as \(email)")
+                            .accessibilityHidden(true)
+                    }
                 } else {
                     Button(action: { showSignIn = true }) {
                         Label("Sign In", systemImage: "person.crop.circle.badge.plus")
@@ -262,6 +249,13 @@ struct PopoverView: View {
         }
     }
 
+    /// The saved count rides in the segment label — a segmented control has no badge
+    /// slot, and the count is useful enough to keep.
+    private var savedTabTitle: String {
+        let count = supportListManager.entries.count
+        return count > 0 ? "Saved (\(count))" : "Saved"
+    }
+
     // MARK: - Keyboard
 
     /// The popover's window only becomes key just *after* `show()`, so focusing
@@ -316,63 +310,6 @@ struct PopoverView: View {
     private func stopMenuPoll() {
         pollTask?.cancel()
         pollTask = nil
-    }
-}
-
-struct TabButton: View {
-    let title: String
-    let icon: String
-    let isSelected: Bool
-    var badge: Int? = nil
-    let action: () -> Void
-
-    /// Custom selected rows must respect active-window state or the accent tint stays
-    /// fully saturated in a background window, which no native control does.
-    @Environment(\.controlActiveState) private var controlActiveState
-
-    private var isWindowActive: Bool {
-        controlActiveState != .inactive
-    }
-
-    private var foreground: Color {
-        guard isSelected else { return .secondary }
-        return isWindowActive ? .accentColor : .secondary
-    }
-
-    private var background: Color {
-        guard isSelected else { return .clear }
-        return isWindowActive
-            ? Color.accentColor.opacity(0.12)
-            : Color.secondary.opacity(0.12)
-    }
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.caption)
-                    .accessibilityHidden(true)
-                Text(title)
-                    .font(isSelected ? .callout.weight(.semibold) : .callout)
-                if let badge = badge, badge > 0 {
-                    Text("\(badge)")
-                        .font(.caption2.weight(.medium))
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 2)
-                        .background(Color.secondary.opacity(0.15))
-                        .clipShape(Capsule())
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .background(background)
-            .foregroundColor(foreground)
-            .cornerRadius(6)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(badge.map { "\(title), \($0) saved" } ?? title)
-        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 }
 

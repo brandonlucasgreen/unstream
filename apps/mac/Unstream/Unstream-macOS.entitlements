@@ -20,9 +20,16 @@
 			<string>com.spotify.playback</string>
 		</array>
 	</dict>
+	<!-- Radiccio publishes no scripting access group, so scripting-targets can't cover
+	     it and an exception is the only route. Without this, sandbox blocks the Apple
+	     event with errAEEventNotPermitted (-1743) and Radiccio detection silently never
+	     works. Parachord used to be listed here and was removed: it is read over a
+	     WebSocket on port 9876, not AppleScript, so the exception did nothing.
+	     Note these exceptions are fine for Developer ID + notarization but are a
+	     rejection risk if the app ever goes to the Mac App Store. -->
 	<key>com.apple.security.temporary-exception.apple-events</key>
 	<array>
-		<string>com.parachord.desktop</string>
+		<string>com.radiccio.mac</string>
 	</array>
 	<key>com.apple.security.application-groups</key>
 	<array>

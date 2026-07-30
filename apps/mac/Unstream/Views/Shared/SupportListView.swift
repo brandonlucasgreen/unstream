@@ -300,11 +300,7 @@ struct SavedPlatformBadge: View {
     }
 
     private var platformColor: Color {
-        let hex = platform.color
-        if hex == "#000000" || hex == "#E0E0E0" {
-            return Color(white: 0.7)
-        }
-        return Color(hex: hex) ?? .blue
+        BrandColor.legible(hex: platform.color, isDark: colorScheme == .dark)
     }
 
     #if os(iOS)

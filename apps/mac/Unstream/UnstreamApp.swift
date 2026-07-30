@@ -329,6 +329,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         NSApp.servicesProvider = ServicesProvider.shared
         ServicesProvider.assertSelectorMatchesInfoPlist()
         NSUpdateDynamicServices()
+
+        // Direct GitHub release, so the app has to tell people an update exists.
+        // Gated on the "Check for updates automatically" setting and a once-a-day
+        // interval inside the checker.
+        Task { await UpdateChecker.shared.checkForUpdatesIfNeeded() }
     }
 
     @objc func togglePopover() {
@@ -383,7 +388,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         let userInfo = response.notification.request.content.userInfo
-        let urlString = (userInfo["artistUrl"] as? String) ?? (userInfo["releaseUrl"] as? String)
+        let urlString = (userInfo["artistUrl"] as? String)
+            ?? (userInfo["releaseUrl"] as? String)
+            ?? (userInfo["updateUrl"] as? String)
         if let urlString, let url = URL(string: urlString) {
             NSWorkspace.shared.open(url)
         }

@@ -72,13 +72,16 @@ class MediaObserver: ObservableObject {
                 print("[MediaObserver] Permission check result: \(errorNum) - \(errorMsg)")
 
                 if errorNum == -1743 {
-                    // Permission denied
+                    // Music automation is denied. Report it, but keep polling: this
+                    // check only probes Music, while Spotify and Radiccio have their own
+                    // separate automation permissions, and Parachord (WebSocket) and
+                    // Plex (HTTP) need no Apple events at all. Returning here used to
+                    // disable detection for every source because of one denied prompt.
                     DispatchQueue.main.async {
-                        self.permissionStatus = "Permission denied. Please enable in System Settings > Privacy & Security > Automation"
+                        self.permissionStatus = "Music access denied. Enable Unstream for Music in System Settings > Privacy & Security > Automation. Other players still work."
                     }
-                    print("[MediaObserver] ERROR: Automation permission denied!")
-                    print("[MediaObserver] Please go to System Settings > Privacy & Security > Automation")
-                    print("[MediaObserver] And enable 'Unstream' to control 'Music'")
+                    print("[MediaObserver] Music automation denied — continuing; other sources are unaffected")
+                    startPolling()
                     return
                 }
                 // Other errors (like -128 user canceled, or Music not running) are OK — permissions are granted

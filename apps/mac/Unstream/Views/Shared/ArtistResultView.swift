@@ -142,6 +142,21 @@ struct ArtistResultView: View {
                 }
             }
 
+            // A result with no links at all — a claimed profile whose owner hasn't added
+            // any yet will do this. Without something here the card is just a name and a
+            // "report an issue" link, which reads as broken.
+            if artist.platforms.isEmpty {
+                HStack(spacing: 6) {
+                    Image(systemName: "link.slash")
+                        .foregroundColor(.secondary)
+                        .accessibilityHidden(true)
+                    Text("No links listed yet.")
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+                .font(locationFont)
+            }
+
             // Search-only platforms section
             if !artist.searchOnlyPlatforms.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {

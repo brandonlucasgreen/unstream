@@ -8,6 +8,7 @@ struct PlatformBadge: View {
     let result: PlatformResult
     var isSubtle: Bool = false
     var onOpen: (() -> Void)? = nil
+    @Environment(\.colorScheme) private var colorScheme
 
     #if os(iOS)
     @State private var safariItem: SafariURL?
@@ -49,7 +50,7 @@ struct PlatformBadge: View {
                         .font(payoutFont)
                         .padding(.horizontal, 3)
                         .padding(.vertical, 1)
-                        .background(isBCFriday ? Color(hex: "#1DA0C3")!.opacity(0.2) : badgeColor.opacity(0.2))
+                        .background(isBCFriday ? bandcampColor.opacity(0.2) : badgeColor.opacity(0.2))
                         .cornerRadius(3)
                 }
 
@@ -57,7 +58,7 @@ struct PlatformBadge: View {
                 if !isSubtle && isBCFriday {
                     Text("BC Friday!")
                         .font(fridayFont)
-                        .foregroundColor(Color(hex: "#1DA0C3") ?? .blue)
+                        .foregroundColor(bandcampColor)
                 }
             }
             .padding(.horizontal, paddingH)
@@ -119,7 +120,13 @@ struct PlatformBadge: View {
     }
 
     private var badgeColor: Color {
-        Color(hex: result.color) ?? .blue
+        BrandColor.legible(hex: result.color, isDark: colorScheme == .dark)
+    }
+
+    /// Bandcamp's cyan, used for the Bandcamp Friday accent. Routed through
+    /// BrandColor too — at luminance ~0.53 it sits just under the dark-mode floor.
+    private var bandcampColor: Color {
+        BrandColor.legible(hex: "#1DA0C3", isDark: colorScheme == .dark)
     }
 
     private func openPlatform() {
