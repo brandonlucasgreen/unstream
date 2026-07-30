@@ -7,9 +7,9 @@ import type { Handler } from '@netlify/functions';
 // v3.3.0 it runs at launch, so a stale value here means users are told they're up to
 // date when they aren't. Keep it in step with Info-macOS.plist.
 const VERSION_INFO = {
-  latestVersion: '3.3.0',
+  latestVersion: '3.3.1',
   downloadUrl: 'https://github.com/brandonlucasgreen/unstream/releases/latest',
-  releaseNotes: 'Keyboard shortcuts, right-click menus, drag-and-drop links, a real Settings window, and "Find on Unstream" in the system Services menu',
+  releaseNotes: 'Fixes saved artists not loading after signing in',
 };
 
 export const handler: Handler = async (event) => {
