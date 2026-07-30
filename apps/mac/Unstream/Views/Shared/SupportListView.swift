@@ -15,20 +15,14 @@ struct SupportListView: View {
                 HStack(spacing: 8) {
                     SavedArtistsSearchBar(supportListManager: supportListManager)
 
-                    #if os(macOS)
-                    Button(action: shareArtistList) {
-                        Image(systemName: "square.and.arrow.up")
-                            .foregroundColor(.secondary)
-                            .font(.system(size: 14))
-                    }
-                    .buttonStyle(.plain)
-                    .help("Share saved artists")
-                    #else
                     ShareLink(item: generateShareText()) {
                         Image(systemName: "square.and.arrow.up")
                             .foregroundColor(.secondary)
-                            .font(.system(size: 14))
                     }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Share saved artists")
+                    #if os(macOS)
+                    .help("Share saved artists")
                     #endif
                 }
             }
@@ -94,18 +88,6 @@ struct SupportListView: View {
         }
         return text
     }
-
-    #if os(macOS)
-    private func shareArtistList() {
-        let shareText = generateShareText()
-        let picker = NSSharingServicePicker(items: [shareText])
-        if let window = NSApp.keyWindow,
-           let contentView = window.contentView {
-            let rect = NSRect(x: contentView.bounds.midX, y: contentView.bounds.maxY - 50, width: 1, height: 1)
-            picker.show(relativeTo: rect, of: contentView, preferredEdge: .minY)
-        }
-    }
-    #endif
 }
 
 struct SavedArtistsSearchBar: View {
@@ -115,11 +97,11 @@ struct SavedArtistsSearchBar: View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.secondary)
-                .font(.system(size: 14))
+                .accessibilityHidden(true)
 
-            TextField("Filter saved artists...", text: $supportListManager.searchQuery)
+            TextField("Filter saved artists…", text: $supportListManager.searchQuery)
                 .textFieldStyle(.plain)
-                .font(.system(size: 14))
+                .accessibilityLabel("Filter saved artists")
 
             if !supportListManager.searchQuery.isEmpty {
                 Button(action: {
@@ -127,9 +109,9 @@ struct SavedArtistsSearchBar: View {
                 }) {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundColor(.secondary)
-                        .font(.system(size: 14))
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Clear filter")
             }
         }
         .padding(.horizontal, 10)
@@ -162,10 +144,14 @@ struct SupportEntryView: View {
     private let iconButtonSize: CGFloat = 44
     private let refreshIconSize: CGFloat = 18
     private let heartIconSize: CGFloat = 20
+    private let nameFont: Font = .system(size: 14, weight: .semibold)
+    private let locationFont: Font = .system(size: 11)
     #else
     private let iconButtonSize: CGFloat = 14
     private let refreshIconSize: CGFloat = 12
     private let heartIconSize: CGFloat = 14
+    private let nameFont: Font = .headline
+    private let locationFont: Font = .caption
     #endif
 
     var body: some View {
@@ -176,14 +162,15 @@ struct SupportEntryView: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(entry.artistName)
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(nameFont)
 
                     if let locationText = entry.location?.displayText {
                         Text(locationText)
-                            .font(.system(size: 11))
+                            .font(locationFont)
                             .foregroundColor(.secondary)
                     }
                 }
+                .textSelection(.enabled)
 
                 Spacer()
 
@@ -200,6 +187,7 @@ struct SupportEntryView: View {
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Refresh platforms for \(entry.artistName)")
                     #if os(macOS)
                     .opacity(isHovering ? 1 : 0.3)
                     .help("Refresh platforms")
@@ -214,6 +202,7 @@ struct SupportEntryView: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Remove \(entry.artistName) from Saved Artists")
                 #if os(macOS)
                 .opacity(isHovering ? 1 : 0.5)
                 .help("Remove from Saved Artists")
@@ -241,6 +230,17 @@ struct SupportEntryView: View {
         .padding(10)
         .background(cardBackgroundColor)
         .cornerRadius(8)
+        // The refresh and remove buttons are hover-dimmed, so the context menu is the
+        // non-hover path to both — required for keyboard and VoiceOver users.
+        .contextMenu {
+            Button("Copy Artist Name") { copyToClipboard(text: entry.artistName) }
+
+            Divider()
+
+            Button("Refresh Platforms", action: onRefresh)
+                .disabled(isRefreshing)
+            Button("Remove from Saved Artists", role: .destructive, action: onRemove)
+        }
         #if os(macOS)
         .onHover { hovering in
             isHovering = hovering
@@ -311,7 +311,7 @@ struct SavedPlatformBadge: View {
     private let socialBadgeSize: CGFloat = 44
     private let socialIconSize: CGFloat = 20
     private let badgeIconSize: CGFloat = 14
-    private let badgeFontSize: CGFloat = 14
+    private let badgeFont: Font = .system(size: 14, weight: .medium)
     private let badgePaddingH: CGFloat = 12
     private let badgePaddingV: CGFloat = 10
     private let badgeSpacing: CGFloat = 6
@@ -319,7 +319,7 @@ struct SavedPlatformBadge: View {
     private let socialBadgeSize: CGFloat = 28
     private let socialIconSize: CGFloat = 14
     private let badgeIconSize: CGFloat = 10
-    private let badgeFontSize: CGFloat = 11
+    private let badgeFont: Font = .caption.weight(.medium)
     private let badgePaddingH: CGFloat = 8
     private let badgePaddingV: CGFloat = 4
     private let badgeSpacing: CGFloat = 4
@@ -338,7 +338,7 @@ struct SavedPlatformBadge: View {
                 HStack(spacing: badgeSpacing) {
                     platformIcon(size: badgeIconSize)
                     Text(platform.displayName)
-                        .font(.system(size: badgeFontSize, weight: .medium))
+                        .font(badgeFont)
                 }
                 .padding(.horizontal, badgePaddingH)
                 .padding(.vertical, badgePaddingV)
@@ -348,9 +348,15 @@ struct SavedPlatformBadge: View {
             }
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Open \(platform.displayName)")
         #if os(macOS)
         .help("Open \(platform.displayName)")
         #endif
+        .linkActions(
+            url: URL(string: platform.url),
+            openTitle: "Open on \(platform.displayName)",
+            onOpen: openPlatformURL
+        )
         #if os(iOS)
         .safariSheet(safariItem: $safariItem)
         #endif
@@ -389,11 +395,11 @@ struct NewReleaseBadge: View {
     #endif
 
     #if os(iOS)
-    private let fontSize: CGFloat = 14
+    private let labelFont: Font = .system(size: 14, weight: .medium)
     private let paddingH: CGFloat = 12
     private let paddingV: CGFloat = 10
     #else
-    private let fontSize: CGFloat = 11
+    private let labelFont: Font = .caption.weight(.medium)
     private let paddingH: CGFloat = 8
     private let paddingV: CGFloat = 4
     #endif
@@ -404,7 +410,7 @@ struct NewReleaseBadge: View {
                 Image(systemName: "sparkles")
                     .foregroundColor(.yellow)
                 Text("New release: \(release.releaseName)")
-                    .font(.system(size: fontSize, weight: .medium))
+                    .font(labelFont)
                     .lineLimit(1)
             }
             .padding(.horizontal, paddingH)
@@ -414,9 +420,15 @@ struct NewReleaseBadge: View {
             .cornerRadius(6)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("New release: \(release.releaseName) on \(release.platform.capitalized)")
         #if os(macOS)
         .help("Open \(release.releaseName) on \(release.platform.capitalized)")
         #endif
+        .linkActions(
+            url: URL(string: release.releaseUrl),
+            openTitle: "Open on \(release.platform.capitalized)",
+            onOpen: openRelease
+        )
         #if os(iOS)
         .safariSheet(safariItem: $safariItem)
         #endif

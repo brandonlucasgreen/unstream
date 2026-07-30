@@ -125,9 +125,11 @@ struct UnstreamApp: App {
 
     var body: some Scene {
         #if os(macOS)
-        // macOS: Empty settings scene — actual UI handled by AppDelegate's popover
+        // The popover is driven by AppDelegate (NSStatusItem), but Settings is a real
+        // SwiftUI Settings scene: that's what gives us the standard settings window,
+        // its frame persistence, and a working "Unstream ▸ Settings… ⌘," menu item.
         Settings {
-            EmptyView()
+            SettingsView(releaseAlertManager: container.releaseAlertManager)
         }
         #else
         // iOS: Standard windowed app
@@ -270,8 +272,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     private static var hasCreatedStatusItem = false
 
     private var popover: NSPopover!
-    private var eventMonitor: Any?
-    private var settingsWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         AppDelegate.shared = self
@@ -310,12 +310,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
         popover.contentViewController = NSHostingController(rootView: contentView)
 
-        // Set up event monitor to close popover when clicking outside
-        eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-            if let popover = self?.popover, popover.isShown {
-                popover.performClose(nil)
-            }
-        }
+        // No click-outside monitor: popover.behavior = .transient already dismisses on
+        // outside clicks. A global monitor only sees events routed to *other* apps, so it
+        // added nothing and risked closing the popover under sheets and share pickers.
 
         // Auth callbacks are handled by ASWebAuthenticationSession in AuthService;
         // no NSAppleEventManager handler needed.
@@ -325,21 +322,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
         // Initialize global hotkey manager (starts listening if enabled)
         _ = GlobalHotkeyManager.shared
-
-        // ⌘, to open settings (local monitor since LSUIElement apps don't show menu bar)
-        NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            if event.modifierFlags.contains(.command) && event.charactersIgnoringModifiers == "," {
-                self?.openSettings()
-                return nil
-            }
-            return event
-        }
-    }
-
-    func applicationWillTerminate(_ notification: Notification) {
-        if let monitor = eventMonitor {
-            NSEvent.removeMonitor(monitor)
-        }
     }
 
     @objc func togglePopover() {
@@ -350,6 +332,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         } else {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             popover.contentViewController?.view.window?.makeKey()
+        }
+    }
+
+    func closePopover() {
+        if popover.isShown {
+            popover.performClose(nil)
         }
     }
 
@@ -376,42 +364,27 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         completionHandler()
     }
 
-    // Open settings window
+    /// Opens the SwiftUI `Settings` scene.
+    ///
+    /// `SettingsLink` is macOS 14+ and we still support 13, so instead of hardcoding a
+    /// private selector (`showSettingsWindow:`) we perform the real "Settings… ⌘," item
+    /// that SwiftUI puts in the app menu. Its action is a SwiftUI-internal callback, so
+    /// sending it via the item keeps working regardless of what Apple renames.
     func openSettings() {
         // Close the popover first so it doesn't obscure settings
         if popover.isShown {
             popover.performClose(nil)
         }
 
-        if let existing = settingsWindow {
-            existing.makeKeyAndOrderFront(nil)
-            NSApp.activate(ignoringOtherApps: true)
+        NSApp.activate(ignoringOtherApps: true)
+
+        guard let appMenu = NSApp.mainMenu?.items.first?.submenu,
+              let item = appMenu.items.first(where: { $0.keyEquivalent == "," && $0.action != nil }),
+              let action = item.action else {
+            assertionFailure("No Settings item in the app menu — did the Settings scene go away?")
             return
         }
-
-        let container = AppStateContainer.shared
-        let settingsView = SettingsView(
-            releaseAlertManager: container.releaseAlertManager
-        )
-
-        let hostingController = NSHostingController(rootView: settingsView)
-
-        let fittingSize = hostingController.view.fittingSize
-        let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: fittingSize.width, height: fittingSize.height),
-            styleMask: [.titled, .closable],
-            backing: .buffered,
-            defer: false
-        )
-        window.title = "Unstream Settings"
-        window.contentViewController = hostingController
-        window.center()
-        window.isReleasedWhenClosed = false
-
-        settingsWindow = window
-
-        settingsWindow?.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
+        NSApp.sendAction(action, to: item.target, from: item)
     }
 
     // Prevent app reopen from creating duplicates

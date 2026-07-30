@@ -19,18 +19,20 @@ struct PlatformBadge: View {
 
     #if os(iOS)
     private let iconSize: CGFloat = 14
-    private let fontSize: CGFloat = 14
-    private let payoutFontSize: CGFloat = 12
     private let paddingH: CGFloat = 12
     private let paddingV: CGFloat = 10
     private let spacing: CGFloat = 6
+    private let labelFont: Font = .system(size: 14, weight: .medium)
+    private let payoutFont: Font = .system(size: 12, weight: .semibold)
+    private let fridayFont: Font = .system(size: 12, weight: .bold)
     #else
     private let iconSize: CGFloat = 10
-    private let fontSize: CGFloat = 11
-    private let payoutFontSize: CGFloat = 9
     private let paddingH: CGFloat = 8
     private let paddingV: CGFloat = 4
     private let spacing: CGFloat = 4
+    private let labelFont: Font = .caption.weight(.medium)
+    private let payoutFont: Font = .caption2.weight(.semibold)
+    private let fridayFont: Font = .caption2.weight(.bold)
     #endif
 
     var body: some View {
@@ -39,12 +41,12 @@ struct PlatformBadge: View {
                 Image(systemName: result.icon)
                     .font(.system(size: iconSize))
                 Text(isSubtle ? "Search \(result.displayName)" : result.displayName)
-                    .font(.system(size: fontSize, weight: .medium))
+                    .font(labelFont)
 
                 // Payout percentage badge
                 if !isSubtle, let payout = displayPayout {
                     Text(payout)
-                        .font(.system(size: payoutFontSize, weight: .semibold))
+                        .font(payoutFont)
                         .padding(.horizontal, 3)
                         .padding(.vertical, 1)
                         .background(isBCFriday ? Color(hex: "#1DA0C3")!.opacity(0.2) : badgeColor.opacity(0.2))
@@ -54,7 +56,7 @@ struct PlatformBadge: View {
                 // BC Friday label
                 if !isSubtle && isBCFriday {
                     Text("BC Friday!")
-                        .font(.system(size: payoutFontSize, weight: .bold))
+                        .font(fridayFont)
                         .foregroundColor(Color(hex: "#1DA0C3") ?? .blue)
                 }
             }
@@ -69,12 +71,33 @@ struct PlatformBadge: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(accessibilityText)
         #if os(macOS)
         .help(helpText)
         #endif
+        // A badge is fundamentally a link, so it should behave like one: draggable to
+        // Safari/Notes/Finder, and right-clickable for copy/open.
+        .linkActions(
+            url: platformURL,
+            openTitle: isSubtle ? "Search \(result.displayName)" : "Open on \(result.displayName)",
+            onOpen: openPlatform
+        )
         #if os(iOS)
         .safariSheet(safariItem: $safariItem)
         #endif
+    }
+
+    private var platformURL: URL? {
+        guard let urlString = result.url else { return nil }
+        return URL(string: urlString)
+    }
+
+    private var accessibilityText: String {
+        if isSubtle { return "Search for artist on \(result.displayName)" }
+        if let payout = result.artistPayoutPercent {
+            return "Open on \(result.displayName), \(payout) to artist"
+        }
+        return "Open on \(result.displayName)"
     }
 
     private var displayPayout: String? {

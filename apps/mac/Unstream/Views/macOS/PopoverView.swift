@@ -14,6 +14,7 @@ struct PopoverView: View {
     @State private var selectedTab: PopoverTab = .search
     @State private var showSignIn = false
     @State private var pollTask: Task<Void, Never>?
+    @FocusState private var searchFieldFocused: Bool
 
     var body: some View {
         VStack(spacing: 0) {
@@ -45,20 +46,23 @@ struct PopoverView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundColor(.green)
-                        .font(.system(size: 10))
+                        .font(.caption2)
+                        .accessibilityHidden(true)
                     Text(auth.userEmail ?? "Signed in")
-                        .font(.system(size: 10))
+                        .font(.caption2)
                         .foregroundColor(.secondary)
                         .lineLimit(1)
                     Spacer()
                 }
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Signed in as \(auth.userEmail ?? "unknown account")")
                 .padding(.horizontal)
                 .padding(.vertical, 4)
             }
 
             // Search bar (only visible on search tab)
             if selectedTab == .search {
-                SearchBarView()
+                SearchBarView(isFocused: $searchFieldFocused)
                     .padding()
             }
 
@@ -166,26 +170,20 @@ struct PopoverView: View {
                 // Sign in/out button
                 if auth.isSignedIn {
                     Button(action: { Task { await auth.signOut() } }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "rectangle.portrait.and.arrow.right")
-                                .font(.system(size: 10))
-                            Text("Sign Out")
-                                .font(.system(size: 10))
-                        }
-                        .foregroundColor(.secondary)
+                        Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
+                    .help("Sign out of Unstream")
                 } else {
                     Button(action: { showSignIn = true }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "person.crop.circle.badge.plus")
-                                .font(.system(size: 10))
-                            Text("Sign In")
-                                .font(.system(size: 10))
-                        }
-                        .foregroundColor(.secondary)
+                        Label("Sign In", systemImage: "person.crop.circle.badge.plus")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
+                    .help("Sign in to sync saved artists")
                 }
 
                 Spacer()
@@ -220,16 +218,20 @@ struct PopoverView: View {
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
-                        .font(.system(size: 16))
+                        .font(.title3)
                         .foregroundColor(.secondary)
                 }
                 .menuStyle(.borderlessButton)
                 .menuIndicator(.hidden)
+                .fixedSize()
+                .accessibilityLabel("More options")
+                .help("Settings, feedback, and more")
             }
             .padding(.horizontal)
             .padding(.vertical, 8)
         }
         .frame(width: 320)
+        .background(keyboardShortcuts)
         .sheet(isPresented: $showSignIn) {
             SignInView()
         }
@@ -237,6 +239,10 @@ struct PopoverView: View {
             // Reset sheet state on every open — NSPopover hides (not destroys) its content
             // view, so onDisappear isn't reliable; onAppear fires on each show.
             showSignIn = false
+            focusSearchField()
+        }
+        .onChange(of: selectedTab) { tab in
+            if tab == .search { focusSearchField() }
         }
         .onDisappear {
             stopMenuPoll()
@@ -251,6 +257,41 @@ struct PopoverView: View {
                 stopMenuPoll()
             }
         }
+    }
+
+    // MARK: - Keyboard
+
+    /// The popover's window only becomes key just *after* `show()`, so focusing
+    /// synchronously in `onAppear` gets discarded. Defer one run-loop turn.
+    private func focusSearchField() {
+        DispatchQueue.main.async {
+            searchFieldFocused = true
+        }
+    }
+
+    /// The popover is a hosted view, not a Scene, so there's no `Commands` builder to
+    /// hang shortcuts on. Zero-size buttons are the standard SwiftUI way to register
+    /// key equivalents inside one; they only fire while the popover is the key window.
+    private var keyboardShortcuts: some View {
+        Group {
+            Button("Search") {
+                selectedTab = .search
+                focusSearchField()
+            }
+            .keyboardShortcut("f", modifiers: .command)
+
+            Button("Search Tab") { selectedTab = .search }
+                .keyboardShortcut("1", modifiers: .command)
+
+            Button("Saved Artists Tab") { selectedTab = .supportList }
+                .keyboardShortcut("2", modifiers: .command)
+
+            Button("Close") { AppDelegate.shared?.closePopover() }
+                .keyboardShortcut("w", modifiers: .command)
+        }
+        .frame(width: 0, height: 0)
+        .opacity(0)
+        .accessibilityHidden(true)
     }
 
     // MARK: - 60-second poll while menu is open
@@ -282,16 +323,37 @@ struct TabButton: View {
     var badge: Int? = nil
     let action: () -> Void
 
+    /// Custom selected rows must respect active-window state or the accent tint stays
+    /// fully saturated in a background window, which no native control does.
+    @Environment(\.controlActiveState) private var controlActiveState
+
+    private var isWindowActive: Bool {
+        controlActiveState != .inactive
+    }
+
+    private var foreground: Color {
+        guard isSelected else { return .secondary }
+        return isWindowActive ? .accentColor : .secondary
+    }
+
+    private var background: Color {
+        guard isSelected else { return .clear }
+        return isWindowActive
+            ? Color.accentColor.opacity(0.12)
+            : Color.secondary.opacity(0.12)
+    }
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 4) {
                 Image(systemName: icon)
-                    .font(.system(size: 11))
+                    .font(.caption)
+                    .accessibilityHidden(true)
                 Text(title)
-                    .font(.system(size: 12, weight: isSelected ? .semibold : .regular))
+                    .font(isSelected ? .callout.weight(.semibold) : .callout)
                 if let badge = badge, badge > 0 {
                     Text("\(badge)")
-                        .font(.system(size: 9, weight: .medium))
+                        .font(.caption2.weight(.medium))
                         .foregroundColor(.secondary)
                         .padding(.horizontal, 5)
                         .padding(.vertical, 2)
@@ -301,11 +363,13 @@ struct TabButton: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
-            .background(isSelected ? Color.accentColor.opacity(0.1) : Color.clear)
-            .foregroundColor(isSelected ? .accentColor : .secondary)
+            .background(background)
+            .foregroundColor(foreground)
             .cornerRadius(6)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(badge.map { "\(title), \($0) saved" } ?? title)
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 }
 

@@ -72,19 +72,21 @@ struct SyncedArtistsView: View {
             if let error = sync.syncError {
                 HStack(spacing: 6) {
                     Image(systemName: "exclamationmark.triangle")
-                        .font(.system(size: 10))
+                        .font(.caption2)
                         .foregroundColor(.orange)
+                        .accessibilityHidden(true)
                     Text(error)
-                        .font(.system(size: 10))
+                        .font(.caption2)
                         .foregroundColor(.orange)
                     Spacer()
                     Button("Retry") {
                         sync.syncError = nil
                         Task { await sync.pull() }
                     }
-                    .font(.system(size: 10))
+                    .font(.caption2)
                     .buttonStyle(.plain)
                     .foregroundColor(.accentColor)
+                    .accessibilityLabel("Retry syncing saved artists")
                 }
                 .padding(.horizontal, 4)
                 .padding(.vertical, 4)
@@ -119,6 +121,11 @@ struct SyncedArtistRow: View {
 
     #if os(iOS)
     @State private var safariItem: SafariURL?
+    private let nameFont: Font = .system(size: 13, weight: .medium)
+    private let badgeFont: Font = .system(size: 9, weight: .medium)
+    #else
+    private let nameFont: Font = .body.weight(.medium)
+    private let badgeFont: Font = .caption2.weight(.medium)
     #endif
 
     var body: some View {
@@ -147,15 +154,16 @@ struct SyncedArtistRow: View {
             // Name + claimed badge
             VStack(alignment: .leading, spacing: 2) {
                 Text(artist.name)
-                    .font(.system(size: 13, weight: .medium))
+                    .font(nameFont)
                     .lineLimit(1)
 
                 if artist.claimed == true {
                     Text("Verified")
-                        .font(.system(size: 9, weight: .medium))
+                        .font(badgeFont)
                         .foregroundColor(.green)
                 }
             }
+            .textSelection(.enabled)
 
             Spacer()
 
@@ -173,6 +181,7 @@ struct SyncedArtistRow: View {
                         .foregroundColor(.secondary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(artist.claimed == true ? "Open \(artist.name)'s artist page" : "Search for \(artist.name)")
                 #if os(macOS)
                 .help(artist.claimed == true ? "Open artist page" : "Search for artist")
                 #endif
@@ -185,11 +194,29 @@ struct SyncedArtistRow: View {
                     .foregroundColor(.red.opacity(0.7))
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Remove \(artist.name) from saved")
             #if os(macOS)
             .help("Remove from saved")
             #endif
         }
         .padding(.vertical, 4)
+        .contextMenu {
+            if artist.claimed == true, let profileURL = artist.profileURL {
+                Button("Open Artist Page") { openURL(profileURL) }
+                Button("Copy Link") { copyToClipboard(url: profileURL) }
+                ShareLink(item: profileURL)
+                Divider()
+            } else if let onOpen {
+                Button("Search for Artist") { onOpen() }
+                Divider()
+            }
+
+            Button("Copy Artist Name") { copyToClipboard(text: artist.name) }
+
+            Divider()
+
+            Button("Remove from Saved", role: .destructive, action: onRemove)
+        }
         #if os(iOS)
         .safariSheet(safariItem: $safariItem)
         #endif
