@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>lol.bgreen.Unstream.releaseCheck</string>
+	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -17,9 +21,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>3.2.0</string>
-	<key>CFBundleVersion</key>
-	<string>11</string>
+	<string>3.3.0</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -31,8 +33,16 @@
 			</array>
 		</dict>
 	</array>
+	<key>CFBundleVersion</key>
+	<string>12</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright 2025-2026 brandon lucas green</string>
+	<key>SUPABASE_ANON_KEY</key>
+	<string>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3b2djbHF6cHNidnFieWhocWJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMTMyODcsImV4cCI6MjA4ODg4OTI4N30.AUcgWjqcsIbcTm-RkjaY2jtVMYmAHaPVE52oGeOsblM</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
@@ -51,15 +61,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>BGTaskSchedulerPermittedIdentifiers</key>
-	<array>
-		<string>lol.bgreen.Unstream.releaseCheck</string>
-	</array>
-	<key>NSHumanReadableCopyright</key>
-	<string>Copyright 2025-2026 brandon lucas green</string>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
-	<key>SUPABASE_ANON_KEY</key>
-	<string>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3b2djbHF6cHNidnFieWhocWJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMTMyODcsImV4cCI6MjA4ODg4OTI4N30.AUcgWjqcsIbcTm-RkjaY2jtVMYmAHaPVE52oGeOsblM</string>
 </dict>
 </plist>
