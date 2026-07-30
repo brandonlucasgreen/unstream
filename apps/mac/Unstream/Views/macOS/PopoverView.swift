@@ -252,6 +252,9 @@ struct PopoverView: View {
             // NSPopoverDelegate fires this unconditionally when the popover closes.
             showSignIn = false
         }
+        .onReceive(NotificationCenter.default.publisher(for: .showSearchTab)) { _ in
+            selectedTab = .search
+        }
         .onChange(of: auth.isSignedIn) { signedIn in
             if !signedIn {
                 stopMenuPoll()

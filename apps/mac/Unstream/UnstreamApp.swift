@@ -322,6 +322,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
         // Initialize global hotkey manager (starts listening if enabled)
         _ = GlobalHotkeyManager.shared
+
+        // Services menu: "Find on Unstream" on any text selection system-wide.
+        // NSUpdateDynamicServices() makes a freshly built copy visible without a
+        // logout; LaunchServices otherwise caches the old NSServices declaration.
+        NSApp.servicesProvider = ServicesProvider.shared
+        ServicesProvider.assertSelectorMatchesInfoPlist()
+        NSUpdateDynamicServices()
     }
 
     @objc func togglePopover() {
@@ -339,6 +346,25 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         if popover.isShown {
             popover.performClose(nil)
         }
+    }
+
+    /// Runs a search on behalf of something outside the popover — the Services menu,
+    /// an App Intent, a URL scheme — and shows the result.
+    func searchFromExternalRequest(_ query: String) {
+        let appState = AppStateContainer.shared.appState
+        appState.searchQuery = query
+        appState.clearResults()
+
+        // PopoverView owns its tab as @State, so ask it to switch rather than
+        // reaching in; it may be showing Saved Artists from last time.
+        NotificationCenter.default.post(name: .showSearchTab, object: nil)
+
+        if !popover.isShown {
+            togglePopover()
+        }
+        NSApp.activate(ignoringOtherApps: true)
+
+        Task { await appState.performSearch() }
     }
 
     // Handle notification when app is in foreground
@@ -397,6 +423,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
 extension Notification.Name {
     static let popoverDidClose = Notification.Name("unstreamPopoverDidClose")
+    /// Posted when an external request (Services menu, App Intent) needs the
+    /// popover to show the Search tab rather than whatever it was last on.
+    static let showSearchTab = Notification.Name("unstreamShowSearchTab")
 }
 
 extension AppDelegate: NSPopoverDelegate {
@@ -408,12 +437,20 @@ extension AppDelegate: NSPopoverDelegate {
 
 // MARK: - Welcome Window Launcher
 
-class WelcomeWindowLauncher {
+class WelcomeWindowLauncher: NSObject, NSWindowDelegate {
     static let shared = WelcomeWindowLauncher()
     private var window: NSWindow?
     private var hasAttemptedShow = false
 
-    init() {
+    /// Closing the window with the title-bar button is a dismissal too. Without this
+    /// the welcome window reappeared on every launch until the user pressed the
+    /// button, and it never recorded that they'd seen it.
+    func windowWillClose(_ notification: Notification) {
+        UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
+    }
+
+    override init() {
+        super.init()
         guard !UserDefaults.standard.bool(forKey: "hasLaunchedBefore") else { return }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
@@ -426,14 +463,14 @@ class WelcomeWindowLauncher {
         guard !hasAttemptedShow else { return }
         hasAttemptedShow = true
 
-        let welcomeView = WelcomeContentView {
-            self.dismiss()
+        let welcomeView = WelcomeContentView { launchAtLogin in
+            self.dismiss(enableLaunchAtLogin: launchAtLogin)
         }
 
         let hostingView = NSHostingView(rootView: welcomeView)
 
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 420, height: 300),
+            contentRect: NSRect(x: 0, y: 0, width: 440, height: 340),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
@@ -442,22 +479,25 @@ class WelcomeWindowLauncher {
         window.contentView = hostingView
         window.center()
         window.isReleasedWhenClosed = false
-        window.level = .floating
-        window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        window.delegate = self
 
         self.window = window
 
+        // A first-run window may come forward, but it is not an emergency: no
+        // .floating level, no orderFrontRegardless, and no requestUserAttention —
+        // a critical attention request bounces the Dock until acknowledged, which
+        // is for data loss, not for saying hello.
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
-        window.orderFrontRegardless()
-        NSApp.requestUserAttention(.criticalRequest)
     }
 
-    func dismiss() {
+    /// - Parameter enableLaunchAtLogin: The user's explicit choice from the welcome
+    ///   window's checkbox. Previously this registered a login item silently behind
+    ///   a "Got it!" button, which is not ours to decide.
+    func dismiss(enableLaunchAtLogin: Bool) {
         UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
 
-        if !UserDefaults.standard.bool(forKey: "hasSetLaunchAtLoginDefault") {
-            UserDefaults.standard.set(true, forKey: "hasSetLaunchAtLoginDefault")
+        if enableLaunchAtLogin {
             do {
                 try SMAppService.mainApp.register()
             } catch {
@@ -473,49 +513,64 @@ class WelcomeWindowLauncher {
 // MARK: - Welcome Content View
 
 struct WelcomeContentView: View {
-    let onDismiss: () -> Void
+    /// Passes the user's launch-at-login choice back to the launcher.
+    let onDismiss: (Bool) -> Void
+
+    @State private var launchAtLogin = true
 
     var body: some View {
         VStack(spacing: 20) {
             Image(nsImage: NSApp.applicationIconImage)
                 .resizable()
                 .frame(width: 64, height: 64)
+                .accessibilityHidden(true)
 
             Text("Unstream is running!")
                 .font(.title2)
                 .fontWeight(.semibold)
 
             VStack(alignment: .leading, spacing: 12) {
-                HStack(alignment: .top, spacing: 10) {
-                    Image(systemName: "menubar.arrow.up.rectangle")
-                        .foregroundColor(.accentColor)
-                        .frame(width: 20)
-                    Text("Click the icon in your menu bar to search for artists.")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                HStack(alignment: .top, spacing: 10) {
-                    Image(systemName: "music.note")
-                        .foregroundColor(.accentColor)
-                        .frame(width: 20)
-                    Text("Play music to see where the artist is available.")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+                welcomeRow(
+                    icon: "menubar.arrow.up.rectangle",
+                    text: "Click the icon in your menu bar to search for artists."
+                )
+                welcomeRow(
+                    icon: "music.note",
+                    text: "Play music to see where the artist is available."
+                )
+                welcomeRow(
+                    icon: "text.viewfinder",
+                    text: "Select an artist name in any app, then choose Services ▸ Find on Unstream."
+                )
             }
             .padding(.horizontal)
 
-            Button("Got it!") {
-                onDismiss()
+            Divider()
+
+            Toggle("Open Unstream at login", isOn: $launchAtLogin)
+
+            Button("Get Started") {
+                onDismiss(launchAtLogin)
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
+            .keyboardShortcut(.defaultAction)
         }
         .padding(30)
-        .frame(width: 420, height: 300)
+        .frame(width: 440, height: 340)
+    }
+
+    private func welcomeRow(icon: String, text: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: icon)
+                .foregroundColor(.accentColor)
+                .frame(width: 20)
+                .accessibilityHidden(true)
+            Text(text)
+                .font(.body)
+                .foregroundColor(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 }
 

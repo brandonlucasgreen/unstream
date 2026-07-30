@@ -29,8 +29,10 @@
 		461E318C0B5687BD71C42E75 /* ShortcutRecorderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CDD15E71A80A31952A7720C /* ShortcutRecorderView.swift */; platformFilters = (macos, ); };
 		47ADDB550C3A545314574336 /* MirloReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 397ABE663954D6016159C13E /* MirloReleaseChecker.swift */; };
 		5669C87F79BF30EBCC921AB0 /* UnstreamShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C2ACE9E0FA5F270656066467 /* UnstreamShareExtension.appex */; platformFilters = (ios, ); settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		5708291E100158963205FAA6 /* FindArtistIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3522A2E5601A58A396FDF7C4 /* FindArtistIntent.swift */; };
 		584FBF6DA0057BC30EB4C786 /* BrandIcons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FEFD60988639A1ECC95D56A /* BrandIcons.swift */; };
 		5ABBCE0981251D2D775F6DFF /* IndieArtistDirectoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4CEC5CEC07C87673B1F5A61 /* IndieArtistDirectoryService.swift */; };
+		5AF682136B14D6BDCBF42E4A /* UnstreamShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B86644D0E7917D893B1E7A3 /* UnstreamShortcuts.swift */; };
 		5B170D71E9A7E9A471424F16 /* iOSSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 359150E4043D5233395827D3 /* iOSSettingsTab.swift */; platformFilters = (ios, ); };
 		5FFFE71A1135656E81B34BDB /* DeviceIDManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEFF951B15732D3AD206D247 /* DeviceIDManager.swift */; };
 		640AB7A350949FAA23C72A53 /* iOSContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5033CFF636FB4C7C07D315A6 /* iOSContentView.swift */; platformFilters = (ios, ); };
@@ -45,6 +47,7 @@
 		8961565967B20B3F28A7877E /* GlobalHotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B52C116B5CC91BC40D028AF /* GlobalHotkeyManager.swift */; platformFilters = (macos, ); };
 		8A4181366EB270C58A708C65 /* SearchBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45AC0E531396E8C63A2001CF /* SearchBarView.swift */; platformFilters = (macos, ); };
 		8C94768621D55383151FD59F /* SearchResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1581BE8FAF07C7C9D3CD99F5 /* SearchResponse.swift */; };
+		8CD55AA9054F310B1DBD51DA /* ServicesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEF52280B036F1EB34F4127 /* ServicesProvider.swift */; platformFilters = (macos, ); };
 		917C407BBA300BE70B9BDEFB /* ScrobbleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEEE83E95439F19BFC679216 /* ScrobbleManager.swift */; platformFilters = (macos, ); };
 		93956240B6028E760C791028 /* SavedArtistsSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16504D9BC91FD976CD10D549 /* SavedArtistsSyncTests.swift */; };
 		A3526462820B7494F5463BE2 /* UnstreamApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 913EEE8809001930E4F88F8C /* UnstreamApp.swift */; };
@@ -105,13 +108,16 @@
 		1003A79CD2A20BF7227C6FB0 /* SupportEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportEntry.swift; sourceTree = "<group>"; };
 		1581BE8FAF07C7C9D3CD99F5 /* SearchResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResponse.swift; sourceTree = "<group>"; };
 		16504D9BC91FD976CD10D549 /* SavedArtistsSyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedArtistsSyncTests.swift; sourceTree = "<group>"; };
+		1B86644D0E7917D893B1E7A3 /* UnstreamShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnstreamShortcuts.swift; sourceTree = "<group>"; };
 		1CDD15E71A80A31952A7720C /* ShortcutRecorderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutRecorderView.swift; sourceTree = "<group>"; };
 		1D967BFF6EECB9BFC4835ABA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		1DEF52280B036F1EB34F4127 /* ServicesProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicesProvider.swift; sourceTree = "<group>"; };
 		1F71936662EEAC06B0C1F008 /* ReleaseAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseAlert.swift; sourceTree = "<group>"; };
 		2724397667CCEE30A098B9CE /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
 		2C8F1E48E643DCC1EECD4A93 /* ReleasesTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleasesTab.swift; sourceTree = "<group>"; };
 		2CD0614342CC41833D04FDEA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		30CDBA3376D2900CCBE870B2 /* SyncedArtistsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncedArtistsView.swift; sourceTree = "<group>"; };
+		3522A2E5601A58A396FDF7C4 /* FindArtistIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindArtistIntent.swift; sourceTree = "<group>"; };
 		359150E4043D5233395827D3 /* iOSSettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSSettingsTab.swift; sourceTree = "<group>"; };
 		385B09E1C63EAE37830E8A04 /* MediaObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaObserver.swift; sourceTree = "<group>"; };
 		397ABE663954D6016159C13E /* MirloReleaseChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MirloReleaseChecker.swift; sourceTree = "<group>"; };
@@ -242,6 +248,7 @@
 				46AF2CAEF0AD6BF7719E6E39 /* Unstream-macOS.entitlements */,
 				829FB6D91FC50FBA72747788 /* UnstreamAPI.swift */,
 				913EEE8809001930E4F88F8C /* UnstreamApp.swift */,
+				DEA0B7FE3D0887F2CA75080A /* Intents */,
 				CBFF34D3930D2D2C364B1F73 /* Models */,
 				605B6FA17B5F8ECFD860F204 /* Platform */,
 				42BD41F06A4ADEB36BC79147 /* Services */,
@@ -309,6 +316,7 @@
 				385B09E1C63EAE37830E8A04 /* MediaObserver.swift */,
 				A93B97CDB100943ECCA942E6 /* NowPlayingNotificationManager.swift */,
 				EEEE83E95439F19BFC679216 /* ScrobbleManager.swift */,
+				1DEF52280B036F1EB34F4127 /* ServicesProvider.swift */,
 				E82B185A730210A472CD947F /* UpdateChecker.swift */,
 			);
 			path = macOS;
@@ -336,6 +344,15 @@
 				8D5154B5C1C2B262BC1B507F /* Shared */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		DEA0B7FE3D0887F2CA75080A /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				3522A2E5601A58A396FDF7C4 /* FindArtistIntent.swift */,
+				1B86644D0E7917D893B1E7A3 /* UnstreamShortcuts.swift */,
+			);
+			path = Intents;
 			sourceTree = "<group>";
 		};
 		E27DFAC60C2E3DEB8AD07F76 /* Products */ = {
@@ -520,6 +537,7 @@
 				5FFFE71A1135656E81B34BDB /* DeviceIDManager.swift in Sources */,
 				A8FD43FE100F214CA8E6241C /* EmptyStateView.swift in Sources */,
 				194D5CB6D2373174426884C5 /* FaircampReleaseChecker.swift in Sources */,
+				5708291E100158963205FAA6 /* FindArtistIntent.swift in Sources */,
 				8961565967B20B3F28A7877E /* GlobalHotkeyManager.swift in Sources */,
 				1132043919606896183DF5BC /* IndieArtist.swift in Sources */,
 				5ABBCE0981251D2D775F6DFF /* IndieArtistDirectoryService.swift in Sources */,
@@ -546,6 +564,7 @@
 				8A4181366EB270C58A708C65 /* SearchBarView.swift in Sources */,
 				8C94768621D55383151FD59F /* SearchResponse.swift in Sources */,
 				11B4891578B50BCF51D68613 /* SearchTab.swift in Sources */,
+				8CD55AA9054F310B1DBD51DA /* ServicesProvider.swift in Sources */,
 				7F078F17D544C2F32A801E60 /* SettingsView.swift in Sources */,
 				461E318C0B5687BD71C42E75 /* ShortcutRecorderView.swift in Sources */,
 				BF58D857FC19F2147E12C7D5 /* SignInView.swift in Sources */,
@@ -559,6 +578,7 @@
 				EAD31F1949071C4F694741C3 /* TipJarView.swift in Sources */,
 				45220D6B5414D8728BE175C4 /* UnstreamAPI.swift in Sources */,
 				A3526462820B7494F5463BE2 /* UnstreamApp.swift in Sources */,
+				5AF682136B14D6BDCBF42E4A /* UnstreamShortcuts.swift in Sources */,
 				DCA4950DEB8FCA6734B3E003 /* UpdateChecker.swift in Sources */,
 				640AB7A350949FAA23C72A53 /* iOSContentView.swift in Sources */,
 				5B170D71E9A7E9A471424F16 /* iOSSettingsTab.swift in Sources */,
