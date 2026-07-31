@@ -1,4 +1,13 @@
 import { parse } from 'node-html-parser';
+import { isSafePublicHostname, isUrlHostnameAllowed } from './middleware';
+import { checkRateLimit, getClientIp } from './ratelimit';
+import { isStoredArtistLink } from './db';
+
+const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36';
+
+// Bandcamp Pro artists point custom domains at their store, so a single request can
+// legitimately redirect off *.bandcamp.com. Follow a few hops, validating each one.
+const MAX_REDIRECTS = 5;
 
 interface PlatformUrls {
   bandcamp?: string;
@@ -24,20 +33,72 @@ interface CheckReleasesResponse {
   error?: string;
 }
 
-// Helper to fetch with timeout
-async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs: number = 5000): Promise<Response> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+/**
+ * Fetch with a timeout, validating **every** hop against `isSafePublicHostname`.
+ *
+ * Node's fetch follows redirects transparently, which means a check on the URL we were
+ * given says nothing about the URL we actually retrieve. That matters here for two
+ * reasons: this endpoint fetches caller-supplied URLs, and it then follows a link found
+ * *inside* the page it fetched. Redirects are resolved manually so each destination is
+ * re-validated before another request goes out.
+ *
+ * Returns null when a target is refused or the redirect chain is too long — callers treat
+ * that the same as an unreachable platform.
+ */
+async function safeFetch(url: string, timeoutMs: number = 5000): Promise<Response | null> {
+  let current = url;
 
-  try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-    });
-    return response;
-  } finally {
-    clearTimeout(timeoutId);
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    if (!isSafePublicHostname(current)) {
+      // Hostname only — the full URL is caller-supplied and shouldn't land in logs.
+      console.warn(`[check-releases] refused unsafe fetch target: ${safeHostname(current)}`);
+      return null;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    let response: Response;
+    try {
+      response = await fetch(current, {
+        headers: { 'User-Agent': USER_AGENT },
+        redirect: 'manual',
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+    if (response.status < 300 || response.status >= 400) return response;
+
+    const location = response.headers.get('location');
+    if (!location) return response; // 3xx without a target — nothing to follow
+    current = new URL(location, current).toString();
   }
+
+  console.warn(`[check-releases] too many redirects from ${safeHostname(url)}`);
+  return null;
+}
+
+function safeHostname(urlString: string): string {
+  try {
+    return new URL(urlString).hostname;
+  } catch {
+    return '<unparseable>';
+  }
+}
+
+/**
+ * May we fetch this URL on an anonymous caller's behalf?
+ *
+ * Allowlisted hosts pass outright. Anything else must already be stored as a link for
+ * this artist — which is how self-hosted Faircamp (arbitrary domains like
+ * music.someartist.com) and Bandcamp custom domains stay reachable without turning the
+ * endpoint into an open fetch proxy.
+ */
+async function mayFetch(url: string, artistName: string): Promise<boolean> {
+  if (!isSafePublicHostname(url)) return false;
+  if (isUrlHostnameAllowed(url)) return true;
+  return isStoredArtistLink(url, artistName);
 }
 
 // Parse various date formats into ISO string
@@ -86,13 +147,8 @@ async function checkBandcamp(artistUrl: string): Promise<ReleaseResult | null> {
       .replace(/\/$/, '');
     const musicUrl = `${baseUrl}/music`;
 
-    const response = await fetchWithTimeout(musicUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      },
-    });
-
-    if (!response.ok) return null;
+    const response = await safeFetch(musicUrl);
+    if (!response || !response.ok) return null;
 
     const html = await response.text();
     const root = parse(html);
@@ -111,17 +167,14 @@ async function checkBandcamp(artistUrl: string): Promise<ReleaseResult | null> {
 
     if (!href || !title) return null;
 
-    // Build full URL
-    const fullUrl = href.startsWith('http') ? href : new URL(href, baseUrl).toString();
+    // Build full URL. `href` comes out of fetched HTML, so it is untrusted input — it is
+    // resolved against the page we actually landed on (which may be a custom domain after
+    // a redirect) and then re-validated by safeFetch before the second request.
+    const fullUrl = href.startsWith('http') ? href : new URL(href, response.url || baseUrl).toString();
 
     // Fetch the album page to get release date
-    const albumResponse = await fetchWithTimeout(fullUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      },
-    });
-
-    if (!albumResponse.ok) return null;
+    const albumResponse = await safeFetch(fullUrl);
+    if (!albumResponse || !albumResponse.ok) return null;
 
     const albumHtml = await albumResponse.text();
 
@@ -152,13 +205,8 @@ async function checkFaircamp(faircampUrl: string): Promise<ReleaseResult | null>
     const baseUrl = faircampUrl.replace(/\/$/, '');
     const rssUrl = `${baseUrl}/feed.rss`;
 
-    const response = await fetchWithTimeout(rssUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      },
-    });
-
-    if (!response.ok) return null;
+    const response = await safeFetch(rssUrl);
+    if (!response || !response.ok) return null;
 
     const rssText = await response.text();
 
@@ -212,13 +260,10 @@ async function checkMirlo(mirloUrl: string): Promise<ReleaseResult | null> {
     // Fetch or use cached RSS feed
     const now = Date.now();
     if (!mirloRssCache || (now - mirloRssCache.fetchedAt) > MIRLO_CACHE_TTL) {
-      const response = await fetchWithTimeout('https://api.mirlo.space/v1/trackGroups?format=rss', {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-        },
-      }, 10000);
-
-      if (!response.ok) return null;
+      // Hardcoded endpoint, so there's no caller-supplied URL to validate here — it still
+      // goes through safeFetch to keep one fetch path in this file.
+      const response = await safeFetch('https://api.mirlo.space/v1/trackGroups?format=rss', 10000);
+      if (!response || !response.ok) return null;
 
       const rssText = await response.text();
 
@@ -308,110 +353,110 @@ async function checkAllPlatforms(platforms: PlatformUrls): Promise<ReleaseResult
   return results[0];
 }
 
+const CORS_HEADERS = {
+  'Content-Type': 'application/json',
+  // The wildcard is deliberate, not an oversight: the Mac app and the browser extension
+  // both call this endpoint, and neither sends an Origin that the shared
+  // buildCorsHeaders() allowlist (unstream.stream) would accept.
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+const PLATFORM_KEYS = ['bandcamp', 'faircamp', 'mirlo'] as const;
+
+function jsonResponse(statusCode: number, body: unknown, extraHeaders: Record<string, string> = {}) {
+  return { statusCode, headers: { ...CORS_HEADERS, ...extraHeaders }, body: JSON.stringify(body) };
+}
+
 // Netlify function handler
 export async function handler(event: {
   httpMethod?: string;
+  headers?: Record<string, string | undefined>;
   body?: string;
   queryStringParameters?: Record<string, string>;
 }) {
   // Handle CORS preflight
   if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
-      body: '',
-    };
+    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   }
 
   // Only allow POST
   if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-      body: JSON.stringify({ error: 'Method not allowed. Use POST.' }),
-    };
+    return jsonResponse(405, { error: 'Method not allowed. Use POST.' });
   }
+
+  // 'lenient' (120/min, 5000/day) rather than 'strict' (10/min): the Mac app and the
+  // extension both loop once per saved artist with no delay and swallow errors, so a
+  // strict tier would silently stop release alerts for every artist past the tenth.
+  // A batch request shape is the real fix; until shipped clients support one, the limit
+  // has to fit the caller it already has.
+  const ip = getClientIp(event.headers || {});
+  const rl = await checkRateLimit(ip, 'lenient', CORS_HEADERS);
+  if (rl.limited) return rl.response;
 
   // Parse request body
   let request: CheckReleasesRequest;
   try {
     request = JSON.parse(event.body || '{}');
   } catch {
-    return {
-      statusCode: 400,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-      body: JSON.stringify({ error: 'Invalid JSON body' }),
-    };
+    return jsonResponse(400, { error: 'Invalid JSON body' });
   }
 
   // Validate request
-  if (!request.artistName || !request.platforms) {
-    return {
-      statusCode: 400,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-      body: JSON.stringify({ error: 'artistName and platforms are required' }),
-    };
+  if (!request.artistName || typeof request.artistName !== 'string' || !request.platforms) {
+    return jsonResponse(400, { error: 'artistName and platforms are required' });
   }
 
-  // Check if at least one platform URL is provided
-  const hasPlatform = request.platforms.bandcamp ||
-                      request.platforms.faircamp ||
-                      request.platforms.mirlo;
+  const requested = PLATFORM_KEYS.filter(
+    p => typeof request.platforms[p] === 'string' && (request.platforms[p] as string).length > 0
+  );
 
-  if (!hasPlatform) {
-    return {
-      statusCode: 400,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-      body: JSON.stringify({ error: 'At least one platform URL is required' }),
-    };
+  if (requested.length === 0) {
+    return jsonResponse(400, { error: 'At least one platform URL is required' });
+  }
+
+  // Only fetch URLs we're willing to request on an anonymous caller's behalf.
+  const platforms: PlatformUrls = {};
+  const refused: string[] = [];
+  await Promise.all(
+    requested.map(async p => {
+      const url = request.platforms[p] as string;
+      if (await mayFetch(url, request.artistName)) platforms[p] = url;
+      else refused.push(`${p}:${safeHostname(url)}`);
+    })
+  );
+
+  if (refused.length > 0) {
+    console.warn(`[check-releases] refused unverified URL(s): ${refused.join(', ')}`);
+  }
+
+  // Refusing to look is not the same as looking and finding nothing — say so rather than
+  // returning an empty result that reads as "this artist has no new release".
+  if (Object.keys(platforms).length === 0) {
+    return jsonResponse(400, {
+      artistName: request.artistName,
+      release: null,
+      error: 'No platform URL could be verified for this artist',
+    });
   }
 
   try {
-    const release = await checkAllPlatforms(request.platforms);
+    const release = await checkAllPlatforms(platforms);
 
     const response: CheckReleasesResponse = {
       artistName: request.artistName,
       release,
     };
 
-    return {
-      statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'no-cache', // Don't cache release checks
-      },
-      body: JSON.stringify(response),
-    };
+    // Don't cache release checks
+    return jsonResponse(200, response, { 'Cache-Control': 'no-cache' });
   } catch (error) {
     console.error('Check releases error:', error);
-    return {
-      statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-      body: JSON.stringify({
-        artistName: request.artistName,
-        release: null,
-        error: 'Failed to check releases',
-      }),
-    };
+    return jsonResponse(500, {
+      artistName: request.artistName,
+      release: null,
+      error: 'Failed to check releases',
+    });
   }
 }

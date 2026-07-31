@@ -308,6 +308,64 @@ export async function deleteStoredLinksForUrl(url: string, artistName: string | 
   }
 }
 
+/**
+ * Is this URL already stored as a platform link for this artist?
+ *
+ * Containment for outbound fetches that a hostname allowlist can't express. Faircamp is
+ * self-hosted on arbitrary domains (music.someartist.com), so `isUrlHostnameAllowed` —
+ * which only admits hostnames with a literal `faircamp` label — rejects most genuine
+ * Faircamp sites. Requiring the URL to be one we already discovered and persisted gives
+ * the same "you can't point us at anything you like" guarantee without breaking the
+ * platform.
+ *
+ * Fails closed: a missing client, a query error, or an unknown artist all return false,
+ * because the caller uses this to decide whether to make a request on a stranger's behalf.
+ */
+export async function isStoredArtistLink(url: string, artistName: string): Promise<boolean> {
+  const client = getClient();
+  if (!client) return false;
+
+  const target = normalizeUrlForMatch(url);
+  // Coarse prefilter on host+path so rows stored as http://, https:// or with a www.
+  // prefix are all candidates; ilike treats % and _ as wildcards, and a URL may
+  // legitimately contain either.
+  const pattern = `%${urlMatchPrefilter(url).replace(/[%_\\]/g, m => `\\${m}`)}%`;
+
+  try {
+    const { data: artist, error: artistError } = await client
+      .from('artists')
+      .select('id')
+      .eq('slug', artistSlug(artistName))
+      .maybeSingle();
+
+    if (artistError) {
+      console.error('[DB] isStoredArtistLink artist lookup failed:', artistError.message);
+      return false;
+    }
+    if (!artist) return false;
+
+    const { data, error } = await client
+      .from('artist_links')
+      .select('url')
+      .eq('artist_id', (artist as { id: string }).id)
+      .ilike('url', pattern);
+
+    if (error) {
+      console.error('[DB] isStoredArtistLink link lookup failed:', error.message);
+      return false;
+    }
+
+    // The ilike is a prefilter, not the decision — compare normalized match keys so a
+    // stored `.../music` doesn't authorize fetching an unrelated deeper path.
+    return ((data as { url: string }[]) || []).some(
+      row => normalizeUrlForMatch(row.url) === target
+    );
+  } catch (error) {
+    console.error('[DB] isStoredArtistLink error:', error);
+    return false;
+  }
+}
+
 // --- Bandcamp slug-probe cache (UNS-152) ---
 
 export interface BandcampProbeRow {

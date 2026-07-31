@@ -342,10 +342,20 @@ export const ALLOWED_OUTBOUND_HOSTNAMES = new Set([
 ]);
 
 /**
- * Check if a URL's hostname is in the SSRF allowlist.
- * Supports wildcard subdomains (*.domain).
+ * Reject targets that are dangerous to fetch regardless of any allowlist: non-HTTP(S)
+ * schemes, localhost, cloud metadata endpoints, and private or raw IP addresses.
+ *
+ * Split out from `isUrlHostnameAllowed` so callers that legitimately fetch hosts outside
+ * the allowlist can still refuse internal targets. The motivating case is redirects:
+ * Bandcamp Pro artists use custom domains (sufjanstevens.bandcamp.com 301s to
+ * music.sufjan.com), so an allowlist check on the *input* URL says nothing about where
+ * the request actually ends up. Validate every hop with this.
+ *
+ * Caveat this does NOT cover: a public hostname whose DNS resolves to a private address
+ * (DNS rebinding). Defending against that needs resolution-time checks, which Node's
+ * fetch doesn't expose. This closes the literal-address and known-metadata-name paths.
  */
-export function isUrlHostnameAllowed(urlString: string): boolean {
+export function isSafePublicHostname(urlString: string): boolean {
   try {
     const parsed = new URL(urlString);
     const hostname = parsed.hostname.toLowerCase();
@@ -367,6 +377,11 @@ export function isUrlHostnameAllowed(urlString: string): boolean {
       return false;
     }
 
+    // Block .local / .internal mDNS and private-namespace suffixes
+    if (hostname.endsWith('.local') || hostname.endsWith('.internal')) {
+      return false;
+    }
+
     // Block any IPv6 address (no allowlisted hostnames are IPv6).
     // This catches ::ffff:127.0.0.1, fe80::, fc00::, fd00::, etc.
     if (hostname.includes(':')) {
@@ -382,12 +397,30 @@ export function isUrlHostnameAllowed(urlString: string): boolean {
       if (a === 192 && b === 168) return false;
       if (a === 169 && b === 254) return false; // AWS metadata / link-local
       if (a === 0) return false;
+      if (a === 127) return false; // full loopback range, not just 127.0.0.1
       if (a === 100 && b >= 64 && b <= 127) return false; // CGNAT range
     }
 
     // Block any remaining raw IP address (not a hostname)
     if (/^\d+$/.test(hostname)) return false; // decimal notation like 2130706433
     if (/^0\d/.test(hostname.split('.')[0])) return false; // octal notation like 0177.0.0.1
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Check if a URL's hostname is in the SSRF allowlist.
+ * Supports wildcard subdomains (*.domain).
+ */
+export function isUrlHostnameAllowed(urlString: string): boolean {
+  try {
+    // Dangerous-target checks first — an allowlisted name can never override them.
+    if (!isSafePublicHostname(urlString)) return false;
+
+    const hostname = new URL(urlString).hostname.toLowerCase();
 
     // Check exact match
     if (ALLOWED_OUTBOUND_HOSTNAMES.has(hostname)) return true;
