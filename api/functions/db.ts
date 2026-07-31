@@ -471,7 +471,7 @@ export async function claimArtistForCatalog(
 /** Record the outcome of a catalog run. Failures increment the backoff counter. */
 export async function recordCatalogOutcome(
   artistId: string,
-  outcome: { releasesFound: number } | { error: string }
+  outcome: { releasesFound: number; releasesDetailed?: number } | { error: string }
 ): Promise<void> {
   const client = getClient();
   if (!client) return;
@@ -482,6 +482,7 @@ export async function recordCatalogOutcome(
       : {
           last_catalogued_at: new Date().toISOString(),
           releases_found: outcome.releasesFound,
+          releases_detailed: outcome.releasesDetailed ?? 0,
           consecutive_failures: 0,
           last_error: null,
         };
@@ -522,6 +523,21 @@ interface ReleaseToPersist {
 }
 
 /**
+ * A release row and its source after a write, which is what the detail pass needs to decide
+ * whether to spend a request on this release's own page.
+ */
+export interface PersistedRelease {
+  releaseId: string;
+  sourceId: string;
+  /** The release page for this source — where the date, formats and prices live. */
+  url: string;
+  /** When that page was last read. Null means never. */
+  detailCheckedAt: string | null;
+  /** Columns on the release row a verified artist has authored. Ingest leaves these alone. */
+  curatedFields: string[];
+}
+
+/**
  * Write a catalog run's releases, merging rather than replacing.
  *
  * Three rules that matter more than they look:
@@ -535,14 +551,16 @@ interface ReleaseToPersist {
  *    artist authored; ingest re-runs forever, so without this every crawl silently reverts
  *    their corrections.
  *
- * Returns the number of releases written or updated.
+ * Returns the releases written or updated, in the order they were given — which for a
+ * Bandcamp grid is newest first, so a budgeted detail pass reading the front of the list
+ * spends its requests on the releases a fan is most likely to be looking at.
  */
 export async function persistReleases(
   artistId: string,
   releases: ReleaseToPersist[]
-): Promise<number> {
+): Promise<PersistedRelease[]> {
   const client = getClient();
-  if (!client || releases.length === 0) return 0;
+  if (!client || releases.length === 0) return [];
 
   try {
     const { data: existingRows, error: readError } = await client
@@ -552,7 +570,7 @@ export async function persistReleases(
 
     if (readError) {
       console.error('[DB] persistReleases read failed:', readError.message);
-      return 0;
+      return [];
     }
 
     type ExistingRow = {
@@ -568,7 +586,7 @@ export async function persistReleases(
     const byIdentity = new Map(existing.map(r => [`${r.release_type}:${r.match_key}`, r]));
     const takenSlugs = new Set(existing.map(r => r.slug));
 
-    let written = 0;
+    const written: PersistedRelease[] = [];
 
     for (const release of releases) {
       const identity = `${release.releaseType}:${release.matchKey}`;
@@ -637,29 +655,145 @@ export async function persistReleases(
         });
       }
 
-      const { error: sourceError } = await client.from('release_sources').upsert(
-        {
-          release_id: releaseId,
-          platform: release.source.platform,
-          url: release.source.url,
-          external_id: release.source.externalId,
-          last_seen_at: new Date().toISOString(),
-        },
-        { onConflict: 'release_id,platform' }
-      );
+      // detail_checked_at is read back rather than written: it belongs to the detail pass, and
+      // a grid re-crawl must not reset it or every crawl would re-fetch every release page.
+      const { data: sourceRow, error: sourceError } = await client
+        .from('release_sources')
+        .upsert(
+          {
+            release_id: releaseId,
+            platform: release.source.platform,
+            url: release.source.url,
+            external_id: release.source.externalId,
+            last_seen_at: new Date().toISOString(),
+          },
+          { onConflict: 'release_id,platform' }
+        )
+        .select('id, url, detail_checked_at')
+        .single();
 
-      if (sourceError) {
-        console.error('[DB] persistReleases source upsert failed:', sourceError.message);
+      if (sourceError || !sourceRow) {
+        console.error('[DB] persistReleases source upsert failed:', sourceError?.message);
         continue;
       }
 
-      written++;
+      const source = sourceRow as { id: string; url: string; detail_checked_at: string | null };
+      written.push({
+        releaseId,
+        sourceId: source.id,
+        url: source.url,
+        detailCheckedAt: source.detail_checked_at,
+        curatedFields: [...curated],
+      });
     }
 
     return written;
   } catch (error) {
     console.error('[DB] persistReleases error:', error);
-    return 0;
+    return [];
+  }
+}
+
+interface DetailToPersist {
+  releaseDate: string | null;
+  datePrecision: string;
+  status: string;
+  offers: Array<{
+    format: string;
+    price: number | null;
+    currency: string | null;
+    availability: string;
+  }>;
+}
+
+/**
+ * Write what a release's own page told us: its date, and what you can buy there.
+ *
+ * The order of operations is the interesting part. Offers are written **before** stale ones
+ * are pruned, and `detail_checked_at` is stamped **last**:
+ *
+ * - Writing before pruning means a failure part-way through leaves the old offers in place
+ *   rather than an empty offer list. This project has already destroyed an artist's links
+ *   once with a delete-before-a-fallible-write (PR #350); an empty release page is the same
+ *   shape of mistake.
+ * - Pruning only happens when the page actually offered something. Zero offers is the normal
+ *   state of a standalone track page, so treating it as "everything was withdrawn" would
+ *   erase real prices.
+ * - Stamping last means an interrupted run is retried next cycle instead of being recorded as
+ *   done.
+ *
+ * Returns false when nothing could be written, so the caller can count it as a failure.
+ */
+export async function persistReleaseDetail(
+  release: PersistedRelease,
+  detail: DetailToPersist
+): Promise<boolean> {
+  const client = getClient();
+  if (!client) return false;
+
+  try {
+    // A date the artist authored outranks anything upstream says, and status is derived from
+    // the date, so a curated date takes both columns out of ingest's hands.
+    if (!release.curatedFields.includes('release_date')) {
+      const patch: Record<string, unknown> = { status: detail.status };
+      if (detail.releaseDate) {
+        patch.release_date = detail.releaseDate;
+        patch.date_precision = detail.datePrecision;
+      }
+
+      const { error } = await client.from('releases').update(patch).eq('id', release.releaseId);
+      if (error) {
+        console.error('[DB] persistReleaseDetail release update failed:', error.message);
+        return false;
+      }
+    }
+
+    if (detail.offers.length > 0) {
+      const capturedAt = new Date().toISOString();
+      const { error: offerError } = await client.from('release_offers').upsert(
+        detail.offers.map(offer => ({
+          release_source_id: release.sourceId,
+          format: offer.format,
+          price: offer.price,
+          currency: offer.currency,
+          availability: offer.availability,
+          captured_at: capturedAt,
+        })),
+        { onConflict: 'release_source_id,format' }
+      );
+
+      if (offerError) {
+        console.error('[DB] persistReleaseDetail offer upsert failed:', offerError.message);
+        return false;
+      }
+
+      const { error: pruneError } = await client
+        .from('release_offers')
+        .delete()
+        .eq('release_source_id', release.sourceId)
+        .not('format', 'in', `(${detail.offers.map(o => o.format).join(',')})`);
+
+      // A failed prune leaves a stale format listed, which is worth logging but not worth
+      // failing the whole detail write over — the prices we did just refresh are still good.
+      if (pruneError) {
+        console.error('[DB] persistReleaseDetail offer prune failed:', pruneError.message);
+      }
+    }
+
+    const { error: stampError } = await client
+      .from('release_sources')
+      .update({ detail_checked_at: new Date().toISOString() })
+      .eq('id', release.sourceId);
+
+    if (stampError) {
+      console.error('[DB] persistReleaseDetail stamp failed:', stampError.message);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('[DB] persistReleaseDetail error:', error);
+    return false;
   }
 }
 

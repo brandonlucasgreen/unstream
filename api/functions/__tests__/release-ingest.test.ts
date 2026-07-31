@@ -5,7 +5,13 @@
 // points at someone else's domain, and not letting two same-slug titles in one page collide.
 
 import { describe, it, expect } from 'vitest';
-import { ingestBandcampGrid, bandcampMusicUrl } from '../release-ingest';
+import {
+  ingestBandcampGrid,
+  ingestBandcampDetail,
+  bandcampMusicUrl,
+  mapAvailability,
+  mapOfferFormat,
+} from '../release-ingest';
 
 function item(opts: { id?: string; href: string; title: string; img?: string }): string {
   return `<li ${opts.id ? `data-item-id="${opts.id}"` : ''} class="music-grid-item">
@@ -160,6 +166,202 @@ describe('ingestBandcampGrid', () => {
       PAGE_URL
     );
     expect(out).toEqual({ ok: false, reason: 'no_releases' });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Release pages — the date, the formats and the prices
+// ---------------------------------------------------------------------------
+
+/** A Bandcamp release page's JSON-LD, in the shape the live pages actually publish. */
+function detailPage(opts: {
+  datePublished?: string | null;
+  packages?: Array<{
+    format?: string;
+    typeName?: string;
+    price?: number | string;
+    currency?: string;
+    availability?: string;
+  }>;
+  extraScript?: string;
+}): string {
+  const graph: Record<string, unknown> = { '@type': 'MusicAlbum', name: 'A Record' };
+  if (opts.datePublished !== null) graph.datePublished = opts.datePublished ?? '06 Oct 2023 00:00:00 GMT';
+  if (opts.packages) {
+    graph.albumRelease = opts.packages.map(p => ({
+      '@type': ['MusicRelease', 'Product'],
+      musicReleaseFormat: p.format,
+      additionalProperty: [{ '@type': 'PropertyValue', name: 'type_name', value: p.typeName }],
+      offers: {
+        '@type': 'Offer',
+        price: p.price,
+        priceCurrency: p.currency ?? 'USD',
+        availability: p.availability ?? 'InStock',
+      },
+    }));
+  }
+  return `<html><head>${opts.extraScript ?? ''}
+    <script type="application/ld+json">${JSON.stringify(graph)}</script>
+  </head><body></body></html>`;
+}
+
+describe('ingestBandcampDetail', () => {
+  it('reads the date and every purchasable format', () => {
+    const out = ingestBandcampDetail(
+      detailPage({
+        datePublished: '15 Sep 2023 00:00:00 GMT',
+        packages: [
+          { format: 'DigitalFormat', typeName: 'Digital', price: 10, availability: 'OnlineOnly' },
+          { format: 'VinylFormat', typeName: '2 x Vinyl LP', price: 25 },
+          { format: 'CDFormat', typeName: 'Compact Disc (CD)', price: 12 },
+        ],
+      }),
+      new Date('2026-07-31T00:00:00Z')
+    );
+
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.detail.releaseDate).toBe('2023-09-15');
+    expect(out.detail.datePrecision).toBe('day');
+    expect(out.detail.status).toBe('released');
+    expect(out.detail.offers).toEqual([
+      { format: 'digital', price: 10, currency: 'USD', availability: 'available' },
+      { format: 'vinyl', price: 25, currency: 'USD', availability: 'available' },
+      { format: 'cd', price: 12, currency: 'USD', availability: 'available' },
+    ]);
+  });
+
+  // One row per (source, format) is a schema constraint, and Bandcamp routinely sells several
+  // variants of one format. Quoting the deluxe box as "the price of the vinyl" would be a
+  // straightforwardly wrong number in front of someone deciding whether to buy.
+  it('collapses variants of one format to the cheapest available', () => {
+    const out = ingestBandcampDetail(
+      detailPage({
+        packages: [
+          { format: 'VinylFormat', typeName: 'Deluxe Box Set', price: 60, availability: 'SoldOut' },
+          { format: 'VinylFormat', typeName: 'Vinyl LP', price: 25, availability: 'InStock' },
+        ],
+      })
+    );
+
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.detail.offers).toEqual([
+      { format: 'vinyl', price: 25, currency: 'USD', availability: 'available' },
+    ]);
+  });
+
+  it('keeps a sold-out format rather than dropping it', () => {
+    // A fan is better served by "vinyl — sold out" than by a page that silently omits the
+    // format, which reads as "this was never pressed".
+    const out = ingestBandcampDetail(
+      detailPage({ packages: [{ format: 'VinylFormat', price: 35, availability: 'SoldOut' }] })
+    );
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.detail.offers[0].availability).toBe('sold_out');
+  });
+
+  it('treats a pre-order as announced', () => {
+    const out = ingestBandcampDetail(
+      detailPage({
+        datePublished: '01 Mar 2027 00:00:00 GMT',
+        packages: [{ format: 'VinylFormat', price: 30, availability: 'https://schema.org/PreOrder' }],
+      }),
+      new Date('2026-07-31T00:00:00Z')
+    );
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.detail.status).toBe('announced');
+    expect(out.detail.offers[0].availability).toBe('preorder');
+  });
+
+  // Mirlo has a live release dated 2925-11-02. Unbounded, one typo sorts to the top of every
+  // chronology and lands in every calendar subscriber's feed.
+  it('refuses an implausible date instead of storing it', () => {
+    const out = ingestBandcampDetail(
+      detailPage({ datePublished: '2925-11-02' }),
+      new Date('2026-07-31T00:00:00Z')
+    );
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.detail.releaseDate).toBeNull();
+    expect(out.detail.datePrecision).toBe('unknown');
+  });
+
+  // Standalone track pages are MusicRecording: a real date, and no offer anywhere in the
+  // JSON-LD. "No offers" here is a fact about the page, not a failure to read it.
+  it('accepts a page with a date and no offers', () => {
+    const out = ingestBandcampDetail(detailPage({ datePublished: '05 Aug 2014 00:00:00 GMT' }));
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.detail.releaseDate).toBe('2014-08-05');
+    expect(out.detail.offers).toEqual([]);
+  });
+
+  // The distinction the rest of this codebase keeps getting wrong: an upstream that declined
+  // to answer is not an upstream that answered "nothing". Only the first should back off, and
+  // neither may be written down as "this release has no price".
+  it('separates a bot challenge from a page it could not read', () => {
+    const challenge = '<html><head><script src="/_fs-ch-abc/main.js"></script></head><body></body></html>';
+    expect(ingestBandcampDetail(challenge)).toEqual({ ok: false, reason: 'bot_challenge' });
+    expect(ingestBandcampDetail('<html><body>a real page, no structured data</body></html>')).toEqual({
+      ok: false,
+      reason: 'unreadable',
+    });
+  });
+
+  it('survives a broken JSON-LD block earlier in the page', () => {
+    const out = ingestBandcampDetail(
+      detailPage({
+        datePublished: '06 Oct 2023 00:00:00 GMT',
+        extraScript: '<script type="application/ld+json">{ not json </script>',
+      })
+    );
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.detail.releaseDate).toBe('2023-10-06');
+  });
+});
+
+describe('mapOfferFormat', () => {
+  it('trusts musicReleaseFormat where it maps cleanly', () => {
+    expect(mapOfferFormat('DigitalFormat', 'Digital')).toBe('digital');
+    expect(mapOfferFormat('VinylFormat', '2 x Vinyl LP')).toBe('vinyl');
+    expect(mapOfferFormat('CDFormat', 'Compact Disc (CD)')).toBe('cd');
+    expect(mapOfferFormat('CassetteFormat', 'Cassette')).toBe('cassette');
+  });
+
+  // Bandcamp sells shirts and books alongside records, and schema.org has no music format for
+  // those — so the package label is the only signal left.
+  it('falls back to the package label for things schema.org has no format for', () => {
+    expect(mapOfferFormat(null, 'T-Shirt/Apparel')).toBe('merch');
+    expect(mapOfferFormat(null, 'Book/Magazine')).toBe('book');
+    expect(mapOfferFormat('OtherFormat', 'Cassette + zine')).toBe('cassette');
+  });
+
+  it('says other rather than guessing', () => {
+    expect(mapOfferFormat(null, null)).toBe('other');
+    expect(mapOfferFormat('MysteryFormat', 'Something new')).toBe('other');
+  });
+});
+
+describe('mapAvailability', () => {
+  it('maps the states Bandcamp actually publishes', () => {
+    expect(mapAvailability('InStock')).toBe('available');
+    expect(mapAvailability('OnlineOnly')).toBe('available'); // digital downloads
+    expect(mapAvailability('SoldOut')).toBe('sold_out');
+    expect(mapAvailability('PreOrder')).toBe('preorder');
+    // The "https://schema.org/…" spelling is folded by the parser, not here — the pre-order
+    // case above goes through the full path with that form.
+  });
+
+  // Optimism is the dangerous default here: telling someone a sold-out record is in stock is
+  // the one availability error that wastes their time.
+  it('leaves anything unrecognized unknown', () => {
+    expect(mapAvailability('Backordered')).toBe('unknown');
+    expect(mapAvailability(null)).toBe('unknown');
+    expect(mapAvailability('')).toBe('unknown');
   });
 });
 
