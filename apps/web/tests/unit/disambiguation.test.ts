@@ -40,6 +40,9 @@ describe('splitSuspiciousPlatforms', () => {
     expect(verified).toBeDefined();
     expect(unverified).toBeDefined();
     expect(unverified!.platforms[0].sourceId).toBe('bandcamp');
+    // Only this branch actually compared releases, so only this branch may claim
+    // the result conflicts with another one. The UI warning keys off the reason.
+    expect(unverified!.unverifiedReason).toBe('conflicting-releases');
   });
 
   it('keeps Bandcamp with matching releases on the same result', () => {
@@ -74,6 +77,36 @@ describe('splitSuspiciousPlatforms', () => {
     const disambiguated = splitSuspiciousPlatforms(results);
 
     expect(disambiguated[0].matchConfidence).toBe('unverified');
+    // Nothing was compared, so this must not be reported as a conflict. A
+    // MusicBrainz-only card lands here and is usually the only result on the page.
+    expect(disambiguated[0].unverifiedReason).toBe('no-release-data');
+  });
+
+  it('verifies a result MusicBrainz confirmed, with no releases and no curated platform', () => {
+    // The Nine Inch Nails / Viagra Boys case: MusicBrainz knows exactly who this is
+    // and supplied their real links, but nothing we can parse releases from lists
+    // them. That is not grounds for a warning.
+    const results = [makeResult('Nine Inch Nails', [
+      { sourceId: 'officialsite', url: 'https://www.nin.com/' },
+      { sourceId: 'discogs', url: 'https://www.discogs.com/artist/4192' },
+    ], { musicBrainzConfirmed: true })];
+
+    const disambiguated = splitSuspiciousPlatforms(results);
+
+    expect(disambiguated[0].matchConfidence).toBe('verified');
+    expect(disambiguated[0].unverifiedReason).toBeUndefined();
+  });
+
+  it('clears the unverified reason when a result is upgraded to verified', () => {
+    const results = [makeResult('Artist', [
+      { sourceId: 'bandcamp', url: 'https://a.bandcamp.com', allReleaseTitles: ['shared album'] },
+      { sourceId: 'mirlo', url: 'https://mirlo.space/artist', latestRelease: { title: 'Shared Album', type: 'album', url: 'https://mirlo.space/artist/shared' }, allReleaseTitles: ['shared album'] },
+    ], { matchConfidence: 'unverified', unverifiedReason: 'no-release-data' })];
+
+    const disambiguated = splitSuspiciousPlatforms(results);
+
+    expect(disambiguated[0].matchConfidence).toBe('verified');
+    expect(disambiguated[0].unverifiedReason).toBeUndefined();
   });
 });
 

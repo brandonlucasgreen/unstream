@@ -258,6 +258,58 @@ describe('mergeWithMusicBrainzData', () => {
     expect(merged[0].platforms).toHaveLength(1);
   });
 
+  // A MusicBrainz identity match is verification in its own right. Nine Inch Nails
+  // was labelled "Unverified" while showing its real official site, Discogs, Qobuz
+  // and socials — every one of them sourced from the MB record doing the labelling.
+  it('upgrades an unverified result MusicBrainz identified to verified', () => {
+    const results = [{
+      ...makeArtistResult('Test Artist', [{ sourceId: 'bandcamp' as const, url: 'https://a.bandcamp.com' }]),
+      matchConfidence: 'unverified' as const,
+      unverifiedReason: 'no-release-data' as const,
+    }];
+    const mbData = makeMBData({ officialUrl: 'https://testartist.com' });
+
+    const merged = mergeWithMusicBrainzData(results, mbData);
+    expect(merged[0].matchConfidence).toBe('verified');
+    expect(merged[0].unverifiedReason).toBeUndefined();
+  });
+
+  it('leaves confidence alone when MusicBrainz only confirmed the name', () => {
+    const results = [{
+      ...makeArtistResult('Test Artist', [{ sourceId: 'bandcamp' as const, url: 'https://a.bandcamp.com' }]),
+      matchConfidence: 'unverified' as const,
+      unverifiedReason: 'no-release-data' as const,
+    }];
+
+    const merged = mergeWithMusicBrainzData(results, makeMBData());
+    expect(merged[0].matchConfidence).toBe('unverified');
+  });
+
+  it('keeps a conflicting-releases split unverified even when MusicBrainz matches', () => {
+    // That split came from comparing actual release titles. A name-level MB match
+    // is weaker evidence and must not quietly erase it.
+    const results = [{
+      ...makeArtistResult('Test Artist', [{ sourceId: 'bandcamp' as const, url: 'https://impostor.bandcamp.com' }]),
+      matchConfidence: 'unverified' as const,
+      unverifiedReason: 'conflicting-releases' as const,
+    }];
+    const mbData = makeMBData({ officialUrl: 'https://testartist.com' });
+
+    const merged = mergeWithMusicBrainzData(results, mbData);
+    expect(merged[0].matchConfidence).toBe('unverified');
+    expect(merged[0].unverifiedReason).toBe('conflicting-releases');
+  });
+
+  it('does not downgrade a claimed profile', () => {
+    const results = [{
+      ...makeArtistResult('Test Artist', [{ sourceId: 'bandcamp' as const, url: 'https://a.bandcamp.com' }]),
+      matchConfidence: 'claimed' as const,
+    }];
+    const mbData = makeMBData({ officialUrl: 'https://testartist.com' });
+
+    expect(mergeWithMusicBrainzData(results, mbData)[0].matchConfidence).toBe('claimed');
+  });
+
   it('adds official site when available', () => {
     const results = [makeArtistResult('Test Artist', [{ sourceId: 'bandcamp', url: 'https://a.bandcamp.com' }])];
     const mbData = makeMBData({ officialUrl: 'https://testartist.com' });
@@ -532,7 +584,11 @@ describe('buildMusicBrainzFallbackResult', () => {
     expect(result).not.toBeNull();
     expect(result!.name).toBe('Radiohead');
     expect(result!.type).toBe('artist');
-    expect(result!.matchConfidence).toBe('unverified');
+    // MusicBrainz named the artist and handed over their official site, Discogs
+    // and socials. Nothing is in doubt, so the card must not wear a warning — this
+    // is the only result on the page and there is nothing to compare it against.
+    expect(result!.matchConfidence).toBe('verified');
+    expect(result!.unverifiedReason).toBeUndefined();
     const ids = result!.platforms.map(p => p.sourceId);
     expect(ids.slice(0, 4)).toEqual(['officialsite', 'discogs', 'instagram', 'youtube']);
     expect(ids).toContain('bandcamp');
@@ -553,5 +609,27 @@ describe('buildMusicBrainzFallbackResult', () => {
     const ids = bare!.platforms.map(p => p.sourceId);
     expect(ids[0]).toBe('bandcamp');
     expect(ids).not.toContain('officialsite');
+  });
+
+  it('stays unverified when MusicBrainz only confirmed the name', () => {
+    // Nothing but search links: MB knows the name and nothing else, so there is
+    // genuinely no destination we can vouch for.
+    const bare = buildMusicBrainzFallbackResult({
+      ...mbData,
+      officialUrl: null,
+      discogsUrl: null,
+      socialLinks: [],
+    });
+    expect(bare!.matchConfidence).toBe('unverified');
+    expect(bare!.unverifiedReason).toBe('no-release-data');
+  });
+
+  it('is verified on socials alone', () => {
+    const socialsOnly = buildMusicBrainzFallbackResult({
+      ...mbData,
+      officialUrl: null,
+      discogsUrl: null,
+    });
+    expect(socialsOnly!.matchConfidence).toBe('verified');
   });
 });

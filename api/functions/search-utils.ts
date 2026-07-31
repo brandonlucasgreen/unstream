@@ -65,10 +65,27 @@ export interface AggregatedResult {
     latestRelease?: LatestRelease;
     allReleaseTitles?: string[]; // For disambiguation - all release titles (normalized)
   }[];
-  // Match confidence: 'verified' means releases match across platforms,
-  // 'unverified' means name-only match (no release data to compare)
-  // 'claimed' means artist has verified ownership of this profile
+  // Match confidence: 'verified' means we know who this is — releases match across
+  // platforms, a curated platform lists them, or MusicBrainz identified them (see
+  // musicBrainzConfirmed); 'unverified' means a name-only match we couldn't confirm;
+  // 'claimed' means the artist has verified ownership of this profile.
   matchConfidence?: 'verified' | 'unverified' | 'claimed';
+  // Why an 'unverified' result is unverified. These are different claims and the
+  // UI must not conflate them: 'conflicting-releases' means we compared this
+  // platform's releases against a verified set and they didn't match (there is
+  // always a sibling verified result), so it may be a different artist with the
+  // same name. 'no-release-data' means we had nothing to compare against at all
+  // — absence of evidence, not evidence of a mismatch, and often the only result
+  // on the page. Absent on results restored from the DB, which only persists the
+  // confidence itself; treat that like 'no-release-data'.
+  unverifiedReason?: 'conflicting-releases' | 'no-release-data';
+  // MusicBrainz matched this artist and supplied real destinations for them
+  // (official site, Discogs, Qobuz, socials). That confirms identity the same way
+  // a curated platform does, and more directly than release-title overlap, so it
+  // counts as verification on its own. Without it, artists MusicBrainz knows
+  // perfectly well — Nine Inch Nails, Viagra Boys — were labelled "Unverified"
+  // purely because nothing we could parse releases from had listed them.
+  musicBrainzConfirmed?: boolean;
   // Slug for claimed artist page (/a/{slug})
   claimedSlug?: string;
   // Set to true when this result was merged via a manual override — protects it from later splitting
@@ -853,9 +870,13 @@ export function splitSuspiciousPlatforms(aggregated: AggregatedResult[]): Aggreg
     const hasCurated = result.platforms.some(p => CURATED_PLATFORMS.has(p.sourceId));
     const suspicious = withoutReleases.filter(p => RELIABLE_RELEASE_PLATFORMS.has(p.sourceId));
 
-    // No platforms have releases
+    // No platforms have releases — nothing to compare, so nothing is in conflict.
+    // A curated platform or a MusicBrainz identity match vouches for the artist
+    // without needing release overlap.
+    const vouchedFor = hasCurated || result.musicBrainzConfirmed === true;
     if (withReleases.length === 0) {
-      result.matchConfidence = hasCurated ? 'verified' : 'unverified';
+      result.matchConfidence = vouchedFor ? 'verified' : 'unverified';
+      result.unverifiedReason = vouchedFor ? undefined : 'no-release-data';
       disambiguated.push(result);
       continue;
     }
@@ -910,6 +931,7 @@ export function splitSuspiciousPlatforms(aggregated: AggregatedResult[]): Aggreg
             imageUrl: result.imageUrl,
             platforms: [platform],
             matchConfidence: 'unverified',
+            unverifiedReason: 'conflicting-releases',
           });
         }
         continue;
@@ -918,12 +940,14 @@ export function splitSuspiciousPlatforms(aggregated: AggregatedResult[]): Aggreg
       // All suspicious platforms verified or kept due to no data
       result.platforms = [...withReleases, ...withoutReleases.filter(p => !RELIABLE_RELEASE_PLATFORMS.has(p.sourceId))];
       result.matchConfidence = 'verified';
+      result.unverifiedReason = undefined;
       disambiguated.push(result);
       continue;
     }
 
     // No suspicious platforms — keep as verified
     result.matchConfidence = 'verified';
+    result.unverifiedReason = undefined;
     disambiguated.push(result);
   }
 

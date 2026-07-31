@@ -1353,6 +1353,7 @@ async function attachNameOnlyPlatforms(
         type: 'artist',
         platforms: toAttach.map(p => ({ sourceId: p.sourceId as SourceId, url: p.url })),
         matchConfidence: 'unverified',
+        unverifiedReason: 'no-release-data',
       };
 
       // If we have Faircamp, fetch releases to seed the result
@@ -1362,6 +1363,7 @@ async function attachNameOnlyPlatforms(
           const fcPlatform = newResult.platforms.find(p => p.sourceId === 'faircamp');
           if (fcPlatform) fcPlatform.allReleaseTitles = titles;
           newResult.matchConfidence = 'verified';
+          newResult.unverifiedReason = undefined;
         }
       }
 
@@ -1435,6 +1437,7 @@ async function attachNameOnlyPlatforms(
           type: 'artist',
           platforms: toAttach.map(p => ({ sourceId: p.sourceId as SourceId, url: p.url })),
           matchConfidence: 'unverified',
+          unverifiedReason: 'no-release-data',
         };
         merged.push(newResult);
         console.log(`[Deferred Attach] Ambiguous "${displayName}" with no Faircamp data — created separate result with ${toAttach.map(p => p.sourceId).join(', ')}`);
@@ -1443,6 +1446,26 @@ async function attachNameOnlyPlatforms(
       }
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+/**
+ * Did MusicBrainz give us a rich answer for this artist — a confirmed name plus at
+ * least one real destination?
+ *
+ * A name-only hit isn't enough: the card it produces is nothing but search links,
+ * and calling that verified would overclaim. But once MB hands over an official
+ * site, a Discogs page, a Qobuz page or a social profile, it has told us who the
+ * artist is and where to find them, which is the question "verified" answers.
+ */
+function musicBrainzConfirmsIdentity(mbData: EnrichedMusicBrainzResult): boolean {
+  if (!mbData.artistName) return false;
+  return Boolean(
+    mbData.officialUrl ||
+    mbData.discogsUrl ||
+    mbData.qobuzUrl ||
+    (mbData.socialLinks && mbData.socialLinks.length > 0)
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -1528,6 +1551,11 @@ function applyEnrichmentToResults(
   if (bestMatchIndex === -1) return;
 
   const result = aggregated[bestMatchIndex];
+  // MB picked this result out of the same-name candidates and is about to attach
+  // the artist's real links to it — that is an identity match, not a guess.
+  if (musicBrainzConfirmsIdentity(mbData)) {
+    result.musicBrainzConfirmed = true;
+  }
   const newPlatforms = [...result.platforms];
 
   // Add official site if available and not already present
@@ -1816,12 +1844,18 @@ async function searchAllPlatforms(query: string, mode: SearchMode): Promise<{ re
         return aSearch - bSearch;
       });
 
+      // This card exists because MusicBrainz knows the artist and our platforms
+      // don't. When MB also handed over their real links, that is the verification
+      // — there are no releases to cross-check and nothing to cross-check against.
+      const mbConfirmed = musicBrainzConfirmsIdentity(mbData);
       const mbResult: AggregatedResult = {
         id: `mb-${mbNorm}`,
         name: mbData.artistName,
         type: 'artist',
         platforms: mbPlatforms,
-        matchConfidence: 'unverified',
+        matchConfidence: mbConfirmed ? 'verified' : 'unverified',
+        unverifiedReason: mbConfirmed ? undefined : 'no-release-data',
+        musicBrainzConfirmed: mbConfirmed,
         location: mbData.location,
         wikipediaSummary: mbData.wikipediaSummary || undefined,
         wikipediaUrl: mbData.wikipediaUrl || undefined,
