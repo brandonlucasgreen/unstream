@@ -2,7 +2,7 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --font-display: "Stack Sans Headline", system-ui, sans-serif;
+  --font-display: "Darker Grotesque", "Stack Sans Headline", system-ui, sans-serif;
   --font-body: "Stack Sans Headline", system-ui, sans-serif;
   --font-mono: ui-monospace, monospace;
 
@@ -141,6 +141,39 @@
     .skeleton::after { animation: none; opacity: 0.5; }
     .skeleton-fade-in { animation: none; }
     .eq-bars span { animation: none; transform: scaleY(0.6); }
+  }
+
+  /* One word of a heading picked out in the accents. A highlighter fill was the
+     first idea, but a translucent orange block over #0d0d0d just reads brown —
+     coloured type with a wavy rule under it survives both themes. */
+  .marker-word {
+    color: var(--color-accent-primary);
+    white-space: nowrap;
+    text-decoration: underline wavy var(--color-accent-secondary);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.16em;
+  }
+
+  /* Three-colour rule under a section heading, in the Unstream accents. Centred
+     on mobile and left-aligned from md up, to follow `text-center md:text-left`
+     on the headings it sits under. */
+  .heading-accent::after {
+    content: '';
+    display: block;
+    width: 3rem;
+    height: 4px;
+    margin: 0.6rem auto 0;
+    border-radius: 999px;
+    background: linear-gradient(
+      90deg,
+      var(--color-accent-primary) 0 33.33%,
+      var(--color-accent-secondary) 33.33% 66.66%,
+      var(--color-accent-tertiary) 66.66% 100%
+    );
+  }
+
+  @media (min-width: 768px) {
+    .heading-accent::after { margin-left: 0; }
   }
 
   .search-input {

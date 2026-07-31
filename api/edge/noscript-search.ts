@@ -139,7 +139,7 @@ function renderPage(query: string, results: SearchResult[], error?: string): str
   <meta name="robots" content="noindex">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Stack+Sans+Headline:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@300..900&family=Stack+Sans+Headline:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root { --bg: #0d0d0d; --bg2: #1a1a1a; --text: #f0f0f0; --muted: #999; --border: #2a2a2a; --accent: #ff6b35; --footer-border: #1a1a1a; }
     @media (prefers-color-scheme: light) {
@@ -147,6 +147,7 @@ function renderPage(query: string, results: SearchResult[], error?: string): str
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Stack Sans Headline', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; }
+    h1, h2 { font-family: 'Darker Grotesque', 'Stack Sans Headline', system-ui, sans-serif; }
     a { color: inherit; }
     .container { max-width: 640px; margin: 0 auto; padding: 0 24px; width: 100%; }
 

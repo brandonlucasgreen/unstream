@@ -6,6 +6,12 @@ export type NavItem = {
   label: string;
   /** Accent-coloured, for primary destinations (Dashboard, admin alerts). */
   emphasis?: boolean;
+  /**
+   * Render as a filled button in the desktop header. The drawer ignores this —
+   * every row there is already a full-width tap target in the primary text
+   * colour, so a button inside the list would only add noise.
+   */
+  button?: boolean;
 };
 
 /** A labelled set of links — a dropdown on desktop, an indented block here. */
