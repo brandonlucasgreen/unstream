@@ -376,6 +376,88 @@ describe('resolution-time checks', () => {
   });
 });
 
+describe('second-hop album link is confined to the host we landed on', () => {
+  // safeFetch asks "is this target safe to fetch", not "is it allowlisted or stored for this
+  // artist" the way mayFetch does for the entry URL. So without a host check, any absolute
+  // href appearing in fetched markup becomes a URL this endpoint will request — a narrower
+  // trust boundary than the entry point's, and a residual "fetch an arbitrary third-party
+  // URL on our behalf" primitive even though internal targets stay blocked.
+  const gridWith = (href: string) =>
+    `<html><body><li class="music-grid-item"><a href="${href}"><p class="title">A Release</p></a></li></body></html>`;
+
+  it('follows a root-relative album link, which is what Bandcamp actually emits', async () => {
+    mocks.fetch
+      .mockResolvedValueOnce(
+        res(200, { body: gridWith('/album/real-release'), url: 'https://someone.bandcamp.com/music' })
+      )
+      .mockResolvedValue(res(200, { body: '"datePublished": "30 May 2025 00:00:00 GMT"' }));
+
+    await post({ artistName: 'Someone', platforms: { bandcamp: 'https://someone.bandcamp.com' } });
+
+    expect(String(mocks.fetch.mock.calls[1][0])).toBe('https://someone.bandcamp.com/album/real-release');
+  });
+
+  it('refuses an absolute cross-host album link embedded in the fetched page', async () => {
+    mocks.fetch.mockResolvedValueOnce(
+      res(200, {
+        body: gridWith('https://attacker.example.com/expensive-endpoint'),
+        url: 'https://someone.bandcamp.com/music',
+      })
+    );
+
+    const r = await post({
+      artistName: 'Someone',
+      platforms: { bandcamp: 'https://someone.bandcamp.com' },
+    });
+
+    expect(r.statusCode).toBe(200);
+    expect(JSON.parse(r.body).release).toBeNull();
+    expect(mocks.fetch).toHaveBeenCalledTimes(1); // second hop never issued
+  });
+
+  it('refuses a protocol-relative cross-host link', async () => {
+    mocks.fetch.mockResolvedValueOnce(
+      res(200, { body: gridWith('//attacker.example.com/x'), url: 'https://someone.bandcamp.com/music' })
+    );
+
+    await post({ artistName: 'Someone', platforms: { bandcamp: 'https://someone.bandcamp.com' } });
+
+    expect(mocks.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  // The case the host check has to keep working: after a Bandcamp Pro custom-domain
+  // redirect, same-origin means the custom domain, not *.bandcamp.com.
+  it('allows a same-host link on a custom domain reached via redirect', async () => {
+    mocks.fetch
+      .mockResolvedValueOnce(res(301, { location: 'https://music.sufjan.com/music' }))
+      .mockResolvedValueOnce(
+        res(200, { body: gridWith('/album/javelin'), url: 'https://music.sufjan.com/music' })
+      )
+      .mockResolvedValue(res(200, { body: '"datePublished": "30 May 2025 00:00:00 GMT"' }));
+
+    await post({ artistName: 'Sufjan Stevens', platforms: { bandcamp: 'https://sufjanstevens.bandcamp.com' } });
+
+    expect(String(mocks.fetch.mock.calls[2][0])).toBe('https://music.sufjan.com/album/javelin');
+  });
+
+  it('refuses a link back to bandcamp.com once we have landed on a custom domain', async () => {
+    // Same-host, not same-platform: after the redirect the trusted origin is the custom
+    // domain, so a link elsewhere is out of scope even if it looks like Bandcamp.
+    mocks.fetch
+      .mockResolvedValueOnce(res(301, { location: 'https://music.sufjan.com/music' }))
+      .mockResolvedValueOnce(
+        res(200, {
+          body: gridWith('https://someoneelse.bandcamp.com/album/x'),
+          url: 'https://music.sufjan.com/music',
+        })
+      );
+
+    await post({ artistName: 'Sufjan Stevens', platforms: { bandcamp: 'https://sufjanstevens.bandcamp.com' } });
+
+    expect(mocks.fetch).toHaveBeenCalledTimes(2);
+  });
+});
+
 describe('rate limiting', () => {
   it('uses the lenient tier, because clients loop once per saved artist', async () => {
     // A strict (10/min) tier would silently break release alerts for every artist past the

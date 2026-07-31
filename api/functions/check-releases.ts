@@ -76,8 +76,10 @@ async function safeFetch(url: string, timeoutMs: number = 5000): Promise<Respons
 
     if (response.status < 300 || response.status >= 400) return response;
 
+    // A 3xx with no Location has nowhere to go. Returning it as-is is deliberate rather
+    // than unhandled: callers check `.ok`, which is false for a 3xx, so it fails closed.
     const location = response.headers.get('location');
-    if (!location) return response; // 3xx without a target — nothing to follow
+    if (!location) return response;
     current = new URL(location, current).toString();
   }
 
@@ -209,10 +211,31 @@ async function checkBandcamp(artistUrl: string): Promise<ReleaseResult | null> {
 
     if (!href || !title) return null;
 
-    // Build full URL. `href` comes out of fetched HTML, so it is untrusted input — it is
-    // resolved against the page we actually landed on (which may be a custom domain after
-    // a redirect) and then re-validated by safeFetch before the second request.
-    const fullUrl = href.startsWith('http') ? href : new URL(href, response.url || baseUrl).toString();
+    // `href` comes out of fetched HTML, so it is untrusted input. Resolve it against the
+    // page we actually landed on — which may be a custom domain after a redirect — and then
+    // confine it to that same host.
+    //
+    // The host check matters because safeFetch only asks "is this target safe to fetch",
+    // not "is this target allowlisted or stored for this artist" the way mayFetch does for
+    // the entry URL. Without it, any absolute href appearing in fetched markup becomes a
+    // URL this endpoint will request, which is a narrower trust boundary than the one
+    // established at the entry point and leaves a "fetch an arbitrary third-party URL on
+    // our behalf" primitive. Bandcamp's own templates always link same-origin (verified
+    // against a live /music page: every grid href is root-relative), so this costs nothing
+    // real and still supports the custom-domain redirect this function is built around.
+    const landedUrl = response.url || musicUrl;
+    let fullUrl: string;
+    try {
+      fullUrl = new URL(href, landedUrl).toString();
+      if (new URL(fullUrl).host !== new URL(landedUrl).host) {
+        console.warn(
+          `[check-releases] refused cross-host album link: ${safeHostname(fullUrl)} from ${safeHostname(landedUrl)}`
+        );
+        return null;
+      }
+    } catch {
+      return null;
+    }
 
     // Fetch the album page to get release date
     const albumResponse = await safeFetch(fullUrl);
