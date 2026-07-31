@@ -1,5 +1,5 @@
 import type { MusicBrainzEnrichmentResponse, PlatformResult, SocialLink, SocialPlatform } from '../shared-types';
-import { delay } from '../shared-utils';
+import { delay, musicBrainzArtistQuery } from '../shared-utils';
 import { fetchDiscogsSocialLinks, fetchOfficialSiteSocialLinks, mergeSocialLinks, parseSocialUrl } from '../social-links';
 
 const USER_AGENT = 'Unstream/1.0 (https://github.com/unstream - ethical music finder)';
@@ -12,7 +12,7 @@ export async function searchMusicBrainz(query: string): Promise<PlatformResult[]
   const results: PlatformResult[] = [];
 
   try {
-    const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=artist:${encodeURIComponent(query)}&fmt=json&limit=1`;
+    const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=${encodeURIComponent(musicBrainzArtistQuery(query))}&fmt=json&limit=1`;
 
     const response = await globalThis.fetch(searchUrl, {
       headers: { 'User-Agent': USER_AGENT },
@@ -130,7 +130,7 @@ export async function searchMusicBrainzEnrichment(query: string): Promise<MusicB
   };
 
   try {
-    const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=artist:${encodeURIComponent(query)}&fmt=json&limit=1`;
+    const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=${encodeURIComponent(musicBrainzArtistQuery(query))}&fmt=json&limit=1`;
 
     const response = await globalThis.fetch(searchUrl, {
       headers: { 'User-Agent': USER_AGENT },

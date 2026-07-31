@@ -366,6 +366,34 @@ export function normalizeSearchQuery(query: string): string {
   return normalizeAccents(query);
 }
 
+/**
+ * Build the `query` value for a MusicBrainz artist search: a quoted Lucene phrase.
+ *
+ * The quotes are load-bearing. MusicBrainz is Lucene-backed, so an unquoted
+ * `artist:viagra boys` parses as `artist:viagra` OR a bare `boys` — and the
+ * loose token drags in whichever popular artist matches it best. Measured
+ * against the live API on 2026-07-31:
+ *
+ *   artist:viagra boys     -> "The Beach Boys"  (score 100, wrong artist)
+ *   artist:"viagra boys"   -> "Viagra Boys"     (score 100, right artist)
+ *
+ * The wrong hit is then correctly rejected by the name-similarity guards
+ * downstream, so the whole artist silently loses enrichment — official site,
+ * socials, Discogs, location, and Qobuz, which MB is now the only source of.
+ * On a 20-artist sample from data/artists-manifest.json, 4 got the wrong top
+ * hit unquoted and all 4 were fixed by quoting; 543 of ~790 catalog artists
+ * have multi-word names.
+ *
+ * Embedded double quotes and backslashes would terminate or escape the phrase,
+ * so they are stripped rather than escaped — no artist name needs them, and a
+ * stripped character costs at most a slightly looser match, while a broken
+ * phrase costs the whole query.
+ */
+export function musicBrainzArtistQuery(query: string): string {
+  const phrase = query.replace(/["\\]/g, ' ').replace(/\s+/g, ' ').trim();
+  return `artist:"${phrase}"`;
+}
+
 // ---------------------------------------------------------------------------
 // Name matching
 // ---------------------------------------------------------------------------

@@ -6,7 +6,7 @@ import { cacheGetOrFetch, artistCacheKey } from './cache';
 import { persistEnrichment, getLinkSuppressions } from './db';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery, isUrlHostnameAllowed } from './middleware';
-import { normalizeAccents, normalizeForComparison, normalizeSearchQuery, isUrlSuppressed, type LinkSuppression } from './search-utils';
+import { normalizeAccents, normalizeForComparison, normalizeSearchQuery, musicBrainzArtistQuery, isUrlSuppressed, type LinkSuppression } from './search-utils';
 
 // Import all shared enrichment functions and types
 import {
@@ -78,7 +78,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
 
   try {
     // Search for artist
-    const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=artist:${encodeURIComponent(query)}&fmt=json&limit=1`;
+    const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=${encodeURIComponent(musicBrainzArtistQuery(query))}&fmt=json&limit=1`;
 
     const response = await globalThis.fetch(searchUrl, {
       headers: {
