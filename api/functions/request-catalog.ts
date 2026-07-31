@@ -32,11 +32,18 @@ export async function requestArtistCatalog(
   const ids = [...new Set(artistIds.filter(Boolean))].slice(0, MAX_ARTISTS_PER_REQUEST);
   if (ids.length === 0) return;
 
-  const secret = process.env.INTERNAL_TASK_SECRET;
-  const siteUrl = process.env.URL || process.env.DEPLOY_PRIME_URL;
+  const secret = process.env.INTERNAL_FUNCTION_SECRET;
+
+  // DEPLOY_PRIME_URL first, not URL. On Netlify, URL is the *production* address even during
+  // a deploy preview, so preferring it would make a preview invoke the production function —
+  // running production code for a preview's traffic and spending the shared hourly crawl
+  // budget. DEPLOY_PRIME_URL is the current deploy (preview, branch, or production), which is
+  // what we want in every context.
+  const siteUrl = process.env.DEPLOY_PRIME_URL || process.env.URL;
+
   if (!secret || !siteUrl) {
     // Not an error worth surfacing: without configuration the feature is simply off.
-    console.log('[catalog] not requested — INTERNAL_TASK_SECRET or URL not configured');
+    console.log('[catalog] not requested — INTERNAL_FUNCTION_SECRET or site URL not configured');
     return;
   }
 

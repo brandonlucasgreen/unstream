@@ -29,10 +29,15 @@ const MAX_ARTISTS_PER_RUN = 25;
 const DELAY_BETWEEN_ARTISTS_MS = 1_000;
 
 function isAuthorized(header: string | undefined): boolean {
-  const secret = process.env.INTERNAL_TASK_SECRET;
+  // Reuses the secret this repo already has for internal function-to-function calls
+  // (resolve-url, search-sources, and both v1 wrappers). A second near-identically-named
+  // variable would be a footgun, and the blast radius of this one is small: cooldown and
+  // hourly caps are enforced inside this function regardless of who calls it, and only
+  // artists already in our database can be named.
+  const secret = process.env.INTERNAL_FUNCTION_SECRET;
   // No secret configured means the endpoint is closed, not open.
   if (!secret) {
-    console.error('[catalog] INTERNAL_TASK_SECRET is not set — refusing all requests');
+    console.error('[catalog] INTERNAL_FUNCTION_SECRET is not set — refusing all requests');
     return false;
   }
   if (!header?.startsWith('Bearer ')) return false;
