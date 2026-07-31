@@ -597,6 +597,26 @@ export async function fetchMusicBrainzData(query: string): Promise<import('../ty
   }
 }
 
+/**
+ * Did MusicBrainz give us a rich answer — a confirmed name plus at least one real
+ * destination? If so the artist's identity is settled and the result is verified,
+ * regardless of whether any platform we can parse releases from has listed them.
+ * A name-only hit is not enough; that card is nothing but search links.
+ *
+ * Mirrors musicBrainzConfirmsIdentity in api/functions/search-sources.ts, minus
+ * the Qobuz check — the client gets Qobuz from platformUrls via pickQobuzUrl
+ * rather than a qobuzUrl field, and a Qobuz relation with no official site, no
+ * Discogs and no socials isn't a case worth mirroring the plumbing for.
+ */
+function musicBrainzConfirmsIdentity(mbData: import('../types').MusicBrainzData): boolean {
+  if (!mbData.artistName) return false;
+  return Boolean(
+    mbData.officialUrl ||
+    mbData.discogsUrl ||
+    (mbData.socialLinks && mbData.socialLinks.length > 0)
+  );
+}
+
 // Build a result card from MusicBrainz data alone, for searches where no
 // platform returned anything. Mirrors the server-side Phase 2.2 fallback in
 // api/functions/search-sources.ts: a prominent artist who isn't on any indie
@@ -630,12 +650,20 @@ export function buildMusicBrainzFallbackResult(
     { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
   );
 
+  // This card is built only when no platform returned anything, so it is always
+  // the only result on the page — there is nothing to cross-check it against and
+  // nothing for it to conflict with. MusicBrainz naming the artist and handing
+  // over their real links is the verification.
+  const confirmed = musicBrainzConfirmsIdentity(mbData);
+
   return {
     id: `mb-${normalizeForComparison(name)}`,
     name,
     type: 'artist',
     platforms,
-    matchConfidence: 'unverified',
+    matchConfidence: confirmed ? 'verified' : 'unverified',
+    unverifiedReason: confirmed ? undefined : 'no-release-data',
+    musicBrainzConfirmed: confirmed,
     location: mbData.location,
     wikipediaSummary: mbData.wikipediaSummary || undefined,
     wikipediaUrl: mbData.wikipediaUrl || undefined,
@@ -840,9 +868,26 @@ export function mergeWithMusicBrainzData(
       return 0;
     });
 
+    // MusicBrainz picked this result out of the same-name candidates and just
+    // attached the artist's real links to it. That settles identity, so a card
+    // still labelled "unverified" only for want of parseable releases is now
+    // verified. A claimed profile already outranks both and is left alone.
+    // A card split off for conflicting releases keeps its warning: that split came
+    // from comparing actual release titles, and a name-level match is not grounds
+    // to throw that evidence away.
+    const confirmed = musicBrainzConfirmsIdentity(mbData);
+    const upgradedConfidence = confirmed &&
+      result.matchConfidence !== 'claimed' &&
+      result.unverifiedReason !== 'conflicting-releases'
+      ? ('verified' as const)
+      : result.matchConfidence;
+
     return {
       ...result,
       platforms: newPlatforms,
+      matchConfidence: upgradedConfidence,
+      musicBrainzConfirmed: confirmed || result.musicBrainzConfirmed,
+      unverifiedReason: upgradedConfidence === 'unverified' ? result.unverifiedReason : undefined,
       wikipediaSummary: mbData.wikipediaSummary || undefined,
       wikipediaUrl: mbData.wikipediaUrl || undefined,
       location: mbData.location || result.location,

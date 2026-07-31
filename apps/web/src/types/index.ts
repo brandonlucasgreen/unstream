@@ -77,10 +77,21 @@ export interface SearchResult {
   type: 'artist' | 'album' | 'track';
   imageUrl?: string;
   platforms: PlatformLink[];
-  // Match confidence: 'verified' means releases match across platforms,
-  // 'unverified' means name-only match (no release data to compare)
-  // 'claimed' means artist has verified ownership of this profile
+  // Match confidence: 'verified' means we know who this is — releases match across
+  // platforms, a curated platform lists them, or MusicBrainz identified them (see
+  // musicBrainzConfirmed); 'unverified' means a name-only match we couldn't confirm;
+  // 'claimed' means the artist has verified ownership of this profile.
   matchConfidence?: 'verified' | 'unverified' | 'claimed';
+  // Why an 'unverified' result is unverified. 'conflicting-releases' means this
+  // platform's releases didn't match a verified sibling result — it may be a
+  // different artist with the same name, and that warrants a warning.
+  // 'no-release-data' means we had nothing to compare against, which is not a
+  // warning about the result. Absent for results restored from the DB; treat
+  // that like 'no-release-data'. Mirrors api/functions/search-utils.ts.
+  unverifiedReason?: 'conflicting-releases' | 'no-release-data';
+  // MusicBrainz matched this artist and supplied real destinations for them.
+  // Counts as verification on its own — see api/functions/search-utils.ts.
+  musicBrainzConfirmed?: boolean;
   // Slug for claimed artist page (/a/{slug})
   claimedSlug?: string;
   // Wikipedia bio summary from MusicBrainz enrichment
