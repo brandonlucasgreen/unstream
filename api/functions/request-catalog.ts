@@ -32,6 +32,17 @@ export async function requestArtistCatalog(
   const ids = [...new Set(artistIds.filter(Boolean))].slice(0, MAX_ARTISTS_PER_REQUEST);
   if (ids.length === 0) return;
 
+  // Production only. Deploy previews and branch deploys run against the *production*
+  // Supabase, so cataloging from one would write real releases and spend the real hourly
+  // crawl budget on behalf of traffic that isn't real. Netlify sets CONTEXT to
+  // 'production' | 'deploy-preview' | 'branch-deploy' | 'dev'; it is undefined in tests and
+  // under the plain Vite dev server, so a strict equality check also keeps local runs from
+  // touching production data. (To exercise this locally, set CONTEXT=production knowingly.)
+  if (process.env.CONTEXT !== 'production') {
+    console.log(`[catalog] not requested — context is ${process.env.CONTEXT ?? 'unset'}, not production`);
+    return;
+  }
+
   const secret = process.env.INTERNAL_FUNCTION_SECRET;
 
   // DEPLOY_PRIME_URL first, not URL. On Netlify, URL is the *production* address even during

@@ -62,6 +62,15 @@ export async function handler(event: {
     return { statusCode: 401, body: '' };
   }
 
+  // Production only, checked here as well as in request-catalog.ts. The caller-side gate stops
+  // a preview from asking; this one means the guarantee holds no matter who asks, since this
+  // function is what actually writes to the production database. Cheap, and the alternative is
+  // a rule that's true only as long as every future caller remembers it.
+  if (process.env.CONTEXT !== 'production') {
+    console.log(`[catalog] refusing — context is ${process.env.CONTEXT ?? 'unset'}, not production`);
+    return { statusCode: 403, body: JSON.stringify({ skipped: 'non-production context' }) };
+  }
+
   let body: { artistIds?: unknown; trigger?: unknown };
   try {
     body = JSON.parse(event.body || '{}');
