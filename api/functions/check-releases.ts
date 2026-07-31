@@ -1,14 +1,8 @@
 import { parse } from 'node-html-parser';
-import { lookup } from 'dns/promises';
-import { isPrivateIpAddress, isSafePublicHostname, isUrlHostnameAllowed } from './middleware';
+import { isSafePublicHostname, isUrlHostnameAllowed } from './middleware';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { isStoredArtistLink } from './db';
-
-const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36';
-
-// Bandcamp Pro artists point custom domains at their store, so a single request can
-// legitimately redirect off *.bandcamp.com. Follow a few hops, validating each one.
-const MAX_REDIRECTS = 5;
+import { safeFetch, safeHostname } from './safe-fetch';
 
 interface PlatformUrls {
   bandcamp?: string;
@@ -32,103 +26,6 @@ interface CheckReleasesResponse {
   artistName: string;
   release: ReleaseResult | null;
   error?: string;
-}
-
-/**
- * Fetch with a timeout, validating **every** hop against `isSafePublicHostname`.
- *
- * Node's fetch follows redirects transparently, which means a check on the URL we were
- * given says nothing about the URL we actually retrieve. That matters here for two
- * reasons: this endpoint fetches caller-supplied URLs, and it then follows a link found
- * *inside* the page it fetched. Redirects are resolved manually so each destination is
- * re-validated before another request goes out.
- *
- * Returns null when a target is refused or the redirect chain is too long — callers treat
- * that the same as an unreachable platform.
- */
-async function safeFetch(url: string, timeoutMs: number = 5000): Promise<Response | null> {
-  let current = url;
-
-  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
-    if (!isSafePublicHostname(current)) {
-      // Hostname only — the full URL is caller-supplied and shouldn't land in logs.
-      console.warn(`[check-releases] refused unsafe fetch target: ${safeHostname(current)}`);
-      return null;
-    }
-
-    if (!(await resolvesToPublicAddress(safeHostname(current)))) {
-      console.warn(`[check-releases] refused target resolving to private space: ${safeHostname(current)}`);
-      return null;
-    }
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-    let response: Response;
-    try {
-      response = await fetch(current, {
-        headers: { 'User-Agent': USER_AGENT },
-        redirect: 'manual',
-        signal: controller.signal,
-      });
-    } finally {
-      clearTimeout(timeoutId);
-    }
-
-    if (response.status < 300 || response.status >= 400) return response;
-
-    // A 3xx with no Location has nowhere to go. Returning it as-is is deliberate rather
-    // than unhandled: callers check `.ok`, which is false for a 3xx, so it fails closed.
-    const location = response.headers.get('location');
-    if (!location) return response;
-    current = new URL(location, current).toString();
-  }
-
-  console.warn(`[check-releases] too many redirects from ${safeHostname(url)}`);
-  return null;
-}
-
-function safeHostname(urlString: string): string {
-  try {
-    return new URL(urlString).hostname;
-  } catch {
-    return '<unparseable>';
-  }
-}
-
-/**
- * Does every DNS answer for this hostname point at a public address?
- *
- * String checks on a hostname are not enough, and this is the gap that made them
- * insufficient: `169-254-169-254.nip.io` is a perfectly ordinary public name that resolves
- * to 169.254.169.254 — the cloud metadata endpoint. Wildcard-DNS services hand those out
- * for free, and a Bandcamp Pro artist can point a custom domain anywhere, so an
- * allowlisted `*.bandcamp.com` input can redirect to a name that resolves into private
- * space. Nothing textual catches that; only resolution does.
- *
- * **All** answers must be public, so a dual-stack host can't smuggle a private AAAA past a
- * public A record. Any resolver failure or NXDOMAIN returns false — for a security
- * predicate, "couldn't check" has to mean "refuse".
- *
- * Residual risk, stated precisely rather than hand-waved: Node's `fetch` performs its own
- * resolution when it connects, so a hostname whose DNS answers *change* between this check
- * and that connect — rotating records or a very low TTL — can still slip through. Closing
- * that needs the connection pinned to the address we validated, which means a custom
- * undici dispatcher; `undici` isn't a declared dependency here (only transitively
- * available), so pinning is deliberately left as a follow-up rather than built on a package
- * that could vanish on any install. What this does close is the one-shot case, which is
- * what was actually reachable. Note also that exfiltration is separately limited: the
- * parsers only extract an RSS `<item><title>` or a Bandcamp `.music-grid-item`, so a
- * typical internal endpoint yields nothing even when reached.
- */
-async function resolvesToPublicAddress(hostname: string): Promise<boolean> {
-  if (!hostname || hostname === '<unparseable>') return false;
-  try {
-    const answers = await lookup(hostname, { all: true, verbatim: true });
-    if (answers.length === 0) return false;
-    return answers.every(a => !isPrivateIpAddress(a.address));
-  } catch {
-    return false;
-  }
 }
 
 /**
