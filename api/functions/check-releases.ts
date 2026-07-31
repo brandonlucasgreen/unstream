@@ -1,5 +1,6 @@
 import { parse } from 'node-html-parser';
-import { isSafePublicHostname, isUrlHostnameAllowed } from './middleware';
+import { lookup } from 'dns/promises';
+import { isPrivateIpAddress, isSafePublicHostname, isUrlHostnameAllowed } from './middleware';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { isStoredArtistLink } from './db';
 
@@ -55,6 +56,11 @@ async function safeFetch(url: string, timeoutMs: number = 5000): Promise<Respons
       return null;
     }
 
+    if (!(await resolvesToPublicAddress(safeHostname(current)))) {
+      console.warn(`[check-releases] refused target resolving to private space: ${safeHostname(current)}`);
+      return null;
+    }
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     let response: Response;
@@ -84,6 +90,42 @@ function safeHostname(urlString: string): string {
     return new URL(urlString).hostname;
   } catch {
     return '<unparseable>';
+  }
+}
+
+/**
+ * Does every DNS answer for this hostname point at a public address?
+ *
+ * String checks on a hostname are not enough, and this is the gap that made them
+ * insufficient: `169-254-169-254.nip.io` is a perfectly ordinary public name that resolves
+ * to 169.254.169.254 — the cloud metadata endpoint. Wildcard-DNS services hand those out
+ * for free, and a Bandcamp Pro artist can point a custom domain anywhere, so an
+ * allowlisted `*.bandcamp.com` input can redirect to a name that resolves into private
+ * space. Nothing textual catches that; only resolution does.
+ *
+ * **All** answers must be public, so a dual-stack host can't smuggle a private AAAA past a
+ * public A record. Any resolver failure or NXDOMAIN returns false — for a security
+ * predicate, "couldn't check" has to mean "refuse".
+ *
+ * Residual risk, stated precisely rather than hand-waved: Node's `fetch` performs its own
+ * resolution when it connects, so a hostname whose DNS answers *change* between this check
+ * and that connect — rotating records or a very low TTL — can still slip through. Closing
+ * that needs the connection pinned to the address we validated, which means a custom
+ * undici dispatcher; `undici` isn't a declared dependency here (only transitively
+ * available), so pinning is deliberately left as a follow-up rather than built on a package
+ * that could vanish on any install. What this does close is the one-shot case, which is
+ * what was actually reachable. Note also that exfiltration is separately limited: the
+ * parsers only extract an RSS `<item><title>` or a Bandcamp `.music-grid-item`, so a
+ * typical internal endpoint yields nothing even when reached.
+ */
+async function resolvesToPublicAddress(hostname: string): Promise<boolean> {
+  if (!hostname || hostname === '<unparseable>') return false;
+  try {
+    const answers = await lookup(hostname, { all: true, verbatim: true });
+    if (answers.length === 0) return false;
+    return answers.every(a => !isPrivateIpAddress(a.address));
+  } catch {
+    return false;
   }
 }
 

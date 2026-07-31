@@ -15,7 +15,12 @@ const mocks = vi.hoisted(() => ({
   getClientIp: vi.fn(() => '1.2.3.4'),
   isStoredArtistLink: vi.fn(),
   fetch: vi.fn(),
+  lookup: vi.fn(),
 }));
+
+// DNS is mocked so the suite is hermetic and so we can express the case that motivated
+// resolution-time checks at all: a hostname that looks public and resolves private.
+vi.mock('dns/promises', () => ({ lookup: mocks.lookup }));
 
 // Rate limiting and the DB are the two side-effecting dependencies. Redis is never touched
 // because checkRateLimit itself is mocked — CI has real Upstash credentials, so a test that
@@ -30,7 +35,7 @@ vi.mock('../db', () => ({
 }));
 
 import { handler } from '../check-releases';
-import { isSafePublicHostname, isUrlHostnameAllowed } from '../middleware';
+import { isPrivateIpAddress, isSafePublicHostname, isUrlHostnameAllowed } from '../middleware';
 
 function post(body: unknown) {
   return handler({
@@ -58,6 +63,8 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.checkRateLimit.mockResolvedValue({ limited: false });
   mocks.isStoredArtistLink.mockResolvedValue(false);
+  // Default: everything resolves to an ordinary public address.
+  mocks.lookup.mockResolvedValue([{ address: '93.184.216.34', family: 4 }]);
   vi.stubGlobal('fetch', mocks.fetch);
 });
 
@@ -232,6 +239,140 @@ describe('redirect handling', () => {
     await post({ artistName: 'Someone', platforms: { bandcamp: 'https://someone.bandcamp.com' } });
 
     expect(mocks.fetch.mock.calls[0][1]).toMatchObject({ redirect: 'manual' });
+  });
+});
+
+describe('isPrivateIpAddress', () => {
+  it.each([
+    ['169.254.169.254', 'AWS/Azure/GCP metadata'],
+    ['127.0.0.1', 'loopback'],
+    ['127.99.99.99', 'loopback range'],
+    ['10.1.2.3', 'private class A'],
+    ['172.16.0.1', 'private class B'],
+    ['172.31.255.255', 'private class B upper bound'],
+    ['192.168.1.1', 'private class C'],
+    ['192.0.0.1', 'IETF protocol assignments'],
+    ['100.64.0.1', 'CGNAT'],
+    ['0.0.0.0', 'this network'],
+    ['224.0.0.1', 'multicast'],
+    ['255.255.255.255', 'broadcast'],
+    ['::1', 'IPv6 loopback'],
+    ['::', 'IPv6 unspecified'],
+    ['fd00::1', 'IPv6 unique-local'],
+    ['fc00::1', 'IPv6 unique-local'],
+    ['fe80::1', 'IPv6 link-local'],
+    ['::ffff:127.0.0.1', 'IPv4-mapped loopback, dotted'],
+    ['::ffff:7f00:1', 'IPv4-mapped loopback, hex groups (how Node normalizes it)'],
+    ['::ffff:a9fe:a9fe', 'IPv4-mapped metadata address'],
+    ['not-an-address', 'unparseable'],
+    ['', 'empty'],
+  ])('treats %s as private (%s)', addr => {
+    expect(isPrivateIpAddress(addr)).toBe(true);
+  });
+
+  it.each([
+    ['93.184.216.34'],
+    ['1.1.1.1'],
+    ['172.15.0.1'],   // just below the private class B range
+    ['172.32.0.1'],   // just above it
+    ['100.63.0.1'],   // just below CGNAT
+    ['100.128.0.1'],  // just above CGNAT
+    ['2606:4700::1111'],
+    ['::ffff:93.184.216.34'],
+  ])('treats %s as public', addr => {
+    expect(isPrivateIpAddress(addr)).toBe(false);
+  });
+});
+
+describe('resolution-time checks', () => {
+  // The gap that string checks could never close, and the reason the docstring on
+  // isSafePublicHostname now says so explicitly: a name that is textually ordinary and
+  // resolves to the metadata address. Wildcard DNS services hand these out for free.
+  it('refuses a public hostname that resolves to the metadata address', async () => {
+    mocks.isStoredArtistLink.mockResolvedValue(true);
+    mocks.lookup.mockResolvedValue([{ address: '169.254.169.254', family: 4 }]);
+
+    const r = await post({
+      artistName: 'Someone',
+      platforms: { faircamp: 'https://169-254-169-254.nip.io/feed.rss' },
+    });
+
+    expect(r.statusCode).toBe(200);
+    expect(JSON.parse(r.body).release).toBeNull();
+    expect(mocks.fetch).not.toHaveBeenCalled();
+  });
+
+  // The exact path the review flagged: input is allowlisted, so no stored link is needed —
+  // a Bandcamp Pro custom domain the attacker controls DNS for does the rest.
+  it('refuses a redirect to a host that resolves into private space', async () => {
+    mocks.lookup.mockImplementation(async (host: string) =>
+      host === 'someone.bandcamp.com'
+        ? [{ address: '93.184.216.34', family: 4 }]
+        : [{ address: '169.254.169.254', family: 4 }]
+    );
+    mocks.fetch.mockResolvedValueOnce(res(301, { location: 'https://evil.example.com/music' }));
+
+    const r = await post({
+      artistName: 'Someone',
+      platforms: { bandcamp: 'https://someone.bandcamp.com' },
+    });
+
+    expect(r.statusCode).toBe(200);
+    expect(JSON.parse(r.body).release).toBeNull();
+    expect(mocks.fetch).toHaveBeenCalledTimes(1); // the redirect was never followed
+  });
+
+  it('refuses a dual-stack host smuggling a private AAAA behind a public A', async () => {
+    mocks.lookup.mockResolvedValue([
+      { address: '93.184.216.34', family: 4 },
+      { address: 'fd00::1', family: 6 },
+    ]);
+
+    const r = await post({
+      artistName: 'Someone',
+      platforms: { bandcamp: 'https://someone.bandcamp.com' },
+    });
+
+    expect(JSON.parse(r.body).release).toBeNull();
+    expect(mocks.fetch).not.toHaveBeenCalled();
+  });
+
+  it('refuses when resolution fails rather than assuming the target is fine', async () => {
+    mocks.lookup.mockRejectedValue(Object.assign(new Error('ENOTFOUND'), { code: 'ENOTFOUND' }));
+
+    await post({ artistName: 'Someone', platforms: { bandcamp: 'https://someone.bandcamp.com' } });
+
+    expect(mocks.fetch).not.toHaveBeenCalled();
+  });
+
+  it('refuses when resolution returns nothing', async () => {
+    mocks.lookup.mockResolvedValue([]);
+
+    await post({ artistName: 'Someone', platforms: { bandcamp: 'https://someone.bandcamp.com' } });
+
+    expect(mocks.fetch).not.toHaveBeenCalled();
+  });
+
+  it('allows an ordinary public host', async () => {
+    mocks.lookup.mockResolvedValue([{ address: '93.184.216.34', family: 4 }]);
+    mocks.fetch.mockResolvedValue(res(200, { body: '<html></html>' }));
+
+    await post({ artistName: 'Someone', platforms: { bandcamp: 'https://someone.bandcamp.com' } });
+
+    expect(mocks.fetch).toHaveBeenCalled();
+  });
+
+  it('checks each hop, not just the first', async () => {
+    mocks.lookup.mockResolvedValue([{ address: '93.184.216.34', family: 4 }]);
+    mocks.fetch
+      .mockResolvedValueOnce(res(301, { location: 'https://music.sufjan.com/music' }))
+      .mockResolvedValue(res(200, { body: '<html></html>', url: 'https://music.sufjan.com/music' }));
+
+    await post({ artistName: 'Sufjan Stevens', platforms: { bandcamp: 'https://sufjanstevens.bandcamp.com' } });
+
+    const resolved = mocks.lookup.mock.calls.map(c => c[0]);
+    expect(resolved).toContain('sufjanstevens.bandcamp.com');
+    expect(resolved).toContain('music.sufjan.com');
   });
 });
 

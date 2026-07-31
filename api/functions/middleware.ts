@@ -351,9 +351,13 @@ export const ALLOWED_OUTBOUND_HOSTNAMES = new Set([
  * music.sufjan.com), so an allowlist check on the *input* URL says nothing about where
  * the request actually ends up. Validate every hop with this.
  *
- * Caveat this does NOT cover: a public hostname whose DNS resolves to a private address
- * (DNS rebinding). Defending against that needs resolution-time checks, which Node's
- * fetch doesn't expose. This closes the literal-address and known-metadata-name paths.
+ * This is a **string** check and cannot be the whole story. A textually ordinary public
+ * hostname can resolve straight into private space — `169-254-169-254.nip.io` resolves to
+ * the cloud metadata address — and no amount of inspecting the name catches that. It is not
+ * a rebinding race; there is simply no resolution here. Callers that fetch the URL must
+ * also check the resolved addresses with `isPrivateIpAddress` (see `resolvesToPublicAddress`
+ * in check-releases.ts). Use this to reject obviously-bad targets, not as an SSRF boundary
+ * on its own.
  */
 export function isSafePublicHostname(urlString: string): boolean {
   try {
@@ -382,33 +386,86 @@ export function isSafePublicHostname(urlString: string): boolean {
       return false;
     }
 
-    // Block any IPv6 address (no allowlisted hostnames are IPv6).
-    // This catches ::ffff:127.0.0.1, fe80::, fc00::, fd00::, etc.
+    // Block any IPv6 address (no allowlisted hostnames are IPv6). `new URL()` keeps the
+    // brackets, so this catches [::1], [::ffff:7f00:1], [fe80::…] and friends.
     if (hostname.includes(':')) {
       return false;
     }
 
-    // Block private IPv4 ranges
-    const ipv4Match = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
-    if (ipv4Match) {
-      const [, a, b] = ipv4Match.map(Number);
-      if (a === 10) return false;
-      if (a === 172 && b >= 16 && b <= 31) return false;
-      if (a === 192 && b === 168) return false;
-      if (a === 169 && b === 254) return false; // AWS metadata / link-local
-      if (a === 0) return false;
-      if (a === 127) return false; // full loopback range, not just 127.0.0.1
-      if (a === 100 && b >= 64 && b <= 127) return false; // CGNAT range
+    // Literal IPv4. No encoded-notation checks are needed here: `new URL()` has already
+    // normalized decimal, octal, hex and short forms to dotted-decimal by this point
+    // (verified — 2130706433, 0177.0.0.1, 0x7f.1 and 127.1 all arrive as "127.0.0.1"),
+    // so a separate check for them would be dead code. Don't re-add one.
+    if (/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) {
+      return !isPrivateIpAddress(hostname);
     }
-
-    // Block any remaining raw IP address (not a hostname)
-    if (/^\d+$/.test(hostname)) return false; // decimal notation like 2130706433
-    if (/^0\d/.test(hostname.split('.')[0])) return false; // octal notation like 0177.0.0.1
 
     return true;
   } catch {
     return false;
   }
+}
+
+/**
+ * Is this IP address in a range we must never fetch from?
+ *
+ * Operates on a resolved address, not a hostname — the point is to be callable *after* DNS
+ * resolution, because a textually innocent hostname can resolve straight into private
+ * space. `169-254-169-254.nip.io` is a public name that resolves to 169.254.169.254, and no
+ * amount of string inspection catches it.
+ *
+ * Unrecognized input returns true (unsafe). This is a security predicate, so "I don't
+ * understand this address" has to mean "refuse", never "allow".
+ */
+export function isPrivateIpAddress(address: string): boolean {
+  const addr = address.trim().toLowerCase().replace(/^\[|\]$/g, '');
+  if (!addr) return true;
+
+  // IPv4-mapped IPv6. Node normalizes ::ffff:127.0.0.1 to ::ffff:7f00:1, so both the
+  // dotted and the hex-group spellings have to be understood and judged as IPv4.
+  const mapped = addr.match(/^::ffff:(.+)$/);
+  if (mapped) {
+    const inner = mapped[1];
+    if (inner.includes('.')) return isPrivateIpv4(inner);
+    const groups = inner.split(':');
+    if (groups.length === 2) {
+      const hi = parseInt(groups[0], 16);
+      const lo = parseInt(groups[1], 16);
+      if (Number.isFinite(hi) && Number.isFinite(lo)) {
+        return isPrivateIpv4(`${(hi >> 8) & 0xff}.${hi & 0xff}.${(lo >> 8) & 0xff}.${lo & 0xff}`);
+      }
+    }
+    return true;
+  }
+
+  if (addr.includes(':')) {
+    if (addr === '::' || addr === '::1') return true;
+    const lead = parseInt(addr.split(':')[0] || '0', 16);
+    if (!Number.isFinite(lead)) return true;
+    if ((lead & 0xfe00) === 0xfc00) return true; // fc00::/7 unique-local
+    if ((lead & 0xffc0) === 0xfe80) return true; // fe80::/10 link-local
+    return false;
+  }
+
+  return isPrivateIpv4(addr);
+}
+
+function isPrivateIpv4(address: string): boolean {
+  const m = address.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (!m) return true;
+  const parts = m.slice(1).map(Number);
+  if (parts.some(n => n > 255)) return true;
+  const [a, b] = parts;
+  if (a === 0) return true; // "this network"
+  if (a === 10) return true;
+  if (a === 127) return true; // whole loopback range, not just 127.0.0.1
+  if (a === 169 && b === 254) return true; // link-local + AWS/Azure/GCP metadata
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  if (a === 192 && b === 168) return true;
+  if (a === 192 && b === 0) return true; // 192.0.0.0/24 IETF protocol assignments
+  if (a === 100 && b >= 64 && b <= 127) return true; // CGNAT
+  if (a >= 224) return true; // multicast and reserved
+  return false;
 }
 
 /**
