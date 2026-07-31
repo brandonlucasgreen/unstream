@@ -318,6 +318,125 @@ export function parseBandcampReleaseTitles(html: string): string[] {
   return titles;
 }
 
+export interface BandcampGridRelease {
+  /**
+   * Bandcamp's own id for the release, e.g. "album-1891263657". Null in the
+   * single-release sidebar layout, which doesn't carry one — callers that need a stable
+   * key there should fall back to the resolved URL.
+   */
+  externalId: string | null;
+  type: 'album' | 'track';
+  /** As written in the page: usually root-relative ("/album/…"). Callers resolve it. */
+  href: string;
+  /** Display-quality title — original case, accents and punctuation intact. */
+  title: string;
+  artworkUrl: string | null;
+}
+
+/**
+ * Every release on a Bandcamp `/music` page, with the identity and artwork the page
+ * already carries.
+ *
+ * `parseBandcampReleaseTitles` reads the same grid but keeps only accent-folded titles,
+ * because it exists to answer "is this the right artist?". This one exists to build a
+ * catalog, so it keeps what that discards:
+ *
+ * - **`data-item-id`** — a stable per-release id, *and* an album-vs-track type prefix.
+ *   Worth more than the title for identity: an artist can rename a release, but the id
+ *   doesn't move, so re-reading a page updates a row instead of creating a second one.
+ * - **`href`** — the release URL.
+ * - **artwork** — `src`, or `data-original` when Bandcamp lazy-loads it.
+ *
+ * What is *not* here, deliberately: release dates. They are not in the grid at all — only
+ * on individual release pages — so a catalog with dates costs one extra request per
+ * release rather than coming free with this parse. Anything relying on dates has to opt
+ * into that cost knowingly.
+ *
+ * Falls back to the `#discography` sidebar for the single-release layout, for the same
+ * reason `parseBandcampReleaseCounts` does: a one-release artist is otherwise
+ * indistinguishable from a parked account.
+ */
+export function parseBandcampGridReleases(html: string): BandcampGridRelease[] {
+  const root = parse(html);
+  const releases: BandcampGridRelease[] = [];
+  const seen = new Set<string>();
+
+  for (const item of root.querySelectorAll('.music-grid-item')) {
+    if (releases.length >= MAX_GRID_RELEASES) break;
+
+    const externalId = item.getAttribute('data-item-id') ?? null;
+    const link = item.querySelector('a');
+    const href = link?.getAttribute('href');
+    const title = item.querySelector('.title')?.textContent?.trim();
+    if (!href || !title) continue;
+
+    // Prefer the id's prefix; fall back to the URL path when the attribute is missing.
+    const type = releaseTypeFromIdOrHref(externalId, href);
+    if (!type) continue;
+
+    const dedupeKey = externalId ?? href;
+    if (seen.has(dedupeKey)) continue;
+    seen.add(dedupeKey);
+
+    releases.push({
+      externalId,
+      type,
+      href,
+      // The grid renders a release's title and its artist on separate lines inside
+      // .title for label pages; keep only the first line as the title.
+      title: title.split('\n')[0].trim(),
+      artworkUrl: artworkFrom(item),
+    });
+  }
+
+  if (releases.length > 0) return releases;
+
+  for (const entry of parseBandcampSidebarDiscography(root)) {
+    if (releases.length >= MAX_GRID_RELEASES) break;
+    const type = releaseTypeFromIdOrHref(null, entry.href);
+    if (!type || !entry.title) continue;
+    if (seen.has(entry.href)) continue;
+    seen.add(entry.href);
+
+    releases.push({
+      externalId: null,
+      type,
+      href: entry.href,
+      title: entry.title,
+      artworkUrl: null,
+    });
+  }
+
+  return releases;
+}
+
+/**
+ * Upper bound on releases read from one page. Not a real Bandcamp limit — grids are
+ * typically well under this — just a guard against a pathological page consuming the
+ * whole function budget.
+ */
+const MAX_GRID_RELEASES = 500;
+
+function releaseTypeFromIdOrHref(
+  externalId: string | null,
+  href: string
+): 'album' | 'track' | null {
+  if (externalId?.startsWith('album-')) return 'album';
+  if (externalId?.startsWith('track-')) return 'track';
+  if (href.includes('/album/')) return 'album';
+  if (href.includes('/track/')) return 'track';
+  return null;
+}
+
+function artworkFrom(item: HTMLElement): string | null {
+  const img = item.querySelector('img');
+  if (!img) return null;
+  // data-original holds the real URL when the grid lazy-loads and src is a placeholder.
+  const src = img.getAttribute('data-original') || img.getAttribute('src') || '';
+  if (!src || src.startsWith('data:')) return null;
+  return src;
+}
+
 // ---------------------------------------------------------------------------
 // Bandwagon
 // ---------------------------------------------------------------------------
