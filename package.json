@@ -13,6 +13,7 @@
     "sync:bandcamp-dates": "npx tsx scripts/sync-bandcamp-dates.ts",
     "ingest:try": "npx tsx scripts/ingest-releases.ts",
     "preview:release": "npx tsx scripts/preview-release-page.ts",
+    "catalog:artist": "npx tsx scripts/catalog-artist.ts",
     "test:web": "cd apps/web && npx vitest run",
     "test:api": "npx vitest run api/functions/",
     "test": "npm run test:web && npm run test:api",
