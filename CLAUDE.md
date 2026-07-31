@@ -172,8 +172,9 @@ have your laptop writing production data.
 Use the dry run instead:
 
 ```bash
-npm run ingest:try -- sufjanstevens          # table of what would be written
-npm run ingest:try -- sufjanstevens --json   # full row shapes
+npm run ingest:try -- sufjanstevens              # table of what would be written
+npm run ingest:try -- sufjanstevens --json       # full row shapes
+npm run ingest:try -- sufjanstevens --detail=3   # + dates, formats and prices for the newest 3
 ```
 
 It runs the real path — the same SSRF-safe fetcher, the same allowlist check, the same parser
@@ -183,6 +184,22 @@ request per run; don't loop it.
 There is deliberately no `--write` flag. Everything with a decision in it lives upstream of the
 database, and `persistReleases` is covered by unit tests plus a migration validated against a
 real Postgres. To test the write path, point `SUPABASE_URL` at a branch database on purpose.
+
+### Seeing the release page locally
+
+`npm run dev` **cannot** show you `/a/{artist}/{release}` — the Vite dev server doesn't run edge
+functions at all. `netlify dev` does, but it reads the production Supabase, where a release only
+exists once demand-driven cataloging has run for that artist. So the page you most want to look
+at is the one neither of those can render.
+
+```bash
+npm run preview:release -- explosionsinthesky    # then open http://localhost:8788
+```
+
+Fetches the real `/music` grid, lists the discography, and renders any release through the
+**real** `api/edge/release-page.ts` — same template, same payout maths — fetching that release's
+page from Bandcamp on demand. Only the two database reads are stubbed; there is no database
+connection, so nothing can be written. One Bandcamp request per release page you open.
 
 Once ingest is live, `release_catalog_state` is the observability surface:
 `last_attempted_at`, `releases_found`, `last_error`, `consecutive_failures`. A run that suddenly

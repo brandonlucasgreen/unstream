@@ -13,6 +13,17 @@
   path = "/"
   function = "og-metadata"
 
+# MUST stay above the /a/* entry below. Edge functions run in declaration order, and `/a/*`
+# matches /a/{artist}/{release} too — declared first, artist-page-static would look up an
+# artist whose slug is "artist/release", find nothing, and fall through. It would still work,
+# but only by accident, and it would cost a database query on every release page view.
+#
+# A regex rather than a path glob because the distinction that matters here is the number of
+# path segments: exactly two under /a/. Netlify's `path` globs can't express that.
+[[edge_functions]]
+  pattern = "^/a/[^/]+/[^/]+/?$"
+  function = "release-page"
+
 [[edge_functions]]
   path = "/artist/*"
   function = "artist-page-static"
