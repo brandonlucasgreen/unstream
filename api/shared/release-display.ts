@@ -65,6 +65,24 @@ export function formatMoney(amount: number, currency: string | null): string {
 }
 
 /**
+ * What goes in the price column.
+ *
+ * **Zero means name-your-price, not free.** Bandcamp reports a name-your-price release as
+ * `price: 0` with no other signal, and rendering that as "$0" tells a fan the record costs
+ * nothing — when in fact they're being invited to decide what to pay, which on a product about
+ * paying artists is close to the opposite message. Caught on Kid Lightbulbs' own catalog, where
+ * every release is name-your-price.
+ *
+ * A null price is a format we know exists but have no figure for; an em dash says that without
+ * claiming it's free.
+ */
+export function formatOfferPrice(price: number | null, currency: string | null): string {
+  if (price === null) return '—';
+  if (price === 0) return 'Name your price';
+  return formatMoney(price, currency);
+}
+
+/**
  * "≈$20–21.25 to the artist" — the emotional payload of the whole product, at the moment
  * someone is deciding where to buy.
  *

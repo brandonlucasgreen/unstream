@@ -8,6 +8,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   formatMoney,
+  formatOfferPrice,
   formatReleaseDate,
   payoutEstimate,
   payoutRank,
@@ -102,5 +103,24 @@ describe('payoutRank', () => {
 
   it('ranks a platform we know nothing about last', () => {
     expect(payoutRank('not-a-platform')).toBeLessThan(payoutRank('bandcamp'));
+  });
+});
+
+describe('formatOfferPrice', () => {
+  // Bandcamp reports name-your-price as `price: 0` with no other signal. Rendering "$0" tells a
+  // fan the record is free when they're actually being asked to decide what to pay — close to
+  // the opposite message on a product about paying artists. Caught on Kid Lightbulbs' own
+  // catalog, where every release is name-your-price.
+  it('reads zero as name-your-price, not free', () => {
+    expect(formatOfferPrice(0, 'USD')).toBe('Name your price');
+  });
+
+  it('says nothing about cost when there is no figure', () => {
+    expect(formatOfferPrice(null, 'USD')).toBe('—');
+  });
+
+  it('renders a real price normally', () => {
+    expect(formatOfferPrice(25, 'USD')).toBe('$25');
+    expect(formatOfferPrice(8.5, 'GBP')).toBe('£8.50');
   });
 });

@@ -23,7 +23,7 @@ import {
   AVAILABILITY_LABELS,
   AVAILABILITY_ORDER,
   FORMAT_LABELS,
-  formatMoney,
+  formatOfferPrice,
   formatReleaseDate,
   payoutEstimate,
   payoutRank,
@@ -64,9 +64,12 @@ const CSS = `
   .source { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
   .source-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--bg2); }
   .offer { display: flex; align-items: baseline; gap: 12px; padding: 10px 16px; border-top: 1px solid var(--border); font-size: 14px; }
-  .offer-format { width: 88px; flex-shrink: 0; font-weight: 500; text-transform: capitalize; }
-  .offer-price { width: 88px; flex-shrink: 0; }
-  .offer-payout { color: var(--muted); font-size: 13px; }
+  .offer-format { flex: 0 0 88px; font-weight: 500; text-transform: capitalize; }
+  /* Sized to content with a floor, not fixed: "$25" and "Name your price" both live in this
+     column, and a width that suits one wraps the other onto two lines. Rows within a card still
+     line up, because one artist's prices are all the same shape. */
+  .offer-price { flex: 0 0 auto; min-width: 88px; }
+  .offer-payout { flex: 1; color: var(--muted); font-size: 13px; }
   .offer.gone { color: var(--muted); }
   .buy { display: block; padding: 12px 16px; border-top: 1px solid var(--border); text-align: center; font-weight: 600; text-decoration: none; color: var(--accent); }
   .buy:hover { text-decoration: underline; }
@@ -83,8 +86,8 @@ const CSS = `
     .release-art, .release-art-fallback { width: 200px; height: 200px; }
     /* Narrower fixed columns so the payout estimate — the line this page exists for — stays on
        one line instead of wrapping under the price. */
-    .offer-format { width: 64px; }
-    .offer-price { width: 72px; }
+    .offer-format { flex-basis: 64px; }
+    .offer-price { min-width: 72px; }
   }
 `;
 
@@ -229,7 +232,7 @@ export default async function handler(request: Request, context: Context) {
         // means for the artist. The availability label rides in the third column rather than
         // beside the price — a sold-out row has no payout to show, and "$14 · Sold out"
         // crammed into the price column wraps onto two lines on every phone.
-        const priceText = offer.price !== null ? formatMoney(offer.price, offer.currency) : '—';
+        const priceText = formatOfferPrice(offer.price, offer.currency);
         const payout = gone ? '' : payoutEstimate(offer.price, offer.currency, payoutPercent);
         const note = [AVAILABILITY_LABELS[offer.availability] || '', payout]
           .filter(Boolean)
