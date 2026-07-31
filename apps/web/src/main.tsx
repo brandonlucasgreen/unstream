@@ -8,6 +8,7 @@ import './index.css'
 import App from './App.tsx'
 import { ArtistPage } from './pages/ArtistPage.tsx'
 import { AppLoadingFallback, AppErrorFallback } from './components/AppFallback'
+import { ScrollToTop } from './components/ScrollToTop'
 
 initSentry()
 
@@ -49,6 +50,7 @@ createRoot(document.getElementById('root')!).render(
     <Sentry.ErrorBoundary fallback={<AppErrorFallback />}>
       <AuthProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <Suspense fallback={<AppLoadingFallback />}>
             <Routes>
               <Route path="/" element={<App />} />
