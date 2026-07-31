@@ -60,3 +60,16 @@ export function parseReleaseDate(dateStr: string | undefined): Date | undefined 
 
   return undefined;
 }
+
+/**
+ * Build the `query` value for a MusicBrainz artist search: a quoted Lucene phrase.
+ *
+ * Dev-only mirror of `musicBrainzArtistQuery` in api/functions/search-utils.ts, which
+ * is the canonical version — this tree cannot import from api/functions. Keep the two
+ * in step; without the quotes, `artist:viagra boys` parses as `artist:viagra` OR a bare
+ * `boys` and MusicBrainz returns "The Beach Boys".
+ */
+export function musicBrainzArtistQuery(query: string): string {
+  const phrase = query.replace(/["\\]/g, ' ').replace(/\s+/g, ' ').trim();
+  return `artist:"${phrase}"`;
+}

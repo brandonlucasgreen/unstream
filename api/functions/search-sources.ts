@@ -37,6 +37,7 @@ import {
   isBandcampSearchLink,
   bandcampSubdomainOf,
   bandcampSubdomainConflicts,
+  musicBrainzArtistQuery,
 } from './search-utils';
 
 // Import shared enrichment functions
@@ -417,7 +418,7 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
     // Search for artist. MB is Lucene-backed and its ranked list is the one real
     // search engine in the fan-out: the top hit drives enrichment (strict gates
     // below), the rest become discovery candidates via collectMbSuggestions.
-    const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=artist:${encodeURIComponent(query)}&fmt=json&limit=5`;
+    const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=${encodeURIComponent(musicBrainzArtistQuery(query))}&fmt=json&limit=5`;
 
     const response = await globalThis.fetch(searchUrl, {
       headers: {
