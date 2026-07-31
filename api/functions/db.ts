@@ -3,6 +3,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { normalizeUrlForMatch, urlMatchPrefilter } from './search-utils';
+import { requestArtistCatalog } from './request-catalog';
 
 let supabase: SupabaseClient | null = null;
 
@@ -363,6 +364,326 @@ export async function isStoredArtistLink(url: string, artistName: string): Promi
   } catch (error) {
     console.error('[DB] isStoredArtistLink error:', error);
     return false;
+  }
+}
+
+// --- Release catalog (Unstream Releases) ---
+
+/** Don't re-crawl an artist inside this window. Repeat searches then cost nothing upstream. */
+const RECATALOG_COOLDOWN_HOURS = 24 * 7;
+
+/**
+ * Hourly ceilings on how many artists we will catalog, by what triggered it.
+ *
+ * Search is unauthenticated and far higher volume than saving, so it gets the smaller
+ * budget: a traffic spike must not turn into us hammering Bandcamp. A save is one person
+ * deliberately asking to follow an artist, so it gets a bigger budget and still gets through
+ * when searches are being dropped.
+ */
+const CATALOG_HOURLY_CAP = { searched: 60, saved: 240 } as const;
+
+export type CatalogTrigger = 'saved' | 'searched';
+
+/**
+ * May we catalog this artist right now — and if so, claim it.
+ *
+ * Cooldown, then hourly cap, then stamp `last_attempted_at`. The stamp is the claim: two
+ * near-simultaneous triggers for the same artist won't both do the work, because the second
+ * sees a fresh attempt timestamp.
+ *
+ * Returns false on any error. Cataloging is opportunistic — if we can't tell whether it's
+ * allowed, not crawling is the safe answer, and the next search or save tries again.
+ */
+export async function claimArtistForCatalog(
+  artistId: string,
+  trigger: CatalogTrigger
+): Promise<boolean> {
+  const client = getClient();
+  if (!client) return false;
+
+  try {
+    const { data: state, error: stateError } = await client
+      .from('release_catalog_state')
+      .select('last_catalogued_at, last_attempted_at, consecutive_failures')
+      .eq('artist_id', artistId)
+      .maybeSingle();
+
+    if (stateError) {
+      console.error('[DB] claimArtistForCatalog read failed:', stateError.message);
+      return false;
+    }
+
+    const now = Date.now();
+    const row = state as
+      | { last_catalogued_at: string | null; last_attempted_at: string; consecutive_failures: number }
+      | null;
+
+    if (row) {
+      // Already catalogued recently.
+      if (row.last_catalogued_at) {
+        const age = now - new Date(row.last_catalogued_at).getTime();
+        if (age < RECATALOG_COOLDOWN_HOURS * 3600_000) return false;
+      }
+
+      // Someone else claimed it moments ago, or a failing artist is backing off. The backoff
+      // doubles per consecutive failure so a permanently broken artist isn't retried on every
+      // single search, capped so it eventually recovers.
+      const attemptAge = now - new Date(row.last_attempted_at).getTime();
+      const backoffMs = Math.min(2 ** Math.min(row.consecutive_failures, 6), 64) * 15 * 60_000;
+      if (attemptAge < Math.max(backoffMs, 60_000)) return false;
+    }
+
+    // Hourly cap, counted across all artists.
+    const since = new Date(now - 3600_000).toISOString();
+    const { count, error: countError } = await client
+      .from('release_catalog_state')
+      .select('artist_id', { count: 'exact', head: true })
+      .gte('last_attempted_at', since);
+
+    if (countError) {
+      console.error('[DB] claimArtistForCatalog count failed:', countError.message);
+      return false;
+    }
+    if ((count ?? 0) >= CATALOG_HOURLY_CAP[trigger]) {
+      console.log(`[catalog] hourly cap reached for trigger=${trigger} (${count}) — skipping`);
+      return false;
+    }
+
+    const { error: claimError } = await client
+      .from('release_catalog_state')
+      .upsert(
+        { artist_id: artistId, last_attempted_at: new Date(now).toISOString(), last_trigger: trigger },
+        { onConflict: 'artist_id' }
+      );
+
+    if (claimError) {
+      console.error('[DB] claimArtistForCatalog claim failed:', claimError.message);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('[DB] claimArtistForCatalog error:', error);
+    return false;
+  }
+}
+
+/** Record the outcome of a catalog run. Failures increment the backoff counter. */
+export async function recordCatalogOutcome(
+  artistId: string,
+  outcome: { releasesFound: number } | { error: string }
+): Promise<void> {
+  const client = getClient();
+  if (!client) return;
+
+  const patch: Record<string, unknown> =
+    'error' in outcome
+      ? { last_error: outcome.error.slice(0, 500) }
+      : {
+          last_catalogued_at: new Date().toISOString(),
+          releases_found: outcome.releasesFound,
+          consecutive_failures: 0,
+          last_error: null,
+        };
+
+  try {
+    if ('error' in outcome) {
+      // Read-then-increment rather than a raw SQL expression, to stay within the JS client.
+      const { data } = await client
+        .from('release_catalog_state')
+        .select('consecutive_failures')
+        .eq('artist_id', artistId)
+        .maybeSingle();
+      const prev = (data as { consecutive_failures: number } | null)?.consecutive_failures ?? 0;
+      patch.consecutive_failures = prev + 1;
+    }
+
+    const { error } = await client
+      .from('release_catalog_state')
+      .update(patch)
+      .eq('artist_id', artistId);
+
+    if (error) console.error('[DB] recordCatalogOutcome failed:', error.message);
+  } catch (error) {
+    console.error('[DB] recordCatalogOutcome error:', error);
+  }
+}
+
+interface ReleaseToPersist {
+  title: string;
+  slug: string;
+  matchKey: string;
+  releaseType: string;
+  releaseDate: string | null;
+  datePrecision: string;
+  status: string;
+  artworkUrl: string | null;
+  source: { platform: string; url: string; externalId: string | null };
+}
+
+/**
+ * Write a catalog run's releases, merging rather than replacing.
+ *
+ * Three rules that matter more than they look:
+ *
+ * 1. **Match on `(artist_id, release_type, match_key)`, not on slug.** A slug is derived from
+ *    a title and changes when the title does; the match key is what identity means here.
+ * 2. **Never overwrite a stored value with null.** A partial run — Bandcamp slow, artwork
+ *    missing — must not erase a date or artwork a previous run found. This is "never cache
+ *    uncertainty" in write form.
+ * 3. **Never touch a field an artist has edited.** `curated_fields` lists columns a verified
+ *    artist authored; ingest re-runs forever, so without this every crawl silently reverts
+ *    their corrections.
+ *
+ * Returns the number of releases written or updated.
+ */
+export async function persistReleases(
+  artistId: string,
+  releases: ReleaseToPersist[]
+): Promise<number> {
+  const client = getClient();
+  if (!client || releases.length === 0) return 0;
+
+  try {
+    const { data: existingRows, error: readError } = await client
+      .from('releases')
+      .select('id, slug, match_key, release_type, release_date, artwork_url, curated_fields')
+      .eq('artist_id', artistId);
+
+    if (readError) {
+      console.error('[DB] persistReleases read failed:', readError.message);
+      return 0;
+    }
+
+    type ExistingRow = {
+      id: string;
+      slug: string;
+      match_key: string;
+      release_type: string;
+      release_date: string | null;
+      artwork_url: string | null;
+      curated_fields: string[] | null;
+    };
+    const existing = (existingRows as ExistingRow[]) || [];
+    const byIdentity = new Map(existing.map(r => [`${r.release_type}:${r.match_key}`, r]));
+    const takenSlugs = new Set(existing.map(r => r.slug));
+
+    let written = 0;
+
+    for (const release of releases) {
+      const identity = `${release.releaseType}:${release.matchKey}`;
+      const prior = byIdentity.get(identity);
+      const curated = new Set(prior?.curated_fields ?? []);
+
+      let releaseId: string;
+
+      if (prior) {
+        const patch: Record<string, unknown> = {};
+        // COALESCE semantics, applied in JS: only fill what's missing, never blank what's set,
+        // and never touch what the artist edited.
+        if (!curated.has('title')) patch.title = release.title;
+        if (!curated.has('artwork_url') && release.artworkUrl && !prior.artwork_url) {
+          patch.artwork_url = release.artworkUrl;
+        }
+        if (!curated.has('release_date') && release.releaseDate && !prior.release_date) {
+          patch.release_date = release.releaseDate;
+          patch.date_precision = release.datePrecision;
+        }
+
+        if (Object.keys(patch).length > 0) {
+          const { error } = await client.from('releases').update(patch).eq('id', prior.id);
+          if (error) {
+            console.error('[DB] persistReleases update failed:', error.message);
+            continue;
+          }
+        }
+        releaseId = prior.id;
+      } else {
+        // Slug must not collide with anything already stored for this artist.
+        let slug = release.slug;
+        if (takenSlugs.has(slug)) slug = `${slug}-${release.matchKey.slice(0, 6)}`;
+        takenSlugs.add(slug);
+
+        const { data: inserted, error } = await client
+          .from('releases')
+          .insert({
+            artist_id: artistId,
+            title: release.title,
+            slug,
+            match_key: release.matchKey,
+            release_type: release.releaseType,
+            release_date: release.releaseDate,
+            date_precision: release.datePrecision,
+            status: release.status,
+            artwork_url: release.artworkUrl,
+            source: 'auto',
+          })
+          .select('id')
+          .single();
+
+        if (error || !inserted) {
+          console.error('[DB] persistReleases insert failed:', error?.message);
+          continue;
+        }
+        releaseId = (inserted as { id: string }).id;
+        byIdentity.set(identity, {
+          id: releaseId,
+          slug,
+          match_key: release.matchKey,
+          release_type: release.releaseType,
+          release_date: release.releaseDate,
+          artwork_url: release.artworkUrl,
+          curated_fields: [],
+        });
+      }
+
+      const { error: sourceError } = await client.from('release_sources').upsert(
+        {
+          release_id: releaseId,
+          platform: release.source.platform,
+          url: release.source.url,
+          external_id: release.source.externalId,
+          last_seen_at: new Date().toISOString(),
+        },
+        { onConflict: 'release_id,platform' }
+      );
+
+      if (sourceError) {
+        console.error('[DB] persistReleases source upsert failed:', sourceError.message);
+        continue;
+      }
+
+      written++;
+    }
+
+    return written;
+  } catch (error) {
+    console.error('[DB] persistReleases error:', error);
+    return 0;
+  }
+}
+
+/** The stored Bandcamp link for an artist, if we have one. */
+export async function getArtistBandcampUrl(artistId: string): Promise<string | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  try {
+    const { data, error } = await client
+      .from('artist_links')
+      .select('url')
+      .eq('artist_id', artistId)
+      .eq('platform', 'bandcamp')
+      .maybeSingle();
+
+    if (error) {
+      console.error('[DB] getArtistBandcampUrl failed:', error.message);
+      return null;
+    }
+    return (data as { url: string } | null)?.url ?? null;
+  } catch (error) {
+    console.error('[DB] getArtistBandcampUrl error:', error);
+    return null;
   }
 }
 
@@ -768,6 +1089,11 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
   const client = getClient();
   if (!client) return;
 
+  // Artists persisted in this run that have a Bandcamp link, collected so cataloging can be
+  // requested in a single call afterwards rather than once per artist. This function is
+  // awaited before the search response is sent, so wall-clock time here is user-visible.
+  const catalogCandidates: string[] = [];
+
   // This runs before the search response is sent, so wall-clock time matters:
   // artists persist concurrently, and each artist's links go up in one bulk
   // upsert instead of one round-trip per link.
@@ -852,10 +1178,21 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
       }
 
       console.log(`[DB] Persisted "${result.name}" with ${linkRows.length} links`);
+
+      // Only worth cataloging artists we can actually catalog — ingest is Bandcamp-only for
+      // now, so an artist without a Bandcamp link would just be a wasted claim.
+      if (linkRowsByPlatform.has('bandcamp')) catalogCandidates.push(artistId);
     } catch (error) {
       console.error(`[DB] Error persisting "${result.name}":`, error);
     }
   }));
+
+  // One request for the whole result set, after the writes, and only a 202 handshake is
+  // awaited. Cooldown and rate-cap checks happen inside the background function, so a search
+  // never pays a database round trip per artist to find out an artist was crawled last week.
+  if (catalogCandidates.length > 0) {
+    await requestArtistCatalog(catalogCandidates, 'searched');
+  }
 }
 
 /**

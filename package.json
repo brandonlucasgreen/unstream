@@ -11,6 +11,7 @@
     "generate:data": "tsx scripts/generate-artist-data.ts",
     "generate:social": "tsx scripts/generate-social-posts.ts",
     "sync:bandcamp-dates": "npx tsx scripts/sync-bandcamp-dates.ts",
+    "ingest:try": "npx tsx scripts/ingest-releases.ts",
     "test:web": "cd apps/web && npx vitest run",
     "test:api": "npx vitest run api/functions/",
     "test": "npm run test:web && npm run test:api",

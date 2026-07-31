@@ -15,6 +15,7 @@
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { authenticateBearerFast } from './middleware';
+import { requestArtistCatalog } from './request-catalog';
 
 function getServiceClient() {
   return getClient();
@@ -251,6 +252,14 @@ async function handleSave(user: { userId: string; email: string }, body: Record<
     if (upsertError) {
       console.error('[saved-artists] Error saving artist:', upsertError);
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to save artist' }) };
+    }
+
+    // Saving is the strongest signal that someone wants this artist's releases — it's what
+    // feeds their release alerts and, later, their calendar. Catalog on the way through.
+    // 'saved' outranks 'searched' when the hourly cap is reached, so a deliberate save still
+    // gets through while opportunistic search-triggered crawls are dropped.
+    if (artistId) {
+      await requestArtistCatalog([artistId], 'saved');
     }
 
     return {
