@@ -14,19 +14,56 @@ import { timingSafeEqual } from 'crypto';
 import {
   claimArtistForCatalog,
   getArtistBandcampUrl,
+  persistReleaseDetail,
   persistReleases,
   recordCatalogOutcome,
   type CatalogTrigger,
+  type PersistedRelease,
 } from './db';
 import { isUrlHostnameAllowed } from './middleware';
 import { safeFetch, safeHostname } from './safe-fetch';
-import { bandcampMusicUrl, ingestBandcampGrid } from './release-ingest';
+import { bandcampMusicUrl, ingestBandcampDetail, ingestBandcampGrid } from './release-ingest';
 
 /** Ceiling on artists per invocation, so one call can't become an unbounded crawl. */
 const MAX_ARTISTS_PER_RUN = 25;
 
 /** Pause between artists. One Bandcamp request each, spaced out rather than in a burst. */
 const DELAY_BETWEEN_ARTISTS_MS = 1_000;
+
+// --- Detail-pass budgets -----------------------------------------------------
+//
+// The grid is one request for a whole discography. Dates, formats and prices are one request
+// *per release*, and they're the data the feature actually rests on, so the pass has to happen
+// — but a blanket sweep of ~800 artists × ~20 releases would be 16,000 requests, which is a
+// crawl programme, not a parser change. Four limits keep it a trickle:
+
+/** Newest-first, so a large discography gets its recent releases priced on the first run. */
+const MAX_DETAIL_FETCHES_PER_ARTIST = 20;
+
+/** Invocation-wide, so a 25-artist batch can't multiply into hundreds of requests. */
+const MAX_DETAIL_FETCHES_PER_RUN = 100;
+
+/** Roughly one request per second sustained — far below what one browser page load costs. */
+const DELAY_BETWEEN_DETAIL_FETCHES_MS = 1_000;
+
+/**
+ * Stop starting detail fetches this long into the invocation. Netlify background functions get
+ * 15 minutes; leaving headroom means a run ends by finishing rather than by being killed
+ * mid-write.
+ */
+const DETAIL_BUDGET_MS = 9 * 60_000;
+
+/**
+ * Re-read a release page after this long. Prices change and vinyl sells out, so an offer is a
+ * claim with an age — but re-reading weekly would triple the crawl for data that rarely moves.
+ */
+const DETAIL_REFRESH_DAYS = 30;
+
+/** What's left of the invocation's detail allowance. Shared across every artist in the batch. */
+interface DetailBudget {
+  fetchesLeft: number;
+  deadline: number;
+}
 
 function isAuthorized(header: string | undefined): boolean {
   // Reuses the secret this repo already has for internal function-to-function calls
@@ -87,6 +124,10 @@ export async function handler(event: {
 
   let catalogued = 0;
   let skipped = 0;
+  const budget: DetailBudget = {
+    fetchesLeft: MAX_DETAIL_FETCHES_PER_RUN,
+    deadline: Date.now() + DETAIL_BUDGET_MS,
+  };
 
   for (const [index, artistId] of artistIds.entries()) {
     // Cooldown, hourly cap and claim all happen here rather than at the call site, so the
@@ -99,7 +140,7 @@ export async function handler(event: {
     if (index > 0) await sleep(DELAY_BETWEEN_ARTISTS_MS);
 
     try {
-      const found = await catalogArtist(artistId);
+      const found = await catalogArtist(artistId, budget);
       if (found === null) {
         skipped++;
       } else {
@@ -121,7 +162,7 @@ export async function handler(event: {
  *
  * @throws on a genuine failure, so the caller records it against the backoff counter.
  */
-async function catalogArtist(artistId: string): Promise<number | null> {
+async function catalogArtist(artistId: string, budget: DetailBudget): Promise<number | null> {
   const storedUrl = await getArtistBandcampUrl(artistId);
   if (!storedUrl) {
     await recordCatalogOutcome(artistId, { error: 'no bandcamp link stored' });
@@ -147,8 +188,9 @@ async function catalogArtist(artistId: string): Promise<number | null> {
   if (!response) throw new Error('fetch refused or too many redirects');
   if (!response.ok) throw new Error(`bandcamp responded ${response.status}`);
 
+  const landedUrl = response.url || musicUrl;
   const html = await response.text();
-  const outcome = ingestBandcampGrid(html, response.url || musicUrl);
+  const outcome = ingestBandcampGrid(html, landedUrl);
 
   if (!outcome.ok) {
     // A bot challenge is the upstream declining to answer, not an artist with no releases.
@@ -161,8 +203,121 @@ async function catalogArtist(artistId: string): Promise<number | null> {
   }
 
   const written = await persistReleases(artistId, outcome.releases);
-  await recordCatalogOutcome(artistId, { releasesFound: written });
-  return written;
+  const detailed = await catalogDetails(written, landedUrl, budget);
+
+  await recordCatalogOutcome(artistId, {
+    releasesFound: written.length,
+    releasesDetailed: detailed,
+  });
+  return written.length;
+}
+
+/**
+ * Read individual release pages for dates, formats and prices.
+ *
+ * This is where the differentiator's data comes from — *"vinyl $25 · CD $12 · digital $10, ≈$21
+ * to the artist"* exists nowhere in the grid — so it can't be skipped, and it can't be
+ * unbounded either. It's the one part of ingest whose cost scales with catalog size rather
+ * than artist count.
+ *
+ * Returns how many pages were read successfully. Never throws: a release page failing is not a
+ * reason to fail the artist's whole catalog, which is already written by this point.
+ */
+async function catalogDetails(
+  releases: PersistedRelease[],
+  landedUrl: string,
+  budget: DetailBudget
+): Promise<number> {
+  const due = releases.filter(needsDetail).slice(0, MAX_DETAIL_FETCHES_PER_ARTIST);
+  if (due.length === 0) return 0;
+
+  let landedHost: string;
+  try {
+    landedHost = new URL(landedUrl).host;
+  } catch {
+    return 0;
+  }
+
+  let read = 0;
+  let attempted = 0;
+
+  for (const release of due) {
+    if (budget.fetchesLeft <= 0 || Date.now() > budget.deadline) {
+      // Said out loud rather than returning quietly: a silent cap reads as "we checked
+      // everything and there were no prices", which is the wrong conclusion to hand anyone
+      // looking at why a release page is bare.
+      console.log(`[catalog] detail budget spent — ${due.length - attempted} release(s) left for a later run`);
+      break;
+    }
+
+    if (!isFetchableReleaseUrl(release.url, landedHost)) {
+      console.warn(`[catalog] skipped release url: ${safeHostname(release.url)}`);
+      continue;
+    }
+
+    // Spacing is per *request*, so a run of failures doesn't turn into a burst.
+    if (attempted > 0) await sleep(DELAY_BETWEEN_DETAIL_FETCHES_MS);
+    attempted++;
+    budget.fetchesLeft--;
+
+    try {
+      const detailResponse = await safeFetch(release.url, 10_000);
+      if (!detailResponse?.ok) continue;
+
+      const outcome = ingestBandcampDetail(await detailResponse.text());
+      if (!outcome.ok) {
+        // A challenge means every subsequent request in this run is likely to be challenged
+        // too. Stop asking rather than burning the budget being refused, and leave
+        // detail_checked_at unset so these releases are retried.
+        if (outcome.reason === 'bot_challenge') {
+          console.warn('[catalog] bandcamp bot challenge on a release page — stopping detail pass');
+          break;
+        }
+        console.warn(`[catalog] unreadable release page: ${safeHostname(release.url)}`);
+        continue;
+      }
+
+      if (await persistReleaseDetail(release, outcome.detail)) read++;
+    } catch (error) {
+      console.warn(
+        `[catalog] detail fetch failed for ${safeHostname(release.url)}:`,
+        error instanceof Error ? error.message : String(error)
+      );
+    }
+  }
+
+  return read;
+}
+
+/**
+ * May we fetch this stored release URL?
+ *
+ * Two ways to qualify, because there are two ways a legitimate release URL arises:
+ *
+ * - **Same host as the page we just read.** A URL parsed out of this run's grid, which is how
+ *   Bandcamp Pro custom domains (`music.sufjan.com`) get in at all — they're nowhere near the
+ *   outbound allowlist, and their legitimacy comes from Bandcamp having redirected us there.
+ * - **On the allowlist.** A row stored by an earlier run, from before the artist moved to a
+ *   custom domain. Without this the host check would refuse those rows forever and their
+ *   prices would never be read.
+ *
+ * Neither answers "is this safe to fetch" — `safeFetch` does that separately, on every
+ * redirect hop. Three different questions, deliberately not collapsed into one.
+ */
+function isFetchableReleaseUrl(url: string, landedHost: string): boolean {
+  try {
+    if (new URL(url).host === landedHost) return true;
+  } catch {
+    return false;
+  }
+  return isUrlHostnameAllowed(url);
+}
+
+/** Never read, or read long enough ago that its prices are worth refreshing. */
+function needsDetail(release: PersistedRelease): boolean {
+  if (!release.detailCheckedAt) return true;
+  const age = Date.now() - new Date(release.detailCheckedAt).getTime();
+  return age > DETAIL_REFRESH_DAYS * 24 * 3600_000;
 }
 
 function sleep(ms: number): Promise<void> {

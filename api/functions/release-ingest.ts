@@ -7,14 +7,19 @@
 
 import {
   parseBandcampGridReleases,
+  parseBandcampReleaseDetail,
   isBandcampChallenge,
+  type BandcampDetailOffer,
   type BandcampGridRelease,
 } from './search-parsers';
 import {
   deriveStatus,
   mapReleaseType,
+  parseReleaseDate,
   releaseMatchKey,
   uniqueReleaseSlug,
+  type DatePrecision,
+  type ReleaseStatus,
   type ReleaseType,
 } from './release-utils';
 
@@ -105,6 +110,168 @@ export function ingestBandcampGrid(html: string, pageUrl: string, now: Date = ne
 
   if (releases.length === 0) return { ok: false, reason: 'no_releases' };
   return { ok: true, releases };
+}
+
+// ---------------------------------------------------------------------------
+// Release pages — dates, formats, prices
+// ---------------------------------------------------------------------------
+
+/** Formats `release_offers.format` accepts. */
+export type OfferFormat = 'digital' | 'vinyl' | 'cassette' | 'cd' | 'book' | 'merch' | 'other';
+
+/** States `release_offers.availability` accepts. */
+export type OfferAvailability = 'available' | 'preorder' | 'sold_out' | 'unknown';
+
+export interface IngestedOffer {
+  format: OfferFormat;
+  price: number | null;
+  currency: string | null;
+  availability: OfferAvailability;
+}
+
+/** Everything a release page adds to what the grid already gave us. */
+export interface IngestedDetail {
+  releaseDate: string | null;
+  datePrecision: DatePrecision;
+  status: ReleaseStatus;
+  offers: IngestedOffer[];
+}
+
+export type DetailOutcome =
+  | { ok: true; detail: IngestedDetail }
+  | { ok: false; reason: 'bot_challenge' | 'unreadable' };
+
+/**
+ * Map a Bandcamp release page into the date and offers for one release.
+ *
+ * Same two-failure discipline as the grid ingest: a bot challenge is the upstream declining
+ * to answer and must back off, while an unreadable page is a parse problem worth reporting —
+ * neither may be written down as "this release has no price".
+ */
+export function ingestBandcampDetail(html: string, now: Date = new Date()): DetailOutcome {
+  if (isBandcampChallenge(html)) return { ok: false, reason: 'bot_challenge' };
+
+  const detail = parseBandcampReleaseDetail(html);
+  if (!detail) return { ok: false, reason: 'unreadable' };
+
+  const { date, precision } = parseReleaseDate(detail.datePublished, now);
+  const offers = aggregateOffers(detail.offers);
+
+  return {
+    ok: true,
+    detail: {
+      releaseDate: date,
+      datePrecision: precision,
+      status: deriveStatus(date, offers.some(o => o.availability === 'preorder'), now),
+      offers,
+    },
+  };
+}
+
+/**
+ * Collapse a page's packages into one offer per format.
+ *
+ * `release_offers` is unique on `(release_source_id, format)`, and Bandcamp routinely sells
+ * several packages of the same format — a standard LP and a coloured variant, a CD and a CD
+ * bundled with a shirt. Rather than pick arbitrarily, keep the **cheapest** price and the
+ * **most available** state across the variants, which is what "vinyl from $25, in stock"
+ * honestly means. Picking the first entry instead would quote a $60 deluxe box as the price
+ * of the record.
+ */
+function aggregateOffers(raw: BandcampDetailOffer[]): IngestedOffer[] {
+  const byFormat = new Map<OfferFormat, IngestedOffer>();
+
+  for (const offer of raw) {
+    const format = mapOfferFormat(offer.format, offer.typeName);
+    const availability = mapAvailability(offer.availability);
+    const existing = byFormat.get(format);
+
+    if (!existing) {
+      byFormat.set(format, { format, price: offer.price, currency: offer.currency, availability });
+      continue;
+    }
+
+    // A missing price loses to a real one; between two real prices the lower wins.
+    if (offer.price !== null && (existing.price === null || offer.price < existing.price)) {
+      existing.price = offer.price;
+      existing.currency = offer.currency;
+    }
+    if (AVAILABILITY_RANK[availability] > AVAILABILITY_RANK[existing.availability]) {
+      existing.availability = availability;
+    }
+  }
+
+  return [...byFormat.values()];
+}
+
+/** Higher wins when variants of one format disagree. Something buyable beats something not. */
+const AVAILABILITY_RANK: Record<OfferAvailability, number> = {
+  available: 3,
+  preorder: 2,
+  sold_out: 1,
+  unknown: 0,
+};
+
+const SCHEMA_FORMATS: Record<string, OfferFormat> = {
+  digitalformat: 'digital',
+  vinylformat: 'vinyl',
+  cdformat: 'cd',
+  cassetteformat: 'cassette',
+};
+
+/**
+ * Which of our formats is this package?
+ *
+ * `musicReleaseFormat` is the authority where it maps cleanly. Bandcamp also sells shirts,
+ * books and bundles, which arrive as formats schema.org has no music equivalent for — so
+ * where the format is unrecognized we read Bandcamp's own package label instead. Anything
+ * still unidentified becomes 'other' rather than being guessed into 'digital': a fan told
+ * "digital $30" about a t-shirt is worse served than one told "other $30".
+ */
+export function mapOfferFormat(
+  schemaFormat: string | null | undefined,
+  typeName: string | null | undefined
+): OfferFormat {
+  const mapped = schemaFormat ? SCHEMA_FORMATS[schemaFormat.toLowerCase().trim()] : undefined;
+  if (mapped) return mapped;
+
+  const label = (typeName ?? '').toLowerCase();
+  if (!label) return 'other';
+
+  if (label.includes('vinyl') || label.includes(' lp')) return 'vinyl';
+  if (label.includes('cassette')) return 'cassette';
+  if (label.includes('compact disc') || /\bcd\b/.test(label)) return 'cd';
+  if (label.includes('book') || label.includes('zine')) return 'book';
+  if (label.includes('shirt') || label.includes('poster') || label.includes('merch')) return 'merch';
+  if (label.includes('digital')) return 'digital';
+
+  return 'other';
+}
+
+/**
+ * schema.org availability onto ours.
+ *
+ * `OnlineOnly` is what Bandcamp uses for a digital download — it means buyable, not
+ * restricted. An unrecognized value stays 'unknown' rather than optimistically 'available':
+ * telling a fan a sold-out record is in stock is the failure that matters here.
+ */
+export function mapAvailability(raw: string | null | undefined): OfferAvailability {
+  switch ((raw ?? '').toLowerCase().trim()) {
+    case 'instock':
+    case 'onlineonly':
+    case 'instoreonly':
+    case 'limitedavailability':
+      return 'available';
+    case 'preorder':
+    case 'presale':
+      return 'preorder';
+    case 'soldout':
+    case 'outofstock':
+    case 'discontinued':
+      return 'sold_out';
+    default:
+      return 'unknown';
+  }
 }
 
 /**

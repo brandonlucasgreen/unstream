@@ -438,6 +438,140 @@ function artworkFrom(item: HTMLElement): string | null {
 }
 
 // ---------------------------------------------------------------------------
+// Bandcamp release pages — the date, the formats and the prices
+// ---------------------------------------------------------------------------
+
+/** One purchasable package on a Bandcamp release page, as the page states it. */
+export interface BandcampDetailOffer {
+  /** schema.org `musicReleaseFormat` with any URL prefix stripped: "VinylFormat", "CDFormat". */
+  format: string | null;
+  /** Bandcamp's own label for the package: "Digital", "2 x Vinyl LP", "Compact Disc (CD)". */
+  typeName: string | null;
+  price: number | null;
+  /** ISO 4217, as given. */
+  currency: string | null;
+  /** schema.org `ItemAvailability`, prefix stripped: "InStock", "SoldOut", "PreOrder". */
+  availability: string | null;
+}
+
+export interface BandcampReleaseDetail {
+  /**
+   * Exactly as the page writes it — "06 Oct 2023 00:00:00 GMT". Left unparsed here so the
+   * sanity bounds live in one place (`parseReleaseDate` in release-utils).
+   */
+  datePublished: string | null;
+  offers: BandcampDetailOffer[];
+}
+
+/**
+ * Read a Bandcamp release page's date and purchase options.
+ *
+ * This is the data the whole Releases feature rests on — *"vinyl $25 · CD $12 · digital $10"* —
+ * and it exists **only** here. The `/music` grid carries identity and artwork but no dates,
+ * formats or prices at all, so a catalog with offers costs one request per release. Nothing
+ * about that is avoidable; it's why the detail pass is budgeted rather than a blanket sweep.
+ *
+ * Read from the page's `application/ld+json` block, not the `data-tralbum` attribute that
+ * also sits in the markup. The tralbum blob is richer (it has stock counts) but it is
+ * Bandcamp's private page state, whereas the JSON-LD is a documented schema.org graph the
+ * site publishes *for machines to read* — a stabler contract, and one we're plainly invited
+ * to use. Where the two disagree in coverage we take the smaller honest answer: see the
+ * standalone-track note below.
+ *
+ * Returns null when there's no usable JSON-LD, which callers must not confuse with "this
+ * release has no offers" — one is us failing to read the page, the other is a fact about
+ * the release.
+ */
+export function parseBandcampReleaseDetail(html: string): BandcampReleaseDetail | null {
+  const graph = firstLdJsonWith(html, node => 'datePublished' in node || 'albumRelease' in node);
+  if (!graph) return null;
+
+  const datePublished = typeof graph.datePublished === 'string' ? graph.datePublished : null;
+
+  // Albums list every package (digital, vinyl, CD, cassette, merch) as an `albumRelease`
+  // entry, each with its own `offers`. Standalone track pages are `MusicRecording` and carry
+  // a date but no offers at all — their price lives only in the tralbum blob, and without a
+  // currency beside it. A price with a guessed currency is worse than no price, so a single
+  // ingests its date and no offer.
+  const releases = Array.isArray(graph.albumRelease) ? graph.albumRelease : [];
+  const offers: BandcampDetailOffer[] = [];
+
+  for (const entry of releases) {
+    if (!isRecord(entry)) continue;
+    for (const offer of asArray(entry.offers)) {
+      if (!isRecord(offer)) continue;
+      offers.push({
+        format: stripSchemaPrefix(entry.musicReleaseFormat),
+        typeName: additionalProperty(entry.additionalProperty, 'type_name'),
+        price: asPrice(offer.price),
+        currency: typeof offer.priceCurrency === 'string' ? offer.priceCurrency.toUpperCase() : null,
+        availability: stripSchemaPrefix(offer.availability),
+      });
+    }
+  }
+
+  return { datePublished, offers };
+}
+
+/** First JSON-LD object in the page that satisfies `predicate`. Malformed blocks are skipped. */
+function firstLdJsonWith(
+  html: string,
+  predicate: (node: Record<string, unknown>) => boolean
+): Record<string, unknown> | null {
+  const root = parse(html);
+  for (const script of root.querySelectorAll('script[type="application/ld+json"]')) {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(script.textContent ?? '');
+    } catch {
+      continue; // a broken block on the page is not a reason to give up on the page
+    }
+    for (const node of asArray(parsed)) {
+      if (isRecord(node) && predicate(node)) return node;
+    }
+  }
+  return null;
+}
+
+/**
+ * "https://schema.org/InStock" and "InStock" mean the same thing, and JSON-LD publishers use
+ * both forms interchangeably. Fold them so callers match on one spelling.
+ */
+function stripSchemaPrefix(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  return trimmed.replace(/^https?:\/\/schema\.org\//, '');
+}
+
+/** Value of a named entry in a schema.org `additionalProperty` list. */
+function additionalProperty(list: unknown, name: string): string | null {
+  for (const entry of asArray(list)) {
+    if (!isRecord(entry)) continue;
+    if (entry.name === name && (typeof entry.value === 'string' || typeof entry.value === 'number')) {
+      return String(entry.value);
+    }
+  }
+  return null;
+}
+
+/** Prices arrive as numbers here, but JSON-LD permits strings, so accept both. */
+function asPrice(value: unknown): number | null {
+  const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN;
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/** JSON-LD lets any property be a single value or an array of them. */
+function asArray(value: unknown): unknown[] {
+  if (value === undefined || value === null) return [];
+  return Array.isArray(value) ? value : [value];
+}
+
+// ---------------------------------------------------------------------------
 // Bandwagon
 // ---------------------------------------------------------------------------
 
