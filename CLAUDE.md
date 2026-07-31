@@ -114,6 +114,7 @@ npm run generate:artists  # Fetch artist list from Wikidata
 npm run generate:data     # Generate artist page JSON + artists-manifest.json via APIs
 npm run generate:social   # Generate social media posts via Buffer
 npm run sync:bandcamp-dates  # Sync Bandcamp release dates
+npm run ingest:try -- <artist>   # Dry-run release ingest against a real Bandcamp page
 npm run sentry:sourcemaps    # Upload source maps to Sentry
 npm run migrate:dry-run   # supabase db push --dry-run against the linked project
 npm run migrate:list      # List applied vs pending migrations
@@ -159,6 +160,34 @@ This is the lesson behind a run of bug fixes (#317–#328) and it applies to eve
 - `cacheGetOrFetch` in `api/functions/cache.ts` takes a `shouldCache` predicate plus an optional short `failureTtlSeconds`. Use them for anything whose failure mode looks like an empty result.
 - Cache keys must not collide across inputs that behave differently. `query_norm` strips punctuation, but punctuation is what generates extra slug candidates — hence the `probed_slugs` column, which records which slugs were actually tried so a cached negative can't hide an artist whose name has a hyphen.
 - A silent `200` with an empty parse is a failure. Report it (Sentry) rather than letting it look like "this artist doesn't exist."
+
+### Testing release ingest locally
+
+Release cataloging only runs when `CONTEXT === 'production'`, because deploy previews and local
+runs both point at the **production** Supabase — so an ungated preview would write real
+`releases` rows and spend the real hourly crawl budget. That means ingest cannot be exercised
+on a deploy preview, and **`CONTEXT=production` is not a valid local workaround** — it would
+have your laptop writing production data.
+
+Use the dry run instead:
+
+```bash
+npm run ingest:try -- sufjanstevens          # table of what would be written
+npm run ingest:try -- sufjanstevens --json   # full row shapes
+```
+
+It runs the real path — the same SSRF-safe fetcher, the same allowlist check, the same parser
+and mapping production uses — and prints the result without touching the database. One Bandcamp
+request per run; don't loop it.
+
+There is deliberately no `--write` flag. Everything with a decision in it lives upstream of the
+database, and `persistReleases` is covered by unit tests plus a migration validated against a
+real Postgres. To test the write path, point `SUPABASE_URL` at a branch database on purpose.
+
+Once ingest is live, `release_catalog_state` is the observability surface:
+`last_attempted_at`, `releases_found`, `last_error`, `consecutive_failures`. A run that suddenly
+finds 0 releases where it previously found 20 is a parser break or a bot challenge, not an
+artist deleting their catalog.
 
 ### Platform registry
 

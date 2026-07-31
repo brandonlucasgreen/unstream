@@ -37,7 +37,11 @@ export async function requestArtistCatalog(
   // crawl budget on behalf of traffic that isn't real. Netlify sets CONTEXT to
   // 'production' | 'deploy-preview' | 'branch-deploy' | 'dev'; it is undefined in tests and
   // under the plain Vite dev server, so a strict equality check also keeps local runs from
-  // touching production data. (To exercise this locally, set CONTEXT=production knowingly.)
+  // touching production data.
+  //
+  // Do NOT set CONTEXT=production to test locally — .env points at the production database,
+  // so that would have a laptop writing real rows. Use `npm run ingest:try <artist>` instead,
+  // which runs the real fetch, parse and mapping and prints what would be written.
   if (process.env.CONTEXT !== 'production') {
     console.log(`[catalog] not requested — context is ${process.env.CONTEXT ?? 'unset'}, not production`);
     return;
