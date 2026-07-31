@@ -96,7 +96,7 @@ export function Header() {
         { to: '/dashboard', label: 'Dashboard', emphasis: true },
         { to: '/settings', label: 'Settings' },
       ]
-    : [{ to: '/login', label: 'Login' }];
+    : [{ to: '/login', label: 'Login', button: true }];
 
   // The sticky header keeps a solid background rather than a blurred one: a
   // backdrop-filter would become the containing block for MobileNav's fixed
@@ -150,9 +150,13 @@ export function Header() {
               <Link
                 key={entry.to}
                 to={entry.to}
-                className={entry.emphasis
-                  ? 'text-accent-primary hover:underline font-medium'
-                  : 'text-text-muted hover:text-text-primary transition-colors'}
+                className={
+                  entry.button
+                    ? 'px-4 py-2 rounded-lg bg-accent-primary text-white font-semibold hover:bg-accent-primary/90 transition-colors shadow-sm shadow-accent-primary/20'
+                    : entry.emphasis
+                      ? 'text-accent-primary hover:underline font-medium'
+                      : 'text-text-muted hover:text-text-primary transition-colors'
+                }
               >
                 {entry.label}
               </Link>

@@ -12,6 +12,7 @@ import { sources, sourceCategories, searchPlatforms, resolveArtistUrl, fetchMusi
 import { analytics } from './services/analytics';
 import { useAuth } from './contexts/AuthContext';
 import { DownloadGrid } from './components/DownloadGrid';
+import { ScreenshotCarousel } from './components/ScreenshotCarousel';
 import { Footer } from './components/Footer';
 import { PlatformIcon } from './components/PlatformIcon';
 import { badgeColors } from './utils/colors';
@@ -262,8 +263,13 @@ function App() {
       <div className={isStandalone ? "pt-20 px-4" : "pt-14 px-4"}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-[30px]">
-            <h1 className="font-display text-4xl md:text-5xl font-bold mb-4 text-text-primary">
-              Directly support the artist you&rsquo;re listening to right now
+            {/* Darker Grotesque's cap height is ~20% shorter than the body face
+                at the same size, so the display sizes are stepped up to keep the
+                old optical weight. Mobile stays at text-4xl regardless: the
+                bigger step runs the hero to four lines and shoves the download
+                buttons toward the fold. */}
+            <h1 className="font-display text-4xl md:text-6xl font-extrabold tracking-tight mb-4 text-text-primary">
+              Directly support the artist you&rsquo;re listening to <span className="marker-word">right now</span>
             </h1>
             {!isStandalone && (
               <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto">
@@ -408,7 +414,7 @@ function App() {
 
               {/* App Features */}
               <div className="bg-surface-secondary rounded-2xl p-6 md:p-8 border border-border">
-                <h2 className="font-display text-2xl md:text-3xl font-semibold text-text-primary mb-6 text-center md:text-left">
+                <h2 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary mb-6 text-center md:text-left heading-accent">
                   Keep track of artists you want to support
                 </h2>
                 <div className="flex flex-col md:flex-row items-start gap-8">
@@ -452,11 +458,7 @@ function App() {
                     </div>
                   </div>
                   <div className="flex-shrink-0 w-full md:w-auto flex justify-center md:justify-start">
-                    <img
-                      src="/unstream-mac-teaser.png"
-                      alt="Unstream for macOS showing artist platforms in the menu bar"
-                      className="w-full md:w-80 rounded-xl shadow-2xl border border-border"
-                    />
+                    <ScreenshotCarousel />
                   </div>
                 </div>
 
@@ -469,7 +471,7 @@ function App() {
               </div>
 
               <div className="bg-surface-secondary rounded-2xl p-6 md:p-8 border border-border">
-                <h2 className="font-display text-2xl md:text-3xl font-semibold text-text-primary mb-6 text-center md:text-left">
+                <h2 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary mb-6 text-center md:text-left heading-accent">
                   Available sources
                 </h2>
 
@@ -532,7 +534,7 @@ function App() {
       <section className="px-4 pb-16">
         <div className="max-w-4xl mx-auto">
           <div className="bg-surface-secondary rounded-2xl p-6 md:p-8 border border-border">
-            <h2 className="font-display text-2xl md:text-3xl font-semibold text-text-primary mb-3 text-center md:text-left">
+            <h2 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary mb-3 text-center md:text-left heading-accent">
               Get in touch
             </h2>
             <p className="text-text-secondary mb-6 text-center md:text-left">
