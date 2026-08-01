@@ -407,6 +407,13 @@ export function ArtistEditPage() {
               >
                 View live profile
               </Link>
+              {' · '}
+              <Link
+                to={`/artist-edit/${form.currentSlug}/releases`}
+                className="text-sm text-accent-primary hover:underline"
+              >
+                Manage releases
+              </Link>
             </div>
             <Link
               to="/artist-dashboard"
