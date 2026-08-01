@@ -160,6 +160,7 @@ describe('mergeStoredArtistsIntoResults', () => {
     type: 'artist',
     platforms: [{ sourceId: 'bandcamp', url: `https://${slug.replace(/-/g, '')}.bandcamp.com` }],
     matchConfidence: 'verified',
+    knownSlug: slug,
   });
 
   it('appends a known (previously-resolved) artist the platforms missed', () => {
@@ -170,11 +171,21 @@ describe('mergeStoredArtistsIntoResults', () => {
     expect(merged.map(r => r.name)).toEqual(['Patrick', 'Patrick Hardy']);
   });
 
-  it('never lets a stored non-claimed artist displace a live result', () => {
-    // The live pipeline just verified this result; the stored copy may be stale.
+  it('attaches a known slug to a live result without displacing it', () => {
+    // The live pipeline just verified this result and wins on identity/freshness,
+    // but its pre-generated /artist/ page slug is still worth surfacing.
     const live = generic('Patrick Hardy');
     const merged = mergeStoredArtistsIntoResults([live], [known('Patrick Hardy', 'patrick-hardy')], 'patrick');
     expect(merged).toHaveLength(1);
     expect(merged[0].id).toBe(live.id);
+    expect(merged[0].knownSlug).toBe('patrick-hardy');
+  });
+
+  it('attaches a known slug through article-insensitive name matching too', () => {
+    const live = generic('Argent Grub');
+    const merged = mergeStoredArtistsIntoResults([live], [known('The Argent Grub', 'the-argent-grub')], 'argent');
+    expect(merged).toHaveLength(1);
+    expect(merged[0].id).toBe(live.id);
+    expect(merged[0].knownSlug).toBe('the-argent-grub');
   });
 });

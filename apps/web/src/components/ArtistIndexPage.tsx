@@ -1,0 +1,159 @@
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import * as Sentry from '@sentry/react';
+
+import { Header } from './Header';
+import { Footer } from './Footer';
+import { Skeleton, SkeletonScreen } from './Skeleton';
+import { ArtistRowsSkeleton } from './LoadingSkeletons';
+
+interface DirectoryArtist {
+  slug: string;
+  name: string;
+  imageUrl: string | null;
+}
+
+interface ArtistIndexPageProps {
+  title: string;
+  subtitle: (count: number) => string;
+  fetchUrl: string;
+  loadingLabel: string;
+  /** Route prefix for an artist's page — '/a' for claimed profiles, '/artist' for pre-generated pages. */
+  linkPrefix: string;
+}
+
+// Shared by the "Indie Artist Index" (/artists, claimed profiles) and
+// "Artists You Know" (/known-artists, pre-generated unclaimed pages) —
+// identical fetch/group/render behavior, differing only in copy, data
+// source, and which artist-page route the cards link to.
+export function ArtistIndexPage({ title, subtitle, fetchUrl, loadingLabel, linkPrefix }: ArtistIndexPageProps) {
+  const [artists, setArtists] = useState<DirectoryArtist[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const res = await fetch(fetchUrl);
+          const ctype = res.headers.get('content-type') || '';
+          if (res.ok && ctype.includes('application/json')) {
+            const data = await res.json();
+            setArtists(data.artists || []);
+            break;
+          }
+          if (attempt === 0 && res.status >= 500) continue;
+        } catch (e) {
+          Sentry.captureException(e, { extra: { context: 'artistIndex.fetch', fetchUrl } });
+          if (attempt === 0) continue;
+        }
+        break;
+      }
+      setLoading(false);
+    }
+    load();
+  }, [fetchUrl]);
+
+  // Group by first letter
+  const grouped: Record<string, DirectoryArtist[]> = {};
+  for (const artist of artists) {
+    const letter = (artist.name[0] || '#').toUpperCase();
+    const key = /[A-Z]/.test(letter) ? letter : '#';
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(artist);
+  }
+  const sortedLetters = Object.keys(grouped).sort((a, b) => {
+    if (a === '#') return 1;
+    if (b === '#') return -1;
+    return a.localeCompare(b);
+  });
+
+  return (
+    <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
+
+      <Header />
+
+      <div className="flex-1 flex flex-col">
+        <div className="pt-8 pb-8 text-center px-6">
+          <h1 className="text-2xl font-bold mb-2">{title}</h1>
+          {!loading && (
+            <p className="text-text-muted text-sm">
+              {subtitle(artists.length)}
+            </p>
+          )}
+        </div>
+
+        {loading ? (
+          <SkeletonScreen label={loadingLabel} className="max-w-3xl mx-auto w-full px-6 pb-12">
+            <div className="flex flex-wrap gap-1.5 justify-center mb-8">
+              {Array.from({ length: 12 }, (_, i) => (
+                <Skeleton key={i} className="w-8 h-8 rounded-lg" />
+              ))}
+            </div>
+            <Skeleton className="h-6 w-8 mb-3" />
+            <ArtistRowsSkeleton count={8} />
+          </SkeletonScreen>
+        ) : (
+          <>
+            {/* Letter navigation */}
+            <div className="max-w-3xl mx-auto w-full px-6 mb-8">
+              <div className="flex flex-wrap gap-1.5 justify-center">
+                {sortedLetters.map(letter => (
+                  <a
+                    key={letter}
+                    href={`#letter-${letter}`}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-bg-secondary border border-border text-sm font-semibold hover:border-accent-primary transition-colors"
+                  >
+                    {letter}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Artist groups */}
+            <div className="max-w-3xl mx-auto w-full px-6 pb-12">
+              <div className="space-y-8">
+                {sortedLetters.map(letter => (
+                  <div key={letter} id={`letter-${letter}`} className="scroll-mt-20">
+                    <h2 className="text-xl font-bold pb-2 border-b border-border mb-1">{letter}</h2>
+                    <div className="grid gap-0.5">
+                      {grouped[letter].map(artist => (
+                        // React Router <Link>: SPA-internal navigation keeps the back button
+                        // working on Safari 26 (UNS-99). The rich profile lives in the edge
+                        // function today; UNS-100 ports it to React.
+                        <Link
+                          key={artist.slug}
+                          to={`${linkPrefix}/${artist.slug}`}
+                          className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg hover:bg-bg-secondary border border-transparent hover:border-border transition-colors"
+                        >
+                          <div className="w-9 h-9 rounded-full bg-bg-secondary flex-shrink-0 flex items-center justify-center font-semibold text-sm text-text-muted overflow-hidden">
+                            {artist.imageUrl ? (
+                              <img
+                                src={artist.imageUrl}
+                                alt=""
+                                className="w-full h-full object-cover rounded-full"
+                                onError={(e) => { const el = e.target as HTMLImageElement; el.style.display = 'none'; el.parentElement!.querySelector('.fallback')?.classList.remove('hidden'); }}
+                              />
+                            ) : null}
+                            <span className={artist.imageUrl ? 'hidden fallback' : ''}>
+                              {artist.name[0]?.toUpperCase() || '?'}
+                            </span>
+                          </div>
+                          <span className="text-sm font-medium">{artist.name}</span>
+                          <svg className="ml-auto flex-shrink-0 w-3.5 h-3.5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      <Footer />
+    </div>
+  );
+}

@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-export async function handler() {
+export async function handler(event: { queryStringParameters?: Record<string, string> }) {
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
 
@@ -9,6 +9,34 @@ export async function handler() {
   }
 
   const supabase = createClient(supabaseUrl, supabaseKey);
+
+  // scope=known lists unclaimed-but-verified artists — the pre-generated
+  // /artist/ pages backfilled from data/artists-manifest.json (#384/#385).
+  // match_confidence is a single, mutually-exclusive column, so this needs
+  // no join against artist_profiles the way the claimed path below does.
+  if (event.queryStringParameters?.scope === 'known') {
+    const { data: artistRows, error } = await supabase
+      .from('artists')
+      .select('slug, name, image_url')
+      .eq('match_confidence', 'verified');
+
+    if (error) {
+      return { statusCode: 500, body: JSON.stringify({ error: 'Failed to fetch artists' }) };
+    }
+
+    const artists = (artistRows || [])
+      .map(a => ({ slug: a.slug, name: a.name, imageUrl: a.image_url || null }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    return {
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=300, s-maxage=300',
+      },
+      body: JSON.stringify({ artists }),
+    };
+  }
 
   // Fetch all verified (claimed) artist profiles
   const { data: profiles, error: profileError } = await supabase

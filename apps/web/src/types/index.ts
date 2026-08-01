@@ -94,6 +94,8 @@ export interface SearchResult {
   musicBrainzConfirmed?: boolean;
   // Slug for claimed artist page (/a/{slug})
   claimedSlug?: string;
+  // Slug for an unclaimed-but-known artist's pre-generated page (/artist/{slug})
+  knownSlug?: string;
   // Wikipedia bio summary from MusicBrainz enrichment
   wikipediaSummary?: string;
   wikipediaUrl?: string;
