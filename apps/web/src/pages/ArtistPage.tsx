@@ -8,6 +8,7 @@ import { NotFoundCard } from '../components/NotFoundCard';
 import { RichArtistProfile } from '../components/RichArtistProfile';
 import { UnclaimedQuietCard } from '../components/UnclaimedQuietCard';
 import { LoginInterstitial } from '../components/LoginInterstitial';
+import { AdminCatalogButton } from '../components/AdminCatalogButton';
 import { analytics } from '../services/analytics';
 import { useAuth } from '../contexts/AuthContext';
 import type { ArtistPagePayload } from '../types/artist-page';
@@ -124,6 +125,8 @@ export function ArtistPage() {
               disabledSave={!artistId}
             />
           )}
+          {/* Renders nothing unless a signed-in admin is looking. */}
+          {artistId && <AdminCatalogButton artistId={artistId} />}
         </div>
       </main>
       <Footer />
