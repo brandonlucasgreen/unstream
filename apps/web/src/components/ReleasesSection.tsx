@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { cheapestOfferSummary, formatReleaseDate } from '../../../../api/shared/release-display';
 import type { ArtistPagePayload } from '../types/artist-page';
 
@@ -17,6 +16,13 @@ type Release = NonNullable<ArtistPagePayload['releases']>[number];
  *
  * The formatting helpers come from `api/shared/release-display.ts`, which the crawler-side edge
  * renderer also uses, so the two can't drift on what a price or a partial date looks like.
+ *
+ * **Rows are plain `<a>`, never react-router `<Link>`.** `/a/{artist}/{release}` is rendered by
+ * the `release-page` edge function and by nothing else — the SPA has no route for a two-segment
+ * `/a/` path, and there is no catch-all `<Route>`, so a client-side navigation there matches
+ * nothing and renders a blank page. It also strands history: the URL changes, React renders
+ * nothing, and Back has nowhere sensible to go. A real navigation reaches the one renderer that
+ * exists, which is also what makes an in-app click and a pasted link produce the same page.
  */
 export function ReleasesSection({
   releases,
@@ -57,8 +63,8 @@ function ReleaseRow({ release, artistSlug }: { release: Release; artistSlug: str
   const meta = [type, date, cheapestOfferSummary(release.offers)].filter(Boolean).join(' · ');
 
   return (
-    <Link
-      to={`/a/${encodeURIComponent(artistSlug)}/${encodeURIComponent(release.slug)}`}
+    <a
+      href={`/a/${encodeURIComponent(artistSlug)}/${encodeURIComponent(release.slug)}`}
       className="flex items-center gap-3 px-3 py-2 rounded-xl border border-border hover:bg-bg-hover transition-colors"
     >
       {release.artworkUrl ? (
@@ -87,6 +93,6 @@ function ReleaseRow({ release, artistSlug }: { release: Release; artistSlug: str
           Coming
         </span>
       )}
-    </Link>
+    </a>
   );
 }
