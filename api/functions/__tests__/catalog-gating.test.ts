@@ -51,8 +51,8 @@ const originalEnv = { ...process.env };
 beforeEach(() => {
   vi.clearAllMocks();
   process.env.INTERNAL_FUNCTION_SECRET = SECRET;
-  process.env.CONTEXT = 'production';
-  process.env.DEPLOY_PRIME_URL = 'https://unstream.stream';
+  process.env.RELEASE_CATALOG_ENABLED = 'true';
+  process.env.URL = 'https://unstream.stream';
   mocks.claimArtistForCatalog.mockResolvedValue(false); // don't do real work by default
   vi.stubGlobal('fetch', mocks.fetch);
 });
@@ -98,9 +98,11 @@ describe('catalog-artist-background auth', () => {
   });
 });
 
-describe('catalog-artist-background is production-only', () => {
-  it.each(['deploy-preview', 'branch-deploy', 'dev'])('refuses in context %s', async context => {
-    process.env.CONTEXT = context;
+describe('catalog-artist-background refuses where cataloging is disabled', () => {
+  // Checked at the writer as well as the caller: the caller-side gate stops a preview asking,
+  // this one holds the guarantee no matter who asks, since this is what writes to production.
+  it('refuses when RELEASE_CATALOG_ENABLED is unset', async () => {
+    delete process.env.RELEASE_CATALOG_ENABLED;
 
     const r = await post({ authorization: `Bearer ${SECRET}` }, { artistIds: [ARTIST] });
 
@@ -108,13 +110,13 @@ describe('catalog-artist-background is production-only', () => {
     expect(mocks.claimArtistForCatalog).not.toHaveBeenCalled();
   });
 
-  it('refuses when CONTEXT is unset', async () => {
-    delete process.env.CONTEXT;
+  it.each(['false', 'yes', ''])('refuses when the flag is %o', async value => {
+    process.env.RELEASE_CATALOG_ENABLED = value;
     const r = await post({ authorization: `Bearer ${SECRET}` }, { artistIds: [ARTIST] });
     expect(r.statusCode).toBe(403);
   });
 
-  it('proceeds in production', async () => {
+  it('proceeds when enabled', async () => {
     const r = await post({ authorization: `Bearer ${SECRET}` }, { artistIds: [ARTIST] });
     expect(r.statusCode).toBe(200);
     expect(mocks.claimArtistForCatalog).toHaveBeenCalledWith(ARTIST, 'searched');
@@ -138,17 +140,21 @@ describe('catalog-artist-background is production-only', () => {
   });
 });
 
-describe('requestArtistCatalog is production-only', () => {
-  it.each(['deploy-preview', 'branch-deploy', 'dev'])('makes no request in context %s', async context => {
-    process.env.CONTEXT = context;
-
+describe('requestArtistCatalog only runs where cataloging is enabled', () => {
+  // The gate this replaced tested `CONTEXT !== 'production'`, which is unimplementable:
+  // Netlify exposes only URL, SITE_NAME and SITE_ID to a function at runtime, so CONTEXT is
+  // undefined in every deployed function and the check refused everything, in production,
+  // always. The test passed the whole time because it set CONTEXT itself.
+  it('makes no request when RELEASE_CATALOG_ENABLED is unset', async () => {
+    delete process.env.RELEASE_CATALOG_ENABLED;
     await requestArtistCatalog([ARTIST], 'saved');
-
     expect(mocks.fetch).not.toHaveBeenCalled();
   });
 
-  it('makes no request when CONTEXT is unset', async () => {
-    delete process.env.CONTEXT;
+  // Unset means off, and so does anything that isn't exactly 'true' — a crawl budget that fails
+  // open is worse than one that fails closed.
+  it.each(['false', '1', 'yes', ''])('makes no request when the flag is %o', async value => {
+    process.env.RELEASE_CATALOG_ENABLED = value;
     await requestArtistCatalog([ARTIST], 'saved');
     expect(mocks.fetch).not.toHaveBeenCalled();
   });

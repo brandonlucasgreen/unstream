@@ -46,7 +46,7 @@ beforeEach(() => {
   mocks.authenticateAdmin.mockResolvedValue({ userId: 'u1', email: 'admin@example.com' });
   mocks.maybeSingle.mockResolvedValue({ data: null, error: null });
   vi.stubGlobal('fetch', mocks.fetch);
-  process.env.CONTEXT = 'production';
+  process.env.RELEASE_CATALOG_ENABLED = 'true';
   process.env.INTERNAL_FUNCTION_SECRET = 'secret';
   process.env.URL = 'https://unstream.stream';
 });
@@ -54,7 +54,7 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals();
   vi.clearAllMocks();
-  delete process.env.CONTEXT;
+  delete process.env.RELEASE_CATALOG_ENABLED;
   delete process.env.INTERNAL_FUNCTION_SECRET;
   delete process.env.URL;
 });
@@ -112,11 +112,11 @@ describe('POST — starting a crawl', () => {
   // Netlify answers 202 to a background invocation the instant it is queued and discards the
   // handler's response — so any refusal we can predict has to be caught here, or it reaches the
   // UI as a crawl that simply never finishes.
-  it('refuses outside production rather than queuing a crawl that will be rejected', async () => {
-    process.env.CONTEXT = 'deploy-preview';
+  it('refuses where cataloging is disabled rather than queuing a crawl that will be rejected', async () => {
+    delete process.env.RELEASE_CATALOG_ENABLED;
     const response = await post();
     expect(response.statusCode).toBe(503);
-    expect(JSON.parse(response.body).error).toContain('production');
+    expect(JSON.parse(response.body).error).toContain('RELEASE_CATALOG_ENABLED');
     expect(mocks.fetch).not.toHaveBeenCalled();
   });
 
