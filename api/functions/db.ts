@@ -150,8 +150,11 @@ export async function getArtistProfileBySlug(slug: string): Promise<ArtistProfil
       .single();
 
     if (artistError || !artist) return null;
-    if (artist.match_confidence !== 'claimed') return null;
 
+    // Deliberately no `match_confidence === 'claimed'` filter. Unclaimed artists have a real row
+    // and real links, and /artist/:slug renders them as the quiet card — the same page the
+    // artist-page-static edge function serves crawlers, which has never had this filter either.
+    // Gating here 404'd every unclaimed artist page for anyone running JS (see #369).
     const artistRow = artist as ArtistRow;
     const artistId = artistRow.id;
 

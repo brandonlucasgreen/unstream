@@ -1,5 +1,6 @@
 // API endpoint: GET /api/artist-page?slug=...
-// Returns the full rich-profile payload for a claimed artist as JSON.
+// Returns an artist's page payload as JSON — the rich profile for a claimed artist, the links
+// and releases for an unclaimed one.
 // This is the data source for the React SPA artist page (UNS-102).
 
 import { getArtistProfileBySlug, getArtistReleases } from './db';
@@ -38,7 +39,7 @@ export async function handler(event: { queryStringParameters?: Record<string, st
   try {
     const bundle = await getArtistProfileBySlug(slug);
 
-    // getArtistProfileBySlug returns null if artist not found or not claimed
+    // getArtistProfileBySlug returns null only if there's no artist row for this slug
     if (!bundle) {
       return {
         statusCode: 404,
@@ -98,11 +99,16 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       };
     });
 
+    // Same claimed test the artist-page-static edge function applies, so the two renderers of
+    // this URL agree on which card a fan sees: a profile row alone isn't enough, the artist row
+    // has to be claimed too.
+    const isClaimed = artistRow.match_confidence === 'claimed' && !!profile?.verified_at;
+
     // Sanitize the featured embed
     const featuredEmbed = sanitizeEmbed(profile?.featured_embed ?? null);
 
     // Build the image URL: custom > artist row > null
-    const imageUrl = profile?.custom_image_url || artistRow.image_url || null;
+    const imageUrl = (isClaimed && profile?.custom_image_url) || artistRow.image_url || null;
 
     // Releases. The page paginates these ten at a time rather than listing them all, so the cap
     // here bounds the payload, not what a fan can reach: six pages, which covers every catalogue
@@ -125,7 +131,8 @@ export async function handler(event: { queryStringParameters?: Record<string, st
         bio: profile.bio,
         customImageUrl: profile.custom_image_url,
         featuredEmbed,
-        verifiedAt: profile.verified_at,
+        // The SPA picks RichArtistProfile vs UnclaimedQuietCard off this field.
+        verifiedAt: isClaimed ? profile.verified_at : null,
       } : null,
       links,
       // Indexes into `links` above which a horizontal divider is drawn.
