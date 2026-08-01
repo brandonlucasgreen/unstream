@@ -33,9 +33,22 @@ interface CatalogState {
   consecutive_failures: number;
 }
 
-async function readState(artistId: string): Promise<CatalogState | null> {
+/**
+ * Read this artist's catalog state.
+ *
+ * Deliberately three-valued, not two. "We couldn't ask" and "we asked and this artist has never
+ * been catalogued" are different facts, and collapsing them into one `null` makes a broken
+ * database read render as a confident "Never catalogued" — the same shape as the bug class the
+ * "never cache uncertainty" principle exists to prevent. This whole feature exists to give
+ * cataloging an observable surface, so an unreadable one has to say so.
+ */
+type StateResult =
+  | { ok: true; state: CatalogState | null }
+  | { ok: false; reason: string };
+
+async function readState(artistId: string): Promise<StateResult> {
   const client = getClient();
-  if (!client) return null;
+  if (!client) return { ok: false, reason: 'Supabase is not configured on this deploy' };
 
   const { data, error } = await client
     .from('release_catalog_state')
@@ -45,9 +58,9 @@ async function readState(artistId: string): Promise<CatalogState | null> {
 
   if (error) {
     console.error('[admin-catalog] state read failed:', error.message);
-    return null;
+    return { ok: false, reason: 'Could not read catalog state' };
   }
-  return (data as CatalogState | null) ?? null;
+  return { ok: true, state: (data as CatalogState | null) ?? null };
 }
 
 /**
@@ -106,15 +119,40 @@ export async function handler(event: {
   }
 
   if (event.httpMethod === 'GET') {
+    const result = await readState(artistId);
+    if (!result.ok) {
+      // 503, not a 200 carrying a null state: the caller must be able to tell "we couldn't ask"
+      // from "never catalogued", or it will report the second when the first is true.
+      return {
+        statusCode: 503,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: result.reason }),
+      };
+    }
     return {
       statusCode: 200,
       headers: CORS_HEADERS,
-      body: JSON.stringify({ admin: true, state: await readState(artistId) }),
+      body: JSON.stringify({ admin: true, state: result.state }),
     };
   }
 
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Method not allowed' }) };
+  }
+
+  // Every reason the background function would refuse, checked here instead — because its
+  // answer never comes back. Netlify's dispatcher returns 202 to the caller the instant it
+  // accepts a background invocation and discards whatever the handler returns, so a 401 from a
+  // bad secret and a 403 from a non-production context both reach us as 202. Anything not
+  // checked up front is indistinguishable from a slow crawl.
+  if (process.env.CONTEXT !== 'production') {
+    return {
+      statusCode: 503,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({
+        error: `Cataloging only runs in production (this deploy is "${process.env.CONTEXT ?? 'unset'}").`,
+      }),
+    };
   }
 
   const secret = process.env.INTERNAL_FUNCTION_SECRET;
@@ -135,20 +173,17 @@ export async function handler(event: {
 
   try {
     const trigger: CatalogTrigger = 'saved'; // the larger hourly budget — this is a deliberate act
-    const response = await fetch(`${siteUrl}/.netlify/functions/catalog-artist-background`, {
+    await fetch(`${siteUrl}/.netlify/functions/catalog-artist-background`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${secret}` },
       body: JSON.stringify({ artistIds: [artistId], trigger }),
     });
 
-    // A background function answers 202 the moment it accepts the job — including when it is
-    // about to refuse on a bad secret. This status is a handshake, not an outcome, so the client
-    // polls the GET above for what actually happened.
-    return {
-      statusCode: 202,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ started: response.status === 202 || response.ok }),
-    };
+    // Nothing useful to report back from that response, and deliberately no `started` flag:
+    // the dispatcher's 202 says only that the request was queued, so any boolean derived from
+    // it would read as "the crawl was accepted" while being true even when it wasn't. The
+    // client polls the GET above, which reports what actually happened.
+    return { statusCode: 202, headers: CORS_HEADERS, body: JSON.stringify({ queued: true }) };
   } catch (error) {
     Sentry.captureException(error);
     return {

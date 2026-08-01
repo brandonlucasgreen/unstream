@@ -24,6 +24,8 @@ interface CatalogState {
   last_error: string | null;
 }
 
+type ReadResult = { ok: true; state: CatalogState | null } | { ok: false; reason: string };
+
 /** How long to keep asking before giving up. A full catalogue with prices takes a few minutes. */
 const MAX_POLLS = 24;
 const POLL_INTERVAL_MS = 5000;
@@ -44,15 +46,25 @@ export function AdminCatalogButton({ artistId }: { artistId: string }) {
   const [status, setStatus] = useState('');
   const [running, setRunning] = useState(false);
   const lastRunAt = useRef<string | null>(null);
+  /** Why the last read failed, so an exhausted poll can report that instead of guessing. */
+  const lastFailure = useRef<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const readState = useCallback(async (): Promise<CatalogState | null> => {
+  /**
+   * Three-valued on purpose. "We couldn't ask" and "this artist has never been catalogued" are
+   * different facts, and a single `null` for both makes a failed request render as a confident
+   * "Never catalogued" — the exact thing this control exists to stop being ambiguous.
+   */
+  const readState = useCallback(async (): Promise<ReadResult> => {
     const response = await fetch(`/api/admin/catalog-artist?artistId=${encodeURIComponent(artistId)}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (!response.ok) return null;
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      return { ok: false, reason: body.error || 'Could not read catalog state' };
+    }
     const data = await response.json();
-    return (data.state as CatalogState | null) ?? null;
+    return { ok: true, state: (data.state as CatalogState | null) ?? null };
   }, [artistId, token]);
 
   useEffect(() => {
@@ -60,12 +72,18 @@ export function AdminCatalogButton({ artistId }: { artistId: string }) {
     let cancelled = false;
 
     readState()
-      .then(state => {
+      .then(result => {
         if (cancelled) return;
-        lastRunAt.current = state?.last_catalogued_at ?? null;
-        setStatus(describe(state));
+        if (!result.ok) {
+          setStatus(result.reason);
+          return;
+        }
+        lastRunAt.current = result.state?.last_catalogued_at ?? null;
+        setStatus(describe(result.state));
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!cancelled) setStatus('Could not read catalog state');
+      });
 
     return () => {
       cancelled = true;
@@ -86,13 +104,24 @@ export function AdminCatalogButton({ artistId }: { artistId: string }) {
     function scheduleNext() {
       attempt += 1;
       if (attempt > MAX_POLLS) {
-        setStatus('Still running — check back shortly');
+        // Say which it was. "Still running" on top of a run of failed reads would be a guess
+        // about the crawl based on no information about the crawl.
+        setStatus(lastFailure.current ?? 'Still running — check back shortly');
         setRunning(false);
         return;
       }
       timer.current = setTimeout(async () => {
         try {
-          const state = await readState();
+          const result = await readState();
+          if (!result.ok) {
+            // A failed read is not "still running" — but it may be transient, so keep asking
+            // and let the message say which of the two we're looking at.
+            lastFailure.current = result.reason;
+            scheduleNext();
+            return;
+          }
+          lastFailure.current = null;
+          const { state } = result;
           if (state?.last_catalogued_at && state.last_catalogued_at !== lastRunAt.current) {
             lastRunAt.current = state.last_catalogued_at;
             setStatus(describe(state));
@@ -106,6 +135,7 @@ export function AdminCatalogButton({ artistId }: { artistId: string }) {
           }
         } catch {
           // A dropped request mid-crawl isn't an answer; keep asking.
+          lastFailure.current = 'Could not read catalog state';
         }
         scheduleNext();
       }, POLL_INTERVAL_MS);
@@ -125,9 +155,10 @@ export function AdminCatalogButton({ artistId }: { artistId: string }) {
       });
       const body = await response.json().catch(() => ({}));
 
-      // 202 is only a handshake — a Netlify background function answers it the instant it
-      // accepts the job, including when it is about to refuse. Polling below reports what
-      // actually happened.
+      // 202 means queued, nothing more: Netlify answers it the instant a background
+      // invocation is accepted and discards whatever the handler returns. The endpoint checks
+      // the refusals it can predict (non-production context, missing secret) and reports them
+      // as real errors above; everything else is settled by polling.
       if (!response.ok && response.status !== 202) {
         setStatus(body.error || 'Could not start');
         setRunning(false);
