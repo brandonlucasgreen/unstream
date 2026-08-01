@@ -15,10 +15,12 @@ import {
   claimArtistForCatalog,
   getArtistForCatalog,
   persistDiscogsReleases,
+  persistFaircampReleases,
   persistMusicBrainzEnrichment,
   persistReleaseDetail,
   persistReleases,
   recordCatalogOutcome,
+  attachDiscoveredSource,
   type CatalogTrigger,
   type PersistedRelease,
 } from './db';
@@ -26,10 +28,14 @@ import { isUrlHostnameAllowed } from './middleware';
 import { safeFetch, safeHostname } from './safe-fetch';
 import {
   bandcampMusicUrl,
+  buildFaircampRelease,
+  findDiscoveredReleaseLinks,
   ingestBandcampDetail,
   ingestBandcampGrid,
   ingestDiscogsMasters,
   ingestDiscogsReleaseDetail,
+  ingestFaircampHomeLinks,
+  ingestFaircampReleasePage,
   ingestMusicBrainzReleaseGroups,
   type DiscogsArtistReleaseEntry,
   type DiscogsReleaseDetailRaw,
@@ -111,11 +117,31 @@ interface DiscogsBudget {
 }
 
 /**
- * Stop *starting* Discogs or MusicBrainz work for a new artist this long into the invocation —
- * leaving headroom on top of Bandcamp's own 9-minute detail budget so a 25-artist batch ends
- * by finishing rather than being killed mid-write.
+ * Stop *starting* Discogs, MusicBrainz, Faircamp or official-site work for a new artist this
+ * long into the invocation — leaving headroom on top of Bandcamp's own 9-minute detail budget
+ * so a 25-artist batch ends by finishing rather than being killed mid-write.
  */
 const ENRICHMENT_CUTOFF_MS = 13 * 60_000;
+
+// --- Faircamp + discovered-link budgets ---------------------------------------
+//
+// Unlike Discogs and MusicBrainz, Faircamp has no centralized rate limit to respect — every
+// instance is a different self-hosted domain — so the ceiling here is about not fetching an
+// unbounded number of pages per artist, not about a shared API's tolerance.
+
+/** One request per candidate release page, spaced out rather than in a burst. */
+const DELAY_BETWEEN_FAIRCAMP_FETCHES_MS = 1_000;
+
+/** Bounds cost for an artist with an unusually large Faircamp archive. */
+const MAX_FAIRCAMP_RELEASES_PER_ARTIST = 20;
+
+/** Invocation-wide, homepage + release-page requests combined, across every artist in the batch. */
+const MAX_FAIRCAMP_FETCHES_PER_RUN = 100;
+
+interface FaircampBudget {
+  fetchesLeft: number;
+  deadline: number;
+}
 
 function isAuthorized(header: string | undefined): boolean {
   // Reuses the secret this repo already has for internal function-to-function calls
@@ -183,6 +209,10 @@ export async function handler(event: {
     fetchesLeft: MAX_DISCOGS_FETCHES_PER_RUN,
     deadline: Date.now() + ENRICHMENT_CUTOFF_MS,
   };
+  const faircampBudget: FaircampBudget = {
+    fetchesLeft: MAX_FAIRCAMP_FETCHES_PER_RUN,
+    deadline: Date.now() + ENRICHMENT_CUTOFF_MS,
+  };
   const enrichmentDeadline = Date.now() + ENRICHMENT_CUTOFF_MS;
 
   for (const [index, artistId] of artistIds.entries()) {
@@ -196,7 +226,7 @@ export async function handler(event: {
     if (index > 0) await sleep(DELAY_BETWEEN_ARTISTS_MS);
 
     try {
-      const found = await catalogArtist(artistId, budget, discogsBudget, enrichmentDeadline);
+      const found = await catalogArtist(artistId, budget, discogsBudget, faircampBudget, enrichmentDeadline);
       if (found === null) {
         skipped++;
       } else {
@@ -214,20 +244,20 @@ export async function handler(event: {
 }
 
 /**
- * Catalog one artist across every source we have a link for. Returns the total release count
- * (Bandcamp + Discogs combined), or null when there was nothing to do at all.
+ * Catalog one artist across every source we have a link for. Returns the total release count,
+ * or null when there was nothing to do at all.
  *
- * The three sources are deliberately independent: Bandcamp remains the one whose own failures
- * can still surface as a thrown error (see `catalogBandcamp`), but that error is caught here
- * rather than left to unwind the whole function, because a Bandcamp bot challenge has nothing
- * to do with whether Discogs or MusicBrainz can answer this run. Only when *nothing* came of
- * the run — Bandcamp failed and Discogs/MusicBrainz found nothing to add — does the run count
- * as a failure against the backoff counter.
+ * Bandcamp remains the one source whose own failures can still surface as a thrown error (see
+ * `catalogBandcamp`), but that error is caught here rather than left to unwind the whole
+ * function — a Bandcamp bot challenge has nothing to do with whether the other sources can
+ * answer this run. Only when *nothing* came of the run — Bandcamp failed and nothing else
+ * added anything — does the run count as a failure against the backoff counter.
  */
 async function catalogArtist(
   artistId: string,
   budget: DetailBudget,
   discogsBudget: DiscogsBudget,
+  faircampBudget: FaircampBudget,
   enrichmentDeadline: number
 ): Promise<number | null> {
   const artist = await getArtistForCatalog(artistId);
@@ -235,8 +265,8 @@ async function catalogArtist(
     await recordCatalogOutcome(artistId, { error: 'artist not found' });
     return null;
   }
-  if (!artist.bandcampUrl && !artist.discogsUrl) {
-    await recordCatalogOutcome(artistId, { error: 'no bandcamp or discogs link stored' });
+  if (!artist.bandcampUrl && !artist.discogsUrl && !artist.faircampUrl) {
+    await recordCatalogOutcome(artistId, { error: 'no bandcamp, discogs, or faircamp link stored' });
     return null;
   }
 
@@ -263,6 +293,12 @@ async function catalogArtist(
       totalFound += await catalogDiscogs(artistId, artist.discogsUrl, discogsBudget);
     }
     await catalogMusicBrainz(artistId, artist.name);
+    if (artist.faircampUrl) {
+      totalFound += await catalogFaircamp(artistId, artist.faircampUrl, faircampBudget);
+    }
+    if (artist.officialSiteUrl) {
+      await catalogOfficialSite(artistId, artist.officialSiteUrl);
+    }
   }
 
   if (bandcampError && totalFound === 0) {
@@ -454,6 +490,109 @@ async function catalogMusicBrainz(artistId: string, artistName: string): Promise
     if (touched > 0) console.log(`[catalog] musicbrainz enriched ${touched} release(s) for artist ${artistId}`);
   } catch (error) {
     console.warn('[catalog] musicbrainz enrichment failed:', error instanceof Error ? error.message : String(error));
+  }
+}
+
+/**
+ * The Faircamp pass: fetch the artist's homepage, discover candidate release links, then fetch
+ * each one (budgeted) for title and artwork via `ingestFaircampReleasePage`. Every page fetched
+ * along the way is also scanned for discovered links to platforms we can't fetch directly
+ * (Subvert today) — an artist's Faircamp page is exactly the kind of place a "buy this
+ * elsewhere" link shows up.
+ *
+ * Never throws — an unreachable or oddly-themed Faircamp instance is worth logging, not worth
+ * failing an artist whose Bandcamp pass may have already succeeded this run.
+ */
+async function catalogFaircamp(artistId: string, faircampUrl: string, budget: FaircampBudget): Promise<number> {
+  try {
+    if (budget.fetchesLeft <= 0 || Date.now() > budget.deadline) return 0;
+    budget.fetchesLeft--;
+
+    const homeResponse = await safeFetch(faircampUrl, 10_000);
+    if (!homeResponse?.ok) return 0;
+
+    const landedUrl = homeResponse.url || faircampUrl;
+    const homeHtml = await homeResponse.text();
+    await scanForDiscoveredLinks(artistId, homeHtml, landedUrl);
+
+    const candidates = ingestFaircampHomeLinks(homeHtml, landedUrl).slice(0, MAX_FAIRCAMP_RELEASES_PER_ARTIST);
+    if (candidates.length === 0) return 0;
+
+    const takenSlugs = new Set<string>();
+    const toPersist: Parameters<typeof persistFaircampReleases>[1] = [];
+
+    for (const candidate of candidates) {
+      if (budget.fetchesLeft <= 0 || Date.now() > budget.deadline) {
+        console.log(`[catalog] faircamp budget spent for artist ${artistId}`);
+        break;
+      }
+      if (toPersist.length > 0) await sleep(DELAY_BETWEEN_FAIRCAMP_FETCHES_MS);
+      budget.fetchesLeft--;
+
+      try {
+        const response = await safeFetch(candidate.url, 10_000);
+        if (!response?.ok) continue;
+
+        const html = await response.text();
+        const page = ingestFaircampReleasePage(html);
+        if (page) {
+          const release = buildFaircampRelease(page, candidate.url, takenSlugs);
+          if (release) {
+            takenSlugs.add(release.slug);
+            toPersist.push(release);
+          }
+        }
+
+        await scanForDiscoveredLinks(artistId, html, response.url || candidate.url);
+      } catch (error) {
+        console.warn(
+          `[catalog] faircamp release fetch failed for ${safeHostname(candidate.url)}:`,
+          error instanceof Error ? error.message : String(error)
+        );
+      }
+    }
+
+    if (toPersist.length === 0) return 0;
+
+    const written = await persistFaircampReleases(artistId, toPersist);
+    return written.length;
+  } catch (error) {
+    console.warn('[catalog] faircamp ingest failed:', error instanceof Error ? error.message : String(error));
+    return 0;
+  }
+}
+
+/**
+ * Scan already-fetched HTML for discovered links (Subvert today — see
+ * `findDiscoveredReleaseLinks`) and attach any confident, exact-title match. Never throws, and
+ * never fetches anything itself — the whole point is surfacing links from pages fetched for a
+ * different reason.
+ */
+async function scanForDiscoveredLinks(artistId: string, html: string, pageUrl: string): Promise<void> {
+  try {
+    for (const link of findDiscoveredReleaseLinks(html, pageUrl)) {
+      const attached = await attachDiscoveredSource(artistId, link.platform, link.url, link.matchKey);
+      if (attached) console.log(`[catalog] discovered ${link.platform} link attached for artist ${artistId}`);
+    }
+  } catch (error) {
+    console.warn('[catalog] discovered-link scan failed:', error instanceof Error ? error.message : String(error));
+  }
+}
+
+/**
+ * The official-site pass: one fetch, scanned only for discovered links. An arbitrary personal
+ * website has no structure reliable enough to parse a whole release from directly — unlike
+ * Faircamp, this never creates a release on its own, only adds a source to one that already
+ * exists.
+ */
+async function catalogOfficialSite(artistId: string, officialSiteUrl: string): Promise<void> {
+  try {
+    const response = await safeFetch(officialSiteUrl, 10_000);
+    if (!response?.ok) return;
+    const html = await response.text();
+    await scanForDiscoveredLinks(artistId, html, response.url || officialSiteUrl);
+  } catch (error) {
+    console.warn('[catalog] official-site scan failed:', error instanceof Error ? error.message : String(error));
   }
 }
 

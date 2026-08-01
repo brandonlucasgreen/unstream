@@ -16,6 +16,10 @@ import {
   ingestDiscogsReleaseDetail,
   mapDiscogsFormatName,
   ingestMusicBrainzReleaseGroups,
+  ingestFaircampHomeLinks,
+  ingestFaircampReleasePage,
+  buildFaircampRelease,
+  findDiscoveredReleaseLinks,
   type DiscogsArtistReleaseEntry,
 } from '../release-ingest';
 
@@ -582,5 +586,150 @@ describe('ingestMusicBrainzReleaseGroups', () => {
       { id: '44444444-4444-4444-4444-444444444444', title: '...' },
     ]);
     expect(out).toHaveLength(0);
+  });
+});
+
+// Fixtures below are trimmed from a real, live Faircamp instance (verified 2026-08-01) rather
+// than guessed — Faircamp's own markup has no JSON-LD, no <time> tag, and no pubDate in its
+// RSS feed, so the parser is deliberately narrow: identity and artwork only.
+const FAIRCAMP_HOME_HTML = `<!doctype html><html><body>
+  <nav>
+    <a href="./">Home</a>
+    <a href="#content">Skip</a>
+    <a href="subscribe/">Subscribe</a>
+  </nav>
+  <ol>
+    <li><a href="ruined-castle/">RUINED CASTLE</a></li>
+    <li><a href="infinite-normal/">INFINITE NORMAL</a></li>
+    <li><a href="solo-piano/">SOLO PIANO</a></li>
+  </ol>
+  <a href="https://simonrepp.com/faircamp/">Powered by Faircamp</a>
+  <a href="favicon.png?H-w5zbrED30">icon</a>
+  <a href="feed.rss">RSS</a>
+  <a href="site.css?xwWmIbFHB50">styles</a>
+</body></html>`;
+
+const FAIRCAMP_RELEASE_HTML = `<!doctype html><html><head>
+  <meta property="og:title" content="RUINED CASTLE"/>
+  <meta property="og:image" content="https://music.kidlightbulbs.com/ruined-castle/cover_800.jpg?XZDh1t00IS8"/>
+  <meta property="og:description" content="The third album. A reflection on suffering."/>
+</head><body></body></html>`;
+
+describe('ingestFaircampHomeLinks', () => {
+  it('finds bare relative release links and resolves them against the page URL', () => {
+    const out = ingestFaircampHomeLinks(FAIRCAMP_HOME_HTML, 'https://music.kidlightbulbs.com/');
+    expect(out).toEqual([
+      { slug: 'ruined-castle', url: 'https://music.kidlightbulbs.com/ruined-castle/' },
+      { slug: 'infinite-normal', url: 'https://music.kidlightbulbs.com/infinite-normal/' },
+      { slug: 'solo-piano', url: 'https://music.kidlightbulbs.com/solo-piano/' },
+    ]);
+  });
+
+  it('excludes known non-release paths and anything with a query string or external host', () => {
+    const out = ingestFaircampHomeLinks(FAIRCAMP_HOME_HTML, 'https://music.kidlightbulbs.com/');
+    expect(out.map(o => o.slug)).not.toContain('subscribe');
+    expect(out.some(o => o.url.includes('simonrepp'))).toBe(false);
+    expect(out.some(o => o.url.includes('favicon'))).toBe(false);
+  });
+
+  it('deduplicates a repeated link and caps at the candidate ceiling', () => {
+    const manyLinks = Array.from({ length: 40 }, (_, i) => `<a href="release-${i}/">R${i}</a>`).join('');
+    const out = ingestFaircampHomeLinks(`<html>${manyLinks}</html>`, 'https://x.example.com/');
+    expect(out.length).toBeLessThanOrEqual(30);
+  });
+});
+
+describe('ingestFaircampReleasePage', () => {
+  it('reads title and artwork from Open Graph tags', () => {
+    expect(ingestFaircampReleasePage(FAIRCAMP_RELEASE_HTML)).toEqual({
+      title: 'RUINED CASTLE',
+      artworkUrl: 'https://music.kidlightbulbs.com/ruined-castle/cover_800.jpg?XZDh1t00IS8',
+    });
+  });
+
+  it('decodes HTML entities in the title', () => {
+    const html = '<meta property="og:title" content="Rock &amp; Roll"/>';
+    expect(ingestFaircampReleasePage(html)?.title).toBe('Rock & Roll');
+  });
+
+  it('returns null when there is no og:title at all — likely not a release page', () => {
+    expect(ingestFaircampReleasePage('<html><body>nothing here</body></html>')).toBeNull();
+  });
+
+  it('accepts a missing artwork tag', () => {
+    expect(ingestFaircampReleasePage('<meta property="og:title" content="No Cover"/>')).toEqual({
+      title: 'No Cover',
+      artworkUrl: null,
+    });
+  });
+});
+
+describe('buildFaircampRelease', () => {
+  it('combines a release page into a persistable shape with an inferred type', () => {
+    const out = buildFaircampRelease(
+      { title: 'RUINED CASTLE', artworkUrl: 'https://example.com/cover.jpg' },
+      'https://music.kidlightbulbs.com/ruined-castle/',
+      new Set()
+    );
+    expect(out).toMatchObject({
+      title: 'RUINED CASTLE',
+      matchKey: 'ruinedcastle',
+      status: 'released',
+      artworkUrl: 'https://example.com/cover.jpg',
+      externalUrl: 'https://music.kidlightbulbs.com/ruined-castle/',
+    });
+  });
+
+  it('never has a date — Faircamp has none to give', () => {
+    const out = buildFaircampRelease({ title: 'Some Release', artworkUrl: null }, 'https://x.example.com/some-release/', new Set());
+    expect(out).not.toHaveProperty('releaseDate');
+  });
+
+  it('returns null for a title with no letters or numbers to match on', () => {
+    expect(buildFaircampRelease({ title: '...', artworkUrl: null }, 'https://x.example.com/dots/', new Set())).toBeNull();
+  });
+});
+
+describe('findDiscoveredReleaseLinks', () => {
+  // Real example: an artist's own official website linking directly to a specific Subvert
+  // release, verified 2026-08-01 (kidlightbulbs.com linking to
+  // subvert.fm/kid-lightbulbs/infinite-normal).
+  const OFFICIAL_SITE_HTML = `<html><body>
+    <a href="https://kidlightbulbs.bandcamp.com/album/infinite-normal">Bandcamp</a>
+    <a href="https://subvert.fm/kid-lightbulbs">Subvert profile</a>
+    <a href="https://www.subvert.fm/kid-lightbulbs/infinite-normal">Buy on Subvert</a>
+  </body></html>`;
+
+  it('finds a specific-release Subvert link but not the bare artist profile link', () => {
+    const out = findDiscoveredReleaseLinks(OFFICIAL_SITE_HTML, 'https://kidlightbulbs.com/');
+    expect(out).toEqual([
+      {
+        platform: 'subvert',
+        url: 'https://www.subvert.fm/kid-lightbulbs/infinite-normal',
+        matchKey: 'infinitenormal',
+      },
+    ]);
+  });
+
+  it('ignores links to hosts it does not recognize', () => {
+    const out = findDiscoveredReleaseLinks(
+      '<a href="https://kidlightbulbs.bandcamp.com/album/infinite-normal">Bandcamp</a>',
+      'https://kidlightbulbs.com/'
+    );
+    expect(out).toEqual([]);
+  });
+
+  it('deduplicates the same link appearing twice', () => {
+    const html = `
+      <a href="https://subvert.fm/artist/release-one">A</a>
+      <a href="https://subvert.fm/artist/release-one">A again</a>
+    `;
+    const out = findDiscoveredReleaseLinks(html, 'https://example.com/');
+    expect(out).toHaveLength(1);
+  });
+
+  it('skips a slug with no letters or numbers to match on', () => {
+    const out = findDiscoveredReleaseLinks('<a href="https://subvert.fm/artist/---">A</a>', 'https://example.com/');
+    expect(out).toEqual([]);
   });
 });

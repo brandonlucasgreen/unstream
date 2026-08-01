@@ -14,7 +14,9 @@ const mocks = vi.hoisted(() => ({
   getArtistForCatalog: vi.fn(),
   persistReleases: vi.fn(),
   persistDiscogsReleases: vi.fn(),
+  persistFaircampReleases: vi.fn(),
   persistMusicBrainzEnrichment: vi.fn(),
+  attachDiscoveredSource: vi.fn(),
   recordCatalogOutcome: vi.fn(),
   safeFetch: vi.fn(),
   fetch: vi.fn(),
@@ -25,7 +27,9 @@ vi.mock('../db', () => ({
   getArtistForCatalog: mocks.getArtistForCatalog,
   persistReleases: mocks.persistReleases,
   persistDiscogsReleases: mocks.persistDiscogsReleases,
+  persistFaircampReleases: mocks.persistFaircampReleases,
   persistMusicBrainzEnrichment: mocks.persistMusicBrainzEnrichment,
+  attachDiscoveredSource: mocks.attachDiscoveredSource,
   recordCatalogOutcome: mocks.recordCatalogOutcome,
 }));
 

@@ -860,19 +860,21 @@ export async function persistReleaseDetail(
   }
 }
 
-/** What the Discogs and MusicBrainz catalog passes need before they can start. */
+/** What the catalog passes need before they can start. */
 export interface ArtistForCatalog {
   name: string;
   bandcampUrl: string | null;
   discogsUrl: string | null;
+  faircampUrl: string | null;
+  officialSiteUrl: string | null;
 }
 
 /**
  * One read for everything cataloging needs to know about an artist: the display name
  * (Discogs and MusicBrainz are both looked up by name, not by a stored id) plus whichever of
- * the Bandcamp/Discogs links are on file. Returns null only when the artist row itself is
- * missing — a source link being absent is a normal, independent per-source outcome, not a
- * reason to fail the whole lookup.
+ * the known links are on file. Returns null only when the artist row itself is missing — a
+ * source link being absent is a normal, independent per-source outcome, not a reason to fail
+ * the whole lookup.
  */
 export async function getArtistForCatalog(artistId: string): Promise<ArtistForCatalog | null> {
   const client = getClient();
@@ -881,7 +883,11 @@ export async function getArtistForCatalog(artistId: string): Promise<ArtistForCa
   try {
     const [{ data: artistRow, error: artistError }, { data: linkRows, error: linkError }] = await Promise.all([
       client.from('artists').select('name').eq('id', artistId).maybeSingle(),
-      client.from('artist_links').select('platform, url').eq('artist_id', artistId).in('platform', ['bandcamp', 'discogs']),
+      client
+        .from('artist_links')
+        .select('platform, url')
+        .eq('artist_id', artistId)
+        .in('platform', ['bandcamp', 'discogs', 'faircamp', 'officialsite']),
     ]);
 
     if (artistError || !artistRow) {
@@ -895,6 +901,8 @@ export async function getArtistForCatalog(artistId: string): Promise<ArtistForCa
       name: (artistRow as { name: string }).name,
       bandcampUrl: links.find(l => l.platform === 'bandcamp')?.url ?? null,
       discogsUrl: links.find(l => l.platform === 'discogs')?.url ?? null,
+      faircampUrl: links.find(l => l.platform === 'faircamp')?.url ?? null,
+      officialSiteUrl: links.find(l => l.platform === 'officialsite')?.url ?? null,
     };
   } catch (error) {
     console.error('[DB] getArtistForCatalog error:', error);
@@ -1198,6 +1206,211 @@ export async function persistMusicBrainzEnrichment(
   } catch (error) {
     console.error('[DB] persistMusicBrainzEnrichment error:', error);
     return 0;
+  }
+}
+
+/**
+ * Write a Faircamp catalog pass.
+ *
+ * Matches on `match_key` **alone**, not `(release_type, match_key)` like every other source —
+ * Faircamp's own release-type guess (`mapDiscogsFormatToReleaseType` reading just a title) is
+ * unreliable enough that partitioning by it would systematically block the one thing that
+ * makes Faircamp worth ingesting: merging into a release Bandcamp or Discogs already typed
+ * correctly, adding Faircamp as a second source on the *same* row instead of a duplicate. When
+ * nothing matches exactly, a title merely *close* to an existing one still only ever flags
+ * (tier 3, `isFuzzyReleaseMatch`) — never merges — same as Discogs.
+ *
+ * Release type is never overwritten on an existing row; whichever source typed it first stands.
+ */
+interface FaircampReleaseToPersist {
+  title: string;
+  slug: string;
+  matchKey: string;
+  releaseType: string;
+  status: string;
+  artworkUrl: string | null;
+  externalUrl: string;
+}
+
+export async function persistFaircampReleases(
+  artistId: string,
+  releases: FaircampReleaseToPersist[]
+): Promise<PersistedRelease[]> {
+  const client = getClient();
+  if (!client || releases.length === 0) return [];
+
+  try {
+    const { data: existingRows, error: readError } = await client
+      .from('releases')
+      .select('id, slug, match_key, release_type, artwork_url, curated_fields')
+      .eq('artist_id', artistId);
+
+    if (readError) {
+      console.error('[DB] persistFaircampReleases read failed:', readError.message);
+      return [];
+    }
+
+    type ExistingRow = {
+      id: string;
+      slug: string;
+      match_key: string;
+      release_type: string;
+      artwork_url: string | null;
+      curated_fields: string[] | null;
+    };
+    const existing = (existingRows as ExistingRow[]) || [];
+    const byMatchKey = new Map(existing.map(r => [r.match_key, r]));
+    const takenSlugs = new Set(existing.map(r => r.slug));
+    const claimedKeys = await getClaimedSourceKeys(client, existing.map(r => r.id));
+
+    const written: PersistedRelease[] = [];
+
+    for (const release of releases) {
+      const prior = byMatchKey.get(release.matchKey);
+
+      let releaseId: string;
+      let curatedFields: string[];
+
+      if (prior) {
+        const curated = new Set(prior.curated_fields ?? []);
+        curatedFields = [...curated];
+        const patch: Record<string, unknown> = {};
+
+        if (!curated.has('artwork_url') && release.artworkUrl && !prior.artwork_url) {
+          patch.artwork_url = release.artworkUrl;
+        }
+
+        if (Object.keys(patch).length > 0) {
+          const { error } = await client.from('releases').update(patch).eq('id', prior.id);
+          if (error) {
+            console.error('[DB] persistFaircampReleases update failed:', error.message);
+            continue;
+          }
+        }
+        releaseId = prior.id;
+      } else {
+        const fuzzy = existing.find(c => isFuzzyReleaseMatch(c.match_key, release.matchKey));
+
+        let slug = release.slug;
+        if (takenSlugs.has(slug)) slug = `${slug}-${release.matchKey.slice(0, 6)}`;
+        takenSlugs.add(slug);
+
+        const { data: inserted, error } = await client
+          .from('releases')
+          .insert({
+            artist_id: artistId,
+            title: release.title,
+            slug,
+            match_key: release.matchKey,
+            release_type: release.releaseType,
+            status: release.status,
+            artwork_url: release.artworkUrl,
+            source: 'auto',
+            ...(fuzzy && { needs_review: true, flagged_against_release_id: fuzzy.id }),
+          })
+          .select('id')
+          .single();
+
+        if (error || !inserted) {
+          console.error('[DB] persistFaircampReleases insert failed:', error?.message);
+          continue;
+        }
+        releaseId = (inserted as { id: string }).id;
+        curatedFields = [];
+
+        const createdRow: ExistingRow = {
+          id: releaseId,
+          slug,
+          match_key: release.matchKey,
+          release_type: release.releaseType,
+          artwork_url: release.artworkUrl,
+          curated_fields: [],
+        };
+        byMatchKey.set(release.matchKey, createdRow);
+        existing.push(createdRow);
+
+        if (fuzzy) {
+          const { error: flagError } = await client
+            .from('releases')
+            .update({ needs_review: true, flagged_against_release_id: releaseId })
+            .eq('id', fuzzy.id);
+          if (flagError) console.error('[DB] persistFaircampReleases fuzzy-flag failed:', flagError.message);
+        }
+      }
+
+      const source = await upsertReleaseSource(client, releaseId, 'faircamp', release.externalUrl, release.externalUrl, claimedKeys);
+      if (!source) {
+        console.error('[DB] persistFaircampReleases source write failed for release', releaseId);
+        continue;
+      }
+
+      written.push({
+        releaseId,
+        sourceId: source.id,
+        url: source.url,
+        detailCheckedAt: source.detail_checked_at,
+        curatedFields,
+      });
+    }
+
+    return written;
+  } catch (error) {
+    console.error('[DB] persistFaircampReleases error:', error);
+    return [];
+  }
+}
+
+/**
+ * Attach a source *discovered* on some other page (never fetched directly — see
+ * `findDiscoveredReleaseLinks`) to an existing release, matched by **exact** normalized title.
+ * Exact only, deliberately: a wrong attachment here would point a fan at a different record
+ * than the one they're looking at, which is worse than never finding the link at all. Refuses
+ * rather than guesses when the match key is ambiguous (two releases share it) or the release
+ * already has a source for this platform.
+ */
+export async function attachDiscoveredSource(
+  artistId: string,
+  platform: string,
+  url: string,
+  matchKey: string
+): Promise<boolean> {
+  const client = getClient();
+  if (!client) return false;
+
+  try {
+    const { data, error } = await client
+      .from('releases')
+      .select('id, release_sources ( platform )')
+      .eq('artist_id', artistId)
+      .eq('match_key', matchKey);
+
+    if (error) {
+      console.error('[DB] attachDiscoveredSource read failed:', error.message);
+      return false;
+    }
+
+    const matches = (data as { id: string; release_sources: { platform: string }[] | null }[]) || [];
+    if (matches.length !== 1) return false; // no match, or ambiguous — never guess
+
+    const release = matches[0];
+    if ((release.release_sources || []).some(s => s.platform === platform)) return false;
+
+    const { error: insertError } = await client.from('release_sources').insert({
+      release_id: release.id,
+      platform,
+      url,
+      external_id: null,
+      source: 'auto',
+    });
+
+    if (insertError) {
+      console.error('[DB] attachDiscoveredSource insert failed:', insertError.message);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('[DB] attachDiscoveredSource error:', error);
+    return false;
   }
 }
 

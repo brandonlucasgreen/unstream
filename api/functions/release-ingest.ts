@@ -567,3 +567,205 @@ export function ingestMusicBrainzReleaseGroups(
 
   return out;
 }
+
+// ---------------------------------------------------------------------------
+// Faircamp — self-hosted, no central API, no reliable date or price
+// ---------------------------------------------------------------------------
+//
+// Every Faircamp instance lives on whatever domain the artist chose (their own subdomain, in
+// the one example this was built against) — there is no directory or API to query, only the
+// same static site a fan lands on. Verified directly against a live instance rather than
+// guessed: the homepage doubles as the release list, since every release is a plain relative
+// link straight off it, and there is no reliable date or price anywhere in Faircamp's own
+// markup — no JSON-LD, no `<time>` tag, no `pubDate` in its own RSS feed. So unlike Bandcamp
+// and Discogs, this ingest only ever produces identity and artwork. A release with no date is
+// an honest "we don't know", not a guess — and this source's whole reason for existing is that
+// a partial, sometimes-wrong catalog beats no catalog at all, with curation (hide/fix) as the
+// backstop for whatever guess turns out wrong.
+
+/** Ceiling on how many relative links one homepage can offer as release candidates. */
+const FAIRCAMP_MAX_CANDIDATES = 30;
+
+/** Slugs that match the release-link shape but never are one, seen or anticipated across themes. */
+const FAIRCAMP_NON_RELEASE_SLUGS = new Set(['subscribe', 'about', 'support', 'contact', 'donate', 'feed', 'blog']);
+
+export interface FaircampReleaseCandidate {
+  slug: string;
+  url: string;
+}
+
+/**
+ * Find candidate release links on a Faircamp artist homepage.
+ *
+ * Deliberately permissive rather than exhaustive: any bare relative path (`slug/`, no query, no
+ * subpath) is a candidate. Some will be wrong — a theme page using an unrecognized slug, say —
+ * accepted per the "even a high failure rate beats nothing" call on this source specifically.
+ */
+export function ingestFaircampHomeLinks(html: string, pageUrl: string): FaircampReleaseCandidate[] {
+  const out: FaircampReleaseCandidate[] = [];
+  const seen = new Set<string>();
+
+  let base: URL;
+  try {
+    base = new URL(pageUrl);
+  } catch {
+    return out;
+  }
+
+  for (const match of html.matchAll(/href="([^"]+)"/g)) {
+    const raw = match[1];
+    if (!/^[a-z0-9][a-z0-9-]*\/$/i.test(raw)) continue;
+
+    const slug = raw.slice(0, -1).toLowerCase();
+    if (FAIRCAMP_NON_RELEASE_SLUGS.has(slug) || seen.has(slug)) continue;
+    seen.add(slug);
+
+    let url: string;
+    try {
+      url = new URL(raw, base).toString();
+    } catch {
+      continue;
+    }
+
+    out.push({ slug, url });
+    if (out.length >= FAIRCAMP_MAX_CANDIDATES) break;
+  }
+
+  return out;
+}
+
+export interface FaircampReleasePage {
+  title: string;
+  artworkUrl: string | null;
+}
+
+function decodeHtmlEntities(s: string): string {
+  return s
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
+/**
+ * Pull the two things a Faircamp release page reliably gives us — title and artwork — both
+ * from Open Graph tags, the only markup consistent enough across themes to trust. Returns null
+ * when there's no `og:title` at all, which usually means the candidate link wasn't a release
+ * page (a theme's "more" or "support" page, say) rather than a parse failure worth reporting.
+ */
+export function ingestFaircampReleasePage(html: string): FaircampReleasePage | null {
+  const titleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]*)"/i);
+  if (!titleMatch) return null;
+
+  const title = decodeHtmlEntities(titleMatch[1]).trim();
+  if (!title) return null;
+
+  const imageMatch = html.match(/<meta\s+property="og:image"\s+content="([^"]*)"/i);
+  const artworkUrl = imageMatch ? decodeHtmlEntities(imageMatch[1]).trim() || null : null;
+
+  return { title, artworkUrl };
+}
+
+export interface FaircampReleaseToPersist {
+  title: string;
+  slug: string;
+  matchKey: string;
+  releaseType: ReleaseType;
+  status: ReleaseStatus;
+  artworkUrl: string | null;
+  externalUrl: string;
+}
+
+/**
+ * Combine a homepage candidate with its release page's title/artwork into something ready to
+ * persist. Release type is inferred from the title alone via the same fallback
+ * `mapDiscogsFormatToReleaseType` uses when Discogs' own format string doesn't say — Faircamp
+ * has no format field at all, so this is the same "read the title, otherwise 'other'" call,
+ * reused rather than duplicated.
+ *
+ * `takenSlugs` is read, not written — the caller must add the returned slug before the next
+ * call, since releases are fetched and combined one at a time here rather than as one batch
+ * (each one is its own network request), unlike Bandcamp's grid.
+ */
+export function buildFaircampRelease(
+  page: FaircampReleasePage,
+  releaseUrl: string,
+  takenSlugs: ReadonlySet<string>,
+  now: Date = new Date()
+): FaircampReleaseToPersist | null {
+  const matchKey = releaseMatchKey(page.title);
+  if (!matchKey) return null;
+
+  return {
+    title: page.title,
+    slug: uniqueReleaseSlug(page.title, takenSlugs),
+    matchKey,
+    releaseType: mapDiscogsFormatToReleaseType(null, page.title),
+    status: deriveStatus(null, false, now),
+    artworkUrl: page.artworkUrl,
+    externalUrl: releaseUrl,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Discovered links — a specific release, spotted on a page we fetched for another reason
+// ---------------------------------------------------------------------------
+//
+// Some platforms (Subvert today) have no fetchable API or page of their own — but an artist's
+// other pages sometimes link directly to a specific release there anyway (their own website
+// linking "buy this on Subvert", say). This never fetches the target platform itself; it only
+// reads links already present in markup fetched for a different reason (a Faircamp page, an
+// official website), and only ever proposes a match — attaching it to an existing release
+// requires an exact title match at the database layer (see `attachDiscoveredSource`), never a
+// guess. A single unmatched slug becomes nothing, not a bare, metadata-less release row.
+
+export interface DiscoveredSourceLink {
+  platform: string;
+  url: string;
+  /** Normalized match key of the release slug, for an exact-match lookup against existing releases. */
+  matchKey: string;
+}
+
+/**
+ * Hosts worth checking, and the shape a link has to have to plausibly point at one specific
+ * release rather than just the artist's own page there. Adding a platform here is a deliberate,
+ * reviewed decision — this is not a generic link scanner.
+ */
+const DISCOVERED_LINK_HOSTS: { platform: string; hostSuffix: string }[] = [{ platform: 'subvert', hostSuffix: 'subvert.fm' }];
+
+export function findDiscoveredReleaseLinks(html: string, pageUrl: string): DiscoveredSourceLink[] {
+  const found: DiscoveredSourceLink[] = [];
+  const seen = new Set<string>();
+
+  for (const match of html.matchAll(/href="([^"]+)"/g)) {
+    let url: URL;
+    try {
+      url = new URL(match[1], pageUrl);
+    } catch {
+      continue;
+    }
+
+    const host = url.hostname.toLowerCase();
+    const platformEntry = DISCOVERED_LINK_HOSTS.find(p => host === p.hostSuffix || host.endsWith(`.${p.hostSuffix}`));
+    if (!platformEntry) continue;
+
+    // At least two path segments — {artist}/{release} — so the artist's own profile link
+    // (just {artist}) is never mistaken for a specific release.
+    const segments = url.pathname.split('/').filter(Boolean);
+    if (segments.length < 2) continue;
+
+    const releaseSlug = segments[segments.length - 1];
+    const matchKey = releaseMatchKey(releaseSlug.replace(/-/g, ' '));
+    if (!matchKey) continue;
+
+    const normalized = url.toString();
+    const dedupeKey = `${platformEntry.platform}:${normalized}`;
+    if (seen.has(dedupeKey)) continue;
+    seen.add(dedupeKey);
+
+    found.push({ platform: platformEntry.platform, url: normalized, matchKey });
+  }
+
+  return found;
+}
