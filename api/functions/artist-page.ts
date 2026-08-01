@@ -2,7 +2,7 @@
 // Returns the full rich-profile payload for a claimed artist as JSON.
 // This is the data source for the React SPA artist page (UNS-102).
 
-import { getArtistProfileBySlug } from './db';
+import { getArtistProfileBySlug, getArtistReleases } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { PLATFORMS } from '../shared/platform-registry';
 import { isBandcampFriday } from '../shared/bandcamp-friday';
@@ -104,6 +104,11 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     // Build the image URL: custom > artist row > null
     const imageUrl = profile?.custom_image_url || artistRow.image_url || null;
 
+    // Releases. Capped because most catalogues fit well under it (16 for Sufjan Stevens, 13 for
+    // Explosions in the Sky) and the artists who don't would otherwise bury the platform links
+    // this page exists to show.
+    const { releases, total: releaseCount } = await getArtistReleases(artistRow.id, 24);
+
     const payload = {
       artist: {
         id: artistRow.id,
@@ -125,6 +130,8 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       // Indexes into `links` above which a horizontal divider is drawn.
       linkDividers: mainLinkDividerIndexes(allLinks, isMainLink, profile?.link_dividers),
       socialLinks: social,
+      releases,
+      releaseCount,
       bandcampFriday: bcFriday,
     };
 

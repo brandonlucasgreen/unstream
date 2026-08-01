@@ -3,6 +3,7 @@ import type { ArtistPagePayload } from '../types/artist-page';
 import { sources } from '../services/sources';
 import { analytics } from '../services/analytics';
 import { PlatformIcon } from './PlatformIcon';
+import { ReleasesSection } from './ReleasesSection';
 import { SocialIcon } from './SocialIcon';
 import type { SourceId } from '../types';
 
@@ -234,6 +235,12 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
             </div>
           </div>
         )}
+
+        <ReleasesSection
+          releases={payload.releases ?? []}
+          total={payload.releaseCount ?? 0}
+          artistSlug={slug}
+        />
 
         {/* Embed Widget */}
         <div className="mt-6">

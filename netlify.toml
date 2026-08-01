@@ -180,6 +180,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/admin/catalog-artist"
+  to = "/.netlify/functions/admin-catalog-artist"
+  status = 200
+
+[[redirects]]
   from = "/api/discord/interaction"
   to = "/.netlify/functions/discord-interaction"
   status = 200
