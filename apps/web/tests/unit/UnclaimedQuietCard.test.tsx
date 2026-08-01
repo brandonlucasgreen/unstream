@@ -76,6 +76,13 @@ describe('UnclaimedQuietCard', () => {
     expect(screen.getByText('Bandcamp')).toBeTruthy();
   });
 
+  it('renders platform links as pills in a responsive row', () => {
+    render(<UnclaimedQuietCard payload={unclaimedPayload} slug="some-artist" />);
+    const pill = document.querySelector('a.source-badge[href="https://some-artist.bandcamp.com"]');
+    expect(pill).toBeTruthy();
+    expect(pill!.closest('.platform-pill-row')).toBeTruthy();
+  });
+
   it('renders social links', () => {
     render(<UnclaimedQuietCard payload={unclaimedPayload} slug="some-artist" />);
     expect(screen.getByText('Follow')).toBeTruthy();

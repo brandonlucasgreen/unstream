@@ -25,7 +25,7 @@ export function SourceBadge({ source, url, isDirectLink, displayName, onClick }:
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 px-2 py-1 text-sm text-text-secondary hover:text-text-primary transition-colors"
+        className="inline-flex items-center gap-1.5 min-h-11 px-2 py-2.5 text-sm text-text-secondary hover:text-text-primary transition-colors"
         title={`Search for this artist on ${label}`}
         onClick={() => { analytics.trackPlatformClick(label); onClick?.(); }}
       >
@@ -68,7 +68,8 @@ export function SourceBadge({ source, url, isDirectLink, displayName, onClick }:
       onClick={() => { analytics.trackPlatformClick(label); onClick?.(); }}
     >
       <PlatformIcon sourceId={source.id} color={textColor} emoji={source.icon} />
-      <span className="flex items-center gap-1">
+      {/* Wraps rather than overflowing when the pill is a narrow grid cell on a phone. */}
+      <span className="flex flex-wrap items-center gap-1">
         {label}
         {hasPayoutPercent ? (
           <span

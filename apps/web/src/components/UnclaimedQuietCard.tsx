@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { ArtistPagePayload } from '../types/artist-page';
 import { sources } from '../services/sources';
 import { analytics } from '../services/analytics';
-import { PlatformIcon } from './PlatformIcon';
 import { ReleasesSection } from './ReleasesSection';
 import { SocialIcon } from './SocialIcon';
+import { SourceBadge } from './SourceBadge';
+import { getSource } from './ResultCardUtils';
 import type { SourceId } from '../types';
 
 interface UnclaimedQuietCardProps {
@@ -107,39 +108,28 @@ export function UnclaimedQuietCard({ payload, slug, justClaimed, onSave, onUnsav
           <h2 className="text-[11px] uppercase tracking-wider text-text-muted mb-3">
             Support directly
           </h2>
-          <div className="grid gap-2">
+          {/* Same platform pills as the search results and claimed artist pages. */}
+          <div className="platform-pill-row">
             {links.map((link) => {
-              const source = sources[link.platform as SourceId];
-              const isOther = link.platform === 'other' || link.platform.startsWith('other_');
-              const linkName = link.displayName || (isOther ? 'Link' : (source?.name || link.platform));
-              const linkColor = source?.color || '#71717a';
-              const isBCFriday = link.bandcampFriday;
-
-              return (
-                <a
-                  key={link.platform + link.url}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  data-track-platform={link.platform}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors ${
-                    isBCFriday
-                      ? 'border-[#1da0c3]/25 bg-[#1da0c3]/[0.06] hover:bg-[#1da0c3]/10'
-                      : 'border-border hover:bg-bg-hover'
-                  }`}
-                  style={!isBCFriday ? { backgroundColor: `${linkColor}08` } : undefined}
+              const badge = (
+                <SourceBadge
+                  source={getSource(link.platform as SourceId)}
+                  url={link.url}
+                  isDirectLink
+                  displayName={link.displayName ?? undefined}
                   onClick={() => handleLinkClick(link.platform)}
-                >
-                  <span className="text-xl inline-flex items-center justify-center w-5">
-                    <PlatformIcon sourceId={link.platform as SourceId} color={linkColor} emoji={source?.icon || '🔗'} className="w-5 h-5" />
-                  </span>
-                  <span className="flex-1 font-medium text-text-primary">{linkName}</span>
-                  {isBCFriday && (
-                    <span className="text-[11px] font-bold text-[#1da0c3] animate-pulse">
-                      Bandcamp Friday!
-                    </span>
-                  )}
-                </a>
+                />
+              );
+              const key = link.platform + link.url;
+
+              // The Bandcamp Friday label rides along in the same cell, so the
+              // pill row stays one grid cell per platform on a phone.
+              if (!link.bandcampFriday) return <Fragment key={key}>{badge}</Fragment>;
+              return (
+                <span key={key} className="flex items-center gap-2">
+                  {badge}
+                  <span className="bandcamp-friday-label">Bandcamp Friday!</span>
+                </span>
               );
             })}
           </div>

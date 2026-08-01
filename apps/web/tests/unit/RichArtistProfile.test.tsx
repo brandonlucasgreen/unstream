@@ -125,6 +125,8 @@ describe('RichArtistProfile', () => {
 
     const patreonLink = document.querySelector('a.source-badge[href="https://patreon.com/kidlightbulbs"]');
     expect(patreonLink).toBeTruthy();
+    // The row is a grid on phones and a wrapped flex row from `sm` up.
+    expect(bandcampLink!.closest('.platform-pill-row')).toBeTruthy();
   });
 
   it('renders the payout percent on each pill', () => {
