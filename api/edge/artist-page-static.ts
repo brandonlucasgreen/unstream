@@ -4,6 +4,7 @@ import { PLATFORMS } from "../shared/platform-registry.ts";
 import { isBandcampFriday } from "../shared/bandcamp-friday.ts";
 import { mainLinkDividerIndexes } from "../shared/link-dividers.ts";
 import { cheapestOfferSummary, formatReleaseDate } from "../shared/release-display.ts";
+import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
 
 /**
  * How many releases to list before summarising the rest.
@@ -181,6 +182,16 @@ export default async function handler(request: Request, context: Context) {
     const slug = url.pathname.replace(/^\/(a|artist)\//, '').replace(/\/$/, '');
 
     if (!slug) return context.next();
+
+    // Real browsers get the SPA, same as a client-side <Link> navigation from /artists would
+    // render — so a direct load and an in-app click produce the same UI (see
+    // docs/retros/UNS-100-bifurcation-retro.md). Only crawlers, which either can't run JS
+    // (social previews) or benefit from content that doesn't wait on a client fetch (indexing),
+    // get this static render.
+    const userAgent = request.headers.get('user-agent');
+    if (!isSocialCrawler(userAgent) && !isIndexingCrawler(userAgent)) {
+      return context.next();
+    }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_KEY");
