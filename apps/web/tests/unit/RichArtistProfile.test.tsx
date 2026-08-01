@@ -190,7 +190,7 @@ describe('RichArtistProfile', () => {
 
   it('renders the embed widget with the artist name in the code snippet', () => {
     render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" />);
-    fireEvent.click(screen.getByText('Embed this profile on your website'));
+    fireEvent.click(screen.getByRole('button', { name: 'Embed this profile' }));
     const codeBlock = document.querySelector('pre');
     expect(codeBlock).toBeTruthy();
     expect(codeBlock!.textContent).toContain('data-artist="Kid Lightbulbs"');
@@ -200,7 +200,7 @@ describe('RichArtistProfile', () => {
 
   it('updates the embed code when theme or link count changes', () => {
     render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" />);
-    fireEvent.click(screen.getByText('Embed this profile on your website'));
+    fireEvent.click(screen.getByRole('button', { name: 'Embed this profile' }));
 
     // Change theme to light
     const lightButtons = screen.getAllByRole('button', { name: 'Light' });
@@ -220,7 +220,7 @@ describe('RichArtistProfile', () => {
     Object.assign(navigator, { clipboard: { writeText } });
 
     render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" />);
-    fireEvent.click(screen.getByText('Embed this profile on your website'));
+    fireEvent.click(screen.getByRole('button', { name: 'Embed this profile' }));
 
     const copyBtn = screen.getByText('Copy');
     fireEvent.click(copyBtn);
