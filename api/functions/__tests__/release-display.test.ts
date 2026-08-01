@@ -7,6 +7,7 @@
 
 import { describe, it, expect } from 'vitest';
 import {
+  cheapestOfferSummary,
   formatMoney,
   formatOfferPrice,
   formatReleaseDate,
@@ -122,5 +123,32 @@ describe('formatOfferPrice', () => {
   it('renders a real price normally', () => {
     expect(formatOfferPrice(25, 'USD')).toBe('$25');
     expect(formatOfferPrice(8.5, 'GBP')).toBe('£8.50');
+  });
+});
+
+describe('cheapestOfferSummary', () => {
+  const offer = (price: number | null, availability = 'available') =>
+    ({ price, currency: 'USD', availability });
+
+  it('quotes the cheapest thing a fan can buy', () => {
+    expect(cheapestOfferSummary([offer(25), offer(8), offer(12)])).toBe('from $8');
+  });
+
+  // The one genuinely misleading number this list could show: a fan clicks expecting $8 vinyl
+  // and finds it gone. A release whose only offer is sold out summarises as nothing.
+  it('ignores sold-out formats when picking the cheapest', () => {
+    expect(cheapestOfferSummary([offer(25), offer(8, 'sold_out')])).toBe('from $25');
+    expect(cheapestOfferSummary([offer(8, 'sold_out')])).toBe('');
+  });
+
+  it('says name-your-price rather than "from $0"', () => {
+    expect(cheapestOfferSummary([offer(0)])).toBe('Name your price');
+  });
+
+  // The normal state for a release catalogued from the Bandcamp grid, whose own page hasn't
+  // been read for prices yet. Silence, not a zero.
+  it('says nothing when there are no offers or no prices', () => {
+    expect(cheapestOfferSummary([])).toBe('');
+    expect(cheapestOfferSummary([offer(null)])).toBe('');
   });
 });

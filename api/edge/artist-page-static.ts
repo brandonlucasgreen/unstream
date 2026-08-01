@@ -3,6 +3,27 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { PLATFORMS } from "../shared/platform-registry.ts";
 import { isBandcampFriday } from "../shared/bandcamp-friday.ts";
 import { mainLinkDividerIndexes } from "../shared/link-dividers.ts";
+import { cheapestOfferSummary, formatReleaseDate } from "../shared/release-display.ts";
+
+/**
+ * How many releases to list before summarising the rest.
+ *
+ * Most catalogues fit: 16 for Sufjan Stevens, 13 for Explosions in the Sky. The cap exists for
+ * the artists who don't — one live Mirlo artist has 33 releases including *Inaction I–V* — where
+ * an unbounded list would bury the platform links this page exists to show.
+ */
+const MAX_RELEASES_SHOWN = 24;
+
+interface ReleaseRow {
+  slug: string;
+  title: string;
+  release_type: string;
+  release_date: string | null;
+  date_precision: string | null;
+  status: string;
+  artwork_url: string | null;
+  release_sources: { release_offers: { price: number | null; currency: string | null; availability: string }[] | null }[] | null;
+}
 
 // Allowed embed domains for featured releases (must match api/functions/artist-profile.ts)
 const ALLOWED_EMBED_DOMAINS = [
@@ -39,6 +60,47 @@ const SOCIAL_ICONS: Record<string, string> = {
 };
 
 const LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 110 110" aria-hidden="true"><defs><filter id="gs"><feColorMatrix type="saturate" values="0"/></filter></defs><g transform="translate(22,22) scale(1.8333)" filter="url(#gs)"><path fill="#50A5E6" d="M30 22c-3 0-6.688 7.094-7 10-.421 3.915 2 4 2 4h11V26s-3.438-4-6-4z"/><ellipse transform="rotate(-60 27.574 28.49)" fill="#1C6399" cx="27.574" cy="28.489" rx="5.848" ry="1.638"/><path fill="#F9CA55" d="M20.086 0c1.181 0 2.138.957 2.138 2.138 0 .789.668 10.824.668 10.824L17.948 18V2.138C17.948.957 18.905 0 20.086 0z"/><path fill="#FFDC5D" d="M18.875 4.323c0-1.099.852-1.989 1.903-1.989 1.051 0 1.903.891 1.903 1.989 0 0 .535 5.942 1.192 9.37.878 1.866 1.369 4.682 1.261 6.248.054.398 5.625 5.006 5.625 5.006-.281 1.813-2.259 6.155-4.759 8.159l-3.521-2.924c-2.885-.404-4.458-3.331-4.458-4.264 0-2.984.854-21.595.854-21.595z"/><path fill="#50A5E6" d="M6 22c3 0 6.688 7.094 7 10 .421 3.915-2 4-2 4H0V26s3.438-4 6-4z"/><ellipse transform="rotate(-30 8.424 28.489)" fill="#1C6399" cx="8.426" cy="28.489" rx="1.638" ry="5.848"/><path fill="#F9CA55" d="M16.061.011c-1.266-.127-2.333.864-2.333 2.103 0 .78-.184 10.319-.184 10.319L17.895 18l.062-15.765c0-1.106-.795-2.114-1.896-2.224z"/><path fill="#FFDC5D" d="M17.125 4.323c0-1.099-.852-1.989-1.903-1.989-1.051 0-1.903.891-1.903 1.989 0 0-.535 5.942-1.192 9.37-.878 1.866-1.369 4.682-1.261 6.248-.054.398-5.625 5.006-5.625 5.006C5.522 26.76 7.5 31.102 10 33.106l3.521-2.924c2.885-.404 4.458-3.331 4.458-4.264 0-2.984-.854-21.595-.854-21.595z"/><path fill="#F9CA55" d="M17.958 25.823c-.414 0-.75-.336-.75-.75V2.792c0-.414.336-.75.75-.75s.75.336.75.75v22.282c.001.413-.335.749-.75.749z"/></g><path d="M14,52 A41,41 0 0,1 96,52" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><line x1="14" y1="52" x2="14" y2="64" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><line x1="96" y1="52" x2="96" y2="64" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><rect x="3" y="60" width="22" height="28" rx="9" fill="currentColor"/><rect x="85" y="60" width="22" height="28" rx="9" fill="currentColor"/></svg>';
+
+/**
+ * One release in the list: artwork, title, and the cheapest way to own it.
+ *
+ * The price is the point. A chronology of titles is something a dozen sites already have; "from
+ * $8" next to it is the thing that makes this list worth clicking, and it comes straight from
+ * the offers the release page shows in full.
+ */
+function renderReleaseRow(release: ReleaseRow, artistSlug: string): string {
+  const href = `/a/${encodeURIComponent(artistSlug)}/${encodeURIComponent(release.slug)}`;
+  const title = escapeHtml(release.title);
+  const date = formatReleaseDate(release.release_date, release.date_precision);
+
+  // Capitalized here rather than with `text-transform: capitalize`, which applies to the whole
+  // line and would turn "from $7" into "From $7" and "Name your price" into "Name Your Price".
+  const type = release.release_type === 'other'
+    ? ''
+    : release.release_type.charAt(0).toUpperCase() + release.release_type.slice(1);
+
+  const offers = (release.release_sources || []).flatMap(s => s.release_offers || []);
+  const meta = [type, date, cheapestOfferSummary(offers)].filter(Boolean).join(' · ');
+
+  const art = release.artwork_url
+    ? `<img src="${escapeHtml(release.artwork_url)}" alt="" loading="lazy" referrerpolicy="no-referrer" style="width:48px;height:48px;border-radius:6px;object-fit:cover;flex-shrink:0;background:var(--bg2)">`
+    : `<div style="width:48px;height:48px;border-radius:6px;flex-shrink:0;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:20px">💿</div>`;
+
+  // An upcoming release is the most interesting row in the list and the easiest to miss when
+  // it's sorted to the top of a chronology that otherwise reads as history.
+  const upcoming = release.status === 'announced'
+    ? '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--accent);flex-shrink:0">Coming</span>'
+    : '';
+
+  return `<a href="${href}" style="display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:12px;border:1px solid var(--border);text-decoration:none;color:var(--text)">
+    ${art}
+    <span style="flex:1;min-width:0">
+      <span style="display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${title}</span>
+      ${meta ? `<span style="display:block;font-size:12px;color:var(--muted)">${escapeHtml(meta)}</span>` : ''}
+    </span>
+    ${upcoming}
+  </a>`;
+}
 
 function isEmbedDomainAllowed(url: string): boolean {
   try {
@@ -133,6 +195,8 @@ export default async function handler(request: Request, context: Context) {
     let artist: any;
     let profile: any;
     let links: any[];
+    let releases: ReleaseRow[] = [];
+    let releaseCount = 0;
 
     try {
       const { data: artistData } = await supabase
@@ -165,6 +229,29 @@ export default async function handler(request: Request, context: Context) {
         .abortSignal(controller.signal);
 
       links = linksData || [];
+
+      // Releases, newest first. `count: 'exact'` alongside a limit gives the full total in the
+      // same round trip, so the "and N more" line is a real number rather than a guess.
+      //
+      // Ordered to match idx_releases_artist_chrono: many releases have no date yet (grid ingest
+      // gets identity and artwork but no dates), and without the created_at tiebreaker those
+      // undated rows would shuffle between requests.
+      const { data: releasesData, count } = await supabase
+        .from('releases')
+        .select(
+          'slug, title, release_type, release_date, date_precision, status, artwork_url,' +
+          ' release_sources ( release_offers ( price, currency, availability ) )',
+          { count: 'exact' }
+        )
+        .eq('artist_id', artist.id)
+        .eq('is_hidden', false)
+        .order('release_date', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false })
+        .limit(MAX_RELEASES_SHOWN)
+        .abortSignal(controller.signal);
+
+      releases = (releasesData as ReleaseRow[]) || [];
+      releaseCount = count ?? releases.length;
     } catch (e: any) {
       // Timeout or error — fall through to SPA
       clearTimeout(timeoutId);
@@ -202,6 +289,29 @@ export default async function handler(request: Request, context: Context) {
     );
 
     const bcFriday = isBandcampFriday();
+
+    // Releases, shared by the claimed and unclaimed templates below.
+    //
+    // Rendered for every artist that has a catalogue, not only verified ones. The releases come
+    // from the artist's stored Bandcamp link — which this page is *already* showing as a place
+    // to buy — so listing what's behind that link asserts nothing the page doesn't already
+    // assert. Gating on verification would hide the feature from nearly every artist, since
+    // almost none are claimed.
+    //
+    // Nothing renders when there are no releases. An empty "Releases" heading reads as broken,
+    // while its absence reads as "nothing here yet" — which is the truth for any artist nobody
+    // has saved or searched, because cataloguing is demand-driven.
+    const releasesHtml = releases.length === 0 ? '' : `
+      <div style="margin-top:24px">
+        <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Releases</h2>
+        <div style="display:grid;gap:8px">
+          ${releases.map((r: ReleaseRow) => renderReleaseRow(r, slug)).join('')}
+        </div>
+        ${releaseCount > releases.length
+          ? `<p style="font-size:13px;color:var(--muted);margin-top:10px">and ${releaseCount - releases.length} more</p>`
+          : ''}
+      </div>
+    `;
 
     // Build platform links HTML (shared by both claimed and unclaimed)
     const platformLinksHtml = mainPlatforms.map((p: { platform: string; url: string; display_name?: string }, index: number) => {
@@ -332,6 +442,7 @@ export default async function handler(request: Request, context: Context) {
         <div style="display:grid;gap:8px">${platformLinksHtml}</div>
       ` : ''}
       ${socialLinksHtml}
+      ${releasesHtml}
     </div>
   </div>
 
@@ -430,6 +541,7 @@ export default async function handler(request: Request, context: Context) {
         <div style="display:grid;gap:8px">${platformLinksHtml}</div>
       ` : ''}
       ${socialLinksHtml}
+      ${releasesHtml}
       <div style="margin-top:24px;padding:16px;border-radius:12px;border:1px solid var(--border);text-align:center">
         <p style="font-size:14px;color:var(--muted)">Are you ${artistName}?</p>
         <a href="/claim?slug=${escapeHtml(slug)}" class="claim-cta">Claim this profile</a>

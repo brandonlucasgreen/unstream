@@ -83,6 +83,31 @@ export function formatOfferPrice(price: number | null, currency: string | null):
 }
 
 /**
+ * "from $8", or "Name your price" — the cheapest thing a fan can actually buy, for a one-line
+ * summary in a list of releases.
+ *
+ * **Sold-out formats are excluded.** Quoting the price of a record nobody can buy would be the
+ * one genuinely misleading number in a discography list — a fan would click expecting $25 vinyl
+ * and find it gone. A release whose only offer is sold out summarises as nothing at all, which
+ * is the honest outcome.
+ *
+ * Returns '' when there are no offers, which is the normal state for a release catalogued from
+ * the Bandcamp grid whose own page hasn't been read for prices yet.
+ */
+export function cheapestOfferSummary(
+  offers: { price: number | null; currency: string | null; availability: string }[]
+): string {
+  const buyable = offers.filter(o => o.availability !== 'sold_out' && o.price !== null);
+  if (buyable.length === 0) return '';
+
+  const cheapest = buyable.reduce((low, o) => (o.price! < low.price! ? o : low));
+
+  // Bandcamp reports name-your-price as 0, and "from $0" reads as free.
+  if (cheapest.price === 0) return 'Name your price';
+  return `from ${formatMoney(cheapest.price!, cheapest.currency)}`;
+}
+
+/**
  * "≈$20–21.25 to the artist" — the emotional payload of the whole product, at the moment
  * someone is deciding where to buy.
  *
