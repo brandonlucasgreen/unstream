@@ -59,8 +59,17 @@ const DELAY_BETWEEN_ARTISTS_MS = 1_000;
 // — but a blanket sweep of ~800 artists × ~20 releases would be 16,000 requests, which is a
 // crawl programme, not a parser change. Four limits keep it a trickle:
 
-/** Newest-first, so a large discography gets its recent releases priced on the first run. */
-const MAX_DETAIL_FETCHES_PER_ARTIST = 20;
+/**
+ * Newest-first, so a large discography gets its recent releases priced on the first run.
+ *
+ * Raised from 20 once an explicit re-catalogue started resetting every source to unpriced
+ * (`clearReleaseDetailCooldown`): at 20, an artist with more releases than that could never get
+ * their whole catalogue priced, because each press re-read the same newest 20 and left the tail
+ * permanently unread. 40 covers every catalogue measured so far — 22 for Kid Lightbulbs, 16 for
+ * Sufjan Stevens, 33 for the largest live Mirlo artist — and costs 40 paced seconds for one
+ * artist. The invocation-wide cap below still bounds a whole batch.
+ */
+const MAX_DETAIL_FETCHES_PER_ARTIST = 40;
 
 /** Invocation-wide, so a 25-artist batch can't multiply into hundreds of requests. */
 const MAX_DETAIL_FETCHES_PER_RUN = 100;

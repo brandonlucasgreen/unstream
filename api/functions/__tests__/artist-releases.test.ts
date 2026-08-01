@@ -21,6 +21,7 @@ const mocks = vi.hoisted(() => ({
   mergeReleases: vi.fn(),
   getCatalogState: vi.fn(),
   clearCatalogCooldown: vi.fn(),
+  clearReleaseDetailCooldown: vi.fn(),
   cacheDeleteByArtist: vi.fn(),
   triggerCatalogNow: vi.fn(),
 }));
@@ -38,6 +39,7 @@ vi.mock('../db', () => ({
   mergeReleases: mocks.mergeReleases,
   getCatalogState: mocks.getCatalogState,
   clearCatalogCooldown: mocks.clearCatalogCooldown,
+  clearReleaseDetailCooldown: mocks.clearReleaseDetailCooldown,
 }));
 
 // buildCorsHeaders is NOT stubbed to a constant — this endpoint performs writes, and one thing
@@ -99,6 +101,7 @@ beforeEach(() => {
   mocks.mergeReleases.mockResolvedValue({ ok: true });
   mocks.getCatalogState.mockResolvedValue({ ok: true, state: null });
   mocks.clearCatalogCooldown.mockResolvedValue(undefined);
+  mocks.clearReleaseDetailCooldown.mockResolvedValue(undefined);
   mocks.triggerCatalogNow.mockResolvedValue({ ok: true });
 });
 
@@ -250,6 +253,9 @@ describe('POST — catalog (self-serve scan)', () => {
     const r = await post({ action: 'catalog', slug: SLUG });
     expect(r.statusCode).toBe(202);
     expect(mocks.clearCatalogCooldown).toHaveBeenCalledWith('artist-1');
+    // Prices only refresh if the sources are reset too — otherwise "Scan my links" re-confirms
+    // the release list and leaves every stored price exactly as it was.
+    expect(mocks.clearReleaseDetailCooldown).toHaveBeenCalledWith('artist-1');
     expect(mocks.triggerCatalogNow).toHaveBeenCalledWith('artist-1');
   });
 

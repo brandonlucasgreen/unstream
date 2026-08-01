@@ -578,6 +578,43 @@ export async function clearCatalogCooldown(artistId: string): Promise<void> {
   if (error) console.error('[DB] clearCatalogCooldown failed:', error.message);
 }
 
+/**
+ * Mark every one of an artist's sources as never priced, so a deliberately-requested crawl
+ * re-reads the release pages instead of only the grid.
+ *
+ * **Clearing the artist's cooldown alone is not enough**, and the gap is invisible: the crawl
+ * runs, reports success, and changes nothing an artist can see. Dates, formats and prices live
+ * only on individual release pages, and both detail passes skip a source that was already read —
+ * Bandcamp's within `DETAIL_REFRESH_DAYS`, Discogs' ever. That refresh rule is right for the
+ * demand-driven crawl it was written for, where re-reading every page weekly would triple the
+ * request count for data that rarely moves. It is wrong for someone standing in front of the
+ * button having just been told their prices are wrong: found once, in exactly that situation,
+ * when a parser fix for a bad Bandcamp price shipped and re-cataloguing didn't apply it.
+ *
+ * Null, not backdated: "never read" is the honest state for a source whose stored price we've
+ * decided not to trust, and it's what both passes already test for.
+ */
+export async function clearReleaseDetailCooldown(artistId: string): Promise<void> {
+  const client = getClient();
+  if (!client) return;
+
+  const { data, error: readError } = await client.from('releases').select('id').eq('artist_id', artistId);
+  if (readError) {
+    console.error('[DB] clearReleaseDetailCooldown read failed:', readError.message);
+    return;
+  }
+
+  const releaseIds = ((data as { id: string }[] | null) || []).map(r => r.id);
+  if (releaseIds.length === 0) return;
+
+  const { error } = await client
+    .from('release_sources')
+    .update({ detail_checked_at: null })
+    .in('release_id', releaseIds);
+
+  if (error) console.error('[DB] clearReleaseDetailCooldown failed:', error.message);
+}
+
 interface ReleaseToPersist {
   title: string;
   slug: string;
