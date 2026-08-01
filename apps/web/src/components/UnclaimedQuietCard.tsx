@@ -4,6 +4,7 @@ import type { ArtistPagePayload } from '../types/artist-page';
 import { sources } from '../services/sources';
 import { analytics } from '../services/analytics';
 import { PlatformIcon } from './PlatformIcon';
+import { ReleasesSection } from './ReleasesSection';
 import { SocialIcon } from './SocialIcon';
 import type { SourceId } from '../types';
 
@@ -173,6 +174,12 @@ export function UnclaimedQuietCard({ payload, slug, justClaimed, onSave, onUnsav
           </div>
         </div>
       )}
+
+      <ReleasesSection
+        releases={payload.releases ?? []}
+        total={payload.releaseCount ?? 0}
+        artistSlug={slug}
+      />
 
       {/* Claim nudge */}
       <div className="mt-6 p-4 rounded-lg border border-border bg-bg-secondary/50 text-center">

@@ -30,5 +30,18 @@ export interface ArtistPagePayload {
     url: string;
     displayName: string | null;
   }>;
+  // Newest first, capped. Older cached responses omit both — treat as no releases.
+  releases?: Array<{
+    slug: string;
+    title: string;
+    releaseType: string;
+    releaseDate: string | null;
+    datePrecision: string | null;
+    status: string;
+    artworkUrl: string | null;
+    offers: Array<{ price: number | null; currency: string | null; availability: string }>;
+  }>;
+  /** Total before the cap, so the UI can say how many are not shown. */
+  releaseCount?: number;
   bandcampFriday: boolean;
 }

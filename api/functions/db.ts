@@ -1441,3 +1441,84 @@ export async function persistEnrichment(
     console.error(`[DB] Error enriching "${artistName}":`, error);
   }
 }
+
+// --- Releases for an artist page ---
+
+export interface ArtistPageRelease {
+  slug: string;
+  title: string;
+  releaseType: string;
+  releaseDate: string | null;
+  datePrecision: string | null;
+  status: string;
+  artworkUrl: string | null;
+  offers: { price: number | null; currency: string | null; availability: string }[];
+}
+
+/**
+ * An artist's releases for their page, newest first, plus the total.
+ *
+ * `count: 'exact'` rides along with the limit in one round trip, so an "and N more" line is a
+ * real number rather than a guess. Ordering matches idx_releases_artist_chrono: many releases
+ * have no date yet — grid ingest gets identity and artwork but no dates — and without the
+ * created_at tiebreaker those undated rows would shuffle between requests.
+ *
+ * Hidden releases are filtered in the query rather than after, so a suppressed release is
+ * indistinguishable from one that was never catalogued. That's the point of the column.
+ */
+export async function getArtistReleases(
+  artistId: string,
+  limit: number
+): Promise<{ releases: ArtistPageRelease[]; total: number }> {
+  const client = getClient();
+  if (!client) return { releases: [], total: 0 };
+
+  try {
+    const { data, count, error } = await client
+      .from('releases')
+      .select(
+        'slug, title, release_type, release_date, date_precision, status, artwork_url,' +
+        ' release_sources ( release_offers ( price, currency, availability ) )',
+        { count: 'exact' }
+      )
+      .eq('artist_id', artistId)
+      .eq('is_hidden', false)
+      .order('release_date', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error('[DB] getArtistReleases failed:', error.message);
+      return { releases: [], total: 0 };
+    }
+
+    type Row = {
+      slug: string;
+      title: string;
+      release_type: string;
+      release_date: string | null;
+      date_precision: string | null;
+      status: string;
+      artwork_url: string | null;
+      release_sources: { release_offers: { price: number | null; currency: string | null; availability: string }[] | null }[] | null;
+    };
+
+    // Through `unknown`: PostgREST types a nested select as a union that includes an error
+    // shape, so a direct cast is rejected. The runtime shape is checked by the query above.
+    const releases = ((data as unknown as Row[]) || []).map(r => ({
+      slug: r.slug,
+      title: r.title,
+      releaseType: r.release_type,
+      releaseDate: r.release_date,
+      datePrecision: r.date_precision,
+      status: r.status,
+      artworkUrl: r.artwork_url,
+      offers: (r.release_sources || []).flatMap(s => s.release_offers || []),
+    }));
+
+    return { releases, total: count ?? releases.length };
+  } catch (error) {
+    console.error('[DB] getArtistReleases error:', error);
+    return { releases: [], total: 0 };
+  }
+}
