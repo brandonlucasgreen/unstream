@@ -163,11 +163,17 @@ This is the lesson behind a run of bug fixes (#317–#328) and it applies to eve
 
 ### Testing release ingest locally
 
-Release cataloging only runs when `CONTEXT === 'production'`, because deploy previews and local
-runs both point at the **production** Supabase — so an ungated preview would write real
-`releases` rows and spend the real hourly crawl budget. That means ingest cannot be exercised
-on a deploy preview, and **`CONTEXT=production` is not a valid local workaround** — it would
-have your laptop writing production data.
+Release cataloging only runs where `RELEASE_CATALOG_ENABLED=true`, a custom env var scoped to
+Functions and set for the **Production context only**. Deploy previews and local runs both point
+at the **production** Supabase, so an ungated preview would write real `releases` rows and spend
+the real hourly crawl budget. Ingest therefore cannot be exercised on a deploy preview, and
+**setting the flag locally is not a valid workaround** — it would have your laptop writing
+production data.
+
+This used to gate on `CONTEXT === 'production'`, which silently disabled cataloging entirely:
+Netlify exposes only `URL`, `SITE_NAME` and `SITE_ID` to a serverless function at runtime, so
+`process.env.CONTEXT` is `undefined` in every deployed function. Don't reach for `CONTEXT` or
+`DEPLOY_PRIME_URL` in a function — neither exists there.
 
 Use the dry run instead:
 

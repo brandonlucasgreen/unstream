@@ -20,6 +20,7 @@
 
 import { getClient, type CatalogTrigger } from './db';
 import { authenticateAdmin, buildCorsHeaders } from './middleware';
+import { isCatalogEnabled } from './request-catalog';
 import { Sentry } from '../lib/sentry';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -145,18 +146,18 @@ export async function handler(event: {
   // accepts a background invocation and discards whatever the handler returns, so a 401 from a
   // bad secret and a 403 from a non-production context both reach us as 202. Anything not
   // checked up front is indistinguishable from a slow crawl.
-  if (process.env.CONTEXT !== 'production') {
+  if (!isCatalogEnabled()) {
     return {
       statusCode: 503,
       headers: CORS_HEADERS,
       body: JSON.stringify({
-        error: `Cataloging only runs in production (this deploy is "${process.env.CONTEXT ?? 'unset'}").`,
+        error: 'Cataloging is disabled on this deploy (RELEASE_CATALOG_ENABLED is not set).',
       }),
     };
   }
 
   const secret = process.env.INTERNAL_FUNCTION_SECRET;
-  const siteUrl = process.env.DEPLOY_PRIME_URL || process.env.URL;
+  const siteUrl = process.env.URL;
 
   if (!secret || !siteUrl) {
     // Said plainly rather than as a generic 500: this exact configuration gap silently stopped

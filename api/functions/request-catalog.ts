@@ -15,6 +15,28 @@ import type { CatalogTrigger } from './db';
 const MAX_ARTISTS_PER_REQUEST = 25;
 
 /**
+ * Is this deploy allowed to catalog?
+ *
+ * **Not `CONTEXT`.** That gate was unimplementable: Netlify exposes only `URL`, `SITE_NAME` and
+ * `SITE_ID` to a serverless function at runtime — `CONTEXT` and `DEPLOY_PRIME_URL` are
+ * build-time variables. So `process.env.CONTEXT` is `undefined` in every deployed function, and
+ * the three `CONTEXT !== 'production'` checks this replaces refused *everything, in production,
+ * always*. Cataloging had never run once. It surfaced only when the admin button reported the
+ * refusal out loud — before that it was a `console.log` nobody reads.
+ *
+ * A custom variable is the documented way to get a per-context value into a function: set
+ * `RELEASE_CATALOG_ENABLED=true` scoped to Functions, for the **Production context only**.
+ * Deploy previews and branch deploys then get no value and stay off, which is the whole point —
+ * previews run against the *production* Supabase, so an ungated one would write real releases
+ * and spend the real hourly crawl budget on traffic that isn't real.
+ *
+ * Unset means off. A crawl budget that fails open is worse than one that fails closed.
+ */
+export function isCatalogEnabled(): boolean {
+  return process.env.RELEASE_CATALOG_ENABLED === 'true';
+}
+
+/**
  * Request release cataloging for one or more artists.
  *
  * Awaited deliberately, despite being "fire and forget" in spirit: un-awaited work is killed
@@ -32,29 +54,23 @@ export async function requestArtistCatalog(
   const ids = [...new Set(artistIds.filter(Boolean))].slice(0, MAX_ARTISTS_PER_REQUEST);
   if (ids.length === 0) return;
 
-  // Production only. Deploy previews and branch deploys run against the *production*
-  // Supabase, so cataloging from one would write real releases and spend the real hourly
-  // crawl budget on behalf of traffic that isn't real. Netlify sets CONTEXT to
-  // 'production' | 'deploy-preview' | 'branch-deploy' | 'dev'; it is undefined in tests and
-  // under the plain Vite dev server, so a strict equality check also keeps local runs from
-  // touching production data.
+  // Deploy previews and branch deploys share the *production* Supabase, so an ungated one would
+  // write real releases and spend the real hourly crawl budget on traffic that isn't real.
   //
-  // Do NOT set CONTEXT=production to test locally — .env points at the production database,
-  // so that would have a laptop writing real rows. Use `npm run ingest:try <artist>` instead,
-  // which runs the real fetch, parse and mapping and prints what would be written.
-  if (process.env.CONTEXT !== 'production') {
-    console.log(`[catalog] not requested — context is ${process.env.CONTEXT ?? 'unset'}, not production`);
+  // Do NOT set RELEASE_CATALOG_ENABLED locally to test — .env points at production, so that
+  // would have a laptop writing real rows. Use `npm run ingest:try <artist>` instead, which runs
+  // the real fetch, parse and mapping and prints what would be written.
+  if (!isCatalogEnabled()) {
+    console.log('[catalog] not requested — RELEASE_CATALOG_ENABLED is not set on this deploy');
     return;
   }
 
   const secret = process.env.INTERNAL_FUNCTION_SECRET;
 
-  // DEPLOY_PRIME_URL first, not URL. On Netlify, URL is the *production* address even during
-  // a deploy preview, so preferring it would make a preview invoke the production function —
-  // running production code for a preview's traffic and spending the shared hourly crawl
-  // budget. DEPLOY_PRIME_URL is the current deploy (preview, branch, or production), which is
-  // what we want in every context.
-  const siteUrl = process.env.DEPLOY_PRIME_URL || process.env.URL;
+  // `URL` and not `DEPLOY_PRIME_URL`: only URL, SITE_NAME and SITE_ID reach a function at
+  // runtime, so DEPLOY_PRIME_URL is always undefined here. That means a preview would invoke the
+  // *production* background function — which is exactly why the gate above has to hold.
+  const siteUrl = process.env.URL;
 
   if (!secret || !siteUrl) {
     // Not an error worth surfacing: without configuration the feature is simply off.
