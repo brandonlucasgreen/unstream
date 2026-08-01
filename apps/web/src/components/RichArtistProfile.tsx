@@ -60,6 +60,8 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
   const [maxLinks, setMaxLinks] = useState(6);
   const [copied, setCopied] = useState(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
+  const shareUrl = `https://unstream.stream/a/${slug}`;
 
   const embedCode = `<div class="unstream-widget" data-artist="${artist.name}" data-theme="${embedTheme}" data-max-links="${maxLinks}"></div>
 <script src="https://unstream.stream/widget.js" async></script>`;
@@ -77,6 +79,24 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
   const handleLinkClick = useCallback((platform: string) => {
     analytics.trackArtistLinkClick(slug, platform);
   }, [slug]);
+
+  const handleShare = useCallback(async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `${artist.name} on Unstream`, url: shareUrl });
+      } catch {
+        // User cancelled the share sheet.
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    } catch (err) {
+      console.warn('[RichArtistProfile] clipboard.writeText failed:', err);
+    }
+  }, [artist.name, shareUrl]);
 
   return (
     <div>
@@ -124,13 +144,18 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
               Verified
             </span>
           )}
+        </div>
+        {locationText && (
+          <div className="mt-1.5 text-sm text-text-muted">{locationText}</div>
+        )}
+        <div className="mt-3 flex items-center justify-center gap-4">
           {onSave && (
             <button
               onClick={isSaved ? onUnsave : onSave}
               disabled={disabledSave}
               aria-label={isSaved ? `Unsave ${artist.name}` : `Save ${artist.name}`}
               title={isSaved ? 'Saved' : 'Save artist'}
-              className={`inline-flex items-center gap-1 text-sm transition-colors ${
+              className={`inline-flex items-center gap-1.5 text-sm transition-colors ${
                 isSaved ? 'text-accent-secondary' : 'text-text-muted hover:text-accent-secondary'
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
@@ -145,11 +170,128 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
               {isSaved ? 'Saved' : 'Save'}
             </button>
           )}
+          <button
+            onClick={handleShare}
+            aria-label={`Share ${artist.name}`}
+            title="Share"
+            className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-accent-secondary transition-colors"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            {shareCopied ? 'Copied!' : 'Share'}
+          </button>
+          <button
+            onClick={() => setEmbedOpen(!embedOpen)}
+            aria-label="Embed this profile"
+            title="Embed this profile on your website"
+            className={`inline-flex items-center gap-1.5 text-sm transition-colors ${
+              embedOpen ? 'text-accent-secondary' : 'text-text-muted hover:text-accent-secondary'
+            }`}
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+            </svg>
+            Embed
+          </button>
         </div>
-        {locationText && (
-          <div className="mt-1.5 text-sm text-text-muted">{locationText}</div>
-        )}
       </div>
+
+      {embedOpen && (
+        <div className="pb-6 text-left">
+          <h2 className="text-[11px] uppercase tracking-wider text-text-muted mb-3">
+            Embed this profile on your website
+          </h2>
+          {/* Theme + Link count controls */}
+          <div className="flex flex-wrap items-center gap-4 mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-text-muted">Theme:</span>
+              <button
+                onClick={() => setEmbedTheme('dark')}
+                className={`px-2.5 py-1 rounded text-xs font-medium border-none cursor-pointer font-body transition-colors ${
+                  embedTheme === 'dark'
+                    ? 'bg-accent-primary/15 text-accent-primary'
+                    : 'bg-bg-secondary text-text-muted hover:text-text-primary'
+                }`}
+              >
+                Dark
+              </button>
+              <button
+                onClick={() => setEmbedTheme('light')}
+                className={`px-2.5 py-1 rounded text-xs font-medium border-none cursor-pointer font-body transition-colors ${
+                  embedTheme === 'light'
+                    ? 'bg-accent-primary/15 text-accent-primary'
+                    : 'bg-bg-secondary text-text-muted hover:text-text-primary'
+                }`}
+              >
+                Light
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-text-muted">
+                Links: <span>{maxLinks}</span>
+              </span>
+              <input
+                type="range"
+                min={3}
+                max={12}
+                value={maxLinks}
+                onChange={(e) => setMaxLinks(Number(e.target.value))}
+                className="w-20 accent-accent-primary"
+              />
+            </div>
+          </div>
+
+          {/* Static card preview — the embed widget is rendered client-side by /widget.js
+              on the consumer's site (see https://bgreen.lol/music/ for a live example), so
+              a live iframe preview isn't possible here. Show a static preview of what the
+              embed will look like. */}
+          <div className="bg-bg-primary rounded-lg p-4 mb-3 border border-border">
+            <div className="text-xs text-text-muted uppercase tracking-wider mb-2">
+              Embed preview
+            </div>
+            <div className="text-sm font-medium text-text-primary mb-2">
+              {artist.name}
+            </div>
+            <div className="flex flex-col gap-1">
+              {links.slice(0, maxLinks).map((link) => (
+                <div
+                  key={link.platform + link.url}
+                  className="flex items-center justify-between text-xs py-1.5 px-2 rounded border border-border"
+                >
+                  <span className="text-text-primary">
+                    {link.displayName || link.platform}
+                  </span>
+                  {link.payoutPercent && (
+                    <span className="text-text-muted">
+                      {link.payoutPercent} to artist
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-text-muted mt-2">
+              The actual embed renders this content via JavaScript on your website.
+            </p>
+          </div>
+
+          {/* Code block */}
+          <div className="relative">
+            <pre className="bg-bg-secondary border border-border rounded-lg p-4 pr-16 overflow-x-auto text-xs text-text-muted font-mono whitespace-pre-wrap break-all">
+              {embedCode}
+            </pre>
+            <button
+              onClick={handleCopy}
+              className="absolute top-2 right-2 px-3 py-1 rounded text-xs font-medium border-none cursor-pointer font-body bg-accent-primary/10 text-accent-primary hover:bg-accent-primary/20 transition-colors"
+            >
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+          <p className="text-xs text-text-muted mt-2">
+            Paste this into your website's HTML. The widget loads asynchronously and won't affect your page speed.
+          </p>
+        </div>
+      )}
 
       {/* Content container */}
       <div className="pb-8">
@@ -248,119 +390,6 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
           total={payload.releaseCount ?? 0}
           artistSlug={slug}
         />
-
-        {/* Embed Widget */}
-        <div className="mt-6">
-          <button
-            onClick={() => setEmbedOpen(!embedOpen)}
-            className="flex items-center gap-2 text-sm text-text-muted hover:text-text-primary transition-colors bg-transparent border-none cursor-pointer font-body p-0"
-          >
-            <svg
-              width="16"
-              height="16"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              className={`transition-transform duration-150 ${embedOpen ? 'rotate-90' : ''}`}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-            Embed this profile on your website
-          </button>
-
-          {embedOpen && (
-            <div className="mt-4">
-              {/* Theme + Link count controls */}
-              <div className="flex flex-wrap items-center gap-4 mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-text-muted">Theme:</span>
-                  <button
-                    onClick={() => setEmbedTheme('dark')}
-                    className={`px-2.5 py-1 rounded text-xs font-medium border-none cursor-pointer font-body transition-colors ${
-                      embedTheme === 'dark'
-                        ? 'bg-accent-primary/15 text-accent-primary'
-                        : 'bg-bg-secondary text-text-muted hover:text-text-primary'
-                    }`}
-                  >
-                    Dark
-                  </button>
-                  <button
-                    onClick={() => setEmbedTheme('light')}
-                    className={`px-2.5 py-1 rounded text-xs font-medium border-none cursor-pointer font-body transition-colors ${
-                      embedTheme === 'light'
-                        ? 'bg-accent-primary/15 text-accent-primary'
-                        : 'bg-bg-secondary text-text-muted hover:text-text-primary'
-                    }`}
-                  >
-                    Light
-                  </button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-text-muted">
-                    Links: <span>{maxLinks}</span>
-                  </span>
-                  <input
-                    type="range"
-                    min={3}
-                    max={12}
-                    value={maxLinks}
-                    onChange={(e) => setMaxLinks(Number(e.target.value))}
-                    className="w-20 accent-accent-primary"
-                  />
-                </div>
-              </div>
-
-              {/* Static card preview — the embed widget is rendered client-side by /widget.js
-                  on the consumer's site (see https://bgreen.lol/music/ for a live example), so
-                  a live iframe preview isn't possible here. Show a static preview of what the
-                  embed will look like. */}
-              <div className="bg-bg-primary rounded-lg p-4 mb-3 border border-border">
-                <div className="text-xs text-text-muted uppercase tracking-wider mb-2">
-                  Embed preview
-                </div>
-                <div className="text-sm font-medium text-text-primary mb-2">
-                  {artist.name}
-                </div>
-                <div className="flex flex-col gap-1">
-                  {links.slice(0, maxLinks).map((link) => (
-                    <div
-                      key={link.platform + link.url}
-                      className="flex items-center justify-between text-xs py-1.5 px-2 rounded border border-border"
-                    >
-                      <span className="text-text-primary">
-                        {link.displayName || link.platform}
-                      </span>
-                      {link.payoutPercent && (
-                        <span className="text-text-muted">
-                          {link.payoutPercent} to artist
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <p className="text-xs text-text-muted mt-2">
-                  The actual embed renders this content via JavaScript on your website.
-                </p>
-              </div>
-
-              {/* Code block */}
-              <div className="relative">
-                <pre className="bg-bg-secondary border border-border rounded-lg p-4 pr-16 overflow-x-auto text-xs text-text-muted font-mono whitespace-pre-wrap break-all">
-                  {embedCode}
-                </pre>
-                <button
-                  onClick={handleCopy}
-                  className="absolute top-2 right-2 px-3 py-1 rounded text-xs font-medium border-none cursor-pointer font-body bg-accent-primary/10 text-accent-primary hover:bg-accent-primary/20 transition-colors"
-                >
-                  {copied ? 'Copied!' : 'Copy'}
-                </button>
-              </div>
-              <p className="text-xs text-text-muted mt-2">
-                Paste this into your website's HTML. The widget loads asynchronously and won't affect your page speed.
-              </p>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );
