@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { PLATFORMS } from "../shared/platform-registry.ts";
 import { isBandcampFriday } from "../shared/bandcamp-friday.ts";
 import { mainLinkDividerIndexes } from "../shared/link-dividers.ts";
-import { cheapestOfferSummary, formatReleaseDate } from "../shared/release-display.ts";
+import { leadingOfferSummary, orderedSourcePlatforms, formatReleaseDate } from "../shared/release-display.ts";
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
 
 /**
@@ -23,7 +23,10 @@ interface ReleaseRow {
   date_precision: string | null;
   status: string;
   artwork_url: string | null;
-  release_sources: { release_offers: { price: number | null; currency: string | null; availability: string }[] | null }[] | null;
+  release_sources: {
+    platform: string;
+    release_offers: { price: number | null; currency: string | null; availability: string }[] | null;
+  }[] | null;
 }
 
 // Allowed embed domains for featured releases (must match api/functions/artist-profile.ts)
@@ -80,8 +83,19 @@ function renderReleaseRow(release: ReleaseRow, artistSlug: string): string {
     ? ''
     : release.release_type.charAt(0).toUpperCase() + release.release_type.slice(1);
 
-  const offers = (release.release_sources || []).flatMap(s => s.release_offers || []);
-  const meta = [type, date, cheapestOfferSummary(offers)].filter(Boolean).join(' · ');
+  const sources = (release.release_sources || []).map(s => ({ platform: s.platform, offers: s.release_offers || [] }));
+  // leadingOfferSummary, not the globally cheapest price across every source — see the
+  // function's own doc for why picking the absolute cheapest could rank a Discogs secondhand
+  // listing above a Bandcamp direct purchase.
+  const meta = [type, date, leadingOfferSummary(sources)].filter(Boolean).join(' · ');
+
+  // Same artist-paying-first order as the summary above and the release page itself.
+  const platformsHtml = orderedSourcePlatforms(sources)
+    .map(p => {
+      const info = PLATFORM_INFO[p];
+      return `<span title="${escapeHtml(info?.name || p)}" style="font-size:12px">${info?.icon || '🔗'}</span>`;
+    })
+    .join('');
 
   const art = release.artwork_url
     ? `<img src="${escapeHtml(release.artwork_url)}" alt="" loading="lazy" referrerpolicy="no-referrer" style="width:48px;height:48px;border-radius:6px;object-fit:cover;flex-shrink:0;background:var(--bg2)">`
@@ -98,6 +112,7 @@ function renderReleaseRow(release: ReleaseRow, artistSlug: string): string {
     <span style="flex:1;min-width:0">
       <span style="display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${title}</span>
       ${meta ? `<span style="display:block;font-size:12px;color:var(--muted)">${escapeHtml(meta)}</span>` : ''}
+      ${platformsHtml ? `<span style="display:flex;gap:4px;margin-top:2px">${platformsHtml}</span>` : ''}
     </span>
     ${upcoming}
   </a>`;
@@ -251,7 +266,7 @@ export default async function handler(request: Request, context: Context) {
         .from('releases')
         .select(
           'slug, title, release_type, release_date, date_precision, status, artwork_url,' +
-          ' release_sources ( release_offers ( price, currency, availability ) )',
+          ' release_sources ( platform, release_offers ( price, currency, availability ) )',
           { count: 'exact' }
         )
         .eq('artist_id', artist.id)

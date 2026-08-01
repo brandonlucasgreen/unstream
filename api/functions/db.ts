@@ -1769,7 +1769,9 @@ export interface ArtistPageRelease {
   datePrecision: string | null;
   status: string;
   artworkUrl: string | null;
-  offers: { price: number | null; currency: string | null; availability: string }[];
+  // Platform attribution kept per-source (not flattened) so the UI can show *where* a release
+  // is available, not just the cheapest number across everywhere it happens to be sold.
+  sources: { platform: string; offers: { price: number | null; currency: string | null; availability: string }[] }[];
 }
 
 /**
@@ -1795,7 +1797,7 @@ export async function getArtistReleases(
       .from('releases')
       .select(
         'slug, title, release_type, release_date, date_precision, status, artwork_url,' +
-        ' release_sources ( release_offers ( price, currency, availability ) )',
+        ' release_sources ( platform, release_offers ( price, currency, availability ) )',
         { count: 'exact' }
       )
       .eq('artist_id', artistId)
@@ -1817,7 +1819,10 @@ export async function getArtistReleases(
       date_precision: string | null;
       status: string;
       artwork_url: string | null;
-      release_sources: { release_offers: { price: number | null; currency: string | null; availability: string }[] | null }[] | null;
+      release_sources: {
+        platform: string;
+        release_offers: { price: number | null; currency: string | null; availability: string }[] | null;
+      }[] | null;
     };
 
     // Through `unknown`: PostgREST types a nested select as a union that includes an error
@@ -1830,7 +1835,7 @@ export async function getArtistReleases(
       datePrecision: r.date_precision,
       status: r.status,
       artworkUrl: r.artwork_url,
-      offers: (r.release_sources || []).flatMap(s => s.release_offers || []),
+      sources: (r.release_sources || []).map(s => ({ platform: s.platform, offers: s.release_offers || [] })),
     }));
 
     return { releases, total: count ?? releases.length };
