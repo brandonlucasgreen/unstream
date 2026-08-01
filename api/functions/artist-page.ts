@@ -4,7 +4,9 @@
 // This is the data source for the React SPA artist page (UNS-102).
 
 import { getArtistProfileBySlug, getArtistReleases } from './db';
-import { checkRateLimit, getClientIp } from './ratelimit';
+import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
+import { Sentry } from '../lib/sentry';
+import { isPublishedArtistSlug } from '../shared/published-artist-slugs';
 import { PLATFORMS } from '../shared/platform-registry';
 import { isBandcampFriday } from '../shared/bandcamp-friday';
 import { mainLinkDividerIndexes } from '../shared/link-dividers';
@@ -37,10 +39,39 @@ export async function handler(event: { queryStringParameters?: Record<string, st
   }
 
   try {
-    const bundle = await getArtistProfileBySlug(slug);
+    const { bundle, failed } = await getArtistProfileBySlug(slug);
 
-    // getArtistProfileBySlug returns null only if there's no artist row for this slug
+    // The lookup itself broke. Say so with a 503 instead of claiming the artist doesn't exist —
+    // a Supabase outage would otherwise render as every artist page 404ing convincingly.
+    if (failed) {
+      Sentry.captureMessage('[artist-page] artist lookup failed', {
+        level: 'error',
+        tags: { slug },
+        extra: { context: 'artist-page.lookupFailed' },
+      });
+      return {
+        statusCode: 503,
+        headers: { ...CORS_HEADERS, 'Cache-Control': 'no-store' },
+        body: JSON.stringify({ error: 'Artist lookup temporarily unavailable' }),
+      };
+    }
+
     if (!bundle) {
+      // A 404 for a slug we publish in data/artists-manifest.json is our bug: that manifest feeds
+      // the sitemap and the social posts, so the URL is one we've handed out. A 404 for anything
+      // else is just a fan or a crawler guessing, and reporting those would bury the real signal.
+      //
+      // Deduped per slug for 24h. That bound matters right now: at the time of writing only 55 of
+      // the 791 published slugs have an `artists` row, so this fires for the rest until that gap is
+      // closed (populate the rows, or stop publishing slugs with no data). One event per slug per
+      // day keeps that backlog readable instead of one per request.
+      if (isPublishedArtistSlug(slug) && await checkSentryDedup(`artist-page-404:${slug}`, 86400)) {
+        Sentry.captureMessage('[artist-page] 404 for a published artist slug', {
+          level: 'warning',
+          tags: { slug },
+          extra: { context: 'artist-page.publishedSlug404' },
+        });
+      }
       return {
         statusCode: 404,
         headers: CORS_HEADERS,

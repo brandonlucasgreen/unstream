@@ -6,8 +6,13 @@
 
 [[headers]]
   for = "/*"
+  # connect-src note: Sentry's ingest host is region-scoped — ours is
+  # o…ingest.us.sentry.io. `*.ingest.sentry.io` does NOT cover it: CSP host wildcards are a
+  # suffix match, and `.ingest.sentry.io` is not a suffix of `.ingest.us.sentry.io`. That
+  # one missing `us.` silently dropped every browser error event between setup and 2026-08-01.
+  # If the Sentry org ever moves region, this host has to move with it.
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' gc.zgo.at letterbird.co; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://unstream.goatcounter.com https://letterbird.co https://*.ingest.sentry.io; img-src 'self' https: data:; frame-src https:; object-src 'none'; base-uri 'self'"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' gc.zgo.at letterbird.co; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://unstream.goatcounter.com https://letterbird.co https://*.ingest.us.sentry.io; img-src 'self' https: data:; frame-src https:; object-src 'none'; base-uri 'self'"
 
 [[edge_functions]]
   path = "/"
