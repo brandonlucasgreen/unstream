@@ -820,7 +820,13 @@ export async function persistReleases(
 interface DetailToPersist {
   releaseDate: string | null;
   datePrecision: string;
-  status: string;
+  /**
+   * Null when this source has nothing to say about the release row itself — Faircamp publishes
+   * prices but no date anywhere in its markup, so it can't derive a status either. Writing its
+   * default 'released' would overwrite an 'announced' that Bandcamp got right from a real
+   * pre-order, so the row is left alone entirely and only the offers are written.
+   */
+  status: string | null;
   offers: Array<{
     format: string;
     price: number | null;
@@ -857,7 +863,7 @@ export async function persistReleaseDetail(
   try {
     // A date the artist authored outranks anything upstream says, and status is derived from
     // the date, so a curated date takes both columns out of ingest's hands.
-    if (!release.curatedFields.includes('release_date')) {
+    if (detail.status !== null && !release.curatedFields.includes('release_date')) {
       const patch: Record<string, unknown> = { status: detail.status };
       if (detail.releaseDate) {
         patch.release_date = detail.releaseDate;
@@ -2009,12 +2015,15 @@ export async function addArtistReleaseLink(
   if (!client) return false;
   if (!(await verifyReleaseOwnership(artistId, [releaseId]))) return false;
 
+  // `external_id` is deliberately absent, not null. PostgREST's upsert updates only the columns
+  // present in the payload, so leaving it out keeps whatever id ingest already stored for this
+  // platform — writing an explicit null would erase the one thing that makes a re-crawl
+  // idempotent, and the next crawl would mint a duplicate source rather than update this row.
   const { error } = await client.from('release_sources').upsert(
     {
       release_id: releaseId,
       platform,
       url,
-      external_id: null,
       source: 'claimed',
       last_seen_at: new Date().toISOString(),
     },

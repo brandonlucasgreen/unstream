@@ -1,3 +1,4 @@
+import { useState, type ReactNode } from 'react';
 import { leadingOfferSummary, orderedSourcePlatforms, formatReleaseDate } from '../../../../api/shared/release-display';
 import { PLATFORMS } from '../../../../api/shared/platform-registry';
 import { PlatformIcon } from './PlatformIcon';
@@ -5,6 +6,9 @@ import type { ArtistPagePayload } from '../types/artist-page';
 import type { SourceId } from '../types';
 
 type Release = NonNullable<ArtistPagePayload['releases']>[number];
+
+/** Releases per page. Two columns of five. */
+const PAGE_SIZE = 10;
 
 /**
  * An artist's releases, each linking to its buying guide at `/a/{artist}/{release}`.
@@ -26,6 +30,9 @@ type Release = NonNullable<ArtistPagePayload['releases']>[number];
  * nothing and renders a blank page. It also strands history: the URL changes, React renders
  * nothing, and Back has nowhere sensible to go. A real navigation reaches the one renderer that
  * exists, which is also what makes an in-app click and a pasted link produce the same page.
+ *
+ * Paginated ten at a time in two columns, so a long discography stays one glance rather than a
+ * scroll past the platform links this page exists to show.
  */
 export function ReleasesSection({
   releases,
@@ -36,20 +43,66 @@ export function ReleasesSection({
   total: number;
   artistSlug: string;
 }) {
+  const [page, setPage] = useState(0);
+
   if (releases.length === 0) return null;
+
+  // Paged over what the payload already carries rather than fetched a page at a time: the whole
+  // list arrives with the page, so turning a page is instant and costs no request. `total` can
+  // still exceed it for an unusually large catalogue, which the note below reports honestly
+  // instead of pretending the last page is the end of the discography.
+  const pageCount = Math.ceil(releases.length / PAGE_SIZE);
+  const current = Math.min(page, pageCount - 1);
+  const shown = releases.slice(current * PAGE_SIZE, current * PAGE_SIZE + PAGE_SIZE);
 
   return (
     <div className="mt-6">
       <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">Releases</h2>
-      <div className="grid gap-2">
-        {releases.map(release => (
+      <div className="grid gap-2 sm:grid-cols-2">
+        {shown.map(release => (
           <ReleaseRow key={release.slug} release={release} artistSlug={artistSlug} />
         ))}
       </div>
+
+      {pageCount > 1 && (
+        <nav className="mt-3 flex items-center justify-center gap-3" aria-label="Releases pages">
+          <PageButton onClick={() => setPage(current - 1)} disabled={current === 0}>
+            ← Previous
+          </PageButton>
+          <span className="text-xs text-text-muted" aria-live="polite">
+            Page {current + 1} of {pageCount}
+          </span>
+          <PageButton onClick={() => setPage(current + 1)} disabled={current === pageCount - 1}>
+            Next →
+          </PageButton>
+        </nav>
+      )}
+
       {total > releases.length && (
-        <p className="mt-2.5 text-xs text-text-muted">and {total - releases.length} more</p>
+        <p className="mt-2.5 text-center text-xs text-text-muted">and {total - releases.length} more</p>
       )}
     </div>
+  );
+}
+
+function PageButton({
+  onClick,
+  disabled,
+  children,
+}: {
+  onClick: () => void;
+  disabled: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="px-3 py-1.5 rounded-lg border border-border text-xs text-text-primary hover:bg-bg-hover transition-colors disabled:opacity-40 disabled:cursor-default disabled:hover:bg-transparent"
+    >
+      {children}
+    </button>
   );
 }
 

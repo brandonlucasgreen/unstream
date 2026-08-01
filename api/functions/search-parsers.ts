@@ -498,6 +498,7 @@ export function parseBandcampReleaseDetail(html: string): BandcampReleaseDetail 
 
   for (const entry of releases) {
     if (!isRecord(entry)) continue;
+    if (!isThisReleasesItem(entry)) continue;
     for (const offer of asArray(entry.offers)) {
       if (!isRecord(offer)) continue;
       offers.push({
@@ -511,6 +512,32 @@ export function parseBandcampReleaseDetail(html: string): BandcampReleaseDetail 
   }
 
   return { datePublished, offers };
+}
+
+/** `item_type` values that are something other than this release: see `isThisReleasesItem`. */
+const CROSS_CATALOG_ITEM_TYPES = new Set(['i', 'b']);
+
+/**
+ * Is this `albumRelease` entry something you can buy *of this release*?
+ *
+ * An album page's `albumRelease` list is not only that album's packages. Bandcamp also parks
+ * two whole-catalog products in it, both typed `DigitalFormat` and indistinguishable from the
+ * album's own download except by `item_type`:
+ *
+ * - `i` — the artist's **monthly subscription**. Priced per month, not per record.
+ * - `b` — the **full digital discography** bundle. Priced for every release at once.
+ *
+ * Left in, they become digital offers on this release, and `aggregateOffers` keeps the cheapest
+ * digital price — so a $5 album next to a $3.33/month subscription is published as "$5 → $3.33".
+ * That is a wrong price on a page whose entire job is being accurate about what an artist is
+ * paid, and it happened: Kid Lightbulbs' albums were all quoting the subscription fee.
+ *
+ * A missing `item_type` is kept rather than dropped — the known intruders both carry one, and
+ * refusing everything unlabelled would silently empty the offers on any page whose markup drifts.
+ */
+function isThisReleasesItem(entry: Record<string, unknown>): boolean {
+  const itemType = additionalProperty(entry.additionalProperty, 'item_type');
+  return !itemType || !CROSS_CATALOG_ITEM_TYPES.has(itemType.toLowerCase().trim());
 }
 
 /** First JSON-LD object in the page that satisfies `predicate`. Malformed blocks are skipped. */

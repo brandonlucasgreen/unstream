@@ -5,6 +5,7 @@
 // search-sources, and for the same reason: this is the part with decisions in it, so it
 // should be testable without a network or a database.
 
+import { parse, type HTMLElement } from 'node-html-parser';
 import {
   parseBandcampGridReleases,
   parseBandcampReleaseDetail,
@@ -597,9 +598,19 @@ export interface FaircampReleaseCandidate {
 /**
  * Find candidate release links on a Faircamp artist homepage.
  *
- * Deliberately permissive rather than exhaustive: any bare relative path (`slug/`, no query, no
- * subpath) is a candidate. Some will be wrong — a theme page using an unrecognized slug, say —
- * accepted per the "even a high failure rate beats nothing" call on this source specifically.
+ * Faircamp's generator wraps each release in `<div class="release">`, and on a site hosting more
+ * than one artist it puts that release's credited artists in a nested `<div class="release_artists">`
+ * — as links of exactly the same shape as the release's own (`kl/`, `blg/`). Reading every bare
+ * relative link, as this used to, therefore catalogs a multi-artist site's *artists* as records:
+ * on music.kidlightbulbs.com that produced release rows called "Kid Lightbulbs" and "Brandon
+ * Lucas Green". Nothing in a release page's own markup distinguishes them afterwards — both
+ * render `og:title` and neither sets a useful `og:type` — so the discrimination has to happen
+ * here, where the structure still says which link is which.
+ *
+ * Still permissive within a release block: two links point at the same release (its cover and
+ * its title) and both are accepted, deduped by slug. The fallback for a page with no release
+ * blocks at all keeps the old scan, minus artist credits — a markup change should cost coverage,
+ * not correctness.
  */
 export function ingestFaircampHomeLinks(html: string, pageUrl: string): FaircampReleaseCandidate[] {
   const out: FaircampReleaseCandidate[] = [];
@@ -612,8 +623,13 @@ export function ingestFaircampHomeLinks(html: string, pageUrl: string): Faircamp
     return out;
   }
 
-  for (const match of html.matchAll(/href="([^"]+)"/g)) {
-    const raw = match[1];
+  const root = parse(html);
+  const blocks = root.querySelectorAll('div.release');
+  const anchors = (blocks.length > 0 ? blocks.flatMap(b => b.querySelectorAll('a[href]')) : root.querySelectorAll('a[href]'))
+    .filter(a => !isArtistCredit(a));
+
+  for (const anchor of anchors) {
+    const raw = anchor.getAttribute('href') ?? '';
     if (!/^[a-z0-9][a-z0-9-]*\/$/i.test(raw)) continue;
 
     const slug = raw.slice(0, -1).toLowerCase();
@@ -634,9 +650,20 @@ export function ingestFaircampHomeLinks(html: string, pageUrl: string): Faircamp
   return out;
 }
 
+/** Is this link one of a release's credited artists rather than the release itself? */
+function isArtistCredit(anchor: HTMLElement): boolean {
+  for (let node: HTMLElement | null = anchor; node; node = node.parentNode) {
+    if (node.classList?.contains('release_artists')) return true;
+  }
+  return false;
+}
+
 export interface FaircampReleasePage {
   title: string;
   artworkUrl: string | null;
+  /** Relative href of this release's purchase page, where the price lives. Null when there
+   *  isn't one — a free, unlisted or code-unlocked release has no purchase page at all. */
+  purchaseHref: string | null;
 }
 
 function decodeHtmlEntities(s: string): string {
@@ -664,7 +691,63 @@ export function ingestFaircampReleasePage(html: string): FaircampReleasePage | n
   const imageMatch = html.match(/<meta\s+property="og:image"\s+content="([^"]*)"/i);
   const artworkUrl = imageMatch ? decodeHtmlEntities(imageMatch[1]).trim() || null : null;
 
-  return { title, artworkUrl };
+  const purchaseMatch = html.match(/href="(purchase\/[A-Za-z0-9_-]+\/)"/);
+
+  return { title, artworkUrl, purchaseHref: purchaseMatch ? purchaseMatch[1] : null };
+}
+
+/**
+ * Read a Faircamp purchase page's price.
+ *
+ * Faircamp's release pages carry no price at all — no JSON-LD, no microdata, nothing — which is
+ * why the catalog showed "Still gathering formats and prices" on every Faircamp release
+ * indefinitely. The price lives one level down, on `{release}/purchase/{token}/`, and this
+ * reads it there.
+ *
+ * Matched against Faircamp's own generator (`renderer/src/pages/multitrack_purchase.rs`), which
+ * emits one of two shapes:
+ *
+ * - **A price input** for anything with a range — name-your-price ("$0 or more"), "up to $10",
+ *   or "$5–20". `data-min` is the floor, and the floor is the honest figure to publish: it is
+ *   what a fan can actually pay. `0` means name-your-price, which the display layer already
+ *   renders as such rather than as "free".
+ * - **No input at all** for a single fixed price, rendered as text. The surrounding words are
+ *   localized, but the generator always writes the amount immediately before the ISO currency
+ *   code, so that adjacency is what's matched rather than any English string.
+ *
+ * Everything Faircamp sells here is a download, so the offer is always `digital` — the page's
+ * own "available formats" line lists codecs (MP3, FLAC, WAV), not physical formats.
+ *
+ * Returns null when no price can be read, which callers must not turn into a price of zero:
+ * "we couldn't read it" and "you may pay nothing" are different claims about someone's income.
+ */
+export function ingestFaircampPurchasePage(html: string): IngestedOffer | null {
+  const input = html.match(/<input\b[^>]*\bid="price"[^>]*>/);
+  if (input) {
+    const min = input[0].match(/data-min="([0-9]+(?:\.[0-9]+)?)"/);
+    if (!min) return null;
+    // The currency code is written immediately after the input, inside the same wrapper.
+    const currency = html.slice(input.index! + input[0].length).match(/^\s*([A-Z]{3})\b/);
+    return { format: 'digital', price: Number(min[1]), currency: currency ? currency[1] : null, availability: 'available' };
+  }
+
+  const fixed = stripTags(html).match(/([0-9]+(?:[.,][0-9]+)?)\s+([A-Z]{3})\b/);
+  if (!fixed) return null;
+
+  return {
+    format: 'digital',
+    price: Number(fixed[1].replace(',', '.')),
+    currency: fixed[2],
+    availability: 'available',
+  };
+}
+
+/** Text content only, so a localized price line can be matched without markup in the way. */
+function stripTags(html: string): string {
+  return html
+    .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ');
 }
 
 export interface FaircampReleaseToPersist {

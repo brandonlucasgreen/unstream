@@ -248,13 +248,15 @@ export default async function handler(request: Request, context: Context) {
         </div>`;
       }).join('');
 
-      // An honest empty state. "We know it's here, we haven't read the prices yet" is a
-      // different statement from "there is nothing to buy", and a fan can act on the first.
+      // An honest empty state. Both branches say the same thing to a fan — we have no price to
+      // show you — and neither says "this is free" or "there is nothing to buy". The wording no
+      // longer promises that a price is on its way: a Faircamp release whose purchase page we
+      // can't read has no price coming, and "still gathering" would be a promise we don't keep.
       const pendingHtml = offers.length === 0
         ? `<div class="offer"><span style="color:var(--muted)">${
             source.detail_checked_at
               ? 'No formats listed on this page.'
-              : 'Still gathering formats and prices.'
+              : 'Price information not available.'
           }</span></div>`
         : '';
 

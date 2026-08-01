@@ -18,6 +18,27 @@ const PLATFORM_OPTIONS = (Object.values(sources) as { id: SourceId; name: string
 
 const RELEASE_TYPES = ['album', 'ep', 'single', 'compilation', 'live', 'remix', 'other'] as const;
 
+/**
+ * What the artist typed, as a URL the server will accept — or null if it can't be one.
+ *
+ * The server requires an http(s) URL, and pasting `subvert.fm/artist/record` (no scheme) is the
+ * ordinary way to get that wrong. Assuming https rather than rejecting is safe here: the value
+ * is stored and linked, never fetched, and every platform this page lists serves https.
+ */
+function normalizeLinkUrl(raw: string): string | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+
+  const candidate = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  try {
+    const parsed = new URL(candidate);
+    // A bare word is a valid URL to the parser but not an address anyone meant to paste.
+    return parsed.hostname.includes('.') ? parsed.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
 interface OwnerRelease {
   id: string;
   title: string;
@@ -160,6 +181,17 @@ export function ArtistReleasesPage() {
             </PageSkeleton>
           ) : (
             <>
+              {/* Above the list, not below it: scanning is where an artist starts, and on a real
+                  catalogue the bottom of the page is a long scroll away. */}
+              {catalog?.canTrigger && (
+                <CatalogNowPanel
+                  slug={slug}
+                  token={session?.access_token}
+                  catalog={catalog}
+                  onFinished={fetchReleases}
+                />
+              )}
+
               <button
                 onClick={() => setShowAddForm(v => !v)}
                 className="px-3 py-1.5 rounded-lg bg-bg-secondary border border-border text-text-primary text-sm font-medium hover:bg-bg-hover transition-colors"
@@ -210,15 +242,6 @@ export function ArtistReleasesPage() {
                     />
                   ))}
                 </div>
-              )}
-
-              {catalog?.canTrigger && (
-                <CatalogNowPanel
-                  slug={slug}
-                  token={session?.access_token}
-                  catalog={catalog}
-                  onFinished={fetchReleases}
-                />
               )}
             </>
           )}
@@ -365,14 +388,14 @@ function CatalogNowPanel({
   }, [slug, token, poll]);
 
   return (
-    <div className="mt-8 p-4 rounded-xl border border-dashed border-border space-y-2">
+    <div className="p-4 rounded-xl border border-dashed border-border space-y-2">
       <h2 className="font-display text-base font-semibold text-text-primary">
         Look for releases on your links
       </h2>
       <p className="text-xs text-text-muted">
         Checks the platforms on your profile — Bandcamp, Discogs, Faircamp — and adds anything it
         finds. Some platforms can't be read automatically, so this won't always find everything;
-        whatever it misses you can add by hand above.
+        whatever it misses you can add by hand below.
       </p>
       <div className="flex flex-wrap items-center gap-3 pt-1">
         <button
@@ -434,7 +457,7 @@ function ReleaseCard({
   onDismiss: () => void;
   onMerge: (keepId: string, dropId: string) => void;
   onUpdate: (patch: { title?: string; releaseDate?: string | null; artworkUrl?: string | null }) => void;
-  onAddLink: (platform: string, url: string) => void;
+  onAddLink: (platform: string, url: string) => Promise<boolean>;
 }) {
   const busy = (key: string) => actionLoading === key;
   const date = formatReleaseDate(release.releaseDate, release.datePrecision);
@@ -537,13 +560,33 @@ function EditReleaseForm({
   busy: boolean;
   linkBusy: boolean;
   onSave: (patch: { title?: string; releaseDate?: string | null; artworkUrl?: string | null }) => void;
-  onAddLink: (platform: string, url: string) => void;
+  onAddLink: (platform: string, url: string) => Promise<boolean>;
 }) {
   const [title, setTitle] = useState(release.title);
   const [releaseDate, setReleaseDate] = useState(release.releaseDate ?? '');
   const [artworkUrl, setArtworkUrl] = useState(release.artworkUrl ?? '');
   const [linkPlatform, setLinkPlatform] = useState<string>(PLATFORM_OPTIONS[0]?.id ?? '');
   const [linkUrl, setLinkUrl] = useState('');
+  const [linkStatus, setLinkStatus] = useState<{ ok: boolean; message: string } | null>(null);
+
+  async function handleAddLink() {
+    const url = normalizeLinkUrl(linkUrl);
+    if (!url) {
+      setLinkStatus({ ok: false, message: "That doesn't look like a web address." });
+      return;
+    }
+
+    setLinkStatus(null);
+    const added = await onAddLink(linkPlatform, url);
+    // The typed URL is kept on failure. Clearing it optimistically threw away what the artist
+    // wrote whenever the save was rejected, so the only way to retry was to type it again.
+    if (added) {
+      setLinkUrl('');
+      setLinkStatus({ ok: true, message: 'Link added.' });
+    } else {
+      setLinkStatus({ ok: false, message: "Couldn't add that link — see the error above." });
+    }
+  }
 
   return (
     <div className="pt-3 border-t border-border space-y-4">
@@ -607,17 +650,19 @@ function EditReleaseForm({
             className="flex-1 min-w-[160px] px-3 py-2 rounded-lg bg-bg-secondary border border-border/50 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
           />
           <button
-            onClick={() => {
-              if (!linkUrl.trim()) return;
-              onAddLink(linkPlatform, linkUrl.trim());
-              setLinkUrl('');
-            }}
+            onClick={handleAddLink}
             disabled={linkBusy || !linkUrl.trim()}
             className="px-3 py-1.5 rounded-lg bg-bg-secondary border border-border text-text-primary text-xs font-medium hover:bg-bg-hover transition-colors disabled:opacity-50"
           >
             {linkBusy ? 'Adding...' : 'Add link'}
           </button>
         </div>
+        {/* Beside the field that caused it. The page-level error banner sits above the whole
+            release list, which on a real catalogue is far off-screen from the form being used —
+            so a rejected link looked exactly like a button that did nothing. */}
+        {linkStatus && (
+          <p className={`text-xs ${linkStatus.ok ? 'text-green-500' : 'text-red-400'}`}>{linkStatus.message}</p>
+        )}
       </div>
     </div>
   );

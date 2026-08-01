@@ -17,6 +17,7 @@ import {
   mapDiscogsFormatName,
   ingestMusicBrainzReleaseGroups,
   ingestFaircampHomeLinks,
+  ingestFaircampPurchasePage,
   ingestFaircampReleasePage,
   buildFaircampRelease,
   findDiscoveredReleaseLinks,
@@ -189,6 +190,8 @@ function detailPage(opts: {
   packages?: Array<{
     format?: string;
     typeName?: string;
+    /** Bandcamp's own product kind: 'a' album, 'p' package, 'b' discography, 'i' subscription. */
+    itemType?: string;
     price?: number | string;
     currency?: string;
     availability?: string;
@@ -201,7 +204,10 @@ function detailPage(opts: {
     graph.albumRelease = opts.packages.map(p => ({
       '@type': ['MusicRelease', 'Product'],
       musicReleaseFormat: p.format,
-      additionalProperty: [{ '@type': 'PropertyValue', name: 'type_name', value: p.typeName }],
+      additionalProperty: [
+        { '@type': 'PropertyValue', name: 'type_name', value: p.typeName },
+        ...(p.itemType ? [{ '@type': 'PropertyValue', name: 'item_type', value: p.itemType }] : []),
+      ],
       offers: {
         '@type': 'Offer',
         price: p.price,
@@ -254,6 +260,43 @@ describe('ingestBandcampDetail', () => {
       })
     );
 
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.detail.offers).toEqual([
+      { format: 'vinyl', price: 25, currency: 'USD', availability: 'available' },
+    ]);
+  });
+
+  // The subscription and the discography bundle are typed DigitalFormat/Digital exactly like
+  // the album's own download, so nothing but item_type tells them apart — and being cheaper,
+  // the subscription wins the cheapest-variant rule and gets published as the album's price.
+  // Measured on kidlightbulbs.bandcamp.com: a $3.33/month subscription quoted as the album.
+  it('ignores the artist subscription and the discography bundle', () => {
+    const out = ingestBandcampDetail(
+      detailPage({
+        packages: [
+          { format: 'DigitalFormat', typeName: 'Digital', itemType: 'a', price: 5, availability: 'OnlineOnly' },
+          { format: 'DigitalFormat', typeName: 'Digital', itemType: 'i', price: 3.33 },
+          { format: 'DigitalFormat', typeName: 'Digital', itemType: 'b', price: 23.2, availability: 'OnlineOnly' },
+          { format: 'VinylFormat', typeName: 'Vinyl LP', itemType: 'p', price: 25, availability: 'InStock' },
+        ],
+      })
+    );
+
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.detail.offers).toEqual([
+      { format: 'digital', price: 5, currency: 'USD', availability: 'available' },
+      { format: 'vinyl', price: 25, currency: 'USD', availability: 'available' },
+    ]);
+  });
+
+  it('keeps a package that carries no item_type at all', () => {
+    // Dropping the unlabelled would empty the offers on any page whose markup drifts — a worse
+    // failure than the one above, and a silent one.
+    const out = ingestBandcampDetail(
+      detailPage({ packages: [{ format: 'VinylFormat', typeName: 'Vinyl LP', price: 25 }] })
+    );
     expect(out.ok).toBe(true);
     if (!out.ok) return;
     expect(out.detail.offers).toEqual([
@@ -592,17 +635,31 @@ describe('ingestMusicBrainzReleaseGroups', () => {
 // Fixtures below are trimmed from a real, live Faircamp instance (verified 2026-08-01) rather
 // than guessed — Faircamp's own markup has no JSON-LD, no <time> tag, and no pubDate in its
 // RSS feed, so the parser is deliberately narrow: identity and artwork only.
+// A multi-artist instance, which is the case that broke: every release block carries its own
+// artist credits, as links indistinguishable in shape from the release links beside them.
 const FAIRCAMP_HOME_HTML = `<!doctype html><html><body>
   <nav>
     <a href="./">Home</a>
     <a href="#content">Skip</a>
     <a href="subscribe/">Subscribe</a>
   </nav>
-  <ol>
-    <li><a href="ruined-castle/">RUINED CASTLE</a></li>
-    <li><a href="infinite-normal/">INFINITE NORMAL</a></li>
-    <li><a href="solo-piano/">SOLO PIANO</a></li>
-  </ol>
+  <div class="page_grid">
+    <div class="release">
+      <a href="ruined-castle/"><img src="ruined-castle/cover_320.jpg?XZDh1t00IS8"></a>
+      <a href="ruined-castle/">RUINED CASTLE</a>
+      <div class="release_artists"><a href="kl/">Kid Lightbulbs</a></div>
+    </div>
+    <div class="release">
+      <a href="infinite-normal/"><img src="infinite-normal/cover_320.jpg?MYD15tAi5QI"></a>
+      <a href="infinite-normal/">INFINITE NORMAL</a>
+      <div class="release_artists"><a href="kl/">Kid Lightbulbs</a></div>
+    </div>
+    <div class="release">
+      <a href="solo-piano/"><img src="solo-piano/cover_320.jpg?_5Kuo0yq7XY"></a>
+      <a href="solo-piano/">SOLO PIANO</a>
+      <div class="release_artists"><a href="blg/">Brandon Lucas Green</a></div>
+    </div>
+  </div>
   <a href="https://simonrepp.com/faircamp/">Powered by Faircamp</a>
   <a href="favicon.png?H-w5zbrED30">icon</a>
   <a href="feed.rss">RSS</a>
@@ -613,7 +670,40 @@ const FAIRCAMP_RELEASE_HTML = `<!doctype html><html><head>
   <meta property="og:title" content="RUINED CASTLE"/>
   <meta property="og:image" content="https://music.kidlightbulbs.com/ruined-castle/cover_800.jpg?XZDh1t00IS8"/>
   <meta property="og:description" content="The third album. A reflection on suffering."/>
-</head><body></body></html>`;
+</head><body>
+  <a href="purchase/YV_jiM0Ks4o/">Buy</a>
+  <a href="embed/">Embed</a>
+</body></html>`;
+
+/**
+ * The purchase page's price block, copied from what Faircamp's generator emits
+ * (renderer/src/pages/multitrack_purchase.rs) and checked against the live page.
+ */
+function faircampPurchaseHtml(opts: { min?: string; max?: string; fixedText?: string }): string {
+  const priceBlock = opts.fixedText
+    ? opts.fixedText
+    : `<label for="price">Name your price</label><br><br>
+       <div style="align-items: center; column-gap: .5rem; display: flex; position: relative;">
+         <span style="position: absolute; left: .5rem;">$</span>
+         <input autocomplete="off"
+                ${opts.max ? `data-max="${opts.max}"` : ''}
+                data-min="${opts.min ?? '0'}"
+                id="price"
+                pattern="[0-9]+([.,][0-9]+)?"
+                placeholder="0 or more"
+                style="padding-left: 1.5rem; width: 8rem;"
+                type="text">
+         USD
+       </div>`;
+
+  return `<!doctype html><html><body>
+    <h1>Purchase downloads</h1>
+    <div id="confirm_price">
+      <div class="interactive"><form action="../../downloads/iKtmnNw4rCY/">${priceBlock}<button>Confirm</button></form></div>
+      <div style="font-size: .9rem; margin: 1rem 0;">Available formats: MP3, Ogg Vorbis, FLAC, WAV</div>
+    </div>
+  </body></html>`;
+}
 
 describe('ingestFaircampHomeLinks', () => {
   it('finds bare relative release links and resolves them against the page URL', () => {
@@ -632,6 +722,27 @@ describe('ingestFaircampHomeLinks', () => {
     expect(out.some(o => o.url.includes('favicon'))).toBe(false);
   });
 
+  // The bug this guards: on a site hosting more than one artist, the per-release artist credits
+  // were catalogued as records, so Kid Lightbulbs' page listed "Kid Lightbulbs" and "Brandon
+  // Lucas Green" as albums. Nothing on the linked page says otherwise — an artist page and a
+  // release page both publish an og:title — so it has to be caught here.
+  it('never treats a release block\'s artist credits as releases', () => {
+    const out = ingestFaircampHomeLinks(FAIRCAMP_HOME_HTML, 'https://music.kidlightbulbs.com/');
+    expect(out.map(o => o.slug)).not.toContain('kl');
+    expect(out.map(o => o.slug)).not.toContain('blg');
+  });
+
+  it('falls back to a whole-page scan when there are no release blocks, still minus credits', () => {
+    // A generator change should cost coverage, not correctness.
+    const noBlocks = `<html><body>
+      <ol>
+        <li><a href="in-winter/">in winter/borders</a><div class="release_artists"><a href="kl/">Kid Lightbulbs</a></div></li>
+      </ol>
+    </body></html>`;
+    const out = ingestFaircampHomeLinks(noBlocks, 'https://music.kidlightbulbs.com/');
+    expect(out.map(o => o.slug)).toEqual(['in-winter']);
+  });
+
   it('deduplicates a repeated link and caps at the candidate ceiling', () => {
     const manyLinks = Array.from({ length: 40 }, (_, i) => `<a href="release-${i}/">R${i}</a>`).join('');
     const out = ingestFaircampHomeLinks(`<html>${manyLinks}</html>`, 'https://x.example.com/');
@@ -640,10 +751,11 @@ describe('ingestFaircampHomeLinks', () => {
 });
 
 describe('ingestFaircampReleasePage', () => {
-  it('reads title and artwork from Open Graph tags', () => {
+  it('reads title, artwork and the purchase link', () => {
     expect(ingestFaircampReleasePage(FAIRCAMP_RELEASE_HTML)).toEqual({
       title: 'RUINED CASTLE',
       artworkUrl: 'https://music.kidlightbulbs.com/ruined-castle/cover_800.jpg?XZDh1t00IS8',
+      purchaseHref: 'purchase/YV_jiM0Ks4o/',
     });
   });
 
@@ -660,7 +772,48 @@ describe('ingestFaircampReleasePage', () => {
     expect(ingestFaircampReleasePage('<meta property="og:title" content="No Cover"/>')).toEqual({
       title: 'No Cover',
       artworkUrl: null,
+      purchaseHref: null,
     });
+  });
+
+  it('reports no purchase link for a release that has none', () => {
+    // A code-unlocked release links `unlock/…` instead, and has no price anywhere.
+    const html = '<meta property="og:title" content="ALTERNATE NORMAL"/><a href="unlock/vvsrj_sNEcc/">Unlock</a>';
+    expect(ingestFaircampReleasePage(html)?.purchaseHref).toBeNull();
+  });
+});
+
+describe('ingestFaircampPurchasePage', () => {
+  it('reads a name-your-price minimum and its currency', () => {
+    expect(ingestFaircampPurchasePage(faircampPurchaseHtml({ min: '0' }))).toEqual({
+      format: 'digital',
+      price: 0,
+      currency: 'USD',
+      availability: 'available',
+    });
+  });
+
+  // The floor of a range is the honest figure: it's what a fan can actually pay.
+  it('takes the floor of a bounded range', () => {
+    expect(ingestFaircampPurchasePage(faircampPurchaseHtml({ min: '5', max: '20' }))).toMatchObject({
+      price: 5,
+      currency: 'USD',
+    });
+  });
+
+  // A fixed price is rendered as text with no input at all, and the words around it are
+  // localized — only the amount-then-ISO-code adjacency is guaranteed by the generator.
+  it('reads a fixed price rendered as plain text', () => {
+    expect(ingestFaircampPurchasePage(faircampPurchaseHtml({ fixedText: 'Preis $12 USD' }))).toMatchObject({
+      price: 12,
+      currency: 'USD',
+    });
+  });
+
+  it('returns null rather than a price of zero when it cannot read one', () => {
+    // "We couldn't read it" and "you may pay nothing" are different claims about someone's
+    // income, and the second is the one that costs an artist money.
+    expect(ingestFaircampPurchasePage('<html><body><p>Sold out</p></body></html>')).toBeNull();
   });
 });
 
