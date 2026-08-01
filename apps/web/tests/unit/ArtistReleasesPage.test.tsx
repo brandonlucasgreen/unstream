@@ -157,6 +157,54 @@ describe('ArtistReleasesPage', () => {
     });
   });
 
+  // Adding a link is the action most likely to be typed slightly wrong, and it used to fail
+  // invisibly: the server rejects a scheme-less URL, and the only report of that was a banner
+  // above the whole release list, off-screen from the form.
+  it('adds a link, sending a scheme-less address as https', async () => {
+    setupFetchMock([releaseItem()]);
+    renderPage();
+
+    await waitFor(() => screen.getByText('Edit / add link'));
+    fireEvent.click(screen.getByText('Edit / add link'));
+
+    const urlInputs = screen.getAllByPlaceholderText('https://...');
+    fireEvent.change(urlInputs[urlInputs.length - 1], {
+      target: { value: 'subvert.fm/kid-lightbulbs/infinite-normal' },
+    });
+    fireEvent.click(screen.getByText('Add link'));
+
+    await waitFor(() => {
+      const postCall = mockFetch.mock.calls.find(call => call[1]?.method === 'POST');
+      expect(postCall).toBeDefined();
+      const body = JSON.parse(postCall![1].body);
+      expect(body.action).toBe('addLink');
+      expect(body.url).toBe('https://subvert.fm/kid-lightbulbs/infinite-normal');
+    });
+    await waitFor(() => expect(screen.getByText('Link added.')).toBeTruthy());
+  });
+
+  it('reports a rejected link beside the field and keeps what was typed', async () => {
+    mockFetch.mockReset();
+    mockFetch.mockImplementation((_url: string, init?: RequestInit) => {
+      if (!init || init.method === undefined) {
+        return Promise.resolve({ ok: true, json: async () => ({ releases: [releaseItem()] }) });
+      }
+      return Promise.resolve({ ok: false, status: 400, json: async () => ({ error: 'Unknown platform' }) });
+    });
+    renderPage();
+
+    await waitFor(() => screen.getByText('Edit / add link'));
+    fireEvent.click(screen.getByText('Edit / add link'));
+
+    const urlInputs = screen.getAllByPlaceholderText('https://...') as HTMLInputElement[];
+    const urlInput = urlInputs[urlInputs.length - 1];
+    fireEvent.change(urlInput, { target: { value: 'https://subvert.fm/a/b' } });
+    fireEvent.click(screen.getByText('Add link'));
+
+    await waitFor(() => expect(screen.getByText(/Couldn't add that link/)).toBeTruthy());
+    expect(urlInput.value).toBe('https://subvert.fm/a/b');
+  });
+
   it('shows an empty state when there is nothing catalogued', async () => {
     setupFetchMock([]);
     renderPage();

@@ -2015,12 +2015,15 @@ export async function addArtistReleaseLink(
   if (!client) return false;
   if (!(await verifyReleaseOwnership(artistId, [releaseId]))) return false;
 
+  // `external_id` is deliberately absent, not null. PostgREST's upsert updates only the columns
+  // present in the payload, so leaving it out keeps whatever id ingest already stored for this
+  // platform — writing an explicit null would erase the one thing that makes a re-crawl
+  // idempotent, and the next crawl would mint a duplicate source rather than update this row.
   const { error } = await client.from('release_sources').upsert(
     {
       release_id: releaseId,
       platform,
       url,
-      external_id: null,
       source: 'claimed',
       last_seen_at: new Date().toISOString(),
     },
