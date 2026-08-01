@@ -23,6 +23,7 @@ import {
   mergeReleases,
   getCatalogState,
   clearCatalogCooldown,
+  clearReleaseDetailCooldown,
 } from './db';
 import { authenticateAdmin, authenticateBearer, buildCorsHeaders } from './middleware';
 import { cacheDeleteByArtist } from './cache';
@@ -219,7 +220,10 @@ export async function handler(event: {
       };
     }
 
-    await clearCatalogCooldown(artistId);
+    // Both, always: the cooldown lets the crawl run, and the detail reset is what makes it
+  // re-read prices rather than only re-confirming the release list. See db.ts.
+  await clearCatalogCooldown(artistId);
+  await clearReleaseDetailCooldown(artistId);
     const queued = await triggerCatalogNow(artistId);
     if (!queued.ok) {
       return { statusCode: queued.status, headers: CORS_HEADERS, body: JSON.stringify({ error: queued.error }) };

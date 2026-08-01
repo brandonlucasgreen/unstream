@@ -18,7 +18,7 @@
 // The GET is what the button uses to decide whether to show itself: visibility follows the
 // server's real admin rule rather than a copy of it in page markup.
 
-import { clearCatalogCooldown, getCatalogState } from './db';
+import { clearCatalogCooldown, clearReleaseDetailCooldown, getCatalogState } from './db';
 import { authenticateAdmin, buildCorsHeaders } from './middleware';
 import { triggerCatalogNow } from './request-catalog';
 
@@ -78,7 +78,10 @@ export async function handler(event: {
     return { statusCode: 405, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
+  // Both, always: the cooldown lets the crawl run, and the detail reset is what makes it
+  // re-read prices rather than only re-confirming the release list. See db.ts.
   await clearCatalogCooldown(artistId);
+  await clearReleaseDetailCooldown(artistId);
   const queued = await triggerCatalogNow(artistId);
 
   if (!queued.ok) {

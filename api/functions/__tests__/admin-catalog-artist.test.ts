@@ -10,6 +10,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 const mocks = vi.hoisted(() => ({
   getCatalogState: vi.fn(),
   clearCatalogCooldown: vi.fn(),
+  clearReleaseDetailCooldown: vi.fn(),
   authenticateAdmin: vi.fn(),
   fetch: vi.fn(() => Promise.resolve({ status: 202, ok: false } as Response)),
 }));
@@ -21,6 +22,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../db', () => ({
   getCatalogState: mocks.getCatalogState,
   clearCatalogCooldown: mocks.clearCatalogCooldown,
+  clearReleaseDetailCooldown: mocks.clearReleaseDetailCooldown,
 }));
 
 vi.mock('../middleware', () => ({
@@ -44,6 +46,7 @@ beforeEach(() => {
   mocks.authenticateAdmin.mockResolvedValue({ userId: 'u1', email: 'admin@example.com' });
   mocks.getCatalogState.mockResolvedValue({ ok: true, state: null });
   mocks.clearCatalogCooldown.mockResolvedValue(undefined);
+  mocks.clearReleaseDetailCooldown.mockResolvedValue(undefined);
   vi.stubGlobal('fetch', mocks.fetch);
   process.env.RELEASE_CATALOG_ENABLED = 'true';
   process.env.INTERNAL_FUNCTION_SECRET = 'secret';
@@ -103,6 +106,11 @@ describe('POST — starting a crawl', () => {
     expect(response.statusCode).toBe(202);
     // Without this the button appears to work and silently does nothing for a week.
     expect(mocks.clearCatalogCooldown).toHaveBeenCalledWith(ARTIST);
+    // And the detail reset, or the crawl re-reads only the release list: prices live on
+    // individual release pages, which both detail passes skip once a source has been read.
+    // A parser fix for a wrong price would ship, the button would report success, and the
+    // wrong price would stay on the page for another 30 days.
+    expect(mocks.clearReleaseDetailCooldown).toHaveBeenCalledWith(ARTIST);
     expect(mocks.fetch).toHaveBeenCalledOnce();
   });
 
