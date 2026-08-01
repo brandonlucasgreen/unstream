@@ -24,19 +24,16 @@ import {
   getCatalogState,
   clearCatalogCooldown,
 } from './db';
-import { authenticateAdmin, authenticateBearer } from './middleware';
+import { authenticateAdmin, authenticateBearer, buildCorsHeaders } from './middleware';
 import { cacheDeleteByArtist } from './cache';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { triggerCatalogNow } from './request-catalog';
+import { PLATFORMS } from '../shared/platform-registry';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-};
+/** Longest title we'll store. Matches the slice in `updateArtistReleaseFields`. */
+const MAX_TITLE_LENGTH = 200;
 
 /** Same rule as artist-profile.ts's link validation: only a protocol check, no domain allowlist. */
 function isHttpUrl(url: string): boolean {
@@ -46,6 +43,19 @@ function isHttpUrl(url: string): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * Is this a platform we can actually render?
+ *
+ * Unlike `artist_links` — which has an explicit `other_N` convention for freeform labels — a
+ * `release_sources.platform` value is read back as a key into the platform registry for the
+ * icon, the display name, and `payoutRank`'s ordering. An unrecognized string would render as a
+ * generic badge that ranks last, i.e. a worse answer for the fan than not showing it at all, so
+ * the registry is the allowlist rather than accepting any label.
+ */
+function isKnownPlatform(platform: string): boolean {
+  return Object.prototype.hasOwnProperty.call(PLATFORMS, platform);
 }
 
 /**
@@ -94,6 +104,13 @@ export async function handler(event: {
   queryStringParameters?: Record<string, string>;
   body?: string | null;
 }) {
+  // The shared helper rather than a hand-rolled wildcard: this endpoint performs writes
+  // (hide/merge/update/create/catalog), so it's restricted to unstream.stream like every other
+  // authenticated surface. Safe for deploy previews — the SPA calls `/api/...` as a same-origin
+  // relative request, and CORS doesn't apply to those at all.
+  const origin = event.headers['origin'] || event.headers['Origin'];
+  const CORS_HEADERS = buildCorsHeaders(origin, false);
+
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   }
@@ -251,7 +268,24 @@ export async function handler(event: {
     if (!releaseId || !UUID_REGEX.test(releaseId)) {
       return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'releaseId must be a UUID' }) };
     }
+    // The declared types are compile-time only — a client can send `"title": 123`. Without
+    // this, a non-string reaches `patch.title.trim()` in db.ts and throws inside an async
+    // function with no try/catch around it, surfacing as a bare 500 rather than the 400 every
+    // other malformed field in this handler returns.
+    if (title !== undefined && (typeof title !== 'string' || !title.trim())) {
+      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'title must be a non-empty string' }) };
+    }
+    if (typeof title === 'string' && title.length > MAX_TITLE_LENGTH) {
+      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: `title must be ${MAX_TITLE_LENGTH} characters or fewer` }) };
+    }
+    // null is meaningful here — it clears the date. Anything other than null or a string is not.
+    if (releaseDate !== undefined && releaseDate !== null && typeof releaseDate !== 'string') {
+      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'releaseDate must be a string or null' }) };
+    }
     if (artworkUrl !== undefined && artworkUrl !== null) {
+      if (typeof artworkUrl !== 'string') {
+        return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'artworkUrl must be a string or null' }) };
+      }
       try {
         if (new URL(artworkUrl).protocol !== 'https:') {
           return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Artwork URL must use HTTPS' }) };
@@ -266,19 +300,37 @@ export async function handler(event: {
     if (!releaseId || !UUID_REGEX.test(releaseId)) {
       return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'releaseId must be a UUID' }) };
     }
-    if (!platform || !url || !isHttpUrl(url)) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'platform and a valid http(s) url are required' }) };
+    if (typeof url !== 'string' || !isHttpUrl(url)) {
+      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'A valid http(s) url is required' }) };
+    }
+    if (typeof platform !== 'string' || !isKnownPlatform(platform)) {
+      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Unknown platform' }) };
     }
     ok = await addArtistReleaseLink(artistId, releaseId, platform, url);
   } else {
     // create
     const { title, releaseType, releaseDate, platform, url } = body;
-    if (!title || !platform || !url || !isHttpUrl(url)) {
+    if (typeof title !== 'string' || !title.trim() || typeof url !== 'string' || !isHttpUrl(url)) {
       return {
         statusCode: 400,
         headers: CORS_HEADERS,
-        body: JSON.stringify({ error: 'title, platform, and a valid http(s) url are required' }),
+        body: JSON.stringify({ error: 'title and a valid http(s) url are required' }),
       };
+    }
+    if (title.length > MAX_TITLE_LENGTH) {
+      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: `title must be ${MAX_TITLE_LENGTH} characters or fewer` }) };
+    }
+    if (typeof platform !== 'string' || !isKnownPlatform(platform)) {
+      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Unknown platform' }) };
+    }
+    if (releaseDate !== undefined && releaseDate !== null && typeof releaseDate !== 'string') {
+      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'releaseDate must be a string or null' }) };
+    }
+    // `releaseType` is mapped through `mapReleaseType`, which returns 'other' for anything it
+    // doesn't recognize — so a junk value degrades rather than needing its own rejection. Only
+    // its *type* matters here.
+    if (releaseType !== undefined && typeof releaseType !== 'string') {
+      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'releaseType must be a string' }) };
     }
     const result = await createArtistRelease(artistId, {
       title,

@@ -40,9 +40,21 @@ vi.mock('../db', () => ({
   clearCatalogCooldown: mocks.clearCatalogCooldown,
 }));
 
+// buildCorsHeaders is NOT stubbed to a constant — this endpoint performs writes, and one thing
+// worth asserting is that it no longer hands back a wildcard origin. Mirrors the real helper's
+// non-API-key behaviour (pin to the canonical origin).
 vi.mock('../middleware', () => ({
   authenticateBearer: mocks.authenticateBearer,
   authenticateAdmin: mocks.authenticateAdmin,
+  buildCorsHeaders: (origin: string | undefined, apiKeyPresent: boolean) => ({
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': apiKeyPresent
+      ? '*'
+      : origin === 'https://unstream.stream'
+        ? origin
+        : 'https://unstream.stream',
+    Vary: 'Origin',
+  }),
 }));
 
 vi.mock('../cache', () => ({
@@ -305,6 +317,80 @@ describe('GET — catalog state for the button', () => {
     const body = JSON.parse((await get()).body);
     expect(body.catalog.state).toBeNull();
     expect(body.catalog.stateError).toBe('Could not read catalog state');
+  });
+});
+
+describe('CORS', () => {
+  // A write endpoint should not advertise itself to every origin. Previously this file
+  // hand-rolled `Access-Control-Allow-Origin: '*'`; it now goes through the shared helper.
+  it('never returns a wildcard origin for an authenticated write surface', async () => {
+    const r = await post({ action: 'hide', slug: SLUG, releaseId: RELEASE_A });
+    expect(r.headers['Access-Control-Allow-Origin']).not.toBe('*');
+    expect(r.headers['Access-Control-Allow-Origin']).toBe('https://unstream.stream');
+  });
+
+  it('answers preflight with the same restricted headers', async () => {
+    const r = await handler({ httpMethod: 'OPTIONS', headers: {} });
+    expect(r.statusCode).toBe(204);
+    expect(r.headers['Access-Control-Allow-Origin']).not.toBe('*');
+  });
+});
+
+describe('input types — a malformed body must not reach the database layer', () => {
+  // The declared TS types are compile-time only. Without a runtime guard a non-string title
+  // reaches `patch.title.trim()` in db.ts and throws inside an async function with no
+  // try/catch, surfacing as a bare 500 instead of a 400.
+  it.each([123, {}, [], true])('rejects a non-string title (%o) with a 400', async bad => {
+    const r = await post({ action: 'update', slug: SLUG, releaseId: RELEASE_A, title: bad });
+    expect(r.statusCode).toBe(400);
+    expect(mocks.updateArtistReleaseFields).not.toHaveBeenCalled();
+  });
+
+  it('rejects an empty or whitespace-only title', async () => {
+    for (const bad of ['', '   ']) {
+      const r = await post({ action: 'update', slug: SLUG, releaseId: RELEASE_A, title: bad });
+      expect(r.statusCode).toBe(400);
+    }
+    expect(mocks.updateArtistReleaseFields).not.toHaveBeenCalled();
+  });
+
+  it('rejects an over-long title rather than silently truncating it', async () => {
+    const r = await post({ action: 'update', slug: SLUG, releaseId: RELEASE_A, title: 'x'.repeat(201) });
+    expect(r.statusCode).toBe(400);
+  });
+
+  // null is meaningful — it clears the date — so it must still be accepted.
+  it('accepts null releaseDate but rejects a non-string one', async () => {
+    expect((await post({ action: 'update', slug: SLUG, releaseId: RELEASE_A, releaseDate: null })).statusCode).toBe(200);
+    expect((await post({ action: 'update', slug: SLUG, releaseId: RELEASE_A, releaseDate: 99 })).statusCode).toBe(400);
+  });
+
+  it('rejects a non-string artworkUrl', async () => {
+    const r = await post({ action: 'update', slug: SLUG, releaseId: RELEASE_A, artworkUrl: 42 });
+    expect(r.statusCode).toBe(400);
+  });
+});
+
+describe('platform allowlist', () => {
+  // release_sources.platform is read back as a registry key for the icon, display name and
+  // payoutRank ordering — an arbitrary label renders as a generic badge that sorts last.
+  it('rejects a platform that is not in the registry', async () => {
+    for (const bad of ['not-a-platform', 'javascript', '', 123]) {
+      const r = await post({ action: 'addLink', slug: SLUG, releaseId: RELEASE_A, platform: bad, url: 'https://example.com/x' });
+      expect(r.statusCode).toBe(400);
+    }
+    expect(mocks.addArtistReleaseLink).not.toHaveBeenCalled();
+  });
+
+  it('accepts a real registry platform', async () => {
+    const r = await post({ action: 'addLink', slug: SLUG, releaseId: RELEASE_A, platform: 'bandcamp', url: 'https://x.bandcamp.com/album/y' });
+    expect(r.statusCode).toBe(200);
+  });
+
+  it('rejects an unknown platform on create too', async () => {
+    const r = await post({ action: 'create', slug: SLUG, title: 'Thing', platform: 'made-up', url: 'https://example.com/x' });
+    expect(r.statusCode).toBe(400);
+    expect(mocks.createArtistRelease).not.toHaveBeenCalled();
   });
 });
 

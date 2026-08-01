@@ -1653,6 +1653,33 @@ export async function mergeReleases(keepId: string, dropId: string): Promise<Mer
   if (keepId === dropId) return { ok: false, error: 'Cannot merge a release into itself' };
 
   try {
+    // Both releases must belong to the same artist. The invariant lives *here*, not only at the
+    // call sites, because a merge is close to irreversible — sources are moved and a row is
+    // deleted — and the two callers reach it by different routes: the artist endpoint proves
+    // ownership of both ids (`verifyReleaseOwnership`), while the admin endpoint passes ids
+    // straight from a request body. Today the admin UI only ever submits pairs from the review
+    // queue, which is same-artist by construction, but "no caller currently sends a mismatched
+    // pair" is not something the database should be relying on.
+    const { data: pair, error: pairError } = await client
+      .from('releases')
+      .select('id, artist_id')
+      .in('id', [keepId, dropId]);
+
+    if (pairError) {
+      console.error('[DB] mergeReleases identity read failed:', pairError.message);
+      return { ok: false, error: 'Failed to read releases' };
+    }
+
+    const rows = (pair as { id: string; artist_id: string }[] | null) || [];
+    if (rows.length !== 2) return { ok: false, error: 'One or both releases could not be found' };
+    if (rows[0].artist_id !== rows[1].artist_id) {
+      // Deliberately not reported back with the artist ids in it — the caller supplied a pair
+      // they had no business pairing, and echoing whose release the other one is would confirm
+      // the existence of a row they can't otherwise see.
+      console.error('[DB] mergeReleases refused a cross-artist merge');
+      return { ok: false, error: 'Those releases belong to different artists' };
+    }
+
     const [{ data: keepSources, error: keepError }, { data: dropSources, error: dropError }] = await Promise.all([
       client.from('release_sources').select('platform').eq('release_id', keepId),
       client.from('release_sources').select('id, platform').eq('release_id', dropId),
