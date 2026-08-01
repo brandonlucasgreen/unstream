@@ -820,7 +820,13 @@ export async function persistReleases(
 interface DetailToPersist {
   releaseDate: string | null;
   datePrecision: string;
-  status: string;
+  /**
+   * Null when this source has nothing to say about the release row itself — Faircamp publishes
+   * prices but no date anywhere in its markup, so it can't derive a status either. Writing its
+   * default 'released' would overwrite an 'announced' that Bandcamp got right from a real
+   * pre-order, so the row is left alone entirely and only the offers are written.
+   */
+  status: string | null;
   offers: Array<{
     format: string;
     price: number | null;
@@ -857,7 +863,7 @@ export async function persistReleaseDetail(
   try {
     // A date the artist authored outranks anything upstream says, and status is derived from
     // the date, so a curated date takes both columns out of ingest's hands.
-    if (!release.curatedFields.includes('release_date')) {
+    if (detail.status !== null && !release.curatedFields.includes('release_date')) {
       const patch: Record<string, unknown> = { status: detail.status };
       if (detail.releaseDate) {
         patch.release_date = detail.releaseDate;

@@ -35,6 +35,7 @@ import {
   ingestDiscogsMasters,
   ingestDiscogsReleaseDetail,
   ingestFaircampHomeLinks,
+  ingestFaircampPurchasePage,
   ingestFaircampReleasePage,
   ingestMusicBrainzReleaseGroups,
   type DiscogsArtistReleaseEntry,
@@ -135,8 +136,12 @@ const DELAY_BETWEEN_FAIRCAMP_FETCHES_MS = 1_000;
 /** Bounds cost for an artist with an unusually large Faircamp archive. */
 const MAX_FAIRCAMP_RELEASES_PER_ARTIST = 20;
 
-/** Invocation-wide, homepage + release-page requests combined, across every artist in the batch. */
-const MAX_FAIRCAMP_FETCHES_PER_RUN = 100;
+/**
+ * Invocation-wide, across every artist in the batch: homepage, release pages and purchase
+ * pages combined. A release costs up to two requests, not one, because Faircamp keeps the price
+ * on a separate purchase page — hence the headroom over the old ceiling of 100.
+ */
+const MAX_FAIRCAMP_FETCHES_PER_RUN = 150;
 
 interface FaircampBudget {
   fetchesLeft: number;
@@ -520,6 +525,10 @@ async function catalogFaircamp(artistId: string, faircampUrl: string, budget: Fa
 
     const takenSlugs = new Set<string>();
     const toPersist: Parameters<typeof persistFaircampReleases>[1] = [];
+    // Where each release's price lives, keyed by the release URL that becomes its source URL.
+    // Read now, fetched after the write, so the 30-day refresh rule can be applied to a source
+    // whose `detail_checked_at` only exists once it has been persisted.
+    const purchaseUrls = new Map<string, string>();
 
     for (const candidate of candidates) {
       if (budget.fetchesLeft <= 0 || Date.now() > budget.deadline) {
@@ -540,6 +549,10 @@ async function catalogFaircamp(artistId: string, faircampUrl: string, budget: Fa
           if (release) {
             takenSlugs.add(release.slug);
             toPersist.push(release);
+            if (page.purchaseHref) {
+              const purchaseUrl = resolveSameHost(page.purchaseHref, response.url || candidate.url);
+              if (purchaseUrl) purchaseUrls.set(release.externalUrl, purchaseUrl);
+            }
           }
         }
 
@@ -555,10 +568,81 @@ async function catalogFaircamp(artistId: string, faircampUrl: string, budget: Fa
     if (toPersist.length === 0) return 0;
 
     const written = await persistFaircampReleases(artistId, toPersist);
+    await catalogFaircampPrices(written, purchaseUrls, budget);
     return written.length;
   } catch (error) {
     console.warn('[catalog] faircamp ingest failed:', error instanceof Error ? error.message : String(error));
     return 0;
+  }
+}
+
+/**
+ * Read Faircamp prices, one purchase page per release that's due one.
+ *
+ * Separate from the release-page pass above because it can only run after the write: whether a
+ * release is due a refresh is a fact about its stored source (`detail_checked_at`), and that
+ * doesn't exist until `persistFaircampReleases` has created it. Same 30-day rule as Bandcamp's
+ * detail pass, so a re-catalog of an unchanged Faircamp site costs nothing extra.
+ *
+ * Never throws — a purchase page that won't load leaves the release with no price, which is what
+ * it already had.
+ */
+async function catalogFaircampPrices(
+  written: PersistedRelease[],
+  purchaseUrls: Map<string, string>,
+  budget: FaircampBudget
+): Promise<void> {
+  for (const release of written) {
+    const purchaseUrl = purchaseUrls.get(release.url);
+    if (!purchaseUrl || !needsDetail(release)) continue;
+
+    if (budget.fetchesLeft <= 0 || Date.now() > budget.deadline) {
+      console.log('[catalog] faircamp budget spent before prices were read');
+      return;
+    }
+    await sleep(DELAY_BETWEEN_FAIRCAMP_FETCHES_MS);
+    budget.fetchesLeft--;
+
+    try {
+      const response = await safeFetch(purchaseUrl, 10_000);
+      if (!response?.ok) continue;
+
+      const offer = ingestFaircampPurchasePage(await response.text());
+      if (!offer) {
+        console.warn(`[catalog] no readable price on ${safeHostname(purchaseUrl)} purchase page`);
+        continue;
+      }
+
+      // status null: Faircamp knows nothing about the release's date, so it must not restate
+      // the row's status — only the offer is written. See `DetailToPersist`.
+      await persistReleaseDetail(release, {
+        releaseDate: null,
+        datePrecision: 'unknown',
+        status: null,
+        offers: [offer],
+      });
+    } catch (error) {
+      console.warn(
+        `[catalog] faircamp purchase fetch failed for ${safeHostname(purchaseUrl)}:`,
+        error instanceof Error ? error.message : String(error)
+      );
+    }
+  }
+}
+
+/**
+ * Resolve a relative href from fetched markup, refusing anything that leaves the host it came
+ * from. Same rule, and same reason, as `resolveReleaseUrl` in release-ingest: an href out of
+ * fetched markup is untrusted.
+ */
+function resolveSameHost(href: string, pageUrl: string): string | null {
+  try {
+    const resolved = new URL(href, pageUrl);
+    if (resolved.host !== new URL(pageUrl).host) return null;
+    if (resolved.protocol !== 'https:' && resolved.protocol !== 'http:') return null;
+    return resolved.toString();
+  } catch {
+    return null;
   }
 }
 

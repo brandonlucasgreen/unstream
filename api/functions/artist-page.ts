@@ -104,10 +104,11 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     // Build the image URL: custom > artist row > null
     const imageUrl = profile?.custom_image_url || artistRow.image_url || null;
 
-    // Releases. Capped because most catalogues fit well under it (16 for Sufjan Stevens, 13 for
-    // Explosions in the Sky) and the artists who don't would otherwise bury the platform links
-    // this page exists to show.
-    const { releases, total: releaseCount } = await getArtistReleases(artistRow.id, 24);
+    // Releases. The page paginates these ten at a time rather than listing them all, so the cap
+    // here bounds the payload, not what a fan can reach: six pages, which covers every catalogue
+    // measured so far (16 for Sufjan Stevens, 13 for Explosions in the Sky, 33 for the largest
+    // live Mirlo artist). Beyond it the list says how many more exist rather than fetching them.
+    const { releases, total: releaseCount } = await getArtistReleases(artistRow.id, 60);
 
     const payload = {
       artist: {
