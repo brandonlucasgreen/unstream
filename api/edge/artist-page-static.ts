@@ -290,6 +290,126 @@ export default async function handler(request: Request, context: Context) {
 
     const bcFriday = isBandcampFriday();
 
+    // Admin-only "catalog releases now" control.
+    //
+    // Rendered hidden for everyone and revealed by the script at the bottom of the page, which
+    // asks /api/admin/catalog-artist whether the caller is an admin. Visibility therefore
+    // follows the server's real admin rule rather than a copy of it in markup — and the rule
+    // that matters is on the endpoint regardless, since hiding a button is decoration, not
+    // access control.
+    //
+    // This is the same progressive-enhancement shape as the Copy URL button on /u/:handle: the
+    // page is still pure SSR, with one small control hydrated on top. It is not a second
+    // renderer for this URL.
+    const adminCatalogHtml = `
+      <div id="admin-catalog" style="display:none;margin-top:32px;padding:12px;border:1px dashed var(--border);border-radius:12px;text-align:center">
+        <button id="admin-catalog-btn" data-artist="${escapeHtml(artist.id)}" style="border:0;border-radius:8px;padding:8px 16px;background:var(--bg2);color:var(--text);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer">Catalog releases now</button>
+        <span id="admin-catalog-status" style="display:block;margin-top:8px;font-size:12px;color:var(--muted)">Admin only</span>
+      </div>`;
+
+    // supabase-js stores the session under `sb-<project-ref>-auth-token`, and this page can't
+    // import supabase-js to ask for it — the CSP allows no external scripts. The ref is the
+    // first label of the Supabase hostname and is already public (it ships in the client bundle
+    // as VITE_SUPABASE_URL), so deriving it here reveals nothing.
+    const supabaseRef = supabaseUrl.replace(/^https?:\/\//, '').split('.')[0];
+
+    const adminCatalogScript = `
+  <script>
+    (function() {
+      var wrap = document.getElementById('admin-catalog');
+      var btn = document.getElementById('admin-catalog-btn');
+      var status = document.getElementById('admin-catalog-status');
+      if (!wrap || !btn || !status) return;
+
+      var token = null;
+      try {
+        var raw = localStorage.getItem('sb-${supabaseRef}-auth-token');
+        if (raw) token = JSON.parse(raw).access_token;
+      } catch (e) { return; }
+      // Not signed in: no request, so an ordinary visitor costs nothing extra.
+      if (!token) return;
+
+      var artistId = btn.getAttribute('data-artist');
+      var auth = { Authorization: 'Bearer ' + token };
+      var lastRunAt = null;
+
+      function describe(state) {
+        if (state && state.last_error) return 'Last run failed: ' + state.last_error;
+        // A row can exist with nothing in it — the claim is stamped before the crawl runs. Only
+        // report counts once a run has actually completed, or "0 releases" would be a claim
+        // about the artist rather than the absence of an answer. That confusion is the whole
+        // reason this catalog has separate "attempted" and "catalogued" timestamps.
+        if (!state || !state.last_catalogued_at) return 'Never catalogued';
+        return (state.releases_found || 0) + ' releases, ' + (state.releases_detailed || 0) + ' with prices';
+      }
+
+      function readState() {
+        return fetch('/api/admin/catalog-artist?artistId=' + artistId, { headers: auth })
+          .then(function(r) { return r.ok ? r.json() : null; });
+      }
+
+      // A 403 here is the normal answer for a signed-in non-admin, and it leaves the control
+      // hidden. The endpoint enforces the same rule, so this only decides what is shown.
+      readState().then(function(data) {
+        if (!data) return;
+        lastRunAt = data.state && data.state.last_catalogued_at;
+        status.textContent = describe(data.state);
+        wrap.style.display = 'block';
+      }).catch(function() {});
+
+      function poll(attempt) {
+        // A full catalogue with prices can take a couple of minutes: one grid request plus one
+        // per release, deliberately spaced out.
+        if (attempt > 24) {
+          status.textContent = 'Still running — reload in a minute';
+          btn.disabled = false;
+          return;
+        }
+        setTimeout(function() {
+          readState().then(function(data) {
+            var s = data && data.state;
+            if (s && s.last_catalogued_at && s.last_catalogued_at !== lastRunAt) {
+              status.textContent = describe(s);
+              // Reload so the releases section reflects what just landed.
+              location.reload();
+              return;
+            }
+            if (s && s.last_error) {
+              status.textContent = describe(s);
+              btn.disabled = false;
+              return;
+            }
+            poll(attempt + 1);
+          }).catch(function() { poll(attempt + 1); });
+        }, 5000);
+      }
+
+      btn.addEventListener('click', function() {
+        btn.disabled = true;
+        status.textContent = 'Cataloguing…';
+        fetch('/api/admin/catalog-artist', {
+          method: 'POST',
+          headers: { Authorization: auth.Authorization, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ artistId: artistId })
+        }).then(function(r) {
+          return r.json().then(function(body) { return { ok: r.ok || r.status === 202, body: body }; });
+        }).then(function(res) {
+          // 202 is only a handshake — the background function answers it even when it is about
+          // to refuse. The polling below is what reports the actual outcome.
+          if (!res.ok) {
+            status.textContent = res.body.error || 'Could not start';
+            btn.disabled = false;
+            return;
+          }
+          poll(0);
+        }).catch(function() {
+          status.textContent = 'Could not start';
+          btn.disabled = false;
+        });
+      });
+    })();
+  </script>`;
+
     // Releases, shared by the claimed and unclaimed templates below.
     //
     // Rendered for every artist that has a catalogue, not only verified ones. The releases come
@@ -443,6 +563,7 @@ export default async function handler(request: Request, context: Context) {
       ` : ''}
       ${socialLinksHtml}
       ${releasesHtml}
+      ${adminCatalogHtml}
     </div>
   </div>
 
@@ -472,7 +593,7 @@ export default async function handler(request: Request, context: Context) {
         <a href="/privacy-policy" style="color:var(--muted);text-decoration:none">Privacy policy</a>
       </nav>
     </div>
-  </footer>
+  </footer>${adminCatalogScript}
 </body>
 </html>`;
 
@@ -542,6 +663,7 @@ export default async function handler(request: Request, context: Context) {
       ` : ''}
       ${socialLinksHtml}
       ${releasesHtml}
+      ${adminCatalogHtml}
       <div style="margin-top:24px;padding:16px;border-radius:12px;border:1px solid var(--border);text-align:center">
         <p style="font-size:14px;color:var(--muted)">Are you ${artistName}?</p>
         <a href="/claim?slug=${escapeHtml(slug)}" class="claim-cta">Claim this profile</a>
@@ -575,7 +697,7 @@ export default async function handler(request: Request, context: Context) {
         <a href="/privacy-policy" style="color:var(--muted);text-decoration:none">Privacy policy</a>
       </nav>
     </div>
-  </footer>
+  </footer>${adminCatalogScript}
 </body>
 </html>`;
 
