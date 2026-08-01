@@ -45,7 +45,11 @@ const CSS = `
   body { font-family: 'Stack Sans Headline', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
   h1, h2 { font-family: 'Darker Grotesque', 'Stack Sans Headline', system-ui, sans-serif; }
   a { color: inherit; }
-  .container { max-width: 640px; margin: 0 auto; padding: 0 24px; width: 100%; }
+  /* 896px (Tailwind's max-w-4xl) to match the width ArtistPage.tsx and Footer.tsx use — this
+     page has no SPA counterpart to fall through to (see the note at the top of this file), so
+     its hand-rolled header/footer is what every real visitor sees and needs to look like the
+     rest of the app, not a narrower one-off. */
+  .container { max-width: 896px; margin: 0 auto; padding: 0 24px; width: 100%; }
   .page-content { position: relative; flex: 1; display: flex; flex-direction: column; }
   @keyframes bc-pulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
   .site-header { padding: 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
@@ -354,11 +358,11 @@ export default async function handler(request: Request, context: Context) {
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
         <a href="/changelog" style="color:var(--muted);text-decoration:none">Changelog</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
-        <a href="https://github.com/users/brandonlucasgreen/projects/4" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Roadmap</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
         <a href="https://github.com/brandonlucasgreen/unstream" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Codebase</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
-        <a href="/support" style="color:var(--muted);text-decoration:none">Support</a>
+        <a href="/support" style="color:var(--muted);text-decoration:none">Donate</a>
+        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <a href="/faq" style="color:var(--muted);text-decoration:none">FAQ</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
         <a href="https://letterbird.co/hi-d2078591" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Contact</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
