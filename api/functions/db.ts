@@ -34,8 +34,9 @@ export function artistSlug(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
-// Determine if a platform URL is a direct link (not a search URL)
-function isDirectLink(url: string): boolean {
+// Determine if a platform URL is a direct link (not a search URL).
+// Exported so scripts/backfill-published-artist-rows.ts stores exactly what a search would store.
+export function isDirectLink(url: string): boolean {
   const lower = url.toLowerCase();
   return (
     !lower.includes('duckduckgo.com') &&
@@ -45,8 +46,9 @@ function isDirectLink(url: string): boolean {
   );
 }
 
-// Platforms that are manual search links, not real artist presences
-const EXCLUDED_PLATFORMS = new Set(['buymeacoffee', 'kofi', 'ampwall']);
+// Platforms that are manual search links, not real artist presences.
+// Exported alongside isDirectLink for the same reason — see above.
+export const EXCLUDED_PLATFORMS = new Set(['buymeacoffee', 'kofi', 'ampwall']);
 
 // How long before artist data is considered stale (24 hours)
 const FRESHNESS_TTL_MS = 24 * 60 * 60 * 1000;
