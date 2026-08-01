@@ -2,7 +2,7 @@
 // Authenticated endpoint for updating a claimed artist profile.
 // Handles: slug changes, bio updates, platform link edits.
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { getClient } from './db';
 import { cacheDeleteByArtist } from './cache';
 import { checkRateLimit, getClientIp } from './ratelimit';
@@ -47,7 +47,7 @@ export const ALLOWED_EMBED_DOMAINS = [
   'embed.tidal.com',
 ];
 
-export function sanitizeEmbed(raw: string | null): string | null {
+export function sanitizeEmbed(raw: string | null, ownedHostnames: string[] = []): string | null {
   if (!raw || !raw.trim()) return null;
 
   // Extract iframe src and validate it's a proper URL
@@ -63,11 +63,13 @@ export function sanitizeEmbed(raw: string | null): string | null {
     return null;
   }
 
-  // Validate embed domain against allowlist
+  // Validate embed domain: either a trusted major platform, or a domain the
+  // artist already has a verified link to (e.g. a self-hosted Faircamp site,
+  // which has no single fixed domain to allowlist).
   const hostname = parsedUrl.hostname.toLowerCase();
   const domainAllowed = ALLOWED_EMBED_DOMAINS.some(
     d => hostname === d || hostname.endsWith('.' + d)
-  );
+  ) || ownedHostnames.includes(hostname);
   if (!domainAllowed) return null;
 
   // Rebuild iframe with only safe attributes (whitelist approach)
@@ -93,6 +95,40 @@ export function sanitizeEmbed(raw: string | null): string | null {
 
   // Cap at 2000 chars
   return iframe.slice(0, 2000);
+}
+
+// Hostnames the artist already has a verified link to, used to allow embeds
+// from self-hosted platforms (Faircamp and similar) that have no single
+// fixed domain to put in ALLOWED_EMBED_DOMAINS. `bodyLinks` is the editor's
+// full desired link list when provided (this save may add the link and embed
+// it in the same request); otherwise fall back to what's already stored.
+async function getOwnedLinkHostnames(
+  client: SupabaseClient,
+  artistId: string,
+  bodyLinks: LinkEntry[] | undefined
+): Promise<string[]> {
+  const hostnames = new Set<string>();
+  const urls: string[] = [];
+
+  if (bodyLinks) {
+    urls.push(...bodyLinks.map(l => l.url).filter((url): url is string => !!url));
+  } else {
+    const { data: links } = await client
+      .from('artist_links')
+      .select('url')
+      .eq('artist_id', artistId);
+    urls.push(...(links || []).map(l => l.url));
+  }
+
+  for (const url of urls) {
+    try {
+      hostnames.add(new URL(url).hostname.toLowerCase());
+    } catch {
+      // Invalid URLs are rejected elsewhere; just skip for hostname purposes.
+    }
+  }
+
+  return [...hostnames];
 }
 
 function slugify(text: string): string {
@@ -302,7 +338,26 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
 
   // --- Update featured embed ---
   if (body.featuredEmbed !== undefined) {
-    const embed = sanitizeEmbed(body.featuredEmbed);
+    let embed: string | null = null;
+
+    // A non-empty value that fails validation is a rejection, not a clear —
+    // report it instead of silently saving null under a "success" response
+    // (see the featured-embed persistence investigation, 2026-07-31).
+    if (body.featuredEmbed && body.featuredEmbed.trim()) {
+      const ownedHostnames = await getOwnedLinkHostnames(client, artist.id, body.links);
+      embed = sanitizeEmbed(body.featuredEmbed, ownedHostnames);
+
+      if (!embed) {
+        return {
+          statusCode: 400,
+          headers: CORS_HEADERS,
+          body: JSON.stringify({
+            error: "That embed code isn't supported. Use an embed from Bandcamp, YouTube, Spotify, SoundCloud, Apple Music, Vimeo, Tidal, or a platform you've linked on this profile.",
+          }),
+        };
+      }
+    }
+
     const { error: embedError } = await client
       .from('artist_profiles')
       .update({ featured_embed: embed, updated_at: new Date().toISOString() })
