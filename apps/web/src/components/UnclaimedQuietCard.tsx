@@ -1,5 +1,4 @@
 import { Fragment, useState } from 'react';
-import { Link } from 'react-router-dom';
 import type { ArtistPagePayload } from '../types/artist-page';
 import { sources } from '../services/sources';
 import { analytics } from '../services/analytics';
@@ -170,19 +169,6 @@ export function UnclaimedQuietCard({ payload, slug, justClaimed, onSave, onUnsav
         total={payload.releaseCount ?? 0}
         artistSlug={slug}
       />
-
-      {/* Claim nudge */}
-      <div className="mt-6 p-4 rounded-lg border border-border bg-bg-secondary/50 text-center">
-        <p className="text-sm text-text-muted">
-          Are you {artist.name}?{' '}
-          <Link
-            to={`/claim?slug=${encodeURIComponent(slug)}`}
-            className="text-accent-primary hover:underline font-medium"
-          >
-            Claim this profile →
-          </Link>
-        </p>
-      </div>
     </div>
   );
 }

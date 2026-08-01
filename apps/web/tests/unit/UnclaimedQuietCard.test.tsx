@@ -105,16 +105,10 @@ describe('UnclaimedQuietCard', () => {
     expect(screen.queryByText(/Embed this profile/)).toBeNull();
   });
 
-  it('shows claim nudge linking to /claim?slug=', () => {
+  it('does not render the claim nudge (link is dead until /claim routing is fixed)', () => {
     render(<UnclaimedQuietCard payload={unclaimedPayload} slug="some-artist" />);
-    const claimLink = screen.getByText('Claim this profile →');
-    expect(claimLink).toBeTruthy();
-    expect(claimLink.closest('a')?.getAttribute('href')).toContain('/claim?slug=some-artist');
-  });
-
-  it('shows claim nudge with artist name', () => {
-    render(<UnclaimedQuietCard payload={unclaimedPayload} slug="some-artist" />);
-    expect(screen.getByText(/Are you Some Artist\?/)).toBeTruthy();
+    expect(screen.queryByText('Claim this profile →')).toBeNull();
+    expect(screen.queryByText(/Are you Some Artist\?/)).toBeNull();
   });
 
   it('renders the post-claim banner when justClaimed is true', () => {

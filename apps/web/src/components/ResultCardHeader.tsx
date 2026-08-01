@@ -93,7 +93,7 @@ export function ResultCardHeader({
             by {result.artist}
           </p>
         )}
-        {result.matchConfidence === 'claimed' && (
+        {result.matchConfidence === 'claimed' ? (
           /* React Router <Link>: SPA-internal navigation keeps history in the SPA
              (back button works on Safari 26). The rich profile lives in the edge
              function today; UNS-100 ports it into React. The hard-navigation path
@@ -108,7 +108,22 @@ export function ResultCardHeader({
             </svg>
             View profile
           </Link>
-        )}
+        ) : result.knownSlug ? (
+          // Unclaimed artists still have a pre-generated /artist/ page (seeded
+          // from data/artists-manifest.json) — muted styling distinguishes it
+          // from the accent-colored claimed "View profile" pill above, since
+          // this isn't an owner-verified identity.
+          <Link
+            to={`/artist/${result.knownSlug}`}
+            className="mt-1 inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-bg-secondary text-text-secondary hover:text-text-primary hover:bg-bg-secondary/70 transition-colors whitespace-nowrap"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+            View artist page
+          </Link>
+        ) : null}
       </div>
 
       {/* Action buttons */}

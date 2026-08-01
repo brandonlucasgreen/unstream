@@ -88,6 +88,8 @@ export interface AggregatedResult {
   musicBrainzConfirmed?: boolean;
   // Slug for claimed artist page (/a/{slug})
   claimedSlug?: string;
+  // Slug for an unclaimed-but-known artist's pre-generated page (/artist/{slug})
+  knownSlug?: string;
   // Set to true when this result was merged via a manual override — protects it from later splitting
   overrideMerged?: boolean;
   // Artist location — populated from the DB for claimed artists and from
@@ -1023,7 +1025,10 @@ export function mergeByReleaseOverlap(disambiguated: AggregatedResult[]): Aggreg
  * relevance position; an exact match on the query leads the list. Non-claimed
  * stored artists (previously resolved and persisted searches) are gap-fillers
  * only — they're appended when the name is missing entirely, and never
- * displace a result the live pipeline just verified, which is fresher.
+ * displace a result the live pipeline just verified, which is fresher. When a
+ * same-name live result already exists, the stored artist's knownSlug is
+ * still attached to it, so a pre-generated /artist/ page can be linked to
+ * even though the live card wins on identity/freshness.
  */
 export function mergeStoredArtistsIntoResults(
   results: AggregatedResult[],
@@ -1047,8 +1052,14 @@ export function mergeStoredArtistsIntoResults(
     );
 
     if (artist.matchConfidence !== 'claimed') {
-      // A stored non-claimed artist only fills a hole.
-      if (sameNameIdx === -1 && !merged.some(r => normalizeForComparison(r.name) === normalizeForComparison(artist.name))) {
+      // A stored non-claimed artist only fills a hole — but if a live result
+      // already covers this name, its knownSlug is worth keeping so the UI
+      // can still link to the pre-generated /artist/ page.
+      if (sameNameIdx !== -1) {
+        if (artist.knownSlug && !merged[sameNameIdx].knownSlug) {
+          merged[sameNameIdx] = { ...merged[sameNameIdx], knownSlug: artist.knownSlug };
+        }
+      } else if (!merged.some(r => normalizeForComparison(r.name) === normalizeForComparison(artist.name))) {
         merged.push(artist);
       }
       continue;

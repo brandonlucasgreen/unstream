@@ -1945,9 +1945,11 @@ async function searchBandcampForAlbum(artistUrl: string, albumTitle: string): Pr
 
 // Shape a DB artist row into a result card. Claimed rows become full profile
 // cards (custom image, /a/ page link); verified rows become plain result cards
-// with the links a past search persisted. Unverified rows are rejected — that
-// confidence level is where junk from name-only matches accumulates.
-function toStoredResult(
+// with the links a past search persisted, and carry a knownSlug so the
+// frontend can link to the pre-generated /artist/ page. Unverified rows are
+// rejected — that confidence level is where junk from name-only matches
+// accumulates.
+export function toStoredResult(
   dbArtist: Awaited<ReturnType<typeof getArtistBySlug>>,
   slug: string,
 ): AggregatedResult | null {
@@ -1969,7 +1971,7 @@ function toStoredResult(
       latestRelease: p.latestRelease,
     })),
     matchConfidence: claimed ? ('claimed' as const) : ('verified' as const),
-    ...(claimed ? { claimedSlug: slug } : {}),
+    ...(claimed ? { claimedSlug: slug } : { knownSlug: slug }),
     ...(dbArtist.location ? { location: dbArtist.location } : {}),
   };
 }
