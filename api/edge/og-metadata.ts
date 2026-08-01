@@ -1,51 +1,5 @@
 import { Context } from "https://edge.netlify.com";
-
-// Social media crawler user agents (for OG tag previews only)
-const SOCIAL_CRAWLER_USER_AGENTS = [
-  'facebookexternalhit',
-  'Facebot',
-  'Twitterbot',
-  'LinkedInBot',
-  'Pinterest',
-  'Slackbot',
-  'TelegramBot',
-  'WhatsApp',
-  'Discordbot',
-  'Applebot',
-  'Mastodon',
-  'Pleroma',
-  'Misskey',
-  'Akkoma',
-  'Pixelfed',
-  'PeerTube',
-  'Lemmy',
-  'Bluesky',
-  'bsky.app',
-  'redditbot',
-];
-
-// Indexing crawlers (need actual page content, not just OG tags)
-const INDEXING_CRAWLERS = [
-  'Googlebot',
-  'bingbot',
-  'YandexBot',
-  'DuckDuckBot',
-  'Baiduspider',
-];
-
-// Check if request is from a social media crawler (OG previews only)
-function isSocialCrawler(userAgent: string | null): boolean {
-  if (!userAgent) return false;
-  const ua = userAgent.toLowerCase();
-  return SOCIAL_CRAWLER_USER_AGENTS.some(crawler => ua.includes(crawler.toLowerCase()));
-}
-
-// Check if request is from an indexing crawler (needs real page content)
-function isIndexingCrawler(userAgent: string | null): boolean {
-  if (!userAgent) return false;
-  const ua = userAgent.toLowerCase();
-  return INDEXING_CRAWLERS.some(crawler => ua.includes(crawler.toLowerCase()));
-}
+import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
 
 // Perform search to get first artist image
 async function getFirstArtistImage(query: string, baseUrl: string): Promise<{ imageUrl?: string; artistName?: string }> {
