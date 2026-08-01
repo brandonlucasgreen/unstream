@@ -9,9 +9,11 @@ interface SourceBadgeProps {
   url: string;
   isDirectLink?: boolean;
   displayName?: string;
+  /** Extra tracking for callers that know more than the platform name (e.g. the artist page). */
+  onClick?: () => void;
 }
 
-export function SourceBadge({ source, url, isDirectLink, displayName }: SourceBadgeProps) {
+export function SourceBadge({ source, url, isDirectLink, displayName, onClick }: SourceBadgeProps) {
   const label = displayName ?? source.name;
   // If we have a direct link, show as verified even if source is normally searchOnly
   const isSearchOnly = isDirectLink ? false : (source.searchOnly ?? false);
@@ -25,7 +27,7 @@ export function SourceBadge({ source, url, isDirectLink, displayName }: SourceBa
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1.5 px-2 py-1 text-sm text-text-secondary hover:text-text-primary transition-colors"
         title={`Search for this artist on ${label}`}
-        onClick={() => analytics.trackPlatformClick(label)}
+        onClick={() => { analytics.trackPlatformClick(label); onClick?.(); }}
       >
         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -63,7 +65,7 @@ export function SourceBadge({ source, url, isDirectLink, displayName }: SourceBa
         backgroundColor: bgColor,
         color: textColor,
       }}
-      onClick={() => analytics.trackPlatformClick(label)}
+      onClick={() => { analytics.trackPlatformClick(label); onClick?.(); }}
     >
       <PlatformIcon sourceId={source.id} color={textColor} emoji={source.icon} />
       <span className="flex items-center gap-1">

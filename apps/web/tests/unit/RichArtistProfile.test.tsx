@@ -116,21 +116,32 @@ describe('RichArtistProfile', () => {
     expect(screen.queryByText('Featured Release')).toBeNull();
   });
 
-  it('renders each main link with data-track-platform, target, and rel', () => {
+  it('renders each main link as a platform pill with target and rel', () => {
     render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" />);
-    const bandcampLink = document.querySelector('a[data-track-platform="bandcamp"]');
+    const bandcampLink = document.querySelector('a.source-badge[href="https://kidlightbulbs.bandcamp.com"]');
     expect(bandcampLink).toBeTruthy();
     expect(bandcampLink!.getAttribute('target')).toBe('_blank');
     expect(bandcampLink!.getAttribute('rel')).toBe('noopener noreferrer');
 
-    const patreonLink = document.querySelector('a[data-track-platform="patreon"]');
+    const patreonLink = document.querySelector('a.source-badge[href="https://patreon.com/kidlightbulbs"]');
     expect(patreonLink).toBeTruthy();
   });
 
-  it('renders the payout percent when link.payoutPercent is set', () => {
+  it('renders the payout percent on each pill', () => {
     render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" />);
-    expect(screen.getByText('80-85% to artist')).toBeTruthy();
-    expect(screen.getByText('86-90% to artist')).toBeTruthy();
+    expect(screen.getByText('80-85%')).toBeTruthy();
+    expect(screen.getByText('86-90%')).toBeTruthy();
+  });
+
+  it('falls back to the "Link" pill for custom links with no display name', () => {
+    const payload = {
+      ...basePayload,
+      links: [{ platform: 'other_1', url: 'https://example.com', displayName: null, payoutPercent: null, bandcampFriday: false }],
+    };
+    render(<RichArtistProfile payload={payload} slug="kid-lightbulbs" />);
+    const link = document.querySelector('a.source-badge[href="https://example.com"]');
+    expect(link).toBeTruthy();
+    expect(link!.textContent).toContain('Link');
   });
 
   it('renders the Bandcamp Friday badge when link.bandcampFriday is true', () => {
@@ -153,7 +164,14 @@ describe('RichArtistProfile', () => {
     render(<RichArtistProfile payload={{ ...basePayload, linkDividers: [1] }} slug="kid-lightbulbs" />);
     const divider = document.querySelector('hr');
     expect(divider).toBeTruthy();
-    expect(divider!.nextElementSibling?.getAttribute('data-track-platform')).toBe('patreon');
+    // The divider starts a new row of pills; the link it points at leads that row.
+    const nextRowLink = divider!.nextElementSibling?.querySelector('a.source-badge');
+    expect(nextRowLink?.getAttribute('href')).toBe('https://patreon.com/kidlightbulbs');
+  });
+
+  it('does not render a divider before the first link', () => {
+    render(<RichArtistProfile payload={{ ...basePayload, linkDividers: [0] }} slug="kid-lightbulbs" />);
+    expect(document.querySelectorAll('hr').length).toBe(0);
   });
 
   it('renders the social links section only when socialLinks.length > 0', () => {
