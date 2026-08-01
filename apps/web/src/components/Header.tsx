@@ -42,6 +42,7 @@ export function Header() {
   const navigate = useNavigate();
   const { session, user, isAdmin, signOut } = useAuth();
   const [pendingVerifyCount, setPendingVerifyCount] = useState(0);
+  const [pendingReleaseReviewCount, setPendingReleaseReviewCount] = useState(0);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   // Fetch pending verification count for admins — only on admin-relevant pages
@@ -63,6 +64,23 @@ export function Header() {
     return () => controller.abort();
   }, [isAdmin, session?.access_token]);
 
+  // Same shape as the verification count above — a queue waiting on the tier-3 dedup backstop
+  // should be just as visible without opening the menu.
+  useEffect(() => {
+    if (!isAdmin || !session?.access_token) return;
+    const controller = new AbortController();
+    fetch('/api/admin/release-review', {
+      headers: { 'Authorization': `Bearer ${session.access_token}` },
+      signal: controller.signal,
+    })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data?.pairs) setPendingReleaseReviewCount(data.pairs.length);
+      })
+      .catch(() => { /* aborted or network error */ });
+    return () => controller.abort();
+  }, [isAdmin, session?.access_token]);
+
   async function handleSignOut() {
     await signOut();
     navigate('/login');
@@ -76,12 +94,17 @@ export function Header() {
   // review is still visible without opening the menu.
   const adminGroup: NavGroup = {
     label: 'Admin',
-    emphasis: pendingVerifyCount > 0,
+    emphasis: pendingVerifyCount > 0 || pendingReleaseReviewCount > 0,
     items: [
       {
         to: '/admin/verify',
         label: pendingVerifyCount > 0 ? `Verify (${pendingVerifyCount})` : 'Verify',
         emphasis: pendingVerifyCount > 0,
+      },
+      {
+        to: '/admin/release-review',
+        label: pendingReleaseReviewCount > 0 ? `Release review (${pendingReleaseReviewCount})` : 'Release review',
+        emphasis: pendingReleaseReviewCount > 0,
       },
       { to: '/admin/links', label: 'Removed links' },
       { to: '/admin/analytics', label: 'Analytics' },

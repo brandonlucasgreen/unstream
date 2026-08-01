@@ -24,6 +24,7 @@ const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage.tsx').the
 const AdminMergePage = lazy(() => import('./pages/AdminMergePage.tsx').then(m => ({ default: m.AdminMergePage })))
 const AdminVerifyPage = lazy(() => import('./pages/AdminVerifyPage.tsx').then(m => ({ default: m.AdminVerifyPage })))
 const AdminLinksPage = lazy(() => import('./pages/AdminLinksPage.tsx').then(m => ({ default: m.AdminLinksPage })))
+const AdminReleaseReviewPage = lazy(() => import('./pages/AdminReleaseReviewPage.tsx').then(m => ({ default: m.AdminReleaseReviewPage })))
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage.tsx').then(m => ({ default: m.ResetPasswordPage })))
 const GuidesIndexPage = lazy(() => import('./pages/GuidesIndexPage.tsx').then(m => ({ default: m.GuidesIndexPage })))
 const GuidePage = lazy(() => import('./pages/GuidePage.tsx').then(m => ({ default: m.GuidePage })))
@@ -72,6 +73,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/admin/merge" element={<AdminMergePage />} />
               <Route path="/admin/verify" element={<AdminVerifyPage />} />
               <Route path="/admin/links" element={<AdminLinksPage />} />
+              <Route path="/admin/release-review" element={<AdminReleaseReviewPage />} />
               <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
               <Route path="/developers" element={<DevelopersPage />} />
               <Route path="/extension" element={<ExtensionPage />} />

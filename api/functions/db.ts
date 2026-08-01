@@ -920,19 +920,13 @@ export async function persistDiscogsReleases(
         }
       }
 
-      if (!prior) {
-        // Tier 3: nothing exact, but something close enough to warrant a human look. Never
-        // merge — insert a new row below and flag both sides, rather than guessing.
-        const candidates = byType.get(release.releaseType) ?? [];
-        const fuzzy = candidates.find(c => isFuzzyReleaseMatch(c.match_key, release.matchKey));
-        if (fuzzy) {
-          const { error: flagError } = await client
-            .from('releases')
-            .update({ needs_review: true })
-            .eq('id', fuzzy.id);
-          if (flagError) console.error('[DB] persistDiscogsReleases fuzzy-flag failed:', flagError.message);
-        }
-      }
+      // Tier 3: nothing exact, but something close enough to warrant a human look. Never
+      // merge — insert a new row below and flag both sides, with each pointing at the other
+      // via `flagged_against_release_id` so an admin queue can show the pair without having
+      // to re-run the fuzzy match to reconstruct what triggered it.
+      const fuzzy = prior
+        ? null
+        : (byType.get(release.releaseType) ?? []).find(c => isFuzzyReleaseMatch(c.match_key, release.matchKey)) ?? null;
 
       let releaseId: string;
       let curatedFields: string[];
@@ -979,6 +973,9 @@ export async function persistDiscogsReleases(
             status: release.status,
             discogs_master_id: release.masterId,
             source: 'auto',
+            // fuzzy.id is already known here, unlike the reverse direction below — this row
+            // can point at its suspected duplicate in the same write that creates it.
+            ...(fuzzy && { needs_review: true, flagged_against_release_id: fuzzy.id }),
           })
           .select('id')
           .single();
@@ -1003,6 +1000,17 @@ export async function persistDiscogsReleases(
         const bucket = byType.get(release.releaseType);
         if (bucket) bucket.push(createdRow);
         else byType.set(release.releaseType, [createdRow]);
+
+        // The reverse direction: fuzzy's own id wasn't known until the new row above existed,
+        // so this side is written second. Never merge — flagging both sides is the whole
+        // point of tier 3.
+        if (fuzzy) {
+          const { error: flagError } = await client
+            .from('releases')
+            .update({ needs_review: true, flagged_against_release_id: releaseId })
+            .eq('id', fuzzy.id);
+          if (flagError) console.error('[DB] persistDiscogsReleases fuzzy-flag failed:', flagError.message);
+        }
       }
 
       const { data: sourceRow, error: sourceError } = await client
@@ -1137,6 +1145,259 @@ export async function persistMusicBrainzEnrichment(
   }
 }
 
+// --- Tier-3 dedup admin review queue ---
+//
+// The backstop the dedup scheme (spec §4) leans on once claiming is optional: ingest never
+// auto-merges a fuzzy match, it only flags both sides via `needs_review` and
+// `flagged_against_release_id`. These functions are the read side (list flagged pairs) and the
+// two things an admin can do about one: say they're different (dismiss) or say they're the
+// same (merge).
+
+export interface ReleaseReviewItem {
+  id: string;
+  title: string;
+  slug: string;
+  releaseType: string;
+  releaseDate: string | null;
+  datePrecision: string | null;
+  artworkUrl: string | null;
+  artistName: string;
+  artistSlug: string;
+  platforms: string[];
+}
+
+/**
+ * Fold a flat needs_review result set into pairs, deduplicating the two rows a symmetric flag
+ * always produces (A flagged against B, and B flagged against A, are one pair to review, not
+ * two). Pure and exported for tests — no network, no database.
+ *
+ * A row whose counterpart isn't in the set (already resolved from the other side, or deleted)
+ * is still shown, alone, rather than dropped — something about it looked ambiguous enough to
+ * flag, and silently hiding that is worse than showing it with nothing to compare against.
+ */
+export function pairReviewRows(
+  rows: Map<string, ReleaseReviewItem & { flaggedAgainst: string | null }>
+): { primary: ReleaseReviewItem; counterpart: ReleaseReviewItem | null }[] {
+  const seen = new Set<string>();
+  const pairs: { primary: ReleaseReviewItem; counterpart: ReleaseReviewItem | null }[] = [];
+
+  for (const row of rows.values()) {
+    if (seen.has(row.id)) continue;
+    seen.add(row.id);
+
+    const counterpart = row.flaggedAgainst ? rows.get(row.flaggedAgainst) ?? null : null;
+    if (counterpart) seen.add(counterpart.id);
+
+    pairs.push({ primary: row, counterpart });
+  }
+
+  return pairs;
+}
+
+/**
+ * Every release currently flagged for review, paired with its suspected duplicate where one is
+ * still on file. Hidden releases are excluded — an admin has already ruled on those.
+ */
+export async function getReleaseReviewQueue(): Promise<
+  { primary: ReleaseReviewItem; counterpart: ReleaseReviewItem | null }[]
+> {
+  const client = getClient();
+  if (!client) return [];
+
+  try {
+    const { data, error } = await client
+      .from('releases')
+      .select(
+        'id, title, slug, release_type, release_date, date_precision, artwork_url, flagged_against_release_id,' +
+        ' artists ( name, slug ), release_sources ( platform )'
+      )
+      .eq('needs_review', true)
+      .eq('is_hidden', false)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('[DB] getReleaseReviewQueue failed:', error.message);
+      return [];
+    }
+
+    type Row = {
+      id: string;
+      title: string;
+      slug: string;
+      release_type: string;
+      release_date: string | null;
+      date_precision: string | null;
+      artwork_url: string | null;
+      flagged_against_release_id: string | null;
+      artists: { name: string; slug: string } | { name: string; slug: string }[] | null;
+      release_sources: { platform: string }[] | null;
+    };
+
+    const rows = new Map<string, ReleaseReviewItem & { flaggedAgainst: string | null }>();
+
+    for (const r of (data as unknown as Row[]) || []) {
+      const artist = Array.isArray(r.artists) ? r.artists[0] : r.artists;
+      rows.set(r.id, {
+        id: r.id,
+        title: r.title,
+        slug: r.slug,
+        releaseType: r.release_type,
+        releaseDate: r.release_date,
+        datePrecision: r.date_precision,
+        artworkUrl: r.artwork_url,
+        artistName: artist?.name ?? '(unknown)',
+        artistSlug: artist?.slug ?? '',
+        platforms: (r.release_sources || []).map(s => s.platform),
+        flaggedAgainst: r.flagged_against_release_id,
+      });
+    }
+
+    return pairReviewRows(rows);
+  } catch (error) {
+    console.error('[DB] getReleaseReviewQueue error:', error);
+    return [];
+  }
+}
+
+/**
+ * "These are different releases." Clears the flag on both sides of the pair — including the
+ * counterpart, looked up here rather than trusted from the client, since flagged_against_
+ * release_id is what makes them a pair and both must stop pointing at the resolved question.
+ */
+export async function dismissReleaseReview(releaseId: string): Promise<boolean> {
+  const client = getClient();
+  if (!client) return false;
+
+  try {
+    const { data: row, error: readError } = await client
+      .from('releases')
+      .select('id, flagged_against_release_id')
+      .eq('id', releaseId)
+      .maybeSingle();
+
+    if (readError || !row) {
+      console.error('[DB] dismissReleaseReview read failed:', readError?.message ?? 'not found');
+      return false;
+    }
+
+    const counterpartId = (row as { flagged_against_release_id: string | null }).flagged_against_release_id;
+    const ids = counterpartId ? [releaseId, counterpartId] : [releaseId];
+
+    const { error } = await client
+      .from('releases')
+      .update({ needs_review: false, flagged_against_release_id: null })
+      .in('id', ids);
+
+    if (error) {
+      console.error('[DB] dismissReleaseReview update failed:', error.message);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('[DB] dismissReleaseReview error:', error);
+    return false;
+  }
+}
+
+export interface MergeReleasesResult {
+  ok: boolean;
+  error?: string;
+}
+
+/**
+ * "These are the same release." Moves every source off `dropId` onto `keepId`, fills in
+ * whatever `keepId` is missing (date, artwork) without overwriting anything it already has or
+ * anything an artist curated, then deletes the now-empty `dropId` row.
+ *
+ * Sources are moved **before** the duplicate row is deleted, and the delete is only attempted
+ * once that move has succeeded — this project has already lost data once to a delete-before-a-
+ * fallible-write (PR #350, an artist's links wiped by a preview), and a release merge is the
+ * same shape of risk.
+ *
+ * Refuses the merge outright if both releases already carry a source on the same platform,
+ * rather than silently dropping one — a merge with an ambiguous outcome should stop and ask,
+ * not guess which of two conflicting sources to keep.
+ */
+export async function mergeReleases(keepId: string, dropId: string): Promise<MergeReleasesResult> {
+  const client = getClient();
+  if (!client) return { ok: false, error: 'Database not configured' };
+  if (keepId === dropId) return { ok: false, error: 'Cannot merge a release into itself' };
+
+  try {
+    const [{ data: keepSources, error: keepError }, { data: dropSources, error: dropError }] = await Promise.all([
+      client.from('release_sources').select('platform').eq('release_id', keepId),
+      client.from('release_sources').select('id, platform').eq('release_id', dropId),
+    ]);
+
+    if (keepError || dropError) {
+      console.error('[DB] mergeReleases read failed:', keepError?.message, dropError?.message);
+      return { ok: false, error: 'Failed to read sources' };
+    }
+
+    const keepPlatforms = new Set((keepSources as { platform: string }[] | null || []).map(s => s.platform));
+    const drop = (dropSources as { id: string; platform: string }[] | null) || [];
+    const conflicting = drop.filter(s => keepPlatforms.has(s.platform));
+
+    if (conflicting.length > 0) {
+      const platforms = conflicting.map(c => c.platform).join(', ');
+      return { ok: false, error: `Both releases already have a source on: ${platforms} — resolve manually` };
+    }
+
+    if (drop.length > 0) {
+      const { error: moveError } = await client
+        .from('release_sources')
+        .update({ release_id: keepId })
+        .eq('release_id', dropId);
+
+      if (moveError) {
+        console.error('[DB] mergeReleases move failed:', moveError.message);
+        return { ok: false, error: 'Failed to move sources' };
+      }
+    }
+
+    const [{ data: keepRow }, { data: dropRow }] = await Promise.all([
+      client.from('releases').select('release_date, artwork_url, curated_fields').eq('id', keepId).maybeSingle(),
+      client.from('releases').select('release_date, date_precision, artwork_url').eq('id', dropId).maybeSingle(),
+    ]);
+
+    if (keepRow && dropRow) {
+      const curated = new Set((keepRow as { curated_fields: string[] | null }).curated_fields ?? []);
+      const patch: Record<string, unknown> = {};
+      const keep = keepRow as { release_date: string | null; artwork_url: string | null };
+      const drop2 = dropRow as { release_date: string | null; date_precision: string | null; artwork_url: string | null };
+
+      if (!curated.has('release_date') && drop2.release_date && !keep.release_date) {
+        patch.release_date = drop2.release_date;
+        patch.date_precision = drop2.date_precision;
+      }
+      if (!curated.has('artwork_url') && drop2.artwork_url && !keep.artwork_url) {
+        patch.artwork_url = drop2.artwork_url;
+      }
+      if (Object.keys(patch).length > 0) {
+        await client.from('releases').update(patch).eq('id', keepId);
+      }
+    }
+
+    // Safe now: every source under dropId has been moved (or there were none), and the
+    // conflict check above means nothing was left behind to lose.
+    const { error: deleteError } = await client.from('releases').delete().eq('id', dropId);
+    if (deleteError) {
+      console.error('[DB] mergeReleases delete failed:', deleteError.message);
+      return { ok: false, error: 'Sources moved, but failed to remove the duplicate row' };
+    }
+
+    const { error: clearError } = await client
+      .from('releases')
+      .update({ needs_review: false, flagged_against_release_id: null })
+      .eq('id', keepId);
+    if (clearError) console.error('[DB] mergeReleases clear-flag failed:', clearError.message);
+
+    return { ok: true };
+  } catch (error) {
+    console.error('[DB] mergeReleases error:', error);
+    return { ok: false, error: 'Unexpected error' };
+  }
+}
 
 // --- Bandcamp slug-probe cache (UNS-152) ---
 
