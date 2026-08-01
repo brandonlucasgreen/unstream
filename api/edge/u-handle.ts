@@ -1,11 +1,13 @@
 // Edge function: /u/{handle}
 // Static HTML renderer for public saved-artists pages.
 // Models after api/edge/artist-page-static.ts — same pattern, same RLS-aware data fetching.
-// The edge function is the single renderer per CLAUDE.md "one route, one renderer".
-// React app hydrates client-side for the Copy URL button only (progressive enhancement).
+// Real browsers get the SPA (PublicSavedArtistsPage.tsx), same as a client-side <Link>
+// navigation would render, so a direct load and an in-app click produce the same UI (see
+// docs/retros/UNS-100-bifurcation-retro.md). Only crawlers get this static render.
 
 import { Context } from "https://edge.netlify.com";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
 
 function escapeHtml(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -49,6 +51,11 @@ export default async function handler(request: Request, context: Context) {
     const handle = url.pathname.replace(/^\/u\//, '').replace(/\/$/, '');
 
     if (!handle) return context.next();
+
+    const userAgent = request.headers.get('user-agent');
+    if (!isSocialCrawler(userAgent) && !isIndexingCrawler(userAgent)) {
+      return context.next();
+    }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_KEY");
