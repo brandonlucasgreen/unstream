@@ -2,9 +2,10 @@ import { Fragment, useState, useCallback } from 'react';
 import type { ArtistPagePayload } from '../types/artist-page';
 import { sources } from '../services/sources';
 import { analytics } from '../services/analytics';
-import { PlatformIcon } from './PlatformIcon';
 import { ReleasesSection } from './ReleasesSection';
 import { SocialIcon } from './SocialIcon';
+import { SourceBadge } from './SourceBadge';
+import { getSource } from './ResultCardUtils';
 import type { SourceId } from '../types';
 
 interface RichArtistProfileProps {
@@ -17,6 +18,28 @@ interface RichArtistProfileProps {
   disabledSave?: boolean;
 }
 
+type ArtistLink = ArtistPagePayload['links'][number];
+
+/**
+ * Split the artist's links at the divider positions they chose, so each group can
+ * render as its own wrapped row of pills with a rule between rows.
+ */
+function groupLinksByDivider(links: ArtistLink[], dividerIndexes: Set<number>): ArtistLink[][] {
+  const groups: ArtistLink[][] = [];
+  let current: ArtistLink[] = [];
+
+  links.forEach((link, index) => {
+    if (dividerIndexes.has(index) && current.length > 0) {
+      groups.push(current);
+      current = [];
+    }
+    current.push(link);
+  });
+
+  if (current.length > 0) groups.push(current);
+  return groups;
+}
+
 function getLocationText(artist: ArtistPagePayload['artist']): string {
   const region = artist.country || artist.countryCode;
   if (artist.city && region) return `${artist.city}, ${region}`;
@@ -27,7 +50,7 @@ function getLocationText(artist: ArtistPagePayload['artist']): string {
 
 export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave, isSaved = false, disabledSave = false }: RichArtistProfileProps) {
   const { artist, profile, links, socialLinks } = payload;
-  const dividerIndexes = new Set(payload.linkDividers ?? []);
+  const linkGroups = groupLinksByDivider(links, new Set(payload.linkDividers ?? []));
   const imageUrl = profile?.customImageUrl || artist.imageUrl;
   const locationText = getLocationText(artist);
 
@@ -149,59 +172,35 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
           </div>
         )}
 
-        {/* Main Platform Links */}
-        {links.length > 0 && (
+        {/* Main Platform Links — the same platform pills the search results use, in the
+            artist's own order. Dividers the artist placed split the pills into rows. */}
+        {linkGroups.length > 0 && (
           <div className={profile?.featuredEmbed ? 'mt-6' : ''}>
             <h2 className="text-[11px] uppercase tracking-wider text-text-muted mb-3">
               Support directly
             </h2>
-            <div className="grid gap-2">
-              {links.map((link, index) => {
-                const source = sources[link.platform as SourceId];
-                const isOther = link.platform === 'other' || link.platform.startsWith('other_');
-                const linkName = link.displayName || (isOther ? 'Link' : (source?.name || link.platform));
-                const linkColor = source?.color || '#71717a';
-                const isBCFriday = link.bandcampFriday;
-
-                return (
-                  <Fragment key={link.platform + link.url}>
-                    {/* Group divider placed by the artist */}
-                    {dividerIndexes.has(index) && (
-                      <hr className="border-0 border-t border-border my-1" />
-                    )}
-                    <a
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      data-track-platform={link.platform}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors ${
-                        isBCFriday
-                          ? 'border-[#1da0c3]/25 bg-[#1da0c3]/[0.06] hover:bg-[#1da0c3]/10'
-                          : 'border-border hover:bg-bg-hover'
-                      }`}
-                      style={!isBCFriday ? { backgroundColor: `${linkColor}08` } : undefined}
-                      onClick={() => handleLinkClick(link.platform)}
-                    >
-                      <span className="text-xl inline-flex items-center justify-center w-5">
-                        {source && !isOther && source.icon !== '🔗' && typeof source.icon === 'string' && source.icon.length <= 2 ? (
-                          <PlatformIcon sourceId={link.platform as SourceId} color={linkColor} emoji={source.icon} className="w-5 h-5" />
-                        ) : (
-                          <PlatformIcon sourceId={link.platform as SourceId} color={linkColor} emoji={source?.icon || '🔗'} className="w-5 h-5" />
+            <div className="space-y-3">
+              {linkGroups.map((group, groupIndex) => (
+                <Fragment key={groupIndex}>
+                  {groupIndex > 0 && <hr className="border-0 border-t border-border" />}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {group.map(link => (
+                      <Fragment key={link.platform + link.url}>
+                        <SourceBadge
+                          source={getSource(link.platform as SourceId)}
+                          url={link.url}
+                          isDirectLink
+                          displayName={link.displayName ?? undefined}
+                          onClick={() => handleLinkClick(link.platform)}
+                        />
+                        {link.bandcampFriday && (
+                          <span className="bandcamp-friday-label">Bandcamp Friday!</span>
                         )}
-                      </span>
-                      <span className="flex-1 font-medium text-text-primary">{linkName}</span>
-                      {link.payoutPercent && (
-                        <span className="text-xs text-text-muted">{link.payoutPercent} to artist</span>
-                      )}
-                      {isBCFriday && (
-                        <span className="text-[11px] font-bold text-[#1da0c3] animate-pulse">
-                          Bandcamp Friday!
-                        </span>
-                      )}
-                    </a>
-                  </Fragment>
-                );
-              })}
+                      </Fragment>
+                    ))}
+                  </div>
+                </Fragment>
+              ))}
             </div>
           </div>
         )}
