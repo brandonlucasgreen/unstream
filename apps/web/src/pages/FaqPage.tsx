@@ -9,9 +9,9 @@ export function FaqPage() {
 
       <Header />
 
-      <div className="pt-8 pb-8 px-4">
+      <div className="pt-6 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="font-display text-3xl md:text-4xl font-semibold text-text-primary mb-4">Frequently Asked Questions</h1>
+          <h1 className="font-display text-3xl md:text-4xl font-semibold text-text-primary mb-2">Frequently Asked Questions</h1>
           <p className="text-text-secondary text-lg max-w-2xl mx-auto">
             Learn more about Unstream, streaming economics, and how to support artists directly.
           </p>
@@ -21,9 +21,9 @@ export function FaqPage() {
       <main className="px-4 pb-16">
         <div className="max-w-2xl mx-auto">
           {faqSections.length > 0 && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               {faqSections.map((section, index) => (
-                <details key={index} className="group bg-bg-secondary rounded-xl border border-border-primary">
+                <details key={index} className="group bg-surface-secondary rounded-xl border border-border">
                   <summary className="flex items-center justify-between cursor-pointer p-4 text-text-primary font-medium hover:bg-bg-hover transition-colors rounded-xl">
                     {section.title}
                     <span className="ml-2 text-text-muted group-open:rotate-180 transition-transform">▼</span>

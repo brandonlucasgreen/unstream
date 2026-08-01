@@ -59,7 +59,7 @@ export function GuidePage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold text-text-primary mb-2">Not found</h1>
+          <h1 className="font-display text-2xl font-semibold text-text-primary mb-2">Not found</h1>
           <Link to="/guides" className="text-accent-primary hover:underline">Back to guides</Link>
         </div>
       </div>
