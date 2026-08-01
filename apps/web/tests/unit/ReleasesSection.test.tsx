@@ -11,7 +11,6 @@
 // with nothing under it.
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import { ReleasesSection } from 'src/components/ReleasesSection';
 import type { ArtistPagePayload } from 'src/types/artist-page';
 
@@ -31,11 +30,13 @@ function release(overrides: Partial<Release> = {}): Release {
   };
 }
 
+// Rendered with **no Router on purpose**. A react-router <Link> throws without one, so this
+// harness is what keeps the rows real anchors: `/a/{artist}/{release}` is served only by the
+// release-page edge function, and a client-side navigation there matches no SPA route, renders
+// a blank page and strands the Back button.
 function show(releases: Release[], total = releases.length) {
   return render(
-    <MemoryRouter>
-      <ReleasesSection releases={releases} total={total} artistSlug="kid-lightbulbs" />
-    </MemoryRouter>
+    <ReleasesSection releases={releases} total={total} artistSlug="kid-lightbulbs" />
   );
 }
 
@@ -47,6 +48,13 @@ describe('ReleasesSection', () => {
     expect(screen.getByRole('link', { name: /RUINED CASTLE/ }).getAttribute('href')).toBe(
       '/a/kid-lightbulbs/ruined-castle'
     );
+  });
+
+  // The regression this file exists to prevent, spelled out: a <Link> here produced a blank
+  // page on click and a dead Back button, because that URL has no SPA route. Rendering without
+  // a Router is the assertion — <Link> cannot mount outside one.
+  it('navigates for real rather than client-side routing to a URL the SPA cannot render', () => {
+    expect(() => show([release()])).not.toThrow();
   });
 
   // An empty "Releases" heading reads as broken; its absence reads as "nothing here yet", which
