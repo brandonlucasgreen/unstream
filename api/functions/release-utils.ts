@@ -144,6 +144,71 @@ export function mapReleaseType(raw: string | null | undefined): ReleaseType {
   return 'other';
 }
 
+/**
+ * Map MusicBrainz's release-group typing onto ours.
+ *
+ * MusicBrainz splits type into one `primary-type` (Album/EP/Single/Broadcast/Other) plus zero
+ * or more `secondary-types` (Compilation/Live/Remix/Soundtrack/…). Secondary types win when
+ * present — a live album is more usefully typed 'live' than 'album' for dedup purposes, the
+ * same reasoning `mapReleaseType` already applies to Bandcamp's own type strings.
+ */
+export function mapMusicBrainzReleaseType(
+  primaryType: string | null | undefined,
+  secondaryTypes: string[] | null | undefined
+): ReleaseType {
+  const secondary = new Set((secondaryTypes ?? []).map(s => s.toLowerCase()));
+  if (secondary.has('compilation')) return 'compilation';
+  if (secondary.has('live')) return 'live';
+  if (secondary.has('remix')) return 'remix';
+
+  switch ((primaryType ?? '').toLowerCase()) {
+    case 'album': return 'album';
+    case 'ep': return 'ep';
+    case 'single': return 'single';
+    default: return 'other';
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Cross-source dedup — tier 3 (fuzzy, never auto-merged)
+// ---------------------------------------------------------------------------
+
+/**
+ * How much of the longer key the shorter one must cover to count as "probably the same".
+ *
+ * Low enough to catch the motivating case — an album plus its "(Deluxe Edition)" or
+ * "(Remastered)" reissue, where the suffix can be nearly as long as the original title — but
+ * still high enough that a short, common word contained inside an unrelated long title (both
+ * happen to have "album" somewhere) doesn't trip it.
+ */
+const MIN_FUZZY_MATCH_RATIO = 0.4;
+
+/** Below this length a match key is too short for containment to mean anything. */
+const MIN_FUZZY_MATCH_LENGTH = 4;
+
+/**
+ * A conservative signal that two match keys under the same release_type MIGHT be the same
+ * release without being exactly equal — e.g. `carrielowell` and
+ * `carrielowelldeluxeedition`.
+ *
+ * This is tier 3 from the spec: it never merges anything. It only flags a pair as
+ * `needs_review` so a human decides. "Under-merge, never over-merge" (§4) means a false
+ * positive here costs a checkbox in an admin queue; a false positive in an exact-match tier
+ * would silently assert two different albums are one, which nobody would ever catch.
+ *
+ * Deliberately narrow: one key must fully *contain* the other, not merely overlap, and the
+ * shorter key must cover most of the longer one's length — otherwise two short, unrelated
+ * titles that happen to share a substring ("EP" inside a longer title's match key, say) would
+ * trip it.
+ */
+export function isFuzzyReleaseMatch(a: string, b: string): boolean {
+  if (!a || !b || a === b) return false;
+  const [shorter, longer] = a.length <= b.length ? [a, b] : [b, a];
+  if (shorter.length < MIN_FUZZY_MATCH_LENGTH) return false;
+  if (!longer.includes(shorter)) return false;
+  return shorter.length / longer.length >= MIN_FUZZY_MATCH_RATIO;
+}
+
 // ---------------------------------------------------------------------------
 // Dates
 // ---------------------------------------------------------------------------

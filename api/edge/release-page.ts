@@ -339,7 +339,7 @@ export default async function handler(request: Request, context: Context) {
     <div class="container" style="padding-bottom:32px">
       <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Where to buy</h2>
       ${sourcesHtml || '<p style="font-size:14px;color:var(--muted)">We haven\'t found anywhere to buy this yet.</p>'}
-      ${oldestCapture ? `<p class="note">Prices checked ${escapeHtml(relativeDays(oldestCapture))}. Stock and prices change &mdash; the platform is the last word. Payout figures are estimates based on each platform's published rates.</p>` : ''}
+      ${oldestCapture ? `<p class="note">Prices last checked ${escapeHtml(relativeDays(oldestCapture))}. Stock and prices may change. Payout figures are estimates based on each platform's published rates.</p>` : ''}
     </div>
   </div>
 

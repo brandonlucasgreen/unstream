@@ -140,6 +140,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/artist-releases"
+  to = "/.netlify/functions/artist-releases"
+  status = 200
+
+[[redirects]]
   from = "/api/desktop/version"
   to = "/.netlify/functions/desktop-version"
   status = 200
@@ -182,6 +187,11 @@
 [[redirects]]
   from = "/api/admin/catalog-artist"
   to = "/.netlify/functions/admin-catalog-artist"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/release-review"
+  to = "/.netlify/functions/admin-release-review"
   status = 200
 
 [[redirects]]

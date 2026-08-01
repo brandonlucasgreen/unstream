@@ -17,6 +17,7 @@ const ClaimPage = lazy(() => import('./pages/ClaimPage.tsx').then(m => ({ defaul
 const LoginPage = lazy(() => import('./pages/LoginPage.tsx').then(m => ({ default: m.LoginPage })))
 const DashboardPage = lazy(() => import('./pages/DashboardPage.tsx').then(m => ({ default: m.DashboardPage })))
 const ArtistEditPage = lazy(() => import('./pages/ArtistEditPage.tsx').then(m => ({ default: m.ArtistEditPage })))
+const ArtistReleasesPage = lazy(() => import('./pages/ArtistReleasesPage.tsx').then(m => ({ default: m.ArtistReleasesPage })))
 const ArtistDirectoryPage = lazy(() => import('./pages/ArtistDirectoryPage.tsx').then(m => ({ default: m.ArtistDirectoryPage })))
 const RoadmapPage = lazy(() => import('./pages/RoadmapPage.tsx').then(m => ({ default: m.RoadmapPage })))
 const SupportPage = lazy(() => import('./pages/SupportPage.tsx').then(m => ({ default: m.SupportPage })))
@@ -24,6 +25,7 @@ const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage.tsx').the
 const AdminMergePage = lazy(() => import('./pages/AdminMergePage.tsx').then(m => ({ default: m.AdminMergePage })))
 const AdminVerifyPage = lazy(() => import('./pages/AdminVerifyPage.tsx').then(m => ({ default: m.AdminVerifyPage })))
 const AdminLinksPage = lazy(() => import('./pages/AdminLinksPage.tsx').then(m => ({ default: m.AdminLinksPage })))
+const AdminReleaseReviewPage = lazy(() => import('./pages/AdminReleaseReviewPage.tsx').then(m => ({ default: m.AdminReleaseReviewPage })))
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage.tsx').then(m => ({ default: m.ResetPasswordPage })))
 const GuidesIndexPage = lazy(() => import('./pages/GuidesIndexPage.tsx').then(m => ({ default: m.GuidesIndexPage })))
 const GuidePage = lazy(() => import('./pages/GuidePage.tsx').then(m => ({ default: m.GuidePage })))
@@ -63,6 +65,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/artist-edit/:slug" element={<ArtistEditPage />} />
+              <Route path="/artist-edit/:slug/releases" element={<ArtistReleasesPage />} />
               <Route path="/artists" element={<ArtistDirectoryPage />} />
               <Route path="/roadmap" element={<RoadmapPage />} />
               <Route path="/support" element={<SupportPage />} />
@@ -72,6 +75,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/admin/merge" element={<AdminMergePage />} />
               <Route path="/admin/verify" element={<AdminVerifyPage />} />
               <Route path="/admin/links" element={<AdminLinksPage />} />
+              <Route path="/admin/release-review" element={<AdminReleaseReviewPage />} />
               <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
               <Route path="/developers" element={<DevelopersPage />} />
               <Route path="/extension" element={<ExtensionPage />} />

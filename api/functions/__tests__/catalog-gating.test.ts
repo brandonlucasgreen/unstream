@@ -11,8 +11,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   claimArtistForCatalog: vi.fn(),
-  getArtistBandcampUrl: vi.fn(),
+  getArtistForCatalog: vi.fn(),
   persistReleases: vi.fn(),
+  persistDiscogsReleases: vi.fn(),
+  persistFaircampReleases: vi.fn(),
+  persistMusicBrainzEnrichment: vi.fn(),
+  attachDiscoveredSource: vi.fn(),
   recordCatalogOutcome: vi.fn(),
   safeFetch: vi.fn(),
   fetch: vi.fn(),
@@ -20,8 +24,12 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('../db', () => ({
   claimArtistForCatalog: mocks.claimArtistForCatalog,
-  getArtistBandcampUrl: mocks.getArtistBandcampUrl,
+  getArtistForCatalog: mocks.getArtistForCatalog,
   persistReleases: mocks.persistReleases,
+  persistDiscogsReleases: mocks.persistDiscogsReleases,
+  persistFaircampReleases: mocks.persistFaircampReleases,
+  persistMusicBrainzEnrichment: mocks.persistMusicBrainzEnrichment,
+  attachDiscoveredSource: mocks.attachDiscoveredSource,
   recordCatalogOutcome: mocks.recordCatalogOutcome,
 }));
 

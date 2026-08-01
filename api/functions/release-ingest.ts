@@ -14,6 +14,7 @@ import {
 } from './search-parsers';
 import {
   deriveStatus,
+  mapMusicBrainzReleaseType,
   mapReleaseType,
   parseReleaseDate,
   releaseMatchKey,
@@ -306,4 +307,465 @@ export function bandcampMusicUrl(artistUrl: string): string | null {
   } catch {
     return null;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Discogs — physical formats, editions, real selling prices, master IDs for dedup
+// ---------------------------------------------------------------------------
+//
+// Two-tier pass, same shape as Bandcamp's grid-then-detail split, because the underlying cost
+// structure is the same: `/artists/{id}/releases` is cheap and gives a whole discography in a
+// couple of paginated requests, while price and format data live one request per release. The
+// difference from Bandcamp is *what* the cheap pass gives us for free: `main_release`, which
+// means the detail pass doesn't need a second lookup to find the release behind a master.
+//
+// Filtered to `role: 'Main'` and `type: 'master'` throughout — an artist's raw releases list
+// can run into the thousands once every pressing, region and reissue is counted individually
+// (docs/specs/unstream-releases-v1-scope.md §10 measured 3,241 for one artist), and Discogs
+// masters have already done the "these forty pressings are one album" work for us.
+
+/** One entry from `GET /artists/{id}/releases`. */
+export interface DiscogsArtistReleaseEntry {
+  id: number;
+  type?: string;
+  main_release?: number;
+  title: string;
+  year?: number;
+  role?: string;
+  format?: string;
+}
+
+/** A master release ready to become (or merge into) a catalog row. */
+export interface DiscogsMasterCandidate {
+  title: string;
+  slug: string;
+  matchKey: string;
+  releaseType: ReleaseType;
+  releaseDate: string | null;
+  datePrecision: DatePrecision;
+  status: ReleaseStatus;
+  masterId: string;
+  /** The specific release Discogs treats as this master's representative pressing — the id
+   *  the detail pass fetches for price and format data. */
+  mainReleaseId: string;
+}
+
+/**
+ * Map an artist's Discogs discography listing into master-release candidates.
+ *
+ * Masters lacking `main_release` are dropped rather than kept with no way to price them — a
+ * master row that can never gain an offer is a dead end, and Discogs omits this field only for
+ * malformed or withdrawn masters.
+ */
+export function ingestDiscogsMasters(
+  entries: DiscogsArtistReleaseEntry[],
+  now: Date = new Date()
+): DiscogsMasterCandidate[] {
+  const out: DiscogsMasterCandidate[] = [];
+  const takenSlugs = new Set<string>();
+  const seenMasters = new Set<string>();
+
+  for (const entry of entries) {
+    if (entry.role !== 'Main' || entry.type !== 'master') continue;
+    if (!entry.main_release) continue;
+
+    const masterId = String(entry.id);
+    // Discogs' pagination has repeated an id across pages before; a page-boundary is not a
+    // guarantee the same master won't be seen twice in one run.
+    if (seenMasters.has(masterId)) continue;
+    seenMasters.add(masterId);
+
+    const matchKey = releaseMatchKey(entry.title);
+    if (!matchKey) continue;
+
+    const { date, precision } = entry.year
+      ? parseReleaseDate(String(entry.year), now)
+      : { date: null, precision: 'unknown' as DatePrecision };
+
+    const slug = uniqueReleaseSlug(entry.title, takenSlugs);
+    takenSlugs.add(slug);
+
+    out.push({
+      title: entry.title,
+      slug,
+      matchKey,
+      releaseType: mapDiscogsFormatToReleaseType(entry.format, entry.title),
+      releaseDate: date,
+      datePrecision: precision,
+      status: deriveStatus(date, false, now),
+      masterId,
+      mainReleaseId: String(entry.main_release),
+    });
+  }
+
+  return out;
+}
+
+/**
+ * Discogs' artist-releases listing carries no dedicated release-type field — only a free-text
+ * format string like "Vinyl, LP, Album" or "CD, Compilation". Parsed the same defensively as
+ * `mapOfferFormat`: known keywords win, anything unrecognized becomes 'other' rather than a
+ * guess. Falls back to scanning the title too, since compilations and live albums often say so
+ * in the format string but occasionally only in the title ("... (Live)").
+ */
+export function mapDiscogsFormatToReleaseType(
+  format: string | null | undefined,
+  title: string | null | undefined
+): ReleaseType {
+  const label = `${format ?? ''} ${title ?? ''}`.toLowerCase();
+  if (!label.trim()) return 'other';
+
+  if (/\bcompilation\b/.test(label)) return 'compilation';
+  if (/\blive\b/.test(label)) return 'live';
+  if (/\bremix/.test(label)) return 'remix';
+  if (/\bep\b/.test(label)) return 'ep';
+  if (/\bsingle\b/.test(label)) return 'single';
+  if (/\balbum\b/.test(label)) return 'album';
+
+  return 'other';
+}
+
+/** What `GET /releases/{id}` gives us for one master's representative pressing. */
+export interface DiscogsReleaseDetailRaw {
+  released?: string | null;
+  year?: number | null;
+  formats?: { name?: string; descriptions?: string[] }[] | null;
+  num_for_sale?: number | null;
+  lowest_price?: number | null;
+}
+
+export interface DiscogsReleaseDetail {
+  releaseDate: string | null;
+  datePrecision: DatePrecision;
+  status: ReleaseStatus;
+  offers: IngestedOffer[];
+}
+
+/**
+ * Map one Discogs release's own page into a date and (at most one) offer.
+ *
+ * `num_for_sale` and `lowest_price` describe secondhand marketplace listings for the **whole
+ * release**, not broken down by format — unlike Bandcamp, which prices each format on its own
+ * release page. Only one offer is emitted, keyed to the release's first listed format, rather
+ * than repeating the same aggregate price across every format in a multi-format pressing (a
+ * CD+book bundle showing "CD $5" and "book $5" as if either were separately buyable for $5
+ * would be the false-precision mistake this codebase exists to avoid).
+ *
+ * Zero current listings is reported as `unknown`, not `sold_out` — "sold out" implies stock
+ * existed and ran out, but a release can simply have no active marketplace listings today
+ * without ever having been withdrawn.
+ */
+export function ingestDiscogsReleaseDetail(
+  raw: DiscogsReleaseDetailRaw,
+  now: Date = new Date()
+): DiscogsReleaseDetail {
+  const dateSource = raw.released || (raw.year ? String(raw.year) : null);
+  const { date, precision } = parseReleaseDate(dateSource, now);
+
+  const offers: IngestedOffer[] = [];
+  const primaryFormat = raw.formats?.[0];
+  if (primaryFormat) {
+    const price = typeof raw.lowest_price === 'number' ? raw.lowest_price : null;
+    const availability: OfferAvailability =
+      price !== null && (raw.num_for_sale ?? 0) > 0 ? 'available' : 'unknown';
+
+    offers.push({
+      format: mapDiscogsFormatName(primaryFormat.name, primaryFormat.descriptions),
+      price,
+      // Discogs' public (unauthenticated) release endpoint has no currency field to read;
+      // its marketplace figures default to USD for requests with no `curr_abbr` override.
+      currency: price !== null ? 'USD' : null,
+      availability,
+    });
+  }
+
+  return {
+    releaseDate: date,
+    datePrecision: precision,
+    status: deriveStatus(date, false, now),
+    offers,
+  };
+}
+
+const DISCOGS_FORMAT_NAMES: Record<string, OfferFormat> = {
+  vinyl: 'vinyl',
+  cd: 'cd',
+  'cd-r': 'cd',
+  cassette: 'cassette',
+  file: 'digital',
+};
+
+/** Discogs' `formats[].name` (plus its free-text descriptions) onto our offer formats. */
+export function mapDiscogsFormatName(
+  name: string | null | undefined,
+  descriptions?: string[] | null
+): OfferFormat {
+  const mapped = name ? DISCOGS_FORMAT_NAMES[name.toLowerCase().trim()] : undefined;
+  if (mapped) return mapped;
+
+  const label = (descriptions ?? []).join(' ').toLowerCase();
+  if (label.includes('book') || label.includes('zine')) return 'book';
+  if (label.includes('shirt') || label.includes('poster') || label.includes('box set')) return 'merch';
+
+  return 'other';
+}
+
+// ---------------------------------------------------------------------------
+// MusicBrainz — release groups, MBIDs, partial dates
+// ---------------------------------------------------------------------------
+//
+// Enrichment only: MusicBrainz never creates a release row on its own. It has no purchase
+// link to offer, and a release page with no source to buy from is a worse outcome than not
+// having the page at all. Its job is filling in what Bandcamp and Discogs can't give
+// precisely — a release-group MBID as a hard identity anchor for future dedup, plus dates at
+// whatever precision MusicBrainz actually has (year-only and month-only are common, and
+// `date_precision` exists specifically so this module never has to pad one into a fabricated
+// day).
+
+/** One entry from `GET /ws/2/release-group?artist={mbid}&inc=...`. */
+export interface MusicBrainzReleaseGroupRaw {
+  id: string;
+  title: string;
+  'primary-type'?: string | null;
+  'secondary-types'?: string[] | null;
+  'first-release-date'?: string | null;
+}
+
+/** An MBID-anchored enrichment for a release we may or may not already have. */
+export interface MusicBrainzReleaseGroupEnrichment {
+  matchKey: string;
+  releaseType: ReleaseType;
+  releaseDate: string | null;
+  datePrecision: DatePrecision;
+  mbid: string;
+}
+
+export function ingestMusicBrainzReleaseGroups(
+  groups: MusicBrainzReleaseGroupRaw[],
+  now: Date = new Date()
+): MusicBrainzReleaseGroupEnrichment[] {
+  const out: MusicBrainzReleaseGroupEnrichment[] = [];
+  const seen = new Set<string>();
+
+  for (const group of groups) {
+    if (!group.id || seen.has(group.id)) continue;
+    seen.add(group.id);
+
+    const matchKey = releaseMatchKey(group.title);
+    if (!matchKey) continue;
+
+    const { date, precision } = parseReleaseDate(group['first-release-date'], now);
+
+    out.push({
+      matchKey,
+      releaseType: mapMusicBrainzReleaseType(group['primary-type'], group['secondary-types']),
+      releaseDate: date,
+      datePrecision: precision,
+      mbid: group.id,
+    });
+  }
+
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Faircamp — self-hosted, no central API, no reliable date or price
+// ---------------------------------------------------------------------------
+//
+// Every Faircamp instance lives on whatever domain the artist chose (their own subdomain, in
+// the one example this was built against) — there is no directory or API to query, only the
+// same static site a fan lands on. Verified directly against a live instance rather than
+// guessed: the homepage doubles as the release list, since every release is a plain relative
+// link straight off it, and there is no reliable date or price anywhere in Faircamp's own
+// markup — no JSON-LD, no `<time>` tag, no `pubDate` in its own RSS feed. So unlike Bandcamp
+// and Discogs, this ingest only ever produces identity and artwork. A release with no date is
+// an honest "we don't know", not a guess — and this source's whole reason for existing is that
+// a partial, sometimes-wrong catalog beats no catalog at all, with curation (hide/fix) as the
+// backstop for whatever guess turns out wrong.
+
+/** Ceiling on how many relative links one homepage can offer as release candidates. */
+const FAIRCAMP_MAX_CANDIDATES = 30;
+
+/** Slugs that match the release-link shape but never are one, seen or anticipated across themes. */
+const FAIRCAMP_NON_RELEASE_SLUGS = new Set(['subscribe', 'about', 'support', 'contact', 'donate', 'feed', 'blog']);
+
+export interface FaircampReleaseCandidate {
+  slug: string;
+  url: string;
+}
+
+/**
+ * Find candidate release links on a Faircamp artist homepage.
+ *
+ * Deliberately permissive rather than exhaustive: any bare relative path (`slug/`, no query, no
+ * subpath) is a candidate. Some will be wrong — a theme page using an unrecognized slug, say —
+ * accepted per the "even a high failure rate beats nothing" call on this source specifically.
+ */
+export function ingestFaircampHomeLinks(html: string, pageUrl: string): FaircampReleaseCandidate[] {
+  const out: FaircampReleaseCandidate[] = [];
+  const seen = new Set<string>();
+
+  let base: URL;
+  try {
+    base = new URL(pageUrl);
+  } catch {
+    return out;
+  }
+
+  for (const match of html.matchAll(/href="([^"]+)"/g)) {
+    const raw = match[1];
+    if (!/^[a-z0-9][a-z0-9-]*\/$/i.test(raw)) continue;
+
+    const slug = raw.slice(0, -1).toLowerCase();
+    if (FAIRCAMP_NON_RELEASE_SLUGS.has(slug) || seen.has(slug)) continue;
+    seen.add(slug);
+
+    let url: string;
+    try {
+      url = new URL(raw, base).toString();
+    } catch {
+      continue;
+    }
+
+    out.push({ slug, url });
+    if (out.length >= FAIRCAMP_MAX_CANDIDATES) break;
+  }
+
+  return out;
+}
+
+export interface FaircampReleasePage {
+  title: string;
+  artworkUrl: string | null;
+}
+
+function decodeHtmlEntities(s: string): string {
+  return s
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
+/**
+ * Pull the two things a Faircamp release page reliably gives us — title and artwork — both
+ * from Open Graph tags, the only markup consistent enough across themes to trust. Returns null
+ * when there's no `og:title` at all, which usually means the candidate link wasn't a release
+ * page (a theme's "more" or "support" page, say) rather than a parse failure worth reporting.
+ */
+export function ingestFaircampReleasePage(html: string): FaircampReleasePage | null {
+  const titleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]*)"/i);
+  if (!titleMatch) return null;
+
+  const title = decodeHtmlEntities(titleMatch[1]).trim();
+  if (!title) return null;
+
+  const imageMatch = html.match(/<meta\s+property="og:image"\s+content="([^"]*)"/i);
+  const artworkUrl = imageMatch ? decodeHtmlEntities(imageMatch[1]).trim() || null : null;
+
+  return { title, artworkUrl };
+}
+
+export interface FaircampReleaseToPersist {
+  title: string;
+  slug: string;
+  matchKey: string;
+  releaseType: ReleaseType;
+  status: ReleaseStatus;
+  artworkUrl: string | null;
+  externalUrl: string;
+}
+
+/**
+ * Combine a homepage candidate with its release page's title/artwork into something ready to
+ * persist. Release type is inferred from the title alone via the same fallback
+ * `mapDiscogsFormatToReleaseType` uses when Discogs' own format string doesn't say — Faircamp
+ * has no format field at all, so this is the same "read the title, otherwise 'other'" call,
+ * reused rather than duplicated.
+ *
+ * `takenSlugs` is read, not written — the caller must add the returned slug before the next
+ * call, since releases are fetched and combined one at a time here rather than as one batch
+ * (each one is its own network request), unlike Bandcamp's grid.
+ */
+export function buildFaircampRelease(
+  page: FaircampReleasePage,
+  releaseUrl: string,
+  takenSlugs: ReadonlySet<string>,
+  now: Date = new Date()
+): FaircampReleaseToPersist | null {
+  const matchKey = releaseMatchKey(page.title);
+  if (!matchKey) return null;
+
+  return {
+    title: page.title,
+    slug: uniqueReleaseSlug(page.title, takenSlugs),
+    matchKey,
+    releaseType: mapDiscogsFormatToReleaseType(null, page.title),
+    status: deriveStatus(null, false, now),
+    artworkUrl: page.artworkUrl,
+    externalUrl: releaseUrl,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Discovered links — a specific release, spotted on a page we fetched for another reason
+// ---------------------------------------------------------------------------
+//
+// Some platforms (Subvert today) have no fetchable API or page of their own — but an artist's
+// other pages sometimes link directly to a specific release there anyway (their own website
+// linking "buy this on Subvert", say). This never fetches the target platform itself; it only
+// reads links already present in markup fetched for a different reason (a Faircamp page, an
+// official website), and only ever proposes a match — attaching it to an existing release
+// requires an exact title match at the database layer (see `attachDiscoveredSource`), never a
+// guess. A single unmatched slug becomes nothing, not a bare, metadata-less release row.
+
+export interface DiscoveredSourceLink {
+  platform: string;
+  url: string;
+  /** Normalized match key of the release slug, for an exact-match lookup against existing releases. */
+  matchKey: string;
+}
+
+/**
+ * Hosts worth checking, and the shape a link has to have to plausibly point at one specific
+ * release rather than just the artist's own page there. Adding a platform here is a deliberate,
+ * reviewed decision — this is not a generic link scanner.
+ */
+const DISCOVERED_LINK_HOSTS: { platform: string; hostSuffix: string }[] = [{ platform: 'subvert', hostSuffix: 'subvert.fm' }];
+
+export function findDiscoveredReleaseLinks(html: string, pageUrl: string): DiscoveredSourceLink[] {
+  const found: DiscoveredSourceLink[] = [];
+  const seen = new Set<string>();
+
+  for (const match of html.matchAll(/href="([^"]+)"/g)) {
+    let url: URL;
+    try {
+      url = new URL(match[1], pageUrl);
+    } catch {
+      continue;
+    }
+
+    const host = url.hostname.toLowerCase();
+    const platformEntry = DISCOVERED_LINK_HOSTS.find(p => host === p.hostSuffix || host.endsWith(`.${p.hostSuffix}`));
+    if (!platformEntry) continue;
+
+    // At least two path segments — {artist}/{release} — so the artist's own profile link
+    // (just {artist}) is never mistaken for a specific release.
+    const segments = url.pathname.split('/').filter(Boolean);
+    if (segments.length < 2) continue;
+
+    const releaseSlug = segments[segments.length - 1];
+    const matchKey = releaseMatchKey(releaseSlug.replace(/-/g, ' '));
+    if (!matchKey) continue;
+
+    const normalized = url.toString();
+    const dedupeKey = `${platformEntry.platform}:${normalized}`;
+    if (seen.has(dedupeKey)) continue;
+    seen.add(dedupeKey);
+
+    found.push({ platform: platformEntry.platform, url: normalized, matchKey });
+  }
+
+  return found;
 }

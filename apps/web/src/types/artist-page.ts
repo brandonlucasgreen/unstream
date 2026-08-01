@@ -39,7 +39,12 @@ export interface ArtistPagePayload {
     datePrecision: string | null;
     status: string;
     artworkUrl: string | null;
-    offers: Array<{ price: number | null; currency: string | null; availability: string }>;
+    // Kept per-source (not flattened) so the UI can show *where* a release is available, not
+    // just the cheapest price across everywhere it happens to be sold.
+    sources: Array<{
+      platform: string;
+      offers: Array<{ price: number | null; currency: string | null; availability: string }>;
+    }>;
   }>;
   /** Total before the cap, so the UI can say how many are not shown. */
   releaseCount?: number;

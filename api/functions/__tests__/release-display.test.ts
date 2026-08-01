@@ -7,10 +7,11 @@
 
 import { describe, it, expect } from 'vitest';
 import {
-  cheapestOfferSummary,
   formatMoney,
   formatOfferPrice,
   formatReleaseDate,
+  leadingOfferSummary,
+  orderedSourcePlatforms,
   payoutEstimate,
   payoutRank,
   relativeDays,
@@ -126,29 +127,57 @@ describe('formatOfferPrice', () => {
   });
 });
 
-describe('cheapestOfferSummary', () => {
+describe('orderedSourcePlatforms', () => {
+  it('orders artist-paying-first, matching the release page itself', () => {
+    expect(orderedSourcePlatforms([{ platform: 'discogs', offers: [] }, { platform: 'bandcamp', offers: [] }]))
+      .toEqual(['bandcamp', 'discogs']);
+  });
+});
+
+describe('leadingOfferSummary', () => {
   const offer = (price: number | null, availability = 'available') =>
     ({ price, currency: 'USD', availability });
+  const source = (platform: string, offers: ReturnType<typeof offer>[]) => ({ platform, offers });
 
-  it('quotes the cheapest thing a fan can buy', () => {
-    expect(cheapestOfferSummary([offer(25), offer(8), offer(12)])).toBe('from $8');
+  it('quotes the cheapest buyable offer from a single source, with its payout estimate', () => {
+    expect(leadingOfferSummary([source('bandcamp', [offer(25), offer(8), offer(12)])]))
+      .toBe('from $8 · ≈$6.40–$6.80 to artist');
   });
 
-  // The one genuinely misleading number this list could show: a fan clicks expecting $8 vinyl
-  // and finds it gone. A release whose only offer is sold out summarises as nothing.
-  it('ignores sold-out formats when picking the cheapest', () => {
-    expect(cheapestOfferSummary([offer(25), offer(8, 'sold_out')])).toBe('from $25');
-    expect(cheapestOfferSummary([offer(8, 'sold_out')])).toBe('');
+  // The whole reason this isn't just "globally cheapest": once Discogs (no payout figure,
+  // secondhand) is a second source, picking the absolute cheapest price could rank a used
+  // copy above the artist's own store — exactly the anti-pattern the sourcing spec warns
+  // against ("used CD $2.64" above "vinyl direct from the artist $30").
+  it('prefers the artist-paying source even when a lower-payout source is cheaper', () => {
+    const out = leadingOfferSummary([
+      source('discogs', [offer(3)]),
+      source('bandcamp', [offer(25)]),
+    ]);
+    expect(out).toContain('$25');
+    expect(out).not.toContain('$3');
+  });
+
+  it('falls through to the next source when the leading one has nothing buyable', () => {
+    const out = leadingOfferSummary([
+      source('bandcamp', [offer(8, 'sold_out')]),
+      source('discogs', [offer(12)]),
+    ]);
+    expect(out).toBe('from $12'); // discogs has no payout percent, so no estimate is shown
+  });
+
+  it('ignores sold-out formats when picking the cheapest within a source', () => {
+    expect(leadingOfferSummary([source('bandcamp', [offer(25), offer(8, 'sold_out')])])).toContain('$25');
   });
 
   it('says name-your-price rather than "from $0"', () => {
-    expect(cheapestOfferSummary([offer(0)])).toBe('Name your price');
+    expect(leadingOfferSummary([source('bandcamp', [offer(0)])])).toBe('Name your price');
   });
 
   // The normal state for a release catalogued from the Bandcamp grid, whose own page hasn't
   // been read for prices yet. Silence, not a zero.
-  it('says nothing when there are no offers or no prices', () => {
-    expect(cheapestOfferSummary([])).toBe('');
-    expect(cheapestOfferSummary([offer(null)])).toBe('');
+  it('says nothing when there are no sources, no offers, or no prices', () => {
+    expect(leadingOfferSummary([])).toBe('');
+    expect(leadingOfferSummary([source('bandcamp', [])])).toBe('');
+    expect(leadingOfferSummary([source('bandcamp', [offer(null)])])).toBe('');
   });
 });

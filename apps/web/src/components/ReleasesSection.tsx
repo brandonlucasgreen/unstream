@@ -1,5 +1,8 @@
-import { cheapestOfferSummary, formatReleaseDate } from '../../../../api/shared/release-display';
+import { leadingOfferSummary, orderedSourcePlatforms, formatReleaseDate } from '../../../../api/shared/release-display';
+import { PLATFORMS } from '../../../../api/shared/platform-registry';
+import { PlatformIcon } from './PlatformIcon';
 import type { ArtistPagePayload } from '../types/artist-page';
+import type { SourceId } from '../types';
 
 type Release = NonNullable<ArtistPagePayload['releases']>[number];
 
@@ -60,7 +63,14 @@ function ReleaseRow({ release, artistSlug }: { release: Release; artistSlug: str
       ? ''
       : release.releaseType.charAt(0).toUpperCase() + release.releaseType.slice(1);
 
-  const meta = [type, date, cheapestOfferSummary(release.offers)].filter(Boolean).join(' · ');
+  // leadingOfferSummary, not the globally cheapest price: once a release has more than one
+  // source, picking the absolute cheapest could rank a Discogs secondhand copy above a
+  // Bandcamp direct purchase — see the function's own doc for why that's off-mission.
+  const meta = [type, date, leadingOfferSummary(release.sources)].filter(Boolean).join(' · ');
+
+  // Ordered the same artist-paying-first way as the summary above and the release page
+  // itself, so the platform a fan sees leading the row is also the one the price came from.
+  const platforms = orderedSourcePlatforms(release.sources);
 
   return (
     <a
@@ -84,6 +94,27 @@ function ReleaseRow({ release, artistSlug }: { release: Release; artistSlug: str
       <span className="flex-1 min-w-0">
         <span className="block font-medium text-text-primary truncate">{release.title}</span>
         {meta && <span className="block text-xs text-text-muted">{meta}</span>}
+        {platforms.length > 0 && (
+          <span className="flex items-center gap-1 mt-1">
+            {/* Icons alone don't convey the platform names to a screen reader; the text below
+                does, and is visually hidden since the meta line above already carries the
+                price/payout for the leading one. */}
+            <span className="sr-only">
+              Available on {platforms.map(p => PLATFORMS[p]?.name ?? p).join(', ')}
+            </span>
+            <span aria-hidden="true" className="flex items-center gap-1">
+              {platforms.map(p => (
+                <PlatformIcon
+                  key={p}
+                  sourceId={p as SourceId}
+                  color={PLATFORMS[p]?.color ?? '#888'}
+                  emoji={PLATFORMS[p]?.icon ?? '🔗'}
+                  className="w-3.5 h-3.5"
+                />
+              ))}
+            </span>
+          </span>
+        )}
       </span>
 
       {/* An upcoming release is the most interesting row here and the easiest to miss at the top

@@ -25,7 +25,7 @@ function release(overrides: Partial<Release> = {}): Release {
     datePrecision: 'day',
     status: 'released',
     artworkUrl: null,
-    offers: [],
+    sources: [],
     ...overrides,
   };
 }
@@ -64,16 +64,21 @@ describe('ReleasesSection', () => {
     expect(container.innerHTML).toBe('');
   });
 
-  it('shows type, date and the cheapest price together', () => {
+  it('shows type, date, the cheapest price, and the payout estimate together', () => {
     show([
       release({
-        offers: [
-          { price: 25, currency: 'USD', availability: 'available' },
-          { price: 7, currency: 'USD', availability: 'available' },
+        sources: [
+          {
+            platform: 'bandcamp',
+            offers: [
+              { price: 25, currency: 'USD', availability: 'available' },
+              { price: 7, currency: 'USD', availability: 'available' },
+            ],
+          },
         ],
       }),
     ]);
-    expect(screen.getByText('Album · 1 June 2024 · from $7')).toBeTruthy();
+    expect(screen.getByText('Album · 1 June 2024 · from $7 · ≈$5.60–$5.95 to artist')).toBeTruthy();
   });
 
   // Quoting the price of a record nobody can buy is the one genuinely misleading number this
@@ -81,9 +86,14 @@ describe('ReleasesSection', () => {
   it('never quotes a sold-out format as the price', () => {
     show([
       release({
-        offers: [
-          { price: 7, currency: 'USD', availability: 'sold_out' },
-          { price: 25, currency: 'USD', availability: 'available' },
+        sources: [
+          {
+            platform: 'bandcamp',
+            offers: [
+              { price: 7, currency: 'USD', availability: 'sold_out' },
+              { price: 25, currency: 'USD', availability: 'available' },
+            ],
+          },
         ],
       }),
     ]);
@@ -93,8 +103,41 @@ describe('ReleasesSection', () => {
 
   // Bandcamp reports name-your-price as 0, and "from $0" would tell a fan the record is free.
   it('reads a zero price as name-your-price', () => {
-    show([release({ offers: [{ price: 0, currency: 'USD', availability: 'available' }] })]);
+    show([
+      release({
+        sources: [{ platform: 'bandcamp', offers: [{ price: 0, currency: 'USD', availability: 'available' }] }],
+      }),
+    ]);
     expect(screen.getByText(/Name your price/)).toBeTruthy();
+  });
+
+  // Where a fan can actually go to get it — the thing this whole task exists to surface.
+  it('shows which platforms the release is available on', () => {
+    show([
+      release({
+        sources: [
+          { platform: 'bandcamp', offers: [] },
+          { platform: 'discogs', offers: [] },
+        ],
+      }),
+    ]);
+    expect(screen.getByText('Available on Bandcamp, Discogs')).toBeTruthy();
+  });
+
+  // The whole reason this isn't just "cheapest price across every source": once Discogs (no
+  // payout figure, secondhand) is a second source, picking the absolute cheapest could rank a
+  // used copy above the artist's own store — see leadingOfferSummary's own doc.
+  it('prefers the artist-paying source even when a lower-payout source is cheaper', () => {
+    show([
+      release({
+        sources: [
+          { platform: 'discogs', offers: [{ price: 3, currency: 'USD', availability: 'available' }] },
+          { platform: 'bandcamp', offers: [{ price: 25, currency: 'USD', availability: 'available' }] },
+        ],
+      }),
+    ]);
+    expect(screen.getByText(/from \$25/)).toBeTruthy();
+    expect(screen.queryByText(/from \$3/)).toBeNull();
   });
 
   // Grid ingest stores year-only and undated releases; rendering "1 January" would state a fact

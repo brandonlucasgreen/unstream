@@ -13,6 +13,8 @@ import {
   shortHash,
   uniqueReleaseSlug,
   mapReleaseType,
+  mapMusicBrainzReleaseType,
+  isFuzzyReleaseMatch,
   parseReleaseDate,
   deriveStatus,
 } from '../release-utils';
@@ -251,5 +253,63 @@ describe('deriveStatus', () => {
     // Undated releases are overwhelmingly back-catalog; telling a fan something is coming
     // when we don't know is the worse error.
     expect(deriveStatus(null, false, now)).toBe('released');
+  });
+});
+
+describe('mapMusicBrainzReleaseType', () => {
+  it('maps primary types directly', () => {
+    expect(mapMusicBrainzReleaseType('Album', [])).toBe('album');
+    expect(mapMusicBrainzReleaseType('EP', [])).toBe('ep');
+    expect(mapMusicBrainzReleaseType('Single', [])).toBe('single');
+  });
+
+  it('is case-insensitive', () => {
+    expect(mapMusicBrainzReleaseType('album', [])).toBe('album');
+  });
+
+  it('lets a secondary type override the primary one', () => {
+    // A live album is more usefully typed 'live' than 'album' for dedup — the same
+    // granularity-over-collapsing philosophy mapReleaseType already applies to Bandcamp.
+    expect(mapMusicBrainzReleaseType('Album', ['Live'])).toBe('live');
+    expect(mapMusicBrainzReleaseType('Album', ['Compilation'])).toBe('compilation');
+    expect(mapMusicBrainzReleaseType('Album', ['Remix'])).toBe('remix');
+  });
+
+  it('falls back to other for unrecognized or missing primary types', () => {
+    expect(mapMusicBrainzReleaseType('Broadcast', [])).toBe('other');
+    expect(mapMusicBrainzReleaseType(null, null)).toBe('other');
+    expect(mapMusicBrainzReleaseType(undefined, undefined)).toBe('other');
+  });
+});
+
+describe('isFuzzyReleaseMatch', () => {
+  it('flags one key as a probable variant of a longer one containing it', () => {
+    expect(isFuzzyReleaseMatch('carrielowell', 'carrielowelldeluxeedition')).toBe(true);
+  });
+
+  it('is symmetric', () => {
+    expect(isFuzzyReleaseMatch('carrielowelldeluxeedition', 'carrielowell')).toBe(true);
+  });
+
+  it('never flags an exact match — that is tier 2, not tier 3', () => {
+    expect(isFuzzyReleaseMatch('carrielowell', 'carrielowell')).toBe(false);
+  });
+
+  it('does not flag titles that are simply different, even if similar in length', () => {
+    expect(isFuzzyReleaseMatch('redalbum', 'bluealbum')).toBe(false);
+  });
+
+  it('requires the shorter key to be a real substring, not just similar', () => {
+    expect(isFuzzyReleaseMatch('carrieandlowell', 'lowellandcarrie')).toBe(false);
+  });
+
+  it('ignores very short keys to avoid coincidental containment', () => {
+    expect(isFuzzyReleaseMatch('ep', 'thebigeprelease')).toBe(false);
+  });
+
+  it('requires the shorter key to cover most of the longer one, not just any amount', () => {
+    // "album" is contained in a much longer, unrelated title — containment alone isn't
+    // enough evidence without a length-ratio floor.
+    expect(isFuzzyReleaseMatch('album', 'thecompletealbumcollectionboxsetwithbonusdisc')).toBe(false);
   });
 });

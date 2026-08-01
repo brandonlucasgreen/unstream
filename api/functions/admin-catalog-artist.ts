@@ -18,74 +18,11 @@
 // The GET is what the button uses to decide whether to show itself: visibility follows the
 // server's real admin rule rather than a copy of it in page markup.
 
-import { getClient, type CatalogTrigger } from './db';
+import { clearCatalogCooldown, getCatalogState } from './db';
 import { authenticateAdmin, buildCorsHeaders } from './middleware';
-import { isCatalogEnabled } from './request-catalog';
-import { Sentry } from '../lib/sentry';
+import { triggerCatalogNow } from './request-catalog';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-interface CatalogState {
-  last_catalogued_at: string | null;
-  last_attempted_at: string;
-  releases_found: number | null;
-  releases_detailed: number | null;
-  last_error: string | null;
-  consecutive_failures: number;
-}
-
-/**
- * Read this artist's catalog state.
- *
- * Deliberately three-valued, not two. "We couldn't ask" and "we asked and this artist has never
- * been catalogued" are different facts, and collapsing them into one `null` makes a broken
- * database read render as a confident "Never catalogued" — the same shape as the bug class the
- * "never cache uncertainty" principle exists to prevent. This whole feature exists to give
- * cataloging an observable surface, so an unreadable one has to say so.
- */
-type StateResult =
-  | { ok: true; state: CatalogState | null }
-  | { ok: false; reason: string };
-
-async function readState(artistId: string): Promise<StateResult> {
-  const client = getClient();
-  if (!client) return { ok: false, reason: 'Supabase is not configured on this deploy' };
-
-  const { data, error } = await client
-    .from('release_catalog_state')
-    .select('last_catalogued_at, last_attempted_at, releases_found, releases_detailed, last_error, consecutive_failures')
-    .eq('artist_id', artistId)
-    .maybeSingle();
-
-  if (error) {
-    console.error('[admin-catalog] state read failed:', error.message);
-    return { ok: false, reason: 'Could not read catalog state' };
-  }
-  return { ok: true, state: (data as CatalogState | null) ?? null };
-}
-
-/**
- * Clear this artist's cooldown so the crawl actually runs.
- *
- * Without it the button would appear to work and do nothing for a week — `claimArtistForCatalog`
- * refuses an artist catalogued in the last 7 days, which is right for demand-driven triggers and
- * wrong for someone deliberately pressing "catalog now".
- *
- * Backdated rather than deleted: the row also carries the failure counter and the last error,
- * which are worth keeping. Two hours clears both the cooldown and the exponential backoff.
- */
-async function clearCooldown(artistId: string): Promise<void> {
-  const client = getClient();
-  if (!client) return;
-
-  const twoHoursAgo = new Date(Date.now() - 2 * 3600_000).toISOString();
-  const { error } = await client
-    .from('release_catalog_state')
-    .update({ last_catalogued_at: null, last_attempted_at: twoHoursAgo, consecutive_failures: 0 })
-    .eq('artist_id', artistId);
-
-  if (error) console.error('[admin-catalog] cooldown clear failed:', error.message);
-}
 
 export async function handler(event: {
   httpMethod: string;
@@ -120,7 +57,7 @@ export async function handler(event: {
   }
 
   if (event.httpMethod === 'GET') {
-    const result = await readState(artistId);
+    const result = await getCatalogState(artistId);
     if (!result.ok) {
       // 503, not a 200 carrying a null state: the caller must be able to tell "we couldn't ask"
       // from "never catalogued", or it will report the second when the first is true.
@@ -141,58 +78,17 @@ export async function handler(event: {
     return { statusCode: 405, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
-  // Every reason the background function would refuse, checked here instead — because its
-  // answer never comes back. Netlify's dispatcher returns 202 to the caller the instant it
-  // accepts a background invocation and discards whatever the handler returns, so a 401 from a
-  // bad secret and a 403 from a non-production context both reach us as 202. Anything not
-  // checked up front is indistinguishable from a slow crawl.
-  if (!isCatalogEnabled()) {
-    return {
-      statusCode: 503,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({
-        error: 'Cataloging is disabled on this deploy (RELEASE_CATALOG_ENABLED is not set).',
-      }),
-    };
+  await clearCatalogCooldown(artistId);
+  const queued = await triggerCatalogNow(artistId);
+
+  if (!queued.ok) {
+    return { statusCode: queued.status, headers: CORS_HEADERS, body: JSON.stringify({ error: queued.error }) };
   }
 
-  const secret = process.env.INTERNAL_FUNCTION_SECRET;
-  const siteUrl = process.env.URL;
-
-  if (!secret || !siteUrl) {
-    // Said plainly rather than as a generic 500: this exact configuration gap silently stopped
-    // release cataloging from ever running, and "nothing happened" gave no clue why.
-    console.error('[admin-catalog] INTERNAL_FUNCTION_SECRET or site URL is not configured');
-    return {
-      statusCode: 503,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'Cataloging is not configured on this deploy (INTERNAL_FUNCTION_SECRET).' }),
-    };
-  }
-
-  await clearCooldown(artistId);
-
-  try {
-    const trigger: CatalogTrigger = 'saved'; // the larger hourly budget — this is a deliberate act
-    await fetch(`${siteUrl}/.netlify/functions/catalog-artist-background`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${secret}` },
-      body: JSON.stringify({ artistIds: [artistId], trigger }),
-    });
-
-    // Nothing useful to report back from that response, and deliberately no `started` flag:
-    // the dispatcher's 202 says only that the request was queued, so any boolean derived from
-    // it would read as "the crawl was accepted" while being true even when it wasn't. The
-    // client polls the GET above, which reports what actually happened.
-    return { statusCode: 202, headers: CORS_HEADERS, body: JSON.stringify({ queued: true }) };
-  } catch (error) {
-    Sentry.captureException(error);
-    return {
-      statusCode: 502,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'Could not reach the cataloging function' }),
-    };
-  }
+  // Deliberately no `started` flag: the dispatcher's 202 says only that the request was queued,
+  // so any boolean derived from it would read as "the crawl was accepted" while being true even
+  // when it wasn't. The client polls the GET above, which reports what actually happened.
+  return { statusCode: 202, headers: CORS_HEADERS, body: JSON.stringify({ queued: true }) };
 }
 
 function safeParseArtistId(body: string | undefined): string | undefined {

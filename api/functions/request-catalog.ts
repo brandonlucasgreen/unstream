@@ -100,3 +100,62 @@ export async function requestArtistCatalog(
     console.warn('[catalog] request failed:', error instanceof Error ? error.message : String(error));
   }
 }
+
+/**
+ * The result of a *deliberate* catalog request — someone pressed a button and is waiting for an
+ * answer, so unlike `requestArtistCatalog` above every refusal is reported rather than logged.
+ */
+export type TriggerCatalogResult =
+  | { ok: true }
+  | { ok: false; status: number; error: string };
+
+/**
+ * Queue a crawl for one artist, on purpose, and say why not if it can't happen.
+ *
+ * **Every refusal the background function could make is checked here instead**, because its
+ * answer never comes back: Netlify's dispatcher returns 202 the instant it accepts a background
+ * invocation and discards whatever the handler returns, so a 401 from a bad secret and a 403
+ * from a disabled deploy both reach the caller as 202. Anything not checked up front is
+ * indistinguishable from a slow crawl — which is exactly how cataloging stayed silently broken
+ * for days before the admin button reported a refusal out loud.
+ *
+ * Callers are responsible for clearing the cooldown first (`clearCatalogCooldown` in db.ts) —
+ * kept separate so this module needs no database access, and therefore no import from db.ts,
+ * which imports from here.
+ */
+export async function triggerCatalogNow(artistId: string): Promise<TriggerCatalogResult> {
+  if (!isCatalogEnabled()) {
+    return {
+      ok: false,
+      status: 503,
+      error: 'Cataloging is disabled on this deploy (RELEASE_CATALOG_ENABLED is not set).',
+    };
+  }
+
+  const secret = process.env.INTERNAL_FUNCTION_SECRET;
+  const siteUrl = process.env.URL;
+
+  if (!secret || !siteUrl) {
+    // Said plainly rather than as a generic 500: this exact configuration gap silently stopped
+    // release cataloging from ever running, and "nothing happened" gave no clue why.
+    console.error('[catalog] INTERNAL_FUNCTION_SECRET or site URL is not configured');
+    return {
+      ok: false,
+      status: 503,
+      error: 'Cataloging is not configured on this deploy (INTERNAL_FUNCTION_SECRET).',
+    };
+  }
+
+  try {
+    // 'saved' is the larger hourly budget, which is right for a deliberate act by a person.
+    await fetch(`${siteUrl}/.netlify/functions/catalog-artist-background`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${secret}` },
+      body: JSON.stringify({ artistIds: [artistId], trigger: 'saved' satisfies CatalogTrigger }),
+    });
+    return { ok: true };
+  } catch (error) {
+    console.error('[catalog] deliberate trigger failed:', error instanceof Error ? error.message : String(error));
+    return { ok: false, status: 502, error: 'Could not reach the cataloging function' };
+  }
+}

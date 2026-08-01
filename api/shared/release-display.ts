@@ -83,31 +83,6 @@ export function formatOfferPrice(price: number | null, currency: string | null):
 }
 
 /**
- * "from $8", or "Name your price" — the cheapest thing a fan can actually buy, for a one-line
- * summary in a list of releases.
- *
- * **Sold-out formats are excluded.** Quoting the price of a record nobody can buy would be the
- * one genuinely misleading number in a discography list — a fan would click expecting $25 vinyl
- * and find it gone. A release whose only offer is sold out summarises as nothing at all, which
- * is the honest outcome.
- *
- * Returns '' when there are no offers, which is the normal state for a release catalogued from
- * the Bandcamp grid whose own page hasn't been read for prices yet.
- */
-export function cheapestOfferSummary(
-  offers: { price: number | null; currency: string | null; availability: string }[]
-): string {
-  const buyable = offers.filter(o => o.availability !== 'sold_out' && o.price !== null);
-  if (buyable.length === 0) return '';
-
-  const cheapest = buyable.reduce((low, o) => (o.price! < low.price! ? o : low));
-
-  // Bandcamp reports name-your-price as 0, and "from $0" reads as free.
-  if (cheapest.price === 0) return 'Name your price';
-  return `from ${formatMoney(cheapest.price!, cheapest.currency)}`;
-}
-
-/**
  * "≈$20–21.25 to the artist" — the emotional payload of the whole product, at the moment
  * someone is deciding where to buy.
  *
@@ -188,4 +163,58 @@ export function payoutRank(platform: string): number {
   const percent = PLATFORMS[platform]?.payoutPercent;
   const first = percent?.match(/\d+(?:\.\d+)?/)?.[0];
   return first ? Number(first) : -1;
+}
+
+/** One release's source, with just enough offer data to summarize or badge with. */
+export interface ReleaseSourceSummary {
+  platform: string;
+  offers: { price: number | null; currency: string | null; availability: string }[];
+}
+
+/**
+ * Which platforms a release is available on, ordered artist-paying-first — the same ordering
+ * the release page itself uses (`payoutRank`). For a compact "where to buy" badge row in a
+ * release list, where a fan should see the best options first without having to click through.
+ */
+export function orderedSourcePlatforms(sources: ReleaseSourceSummary[]): string[] {
+  return [...sources]
+    .sort((a, b) => payoutRank(b.platform) - payoutRank(a.platform))
+    .map(s => s.platform);
+}
+
+/**
+ * "from $8 · ≈$6.80 to artist", or "Name your price" — the one line a release-list row shows,
+ * for the leading (artist-paying-first) source that actually has a buyable offer.
+ *
+ * **Deliberately not the globally cheapest price across every source.** Once a release has
+ * more than one source, picking the absolute cheapest price could promote a Discogs secondhand
+ * listing over a Bandcamp direct purchase — exactly the anti-pattern the sourcing spec warns
+ * against ("used CD $2.64" ranked above "vinyl direct from the artist $30" would be off-mission
+ * even though both facts are true). So sources are walked in the same artist-paying-first order
+ * the release page uses, and the first one with a real buyable offer wins, even if a
+ * lower-payout source further down the list happens to be cheaper.
+ *
+ * Same sold-out and name-your-price handling as the release page itself: a release whose only
+ * offer is sold out contributes nothing to the summary, and a price of exactly 0 means
+ * name-your-price, not free.
+ *
+ * Returns '' when no source has a buyable offer, which is the normal state for a release whose
+ * detail pages haven't been read for prices yet.
+ */
+export function leadingOfferSummary(sources: ReleaseSourceSummary[]): string {
+  const ordered = [...sources].sort((a, b) => payoutRank(b.platform) - payoutRank(a.platform));
+
+  for (const source of ordered) {
+    const buyable = source.offers.filter(o => o.availability !== 'sold_out' && o.price !== null);
+    if (buyable.length === 0) continue;
+
+    const cheapest = buyable.reduce((low, o) => (o.price! < low.price! ? o : low));
+    if (cheapest.price === 0) return 'Name your price';
+
+    const priceText = `from ${formatMoney(cheapest.price!, cheapest.currency)}`;
+    const payout = payoutEstimate(cheapest.price!, cheapest.currency, PLATFORMS[source.platform]?.payoutPercent);
+    return payout ? `${priceText} · ${payout}` : priceText;
+  }
+
+  return '';
 }

@@ -11,6 +11,16 @@ import {
   bandcampMusicUrl,
   mapAvailability,
   mapOfferFormat,
+  ingestDiscogsMasters,
+  mapDiscogsFormatToReleaseType,
+  ingestDiscogsReleaseDetail,
+  mapDiscogsFormatName,
+  ingestMusicBrainzReleaseGroups,
+  ingestFaircampHomeLinks,
+  ingestFaircampReleasePage,
+  buildFaircampRelease,
+  findDiscoveredReleaseLinks,
+  type DiscogsArtistReleaseEntry,
 } from '../release-ingest';
 
 function item(opts: { id?: string; href: string; title: string; img?: string }): string {
@@ -386,5 +396,340 @@ describe('bandcampMusicUrl', () => {
     expect(bandcampMusicUrl('not a url')).toBeNull();
     expect(bandcampMusicUrl('file:///etc/passwd')).toBeNull();
     expect(bandcampMusicUrl('')).toBeNull();
+  });
+});
+
+describe('mapDiscogsFormatToReleaseType', () => {
+  it('reads the format string first', () => {
+    expect(mapDiscogsFormatToReleaseType('Vinyl, LP, Album', 'Some Title')).toBe('album');
+    expect(mapDiscogsFormatToReleaseType('CD, Compilation', 'Some Title')).toBe('compilation');
+    expect(mapDiscogsFormatToReleaseType('Vinyl, 7", Single', 'Some Title')).toBe('single');
+  });
+
+  it('falls back to the title when the format string does not say', () => {
+    expect(mapDiscogsFormatToReleaseType(null, 'Live at the Fillmore')).toBe('live');
+    expect(mapDiscogsFormatToReleaseType('File, MP3', 'Acoustic Sessions EP')).toBe('ep');
+  });
+
+  it('defaults to other rather than guessing', () => {
+    expect(mapDiscogsFormatToReleaseType('Vinyl, 12"', 'Untitled')).toBe('other');
+    expect(mapDiscogsFormatToReleaseType(null, null)).toBe('other');
+  });
+});
+
+function discogsEntry(opts: Partial<DiscogsArtistReleaseEntry> & { title: string }): DiscogsArtistReleaseEntry {
+  return {
+    id: 1,
+    type: 'master',
+    role: 'Main',
+    main_release: 100,
+    ...opts,
+  } as DiscogsArtistReleaseEntry;
+}
+
+describe('ingestDiscogsMasters', () => {
+  it('keeps only role=Main, type=master entries with a main_release', () => {
+    const out = ingestDiscogsMasters([
+      discogsEntry({ id: 1, main_release: 101, title: 'Real Album', format: 'Vinyl, LP, Album', year: 2015 }),
+      discogsEntry({ id: 2, type: 'release', title: 'A Specific Pressing' }),
+      discogsEntry({ id: 3, role: 'TrackAppearance', title: 'Featured On Someone Elses Comp' }),
+      discogsEntry({ id: 4, main_release: undefined, title: 'Master With No Representative Release' }),
+    ]);
+
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({
+      title: 'Real Album',
+      matchKey: 'realalbum',
+      releaseType: 'album',
+      releaseDate: '2015-01-01',
+      datePrecision: 'year',
+      masterId: '1',
+      mainReleaseId: '101',
+    });
+  });
+
+  it('drops a master repeated across pages rather than double-counting it', () => {
+    const out = ingestDiscogsMasters([
+      discogsEntry({ id: 5, title: 'Repeated Master' }),
+      discogsEntry({ id: 5, title: 'Repeated Master' }),
+    ]);
+    expect(out).toHaveLength(1);
+  });
+
+  it('assigns non-colliding slugs across two titles that would otherwise clash', () => {
+    const out = ingestDiscogsMasters([
+      discogsEntry({ id: 6, main_release: 201, title: 'A Record!' }),
+      discogsEntry({ id: 7, main_release: 202, title: 'A Record?' }),
+    ]);
+    expect(new Set(out.map(o => o.slug)).size).toBe(2);
+  });
+});
+
+describe('ingestDiscogsReleaseDetail', () => {
+  it('maps a full date, one offer, and available when listings exist', () => {
+    const out = ingestDiscogsReleaseDetail({
+      released: '2015-03-31',
+      formats: [{ name: 'Vinyl', descriptions: ['LP', 'Album'] }],
+      num_for_sale: 12,
+      lowest_price: 24.5,
+    });
+
+    expect(out.releaseDate).toBe('2015-03-31');
+    expect(out.datePrecision).toBe('day');
+    expect(out.offers).toEqual([
+      { format: 'vinyl', price: 24.5, currency: 'USD', availability: 'available' },
+    ]);
+  });
+
+  it('falls back to a year-only date when released is absent', () => {
+    const out = ingestDiscogsReleaseDetail({ year: 1998, formats: [{ name: 'CD' }] });
+    expect(out.releaseDate).toBe('1998-01-01');
+    expect(out.datePrecision).toBe('year');
+  });
+
+  // Zero current listings is not the same claim as "sold out" — that implies stock existed
+  // and ran out, but a release can simply have no active marketplace listings today.
+  it('reports zero listings as unknown, never sold_out', () => {
+    const out = ingestDiscogsReleaseDetail({
+      formats: [{ name: 'Vinyl' }],
+      num_for_sale: 0,
+      lowest_price: null,
+    });
+    expect(out.offers[0].availability).toBe('unknown');
+    expect(out.offers[0].price).toBeNull();
+    expect(out.offers[0].currency).toBeNull();
+  });
+
+  it('emits no offer at all when there is no format data', () => {
+    const out = ingestDiscogsReleaseDetail({ released: '2015' });
+    expect(out.offers).toEqual([]);
+  });
+
+  it('emits only one offer even for a multi-format bundle, keyed to the first format', () => {
+    // num_for_sale/lowest_price describe the whole release, not a per-format breakdown —
+    // repeating the same aggregate price across every format would misrepresent a bundle
+    // as several separately-buyable items at that price.
+    const out = ingestDiscogsReleaseDetail({
+      formats: [{ name: 'CD' }, { name: 'File' }],
+      num_for_sale: 3,
+      lowest_price: 9.99,
+    });
+    expect(out.offers).toHaveLength(1);
+    expect(out.offers[0].format).toBe('cd');
+  });
+});
+
+describe('mapDiscogsFormatName', () => {
+  it('maps known Discogs format names', () => {
+    expect(mapDiscogsFormatName('Vinyl')).toBe('vinyl');
+    expect(mapDiscogsFormatName('CD')).toBe('cd');
+    expect(mapDiscogsFormatName('Cassette')).toBe('cassette');
+    expect(mapDiscogsFormatName('File')).toBe('digital');
+  });
+
+  it('is case-insensitive', () => {
+    expect(mapDiscogsFormatName('vinyl')).toBe('vinyl');
+  });
+
+  it('reads descriptions when the name itself is unrecognized', () => {
+    expect(mapDiscogsFormatName('Box Set', ['Book'])).toBe('book');
+    expect(mapDiscogsFormatName('Box Set', ['Poster'])).toBe('merch');
+  });
+
+  it('defaults to other', () => {
+    expect(mapDiscogsFormatName(null, [])).toBe('other');
+    expect(mapDiscogsFormatName('8-Track Cartridge', [])).toBe('other');
+  });
+});
+
+describe('ingestMusicBrainzReleaseGroups', () => {
+  it('maps a release group into a matchable enrichment', () => {
+    const out = ingestMusicBrainzReleaseGroups([
+      {
+        id: '11111111-1111-1111-1111-111111111111',
+        title: 'Carrie & Lowell',
+        'primary-type': 'Album',
+        'secondary-types': [],
+        'first-release-date': '2015-03-31',
+      },
+    ]);
+
+    expect(out).toEqual([
+      {
+        matchKey: 'carrielowell',
+        releaseType: 'album',
+        releaseDate: '2015-03-31',
+        datePrecision: 'day',
+        mbid: '11111111-1111-1111-1111-111111111111',
+      },
+    ]);
+  });
+
+  it('keeps year-only precision rather than fabricating a day', () => {
+    const out = ingestMusicBrainzReleaseGroups([
+      { id: '22222222-2222-2222-2222-222222222222', title: 'Some Album', 'first-release-date': '1998' },
+    ]);
+    expect(out[0].releaseDate).toBe('1998-01-01');
+    expect(out[0].datePrecision).toBe('year');
+  });
+
+  it('drops a duplicate id rather than emitting it twice', () => {
+    const out = ingestMusicBrainzReleaseGroups([
+      { id: '33333333-3333-3333-3333-333333333333', title: 'Dup' },
+      { id: '33333333-3333-3333-3333-333333333333', title: 'Dup' },
+    ]);
+    expect(out).toHaveLength(1);
+  });
+
+  it('skips a release group with no usable title', () => {
+    const out = ingestMusicBrainzReleaseGroups([
+      { id: '44444444-4444-4444-4444-444444444444', title: '...' },
+    ]);
+    expect(out).toHaveLength(0);
+  });
+});
+
+// Fixtures below are trimmed from a real, live Faircamp instance (verified 2026-08-01) rather
+// than guessed — Faircamp's own markup has no JSON-LD, no <time> tag, and no pubDate in its
+// RSS feed, so the parser is deliberately narrow: identity and artwork only.
+const FAIRCAMP_HOME_HTML = `<!doctype html><html><body>
+  <nav>
+    <a href="./">Home</a>
+    <a href="#content">Skip</a>
+    <a href="subscribe/">Subscribe</a>
+  </nav>
+  <ol>
+    <li><a href="ruined-castle/">RUINED CASTLE</a></li>
+    <li><a href="infinite-normal/">INFINITE NORMAL</a></li>
+    <li><a href="solo-piano/">SOLO PIANO</a></li>
+  </ol>
+  <a href="https://simonrepp.com/faircamp/">Powered by Faircamp</a>
+  <a href="favicon.png?H-w5zbrED30">icon</a>
+  <a href="feed.rss">RSS</a>
+  <a href="site.css?xwWmIbFHB50">styles</a>
+</body></html>`;
+
+const FAIRCAMP_RELEASE_HTML = `<!doctype html><html><head>
+  <meta property="og:title" content="RUINED CASTLE"/>
+  <meta property="og:image" content="https://music.kidlightbulbs.com/ruined-castle/cover_800.jpg?XZDh1t00IS8"/>
+  <meta property="og:description" content="The third album. A reflection on suffering."/>
+</head><body></body></html>`;
+
+describe('ingestFaircampHomeLinks', () => {
+  it('finds bare relative release links and resolves them against the page URL', () => {
+    const out = ingestFaircampHomeLinks(FAIRCAMP_HOME_HTML, 'https://music.kidlightbulbs.com/');
+    expect(out).toEqual([
+      { slug: 'ruined-castle', url: 'https://music.kidlightbulbs.com/ruined-castle/' },
+      { slug: 'infinite-normal', url: 'https://music.kidlightbulbs.com/infinite-normal/' },
+      { slug: 'solo-piano', url: 'https://music.kidlightbulbs.com/solo-piano/' },
+    ]);
+  });
+
+  it('excludes known non-release paths and anything with a query string or external host', () => {
+    const out = ingestFaircampHomeLinks(FAIRCAMP_HOME_HTML, 'https://music.kidlightbulbs.com/');
+    expect(out.map(o => o.slug)).not.toContain('subscribe');
+    expect(out.some(o => o.url.includes('simonrepp'))).toBe(false);
+    expect(out.some(o => o.url.includes('favicon'))).toBe(false);
+  });
+
+  it('deduplicates a repeated link and caps at the candidate ceiling', () => {
+    const manyLinks = Array.from({ length: 40 }, (_, i) => `<a href="release-${i}/">R${i}</a>`).join('');
+    const out = ingestFaircampHomeLinks(`<html>${manyLinks}</html>`, 'https://x.example.com/');
+    expect(out.length).toBeLessThanOrEqual(30);
+  });
+});
+
+describe('ingestFaircampReleasePage', () => {
+  it('reads title and artwork from Open Graph tags', () => {
+    expect(ingestFaircampReleasePage(FAIRCAMP_RELEASE_HTML)).toEqual({
+      title: 'RUINED CASTLE',
+      artworkUrl: 'https://music.kidlightbulbs.com/ruined-castle/cover_800.jpg?XZDh1t00IS8',
+    });
+  });
+
+  it('decodes HTML entities in the title', () => {
+    const html = '<meta property="og:title" content="Rock &amp; Roll"/>';
+    expect(ingestFaircampReleasePage(html)?.title).toBe('Rock & Roll');
+  });
+
+  it('returns null when there is no og:title at all — likely not a release page', () => {
+    expect(ingestFaircampReleasePage('<html><body>nothing here</body></html>')).toBeNull();
+  });
+
+  it('accepts a missing artwork tag', () => {
+    expect(ingestFaircampReleasePage('<meta property="og:title" content="No Cover"/>')).toEqual({
+      title: 'No Cover',
+      artworkUrl: null,
+    });
+  });
+});
+
+describe('buildFaircampRelease', () => {
+  it('combines a release page into a persistable shape with an inferred type', () => {
+    const out = buildFaircampRelease(
+      { title: 'RUINED CASTLE', artworkUrl: 'https://example.com/cover.jpg' },
+      'https://music.kidlightbulbs.com/ruined-castle/',
+      new Set()
+    );
+    expect(out).toMatchObject({
+      title: 'RUINED CASTLE',
+      matchKey: 'ruinedcastle',
+      status: 'released',
+      artworkUrl: 'https://example.com/cover.jpg',
+      externalUrl: 'https://music.kidlightbulbs.com/ruined-castle/',
+    });
+  });
+
+  it('never has a date — Faircamp has none to give', () => {
+    const out = buildFaircampRelease({ title: 'Some Release', artworkUrl: null }, 'https://x.example.com/some-release/', new Set());
+    expect(out).not.toHaveProperty('releaseDate');
+  });
+
+  it('returns null for a title with no letters or numbers to match on', () => {
+    expect(buildFaircampRelease({ title: '...', artworkUrl: null }, 'https://x.example.com/dots/', new Set())).toBeNull();
+  });
+});
+
+describe('findDiscoveredReleaseLinks', () => {
+  // Real example: an artist's own official website linking directly to a specific Subvert
+  // release, verified 2026-08-01 (kidlightbulbs.com linking to
+  // subvert.fm/kid-lightbulbs/infinite-normal).
+  const OFFICIAL_SITE_HTML = `<html><body>
+    <a href="https://kidlightbulbs.bandcamp.com/album/infinite-normal">Bandcamp</a>
+    <a href="https://subvert.fm/kid-lightbulbs">Subvert profile</a>
+    <a href="https://www.subvert.fm/kid-lightbulbs/infinite-normal">Buy on Subvert</a>
+  </body></html>`;
+
+  it('finds a specific-release Subvert link but not the bare artist profile link', () => {
+    const out = findDiscoveredReleaseLinks(OFFICIAL_SITE_HTML, 'https://kidlightbulbs.com/');
+    expect(out).toEqual([
+      {
+        platform: 'subvert',
+        url: 'https://www.subvert.fm/kid-lightbulbs/infinite-normal',
+        matchKey: 'infinitenormal',
+      },
+    ]);
+  });
+
+  it('ignores links to hosts it does not recognize', () => {
+    const out = findDiscoveredReleaseLinks(
+      '<a href="https://kidlightbulbs.bandcamp.com/album/infinite-normal">Bandcamp</a>',
+      'https://kidlightbulbs.com/'
+    );
+    expect(out).toEqual([]);
+  });
+
+  it('deduplicates the same link appearing twice', () => {
+    const html = `
+      <a href="https://subvert.fm/artist/release-one">A</a>
+      <a href="https://subvert.fm/artist/release-one">A again</a>
+    `;
+    const out = findDiscoveredReleaseLinks(html, 'https://example.com/');
+    expect(out).toHaveLength(1);
+  });
+
+  it('skips a slug with no letters or numbers to match on', () => {
+    const out = findDiscoveredReleaseLinks('<a href="https://subvert.fm/artist/---">A</a>', 'https://example.com/');
+    expect(out).toEqual([]);
   });
 });

@@ -3,6 +3,14 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { normalizeUrlForMatch, urlMatchPrefilter } from './search-utils';
+import {
+  deriveStatus,
+  isFuzzyReleaseMatch,
+  mapReleaseType,
+  parseReleaseDate,
+  releaseMatchKey,
+  uniqueReleaseSlug,
+} from './release-utils';
 import { requestArtistCatalog } from './request-catalog';
 
 let supabase: SupabaseClient | null = null;
@@ -510,6 +518,66 @@ export async function recordCatalogOutcome(
   }
 }
 
+export interface CatalogStateRow {
+  last_catalogued_at: string | null;
+  last_attempted_at: string;
+  releases_found: number | null;
+  releases_detailed: number | null;
+  last_error: string | null;
+  consecutive_failures: number;
+}
+
+/**
+ * Deliberately three-valued, not two. "We couldn't ask" and "we asked and this artist has never
+ * been catalogued" are different facts, and collapsing them into one `null` makes a broken
+ * database read render as a confident "Never catalogued" — the same shape as the bug class the
+ * "never cache uncertainty" principle exists to prevent. Every surface that reports cataloging
+ * exists to make it observable, so an unreadable state has to say so rather than guess.
+ */
+export type CatalogStateResult =
+  | { ok: true; state: CatalogStateRow | null }
+  | { ok: false; reason: string };
+
+export async function getCatalogState(artistId: string): Promise<CatalogStateResult> {
+  const client = getClient();
+  if (!client) return { ok: false, reason: 'Supabase is not configured on this deploy' };
+
+  const { data, error } = await client
+    .from('release_catalog_state')
+    .select('last_catalogued_at, last_attempted_at, releases_found, releases_detailed, last_error, consecutive_failures')
+    .eq('artist_id', artistId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('[DB] getCatalogState failed:', error.message);
+    return { ok: false, reason: 'Could not read catalog state' };
+  }
+  return { ok: true, state: (data as CatalogStateRow | null) ?? null };
+}
+
+/**
+ * Clear an artist's cooldown so a deliberately-requested crawl actually runs.
+ *
+ * Without it a "catalog now" control would appear to work and do nothing for a week —
+ * `claimArtistForCatalog` refuses an artist catalogued in the last 7 days, which is right for
+ * demand-driven triggers and wrong for someone deliberately asking.
+ *
+ * Backdated rather than deleted: the row also carries the failure counter and the last error,
+ * which are worth keeping. Two hours clears both the cooldown and the exponential backoff.
+ */
+export async function clearCatalogCooldown(artistId: string): Promise<void> {
+  const client = getClient();
+  if (!client) return;
+
+  const twoHoursAgo = new Date(Date.now() - 2 * 3600_000).toISOString();
+  const { error } = await client
+    .from('release_catalog_state')
+    .update({ last_catalogued_at: null, last_attempted_at: twoHoursAgo, consecutive_failures: 0 })
+    .eq('artist_id', artistId);
+
+  if (error) console.error('[DB] clearCatalogCooldown failed:', error.message);
+}
+
 interface ReleaseToPersist {
   title: string;
   slug: string;
@@ -555,6 +623,69 @@ export interface PersistedRelease {
  * Bandcamp grid is newest first, so a budgeted detail pass reading the front of the list
  * spends its requests on the releases a fan is most likely to be looking at.
  */
+/**
+ * Which `(release_id, platform)` source rows an artist has claimed — added or corrected
+ * themselves via the curation UI, rather than ingest. Every ingest path must read this before
+ * writing a source row: a re-crawl silently overwriting an artist's fix in 30 days would be the
+ * exact "ingest clobbers a curated edit" bug `curated_fields` exists to prevent on `releases`
+ * itself, just one table over.
+ */
+async function getClaimedSourceKeys(client: SupabaseClient, releaseIds: string[]): Promise<Set<string>> {
+  if (releaseIds.length === 0) return new Set();
+
+  const { data, error } = await client
+    .from('release_sources')
+    .select('release_id, platform')
+    .eq('source', 'claimed')
+    .in('release_id', releaseIds);
+
+  if (error) {
+    console.error('[DB] getClaimedSourceKeys failed:', error.message);
+    return new Set();
+  }
+
+  return new Set((data as { release_id: string; platform: string }[] || []).map(r => `${r.release_id}:${r.platform}`));
+}
+
+/**
+ * Write one release's source row — or, if an artist has claimed this exact release+platform,
+ * read the existing (untouched) row back instead. The one place every ingest path goes through
+ * to write `release_sources`, so "never overwrite a claimed URL" only has to be correct once.
+ */
+async function upsertReleaseSource(
+  client: SupabaseClient,
+  releaseId: string,
+  platform: string,
+  url: string,
+  externalId: string | null,
+  claimedKeys: Set<string>
+): Promise<{ id: string; url: string; detail_checked_at: string | null } | null> {
+  if (claimedKeys.has(`${releaseId}:${platform}`)) {
+    const { data, error } = await client
+      .from('release_sources')
+      .select('id, url, detail_checked_at')
+      .eq('release_id', releaseId)
+      .eq('platform', platform)
+      .maybeSingle();
+    if (error || !data) return null;
+    return data as { id: string; url: string; detail_checked_at: string | null };
+  }
+
+  // detail_checked_at is read back rather than written: it belongs to the detail pass, and a
+  // grid re-crawl must not reset it or every crawl would re-fetch every release page.
+  const { data, error } = await client
+    .from('release_sources')
+    .upsert(
+      { release_id: releaseId, platform, url, external_id: externalId, last_seen_at: new Date().toISOString() },
+      { onConflict: 'release_id,platform' }
+    )
+    .select('id, url, detail_checked_at')
+    .single();
+
+  if (error || !data) return null;
+  return data as { id: string; url: string; detail_checked_at: string | null };
+}
+
 export async function persistReleases(
   artistId: string,
   releases: ReleaseToPersist[]
@@ -585,6 +716,7 @@ export async function persistReleases(
     const existing = (existingRows as ExistingRow[]) || [];
     const byIdentity = new Map(existing.map(r => [`${r.release_type}:${r.match_key}`, r]));
     const takenSlugs = new Set(existing.map(r => r.slug));
+    const claimedKeys = await getClaimedSourceKeys(client, existing.map(r => r.id));
 
     const written: PersistedRelease[] = [];
 
@@ -655,29 +787,20 @@ export async function persistReleases(
         });
       }
 
-      // detail_checked_at is read back rather than written: it belongs to the detail pass, and
-      // a grid re-crawl must not reset it or every crawl would re-fetch every release page.
-      const { data: sourceRow, error: sourceError } = await client
-        .from('release_sources')
-        .upsert(
-          {
-            release_id: releaseId,
-            platform: release.source.platform,
-            url: release.source.url,
-            external_id: release.source.externalId,
-            last_seen_at: new Date().toISOString(),
-          },
-          { onConflict: 'release_id,platform' }
-        )
-        .select('id, url, detail_checked_at')
-        .single();
+      const source = await upsertReleaseSource(
+        client,
+        releaseId,
+        release.source.platform,
+        release.source.url,
+        release.source.externalId,
+        claimedKeys
+      );
 
-      if (sourceError || !sourceRow) {
-        console.error('[DB] persistReleases source upsert failed:', sourceError?.message);
+      if (!source) {
+        console.error('[DB] persistReleases source write failed for release', releaseId);
         continue;
       }
 
-      const source = sourceRow as { id: string; url: string; detail_checked_at: string | null };
       written.push({
         releaseId,
         sourceId: source.id,
@@ -797,27 +920,1206 @@ export async function persistReleaseDetail(
   }
 }
 
-/** The stored Bandcamp link for an artist, if we have one. */
-export async function getArtistBandcampUrl(artistId: string): Promise<string | null> {
+/** What the catalog passes need before they can start. */
+export interface ArtistForCatalog {
+  name: string;
+  bandcampUrl: string | null;
+  discogsUrl: string | null;
+  faircampUrl: string | null;
+  officialSiteUrl: string | null;
+}
+
+/**
+ * One read for everything cataloging needs to know about an artist: the display name
+ * (Discogs and MusicBrainz are both looked up by name, not by a stored id) plus whichever of
+ * the known links are on file. Returns null only when the artist row itself is missing — a
+ * source link being absent is a normal, independent per-source outcome, not a reason to fail
+ * the whole lookup.
+ */
+export async function getArtistForCatalog(artistId: string): Promise<ArtistForCatalog | null> {
   const client = getClient();
   if (!client) return null;
 
   try {
-    const { data, error } = await client
-      .from('artist_links')
-      .select('url')
-      .eq('artist_id', artistId)
-      .eq('platform', 'bandcamp')
-      .maybeSingle();
+    const [{ data: artistRow, error: artistError }, { data: linkRows, error: linkError }] = await Promise.all([
+      client.from('artists').select('name').eq('id', artistId).maybeSingle(),
+      client
+        .from('artist_links')
+        .select('platform, url')
+        .eq('artist_id', artistId)
+        .in('platform', ['bandcamp', 'discogs', 'faircamp', 'officialsite']),
+    ]);
 
-    if (error) {
-      console.error('[DB] getArtistBandcampUrl failed:', error.message);
+    if (artistError || !artistRow) {
+      if (artistError) console.error('[DB] getArtistForCatalog artist read failed:', artistError.message);
       return null;
     }
-    return (data as { url: string } | null)?.url ?? null;
+    if (linkError) console.error('[DB] getArtistForCatalog link read failed:', linkError.message);
+
+    const links = (linkRows as { platform: string; url: string }[] | null) || [];
+    return {
+      name: (artistRow as { name: string }).name,
+      bandcampUrl: links.find(l => l.platform === 'bandcamp')?.url ?? null,
+      discogsUrl: links.find(l => l.platform === 'discogs')?.url ?? null,
+      faircampUrl: links.find(l => l.platform === 'faircamp')?.url ?? null,
+      officialSiteUrl: links.find(l => l.platform === 'officialsite')?.url ?? null,
+    };
   } catch (error) {
-    console.error('[DB] getArtistBandcampUrl error:', error);
+    console.error('[DB] getArtistForCatalog error:', error);
     return null;
+  }
+}
+
+interface DiscogsReleaseToPersist {
+  title: string;
+  slug: string;
+  matchKey: string;
+  releaseType: string;
+  releaseDate: string | null;
+  datePrecision: string;
+  status: string;
+  masterId: string;
+  mainReleaseId: string;
+}
+
+/**
+ * Write a Discogs catalog pass, merging into whatever's already there rather than replacing
+ * it — same shape and same three rules as `persistReleases`, plus a fourth this source needs
+ * and Bandcamp didn't, because Bandcamp is the only source in the catalog:
+ *
+ * 4. **Prefer the hard identifier over the title guess.** `discogs_master_id` is Discogs'
+ *    own "these pressings are one album" conclusion — tier 1 in the dedup scheme (spec §4).
+ *    Only fall back to `(release_type, match_key)` — tier 2 — when this artist has no row
+ *    with that master id yet, and only when that tier-2 candidate doesn't already carry a
+ *    *different* master id (which would mean the title match is coincidental, not the same
+ *    release). And when nothing matches exactly but a title is merely *close* to an existing
+ *    one — `isFuzzyReleaseMatch` — this never merges either: it inserts a new row and flags
+ *    both `needs_review`, which is tier 3. A human decides; the catalog never silently
+ *    asserts two different albums are the same one.
+ */
+export async function persistDiscogsReleases(
+  artistId: string,
+  releases: DiscogsReleaseToPersist[]
+): Promise<PersistedRelease[]> {
+  const client = getClient();
+  if (!client || releases.length === 0) return [];
+
+  try {
+    const { data: existingRows, error: readError } = await client
+      .from('releases')
+      .select('id, slug, match_key, release_type, release_date, curated_fields, discogs_master_id')
+      .eq('artist_id', artistId);
+
+    if (readError) {
+      console.error('[DB] persistDiscogsReleases read failed:', readError.message);
+      return [];
+    }
+
+    type ExistingRow = {
+      id: string;
+      slug: string;
+      match_key: string;
+      release_type: string;
+      release_date: string | null;
+      curated_fields: string[] | null;
+      discogs_master_id: string | null;
+    };
+    const existing = (existingRows as ExistingRow[]) || [];
+    const byMasterId = new Map(
+      existing.filter(r => r.discogs_master_id).map(r => [r.discogs_master_id as string, r])
+    );
+    const byIdentity = new Map(existing.map(r => [`${r.release_type}:${r.match_key}`, r]));
+    const byType = new Map<string, ExistingRow[]>();
+    for (const row of existing) {
+      const bucket = byType.get(row.release_type);
+      if (bucket) bucket.push(row);
+      else byType.set(row.release_type, [row]);
+    }
+    const takenSlugs = new Set(existing.map(r => r.slug));
+    const claimedKeys = await getClaimedSourceKeys(client, existing.map(r => r.id));
+
+    const written: PersistedRelease[] = [];
+
+    for (const release of releases) {
+      let prior = byMasterId.get(release.masterId);
+      let matchedByMasterId = Boolean(prior);
+
+      if (!prior) {
+        const exact = byIdentity.get(`${release.releaseType}:${release.matchKey}`);
+        if (exact && (!exact.discogs_master_id || exact.discogs_master_id === release.masterId)) {
+          prior = exact;
+        }
+      }
+
+      // Tier 3: nothing exact, but something close enough to warrant a human look. Never
+      // merge — insert a new row below and flag both sides, with each pointing at the other
+      // via `flagged_against_release_id` so an admin queue can show the pair without having
+      // to re-run the fuzzy match to reconstruct what triggered it.
+      const fuzzy = prior
+        ? null
+        : (byType.get(release.releaseType) ?? []).find(c => isFuzzyReleaseMatch(c.match_key, release.matchKey)) ?? null;
+
+      let releaseId: string;
+      let curatedFields: string[];
+
+      if (prior) {
+        const curated = new Set(prior.curated_fields ?? []);
+        curatedFields = [...curated];
+        const patch: Record<string, unknown> = {};
+
+        // Title is only ever taken from a hard-identifier match (a re-crawl of a release we
+        // already know is this one). A tier-2 title-equality match means the two titles
+        // already normalize the same — overwriting risks nothing informative and risks
+        // clobbering a display-quality title Bandcamp already got right.
+        if (!curated.has('title') && matchedByMasterId) patch.title = release.title;
+        if (!prior.discogs_master_id) patch.discogs_master_id = release.masterId;
+        if (!curated.has('release_date') && release.releaseDate && !prior.release_date) {
+          patch.release_date = release.releaseDate;
+          patch.date_precision = release.datePrecision;
+        }
+
+        if (Object.keys(patch).length > 0) {
+          const { error } = await client.from('releases').update(patch).eq('id', prior.id);
+          if (error) {
+            console.error('[DB] persistDiscogsReleases update failed:', error.message);
+            continue;
+          }
+        }
+        releaseId = prior.id;
+      } else {
+        let slug = release.slug;
+        if (takenSlugs.has(slug)) slug = `${slug}-${release.matchKey.slice(0, 6)}`;
+        takenSlugs.add(slug);
+
+        const { data: inserted, error } = await client
+          .from('releases')
+          .insert({
+            artist_id: artistId,
+            title: release.title,
+            slug,
+            match_key: release.matchKey,
+            release_type: release.releaseType,
+            release_date: release.releaseDate,
+            date_precision: release.datePrecision,
+            status: release.status,
+            discogs_master_id: release.masterId,
+            source: 'auto',
+            // fuzzy.id is already known here, unlike the reverse direction below — this row
+            // can point at its suspected duplicate in the same write that creates it.
+            ...(fuzzy && { needs_review: true, flagged_against_release_id: fuzzy.id }),
+          })
+          .select('id')
+          .single();
+
+        if (error || !inserted) {
+          console.error('[DB] persistDiscogsReleases insert failed:', error?.message);
+          continue;
+        }
+        releaseId = (inserted as { id: string }).id;
+        curatedFields = [];
+
+        const createdRow: ExistingRow = {
+          id: releaseId,
+          slug,
+          match_key: release.matchKey,
+          release_type: release.releaseType,
+          release_date: release.releaseDate,
+          curated_fields: [],
+          discogs_master_id: release.masterId,
+        };
+        byMasterId.set(release.masterId, createdRow);
+        const bucket = byType.get(release.releaseType);
+        if (bucket) bucket.push(createdRow);
+        else byType.set(release.releaseType, [createdRow]);
+
+        // The reverse direction: fuzzy's own id wasn't known until the new row above existed,
+        // so this side is written second. Never merge — flagging both sides is the whole
+        // point of tier 3.
+        if (fuzzy) {
+          const { error: flagError } = await client
+            .from('releases')
+            .update({ needs_review: true, flagged_against_release_id: releaseId })
+            .eq('id', fuzzy.id);
+          if (flagError) console.error('[DB] persistDiscogsReleases fuzzy-flag failed:', flagError.message);
+        }
+      }
+
+      const source = await upsertReleaseSource(
+        client,
+        releaseId,
+        'discogs',
+        // The specific pressing Discogs treats as this master's representative release — a
+        // real listing page, unlike the abstract master page.
+        `https://www.discogs.com/release/${release.mainReleaseId}`,
+        release.masterId,
+        claimedKeys
+      );
+
+      if (!source) {
+        console.error('[DB] persistDiscogsReleases source write failed for release', releaseId);
+        continue;
+      }
+
+      written.push({
+        releaseId,
+        sourceId: source.id,
+        url: source.url,
+        detailCheckedAt: source.detail_checked_at,
+        curatedFields,
+      });
+    }
+
+    return written;
+  } catch (error) {
+    console.error('[DB] persistDiscogsReleases error:', error);
+    return [];
+  }
+}
+
+interface MusicBrainzEnrichmentInput {
+  matchKey: string;
+  releaseType: string;
+  releaseDate: string | null;
+  datePrecision: string;
+  mbid: string;
+}
+
+/**
+ * Fill in what MusicBrainz knows about releases we already have: a date at whatever precision
+ * MusicBrainz actually carries, and the release-group MBID as a hard identity anchor for
+ * future dedup passes (including Discogs and Bandcamp re-crawls, once one of them also finds
+ * this MBID some other way).
+ *
+ * **Update-only, by design.** MusicBrainz has no purchase link to offer, so unlike Bandcamp
+ * and Discogs this never inserts a new release row — a release page with a date and nowhere
+ * to buy it would be a worse outcome than not having the page at all.
+ *
+ * Matches tier 1 (an existing `musicbrainz_release_group_id`) first, then tier 2
+ * (`release_type` + `match_key`) — and only when that tier-2 candidate doesn't already carry
+ * a *different* MBID, which would mean the title match is coincidental. Returns how many rows
+ * were touched.
+ */
+export async function persistMusicBrainzEnrichment(
+  artistId: string,
+  groups: MusicBrainzEnrichmentInput[]
+): Promise<number> {
+  const client = getClient();
+  if (!client || groups.length === 0) return 0;
+
+  try {
+    const { data: existingRows, error } = await client
+      .from('releases')
+      .select('id, match_key, release_type, release_date, curated_fields, musicbrainz_release_group_id')
+      .eq('artist_id', artistId);
+
+    if (error) {
+      console.error('[DB] persistMusicBrainzEnrichment read failed:', error.message);
+      return 0;
+    }
+
+    type ExistingRow = {
+      id: string;
+      match_key: string;
+      release_type: string;
+      release_date: string | null;
+      curated_fields: string[] | null;
+      musicbrainz_release_group_id: string | null;
+    };
+    const existing = (existingRows as ExistingRow[]) || [];
+    const byMbid = new Map(
+      existing.filter(r => r.musicbrainz_release_group_id).map(r => [r.musicbrainz_release_group_id as string, r])
+    );
+    const byIdentity = new Map(existing.map(r => [`${r.release_type}:${r.match_key}`, r]));
+
+    let touched = 0;
+
+    for (const group of groups) {
+      let row = byMbid.get(group.mbid);
+      if (!row) {
+        const candidate = byIdentity.get(`${group.releaseType}:${group.matchKey}`);
+        if (candidate && (!candidate.musicbrainz_release_group_id || candidate.musicbrainz_release_group_id === group.mbid)) {
+          row = candidate;
+        }
+      }
+      // MusicBrainz alone never creates a row — if nothing here matches, there's nothing yet
+      // to attach this enrichment to.
+      if (!row) continue;
+
+      const curated = new Set(row.curated_fields ?? []);
+      const patch: Record<string, unknown> = {};
+      if (!row.musicbrainz_release_group_id) patch.musicbrainz_release_group_id = group.mbid;
+      if (!curated.has('release_date') && group.releaseDate && !row.release_date) {
+        patch.release_date = group.releaseDate;
+        patch.date_precision = group.datePrecision;
+      }
+      if (Object.keys(patch).length === 0) continue;
+
+      const { error: updateError } = await client.from('releases').update(patch).eq('id', row.id);
+      if (updateError) {
+        console.error('[DB] persistMusicBrainzEnrichment update failed:', updateError.message);
+        continue;
+      }
+      touched++;
+    }
+
+    return touched;
+  } catch (error) {
+    console.error('[DB] persistMusicBrainzEnrichment error:', error);
+    return 0;
+  }
+}
+
+/**
+ * Write a Faircamp catalog pass.
+ *
+ * Matches on `match_key` **alone**, not `(release_type, match_key)` like every other source —
+ * Faircamp's own release-type guess (`mapDiscogsFormatToReleaseType` reading just a title) is
+ * unreliable enough that partitioning by it would systematically block the one thing that
+ * makes Faircamp worth ingesting: merging into a release Bandcamp or Discogs already typed
+ * correctly, adding Faircamp as a second source on the *same* row instead of a duplicate. When
+ * nothing matches exactly, a title merely *close* to an existing one still only ever flags
+ * (tier 3, `isFuzzyReleaseMatch`) — never merges — same as Discogs.
+ *
+ * Release type is never overwritten on an existing row; whichever source typed it first stands.
+ */
+interface FaircampReleaseToPersist {
+  title: string;
+  slug: string;
+  matchKey: string;
+  releaseType: string;
+  status: string;
+  artworkUrl: string | null;
+  externalUrl: string;
+}
+
+export async function persistFaircampReleases(
+  artistId: string,
+  releases: FaircampReleaseToPersist[]
+): Promise<PersistedRelease[]> {
+  const client = getClient();
+  if (!client || releases.length === 0) return [];
+
+  try {
+    const { data: existingRows, error: readError } = await client
+      .from('releases')
+      .select('id, slug, match_key, release_type, artwork_url, curated_fields')
+      .eq('artist_id', artistId);
+
+    if (readError) {
+      console.error('[DB] persistFaircampReleases read failed:', readError.message);
+      return [];
+    }
+
+    type ExistingRow = {
+      id: string;
+      slug: string;
+      match_key: string;
+      release_type: string;
+      artwork_url: string | null;
+      curated_fields: string[] | null;
+    };
+    const existing = (existingRows as ExistingRow[]) || [];
+    const byMatchKey = new Map(existing.map(r => [r.match_key, r]));
+    const takenSlugs = new Set(existing.map(r => r.slug));
+    const claimedKeys = await getClaimedSourceKeys(client, existing.map(r => r.id));
+
+    const written: PersistedRelease[] = [];
+
+    for (const release of releases) {
+      const prior = byMatchKey.get(release.matchKey);
+
+      let releaseId: string;
+      let curatedFields: string[];
+
+      if (prior) {
+        const curated = new Set(prior.curated_fields ?? []);
+        curatedFields = [...curated];
+        const patch: Record<string, unknown> = {};
+
+        if (!curated.has('artwork_url') && release.artworkUrl && !prior.artwork_url) {
+          patch.artwork_url = release.artworkUrl;
+        }
+
+        if (Object.keys(patch).length > 0) {
+          const { error } = await client.from('releases').update(patch).eq('id', prior.id);
+          if (error) {
+            console.error('[DB] persistFaircampReleases update failed:', error.message);
+            continue;
+          }
+        }
+        releaseId = prior.id;
+      } else {
+        const fuzzy = existing.find(c => isFuzzyReleaseMatch(c.match_key, release.matchKey));
+
+        let slug = release.slug;
+        if (takenSlugs.has(slug)) slug = `${slug}-${release.matchKey.slice(0, 6)}`;
+        takenSlugs.add(slug);
+
+        const { data: inserted, error } = await client
+          .from('releases')
+          .insert({
+            artist_id: artistId,
+            title: release.title,
+            slug,
+            match_key: release.matchKey,
+            release_type: release.releaseType,
+            status: release.status,
+            artwork_url: release.artworkUrl,
+            source: 'auto',
+            ...(fuzzy && { needs_review: true, flagged_against_release_id: fuzzy.id }),
+          })
+          .select('id')
+          .single();
+
+        if (error || !inserted) {
+          console.error('[DB] persistFaircampReleases insert failed:', error?.message);
+          continue;
+        }
+        releaseId = (inserted as { id: string }).id;
+        curatedFields = [];
+
+        const createdRow: ExistingRow = {
+          id: releaseId,
+          slug,
+          match_key: release.matchKey,
+          release_type: release.releaseType,
+          artwork_url: release.artworkUrl,
+          curated_fields: [],
+        };
+        byMatchKey.set(release.matchKey, createdRow);
+        existing.push(createdRow);
+
+        if (fuzzy) {
+          const { error: flagError } = await client
+            .from('releases')
+            .update({ needs_review: true, flagged_against_release_id: releaseId })
+            .eq('id', fuzzy.id);
+          if (flagError) console.error('[DB] persistFaircampReleases fuzzy-flag failed:', flagError.message);
+        }
+      }
+
+      const source = await upsertReleaseSource(client, releaseId, 'faircamp', release.externalUrl, release.externalUrl, claimedKeys);
+      if (!source) {
+        console.error('[DB] persistFaircampReleases source write failed for release', releaseId);
+        continue;
+      }
+
+      written.push({
+        releaseId,
+        sourceId: source.id,
+        url: source.url,
+        detailCheckedAt: source.detail_checked_at,
+        curatedFields,
+      });
+    }
+
+    return written;
+  } catch (error) {
+    console.error('[DB] persistFaircampReleases error:', error);
+    return [];
+  }
+}
+
+/**
+ * Attach a source *discovered* on some other page (never fetched directly — see
+ * `findDiscoveredReleaseLinks`) to an existing release, matched by **exact** normalized title.
+ * Exact only, deliberately: a wrong attachment here would point a fan at a different record
+ * than the one they're looking at, which is worse than never finding the link at all. Refuses
+ * rather than guesses when the match key is ambiguous (two releases share it) or the release
+ * already has a source for this platform.
+ */
+export async function attachDiscoveredSource(
+  artistId: string,
+  platform: string,
+  url: string,
+  matchKey: string
+): Promise<boolean> {
+  const client = getClient();
+  if (!client) return false;
+
+  try {
+    const { data, error } = await client
+      .from('releases')
+      .select('id, release_sources ( platform )')
+      .eq('artist_id', artistId)
+      .eq('match_key', matchKey);
+
+    if (error) {
+      console.error('[DB] attachDiscoveredSource read failed:', error.message);
+      return false;
+    }
+
+    const matches = (data as { id: string; release_sources: { platform: string }[] | null }[]) || [];
+    if (matches.length !== 1) return false; // no match, or ambiguous — never guess
+
+    const release = matches[0];
+    if ((release.release_sources || []).some(s => s.platform === platform)) return false;
+
+    const { error: insertError } = await client.from('release_sources').insert({
+      release_id: release.id,
+      platform,
+      url,
+      external_id: null,
+      source: 'auto',
+    });
+
+    if (insertError) {
+      console.error('[DB] attachDiscoveredSource insert failed:', insertError.message);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('[DB] attachDiscoveredSource error:', error);
+    return false;
+  }
+}
+
+// --- Tier-3 dedup admin review queue ---
+//
+// The backstop the dedup scheme (spec §4) leans on once claiming is optional: ingest never
+// auto-merges a fuzzy match, it only flags both sides via `needs_review` and
+// `flagged_against_release_id`. These functions are the read side (list flagged pairs) and the
+// two things an admin can do about one: say they're different (dismiss) or say they're the
+// same (merge).
+
+export interface ReleaseReviewItem {
+  id: string;
+  title: string;
+  slug: string;
+  releaseType: string;
+  releaseDate: string | null;
+  datePrecision: string | null;
+  artworkUrl: string | null;
+  artistName: string;
+  artistSlug: string;
+  platforms: string[];
+}
+
+/**
+ * Fold a flat needs_review result set into pairs, deduplicating the two rows a symmetric flag
+ * always produces (A flagged against B, and B flagged against A, are one pair to review, not
+ * two). Pure and exported for tests — no network, no database.
+ *
+ * A row whose counterpart isn't in the set (already resolved from the other side, or deleted)
+ * is still shown, alone, rather than dropped — something about it looked ambiguous enough to
+ * flag, and silently hiding that is worse than showing it with nothing to compare against.
+ */
+export function pairReviewRows(
+  rows: Map<string, ReleaseReviewItem & { flaggedAgainst: string | null }>
+): { primary: ReleaseReviewItem; counterpart: ReleaseReviewItem | null }[] {
+  const seen = new Set<string>();
+  const pairs: { primary: ReleaseReviewItem; counterpart: ReleaseReviewItem | null }[] = [];
+
+  for (const row of rows.values()) {
+    if (seen.has(row.id)) continue;
+    seen.add(row.id);
+
+    const counterpart = row.flaggedAgainst ? rows.get(row.flaggedAgainst) ?? null : null;
+    if (counterpart) seen.add(counterpart.id);
+
+    pairs.push({ primary: row, counterpart });
+  }
+
+  return pairs;
+}
+
+/**
+ * Every release currently flagged for review, paired with its suspected duplicate where one is
+ * still on file. Hidden releases are excluded — an admin has already ruled on those.
+ */
+export async function getReleaseReviewQueue(): Promise<
+  { primary: ReleaseReviewItem; counterpart: ReleaseReviewItem | null }[]
+> {
+  const client = getClient();
+  if (!client) return [];
+
+  try {
+    const { data, error } = await client
+      .from('releases')
+      .select(
+        'id, title, slug, release_type, release_date, date_precision, artwork_url, flagged_against_release_id,' +
+        ' artists ( name, slug ), release_sources ( platform )'
+      )
+      .eq('needs_review', true)
+      .eq('is_hidden', false)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('[DB] getReleaseReviewQueue failed:', error.message);
+      return [];
+    }
+
+    type Row = {
+      id: string;
+      title: string;
+      slug: string;
+      release_type: string;
+      release_date: string | null;
+      date_precision: string | null;
+      artwork_url: string | null;
+      flagged_against_release_id: string | null;
+      artists: { name: string; slug: string } | { name: string; slug: string }[] | null;
+      release_sources: { platform: string }[] | null;
+    };
+
+    const rows = new Map<string, ReleaseReviewItem & { flaggedAgainst: string | null }>();
+
+    for (const r of (data as unknown as Row[]) || []) {
+      const artist = Array.isArray(r.artists) ? r.artists[0] : r.artists;
+      rows.set(r.id, {
+        id: r.id,
+        title: r.title,
+        slug: r.slug,
+        releaseType: r.release_type,
+        releaseDate: r.release_date,
+        datePrecision: r.date_precision,
+        artworkUrl: r.artwork_url,
+        artistName: artist?.name ?? '(unknown)',
+        artistSlug: artist?.slug ?? '',
+        platforms: (r.release_sources || []).map(s => s.platform),
+        flaggedAgainst: r.flagged_against_release_id,
+      });
+    }
+
+    return pairReviewRows(rows);
+  } catch (error) {
+    console.error('[DB] getReleaseReviewQueue error:', error);
+    return [];
+  }
+}
+
+/**
+ * "These are different releases." Clears the flag on both sides of the pair — including the
+ * counterpart, looked up here rather than trusted from the client, since flagged_against_
+ * release_id is what makes them a pair and both must stop pointing at the resolved question.
+ */
+export async function dismissReleaseReview(releaseId: string): Promise<boolean> {
+  const client = getClient();
+  if (!client) return false;
+
+  try {
+    const { data: row, error: readError } = await client
+      .from('releases')
+      .select('id, flagged_against_release_id')
+      .eq('id', releaseId)
+      .maybeSingle();
+
+    if (readError || !row) {
+      console.error('[DB] dismissReleaseReview read failed:', readError?.message ?? 'not found');
+      return false;
+    }
+
+    const counterpartId = (row as { flagged_against_release_id: string | null }).flagged_against_release_id;
+    const ids = counterpartId ? [releaseId, counterpartId] : [releaseId];
+
+    const { error } = await client
+      .from('releases')
+      .update({ needs_review: false, flagged_against_release_id: null })
+      .in('id', ids);
+
+    if (error) {
+      console.error('[DB] dismissReleaseReview update failed:', error.message);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('[DB] dismissReleaseReview error:', error);
+    return false;
+  }
+}
+
+export interface MergeReleasesResult {
+  ok: boolean;
+  error?: string;
+}
+
+/**
+ * "These are the same release." Moves every source off `dropId` onto `keepId`, fills in
+ * whatever `keepId` is missing (date, artwork) without overwriting anything it already has or
+ * anything an artist curated, then deletes the now-empty `dropId` row.
+ *
+ * Sources are moved **before** the duplicate row is deleted, and the delete is only attempted
+ * once that move has succeeded — this project has already lost data once to a delete-before-a-
+ * fallible-write (PR #350, an artist's links wiped by a preview), and a release merge is the
+ * same shape of risk.
+ *
+ * Refuses the merge outright if both releases already carry a source on the same platform,
+ * rather than silently dropping one — a merge with an ambiguous outcome should stop and ask,
+ * not guess which of two conflicting sources to keep.
+ */
+export async function mergeReleases(keepId: string, dropId: string): Promise<MergeReleasesResult> {
+  const client = getClient();
+  if (!client) return { ok: false, error: 'Database not configured' };
+  if (keepId === dropId) return { ok: false, error: 'Cannot merge a release into itself' };
+
+  try {
+    // Both releases must belong to the same artist. The invariant lives *here*, not only at the
+    // call sites, because a merge is close to irreversible — sources are moved and a row is
+    // deleted — and the two callers reach it by different routes: the artist endpoint proves
+    // ownership of both ids (`verifyReleaseOwnership`), while the admin endpoint passes ids
+    // straight from a request body. Today the admin UI only ever submits pairs from the review
+    // queue, which is same-artist by construction, but "no caller currently sends a mismatched
+    // pair" is not something the database should be relying on.
+    const { data: pair, error: pairError } = await client
+      .from('releases')
+      .select('id, artist_id')
+      .in('id', [keepId, dropId]);
+
+    if (pairError) {
+      console.error('[DB] mergeReleases identity read failed:', pairError.message);
+      return { ok: false, error: 'Failed to read releases' };
+    }
+
+    const rows = (pair as { id: string; artist_id: string }[] | null) || [];
+    if (rows.length !== 2) return { ok: false, error: 'One or both releases could not be found' };
+    if (rows[0].artist_id !== rows[1].artist_id) {
+      // Deliberately not reported back with the artist ids in it — the caller supplied a pair
+      // they had no business pairing, and echoing whose release the other one is would confirm
+      // the existence of a row they can't otherwise see.
+      console.error('[DB] mergeReleases refused a cross-artist merge');
+      return { ok: false, error: 'Those releases belong to different artists' };
+    }
+
+    const [{ data: keepSources, error: keepError }, { data: dropSources, error: dropError }] = await Promise.all([
+      client.from('release_sources').select('platform').eq('release_id', keepId),
+      client.from('release_sources').select('id, platform').eq('release_id', dropId),
+    ]);
+
+    if (keepError || dropError) {
+      console.error('[DB] mergeReleases read failed:', keepError?.message, dropError?.message);
+      return { ok: false, error: 'Failed to read sources' };
+    }
+
+    const keepPlatforms = new Set((keepSources as { platform: string }[] | null || []).map(s => s.platform));
+    const drop = (dropSources as { id: string; platform: string }[] | null) || [];
+    const conflicting = drop.filter(s => keepPlatforms.has(s.platform));
+
+    if (conflicting.length > 0) {
+      const platforms = conflicting.map(c => c.platform).join(', ');
+      return { ok: false, error: `Both releases already have a source on: ${platforms} — resolve manually` };
+    }
+
+    if (drop.length > 0) {
+      const { error: moveError } = await client
+        .from('release_sources')
+        .update({ release_id: keepId })
+        .eq('release_id', dropId);
+
+      if (moveError) {
+        console.error('[DB] mergeReleases move failed:', moveError.message);
+        return { ok: false, error: 'Failed to move sources' };
+      }
+    }
+
+    const [{ data: keepRow }, { data: dropRow }] = await Promise.all([
+      client.from('releases').select('release_date, artwork_url, curated_fields').eq('id', keepId).maybeSingle(),
+      client.from('releases').select('release_date, date_precision, artwork_url').eq('id', dropId).maybeSingle(),
+    ]);
+
+    if (keepRow && dropRow) {
+      const curated = new Set((keepRow as { curated_fields: string[] | null }).curated_fields ?? []);
+      const patch: Record<string, unknown> = {};
+      const keep = keepRow as { release_date: string | null; artwork_url: string | null };
+      const drop2 = dropRow as { release_date: string | null; date_precision: string | null; artwork_url: string | null };
+
+      if (!curated.has('release_date') && drop2.release_date && !keep.release_date) {
+        patch.release_date = drop2.release_date;
+        patch.date_precision = drop2.date_precision;
+      }
+      if (!curated.has('artwork_url') && drop2.artwork_url && !keep.artwork_url) {
+        patch.artwork_url = drop2.artwork_url;
+      }
+      if (Object.keys(patch).length > 0) {
+        await client.from('releases').update(patch).eq('id', keepId);
+      }
+    }
+
+    // Safe now: every source under dropId has been moved (or there were none), and the
+    // conflict check above means nothing was left behind to lose.
+    const { error: deleteError } = await client.from('releases').delete().eq('id', dropId);
+    if (deleteError) {
+      console.error('[DB] mergeReleases delete failed:', deleteError.message);
+      return { ok: false, error: 'Sources moved, but failed to remove the duplicate row' };
+    }
+
+    const { error: clearError } = await client
+      .from('releases')
+      .update({ needs_review: false, flagged_against_release_id: null })
+      .eq('id', keepId);
+    if (clearError) console.error('[DB] mergeReleases clear-flag failed:', clearError.message);
+
+    return { ok: true };
+  } catch (error) {
+    console.error('[DB] mergeReleases error:', error);
+    return { ok: false, error: 'Unexpected error' };
+  }
+}
+
+// --- Artist release curation (spec §11) ---
+//
+// The artist-facing half of the dedup backstop, and the durable fix for whatever the ~4%
+// wrong-artist probe rate and under-merge bias leave behind: a verified artist reviewing their
+// own catalog is the one source of ground truth ingest can never have. Every write here goes
+// through the same "service role + server-side ownership check" convention as
+// `api/functions/artist-profile.ts` — there is no RLS policy keyed to auth.uid() for these
+// tables (see the comment on `releases` in the schema migration), so the ownership check below
+// *is* the security boundary, not a UI nicety.
+
+export interface OwnedArtistCheck {
+  ok: boolean;
+  status: number;
+  error?: string;
+  artistId?: string;
+  artistName?: string;
+}
+
+/**
+ * Resolve a slug to an artist and verify the given user owns a verified claim on it. The same
+ * check `artist-profile.ts` inlines for bio/link edits, factored out here so newer
+ * release-curation endpoints don't each carry their own copy of an auth-critical block.
+ */
+export async function resolveOwnedArtist(slug: string, userId: string): Promise<OwnedArtistCheck> {
+  const client = getClient();
+  if (!client) return { ok: false, status: 500, error: 'Database not configured' };
+
+  const { data: artist, error: findError } = await client
+    .from('artists')
+    .select('id, name')
+    .eq('slug', slug)
+    .single();
+
+  if (findError || !artist) return { ok: false, status: 404, error: 'Artist not found' };
+
+  const { data: profile, error: profileError } = await client
+    .from('artist_profiles')
+    .select('user_id, verified_at')
+    .eq('artist_id', artist.id)
+    .single();
+
+  if (profileError || !profile) return { ok: false, status: 404, error: 'Profile not found' };
+  if (profile.user_id !== userId) return { ok: false, status: 403, error: 'You do not own this profile' };
+  if (!profile.verified_at) return { ok: false, status: 403, error: 'Profile not yet verified' };
+
+  return { ok: true, status: 200, artistId: (artist as { id: string }).id, artistName: (artist as { name: string }).name };
+}
+
+/**
+ * Do all of these release ids actually belong to this artist? `resolveOwnedArtist` proves the
+ * caller owns *an* artist profile — it says nothing about whether the release ids they sent in
+ * the request body are that artist's. Every action that takes a release id from the client
+ * must check this before touching the row, or a claimed artist could hide/merge/edit another
+ * artist's releases by guessing UUIDs.
+ */
+export async function verifyReleaseOwnership(artistId: string, releaseIds: string[]): Promise<boolean> {
+  const client = getClient();
+  if (!client || releaseIds.length === 0) return false;
+
+  const unique = [...new Set(releaseIds)];
+  const { data, error } = await client
+    .from('releases')
+    .select('id')
+    .eq('artist_id', artistId)
+    .in('id', unique);
+
+  if (error) {
+    console.error('[DB] verifyReleaseOwnership failed:', error.message);
+    return false;
+  }
+  return (data || []).length === unique.length;
+}
+
+export interface OwnerReleaseItem {
+  id: string;
+  title: string;
+  slug: string;
+  releaseType: string;
+  releaseDate: string | null;
+  datePrecision: string | null;
+  artworkUrl: string | null;
+  isHidden: boolean;
+  needsReview: boolean;
+  flaggedAgainst: { id: string; title: string } | null;
+  sources: { platform: string; url: string }[];
+}
+
+/**
+ * Every release under this artist — including hidden ones and needs_review ones, unlike the
+ * public `getArtistReleases`, because the whole point of this view is letting the artist see
+ * what ingest did (right or wrong) rather than only what a fan would see.
+ */
+export async function getArtistReleasesForOwner(artistId: string): Promise<OwnerReleaseItem[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  try {
+    const { data, error } = await client
+      .from('releases')
+      .select(
+        'id, title, slug, release_type, release_date, date_precision, artwork_url, is_hidden,' +
+        ' needs_review, flagged_against_release_id, release_sources ( platform, url )'
+      )
+      .eq('artist_id', artistId)
+      .order('release_date', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('[DB] getArtistReleasesForOwner failed:', error.message);
+      return [];
+    }
+
+    type Row = {
+      id: string;
+      title: string;
+      slug: string;
+      release_type: string;
+      release_date: string | null;
+      date_precision: string | null;
+      artwork_url: string | null;
+      is_hidden: boolean;
+      needs_review: boolean;
+      flagged_against_release_id: string | null;
+      release_sources: { platform: string; url: string }[] | null;
+    };
+
+    const rows = (data as unknown as Row[]) || [];
+    // The counterpart a release is flagged against is always another row in this same result
+    // set — tier-3 fuzzy matching only ever compares releases under one artist — so resolving
+    // its title costs nothing extra to fetch.
+    const titleById = new Map(rows.map(r => [r.id, r.title]));
+
+    return rows.map(r => ({
+      id: r.id,
+      title: r.title,
+      slug: r.slug,
+      releaseType: r.release_type,
+      releaseDate: r.release_date,
+      datePrecision: r.date_precision,
+      artworkUrl: r.artwork_url,
+      isHidden: r.is_hidden,
+      needsReview: r.needs_review,
+      flaggedAgainst:
+        r.flagged_against_release_id && titleById.has(r.flagged_against_release_id)
+          ? { id: r.flagged_against_release_id, title: titleById.get(r.flagged_against_release_id)! }
+          : null,
+      sources: (r.release_sources || []).map(s => ({ platform: s.platform, url: s.url })),
+    }));
+  } catch (error) {
+    console.error('[DB] getArtistReleasesForOwner error:', error);
+    return [];
+  }
+}
+
+/** "This shouldn't be on my page." Ingest must never write `is_hidden` — only this, or an admin. */
+export async function setReleaseHidden(artistId: string, releaseId: string, hidden: boolean): Promise<boolean> {
+  const client = getClient();
+  if (!client) return false;
+  if (!(await verifyReleaseOwnership(artistId, [releaseId]))) return false;
+
+  const { error } = await client.from('releases').update({ is_hidden: hidden }).eq('id', releaseId);
+  if (error) {
+    console.error('[DB] setReleaseHidden failed:', error.message);
+    return false;
+  }
+  return true;
+}
+
+export interface ReleaseFieldPatch {
+  title?: string;
+  /** null clears the date entirely; omit the key to leave it untouched. */
+  releaseDate?: string | null;
+  artworkUrl?: string | null;
+}
+
+/**
+ * "Fix" — correct a title, date, or artwork ingest got wrong. Every field touched here is
+ * added to `curated_fields`, the existing provenance mechanism that stops a later re-crawl from
+ * silently reverting the artist's correction (see the `releases` migration's own comment on
+ * why this had to ship in step 1, not be retrofitted later).
+ */
+export async function updateArtistReleaseFields(
+  artistId: string,
+  releaseId: string,
+  patch: ReleaseFieldPatch
+): Promise<boolean> {
+  const client = getClient();
+  if (!client) return false;
+  if (!(await verifyReleaseOwnership(artistId, [releaseId]))) return false;
+
+  const { data: row, error: readError } = await client
+    .from('releases')
+    .select('curated_fields')
+    .eq('id', releaseId)
+    .maybeSingle();
+
+  if (readError || !row) {
+    console.error('[DB] updateArtistReleaseFields read failed:', readError?.message ?? 'not found');
+    return false;
+  }
+
+  const curated = new Set((row as { curated_fields: string[] | null }).curated_fields ?? []);
+  const update: Record<string, unknown> = {};
+
+  if (patch.title !== undefined) {
+    const title = patch.title.trim().slice(0, 200);
+    if (!title) return false;
+    update.title = title;
+    curated.add('title');
+  }
+  if (patch.releaseDate !== undefined) {
+    if (patch.releaseDate === null) {
+      update.release_date = null;
+      update.date_precision = 'unknown';
+    } else {
+      const { date, precision } = parseReleaseDate(patch.releaseDate);
+      if (!date) return false;
+      update.release_date = date;
+      update.date_precision = precision;
+    }
+    curated.add('release_date');
+  }
+  if (patch.artworkUrl !== undefined) {
+    update.artwork_url = patch.artworkUrl;
+    curated.add('artwork_url');
+  }
+
+  if (Object.keys(update).length === 0) return true;
+  update.curated_fields = [...curated];
+
+  const { error } = await client.from('releases').update(update).eq('id', releaseId);
+  if (error) {
+    console.error('[DB] updateArtistReleaseFields update failed:', error.message);
+    return false;
+  }
+  return true;
+}
+
+/**
+ * "Add a platform link we missed" — or correct one ingest got wrong. Written with
+ * `source: 'claimed'`, which `getClaimedSourceKeys` (used by every ingest path) checks before
+ * ever overwriting a source's URL — the same "never clobber a curated edit" rule `curated_fields`
+ * enforces on the release row itself, one table over.
+ */
+export async function addArtistReleaseLink(
+  artistId: string,
+  releaseId: string,
+  platform: string,
+  url: string
+): Promise<boolean> {
+  const client = getClient();
+  if (!client) return false;
+  if (!(await verifyReleaseOwnership(artistId, [releaseId]))) return false;
+
+  const { error } = await client.from('release_sources').upsert(
+    {
+      release_id: releaseId,
+      platform,
+      url,
+      external_id: null,
+      source: 'claimed',
+      last_seen_at: new Date().toISOString(),
+    },
+    { onConflict: 'release_id,platform' }
+  );
+
+  if (error) {
+    console.error('[DB] addArtistReleaseLink failed:', error.message);
+    return false;
+  }
+  return true;
+}
+
+export interface NewArtistRelease {
+  title: string;
+  releaseType: string;
+  releaseDate: string | null;
+  platform: string;
+  url: string;
+}
+
+export interface CreateReleaseResult {
+  ok: boolean;
+  error?: string;
+  releaseId?: string;
+}
+
+/**
+ * "Add a release we never found." A release row ingest has no idea exists, so unlike
+ * everything else in this file it is never matched against `existing` — it's simply created,
+ * fully curated from the start (ingest must never touch a hand-authored row).
+ */
+export async function createArtistRelease(artistId: string, input: NewArtistRelease): Promise<CreateReleaseResult> {
+  const client = getClient();
+  if (!client) return { ok: false, error: 'Database not configured' };
+
+  const title = input.title.trim().slice(0, 200);
+  if (!title) return { ok: false, error: 'Title is required' };
+
+  const matchKey = releaseMatchKey(title);
+  if (!matchKey) return { ok: false, error: 'Title needs at least one letter or number' };
+
+  const releaseType = mapReleaseType(input.releaseType);
+  const now = new Date();
+  const { date, precision } = input.releaseDate
+    ? parseReleaseDate(input.releaseDate, now)
+    : { date: null, precision: 'unknown' as const };
+
+  try {
+    const { data: existingSlugs, error: slugError } = await client
+      .from('releases')
+      .select('slug')
+      .eq('artist_id', artistId);
+
+    if (slugError) {
+      console.error('[DB] createArtistRelease slug read failed:', slugError.message);
+      return { ok: false, error: 'Failed to create release' };
+    }
+
+    const taken = new Set(((existingSlugs as { slug: string }[] | null) || []).map(r => r.slug));
+    const slug = uniqueReleaseSlug(title, taken);
+
+    const { data: inserted, error } = await client
+      .from('releases')
+      .insert({
+        artist_id: artistId,
+        title,
+        slug,
+        match_key: matchKey,
+        release_type: releaseType,
+        release_date: date,
+        date_precision: precision,
+        status: deriveStatus(date, false, now),
+        source: 'claimed',
+        curated_fields: ['title', 'release_date'],
+      })
+      .select('id')
+      .single();
+
+    if (error || !inserted) {
+      console.error('[DB] createArtistRelease insert failed:', error?.message);
+      return { ok: false, error: 'Failed to create release' };
+    }
+
+    const releaseId = (inserted as { id: string }).id;
+
+    const { error: sourceError } = await client.from('release_sources').insert({
+      release_id: releaseId,
+      platform: input.platform,
+      url: input.url,
+      external_id: null,
+      source: 'claimed',
+    });
+
+    if (sourceError) {
+      console.error('[DB] createArtistRelease source insert failed:', sourceError.message);
+      // The release itself was created — better to hand back a release missing its one link
+      // than to lose the title/date/type the artist just entered.
+      return { ok: true, releaseId };
+    }
+
+    return { ok: true, releaseId };
+  } catch (error) {
+    console.error('[DB] createArtistRelease error:', error);
+    return { ok: false, error: 'Unexpected error' };
   }
 }
 
@@ -1452,7 +2754,9 @@ export interface ArtistPageRelease {
   datePrecision: string | null;
   status: string;
   artworkUrl: string | null;
-  offers: { price: number | null; currency: string | null; availability: string }[];
+  // Platform attribution kept per-source (not flattened) so the UI can show *where* a release
+  // is available, not just the cheapest number across everywhere it happens to be sold.
+  sources: { platform: string; offers: { price: number | null; currency: string | null; availability: string }[] }[];
 }
 
 /**
@@ -1478,7 +2782,7 @@ export async function getArtistReleases(
       .from('releases')
       .select(
         'slug, title, release_type, release_date, date_precision, status, artwork_url,' +
-        ' release_sources ( release_offers ( price, currency, availability ) )',
+        ' release_sources ( platform, release_offers ( price, currency, availability ) )',
         { count: 'exact' }
       )
       .eq('artist_id', artistId)
@@ -1500,7 +2804,10 @@ export async function getArtistReleases(
       date_precision: string | null;
       status: string;
       artwork_url: string | null;
-      release_sources: { release_offers: { price: number | null; currency: string | null; availability: string }[] | null }[] | null;
+      release_sources: {
+        platform: string;
+        release_offers: { price: number | null; currency: string | null; availability: string }[] | null;
+      }[] | null;
     };
 
     // Through `unknown`: PostgREST types a nested select as a union that includes an error
@@ -1513,7 +2820,7 @@ export async function getArtistReleases(
       datePrecision: r.date_precision,
       status: r.status,
       artworkUrl: r.artwork_url,
-      offers: (r.release_sources || []).flatMap(s => s.release_offers || []),
+      sources: (r.release_sources || []).map(s => ({ platform: s.platform, offers: s.release_offers || [] })),
     }));
 
     return { releases, total: count ?? releases.length };
