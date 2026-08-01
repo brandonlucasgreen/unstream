@@ -14,6 +14,7 @@ import {
 } from './search-parsers';
 import {
   deriveStatus,
+  mapMusicBrainzReleaseType,
   mapReleaseType,
   parseReleaseDate,
   releaseMatchKey,
@@ -306,4 +307,263 @@ export function bandcampMusicUrl(artistUrl: string): string | null {
   } catch {
     return null;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Discogs — physical formats, editions, real selling prices, master IDs for dedup
+// ---------------------------------------------------------------------------
+//
+// Two-tier pass, same shape as Bandcamp's grid-then-detail split, because the underlying cost
+// structure is the same: `/artists/{id}/releases` is cheap and gives a whole discography in a
+// couple of paginated requests, while price and format data live one request per release. The
+// difference from Bandcamp is *what* the cheap pass gives us for free: `main_release`, which
+// means the detail pass doesn't need a second lookup to find the release behind a master.
+//
+// Filtered to `role: 'Main'` and `type: 'master'` throughout — an artist's raw releases list
+// can run into the thousands once every pressing, region and reissue is counted individually
+// (docs/specs/unstream-releases-v1-scope.md §10 measured 3,241 for one artist), and Discogs
+// masters have already done the "these forty pressings are one album" work for us.
+
+/** One entry from `GET /artists/{id}/releases`. */
+export interface DiscogsArtistReleaseEntry {
+  id: number;
+  type?: string;
+  main_release?: number;
+  title: string;
+  year?: number;
+  role?: string;
+  format?: string;
+}
+
+/** A master release ready to become (or merge into) a catalog row. */
+export interface DiscogsMasterCandidate {
+  title: string;
+  slug: string;
+  matchKey: string;
+  releaseType: ReleaseType;
+  releaseDate: string | null;
+  datePrecision: DatePrecision;
+  status: ReleaseStatus;
+  masterId: string;
+  /** The specific release Discogs treats as this master's representative pressing — the id
+   *  the detail pass fetches for price and format data. */
+  mainReleaseId: string;
+}
+
+/**
+ * Map an artist's Discogs discography listing into master-release candidates.
+ *
+ * Masters lacking `main_release` are dropped rather than kept with no way to price them — a
+ * master row that can never gain an offer is a dead end, and Discogs omits this field only for
+ * malformed or withdrawn masters.
+ */
+export function ingestDiscogsMasters(
+  entries: DiscogsArtistReleaseEntry[],
+  now: Date = new Date()
+): DiscogsMasterCandidate[] {
+  const out: DiscogsMasterCandidate[] = [];
+  const takenSlugs = new Set<string>();
+  const seenMasters = new Set<string>();
+
+  for (const entry of entries) {
+    if (entry.role !== 'Main' || entry.type !== 'master') continue;
+    if (!entry.main_release) continue;
+
+    const masterId = String(entry.id);
+    // Discogs' pagination has repeated an id across pages before; a page-boundary is not a
+    // guarantee the same master won't be seen twice in one run.
+    if (seenMasters.has(masterId)) continue;
+    seenMasters.add(masterId);
+
+    const matchKey = releaseMatchKey(entry.title);
+    if (!matchKey) continue;
+
+    const { date, precision } = entry.year
+      ? parseReleaseDate(String(entry.year), now)
+      : { date: null, precision: 'unknown' as DatePrecision };
+
+    const slug = uniqueReleaseSlug(entry.title, takenSlugs);
+    takenSlugs.add(slug);
+
+    out.push({
+      title: entry.title,
+      slug,
+      matchKey,
+      releaseType: mapDiscogsFormatToReleaseType(entry.format, entry.title),
+      releaseDate: date,
+      datePrecision: precision,
+      status: deriveStatus(date, false, now),
+      masterId,
+      mainReleaseId: String(entry.main_release),
+    });
+  }
+
+  return out;
+}
+
+/**
+ * Discogs' artist-releases listing carries no dedicated release-type field — only a free-text
+ * format string like "Vinyl, LP, Album" or "CD, Compilation". Parsed the same defensively as
+ * `mapOfferFormat`: known keywords win, anything unrecognized becomes 'other' rather than a
+ * guess. Falls back to scanning the title too, since compilations and live albums often say so
+ * in the format string but occasionally only in the title ("... (Live)").
+ */
+export function mapDiscogsFormatToReleaseType(
+  format: string | null | undefined,
+  title: string | null | undefined
+): ReleaseType {
+  const label = `${format ?? ''} ${title ?? ''}`.toLowerCase();
+  if (!label.trim()) return 'other';
+
+  if (/\bcompilation\b/.test(label)) return 'compilation';
+  if (/\blive\b/.test(label)) return 'live';
+  if (/\bremix/.test(label)) return 'remix';
+  if (/\bep\b/.test(label)) return 'ep';
+  if (/\bsingle\b/.test(label)) return 'single';
+  if (/\balbum\b/.test(label)) return 'album';
+
+  return 'other';
+}
+
+/** What `GET /releases/{id}` gives us for one master's representative pressing. */
+export interface DiscogsReleaseDetailRaw {
+  released?: string | null;
+  year?: number | null;
+  formats?: { name?: string; descriptions?: string[] }[] | null;
+  num_for_sale?: number | null;
+  lowest_price?: number | null;
+}
+
+export interface DiscogsReleaseDetail {
+  releaseDate: string | null;
+  datePrecision: DatePrecision;
+  status: ReleaseStatus;
+  offers: IngestedOffer[];
+}
+
+/**
+ * Map one Discogs release's own page into a date and (at most one) offer.
+ *
+ * `num_for_sale` and `lowest_price` describe secondhand marketplace listings for the **whole
+ * release**, not broken down by format — unlike Bandcamp, which prices each format on its own
+ * release page. Only one offer is emitted, keyed to the release's first listed format, rather
+ * than repeating the same aggregate price across every format in a multi-format pressing (a
+ * CD+book bundle showing "CD $5" and "book $5" as if either were separately buyable for $5
+ * would be the false-precision mistake this codebase exists to avoid).
+ *
+ * Zero current listings is reported as `unknown`, not `sold_out` — "sold out" implies stock
+ * existed and ran out, but a release can simply have no active marketplace listings today
+ * without ever having been withdrawn.
+ */
+export function ingestDiscogsReleaseDetail(
+  raw: DiscogsReleaseDetailRaw,
+  now: Date = new Date()
+): DiscogsReleaseDetail {
+  const dateSource = raw.released || (raw.year ? String(raw.year) : null);
+  const { date, precision } = parseReleaseDate(dateSource, now);
+
+  const offers: IngestedOffer[] = [];
+  const primaryFormat = raw.formats?.[0];
+  if (primaryFormat) {
+    const price = typeof raw.lowest_price === 'number' ? raw.lowest_price : null;
+    const availability: OfferAvailability =
+      price !== null && (raw.num_for_sale ?? 0) > 0 ? 'available' : 'unknown';
+
+    offers.push({
+      format: mapDiscogsFormatName(primaryFormat.name, primaryFormat.descriptions),
+      price,
+      // Discogs' public (unauthenticated) release endpoint has no currency field to read;
+      // its marketplace figures default to USD for requests with no `curr_abbr` override.
+      currency: price !== null ? 'USD' : null,
+      availability,
+    });
+  }
+
+  return {
+    releaseDate: date,
+    datePrecision: precision,
+    status: deriveStatus(date, false, now),
+    offers,
+  };
+}
+
+const DISCOGS_FORMAT_NAMES: Record<string, OfferFormat> = {
+  vinyl: 'vinyl',
+  cd: 'cd',
+  'cd-r': 'cd',
+  cassette: 'cassette',
+  file: 'digital',
+};
+
+/** Discogs' `formats[].name` (plus its free-text descriptions) onto our offer formats. */
+export function mapDiscogsFormatName(
+  name: string | null | undefined,
+  descriptions?: string[] | null
+): OfferFormat {
+  const mapped = name ? DISCOGS_FORMAT_NAMES[name.toLowerCase().trim()] : undefined;
+  if (mapped) return mapped;
+
+  const label = (descriptions ?? []).join(' ').toLowerCase();
+  if (label.includes('book') || label.includes('zine')) return 'book';
+  if (label.includes('shirt') || label.includes('poster') || label.includes('box set')) return 'merch';
+
+  return 'other';
+}
+
+// ---------------------------------------------------------------------------
+// MusicBrainz — release groups, MBIDs, partial dates
+// ---------------------------------------------------------------------------
+//
+// Enrichment only: MusicBrainz never creates a release row on its own. It has no purchase
+// link to offer, and a release page with no source to buy from is a worse outcome than not
+// having the page at all. Its job is filling in what Bandcamp and Discogs can't give
+// precisely — a release-group MBID as a hard identity anchor for future dedup, plus dates at
+// whatever precision MusicBrainz actually has (year-only and month-only are common, and
+// `date_precision` exists specifically so this module never has to pad one into a fabricated
+// day).
+
+/** One entry from `GET /ws/2/release-group?artist={mbid}&inc=...`. */
+export interface MusicBrainzReleaseGroupRaw {
+  id: string;
+  title: string;
+  'primary-type'?: string | null;
+  'secondary-types'?: string[] | null;
+  'first-release-date'?: string | null;
+}
+
+/** An MBID-anchored enrichment for a release we may or may not already have. */
+export interface MusicBrainzReleaseGroupEnrichment {
+  matchKey: string;
+  releaseType: ReleaseType;
+  releaseDate: string | null;
+  datePrecision: DatePrecision;
+  mbid: string;
+}
+
+export function ingestMusicBrainzReleaseGroups(
+  groups: MusicBrainzReleaseGroupRaw[],
+  now: Date = new Date()
+): MusicBrainzReleaseGroupEnrichment[] {
+  const out: MusicBrainzReleaseGroupEnrichment[] = [];
+  const seen = new Set<string>();
+
+  for (const group of groups) {
+    if (!group.id || seen.has(group.id)) continue;
+    seen.add(group.id);
+
+    const matchKey = releaseMatchKey(group.title);
+    if (!matchKey) continue;
+
+    const { date, precision } = parseReleaseDate(group['first-release-date'], now);
+
+    out.push({
+      matchKey,
+      releaseType: mapMusicBrainzReleaseType(group['primary-type'], group['secondary-types']),
+      releaseDate: date,
+      datePrecision: precision,
+      mbid: group.id,
+    });
+  }
+
+  return out;
 }

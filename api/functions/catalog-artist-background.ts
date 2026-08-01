@@ -13,7 +13,9 @@
 import { timingSafeEqual } from 'crypto';
 import {
   claimArtistForCatalog,
-  getArtistBandcampUrl,
+  getArtistForCatalog,
+  persistDiscogsReleases,
+  persistMusicBrainzEnrichment,
   persistReleaseDetail,
   persistReleases,
   recordCatalogOutcome,
@@ -22,8 +24,20 @@ import {
 } from './db';
 import { isUrlHostnameAllowed } from './middleware';
 import { safeFetch, safeHostname } from './safe-fetch';
-import { bandcampMusicUrl, ingestBandcampDetail, ingestBandcampGrid } from './release-ingest';
+import {
+  bandcampMusicUrl,
+  ingestBandcampDetail,
+  ingestBandcampGrid,
+  ingestDiscogsMasters,
+  ingestDiscogsReleaseDetail,
+  ingestMusicBrainzReleaseGroups,
+  type DiscogsArtistReleaseEntry,
+  type DiscogsReleaseDetailRaw,
+  type MusicBrainzReleaseGroupRaw,
+} from './release-ingest';
 import { isCatalogEnabled } from './request-catalog';
+import { musicBrainzArtistQuery, normalizeForComparison } from './search-utils';
+import { extractDiscogsArtistId } from '../search/enrichment';
 
 /** Ceiling on artists per invocation, so one call can't become an unbounded crawl. */
 const MAX_ARTISTS_PER_RUN = 25;
@@ -65,6 +79,43 @@ interface DetailBudget {
   fetchesLeft: number;
   deadline: number;
 }
+
+// --- Discogs + MusicBrainz enrichment budgets ---------------------------------
+//
+// Both ride along after Bandcamp within the same per-artist catalog run, sharing the
+// invocation's 15-minute Netlify ceiling with Bandcamp's own 9-minute detail budget above.
+// Neither ever fails the artist's run: a MusicBrainz hiccup or a Discogs rate-limit response
+// is worth logging, not worth discarding Bandcamp data this run already wrote.
+
+const DISCOGS_USER_AGENT = 'Unstream/1.0 (https://unstream.stream - ethical music finder)';
+const MUSICBRAINZ_USER_AGENT = 'Unstream/1.0 (https://unstream.stream - ethical music finder)';
+
+/** Sanity check before an MBID from MusicBrainz's own response is interpolated into a URL. */
+const MB_MBID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Discogs allows 25 req/min unauthenticated; paced well under that with margin to spare. */
+const DELAY_BETWEEN_DISCOGS_FETCHES_MS = 2_600;
+
+/** Filtered to `role: Main` + `type: master` per-artist, so this bounds priced releases, not raw listing rows. */
+const MAX_DISCOGS_MASTERS_PER_ARTIST = 5;
+
+/** Invocation-wide, list + detail requests combined. */
+const MAX_DISCOGS_FETCHES_PER_RUN = 30;
+
+/** How many raw (unfiltered) rows to read from `/artists/{id}/releases` before stopping. */
+const MAX_DISCOGS_LIST_PAGES = 2;
+
+interface DiscogsBudget {
+  fetchesLeft: number;
+  deadline: number;
+}
+
+/**
+ * Stop *starting* Discogs or MusicBrainz work for a new artist this long into the invocation —
+ * leaving headroom on top of Bandcamp's own 9-minute detail budget so a 25-artist batch ends
+ * by finishing rather than being killed mid-write.
+ */
+const ENRICHMENT_CUTOFF_MS = 13 * 60_000;
 
 function isAuthorized(header: string | undefined): boolean {
   // Reuses the secret this repo already has for internal function-to-function calls
@@ -128,6 +179,11 @@ export async function handler(event: {
     fetchesLeft: MAX_DETAIL_FETCHES_PER_RUN,
     deadline: Date.now() + DETAIL_BUDGET_MS,
   };
+  const discogsBudget: DiscogsBudget = {
+    fetchesLeft: MAX_DISCOGS_FETCHES_PER_RUN,
+    deadline: Date.now() + ENRICHMENT_CUTOFF_MS,
+  };
+  const enrichmentDeadline = Date.now() + ENRICHMENT_CUTOFF_MS;
 
   for (const [index, artistId] of artistIds.entries()) {
     // Cooldown, hourly cap and claim all happen here rather than at the call site, so the
@@ -140,7 +196,7 @@ export async function handler(event: {
     if (index > 0) await sleep(DELAY_BETWEEN_ARTISTS_MS);
 
     try {
-      const found = await catalogArtist(artistId, budget);
+      const found = await catalogArtist(artistId, budget, discogsBudget, enrichmentDeadline);
       if (found === null) {
         skipped++;
       } else {
@@ -158,30 +214,93 @@ export async function handler(event: {
 }
 
 /**
- * Catalog one artist. Returns the release count, or null when there was nothing to do.
+ * Catalog one artist across every source we have a link for. Returns the total release count
+ * (Bandcamp + Discogs combined), or null when there was nothing to do at all.
  *
- * @throws on a genuine failure, so the caller records it against the backoff counter.
+ * The three sources are deliberately independent: Bandcamp remains the one whose own failures
+ * can still surface as a thrown error (see `catalogBandcamp`), but that error is caught here
+ * rather than left to unwind the whole function, because a Bandcamp bot challenge has nothing
+ * to do with whether Discogs or MusicBrainz can answer this run. Only when *nothing* came of
+ * the run — Bandcamp failed and Discogs/MusicBrainz found nothing to add — does the run count
+ * as a failure against the backoff counter.
  */
-async function catalogArtist(artistId: string, budget: DetailBudget): Promise<number | null> {
-  const storedUrl = await getArtistBandcampUrl(artistId);
-  if (!storedUrl) {
-    await recordCatalogOutcome(artistId, { error: 'no bandcamp link stored' });
+async function catalogArtist(
+  artistId: string,
+  budget: DetailBudget,
+  discogsBudget: DiscogsBudget,
+  enrichmentDeadline: number
+): Promise<number | null> {
+  const artist = await getArtistForCatalog(artistId);
+  if (!artist) {
+    await recordCatalogOutcome(artistId, { error: 'artist not found' });
+    return null;
+  }
+  if (!artist.bandcampUrl && !artist.discogsUrl) {
+    await recordCatalogOutcome(artistId, { error: 'no bandcamp or discogs link stored' });
     return null;
   }
 
+  let totalFound = 0;
+  let totalDetailed = 0;
+  let bandcampError: string | null = null;
+
+  if (artist.bandcampUrl) {
+    try {
+      const { found, detailed } = await catalogBandcamp(artistId, artist.bandcampUrl, budget);
+      totalFound += found;
+      totalDetailed += detailed;
+    } catch (error) {
+      bandcampError = error instanceof Error ? error.message : String(error);
+      console.error(`[catalog] bandcamp pass failed for artist ${artistId}:`, bandcampError);
+    }
+  }
+
+  // Stop *starting* new enrichment work once the invocation is close to Netlify's ceiling —
+  // an artist skipped here simply gets picked up by the artist's normal 7-day recatalog
+  // cooldown next time, rather than the whole batch being killed mid-write.
+  if (Date.now() < enrichmentDeadline) {
+    if (artist.discogsUrl) {
+      totalFound += await catalogDiscogs(artistId, artist.discogsUrl, discogsBudget);
+    }
+    await catalogMusicBrainz(artistId, artist.name);
+  }
+
+  if (bandcampError && totalFound === 0) {
+    await recordCatalogOutcome(artistId, { error: bandcampError });
+    return null;
+  }
+
+  await recordCatalogOutcome(artistId, {
+    releasesFound: totalFound,
+    releasesDetailed: totalDetailed,
+  });
+  return totalFound;
+}
+
+/**
+ * The Bandcamp pass: grid, then a budgeted detail pass over individual release pages.
+ *
+ * @throws on a genuine failure — a bot challenge or an unreachable fetch — so the caller can
+ * tell "Bandcamp declined to answer" apart from "Bandcamp said zero releases".
+ */
+async function catalogBandcamp(
+  artistId: string,
+  storedUrl: string,
+  budget: DetailBudget
+): Promise<{ found: number; detailed: number }> {
   // The stored URL is not automatically trustworthy: a claimed artist can save any http(s)
   // URL to their profile links, so a row labelled 'bandcamp' may not be Bandcamp at all.
   // The allowlist answers "is this really Bandcamp"; safeFetch separately answers "is this
   // safe to fetch". Both are needed — they are different questions.
   if (!isUrlHostnameAllowed(storedUrl)) {
-    await recordCatalogOutcome(artistId, { error: `stored bandcamp url not allowlisted: ${safeHostname(storedUrl)}` });
-    return null;
+    console.warn(`[catalog] stored bandcamp url not allowlisted: ${safeHostname(storedUrl)}`);
+    return { found: 0, detailed: 0 };
   }
 
   const musicUrl = bandcampMusicUrl(storedUrl);
   if (!musicUrl) {
-    await recordCatalogOutcome(artistId, { error: 'could not derive /music url' });
-    return null;
+    console.warn(`[catalog] could not derive /music url for artist ${artistId}`);
+    return { found: 0, detailed: 0 };
   }
 
   const response = await safeFetch(musicUrl, 10_000);
@@ -197,19 +316,145 @@ async function catalogArtist(artistId: string, budget: DetailBudget): Promise<nu
     // Throwing marks it a failure so it backs off and retries; recording it as a successful
     // zero would poison the cooldown with a false negative for a week.
     if (outcome.reason === 'bot_challenge') throw new Error('bandcamp bot challenge');
-
-    await recordCatalogOutcome(artistId, { releasesFound: 0 });
-    return 0;
+    return { found: 0, detailed: 0 };
   }
 
   const written = await persistReleases(artistId, outcome.releases);
   const detailed = await catalogDetails(written, landedUrl, budget);
+  return { found: written.length, detailed };
+}
 
-  await recordCatalogOutcome(artistId, {
-    releasesFound: written.length,
-    releasesDetailed: detailed,
-  });
-  return written.length;
+/**
+ * The Discogs pass: a cheap paginated listing (filtered to `role: Main` + `type: master`),
+ * then a budgeted detail pass over the newest masters for price and format data.
+ *
+ * Never throws — a Discogs hiccup is worth logging, not worth failing an artist whose
+ * Bandcamp pass may have already succeeded this run.
+ */
+async function catalogDiscogs(artistId: string, discogsUrl: string, budget: DiscogsBudget): Promise<number> {
+  const discogsArtistId = extractDiscogsArtistId(discogsUrl);
+  if (!discogsArtistId) return 0;
+
+  try {
+    const entries: DiscogsArtistReleaseEntry[] = [];
+
+    for (let page = 1; page <= MAX_DISCOGS_LIST_PAGES; page++) {
+      if (budget.fetchesLeft <= 0 || Date.now() > budget.deadline) break;
+      if (page > 1) await sleep(DELAY_BETWEEN_DISCOGS_FETCHES_MS);
+      budget.fetchesLeft--;
+
+      const listUrl = `https://api.discogs.com/artists/${discogsArtistId}/releases?per_page=100&page=${page}&sort=year&sort_order=desc`;
+      const response = await globalThis.fetch(listUrl, { headers: { 'User-Agent': DISCOGS_USER_AGENT } });
+      if (!response.ok) {
+        console.warn(`[catalog] discogs artist-releases responded ${response.status} for artist ${artistId}`);
+        break;
+      }
+
+      const data = (await response.json()) as {
+        releases?: DiscogsArtistReleaseEntry[];
+        pagination?: { pages?: number };
+      };
+      entries.push(...(data.releases ?? []));
+      if (page >= (data.pagination?.pages ?? 1)) break;
+    }
+
+    const masters = ingestDiscogsMasters(entries).slice(0, MAX_DISCOGS_MASTERS_PER_ARTIST);
+    if (masters.length === 0) return 0;
+
+    const written = await persistDiscogsReleases(
+      artistId,
+      masters.map(m => ({
+        title: m.title,
+        slug: m.slug,
+        matchKey: m.matchKey,
+        releaseType: m.releaseType,
+        releaseDate: m.releaseDate,
+        datePrecision: m.datePrecision,
+        status: m.status,
+        masterId: m.masterId,
+        mainReleaseId: m.mainReleaseId,
+      }))
+    );
+
+    for (const release of written) {
+      // Only price a master once; re-pricing rides the same cooldown as the rest of this
+      // artist's catalog rather than its own schedule.
+      if (release.detailCheckedAt) continue;
+
+      if (budget.fetchesLeft <= 0 || Date.now() > budget.deadline) {
+        console.log(`[catalog] discogs detail budget spent for artist ${artistId}`);
+        break;
+      }
+      await sleep(DELAY_BETWEEN_DISCOGS_FETCHES_MS);
+      budget.fetchesLeft--;
+
+      try {
+        const releaseId = release.url.split('/').pop();
+        const detailResponse = await globalThis.fetch(`https://api.discogs.com/releases/${releaseId}`, {
+          headers: { 'User-Agent': DISCOGS_USER_AGENT },
+        });
+        if (!detailResponse.ok) continue;
+
+        const detail = ingestDiscogsReleaseDetail((await detailResponse.json()) as DiscogsReleaseDetailRaw);
+        await persistReleaseDetail(release, detail);
+      } catch (error) {
+        console.warn(
+          '[catalog] discogs detail fetch failed:',
+          error instanceof Error ? error.message : String(error)
+        );
+      }
+    }
+
+    return written.length;
+  } catch (error) {
+    console.warn('[catalog] discogs ingest failed:', error instanceof Error ? error.message : String(error));
+    return 0;
+  }
+}
+
+/**
+ * The MusicBrainz pass: enrichment only. Finds this artist's release groups and merges in
+ * whatever they add to releases we already have — never creates a new one, since MusicBrainz
+ * has no purchase link to offer (see `persistMusicBrainzEnrichment`).
+ *
+ * Two requests, spaced by MusicBrainz's mandatory ~1/sec rate limit — the same pacing
+ * `search-musicbrainz.ts` already uses against the same API. Never throws.
+ */
+async function catalogMusicBrainz(artistId: string, artistName: string): Promise<void> {
+  try {
+    const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=${encodeURIComponent(musicBrainzArtistQuery(artistName))}&fmt=json&limit=1`;
+    const searchResponse = await globalThis.fetch(searchUrl, { headers: { 'User-Agent': MUSICBRAINZ_USER_AGENT } });
+    if (!searchResponse.ok) return;
+
+    const searchData = (await searchResponse.json()) as { artists?: { id: string; name: string; score: number }[] };
+    const artist = searchData.artists?.[0];
+    if (!artist || artist.score < 95 || !MB_MBID_PATTERN.test(artist.id)) return;
+
+    // Same over-eager-match guard as search-musicbrainz.ts: a low-confidence name match would
+    // attach some other artist's release dates and MBIDs to this one's catalog.
+    const queryNormalized = normalizeForComparison(artistName);
+    const artistNormalized = normalizeForComparison(artist.name);
+    const isNameMatch =
+      queryNormalized === artistNormalized ||
+      (queryNormalized.includes(artistNormalized) && artistNormalized.length > queryNormalized.length * 0.7) ||
+      (artistNormalized.includes(queryNormalized) && queryNormalized.length > artistNormalized.length * 0.7);
+    if (!isNameMatch) return;
+
+    await sleep(1_100); // MusicBrainz's mandatory ~1 req/sec
+
+    const rgUrl = `https://musicbrainz.org/ws/2/release-group?artist=${artist.id}&fmt=json&limit=100`;
+    const rgResponse = await globalThis.fetch(rgUrl, { headers: { 'User-Agent': MUSICBRAINZ_USER_AGENT } });
+    if (!rgResponse.ok) return;
+
+    const rgData = (await rgResponse.json()) as { 'release-groups'?: MusicBrainzReleaseGroupRaw[] };
+    const groups = ingestMusicBrainzReleaseGroups(rgData['release-groups'] ?? []);
+    if (groups.length === 0) return;
+
+    const touched = await persistMusicBrainzEnrichment(artistId, groups);
+    if (touched > 0) console.log(`[catalog] musicbrainz enriched ${touched} release(s) for artist ${artistId}`);
+  } catch (error) {
+    console.warn('[catalog] musicbrainz enrichment failed:', error instanceof Error ? error.message : String(error));
+  }
 }
 
 /**

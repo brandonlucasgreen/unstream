@@ -316,6 +316,9 @@ export const ALLOWED_OUTBOUND_HOSTNAMES = new Set([
   'www.beatport.com',
   'discogs.com',
   'www.discogs.com',
+  // Discogs' actual database API (releases, masters, artist discographies) lives on this
+  // subdomain, distinct from the www host used for social-link scraping above.
+  'api.discogs.com',
   // Music metadata
   'musicbrainz.org',
   'beta.musicbrainz.org',

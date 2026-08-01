@@ -3,6 +3,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { normalizeUrlForMatch, urlMatchPrefilter } from './search-utils';
+import { isFuzzyReleaseMatch } from './release-utils';
 import { requestArtistCatalog } from './request-catalog';
 
 let supabase: SupabaseClient | null = null;
@@ -797,29 +798,345 @@ export async function persistReleaseDetail(
   }
 }
 
-/** The stored Bandcamp link for an artist, if we have one. */
-export async function getArtistBandcampUrl(artistId: string): Promise<string | null> {
+/** What the Discogs and MusicBrainz catalog passes need before they can start. */
+export interface ArtistForCatalog {
+  name: string;
+  bandcampUrl: string | null;
+  discogsUrl: string | null;
+}
+
+/**
+ * One read for everything cataloging needs to know about an artist: the display name
+ * (Discogs and MusicBrainz are both looked up by name, not by a stored id) plus whichever of
+ * the Bandcamp/Discogs links are on file. Returns null only when the artist row itself is
+ * missing — a source link being absent is a normal, independent per-source outcome, not a
+ * reason to fail the whole lookup.
+ */
+export async function getArtistForCatalog(artistId: string): Promise<ArtistForCatalog | null> {
   const client = getClient();
   if (!client) return null;
 
   try {
-    const { data, error } = await client
-      .from('artist_links')
-      .select('url')
-      .eq('artist_id', artistId)
-      .eq('platform', 'bandcamp')
-      .maybeSingle();
+    const [{ data: artistRow, error: artistError }, { data: linkRows, error: linkError }] = await Promise.all([
+      client.from('artists').select('name').eq('id', artistId).maybeSingle(),
+      client.from('artist_links').select('platform, url').eq('artist_id', artistId).in('platform', ['bandcamp', 'discogs']),
+    ]);
 
-    if (error) {
-      console.error('[DB] getArtistBandcampUrl failed:', error.message);
+    if (artistError || !artistRow) {
+      if (artistError) console.error('[DB] getArtistForCatalog artist read failed:', artistError.message);
       return null;
     }
-    return (data as { url: string } | null)?.url ?? null;
+    if (linkError) console.error('[DB] getArtistForCatalog link read failed:', linkError.message);
+
+    const links = (linkRows as { platform: string; url: string }[] | null) || [];
+    return {
+      name: (artistRow as { name: string }).name,
+      bandcampUrl: links.find(l => l.platform === 'bandcamp')?.url ?? null,
+      discogsUrl: links.find(l => l.platform === 'discogs')?.url ?? null,
+    };
   } catch (error) {
-    console.error('[DB] getArtistBandcampUrl error:', error);
+    console.error('[DB] getArtistForCatalog error:', error);
     return null;
   }
 }
+
+interface DiscogsReleaseToPersist {
+  title: string;
+  slug: string;
+  matchKey: string;
+  releaseType: string;
+  releaseDate: string | null;
+  datePrecision: string;
+  status: string;
+  masterId: string;
+  mainReleaseId: string;
+}
+
+/**
+ * Write a Discogs catalog pass, merging into whatever's already there rather than replacing
+ * it — same shape and same three rules as `persistReleases`, plus a fourth this source needs
+ * and Bandcamp didn't, because Bandcamp is the only source in the catalog:
+ *
+ * 4. **Prefer the hard identifier over the title guess.** `discogs_master_id` is Discogs'
+ *    own "these pressings are one album" conclusion — tier 1 in the dedup scheme (spec §4).
+ *    Only fall back to `(release_type, match_key)` — tier 2 — when this artist has no row
+ *    with that master id yet, and only when that tier-2 candidate doesn't already carry a
+ *    *different* master id (which would mean the title match is coincidental, not the same
+ *    release). And when nothing matches exactly but a title is merely *close* to an existing
+ *    one — `isFuzzyReleaseMatch` — this never merges either: it inserts a new row and flags
+ *    both `needs_review`, which is tier 3. A human decides; the catalog never silently
+ *    asserts two different albums are the same one.
+ */
+export async function persistDiscogsReleases(
+  artistId: string,
+  releases: DiscogsReleaseToPersist[]
+): Promise<PersistedRelease[]> {
+  const client = getClient();
+  if (!client || releases.length === 0) return [];
+
+  try {
+    const { data: existingRows, error: readError } = await client
+      .from('releases')
+      .select('id, slug, match_key, release_type, release_date, curated_fields, discogs_master_id')
+      .eq('artist_id', artistId);
+
+    if (readError) {
+      console.error('[DB] persistDiscogsReleases read failed:', readError.message);
+      return [];
+    }
+
+    type ExistingRow = {
+      id: string;
+      slug: string;
+      match_key: string;
+      release_type: string;
+      release_date: string | null;
+      curated_fields: string[] | null;
+      discogs_master_id: string | null;
+    };
+    const existing = (existingRows as ExistingRow[]) || [];
+    const byMasterId = new Map(
+      existing.filter(r => r.discogs_master_id).map(r => [r.discogs_master_id as string, r])
+    );
+    const byIdentity = new Map(existing.map(r => [`${r.release_type}:${r.match_key}`, r]));
+    const byType = new Map<string, ExistingRow[]>();
+    for (const row of existing) {
+      const bucket = byType.get(row.release_type);
+      if (bucket) bucket.push(row);
+      else byType.set(row.release_type, [row]);
+    }
+    const takenSlugs = new Set(existing.map(r => r.slug));
+
+    const written: PersistedRelease[] = [];
+
+    for (const release of releases) {
+      let prior = byMasterId.get(release.masterId);
+      let matchedByMasterId = Boolean(prior);
+
+      if (!prior) {
+        const exact = byIdentity.get(`${release.releaseType}:${release.matchKey}`);
+        if (exact && (!exact.discogs_master_id || exact.discogs_master_id === release.masterId)) {
+          prior = exact;
+        }
+      }
+
+      if (!prior) {
+        // Tier 3: nothing exact, but something close enough to warrant a human look. Never
+        // merge — insert a new row below and flag both sides, rather than guessing.
+        const candidates = byType.get(release.releaseType) ?? [];
+        const fuzzy = candidates.find(c => isFuzzyReleaseMatch(c.match_key, release.matchKey));
+        if (fuzzy) {
+          const { error: flagError } = await client
+            .from('releases')
+            .update({ needs_review: true })
+            .eq('id', fuzzy.id);
+          if (flagError) console.error('[DB] persistDiscogsReleases fuzzy-flag failed:', flagError.message);
+        }
+      }
+
+      let releaseId: string;
+      let curatedFields: string[];
+
+      if (prior) {
+        const curated = new Set(prior.curated_fields ?? []);
+        curatedFields = [...curated];
+        const patch: Record<string, unknown> = {};
+
+        // Title is only ever taken from a hard-identifier match (a re-crawl of a release we
+        // already know is this one). A tier-2 title-equality match means the two titles
+        // already normalize the same — overwriting risks nothing informative and risks
+        // clobbering a display-quality title Bandcamp already got right.
+        if (!curated.has('title') && matchedByMasterId) patch.title = release.title;
+        if (!prior.discogs_master_id) patch.discogs_master_id = release.masterId;
+        if (!curated.has('release_date') && release.releaseDate && !prior.release_date) {
+          patch.release_date = release.releaseDate;
+          patch.date_precision = release.datePrecision;
+        }
+
+        if (Object.keys(patch).length > 0) {
+          const { error } = await client.from('releases').update(patch).eq('id', prior.id);
+          if (error) {
+            console.error('[DB] persistDiscogsReleases update failed:', error.message);
+            continue;
+          }
+        }
+        releaseId = prior.id;
+      } else {
+        let slug = release.slug;
+        if (takenSlugs.has(slug)) slug = `${slug}-${release.matchKey.slice(0, 6)}`;
+        takenSlugs.add(slug);
+
+        const { data: inserted, error } = await client
+          .from('releases')
+          .insert({
+            artist_id: artistId,
+            title: release.title,
+            slug,
+            match_key: release.matchKey,
+            release_type: release.releaseType,
+            release_date: release.releaseDate,
+            date_precision: release.datePrecision,
+            status: release.status,
+            discogs_master_id: release.masterId,
+            source: 'auto',
+          })
+          .select('id')
+          .single();
+
+        if (error || !inserted) {
+          console.error('[DB] persistDiscogsReleases insert failed:', error?.message);
+          continue;
+        }
+        releaseId = (inserted as { id: string }).id;
+        curatedFields = [];
+
+        const createdRow: ExistingRow = {
+          id: releaseId,
+          slug,
+          match_key: release.matchKey,
+          release_type: release.releaseType,
+          release_date: release.releaseDate,
+          curated_fields: [],
+          discogs_master_id: release.masterId,
+        };
+        byMasterId.set(release.masterId, createdRow);
+        const bucket = byType.get(release.releaseType);
+        if (bucket) bucket.push(createdRow);
+        else byType.set(release.releaseType, [createdRow]);
+      }
+
+      const { data: sourceRow, error: sourceError } = await client
+        .from('release_sources')
+        .upsert(
+          {
+            release_id: releaseId,
+            platform: 'discogs',
+            // The specific pressing Discogs treats as this master's representative release —
+            // a real listing page, unlike the abstract master page.
+            url: `https://www.discogs.com/release/${release.mainReleaseId}`,
+            external_id: release.masterId,
+            last_seen_at: new Date().toISOString(),
+          },
+          { onConflict: 'release_id,platform' }
+        )
+        .select('id, url, detail_checked_at')
+        .single();
+
+      if (sourceError || !sourceRow) {
+        console.error('[DB] persistDiscogsReleases source upsert failed:', sourceError?.message);
+        continue;
+      }
+
+      const source = sourceRow as { id: string; url: string; detail_checked_at: string | null };
+      written.push({
+        releaseId,
+        sourceId: source.id,
+        url: source.url,
+        detailCheckedAt: source.detail_checked_at,
+        curatedFields,
+      });
+    }
+
+    return written;
+  } catch (error) {
+    console.error('[DB] persistDiscogsReleases error:', error);
+    return [];
+  }
+}
+
+interface MusicBrainzEnrichmentInput {
+  matchKey: string;
+  releaseType: string;
+  releaseDate: string | null;
+  datePrecision: string;
+  mbid: string;
+}
+
+/**
+ * Fill in what MusicBrainz knows about releases we already have: a date at whatever precision
+ * MusicBrainz actually carries, and the release-group MBID as a hard identity anchor for
+ * future dedup passes (including Discogs and Bandcamp re-crawls, once one of them also finds
+ * this MBID some other way).
+ *
+ * **Update-only, by design.** MusicBrainz has no purchase link to offer, so unlike Bandcamp
+ * and Discogs this never inserts a new release row — a release page with a date and nowhere
+ * to buy it would be a worse outcome than not having the page at all.
+ *
+ * Matches tier 1 (an existing `musicbrainz_release_group_id`) first, then tier 2
+ * (`release_type` + `match_key`) — and only when that tier-2 candidate doesn't already carry
+ * a *different* MBID, which would mean the title match is coincidental. Returns how many rows
+ * were touched.
+ */
+export async function persistMusicBrainzEnrichment(
+  artistId: string,
+  groups: MusicBrainzEnrichmentInput[]
+): Promise<number> {
+  const client = getClient();
+  if (!client || groups.length === 0) return 0;
+
+  try {
+    const { data: existingRows, error } = await client
+      .from('releases')
+      .select('id, match_key, release_type, release_date, curated_fields, musicbrainz_release_group_id')
+      .eq('artist_id', artistId);
+
+    if (error) {
+      console.error('[DB] persistMusicBrainzEnrichment read failed:', error.message);
+      return 0;
+    }
+
+    type ExistingRow = {
+      id: string;
+      match_key: string;
+      release_type: string;
+      release_date: string | null;
+      curated_fields: string[] | null;
+      musicbrainz_release_group_id: string | null;
+    };
+    const existing = (existingRows as ExistingRow[]) || [];
+    const byMbid = new Map(
+      existing.filter(r => r.musicbrainz_release_group_id).map(r => [r.musicbrainz_release_group_id as string, r])
+    );
+    const byIdentity = new Map(existing.map(r => [`${r.release_type}:${r.match_key}`, r]));
+
+    let touched = 0;
+
+    for (const group of groups) {
+      let row = byMbid.get(group.mbid);
+      if (!row) {
+        const candidate = byIdentity.get(`${group.releaseType}:${group.matchKey}`);
+        if (candidate && (!candidate.musicbrainz_release_group_id || candidate.musicbrainz_release_group_id === group.mbid)) {
+          row = candidate;
+        }
+      }
+      // MusicBrainz alone never creates a row — if nothing here matches, there's nothing yet
+      // to attach this enrichment to.
+      if (!row) continue;
+
+      const curated = new Set(row.curated_fields ?? []);
+      const patch: Record<string, unknown> = {};
+      if (!row.musicbrainz_release_group_id) patch.musicbrainz_release_group_id = group.mbid;
+      if (!curated.has('release_date') && group.releaseDate && !row.release_date) {
+        patch.release_date = group.releaseDate;
+        patch.date_precision = group.datePrecision;
+      }
+      if (Object.keys(patch).length === 0) continue;
+
+      const { error: updateError } = await client.from('releases').update(patch).eq('id', row.id);
+      if (updateError) {
+        console.error('[DB] persistMusicBrainzEnrichment update failed:', updateError.message);
+        continue;
+      }
+      touched++;
+    }
+
+    return touched;
+  } catch (error) {
+    console.error('[DB] persistMusicBrainzEnrichment error:', error);
+    return 0;
+  }
+}
+
 
 // --- Bandcamp slug-probe cache (UNS-152) ---
 
