@@ -134,22 +134,35 @@ export interface ArtistProfileBundle {
 }
 
 /**
- * Fetch the artist row + profile row + links for a claimed artist.
- * Returns null if the artist doesn't exist or isn't claimed.
+ * Fetch the artist row + profile row + links for an artist.
+ *
+ * Three outcomes, deliberately distinguishable — a caller that can't tell "no such artist" from
+ * "the database didn't answer" turns an outage into a page full of 404s that look like the truth:
+ *   { bundle }            — found
+ *   { bundle: null }      — no artist row with this slug
+ *   { failed: true }      — the lookup itself failed (no client, query error, exception)
  */
-export async function getArtistProfileBySlug(slug: string): Promise<ArtistProfileBundle | null> {
+export interface ArtistProfileLookup {
+  bundle: ArtistProfileBundle | null;
+  failed: boolean;
+}
+
+export async function getArtistProfileBySlug(slug: string): Promise<ArtistProfileLookup> {
   const client = getClient();
-  if (!client) return null;
+  // No service-role client means the credentials are missing, not that the artist is missing.
+  if (!client) return { bundle: null, failed: true };
 
   try {
-    // Find the artist row first
+    // Find the artist row first. maybeSingle() rather than single(): single() reports "0 rows" as
+    // an error, which is what made a genuine absence indistinguishable from a real failure.
     const { data: artist, error: artistError } = await client
       .from('artists')
       .select('*')
       .eq('slug', slug)
-      .single();
+      .maybeSingle();
 
-    if (artistError || !artist) return null;
+    if (artistError) return { bundle: null, failed: true };
+    if (!artist) return { bundle: null, failed: false };
 
     // Deliberately no `match_confidence === 'claimed'` filter. Unclaimed artists have a real row
     // and real links, and /artist/:slug renders them as the quiet card — the same page the
@@ -173,13 +186,16 @@ export async function getArtistProfileBySlug(slug: string): Promise<ArtistProfil
     ]);
 
     return {
-      artist: artistRow,
-      profile: (profileResult.data as ArtistProfileRow | null) ?? null,
-      links: (linksResult.data as LinkRow[]) || [],
+      bundle: {
+        artist: artistRow,
+        profile: (profileResult.data as ArtistProfileRow | null) ?? null,
+        links: (linksResult.data as LinkRow[]) || [],
+      },
+      failed: false,
     };
   } catch (error) {
     console.error('[DB] getArtistProfileBySlug error:', error);
-    return null;
+    return { bundle: null, failed: true };
   }
 }
 
