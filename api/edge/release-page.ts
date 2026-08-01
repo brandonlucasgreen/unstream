@@ -60,6 +60,12 @@ const CSS = `
   .site-header .header-search input:focus { outline: none; border-color: var(--accent); }
   .site-header .header-search button { border: 0; border-radius: 8px; padding: 8px 14px; background: var(--accent); color: #fff; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; }
   @media (max-width: 640px) { .site-header .header-search { display: none; } }
+  /* Unlike artist-page-static, this page has no SPA counterpart to hand real browsers off to
+     (see the note at the top of this file) — every visitor sees this exact header, so it's the
+     only place a signed-out fan following a release alert can reach the login page. */
+  .site-header .nav-right { display: flex; align-items: center; flex-shrink: 0; }
+  .site-header .nav-link { color: var(--muted); text-decoration: none; font-size: 14px; }
+  .site-header .nav-link:hover { color: var(--text); }
 
   .release-head { display: flex; gap: 20px; align-items: flex-start; }
   .release-art { width: 160px; height: 160px; flex-shrink: 0; border-radius: 12px; border: 1px solid var(--border); background: var(--bg2); object-fit: cover; }
@@ -315,6 +321,9 @@ export default async function handler(request: Request, context: Context) {
       <input type="text" name="q" placeholder="Search artists..." aria-label="Search artists" enterkeyhint="search">
       <button type="submit">Search</button>
     </form>
+    <div class="nav-right">
+      <a href="/login" class="nav-link">Login</a>
+    </div>
   </header>
 
   <div class="page-content">
