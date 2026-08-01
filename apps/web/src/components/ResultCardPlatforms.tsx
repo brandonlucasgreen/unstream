@@ -58,7 +58,7 @@ export function ResultCardPlatforms({ platforms, category, compact = false, onRe
           {category}
         </h4>
       )}
-      <div className="flex flex-wrap gap-2">
+      <div className="platform-pill-row">
         {visiblePlatforms.map(platform => (
           <PlatformBadge key={platform.sourceId} platform={platform} onRemoveLink={onRemoveLink} />
         ))}
@@ -72,7 +72,7 @@ export function ResultCardPlatforms({ platforms, category, compact = false, onRe
         </button>
       )}
       {showAll && hasMore && (
-        <div className="flex flex-wrap gap-2">
+        <div className="platform-pill-row">
           {platforms.slice(4).map(platform => (
             <PlatformBadge key={platform.sourceId} platform={platform} onRemoveLink={onRemoveLink} />
           ))}

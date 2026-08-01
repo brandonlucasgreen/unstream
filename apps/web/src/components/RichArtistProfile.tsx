@@ -183,9 +183,9 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
               {linkGroups.map((group, groupIndex) => (
                 <Fragment key={groupIndex}>
                   {groupIndex > 0 && <hr className="border-0 border-t border-border" />}
-                  <div className="flex flex-wrap items-center gap-2">
-                    {group.map(link => (
-                      <Fragment key={link.platform + link.url}>
+                  <div className="platform-pill-row">
+                    {group.map(link => {
+                      const badge = (
                         <SourceBadge
                           source={getSource(link.platform as SourceId)}
                           url={link.url}
@@ -193,11 +193,19 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
                           displayName={link.displayName ?? undefined}
                           onClick={() => handleLinkClick(link.platform)}
                         />
-                        {link.bandcampFriday && (
+                      );
+                      const key = link.platform + link.url;
+
+                      // The Bandcamp Friday label rides along in the same cell, so the
+                      // pill row stays one grid cell per platform on a phone.
+                      if (!link.bandcampFriday) return <Fragment key={key}>{badge}</Fragment>;
+                      return (
+                        <span key={key} className="flex items-center gap-2">
+                          {badge}
                           <span className="bandcamp-friday-label">Bandcamp Friday!</span>
-                        )}
-                      </Fragment>
-                    ))}
+                        </span>
+                      );
+                    })}
                   </div>
                 </Fragment>
               ))}

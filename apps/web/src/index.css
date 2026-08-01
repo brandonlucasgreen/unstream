@@ -185,7 +185,18 @@
   }
 
   .source-badge {
-    @apply inline-flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-colors;
+    /* min-height keeps every pill a 44px tap target and stops a row of pills with
+       and without a payout badge from looking ragged. */
+    @apply inline-flex items-center gap-2 min-h-11 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors;
+  }
+
+  /* Rows of platform pills (search results and the artist page).
+     Phones get one full-width pill per row, or two on a wide phone — a wrapped
+     flex row leaves a ragged staircase of odd widths at that size. From `sm` up
+     there's room for the pills to hug their own content again. */
+  .platform-pill-row {
+    @apply grid gap-2 sm:flex sm:flex-wrap;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   }
 
   .result-card {
@@ -253,6 +264,16 @@
     opacity: 1;
     visibility: visible;
     transition-delay: 0.25s;
+  }
+
+  /* The tooltip only opens on hover, so on a touch device it is unreachable —
+     but `visibility: hidden` still takes up layout, and a 180px tooltip on a
+     right-hand pill hung past the viewport and made the page scroll sideways.
+     Keep it out of the box model where it can never be shown. */
+  @media (hover: none) {
+    .payout-tooltip {
+      display: none;
+    }
   }
 
   /* Custom tooltip for AI policy badges */
