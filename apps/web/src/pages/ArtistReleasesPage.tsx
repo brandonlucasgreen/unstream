@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
@@ -32,6 +32,23 @@ interface OwnerRelease {
   sources: { platform: string; url: string }[];
 }
 
+interface CatalogState {
+  last_catalogued_at: string | null;
+  releases_found: number | null;
+  releases_detailed: number | null;
+  last_error: string | null;
+}
+
+interface CatalogInfo {
+  canTrigger: boolean;
+  state: CatalogState | null;
+  stateError: string | null;
+}
+
+/** How long to keep asking before giving up. A full catalogue with prices takes a few minutes. */
+const MAX_CATALOG_POLLS = 24;
+const CATALOG_POLL_INTERVAL_MS = 5000;
+
 /**
  * The artist-facing half of release curation (spec §11) — reachable from `ArtistEditPage` via
  * "Manage releases". Ingest never merges a suspected duplicate or overwrites a curated field
@@ -47,6 +64,7 @@ export function ArtistReleasesPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [catalog, setCatalog] = useState<CatalogInfo | null>(null);
 
   const fetchReleases = useCallback(async () => {
     if (!session?.access_token || !slug) return;
@@ -65,6 +83,7 @@ export function ArtistReleasesPage() {
 
       const data = await response.json();
       setReleases(data.releases || []);
+      setCatalog(data.catalog ?? null);
     } catch (err) {
       Sentry.captureException(err, { extra: { context: 'artistReleases.fetch' } });
       setError(err instanceof Error ? err.message : 'Failed to load releases.');
@@ -192,10 +211,182 @@ export function ArtistReleasesPage() {
                   ))}
                 </div>
               )}
+
+              {catalog?.canTrigger && (
+                <CatalogNowPanel
+                  slug={slug}
+                  token={session?.access_token}
+                  catalog={catalog}
+                  onFinished={fetchReleases}
+                />
+              )}
             </>
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function describeCatalogState(state: CatalogState | null): string {
+  if (state?.last_error) return `Last run failed: ${state.last_error}`;
+  // A state row exists as soon as a crawl is *claimed*, before it runs — so counts are only
+  // meaningful once one has finished. Otherwise "0 releases" would be a claim about the
+  // catalogue rather than the absence of an answer.
+  if (!state?.last_catalogued_at) return 'Never catalogued';
+  return `${state.releases_found ?? 0} releases found, ${state.releases_detailed ?? 0} with prices`;
+}
+
+/**
+ * "Scan my links for releases" — the self-serve version of the admin catalog button.
+ *
+ * Visibility is decided by the server (`catalog.canTrigger`), not re-derived here, so the
+ * rollout gate can't drift out of sync with a copy of the rule in page code. While that gate is
+ * admin-only the copy says so plainly rather than pretending to be generally available.
+ *
+ * Polls for the outcome the same way `AdminCatalogButton` does, and for the same reason: Netlify
+ * answers a background invocation with 202 the moment it's queued and discards the handler's
+ * response, so the only honest way to report what happened is to ask afterwards.
+ */
+function CatalogNowPanel({
+  slug,
+  token,
+  catalog,
+  onFinished,
+}: {
+  slug: string;
+  token: string | undefined;
+  catalog: CatalogInfo;
+  onFinished: () => Promise<void> | void;
+}) {
+  const [status, setStatus] = useState<string>(
+    catalog.stateError ?? describeCatalogState(catalog.state)
+  );
+  const [running, setRunning] = useState(false);
+  const lastRunAt = useRef<string | null>(catalog.state?.last_catalogued_at ?? null);
+  const lastFailure = useRef<string | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (timer.current) clearTimeout(timer.current);
+  }, []);
+
+  /**
+   * Three-valued on purpose: "we couldn't ask" and "never catalogued" are different facts, and
+   * one `null` for both makes a failed request render as a confident "Never catalogued".
+   */
+  const readState = useCallback(async (): Promise<
+    { ok: true; state: CatalogState | null } | { ok: false; reason: string }
+  > => {
+    const response = await fetch(`/api/artist-releases?slug=${encodeURIComponent(slug)}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      return { ok: false, reason: body.error || 'Could not read catalog state' };
+    }
+    const data = await response.json();
+    const info = (data.catalog ?? null) as CatalogInfo | null;
+    if (info?.stateError) return { ok: false, reason: info.stateError };
+    return { ok: true, state: info?.state ?? null };
+  }, [slug, token]);
+
+  const poll = useCallback(() => {
+    let attempt = 0;
+
+    function scheduleNext() {
+      attempt += 1;
+      if (attempt > MAX_CATALOG_POLLS) {
+        // Say which it was. "Still running" on top of a run of failed reads would be a guess
+        // about the crawl based on no information about the crawl.
+        setStatus(lastFailure.current ?? 'Still running — check back shortly');
+        setRunning(false);
+        return;
+      }
+      timer.current = setTimeout(async () => {
+        try {
+          const result = await readState();
+          if (!result.ok) {
+            // A failed read is not "still running" — but it may be transient, so keep asking
+            // and let the message say which of the two we're looking at.
+            lastFailure.current = result.reason;
+            scheduleNext();
+            return;
+          }
+          lastFailure.current = null;
+          const { state } = result;
+          if (state?.last_catalogued_at && state.last_catalogued_at !== lastRunAt.current) {
+            lastRunAt.current = state.last_catalogued_at;
+            setStatus(describeCatalogState(state));
+            setRunning(false);
+            await onFinished();
+            return;
+          }
+          if (state?.last_error) {
+            setStatus(describeCatalogState(state));
+            setRunning(false);
+            return;
+          }
+        } catch {
+          // A dropped request mid-crawl isn't an answer; keep asking.
+          lastFailure.current = 'Could not read catalog state';
+        }
+        scheduleNext();
+      }, CATALOG_POLL_INTERVAL_MS);
+    }
+
+    scheduleNext();
+  }, [readState, onFinished]);
+
+  const start = useCallback(async () => {
+    setRunning(true);
+    setStatus('Scanning your links…');
+    try {
+      const response = await fetch('/api/artist-releases', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ slug, action: 'catalog' }),
+      });
+      const body = await response.json().catch(() => ({}));
+
+      // 202 means queued and nothing more. The endpoint reports the refusals it can predict
+      // (cataloging disabled, secret missing) as real errors; everything else is settled by
+      // polling.
+      if (!response.ok && response.status !== 202) {
+        setStatus(body.error || 'Could not start');
+        setRunning(false);
+        return;
+      }
+      poll();
+    } catch {
+      setStatus('Could not start');
+      setRunning(false);
+    }
+  }, [slug, token, poll]);
+
+  return (
+    <div className="mt-8 p-4 rounded-xl border border-dashed border-border space-y-2">
+      <h2 className="font-display text-base font-semibold text-text-primary">
+        Look for releases on your links
+      </h2>
+      <p className="text-xs text-text-muted">
+        Checks the platforms on your profile — Bandcamp, Discogs, Faircamp — and adds anything it
+        finds. Some platforms can't be read automatically, so this won't always find everything;
+        whatever it misses you can add by hand above.
+      </p>
+      <div className="flex flex-wrap items-center gap-3 pt-1">
+        <button
+          onClick={start}
+          disabled={running || !token}
+          className="px-4 py-2 rounded-lg bg-bg-secondary border border-border text-sm text-text-primary hover:bg-bg-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {running ? 'Scanning…' : 'Scan my links for releases'}
+        </button>
+        <span className="text-xs text-text-muted">{status}</span>
+      </div>
+      <p className="text-[11px] text-text-muted pt-1">
+        Admin only for now, while we watch how it behaves.
+      </p>
     </div>
   );
 }

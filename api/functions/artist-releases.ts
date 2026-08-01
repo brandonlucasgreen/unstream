@@ -21,10 +21,13 @@ import {
   createArtistRelease,
   dismissReleaseReview,
   mergeReleases,
+  getCatalogState,
+  clearCatalogCooldown,
 } from './db';
-import { authenticateBearer } from './middleware';
+import { authenticateAdmin, authenticateBearer } from './middleware';
 import { cacheDeleteByArtist } from './cache';
 import { checkRateLimit, getClientIp } from './ratelimit';
+import { triggerCatalogNow } from './request-catalog';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -43,6 +46,24 @@ function isHttpUrl(url: string): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * Is self-serve cataloguing available to this caller yet?
+ *
+ * **A rollout gate, deliberately separate from the permission model.** Ownership is what
+ * *authorizes* the `catalog` action — the artist asking is the artist whose catalog it is. This
+ * extra admin check is a temporary limit on who can reach it at all, while the crawl behaviour
+ * is watched on real traffic: an artist-triggered crawl spends the same shared hourly budget
+ * every fan-triggered one does, and the newer sources (Faircamp, discovered links) have never
+ * run against anything but one test instance.
+ *
+ * **To open this to all verified artists, delete this function and its two call sites.** Nothing
+ * about the ownership checks changes — which is the point of keeping the two ideas apart rather
+ * than folding the admin test into the authorization path.
+ */
+async function canTriggerCatalog(authHeader: string | undefined): Promise<boolean> {
+  return (await authenticateAdmin(authHeader)) !== null;
 }
 
 async function purgeArtistCaches(artistName: string, slug: string): Promise<void> {
@@ -86,7 +107,8 @@ export async function handler(event: {
     return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
   }
 
-  const user = await authenticateBearer(event.headers.authorization || event.headers.Authorization);
+  const authHeader = event.headers.authorization || event.headers.Authorization;
+  const user = await authenticateBearer(authHeader);
   if (!user) {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Authentication required' }) };
   }
@@ -103,7 +125,26 @@ export async function handler(event: {
     }
 
     const releases = await getArtistReleasesForOwner(owned.artistId);
-    return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ releases }) };
+
+    // `canTrigger` comes from the server rather than being re-derived in the page, so the
+    // button's visibility follows the real rule instead of a copy of it — same reasoning as
+    // AdminCatalogButton. `state` is three-valued (see getCatalogState): a failed read must not
+    // render as a confident "never catalogued".
+    const canTrigger = await canTriggerCatalog(authHeader);
+    const stateResult = canTrigger ? await getCatalogState(owned.artistId) : null;
+
+    return {
+      statusCode: 200,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({
+        releases,
+        catalog: {
+          canTrigger,
+          state: stateResult?.ok ? stateResult.state : null,
+          stateError: stateResult && !stateResult.ok ? stateResult.reason : null,
+        },
+      }),
+    };
   }
 
   if (event.httpMethod !== 'POST') {
@@ -112,7 +153,7 @@ export async function handler(event: {
 
   let body: {
     slug?: string;
-    action?: 'hide' | 'unhide' | 'dismiss' | 'merge' | 'update' | 'addLink' | 'create';
+    action?: 'hide' | 'unhide' | 'dismiss' | 'merge' | 'update' | 'addLink' | 'create' | 'catalog';
     releaseId?: string;
     keepId?: string;
     dropId?: string;
@@ -141,13 +182,35 @@ export async function handler(event: {
   }
   const artistId = owned.artistId;
 
-  const VALID_ACTIONS = ['hide', 'unhide', 'dismiss', 'merge', 'update', 'addLink', 'create'];
+  const VALID_ACTIONS = ['hide', 'unhide', 'dismiss', 'merge', 'update', 'addLink', 'create', 'catalog'];
   if (!action || !VALID_ACTIONS.includes(action)) {
     return {
       statusCode: 400,
       headers: CORS_HEADERS,
       body: JSON.stringify({ error: `action must be one of: ${VALID_ACTIONS.join(', ')}` }),
     };
+  }
+
+  // Cataloguing returns 202 and is settled by polling the GET, so it doesn't fit the
+  // ok/responseExtra shape the editing actions share below — handled on its own here.
+  if (action === 'catalog') {
+    if (!(await canTriggerCatalog(authHeader))) {
+      return {
+        statusCode: 403,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: 'Self-serve cataloguing is not available yet.' }),
+      };
+    }
+
+    await clearCatalogCooldown(artistId);
+    const queued = await triggerCatalogNow(artistId);
+    if (!queued.ok) {
+      return { statusCode: queued.status, headers: CORS_HEADERS, body: JSON.stringify({ error: queued.error }) };
+    }
+
+    // No cache purge here: nothing has been written yet. The crawl runs asynchronously, and the
+    // page polls the GET for its outcome.
+    return { statusCode: 202, headers: CORS_HEADERS, body: JSON.stringify({ queued: true }) };
   }
 
   let ok = false;

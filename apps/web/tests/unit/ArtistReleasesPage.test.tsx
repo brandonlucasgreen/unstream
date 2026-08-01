@@ -53,12 +53,12 @@ function renderPage() {
   );
 }
 
-function setupFetchMock(releases: unknown[]) {
+function setupFetchMock(releases: unknown[], catalog?: unknown) {
   mockFetch.mockReset();
   mockFetch.mockImplementation((url: string, init?: RequestInit) => {
     if (!init || init.method === undefined) {
       // GET
-      return Promise.resolve({ ok: true, json: async () => ({ releases }) });
+      return Promise.resolve({ ok: true, json: async () => ({ releases, catalog }) });
     }
     return Promise.resolve({ ok: true, json: async () => ({ success: true }) });
   });
@@ -161,5 +161,105 @@ describe('ArtistReleasesPage', () => {
     setupFetchMock([]);
     renderPage();
     await waitFor(() => expect(screen.getByText('No releases catalogued yet.')).toBeTruthy());
+  });
+});
+
+describe('ArtistReleasesPage — self-serve catalog scan', () => {
+  beforeEach(() => vi.clearAllMocks());
+  afterEach(() => cleanup());
+
+  const SCAN_LABEL = 'Scan my links for releases';
+
+  // Visibility follows the server's `canTrigger`, not a copy of the rule in page code — so the
+  // rollout gate can't drift out of sync with the client.
+  it('hides the scan control when the server says the caller cannot trigger', async () => {
+    setupFetchMock([], { canTrigger: false, state: null, stateError: null });
+    renderPage();
+    await waitFor(() => screen.getByText('No releases catalogued yet.'));
+    expect(screen.queryByText(SCAN_LABEL)).toBeNull();
+  });
+
+  it('hides the scan control entirely when the response carries no catalog block at all', async () => {
+    setupFetchMock([]);
+    renderPage();
+    await waitFor(() => screen.getByText('No releases catalogued yet.'));
+    expect(screen.queryByText(SCAN_LABEL)).toBeNull();
+  });
+
+  it('shows the scan control, and says it is admin-only for now', async () => {
+    setupFetchMock([], { canTrigger: true, state: null, stateError: null });
+    renderPage();
+    await waitFor(() => expect(screen.getByText(SCAN_LABEL)).toBeTruthy());
+    expect(screen.getByText(/Admin only for now/)).toBeTruthy();
+    expect(screen.getByText('Never catalogued')).toBeTruthy();
+  });
+
+  it('summarizes a previous run', async () => {
+    setupFetchMock([], {
+      canTrigger: true,
+      state: { last_catalogued_at: '2026-08-01T00:00:00Z', releases_found: 12, releases_detailed: 9, last_error: null },
+      stateError: null,
+    });
+    renderPage();
+    await waitFor(() => expect(screen.getByText('12 releases found, 9 with prices')).toBeTruthy());
+  });
+
+  // "We couldn't ask" must not render as a confident "Never catalogued".
+  it('reports an unreadable state instead of claiming never-catalogued', async () => {
+    setupFetchMock([], { canTrigger: true, state: null, stateError: 'Could not read catalog state' });
+    renderPage();
+    await waitFor(() => expect(screen.getByText('Could not read catalog state')).toBeTruthy());
+    expect(screen.queryByText('Never catalogued')).toBeNull();
+  });
+
+  it('reports a failed previous run rather than a count', async () => {
+    setupFetchMock([], {
+      canTrigger: true,
+      state: { last_catalogued_at: '2026-08-01T00:00:00Z', releases_found: 0, releases_detailed: 0, last_error: 'bandcamp bot challenge' },
+      stateError: null,
+    });
+    renderPage();
+    await waitFor(() => expect(screen.getByText(/Last run failed: bandcamp bot challenge/)).toBeTruthy());
+  });
+
+  it('posts the catalog action for this artist when clicked', async () => {
+    setupFetchMock([], { canTrigger: true, state: null, stateError: null });
+    renderPage();
+    await waitFor(() => screen.getByText(SCAN_LABEL));
+
+    fireEvent.click(screen.getByText(SCAN_LABEL));
+
+    await waitFor(() => {
+      const postCall = mockFetch.mock.calls.find(call => call[1]?.method === 'POST');
+      expect(postCall).toBeDefined();
+      expect(JSON.parse(postCall![1].body)).toEqual({ slug: 'kid-lightbulbs', action: 'catalog' });
+    });
+  });
+
+  // The endpoint reports refusals it can predict (cataloging disabled, missing secret) as real
+  // errors; those must surface rather than leaving the UI stuck on "Scanning…".
+  it('surfaces a refusal from the endpoint', async () => {
+    mockFetch.mockReset();
+    mockFetch.mockImplementation((url: string, init?: RequestInit) => {
+      if (!init || init.method === undefined) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ releases: [], catalog: { canTrigger: true, state: null, stateError: null } }),
+        });
+      }
+      return Promise.resolve({
+        ok: false,
+        status: 503,
+        json: async () => ({ error: 'Cataloging is disabled on this deploy (RELEASE_CATALOG_ENABLED is not set).' }),
+      });
+    });
+
+    renderPage();
+    await waitFor(() => screen.getByText(SCAN_LABEL));
+    fireEvent.click(screen.getByText(SCAN_LABEL));
+
+    await waitFor(() => expect(screen.getByText(/RELEASE_CATALOG_ENABLED/)).toBeTruthy());
+    // Re-enabled rather than stuck mid-scan, so it can be retried once configuration is fixed.
+    expect((screen.getByText(SCAN_LABEL) as HTMLButtonElement).disabled).toBe(false);
   });
 });

@@ -518,6 +518,66 @@ export async function recordCatalogOutcome(
   }
 }
 
+export interface CatalogStateRow {
+  last_catalogued_at: string | null;
+  last_attempted_at: string;
+  releases_found: number | null;
+  releases_detailed: number | null;
+  last_error: string | null;
+  consecutive_failures: number;
+}
+
+/**
+ * Deliberately three-valued, not two. "We couldn't ask" and "we asked and this artist has never
+ * been catalogued" are different facts, and collapsing them into one `null` makes a broken
+ * database read render as a confident "Never catalogued" — the same shape as the bug class the
+ * "never cache uncertainty" principle exists to prevent. Every surface that reports cataloging
+ * exists to make it observable, so an unreadable state has to say so rather than guess.
+ */
+export type CatalogStateResult =
+  | { ok: true; state: CatalogStateRow | null }
+  | { ok: false; reason: string };
+
+export async function getCatalogState(artistId: string): Promise<CatalogStateResult> {
+  const client = getClient();
+  if (!client) return { ok: false, reason: 'Supabase is not configured on this deploy' };
+
+  const { data, error } = await client
+    .from('release_catalog_state')
+    .select('last_catalogued_at, last_attempted_at, releases_found, releases_detailed, last_error, consecutive_failures')
+    .eq('artist_id', artistId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('[DB] getCatalogState failed:', error.message);
+    return { ok: false, reason: 'Could not read catalog state' };
+  }
+  return { ok: true, state: (data as CatalogStateRow | null) ?? null };
+}
+
+/**
+ * Clear an artist's cooldown so a deliberately-requested crawl actually runs.
+ *
+ * Without it a "catalog now" control would appear to work and do nothing for a week —
+ * `claimArtistForCatalog` refuses an artist catalogued in the last 7 days, which is right for
+ * demand-driven triggers and wrong for someone deliberately asking.
+ *
+ * Backdated rather than deleted: the row also carries the failure counter and the last error,
+ * which are worth keeping. Two hours clears both the cooldown and the exponential backoff.
+ */
+export async function clearCatalogCooldown(artistId: string): Promise<void> {
+  const client = getClient();
+  if (!client) return;
+
+  const twoHoursAgo = new Date(Date.now() - 2 * 3600_000).toISOString();
+  const { error } = await client
+    .from('release_catalog_state')
+    .update({ last_catalogued_at: null, last_attempted_at: twoHoursAgo, consecutive_failures: 0 })
+    .eq('artist_id', artistId);
+
+  if (error) console.error('[DB] clearCatalogCooldown failed:', error.message);
+}
+
 interface ReleaseToPersist {
   title: string;
   slug: string;
