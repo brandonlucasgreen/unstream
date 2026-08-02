@@ -5,6 +5,20 @@ enum PopoverTab {
     case supportList
 }
 
+/// One level of the popover's drill-down.
+enum PopoverRoute: Hashable {
+    case artistReleases(slug: String, name: String)
+    case releaseGuide(ReleaseGuideTarget)
+
+    /// Shown centred in the back header, so it's obvious which level you're on.
+    var title: String {
+        switch self {
+        case .artistReleases: return "Releases"
+        case .releaseGuide: return "Where to Buy"
+        }
+    }
+}
+
 struct PopoverView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var supportListManager: SupportListManager
@@ -14,9 +28,115 @@ struct PopoverView: View {
     @State private var selectedTab: PopoverTab = .search
     @State private var showSignIn = false
     @State private var pollTask: Task<Void, Never>?
+    /// Where the popover has drilled to. Empty means the normal Search/Saved tabs.
+    ///
+    /// A stack rather than one optional because there are genuinely two levels now — a search
+    /// result opens an artist's releases, and a release opens its buying guide — and Back from
+    /// the guide should land on the release list you came from, not all the way out to search.
+    @State private var route: [PopoverRoute] = []
     @FocusState private var searchFieldFocused: Bool
 
     var body: some View {
+        VStack(spacing: 0) {
+            // A release guide takes over the popover rather than opening a window: this is a
+            // menu-bar app, and a second window for a page this small would be a heavier answer
+            // than the question deserves. The footer stays put so the popover doesn't resize
+            // out from under the pointer.
+            if let current = route.last {
+                drillDown(current)
+            } else {
+                browseContent
+            }
+
+            Divider()
+
+            footer
+        }
+        .frame(width: 320)
+        .background(keyboardShortcuts)
+        .sheet(isPresented: $showSignIn) {
+            SignInView()
+        }
+        .onAppear {
+            // Reset transient state on every open — NSPopover hides (not destroys) its content
+            // view, so onDisappear isn't reliable; onAppear fires on each show. Without this,
+            // reopening the menu bar would drop you back into the release you last looked at.
+            showSignIn = false
+            route = []
+            focusSearchField()
+        }
+        .onChange(of: selectedTab) { tab in
+            if tab == .search { focusSearchField() }
+        }
+        .onDisappear {
+            stopMenuPoll()
+            showSignIn = false
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .popoverDidClose)) { _ in
+            // NSPopoverDelegate fires this unconditionally when the popover closes.
+            showSignIn = false
+            route = []
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .showSearchTab)) { _ in
+            route = []
+            selectedTab = .search
+        }
+        .onChange(of: auth.isSignedIn) { signedIn in
+            if !signedIn {
+                stopMenuPoll()
+            }
+        }
+    }
+
+    // MARK: - Drill-down
+
+    private func drillDown(_ current: PopoverRoute) -> some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 6) {
+                Button(action: { _ = route.popLast() }) {
+                    HStack(spacing: 3) {
+                        Image(systemName: "chevron.left")
+                        Text("Back")
+                    }
+                    .font(.caption)
+                }
+                .buttonStyle(.plain)
+                .foregroundColor(.accentColor)
+                .help("Back")
+
+                Spacer()
+
+                Text(current.title)
+                    .font(.caption.weight(.semibold))
+                    .foregroundColor(.secondary)
+
+                Spacer()
+
+                // Balances the back button so the title sits centred.
+                Color.clear.frame(width: 44, height: 1)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+
+            Divider()
+
+            Group {
+                switch current {
+                case let .artistReleases(slug, name):
+                    ArtistReleasesView(slug: slug, fallbackName: name) { target in
+                        route.append(.releaseGuide(target))
+                    }
+                case let .releaseGuide(target):
+                    ReleaseGuideView(target: target)
+                }
+            }
+            .frame(maxHeight: 350)
+        }
+    }
+
+    // MARK: - Search / saved tabs
+
+    private var browseContent: some View {
         VStack(spacing: 0) {
             // A real segmented control: correct selection emphasis in both appearances
             // and in an inactive window, which the hand-rolled accent-tinted pills got
@@ -136,11 +256,19 @@ struct PopoverView: View {
                 .padding()
             }
             .frame(maxHeight: 350)
+            .environment(\.openReleaseGuide) { target in
+                route = [.releaseGuide(target)]
+            }
+            .environment(\.openArtistReleases) { slug, name in
+                route = [.artistReleases(slug: slug, name: name)]
+            }
+        }
+    }
 
-            Divider()
+    // MARK: - Footer
 
-            // Footer
-            HStack {
+    private var footer: some View {
+        HStack {
                 // Sign in/out button
                 if auth.isSignedIn {
                     // Account identity lives next to the sign-out action rather than in
@@ -209,40 +337,9 @@ struct PopoverView: View {
                 .fixedSize()
                 .accessibilityLabel("More options")
                 .help("Settings, feedback, and more")
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 8)
         }
-        .frame(width: 320)
-        .background(keyboardShortcuts)
-        .sheet(isPresented: $showSignIn) {
-            SignInView()
-        }
-        .onAppear {
-            // Reset sheet state on every open — NSPopover hides (not destroys) its content
-            // view, so onDisappear isn't reliable; onAppear fires on each show.
-            showSignIn = false
-            focusSearchField()
-        }
-        .onChange(of: selectedTab) { tab in
-            if tab == .search { focusSearchField() }
-        }
-        .onDisappear {
-            stopMenuPoll()
-            showSignIn = false
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .popoverDidClose)) { _ in
-            // NSPopoverDelegate fires this unconditionally when the popover closes.
-            showSignIn = false
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .showSearchTab)) { _ in
-            selectedTab = .search
-        }
-        .onChange(of: auth.isSignedIn) { signedIn in
-            if !signedIn {
-                stopMenuPoll()
-            }
-        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
     }
 
     /// The saved count rides in the segment label — a segmented control has no badge
@@ -268,16 +365,38 @@ struct PopoverView: View {
     private var keyboardShortcuts: some View {
         Group {
             Button("Search") {
+                route = []
                 selectedTab = .search
                 focusSearchField()
             }
             .keyboardShortcut("f", modifiers: .command)
 
-            Button("Search Tab") { selectedTab = .search }
-                .keyboardShortcut("1", modifiers: .command)
+            Button("Search Tab") {
+                route = []
+                selectedTab = .search
+            }
+            .keyboardShortcut("1", modifiers: .command)
 
-            Button("Saved Artists Tab") { selectedTab = .supportList }
-                .keyboardShortcut("2", modifiers: .command)
+            Button("Saved Artists Tab") {
+                route = []
+                selectedTab = .supportList
+            }
+            .keyboardShortcut("2", modifiers: .command)
+
+            // Escape backs out of a drill-down, which is what Escape should do. Registered only
+            // while one is open, so everywhere else Escape keeps its usual job of dismissing the
+            // popover.
+            //
+            // ⌘[ alongside it because that is *the* Back shortcut on the Mac — Safari, Finder,
+            // Preview, Xcode — and a drill-down that ignores it fails the muscle-memory test even
+            // though Escape works.
+            if !route.isEmpty {
+                Button("Back") { _ = route.popLast() }
+                    .keyboardShortcut(.escape, modifiers: [])
+
+                Button("Back (Command-Bracket)") { _ = route.popLast() }
+                    .keyboardShortcut("[", modifiers: .command)
+            }
 
             Button("Close") { AppDelegate.shared?.closePopover() }
                 .keyboardShortcut("w", modifiers: .command)

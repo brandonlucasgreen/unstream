@@ -1,20 +1,81 @@
 /* Unstream Chrome Extension - Popup Styles */
 
+/* Unstream's typeface, bundled rather than fetched.
+   Matches the web app: Stack Sans Headline for body, Darker Grotesque for display.
+   See reference: the stack is declared in six places across web + edge functions; this is the
+   seventh, and it can't share them because the extension has no build step.
+
+   Bundled, not linked to fonts.googleapis.com, for two reasons: a remote stylesheet would be a
+   request to Google every time the popup opens — on a product whose whole pitch is not leaking
+   your listening to third parties — and MV3 extension pages shouldn't depend on remote resources
+   to render. Both families are OFL, so redistribution is fine. Latin subsets only, 76 KB total.
+
+   Darker Grotesque has a notably short cap height (~56 vs ~70 at the same size), so it is used
+   only where a size bump comes with it — the logo — rather than across the UI. */
+@font-face {
+  font-family: 'Stack Sans Headline';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/StackSansHeadline-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Stack Sans Headline';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../fonts/StackSansHeadline-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Stack Sans Headline';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/StackSansHeadline-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Darker Grotesque';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/DarkerGrotesque-700.woff2') format('woff2');
+}
+
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+/* The popup has to scroll, and `max-height` + `overflow-y` on `body` alone does not make it.
+   CSS propagates `body`'s overflow to the viewport when `html` is `overflow: visible` — and in
+   doing so `body` itself computes to `visible`, so its `max-height` clips the box while the
+   content spills straight out of it. Measured before this fix, with the page forced tall:
+   `html.scrollHeight` was 1587 against a 520px body, i.e. the content had escaped the root
+   element. A tab still scrolls in that state because the viewport scrolls; a popup has no fixed
+   viewport — Chrome sizes the window from the document — so it clips instead.
+
+   Declaring overflow on `html` stops the propagation, and `body` becomes a genuine scroll
+   container. After the fix, same measurement: `html.scrollHeight` equals its client height, and
+   `body` scrolls internally.
+
+   580px rather than 520: Chrome caps a popup at 600px tall, and the releases list earns the
+   extra room. */
+html {
+  overflow: hidden;
+  max-height: 580px;
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Stack Sans Headline', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   line-height: 1.5;
   color: #E5E7EB;
   background: #1F2937;
   width: 380px;
   min-height: 200px;
-  max-height: 520px;
+  max-height: 580px;
   overflow-y: auto;
 }
 
@@ -41,8 +102,13 @@ body {
 }
 
 .logo-text {
-  font-size: 18px;
-  font-weight: 600;
+  /* The one place Darker Grotesque earns its keep. Its cap height is ~20% shorter than Stack
+     Sans at the same size, so the bump from 18px/600 to 22px/700 is what keeps the wordmark
+     reading at the same weight as before rather than shrinking. */
+  font-family: 'Darker Grotesque', 'Stack Sans Headline', system-ui, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   color: #F9FAFB;
 }
 
@@ -446,13 +512,16 @@ body {
 }
 
 .new-release-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   padding: 10px 12px;
   background: linear-gradient(135deg, #374151 0%, #1F2937 100%);
   border: 1px solid #FCD34D;
   border-radius: 8px;
+}
+
+.release-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .release-info {
@@ -483,7 +552,6 @@ body {
 .release-platform {
   font-size: 10px;
   color: #9CA3AF;
-  text-transform: capitalize;
 }
 
 .release-actions {
@@ -524,6 +592,154 @@ body {
   background: #374151;
   color: #EF4444;
   border-color: #EF4444;
+}
+
+/* The buying guide, expanded under an alert rather than opened in a tab.
+   The payout comparison is the product — it belongs where the fan already is. */
+.release-guide {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #4B5563;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guide-banner {
+  padding: 6px 8px;
+  background: rgba(252, 211, 77, 0.14);
+  border-radius: 6px;
+  font-size: 11px;
+  color: #FCD34D;
+}
+
+.guide-message {
+  font-size: 11px;
+  color: #9CA3AF;
+}
+
+.guide-source {
+  border: 1px solid #4B5563;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.guide-source-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.guide-source-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #F9FAFB;
+  white-space: nowrap;
+}
+
+.guide-payout {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(52, 211, 153, 0.16);
+  color: #6EE7B7;
+  white-space: nowrap;
+}
+
+.guide-payout-unknown {
+  background: rgba(156, 163, 175, 0.16);
+  color: #9CA3AF;
+}
+
+.guide-buy {
+  margin-left: auto;
+  padding: 3px 10px;
+  background: transparent;
+  border: 1px solid #FCD34D;
+  border-radius: 5px;
+  color: #FCD34D;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.guide-buy:hover {
+  background: #FCD34D;
+  color: #1F2937;
+}
+
+.guide-offer {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 8px;
+  border-top: 1px solid #374151;
+}
+
+.guide-offer-unavailable {
+  opacity: 0.55;
+}
+
+.guide-format {
+  font-size: 11px;
+  color: #D1D5DB;
+  width: 66px;
+  flex-shrink: 0;
+}
+
+.guide-price-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.guide-price {
+  font-size: 12px;
+  font-weight: 500;
+  color: #F9FAFB;
+}
+
+.guide-offer-payout {
+  font-size: 10px;
+  color: #6EE7B7;
+}
+
+.guide-availability {
+  font-size: 10px;
+  color: #9CA3AF;
+  white-space: nowrap;
+}
+
+.guide-availability-notice {
+  color: #FBBF24;
+}
+
+.guide-empty {
+  padding: 6px 8px;
+  border-top: 1px solid #374151;
+  font-size: 10px;
+  color: #9CA3AF;
+}
+
+.guide-footnote {
+  font-size: 10px;
+  color: #8B95A5;
+}
+
+.guide-link {
+  align-self: flex-start;
+  padding: 0;
+  background: none;
+  border: none;
+  color: #FCD34D;
+  font-size: 11px;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .sparkle {
@@ -586,7 +802,7 @@ body {
 .saved-artist-remove {
   background: none;
   border: none;
-  color: #6B7280;
+  color: #8B95A5;
   font-size: 18px;
   cursor: pointer;
   padding: 2px 6px;
@@ -665,7 +881,7 @@ body {
 }
 
 #search-input::placeholder {
-  color: #6B7280;
+  color: #8B95A5;
 }
 
 #search-input:focus {
@@ -727,7 +943,7 @@ body {
 
 .last-check-time {
   font-size: 11px;
-  color: #6B7280;
+  color: #8B95A5;
   margin-top: 8px;
   text-align: center;
 }
@@ -796,7 +1012,7 @@ body {
 }
 
 .auth-input::placeholder {
-  color: #6B7280;
+  color: #8B95A5;
 }
 
 .auth-input:focus {
@@ -993,4 +1209,133 @@ body {
 
 .toggle-setting input:checked + .toggle-switch::before {
   transform: translateX(20px);
+}
+
+/* Artist releases — the catalogue, expanded from the result card. */
+.artist-releases-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid #4B5563;
+  border-radius: 8px;
+  color: #F9FAFB;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.artist-releases-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #6B7280;
+}
+
+.artist-releases-chevron {
+  color: #9CA3AF;
+  font-size: 16px;
+  transition: transform 0.2s;
+}
+
+.artist-releases-toggle[aria-expanded="true"] .artist-releases-chevron {
+  transform: rotate(90deg);
+}
+
+.artist-releases {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.artist-release {
+  border: 1px solid #374151;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.artist-release.is-open {
+  border-color: #4B5563;
+}
+
+.artist-release-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.artist-release-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.artist-release-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.artist-release-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: #F9FAFB;
+}
+
+.artist-release-price {
+  font-size: 10px;
+  color: #6EE7B7;
+}
+
+.artist-release-date {
+  font-size: 10px;
+  color: #9CA3AF;
+}
+
+.artist-release-chevron {
+  color: #8B95A5;
+  font-size: 14px;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.artist-release-row[aria-expanded="true"] .artist-release-chevron {
+  transform: rotate(90deg);
+}
+
+/* The guide nests one level deeper here than under an alert row, so it needs its own inset. */
+.artist-release .release-guide {
+  margin: 0;
+  padding: 10px;
+  border-top: 1px solid #374151;
+}
+
+/* Muted text is #8B95A5, not the #6B7280 it used to be. Same fix as PR #401 made on the web
+   (--color-text-muted #666666 -> #808080): on the popup's #1F2937 background, #6B7280 measured
+   3.04:1, under the 4.5:1 that 10-11px text needs, and it was carrying the guide footnote, the
+   last-checked line and the input placeholders. #8B95A5 measures 4.85:1, close to the web's
+   post-fix 4.74:1. The background and border-colour uses of #6B7280 are deliberately unchanged —
+   they aren't text. */
+
+/* The `hidden` class is the popup's only visibility toggle in JS, but the stylesheet only ever
+   defined it for two specific components (`.section.hidden`, `.detect-enable-btn.hidden`). Every
+   other element toggled with it — `.auth-form`, `.auth-error`, `.magic-link-sent`, and the
+   release panels — was never actually hidden; they only looked hidden while they happened to be
+   empty. Filling one with content made it appear as a stray gap.
+
+   `!important` is deliberate rather than lazy: component rules like `.artist-releases` and
+   `.release-guide` set `display: flex`, and at equal specificity the later rule wins, so a plain
+   `.hidden { display: none }` would lose to whichever component was defined after it. */
+.hidden {
+  display: none !important;
 }

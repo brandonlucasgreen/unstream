@@ -386,8 +386,12 @@ struct SavedPlatformBadge: View {
 struct NewReleaseBadge: View {
     let release: NewRelease
 
+    /// Set by the macOS popover, which drills down in place rather than opening a window.
+    @Environment(\.openReleaseGuide) private var openReleaseGuide
+
     #if os(iOS)
     @State private var safariItem: SafariURL?
+    @State private var guideTarget: ReleaseGuideTarget?
     #endif
 
     #if os(iOS)
@@ -416,26 +420,63 @@ struct NewReleaseBadge: View {
             .cornerRadius(6)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("New release: \(release.releaseName) on \(release.displayPlatform)")
+        .accessibilityLabel(accessibilityText)
         #if os(macOS)
-        .help("Open \(release.releaseName) on \(release.displayPlatform)")
+        .help(helpText)
         #endif
         .linkActions(
             url: URL(string: release.releaseUrl),
-            openTitle: "Open on \(release.displayPlatform)",
-            onOpen: openRelease
+            // The context menu always opens the link in a browser, so it names wherever the link
+            // actually goes — our release page for a catalogued release, the shop for an alert
+            // from the older scrape path.
+            openTitle: release.guideTarget != nil
+                ? "Open on Unstream"
+                : "Open on \(release.displayPlatform)",
+            onOpen: openInBrowser
         )
         #if os(iOS)
         .safariSheet(safariItem: $safariItem)
+        .sheet(item: $guideTarget) { ReleaseGuideSheet(target: $0) }
         #endif
     }
 
+    /// Show the payout comparison in the app when the release is one we've catalogued; fall back
+    /// to the browser only for alerts from the older scrape path, whose `releaseUrl` points at a
+    /// single shop and so has no guide behind it.
     private func openRelease() {
+        guard let target = release.guideTarget else {
+            openInBrowser()
+            return
+        }
+        #if os(macOS)
+        guard let openReleaseGuide else {
+            openInBrowser()
+            return
+        }
+        openReleaseGuide(target)
+        #else
+        guideTarget = target
+        #endif
+    }
+
+    private func openInBrowser() {
         guard let url = URL(string: release.releaseUrl) else { return }
         #if os(macOS)
         NSWorkspace.shared.open(url)
         #else
         safariItem = SafariURL(url: url)
         #endif
+    }
+
+    private var accessibilityText: String {
+        release.guideTarget != nil
+            ? "New release: \(release.releaseName). Show where to buy."
+            : "New release: \(release.releaseName) on \(release.displayPlatform)"
+    }
+
+    private var helpText: String {
+        release.guideTarget != nil
+            ? "Where to buy \(release.releaseName)"
+            : "Open \(release.releaseName) on \(release.displayPlatform)"
     }
 }

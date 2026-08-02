@@ -1929,6 +1929,35 @@ export function toStoredResult(
   };
 }
 
+/**
+ * Give every placeable artist result the slug of their page, in place.
+ *
+ * Without this a native client has no way to reach an artist's releases at all: only
+ * `toStoredResult` set a slug, and that runs solely on the DB-served path, so a live-resolved
+ * search returned none. Measured on production before the fix — of six real searches only the one
+ * *claimed* artist came back with a slug, while all six had rows carrying 16-21 catalogued
+ * releases apiece. The data was there; the address for it wasn't.
+ *
+ * Deriving the slug client-side was the alternative, and is rejected on purpose: `artistSlug`
+ * would then have to be reimplemented in Swift and in the extension's JavaScript, which is the
+ * same hand-copied-rule drift that `/api/release`'s server-side `payoutPercent` exists to prevent.
+ * One definition, on the server.
+ *
+ * Two rules, both about not handing out an address that 404s:
+ * - **Never overwrite.** A claimed artist keeps `claimedSlug`; a stored card keeps its `knownSlug`.
+ * - **Skip unverified results.** `persistSearchResults` doesn't write them, so they have no row.
+ */
+export function attachArtistPageSlugs(results: AggregatedResult[]): void {
+  for (const result of results) {
+    if (result.type !== 'artist') continue;
+    if (result.claimedSlug || result.knownSlug) continue;
+    if (result.matchConfidence === 'unverified') continue;
+    // The same expression `persistSearchResults` upserts under, so this names a row that exists
+    // rather than guessing at one.
+    result.knownSlug = artistSlug(result.name);
+  }
+}
+
 // Netlify function handler
 export async function handler(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
   const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
@@ -2043,6 +2072,21 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     } catch (err) {
       console.error('[DB] Background persist failed:', err);
     }
+
+    // Tell the client where each artist's page lives.
+    //
+    // Without this a native client has no way to reach an artist's releases at all: only
+    // `toStoredResult` set a slug, and that runs solely on the DB-served path, so a live-resolved
+    // search returned none. Measured on production before the fix — of six real searches, only
+    // the one *claimed* artist came back with a slug, while all six had rows carrying 16-21
+    // catalogued releases apiece. The data was there; the address for it wasn't.
+    //
+    // Deriving it client-side was the alternative and is rejected on purpose: `artistSlug` would
+    // then have to be reimplemented in Swift and in the extension's JavaScript, which is the same
+    // hand-copied-rule drift that the release endpoint's server-side `payoutPercent` exists to
+    // prevent. One definition, on the server.
+    //
+    attachArtistPageSlugs(finalResults);
 
     const response: SearchResponse = {
       query, // Return original query for display

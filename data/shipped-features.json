@@ -103,5 +103,12 @@
     "description": "Make your saved artists list public and share a link with friends — they can browse who you support on Unstream without signing in. Set a username in Settings, then toggle sharing from your dashboard.",
     "date": "2026-06-27",
     "announced": true
+  },
+  {
+    "id": "release-pages",
+    "title": "Release pages",
+    "description": "Releases now have their own pages: every format and price we can find, on every platform that carries them, with an estimate of how much of it reaches the artist. Release alerts point here now instead of sending you straight to one shop.",
+    "date": "2026-08-02",
+    "announced": false
   }
 ]

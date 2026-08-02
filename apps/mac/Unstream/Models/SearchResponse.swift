@@ -43,8 +43,18 @@ struct ArtistResult: Codable, Identifiable {
     let imageUrl: String?
     let platforms: [PlatformResult]
     let claimedSlug: String?
+    /// Slug for an artist we have a row for but who hasn't claimed their page.
+    ///
+    /// Optional and decoded leniently because an older deploy of `/api/search/sources` doesn't
+    /// send it — before that change only *claimed* artists came back addressable, which is why
+    /// the app had no way to reach anyone's releases.
+    let knownSlug: String?
     let matchConfidence: String?
     let location: ArtistLocation?
+
+    /// Where this artist's page lives, claimed or not. Nil means the search couldn't place them —
+    /// an unverified result, which nothing persists, so there is no page to open.
+    var pageSlug: String? { claimedSlug ?? knownSlug }
 
     /// Platforms that have verified artist presence (excluding social)
     var verifiedPlatforms: [PlatformResult] {

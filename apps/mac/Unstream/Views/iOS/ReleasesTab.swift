@@ -81,40 +81,62 @@ private struct ReleaseRow: View {
     @State private var safariItem: SafariURL?
 
     var body: some View {
-        Button {
-            if let url = URL(string: release.releaseUrl) {
-                safariItem = SafariURL(url: url)
-            }
-        } label: {
-            HStack(spacing: 12) {
-                Image(systemName: "sparkles")
-                    .foregroundColor(.yellow)
-                    .font(.title3)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(release.artistName)
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-                    Text(release.releaseName)
-                        .font(.subheadline)
-                        .foregroundColor(.primary)
-                    Text("on \(release.displayPlatform)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+        Group {
+            // A catalogued release pushes the payout comparison onto this tab. Only an alert
+            // from the older per-platform scrape path — whose `releaseUrl` is one shop's, not
+            // ours — still leaves the app, because there is no guide behind it.
+            if let target = release.guideTarget {
+                NavigationLink { guideDestination(target) } label: { rowContent(showsChevron: true) }
+                    .buttonStyle(.plain)
+            } else {
+                Button {
+                    if let url = URL(string: release.releaseUrl) {
+                        safariItem = SafariURL(url: url)
+                    }
+                } label: {
+                    rowContent(showsChevron: false)
                 }
+                .buttonStyle(.plain)
+                .safariSheet(safariItem: $safariItem)
+            }
+        }
+    }
 
-                Spacer()
+    private func guideDestination(_ target: ReleaseGuideTarget) -> some View {
+        ReleaseGuideView(target: target)
+            .navigationTitle("Where to Buy")
+            .navigationBarTitleDisplayMode(.inline)
+    }
 
-                Image(systemName: "arrow.up.right")
+    private func rowContent(showsChevron: Bool) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: "sparkles")
+                .foregroundColor(.yellow)
+                .font(.title3)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(release.artistName)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                Text(release.releaseName)
+                    .font(.subheadline)
+                    .foregroundColor(.primary)
+                // The price line is the reason to tap, so it leads once we have one.
+                Text(release.offerSummary.isEmpty ? "on \(release.displayPlatform)" : release.offerSummary)
+                    .font(.caption)
                     .foregroundColor(.secondary)
             }
-            .padding(12)
-            .background(Color(.secondarySystemGroupedBackground))
-            .cornerRadius(10)
+
+            Spacer()
+
+            Image(systemName: showsChevron ? "chevron.right" : "arrow.up.right")
+                .foregroundColor(.secondary)
+                .font(.caption)
         }
-        .buttonStyle(.plain)
-        .safariSheet(safariItem: $safariItem)
+        .padding(12)
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(10)
     }
 }
 #endif
