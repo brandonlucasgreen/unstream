@@ -41,7 +41,7 @@ export function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Toast state
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [undoToast, setUndoToast] = useState<{ message: string; artistId: string; onUndo: () => void } | null>(null);
   const [supportingSlug, setSupportingSlug] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -182,11 +182,6 @@ export function DashboardPage() {
     }
   };
 
-  const handleRemoveClaimedProfile = async (_profileId: string, _artistId: string, _slug: string) => {
-    // For now, just show a message - actual removal would require additional API
-    setToast({ message: 'Profile management coming soon!', type: 'info' });
-  };
-
   const handleToggleSupport = async (artist: SavedArtist) => {
     const newSupported = !artist.supported;
     const slug = artist.artistId;
@@ -321,13 +316,6 @@ export function DashboardPage() {
                           >
                             Releases
                           </Link>
-                          <button
-                            onClick={() => handleRemoveClaimedProfile(profile.id, profile.artistId, profile.slug)}
-                            className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-red-400 hover:border-red-500/30 transition-colors"
-                            title="Remove profile (coming soon)"
-                          >
-                            Remove
-                          </button>
                         </div>
                       </div>
                     </div>
@@ -483,14 +471,11 @@ export function DashboardPage() {
         {toast && (
           <div className={`pointer-events-auto px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-in slide-in-from-right duration-300 ${
             toast.type === 'error' ? 'bg-red-500/10 border border-red-500/20 text-red-400' :
-            toast.type === 'info' ? 'bg-accent-primary/10 border border-accent-primary/20 text-accent-primary' :
             'bg-green-500/10 border border-green-500/20 text-green-400'
           }`}>
             <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {toast.type === 'error' ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              ) : toast.type === 'info' ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               ) : (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               )}

@@ -30,6 +30,7 @@
   "include": [
     "functions/search-sources.ts",
     "functions/__tests__/to-stored-result.test.ts",
+    "functions/artist-profile.ts",
     "functions/me-settings.ts",
     "functions/me-username.ts",
     "functions/me-password.ts",
@@ -39,6 +40,7 @@
     "functions/redis.ts",
     "functions/cache.ts",
     "shared/feed-format.ts",
+    "functions/__tests__/artist-profile-remove.test.ts",
     "functions/__tests__/me-settings.test.ts",
     "functions/__tests__/me-username.test.ts",
     "functions/__tests__/me-password.test.ts",

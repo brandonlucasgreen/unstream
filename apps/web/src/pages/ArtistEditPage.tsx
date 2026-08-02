@@ -101,6 +101,9 @@ interface FormState {
   links: LinkEntry[];
   city: string;
   country: string;
+  removeOpen: boolean;
+  removeConfirmText: string;
+  removing: boolean;
 }
 
 type FormAction =
@@ -134,6 +137,9 @@ const initialFormState: FormState = {
   links: [],
   city: '',
   country: '',
+  removeOpen: false,
+  removeConfirmText: '',
+  removing: false,
 };
 
 export function ArtistEditPage() {
@@ -381,6 +387,37 @@ export function ArtistEditPage() {
     set('saving', false);
   }
 
+  async function handleRemoveArtist() {
+    set('error', null);
+    set('success', null);
+
+    if (!session) {
+      set('error', 'Session expired. Please sign in again.');
+      return;
+    }
+
+    set('removing', true);
+    try {
+      const response = await fetch(`/api/artist-profile?slug=${encodeURIComponent(form.currentSlug)}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${session.access_token}` },
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        set('error', data.error || 'Failed to remove this artist. Please try again.');
+        set('removing', false);
+        return;
+      }
+
+      navigate('/dashboard', { replace: true });
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'artistEdit.removeArtist' } });
+      set('error', 'Network error. Please try again.');
+      set('removing', false);
+    }
+  }
+
   if (form.loading) {
     return (
       <PageSkeleton label="Loading artist profile">
@@ -390,6 +427,11 @@ export function ArtistEditPage() {
   }
 
   const usedPlatforms = new Set(form.links.map(l => l.platform));
+
+  // Case-insensitive: the point of typing the name is deliberation, not spelling.
+  const removeConfirmed =
+    form.removeConfirmText.trim().length > 0 &&
+    form.removeConfirmText.trim().toLowerCase() === form.originalName.trim().toLowerCase();
 
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
@@ -778,6 +820,60 @@ export function ArtistEditPage() {
               Cancel
             </Link>
           </div>
+
+          {/* Danger zone — removing the claim lives here rather than on the dashboard, where it
+              sat one click away from Edit and View. */}
+          <section className="rounded-lg border border-red-500/30 bg-red-500/5 p-4 space-y-3">
+            <h2 className="text-sm font-semibold text-red-400">Danger zone</h2>
+            <p className="text-xs text-text-muted">
+              Removing {form.originalName} takes this artist off your account. Your bio, profile
+              photo, featured release and link dividers are deleted, and unstream.stream/a/
+              {form.currentSlug} goes back to being an unclaimed page built from search results.
+              Your platform links stay on it. You can claim the page again later.
+            </p>
+
+            {!form.removeOpen ? (
+              <button
+                onClick={() => set('removeOpen', true)}
+                className="px-4 py-2 rounded-lg border border-red-500/40 text-red-400 text-sm font-medium hover:bg-red-500/10 transition-colors"
+              >
+                Remove this artist
+              </button>
+            ) : (
+              <div className="space-y-3">
+                <label htmlFor="remove-confirm" className="block text-xs text-text-muted">
+                  Type <span className="font-medium text-text-primary">{form.originalName}</span> to confirm.
+                </label>
+                <input
+                  id="remove-confirm"
+                  type="text"
+                  value={form.removeConfirmText}
+                  onChange={e => set('removeConfirmText', e.target.value)}
+                  autoComplete="off"
+                  className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary focus:outline-none focus:border-red-500/50"
+                />
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={handleRemoveArtist}
+                    disabled={form.removing || !removeConfirmed}
+                    className="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-medium hover:bg-red-500/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {form.removing ? 'Removing...' : 'Remove this artist'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      set('removeOpen', false);
+                      set('removeConfirmText', '');
+                    }}
+                    disabled={form.removing}
+                    className="text-sm text-text-muted hover:text-text-primary transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </section>
         </div>
       </main>
 
