@@ -1,9 +1,10 @@
-// API endpoint: PUT /api/artist-profile
-// Authenticated endpoint for updating a claimed artist profile.
-// Handles: slug changes, bio updates, platform link edits.
+// API endpoint: /api/artist-profile
+// Authenticated endpoints for a claimed artist profile.
+// PUT    — update the profile: slug changes, bio updates, platform link edits.
+// DELETE — remove the claim, handing the page back to its unclaimed state.
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { getClient } from './db';
+import { getClient, resolveOwnedArtist } from './db';
 import { cacheDeleteByArtist } from './cache';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { Sentry } from '../lib/sentry';
@@ -31,7 +32,7 @@ const CORS_HEADERS = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+  'Access-Control-Allow-Methods': 'PUT, DELETE, OPTIONS',
 };
 
 // Allowed embed domains for featured releases
@@ -135,7 +136,98 @@ function slugify(text: string): string {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
-export async function handler(event: { httpMethod: string; headers: Record<string, string | undefined>; body: string | null }) {
+// Search results and the artist's server-rendered page are both cached; anything that changes
+// what the page says has to clear them or the edit looks like it didn't save.
+async function purgeArtistCaches(artistName: string, slug: string): Promise<void> {
+  try {
+    await cacheDeleteByArtist(artistName);
+  } catch (e) {
+    console.error('[Profile] Redis cache purge failed:', e);
+  }
+
+  try {
+    const siteId = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
+    const token = process.env.NETLIFY_API_TOKEN;
+    if (siteId && token) {
+      await fetch('https://api.netlify.com/api/v1/purge', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ site_id: siteId, cache_tags: [`artist-${slug}`] }),
+      });
+      console.log(`[Profile] Purged CDN cache for artist-${slug}`);
+    } else {
+      console.warn('[Profile] NETLIFY_SITE_ID or NETLIFY_API_TOKEN not set, skipping CDN purge');
+    }
+  } catch (e) {
+    console.error('[Profile] CDN cache purge failed:', e);
+  }
+}
+
+// Removing a claim un-verifies the artist rather than deleting them. The artists row is public
+// search data that existed before the claim and still describes a real artist; what goes is
+// everything the claim added — bio, photo, featured release, divider layout — all of which live
+// on the artist_profiles row. Platform links stay: they were discoverable before the claim too.
+async function handleRemoveClaim(client: SupabaseClient, slug: string, userId: string) {
+  const owned = await resolveOwnedArtist(slug, userId);
+  if (!owned.ok || !owned.artistId || !owned.artistName) {
+    return { statusCode: owned.status, headers: CORS_HEADERS, body: JSON.stringify({ error: owned.error }) };
+  }
+
+  // Scoped to user_id as well as artist_id even though ownership is already proven: this is the
+  // one destructive action an artist can take on their own profile, so it shouldn't rely on a
+  // check made a few milliseconds earlier.
+  const { error: deleteError, count } = await client
+    .from('artist_profiles')
+    .delete({ count: 'exact' })
+    .eq('artist_id', owned.artistId)
+    .eq('user_id', userId);
+
+  if (deleteError) {
+    console.error('[Profile] Claim removal failed:', deleteError);
+    Sentry.captureException(new Error(`artist_profiles delete failed: ${deleteError.message}`), {
+      tags: { subsystem: 'artist-profile' },
+      extra: { artistId: owned.artistId, slug },
+    });
+    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to remove this artist. Please try again.' }) };
+  }
+
+  if (!count) {
+    return { statusCode: 409, headers: CORS_HEADERS, body: JSON.stringify({ error: 'This artist is no longer claimed by your account.' }) };
+  }
+
+  // Back to auto-discovered. Left flagged as claimed, the row would never expire and enrichment
+  // would keep skipping it (see getArtistBySlug and the enrichment guard in db.ts), so the page
+  // would stay frozen on the last edit of an artist who just asked to be removed.
+  const { error: revertError } = await client
+    .from('artists')
+    .update({ match_confidence: 'unverified', source: 'auto', updated_at: new Date().toISOString() })
+    .eq('id', owned.artistId);
+
+  if (revertError) {
+    // The removal itself stands — the page renders unclaimed with no profile row either way —
+    // but the artist row is now in a state only a human can fix, so say so loudly.
+    console.error('[Profile] Artist revert after claim removal failed:', revertError);
+    Sentry.captureException(new Error(`artist revert after claim removal failed: ${revertError.message}`), {
+      tags: { subsystem: 'artist-profile' },
+      extra: { artistId: owned.artistId, slug },
+    });
+  }
+
+  await purgeArtistCaches(owned.artistName, slug);
+  console.log(`[Profile] Claim removed for "${owned.artistName}" (${slug})`);
+
+  return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ success: true }) };
+}
+
+export async function handler(event: {
+  httpMethod: string;
+  headers: Record<string, string | undefined>;
+  queryStringParameters?: Record<string, string> | null;
+  body: string | null;
+}) {
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   }
@@ -144,7 +236,7 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
   const rl = await checkRateLimit(ip, 'standard', CORS_HEADERS);
   if (rl.limited) return rl.response;
 
-  if (event.httpMethod !== 'PUT') {
+  if (event.httpMethod !== 'PUT' && event.httpMethod !== 'DELETE') {
     return { statusCode: 405, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
@@ -156,6 +248,16 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
   const userId = await authenticateRequest(event.headers.authorization || event.headers.Authorization);
   if (!userId) {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Authentication required' }) };
+  }
+
+  // DELETE takes its slug from the query string like the other delete endpoints here — a body
+  // on DELETE is inconsistently forwarded, and there's nothing else to send.
+  if (event.httpMethod === 'DELETE') {
+    const slug = event.queryStringParameters?.slug;
+    if (!slug) {
+      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'slug is required' }) };
+    }
+    return handleRemoveClaim(client, slug, userId);
   }
 
   let body: {
@@ -411,37 +513,7 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
     console.log(`[Profile] Updated ${links.length} links and ${dividers.length} dividers for artist "${artist.name}"`);
   }
 
-  // --- Bust caches ---
-  // 1. Purge Redis cache for search results containing this artist
-  try {
-    await cacheDeleteByArtist(artist.name);
-  } catch (e) {
-    console.error('[Profile] Redis cache purge failed:', e);
-  }
-
-  // 2. Purge Netlify CDN cache for this artist's page via cache tag
-  try {
-    const siteId = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
-    const token = process.env.NETLIFY_API_TOKEN;
-    if (siteId && token) {
-      await fetch(`https://api.netlify.com/api/v1/purge`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          site_id: siteId,
-          cache_tags: [`artist-${finalSlug}`],
-        }),
-      });
-      console.log(`[Profile] Purged CDN cache for artist-${finalSlug}`);
-    } else {
-      console.warn('[Profile] NETLIFY_SITE_ID or NETLIFY_API_TOKEN not set, skipping CDN purge');
-    }
-  } catch (e) {
-    console.error('[Profile] CDN cache purge failed:', e);
-  }
+  await purgeArtistCaches(artist.name, finalSlug);
 
   return {
     statusCode: 200,
