@@ -993,6 +993,7 @@ export interface ArtistForCatalog {
   bandcampUrl: string | null;
   discogsUrl: string | null;
   faircampUrl: string | null;
+  jamcoopUrl: string | null;
   officialSiteUrl: string | null;
 }
 
@@ -1014,7 +1015,7 @@ export async function getArtistForCatalog(artistId: string): Promise<ArtistForCa
         .from('artist_links')
         .select('platform, url')
         .eq('artist_id', artistId)
-        .in('platform', ['bandcamp', 'discogs', 'faircamp', 'officialsite']),
+        .in('platform', ['bandcamp', 'discogs', 'faircamp', 'jamcoop', 'officialsite']),
     ]);
 
     if (artistError || !artistRow) {
@@ -1029,6 +1030,7 @@ export async function getArtistForCatalog(artistId: string): Promise<ArtistForCa
       bandcampUrl: links.find(l => l.platform === 'bandcamp')?.url ?? null,
       discogsUrl: links.find(l => l.platform === 'discogs')?.url ?? null,
       faircampUrl: links.find(l => l.platform === 'faircamp')?.url ?? null,
+      jamcoopUrl: links.find(l => l.platform === 'jamcoop')?.url ?? null,
       officialSiteUrl: links.find(l => l.platform === 'officialsite')?.url ?? null,
     };
   } catch (error) {
@@ -1483,6 +1485,178 @@ export async function persistFaircampReleases(
     return written;
   } catch (error) {
     console.error('[DB] persistFaircampReleases error:', error);
+    return [];
+  }
+}
+
+/**
+ * Write a Jam.coop catalog pass.
+ *
+ * Matches on `match_key` alone for the same reason `persistFaircampReleases` does: Jam.coop
+ * files every release under `/albums/` and exposes no type field, so its inferred release type
+ * is too weak to partition identity by, and partitioning by it would produce a duplicate row
+ * every time Bandcamp had already typed the same record correctly.
+ *
+ * Where it differs from Faircamp is the date. Jam.coop publishes one on the album page, so this
+ * fills `release_date`/`date_precision` on an existing row that lacks them — under the same
+ * never-overwrite rules as everywhere else: a stored date wins over a new one, and a date the
+ * artist curated is never touched at all.
+ */
+interface JamcoopReleaseToPersist {
+  title: string;
+  slug: string;
+  matchKey: string;
+  releaseType: string;
+  releaseDate: string | null;
+  datePrecision: string;
+  status: string;
+  artworkUrl: string | null;
+  externalUrl: string;
+}
+
+export async function persistJamcoopReleases(
+  artistId: string,
+  releases: JamcoopReleaseToPersist[]
+): Promise<PersistedRelease[]> {
+  const client = getClient();
+  if (!client || releases.length === 0) return [];
+
+  try {
+    const { data: existingRows, error: readError } = await client
+      .from('releases')
+      .select('id, slug, match_key, release_type, release_date, artwork_url, curated_fields')
+      .eq('artist_id', artistId);
+
+    if (readError) {
+      console.error('[DB] persistJamcoopReleases read failed:', readError.message);
+      return [];
+    }
+
+    type ExistingRow = {
+      id: string;
+      slug: string;
+      match_key: string;
+      release_type: string;
+      release_date: string | null;
+      artwork_url: string | null;
+      curated_fields: string[] | null;
+    };
+    const existing = (existingRows as ExistingRow[]) || [];
+    const byMatchKey = new Map(existing.map(r => [r.match_key, r]));
+    const takenSlugs = new Set(existing.map(r => r.slug));
+    const claimedKeys = await getClaimedSourceKeys(client, existing.map(r => r.id));
+
+    const written: PersistedRelease[] = [];
+
+    for (const release of releases) {
+      const prior = byMatchKey.get(release.matchKey);
+
+      let releaseId: string;
+      let curatedFields: string[];
+
+      if (prior) {
+        const curated = new Set(prior.curated_fields ?? []);
+        curatedFields = [...curated];
+        const patch: Record<string, unknown> = {};
+
+        if (!curated.has('artwork_url') && release.artworkUrl && !prior.artwork_url) {
+          patch.artwork_url = release.artworkUrl;
+        }
+        if (!curated.has('release_date') && release.releaseDate && !prior.release_date) {
+          patch.release_date = release.releaseDate;
+          patch.date_precision = release.datePrecision;
+          // Status is derived from the date, so the two move together — but only when this pass
+          // is the one supplying the date. An existing dated row keeps whatever status its own
+          // source derived, including an 'announced' from a real pre-order flag.
+          patch.status = release.status;
+        }
+
+        if (Object.keys(patch).length > 0) {
+          const { error } = await client.from('releases').update(patch).eq('id', prior.id);
+          if (error) {
+            console.error('[DB] persistJamcoopReleases update failed:', error.message);
+            continue;
+          }
+        }
+        releaseId = prior.id;
+      } else {
+        const fuzzy = existing.find(c => isFuzzyReleaseMatch(c.match_key, release.matchKey));
+
+        let slug = release.slug;
+        if (takenSlugs.has(slug)) slug = `${slug}-${release.matchKey.slice(0, 6)}`;
+        takenSlugs.add(slug);
+
+        const { data: inserted, error } = await client
+          .from('releases')
+          .insert({
+            artist_id: artistId,
+            title: release.title,
+            slug,
+            match_key: release.matchKey,
+            release_type: release.releaseType,
+            release_date: release.releaseDate,
+            date_precision: release.datePrecision,
+            status: release.status,
+            artwork_url: release.artworkUrl,
+            source: 'auto',
+            ...(fuzzy && { needs_review: true, flagged_against_release_id: fuzzy.id }),
+          })
+          .select('id')
+          .single();
+
+        if (error || !inserted) {
+          console.error('[DB] persistJamcoopReleases insert failed:', error?.message);
+          continue;
+        }
+        releaseId = (inserted as { id: string }).id;
+        curatedFields = [];
+
+        const createdRow: ExistingRow = {
+          id: releaseId,
+          slug,
+          match_key: release.matchKey,
+          release_type: release.releaseType,
+          release_date: release.releaseDate,
+          artwork_url: release.artworkUrl,
+          curated_fields: [],
+        };
+        byMatchKey.set(release.matchKey, createdRow);
+        existing.push(createdRow);
+
+        if (fuzzy) {
+          const { error: flagError } = await client
+            .from('releases')
+            .update({ needs_review: true, flagged_against_release_id: releaseId })
+            .eq('id', fuzzy.id);
+          if (flagError) console.error('[DB] persistJamcoopReleases fuzzy-flag failed:', flagError.message);
+        }
+      }
+
+      const source = await upsertReleaseSource(
+        client,
+        releaseId,
+        'jamcoop',
+        release.externalUrl,
+        release.externalUrl,
+        claimedKeys
+      );
+      if (!source) {
+        console.error('[DB] persistJamcoopReleases source write failed for release', releaseId);
+        continue;
+      }
+
+      written.push({
+        releaseId,
+        sourceId: source.id,
+        url: source.url,
+        detailCheckedAt: source.detail_checked_at,
+        curatedFields,
+      });
+    }
+
+    return written;
+  } catch (error) {
+    console.error('[DB] persistJamcoopReleases error:', error);
     return [];
   }
 }
@@ -2897,5 +3071,434 @@ export async function getArtistReleases(
   } catch (error) {
     console.error('[DB] getArtistReleases error:', error);
     return { releases: [], total: 0 };
+  }
+}
+
+// --- Releases for alerts ---
+
+export interface AlertRelease {
+  /** Release slug, for building the /a/{artist}/{release} link an alert points at. */
+  slug: string;
+  title: string;
+  releaseDate: string | null;
+  datePrecision: string | null;
+  status: string;
+  artworkUrl: string | null;
+  sources: {
+    platform: string;
+    /** The platform's own page for this release — the fallback link when a fan wants the source. */
+    url: string;
+    offers: { price: number | null; currency: string | null; availability: string }[];
+  }[];
+}
+
+export interface AlertReleases {
+  /** The catalogued artist's slug, which may differ from the caller's derived one. */
+  artistSlug: string;
+  releases: AlertRelease[];
+}
+
+/**
+ * Everything an alert needs for one artist, straight out of the catalog.
+ *
+ * **Returns null when this artist has no catalog at all, and `[]` when they have one with
+ * nothing new in it.** Those are different facts and the caller depends on the difference: the
+ * first means "we haven't looked yet, go and scrape" and the second means "we looked and there
+ * is genuinely nothing". Collapsing them into an empty array is the single most repeated bug
+ * class in this codebase, and here it would either silently stop alerting for every artist
+ * without a catalog, or re-scrape Bandcamp for every artist forever.
+ *
+ * The window is a floor, not a range. Anything dated on or after `today - windowDays` qualifies,
+ * **including releases dated in the future** — which is the whole point of the fix. The old
+ * client-side check required `daysDiff >= 0`, so a pre-announced record was filtered out for
+ * being in the future and then aged past the window before it ever became "recent"; the most
+ * delightful possible alert ("your artist just announced an album for September") could not fire
+ * at all. Undated releases are excluded: with no date there is nothing to say is new, and grid
+ * ingest produces plenty of them.
+ */
+export async function getReleasesForAlerts(
+  artistName: string,
+  windowDays: number,
+  now: Date = new Date()
+): Promise<AlertReleases | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  try {
+    const { data: artist, error: artistError } = await client
+      .from('artists')
+      .select('id, slug')
+      .eq('slug', artistSlug(artistName))
+      .maybeSingle();
+
+    if (artistError) {
+      console.error('[DB] getReleasesForAlerts artist lookup failed:', artistError.message);
+      return null;
+    }
+    if (!artist) return null;
+
+    const { id, slug } = artist as { id: string; slug: string };
+
+    // Has this artist ever been catalogued? Asked separately from the windowed read because a
+    // catalogued artist with a quiet month and an artist nobody has ever crawled produce the
+    // same empty result set, and only the second one should trigger a live scrape.
+    const { count: catalogued, error: countError } = await client
+      .from('releases')
+      .select('id', { count: 'exact', head: true })
+      .eq('artist_id', id);
+
+    if (countError) {
+      console.error('[DB] getReleasesForAlerts count failed:', countError.message);
+      return null;
+    }
+    if (!catalogued) return null;
+
+    const since = new Date(now.getTime() - windowDays * 86_400_000).toISOString().slice(0, 10);
+
+    const { data, error } = await client
+      .from('releases')
+      .select(
+        'slug, title, release_date, date_precision, status, artwork_url,' +
+        ' release_sources ( platform, url, release_offers ( price, currency, availability ) )'
+      )
+      .eq('artist_id', id)
+      .eq('is_hidden', false)
+      // A tier-3 fuzzy flag means we are not sure this is a distinct record. Sending a push
+      // notification about it would publish that uncertainty to a fan's lock screen, so flagged
+      // rows wait for the review queue rather than alerting.
+      .eq('needs_review', false)
+      .gte('release_date', since)
+      .order('release_date', { ascending: false })
+      .limit(50);
+
+    if (error) {
+      console.error('[DB] getReleasesForAlerts read failed:', error.message);
+      return null;
+    }
+
+    type Row = {
+      slug: string;
+      title: string;
+      release_date: string | null;
+      date_precision: string | null;
+      status: string;
+      artwork_url: string | null;
+      release_sources: {
+        platform: string;
+        url: string;
+        release_offers: { price: number | null; currency: string | null; availability: string }[] | null;
+      }[] | null;
+    };
+
+    const releases = ((data as unknown as Row[]) || []).map(r => ({
+      slug: r.slug,
+      title: r.title,
+      releaseDate: r.release_date,
+      datePrecision: r.date_precision,
+      status: r.status,
+      artworkUrl: r.artwork_url,
+      sources: (r.release_sources || []).map(s => ({
+        platform: s.platform,
+        url: s.url,
+        offers: s.release_offers || [],
+      })),
+    }));
+
+    return { artistSlug: slug, releases };
+  } catch (error) {
+    console.error('[DB] getReleasesForAlerts error:', error);
+    return null;
+  }
+}
+
+// --- Release feeds (/feed/f/{token}.ics) ---
+
+/**
+ * Look up whose feed this token is.
+ *
+ * The token *is* the authorization — a calendar client sends no session — so this is the whole
+ * auth check for the feed path. Returns null for an unknown token, which the caller must turn
+ * into a 404 rather than a 401: a 401 invites retrying with a different token, and confirming
+ * "this token shape exists but is wrong" is more than an anonymous caller needs to know.
+ *
+ * Never log the token. It's a credential in a URL, and path tokens end up in access logs and
+ * referrers by default (spec §8).
+ */
+export async function getFeedTokenOwner(token: string): Promise<string | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  try {
+    const { data, error } = await client
+      .from('release_feed_tokens')
+      .select('user_id')
+      .eq('token', token)
+      .maybeSingle();
+
+    if (error) {
+      console.error('[DB] getFeedTokenOwner failed:', error.message);
+      return null;
+    }
+    return data ? (data as { user_id: string }).user_id : null;
+  } catch (error) {
+    console.error('[DB] getFeedTokenOwner error:', error);
+    return null;
+  }
+}
+
+/** The user's existing feed token, or null if they've never made one. */
+export async function getFeedToken(userId: string): Promise<string | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  try {
+    const { data, error } = await client
+      .from('release_feed_tokens')
+      .select('token')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error('[DB] getFeedToken failed:', error.message);
+      return null;
+    }
+    return data ? (data as { token: string }).token : null;
+  } catch (error) {
+    console.error('[DB] getFeedToken error:', error);
+    return null;
+  }
+}
+
+/**
+ * Issue a feed token, replacing any existing one.
+ *
+ * Upsert on `user_id` rather than insert-then-delete, so rotation is a single statement and
+ * there is never a window where the user has no token at all. The caller generates the value —
+ * `crypto.randomBytes` lives at the endpoint, keeping this module free of the "how much entropy"
+ * decision.
+ */
+export async function setFeedToken(userId: string, token: string): Promise<boolean> {
+  const client = getClient();
+  if (!client) return false;
+
+  try {
+    const { error } = await client
+      .from('release_feed_tokens')
+      .upsert(
+        { user_id: userId, token, rotated_at: new Date().toISOString() },
+        { onConflict: 'user_id' }
+      );
+
+    if (error) {
+      console.error('[DB] setFeedToken failed:', error.message);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('[DB] setFeedToken error:', error);
+    return false;
+  }
+}
+
+/** Revoke the user's feed token entirely, breaking every existing subscription. */
+export async function deleteFeedToken(userId: string): Promise<boolean> {
+  const client = getClient();
+  if (!client) return false;
+
+  try {
+    const { error } = await client.from('release_feed_tokens').delete().eq('user_id', userId);
+    if (error) {
+      console.error('[DB] deleteFeedToken failed:', error.message);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('[DB] deleteFeedToken error:', error);
+    return false;
+  }
+}
+
+export interface FeedReleaseRow {
+  artistName: string;
+  artistSlug: string;
+  title: string;
+  releaseSlug: string;
+  releaseDate: string;
+  offerSummary: string;
+  platforms: string[];
+  sources: { platform: string; offers: { price: number | null; currency: string | null; availability: string }[] }[];
+}
+
+/**
+ * How far back a feed reaches. Spec §3 argues for upcoming releases only ("a calendar of past
+ * releases is a changelog"), and that argument is right about the *back catalogue* — but a
+ * record that came out last week is still something a subscriber may not have bought yet, which
+ * is the same purchase-intent moment the alerts serve. A short trailing window keeps that case
+ * and stops the feed reading as broken while catalog coverage is still thin.
+ */
+export const FEED_TRAILING_DAYS = 30;
+
+/** Cap on events in one feed, so a fan with hundreds of saved artists still gets a usable file. */
+const FEED_MAX_RELEASES = 200;
+
+type FeedQueryRow = {
+  slug: string;
+  title: string;
+  release_date: string | null;
+  artists: { name: string; slug: string } | null;
+  release_sources: {
+    platform: string;
+    release_offers: { price: number | null; currency: string | null; availability: string }[] | null;
+  }[] | null;
+};
+
+function toFeedRows(rows: FeedQueryRow[]): FeedReleaseRow[] {
+  return rows
+    .filter(r => r.release_date && r.artists)
+    .map(r => ({
+      artistName: r.artists!.name,
+      artistSlug: r.artists!.slug,
+      title: r.title,
+      releaseSlug: r.slug,
+      releaseDate: r.release_date!,
+      offerSummary: '',
+      platforms: [],
+      sources: (r.release_sources || []).map(s => ({
+        platform: s.platform,
+        offers: s.release_offers || [],
+      })),
+    }));
+}
+
+const FEED_SELECT =
+  'slug, title, release_date, artists!inner ( name, slug ),' +
+  ' release_sources ( platform, release_offers ( price, currency, availability ) )';
+
+/** Soonest first — a calendar and a reader both want the next thing at the top. */
+function feedSince(now: Date): string {
+  return new Date(now.getTime() - FEED_TRAILING_DAYS * 86_400_000).toISOString().slice(0, 10);
+}
+
+/**
+ * Every release worth putting in one fan's feed: across all their saved artists, dated within
+ * the trailing window or still to come.
+ *
+ * Two exclusions match the alert path for the same reasons — hidden releases are suppressed by
+ * an artist and must stay invisible, and a `needs_review` tier-3 fuzzy flag means we aren't sure
+ * the release is distinct, which is not something to publish into someone's calendar.
+ */
+export async function getFeedReleasesForUser(userId: string, now: Date = new Date()): Promise<FeedReleaseRow[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  try {
+    const { data: saved, error: savedError } = await client
+      .from('saved_artists')
+      .select('artist_id')
+      .eq('user_id', userId);
+
+    if (savedError) {
+      console.error('[DB] getFeedReleasesForUser saved read failed:', savedError.message);
+      return [];
+    }
+
+    const artistIds = ((saved as { artist_id: string }[]) || []).map(r => r.artist_id);
+    if (artistIds.length === 0) return [];
+
+    const { data, error } = await client
+      .from('releases')
+      .select(FEED_SELECT)
+      .in('artist_id', artistIds)
+      .eq('is_hidden', false)
+      .eq('needs_review', false)
+      .gte('release_date', feedSince(now))
+      .order('release_date', { ascending: true })
+      .limit(FEED_MAX_RELEASES);
+
+    if (error) {
+      console.error('[DB] getFeedReleasesForUser read failed:', error.message);
+      return [];
+    }
+
+    return toFeedRows((data as unknown as FeedQueryRow[]) || []);
+  } catch (error) {
+    console.error('[DB] getFeedReleasesForUser error:', error);
+    return [];
+  }
+}
+
+/** The same feed for one artist, for the public /a/{slug}/releases.xml. */
+export async function getFeedReleasesForArtist(
+  artistSlugValue: string,
+  now: Date = new Date()
+): Promise<{ artistName: string; releases: FeedReleaseRow[] } | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  try {
+    const { data: artist, error: artistError } = await client
+      .from('artists')
+      .select('id, name')
+      .eq('slug', artistSlugValue)
+      .maybeSingle();
+
+    if (artistError || !artist) return null;
+    const { id, name } = artist as { id: string; name: string };
+
+    const { data, error } = await client
+      .from('releases')
+      .select(FEED_SELECT)
+      .eq('artist_id', id)
+      .eq('is_hidden', false)
+      .eq('needs_review', false)
+      .gte('release_date', feedSince(now))
+      .order('release_date', { ascending: true })
+      .limit(FEED_MAX_RELEASES);
+
+    if (error) {
+      console.error('[DB] getFeedReleasesForArtist read failed:', error.message);
+      return null;
+    }
+
+    return { artistName: name, releases: toFeedRows((data as unknown as FeedQueryRow[]) || []) };
+  } catch (error) {
+    console.error('[DB] getFeedReleasesForArtist error:', error);
+    return null;
+  }
+}
+
+/**
+ * The public feed for a shared list at /u/{handle}.
+ *
+ * Gated on the same opt-in the HTML page uses (`usernames.saved_artists_public`) — a handle
+ * existing is not consent to publish that person's subscriptions as a calendar. Returns null
+ * when the handle is unknown *or* not shared, so the caller 404s either way and the feed can't
+ * be used to probe which handles exist.
+ */
+export async function getFeedReleasesForHandle(
+  handle: string,
+  now: Date = new Date()
+): Promise<{ displayName: string; releases: FeedReleaseRow[] } | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  try {
+    const { data: row, error } = await client
+      .from('usernames')
+      .select('user_id, username, saved_artists_public')
+      .eq('username', handle.toLowerCase())
+      .maybeSingle();
+
+    if (error || !row) return null;
+    const username = row as { user_id: string; username: string; saved_artists_public: boolean };
+    if (!username.saved_artists_public) return null;
+
+    return {
+      displayName: username.username,
+      releases: await getFeedReleasesForUser(username.user_id, now),
+    };
+  } catch (error) {
+    console.error('[DB] getFeedReleasesForHandle error:', error);
+    return null;
   }
 }

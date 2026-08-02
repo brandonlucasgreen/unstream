@@ -216,23 +216,22 @@ class ReleaseAlertManager: ObservableObject {
             // Skip if no supported platforms
             guard !platforms.isEmpty else { continue }
 
-            // Call API to check for releases (API handles priority internally)
-            if let release = await checkViaAPI(artistName: entry.artistName, platforms: platforms) {
-                foundNewReleases.append(release)
-            }
+            // The server returns every release in the window, not just the newest, so an artist
+            // who put out two records since the last check produces two alerts.
+            foundNewReleases.append(contentsOf: await checkViaAPI(artistName: entry.artistName, platforms: platforms))
         }
 
-        // Update state with new releases
+        // Update state with new releases.
+        //
+        // There is deliberately no second dedup here. There used to be one — it asked whether
+        // the display list already held *any* release by this artist, and skipped the release if
+        // so. That was wrong in a way that lost data permanently: checkViaAPI has already done
+        // the correct per-release dedup and has already recorded the release as known, so an
+        // artist's genuinely-new second record was dropped from both the list and the
+        // notification while being marked as seen — making it undetectable forever after.
         if !foundNewReleases.isEmpty {
-            var releasesToNotify: [NewRelease] = []
-            for release in foundNewReleases {
-                let alreadyKnown = newReleases.contains(where: { $0.artistName.lowercased() == release.artistName.lowercased() })
-                if !alreadyKnown {
-                    newReleases.append(release)
-                    checkState.newReleases.append(release)
-                    releasesToNotify.append(release)
-                }
-            }
+            newReleases.append(contentsOf: foundNewReleases)
+            checkState.newReleases.append(contentsOf: foundNewReleases)
 
             // Save state and wait for UI to update before sending notifications
             saveState()
@@ -240,44 +239,112 @@ class ReleaseAlertManager: ObservableObject {
             // Small delay to ensure SwiftUI has time to update the UI
             try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
 
-            // Send individual notifications for each new release
-            if !releasesToNotify.isEmpty {
-                await sendNotifications(for: releasesToNotify)
-            }
+            await sendNotifications(for: foundNewReleases)
         }
     }
 
-    private func checkViaAPI(artistName: String, platforms: [String: String]) async -> NewRelease? {
+    /// Ask the server what's new for one artist, and keep only what we haven't seen before.
+    private func checkViaAPI(artistName: String, platforms: [String: String]) async -> [NewRelease] {
         do {
-            guard let result = try await releaseAPI.checkReleases(artistName: artistName, platforms: platforms) else {
-                return nil
-            }
+            let results = try await releaseAPI.checkReleases(artistName: artistName, platforms: platforms)
+            return Self.selectUnseen(results, artistName: artistName, state: &checkState)
+        } catch {
+            print("API check failed for \(artistName): \(error)")
+            return []
+        }
+    }
 
-            // Check if we already know about this release (on ANY platform)
-            if checkState.isKnownReleaseByName(result.releaseName, for: artistName) {
-                return nil
-            }
+    /// Which of these results haven't we alerted on before? Marks each one it returns as known.
+    ///
+    /// **This is the only dedup point, and that is the fix.** Identity is the release name,
+    /// compared across platforms so one record on both Bandcamp and Mirlo is one alert rather
+    /// than two — but *within* an artist, so a second, different record is always new.
+    ///
+    /// There used to be a second layer on top of this in `checkAllArtists`, asking whether the
+    /// display list already held any release by the same artist. Because this function has
+    /// already recorded the release as known by the time that check ran, a genuinely-new second
+    /// record was dropped from the list and the notification while being marked as seen — so it
+    /// could never be detected again. Extracted here, `inout` over the state, so the rule can be
+    /// tested directly rather than only through a network call.
+    nonisolated static func selectUnseen(
+        _ results: [ReleaseCheckResult],
+        artistName: String,
+        state: inout ReleaseCheckState
+    ) -> [NewRelease] {
+        var fresh: [NewRelease] = []
 
-            // Mark as known
-            checkState.addKnownRelease(
+        for result in results {
+            if state.isKnownReleaseByName(result.releaseName, for: artistName) { continue }
+
+            state.addKnownRelease(
                 KnownRelease(releaseName: result.releaseName, releaseDate: result.releaseDate, platform: result.platform),
                 for: artistName
             )
 
-            return NewRelease(
+            fresh.append(NewRelease(
                 artistName: artistName,
                 releaseName: result.releaseName,
                 releaseDate: result.releaseDate,
                 releaseUrl: result.releaseUrl,
-                platform: result.platform
-            )
-        } catch {
-            print("API check failed for \(artistName): \(error)")
-            return nil
+                platform: result.platform,
+                platforms: result.platforms,
+                status: result.status,
+                offerSummary: result.offerSummary
+            ))
         }
+
+        return fresh
     }
 
     // MARK: - Notifications
+
+    /// What a release notification actually says.
+    ///
+    /// The old body was `"X" is out now on Bandcamp!` — one platform, no formats, no price, at
+    /// the exact moment someone is deciding whether and where to buy. With the catalog behind
+    /// the API there is real information to offer instead, so this builds up from whatever the
+    /// server actually knew rather than asserting a fixed shape:
+    ///
+    ///   "Infinite Normal" — out now on Bandcamp and Mirlo · from $8 · ≈$6.80 to artist
+    ///   "Next Year" — announced, 1 September
+    ///
+    /// Nothing is invented: an empty `offerSummary` (no price read yet) simply omits that
+    /// clause rather than printing a placeholder.
+    /// `nonisolated` because it is a pure function of its argument — it touches no manager
+    /// state, so there is no reason to make callers (including tests) hop to the main actor.
+    nonisolated static func notificationBody(for release: NewRelease) -> String {
+        var parts: [String] = []
+
+        let where_ = formatPlatformList(release.platforms)
+        if release.isUpcoming {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "d MMMM"
+            let date = formatter.string(from: release.releaseDate)
+            parts.append(where_.isEmpty ? "announced for \(date)" : "announced for \(date) on \(where_)")
+        } else {
+            parts.append(where_.isEmpty ? "out now" : "out now on \(where_)")
+        }
+
+        if !release.offerSummary.isEmpty {
+            parts.append(release.offerSummary)
+        }
+
+        return "\"\(release.releaseName)\" — " + parts.joined(separator: " · ")
+    }
+
+    /// "Bandcamp", "Bandcamp and Mirlo", "Bandcamp, Mirlo and 2 more" — a notification body has
+    /// very little room, so a long list is summarized rather than truncated mid-name.
+    nonisolated private static func formatPlatformList(_ platforms: [String]) -> String {
+        // platformCatalog carries the proper display name ("Jam.coop", "Ko-fi"), which
+        // `.capitalized` would mangle. An unknown id falls back rather than being dropped.
+        let names = platforms.map { platformCatalog[$0]?.name ?? $0.capitalized }
+        switch names.count {
+        case 0: return ""
+        case 1: return names[0]
+        case 2: return "\(names[0]) and \(names[1])"
+        default: return "\(names[0]), \(names[1]) and \(names.count - 2) more"
+        }
+    }
 
     private func sendNotifications(for releases: [NewRelease]) async {
         // Check authorization status first
@@ -288,8 +355,10 @@ class ReleaseAlertManager: ObservableObject {
         for release in releases {
 
             let content = UNMutableNotificationContent()
-            content.title = "New Release from \(release.artistName)"
-            content.body = "\"\(release.releaseName)\" is out now on \(release.platform.capitalized)!"
+            content.title = release.isUpcoming
+                ? "\(release.artistName) — coming soon"
+                : "New Release from \(release.artistName)"
+            content.body = Self.notificationBody(for: release)
             content.sound = .default
             content.userInfo = ["releaseUrl": release.releaseUrl]
 

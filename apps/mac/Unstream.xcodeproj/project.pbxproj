@@ -35,6 +35,7 @@
 		5AF682136B14D6BDCBF42E4A /* UnstreamShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B86644D0E7917D893B1E7A3 /* UnstreamShortcuts.swift */; };
 		5B170D71E9A7E9A471424F16 /* iOSSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 359150E4043D5233395827D3 /* iOSSettingsTab.swift */; platformFilters = (ios, ); };
 		5FFFE71A1135656E81B34BDB /* DeviceIDManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEFF951B15732D3AD206D247 /* DeviceIDManager.swift */; };
+		63E898D2663789CC76EF14C1 /* ReleaseAlertTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66C32A6DB203A3FC0A26D719 /* ReleaseAlertTests.swift */; };
 		640AB7A350949FAA23C72A53 /* iOSContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5033CFF636FB4C7C07D315A6 /* iOSContentView.swift */; platformFilters = (ios, ); };
 		64514560D09214DE420ED24D /* NowPlayingNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A93B97CDB100943ECCA942E6 /* NowPlayingNotificationManager.swift */; platformFilters = (macos, ); };
 		7182754E06D41AE6FB47653A /* SupportListManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F5BF0BE3FBF25D3C4102A6 /* SupportListManager.swift */; };
@@ -131,6 +132,7 @@
 		529125F63F2294A642A38108 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		590FD31A0B703B21FFCCBEA7 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		607E17AC019A1B8698E64ACC /* Unstream.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Unstream.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		66C32A6DB203A3FC0A26D719 /* ReleaseAlertTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseAlertTests.swift; sourceTree = "<group>"; };
 		673FC4B1F41A233725896DB8 /* ReleaseCheckAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseCheckAPI.swift; sourceTree = "<group>"; };
 		6B52C116B5CC91BC40D028AF /* GlobalHotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotkeyManager.swift; sourceTree = "<group>"; };
 		752695EB82D70EEE00B921FA /* TipJarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipJarView.swift; sourceTree = "<group>"; };
@@ -262,6 +264,7 @@
 			isa = PBXGroup;
 			children = (
 				99D11E8AD4C3856F744DAA65 /* Info.plist */,
+				66C32A6DB203A3FC0A26D719 /* ReleaseAlertTests.swift */,
 				16504D9BC91FD976CD10D549 /* SavedArtistsSyncTests.swift */,
 			);
 			path = UnstreamTests;
@@ -510,6 +513,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63E898D2663789CC76EF14C1 /* ReleaseAlertTests.swift in Sources */,
 				93956240B6028E760C791028 /* SavedArtistsSyncTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

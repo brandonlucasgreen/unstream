@@ -792,6 +792,255 @@ export function buildFaircampRelease(
 }
 
 // ---------------------------------------------------------------------------
+// Jam.coop — a co-op marketplace, server-rendered, and the cheapest good source after Bandcamp
+// ---------------------------------------------------------------------------
+//
+// Jam.coop is small (231 artists in its own directory) but it is the best-shaped source this
+// feature has added since Bandcamp, for three reasons worth writing down:
+//
+// - **robots.txt permits everything.** Fetched and checked before a line of this was written:
+//   the file contains a single comment and no `Disallow` at all — unlike Mirlo, whose genuinely
+//   better API is `Disallow: /v1/` and therefore stays unbuilt (spec §10).
+// - **It is entirely server-rendered.** No client-side hydration to defeat, unlike Bandwagon's
+//   `/albums` listing, which returned nothing.
+// - **One request per release gets everything.** Title, artwork, date, price, currency and
+//   format all live on the album page — so unlike Faircamp (which needs a second purchase-page
+//   request for a price, and has no date at *any* depth) a release costs exactly one fetch.
+//
+// Two-tier like every other source: `/artists/{slug}` lists the albums, `/artists/{slug}/albums/{album}`
+// has the detail.
+
+/** Ceiling on albums read off one artist page, before the per-run budget applies. */
+const JAMCOOP_MAX_CANDIDATES = 40;
+
+export interface JamcoopReleaseCandidate {
+  /** The album's own slug, used only for dedup within a page. */
+  slug: string;
+  url: string;
+  /** Grid artwork, kept as a fallback for an album page that somehow has no image. */
+  artworkUrl: string | null;
+}
+
+/**
+ * Find an artist's albums on their Jam.coop artist page.
+ *
+ * Matched on the **href shape** (`/artists/{artist}/albums/{album}`) rather than on the
+ * surrounding markup's classes. Jam.coop is a Tailwind app, so its class strings
+ * (`font-medium text-slate-600 break-words`) are presentational and would change on any
+ * redesign, whereas the route shape is the app's own URL contract. The same reasoning is why
+ * the album parser below reads `<h1>` and the `Released:` label instead of class selectors.
+ *
+ * Only albums belonging to the artist whose page this is are accepted — the page also links to
+ * other artists (a "more from Jam.coop" rail, compilation credits), and cataloguing those under
+ * this artist would attribute someone else's record to them.
+ */
+export function ingestJamcoopArtistPage(html: string, pageUrl: string): JamcoopReleaseCandidate[] {
+  const out: JamcoopReleaseCandidate[] = [];
+  const seen = new Set<string>();
+
+  let base: URL;
+  let artistSlug: string;
+  try {
+    base = new URL(pageUrl);
+    const match = base.pathname.match(/^\/artists\/([^/]+)/);
+    if (!match) return out;
+    artistSlug = match[1].toLowerCase();
+  } catch {
+    return out;
+  }
+
+  const root = parse(html);
+
+  for (const anchor of root.querySelectorAll('a[href]')) {
+    const href = anchor.getAttribute('href') ?? '';
+
+    let url: URL;
+    try {
+      url = new URL(href, base);
+    } catch {
+      continue;
+    }
+    // An href out of fetched markup is untrusted — same rule as `resolveReleaseUrl`.
+    if (url.host !== base.host) continue;
+
+    const match = url.pathname.match(/^\/artists\/([^/]+)\/albums\/([^/]+)\/?$/);
+    if (!match) continue;
+    if (match[1].toLowerCase() !== artistSlug) continue;
+
+    const slug = match[2].toLowerCase();
+    if (seen.has(slug)) continue;
+    seen.add(slug);
+
+    const img = anchor.querySelector('img');
+    out.push({
+      slug,
+      url: url.toString(),
+      artworkUrl: img?.getAttribute('src')?.trim() || null,
+    });
+
+    if (out.length >= JAMCOOP_MAX_CANDIDATES) break;
+  }
+
+  return out;
+}
+
+export interface JamcoopAlbumPage {
+  title: string;
+  artworkUrl: string | null;
+  releaseDate: string | null;
+  datePrecision: DatePrecision;
+  status: ReleaseStatus;
+  /** Empty when no price could be read — never a zero standing in for "unknown". */
+  offers: IngestedOffer[];
+}
+
+/**
+ * Symbols Jam.coop's price line can carry, onto ISO codes.
+ *
+ * Deliberately only these three. A symbol that isn't here fails to match the price pattern at
+ * all, so the release is stored with **no offer** rather than with a price in a guessed
+ * currency: `formatMoney` defaults a null currency to USD, so publishing "¥800" as
+ * `currency: null` would render it "$800" — a wrong number about someone's money on the page
+ * whose whole job is being right about that. Every release sampled across the platform quoted
+ * GBP (Jam.coop is a UK co-op); the other two are forward-looking, not observed.
+ */
+const JAMCOOP_CURRENCY_SYMBOLS: Record<string, string> = {
+  '£': 'GBP',
+  '€': 'EUR',
+  $: 'USD',
+};
+
+/**
+ * Read one Jam.coop album page: title, artwork, release date, and its single digital offer.
+ *
+ * Returns null when there's no `<h1>` to take a title from, which means the fetch didn't land
+ * on an album page (a redirect to a listing, an error page) rather than that the album has no
+ * title.
+ *
+ * **"£7.00 or more" is published as 7.00, not as name-your-price.** The floor is what a fan can
+ * actually pay, which is the honest figure — the same call `ingestFaircampPurchasePage` makes
+ * about Faircamp's `data-min`, and for the same reason. A genuine "£0.00 or more" still lands
+ * as `price: 0`, which the display layer already renders as "Name your price" rather than
+ * "free".
+ *
+ * Everything Jam.coop sells is a download ("Digital download. MP3 and FLAC"), so the offer is
+ * always `digital`; there is no physical stock and therefore nothing that can be sold out.
+ */
+export function ingestJamcoopAlbumPage(html: string, now: Date = new Date()): JamcoopAlbumPage | null {
+  const root = parse(html);
+
+  const title = root.querySelector('h1')?.textContent?.trim();
+  if (!title) return null;
+
+  const artworkUrl = root.querySelector('img')?.getAttribute('src')?.trim() || null;
+
+  // Jam.coop writes "<strong>Released:</strong> October 4, 2024". The label is matched rather
+  // than a position, and the value handed to the shared date parser rather than parsed here.
+  const dateMatch = stripTags(html).match(/Released:\s*([A-Za-z]+\s+\d{1,2},\s*\d{4})/);
+  const { date, precision } = parseReleaseDate(dateMatch ? dateMatch[1] : null, now);
+
+  return {
+    title,
+    artworkUrl,
+    releaseDate: date,
+    datePrecision: precision,
+    // No pre-order flag exists in Jam.coop's markup, so a future date is the only signal —
+    // which is exactly what deriveStatus falls back to.
+    status: deriveStatus(date, false, now),
+    offers: parseJamcoopOffer(html),
+  };
+}
+
+/**
+ * The price line, e.g. "£3.00 or more. Digital download. MP3 and FLAC".
+ *
+ * Anchored on "Digital download" rather than on the amount alone: an album page also carries
+ * track durations, track numbers and a description that may quote prices, and matching the
+ * first currency-shaped string on the page would eventually pick one of those up.
+ */
+function parseJamcoopOffer(html: string): IngestedOffer[] {
+  const line = stripTags(html).match(
+    /([£€$])\s*([0-9]+(?:\.[0-9]{1,2})?)[^.]*\.\s*Digital download/
+  );
+  if (!line) return [];
+
+  const price = Number(line[2]);
+  if (!Number.isFinite(price)) return [];
+
+  return [
+    { format: 'digital', price, currency: JAMCOOP_CURRENCY_SYMBOLS[line[1]], availability: 'available' },
+  ];
+}
+
+export interface JamcoopReleaseToPersist {
+  title: string;
+  slug: string;
+  matchKey: string;
+  releaseType: ReleaseType;
+  releaseDate: string | null;
+  datePrecision: DatePrecision;
+  status: ReleaseStatus;
+  artworkUrl: string | null;
+  externalUrl: string;
+  offers: IngestedOffer[];
+}
+
+/**
+ * Combine an album page with its candidate link into something ready to persist.
+ *
+ * Release type comes from the title alone, via the same fallback Faircamp uses — Jam.coop files
+ * everything under `/albums/` regardless of length, so the route says nothing about type. A
+ * track count was considered and rejected: a one-track release is as likely to be a long-form
+ * ambient album as a single, and 'other' is an honest "we don't know" where a guess would be a
+ * claim.
+ *
+ * `takenSlugs` is read, not written — the caller adds each returned slug before the next call,
+ * since albums are fetched one at a time rather than as one batch.
+ */
+export function buildJamcoopRelease(
+  page: JamcoopAlbumPage,
+  candidate: JamcoopReleaseCandidate,
+  takenSlugs: ReadonlySet<string>
+): JamcoopReleaseToPersist | null {
+  const matchKey = releaseMatchKey(page.title);
+  if (!matchKey) return null;
+
+  return {
+    title: page.title,
+    slug: uniqueReleaseSlug(page.title, takenSlugs),
+    matchKey,
+    releaseType: mapDiscogsFormatToReleaseType(null, page.title),
+    releaseDate: page.releaseDate,
+    datePrecision: page.datePrecision,
+    status: page.status,
+    artworkUrl: page.artworkUrl ?? candidate.artworkUrl,
+    externalUrl: candidate.url,
+    offers: page.offers,
+  };
+}
+
+/**
+ * The `/artists/{slug}` URL for a stored Jam.coop link.
+ *
+ * Stored links come from the directory scrape in `search-sources.ts`, which already produces
+ * this shape — but a claimed artist can save any URL to their profile, so a link pointing at an
+ * album or at the bare host is normalized back to the artist page rather than fetched as-is.
+ */
+export function jamcoopArtistUrl(storedUrl: string): string | null {
+  try {
+    const u = new URL(storedUrl);
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return null;
+
+    const match = u.pathname.match(/^\/artists\/([^/]+)/);
+    if (!match) return null;
+
+    return `${u.origin}/artists/${match[1]}`;
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Discovered links — a specific release, spotted on a page we fetched for another reason
 // ---------------------------------------------------------------------------
 //
