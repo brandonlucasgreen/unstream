@@ -1,4 +1,4 @@
-import { StrictMode, Suspense, lazy } from 'react'
+import { StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import * as Sentry from '@sentry/react'
@@ -9,35 +9,37 @@ import App from './App.tsx'
 import { ArtistPage } from './pages/ArtistPage.tsx'
 import { AppLoadingFallback, AppErrorFallback } from './components/AppFallback'
 import { ScrollToTop } from './components/ScrollToTop'
+import { lazyWithRetry } from './utils/lazyWithRetry'
 
 initSentry()
 
-// Lazy-load non-critical pages to reduce initial bundle size
-const ClaimPage = lazy(() => import('./pages/ClaimPage.tsx').then(m => ({ default: m.ClaimPage })))
-const LoginPage = lazy(() => import('./pages/LoginPage.tsx').then(m => ({ default: m.LoginPage })))
-const DashboardPage = lazy(() => import('./pages/DashboardPage.tsx').then(m => ({ default: m.DashboardPage })))
-const ArtistEditPage = lazy(() => import('./pages/ArtistEditPage.tsx').then(m => ({ default: m.ArtistEditPage })))
-const ArtistReleasesPage = lazy(() => import('./pages/ArtistReleasesPage.tsx').then(m => ({ default: m.ArtistReleasesPage })))
-const ArtistDirectoryPage = lazy(() => import('./pages/ArtistDirectoryPage.tsx').then(m => ({ default: m.ArtistDirectoryPage })))
-const KnownArtistsPage = lazy(() => import('./pages/KnownArtistsPage.tsx').then(m => ({ default: m.KnownArtistsPage })))
-const RoadmapPage = lazy(() => import('./pages/RoadmapPage.tsx').then(m => ({ default: m.RoadmapPage })))
-const SupportPage = lazy(() => import('./pages/SupportPage.tsx').then(m => ({ default: m.SupportPage })))
-const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage.tsx').then(m => ({ default: m.PrivacyPolicyPage })))
-const AdminMergePage = lazy(() => import('./pages/AdminMergePage.tsx').then(m => ({ default: m.AdminMergePage })))
-const AdminVerifyPage = lazy(() => import('./pages/AdminVerifyPage.tsx').then(m => ({ default: m.AdminVerifyPage })))
-const AdminLinksPage = lazy(() => import('./pages/AdminLinksPage.tsx').then(m => ({ default: m.AdminLinksPage })))
-const AdminReleaseReviewPage = lazy(() => import('./pages/AdminReleaseReviewPage.tsx').then(m => ({ default: m.AdminReleaseReviewPage })))
-const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage.tsx').then(m => ({ default: m.ResetPasswordPage })))
-const GuidesIndexPage = lazy(() => import('./pages/GuidesIndexPage.tsx').then(m => ({ default: m.GuidesIndexPage })))
-const GuidePage = lazy(() => import('./pages/GuidePage.tsx').then(m => ({ default: m.GuidePage })))
-const DevelopersPage = lazy(() => import('./pages/DevelopersPage.tsx').then(m => ({ default: m.DevelopersPage })))
-const ChangelogPage = lazy(() => import('./pages/ChangelogPage.tsx').then(m => ({ default: m.ChangelogPage })))
-const ExtensionPage = lazy(() => import('./pages/ExtensionPage.tsx').then(m => ({ default: m.ExtensionPage })))
-const ImportPage = lazy(() => import('./pages/ImportPage.tsx').then(m => ({ default: m.ImportPage })))
-const FaqPage = lazy(() => import('./pages/FaqPage.tsx').then(m => ({ default: m.FaqPage })))
-const SettingsPage = lazy(() => import('./pages/SettingsPage.tsx').then(m => ({ default: m.SettingsPage })))
-const PublicSavedArtistsPage = lazy(() => import('./pages/PublicSavedArtistsPage.tsx').then(m => ({ default: m.PublicSavedArtistsPage })))
-const AdminAnalyticsPage = lazy(() => import('./pages/AdminAnalyticsPage.tsx').then(m => ({ default: m.AdminAnalyticsPage })))
+// Lazy-load non-critical pages to reduce initial bundle size.
+// lazyWithRetry adds a one-shot reload when a chunk belongs to a superseded deploy.
+const ClaimPage = lazyWithRetry(() => import('./pages/ClaimPage.tsx').then(m => ({ default: m.ClaimPage })))
+const LoginPage = lazyWithRetry(() => import('./pages/LoginPage.tsx').then(m => ({ default: m.LoginPage })))
+const DashboardPage = lazyWithRetry(() => import('./pages/DashboardPage.tsx').then(m => ({ default: m.DashboardPage })))
+const ArtistEditPage = lazyWithRetry(() => import('./pages/ArtistEditPage.tsx').then(m => ({ default: m.ArtistEditPage })))
+const ArtistReleasesPage = lazyWithRetry(() => import('./pages/ArtistReleasesPage.tsx').then(m => ({ default: m.ArtistReleasesPage })))
+const ArtistDirectoryPage = lazyWithRetry(() => import('./pages/ArtistDirectoryPage.tsx').then(m => ({ default: m.ArtistDirectoryPage })))
+const KnownArtistsPage = lazyWithRetry(() => import('./pages/KnownArtistsPage.tsx').then(m => ({ default: m.KnownArtistsPage })))
+const RoadmapPage = lazyWithRetry(() => import('./pages/RoadmapPage.tsx').then(m => ({ default: m.RoadmapPage })))
+const SupportPage = lazyWithRetry(() => import('./pages/SupportPage.tsx').then(m => ({ default: m.SupportPage })))
+const PrivacyPolicyPage = lazyWithRetry(() => import('./pages/PrivacyPolicyPage.tsx').then(m => ({ default: m.PrivacyPolicyPage })))
+const AdminMergePage = lazyWithRetry(() => import('./pages/AdminMergePage.tsx').then(m => ({ default: m.AdminMergePage })))
+const AdminVerifyPage = lazyWithRetry(() => import('./pages/AdminVerifyPage.tsx').then(m => ({ default: m.AdminVerifyPage })))
+const AdminLinksPage = lazyWithRetry(() => import('./pages/AdminLinksPage.tsx').then(m => ({ default: m.AdminLinksPage })))
+const AdminReleaseReviewPage = lazyWithRetry(() => import('./pages/AdminReleaseReviewPage.tsx').then(m => ({ default: m.AdminReleaseReviewPage })))
+const ResetPasswordPage = lazyWithRetry(() => import('./pages/ResetPasswordPage.tsx').then(m => ({ default: m.ResetPasswordPage })))
+const GuidesIndexPage = lazyWithRetry(() => import('./pages/GuidesIndexPage.tsx').then(m => ({ default: m.GuidesIndexPage })))
+const GuidePage = lazyWithRetry(() => import('./pages/GuidePage.tsx').then(m => ({ default: m.GuidePage })))
+const DevelopersPage = lazyWithRetry(() => import('./pages/DevelopersPage.tsx').then(m => ({ default: m.DevelopersPage })))
+const ChangelogPage = lazyWithRetry(() => import('./pages/ChangelogPage.tsx').then(m => ({ default: m.ChangelogPage })))
+const ExtensionPage = lazyWithRetry(() => import('./pages/ExtensionPage.tsx').then(m => ({ default: m.ExtensionPage })))
+const ImportPage = lazyWithRetry(() => import('./pages/ImportPage.tsx').then(m => ({ default: m.ImportPage })))
+const FaqPage = lazyWithRetry(() => import('./pages/FaqPage.tsx').then(m => ({ default: m.FaqPage })))
+const SettingsPage = lazyWithRetry(() => import('./pages/SettingsPage.tsx').then(m => ({ default: m.SettingsPage })))
+const PublicSavedArtistsPage = lazyWithRetry(() => import('./pages/PublicSavedArtistsPage.tsx').then(m => ({ default: m.PublicSavedArtistsPage })))
+const AdminAnalyticsPage = lazyWithRetry(() => import('./pages/AdminAnalyticsPage.tsx').then(m => ({ default: m.AdminAnalyticsPage })))
 
 // Redirect components for old routes
 function ArtistLoginRedirect() {
