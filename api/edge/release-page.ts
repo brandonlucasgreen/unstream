@@ -79,7 +79,15 @@ const CSS = `
   .release-art { width: 160px; height: 160px; flex-shrink: 0; border-radius: 12px; border: 1px solid var(--border); background: var(--bg2); object-fit: cover; }
   .release-art-fallback { width: 160px; height: 160px; flex-shrink: 0; border-radius: 12px; border: 1px solid var(--border); background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 40px; }
 
-  .source { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
+  /* Two columns on desktop — full-width cards were hard to scan when there were more than two
+     or three platforms. align-items: start keeps each card its natural height instead of
+     grid's default stretch, which would otherwise pad a short card (e.g. one offer) with empty
+     space to match a taller neighbor. */
+  .sources-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; margin-bottom: 12px; }
+  @media (max-width: 700px) {
+    .sources-grid { grid-template-columns: 1fr; }
+  }
+  .source { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
   .source-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--bg2); }
   .offer { display: flex; align-items: baseline; gap: 12px; padding: 10px 16px; border-top: 1px solid var(--border); font-size: 14px; }
   .offer-format { flex: 0 0 88px; font-weight: 500; text-transform: capitalize; }
@@ -357,7 +365,7 @@ export default async function handler(request: Request, context: Context) {
 
     <div class="container" style="padding-bottom:32px">
       <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Where to buy</h2>
-      ${sourcesHtml || '<p style="font-size:14px;color:var(--muted)">We haven\'t found anywhere to buy this yet.</p>'}
+      ${sourcesHtml ? `<div class="sources-grid">${sourcesHtml}</div>` : '<p style="font-size:14px;color:var(--muted)">We haven\'t found anywhere to buy this yet.</p>'}
       ${oldestCapture ? `<p class="note">Prices last checked ${escapeHtml(relativeDays(oldestCapture))}. Stock and prices may change. Payout figures are estimates based on each platform's published rates.</p>` : ''}
     </div>
   </div>
