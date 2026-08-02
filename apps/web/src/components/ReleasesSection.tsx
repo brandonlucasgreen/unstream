@@ -81,6 +81,33 @@ export function ReleasesSection({
       {total > releases.length && (
         <p className="mt-2.5 text-center text-xs text-text-muted">and {total - releases.length} more</p>
       )}
+
+      {/*
+        The per-artist feeds had no entry point anywhere in the app — they worked, but the only
+        way to find one was to already know the URL. This is the natural place: it sits with the
+        releases it describes, and only renders when there are releases to follow.
+
+        Plain <a> rather than react-router <Link>: these are not SPA routes. They are served by
+        a Netlify function, so a client-side navigation would try to render them in-app and fail.
+      */}
+      <p className="mt-3 text-center text-xs text-text-muted">
+        Follow for new releases:{' '}
+        <a
+          href={`/a/${encodeURIComponent(artistSlug)}/releases.ics`}
+          className="text-accent-primary hover:underline"
+          title="Subscribe in Apple Calendar, Google Calendar or another calendar app"
+        >
+          ICS
+        </a>
+        {' · '}
+        <a
+          href={`/a/${encodeURIComponent(artistSlug)}/releases.xml`}
+          className="text-accent-primary hover:underline"
+          title="Subscribe in an RSS reader"
+        >
+          XML
+        </a>
+      </p>
     </div>
   );
 }

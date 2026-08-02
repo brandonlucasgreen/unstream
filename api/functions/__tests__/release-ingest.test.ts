@@ -225,6 +225,127 @@ function detailPage(opts: {
   </head><body></body></html>`;
 }
 
+/**
+ * A standalone-track page's JSON-LD, as the live pages publish it: `@type: MusicRecording`, no
+ * top-level `albumRelease`, and the purchasable items hanging off `inAlbum` — the track's own
+ * download *plus* every physical package of the album it belongs to.
+ */
+function trackPage(opts: {
+  trackId?: string | null;
+  datePublished?: string;
+  /** The track's own download. */
+  own?: { price: number; currency?: string } | null;
+  /** The surrounding album's packages, which are NOT buyable as this track. */
+  albumPackages?: Array<{ format: string; price: number; packageId: string }>;
+  host?: string;
+  slug?: string;
+}): string {
+  const host = opts.host ?? 'https://artist.bandcamp.com';
+  const slug = opts.slug ?? 'a-single';
+  const trackId = opts.trackId === undefined ? '748933878' : opts.trackId;
+
+  const albumRelease: unknown[] = [];
+  if (opts.own !== null) {
+    albumRelease.push({
+      '@type': ['MusicRelease', 'Product'],
+      musicReleaseFormat: 'DigitalFormat',
+      name: 'A Single',
+      additionalProperty: [{ '@type': 'PropertyValue', name: 'type_name', value: 'Digital' }],
+      offers: {
+        '@type': 'Offer',
+        url: `${host}/track/${slug}#t${trackId}-buy`,
+        price: opts.own?.price ?? 1.5,
+        priceCurrency: opts.own?.currency ?? 'USD',
+        availability: 'OnlineOnly',
+      },
+    });
+  }
+  for (const pkg of opts.albumPackages ?? []) {
+    albumRelease.push({
+      '@type': ['MusicRelease', 'Product'],
+      musicReleaseFormat: pkg.format,
+      name: `THE ALBUM ${pkg.format}`,
+      offers: {
+        '@type': 'Offer',
+        url: `${host}/track/${slug}#p${pkg.packageId}-buy`,
+        price: pkg.price,
+        priceCurrency: 'USD',
+        availability: 'InStock',
+      },
+    });
+  }
+
+  const graph: Record<string, unknown> = {
+    '@type': 'MusicRecording',
+    name: 'A Single',
+    datePublished: opts.datePublished ?? '30 May 2025 00:00:00 GMT',
+    ...(trackId ? { additionalProperty: [{ '@type': 'PropertyValue', name: 'track_id', value: trackId }] } : {}),
+    inAlbum: { '@type': 'MusicAlbum', name: 'THE ALBUM', albumRelease },
+  };
+  return `<html><head><script type="application/ld+json">${JSON.stringify(graph)}</script></head><body></body></html>`;
+}
+
+// Standalone `/track/` pages were reported as having no formats at all — 183 of 777 Bandcamp
+// sources, every one a track URL. The old parser only read a top-level `albumRelease`, and a
+// comment asserted track pages "carry a date but no offers at all". That was wrong: the track's
+// own purchase is published under `inAlbum.albumRelease`, with a real price and currency.
+describe('ingestBandcampDetail — standalone track pages', () => {
+  it('reads the track\'s own digital price from inAlbum', () => {
+    const out = ingestBandcampDetail(trackPage({ own: { price: 1, currency: 'GBP' } }));
+
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.detail.offers).toEqual([
+      { format: 'digital', price: 1, currency: 'GBP', availability: 'available' },
+    ]);
+    expect(out.detail.releaseDate).toBe('2025-05-30');
+  });
+
+  // The one that matters. A track page also lists the *album's* vinyl/CD/cassette, and buying
+  // those gets you the album, not this track — so publishing "this single is available on vinyl
+  // for $30" would be a wrong claim about what someone's money buys.
+  it('does not attribute the album\'s physical packages to the track', () => {
+    const out = ingestBandcampDetail(
+      trackPage({
+        own: { price: 1.5 },
+        albumPackages: [
+          { format: 'VinylFormat', price: 30, packageId: '3409308344' },
+          { format: 'CDFormat', price: 15, packageId: '3713717029' },
+          { format: 'CassetteFormat', price: 15, packageId: '7013211' },
+        ],
+      })
+    );
+
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.detail.offers.map(o => o.format)).toEqual(['digital']);
+    expect(out.detail.offers[0].price).toBe(1.5);
+  });
+
+  // Without a track id there is nothing to tell the track's download apart from the album's
+  // packages, so no price at all beats a possibly-wrong one.
+  it('emits no offers when the track id is missing', () => {
+    const out = ingestBandcampDetail(
+      trackPage({ trackId: null, albumPackages: [{ format: 'VinylFormat', price: 30, packageId: '1' }] })
+    );
+
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.detail.offers).toEqual([]);
+    // The date still parses — a missing price is not a missing page.
+    expect(out.detail.releaseDate).toBe('2025-05-30');
+  });
+
+  it('still reads the date when the track has no purchase offer at all', () => {
+    const out = ingestBandcampDetail(trackPage({ own: null }));
+
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.detail.offers).toEqual([]);
+    expect(out.detail.releaseDate).toBe('2025-05-30');
+  });
+});
+
 describe('ingestBandcampDetail', () => {
   it('reads the date and every purchasable format', () => {
     const out = ingestBandcampDetail(
