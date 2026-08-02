@@ -42,6 +42,11 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      // The generated registerSW.js calls navigator.serviceWorker.register()
+      // with no .catch(), so every browser and crawler that declines to
+      // register one raised an unhandled `Error: Rejected` in Sentry. We
+      // register from src/services/registerServiceWorker.ts instead.
+      injectRegister: false,
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
         name: 'Unstream',

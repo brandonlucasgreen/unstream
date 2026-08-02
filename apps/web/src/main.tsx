@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import * as Sentry from '@sentry/react'
 import { initSentry } from './services/sentry'
+import { registerServiceWorker } from './services/registerServiceWorker'
 import { AuthProvider } from './contexts/AuthContext'
 import './index.css'
 import App from './App.tsx'
@@ -12,6 +13,11 @@ import { ScrollToTop } from './components/ScrollToTop'
 import { lazyWithRetry } from './utils/lazyWithRetry'
 
 initSentry()
+
+// Ours rather than vite-plugin-pwa's injected registerSW.js, which reports a
+// declined registration as an unhandled rejection. Guarded on PROD because the
+// plugin only emits /sw.js for a build, exactly as the injected script was.
+if (import.meta.env.PROD) registerServiceWorker()
 
 // Lazy-load non-critical pages to reduce initial bundle size.
 // lazyWithRetry adds a one-shot reload when a chunk belongs to a superseded deploy.
