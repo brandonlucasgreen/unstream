@@ -446,13 +446,16 @@ body {
 }
 
 .new-release-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   padding: 10px 12px;
   background: linear-gradient(135deg, #374151 0%, #1F2937 100%);
   border: 1px solid #FCD34D;
   border-radius: 8px;
+}
+
+.release-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .release-info {
@@ -483,7 +486,6 @@ body {
 .release-platform {
   font-size: 10px;
   color: #9CA3AF;
-  text-transform: capitalize;
 }
 
 .release-actions {
@@ -524,6 +526,154 @@ body {
   background: #374151;
   color: #EF4444;
   border-color: #EF4444;
+}
+
+/* The buying guide, expanded under an alert rather than opened in a tab.
+   The payout comparison is the product — it belongs where the fan already is. */
+.release-guide {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #4B5563;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guide-banner {
+  padding: 6px 8px;
+  background: rgba(252, 211, 77, 0.14);
+  border-radius: 6px;
+  font-size: 11px;
+  color: #FCD34D;
+}
+
+.guide-message {
+  font-size: 11px;
+  color: #9CA3AF;
+}
+
+.guide-source {
+  border: 1px solid #4B5563;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.guide-source-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.guide-source-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #F9FAFB;
+  white-space: nowrap;
+}
+
+.guide-payout {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(52, 211, 153, 0.16);
+  color: #6EE7B7;
+  white-space: nowrap;
+}
+
+.guide-payout-unknown {
+  background: rgba(156, 163, 175, 0.16);
+  color: #9CA3AF;
+}
+
+.guide-buy {
+  margin-left: auto;
+  padding: 3px 10px;
+  background: transparent;
+  border: 1px solid #FCD34D;
+  border-radius: 5px;
+  color: #FCD34D;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.guide-buy:hover {
+  background: #FCD34D;
+  color: #1F2937;
+}
+
+.guide-offer {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 8px;
+  border-top: 1px solid #374151;
+}
+
+.guide-offer-unavailable {
+  opacity: 0.55;
+}
+
+.guide-format {
+  font-size: 11px;
+  color: #D1D5DB;
+  width: 66px;
+  flex-shrink: 0;
+}
+
+.guide-price-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.guide-price {
+  font-size: 12px;
+  font-weight: 500;
+  color: #F9FAFB;
+}
+
+.guide-offer-payout {
+  font-size: 10px;
+  color: #6EE7B7;
+}
+
+.guide-availability {
+  font-size: 10px;
+  color: #9CA3AF;
+  white-space: nowrap;
+}
+
+.guide-availability-notice {
+  color: #FBBF24;
+}
+
+.guide-empty {
+  padding: 6px 8px;
+  border-top: 1px solid #374151;
+  font-size: 10px;
+  color: #9CA3AF;
+}
+
+.guide-footnote {
+  font-size: 10px;
+  color: #6B7280;
+}
+
+.guide-link {
+  align-self: flex-start;
+  padding: 0;
+  background: none;
+  border: none;
+  color: #FCD34D;
+  font-size: 11px;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .sparkle {

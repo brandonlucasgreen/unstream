@@ -2,6 +2,8 @@
 
 import { isBandcampFriday } from '../lib/bandcamp-friday.js';
 import { ALLOWED_RELEASE_DOMAINS, SOURCE_CONFIG, PAYOUT_PERCENTAGES } from '../lib/constants.js';
+import { releaseSlugsFromUrl } from '../lib/release-display.js';
+import { renderReleaseGuide, guideMessage, guideLink } from '../lib/release-guide.js';
 import { signInWithPassword, signInWithOtp, signOut, getStoredSession, getAccessToken, getDeviceId } from '../lib/supabase.js';
 import {
   getCustomSites,
@@ -1129,60 +1131,158 @@ function renderNewReleases() {
 
   const fragment = document.createDocumentFragment();
   for (const release of newReleases) {
-    const div = document.createElement('div');
-    div.className = 'new-release-item';
-
-    const infoDiv = document.createElement('div');
-    infoDiv.className = 'release-info';
-
-    const artistSpan = document.createElement('span');
-    artistSpan.className = 'release-artist';
-    artistSpan.textContent = release.artistName;
-
-    const titleSpan = document.createElement('span');
-    titleSpan.className = 'release-title';
-    titleSpan.textContent = release.releaseName;
-
-    const platformBadge = document.createElement('span');
-    platformBadge.className = 'release-platform';
-    platformBadge.textContent = release.platform;
-
-    infoDiv.appendChild(artistSpan);
-    infoDiv.appendChild(titleSpan);
-    infoDiv.appendChild(platformBadge);
-
-    const actionsDiv = document.createElement('div');
-    actionsDiv.className = 'release-actions';
-
-    const openBtn = document.createElement('button');
-    openBtn.className = 'release-open';
-    openBtn.title = 'Listen';
-    openBtn.textContent = 'Listen';
-    openBtn.addEventListener('click', () => {
-      if (isAllowedReleaseUrl(release.releaseUrl)) {
-        chrome.tabs.create({ url: release.releaseUrl });
-      }
-    });
-
-    const dismissBtn = document.createElement('button');
-    dismissBtn.className = 'release-dismiss';
-    dismissBtn.title = 'Dismiss';
-    dismissBtn.textContent = '\u00D7';
-    dismissBtn.addEventListener('click', async () => {
-      await chrome.runtime.sendMessage({ type: 'DISMISS_RELEASE', releaseId: release.id });
-      loadNewReleases();
-    });
-
-    actionsDiv.appendChild(openBtn);
-    actionsDiv.appendChild(dismissBtn);
-
-    div.appendChild(infoDiv);
-    div.appendChild(actionsDiv);
-    fragment.appendChild(div);
+    fragment.appendChild(buildReleaseItem(release));
   }
 
   elements.newReleases.replaceChildren(fragment);
   elements.releasesSection.classList.remove('hidden');
+}
+
+/**
+ * One alert row, with the buying guide folded underneath it.
+ *
+ * The payout comparison *is* the product, and it matters at the moment someone decides where to
+ * buy. Sending that moment to `chrome.tabs.create` handed it to a browser tab \u2014 the same mistake
+ * the old alerts made by linking straight to one shop. So the guide expands in place, and
+ * opening the web page is the escape hatch rather than the main action.
+ */
+function buildReleaseItem(release) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'new-release-item';
+
+  const row = document.createElement('div');
+  row.className = 'release-row';
+
+  const infoDiv = document.createElement('div');
+  infoDiv.className = 'release-info';
+
+  const artistSpan = document.createElement('span');
+  artistSpan.className = 'release-artist';
+  artistSpan.textContent = release.artistName;
+
+  const titleSpan = document.createElement('span');
+  titleSpan.className = 'release-title';
+  titleSpan.textContent = release.releaseName;
+
+  const subtitle = document.createElement('span');
+  subtitle.className = 'release-platform';
+  // The price line is the reason to open the guide, so it leads when we have one. Falling back
+  // to the platform's proper name where we have one \u2014 SOURCE_CONFIG renders "Jam.coop", not
+  // "Jamcoop". Platforms it doesn't list (Subvert) at least get a capital letter rather than
+  // the bare id; the CSS used to do that with `text-transform`, which can't stay now that this
+  // line is usually a price.
+  subtitle.textContent = release.offerSummary || `on ${platformDisplayName(release.platform)}`;
+
+  infoDiv.appendChild(artistSpan);
+  infoDiv.appendChild(titleSpan);
+  infoDiv.appendChild(subtitle);
+
+  const actionsDiv = document.createElement('div');
+  actionsDiv.className = 'release-actions';
+
+  const slugs = releaseSlugsFromUrl(release.releaseUrl);
+
+  const panel = document.createElement('div');
+  panel.className = 'release-guide hidden';
+
+  if (slugs) {
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'release-open';
+    toggleBtn.title = 'Where to buy';
+    toggleBtn.textContent = 'Where to buy';
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    toggleBtn.addEventListener('click', () => toggleReleaseGuide(release, slugs, toggleBtn, panel));
+    actionsDiv.appendChild(toggleBtn);
+  } else {
+    // An alert from the older per-platform scrape path: `releaseUrl` is one shop's, and there is
+    // no catalogued release behind it to build a guide from.
+    const openBtn = document.createElement('button');
+    openBtn.className = 'release-open';
+    openBtn.title = 'Listen';
+    openBtn.textContent = 'Listen';
+    openBtn.addEventListener('click', () => openReleaseUrl(release.releaseUrl));
+    actionsDiv.appendChild(openBtn);
+  }
+
+  const dismissBtn = document.createElement('button');
+  dismissBtn.className = 'release-dismiss';
+  dismissBtn.title = 'Dismiss';
+  dismissBtn.textContent = '\u00D7';
+  dismissBtn.addEventListener('click', async () => {
+    await chrome.runtime.sendMessage({ type: 'DISMISS_RELEASE', releaseId: release.id });
+    loadNewReleases();
+  });
+  actionsDiv.appendChild(dismissBtn);
+
+  row.appendChild(infoDiv);
+  row.appendChild(actionsDiv);
+  wrapper.appendChild(row);
+  wrapper.appendChild(panel);
+  return wrapper;
+}
+
+function openReleaseUrl(url) {
+  if (isAllowedReleaseUrl(url)) {
+    chrome.tabs.create({ url });
+  }
+}
+
+function platformDisplayName(platform) {
+  if (SOURCE_CONFIG[platform]?.name) return SOURCE_CONFIG[platform].name;
+  return platform ? platform[0].toUpperCase() + platform.slice(1) : '';
+}
+
+/** Fetched guides, keyed by "artist/release", so reopening a row doesn't refetch. */
+const releaseGuideCache = new Map();
+
+async function toggleReleaseGuide(release, slugs, toggleBtn, panel) {
+  const isOpen = !panel.classList.contains('hidden');
+  if (isOpen) {
+    panel.classList.add('hidden');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    toggleBtn.textContent = 'Where to buy';
+    return;
+  }
+
+  panel.classList.remove('hidden');
+  toggleBtn.setAttribute('aria-expanded', 'true');
+  toggleBtn.textContent = 'Hide';
+
+  const key = `${slugs.artist}/${slugs.release}`;
+  if (releaseGuideCache.has(key)) {
+    renderReleaseGuide(panel, releaseGuideCache.get(key), release.releaseUrl, openReleaseUrl);
+    return;
+  }
+
+  panel.replaceChildren(guideMessage('Checking where to buy\u2026'));
+
+  try {
+    const response = await fetch(
+      `${API_BASE}/release/${encodeURIComponent(slugs.artist)}/${encodeURIComponent(slugs.release)}`
+    );
+
+    // A 404 means the release genuinely isn't catalogued. Anything else \u2014 a 503 from a database
+    // that didn't answer, a rate limit \u2014 means we don't know, and saying "not catalogued" for a
+    // question nobody answered would be a convincing lie.
+    if (response.status === 404) {
+      panel.replaceChildren(
+        guideMessage("We haven't catalogued this release yet."),
+        guideLink('Open on Unstream', release.releaseUrl, openReleaseUrl)
+      );
+      return;
+    }
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const detail = await response.json();
+    releaseGuideCache.set(key, detail);
+    renderReleaseGuide(panel, detail, release.releaseUrl, openReleaseUrl);
+  } catch (error) {
+    console.error('[Unstream] Release guide fetch failed:', error);
+    panel.replaceChildren(
+      guideMessage("Couldn't load prices just now."),
+      guideLink('Open on Unstream', release.releaseUrl, openReleaseUrl)
+    );
+  }
 }
 
 // Load last check time

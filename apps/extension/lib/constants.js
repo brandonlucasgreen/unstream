@@ -2,7 +2,15 @@
 // PAYOUT_PERCENTAGES must be kept in sync with apps/web/src/services/sources.ts.
 // Run `npm run sync:bandcamp-dates` after updating Bandcamp Friday dates in the web app.
 
+// Where a release alert is allowed to send someone. Guards both the popup's link and the
+// notification click, so an alert can never open an arbitrary URL.
+//
+// `unstream.stream` is first because it is now the *usual* destination, not an exception: a
+// catalogued release's `releaseUrl` is our own release page, so a fan lands on the payout
+// comparison rather than one shop. Leaving it out meant every catalog-backed alert had a Listen
+// button and a notification that silently did nothing when clicked.
 export const ALLOWED_RELEASE_DOMAINS = [
+  'unstream.stream',
   'bandcamp.com',
   'mirlo.space',
   'qobuz.com',

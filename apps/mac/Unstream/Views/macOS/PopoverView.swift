@@ -14,9 +14,102 @@ struct PopoverView: View {
     @State private var selectedTab: PopoverTab = .search
     @State private var showSignIn = false
     @State private var pollTask: Task<Void, Never>?
+    /// Non-nil while the popover is drilled into a release's buying guide.
+    @State private var openGuide: ReleaseGuideTarget?
     @FocusState private var searchFieldFocused: Bool
 
     var body: some View {
+        VStack(spacing: 0) {
+            // A release guide takes over the popover rather than opening a window: this is a
+            // menu-bar app, and a second window for a page this small would be a heavier answer
+            // than the question deserves. The footer stays put so the popover doesn't resize
+            // out from under the pointer.
+            if let target = openGuide {
+                releaseGuide(target)
+            } else {
+                browseContent
+            }
+
+            Divider()
+
+            footer
+        }
+        .frame(width: 320)
+        .background(keyboardShortcuts)
+        .sheet(isPresented: $showSignIn) {
+            SignInView()
+        }
+        .onAppear {
+            // Reset transient state on every open — NSPopover hides (not destroys) its content
+            // view, so onDisappear isn't reliable; onAppear fires on each show. Without this,
+            // reopening the menu bar would drop you back into the release you last looked at.
+            showSignIn = false
+            openGuide = nil
+            focusSearchField()
+        }
+        .onChange(of: selectedTab) { tab in
+            if tab == .search { focusSearchField() }
+        }
+        .onDisappear {
+            stopMenuPoll()
+            showSignIn = false
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .popoverDidClose)) { _ in
+            // NSPopoverDelegate fires this unconditionally when the popover closes.
+            showSignIn = false
+            openGuide = nil
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .showSearchTab)) { _ in
+            openGuide = nil
+            selectedTab = .search
+        }
+        .onChange(of: auth.isSignedIn) { signedIn in
+            if !signedIn {
+                stopMenuPoll()
+            }
+        }
+    }
+
+    // MARK: - Release guide (drill-down)
+
+    private func releaseGuide(_ target: ReleaseGuideTarget) -> some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 6) {
+                Button(action: { openGuide = nil }) {
+                    HStack(spacing: 3) {
+                        Image(systemName: "chevron.left")
+                        Text("Back")
+                    }
+                    .font(.caption)
+                }
+                .buttonStyle(.plain)
+                .foregroundColor(.accentColor)
+                .help("Back to saved artists")
+
+                Spacer()
+
+                Text("Where to Buy")
+                    .font(.caption.weight(.semibold))
+                    .foregroundColor(.secondary)
+
+                Spacer()
+
+                // Balances the back button so the title sits centred.
+                Color.clear.frame(width: 44, height: 1)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+
+            Divider()
+
+            ReleaseGuideView(target: target)
+                .frame(maxHeight: 350)
+        }
+    }
+
+    // MARK: - Search / saved tabs
+
+    private var browseContent: some View {
         VStack(spacing: 0) {
             // A real segmented control: correct selection emphasis in both appearances
             // and in an inactive window, which the hand-rolled accent-tinted pills got
@@ -136,11 +229,16 @@ struct PopoverView: View {
                 .padding()
             }
             .frame(maxHeight: 350)
+            .environment(\.openReleaseGuide) { target in
+                openGuide = target
+            }
+        }
+    }
 
-            Divider()
+    // MARK: - Footer
 
-            // Footer
-            HStack {
+    private var footer: some View {
+        HStack {
                 // Sign in/out button
                 if auth.isSignedIn {
                     // Account identity lives next to the sign-out action rather than in
@@ -209,40 +307,9 @@ struct PopoverView: View {
                 .fixedSize()
                 .accessibilityLabel("More options")
                 .help("Settings, feedback, and more")
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 8)
         }
-        .frame(width: 320)
-        .background(keyboardShortcuts)
-        .sheet(isPresented: $showSignIn) {
-            SignInView()
-        }
-        .onAppear {
-            // Reset sheet state on every open — NSPopover hides (not destroys) its content
-            // view, so onDisappear isn't reliable; onAppear fires on each show.
-            showSignIn = false
-            focusSearchField()
-        }
-        .onChange(of: selectedTab) { tab in
-            if tab == .search { focusSearchField() }
-        }
-        .onDisappear {
-            stopMenuPoll()
-            showSignIn = false
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .popoverDidClose)) { _ in
-            // NSPopoverDelegate fires this unconditionally when the popover closes.
-            showSignIn = false
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .showSearchTab)) { _ in
-            selectedTab = .search
-        }
-        .onChange(of: auth.isSignedIn) { signedIn in
-            if !signedIn {
-                stopMenuPoll()
-            }
-        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
     }
 
     /// The saved count rides in the segment label — a segmented control has no badge
@@ -268,16 +335,31 @@ struct PopoverView: View {
     private var keyboardShortcuts: some View {
         Group {
             Button("Search") {
+                openGuide = nil
                 selectedTab = .search
                 focusSearchField()
             }
             .keyboardShortcut("f", modifiers: .command)
 
-            Button("Search Tab") { selectedTab = .search }
-                .keyboardShortcut("1", modifiers: .command)
+            Button("Search Tab") {
+                openGuide = nil
+                selectedTab = .search
+            }
+            .keyboardShortcut("1", modifiers: .command)
 
-            Button("Saved Artists Tab") { selectedTab = .supportList }
-                .keyboardShortcut("2", modifiers: .command)
+            Button("Saved Artists Tab") {
+                openGuide = nil
+                selectedTab = .supportList
+            }
+            .keyboardShortcut("2", modifiers: .command)
+
+            // Escape backs out of a release guide, which is what a drill-down should do. It is
+            // registered only while one is open so that everywhere else Escape keeps its usual
+            // job of dismissing the popover.
+            if openGuide != nil {
+                Button("Back") { openGuide = nil }
+                    .keyboardShortcut(.escape, modifiers: [])
+            }
 
             Button("Close") { AppDelegate.shared?.closePopover() }
                 .keyboardShortcut("w", modifiers: .command)
