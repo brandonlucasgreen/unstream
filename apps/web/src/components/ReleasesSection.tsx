@@ -58,33 +58,35 @@ export function ReleasesSection({
   return (
     <div className="mt-6">
       {/*
-        The feed links live in the heading rather than under the list. They were a separate line
-        at the foot of the section first, which put them furthest from the thing they subscribe
-        to and read as a stray footnote. Sitting in the heading they're findable without taking
-        any vertical space of their own.
+        The feed links live in the heading rather than under the list — as icons, since the
+        calendar and RSS marks are both conventional enough to carry the meaning without the
+        words. They were a full sentence at the foot of the section first, which put them
+        furthest from the thing they subscribe to and read as a stray footnote.
+
+        Icon-only, so each anchor carries an `aria-label`: a screen reader would otherwise
+        announce nothing but the link. `title` gives the same text as a hover tooltip for
+        sighted users, who get no other explanation of what the marks do.
 
         Plain <a>, not react-router <Link>: these are served by a Netlify function, so a
         client-side navigation would try to render them in-app and fail.
       */}
-      <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
+      <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3 flex items-center gap-2">
         Releases
-        <span aria-hidden="true"> · </span>
-        <span className="sr-only">— </span>
-        Subscribe via{' '}
-        <a
-          href={`/a/${encodeURIComponent(artistSlug)}/releases.xml`}
-          className="hover:text-accent-primary hover:underline"
-          title="Subscribe in an RSS reader"
-        >
-          RSS
-        </a>
-        {' or '}
         <a
           href={`/a/${encodeURIComponent(artistSlug)}/releases.ics`}
-          className="hover:text-accent-primary hover:underline"
+          className="text-text-muted hover:text-accent-primary transition-colors"
+          aria-label="Subscribe to this artist's releases in a calendar app"
           title="Subscribe in Apple Calendar, Google Calendar or another calendar app"
         >
-          ICS
+          <CalendarIcon />
+        </a>
+        <a
+          href={`/a/${encodeURIComponent(artistSlug)}/releases.xml`}
+          className="text-text-muted hover:text-accent-primary transition-colors"
+          aria-label="Subscribe to this artist's releases in an RSS reader"
+          title="Subscribe in an RSS reader"
+        >
+          <RssIcon />
         </a>
       </h2>
       <div className="grid gap-2 sm:grid-cols-2">
@@ -208,5 +210,49 @@ function ReleaseRow({ release, artistSlug }: { release: Release; artistSlug: str
         </span>
       )}
     </a>
+  );
+}
+
+/**
+ * Both marks are drawn as strokes at the same weight so they read as a pair. The RSS icon is
+ * conventionally solid, but a filled mark beside an outlined calendar looks like two icons from
+ * different sets — the stroked arcs are just as recognisable at this size.
+ *
+ * `aria-hidden` because the surrounding anchor already carries the accessible name; without it a
+ * screen reader announces the link twice.
+ */
+function CalendarIcon() {
+  return (
+    <svg
+      className="w-3.5 h-3.5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 10h18M8 3v4M16 3v4" />
+    </svg>
+  );
+}
+
+function RssIcon() {
+  return (
+    <svg
+      className="w-3.5 h-3.5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M4 11a9 9 0 019 9M4 4a16 16 0 0116 16" />
+      <circle cx="5" cy="19" r="1.5" fill="currentColor" stroke="none" />
+    </svg>
   );
 }
