@@ -1,35 +1,38 @@
 name: Release catalogue sweep
 
-# Keeps saved artists' release catalogues from going stale.
+# Builds and refreshes release catalogues in the background.
 #
 # Every other catalog trigger is demand-driven: a save, a search, a button. So an artist who is
-# saved but never searched gets catalogued once and never again, and their release alerts
-# quietly stop — the long tail this feature exists for. See api/functions/recatalog-sweep.ts.
+# catalogued once and not searched again quietly stops producing release alerts, and their
+# artist page keeps showing the releases they had that day. See api/functions/recatalog-sweep.ts.
 #
 # A GitHub Actions cron rather than a scheduled Netlify function: there are no scheduled Netlify
 # functions in this repo, and this is the established precedent (schedule-social-posts.yml,
 # upstash-keepalive.yml).
 #
-# ## Cadence: daily, 05:00 UTC
+# ## Cadence: every 6 hours
 #
-# What this actually costs the sites we crawl is one batch of at most 25 artists, run through
-# the existing background function, which paces itself: one second between artists, at most 100
-# Bandcamp release-page fetches per run on top of one grid page each. So a sweep is on the order
-# of 125 requests to Bandcamp, sequential, spread over minutes — a trickle, and less than a
-# handful of real visitors searching. 05:00 UTC keeps it off both US and European peak.
+# One run asks for at most 25 artists — one background invocation's worth — so four runs a day
+# is 100 artists daily. Measured against the pool on 2026-08-02 (2,564 artists with a
+# catalogue-able link, 9 of them saved by anybody) that means:
 #
-# Daily rather than weekly because the batch is small and the 7-day cooldown is what actually
-# bounds per-artist crawling: an artist can't be re-crawled more than once a week however often
-# this runs. Daily just means the 25 slots are spread across seven small runs instead of arriving
-# in one lump, and it caps how long a newly-saved artist waits for a first catalogue if the
-# save-time request was dropped by the hourly cap.
+#   - Saved artists come round as soon as their 7-day cooldown expires. They sort first, and
+#     there are single figures of them, so an alert never waits behind the backfill.
+#   - The rest rotate roughly monthly, which is the right order for artist-page freshness.
+#   - The ~2,400 artists with no catalogue at all drain in about three weeks.
+#
+# What it costs the sites we crawl: the background function paces itself at one second between
+# artists, at most 100 Bandcamp release-page fetches per run on top of one grid page each. Four
+# runs is on the order of 400-500 sequential Bandcamp requests a day — well under one a minute
+# averaged, against robots-permitted paths. The lever if the tail needs to be tighter is this
+# cadence, not the batch size, which is capped by what one invocation can do.
 #
 # Safe to over-run. A duplicate invocation finds the same artists claimed and does nothing, so
 # re-running by hand is free.
 
 on:
   schedule:
-    - cron: '0 5 * * *' # Daily, 05:00 UTC
+    - cron: '0 1,7,13,19 * * *' # Every 6 hours, offset off the top-of-day cron rush
   workflow_dispatch: # Manual trigger from the GitHub UI
 
 jobs:
@@ -60,7 +63,8 @@ jobs:
             exit 1
           fi
 
-          # Worth reading rather than skipping past: `requested` falling to 0 every day while
-          # `savedArtists` is large means everything is inside its cooldown (fine) or that
-          # selection has broken (not fine, and it looks identical from here).
+          # Worth reading rather than skipping past. `requested: 0` is fine when `inCooldown`
+          # accounts for the whole `catalogueable` pool — everything really is caught up. It is
+          # not fine if `catalogueable` has collapsed, which is what a broken or truncated
+          # selection query looks like, and the two are indistinguishable without these counts.
           echo "Sweep OK: $body"

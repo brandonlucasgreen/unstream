@@ -5,14 +5,14 @@
 //  1. The sweep must never answer 200 when it did nothing it was asked to do. A daily job that
 //     reports success while cataloging is disabled, or the database is unreadable, recreates
 //     precisely the bug it was built to fix — release alerts going quiet with nothing to see.
-//  2. One artist blowing up mid-sweep must not take the rest of the batch with it. A sweep runs
-//     once a day; the artists after the failure would wait another day for a slot they only get
-//     because they are the stalest.
+//  2. One artist blowing up mid-sweep must not take the rest of the batch with it. Slots are
+//     scarce — a few dozen a day against a pool in the thousands — so the artists after a
+//     failure would wait a whole rotation for a place they only reached by being the stalest.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  getStaleSavedArtistCatalogs: vi.fn(),
+  getStaleCatalogCandidates: vi.fn(),
   requestArtistCatalog: vi.fn(),
   captureMessage: vi.fn(),
   // For the background-loop isolation test:
@@ -22,7 +22,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('../db', () => ({
-  getStaleSavedArtistCatalogs: mocks.getStaleSavedArtistCatalogs,
+  getStaleCatalogCandidates: mocks.getStaleCatalogCandidates,
   claimArtistForCatalog: mocks.claimArtistForCatalog,
   getArtistForCatalog: mocks.getArtistForCatalog,
   recordCatalogOutcome: mocks.recordCatalogOutcome,
@@ -52,7 +52,19 @@ const SECRET = 'sweep-test-secret';
 const originalEnv = { ...process.env };
 
 function candidate(artistId: string, lastAttemptedAt: string | null = '2026-07-01T00:00:00+00:00') {
-  return { artistId, savers: 1, lastAttemptedAt, releasesFound: 12 };
+  return { artistId, saved: false, savers: 0, lastAttemptedAt, releasesFound: 12 };
+}
+
+function selection(candidates: ReturnType<typeof candidate>[], extra: Record<string, number> = {}) {
+  return {
+    ok: true,
+    candidates,
+    catalogueable: 2_500,
+    savedArtists: 9,
+    inCooldown: 2_400,
+    eligible: 100,
+    ...extra,
+  };
 }
 
 function post(headers: Record<string, string | undefined> = { authorization: `Bearer ${SECRET}` }) {
@@ -65,12 +77,7 @@ beforeEach(() => {
   process.env.RELEASE_CATALOG_ENABLED = 'true';
   process.env.URL = 'https://unstream.stream';
   mocks.requestArtistCatalog.mockResolvedValue(true);
-  mocks.getStaleSavedArtistCatalogs.mockResolvedValue({
-    ok: true,
-    candidates: [candidate('a'), candidate('b')],
-    savedArtists: 40,
-    inCooldown: 38,
-  });
+  mocks.getStaleCatalogCandidates.mockResolvedValue(selection([candidate('a'), candidate('b')]));
 });
 
 afterEach(() => {
@@ -81,7 +88,7 @@ describe('recatalog-sweep auth', () => {
   it('rejects a request with no Authorization header', async () => {
     const r = await post({});
     expect(r.statusCode).toBe(401);
-    expect(mocks.getStaleSavedArtistCatalogs).not.toHaveBeenCalled();
+    expect(mocks.getStaleCatalogCandidates).not.toHaveBeenCalled();
   });
 
   it('rejects a wrong secret', async () => {
@@ -106,7 +113,7 @@ describe('recatalog-sweep auth', () => {
   it('rejects non-POST', async () => {
     const r = await handler({ httpMethod: 'GET', headers: { authorization: `Bearer ${SECRET}` } });
     expect(r.statusCode).toBe(405);
-    expect(mocks.getStaleSavedArtistCatalogs).not.toHaveBeenCalled();
+    expect(mocks.getStaleCatalogCandidates).not.toHaveBeenCalled();
   });
 });
 
@@ -127,7 +134,7 @@ describe('recatalog-sweep refuses out loud', () => {
   });
 
   it('fails when the candidates cannot be read', async () => {
-    mocks.getStaleSavedArtistCatalogs.mockResolvedValue({ ok: false, reason: 'Could not read saved artists: down' });
+    mocks.getStaleCatalogCandidates.mockResolvedValue({ ok: false, reason: 'Could not read saved artists: down' });
 
     const r = await post();
 
@@ -168,35 +175,36 @@ describe('recatalog-sweep dispatch', () => {
     await post();
     // Matches MAX_ARTISTS_PER_RUN in catalog-artist-background: asking for more would silently
     // drop the overflow, which would look like the sweep working.
-    expect(mocks.getStaleSavedArtistCatalogs).toHaveBeenCalledWith(25);
+    expect(mocks.getStaleCatalogCandidates).toHaveBeenCalledWith(25);
   });
 
-  it('reports counts a reader can tell a quiet day from a broken sweep by', async () => {
-    mocks.getStaleSavedArtistCatalogs.mockResolvedValue({
-      ok: true,
-      candidates: [candidate('a', null), candidate('b', '2026-06-01T00:00:00+00:00')],
-      savedArtists: 40,
-      inCooldown: 38,
-    });
+  it('reports counts a reader can tell a quiet run from a broken sweep by', async () => {
+    const savedOne = { ...candidate('a', null), saved: true, savers: 3 };
+    mocks.getStaleCatalogCandidates.mockResolvedValue(
+      selection([savedOne, candidate('b', '2026-06-01T00:00:00+00:00')])
+    );
 
     const r = await post();
 
+    // `catalogueable` is the load-bearing one: requested: 0 is fine when inCooldown accounts
+    // for the pool, and alarming when the pool itself has collapsed. Without it in the body
+    // those two are indistinguishable from the workflow log.
     expect(JSON.parse(r.body)).toEqual({
       requested: 2,
-      savedArtists: 40,
-      inCooldown: 38,
-      stalestAttemptedAt: null,
+      catalogueable: 2_500,
+      savedArtists: 9,
+      inCooldown: 2_400,
+      eligible: 100,
+      savedInBatch: 1,
       neverAttempted: 1,
+      stalestAttemptedAt: null,
     });
   });
 
   it('is a quiet success when everyone is inside their cooldown', async () => {
-    mocks.getStaleSavedArtistCatalogs.mockResolvedValue({
-      ok: true,
-      candidates: [],
-      savedArtists: 40,
-      inCooldown: 40,
-    });
+    mocks.getStaleCatalogCandidates.mockResolvedValue(
+      selection([], { inCooldown: 2_500, eligible: 0 })
+    );
 
     const r = await post();
 
