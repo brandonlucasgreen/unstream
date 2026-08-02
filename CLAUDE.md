@@ -208,9 +208,25 @@ page from Bandcamp on demand. Only the two database reads are stubbed; there is 
 connection, so nothing can be written. One Bandcamp request per release page you open.
 
 Once ingest is live, `release_catalog_state` is the observability surface:
-`last_attempted_at`, `releases_found`, `last_error`, `consecutive_failures`. A run that suddenly
-finds 0 releases where it previously found 20 is a parser break or a bot challenge, not an
-artist deleting their catalog.
+`last_attempted_at`, `releases_found`, `last_error`, `consecutive_failures`, `last_trigger`. A run
+that suddenly finds 0 releases where it previously found 20 is a parser break or a bot challenge,
+not an artist deleting their catalog — `recordCatalogOutcome` reports exactly that transition to
+Sentry, since it is otherwise recorded as a perfectly ordinary success.
+
+### Keeping catalogues fresh
+
+Every other catalog trigger is demand-driven — a save, a search, an artist's own button, the admin
+command — and `check-releases` only *reads* the catalogue. So without a scheduled refresh an artist
+who is saved but never searched gets catalogued once and their release alerts quietly stop. That
+is what `api/functions/recatalog-sweep.ts` fixes, run daily by `.github/workflows/recatalog-sweep.yml`.
+
+The sweep selects the stalest catalogues **among artists somebody has saved** (`getStaleSavedArtistCatalogs`
+in `db.ts`: never-attempted first, then oldest `last_attempted_at`, savers only as a tiebreak) and
+asks `requestArtistCatalog` for up to 25 of them under the `scheduled` trigger. It adds no rate
+limiting of its own — the 7-day cooldown and the hourly cap in `claimArtistForCatalog` still decide
+— so running it twice is a no-op. It returns a real summary rather than 202, and any refusal is a
+non-2xx that fails the workflow: a scheduled job that reports success while doing nothing is the
+same silent failure it was built to fix.
 
 ### Platform registry
 
@@ -327,6 +343,8 @@ GitHub Actions (`.github/workflows/`):
 - `supabase-migrate.yml` — auto-applies new migrations on push to `main`.
 - `schedule-social-posts.yml` — weekly (Mondays) social post generation, committed back to the repo.
 - `semantic-revert-check.yml` — runs `scripts/semantic-revert-check.py` on every PR to flag changes that quietly undo earlier fixes. If it flags your PR, take it seriously: the bug loops it was built for are described in `docs/retros/UNS-100-bifurcation-retro.md`.
+- `upstash-keepalive.yml` — twice weekly, writes one Redis key so the free-tier database isn't reaped for inactivity (which silently killed caching and rate limiting once).
+- `recatalog-sweep.yml` — daily, POSTs `/.netlify/functions/recatalog-sweep` so saved artists' release catalogues stay fresh. See "Keeping catalogues fresh" below.
 
 ## Engineering principles
 

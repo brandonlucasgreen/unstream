@@ -12,6 +12,7 @@ import {
   uniqueReleaseSlug,
 } from './release-utils';
 import { requestArtistCatalog } from './request-catalog';
+import { Sentry } from '../lib/sentry';
 
 let supabase: SupabaseClient | null = null;
 
@@ -402,7 +403,7 @@ export async function isStoredArtistLink(url: string, artistName: string): Promi
 // --- Release catalog (Unstream Releases) ---
 
 /** Don't re-crawl an artist inside this window. Repeat searches then cost nothing upstream. */
-const RECATALOG_COOLDOWN_HOURS = 24 * 7;
+export const RECATALOG_COOLDOWN_HOURS = 24 * 7;
 
 /**
  * Hourly ceilings on how many artists we will catalog, by what triggered it.
@@ -411,10 +412,18 @@ const RECATALOG_COOLDOWN_HOURS = 24 * 7;
  * budget: a traffic spike must not turn into us hammering Bandcamp. A save is one person
  * deliberately asking to follow an artist, so it gets a bigger budget and still gets through
  * when searches are being dropped.
+ *
+ * The scheduled sweep sits between the two, and the reason is the shared counter: the cap is
+ * compared against every attempt in the last hour, whatever triggered it. Give the sweep the
+ * smallest budget and an ordinary hour of search traffic would leave it nothing to spend — it
+ * runs once a day at a fixed time, so it can't wait for a quieter moment the way a search can
+ * be dropped and re-triggered by the next visitor. Give it the largest and a machine caller
+ * would outrank a person. In between, it gets through in normal conditions and still yields
+ * during a genuine spike.
  */
-const CATALOG_HOURLY_CAP = { searched: 60, saved: 240 } as const;
+const CATALOG_HOURLY_CAP = { searched: 60, saved: 240, scheduled: 120 } as const;
 
-export type CatalogTrigger = 'saved' | 'searched';
+export type CatalogTrigger = 'saved' | 'searched' | 'scheduled';
 
 /**
  * May we catalog this artist right now — and if so, claim it.
@@ -529,6 +538,27 @@ export async function recordCatalogOutcome(
         .maybeSingle();
       const prev = (data as { consecutive_failures: number } | null)?.consecutive_failures ?? 0;
       patch.consecutive_failures = prev + 1;
+    } else if (outcome.releasesFound === 0) {
+      // A run that finds 0 releases where it previously found 20 is a parser break or a bot
+      // challenge, not an artist deleting their catalogue — and it is recorded as a *success*,
+      // so nothing else about it looks wrong. Report the transition, because the alternative
+      // is a pipeline that degrades into finding nothing and never says so.
+      //
+      // Only the transition: an artist who has always had 0 releases is not news, and this
+      // fires on every trigger, not just the scheduled sweep.
+      const { data } = await client
+        .from('release_catalog_state')
+        .select('releases_found')
+        .eq('artist_id', artistId)
+        .maybeSingle();
+      const previous = (data as { releases_found: number | null } | null)?.releases_found ?? 0;
+      if (previous > 0) {
+        Sentry.captureMessage('[catalog] release count dropped to zero', {
+          level: 'warning',
+          tags: { area: 'release-catalog', kind: 'releases-dropped-to-zero' },
+          extra: { artistId, previousReleasesFound: previous },
+        });
+      }
     }
 
     const { error } = await client
@@ -577,6 +607,142 @@ export async function getCatalogState(artistId: string): Promise<CatalogStateRes
     return { ok: false, reason: 'Could not read catalog state' };
   }
   return { ok: true, state: (data as CatalogStateRow | null) ?? null };
+}
+
+/** One artist the scheduled sweep could re-crawl, with the facts it was chosen on. */
+export interface StaleCatalogCandidate {
+  artistId: string;
+  /** How many people have this artist saved. Used only to break ties — see the sort below. */
+  savers: number;
+  /** Null means never attempted: saved, but no catalog run has ever claimed them. */
+  lastAttemptedAt: string | null;
+  /** What the last successful run found, so a sweep run can be read against it afterwards. */
+  releasesFound: number | null;
+}
+
+/**
+ * Three-valued for the same reason as `CatalogStateResult`: "we couldn't ask" must not render
+ * as "nothing needs re-cataloguing". The sweep reports the first as a failure and the second as
+ * a quiet, successful run, and they look identical if collapsed.
+ */
+export type StaleCatalogResult =
+  | { ok: true; candidates: StaleCatalogCandidate[]; savedArtists: number; inCooldown: number }
+  | { ok: false; reason: string };
+
+/** Bounds the sweep's first read. Well above the current saved population; a guard, not a limit. */
+const MAX_SAVED_ARTISTS_SCANNED = 10_000;
+
+/** How many ids to put in one `in()` filter, which becomes a URL query string. */
+const CATALOG_STATE_CHUNK = 200;
+
+/**
+ * The stalest catalogues among artists somebody has actually saved.
+ *
+ * **Saved artists only, not every artist row.** There are thousands of artists in the database
+ * and only a fraction are saved by anyone; a save is what creates the obligation, because it is
+ * what makes someone expect an alert. An artist nobody has saved gets catalogued when they're
+ * searched, which is the demand-driven behaviour that already works.
+ *
+ * Ordering, in priority order:
+ *
+ *   1. **Never attempted first.** Saved but no catalog state at all means the crawl requested at
+ *      save time never got through — usually the hourly cap. Nothing else will retry it, so it
+ *      goes to the front.
+ *   2. **Then stalest `last_attempted_at`.** Staleness is the thing that makes alerts go quiet,
+ *      so it is what the sweep is for.
+ *   3. **Then most savers.** A tiebreak only. Sorting by popularity first would starve exactly
+ *      the long tail this exists to serve — popular artists already stay fresh because people
+ *      search them.
+ *
+ * Artists inside the re-catalog cooldown are dropped here rather than left for
+ * `claimArtistForCatalog` to refuse. That's not a second rate limiter — the same constant, read
+ * up front — it's what stops a bounded batch being spent entirely on artists that will be
+ * refused a moment later. The claim remains the authority; this only decides who to ask about.
+ */
+export async function getStaleSavedArtistCatalogs(limit: number): Promise<StaleCatalogResult> {
+  const client = getClient();
+  if (!client) return { ok: false, reason: 'Supabase is not configured on this deploy' };
+
+  // `deleted` is a tombstone, not a hard delete (migration 017) — an unsaved artist keeps a row
+  // so other devices can prune it, and re-crawling for someone who unsaved them is waste.
+  const { data: saved, error: savedError } = await client
+    .from('saved_artists')
+    .select('artist_id')
+    .eq('deleted', false)
+    .not('artist_id', 'is', null)
+    .limit(MAX_SAVED_ARTISTS_SCANNED);
+
+  if (savedError) {
+    console.error('[DB] getStaleSavedArtistCatalogs saved read failed:', savedError.message);
+    return { ok: false, reason: `Could not read saved artists: ${savedError.message}` };
+  }
+
+  const savers = new Map<string, number>();
+  for (const row of (saved as { artist_id: string | null }[]) ?? []) {
+    if (!row.artist_id) continue;
+    savers.set(row.artist_id, (savers.get(row.artist_id) ?? 0) + 1);
+  }
+
+  if (savers.size === 0) return { ok: true, candidates: [], savedArtists: 0, inCooldown: 0 };
+
+  interface StateRow {
+    artist_id: string;
+    last_attempted_at: string | null;
+    last_catalogued_at: string | null;
+    releases_found: number | null;
+  }
+
+  const ids = [...savers.keys()];
+  const state = new Map<string, StateRow>();
+
+  for (let i = 0; i < ids.length; i += CATALOG_STATE_CHUNK) {
+    const { data, error } = await client
+      .from('release_catalog_state')
+      .select('artist_id, last_attempted_at, last_catalogued_at, releases_found')
+      .in('artist_id', ids.slice(i, i + CATALOG_STATE_CHUNK));
+
+    if (error) {
+      console.error('[DB] getStaleSavedArtistCatalogs state read failed:', error.message);
+      return { ok: false, reason: `Could not read catalog state: ${error.message}` };
+    }
+    for (const row of (data as StateRow[]) ?? []) state.set(row.artist_id, row);
+  }
+
+  const cooldownCutoff = Date.now() - RECATALOG_COOLDOWN_HOURS * 3600_000;
+  const candidates: StaleCatalogCandidate[] = [];
+  let inCooldown = 0;
+
+  for (const [artistId, count] of savers) {
+    const row = state.get(artistId);
+    if (row?.last_catalogued_at && new Date(row.last_catalogued_at).getTime() > cooldownCutoff) {
+      inCooldown++;
+      continue;
+    }
+    candidates.push({
+      artistId,
+      savers: count,
+      lastAttemptedAt: row?.last_attempted_at ?? null,
+      releasesFound: row?.releases_found ?? null,
+    });
+  }
+
+  candidates.sort((a, b) => {
+    if (a.lastAttemptedAt === null || b.lastAttemptedAt === null) {
+      if (a.lastAttemptedAt !== b.lastAttemptedAt) return a.lastAttemptedAt === null ? -1 : 1;
+    } else {
+      // Compared as instants, not strings: PostgREST timestamps can differ in offset notation.
+      const diff = new Date(a.lastAttemptedAt).getTime() - new Date(b.lastAttemptedAt).getTime();
+      if (diff !== 0) return diff;
+    }
+    return b.savers - a.savers;
+  });
+
+  return {
+    ok: true,
+    candidates: candidates.slice(0, limit),
+    savedArtists: savers.size,
+    inCooldown,
+  };
 }
 
 /**

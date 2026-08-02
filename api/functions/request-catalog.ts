@@ -46,13 +46,19 @@ export function isCatalogEnabled(): boolean {
  *
  * Never throws and never blocks meaningfully — cataloging is opportunistic, and a fan saving
  * an artist must not see an error because a crawl couldn't be scheduled.
+ *
+ * Returns whether the handshake completed. **That is not "the crawl was accepted"** — Netlify's
+ * dispatcher answers 202 to anything, including a request the background function then refuses,
+ * so the only thing false rules out is that the request left at all. The user-facing callers
+ * ignore it; the scheduled sweep reads it, because for a job that runs once a day a request that
+ * never left is the difference between working and silently doing nothing.
  */
 export async function requestArtistCatalog(
   artistIds: string[],
   trigger: CatalogTrigger
-): Promise<void> {
+): Promise<boolean> {
   const ids = [...new Set(artistIds.filter(Boolean))].slice(0, MAX_ARTISTS_PER_REQUEST);
-  if (ids.length === 0) return;
+  if (ids.length === 0) return false;
 
   // Deploy previews and branch deploys share the *production* Supabase, so an ungated one would
   // write real releases and spend the real hourly crawl budget on traffic that isn't real.
@@ -62,7 +68,7 @@ export async function requestArtistCatalog(
   // the real fetch, parse and mapping and prints what would be written.
   if (!isCatalogEnabled()) {
     console.log('[catalog] not requested — RELEASE_CATALOG_ENABLED is not set on this deploy');
-    return;
+    return false;
   }
 
   const secret = process.env.INTERNAL_FUNCTION_SECRET;
@@ -75,7 +81,7 @@ export async function requestArtistCatalog(
   if (!secret || !siteUrl) {
     // Not an error worth surfacing: without configuration the feature is simply off.
     console.log('[catalog] not requested — INTERNAL_FUNCTION_SECRET or site URL not configured');
-    return;
+    return false;
   }
 
   try {
@@ -94,10 +100,14 @@ export async function requestArtistCatalog(
     } finally {
       clearTimeout(timeoutId);
     }
+    return true;
   } catch (error) {
-    // A failed handshake means these artists don't get catalogued this time. The next search
-    // or save asks again, so there's nothing to retry and nothing a user should see.
+    // A failed handshake means these artists don't get catalogued this time. For a search or a
+    // save the next one asks again, so there's nothing to retry and nothing a user should see —
+    // which is why this is a return value rather than a throw. The scheduled sweep, which has no
+    // "next one" for another day, is the caller that reports it.
     console.warn('[catalog] request failed:', error instanceof Error ? error.message : String(error));
+    return false;
   }
 }
 

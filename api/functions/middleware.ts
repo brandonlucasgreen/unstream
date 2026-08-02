@@ -261,6 +261,36 @@ export async function authenticateApiKey(
 }
 
 // ---------------------------------------------------------------------------
+// Internal function-to-function auth
+// ---------------------------------------------------------------------------
+
+/**
+ * Is this request from one of our own callers — another function, or the scheduled sweep?
+ *
+ * Authenticated with INTERNAL_FUNCTION_SECRET, the secret this repo already uses for
+ * function-to-function calls (resolve-url, search-sources, both v1 wrappers,
+ * catalog-artist-background). A second near-identically-named variable would be a footgun.
+ *
+ * **Fails closed.** No secret configured closes the endpoint rather than opening it: the
+ * endpoints behind this make Unstream crawl third-party sites, which is exactly the amplifier
+ * an unauthenticated route would hand to anyone who found it.
+ */
+export function isInternalRequest(header: string | undefined): boolean {
+  const secret = process.env.INTERNAL_FUNCTION_SECRET;
+  if (!secret) {
+    console.error('[internal-auth] INTERNAL_FUNCTION_SECRET is not set — refusing all requests');
+    return false;
+  }
+  if (!header?.startsWith('Bearer ')) return false;
+
+  const provided = Buffer.from(header.slice(7));
+  const expected = Buffer.from(secret);
+  // timingSafeEqual throws on length mismatch, so compare lengths first.
+  if (provided.length !== expected.length) return false;
+  return timingSafeEqual(provided, expected);
+}
+
+// ---------------------------------------------------------------------------
 // Query validation
 // ---------------------------------------------------------------------------
 

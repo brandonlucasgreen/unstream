@@ -12,6 +12,11 @@
 //    has saved or searched yet has no catalog, and treating that as "no new releases" would
 //    silently switch alerts off for them.
 //
+// Note what this file does *not* do: it reads the catalog, it never refreshes it. Keeping a
+// saved artist's catalog current is the scheduled sweep's job (`recatalog-sweep.ts`). Without
+// that, path 1 would read the same catalog forever for anyone nobody searches, which is a
+// quieter version of the same bug the fallback above exists to prevent.
+//
 // The response stays backwards-compatible on purpose. `release` (singular) is still populated
 // for the shipped Mac app and browser extension, which decode exactly that field; `releases`
 // (plural) is additive and carries what a newer client can use. Both shipped clients decode

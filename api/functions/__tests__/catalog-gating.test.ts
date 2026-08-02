@@ -191,7 +191,10 @@ describe('requestArtistCatalog only runs where cataloging is enabled', () => {
   it('deduplicates ids and never throws when the handshake fails', async () => {
     mocks.fetch.mockRejectedValue(new Error('network down'));
 
-    await expect(requestArtistCatalog([ARTIST, ARTIST, ''], 'searched')).resolves.toBeUndefined();
+    // False, not a throw: a fan saving an artist must not see an error because a crawl could
+    // not be scheduled. The scheduled sweep is the one caller that reads the return, because
+    // it has no next visitor to ask again.
+    await expect(requestArtistCatalog([ARTIST, ARTIST, ''], 'searched')).resolves.toBe(false);
 
     const body = JSON.parse(String((mocks.fetch.mock.calls[0][1] as RequestInit).body));
     expect(body.artistIds).toEqual([ARTIST]);

@@ -10,7 +10,6 @@
 // auth, and copying that here would be a mistake: an open endpoint that makes Unstream crawl
 // Bandcamp on demand is exactly the amplifier the check-releases hardening existed to close.
 
-import { timingSafeEqual } from 'crypto';
 import {
   claimArtistForCatalog,
   getArtistForCatalog,
@@ -25,7 +24,7 @@ import {
   type CatalogTrigger,
   type PersistedRelease,
 } from './db';
-import { isUrlHostnameAllowed } from './middleware';
+import { isInternalRequest, isUrlHostnameAllowed } from './middleware';
 import { safeFetch, safeHostname } from './safe-fetch';
 import {
   bandcampMusicUrl,
@@ -187,27 +186,6 @@ interface JamcoopBudget {
   deadline: number;
 }
 
-function isAuthorized(header: string | undefined): boolean {
-  // Reuses the secret this repo already has for internal function-to-function calls
-  // (resolve-url, search-sources, and both v1 wrappers). A second near-identically-named
-  // variable would be a footgun, and the blast radius of this one is small: cooldown and
-  // hourly caps are enforced inside this function regardless of who calls it, and only
-  // artists already in our database can be named.
-  const secret = process.env.INTERNAL_FUNCTION_SECRET;
-  // No secret configured means the endpoint is closed, not open.
-  if (!secret) {
-    console.error('[catalog] INTERNAL_FUNCTION_SECRET is not set — refusing all requests');
-    return false;
-  }
-  if (!header?.startsWith('Bearer ')) return false;
-
-  const provided = Buffer.from(header.slice(7));
-  const expected = Buffer.from(secret);
-  // timingSafeEqual throws on length mismatch, so compare lengths first.
-  if (provided.length !== expected.length) return false;
-  return timingSafeEqual(provided, expected);
-}
-
 export async function handler(event: {
   httpMethod?: string;
   headers?: Record<string, string | undefined>;
@@ -217,7 +195,9 @@ export async function handler(event: {
     return { statusCode: 405, body: '' };
   }
 
-  if (!isAuthorized(event.headers?.authorization ?? event.headers?.Authorization)) {
+  // The blast radius of the shared internal secret is small here: cooldown and hourly caps are
+  // enforced below regardless of who calls, and only artists already in our database can be named.
+  if (!isInternalRequest(event.headers?.authorization ?? event.headers?.Authorization)) {
     return { statusCode: 401, body: '' };
   }
 
@@ -239,7 +219,10 @@ export async function handler(event: {
   const artistIds = Array.isArray(body.artistIds)
     ? body.artistIds.filter((id): id is string => typeof id === 'string').slice(0, MAX_ARTISTS_PER_RUN)
     : [];
-  const trigger: CatalogTrigger = body.trigger === 'saved' ? 'saved' : 'searched';
+  // Allowlisted, not cast: an unrecognized trigger falls back to the smallest budget rather
+  // than reaching CATALOG_HOURLY_CAP as an undefined key, where the cap comparison would pass.
+  const trigger: CatalogTrigger =
+    body.trigger === 'saved' || body.trigger === 'scheduled' ? body.trigger : 'searched';
 
   if (artistIds.length === 0) return { statusCode: 400, body: '' };
 
