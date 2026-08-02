@@ -9,7 +9,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   authenticateBearer: vi.fn(),
-  authenticateAdmin: vi.fn(),
   resolveOwnedArtist: vi.fn(),
   verifyReleaseOwnership: vi.fn(),
   getArtistReleasesForOwner: vi.fn(),
@@ -49,7 +48,6 @@ vi.mock('../db', () => ({
 // non-API-key behaviour (pin to the canonical origin).
 vi.mock('../middleware', () => ({
   authenticateBearer: mocks.authenticateBearer,
-  authenticateAdmin: mocks.authenticateAdmin,
   buildCorsHeaders: (origin: string | undefined, apiKeyPresent: boolean) => ({
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': apiKeyPresent
@@ -90,8 +88,6 @@ function post(body: unknown) {
 
 beforeEach(() => {
   mocks.authenticateBearer.mockResolvedValue({ userId: 'u1', email: 'artist@example.com' });
-  // Admin by default so the catalog path is reachable; the gate has its own tests below.
-  mocks.authenticateAdmin.mockResolvedValue({ userId: 'u1', email: 'admin@example.com' });
   mocks.resolveOwnedArtist.mockResolvedValue({ ok: true, status: 200, artistId: 'artist-1', artistName: 'Kid Lightbulbs' });
   mocks.verifyReleaseOwnership.mockResolvedValue(true);
   mocks.getArtistReleasesForOwner.mockResolvedValue([]);
@@ -309,6 +305,8 @@ describe('POST — reorder', () => {
   });
 });
 
+// Open to every verified owner — there is no admin gate on this action, only the once-a-day
+// ceiling below. Ownership (`resolveOwnedArtist`) is what authorizes it.
 describe('POST — catalog (self-serve scan)', () => {
   it('clears the cooldown before queuing, or the button silently does nothing for a week', async () => {
     const r = await post({ action: 'catalog', slug: SLUG });
@@ -320,21 +318,45 @@ describe('POST — catalog (self-serve scan)', () => {
     expect(mocks.triggerCatalogNow).toHaveBeenCalledWith('artist-1');
   });
 
-  // The rollout gate. Ownership authorizes the action; this is a separate, temporary limit on
-  // who can reach it at all — so a verified non-admin owner is refused for now.
-  it('refuses a verified owner who is not an admin while the rollout gate is on', async () => {
-    mocks.authenticateAdmin.mockResolvedValue(null);
+  // Ownership is still the security boundary — nobody, admin or not, may catalog a profile that
+  // isn't theirs through this endpoint (that's what /api/admin/catalog-artist is for).
+  it('still requires ownership', async () => {
+    mocks.resolveOwnedArtist.mockResolvedValue({ ok: false, status: 403, error: 'You do not own this profile' });
     const r = await post({ action: 'catalog', slug: SLUG });
     expect(r.statusCode).toBe(403);
     expect(mocks.triggerCatalogNow).not.toHaveBeenCalled();
   });
 
-  // Ownership still has to hold on top of the gate — an admin may not catalog a profile that
-  // isn't theirs through this endpoint (that's what /api/admin/catalog-artist is for).
-  it('still requires ownership even for an admin', async () => {
-    mocks.resolveOwnedArtist.mockResolvedValue({ ok: false, status: 403, error: 'You do not own this profile' });
+  // The once-a-day ceiling. Every press is a fresh crawl of this artist's Bandcamp, Discogs and
+  // Faircamp pages, so an owner who can press the button repeatedly is an amplifier.
+  it('refuses a second scan inside the cooldown, and does not clear anything', async () => {
+    mocks.getCatalogState.mockResolvedValue({
+      ok: true,
+      state: { last_attempted_at: new Date(Date.now() - 3600_000).toISOString(), last_catalogued_at: null, releases_found: null, releases_detailed: null, last_error: null, consecutive_failures: 0 },
+    });
     const r = await post({ action: 'catalog', slug: SLUG });
-    expect(r.statusCode).toBe(403);
+    expect(r.statusCode).toBe(429);
+    expect(mocks.triggerCatalogNow).not.toHaveBeenCalled();
+    // Clearing the cooldowns is itself a write, and it would let the *next* press through even
+    // though this one was refused.
+    expect(mocks.clearCatalogCooldown).not.toHaveBeenCalled();
+    expect(mocks.clearReleaseDetailCooldown).not.toHaveBeenCalled();
+  });
+
+  it('allows a scan once the cooldown has elapsed', async () => {
+    mocks.getCatalogState.mockResolvedValue({
+      ok: true,
+      state: { last_attempted_at: new Date(Date.now() - 25 * 3600_000).toISOString(), last_catalogued_at: null, releases_found: null, releases_detailed: null, last_error: null, consecutive_failures: 0 },
+    });
+    expect((await post({ action: 'catalog', slug: SLUG })).statusCode).toBe(202);
+  });
+
+  // Not knowing whether a scan is allowed is not permission to run one — the same answer
+  // claimArtistForCatalog gives itself when it can't read the row.
+  it('refuses rather than guessing when the catalog state cannot be read', async () => {
+    mocks.getCatalogState.mockResolvedValue({ ok: false, reason: 'Could not read catalog state' });
+    const r = await post({ action: 'catalog', slug: SLUG });
+    expect(r.statusCode).toBe(503);
     expect(mocks.triggerCatalogNow).not.toHaveBeenCalled();
   });
 
@@ -359,26 +381,31 @@ describe('POST — catalog (self-serve scan)', () => {
 });
 
 describe('GET — catalog state for the button', () => {
-  it('reports canTrigger true and the state for an admin', async () => {
+  it('reports the state and a scan that is ready to run', async () => {
     mocks.getCatalogState.mockResolvedValue({
       ok: true,
-      state: { last_catalogued_at: '2026-08-01T00:00:00Z', releases_found: 12, releases_detailed: 9, last_error: null, consecutive_failures: 0 },
+      state: { last_attempted_at: '2026-07-01T00:00:00Z', last_catalogued_at: '2026-07-01T00:00:00Z', releases_found: 12, releases_detailed: 9, last_error: null, consecutive_failures: 0 },
     });
     const body = JSON.parse((await get()).body);
-    expect(body.catalog.canTrigger).toBe(true);
     expect(body.catalog.state.releases_found).toBe(12);
     expect(body.catalog.stateError).toBeNull();
+    expect(body.catalog.nextScanAvailableAt).toBeNull();
   });
 
-  it('reports canTrigger false for a non-admin owner, and does not read state at all', async () => {
-    mocks.authenticateAdmin.mockResolvedValue(null);
+  // The page disables its button from this rather than re-deriving the rule, so a scan that
+  // would come back 429 reads as "not yet" instead of a button that errors when pressed.
+  it('reports when the next scan is due while the cooldown is running', async () => {
+    const lastAttempt = new Date(Date.now() - 3600_000);
+    mocks.getCatalogState.mockResolvedValue({
+      ok: true,
+      state: { last_attempted_at: lastAttempt.toISOString(), last_catalogued_at: null, releases_found: null, releases_detailed: null, last_error: null, consecutive_failures: 0 },
+    });
     const body = JSON.parse((await get()).body);
-    expect(body.catalog.canTrigger).toBe(false);
-    expect(mocks.getCatalogState).not.toHaveBeenCalled();
+    expect(new Date(body.catalog.nextScanAvailableAt).getTime()).toBe(lastAttempt.getTime() + 24 * 3600_000);
   });
 
   // A failed read must not arrive as a null state — that renders as a confident
-  // "Never catalogued" when the truth is "we couldn't ask".
+  // "Never catalogued" when the truth is "we couldn't ask" — nor as a scan that's ready to go.
   it('reports an unreadable state distinctly from never-catalogued', async () => {
     mocks.getCatalogState.mockResolvedValue({ ok: false, reason: 'Could not read catalog state' });
     const body = JSON.parse((await get()).body);
