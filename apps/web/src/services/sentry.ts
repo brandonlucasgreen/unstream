@@ -61,6 +61,22 @@ export function isInjectedNativeBridgeError(message: string): boolean {
   return message.includes('webkit.messageHandlers')
 }
 
+/**
+ * The text every filter below is matched against.
+ *
+ * Both sources are read because either one alone can be empty. Errors captured by
+ * the global handler often arrive with no `originalException` — the injected-script
+ * TypeError above is one of them — and then the message survives only on the event.
+ * Reading one source would drop an error from a filter purely because of how it
+ * happened to be captured, which is invisible and very annoying to debug.
+ */
+export function sentryErrorMessage(event: Sentry.ErrorEvent, hint?: Sentry.EventHint): string {
+  return [
+    hint?.originalException?.toString() || '',
+    event.exception?.values?.[0]?.value || '',
+  ].join(' ')
+}
+
 export function initSentry(): void {
   const dsn = import.meta.env.VITE_SENTRY_DSN
   const environment = import.meta.env.VITE_SENTRY_ENV || import.meta.env.MODE
@@ -99,14 +115,7 @@ export function initSentry(): void {
         return null
       }
 
-      // Errors caught by the global handler sometimes arrive with no
-      // originalException — an injected script's TypeError is one of them — and the
-      // message only survives on the event. Read both, so a filter below can't miss
-      // an error purely because of how it happened to be captured.
-      const errorMessage = [
-        hint?.originalException?.toString() || '',
-        event.exception?.values?.[0]?.value || '',
-      ].join(' ')
+      const errorMessage = sentryErrorMessage(event, hint)
 
       // Classified BEFORE the benign-error filter so a stale-build failure can
       // never be mistaken for a transient network blip and dropped.
