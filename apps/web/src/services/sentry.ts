@@ -38,6 +38,29 @@ export function isStaleBuildAssetError(message: string): boolean {
   )
 }
 
+/**
+ * True when an error came from a WebKit-to-native bridge script that something
+ * outside our page injected into it.
+ *
+ * Sentry attributes these to us because the stack points at
+ * `https://unstream.stream/:1` — but our document has no inline JavaScript
+ * (`apps/web/index.html` loads the bundle and GoatCounter as external files, and
+ * the og-metadata edge function adds no scripts), so line 1 of the document is
+ * never our code. It's an in-app browser: iOS apps that open links in a WKWebView
+ * inject their own script, which reports home over `window.webkit.messageHandlers`
+ * and throws when that bridge isn't there — usually from a `pagehide` listener
+ * firing after the webview has already torn it down. The frame names in those
+ * traces (`sendDataToNative`, `sendPageHideMessage`) exist nowhere in this repo.
+ *
+ * Nothing we ship causes it and nothing we ship can fix it, so it's noise. If
+ * Unstream ever loads itself in a WKWebView of its own (the Apple app is native
+ * SwiftUI today, with no webview anywhere), delete this filter — at that point it
+ * would be hiding a real bug.
+ */
+export function isInjectedNativeBridgeError(message: string): boolean {
+  return message.includes('webkit.messageHandlers')
+}
+
 export function initSentry(): void {
   const dsn = import.meta.env.VITE_SENTRY_DSN
   const environment = import.meta.env.VITE_SENTRY_ENV || import.meta.env.MODE
@@ -76,7 +99,14 @@ export function initSentry(): void {
         return null
       }
 
-      const errorMessage = hint?.originalException?.toString() || ''
+      // Errors caught by the global handler sometimes arrive with no
+      // originalException — an injected script's TypeError is one of them — and the
+      // message only survives on the event. Read both, so a filter below can't miss
+      // an error purely because of how it happened to be captured.
+      const errorMessage = [
+        hint?.originalException?.toString() || '',
+        event.exception?.values?.[0]?.value || '',
+      ].join(' ')
 
       // Classified BEFORE the benign-error filter so a stale-build failure can
       // never be mistaken for a transient network blip and dropped.
@@ -98,6 +128,11 @@ export function initSentry(): void {
         // none of the titles mention a deploy.
         event.fingerprint = ['stale-build-asset']
         return event
+      }
+
+      // Somebody else's script failing inside our page. Not our bug to fix.
+      if (isInjectedNativeBridgeError(errorMessage)) {
+        return null
       }
 
       // Filter out common benign errors
