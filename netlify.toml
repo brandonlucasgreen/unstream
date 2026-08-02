@@ -284,13 +284,14 @@
 # One release's buying guide as JSON — the twin of the HTML page at /a/:artist/:release, for the
 # Mac app and the browser extension.
 #
-# The slugs are passed as query params rather than left in the path on purpose: behind a
-# `status = 200` rewrite `event.path` can be the rewrite *target*, which carries no routing
-# information. feed-releases.ts above hit that and has to reconstruct the path from `rawUrl`;
-# Netlify's placeholder substitution avoids needing the workaround at all.
+# The function reads the two slugs out of `rawUrl`, the same way feed-releases.ts above does.
+# This was first written as `to = ".../release-detail?artist=:artist&release=:release"`, on the
+# assumption that Netlify substitutes `from` placeholders into the destination's query string.
+# **It does not.** Verified on deploy preview 393: the rewrite matched and the function ran, but
+# `queryStringParameters` was empty, so every request 400'd. Don't reintroduce that form.
 [[redirects]]
   from = "/api/release/:artist/:release"
-  to = "/.netlify/functions/release-detail?artist=:artist&release=:release"
+  to = "/.netlify/functions/release-detail"
   status = 200
 
 [[redirects]]

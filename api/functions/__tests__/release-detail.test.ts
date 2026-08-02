@@ -33,7 +33,7 @@ vi.mock('../db', () => ({ getReleaseDetail: mocks.getReleaseDetail }));
 vi.mock('../../shared/bandcamp-friday', () => ({ isBandcampFriday: mocks.isBandcampFriday }));
 vi.mock('../../lib/sentry', () => ({ Sentry: { captureMessage: mocks.captureMessage } }));
 
-import { handler } from '../release-detail';
+import { handler, parseSlugs } from '../release-detail';
 import { PLATFORMS } from '../../shared/platform-registry';
 
 type Offer = {
@@ -102,9 +102,75 @@ beforeEach(() => {
   mocks.getReleaseDetail.mockResolvedValue({ detail: detail(), failed: false });
 });
 
+// The bug this suite missed the first time. The endpoint originally read its slugs from
+// `queryStringParameters`, because netlify.toml's rewrite target carried
+// `?artist=:artist&release=:release` and Netlify was assumed to substitute placeholders into a
+// destination query string. **It does not.** On deploy preview 393 the rewrite matched and the
+// function ran with an empty `queryStringParameters`, so every real request 400'd while every
+// test passed — because every test supplied the query params the real caller never sends.
+//
+// So these drive the event shape Netlify actually delivers: `rawUrl` carrying the pretty path,
+// and no query string whatsoever.
+describe('parseSlugs — the production event shape', () => {
+  it('reads the slugs from the path with no query params at all', () => {
+    expect(parseSlugs({
+      rawUrl: 'https://unstream.stream/api/release/boy-harsher/get-mean',
+      path: '/.netlify/functions/release-detail',
+      queryStringParameters: null,
+    })).toEqual({ artist: 'boy-harsher', release: 'get-mean' });
+  });
+
+  // `event.path` behind a status-200 rewrite is the rewrite *target*, which carries no routing
+  // information. rawUrl has to win, or the pretty route resolves to nothing.
+  it('prefers rawUrl over path, because a rewrite overwrites path', () => {
+    expect(parseSlugs({
+      rawUrl: 'https://unstream.stream/api/release/kid-lightbulbs/fruit-is-year-3-honeycrush',
+      path: '/.netlify/functions/release-detail',
+    })).toEqual({ artist: 'kid-lightbulbs', release: 'fruit-is-year-3-honeycrush' });
+  });
+
+  it('tolerates a trailing slash and percent-encoding', () => {
+    expect(parseSlugs({ rawUrl: 'https://unstream.stream/api/release/boy-harsher/get-mean/' }))
+      .toEqual({ artist: 'boy-harsher', release: 'get-mean' });
+    expect(parseSlugs({ rawUrl: 'https://unstream.stream/api/release/boy-harsher/get%2Dmean' }))
+      .toEqual({ artist: 'boy-harsher', release: 'get-mean' });
+  });
+
+  // Direct invocation of the raw function URL is a real, working way to call this.
+  it('falls back to query params when the path is the bare function URL', () => {
+    expect(parseSlugs({
+      rawUrl: 'https://unstream.stream/.netlify/functions/release-detail?artist=a&release=b',
+      queryStringParameters: { artist: 'a', release: 'b' },
+    })).toEqual({ artist: 'a', release: 'b' });
+  });
+
+  it.each([
+    ['one path segment', { rawUrl: 'https://unstream.stream/api/release/boy-harsher' }],
+    ['three path segments', { rawUrl: 'https://unstream.stream/api/release/a/b/c' }],
+    ['a different route entirely', { rawUrl: 'https://unstream.stream/a/boy-harsher/get-mean' }],
+    ['only one query param', { rawUrl: 'https://x/.netlify/functions/release-detail', queryStringParameters: { artist: 'a' } }],
+    ['nothing at all', {}],
+  ])('returns null for %s', (_label, event) => {
+    expect(parseSlugs(event)).toBeNull();
+  });
+});
+
 describe('routing and input', () => {
-  // The slugs arrive as query params because netlify.toml substitutes them into the rewrite
-  // target — `event.path` is the rewrite target behind a status-200 rewrite and carries nothing.
+  // The end-to-end version of the above: the pretty path alone, no query params, must reach the
+  // lookup with both slugs.
+  it('serves the pretty route Netlify actually delivers, with no query params', async () => {
+    const res = await handler({
+      httpMethod: 'GET',
+      rawUrl: 'https://unstream.stream/api/release/boy-harsher/get-mean',
+      path: '/.netlify/functions/release-detail',
+      queryStringParameters: null,
+      headers: { 'x-nf-client-connection-ip': '1.2.3.4' },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(mocks.getReleaseDetail).toHaveBeenCalledWith('boy-harsher', 'get-mean');
+  });
+
   it('reads both slugs from the query string and passes them to the lookup', async () => {
     await get({ artist: 'kid-lightbulbs', release: 'fruit-is-year-3-honeycrush' });
     expect(mocks.getReleaseDetail).toHaveBeenCalledWith('kid-lightbulbs', 'fruit-is-year-3-honeycrush');

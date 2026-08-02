@@ -51,6 +51,52 @@ function json(statusCode: number, body: unknown, extraHeaders: Record<string, st
   return { statusCode, headers: { ...CORS_HEADERS, ...extraHeaders }, body: JSON.stringify(body) };
 }
 
+/**
+ * The two slugs, from the request path.
+ *
+ * **`rawUrl`, not `event.path`.** Behind a `status = 200` rewrite `event.path` can be the rewrite
+ * *target* (`/.netlify/functions/release-detail`), which carries no routing information at all.
+ * Netlify always sets `rawUrl` to the full original request URL, so that is the source of truth —
+ * the same arrangement feed-releases.ts uses, for the same reason.
+ *
+ * This originally read the slugs from `queryStringParameters`, on the assumption that Netlify
+ * substitutes `from` placeholders into a rewrite destination's query string. It does not: on
+ * deploy preview 393 the rewrite matched and this function ran with an empty
+ * `queryStringParameters`, so every request 400'd. The query-string branch is kept only as a
+ * fallback for direct invocation — `/.netlify/functions/release-detail?artist=…&release=…` is a
+ * real, working way to call this, and the tests drive it that way too.
+ */
+export function parseSlugs(event: {
+  path?: string;
+  rawUrl?: string;
+  queryStringParameters?: Record<string, string> | null;
+}): { artist: string; release: string } | null {
+  const path = (() => {
+    if (event.rawUrl) {
+      try {
+        return new URL(event.rawUrl).pathname;
+      } catch {
+        // fall through to `path`
+      }
+    }
+    return event.path || '';
+  })();
+
+  const match = path.replace(/\/$/, '').match(/^\/api\/release\/([^/]+)\/([^/]+)$/);
+  if (match) {
+    try {
+      return { artist: decodeURIComponent(match[1]), release: decodeURIComponent(match[2]) };
+    } catch {
+      // A malformed percent-escape can't be a slug we minted; fall through and let the caller 404.
+      return null;
+    }
+  }
+
+  const artist = event.queryStringParameters?.artist;
+  const release = event.queryStringParameters?.release;
+  return artist && release ? { artist, release } : null;
+}
+
 /** One source's offers, ordered the way the release page orders them: what you can buy first,
  *  cheapest first within that, and anything you can't buy at the bottom. */
 function sortedOffers(source: ReleaseDetailSource) {
@@ -63,6 +109,8 @@ function sortedOffers(source: ReleaseDetailSource) {
 
 export async function handler(event: {
   httpMethod?: string;
+  path?: string;
+  rawUrl?: string;
   queryStringParameters?: Record<string, string> | null;
   headers?: Record<string, string | undefined>;
 }) {
@@ -80,17 +128,12 @@ export async function handler(event: {
   // returning `undefined` here would serve a rate-limited request as an empty 200.
   if (rl.limited) return rl.response ?? json(429, { error: 'Rate limit exceeded' });
 
-  // The slugs arrive as query params, substituted into the rewrite target by netlify.toml,
-  // rather than parsed out of the path. Behind a `status = 200` rewrite `event.path` is not
-  // dependable — it can be the rewrite *target*, which carries no routing information at all.
-  // feed-releases.ts hit exactly that and has to reconstruct the path from `rawUrl`; letting
-  // Netlify do the substitution avoids needing the workaround here.
-  const artist = event.queryStringParameters?.artist;
-  const release = event.queryStringParameters?.release;
-
-  if (!artist || !release) {
+  const slugs = parseSlugs(event);
+  if (!slugs) {
     return json(400, { error: 'artist and release are required' });
   }
+  const { artist, release } = slugs;
+
   if (!SLUG_PATTERN.test(artist) || !SLUG_PATTERN.test(release)) {
     return json(404, { error: 'Release not found' });
   }
