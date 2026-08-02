@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
   createArtistRelease: vi.fn(),
   dismissReleaseReview: vi.fn(),
   mergeReleases: vi.fn(),
+  setReleaseDisplayOrder: vi.fn(),
   getCatalogState: vi.fn(),
   clearCatalogCooldown: vi.fn(),
   clearReleaseDetailCooldown: vi.fn(),
@@ -37,6 +38,7 @@ vi.mock('../db', () => ({
   createArtistRelease: mocks.createArtistRelease,
   dismissReleaseReview: mocks.dismissReleaseReview,
   mergeReleases: mocks.mergeReleases,
+  setReleaseDisplayOrder: mocks.setReleaseDisplayOrder,
   getCatalogState: mocks.getCatalogState,
   clearCatalogCooldown: mocks.clearCatalogCooldown,
   clearReleaseDetailCooldown: mocks.clearReleaseDetailCooldown,
@@ -99,6 +101,7 @@ beforeEach(() => {
   mocks.createArtistRelease.mockResolvedValue({ ok: true, releaseId: RELEASE_A });
   mocks.dismissReleaseReview.mockResolvedValue(true);
   mocks.mergeReleases.mockResolvedValue({ ok: true });
+  mocks.setReleaseDisplayOrder.mockResolvedValue(true);
   mocks.getCatalogState.mockResolvedValue({ ok: true, state: null });
   mocks.clearCatalogCooldown.mockResolvedValue(undefined);
   mocks.clearReleaseDetailCooldown.mockResolvedValue(undefined);
@@ -245,6 +248,64 @@ describe('POST — create', () => {
     mocks.createArtistRelease.mockResolvedValue({ ok: false, error: 'Title needs at least one letter or number' });
     const r = await post({ action: 'create', slug: SLUG, title: '!!!', platform: 'bandcamp', url: 'https://x.bandcamp.com' });
     expect(r.statusCode).toBe(400);
+  });
+});
+
+describe('POST — reorder', () => {
+  const RELEASE_C = '33333333-3333-3333-3333-333333333333';
+
+  it('stores the arrangement exactly as sent', async () => {
+    const r = await post({ action: 'reorder', slug: SLUG, releaseIds: [RELEASE_B, RELEASE_A, RELEASE_C] });
+    expect(r.statusCode).toBe(200);
+    expect(mocks.setReleaseDisplayOrder).toHaveBeenCalledWith('artist-1', [RELEASE_B, RELEASE_A, RELEASE_C]);
+  });
+
+  // The same rule every other release-id action follows: owning the profile says nothing about
+  // who owns the ids in the body, so an artist can't rearrange (and thereby confirm the
+  // existence of) releases that aren't theirs.
+  it('refuses ids that are not this artist\'s', async () => {
+    mocks.verifyReleaseOwnership.mockResolvedValue(false);
+    const r = await post({ action: 'reorder', slug: SLUG, releaseIds: [RELEASE_A, RELEASE_B] });
+    expect(r.statusCode).toBe(403);
+    expect(mocks.setReleaseDisplayOrder).not.toHaveBeenCalled();
+  });
+
+  it.each([[RELEASE_A], [['nope']], [[RELEASE_A, 42]], [[null]], [{}]])(
+    'rejects releaseIds that are not all UUIDs (%o)',
+    async bad => {
+      const r = await post({ action: 'reorder', slug: SLUG, releaseIds: bad });
+      expect(r.statusCode).toBe(400);
+      expect(mocks.setReleaseDisplayOrder).not.toHaveBeenCalled();
+    }
+  );
+
+  // A repeated id isn't an arrangement: the last occurrence would win and a release the artist
+  // can see would drop out of their order without saying so.
+  it('rejects a repeated id', async () => {
+    const r = await post({ action: 'reorder', slug: SLUG, releaseIds: [RELEASE_A, RELEASE_A] });
+    expect(r.statusCode).toBe(400);
+    expect(mocks.setReleaseDisplayOrder).not.toHaveBeenCalled();
+  });
+
+  it('rejects an implausibly long arrangement rather than handing it to Postgres', async () => {
+    const many = Array.from({ length: 501 }, (_, i) => `${i.toString(16).padStart(8, '0')}-1111-1111-1111-111111111111`);
+    const r = await post({ action: 'reorder', slug: SLUG, releaseIds: many });
+    expect(r.statusCode).toBe(400);
+    expect(mocks.setReleaseDisplayOrder).not.toHaveBeenCalled();
+  });
+
+  // Reset is an empty arrangement — the RPC reads that as "clear every position". It must not
+  // trip the ownership check, which reports false for an empty id list.
+  it('resets to date order with an empty arrangement, without an ownership lookup', async () => {
+    const r = await post({ action: 'resetOrder', slug: SLUG });
+    expect(r.statusCode).toBe(200);
+    expect(mocks.verifyReleaseOwnership).not.toHaveBeenCalled();
+    expect(mocks.setReleaseDisplayOrder).toHaveBeenCalledWith('artist-1', []);
+  });
+
+  it('purges the artist caches so the public page picks the new order up', async () => {
+    await post({ action: 'reorder', slug: SLUG, releaseIds: [RELEASE_A] });
+    expect(mocks.cacheDeleteByArtist).toHaveBeenCalledWith('Kid Lightbulbs');
   });
 });
 
