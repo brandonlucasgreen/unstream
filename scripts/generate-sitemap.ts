@@ -1,6 +1,6 @@
 /**
  * Generate sitemap.xml from the artists manifest.
- * Includes all /artist/{slug} URLs plus static pages.
+ * Includes all /artist/{slug} URLs, every catalogued /a/{artist}/{release} URL, plus static pages.
  *
  * Output: public/sitemap.xml
  * Usage: npx tsx scripts/generate-sitemap.ts
@@ -18,6 +18,14 @@
  * So: `lastmod` comes from `artists.updated_at`, and a slug with no artist row is left out rather
  * than advertised. If Supabase can't be reached the build must not fail or silently ship an empty
  * sitemap, so it falls back to the old manifest-only behaviour and says so loudly.
+ *
+ * Release pages have no manifest at all — they exist only where demand-driven cataloging has run
+ * — so they come straight from the database, on the same rule: list a URL only if it renders.
+ * When Supabase is unreachable, none are listed rather than guessed at, and the build says so.
+ *
+ * The whole file is a build-time snapshot either way: an artist catalogued after a deploy shows
+ * up in the sitemap at the next one. Their release pages are linked from the artist page in the
+ * meantime, so they are reachable, just not advertised.
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
@@ -31,6 +39,16 @@ const GUIDES_MANIFEST_PATH = join(__dirname, '..', 'data', 'guides', 'guides-man
 const OUTPUT_PATH = join(__dirname, '..', 'apps', 'web', 'public', 'sitemap.xml');
 
 const BASE_URL = 'https://unstream.stream';
+
+/**
+ * Sitemaps are capped at 50,000 URLs by the protocol. Warn well before that so the split into a
+ * sitemap index is a planned change rather than something discovered from Search Console after
+ * a batch catalog run quietly pushed the file over the line.
+ */
+const URL_COUNT_WARN_AT = 45_000;
+
+/** Rows to ask for per request. Supabase won't return more than 1,000; it may return fewer. */
+const RELEASE_PAGE_SIZE = 1_000;
 
 interface ManifestEntry {
   name: string;
@@ -57,6 +75,14 @@ function escapeXml(str: string): string {
     .replace(/'/g, '&apos;');
 }
 
+/** The service-role client, or null when it isn't configured. Both lookups below share it. */
+function getClient() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key);
+}
+
 /**
  * `updated_at` per published slug, or null if Supabase is unreachable/unconfigured.
  *
@@ -64,14 +90,12 @@ function escapeXml(str: string): string {
  * — the distinction that stops a credentials problem from silently emptying the sitemap.
  */
 async function fetchArtistUpdatedAt(slugs: string[]): Promise<Map<string, string> | null> {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_KEY;
-  if (!url || !key) {
+  const client = getClient();
+  if (!client) {
     console.warn('⚠️  SUPABASE_URL/SUPABASE_SERVICE_KEY not set — falling back to manifest dates.');
     return null;
   }
 
-  const client = createClient(url, key);
   const updatedAt = new Map<string, string>();
 
   for (let i = 0; i < slugs.length; i += 200) {
@@ -90,6 +114,71 @@ async function fetchArtistUpdatedAt(slugs: string[]): Promise<Map<string, string
   }
 
   return updatedAt;
+}
+
+interface ReleaseEntry {
+  artistSlug: string;
+  releaseSlug: string;
+  updatedAt: string;
+}
+
+/**
+ * Every release page that renders, or null if Supabase is unreachable/unconfigured.
+ *
+ * Same "couldn't ask" convention as `fetchArtistUpdatedAt`, and same reason: an empty array would
+ * read as "this site has no release pages", which is a claim, not an absence of one.
+ *
+ * `is_hidden` + `needs_review` is the same pair the feeds exclude on (`getFeedReleasesForUser` in
+ * api/functions/db.ts), for the same two reasons: a hidden release was suppressed by an artist
+ * and must stay invisible, and a `needs_review` tier-3 fuzzy flag means we aren't sure the
+ * release is distinct. `release-page.ts` itself only filters the first, which is right for
+ * someone following a link but not for what we volunteer to a crawler — listing both sides of a
+ * suspected duplicate hands Google two URLs for one record.
+ *
+ * The join is inner, so a release whose artist row has gone is dropped rather than emitted as
+ * `/a/undefined/…`.
+ */
+async function fetchReleaseEntries(): Promise<ReleaseEntry[] | null> {
+  const client = getClient();
+  if (!client) {
+    console.warn('⚠️  SUPABASE_URL/SUPABASE_SERVICE_KEY not set — no release URLs in the sitemap.');
+    return null;
+  }
+
+  const entries: ReleaseEntry[] = [];
+
+  // Ordered by a unique column so the pages can't overlap or skip: without an order Postgres
+  // makes no promise about row order between requests, and the silent result is a sitemap
+  // missing an arbitrary slice of releases — which looks exactly like a sitemap that is complete.
+  //
+  // The cursor advances by however many rows *came back*, not by the page size we asked for, and
+  // stops only on an empty page. PostgREST applies its own `max-rows` ceiling on top of our
+  // range, so a server configured below RELEASE_PAGE_SIZE would make every page look short —
+  // and "short page means last page" would then end the walk after one request and call it done.
+  for (let from = 0; ; ) {
+    const { data, error } = await client
+      .from('releases')
+      .select('slug, updated_at, artists!inner ( slug )')
+      .eq('is_hidden', false)
+      .eq('needs_review', false)
+      .order('id', { ascending: true })
+      .range(from, from + RELEASE_PAGE_SIZE - 1);
+
+    if (error) {
+      console.warn(`⚠️  Release lookup failed (${error.message}) — no release URLs in the sitemap.`);
+      return null;
+    }
+    if (data.length === 0) break;
+
+    for (const row of data as unknown as { slug: string; updated_at: string; artists: { slug: string } }[]) {
+      if (!row.artists?.slug || !row.slug) continue;
+      entries.push({ artistSlug: row.artists.slug, releaseSlug: row.slug, updatedAt: row.updated_at });
+    }
+
+    from += data.length;
+  }
+
+  return entries;
 }
 
 async function main() {
@@ -153,6 +242,36 @@ async function main() {
     }
 
     console.log(`Added ${guides.length} guide URLs to sitemap`);
+  }
+
+  // Release pages. Below artist pages in priority: the artist page is the hub a fan lands on and
+  // the release page is one record within it. `monthly` matches the 30-day price refresh in
+  // catalog-artist-background.ts — a release page's content is its formats and prices, and that
+  // is how often we re-read them.
+  const releases = await fetchReleaseEntries();
+
+  if (releases) {
+    for (const release of releases) {
+      const loc = `${BASE_URL}/a/${encodeURIComponent(release.artistSlug)}/${encodeURIComponent(release.releaseSlug)}`;
+      urls.push(`  <url>
+    <loc>${escapeXml(loc)}</loc>
+    <lastmod>${release.updatedAt.split('T')[0]}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>`);
+    }
+
+    console.log(`Added ${releases.length} release URLs to sitemap`);
+    if (releases.length === 0) {
+      console.log('  No releases are catalogued yet — cataloging is demand-driven (see CLAUDE.md).');
+    }
+  }
+
+  // Said out loud rather than silently truncated: the 50,000 ceiling is a protocol limit, and a
+  // sitemap that quietly drops URLs past it reads as a complete one.
+  if (urls.length >= URL_COUNT_WARN_AT) {
+    console.warn(`⚠️  ${urls.length} URLs — the sitemap protocol caps a single file at 50,000.`);
+    console.warn('    Split into a sitemap index before the next batch of releases lands.');
   }
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
