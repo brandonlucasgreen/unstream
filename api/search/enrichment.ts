@@ -166,9 +166,6 @@ export async function fetchWikipediaSummary(wikipediaUrl: string): Promise<{ ext
   }
 }
 
-// Helper to delay execution (for rate limiting)
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 // Fetch and parse links from a Linktree page
 export async function fetchLinktreeLinks(linktreeUrl: string): Promise<SocialLink[]> {
   const socialLinks: SocialLink[] = [];

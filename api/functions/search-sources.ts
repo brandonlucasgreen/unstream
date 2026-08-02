@@ -42,17 +42,16 @@ import {
 
 // Import shared enrichment functions
 import {
-  SocialLink,
-  DiscoveredPlatformLink,
-  ArtistLocation,
-  SocialPlatform,
+  type SocialLink,
+  type DiscoveredPlatformLink,
+  type ArtistLocation,
+  type SocialPlatform,
   parseSocialUrl,
   fetchDiscogsSocialLinks,
   fetchOfficialSiteSocialLinks,
   mergeSocialLinks,
   searchPeerTubeChannels,
   fetchLinktreeLinks,
-  parseLocationString,
   mergeLocations,
   fetchBandcampLocation,
   checkBandcampSubdomain,
@@ -682,8 +681,8 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
 
     // Scrape Linktree if found
     let linktreeSocialLinks: SocialLink[] = [];
-    if (linktreeUrl || officialSiteResult.linktreeUrl) {
-      const finalLinktreeUrl = linktreeUrl || officialSiteResult.linktreeUrl;
+    const finalLinktreeUrl = linktreeUrl || officialSiteResult.linktreeUrl;
+    if (finalLinktreeUrl) {
       linktreeSocialLinks = await fetchLinktreeLinks(finalLinktreeUrl);
     }
 
@@ -1195,7 +1194,7 @@ async function searchEven(query: string): Promise<Map<string, NameOnlyEntry>> {
 
         if (!response.ok) { fetchFailed = true; return results; }
 
-        const json = await response.json();
+        const json = await response.json() as { hits?: { name?: string; slug?: string; username?: string }[] };
         const queryNormalized = normalizeForComparison(query);
         const seen = new Set<string>();
 
@@ -1895,52 +1894,6 @@ async function searchAllPlatforms(query: string, mode: SearchMode): Promise<{ re
   // hasPendingEnrichment: false and never called Phase 2 to fill the gap.
   const enrichmentApplied = mbData !== null && mbData.artistName !== null && mbData.enrichmentComplete;
   return { results: finalResults, enrichmentApplied };
-}
-
-// Search a Bandcamp artist page for a specific album title
-// Uses /music endpoint to access full discography (base URL may redirect to a single release)
-async function searchBandcampForAlbum(artistUrl: string, albumTitle: string): Promise<string | undefined> {
-  try {
-    // Extract base artist URL and append /music for full discography
-    const baseUrl = artistUrl.replace(/\/(music|album|track).*$/, '');
-    const musicUrl = `${baseUrl}/music`;
-
-    const response = await fetchWithTimeout(musicUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      },
-    }, 3000);
-
-    if (!response.ok) return undefined;
-
-    const html = await response.text();
-    const root = parse(html);
-    const normalizedSearchTitle = normalizeForComparison(albumTitle);
-
-    // Look through all music grid items for matching title
-    const musicGridItems = root.querySelectorAll('.music-grid-item');
-    for (const item of musicGridItems) {
-      const titleEl = item.querySelector('.title');
-      const title = titleEl?.textContent?.trim();
-      if (!title) continue;
-
-      const normalizedTitle = normalizeForComparison(title);
-      // Check for match (allowing partial matches for long titles)
-      if (normalizedTitle === normalizedSearchTitle ||
-          normalizedTitle.includes(normalizedSearchTitle) ||
-          normalizedSearchTitle.includes(normalizedTitle)) {
-        const link = item.querySelector('a');
-        const href = link?.getAttribute('href');
-        if (href) {
-          return href.startsWith('http') ? href : new URL(href, artistUrl).toString();
-        }
-      }
-    }
-
-    return undefined;
-  } catch {
-    return undefined;
-  }
 }
 
 // Shape a DB artist row into a result card. Claimed rows become full profile

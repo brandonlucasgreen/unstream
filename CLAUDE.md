@@ -122,7 +122,7 @@ npm run migrate:list      # List applied vs pending migrations
 
 `npm run build` runs, in order: guides manifest → dispatch feed → root `tsc -b` → API function tests → `apps/web` `tsc -b` → web unit tests → `vite build` → sitemap. **Any failure blocks the Netlify deploy.** Run `npm run build` (or at minimum `npm run lint`, `npm run test:unit`, `npm run test:api`) before considering work done.
 
-**Typecheck coverage gotcha:** `api/tsconfig.json` has a narrow `include` — only the `me-*` functions and their tests. So neither `tsc -b` nor `npm run typecheck:api` typechecks most of `api/`. A type error in `search-sources.ts` will not fail the build; it will fail at runtime in production. When you touch `api/`, rely on the function tests and read carefully — and if you add a file worth typechecking, add it to that `include` list.
+**Typecheck coverage gotcha:** `api/tsconfig.json` has a narrow `include` — the `me-*` functions, `search-sources.ts`, and their tests. Files reachable from those *are* checked, so the search backend (`db.ts`, `search-utils.ts`, `search-parsers.ts`, `middleware.ts`, `api/search/*`) is now covered. Everything else in `api/` — the edge functions, `artist-profile.ts`, the release and admin endpoints — is not: a type error there won't fail the build, it will fail at runtime in production. When you touch an unlisted file, rely on the function tests and read carefully — and if it's worth typechecking, add it to that `include` list and fix whatever strict mode surfaces.
 
 ## Key patterns
 

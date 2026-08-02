@@ -58,6 +58,9 @@ const FRESHNESS_TTL_MS = 24 * 60 * 60 * 1000;
 interface PlatformLink {
   sourceId: string;
   url: string;
+  // Custom label an artist set in the profile editor (artist_links.display_name).
+  // Only "other" links normally carry one; search-discovered links leave it null.
+  displayName?: string;
   latestRelease?: {
     title: string;
     type: 'album' | 'track';
