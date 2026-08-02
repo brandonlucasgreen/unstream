@@ -26,12 +26,20 @@ function stubServiceWorker(value: unknown) {
   });
 }
 
+function setReadyState(state: DocumentReadyState) {
+  Object.defineProperty(document, 'readyState', { value: state, configurable: true });
+}
+
 /** Runs this test's 'load' listener, as page load would. */
 async function fireLoad() {
   for (const [type, handler] of listen.mock.calls) {
     if (type === 'load') (handler as EventListener)(new Event('load'));
   }
-  // Let the rejection handler attached inside the listener run.
+  await settle();
+}
+
+/** Lets the rejection handler attached inside the registration run. */
+async function settle() {
   await Promise.resolve();
   await Promise.resolve();
 }
@@ -41,6 +49,7 @@ beforeEach(() => {
   vi.mocked(addBreadcrumb).mockClear();
   listen.mockClear();
   stubServiceWorker({ register });
+  setReadyState('loading');
 });
 
 afterEach(() => {
@@ -56,6 +65,17 @@ describe('registerServiceWorker', () => {
 
     expect(register).toHaveBeenCalledWith('/sw.js', { scope: '/' });
     expect(addBreadcrumb).not.toHaveBeenCalled();
+  });
+
+  it('registers straight away when load has already fired', async () => {
+    // A listener added after 'load' never runs, which would leave the app with
+    // no service worker and nothing to show for it.
+    setReadyState('complete');
+
+    registerServiceWorker();
+    await settle();
+
+    expect(register).toHaveBeenCalledWith('/sw.js', { scope: '/' });
   });
 
   it('records a declined registration as a breadcrumb rather than an error', async () => {

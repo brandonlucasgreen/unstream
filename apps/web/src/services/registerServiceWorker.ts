@@ -28,14 +28,25 @@ import * as Sentry from '@sentry/react'
 export function registerServiceWorker(): void {
   if (!('serviceWorker' in navigator)) return
 
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch((error: unknown) => {
-      Sentry.addBreadcrumb({
-        category: 'pwa',
-        level: 'info',
-        message: 'Service worker registration declined',
-        data: { reason: error instanceof Error ? error.message : String(error) },
-      })
+  // Held until load so registration never competes with the first paint, which
+  // is what the injected script did too. Checking readyState rather than
+  // trusting the listener: main.tsx runs as a deferred module, so today it is
+  // reliably before 'load' — but a listener added after 'load' has fired never
+  // runs, and that failure is silent, a service worker that simply never exists.
+  if (document.readyState === 'complete') {
+    register()
+  } else {
+    window.addEventListener('load', register, { once: true })
+  }
+}
+
+function register(): void {
+  navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch((error: unknown) => {
+    Sentry.addBreadcrumb({
+      category: 'pwa',
+      level: 'info',
+      message: 'Service worker registration declined',
+      data: { reason: error instanceof Error ? error.message : String(error) },
     })
   })
 }
