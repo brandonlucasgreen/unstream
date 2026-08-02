@@ -26,7 +26,11 @@ function release(over: Partial<FeedRelease> = {}): FeedRelease {
     releaseSlug: 'infinite-normal',
     releaseDate: '2026-09-01',
     offerSummary: 'from $8 · ≈$6.80 to artist',
-    platforms: ['Bandcamp', 'Mirlo'],
+    artworkUrl: 'https://f4.bcbits.com/img/a1234.jpg',
+    sources: [
+      { name: 'Bandcamp', url: 'https://kidlightbulbs.bandcamp.com/album/infinite-normal' },
+      { name: 'Mirlo', url: 'https://mirlo.space/kid-lightbulbs/release/infinite-normal' },
+    ],
     ...over,
   };
 }
@@ -176,8 +180,46 @@ describe('buildIcs', () => {
 
     expect(lines).toContain('URL:https://unstream.stream/a/kid-lightbulbs/infinite-normal');
     const description = lines.find(l => l.startsWith('DESCRIPTION:')) ?? '';
-    expect(description).toContain('Bandcamp\\, Mirlo');
     expect(description).toContain('to artist');
+  });
+
+  // The gap this closes: entries named "Bandcamp, Faircamp" and gave the reader no way to reach
+  // either. DESCRIPTION is plain text, so bare URLs on their own lines — every client linkifies
+  // those, and there is no anchor markup available.
+  it('lists a reachable URL per platform in the description', () => {
+    const lines = logicalLines(buildIcs([release()], 'Cal', NOW));
+    const description = lines.find(l => l.startsWith('DESCRIPTION:')) ?? '';
+
+    expect(description).toContain('Bandcamp: https://kidlightbulbs.bandcamp.com/album/infinite-normal');
+    expect(description).toContain('Mirlo: https://mirlo.space/kid-lightbulbs/release/infinite-normal');
+  });
+
+  it('attaches the cover art with a declared type', () => {
+    const lines = logicalLines(buildIcs([release()], 'Cal', NOW));
+    expect(lines).toContain('ATTACH;FMTTYPE=image/jpeg:https://f4.bcbits.com/img/a1234.jpg');
+  });
+
+  it('declares the right type for a png, and none for an unknown extension', () => {
+    const png = logicalLines(buildIcs([release({ artworkUrl: 'https://x.test/a.png' })], 'Cal', NOW));
+    expect(png).toContain('ATTACH;FMTTYPE=image/png:https://x.test/a.png');
+
+    // Asserting image/jpeg over something unidentified can make a client reject the attachment;
+    // FMTTYPE is optional, so omitting it beats guessing.
+    const odd = logicalLines(buildIcs([release({ artworkUrl: 'https://x.test/image' })], 'Cal', NOW));
+    expect(odd).toContain('ATTACH:https://x.test/image');
+  });
+
+  it('omits ATTACH entirely when there is no artwork', () => {
+    const lines = logicalLines(buildIcs([release({ artworkUrl: null })], 'Cal', NOW));
+    expect(lines.some(l => l.startsWith('ATTACH'))).toBe(false);
+  });
+
+  // A URI value is not TEXT: escaping its commas to `\,` would corrupt the address.
+  it('does not text-escape URLs in ATTACH or URL', () => {
+    const lines = logicalLines(
+      buildIcs([release({ artworkUrl: 'https://x.test/a,b.jpg' })], 'Cal', NOW)
+    );
+    expect(lines).toContain('ATTACH;FMTTYPE=image/jpeg:https://x.test/a,b.jpg');
   });
 
   it('omits the price line rather than inventing one when no offer is known', () => {
@@ -215,6 +257,31 @@ describe('buildAtom', () => {
     expect(xml).toContain('<feed xmlns="http://www.w3.org/2005/Atom">');
     expect(xml.match(/<entry>/g)).toHaveLength(1);
     expect(xml.trimEnd().endsWith('</feed>')).toBe(true);
+  });
+
+  it('links every platform and embeds the artwork in the entry content', () => {
+    const xml = buildAtom([release()], opts, NOW);
+
+    // <content type="html"> is entity-encoded, so the markup appears escaped in the raw feed and
+    // the reader decodes it once before rendering.
+    expect(xml).toContain('&lt;img src=&quot;https://f4.bcbits.com/img/a1234.jpg&quot;');
+    expect(xml).toContain('&lt;a href=&quot;https://kidlightbulbs.bandcamp.com/album/infinite-normal&quot;&gt;Bandcamp');
+    expect(xml).toContain('&lt;a href=&quot;https://mirlo.space/kid-lightbulbs/release/infinite-normal&quot;&gt;Mirlo');
+  });
+
+  // For readers that only walk <link> elements rather than rendering content.
+  it('emits a related link per platform and an enclosure for the artwork', () => {
+    const xml = buildAtom([release()], opts, NOW);
+
+    expect(xml).toContain('<link rel="related" type="text/html" href="https://kidlightbulbs.bandcamp.com/album/infinite-normal" title="Bandcamp"/>');
+    expect(xml).toContain('<link rel="enclosure" type="image/jpeg" href="https://f4.bcbits.com/img/a1234.jpg"/>');
+  });
+
+  it('omits the enclosure and the img when there is no artwork', () => {
+    const xml = buildAtom([release({ artworkUrl: null })], opts, NOW);
+
+    expect(xml).not.toContain('rel="enclosure"');
+    expect(xml).not.toContain('&lt;img');
   });
 
   it('escapes XML metacharacters in a title', () => {

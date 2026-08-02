@@ -20,8 +20,16 @@ export interface FeedRelease {
   releaseDate: string;
   /** "from $8 · ≈$6.80 to artist", or ''. Shown in the event description when present. */
   offerSummary: string;
-  /** Platforms this release is on, artist-paying first. */
-  platforms: string[];
+  /**
+   * Where you can buy it, artist-paying first — display name plus the platform's own page.
+   *
+   * Named `sources` rather than the old `platforms: string[]` because a bare list of names was
+   * exactly the problem: a feed entry said "Bandcamp, Faircamp" and gave the reader no way to
+   * reach either.
+   */
+  sources: { name: string; url: string }[];
+  /** Cover art. Null when the release has none — never rendered as a broken image. */
+  artworkUrl: string | null;
 }
 
 const SITE = 'https://unstream.stream';
@@ -98,18 +106,54 @@ function icsTimestamp(now: Date): string {
 }
 
 /**
- * What an event says beyond its title: where to buy, for how much, and the link back.
+ * What an event says beyond its title: where to buy, for how much, and the links.
  *
- * The link is to the Unstream release page, never to one platform — the same pillar-3 rule the
- * alerts follow. A calendar entry that deep-links to one shop hides the payout comparison at
- * exactly the moment it matters.
+ * The event's own `URL` property stays the Unstream release page — the same pillar-3 rule the
+ * alerts follow, since a calendar entry that deep-links to one shop hides the payout comparison
+ * at exactly the moment it matters. But `URL` is single-valued in RFC 5545, so the per-platform
+ * links go in the description, one per line: naming "Bandcamp, Faircamp" without giving the
+ * reader a way to reach either was the gap this closes.
+ *
+ * Written as bare URLs on their own lines because iCalendar DESCRIPTION is **plain text** — there
+ * is no anchor markup to use, and every calendar client linkifies a bare URL. Anything cleverer
+ * would show up as literal angle brackets in Apple Calendar.
  */
 function eventDescription(release: FeedRelease): string {
   const parts: string[] = [];
-  if (release.platforms.length > 0) parts.push(`On ${release.platforms.join(', ')}`);
   if (release.offerSummary) parts.push(release.offerSummary);
   parts.push(releasePageUrl(release.artistSlug, release.releaseSlug));
+
+  for (const source of release.sources) {
+    parts.push(`${source.name}: ${source.url}`);
+  }
+
   return parts.join('\n');
+}
+
+/** Extensions Bandcamp and the other sources actually serve, onto iCalendar FMTTYPE values. */
+const IMAGE_MIME: Record<string, string> = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  gif: 'image/gif',
+  webp: 'image/webp',
+};
+
+/**
+ * `ATTACH` line for the cover art, or null.
+ *
+ * `FMTTYPE` is only declared when the extension actually says what the image is. Asserting
+ * `image/jpeg` over a PNG is the kind of small lie that makes a client refuse the attachment
+ * outright, and the parameter is optional — omitting it is better than guessing.
+ *
+ * The URI is **not** run through `escapeIcsText`: this is a URI value, not TEXT, and escaping
+ * its commas to `\,` would corrupt the address. Same reason `URL:` below is unescaped.
+ */
+function artworkAttachLine(artworkUrl: string | null): string | null {
+  if (!artworkUrl) return null;
+  const ext = artworkUrl.split('?')[0].split('.').pop()?.toLowerCase() ?? '';
+  const mime = IMAGE_MIME[ext];
+  return mime ? `ATTACH;FMTTYPE=${mime}:${artworkUrl}` : `ATTACH:${artworkUrl}`;
 }
 
 /**
@@ -148,6 +192,7 @@ export function buildIcs(
   const stamp = icsTimestamp(now);
 
   for (const release of releases) {
+    const attach = artworkAttachLine(release.artworkUrl);
     lines.push(
       'BEGIN:VEVENT',
       `UID:${release.artistSlug}-${release.releaseSlug}@unstream.stream`,
@@ -157,6 +202,7 @@ export function buildIcs(
       `SUMMARY:${escapeIcsText(`${release.artistName} — ${release.title}`)}`,
       `DESCRIPTION:${escapeIcsText(eventDescription(release))}`,
       `URL:${releasePageUrl(release.artistSlug, release.releaseSlug)}`,
+      ...(attach ? [attach] : []),
       'TRANSP:TRANSPARENT',
       'END:VEVENT'
     );
@@ -181,6 +227,45 @@ export function escapeXml(value: string): string {
     .replace(/'/g, '&apos;');
 }
 
+/** The image's MIME type from its extension, defaulting to JPEG — what Bandcamp serves. */
+function imageMimeType(url: string): string {
+  const ext = url.split('?')[0].split('.').pop()?.toLowerCase() ?? '';
+  return IMAGE_MIME[ext] ?? 'image/jpeg';
+}
+
+/**
+ * The rich body of an entry: cover art, the price line, and a link per platform.
+ *
+ * Escaped **twice**, deliberately, and it is correct: values are escaped as they go into the
+ * HTML, then `<content type="html">` requires the whole HTML string to be entity-encoded again
+ * so it survives as XML character data. The reader decodes once to recover the HTML and renders
+ * it. Getting this wrong in either direction either breaks the XML or shows visible tags.
+ *
+ * The artwork is hotlinked from wherever the platform serves it, same as the artist page already
+ * does. Rehosting at feed scale raises rights questions this feature has not answered.
+ */
+function entryHtml(release: FeedRelease, pageUrl: string): string {
+  const parts: string[] = [];
+
+  if (release.artworkUrl) {
+    parts.push(
+      `<p><a href="${escapeXml(pageUrl)}"><img src="${escapeXml(release.artworkUrl)}" alt="${escapeXml(release.title)}" width="300"/></a></p>`
+    );
+  }
+
+  if (release.offerSummary) parts.push(`<p>${escapeXml(release.offerSummary)}</p>`);
+
+  if (release.sources.length > 0) {
+    const links = release.sources
+      .map(source => `<a href="${escapeXml(source.url)}">${escapeXml(source.name)}</a>`)
+      .join(' &middot; ');
+    parts.push(`<p>Buy on: ${links}</p>`);
+  }
+
+  parts.push(`<p><a href="${escapeXml(pageUrl)}">Compare where to buy on Unstream</a></p>`);
+  return parts.join('');
+}
+
 /**
  * The same releases as an Atom feed, for RSS readers.
  *
@@ -202,7 +287,7 @@ export function buildAtom(
   const entries = releases.map(release => {
     const url = releasePageUrl(release.artistSlug, release.releaseSlug);
     const summaryParts = [
-      release.platforms.length > 0 ? `On ${release.platforms.join(', ')}` : '',
+      release.sources.length > 0 ? `On ${release.sources.map(x => x.name).join(', ')}` : '',
       release.offerSummary,
     ].filter(Boolean);
 
@@ -211,9 +296,22 @@ export function buildAtom(
       `    <title>${escapeXml(`${release.artistName} — ${release.title}`)}</title>`,
       `    <id>tag:unstream.stream,2026:release/${escapeXml(release.artistSlug)}/${escapeXml(release.releaseSlug)}</id>`,
       `    <link rel="alternate" type="text/html" href="${escapeXml(url)}"/>`,
+      // One `rel="related"` per platform. A reader that renders the HTML content below gets the
+      // links anyway; this is for the ones that only walk <link> elements.
+      ...release.sources.map(
+        source => `    <link rel="related" type="text/html" href="${escapeXml(source.url)}" title="${escapeXml(source.name)}"/>`
+      ),
+      // Podcast-style enclosure, which is how most readers find a per-entry image.
+      ...(release.artworkUrl
+        ? [`    <link rel="enclosure" type="${escapeXml(imageMimeType(release.artworkUrl))}" href="${escapeXml(release.artworkUrl)}"/>`]
+        : []),
       `    <updated>${release.releaseDate}T00:00:00Z</updated>`,
       `    <author><name>${escapeXml(release.artistName)}</name></author>`,
-      `    <summary>${escapeXml(summaryParts.join(' · ') || 'Upcoming release')}</summary>`,
+      // `summary` stays plain text for readers that show only that; `content` carries the
+      // artwork and the real links. Both are populated on purpose — a reader shows one or the
+      // other and there is no way to know which.
+      `    <summary>${escapeXml(summaryParts.join(' · ') || 'New release')}</summary>`,
+      `    <content type="html">${escapeXml(entryHtml(release, url))}</content>`,
       '  </entry>',
     ].join('\n');
   });

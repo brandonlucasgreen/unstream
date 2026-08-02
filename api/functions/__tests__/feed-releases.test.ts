@@ -40,9 +40,19 @@ function row(over: Record<string, unknown> = {}) {
     releaseDate: '2026-09-01',
     offerSummary: '',
     platforms: [],
-    sources: [{ platform: 'bandcamp', offers: [{ price: 8, currency: 'USD', availability: 'available' }] }],
+    artworkUrl: null,
+    sources: [{ platform: 'bandcamp', url: 'https://x.bandcamp.com/album/a-record', offers: [{ price: 8, currency: 'USD', availability: 'available' }] }],
     ...over,
   };
+}
+
+/**
+ * ICS content lines are folded at 75 octets, so a raw `toContain` against the body fails
+ * whenever the string it's looking for straddles a fold. Unfold first, the way a real parser
+ * does, and assert against the logical content.
+ */
+function unfoldIcs(body: string): string {
+  return body.replace(/\r\n /g, '');
 }
 
 function get(path: string) {
@@ -234,13 +244,13 @@ describe('platform naming and ordering', () => {
   it('uses proper platform names in the event description', async () => {
     mocks.getFeedTokenOwner.mockResolvedValue('user-1');
     mocks.getFeedReleasesForUser.mockResolvedValue([
-      row({ sources: [{ platform: 'jamcoop', offers: [] }] }),
+      row({ sources: [{ platform: 'jamcoop', url: 'https://jam.coop/artists/x/albums/a', offers: [] }] }),
     ]);
 
     const r = await get(`/feed/f/${TOKEN}.ics`);
 
-    expect(r.body).toContain('Jam.coop');
-    expect(r.body).not.toContain('jamcoop');
+    expect(unfoldIcs(r.body)).toContain('Jam.coop');
+    expect(unfoldIcs(r.body)).not.toContain('jamcoop:');
   });
 
   // The same artist-paying-first guardrail as the release page and the alerts: a secondhand
@@ -250,15 +260,30 @@ describe('platform naming and ordering', () => {
     mocks.getFeedReleasesForUser.mockResolvedValue([
       row({
         sources: [
-          { platform: 'discogs', offers: [{ price: 2.64, currency: 'USD', availability: 'available' }] },
-          { platform: 'bandcamp', offers: [{ price: 8, currency: 'USD', availability: 'available' }] },
+          { platform: 'discogs', url: 'https://discogs.com/release/1', offers: [{ price: 2.64, currency: 'USD', availability: 'available' }] },
+          { platform: 'bandcamp', url: 'https://x.bandcamp.com/album/a-record', offers: [{ price: 8, currency: 'USD', availability: 'available' }] },
         ],
       }),
     ]);
 
     const r = await get(`/feed/f/${TOKEN}.ics`);
 
-    expect(r.body).toMatch(/Bandcamp\\?, ?Discogs/);
+    // One line per platform now, so "first" means the earlier line — Bandcamp (80-85%) ahead of
+    // Discogs (no published payout), never the other way round.
+    const body = unfoldIcs(r.body);
+    expect(body.indexOf('Bandcamp:')).toBeGreaterThan(-1);
+    expect(body.indexOf('Bandcamp:')).toBeLessThan(body.indexOf('Discogs:'));
+  });
+
+  it('gives every platform a reachable link, not just a name', async () => {
+    mocks.getFeedTokenOwner.mockResolvedValue('user-1');
+    mocks.getFeedReleasesForUser.mockResolvedValue([row()]);
+
+    const ics = await get(`/feed/f/${TOKEN}.ics`);
+    const atom = await get(`/feed/f/${TOKEN}.xml`);
+
+    expect(unfoldIcs(ics.body)).toContain('Bandcamp: https://x.bandcamp.com/album/a-record');
+    expect(atom.body).toContain('href="https://x.bandcamp.com/album/a-record"');
   });
 });
 

@@ -3326,7 +3326,14 @@ export interface FeedReleaseRow {
   releaseDate: string;
   offerSummary: string;
   platforms: string[];
-  sources: { platform: string; offers: { price: number | null; currency: string | null; availability: string }[] }[];
+  /** Cover art, so a feed entry can show the record rather than just name it. */
+  artworkUrl: string | null;
+  sources: {
+    platform: string;
+    /** The platform's own page. Feed entries link each platform rather than listing dead names. */
+    url: string;
+    offers: { price: number | null; currency: string | null; availability: string }[];
+  }[];
 }
 
 /**
@@ -3345,9 +3352,11 @@ type FeedQueryRow = {
   slug: string;
   title: string;
   release_date: string | null;
+  artwork_url: string | null;
   artists: { name: string; slug: string } | null;
   release_sources: {
     platform: string;
+    url: string;
     release_offers: { price: number | null; currency: string | null; availability: string }[] | null;
   }[] | null;
 };
@@ -3363,16 +3372,18 @@ function toFeedRows(rows: FeedQueryRow[]): FeedReleaseRow[] {
       releaseDate: r.release_date!,
       offerSummary: '',
       platforms: [],
+      artworkUrl: r.artwork_url,
       sources: (r.release_sources || []).map(s => ({
         platform: s.platform,
+        url: s.url,
         offers: s.release_offers || [],
       })),
     }));
 }
 
 const FEED_SELECT =
-  'slug, title, release_date, artists!inner ( name, slug ),' +
-  ' release_sources ( platform, release_offers ( price, currency, availability ) )';
+  'slug, title, release_date, artwork_url, artists!inner ( name, slug ),' +
+  ' release_sources ( platform, url, release_offers ( price, currency, availability ) )';
 
 /** Soonest first — a calendar and a reader both want the next thing at the top. */
 function feedSince(now: Date): string {

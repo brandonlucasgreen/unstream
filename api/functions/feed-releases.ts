@@ -83,7 +83,15 @@ function toFeedReleases(rows: FeedReleaseRow[]): FeedRelease[] {
     releaseSlug: row.releaseSlug,
     releaseDate: row.releaseDate,
     offerSummary: leadingOfferSummary(row.sources),
-    platforms: orderedSourcePlatforms(row.sources).map(p => PLATFORMS[p]?.name ?? p),
+    artworkUrl: row.artworkUrl,
+    // Ordered artist-paying-first, then paired with the platform's own page so a feed entry can
+    // actually link "Bandcamp" rather than just print it. `orderedSourcePlatforms` returns ids,
+    // so the URL is looked up back on the row it came from.
+    sources: orderedSourcePlatforms(row.sources).flatMap(id => {
+      const source = row.sources.find(s => s.platform === id);
+      if (!source?.url) return [];
+      return [{ name: PLATFORMS[id]?.name ?? id, url: source.url }];
+    }),
   }));
 }
 
