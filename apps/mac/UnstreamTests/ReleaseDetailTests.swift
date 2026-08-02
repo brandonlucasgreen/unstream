@@ -137,10 +137,22 @@ final class ReleaseDetailTests: XCTestCase {
 
     func testFreshnessParsesFractionalSecondTimestamps() {
         // The API sends fractional seconds on captured_at and not on others; a parser that
-        // handles only one shape silently drops the freshness line entirely.
+        // handles only one shape silently drops the freshness line entirely, so the thing this
+        // actually guards is "produces anything at all".
+        //
+        // The `now` here is deliberately well clear of a day boundary. An earlier version used
+        // exactly two days later, which is 172,799s once the .933 is counted — one second short,
+        // so it correctly read "yesterday" and the test was simply wrong about the code. Don't
+        // straddle the boundary in the test that isn't about the boundary; that's what
+        // `testFreshnessCountsElapsedDaysNotCalendarDays` above is for.
         let stamp = "2026-08-01T19:10:35.933+00:00"
-        let now = ISO8601DateFormatter().date(from: "2026-08-03T19:10:35Z")!
+        let now = ISO8601DateFormatter().date(from: "2026-08-03T20:00:00Z")!
+
         XCTAssertEqual(ReleaseFormatting.freshness(stamp, now: now), "Prices checked 2 days ago")
+        XCTAssertNotEqual(
+            ReleaseFormatting.freshness(stamp, now: now), "",
+            "A fractional-second timestamp must parse, not fall through to the empty 'never read' case"
+        )
     }
 
     func testFutureTimestampDoesNotProduceNegativeDays() {
