@@ -113,7 +113,7 @@ function eventDescription(release: FeedRelease): string {
 }
 
 /**
- * A whole calendar of upcoming releases.
+ * A whole calendar of releases.
  *
  * All-day events, because a release date is a day and not a moment — an event at "00:00 UTC"
  * lands on the wrong day for anyone west of Greenwich, which for a US subscriber means every
@@ -123,7 +123,15 @@ function eventDescription(release: FeedRelease): string {
  * existing entry instead of duplicating it — a subscribed calendar re-fetches indefinitely, and
  * an unstable UID would pile up a new copy of every release on every refresh.
  */
-export function buildIcs(releases: FeedRelease[], calendarName: string, now: Date = new Date()): string {
+export function buildIcs(
+  releases: FeedRelease[],
+  calendarName: string,
+  now: Date = new Date(),
+  /** One line describing the calendar. Defaults to the per-fan feed's wording, since that is
+   *  the primary feed; an artist feed passes its own, because "from the artists you support"
+   *  is plainly untrue of a single artist's discography. */
+  description = 'Upcoming releases from the artists you support on Unstream'
+): string {
   const lines: string[] = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -131,7 +139,7 @@ export function buildIcs(releases: FeedRelease[], calendarName: string, now: Dat
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     `X-WR-CALNAME:${escapeIcsText(calendarName)}`,
-    'X-WR-CALDESC:Upcoming releases from the artists you support on Unstream',
+    `X-WR-CALDESC:${escapeIcsText(description)}`,
     // Clients that honour it back off to daily; a release calendar changes slowly.
     'REFRESH-INTERVAL;VALUE=DURATION:P1D',
     'X-PUBLISHED-TTL:P1D',

@@ -57,7 +57,36 @@ export function ReleasesSection({
 
   return (
     <div className="mt-6">
-      <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">Releases</h2>
+      {/*
+        The feed links live in the heading rather than under the list. They were a separate line
+        at the foot of the section first, which put them furthest from the thing they subscribe
+        to and read as a stray footnote. Sitting in the heading they're findable without taking
+        any vertical space of their own.
+
+        Plain <a>, not react-router <Link>: these are served by a Netlify function, so a
+        client-side navigation would try to render them in-app and fail.
+      */}
+      <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
+        Releases
+        <span aria-hidden="true"> · </span>
+        <span className="sr-only">— </span>
+        Subscribe via{' '}
+        <a
+          href={`/a/${encodeURIComponent(artistSlug)}/releases.xml`}
+          className="hover:text-accent-primary hover:underline"
+          title="Subscribe in an RSS reader"
+        >
+          RSS
+        </a>
+        {' or '}
+        <a
+          href={`/a/${encodeURIComponent(artistSlug)}/releases.ics`}
+          className="hover:text-accent-primary hover:underline"
+          title="Subscribe in Apple Calendar, Google Calendar or another calendar app"
+        >
+          ICS
+        </a>
+      </h2>
       <div className="grid gap-2 sm:grid-cols-2">
         {shown.map(release => (
           <ReleaseRow key={release.slug} release={release} artistSlug={artistSlug} />
@@ -82,32 +111,6 @@ export function ReleasesSection({
         <p className="mt-2.5 text-center text-xs text-text-muted">and {total - releases.length} more</p>
       )}
 
-      {/*
-        The per-artist feeds had no entry point anywhere in the app — they worked, but the only
-        way to find one was to already know the URL. This is the natural place: it sits with the
-        releases it describes, and only renders when there are releases to follow.
-
-        Plain <a> rather than react-router <Link>: these are not SPA routes. They are served by
-        a Netlify function, so a client-side navigation would try to render them in-app and fail.
-      */}
-      <p className="mt-3 text-center text-xs text-text-muted">
-        Follow for new releases:{' '}
-        <a
-          href={`/a/${encodeURIComponent(artistSlug)}/releases.ics`}
-          className="text-accent-primary hover:underline"
-          title="Subscribe in Apple Calendar, Google Calendar or another calendar app"
-        >
-          ICS
-        </a>
-        {' · '}
-        <a
-          href={`/a/${encodeURIComponent(artistSlug)}/releases.xml`}
-          className="text-accent-primary hover:underline"
-          title="Subscribe in an RSS reader"
-        >
-          XML
-        </a>
-      </p>
     </div>
   );
 }

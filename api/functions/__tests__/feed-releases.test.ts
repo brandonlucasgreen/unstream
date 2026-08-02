@@ -200,13 +200,27 @@ describe('the public handle feed', () => {
 });
 
 describe('the public artist feed', () => {
-  it('serves one artist’s upcoming releases', async () => {
+  it('serves one artist’s releases', async () => {
     mocks.getFeedReleasesForArtist.mockResolvedValue({ artistName: 'Kid Lightbulbs', releases: [row()] });
 
     const r = await get('/a/kid-lightbulbs/releases.xml');
 
     expect(r.statusCode).toBe(200);
-    expect(r.body).toContain('Kid Lightbulbs — upcoming releases');
+    expect(r.body).toContain('Kid Lightbulbs — releases');
+  });
+
+  // An artist feed is a discography, not a calendar of what's imminent — the window belongs to
+  // the per-fan feeds. Saying "upcoming" here would misdescribe a feed full of back catalogue.
+  it('does not describe an artist feed as upcoming, in either format', async () => {
+    mocks.getFeedReleasesForArtist.mockResolvedValue({ artistName: 'Kid Lightbulbs', releases: [row()] });
+
+    const atom = await get('/a/kid-lightbulbs/releases.xml');
+    const ics = await get('/a/kid-lightbulbs/releases.ics');
+
+    expect(atom.body.toLowerCase()).not.toContain('upcoming');
+    expect(ics.body.toLowerCase()).not.toContain('upcoming');
+    // …and the calendar description names the artist rather than "the artists you support".
+    expect(ics.body).toContain('Releases by Kid Lightbulbs');
   });
 
   it('404s an unknown artist', async () => {

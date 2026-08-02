@@ -3427,10 +3427,23 @@ export async function getFeedReleasesForUser(userId: string, now: Date = new Dat
   }
 }
 
-/** The same feed for one artist, for the public /a/{slug}/releases.xml. */
+/**
+ * One artist's feed, for the public `/a/{slug}/releases.{xml,ics}`.
+ *
+ * **Deliberately unwindowed, unlike the per-fan and per-handle feeds above.** Those are a
+ * calendar of what's coming across everything you follow, where a trailing window keeps the
+ * thing usable. An artist feed is a different object: it is that artist's *discography*, and
+ * someone subscribing to it wants the back catalogue, not just whatever happens to be imminent.
+ * Brandon, on his own artist feed: *"It really should include everything - not just upcoming
+ * ones."*
+ *
+ * Ordered newest-first rather than soonest-first, which is both the RSS convention and the safe
+ * pairing with `FEED_MAX_RELEASES`: an ascending order plus a cap would silently drop an artist's
+ * *recent* work in favour of their oldest.
+ */
 export async function getFeedReleasesForArtist(
   artistSlugValue: string,
-  now: Date = new Date()
+  _now: Date = new Date()
 ): Promise<{ artistName: string; releases: FeedReleaseRow[] } | null> {
   const client = getClient();
   if (!client) return null;
@@ -3451,8 +3464,11 @@ export async function getFeedReleasesForArtist(
       .eq('artist_id', id)
       .eq('is_hidden', false)
       .eq('needs_review', false)
-      .gte('release_date', feedSince(now))
-      .order('release_date', { ascending: true })
+      // No date floor: the whole catalogue, past and upcoming. `not.is.null` because an undated
+      // release has no event to place in a calendar and no meaningful position in a feed —
+      // `toFeedRows` drops those anyway, so excluding them here stops them eating the cap.
+      .not('release_date', 'is', null)
+      .order('release_date', { ascending: false })
       .limit(FEED_MAX_RELEASES);
 
     if (error) {

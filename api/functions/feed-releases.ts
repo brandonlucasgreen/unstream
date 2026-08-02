@@ -90,13 +90,13 @@ function toFeedReleases(rows: FeedReleaseRow[]): FeedRelease[] {
 function render(
   releases: FeedReleaseRow[],
   format: Format,
-  opts: { title: string; selfUrl: string; feedId: string },
+  opts: { title: string; selfUrl: string; feedId: string; description?: string },
   isPrivate: boolean
 ): FeedResponse {
   const entries = toFeedReleases(releases);
   const body =
     format === 'ics'
-      ? buildIcs(entries, opts.title)
+      ? buildIcs(entries, opts.title, new Date(), opts.description)
       : buildAtom(entries, { title: opts.title, selfUrl: opts.selfUrl, feedId: opts.feedId });
 
   return { statusCode: 200, headers: feedHeaders(format, isPrivate), body };
@@ -216,7 +216,8 @@ export async function handler(event: {
     artist.releases,
     route.format,
     {
-      title: `${artist.artistName} — upcoming releases`,
+      title: `${artist.artistName} — releases`,
+      description: `Releases by ${artist.artistName}, from Unstream`,
       selfUrl: `${SITE}/a/${encodeURIComponent(route.slug)}/releases.${route.format}`,
       feedId: `tag:unstream.stream,2026:feed/a/${route.slug}`,
     },
