@@ -281,6 +281,18 @@
   to = "/.netlify/functions/me-feed-token"
   status = 200
 
+# One release's buying guide as JSON — the twin of the HTML page at /a/:artist/:release, for the
+# Mac app and the browser extension.
+#
+# The slugs are passed as query params rather than left in the path on purpose: behind a
+# `status = 200` rewrite `event.path` can be the rewrite *target*, which carries no routing
+# information. feed-releases.ts above hit that and has to reconstruct the path from `rawUrl`;
+# Netlify's placeholder substitution avoids needing the workaround at all.
+[[redirects]]
+  from = "/api/release/:artist/:release"
+  to = "/.netlify/functions/release-detail?artist=:artist&release=:release"
+  status = 200
+
 [[redirects]]
   from = "/plus"
   to = "/support"
