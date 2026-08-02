@@ -205,6 +205,11 @@ struct ReleaseGuideView: View {
 
             Spacer(minLength: 0)
         }
+        .linkActions(
+            url: URL(string: detail?.pageUrl ?? webPageURL),
+            openTitle: "Open on Unstream",
+            onOpen: { open(URL(string: detail?.pageUrl ?? webPageURL)) }
+        )
     }
 
     private var artwork: some View {
@@ -297,6 +302,13 @@ struct ReleaseGuideView: View {
         }
         .background(RoundedRectangle(cornerRadius: 8).fill(Color.secondary.opacity(0.07)))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.secondary.opacity(0.15)))
+        // The whole card carries the platform's URL, not just the small "Buy" text: a Mac user
+        // right-clicks or drags the *thing*, and the thing here is "this release on Bandcamp".
+        .linkActions(
+            url: URL(string: source.url),
+            openTitle: "Open on \(source.name)",
+            onOpen: { open(URL(string: source.url)) }
+        )
     }
 
     /// A platform with no published rate says so, rather than silently looking like one whose
@@ -354,6 +366,9 @@ struct ReleaseGuideView: View {
         }
         .padding(.horizontal, 10).padding(.vertical, 7)
         .opacity(offer.isBuyable ? 1 : 0.55)
+        // A price is a fact someone may want to quote elsewhere; let them select it rather than
+        // retype it. Selection sits on the row's text, so it doesn't fight the card's drag.
+        .textSelection(.enabled)
     }
 
     // MARK: - Actions
@@ -381,6 +396,7 @@ struct ReleaseGuideView: View {
                 .font(.caption)
                 .buttonStyle(.plain)
                 .foregroundColor(.accentColor)
+                .linkActions(url: url, openTitle: "Open on Unstream", onOpen: { open(url) })
         }
     }
 
@@ -390,7 +406,8 @@ struct ReleaseGuideView: View {
         "https://unstream.stream/a/\(target.artistSlug)/\(target.releaseSlug)"
     }
 
-    private func open(_ url: URL) {
+    private func open(_ url: URL?) {
+        guard let url else { return }
         #if os(macOS)
         NSWorkspace.shared.open(url)
         #else

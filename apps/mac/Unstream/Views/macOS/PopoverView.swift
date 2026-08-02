@@ -383,12 +383,19 @@ struct PopoverView: View {
             }
             .keyboardShortcut("2", modifiers: .command)
 
-            // Escape backs out of a release guide, which is what a drill-down should do. It is
-            // registered only while one is open so that everywhere else Escape keeps its usual
-            // job of dismissing the popover.
+            // Escape backs out of a drill-down, which is what Escape should do. Registered only
+            // while one is open, so everywhere else Escape keeps its usual job of dismissing the
+            // popover.
+            //
+            // ⌘[ alongside it because that is *the* Back shortcut on the Mac — Safari, Finder,
+            // Preview, Xcode — and a drill-down that ignores it fails the muscle-memory test even
+            // though Escape works.
             if !route.isEmpty {
                 Button("Back") { _ = route.popLast() }
                     .keyboardShortcut(.escape, modifiers: [])
+
+                Button("Back (Command-Bracket)") { _ = route.popLast() }
+                    .keyboardShortcut("[", modifiers: .command)
             }
 
             Button("Close") { AppDelegate.shared?.closePopover() }
