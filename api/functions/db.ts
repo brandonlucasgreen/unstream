@@ -2080,6 +2080,8 @@ export interface OwnerReleaseItem {
   isHidden: boolean;
   needsReview: boolean;
   flaggedAgainst: { id: string; title: string } | null;
+  /** Position in the artist's manual order, or null if they haven't arranged this one. */
+  displayOrder: number | null;
   sources: { platform: string; url: string }[];
 }
 
@@ -2087,6 +2089,9 @@ export interface OwnerReleaseItem {
  * Every release under this artist — including hidden ones and needs_review ones, unlike the
  * public `getArtistReleases`, because the whole point of this view is letting the artist see
  * what ingest did (right or wrong) rather than only what a fan would see.
+ *
+ * Ordered exactly as the public page orders them, so what the artist arranges here is what a
+ * fan sees rather than a second arrangement that only exists in the editor.
  */
 export async function getArtistReleasesForOwner(artistId: string): Promise<OwnerReleaseItem[]> {
   const client = getClient();
@@ -2097,9 +2102,10 @@ export async function getArtistReleasesForOwner(artistId: string): Promise<Owner
       .from('releases')
       .select(
         'id, title, slug, release_type, release_date, date_precision, artwork_url, is_hidden,' +
-        ' needs_review, flagged_against_release_id, release_sources ( platform, url )'
+        ' needs_review, flagged_against_release_id, display_order, release_sources ( platform, url )'
       )
       .eq('artist_id', artistId)
+      .order('display_order', { ascending: true, nullsFirst: false })
       .order('release_date', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false });
 
@@ -2119,6 +2125,7 @@ export async function getArtistReleasesForOwner(artistId: string): Promise<Owner
       is_hidden: boolean;
       needs_review: boolean;
       flagged_against_release_id: string | null;
+      display_order: number | null;
       release_sources: { platform: string; url: string }[] | null;
     };
 
@@ -2142,12 +2149,40 @@ export async function getArtistReleasesForOwner(artistId: string): Promise<Owner
         r.flagged_against_release_id && titleById.has(r.flagged_against_release_id)
           ? { id: r.flagged_against_release_id, title: titleById.get(r.flagged_against_release_id)! }
           : null,
+      displayOrder: r.display_order,
       sources: (r.release_sources || []).map(s => ({ platform: s.platform, url: s.url })),
     }));
   } catch (error) {
     console.error('[DB] getArtistReleasesForOwner error:', error);
     return [];
   }
+}
+
+/**
+ * Store a claimed artist's manual release order.
+ *
+ * `releaseIds` is the complete arrangement the editor is showing, in display order. Releases
+ * left out of it are reset to unpositioned, so an empty array is "back to newest first", and a
+ * release catalogued between the page loading and saving isn't handed a position nobody chose —
+ * it stays null and sorts to the end.
+ *
+ * One RPC because it's one transaction: a half-written order is an arrangement the artist never
+ * picked, showing on their public page. Same reasoning as `replace_artist_links`.
+ */
+export async function setReleaseDisplayOrder(artistId: string, releaseIds: string[]): Promise<boolean> {
+  const client = getClient();
+  if (!client) return false;
+
+  const { error } = await client.rpc('set_release_display_order', {
+    p_artist_id: artistId,
+    p_release_ids: releaseIds,
+  });
+
+  if (error) {
+    console.error('[DB] setReleaseDisplayOrder failed:', error.message);
+    return false;
+  }
+  return true;
 }
 
 /** "This shouldn't be on my page." Ingest must never write `is_hidden` — only this, or an admin. */
@@ -3004,12 +3039,19 @@ export interface ArtistPageRelease {
 }
 
 /**
- * An artist's releases for their page, newest first, plus the total.
+ * An artist's releases for their page, in the artist's order where they set one and newest
+ * first otherwise, plus the total.
  *
  * `count: 'exact'` rides along with the limit in one round trip, so an "and N more" line is a
- * real number rather than a guess. Ordering matches idx_releases_artist_chrono: many releases
- * have no date yet — grid ingest gets identity and artwork but no dates — and without the
- * created_at tiebreaker those undated rows would shuffle between requests.
+ * real number rather than a guess. The chronological part of the ordering matches
+ * idx_releases_artist_chrono: many releases have no date yet — grid ingest gets identity and
+ * artwork but no dates — and without the created_at tiebreaker those undated rows would shuffle
+ * between requests.
+ *
+ * `display_order` leads, NULLS LAST: it's null for every release until a claimed artist arranges
+ * their catalogue on /artist-edit/:slug/releases, so this is unchanged behaviour for everyone
+ * else. Sorted in SQL rather than after the fetch on purpose — re-sorting a date-limited page in
+ * JS would drop a release the artist had pinned to the top out of the query entirely.
  *
  * Hidden releases are filtered in the query rather than after, so a suppressed release is
  * indistinguishable from one that was never catalogued. That's the point of the column.
@@ -3031,6 +3073,7 @@ export async function getArtistReleases(
       )
       .eq('artist_id', artistId)
       .eq('is_hidden', false)
+      .order('display_order', { ascending: true, nullsFirst: false })
       .order('release_date', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false })
       .limit(limit);
@@ -3281,6 +3324,12 @@ export interface AlertReleases {
  * delightful possible alert ("your artist just announced an album for September") could not fire
  * at all. Undated releases are excluded: with no date there is nothing to say is new, and grid
  * ingest produces plenty of them.
+ *
+ * Strictly chronological, and `releases.display_order` deliberately does not apply — that's not
+ * an oversight. An artist's manual arrangement answers "what should fans see first on my page";
+ * an alert answers "what came out". Honouring the arrangement here would let a pinned back
+ * catalogue release be announced as the new one, and `release[0]` — which the shipped Mac app
+ * and extension read as *the* new release — would stop meaning newest.
  */
 export async function getReleasesForAlerts(
   artistName: string,
@@ -3513,6 +3562,10 @@ export const FEED_TRAILING_DAYS = 30;
 
 /** Cap on events in one feed, so a fan with hundreds of saved artists still gets a usable file. */
 const FEED_MAX_RELEASES = 200;
+
+// Every feed read below is ordered by date, and `releases.display_order` deliberately does not
+// apply to any of them. A calendar is keyed on dates and a reader sorts an Atom feed by them, so
+// an artist's page arrangement has nothing to say here — the same line drawn for alerts above.
 
 type FeedQueryRow = {
   slug: string;

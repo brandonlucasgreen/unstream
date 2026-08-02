@@ -256,12 +256,16 @@ export default async function handler(request: Request, context: Context) {
 
       links = linksData || [];
 
-      // Releases, newest first. `count: 'exact'` alongside a limit gives the full total in the
-      // same round trip, so the "and N more" line is a real number rather than a guess.
+      // Releases, in the artist's own order where they set one and newest first otherwise.
+      // `count: 'exact'` alongside a limit gives the full total in the same round trip, so the
+      // "and N more" line is a real number rather than a guess.
       //
-      // Ordered to match idx_releases_artist_chrono: many releases have no date yet (grid ingest
-      // gets identity and artwork but no dates), and without the created_at tiebreaker those
-      // undated rows would shuffle between requests.
+      // The ordering must stay identical to `getArtistReleases` in api/functions/db.ts — this is
+      // the crawler's view of the same page the SPA renders, and the two disagreeing on release
+      // order is the two-renderers trap in miniature. display_order leads (NULLS LAST, so it's
+      // inert until a claimed artist arranges their catalogue); the chronological part matches
+      // idx_releases_artist_chrono, where created_at is the tiebreaker that stops undated rows —
+      // grid ingest gets identity and artwork but no dates — shuffling between requests.
       const { data: releasesData, count } = await supabase
         .from('releases')
         .select(
@@ -271,6 +275,7 @@ export default async function handler(request: Request, context: Context) {
         )
         .eq('artist_id', artist.id)
         .eq('is_hidden', false)
+        .order('display_order', { ascending: true, nullsFirst: false })
         .order('release_date', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: false })
         .limit(MAX_RELEASES_SHOWN)

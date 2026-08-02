@@ -9,6 +9,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { ArtistReleasesPage } from 'src/pages/ArtistReleasesPage';
+import { applyPendingOrder } from 'src/utils/releaseOrder';
 
 const mockSession = { access_token: 'user-token' };
 vi.mock('src/contexts/AuthContext', () => ({
@@ -38,6 +39,7 @@ function releaseItem(overrides: Record<string, unknown> = {}) {
     isHidden: false,
     needsReview: false,
     flaggedAgainst: null,
+    displayOrder: null,
     sources: [{ platform: 'bandcamp', url: 'https://x.bandcamp.com/album/ruined-castle' }],
     ...overrides,
   };
@@ -209,6 +211,118 @@ describe('ArtistReleasesPage', () => {
     setupFetchMock([]);
     renderPage();
     await waitFor(() => expect(screen.getByText('No releases catalogued yet.')).toBeTruthy());
+  });
+});
+
+describe('applyPendingOrder', () => {
+  const a = { id: 'a' };
+  const b = { id: 'b' };
+  const c = { id: 'c' };
+
+  it('leaves the server order alone when nothing is pending', () => {
+    expect(applyPendingOrder([a, b, c], null)).toEqual([a, b, c]);
+  });
+
+  it('applies the artist\'s arrangement', () => {
+    expect(applyPendingOrder([a, b, c], ['c', 'a', 'b'])).toEqual([c, a, b]);
+  });
+
+  // The case this helper exists for: any other action on the page refetches, and a release
+  // catalogued since the page loaded arrives with no place in the pending arrangement. It has to
+  // land at the end, in its server order — not in the middle of an order it was never part of,
+  // and not by way of a NaN comparator that leaves the whole list arbitrary.
+  it('puts releases the artist has not placed after the ones they have, in server order', () => {
+    const d = { id: 'd' };
+    expect(applyPendingOrder([a, b, c, d], ['c', 'a'])).toEqual([c, a, b, d]);
+  });
+});
+
+describe('ArtistReleasesPage — manual ordering', () => {
+  beforeEach(() => vi.clearAllMocks());
+  afterEach(() => cleanup());
+
+  const FIRST = releaseItem({ id: '11111111-1111-1111-1111-111111111111', title: 'Ruined Castle' });
+  const SECOND = releaseItem({ id: '22222222-2222-2222-2222-222222222222', title: 'Infinite Normal' });
+
+  /** Titles in DOM order — what the artist actually sees, rather than what state holds. */
+  function titlesInOrder() {
+    return screen.getAllByText(/^(Ruined Castle|Infinite Normal)$/).map(el => el.textContent);
+  }
+
+  it('offers no arrows when there is only one release to arrange', async () => {
+    setupFetchMock([FIRST]);
+    renderPage();
+    await waitFor(() => screen.getByText('Ruined Castle'));
+    expect(screen.queryByLabelText(/Move Ruined Castle/)).toBeNull();
+  });
+
+  it('moves a release down and saves the whole arrangement in order', async () => {
+    setupFetchMock([FIRST, SECOND]);
+    renderPage();
+
+    await waitFor(() => screen.getByLabelText('Move Ruined Castle down'));
+    fireEvent.click(screen.getByLabelText('Move Ruined Castle down'));
+
+    // Nothing is written until the artist says so — the arrows rearrange locally.
+    expect(mockFetch.mock.calls.some(call => call[1]?.method === 'POST')).toBe(false);
+    fireEvent.click(screen.getByText('Save order'));
+
+    await waitFor(() => {
+      const postCall = mockFetch.mock.calls.find(call => call[1]?.method === 'POST');
+      expect(postCall).toBeDefined();
+      expect(JSON.parse(postCall![1].body)).toEqual({
+        slug: 'kid-lightbulbs',
+        action: 'reorder',
+        releaseIds: [SECOND.id, FIRST.id],
+      });
+    });
+  });
+
+  it('discards an unsaved arrangement without writing anything', async () => {
+    setupFetchMock([FIRST, SECOND]);
+    renderPage();
+
+    await waitFor(() => screen.getByLabelText('Move Infinite Normal up'));
+    fireEvent.click(screen.getByLabelText('Move Infinite Normal up'));
+    fireEvent.click(screen.getByText('Discard'));
+
+    expect(screen.queryByText('Save order')).toBeNull();
+    expect(mockFetch.mock.calls.some(call => call[1]?.method === 'POST')).toBe(false);
+  });
+
+  // An unsaved arrangement must survive the refetch that every other action triggers, or the
+  // artist loses their work to a click on "Hide".
+  it('keeps an unsaved arrangement across another action\'s refetch', async () => {
+    setupFetchMock([FIRST, SECOND]);
+    renderPage();
+
+    await waitFor(() => screen.getByLabelText('Move Infinite Normal up'));
+    fireEvent.click(screen.getByLabelText('Move Infinite Normal up'));
+    fireEvent.click(screen.getAllByText('Hide')[0]);
+
+    await waitFor(() => expect(mockFetch.mock.calls.filter(call => !call[1]?.method).length).toBe(2));
+    expect(screen.getByText('Save order')).toBeTruthy();
+    expect(titlesInOrder()).toEqual(['Infinite Normal', 'Ruined Castle']);
+  });
+
+  it('offers a reset only once an order has been stored, and clears it', async () => {
+    setupFetchMock([FIRST, SECOND]);
+    renderPage();
+    await waitFor(() => screen.getByText('Ruined Castle'));
+    expect(screen.queryByText('Reset to newest first')).toBeNull();
+
+    cleanup();
+    setupFetchMock([{ ...FIRST, displayOrder: 0 }, { ...SECOND, displayOrder: 1 }]);
+    renderPage();
+
+    await waitFor(() => screen.getByText('Reset to newest first'));
+    fireEvent.click(screen.getByText('Reset to newest first'));
+
+    await waitFor(() => {
+      const postCall = mockFetch.mock.calls.find(call => call[1]?.method === 'POST');
+      expect(postCall).toBeDefined();
+      expect(JSON.parse(postCall![1].body)).toEqual({ slug: 'kid-lightbulbs', action: 'resetOrder' });
+    });
   });
 });
 

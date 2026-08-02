@@ -9,6 +9,7 @@ import { PlatformIcon } from '../components/PlatformIcon';
 import { PLATFORMS } from '../../../../api/shared/platform-registry';
 import { formatReleaseDate } from '../../../../api/shared/release-display';
 import { sources } from '../services/sources';
+import { applyPendingOrder } from '../utils/releaseOrder';
 import type { SourceId } from '../types';
 
 const PLATFORM_OPTIONS = (Object.values(sources) as { id: SourceId; name: string }[])
@@ -50,6 +51,8 @@ interface OwnerRelease {
   isHidden: boolean;
   needsReview: boolean;
   flaggedAgainst: { id: string; title: string } | null;
+  /** Position in the artist's manual order, or null if this one has never been placed. */
+  displayOrder: number | null;
   sources: { platform: string; url: string }[];
 }
 
@@ -86,6 +89,7 @@ export function ArtistReleasesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [catalog, setCatalog] = useState<CatalogInfo | null>(null);
+  const [pendingOrder, setPendingOrder] = useState<string[] | null>(null);
 
   const fetchReleases = useCallback(async () => {
     if (!session?.access_token || !slug) return;
@@ -150,6 +154,28 @@ export function ArtistReleasesPage() {
 
   if (!slug) return null;
 
+  // What the page shows: the saved order from the server, with any unsaved rearrangement on top.
+  const ordered = applyPendingOrder(releases, pendingOrder);
+  const hasCustomOrder = releases.some(r => r.displayOrder !== null);
+
+  function moveRelease(index: number, direction: -1 | 1) {
+    const target = index + direction;
+    if (target < 0 || target >= ordered.length) return;
+    const rearranged = [...ordered];
+    [rearranged[index], rearranged[target]] = [rearranged[target], rearranged[index]];
+    setPendingOrder(rearranged.map(r => r.id));
+  }
+
+  async function saveOrder() {
+    const saved = await runAction('reorder', { action: 'reorder', releaseIds: ordered.map(r => r.id) });
+    if (saved) setPendingOrder(null);
+  }
+
+  async function resetOrder() {
+    const reset = await runAction('resetOrder', { action: 'resetOrder' });
+    if (reset) setPendingOrder(null);
+  }
+
   return (
     <div className="min-h-screen">
       <Header />
@@ -164,8 +190,8 @@ export function ArtistReleasesPage() {
             </Link>
             <h1 className="font-display text-2xl font-bold text-text-primary mt-1">Manage Releases</h1>
             <p className="text-text-muted text-sm mt-1">
-              Hide anything that isn't yours, fix a title or date, merge a duplicate, or add
-              something we missed.
+              Hide anything that isn't yours, fix a title or date, merge a duplicate, add
+              something we missed, or put them in the order you want fans to see.
             </p>
           </div>
 
@@ -209,16 +235,39 @@ export function ArtistReleasesPage() {
                 />
               )}
 
-              {releases.length === 0 ? (
+              {ordered.length > 1 && (
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <p className="text-xs text-text-muted">
+                    Fans see your releases in this order. Use the arrows to arrange them — anything
+                    catalogued later is added to the end.
+                  </p>
+                  {hasCustomOrder && (
+                    <button
+                      onClick={resetOrder}
+                      disabled={actionLoading === 'resetOrder'}
+                      className="text-xs text-text-muted hover:text-text-primary transition-colors disabled:opacity-50"
+                    >
+                      {actionLoading === 'resetOrder' ? 'Resetting...' : 'Reset to newest first'}
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {ordered.length === 0 ? (
                 <p className="text-text-muted text-sm">No releases catalogued yet.</p>
               ) : (
                 <div className="space-y-3">
-                  {releases.map(release => (
+                  {ordered.map((release, index) => (
                     <ReleaseCard
                       key={release.id}
                       release={release}
                       editing={editingId === release.id}
                       actionLoading={actionLoading}
+                      showReorder={ordered.length > 1}
+                      canMoveUp={index > 0}
+                      canMoveDown={index < ordered.length - 1}
+                      onMoveUp={() => moveRelease(index, -1)}
+                      onMoveDown={() => moveRelease(index, 1)}
                       onToggleEdit={() => setEditingId(editingId === release.id ? null : release.id)}
                       onHide={() =>
                         runAction(`hide-${release.id}`, {
@@ -241,6 +290,28 @@ export function ArtistReleasesPage() {
                       }
                     />
                   ))}
+                </div>
+              )}
+
+              {/* Sticky, because a rearranged release can be a long scroll away from the top of
+                  a real catalogue — and an unsaved order that looks saved is the whole failure
+                  mode worth designing out here. */}
+              {pendingOrder && (
+                <div className="sticky bottom-4 flex flex-wrap items-center gap-3 p-3 rounded-xl bg-surface border border-border shadow-lg">
+                  <span className="text-sm text-text-primary">Your new order isn't saved yet.</span>
+                  <button
+                    onClick={saveOrder}
+                    disabled={actionLoading === 'reorder'}
+                    className="px-3 py-1.5 rounded-lg bg-green-600 text-white text-xs font-medium hover:bg-green-500 transition-colors disabled:opacity-50"
+                  >
+                    {actionLoading === 'reorder' ? 'Saving...' : 'Save order'}
+                  </button>
+                  <button
+                    onClick={() => setPendingOrder(null)}
+                    className="px-3 py-1.5 rounded-lg bg-bg-secondary border border-border text-text-primary text-xs font-medium hover:bg-bg-hover transition-colors"
+                  >
+                    Discard
+                  </button>
                 </div>
               )}
             </>
@@ -442,6 +513,11 @@ function ReleaseCard({
   release,
   editing,
   actionLoading,
+  showReorder,
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown,
   onToggleEdit,
   onHide,
   onDismiss,
@@ -452,6 +528,11 @@ function ReleaseCard({
   release: OwnerRelease;
   editing: boolean;
   actionLoading: string | null;
+  showReorder: boolean;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
   onToggleEdit: () => void;
   onHide: () => void;
   onDismiss: () => void;
@@ -467,6 +548,31 @@ function ReleaseCard({
   return (
     <div className={`p-4 rounded-xl bg-surface border border-border space-y-3 ${release.isHidden ? 'opacity-60' : ''}`}>
       <div className="flex items-start gap-3">
+        {/* Same control as the platform-link editor on /artist-edit/:slug — one arrangement
+            gesture across the two lists an artist curates. */}
+        {showReorder && (
+          <div className="flex flex-col gap-0.5 pt-1 shrink-0">
+            <button
+              onClick={onMoveUp}
+              disabled={!canMoveUp}
+              aria-label={`Move ${release.title} up`}
+              title="Move up"
+              className="text-text-muted hover:text-text-primary disabled:opacity-20 text-xs leading-none"
+            >
+              ▲
+            </button>
+            <button
+              onClick={onMoveDown}
+              disabled={!canMoveDown}
+              aria-label={`Move ${release.title} down`}
+              title="Move down"
+              className="text-text-muted hover:text-text-primary disabled:opacity-20 text-xs leading-none"
+            >
+              ▼
+            </button>
+          </div>
+        )}
+
         {release.artworkUrl ? (
           <img
             src={release.artworkUrl}

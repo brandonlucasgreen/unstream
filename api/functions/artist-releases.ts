@@ -2,8 +2,8 @@
 //
 // The artist-facing half of release curation (spec §11): review what ingest catalogued, hide
 // what's wrong, fix a title/date/artwork, merge a release the tier-3 dedup pass flagged as a
-// possible duplicate (or one it didn't), add a platform link that's missing, or add a release
-// ingest never found at all.
+// possible duplicate (or one it didn't), add a platform link that's missing, add a release
+// ingest never found at all, or arrange the catalogue in the order fans should see it.
 //
 // Ownership is the security boundary here, not an RLS policy — `releases`/`release_sources`
 // have no auth.uid()-keyed write policy (see the `releases` migration's own comment), so every
@@ -21,6 +21,7 @@ import {
   createArtistRelease,
   dismissReleaseReview,
   mergeReleases,
+  setReleaseDisplayOrder,
   getCatalogState,
   clearCatalogCooldown,
   clearReleaseDetailCooldown,
@@ -35,6 +36,13 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 
 /** Longest title we'll store. Matches the slice in `updateArtistReleaseFields`. */
 const MAX_TITLE_LENGTH = 200;
+
+/**
+ * Most releases one `reorder` may arrange. The editor sends every release it knows about, so
+ * this is a bound on the array handed to Postgres, not a product limit: the largest catalogue
+ * measured so far is 33.
+ */
+const MAX_ORDERED_RELEASES = 500;
 
 /** Same rule as artist-profile.ts's link validation: only a protocol check, no domain allowlist. */
 function isHttpUrl(url: string): boolean {
@@ -171,8 +179,19 @@ export async function handler(event: {
 
   let body: {
     slug?: string;
-    action?: 'hide' | 'unhide' | 'dismiss' | 'merge' | 'update' | 'addLink' | 'create' | 'catalog';
+    action?:
+      | 'hide'
+      | 'unhide'
+      | 'dismiss'
+      | 'merge'
+      | 'update'
+      | 'addLink'
+      | 'create'
+      | 'catalog'
+      | 'reorder'
+      | 'resetOrder';
     releaseId?: string;
+    releaseIds?: unknown;
     keepId?: string;
     dropId?: string;
     title?: string;
@@ -200,7 +219,18 @@ export async function handler(event: {
   }
   const artistId = owned.artistId;
 
-  const VALID_ACTIONS = ['hide', 'unhide', 'dismiss', 'merge', 'update', 'addLink', 'create', 'catalog'];
+  const VALID_ACTIONS = [
+    'hide',
+    'unhide',
+    'dismiss',
+    'merge',
+    'update',
+    'addLink',
+    'create',
+    'catalog',
+    'reorder',
+    'resetOrder',
+  ];
   if (!action || !VALID_ACTIONS.includes(action)) {
     return {
       statusCode: 400,
@@ -299,6 +329,28 @@ export async function handler(event: {
       }
     }
     ok = await updateArtistReleaseFields(artistId, releaseId, { title, releaseDate, artworkUrl });
+  } else if (action === 'reorder' || action === 'resetOrder') {
+    // Two actions, one write: `resetOrder` is an empty arrangement, which the RPC reads as
+    // "clear every position and go back to newest first".
+    const releaseIds: unknown = action === 'resetOrder' ? [] : body.releaseIds;
+    if (!Array.isArray(releaseIds) || releaseIds.some(id => typeof id !== 'string' || !UUID_REGEX.test(id))) {
+      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'releaseIds must be an array of UUIDs' }) };
+    }
+    if (releaseIds.length > MAX_ORDERED_RELEASES) {
+      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: `releaseIds must contain ${MAX_ORDERED_RELEASES} ids or fewer` }) };
+    }
+    // A repeated id means the editor sent an arrangement that isn't one — the last occurrence
+    // would silently win and a release the artist can see would vanish from their order.
+    if (new Set(releaseIds).size !== releaseIds.length) {
+      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'releaseIds must not repeat' }) };
+    }
+    // Same rule as hide/merge: owning the profile says nothing about who owns the ids in the
+    // body. `verifyReleaseOwnership` reports false for an empty list, so only ask when there's
+    // something to check — a reset touches nothing but this artist's own rows.
+    if (releaseIds.length > 0 && !(await verifyReleaseOwnership(artistId, releaseIds as string[]))) {
+      return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not your release' }) };
+    }
+    ok = await setReleaseDisplayOrder(artistId, releaseIds as string[]);
   } else if (action === 'addLink') {
     const { releaseId, platform, url } = body;
     if (!releaseId || !UUID_REGEX.test(releaseId)) {
