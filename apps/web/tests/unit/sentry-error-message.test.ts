@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Sentry, sentryErrorMessage, isStaleBuildAssetError, isInjectedNativeBridgeError } from '../../src/services/sentry';
+import { Sentry, sentryErrorMessage, isStaleBuildAssetError, isInjectedNativeBridgeError, isDroppedRequestError } from '../../src/services/sentry';
 
 /**
  * Every filter in `beforeSend` matches against the string this builds, so it has to
@@ -41,8 +41,7 @@ describe('sentryErrorMessage', () => {
     const message = sentryErrorMessage(eventWith(), {});
     expect(isStaleBuildAssetError(message)).toBe(false);
     expect(isInjectedNativeBridgeError(message)).toBe(false);
-    expect(message.includes('Network Error')).toBe(false);
-    expect(message.includes('AbortError')).toBe(false);
+    expect(isDroppedRequestError(message)).toBe(false);
   });
 });
 
@@ -56,8 +55,9 @@ describe('the pre-existing filters, against an event-only message', () => {
   });
 
   it('still spots the benign network errors', () => {
-    expect(sentryErrorMessage(eventWith('Network Error'), {}).includes('Network Error')).toBe(true);
-    expect(sentryErrorMessage(eventWith('AbortError: Fetch is aborted'), {}).includes('AbortError')).toBe(true);
+    expect(isDroppedRequestError(sentryErrorMessage(eventWith('Network Error'), {}))).toBe(true);
+    expect(isDroppedRequestError(sentryErrorMessage(eventWith('AbortError: Fetch is aborted'), {}))).toBe(true);
+    expect(isDroppedRequestError(sentryErrorMessage(eventWith('TypeError: Load failed'), {}))).toBe(true);
   });
 
   it('still catches the injected bridge error in its reported shape', () => {
