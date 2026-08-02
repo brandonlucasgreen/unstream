@@ -62,6 +62,53 @@ export function isInjectedNativeBridgeError(message: string): boolean {
 }
 
 /**
+ * The exact wording each engine uses when a `fetch()` never produced a response.
+ *
+ * These are whole messages, not fragments — see `isDroppedRequestError` for why
+ * that matters.
+ */
+const DROPPED_REQUEST_MESSAGES = [
+  // Safari / WebKit — the wording behind the DashboardPage reports
+  'Load failed',
+  // Chrome / Edge
+  'Failed to fetch',
+  // Firefox
+  'NetworkError when attempting to fetch resource.',
+]
+
+/**
+ * True when an error is a request that never reached the server, or whose answer
+ * never got back.
+ *
+ * The user went through a tunnel, closed the tab mid-request, or (on iOS Safari,
+ * which is where most of these come from) backgrounded the page while a fetch was
+ * still open and WebKit tore the connection down. Every caller already handles it:
+ * DashboardPage, for one, catches it and shows "Failed to load your profiles.
+ * Please try again." So the browser is telling us about someone's wifi, and there
+ * is no code change that would make it stop.
+ *
+ * Matched with `endsWith` rather than `includes`, because the browser's phrasing
+ * is a substring of messages we throw ourselves for a response that *did* arrive
+ * with an error status — `Failed to fetch (500)`, `Failed to fetch embed`,
+ * `Failed to fetch sharing status`. Those mean our API is broken and have to keep
+ * reporting; only the bare browser message is dropped.
+ *
+ * A real outage — the API unreachable for everyone — is not what this hides: that
+ * shows up in uptime and Netlify monitoring, where it isn't buried under one event
+ * per flaky connection.
+ */
+export function isDroppedRequestError(message: string): boolean {
+  const trimmed = message.trim()
+  return (
+    DROPPED_REQUEST_MESSAGES.some(wording => trimmed.endsWith(wording)) ||
+    // A request we cancelled ourselves, and axios-era wording kept from the
+    // filter this replaced. Neither phrase appears in an error we throw.
+    trimmed.includes('AbortError') ||
+    trimmed.includes('Network Error')
+  )
+}
+
+/**
  * The text every filter below is matched against.
  *
  * Both sources are read because either one alone can be empty. Errors captured by
@@ -117,7 +164,7 @@ export function initSentry(): void {
 
       const errorMessage = sentryErrorMessage(event, hint)
 
-      // Classified BEFORE the benign-error filter so a stale-build failure can
+      // Classified BEFORE the dropped-request filter so a stale-build failure can
       // never be mistaken for a transient network blip and dropped.
       if (isStaleBuildAssetError(errorMessage)) {
         event.tags = {
@@ -144,8 +191,8 @@ export function initSentry(): void {
         return null
       }
 
-      // Filter out common benign errors
-      if (errorMessage.includes('Network Error') || errorMessage.includes('AbortError')) {
+      // Somebody's connection dropped mid-request. Handled in the UI already.
+      if (isDroppedRequestError(errorMessage)) {
         return null
       }
 
