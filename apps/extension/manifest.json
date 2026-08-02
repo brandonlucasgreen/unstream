@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Unstream - Support Music Directly",
   "description": "See where your money actually goes. Unstream shows artist payout percentages and finds them on 17 platforms. Free and open source.",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
