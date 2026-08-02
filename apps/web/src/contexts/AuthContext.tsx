@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import * as Sentry from '@sentry/react';
 import { getSupabaseClient, waitForMagicLinkSession } from '../services/auth';
@@ -43,6 +43,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [savedArtistIds, setSavedArtistIds] = useState<Set<string>>(new Set());
   const [artistsLoaded, setArtistsLoaded] = useState(false);
 
+  // The auth listener below is installed once, so it cannot read `session` state:
+  // that closure is pinned to the initial null forever, which is why the
+  // "session ended unexpectedly" report has never fired a single time. A ref
+  // holds the live value instead.
+  const sessionRef = useRef<Session | null>(null);
+  // Set while our own signOut() runs, so a deliberate sign-out isn't reported as
+  // a session dropping out from under the user.
+  const signingOutRef = useRef(false);
+
   useEffect(() => {
     const supabase = getSupabaseClient();
     if (!supabase) {
@@ -59,6 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Clear the hash from the URL
         window.history.replaceState(null, '', window.location.pathname + window.location.search);
         if (!cancelled && magicSession) {
+          sessionRef.current = magicSession;
           setSession(magicSession);
           setUser(magicSession.user);
         }
@@ -66,6 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Check for existing session — fast, no domain data
         const { data } = await supabase!.auth.getSession();
         if (!cancelled && data.session) {
+          sessionRef.current = data.session;
           setSession(data.session);
           setUser(data.session.user);
         }
@@ -77,15 +88,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     init();
 
     // Listen for auth state changes (sign in, sign out, token refresh)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       if (!cancelled) {
-        if (newSession === null && session !== null) {
+        const previous = sessionRef.current;
+        if (newSession === null && previous !== null && !signingOutRef.current) {
           Sentry.captureMessage('Auth session ended unexpectedly', {
-            level: 'info',
-            extra: { previousUserId: session?.user?.id, previousExpiry: session?.expires_at },
-            tags: { context: 'auth.session' },
+            level: 'warning',
+            extra: {
+              previousUserId: previous.user?.id,
+              previousExpiry: previous.expires_at,
+              // Whether the token was already past its expiry when it dropped
+              // separates an ordinary expiry from a session vanishing early.
+              expiredBeforeDrop: previous.expires_at
+                ? previous.expires_at * 1000 < Date.now()
+                : null,
+            },
+            tags: { context: 'auth.session', auth_event: event },
           });
         }
+        sessionRef.current = newSession;
         setSession(newSession);
         setUser(newSession?.user ?? null);
         // Clear saved artists on sign out
@@ -105,8 +126,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const handleSignOut = useCallback(async () => {
     const supabase = getSupabaseClient();
-    if (supabase) {
-      await supabase.auth.signOut();
+    signingOutRef.current = true;
+    try {
+      if (supabase) {
+        await supabase.auth.signOut();
+      }
+    } finally {
+      signingOutRef.current = false;
     }
     setSavedArtists([]);
     setSavedArtistIds(new Set());

@@ -2053,6 +2053,21 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       if (shouldCapture) {
         Sentry.captureMessage('Search returned 0 results', {
           level: 'info',
+          // The query has to be a TAG, not just an extra. Every zero-result event
+          // shares one message, so Sentry folds them into a single issue where
+          // `extra` is only readable one event at a time — you can't see which
+          // searches came back empty without paging through them. Tags get an
+          // aggregated value distribution on the issue page and are searchable
+          // (`search_query:radiohead`), which is the whole point of this signal.
+          // Both values are already length-capped by validateQuery (200 chars),
+          // which is also Sentry's tag-value limit.
+          tags: {
+            search_query: normalizedQuery,
+            // 'exact' means a playback-detection client (extension, Mac app) sent a
+            // real artist name and we have no coverage; 'fuzzy' means a human typed
+            // it and it may just be a typo. Very different follow-ups.
+            search_mode: mode,
+          },
           extra: {
             query,
             normalizedQuery,

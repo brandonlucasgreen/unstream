@@ -10,6 +10,34 @@ import * as Sentry from '@sentry/react'
 
 export { Sentry }
 
+/**
+ * True when an error is a page asking for a JS chunk its deploy no longer has.
+ *
+ * This is what a deploy does to an already-open tab. Pages are lazy-loaded
+ * (`lazy(() => import('./pages/LoginPage.tsx'))` and friends in main.tsx), so the
+ * chunk filename carries a content hash. A tab still running build N clicks a link,
+ * requests `/assets/LoginPage-<oldHash>.js`, and build N+1 doesn't have that file.
+ * Netlify's SPA catch-all then answers `200 text/html` instead of 404, so the
+ * browser rejects it as a module and the import promise rejects — which React
+ * surfaces through the error boundary as "Unstream hit an unexpected error".
+ *
+ * Each engine words it differently, hence the list.
+ */
+export function isStaleBuildAssetError(message: string): boolean {
+  return (
+    // Chrome / Edge
+    message.includes('Failed to fetch dynamically imported module') ||
+    // Firefox
+    message.includes('error loading dynamically imported module') ||
+    // Safari
+    message.includes('Importing a module script failed') ||
+    // Any engine, when the SPA catch-all serves index.html in place of the chunk
+    message.includes('Expected a JavaScript module script') ||
+    // Vite's preload helper, when a stylesheet for a route chunk is missing
+    message.includes('Unable to preload CSS for')
+  )
+}
+
 export function initSentry(): void {
   const dsn = import.meta.env.VITE_SENTRY_DSN
   const environment = import.meta.env.VITE_SENTRY_ENV || import.meta.env.MODE
@@ -48,8 +76,31 @@ export function initSentry(): void {
         return null
       }
 
-      // Filter out common benign errors
       const errorMessage = hint?.originalException?.toString() || ''
+
+      // Classified BEFORE the benign-error filter so a stale-build failure can
+      // never be mistaken for a transient network blip and dropped.
+      if (isStaleBuildAssetError(errorMessage)) {
+        event.tags = {
+          ...event.tags,
+          error_type: 'stale-build-asset',
+          // Which route the user was trying to reach — the reason this shows up
+          // as a login bug is that /login is one of the lazy-loaded routes.
+          route: window.location.pathname,
+        }
+        event.extra = {
+          ...event.extra,
+          runningRelease: version,
+          hasServiceWorker: !!navigator.serviceWorker?.controller,
+        }
+        // One issue for all of them, titled for what it actually is. Left to
+        // group itself, every browser's wording becomes a separate issue and
+        // none of the titles mention a deploy.
+        event.fingerprint = ['stale-build-asset']
+        return event
+      }
+
+      // Filter out common benign errors
       if (errorMessage.includes('Network Error') || errorMessage.includes('AbortError')) {
         return null
       }

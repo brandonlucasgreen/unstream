@@ -1,9 +1,30 @@
 // Supabase client-side auth for artist claim flow.
 // Uses the anon key (safe to expose) — RLS policies control access.
 
-import { createClient, type SupabaseClient, type Session } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient, type Session, type AuthError } from '@supabase/supabase-js';
+import * as Sentry from '@sentry/react';
 
 let client: SupabaseClient | null = null;
+
+/**
+ * Report an auth failure that Supabase *returned* rather than threw.
+ *
+ * Every function here hands back `{ error }`, so callers surface the message in
+ * the UI and their try/catch never runs — which meant no failed sign-in has ever
+ * reached Sentry. Wrong-password is excluded deliberately: it's the user's typo,
+ * it happens constantly, and burying the real failures under it defeats the point.
+ * What's left is the set worth waking up to — rate limits, disabled providers,
+ * Supabase 5xx, and network failures during sign-in.
+ */
+function reportAuthFailure(operation: string, error: AuthError): void {
+  if (error.message === 'Invalid login credentials') return;
+
+  Sentry.captureMessage(`Auth failed: ${operation}`, {
+    level: 'warning',
+    tags: { context: 'auth.service', auth_operation: operation, auth_status: String(error.status ?? 'none') },
+    extra: { errorMessage: error.message, errorCode: error.code, errorName: error.name },
+  });
+}
 
 export function getSupabaseClient(): SupabaseClient | null {
   if (client) return client;
@@ -26,6 +47,7 @@ export async function signInWithMagicLink(email: string, redirectTo: string): Pr
     options: { emailRedirectTo: redirectTo },
   });
 
+  if (error) reportAuthFailure('magicLink', error);
   return { error: error?.message ?? null };
 }
 
@@ -80,6 +102,7 @@ export async function signInWithPassword(email: string, password: string): Promi
   if (!supabase) return { error: 'Auth not configured' };
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) reportAuthFailure('passwordLogin', error);
   return { error: error?.message ?? null };
 }
 
@@ -88,6 +111,7 @@ export async function resetPasswordForEmail(email: string, redirectTo: string): 
   if (!supabase) return { error: 'Auth not configured' };
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+  if (error) reportAuthFailure('resetPassword', error);
   return { error: error?.message ?? null };
 }
 
