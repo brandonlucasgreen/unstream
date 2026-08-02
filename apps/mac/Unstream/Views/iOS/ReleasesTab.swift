@@ -99,7 +99,7 @@ private struct ReleaseRow: View {
                     Text(release.releaseName)
                         .font(.subheadline)
                         .foregroundColor(.primary)
-                    Text("on \(release.platform.capitalized)")
+                    Text("on \(release.displayPlatform)")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }

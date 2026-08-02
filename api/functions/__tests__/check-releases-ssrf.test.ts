@@ -14,6 +14,9 @@ const mocks = vi.hoisted(() => ({
   checkRateLimit: vi.fn(),
   getClientIp: vi.fn(() => '1.2.3.4'),
   isStoredArtistLink: vi.fn(),
+  // Null by default: "this artist has never been catalogued", which is what sends every test
+  // in this file down the live-scrape path the SSRF rules govern.
+  getReleasesForAlerts: vi.fn(async () => null),
   fetch: vi.fn(),
   lookup: vi.fn(),
 }));
@@ -32,6 +35,7 @@ vi.mock('../ratelimit', () => ({
 
 vi.mock('../db', () => ({
   isStoredArtistLink: mocks.isStoredArtistLink,
+  getReleasesForAlerts: mocks.getReleasesForAlerts,
 }));
 
 import { handler } from '../check-releases';
@@ -63,6 +67,10 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.checkRateLimit.mockResolvedValue({ limited: false });
   mocks.isStoredArtistLink.mockResolvedValue(false);
+  // No catalog for this artist, so every test here exercises the live-scrape path whose SSRF
+  // behaviour this file exists to pin. Set explicitly rather than relying on clearAllMocks
+  // leaving the hoisted default in place.
+  mocks.getReleasesForAlerts.mockResolvedValue(null);
   // Default: everything resolves to an ordinary public address.
   mocks.lookup.mockResolvedValue([{ address: '93.184.216.34', family: 4 }]);
   vi.stubGlobal('fetch', mocks.fetch);
@@ -485,7 +493,13 @@ describe('rate limiting', () => {
 
 describe('backward compatibility with shipped clients', () => {
   // The Mac app (3.3.x) and extension (2.5.x) are already released against this contract.
-  it('keeps the response shape', async () => {
+  //
+  // This used to assert the exact key set, which would forbid ever adding a field. That is
+  // stricter than the actual constraint: the Mac client decodes into a Swift `Codable` struct
+  // and the extension reads named properties off the parsed object, so both ignore keys they
+  // don't know. What they cannot survive is a *removed* or *retyped* field — so that is what
+  // is pinned here, on both response paths.
+  it('keeps the legacy fields a shipped client decodes', async () => {
     mocks.fetch.mockResolvedValue(res(200, { body: '<html></html>' }));
 
     const r = await post({
@@ -494,8 +508,49 @@ describe('backward compatibility with shipped clients', () => {
     });
 
     const parsed = JSON.parse(r.body);
-    expect(Object.keys(parsed).sort()).toEqual(['artistName', 'release']);
-    expect(parsed.artistName).toBe('Someone');
+    expect(parsed).toHaveProperty('artistName', 'Someone');
+    expect(parsed).toHaveProperty('release');
+    expect(parsed.release === null || typeof parsed.release === 'object').toBe(true);
+  });
+
+  it('keeps the legacy release fields when the catalog answers', async () => {
+    mocks.getReleasesForAlerts.mockResolvedValue({
+      artistSlug: 'someone',
+      releases: [
+        {
+          slug: 'a-record',
+          title: 'A Record',
+          releaseDate: '2026-07-20',
+          datePrecision: 'day',
+          status: 'released',
+          artworkUrl: null,
+          sources: [
+            {
+              platform: 'bandcamp',
+              url: 'https://someone.bandcamp.com/album/a-record',
+              offers: [{ price: 8, currency: 'USD', availability: 'available' }],
+            },
+          ],
+        },
+      ],
+    });
+
+    const parsed = JSON.parse((await post({
+      artistName: 'Someone',
+      platforms: { bandcamp: 'https://someone.bandcamp.com' },
+    })).body);
+
+    // Exactly the four keys ReleaseCheckAPI.swift's APIRelease declares, all non-optional there.
+    expect(parsed.release).toMatchObject({
+      releaseName: 'A Record',
+      releaseDate: '2026-07-20',
+      platform: 'bandcamp',
+    });
+    expect(typeof parsed.release.releaseUrl).toBe('string');
+    // The Swift client parses this with a yyyy-MM-dd formatter and throws otherwise.
+    expect(parsed.release.releaseDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    // Not fetched at all: the catalog answered.
+    expect(mocks.fetch).not.toHaveBeenCalled();
   });
 
   it('still rejects a request with no platform URLs', async () => {

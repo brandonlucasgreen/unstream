@@ -55,17 +55,25 @@ const CSS = `
   .site-header { padding: 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
   .site-header .brand { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 700; color: var(--text); text-decoration: none; flex-shrink: 0; }
   .site-header .brand:hover { opacity: 0.8; }
-  .site-header .header-search { display: flex; gap: 8px; flex: 1; max-width: 420px; margin: 0 auto; }
-  .site-header .header-search input { flex: 1; min-width: 0; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 14px; color: var(--text); font-family: inherit; }
+  /* Matches the React HeaderSearch this page can't render: a magnifying glass inside the
+     field and no submit button. Enter submits the form, which is what the icon implies and
+     what every other page in the app does — a separate "Search" button only appeared here
+     because plain SSR made it the obvious way to submit. */
+  .site-header .header-search { position: relative; flex: 1; max-width: 420px; margin: 0 auto; }
+  .site-header .header-search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--muted); pointer-events: none; }
+  .site-header .header-search input { width: 100%; min-width: 0; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px 8px 36px; font-size: 14px; color: var(--text); font-family: inherit; }
+  .site-header .header-search input::placeholder { color: var(--muted); }
   .site-header .header-search input:focus { outline: none; border-color: var(--accent); }
-  .site-header .header-search button { border: 0; border-radius: 8px; padding: 8px 14px; background: var(--accent); color: #fff; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; }
   @media (max-width: 640px) { .site-header .header-search { display: none; } }
   /* Unlike artist-page-static, this page has no SPA counterpart to hand real browsers off to
      (see the note at the top of this file) — every visitor sees this exact header, so it's the
      only place a signed-out fan following a release alert can reach the login page. */
   .site-header .nav-right { display: flex; align-items: center; flex-shrink: 0; }
-  .site-header .nav-link { color: var(--muted); text-decoration: none; font-size: 14px; }
-  .site-header .nav-link:hover { color: var(--text); }
+  /* A filled accent button, matching the React header's Login. It was a muted text link here,
+     which read as secondary navigation rather than the primary action for a signed-out fan
+     arriving from a release alert. */
+  .site-header .nav-button { padding: 8px 16px; border-radius: 8px; background: var(--accent); color: #fff; text-decoration: none; font-size: 14px; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  .site-header .nav-button:hover { opacity: 0.9; }
 
   .release-head { display: flex; gap: 20px; align-items: flex-start; }
   .release-art { width: 160px; height: 160px; flex-shrink: 0; border-radius: 12px; border: 1px solid var(--border); background: var(--bg2); object-fit: cover; }
@@ -318,11 +326,11 @@ export default async function handler(request: Request, context: Context) {
          HeaderSearch. Submitting lands on /?q=… where the SPA renders results. Never point
          this at /search — that URL belongs to the noscript-search edge function. -->
     <form class="header-search" action="/" method="get" role="search">
+      <svg class="header-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
       <input type="text" name="q" placeholder="Search artists..." aria-label="Search artists" enterkeyhint="search">
-      <button type="submit">Search</button>
     </form>
     <div class="nav-right">
-      <a href="/login" class="nav-link">Login</a>
+      <a href="/login" class="nav-button">Login</a>
     </div>
   </header>
 

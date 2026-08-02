@@ -27,6 +27,11 @@
 # path segments: exactly two under /a/. Netlify's `path` globs can't express that.
 [[edge_functions]]
   pattern = "^/a/[^/]+/[^/]+/?$"
+  # /a/{artist}/releases.xml is two segments too, so without this the release-page renderer
+  # would try to look up a release whose slug is "releases.xml". Feeds are served by a Netlify
+  # function (see the /a/*/releases.* redirect below) — edge functions run *before* redirects,
+  # so the exclusion has to be declared here or the redirect is never reached.
+  excludedPattern = "^/a/[^/]+/releases\\.(ics|xml)$"
   function = "release-page"
 
 [[edge_functions]]
@@ -35,6 +40,9 @@
 
 [[edge_functions]]
   path = "/a/*"
+  # Same exclusion, for the same reason: excluding the feed path from release-page above only
+  # drops it through to this entry, whose glob matches it just as happily.
+  excludedPattern = "^/a/[^/]+/releases\\.(ics|xml)$"
   function = "artist-page-static"
 
 [[edge_functions]]
@@ -47,6 +55,8 @@
 
 [[edge_functions]]
   path = "/u/*"
+  # /u/{handle}/releases.ics and .xml are feeds, not the shared-list HTML page.
+  excludedPattern = "^/u/[^/]+/releases\\.(ics|xml)$"
   function = "u-handle"
 
 [[redirects]]
@@ -233,6 +243,42 @@
 [[redirects]]
   from = "/api/v1/keys"
   to = "/.netlify/functions/api-key-generate"
+  status = 200
+
+# Release feeds. All three shapes hit one function, which reads the route off the path.
+#
+# These MUST stay above the SPA catch-all: redirects are first-match-wins, and `/*` would
+# otherwise hand a calendar client an HTML page. The two public ones also need the
+# `excludedPattern` entries on the /a/* and /u/* edge functions above, since edge functions run
+# before redirects.
+[[redirects]]
+  from = "/feed/f/*"
+  to = "/.netlify/functions/feed-releases"
+  status = 200
+
+[[redirects]]
+  from = "/u/:handle/releases.ics"
+  to = "/.netlify/functions/feed-releases"
+  status = 200
+
+[[redirects]]
+  from = "/u/:handle/releases.xml"
+  to = "/.netlify/functions/feed-releases"
+  status = 200
+
+[[redirects]]
+  from = "/a/:artist/releases.xml"
+  to = "/.netlify/functions/feed-releases"
+  status = 200
+
+[[redirects]]
+  from = "/a/:artist/releases.ics"
+  to = "/.netlify/functions/feed-releases"
+  status = 200
+
+[[redirects]]
+  from = "/api/me/feed-token"
+  to = "/.netlify/functions/me-feed-token"
   status = 200
 
 [[redirects]]

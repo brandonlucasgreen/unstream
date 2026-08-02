@@ -488,12 +488,25 @@ export function parseBandcampReleaseDetail(html: string): BandcampReleaseDetail 
 
   const datePublished = typeof graph.datePublished === 'string' ? graph.datePublished : null;
 
-  // Albums list every package (digital, vinyl, CD, cassette, merch) as an `albumRelease`
-  // entry, each with its own `offers`. Standalone track pages are `MusicRecording` and carry
-  // a date but no offers at all — their price lives only in the tralbum blob, and without a
-  // currency beside it. A price with a guessed currency is worse than no price, so a single
-  // ingests its date and no offer.
-  const releases = Array.isArray(graph.albumRelease) ? graph.albumRelease : [];
+  // Albums (`MusicAlbum`) list every package — digital, vinyl, CD, cassette, merch — as a
+  // top-level `albumRelease` entry with its own `offers`.
+  //
+  // Standalone track pages (`MusicRecording`) have no top-level `albumRelease`; theirs lives at
+  // `inAlbum.albumRelease`. This used to be documented here as "track pages carry a date but no
+  // offers at all", which was simply **wrong** — verified against live pages, a track's own
+  // purchase is published in the JSON-LD with a real price *and* currency. Believing the old
+  // note cost the catalogue a price on 183 of 777 Bandcamp sources (24%), every one of them a
+  // `/track/` URL, which surfaced as "No formats listed on this page".
+  const trackId = additionalProperty(graph.additionalProperty, 'track_id');
+  const isTrackPage = !Array.isArray(graph.albumRelease);
+  const inAlbum = isRecord(graph.inAlbum) ? graph.inAlbum : null;
+
+  const releases = Array.isArray(graph.albumRelease)
+    ? graph.albumRelease
+    : Array.isArray(inAlbum?.albumRelease)
+      ? inAlbum.albumRelease
+      : [];
+
   const offers: BandcampDetailOffer[] = [];
 
   for (const entry of releases) {
@@ -501,6 +514,14 @@ export function parseBandcampReleaseDetail(html: string): BandcampReleaseDetail 
     if (!isThisReleasesItem(entry)) continue;
     for (const offer of asArray(entry.offers)) {
       if (!isRecord(offer)) continue;
+      // On a track page the surrounding album's *physical* packages are listed too, and they
+      // are not things you can buy of this track: a single would otherwise be published as
+      // available on vinyl for $30, when that $30 buys the whole album. Bandcamp distinguishes
+      // them in the offer URL — the track's own download is `#t{track_id}-buy`, every album
+      // package is `#p{package_id}-buy` — so that is what's matched. Same class of problem as
+      // `isThisReleasesItem` below, one level further in.
+      if (isTrackPage && !isThisTracksOffer(offer, trackId)) continue;
+
       offers.push({
         format: stripSchemaPrefix(entry.musicReleaseFormat),
         typeName: additionalProperty(entry.additionalProperty, 'type_name'),
@@ -512,6 +533,21 @@ export function parseBandcampReleaseDetail(html: string): BandcampReleaseDetail 
   }
 
   return { datePublished, offers };
+}
+
+/**
+ * On a `MusicRecording` page, is this offer for the track itself rather than for the album it
+ * belongs to?
+ *
+ * Matched on the offer URL's `#t{track_id}-buy` fragment. Refuses when the track id is unknown,
+ * because without it there is nothing to tell the track's own download apart from the album's —
+ * and publishing an album's vinyl price against a single track is a wrong number about what
+ * someone is buying, which is worse than showing no price at all.
+ */
+function isThisTracksOffer(offer: Record<string, unknown>, trackId: string | null): boolean {
+  if (!trackId) return false;
+  const url = typeof offer.url === 'string' ? offer.url : '';
+  return url.includes(`#t${trackId}-buy`);
 }
 
 /** `item_type` values that are something other than this release: see `isThisReleasesItem`. */

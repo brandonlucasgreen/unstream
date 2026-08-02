@@ -16,6 +16,7 @@ import {
   getArtistForCatalog,
   persistDiscogsReleases,
   persistFaircampReleases,
+  persistJamcoopReleases,
   persistMusicBrainzEnrichment,
   persistReleaseDetail,
   persistReleases,
@@ -29,6 +30,7 @@ import { safeFetch, safeHostname } from './safe-fetch';
 import {
   bandcampMusicUrl,
   buildFaircampRelease,
+  buildJamcoopRelease,
   findDiscoveredReleaseLinks,
   ingestBandcampDetail,
   ingestBandcampGrid,
@@ -37,9 +39,13 @@ import {
   ingestFaircampHomeLinks,
   ingestFaircampPurchasePage,
   ingestFaircampReleasePage,
+  ingestJamcoopAlbumPage,
+  ingestJamcoopArtistPage,
   ingestMusicBrainzReleaseGroups,
+  jamcoopArtistUrl,
   type DiscogsArtistReleaseEntry,
   type DiscogsReleaseDetailRaw,
+  type IngestedOffer,
   type MusicBrainzReleaseGroupRaw,
 } from './release-ingest';
 import { isCatalogEnabled } from './request-catalog';
@@ -157,6 +163,30 @@ interface FaircampBudget {
   deadline: number;
 }
 
+// --- Jam.coop budgets ----------------------------------------------------------
+//
+// One small co-op's own servers, so the pacing is deliberately gentler than the ~1/sec used
+// against Bandcamp. Jam.coop's robots.txt sets no crawl-delay at all — this is courtesy, not
+// compliance, and it costs nothing because the catalogues are small (one album is typical;
+// the largest seen was a handful).
+//
+// Cheaper per release than any other source: title, artwork, date, price, currency and format
+// all arrive in the single album-page fetch, so a release costs one request rather than
+// Faircamp's two or Bandcamp's grid-plus-detail.
+
+const DELAY_BETWEEN_JAMCOOP_FETCHES_MS = 1_500;
+
+/** Bounds one artist with an unusually large Jam.coop catalogue. */
+const MAX_JAMCOOP_RELEASES_PER_ARTIST = 20;
+
+/** Invocation-wide, artist pages and album pages combined. */
+const MAX_JAMCOOP_FETCHES_PER_RUN = 60;
+
+interface JamcoopBudget {
+  fetchesLeft: number;
+  deadline: number;
+}
+
 function isAuthorized(header: string | undefined): boolean {
   // Reuses the secret this repo already has for internal function-to-function calls
   // (resolve-url, search-sources, and both v1 wrappers). A second near-identically-named
@@ -227,6 +257,10 @@ export async function handler(event: {
     fetchesLeft: MAX_FAIRCAMP_FETCHES_PER_RUN,
     deadline: Date.now() + ENRICHMENT_CUTOFF_MS,
   };
+  const jamcoopBudget: JamcoopBudget = {
+    fetchesLeft: MAX_JAMCOOP_FETCHES_PER_RUN,
+    deadline: Date.now() + ENRICHMENT_CUTOFF_MS,
+  };
   const enrichmentDeadline = Date.now() + ENRICHMENT_CUTOFF_MS;
 
   for (const [index, artistId] of artistIds.entries()) {
@@ -240,7 +274,14 @@ export async function handler(event: {
     if (index > 0) await sleep(DELAY_BETWEEN_ARTISTS_MS);
 
     try {
-      const found = await catalogArtist(artistId, budget, discogsBudget, faircampBudget, enrichmentDeadline);
+      const found = await catalogArtist(
+        artistId,
+        budget,
+        discogsBudget,
+        faircampBudget,
+        jamcoopBudget,
+        enrichmentDeadline
+      );
       if (found === null) {
         skipped++;
       } else {
@@ -272,6 +313,7 @@ async function catalogArtist(
   budget: DetailBudget,
   discogsBudget: DiscogsBudget,
   faircampBudget: FaircampBudget,
+  jamcoopBudget: JamcoopBudget,
   enrichmentDeadline: number
 ): Promise<number | null> {
   const artist = await getArtistForCatalog(artistId);
@@ -279,8 +321,8 @@ async function catalogArtist(
     await recordCatalogOutcome(artistId, { error: 'artist not found' });
     return null;
   }
-  if (!artist.bandcampUrl && !artist.discogsUrl && !artist.faircampUrl) {
-    await recordCatalogOutcome(artistId, { error: 'no bandcamp, discogs, or faircamp link stored' });
+  if (!artist.bandcampUrl && !artist.discogsUrl && !artist.faircampUrl && !artist.jamcoopUrl) {
+    await recordCatalogOutcome(artistId, { error: 'no bandcamp, discogs, faircamp, or jam.coop link stored' });
     return null;
   }
 
@@ -309,6 +351,11 @@ async function catalogArtist(
     await catalogMusicBrainz(artistId, artist.name);
     if (artist.faircampUrl) {
       totalFound += await catalogFaircamp(artistId, artist.faircampUrl, faircampBudget);
+    }
+    if (artist.jamcoopUrl) {
+      const { found, detailed } = await catalogJamcoop(artistId, artist.jamcoopUrl, jamcoopBudget);
+      totalFound += found;
+      totalDetailed += detailed;
     }
     if (artist.officialSiteUrl) {
       await catalogOfficialSite(artistId, artist.officialSiteUrl);
@@ -636,6 +683,127 @@ async function catalogFaircampPrices(
         error instanceof Error ? error.message : String(error)
       );
     }
+  }
+}
+
+/**
+ * The Jam.coop pass: fetch the artist page for its album list, then one page per album for
+ * everything else.
+ *
+ * Unlike Faircamp there is no second "prices live somewhere else" round trip — Jam.coop's album
+ * page carries the date and the price alongside the title and artwork, so one fetch produces a
+ * complete release.
+ *
+ * That single fetch is also why this pass has no 30-day `detail_checked_at` skip like Bandcamp's
+ * and Faircamp's detail passes do: the album page *is* how a release is identified at all, so
+ * there is nothing to skip to. Every run re-reads every album page. That's affordable here and
+ * nowhere else — Jam.coop catalogues are tiny (one album is typical across the platform's 231
+ * artists), the per-artist cooldown is 7 days, and the per-artist ceiling is 20 — so the worst
+ * case for one artist is 21 requests a week, against Bandcamp's grid-plus-40.
+ *
+ * Returns found/detailed separately so `releases_detailed` stays meaningful — the two fail
+ * independently here just as they do for Bandcamp (an artist page can parse perfectly while
+ * every album page is unreachable).
+ *
+ * Never throws: a Jam.coop hiccup is worth logging, not worth failing an artist whose Bandcamp
+ * pass may have already succeeded this run.
+ */
+async function catalogJamcoop(
+  artistId: string,
+  storedUrl: string,
+  budget: JamcoopBudget
+): Promise<{ found: number; detailed: number }> {
+  try {
+    // Two different questions, same as the Bandcamp pass: the allowlist answers "is this really
+    // Jam.coop" (a claimed artist can store any URL against the platform), safeFetch answers
+    // "is this safe to fetch".
+    if (!isUrlHostnameAllowed(storedUrl)) {
+      console.warn(`[catalog] stored jam.coop url not allowlisted: ${safeHostname(storedUrl)}`);
+      return { found: 0, detailed: 0 };
+    }
+
+    const artistUrl = jamcoopArtistUrl(storedUrl);
+    if (!artistUrl) {
+      console.warn(`[catalog] could not derive jam.coop artist url for artist ${artistId}`);
+      return { found: 0, detailed: 0 };
+    }
+
+    if (budget.fetchesLeft <= 0 || Date.now() > budget.deadline) return { found: 0, detailed: 0 };
+    budget.fetchesLeft--;
+
+    const response = await safeFetch(artistUrl, 10_000);
+    if (!response?.ok) return { found: 0, detailed: 0 };
+
+    const landedUrl = response.url || artistUrl;
+    const candidates = ingestJamcoopArtistPage(await response.text(), landedUrl).slice(
+      0,
+      MAX_JAMCOOP_RELEASES_PER_ARTIST
+    );
+    if (candidates.length === 0) return { found: 0, detailed: 0 };
+
+    const takenSlugs = new Set<string>();
+    const toPersist: Parameters<typeof persistJamcoopReleases>[1] = [];
+    // Offers are read now but written after the release rows exist, since an offer hangs off a
+    // `release_sources.id` that only comes into being at persist time.
+    const offersByUrl = new Map<string, IngestedOffer[]>();
+
+    for (const candidate of candidates) {
+      if (budget.fetchesLeft <= 0 || Date.now() > budget.deadline) {
+        console.log(`[catalog] jam.coop budget spent for artist ${artistId}`);
+        break;
+      }
+      if (toPersist.length > 0) await sleep(DELAY_BETWEEN_JAMCOOP_FETCHES_MS);
+      budget.fetchesLeft--;
+
+      try {
+        const albumResponse = await safeFetch(candidate.url, 10_000);
+        if (!albumResponse?.ok) continue;
+
+        const page = ingestJamcoopAlbumPage(await albumResponse.text());
+        if (!page) {
+          console.warn(`[catalog] unreadable jam.coop album page: ${candidate.url}`);
+          continue;
+        }
+
+        const release = buildJamcoopRelease(page, candidate, takenSlugs);
+        if (!release) continue;
+
+        takenSlugs.add(release.slug);
+        toPersist.push(release);
+        if (release.offers.length > 0) offersByUrl.set(release.externalUrl, release.offers);
+      } catch (error) {
+        console.warn(
+          `[catalog] jam.coop album fetch failed for ${safeHostname(candidate.url)}:`,
+          error instanceof Error ? error.message : String(error)
+        );
+      }
+    }
+
+    if (toPersist.length === 0) return { found: 0, detailed: 0 };
+
+    const written = await persistJamcoopReleases(artistId, toPersist);
+
+    let detailed = 0;
+    for (const release of written) {
+      const offers = offersByUrl.get(release.url);
+      if (!offers) continue;
+
+      // status null: the release row's date and status were already written by
+      // persistJamcoopReleases from this same page, so restating them here would be a second
+      // write of the same fact — and would overwrite a date another source got more precisely.
+      const ok = await persistReleaseDetail(release, {
+        releaseDate: null,
+        datePrecision: 'unknown',
+        status: null,
+        offers,
+      });
+      if (ok) detailed++;
+    }
+
+    return { found: written.length, detailed };
+  } catch (error) {
+    console.warn('[catalog] jam.coop ingest failed:', error instanceof Error ? error.message : String(error));
+    return { found: 0, detailed: 0 };
   }
 }
 

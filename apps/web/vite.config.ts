@@ -87,6 +87,11 @@ export default defineConfig({
           /^\/u\//,
           /^\/guides\//,
           /^\/search/,
+          // Release feeds (.ics/.xml) are served by a Netlify function, not the SPA. Calendar
+          // clients never touch the SW, but a user clicking their own feed link in the browser
+          // is a navigation, and the cached shell would hand them an HTML page instead of the
+          // calendar. /a/ and /u/ above already cover the two public feed shapes.
+          /^\/feed\//,
         ],
         runtimeCaching: [
           {

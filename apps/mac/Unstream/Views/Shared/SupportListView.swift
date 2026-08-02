@@ -416,13 +416,13 @@ struct NewReleaseBadge: View {
             .cornerRadius(6)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("New release: \(release.releaseName) on \(release.platform.capitalized)")
+        .accessibilityLabel("New release: \(release.releaseName) on \(release.displayPlatform)")
         #if os(macOS)
-        .help("Open \(release.releaseName) on \(release.platform.capitalized)")
+        .help("Open \(release.releaseName) on \(release.displayPlatform)")
         #endif
         .linkActions(
             url: URL(string: release.releaseUrl),
-            openTitle: "Open on \(release.platform.capitalized)",
+            openTitle: "Open on \(release.displayPlatform)",
             onOpen: openRelease
         )
         #if os(iOS)

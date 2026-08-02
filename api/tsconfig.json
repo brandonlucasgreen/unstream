@@ -33,11 +33,16 @@
     "functions/me-settings.ts",
     "functions/me-username.ts",
     "functions/me-password.ts",
+    "functions/me-feed-token.ts",
+    "functions/feed-releases.ts",
     "functions/redis.ts",
     "functions/cache.ts",
+    "shared/feed-format.ts",
     "functions/__tests__/me-settings.test.ts",
     "functions/__tests__/me-username.test.ts",
     "functions/__tests__/me-password.test.ts",
+    "functions/__tests__/feed-format.test.ts",
+    "functions/__tests__/feed-releases.test.ts",
     "functions/__tests__/redis-resilience.test.ts"
   ]
 }

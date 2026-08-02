@@ -21,6 +21,10 @@ import {
   ingestFaircampReleasePage,
   buildFaircampRelease,
   findDiscoveredReleaseLinks,
+  ingestJamcoopArtistPage,
+  ingestJamcoopAlbumPage,
+  buildJamcoopRelease,
+  jamcoopArtistUrl,
   type DiscogsArtistReleaseEntry,
 } from '../release-ingest';
 
@@ -220,6 +224,127 @@ function detailPage(opts: {
     <script type="application/ld+json">${JSON.stringify(graph)}</script>
   </head><body></body></html>`;
 }
+
+/**
+ * A standalone-track page's JSON-LD, as the live pages publish it: `@type: MusicRecording`, no
+ * top-level `albumRelease`, and the purchasable items hanging off `inAlbum` — the track's own
+ * download *plus* every physical package of the album it belongs to.
+ */
+function trackPage(opts: {
+  trackId?: string | null;
+  datePublished?: string;
+  /** The track's own download. */
+  own?: { price: number; currency?: string } | null;
+  /** The surrounding album's packages, which are NOT buyable as this track. */
+  albumPackages?: Array<{ format: string; price: number; packageId: string }>;
+  host?: string;
+  slug?: string;
+}): string {
+  const host = opts.host ?? 'https://artist.bandcamp.com';
+  const slug = opts.slug ?? 'a-single';
+  const trackId = opts.trackId === undefined ? '748933878' : opts.trackId;
+
+  const albumRelease: unknown[] = [];
+  if (opts.own !== null) {
+    albumRelease.push({
+      '@type': ['MusicRelease', 'Product'],
+      musicReleaseFormat: 'DigitalFormat',
+      name: 'A Single',
+      additionalProperty: [{ '@type': 'PropertyValue', name: 'type_name', value: 'Digital' }],
+      offers: {
+        '@type': 'Offer',
+        url: `${host}/track/${slug}#t${trackId}-buy`,
+        price: opts.own?.price ?? 1.5,
+        priceCurrency: opts.own?.currency ?? 'USD',
+        availability: 'OnlineOnly',
+      },
+    });
+  }
+  for (const pkg of opts.albumPackages ?? []) {
+    albumRelease.push({
+      '@type': ['MusicRelease', 'Product'],
+      musicReleaseFormat: pkg.format,
+      name: `THE ALBUM ${pkg.format}`,
+      offers: {
+        '@type': 'Offer',
+        url: `${host}/track/${slug}#p${pkg.packageId}-buy`,
+        price: pkg.price,
+        priceCurrency: 'USD',
+        availability: 'InStock',
+      },
+    });
+  }
+
+  const graph: Record<string, unknown> = {
+    '@type': 'MusicRecording',
+    name: 'A Single',
+    datePublished: opts.datePublished ?? '30 May 2025 00:00:00 GMT',
+    ...(trackId ? { additionalProperty: [{ '@type': 'PropertyValue', name: 'track_id', value: trackId }] } : {}),
+    inAlbum: { '@type': 'MusicAlbum', name: 'THE ALBUM', albumRelease },
+  };
+  return `<html><head><script type="application/ld+json">${JSON.stringify(graph)}</script></head><body></body></html>`;
+}
+
+// Standalone `/track/` pages were reported as having no formats at all — 183 of 777 Bandcamp
+// sources, every one a track URL. The old parser only read a top-level `albumRelease`, and a
+// comment asserted track pages "carry a date but no offers at all". That was wrong: the track's
+// own purchase is published under `inAlbum.albumRelease`, with a real price and currency.
+describe('ingestBandcampDetail — standalone track pages', () => {
+  it('reads the track\'s own digital price from inAlbum', () => {
+    const out = ingestBandcampDetail(trackPage({ own: { price: 1, currency: 'GBP' } }));
+
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.detail.offers).toEqual([
+      { format: 'digital', price: 1, currency: 'GBP', availability: 'available' },
+    ]);
+    expect(out.detail.releaseDate).toBe('2025-05-30');
+  });
+
+  // The one that matters. A track page also lists the *album's* vinyl/CD/cassette, and buying
+  // those gets you the album, not this track — so publishing "this single is available on vinyl
+  // for $30" would be a wrong claim about what someone's money buys.
+  it('does not attribute the album\'s physical packages to the track', () => {
+    const out = ingestBandcampDetail(
+      trackPage({
+        own: { price: 1.5 },
+        albumPackages: [
+          { format: 'VinylFormat', price: 30, packageId: '3409308344' },
+          { format: 'CDFormat', price: 15, packageId: '3713717029' },
+          { format: 'CassetteFormat', price: 15, packageId: '7013211' },
+        ],
+      })
+    );
+
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.detail.offers.map(o => o.format)).toEqual(['digital']);
+    expect(out.detail.offers[0].price).toBe(1.5);
+  });
+
+  // Without a track id there is nothing to tell the track's download apart from the album's
+  // packages, so no price at all beats a possibly-wrong one.
+  it('emits no offers when the track id is missing', () => {
+    const out = ingestBandcampDetail(
+      trackPage({ trackId: null, albumPackages: [{ format: 'VinylFormat', price: 30, packageId: '1' }] })
+    );
+
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.detail.offers).toEqual([]);
+    // The date still parses — a missing price is not a missing page.
+    expect(out.detail.releaseDate).toBe('2025-05-30');
+  });
+
+  it('still reads the date when the track has no purchase offer at all', () => {
+    const out = ingestBandcampDetail(trackPage({ own: null }));
+
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.detail.offers).toEqual([]);
+    expect(out.detail.releaseDate).toBe('2025-05-30');
+  });
+});
 
 describe('ingestBandcampDetail', () => {
   it('reads the date and every purchasable format', () => {
@@ -884,5 +1009,238 @@ describe('findDiscoveredReleaseLinks', () => {
   it('skips a slug with no letters or numbers to match on', () => {
     const out = findDiscoveredReleaseLinks('<a href="https://subvert.fm/artist/---">A</a>', 'https://example.com/');
     expect(out).toEqual([]);
+  });
+});
+
+// --- Jam.coop -----------------------------------------------------------------
+//
+// Markup shapes below are copied from live jam.coop pages (fetched 2026-08-01), trimmed to the
+// parts the parsers read. The price line and the "Released:" label are reproduced verbatim,
+// since those two strings are the whole contract.
+
+const JAMCOOP_ARTIST_URL = 'https://jam.coop/artists/carya-amara';
+
+function jamcoopAlbumHtml(opts: {
+  title?: string;
+  released?: string;
+  priceLine?: string;
+  description?: string;
+} = {}): string {
+  const { title = 'Carrion Carya Amara', released = 'October 4, 2024' } = opts;
+  const priceLine = opts.priceLine ?? '£3.00 or more. Digital download. MP3 and FLAC';
+  // The description is emitted *before* the price line on purpose. "First price-shaped string on
+  // the page" would be a plausible-looking parser, and putting the description after the price
+  // would let it pass — so the fixture is ordered to make the "Digital download" anchor the only
+  // thing that can produce the right answer.
+  return `<html><body>
+    <img class="w-full" src="https://cdn.jam.coop/art.jpg" />
+    <h1 class="text-lg font-medium leading-tight">${title}</h1>
+    <h2 class="text-sm"><a href="/artists/carya-amara">Carya Amara</a></h2>
+    ${opts.description ? `<section><p>${opts.description}</p></section>` : ''}
+    <div>
+      <form class="button_to" method="get" action="/artists/carya-amara/albums/x/purchases/new"><button>Buy</button></form>
+      <p class="text-xs text-slate-600">${priceLine}</p>
+    </div>
+    <section class="mt-6"><p><strong>Released:</strong> ${released}</p></section>
+  </body></html>`;
+}
+
+describe('ingestJamcoopArtistPage', () => {
+  it('finds the artist’s albums and their grid artwork', () => {
+    const html = `<html><body>
+      <a href="/artists/carya-amara/albums/carrion-carya-amara">
+        <div><img class="object-cover" src="https://cdn.jam.coop/a.jpg" /></div>
+        <p>Carrion Carya Amara</p>
+      </a>
+      <a href="/artists/carya-amara/albums/second-record">
+        <div><img src="https://cdn.jam.coop/b.jpg" /></div>
+      </a>
+    </body></html>`;
+
+    expect(ingestJamcoopArtistPage(html, JAMCOOP_ARTIST_URL)).toEqual([
+      {
+        slug: 'carrion-carya-amara',
+        url: 'https://jam.coop/artists/carya-amara/albums/carrion-carya-amara',
+        artworkUrl: 'https://cdn.jam.coop/a.jpg',
+      },
+      {
+        slug: 'second-record',
+        url: 'https://jam.coop/artists/carya-amara/albums/second-record',
+        artworkUrl: 'https://cdn.jam.coop/b.jpg',
+      },
+    ]);
+  });
+
+  // The page links to other artists too (nav, credits, a "more from jam.coop" rail). Cataloguing
+  // those under this artist would attribute someone else's record to them.
+  it('refuses albums belonging to a different artist on the same page', () => {
+    const html = `
+      <a href="/artists/carya-amara/albums/mine">Mine</a>
+      <a href="/artists/someone-else/albums/theirs">Theirs</a>
+    `;
+    const out = ingestJamcoopArtistPage(html, JAMCOOP_ARTIST_URL);
+    expect(out.map(c => c.slug)).toEqual(['mine']);
+  });
+
+  it('refuses an album link that leaves the host', () => {
+    const html = '<a href="https://evil.example/artists/carya-amara/albums/x">X</a>';
+    expect(ingestJamcoopArtistPage(html, JAMCOOP_ARTIST_URL)).toEqual([]);
+  });
+
+  it('ignores links that are not album routes', () => {
+    const html = `
+      <a href="/artists">Artists</a>
+      <a href="/artists/carya-amara">The artist</a>
+      <a href="/tags/electronic">electronic</a>
+    `;
+    expect(ingestJamcoopArtistPage(html, JAMCOOP_ARTIST_URL)).toEqual([]);
+  });
+
+  it('deduplicates an album linked twice (cover and title both link to it)', () => {
+    const html = `
+      <a href="/artists/carya-amara/albums/one"><img src="https://cdn.jam.coop/a.jpg" /></a>
+      <a href="/artists/carya-amara/albums/one">One</a>
+    `;
+    expect(ingestJamcoopArtistPage(html, JAMCOOP_ARTIST_URL)).toHaveLength(1);
+  });
+});
+
+describe('ingestJamcoopAlbumPage', () => {
+  it('reads title, artwork, date and the digital offer', () => {
+    const page = ingestJamcoopAlbumPage(jamcoopAlbumHtml(), new Date('2026-08-01T00:00:00Z'));
+    expect(page).toEqual({
+      title: 'Carrion Carya Amara',
+      artworkUrl: 'https://cdn.jam.coop/art.jpg',
+      releaseDate: '2024-10-04',
+      datePrecision: 'day',
+      status: 'released',
+      offers: [{ format: 'digital', price: 3, currency: 'GBP', availability: 'available' }],
+    });
+  });
+
+  // "£7.00 or more" is name-your-price with a floor. The floor is what a fan can actually pay,
+  // so it is the honest figure to publish — the same call the Faircamp purchase parser makes.
+  it('publishes the floor of a "or more" price, not zero', () => {
+    const page = ingestJamcoopAlbumPage(
+      jamcoopAlbumHtml({ priceLine: '£7.00 or more. Digital download. MP3 and FLAC' })
+    );
+    expect(page?.offers[0]).toMatchObject({ price: 7, currency: 'GBP' });
+  });
+
+  // A genuine zero floor is real name-your-price, which the display layer renders as such.
+  it('keeps a zero floor as zero', () => {
+    const page = ingestJamcoopAlbumPage(
+      jamcoopAlbumHtml({ priceLine: '£0.00 or more. Digital download. MP3 and FLAC' })
+    );
+    expect(page?.offers[0]).toMatchObject({ price: 0, currency: 'GBP' });
+  });
+
+  // A symbol outside the mapped set fails the price pattern outright, so no offer is stored.
+  // That is the intended outcome: formatMoney defaults a null currency to USD, so a price kept
+  // without an identified currency would render "¥800" as "$800".
+  it('emits no offer at all rather than a price in an unidentifiable currency', () => {
+    const page = ingestJamcoopAlbumPage(
+      jamcoopAlbumHtml({ priceLine: '¥800 or more. Digital download. MP3 and FLAC' })
+    );
+    expect(page?.offers).toEqual([]);
+    expect(page?.title).toBe('Carrion Carya Amara'); // the rest of the page still parses
+  });
+
+  // The price is anchored on "Digital download" precisely so a figure quoted in an album
+  // description can't be mistaken for the asking price.
+  it('does not take a price out of the release description', () => {
+    const page = ingestJamcoopAlbumPage(
+      jamcoopAlbumHtml({
+        description: 'Recorded on a £50 cassette deck.',
+        priceLine: '£4.00 or more. Digital download. MP3 and FLAC',
+      })
+    );
+    expect(page?.offers[0]).toMatchObject({ price: 4 });
+  });
+
+  it('marks a future-dated release announced', () => {
+    const page = ingestJamcoopAlbumPage(
+      jamcoopAlbumHtml({ released: 'December 1, 2026' }),
+      new Date('2026-08-01T00:00:00Z')
+    );
+    expect(page?.releaseDate).toBe('2026-12-01');
+    expect(page?.status).toBe('announced');
+  });
+
+  // A missing date is "we don't know", never a guessed one.
+  it('leaves the date null when the page has no Released label', () => {
+    const html = '<html><body><h1>Untitled</h1><p class="text-xs">£2.00 or more. Digital download.</p></body></html>';
+    const page = ingestJamcoopAlbumPage(html);
+    expect(page?.releaseDate).toBeNull();
+    expect(page?.datePrecision).toBe('unknown');
+  });
+
+  it('returns null when there is no title to read', () => {
+    expect(ingestJamcoopAlbumPage('<html><body><p>Not an album page</p></body></html>')).toBeNull();
+  });
+
+  it('still returns the release when there is no price at all', () => {
+    const html = '<html><body><h1>Free Thing</h1><p><strong>Released:</strong> March 2, 2024</p></body></html>';
+    const page = ingestJamcoopAlbumPage(html);
+    expect(page?.offers).toEqual([]);
+    expect(page?.releaseDate).toBe('2024-03-02');
+  });
+});
+
+describe('buildJamcoopRelease', () => {
+  const candidate = {
+    slug: 'carrion-carya-amara',
+    url: 'https://jam.coop/artists/carya-amara/albums/carrion-carya-amara',
+    artworkUrl: 'https://cdn.jam.coop/grid.jpg',
+  };
+
+  it('carries the album page’s date and offers through to the persist shape', () => {
+    const page = ingestJamcoopAlbumPage(jamcoopAlbumHtml())!;
+    const built = buildJamcoopRelease(page, candidate, new Set());
+    expect(built).toMatchObject({
+      title: 'Carrion Carya Amara',
+      slug: 'carrion-carya-amara',
+      matchKey: 'carrioncaryaamara',
+      releaseDate: '2024-10-04',
+      externalUrl: candidate.url,
+      offers: [{ format: 'digital', price: 3, currency: 'GBP', availability: 'available' }],
+    });
+  });
+
+  it('falls back to the grid artwork when the album page has none', () => {
+    const page = { ...ingestJamcoopAlbumPage(jamcoopAlbumHtml())!, artworkUrl: null };
+    expect(buildJamcoopRelease(page, candidate, new Set())?.artworkUrl).toBe('https://cdn.jam.coop/grid.jpg');
+  });
+
+  it('avoids a slug already taken in this run', () => {
+    const page = ingestJamcoopAlbumPage(jamcoopAlbumHtml())!;
+    const built = buildJamcoopRelease(page, candidate, new Set(['carrion-carya-amara']));
+    expect(built?.slug).not.toBe('carrion-carya-amara');
+  });
+
+  it('refuses a title with nothing to match on', () => {
+    const page = { ...ingestJamcoopAlbumPage(jamcoopAlbumHtml())!, title: '!!!' };
+    expect(buildJamcoopRelease(page, candidate, new Set())).toBeNull();
+  });
+});
+
+describe('jamcoopArtistUrl', () => {
+  it('normalizes an album link back to the artist page', () => {
+    expect(jamcoopArtistUrl('https://jam.coop/artists/carya-amara/albums/carrion-carya-amara')).toBe(
+      'https://jam.coop/artists/carya-amara'
+    );
+  });
+
+  it('passes an artist page through unchanged', () => {
+    expect(jamcoopArtistUrl('https://jam.coop/artists/carya-amara')).toBe('https://jam.coop/artists/carya-amara');
+  });
+
+  it('refuses a URL with no artist in it', () => {
+    expect(jamcoopArtistUrl('https://jam.coop/')).toBeNull();
+    expect(jamcoopArtistUrl('https://jam.coop/newsletters')).toBeNull();
+  });
+
+  it('refuses a non-http scheme', () => {
+    expect(jamcoopArtistUrl('javascript:alert(1)//artists/x')).toBeNull();
   });
 });

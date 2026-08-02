@@ -1,8 +1,28 @@
+// Release alerts.
+//
+// Two paths, and which one runs is the whole point of this file:
+//
+// 1. **The catalog** (`getReleasesForAlerts`). Preferred. Every release in the window, with
+//    every platform it's on and what each costs — built once on the server by the cataloging
+//    pipeline rather than re-derived per fan. This is what fixes spec §5 defects 2, 3 and 4:
+//    upcoming releases can be alerted on, more than one release per artist survives, and a
+//    record on both Bandcamp and Mirlo says so instead of silently picking one.
+// 2. **A live scrape**, exactly as before, for an artist the catalog has never seen. Falling
+//    back rather than returning nothing matters: coverage is demand-driven, so an artist nobody
+//    has saved or searched yet has no catalog, and treating that as "no new releases" would
+//    silently switch alerts off for them.
+//
+// The response stays backwards-compatible on purpose. `release` (singular) is still populated
+// for the shipped Mac app and browser extension, which decode exactly that field; `releases`
+// (plural) is additive and carries what a newer client can use. Both shipped clients decode
+// `platform` as a plain string and ignore unknown keys, so neither breaks on the new fields.
+
 import { parse } from 'node-html-parser';
 import { isSafePublicHostname, isUrlHostnameAllowed } from './middleware';
 import { checkRateLimit, getClientIp } from './ratelimit';
-import { isStoredArtistLink } from './db';
+import { getReleasesForAlerts, isStoredArtistLink, type AlertRelease } from './db';
 import { safeFetch, safeHostname } from './safe-fetch';
+import { leadingOfferSummary, orderedSourcePlatforms } from '../shared/release-display';
 
 interface PlatformUrls {
   bandcamp?: string;
@@ -14,17 +34,39 @@ interface ReleaseResult {
   releaseName: string;
   releaseDate: string; // ISO format
   releaseUrl: string;
-  platform: 'bandcamp' | 'faircamp' | 'mirlo';
+  /**
+   * The platform an alert leads with. Not a closed set any more: with the catalog behind this,
+   * a release can lead with any platform in the registry (jam.coop, Discogs, …), and both
+   * shipped clients decode this as a plain string.
+   */
+  platform: string;
+}
+
+/** What a catalog-backed alert carries beyond the legacy single-release shape. */
+interface CatalogReleaseResult extends ReleaseResult {
+  /** Every platform this release is on, artist-paying first. Defect 4: never collapsed to one. */
+  platforms: string[];
+  /** 'announced' for a release dated in the future — defect 2, which could not fire before. */
+  status: string;
+  /** "from £3 · ≈£2.55 to artist", or 'Name your price'. Defect 7: a body worth reading. */
+  offerSummary: string;
+  /** The platform's own page, for a client that would rather link straight to the shop. */
+  platformUrl: string;
 }
 
 interface CheckReleasesRequest {
   artistName: string;
   platforms: PlatformUrls;
+  /** How far back to look. Optional; shipped clients don't send it. */
+  sinceDays?: number;
 }
 
 interface CheckReleasesResponse {
   artistName: string;
   release: ReleaseResult | null;
+  releases?: CatalogReleaseResult[];
+  /** Which path answered — so a client (and a human debugging one) can tell. */
+  source?: 'catalog' | 'live';
   error?: string;
 }
 
@@ -72,12 +114,34 @@ function parseDateToISO(dateStr: string): string | null {
   return null;
 }
 
-// Check if release is within the last 30 days (slightly lenient for timezone/timing differences)
-function isWithinLastMonth(dateStr: string): boolean {
+/** Default lookback. Matches the window shipped clients already assume. */
+const DEFAULT_WINDOW_DAYS = 31;
+
+/**
+ * Ceiling on a caller-supplied window. A year is far more than a client catching up after a
+ * long sleep needs, and it stops the parameter being a way to ask for an artist's whole
+ * discography through an alerts endpoint.
+ */
+const MAX_WINDOW_DAYS = 365;
+
+function resolveWindowDays(raw: unknown): number {
+  if (typeof raw !== 'number' || !Number.isFinite(raw) || raw <= 0) return DEFAULT_WINDOW_DAYS;
+  return Math.min(Math.floor(raw), MAX_WINDOW_DAYS);
+}
+
+/**
+ * Is this release recent enough to alert on — **or still to come**?
+ *
+ * The old version of this required `daysDiff >= 0`, which discarded every future-dated release
+ * (spec §5 defect 2). A pre-announced record was filtered out for being in the future, and by
+ * the time it came out it had usually aged past the window, so it was never alerted on at all.
+ * A future date is now the *best* reason to alert, not a disqualification.
+ */
+function isWithinWindow(dateStr: string, windowDays: number, now: Date = new Date()): boolean {
   const releaseDate = new Date(dateStr);
-  const now = new Date();
+  if (Number.isNaN(releaseDate.getTime())) return false;
   const daysDiff = (now.getTime() - releaseDate.getTime()) / (1000 * 60 * 60 * 24);
-  return daysDiff >= 0 && daysDiff <= 31;
+  return daysDiff <= windowDays;
 }
 
 // Check Bandcamp for latest release
@@ -281,7 +345,7 @@ async function checkMirlo(mirloUrl: string): Promise<ReleaseResult | null> {
 }
 
 // Main check function - checks all platforms and returns the best result
-async function checkAllPlatforms(platforms: PlatformUrls): Promise<ReleaseResult | null> {
+async function checkAllPlatforms(platforms: PlatformUrls, windowDays: number): Promise<ReleaseResult | null> {
   const results: ReleaseResult[] = [];
 
   // Check all platforms in parallel
@@ -291,10 +355,9 @@ async function checkAllPlatforms(platforms: PlatformUrls): Promise<ReleaseResult
     platforms.mirlo ? checkMirlo(platforms.mirlo) : Promise.resolve(null),
   ]);
 
-  // Collect successful results that are within the last 30 days
   for (const check of checks) {
     if (check.status === 'fulfilled' && check.value) {
-      if (isWithinLastMonth(check.value.releaseDate)) {
+      if (isWithinWindow(check.value.releaseDate, windowDays)) {
         results.push(check.value);
       }
     }
@@ -302,17 +365,71 @@ async function checkAllPlatforms(platforms: PlatformUrls): Promise<ReleaseResult
 
   if (results.length === 0) return null;
 
-  // Priority order: Mirlo > Faircamp > Bandcamp
-  const priorityOrder: ReleaseResult['platform'][] = ['mirlo', 'faircamp', 'bandcamp'];
+  // Priority order: Mirlo > Faircamp > Bandcamp.
+  //
+  // Still a hardcoded list, and still wrong in the way spec §5 defect 4 describes — a release on
+  // both Bandcamp and Mirlo is reported as one platform and the fan never learns about the
+  // other. It is left alone deliberately: this path only runs for an artist with no catalog, it
+  // has one scraped result per platform and no offer data to rank them by, and the real fix is
+  // the catalog path above, which reports every platform. Changing the order here would move
+  // the arbitrariness around rather than remove it.
+  const priorityOrder = ['mirlo', 'faircamp', 'bandcamp'];
 
-  // Find the highest priority platform with a release
   for (const platform of priorityOrder) {
     const result = results.find(r => r.platform === platform);
     if (result) return result;
   }
 
-  // Fallback to first result
   return results[0];
+}
+
+// ---------------------------------------------------------------------------
+// The catalog path
+// ---------------------------------------------------------------------------
+
+/** The Unstream release page an alert should lead to, rather than one platform's shop. */
+function releasePageUrl(artistSlug: string, releaseSlug: string): string {
+  return `https://unstream.stream/a/${encodeURIComponent(artistSlug)}/${encodeURIComponent(releaseSlug)}`;
+}
+
+/**
+ * Turn catalogued releases into alert results.
+ *
+ * Two things here are the product decision, not plumbing:
+ *
+ * - **`releaseUrl` is the Unstream release page, not the platform's.** That is pillar 3 of the
+ *   spec: today an alert hands a fan straight to one shop, which hides the payout comparison at
+ *   the exact moment they are deciding where to buy. The platform's own URL is still returned
+ *   alongside, as `platformUrl`.
+ * - **The leading platform is the artist-paying one**, via `orderedSourcePlatforms` — the same
+ *   ordering the release page and the artist page already use, rather than this file's old
+ *   hardcoded `mirlo > faircamp > bandcamp`.
+ *
+ * Releases with no source at all are dropped: an alert a fan cannot act on is noise.
+ */
+function toCatalogResults(artistSlug: string, releases: AlertRelease[]): CatalogReleaseResult[] {
+  const out: CatalogReleaseResult[] = [];
+
+  for (const release of releases) {
+    if (!release.releaseDate || release.sources.length === 0) continue;
+
+    const platforms = orderedSourcePlatforms(release.sources);
+    const leading = platforms[0];
+    const leadingSource = release.sources.find(s => s.platform === leading);
+
+    out.push({
+      releaseName: release.title,
+      releaseDate: release.releaseDate,
+      releaseUrl: releasePageUrl(artistSlug, release.slug),
+      platform: leading,
+      platforms,
+      status: release.status,
+      offerSummary: leadingOfferSummary(release.sources),
+      platformUrl: leadingSource?.url ?? '',
+    });
+  }
+
+  return out;
 }
 
 const CORS_HEADERS = {
@@ -370,6 +487,33 @@ export async function handler(event: {
     return jsonResponse(400, { error: 'artistName and platforms are required' });
   }
 
+  const windowDays = resolveWindowDays(request.sinceDays);
+
+  // The catalog first. Answering from it costs one database read instead of two to four
+  // outbound scrapes, and it is the only path that can report an upcoming release, a second
+  // release in the same window, or more than one platform.
+  //
+  // A null here means this artist has never been catalogued — not that they have nothing new —
+  // so it falls through to the live scrape rather than reporting a negative we didn't establish.
+  try {
+    const catalogued = await getReleasesForAlerts(request.artistName, windowDays);
+    if (catalogued) {
+      const releases = toCatalogResults(catalogued.artistSlug, catalogued.releases);
+      const response: CheckReleasesResponse = {
+        artistName: request.artistName,
+        // Newest first out of the query, so the head is the one a single-release client should
+        // show. Still populated for the shipped Mac app and extension, which read only this.
+        release: releases[0] ?? null,
+        releases,
+        source: 'catalog',
+      };
+      return jsonResponse(200, response, { 'Cache-Control': 'no-cache' });
+    }
+  } catch (error) {
+    // A catalog read failing is not evidence about releases either — fall through and scrape.
+    console.error('[check-releases] catalog read failed, falling back to live check:', error);
+  }
+
   const requested = PLATFORM_KEYS.filter(
     p => typeof request.platforms[p] === 'string' && (request.platforms[p] as string).length > 0
   );
@@ -404,11 +548,30 @@ export async function handler(event: {
   }
 
   try {
-    const release = await checkAllPlatforms(platforms);
+    const release = await checkAllPlatforms(platforms, windowDays);
 
     const response: CheckReleasesResponse = {
       artistName: request.artistName,
       release,
+      // One scraped release at most, so the plural field says the same thing rather than
+      // being absent — a client reading `releases` shouldn't have to special-case this path.
+      //
+      // `offerSummary` is empty and `platforms` has one entry because that is genuinely all a
+      // scrape of one platform's latest release establishes. Status is derived rather than
+      // assumed 'released': now that a future date is no longer filtered out, a scraped
+      // pre-announcement can reach here.
+      releases: release
+        ? [
+            {
+              ...release,
+              platforms: [release.platform],
+              status: release.releaseDate > new Date().toISOString().slice(0, 10) ? 'announced' : 'released',
+              offerSummary: '',
+              platformUrl: release.releaseUrl,
+            },
+          ]
+        : [],
+      source: 'live',
     };
 
     // Don't cache release checks
