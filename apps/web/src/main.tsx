@@ -50,7 +50,17 @@ function ArtistDashboardRedirect() {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Sentry.ErrorBoundary fallback={<AppErrorFallback />}>
+    <Sentry.ErrorBoundary
+      fallback={<AppErrorFallback />}
+      // Without this, a boundary crash arrives in Sentry as a bare error with no
+      // clue where the user was. Every route below is lazy-loaded, so the route
+      // path is what turns "TypeError: Failed to fetch dynamically imported
+      // module" into "sign-in was broken for this person".
+      beforeCapture={scope => {
+        scope.setTag('context', 'app.errorBoundary')
+        scope.setTag('route', window.location.pathname)
+      }}
+    >
       <AuthProvider>
         <BrowserRouter>
           <ScrollToTop />

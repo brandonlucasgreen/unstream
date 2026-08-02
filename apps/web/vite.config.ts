@@ -27,6 +27,14 @@ if (sentryEnabled && !env.SENTRY_AUTH_TOKEN) {
   console.warn('⚠️  SENTRY_AUTH_TOKEN is not set. Source map upload will fail.')
 }
 
+// The Sentry release, injected as VITE_APP_VERSION. Netlify exposes the deployed
+// commit as COMMIT_REF at build time; without it every event reports release
+// 'unknown', which makes the deploy-shaped errors unattributable — a tab running
+// an old build asking for that build's chunks is only diagnosable if you can see
+// *which* build it was running. Passed to sentryVitePlugin too so uploaded source
+// maps land on the same release the client reports.
+const release = env.VITE_APP_VERSION || env.COMMIT_REF || 'dev'
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -100,6 +108,7 @@ export default defineConfig({
       org: env.SENTRY_ORG,
       project: env.SENTRY_PROJECT || 'unstream-web',
       authToken: env.SENTRY_AUTH_TOKEN,
+      release: { name: release },
     })] : []),
     {
       name: 'api-server',
@@ -124,4 +133,7 @@ export default defineConfig({
       },
     },
   ],
+  define: {
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(release),
+  },
 })
