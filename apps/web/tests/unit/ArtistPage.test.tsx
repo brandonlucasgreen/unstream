@@ -36,10 +36,12 @@ const mockSaveArtist = vi.fn();
 const mockRemoveSavedArtist = vi.fn();
 const mockLoadSavedArtists = vi.fn();
 const mockIsArtistSaved = vi.fn();
+// Read at render time, so a test can sign the user in before mounting.
+let mockSession: { access_token: string } | null = null;
 
 vi.mock('src/contexts/AuthContext', () => ({
   useAuth: () => ({
-    session: null,
+    session: mockSession,
     user: null,
     isAdmin: false,
     isLoading: false,
@@ -66,19 +68,28 @@ vi.mock('src/components/LoginInterstitial', () => ({
 
 // Mock RichArtistProfile
 vi.mock('src/components/RichArtistProfile', () => ({
-  RichArtistProfile: ({ payload, justClaimed, isSaved }: any) => (
+  RichArtistProfile: ({ payload, justClaimed, isSaved, onSave, onUnsave }: any) => (
     <div data-testid="rich-artist-profile">
       RichArtistProfile: {payload.artist.name} {justClaimed ? '(just claimed)' : ''} {isSaved ? '(saved)' : ''}
+      <button onClick={isSaved ? onUnsave : onSave}>Save</button>
     </div>
   ),
 }));
 
 // Mock UnclaimedQuietCard
 vi.mock('src/components/UnclaimedQuietCard', () => ({
-  UnclaimedQuietCard: ({ payload, justClaimed, isSaved }: any) => (
+  UnclaimedQuietCard: ({ payload, justClaimed, isSaved, onSave, onUnsave }: any) => (
     <div data-testid="unclaimed-quiet-card">
       UnclaimedQuietCard: {payload.artist.name} {justClaimed ? '(just claimed)' : ''} {isSaved ? '(saved)' : ''}
+      <button onClick={isSaved ? onUnsave : onSave}>Save</button>
     </div>
+  ),
+}));
+
+// Mock AdminCatalogButton — echoes back the id it was handed, which must be the UUID.
+vi.mock('src/components/AdminCatalogButton', () => ({
+  AdminCatalogButton: ({ artistId }: { artistId: string }) => (
+    <div data-testid="admin-catalog-button">{artistId}</div>
   ),
 }));
 
@@ -99,7 +110,7 @@ vi.mock('src/components/LoadingProfile', () => ({
 // Shared fixtures
 const claimedPayload = {
   artist: {
-    id: 'artist-1',
+    id: '550e8400-e29b-41d4-a716-446655440000',
     slug: 'kid-lightbulbs',
     name: 'Kid Lightbulbs',
     imageUrl: 'https://example.com/image.jpg',
@@ -129,7 +140,7 @@ const claimedPayload = {
 
 const unclaimedPayload = {
   artist: {
-    id: 'artist-2',
+    id: '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
     slug: 'some-artist',
     name: 'Some Artist',
     imageUrl: 'https://example.com/some.jpg',
@@ -157,6 +168,12 @@ describe('ArtistPage', () => {
     vi.restoreAllMocks();
     mockUseParams.mockReturnValue({ slug: 'kid-lightbulbs' });
     mockUseSearchParams.mockReturnValue([new URLSearchParams()]);
+    mockSession = null;
+    // restoreAllMocks restores spies but leaves vi.fn() call history in place, so a test
+    // reading mock.calls[0] would otherwise see the previous test's call.
+    mockSaveArtist.mockClear();
+    mockRemoveSavedArtist.mockClear();
+    mockIsArtistSaved.mockClear();
     mockIsArtistSaved.mockReturnValue(false);
   });
 
@@ -256,6 +273,86 @@ describe('ArtistPage', () => {
     vi.spyOn(global, 'fetch').mockReturnValue(new Promise(() => {}));
     render(<ArtistPage />);
     expect(screen.queryByText('Back to artists')).toBeNull();
+  });
+
+  // Saving is keyed by slug end to end: /api/saved-artists stores and validates `artist_slug`,
+  // and savedArtistIds holds slugs. Sending artist.id — the artists-table UUID — made every save
+  // from this page fail validation with a 400 and read back as unsaved.
+  describe('save identifier', () => {
+    it('saves a claimed artist by slug, not by the artists-table UUID', async () => {
+      mockSession = { access_token: 'token' };
+      mockUseParams.mockReturnValue({ slug: 'kid-lightbulbs' });
+      vi.spyOn(global, 'fetch').mockResolvedValue(
+        new Response(JSON.stringify(claimedPayload), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      );
+      render(<ArtistPage />);
+      await waitFor(() => expect(screen.getByTestId('rich-artist-profile')).toBeTruthy());
+
+      screen.getByText('Save').click();
+
+      await waitFor(() => expect(mockSaveArtist).toHaveBeenCalled());
+      expect(mockSaveArtist).toHaveBeenCalledWith(
+        'kid-lightbulbs',
+        undefined,
+        'Kid Lightbulbs',
+        'https://example.com/image.jpg',
+      );
+    });
+
+    it('saves an unclaimed artist by slug too', async () => {
+      mockSession = { access_token: 'token' };
+      mockUseParams.mockReturnValue({ slug: 'some-artist' });
+      vi.spyOn(global, 'fetch').mockResolvedValue(
+        new Response(JSON.stringify(unclaimedPayload), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      );
+      render(<ArtistPage />);
+      await waitFor(() => expect(screen.getByTestId('unclaimed-quiet-card')).toBeTruthy());
+
+      screen.getByText('Save').click();
+
+      await waitFor(() => expect(mockSaveArtist).toHaveBeenCalled());
+      expect(mockSaveArtist.mock.calls[0][0]).toBe('some-artist');
+    });
+
+    it('asks whether the slug is saved, not the UUID', async () => {
+      mockUseParams.mockReturnValue({ slug: 'kid-lightbulbs' });
+      vi.spyOn(global, 'fetch').mockResolvedValue(
+        new Response(JSON.stringify(claimedPayload), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      );
+      render(<ArtistPage />);
+      await waitFor(() => expect(screen.getByTestId('rich-artist-profile')).toBeTruthy());
+
+      expect(mockIsArtistSaved).toHaveBeenCalledWith('kid-lightbulbs');
+      expect(mockIsArtistSaved).not.toHaveBeenCalledWith(claimedPayload.artist.id);
+    });
+
+    it('removes by slug', async () => {
+      mockSession = { access_token: 'token' };
+      mockIsArtistSaved.mockReturnValue(true);
+      mockUseParams.mockReturnValue({ slug: 'kid-lightbulbs' });
+      vi.spyOn(global, 'fetch').mockResolvedValue(
+        new Response(JSON.stringify(claimedPayload), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      );
+      render(<ArtistPage />);
+      await waitFor(() => expect(screen.getByTestId('rich-artist-profile')).toBeTruthy());
+
+      screen.getByText('Save').click();
+
+      await waitFor(() => expect(mockRemoveSavedArtist).toHaveBeenCalledWith('kid-lightbulbs'));
+    });
+
+    // The other half of the fix: the admin catalog endpoint validates a UUID, so that control
+    // must keep getting artist.id even though save no longer does.
+    it('still hands the UUID to the admin catalog control', async () => {
+      mockUseParams.mockReturnValue({ slug: 'kid-lightbulbs' });
+      vi.spyOn(global, 'fetch').mockResolvedValue(
+        new Response(JSON.stringify(claimedPayload), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      );
+      render(<ArtistPage />);
+      await waitFor(() => {
+        expect(screen.getByTestId('admin-catalog-button').textContent).toBe(claimedPayload.artist.id);
+      });
+    });
   });
 
   it('cancels fetch on slug change', async () => {

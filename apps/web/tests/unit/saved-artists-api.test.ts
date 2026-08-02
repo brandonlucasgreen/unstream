@@ -2,39 +2,51 @@ import { describe, it, expect } from 'vitest';
 
 describe('saved-artists API - Validation logic', () => {
   const mockUUID = '123e4567-e89b-12d3-a456-426614174000';
-  const mockAnotherUUID = '223e4567-e89b-12d3-a456-426614174001';
-  const mockInvalidUUID = 'not-a-uuid';
 
-  // Use the same regex from saved-artists.ts
-  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  // `artistId` on this endpoint is an artist **slug**, not the artists-table UUID: handleSave
+  // validates the slug format, stores `artist_slug`, and reads slugs back out. This block used
+  // to assert the opposite — a UUID contract left over from an earlier design, with a comment
+  // claiming it mirrored saved-artists.ts. It didn't, and believing it was how the React artist
+  // page came to send `artist.id` and 400 on every save.
+  //
+  // Mirrors of the two checks in api/functions/saved-artists.ts handleSave.
+  const SLUG_REGEX = /^[a-z0-9](?:[a-z0-9-]{0,58}[a-z0-9])?$/;
+  const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
-  function isValidUUID(id: string): boolean {
-    return UUID_RE.test(id);
+  function isValidArtistId(id: string | undefined): boolean {
+    if (!id) return false;
+    return SLUG_REGEX.test(id) && !UUID_REGEX.test(id);
   }
 
-  describe('UUID Validation', () => {
-    it('valid UUID passes validation', () => {
-      expect(isValidUUID(mockUUID)).toBe(true);
-      expect(isValidUUID(mockAnotherUUID)).toBe(true);
+  describe('artistId validation', () => {
+    it('accepts artist slugs, including the long and short real ones', () => {
+      expect(isValidArtistId('radiohead')).toBe(true);
+      expect(isValidArtistId('sufjan-stevens')).toBe(true);
+      expect(isValidArtistId('2pac')).toBe(true);
+      // Published slugs the previous 3–20 character bound rejected.
+      expect(isValidArtistId('x')).toBe(true);
+      expect(isValidArtistId('explosions-in-the-sky')).toBe(true);
+      expect(isValidArtistId('sopor-aeternus-the-ensemble-of-shadows')).toBe(true);
+      // Search results for unverified artists are saved under a synthetic key.
+      expect(isValidArtistId('nameonly-explosionsinthesky-1785600000000')).toBe(true);
     });
 
-    it('invalid UUID fails validation', () => {
-      expect(isValidUUID(mockInvalidUUID)).toBe(false);
-      expect(isValidUUID('')).toBe(false);
-      expect(isValidUUID('123')).toBe(false);
-      expect(isValidUUID('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx')).toBe(false);
-    });
-  });
-
-  describe('Input validation - Missing/Invalid artistId', () => {
-    it('missing artistId fails validation', () => {
-      const body = {};
-      expect(isValidUUID(body.artistId as string)).toBe(false);
+    it('rejects the artists-table UUID', () => {
+      expect(isValidArtistId(mockUUID)).toBe(false);
     });
 
-    it('invalid (non-UUID) artistId fails validation', () => {
-      const body = { artistId: mockInvalidUUID };
-      expect(isValidUUID(body.artistId as string)).toBe(false);
+    it('rejects a missing artistId', () => {
+      const body: Record<string, unknown> = {};
+      expect(isValidArtistId(body.artistId as string | undefined)).toBe(false);
+    });
+
+    it('rejects anything that could break out of HTML in the SSR share page', () => {
+      expect(isValidArtistId('<script>')).toBe(false);
+      expect(isValidArtistId('bad slug')).toBe(false);
+      expect(isValidArtistId('BadSlug')).toBe(false);
+      expect(isValidArtistId('-bad')).toBe(false);
+      expect(isValidArtistId('bad-')).toBe(false);
+      expect(isValidArtistId('a'.repeat(61))).toBe(false);
     });
   });
 
@@ -45,14 +57,8 @@ describe('saved-artists API - Validation logic', () => {
     });
 
     it('artistIds array > 100 is invalid', () => {
-      const artistIds = Array.from({ length: 101 }, () => mockUUID);
+      const artistIds = Array.from({ length: 101 }, () => 'radiohead');
       expect(artistIds.length).toBeGreaterThan(100);
-    });
-
-    it('non-UUID values in artistIds array are invalid', () => {
-      const artistIds = [mockUUID, mockInvalidUUID];
-      const invalidCount = artistIds.filter(id => !isValidUUID(id)).length;
-      expect(invalidCount).toBeGreaterThan(0);
     });
   });
 
