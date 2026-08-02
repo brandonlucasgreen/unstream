@@ -1,5 +1,47 @@
 /* Unstream Chrome Extension - Popup Styles */
 
+/* Unstream's typeface, bundled rather than fetched.
+   Matches the web app: Stack Sans Headline for body, Darker Grotesque for display.
+   See reference: the stack is declared in six places across web + edge functions; this is the
+   seventh, and it can't share them because the extension has no build step.
+
+   Bundled, not linked to fonts.googleapis.com, for two reasons: a remote stylesheet would be a
+   request to Google every time the popup opens — on a product whose whole pitch is not leaking
+   your listening to third parties — and MV3 extension pages shouldn't depend on remote resources
+   to render. Both families are OFL, so redistribution is fine. Latin subsets only, 76 KB total.
+
+   Darker Grotesque has a notably short cap height (~56 vs ~70 at the same size), so it is used
+   only where a size bump comes with it — the logo — rather than across the UI. */
+@font-face {
+  font-family: 'Stack Sans Headline';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/StackSansHeadline-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Stack Sans Headline';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../fonts/StackSansHeadline-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Stack Sans Headline';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/StackSansHeadline-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Darker Grotesque';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/DarkerGrotesque-700.woff2') format('woff2');
+}
+
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -7,7 +49,7 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Stack Sans Headline', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   line-height: 1.5;
   color: #E5E7EB;
@@ -41,8 +83,13 @@ body {
 }
 
 .logo-text {
-  font-size: 18px;
-  font-weight: 600;
+  /* The one place Darker Grotesque earns its keep. Its cap height is ~20% shorter than Stack
+     Sans at the same size, so the bump from 18px/600 to 22px/700 is what keeps the wordmark
+     reading at the same weight as before rather than shrinking. */
+  font-family: 'Darker Grotesque', 'Stack Sans Headline', system-ui, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   color: #F9FAFB;
 }
 
