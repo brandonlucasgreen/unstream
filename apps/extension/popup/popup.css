@@ -728,7 +728,7 @@ body {
 
 .guide-footnote {
   font-size: 10px;
-  color: #6B7280;
+  color: #8B95A5;
 }
 
 .guide-link {
@@ -802,7 +802,7 @@ body {
 .saved-artist-remove {
   background: none;
   border: none;
-  color: #6B7280;
+  color: #8B95A5;
   font-size: 18px;
   cursor: pointer;
   padding: 2px 6px;
@@ -881,7 +881,7 @@ body {
 }
 
 #search-input::placeholder {
-  color: #6B7280;
+  color: #8B95A5;
 }
 
 #search-input:focus {
@@ -943,7 +943,7 @@ body {
 
 .last-check-time {
   font-size: 11px;
-  color: #6B7280;
+  color: #8B95A5;
   margin-top: 8px;
   text-align: center;
 }
@@ -1012,7 +1012,7 @@ body {
 }
 
 .auth-input::placeholder {
-  color: #6B7280;
+  color: #8B95A5;
 }
 
 .auth-input:focus {
@@ -1303,7 +1303,7 @@ body {
 }
 
 .artist-release-chevron {
-  color: #6B7280;
+  color: #8B95A5;
   font-size: 14px;
   flex-shrink: 0;
   transition: transform 0.2s;
@@ -1319,6 +1319,13 @@ body {
   padding: 10px;
   border-top: 1px solid #374151;
 }
+
+/* Muted text is #8B95A5, not the #6B7280 it used to be. Same fix as PR #401 made on the web
+   (--color-text-muted #666666 -> #808080): on the popup's #1F2937 background, #6B7280 measured
+   3.04:1, under the 4.5:1 that 10-11px text needs, and it was carrying the guide footnote, the
+   last-checked line and the input placeholders. #8B95A5 measures 4.85:1, close to the web's
+   post-fix 4.74:1. The background and border-colour uses of #6B7280 are deliberately unchanged —
+   they aren't text. */
 
 /* The `hidden` class is the popup's only visibility toggle in JS, but the stylesheet only ever
    defined it for two specific components (`.section.hidden`, `.detect-enable-btn.hidden`). Every
