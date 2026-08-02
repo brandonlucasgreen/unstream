@@ -39,4 +39,7 @@ export const PAYOUT_PERCENTAGES = {
   kofi: '92-97%',
   qobuz: '~70%',
   beatport: '55-70%',
+  // Range, not a flat 85%: 15% fee with a 20p minimum (https://jam.coop/docs/about),
+  // so cheap releases pay out less. See api/shared/platform-registry.ts.
+  jamcoop: '82-85%',
 };

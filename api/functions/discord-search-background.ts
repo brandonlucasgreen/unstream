@@ -11,7 +11,9 @@ const PLATFORM_INFO: Record<string, { name: string; emoji: string; category: str
   ampwall: { name: 'Ampwall', emoji: '\u{1F50A}', category: 'Music Marketplaces', payout: '85-90%' },
   qobuz: { name: 'Qobuz', emoji: '\u{1F4BF}', category: 'Music Marketplaces', payout: '~70%' },
   beatport: { name: 'Beatport', emoji: '\u{1F39B}\uFE0F', category: 'Music Marketplaces', payout: '55-70%' },
-  jamcoop: { name: 'Jam.coop', emoji: '\u{1F3B8}', category: 'Music Marketplaces', payout: '86-95%' },
+  // Range, not a flat 85%: 15% fee with a 20p minimum (https://jam.coop/docs/about),
+  // so cheap releases pay out less. See api/shared/platform-registry.ts.
+  jamcoop: { name: 'Jam.coop', emoji: '\u{1F3B8}', category: 'Music Marketplaces', payout: '82-85%' },
   discogs: { name: 'Discogs', emoji: '\u{1F4BF}', category: 'Music Marketplaces' },
   faircamp: { name: 'Faircamp', emoji: '\u26FA', category: 'Decentralized', payout: '90-100%' },
   bandwagon: { name: 'Bandwagon', emoji: '\u{1F690}', category: 'Decentralized', payout: '90-100%' },

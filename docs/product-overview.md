@@ -225,7 +225,7 @@ Configured in `netlify.toml` headers. Allows: GoatCounter analytics, Letterbird 
 | Mirlo | 86-90% |
 | Ampwall | 92-95% |
 | Qobuz | ~70% |
-| Jam.coop | Cooperative model |
+| Jam.coop | 82-85% |
 | Discogs | Varies (marketplace) |
 
 ### Patronage (recurring support)

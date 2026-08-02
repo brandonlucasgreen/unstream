@@ -99,6 +99,11 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     color: '#D97706',
     icon: '🎸',
     category: 'marketplace',
+    // A range, not a flat 85%: the co-op takes 15% "minimum 20p" per sale
+    // (https://jam.coop/docs/about). The 20p floor is what bites on cheap releases —
+    // on a £1.00 sale the fee is 20p (20%), not 15p — and plenty of Jam.coop releases
+    // sell for £0.75–£3.00, so the effective payout at the low end is under 85%.
+    payoutPercent: '82-85%',
     homepageUrl: 'https://jam.coop',
   },
   discogs: {

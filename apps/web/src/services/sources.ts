@@ -199,6 +199,9 @@ export const sources: Record<SourceId, Source> = {
     hasEmbed: false,
     searchUrlTemplate: 'https://jam.coop/artists',
     homepageUrl: 'https://jam.coop',
+    // Range, not a flat 85%: 15% fee with a 20p minimum (https://jam.coop/docs/about),
+    // so cheap releases pay out less. See api/shared/platform-registry.ts.
+    artistPayoutPercent: '82-85%',
   },
   officialsite: {
     id: 'officialsite',

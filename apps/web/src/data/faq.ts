@@ -31,6 +31,7 @@ We also link to a number of alternative services that can help you reduce your d
 - **Ampwall:** **92-95%** of sale price [(source)](https://ampwall.com/selling)
 - **Mirlo:** **86-90%** of sale price [(source)](https://mirlo.space/pages/about)
 - **Bandcamp:** **80-85%** of sale price [(source)](https://bandcamp.com/fair_trade_music_policy)
+- **Jam.coop:** **82-85%** of sale price — a 15% fee with a 20p minimum, so cheaper releases pay out a little less [(source)](https://jam.coop/docs/about)
 - **Qobuz:** **70%** of sale price [(source)](https://www.reddit.com/r/audiophile/comments/esy440/comment/ffcxlql/)
 - **Patreon:** **86-90%** of sales or memberships [(source)](https://support.patreon.com/hc/en-us/articles/11111747095181-Creator-fees-overview)
 - **Buy Me a Coffee:** **92%** of sales or memberships [(source)](https://help.buymeacoffee.com/en/articles/8105744-how-to-calculate-charges-on-your-payment)
