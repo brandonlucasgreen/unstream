@@ -27,7 +27,9 @@ let platformCatalog: [String: PlatformConfig] = [
     "bandwagon": PlatformConfig(name: "Bandwagon", icon: "car", color: "#FF6B35", searchOnly: false),
     "faircamp": PlatformConfig(name: "Faircamp", icon: "tent", color: "#2D5A27", searchOnly: false, artistPayoutPercent: "90-97%"),
     "qobuz": PlatformConfig(name: "Qobuz", icon: "hifispeaker", color: "#4169E1", searchOnly: false, artistPayoutPercent: "~70%"),
-    "jamcoop": PlatformConfig(name: "Jam.coop", icon: "guitars", color: "#D97706", searchOnly: false),
+    // Range, not a flat 85%: 15% fee with a 20p minimum (https://jam.coop/docs/about),
+    // so cheap releases pay out less. See api/shared/platform-registry.ts.
+    "jamcoop": PlatformConfig(name: "Jam.coop", icon: "guitars", color: "#D97706", searchOnly: false, artistPayoutPercent: "82-85%"),
     "freegal": PlatformConfig(name: "Freegal", icon: "building.columns", color: "#00A651", searchOnly: false),
     "hoopla": PlatformConfig(name: "Hoopla", icon: "books.vertical", color: "#E31837", searchOnly: false),
     "patreon": PlatformConfig(name: "Patreon", icon: "heart", color: "#FF424D", searchOnly: false, artistPayoutPercent: "86-90%"),

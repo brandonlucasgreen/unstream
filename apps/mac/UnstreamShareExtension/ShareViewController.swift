@@ -61,7 +61,9 @@ private let allPlatformMeta: [String: PlatformMeta] = [
     "qobuz":        .init(name: "Qobuz",           icon: "💿", payoutPercent: "~70%",   isSocial: false),
     "beatport":     .init(name: "Beatport",        icon: "🎛️", payoutPercent: "55–70%", isSocial: false),
     "even":         .init(name: "EVEN",            icon: "🎤", payoutPercent: "~80%",   isSocial: false),
-    "jamcoop":      .init(name: "Jam.coop",        icon: "🎸", payoutPercent: nil,       isSocial: false),
+    // Range, not a flat 85%: 15% fee with a 20p minimum (https://jam.coop/docs/about),
+    // so cheap releases pay out less. See api/shared/platform-registry.ts.
+    "jamcoop":      .init(name: "Jam.coop",        icon: "🎸", payoutPercent: "82–85%", isSocial: false),
     "officialsite": .init(name: "Official Site",   icon: "🌐", payoutPercent: nil,       isSocial: false),
     "discogs":      .init(name: "Discogs",         icon: "💿", payoutPercent: nil,       isSocial: false),
     "instagram":    .init(name: "Instagram",       icon: "📸", payoutPercent: nil,       isSocial: true),
