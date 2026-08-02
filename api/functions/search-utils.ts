@@ -799,7 +799,9 @@ export function aggregateResults(allResults: PlatformResult[], query?: string): 
 export function attachAmpwallAndSearchLinks(
   aggregated: AggregatedResult[],
   ampwallMatches: Map<string, string>,
-  mbData?: { artistName: string; bandcampUrl?: string } | null,
+  // artistName is null when MusicBrainz had no match — the Bandcamp relation
+  // below is only trusted when it belongs to a named artist.
+  mbData?: { artistName: string | null; bandcampUrl?: string | null } | null,
 ): void {
   const usedPlatformUrls = new Set<string>();
 
@@ -830,7 +832,7 @@ export function attachAmpwallAndSearchLinks(
     // Bandcamp: prefer direct URL from MusicBrainz relations, fall back to search link
     if (!result.platforms.some(p => p.sourceId === 'bandcamp')) {
       // Check if MusicBrainz has a direct Bandcamp URL for this artist
-      const mbBandcampUrl = mbData?.bandcampUrl &&
+      const mbBandcampUrl = mbData?.bandcampUrl && mbData.artistName &&
         normalizeForComparison(mbData.artistName) === normalizedName
         ? mbData.bandcampUrl
         : undefined;

@@ -44,4 +44,22 @@ describe('toStoredResult', () => {
     expect(result!.knownSlug).toBe('patrick-hardy');
     expect(result!.claimedSlug).toBeUndefined();
   });
+
+  // artist_links.display_name is the custom label an artist typed in the profile
+  // editor for an "other" link. It has to survive the DB -> card mapping or the
+  // link renders as a bare platform id on the most polished results we serve.
+  it('carries a stored display name through to the card', () => {
+    const result = toStoredResult(
+      dbArtist({
+        matchConfidence: 'claimed',
+        platforms: [
+          { sourceId: 'other_0', url: 'https://example.com/shop', displayName: 'Tape store' },
+          { sourceId: 'bandcamp', url: 'https://artist.bandcamp.com' },
+        ],
+      }),
+      'kid-lightbulbs',
+    );
+    expect(result!.platforms[0].displayName).toBe('Tape store');
+    expect(result!.platforms[1].displayName).toBeUndefined();
+  });
 });

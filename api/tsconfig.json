@@ -22,7 +22,14 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
+  // Only the files listed here are typechecked. Everything reachable from them
+  // (db.ts, middleware.ts, search-utils.ts, the parsers, api/search/*) is
+  // checked too, which is why search-sources.ts earns its place: it pulls in
+  // most of the search backend. Adding a file here means committing to keeping
+  // it clean under strict mode.
   "include": [
+    "functions/search-sources.ts",
+    "functions/__tests__/to-stored-result.test.ts",
     "functions/me-settings.ts",
     "functions/me-username.ts",
     "functions/me-password.ts",
