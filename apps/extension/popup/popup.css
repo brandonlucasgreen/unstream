@@ -48,6 +48,25 @@
   padding: 0;
 }
 
+/* The popup has to scroll, and `max-height` + `overflow-y` on `body` alone does not make it.
+   CSS propagates `body`'s overflow to the viewport when `html` is `overflow: visible` — and in
+   doing so `body` itself computes to `visible`, so its `max-height` clips the box while the
+   content spills straight out of it. Measured before this fix, with the page forced tall:
+   `html.scrollHeight` was 1587 against a 520px body, i.e. the content had escaped the root
+   element. A tab still scrolls in that state because the viewport scrolls; a popup has no fixed
+   viewport — Chrome sizes the window from the document — so it clips instead.
+
+   Declaring overflow on `html` stops the propagation, and `body` becomes a genuine scroll
+   container. After the fix, same measurement: `html.scrollHeight` equals its client height, and
+   `body` scrolls internally.
+
+   580px rather than 520: Chrome caps a popup at 600px tall, and the releases list earns the
+   extra room. */
+html {
+  overflow: hidden;
+  max-height: 580px;
+}
+
 body {
   font-family: 'Stack Sans Headline', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
@@ -56,7 +75,7 @@ body {
   background: #1F2937;
   width: 380px;
   min-height: 200px;
-  max-height: 520px;
+  max-height: 580px;
   overflow-y: auto;
 }
 
