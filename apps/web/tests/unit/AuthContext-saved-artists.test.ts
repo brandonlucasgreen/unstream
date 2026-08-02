@@ -255,19 +255,15 @@ describe('AuthContext saved artists state management', () => {
       expect(artistIds.length).toBeGreaterThan(100);
     });
 
-    it('validates all IDs are UUIDs before sending', () => {
-      const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      const validIds = [
-        '123e4567-e89b-12d3-a456-426614174000',
-        '223e4567-e89b-12d3-a456-426614174001',
-      ];
-      const mixedIds = [
-        '123e4567-e89b-12d3-a456-426614174000',
-        'not-a-uuid',
-      ];
+    // The ids here are artist **slugs**: handleCheck queries `.in('artist_slug', artistIds)`.
+    // This used to assert they were UUIDs, which was never true of this endpoint — the same
+    // stale mental model that had the React artist page saving by artists-table id.
+    it('sends artist slugs, not database ids', () => {
+      const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{0,58}[a-z0-9])?$/;
+      const artistIds = ['radiohead', 'explosions-in-the-sky', 'bt'];
 
-      expect(validIds.every(id => UUID_RE.test(id))).toBe(true);
-      expect(mixedIds.every(id => UUID_RE.test(id))).toBe(false);
+      expect(artistIds.every(id => SLUG_RE.test(id))).toBe(true);
+      expect(SLUG_RE.test('123e4567-e89b-12d3-a456-426614174000')).toBe(true); // format alone allows it
     });
   });
 });

@@ -35,6 +35,25 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+/**
+ * The server's own explanation of a rejected save/remove, for the Sentry report.
+ *
+ * Without it these reports said only "failed", which is what made a save that answered
+ * 400 "Invalid artist slug format" on every single attempt look indistinguishable from a
+ * flaky network. The status code goes on a tag so the issue page separates a client bug
+ * (400) from an expired session (401) from a database outage (500) at a glance.
+ */
+async function describeFailure(response: Response): Promise<{ statusCode: number; serverError: string }> {
+  let serverError = '(no body)';
+  try {
+    const body = await response.json();
+    if (typeof body?.error === 'string') serverError = body.error;
+  } catch {
+    // A non-JSON body is itself worth seeing, but not worth failing the report over.
+  }
+  return { statusCode: response.status, serverError };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -185,10 +204,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = await response.json();
         setSavedArtists(prev => [...prev, data.savedArtist]);
       } else {
+        const { statusCode, serverError } = await describeFailure(response);
         Sentry.captureMessage('Save artist failed (rolled back)', {
           level: 'warning',
-          extra: { artistId, artistName, hasSession: !!session },
-          tags: { context: 'auth.saveArtist' },
+          extra: { artistId, artistName, hasSession: !!session, serverError },
+          tags: { context: 'auth.saveArtist', status_code: String(statusCode) },
         });
         // Rollback on error: remove from both Set and array
         setSavedArtistIds(prev => {
@@ -240,10 +260,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
+        const { statusCode, serverError } = await describeFailure(response);
         Sentry.captureMessage('Remove artist failed (rolled back)', {
           level: 'warning',
-          extra: { artistId, artistName: removedFromList?.name, hasSession: !!session },
-          tags: { context: 'auth.removeSavedArtist' },
+          extra: { artistId, artistName: removedFromList?.name, hasSession: !!session, serverError },
+          tags: { context: 'auth.removeSavedArtist', status_code: String(statusCode) },
         });
         // Rollback on error: restore both Set and array
         setSavedArtistIds(prev => new Set(prev).add(artistId));
@@ -296,10 +317,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSavedArtistIds(new Set((data.savedArtists || []).map((a: SavedArtist) => a.artistId)));
         setArtistsLoaded(true);
       } else {
+        const { statusCode, serverError } = await describeFailure(response);
         Sentry.captureMessage('Dashboard saved-artists load failed', {
           level: 'warning',
-          extra: { statusCode: response.status, hasSession: !!session },
-          tags: { context: 'auth.loadSavedArtists' },
+          extra: { statusCode, hasSession: !!session, serverError },
+          tags: { context: 'auth.loadSavedArtists', status_code: String(statusCode) },
         });
       }
     } catch (e) {

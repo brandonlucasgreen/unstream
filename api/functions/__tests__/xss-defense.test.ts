@@ -16,7 +16,7 @@ function escapeHtml(str: string): string {
 }
 
 // Mirror of the slug validation regex in api/functions/saved-artists.ts handleSave.
-const SLUG_REGEX = /^[a-z0-9](?:[a-z0-9-]{1,18}[a-z0-9])$/;
+const SLUG_REGEX = /^[a-z0-9](?:[a-z0-9-]{0,58}[a-z0-9])?$/;
 
 describe('XSS defense: escapeHtml applied to artist slug in edge function SSR', () => {
   it('escapes & < > " and \' in slug values', () => {
@@ -77,8 +77,12 @@ describe('XSS defense: slug validation on save rejects malicious slugs', () => {
     expect(SLUG_REGEX.test('BadSlug')).toBe(false);
   });
 
-  it('rejects a slug that is too short (< 3 chars)', () => {
-    expect(SLUG_REGEX.test('ab')).toBe(false);
+  it('rejects an empty slug', () => {
+    expect(SLUG_REGEX.test('')).toBe(false);
+  });
+
+  it('rejects a slug longer than 60 characters', () => {
+    expect(SLUG_REGEX.test('a'.repeat(61))).toBe(false);
   });
 
   it('rejects a slug with leading hyphen', () => {
@@ -99,5 +103,35 @@ describe('XSS defense: slug validation on save rejects malicious slugs', () => {
 
   it('accepts a valid slug with numbers', () => {
     expect(SLUG_REGEX.test('2pac')).toBe(true);
+  });
+
+  // Real published slugs the old 3–20 character bound rejected, which is what broke saving
+  // these artists. Kept as a list so a future tightening of the bound fails here first.
+  it.each([
+    'x',
+    'bt',
+    'iq',
+    'explosions-in-the-sky',
+    'queens-of-the-stone-age',
+    'godspeed-you-black-emperor',
+    'sopor-aeternus-the-ensemble-of-shadows',
+  ])('accepts the published artist slug %s', slug => {
+    expect(SLUG_REGEX.test(slug)).toBe(true);
+  });
+
+  // A lowercase UUID is hex and hyphens, so the slug format alone admits one — the old
+  // 20-character cap was all that rejected it. handleSave checks the UUID shape separately;
+  // this pins the fact that the slug regex cannot be relied on for it.
+  it('does not reject an artists-table UUID on format alone', () => {
+    expect(SLUG_REGEX.test('550e8400-e29b-41d4-a716-446655440000')).toBe(true);
+  });
+
+  it('rejects an artists-table UUID once the UUID shape is checked too', () => {
+    // Mirror of the UUID guard in api/functions/saved-artists.ts handleSave.
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+    const uuid = '550e8400-e29b-41d4-a716-446655440000';
+    expect(SLUG_REGEX.test(uuid) && !UUID_REGEX.test(uuid)).toBe(false);
+    // And it must not reject a real slug that happens to be all hex characters.
+    expect(UUID_REGEX.test('deadbeef')).toBe(false);
   });
 });

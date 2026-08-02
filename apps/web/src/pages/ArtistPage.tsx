@@ -72,8 +72,15 @@ export function ArtistPage() {
     return () => { document.title = 'Unstream - Support artists directly'; };
   }, [payload?.artist.name, payload?.profile?.bio]);
 
-  // Auth-aware save wiring
-  const artistId = payload?.artist.id ?? null;
+  // Auth-aware save wiring.
+  //
+  // Saved artists are keyed by *slug* everywhere: /api/saved-artists stores `artist_slug`,
+  // validates the value against the artist-slug format, and returns slugs — so `savedArtistIds`
+  // holds slugs too. `artist.id` is the artists-table UUID; passing it here made every save
+  // fail format validation with a 400 and every saved artist read back as unsaved. It's the
+  // right identifier only for the admin catalog control, which takes a UUID.
+  const artistId = payload?.artist.slug ?? null;
+  const artistUuid = payload?.artist.id ?? null;
   const artistName = payload?.artist.name ?? '';
   const artistImageUrl = payload?.artist.imageUrl ?? '';
   const isSaved = artistId ? isArtistSaved(artistId) : false;
@@ -126,7 +133,7 @@ export function ArtistPage() {
             />
           )}
           {/* Renders nothing unless a signed-in admin is looking. */}
-          {artistId && <AdminCatalogButton artistId={artistId} />}
+          {artistUuid && <AdminCatalogButton artistId={artistUuid} />}
         </div>
       </main>
       <Footer />
