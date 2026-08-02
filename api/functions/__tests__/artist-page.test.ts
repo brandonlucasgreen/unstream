@@ -193,4 +193,85 @@ describe('GET /api/artist-page', () => {
       expect(mocks.captureMessage.mock.calls[0][0]).toContain('lookup failed');
     });
   });
+
+  describe('release rows carry a price line the client cannot compute', () => {
+    beforeEach(() => {
+      // The outer beforeEach doesn't stub the artist lookup — each test supplies its own — so
+      // without this every call here 404s and the assertions read `undefined`.
+      mocks.getArtistProfileBySlug.mockResolvedValue({
+        bundle: { artist: artistRow(), profile: null, links },
+        failed: false,
+      });
+    });
+
+    // The Mac app and the extension have no copy of the payout registry and must not grow one —
+    // that hand-copied-figure drift is what let the Discord bot quote an unsourced Jam.coop rate
+    // for months. So the summary is priced here, exactly as `check-releases` does for an alert.
+    const sources = [
+      {
+        platform: 'bandcamp',
+        offers: [{ price: 8, currency: 'USD', availability: 'available' }],
+      },
+      {
+        platform: 'discogs',
+        offers: [{ price: 2.64, currency: 'USD', availability: 'available' }],
+      },
+    ];
+
+    const release = {
+      slug: 'maggot-brain',
+      title: 'Maggot Brain',
+      releaseType: 'album',
+      releaseDate: '1971-07-12',
+      datePrecision: 'day',
+      status: 'released',
+      artworkUrl: null,
+      sources,
+    };
+
+    it('prices the leading artist-paying source, not the cheapest listing', async () => {
+      mocks.getArtistReleases.mockResolvedValue({ releases: [release], total: 1 });
+
+      const body = JSON.parse((await call('funkadelic')).body);
+
+      // Discogs is cheaper at $2.64 and must NOT win: it is a secondhand marketplace, so the
+      // artist receives nothing. Bandcamp leads on payout, so its price is the one quoted.
+      expect(body.releases[0].offerSummary).toBe('from $8 · ≈$6.40–$6.80 to artist');
+      expect(body.releases[0].platforms).toEqual(['bandcamp', 'discogs']);
+    });
+
+    it('says nothing rather than inventing a price when no source has a buyable offer', async () => {
+      mocks.getArtistReleases.mockResolvedValue({
+        releases: [{ ...release, sources: [{ platform: 'bandcamp', offers: [] }] }],
+        total: 1,
+      });
+
+      const body = JSON.parse((await call('funkadelic')).body);
+      expect(body.releases[0].offerSummary).toBe('');
+    });
+
+    it('keeps every field the release already had', async () => {
+      mocks.getArtistReleases.mockResolvedValue({ releases: [release], total: 1 });
+
+      const body = JSON.parse((await call('funkadelic')).body);
+      // Additive only — the SPA artist page reads these and must not lose them.
+      expect(body.releases[0]).toMatchObject({
+        slug: 'maggot-brain',
+        title: 'Maggot Brain',
+        releaseDate: '1971-07-12',
+        datePrecision: 'day',
+        status: 'released',
+      });
+    });
+
+    it('reports the true total when the 60-release cap truncates the list', async () => {
+      // The client shows "Showing 60 of 84" off this; collapsing them would imply the list is
+      // the whole catalogue.
+      mocks.getArtistReleases.mockResolvedValue({ releases: [release], total: 84 });
+
+      const body = JSON.parse((await call('funkadelic')).body);
+      expect(body.releaseCount).toBe(84);
+      expect(body.releases).toHaveLength(1);
+    });
+  });
 });

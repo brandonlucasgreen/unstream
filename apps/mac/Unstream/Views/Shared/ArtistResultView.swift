@@ -40,8 +40,14 @@ struct ArtistResultView: View {
     @EnvironmentObject var supportListManager: SupportListManager
     @EnvironmentObject var appState: AppState
 
+    #if os(macOS)
+    /// Set by the popover, which drills down in place rather than opening a window.
+    @Environment(\.openArtistReleases) private var openArtistReleases
+    #endif
+
     #if os(iOS)
     @State private var safariItem: SafariURL?
+    @State private var releaseTarget: ReleaseGuideTarget?
     #endif
 
     private var isSaved: Bool {
@@ -123,6 +129,14 @@ struct ArtistResultView: View {
                         }
                     }
                 }
+            }
+
+            // The way from "I found them" to "here's what their records cost".
+            //
+            // Only shown when the search placed the artist — `pageSlug` is nil for an unverified
+            // result, which nothing persists, so there would be no page behind the row.
+            if let slug = artist.pageSlug {
+                releasesRow(slug: slug)
             }
 
             // Social platforms section
@@ -261,6 +275,54 @@ struct ArtistResultView: View {
         #if os(macOS)
         .help("Share this artist")
         #endif
+    }
+
+    // MARK: - Releases
+
+    /// macOS drills into the popover in place; iOS pushes onto the search tab's existing
+    /// NavigationStack. Both land on the same `ArtistReleasesView`.
+    @ViewBuilder
+    private func releasesRow(slug: String) -> some View {
+        #if os(macOS)
+        Button { openArtistReleases?(slug, artist.name) } label: { releasesRowLabel }
+            .buttonStyle(.plain)
+            .help("See \(artist.name)'s releases and prices")
+        #else
+        NavigationLink {
+            ArtistReleasesView(slug: slug, fallbackName: artist.name) { target in
+                releaseTarget = target
+            }
+            .navigationTitle("Releases")
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(item: $releaseTarget) { target in
+                ReleaseGuideView(target: target)
+                    .navigationTitle("Where to Buy")
+                    .navigationBarTitleDisplayMode(.inline)
+            }
+        } label: {
+            releasesRowLabel
+        }
+        .buttonStyle(.plain)
+        #endif
+    }
+
+    private var releasesRowLabel: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "music.note.list")
+                .foregroundColor(.accentColor)
+            Text("Releases & prices")
+                .font(.caption.weight(.medium))
+                .foregroundColor(.primary)
+            Spacer()
+            Image(systemName: "chevron.right")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+        }
+        .padding(.horizontal, 10).padding(.vertical, 8)
+        .frame(maxWidth: .infinity)
+        .contentShape(Rectangle())
+        .background(RoundedRectangle(cornerRadius: 8).fill(Color.accentColor.opacity(0.10)))
+        .accessibilityLabel("See \(artist.name)'s releases and prices")
     }
 
     // MARK: - Helpers

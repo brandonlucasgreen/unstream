@@ -44,10 +44,21 @@ struct OpenReleaseGuideKey: EnvironmentKey {
     static let defaultValue: ((ReleaseGuideTarget) -> Void)? = nil
 }
 
+/// The same bridge, one level up: show an artist's catalogue. Set by the macOS popover, which
+/// pushes it onto its own stack; iOS uses a NavigationLink and leaves this nil.
+struct OpenArtistReleasesKey: EnvironmentKey {
+    static let defaultValue: ((_ slug: String, _ name: String) -> Void)? = nil
+}
+
 extension EnvironmentValues {
     var openReleaseGuide: ((ReleaseGuideTarget) -> Void)? {
         get { self[OpenReleaseGuideKey.self] }
         set { self[OpenReleaseGuideKey.self] = newValue }
+    }
+
+    var openArtistReleases: ((String, String) -> Void)? {
+        get { self[OpenArtistReleasesKey.self] }
+        set { self[OpenArtistReleasesKey.self] = newValue }
     }
 }
 

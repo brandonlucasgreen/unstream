@@ -9,6 +9,7 @@ import { Sentry } from '../lib/sentry';
 import { isPublishedArtistSlug } from '../shared/published-artist-slugs';
 import { PLATFORMS } from '../shared/platform-registry';
 import { isBandcampFriday } from '../shared/bandcamp-friday';
+import { leadingOfferSummary, orderedSourcePlatforms } from '../shared/release-display';
 import { mainLinkDividerIndexes } from '../shared/link-dividers';
 import { sanitizeEmbed } from './artist-profile';
 
@@ -147,6 +148,23 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     // live Mirlo artist). Beyond it the list says how many more exist rather than fetching them.
     const { releases, total: releaseCount } = await getArtistReleases(artistRow.id, 60);
 
+    // "from $8 · ≈$6.80 to artist", and the platforms ordered artist-paying-first.
+    //
+    // Computed here rather than shipped as raw offers for the client to price up, for the same
+    // reason `/api/release` computes `payoutPercent` server-side: the payout figures live in the
+    // registry, and every hand-kept copy of them is a drift risk (the Discord bot quoted an
+    // unsourced Jam.coop rate for months from exactly such a copy). The web page can already do
+    // this arithmetic from its own mirror of the registry; the Mac app and the extension cannot,
+    // and shouldn't learn to.
+    //
+    // Same two fields, same names, as a release alert from `check-releases` — a release row
+    // should read identically wherever a client renders one.
+    const releasesWithSummary = releases.map(release => ({
+      ...release,
+      offerSummary: leadingOfferSummary(release.sources),
+      platforms: orderedSourcePlatforms(release.sources),
+    }));
+
     const payload = {
       artist: {
         id: artistRow.id,
@@ -169,7 +187,7 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       // Indexes into `links` above which a horizontal divider is drawn.
       linkDividers: mainLinkDividerIndexes(allLinks, isMainLink, profile?.link_dividers),
       socialLinks: social,
-      releases,
+      releases: releasesWithSummary,
       releaseCount,
       bandcampFriday: bcFriday,
     };

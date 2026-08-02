@@ -5,6 +5,20 @@ enum PopoverTab {
     case supportList
 }
 
+/// One level of the popover's drill-down.
+enum PopoverRoute: Hashable {
+    case artistReleases(slug: String, name: String)
+    case releaseGuide(ReleaseGuideTarget)
+
+    /// Shown centred in the back header, so it's obvious which level you're on.
+    var title: String {
+        switch self {
+        case .artistReleases: return "Releases"
+        case .releaseGuide: return "Where to Buy"
+        }
+    }
+}
+
 struct PopoverView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var supportListManager: SupportListManager
@@ -14,8 +28,12 @@ struct PopoverView: View {
     @State private var selectedTab: PopoverTab = .search
     @State private var showSignIn = false
     @State private var pollTask: Task<Void, Never>?
-    /// Non-nil while the popover is drilled into a release's buying guide.
-    @State private var openGuide: ReleaseGuideTarget?
+    /// Where the popover has drilled to. Empty means the normal Search/Saved tabs.
+    ///
+    /// A stack rather than one optional because there are genuinely two levels now — a search
+    /// result opens an artist's releases, and a release opens its buying guide — and Back from
+    /// the guide should land on the release list you came from, not all the way out to search.
+    @State private var route: [PopoverRoute] = []
     @FocusState private var searchFieldFocused: Bool
 
     var body: some View {
@@ -24,8 +42,8 @@ struct PopoverView: View {
             // menu-bar app, and a second window for a page this small would be a heavier answer
             // than the question deserves. The footer stays put so the popover doesn't resize
             // out from under the pointer.
-            if let target = openGuide {
-                releaseGuide(target)
+            if let current = route.last {
+                drillDown(current)
             } else {
                 browseContent
             }
@@ -44,7 +62,7 @@ struct PopoverView: View {
             // view, so onDisappear isn't reliable; onAppear fires on each show. Without this,
             // reopening the menu bar would drop you back into the release you last looked at.
             showSignIn = false
-            openGuide = nil
+            route = []
             focusSearchField()
         }
         .onChange(of: selectedTab) { tab in
@@ -57,10 +75,10 @@ struct PopoverView: View {
         .onReceive(NotificationCenter.default.publisher(for: .popoverDidClose)) { _ in
             // NSPopoverDelegate fires this unconditionally when the popover closes.
             showSignIn = false
-            openGuide = nil
+            route = []
         }
         .onReceive(NotificationCenter.default.publisher(for: .showSearchTab)) { _ in
-            openGuide = nil
+            route = []
             selectedTab = .search
         }
         .onChange(of: auth.isSignedIn) { signedIn in
@@ -70,12 +88,12 @@ struct PopoverView: View {
         }
     }
 
-    // MARK: - Release guide (drill-down)
+    // MARK: - Drill-down
 
-    private func releaseGuide(_ target: ReleaseGuideTarget) -> some View {
+    private func drillDown(_ current: PopoverRoute) -> some View {
         VStack(spacing: 0) {
             HStack(spacing: 6) {
-                Button(action: { openGuide = nil }) {
+                Button(action: { _ = route.popLast() }) {
                     HStack(spacing: 3) {
                         Image(systemName: "chevron.left")
                         Text("Back")
@@ -84,11 +102,11 @@ struct PopoverView: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundColor(.accentColor)
-                .help("Back to saved artists")
+                .help("Back")
 
                 Spacer()
 
-                Text("Where to Buy")
+                Text(current.title)
                     .font(.caption.weight(.semibold))
                     .foregroundColor(.secondary)
 
@@ -102,8 +120,17 @@ struct PopoverView: View {
 
             Divider()
 
-            ReleaseGuideView(target: target)
-                .frame(maxHeight: 350)
+            Group {
+                switch current {
+                case let .artistReleases(slug, name):
+                    ArtistReleasesView(slug: slug, fallbackName: name) { target in
+                        route.append(.releaseGuide(target))
+                    }
+                case let .releaseGuide(target):
+                    ReleaseGuideView(target: target)
+                }
+            }
+            .frame(maxHeight: 350)
         }
     }
 
@@ -230,7 +257,10 @@ struct PopoverView: View {
             }
             .frame(maxHeight: 350)
             .environment(\.openReleaseGuide) { target in
-                openGuide = target
+                route = [.releaseGuide(target)]
+            }
+            .environment(\.openArtistReleases) { slug, name in
+                route = [.artistReleases(slug: slug, name: name)]
             }
         }
     }
@@ -335,20 +365,20 @@ struct PopoverView: View {
     private var keyboardShortcuts: some View {
         Group {
             Button("Search") {
-                openGuide = nil
+                route = []
                 selectedTab = .search
                 focusSearchField()
             }
             .keyboardShortcut("f", modifiers: .command)
 
             Button("Search Tab") {
-                openGuide = nil
+                route = []
                 selectedTab = .search
             }
             .keyboardShortcut("1", modifiers: .command)
 
             Button("Saved Artists Tab") {
-                openGuide = nil
+                route = []
                 selectedTab = .supportList
             }
             .keyboardShortcut("2", modifiers: .command)
@@ -356,8 +386,8 @@ struct PopoverView: View {
             // Escape backs out of a release guide, which is what a drill-down should do. It is
             // registered only while one is open so that everywhere else Escape keeps its usual
             // job of dismissing the popover.
-            if openGuide != nil {
-                Button("Back") { openGuide = nil }
+            if !route.isEmpty {
+                Button("Back") { _ = route.popLast() }
                     .keyboardShortcut(.escape, modifiers: [])
             }
 

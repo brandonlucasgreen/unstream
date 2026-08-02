@@ -35,6 +35,30 @@ actor ReleaseDetailService {
         return (parts[1], parts[2])
     }
 
+    /// An artist's catalogue — the list a fan picks a release from before seeing its guide.
+    ///
+    /// Same three outcomes as `fetch(artist:release:)`: a 404 means no such artist page, anything
+    /// else means we couldn't get an answer and must not be rendered as "they have no releases".
+    func fetchArtistPage(slug: String) async throws -> ArtistPage {
+        guard let encoded = slug.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let url = URL(string: "\(baseURL)/artist-page?slug=\(encoded)") else {
+            throw ReleaseDetailError.unavailable
+        }
+
+        let (data, response) = try await session.data(from: url)
+        guard let http = response as? HTTPURLResponse else { throw ReleaseDetailError.unavailable }
+
+        if http.statusCode == 404 { throw ReleaseDetailError.notFound }
+        guard (200...299).contains(http.statusCode) else { throw ReleaseDetailError.unavailable }
+
+        do {
+            return try JSONDecoder().decode(ArtistPage.self, from: data)
+        } catch {
+            print("[ReleaseDetailService] Artist page decode failed for \(slug): \(error)")
+            throw ReleaseDetailError.unavailable
+        }
+    }
+
     func fetch(artist: String, release: String) async throws -> ReleaseDetail {
         guard let encodedArtist = artist.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
               let encodedRelease = release.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),

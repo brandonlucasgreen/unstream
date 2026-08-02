@@ -43,6 +43,7 @@
 		7182754E06D41AE6FB47653A /* SupportListManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F5BF0BE3FBF25D3C4102A6 /* SupportListManager.swift */; };
 		73FF0C6CC35AB1BD1A3C1635 /* Clipboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A30019089B4F933FE70826 /* Clipboard.swift */; };
 		75EF27233764A8174CBE4753 /* SafariView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D144E8586F19DBA63C2F37B1 /* SafariView.swift */; };
+		777C57218E913093E047A57A /* ArtistReleasesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CD90F124A9BB110C3863CFD /* ArtistReleasesView.swift */; };
 		7F078F17D544C2F32A801E60 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B2D53C4C4BBA92385BF4F0A /* SettingsView.swift */; platformFilters = (macos, ); };
 		7FA2720BFA00323DC8E66A9A /* ListenBrainzService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 757215FB463E24C4101FECCF /* ListenBrainzService.swift */; platformFilters = (macos, ); };
 		8496B178348A9BFE188287B2 /* LinkActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D7374CAB7B2AF10890C2D2 /* LinkActions.swift */; };
@@ -53,6 +54,7 @@
 		8CD55AA9054F310B1DBD51DA /* ServicesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEF52280B036F1EB34F4127 /* ServicesProvider.swift */; platformFilters = (macos, ); };
 		917C407BBA300BE70B9BDEFB /* ScrobbleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEEE83E95439F19BFC679216 /* ScrobbleManager.swift */; platformFilters = (macos, ); };
 		93956240B6028E760C791028 /* SavedArtistsSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16504D9BC91FD976CD10D549 /* SavedArtistsSyncTests.swift */; };
+		943B6AACF5076051E8596676 /* ArtistReleases.swift in Sources */ = {isa = PBXBuildFile; fileRef = B23E1517361AB51417316732 /* ArtistReleases.swift */; };
 		A3526462820B7494F5463BE2 /* UnstreamApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 913EEE8809001930E4F88F8C /* UnstreamApp.swift */; };
 		A8FD43FE100F214CA8E6241C /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE9E59C365D8F116C435B8BC /* EmptyStateView.swift */; };
 		A91A7A297319DD5233D5CAC3 /* ArtistResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94E30B61F5B6C06CA39DB0E2 /* ArtistResultView.swift */; };
@@ -159,6 +161,7 @@
 		9B08A02BD24EAF475A2689D6 /* NowPlayingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingView.swift; sourceTree = "<group>"; };
 		9B2D53C4C4BBA92385BF4F0A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		9C40AC0CB901A9F09846258C /* TipJarStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipJarStore.swift; sourceTree = "<group>"; };
+		9CD90F124A9BB110C3863CFD /* ArtistReleasesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtistReleasesView.swift; sourceTree = "<group>"; };
 		A4CEC5CEC07C87673B1F5A61 /* IndieArtistDirectoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndieArtistDirectoryService.swift; sourceTree = "<group>"; };
 		A93B97CDB100943ECCA942E6 /* NowPlayingNotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingNotificationManager.swift; sourceTree = "<group>"; };
 		AB06541602FC51167DB50DC9 /* ReleaseAlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseAlertManager.swift; sourceTree = "<group>"; };
@@ -166,6 +169,7 @@
 		AD8B198703B8234660D2ABF8 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		B0A30019089B4F933FE70826 /* Clipboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clipboard.swift; sourceTree = "<group>"; };
 		B144C3234699177712315DB9 /* UnstreamTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnstreamTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B23E1517361AB51417316732 /* ArtistReleases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtistReleases.swift; sourceTree = "<group>"; };
 		B245CC3DBF71C4B066A96632 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		B4745357EE3AD119D3F7B059 /* BandcampFriday.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandcampFriday.swift; sourceTree = "<group>"; };
 		B733B6764210C3CAE08F12E0 /* SavedArtistsSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedArtistsSync.swift; sourceTree = "<group>"; };
@@ -283,6 +287,7 @@
 		8D5154B5C1C2B262BC1B507F /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				9CD90F124A9BB110C3863CFD /* ArtistReleasesView.swift */,
 				94E30B61F5B6C06CA39DB0E2 /* ArtistResultView.swift */,
 				7FEFD60988639A1ECC95D56A /* BrandIcons.swift */,
 				B0A30019089B4F933FE70826 /* Clipboard.swift */,
@@ -340,6 +345,7 @@
 			isa = PBXGroup;
 			children = (
 				DC148A11F868801384A78672 /* AppState.swift */,
+				B23E1517361AB51417316732 /* ArtistReleases.swift */,
 				752DBE41E6259FE62017B41D /* IndieArtist.swift */,
 				BC8C8A39D8800BDBA893E0EA /* NowPlaying.swift */,
 				E488821D948022DCF94F9759 /* PlatformCatalog.swift */,
@@ -544,6 +550,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				DEAB976819E6E900B9C1114A /* AppState.swift in Sources */,
+				943B6AACF5076051E8596676 /* ArtistReleases.swift in Sources */,
+				777C57218E913093E047A57A /* ArtistReleasesView.swift in Sources */,
 				A91A7A297319DD5233D5CAC3 /* ArtistResultView.swift in Sources */,
 				C79BDDA2535271F460C71568 /* AuthService.swift in Sources */,
 				B8D05D430D492713FB2E97EF /* BandcampFriday.swift in Sources */,
