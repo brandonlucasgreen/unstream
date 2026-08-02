@@ -332,15 +332,6 @@ describe('ArtistReleasesPage — self-serve catalog scan', () => {
 
   const SCAN_LABEL = 'Scan my links for releases';
 
-  // Visibility follows the server's `canTrigger`, not a copy of the rule in page code — so the
-  // rollout gate can't drift out of sync with the client.
-  it('hides the scan control when the server says the caller cannot trigger', async () => {
-    setupFetchMock([], { canTrigger: false, state: null, stateError: null });
-    renderPage();
-    await waitFor(() => screen.getByText('No releases catalogued yet.'));
-    expect(screen.queryByText(SCAN_LABEL)).toBeNull();
-  });
-
   it('hides the scan control entirely when the response carries no catalog block at all', async () => {
     setupFetchMock([]);
     renderPage();
@@ -348,19 +339,33 @@ describe('ArtistReleasesPage — self-serve catalog scan', () => {
     expect(screen.queryByText(SCAN_LABEL)).toBeNull();
   });
 
-  it('shows the scan control, and says it is admin-only for now', async () => {
-    setupFetchMock([], { canTrigger: true, state: null, stateError: null });
+  // Every verified owner gets the control now — the admin-only rollout gate is gone, and what
+  // replaced it is a once-a-day limit rather than a limit on who may press the button.
+  it('shows the scan control to any owner, ready to run', async () => {
+    setupFetchMock([], { state: null, stateError: null, nextScanAvailableAt: null });
     renderPage();
     await waitFor(() => expect(screen.getByText(SCAN_LABEL)).toBeTruthy());
-    expect(screen.getByText(/Admin only for now/)).toBeTruthy();
+    expect((screen.getByText(SCAN_LABEL) as HTMLButtonElement).disabled).toBe(false);
+    expect(screen.getByText(/once a day/)).toBeTruthy();
     expect(screen.getByText('Never catalogued')).toBeTruthy();
+  });
+
+  // The cooldown is the server's answer, not a rule re-derived here — and a scan that would come
+  // back 429 has to read as "not yet" rather than a button that errors when pressed.
+  it('disables the scan control while the server says a scan is not due yet', async () => {
+    const readyAt = new Date(Date.now() + 5 * 3600_000).toISOString();
+    setupFetchMock([], { state: null, stateError: null, nextScanAvailableAt: readyAt });
+    renderPage();
+    await waitFor(() => expect(screen.getByText(SCAN_LABEL)).toBeTruthy());
+    expect((screen.getByText(SCAN_LABEL) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByText(/you can scan again in about 5 hours/)).toBeTruthy();
   });
 
   it('summarizes a previous run', async () => {
     setupFetchMock([], {
-      canTrigger: true,
       state: { last_catalogued_at: '2026-08-01T00:00:00Z', releases_found: 12, releases_detailed: 9, last_error: null },
       stateError: null,
+      nextScanAvailableAt: null,
     });
     renderPage();
     await waitFor(() => expect(screen.getByText('12 releases found, 9 with prices')).toBeTruthy());
@@ -368,7 +373,7 @@ describe('ArtistReleasesPage — self-serve catalog scan', () => {
 
   // "We couldn't ask" must not render as a confident "Never catalogued".
   it('reports an unreadable state instead of claiming never-catalogued', async () => {
-    setupFetchMock([], { canTrigger: true, state: null, stateError: 'Could not read catalog state' });
+    setupFetchMock([], { state: null, stateError: 'Could not read catalog state', nextScanAvailableAt: null });
     renderPage();
     await waitFor(() => expect(screen.getByText('Could not read catalog state')).toBeTruthy());
     expect(screen.queryByText('Never catalogued')).toBeNull();
@@ -376,16 +381,16 @@ describe('ArtistReleasesPage — self-serve catalog scan', () => {
 
   it('reports a failed previous run rather than a count', async () => {
     setupFetchMock([], {
-      canTrigger: true,
       state: { last_catalogued_at: '2026-08-01T00:00:00Z', releases_found: 0, releases_detailed: 0, last_error: 'bandcamp bot challenge' },
       stateError: null,
+      nextScanAvailableAt: null,
     });
     renderPage();
     await waitFor(() => expect(screen.getByText(/Last run failed: bandcamp bot challenge/)).toBeTruthy());
   });
 
   it('posts the catalog action for this artist when clicked', async () => {
-    setupFetchMock([], { canTrigger: true, state: null, stateError: null });
+    setupFetchMock([], { state: null, stateError: null, nextScanAvailableAt: null });
     renderPage();
     await waitFor(() => screen.getByText(SCAN_LABEL));
 
@@ -406,7 +411,10 @@ describe('ArtistReleasesPage — self-serve catalog scan', () => {
       if (!init || init.method === undefined) {
         return Promise.resolve({
           ok: true,
-          json: async () => ({ releases: [], catalog: { canTrigger: true, state: null, stateError: null } }),
+          json: async () => ({
+            releases: [],
+            catalog: { state: null, stateError: null, nextScanAvailableAt: null },
+          }),
         });
       }
       return Promise.resolve({

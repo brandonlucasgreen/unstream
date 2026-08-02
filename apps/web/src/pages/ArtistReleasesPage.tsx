@@ -64,9 +64,10 @@ interface CatalogState {
 }
 
 interface CatalogInfo {
-  canTrigger: boolean;
   state: CatalogState | null;
   stateError: string | null;
+  /** ISO timestamp the next scan is allowed, or null if one can run now. Decided server-side. */
+  nextScanAvailableAt: string | null;
 }
 
 /** How long to keep asking before giving up. A full catalogue with prices takes a few minutes. */
@@ -209,7 +210,7 @@ export function ArtistReleasesPage() {
             <>
               {/* Above the list, not below it: scanning is where an artist starts, and on a real
                   catalogue the bottom of the page is a long scroll away. */}
-              {catalog?.canTrigger && (
+              {catalog && (
                 <CatalogNowPanel
                   slug={slug}
                   token={session?.access_token}
@@ -331,12 +332,23 @@ function describeCatalogState(state: CatalogState | null): string {
   return `${state.releases_found ?? 0} releases found, ${state.releases_detailed ?? 0} with prices`;
 }
 
+/** "in about 5 hours" / "in about 20 minutes" — enough precision for a once-a-day limit. */
+function describeWait(readyAt: string): string {
+  const minutes = Math.ceil((new Date(readyAt).getTime() - Date.now()) / 60_000);
+  if (minutes <= 1) return 'in a moment';
+  if (minutes < 60) return `in about ${minutes} minutes`;
+  const hours = Math.round(minutes / 60);
+  return hours === 1 ? 'in about an hour' : `in about ${hours} hours`;
+}
+
 /**
- * "Scan my links for releases" — the self-serve version of the admin catalog button.
+ * "Scan my links for releases" — the self-serve version of the admin catalog button, available
+ * to any artist who owns a verified profile.
  *
- * Visibility is decided by the server (`catalog.canTrigger`), not re-derived here, so the
- * rollout gate can't drift out of sync with a copy of the rule in page code. While that gate is
- * admin-only the copy says so plainly rather than pretending to be generally available.
+ * Whether a scan may run *right now* is decided by the server (`catalog.nextScanAvailableAt`)
+ * rather than re-derived here, so the once-a-day limit can't drift out of sync with a copy of
+ * the rule in page code. The button is disabled ahead of a refusal on purpose: a scan that would
+ * come back 429 should read as "not yet", not as a button that errors when you press it.
  *
  * Polls for the outcome the same way `AdminCatalogButton` does, and for the same reason: Netlify
  * answers a background invocation with 202 the moment it's queued and discards the handler's
@@ -458,6 +470,10 @@ function CatalogNowPanel({
     }
   }, [slug, token, poll]);
 
+  // Read from the prop at render time rather than held in state, so a scan that finishes and
+  // refetches re-disables the button with its new cooldown without any extra wiring.
+  const readyAt = catalog.nextScanAvailableAt;
+
   return (
     <div className="p-4 rounded-xl border border-dashed border-border space-y-2">
       <h2 className="font-display text-base font-semibold text-text-primary">
@@ -471,7 +487,7 @@ function CatalogNowPanel({
       <div className="flex flex-wrap items-center gap-3 pt-1">
         <button
           onClick={start}
-          disabled={running || !token}
+          disabled={running || !token || readyAt !== null}
           className="px-4 py-2 rounded-lg bg-bg-secondary border border-border text-sm text-text-primary hover:bg-bg-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {running ? 'Scanning…' : 'Scan my links for releases'}
@@ -479,7 +495,9 @@ function CatalogNowPanel({
         <span className="text-xs text-text-muted">{status}</span>
       </div>
       <p className="text-[11px] text-text-muted pt-1">
-        Admin only for now, while we watch how it behaves.
+        {readyAt
+          ? `We checked your links in the last day — you can scan again ${describeWait(readyAt)}.`
+          : 'You can run this once a day. Scanning re-reads every release page, so it takes a few minutes.'}
       </p>
     </div>
   );

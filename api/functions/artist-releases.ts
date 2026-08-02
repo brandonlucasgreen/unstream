@@ -26,7 +26,7 @@ import {
   clearCatalogCooldown,
   clearReleaseDetailCooldown,
 } from './db';
-import { authenticateAdmin, authenticateBearer, buildCorsHeaders } from './middleware';
+import { authenticateBearer, buildCorsHeaders } from './middleware';
 import { cacheDeleteByArtist } from './cache';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { triggerCatalogNow } from './request-catalog';
@@ -68,21 +68,37 @@ function isKnownPlatform(platform: string): boolean {
 }
 
 /**
- * Is self-serve cataloguing available to this caller yet?
+ * How long an artist waits between self-serve scans.
  *
- * **A rollout gate, deliberately separate from the permission model.** Ownership is what
- * *authorizes* the `catalog` action — the artist asking is the artist whose catalog it is. This
- * extra admin check is a temporary limit on who can reach it at all, while the crawl behaviour
- * is watched on real traffic: an artist-triggered crawl spends the same shared hourly budget
- * every fan-triggered one does, and the newer sources (Faircamp, discovered links) have never
- * run against anything but one test instance.
+ * This replaces the admin-only rollout gate the feature launched behind, and it is deliberately
+ * a *different* kind of limit. Ownership is what authorizes a scan — the artist asking is the
+ * artist whose catalog it is — but authorization puts no ceiling on how *often* the button may
+ * be pressed, and every press is a fresh crawl of that artist's Bandcamp, Discogs and Faircamp
+ * pages, spending the same shared hourly budget fan-driven cataloguing spends. Now that any
+ * verified owner can reach it, that ceiling has to exist somewhere.
  *
- * **To open this to all verified artists, delete this function and its two call sites.** Nothing
- * about the ownership checks changes — which is the point of keeping the two ideas apart rather
- * than folding the admin test into the authorization path.
+ * A day is generous for the real need: a catalogue changes when a release ships, not hourly.
+ *
+ * Admins are not exempt — `/api/admin/catalog-artist` (the button on the public artist page) is
+ * the unthrottled path, and keeping this one rule for everybody means the artist-facing surface
+ * behaves the same way whoever is looking at it.
  */
-async function canTriggerCatalog(authHeader: string | undefined): Promise<boolean> {
-  return (await authenticateAdmin(authHeader)) !== null;
+const SCAN_COOLDOWN_HOURS = 24;
+
+/**
+ * When may this artist be scanned again — or null if now.
+ *
+ * Measured from `release_catalog_state.last_attempted_at`, which is the last time we crawled
+ * this artist *for any reason*, so the honest phrasing in the UI is "we last checked your
+ * links", not "you last scanned". Ordinary fan traffic can't hold the button down:
+ * `claimArtistForCatalog` only stamps that column when a crawl actually proceeds, which for
+ * demand-driven triggers is at most once every seven days.
+ */
+function nextScanAvailableAt(lastAttemptedAt: string | null | undefined): string | null {
+  if (!lastAttemptedAt) return null;
+  const readyAt = new Date(lastAttemptedAt).getTime() + SCAN_COOLDOWN_HOURS * 3600_000;
+  if (!Number.isFinite(readyAt) || readyAt <= Date.now()) return null;
+  return new Date(readyAt).toISOString();
 }
 
 async function purgeArtistCaches(artistName: string, slug: string): Promise<void> {
@@ -152,12 +168,11 @@ export async function handler(event: {
 
     const releases = await getArtistReleasesForOwner(owned.artistId);
 
-    // `canTrigger` comes from the server rather than being re-derived in the page, so the
-    // button's visibility follows the real rule instead of a copy of it — same reasoning as
-    // AdminCatalogButton. `state` is three-valued (see getCatalogState): a failed read must not
-    // render as a confident "never catalogued".
-    const canTrigger = await canTriggerCatalog(authHeader);
-    const stateResult = canTrigger ? await getCatalogState(owned.artistId) : null;
+    // The cooldown is computed here rather than re-derived in the page, so the button's
+    // disabled state follows the real rule instead of a copy of it. `state` is three-valued
+    // (see getCatalogState): a failed read must not render as a confident "never catalogued",
+    // and it must not render as a scan that's ready to run either.
+    const stateResult = await getCatalogState(owned.artistId);
 
     return {
       statusCode: 200,
@@ -165,9 +180,11 @@ export async function handler(event: {
       body: JSON.stringify({
         releases,
         catalog: {
-          canTrigger,
-          state: stateResult?.ok ? stateResult.state : null,
-          stateError: stateResult && !stateResult.ok ? stateResult.reason : null,
+          state: stateResult.ok ? stateResult.state : null,
+          stateError: stateResult.ok ? null : stateResult.reason,
+          nextScanAvailableAt: stateResult.ok
+            ? nextScanAvailableAt(stateResult.state?.last_attempted_at)
+            : null,
         },
       }),
     };
@@ -242,18 +259,35 @@ export async function handler(event: {
   // Cataloguing returns 202 and is settled by polling the GET, so it doesn't fit the
   // ok/responseExtra shape the editing actions share below — handled on its own here.
   if (action === 'catalog') {
-    if (!(await canTriggerCatalog(authHeader))) {
+    // Read the state *before* clearing the cooldown below — `clearCatalogCooldown` backdates
+    // `last_attempted_at` two hours to let the crawl through, so checking afterwards would be
+    // checking a value this same request just wrote.
+    const stateResult = await getCatalogState(artistId);
+    if (!stateResult.ok) {
+      // Not knowing whether a scan is allowed is not permission to run one. The same answer
+      // `claimArtistForCatalog` gives itself when it can't read the row.
+      return { statusCode: 503, headers: CORS_HEADERS, body: JSON.stringify({ error: stateResult.reason }) };
+    }
+
+    const readyAt = nextScanAvailableAt(stateResult.state?.last_attempted_at);
+    if (readyAt) {
       return {
-        statusCode: 403,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({ error: 'Self-serve cataloguing is not available yet.' }),
+        statusCode: 429,
+        headers: {
+          ...CORS_HEADERS,
+          'Retry-After': String(Math.ceil((new Date(readyAt).getTime() - Date.now()) / 1000)),
+        },
+        body: JSON.stringify({
+          error: 'We checked your links in the last day — a scan runs at most once a day.',
+          nextScanAvailableAt: readyAt,
+        }),
       };
     }
 
     // Both, always: the cooldown lets the crawl run, and the detail reset is what makes it
-  // re-read prices rather than only re-confirming the release list. See db.ts.
-  await clearCatalogCooldown(artistId);
-  await clearReleaseDetailCooldown(artistId);
+    // re-read prices rather than only re-confirming the release list. See db.ts.
+    await clearCatalogCooldown(artistId);
+    await clearReleaseDetailCooldown(artistId);
     const queued = await triggerCatalogNow(artistId);
     if (!queued.ok) {
       return { statusCode: queued.status, headers: CORS_HEADERS, body: JSON.stringify({ error: queued.error }) };
