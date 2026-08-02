@@ -17,6 +17,7 @@ import {
   persistDiscogsReleases,
   persistFaircampReleases,
   persistJamcoopReleases,
+  persistMirloReleases,
   persistMusicBrainzEnrichment,
   persistReleaseDetail,
   persistReleases,
@@ -25,13 +26,18 @@ import {
   type CatalogTrigger,
   type PersistedRelease,
 } from './db';
+import { cacheGetOrFetch } from './cache';
 import { isUrlHostnameAllowed } from './middleware';
 import { safeFetch, safeHostname } from './safe-fetch';
 import {
   bandcampMusicUrl,
   buildFaircampRelease,
   buildJamcoopRelease,
+  buildMirloReleases,
   findDiscoveredReleaseLinks,
+  ingestCanimusCatalog,
+  mirloArtistSlug,
+  type CanimusCatalog,
   ingestBandcampDetail,
   ingestBandcampGrid,
   ingestDiscogsMasters,
@@ -187,6 +193,35 @@ interface JamcoopBudget {
   deadline: number;
 }
 
+// --- Mirlo (Fairplayer/Canimus federation) --------------------------------------
+//
+// Structurally unlike every source above. There is no per-artist request: the Canimus catalog
+// is one document covering every artist who opted in to federated syndication, so the whole
+// batch shares a single fetch, memoized for the invocation and cached in Redis across them.
+// An artist's pass is then a lookup in an already-fetched document and costs Mirlo nothing.
+//
+// Gated off by default. Mirlo's robots.txt disallows `/v1/`, which is where the documented
+// federation endpoint lives, and that tension is Mirlo's to resolve rather than ours to assume
+// away — see the Mirlo section in release-ingest.ts. The flag exists so this can ship,
+// reviewed and tested, without adding a single request until Mirlo says yes.
+
+const CANIMUS_CATALOG_URL = 'https://mirlo.space/v1/sm/canimus.json';
+
+/**
+ * One document, refreshed a few times a day at most. Mirlo's catalogue is small and opt-in, and
+ * new releases are not so time-critical that a stale half-day matters against the cost of
+ * re-pulling a whole platform's catalogue on every batch.
+ */
+const CANIMUS_CACHE_TTL_SECONDS = 6 * 60 * 60;
+
+/** Pages of `take`, so one bad response can't turn into an unbounded pagination loop. */
+const CANIMUS_MAX_PAGES = 10;
+const CANIMUS_PAGE_SIZE = 200;
+
+function isMirloCanimusEnabled(): boolean {
+  return process.env.MIRLO_CANIMUS_ENABLED === 'true';
+}
+
 function isAuthorized(header: string | undefined): boolean {
   // Reuses the secret this repo already has for internal function-to-function calls
   // (resolve-url, search-sources, and both v1 wrappers). A second near-identically-named
@@ -242,6 +277,11 @@ export async function handler(event: {
   const trigger: CatalogTrigger = body.trigger === 'saved' ? 'saved' : 'searched';
 
   if (artistIds.length === 0) return { statusCode: 400, body: '' };
+
+  // A warm Lambda outlives an invocation, and the memo has no TTL of its own — without this a
+  // container could serve the same Canimus snapshot for as long as it stays warm, well past the
+  // six hours the Redis entry is allowed to live.
+  __resetCanimusMemo();
 
   let catalogued = 0;
   let skipped = 0;
@@ -321,8 +361,11 @@ async function catalogArtist(
     await recordCatalogOutcome(artistId, { error: 'artist not found' });
     return null;
   }
-  if (!artist.bandcampUrl && !artist.discogsUrl && !artist.faircampUrl && !artist.jamcoopUrl) {
-    await recordCatalogOutcome(artistId, { error: 'no bandcamp, discogs, faircamp, or jam.coop link stored' });
+  const mirloUrl = isMirloCanimusEnabled() ? artist.mirloUrl : null;
+  if (!artist.bandcampUrl && !artist.discogsUrl && !artist.faircampUrl && !artist.jamcoopUrl && !mirloUrl) {
+    await recordCatalogOutcome(artistId, {
+      error: 'no bandcamp, discogs, faircamp, jam.coop, or mirlo link stored',
+    });
     return null;
   }
 
@@ -356,6 +399,11 @@ async function catalogArtist(
       const { found, detailed } = await catalogJamcoop(artistId, artist.jamcoopUrl, jamcoopBudget);
       totalFound += found;
       totalDetailed += detailed;
+    }
+    // No budget parameter: the Canimus catalog is one shared fetch for the whole invocation,
+    // so an extra artist here costs Mirlo nothing and there is no per-artist spend to bound.
+    if (mirloUrl) {
+      totalFound += await catalogMirlo(artistId, mirloUrl);
     }
     if (artist.officialSiteUrl) {
       await catalogOfficialSite(artistId, artist.officialSiteUrl);
@@ -708,6 +756,134 @@ async function catalogFaircampPrices(
  * Never throws: a Jam.coop hiccup is worth logging, not worth failing an artist whose Bandcamp
  * pass may have already succeeded this run.
  */
+/**
+ * Fetch and parse the Canimus catalog, once per invocation.
+ *
+ * `undefined` distinguishes "not fetched yet" from a cached `null` meaning "the fetch failed
+ * this invocation" — so a failure is not retried 25 times inside one batch, and equally is not
+ * written to Redis as if Mirlo had said nobody opted in. That distinction is the rule this
+ * codebase keeps relearning: never cache uncertainty.
+ */
+let canimusMemo: CanimusCatalog | null | undefined;
+
+/** Reset between invocations in tests; a warm Lambda would otherwise reuse a stale memo. */
+export function __resetCanimusMemo(): void {
+  canimusMemo = undefined;
+}
+
+async function loadCanimusCatalog(): Promise<CanimusCatalog | null> {
+  if (canimusMemo !== undefined) return canimusMemo;
+
+  const { data } = await cacheGetOrFetch<CanimusCatalog | null>(
+    'canimus:mirlo:v1',
+    fetchCanimusCatalog,
+    CANIMUS_CACHE_TTL_SECONDS,
+    // A failed or unparseable fetch is not "the catalogue is empty". Caching that would hide
+    // every opted-in Mirlo artist for six hours on one bad response.
+    catalog => catalog !== null
+  );
+
+  canimusMemo = data;
+  return data;
+}
+
+/**
+ * Page through `/v1/sm/canimus.json` and merge the pages.
+ *
+ * Returns null on any failure — a refused fetch, a non-OK status, a body that isn't JSON, or a
+ * body that parses but isn't a Canimus root (a challenge page or an error envelope). All four
+ * mean "Mirlo did not answer", which is categorically different from an empty catalogue.
+ */
+async function fetchCanimusCatalog(): Promise<CanimusCatalog | null> {
+  const merged: CanimusCatalog = { artists: [], deletedSlugs: [] };
+  const seenSlugs = new Set<string>();
+
+  for (let page = 0; page < CANIMUS_MAX_PAGES; page++) {
+    const url = `${CANIMUS_CATALOG_URL}?skip=${page * CANIMUS_PAGE_SIZE}&take=${CANIMUS_PAGE_SIZE}`;
+
+    // Same two questions as every other source: the allowlist answers "is this really Mirlo",
+    // safeFetch answers "is this safe to fetch".
+    if (!isUrlHostnameAllowed(url)) {
+      console.warn('[catalog] canimus url not allowlisted');
+      return null;
+    }
+
+    let parsed: unknown;
+    try {
+      const response = await safeFetch(url, 15_000);
+      if (!response) {
+        console.warn('[catalog] canimus fetch refused');
+        return null;
+      }
+      if (!response.ok) {
+        console.warn(`[catalog] canimus responded ${response.status}`);
+        return null;
+      }
+      parsed = await response.json();
+    } catch (error) {
+      console.warn('[catalog] canimus fetch failed:', error instanceof Error ? error.message : String(error));
+      return null;
+    }
+
+    const catalog = ingestCanimusCatalog(parsed, CANIMUS_CATALOG_URL);
+    if (!catalog) {
+      // A 200 that doesn't parse as a Canimus root is a silent failure, and silent failures are
+      // the thing this codebase reports rather than swallows.
+      console.error('[catalog] canimus response was not a Canimus root document');
+      return null;
+    }
+
+    for (const artist of catalog.artists) {
+      if (seenSlugs.has(artist.slug)) continue;
+      seenSlugs.add(artist.slug);
+      merged.artists.push(artist);
+    }
+    merged.deletedSlugs.push(...catalog.deletedSlugs);
+
+    // A short page is the last page. An empty one ends it too, and guards against a host that
+    // ignores `skip` and would otherwise return page 1 ten times.
+    if (catalog.artists.length < CANIMUS_PAGE_SIZE) break;
+
+    await sleep(DELAY_BETWEEN_ARTISTS_MS);
+  }
+
+  console.log(`[catalog] canimus catalog: ${merged.artists.length} opted-in artists`);
+  return merged;
+}
+
+/**
+ * The Mirlo pass: find this artist in the shared Canimus catalog and write their releases.
+ *
+ * Never fetches per artist and never throws — a Mirlo miss is worth logging, not worth failing
+ * an artist whose Bandcamp pass already succeeded this run.
+ */
+async function catalogMirlo(artistId: string, storedUrl: string): Promise<number> {
+  try {
+    const slug = mirloArtistSlug(storedUrl);
+    if (!slug) {
+      console.warn(`[catalog] could not derive mirlo slug for artist ${artistId}`);
+      return 0;
+    }
+
+    const catalog = await loadCanimusCatalog();
+    if (!catalog) return 0;
+
+    const entry = catalog.artists.find(a => a.slug === slug);
+    // Not an error: the catalogue only carries artists who opted in to federated syndication,
+    // so most Mirlo artists we have a link for are legitimately absent from it.
+    if (!entry) return 0;
+
+    const toPersist = buildMirloReleases(entry);
+    if (toPersist.length === 0) return 0;
+
+    const written = await persistMirloReleases(artistId, toPersist);
+    return written.length;
+  } catch (error) {
+    console.warn('[catalog] mirlo ingest failed:', error instanceof Error ? error.message : String(error));
+    return 0;
+  }
+}
+
 async function catalogJamcoop(
   artistId: string,
   storedUrl: string,

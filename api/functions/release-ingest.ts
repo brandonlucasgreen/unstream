@@ -799,8 +799,9 @@ export function buildFaircampRelease(
 // feature has added since Bandcamp, for three reasons worth writing down:
 //
 // - **robots.txt permits everything.** Fetched and checked before a line of this was written:
-//   the file contains a single comment and no `Disallow` at all — unlike Mirlo, whose genuinely
-//   better API is `Disallow: /v1/` and therefore stays unbuilt (spec §10).
+//   the file contains a single comment and no `Disallow` at all — unlike Mirlo, whose richer
+//   REST API is `Disallow: /v1/` and is still not read for that reason (see the Mirlo section
+//   below, which goes through the federation catalog instead).
 // - **It is entirely server-rendered.** No client-side hydration to defeat, unlike Bandwagon's
 //   `/albums` listing, which returned nothing.
 // - **One request per release gets everything.** Title, artwork, date, price, currency and
@@ -1039,6 +1040,319 @@ export function jamcoopArtistUrl(storedUrl: string): string | null {
     return null;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Mirlo — via the Fairplayer/Canimus federation catalog, not the REST API
+// ---------------------------------------------------------------------------
+//
+// Mirlo publishes two ways in. The obvious one, `/v1/artists/{slug}`, returns any public
+// artist's whole discography with prices attached — richer than what's used here. It is not
+// what this reads, for a reason worth stating plainly: Mirlo's robots.txt disallows `/v1/`
+// under a hand-written `# Disallow crawling the API` comment, and per-artist fan-out against
+// it is exactly the crawling that comment is defending against.
+//
+// The Canimus catalog endpoint (`/v1/sm/canimus.json`) is a different proposition. It is a
+// single whole-platform document, published and documented by Mirlo specifically so that
+// aggregators and players can syndicate — and it contains **only artists who individually
+// opted in** to federated syndication. So the consent is per-artist and explicit, and the
+// cost to Mirlo is one request per refresh for the entire catalogue rather than one per
+// artist per run.
+//
+// Two consequences fall out of that choice and both are deliberate:
+//
+// - **Narrower coverage than the REST API.** Opted-in artists only. A Mirlo artist who
+//   hasn't ticked the box is invisible here, and that is the correct outcome, not a gap to
+//   work around.
+// - **No prices.** The Canimus shape carries no price, currency or pre-order flag (the REST
+//   `trackGroup` shape does). A Mirlo release therefore lands with sources but no offers,
+//   so the payout comparison — the product's whole thesis — can't be rendered for it yet.
+//   The honest fix is Mirlo's own REST API under an agreed key, not scraping around this.
+//
+// Structurally this is closest to Discogs: one cheap listing request yields many artists'
+// worth of releases, so the fetch is shared across a whole batch rather than per artist.
+
+/** Ceiling on releases taken from one artist in the catalog, before any per-run budget. */
+const CANIMUS_MAX_RELEASES_PER_ARTIST = 60;
+
+export interface CanimusRelease {
+  title: string;
+  url: string;
+  releaseDate: string | null;
+  datePrecision: DatePrecision;
+  status: ReleaseStatus;
+  artworkUrl: string | null;
+}
+
+export interface CanimusArtistLink {
+  type: string;
+  href: string;
+}
+
+export interface CanimusArtist {
+  name: string;
+  url: string;
+  /** Lowercased Mirlo artist slug — the join key against a stored `mirlo` artist link. */
+  slug: string;
+  /**
+   * The artist's own declared off-platform links. Not used by ingest; read by the
+   * Mirlo↔Bandcamp overlap measurement, where an artist-asserted Bandcamp URL is far better
+   * evidence of "same artist" than any name match we could compute.
+   */
+  links: CanimusArtistLink[];
+  releases: CanimusRelease[];
+}
+
+export interface CanimusCatalog {
+  artists: CanimusArtist[];
+  /** Artist slugs the host reports as opted-out or removed since the requested `fromDate`. */
+  deletedSlugs: string[];
+}
+
+/**
+ * Parse a `canimus.json` document into artists and their releases.
+ *
+ * `catalogUrl` is the URL the document was actually fetched from, and every URL in the
+ * response is pinned to its host. This is not paranoia about Mirlo: the document is
+ * network input, `release_sources.url` is rendered as a link fans click, and the codebase
+ * already applies exactly this rule to hrefs pulled out of fetched markup
+ * (`resolveReleaseUrl`, `resolveSameHost`). A federation format whose whole purpose is
+ * pointing at other hosts makes the rule more load-bearing here, not less — cross-host
+ * entries are dropped rather than trusted, because a release we attribute to an artist is a
+ * durable public claim about what they made and where to buy it.
+ *
+ * Returns null when the document isn't a Canimus root at all — a login wall, an error body
+ * or an HTML challenge page parses as "not this shape" rather than as an empty catalogue.
+ * That distinction is the difference between "nobody has opted in" and "we were blocked",
+ * and conflating them is the most repeated bug class in this codebase.
+ */
+export function ingestCanimusCatalog(
+  raw: unknown,
+  catalogUrl: string,
+  now: Date = new Date()
+): CanimusCatalog | null {
+  if (!isRecord(raw) || raw.type !== 'root' || !Array.isArray(raw.children)) return null;
+
+  let host: string;
+  try {
+    host = new URL(catalogUrl).host;
+  } catch {
+    return null;
+  }
+
+  const artists: CanimusArtist[] = [];
+  const seenSlugs = new Set<string>();
+
+  for (const node of raw.children) {
+    const artist = parseCanimusArtist(node, host, now);
+    if (!artist || seenSlugs.has(artist.slug)) continue;
+    seenSlugs.add(artist.slug);
+    artists.push(artist);
+  }
+
+  const deletedSlugs: string[] = [];
+  if (Array.isArray(raw.deleted)) {
+    for (const node of raw.deleted) {
+      if (!isRecord(node) || node.type !== 'artist') continue;
+      const slug = canimusArtistSlug(node.url, host);
+      if (slug) deletedSlugs.push(slug);
+    }
+  }
+
+  return { artists, deletedSlugs };
+}
+
+function parseCanimusArtist(node: unknown, host: string, now: Date): CanimusArtist | null {
+  if (!isRecord(node) || node.type !== 'artist') return null;
+
+  const slug = canimusArtistSlug(node.url, host);
+  if (!slug) return null;
+
+  const name = typeof node.name === 'string' ? node.name.trim() : '';
+  if (!name) return null;
+
+  const links: CanimusArtistLink[] = [];
+  if (Array.isArray(node.links)) {
+    for (const link of node.links) {
+      if (!isRecord(link) || typeof link.href !== 'string') continue;
+      // Artist-declared links deliberately point off-host, so the host pin does not apply —
+      // but they are only ever compared, never fetched and never written as a source.
+      links.push({ type: typeof link.type === 'string' ? link.type : '', href: link.href });
+    }
+  }
+
+  const releases: CanimusRelease[] = [];
+  const seenUrls = new Set<string>();
+  if (Array.isArray(node.children)) {
+    for (const child of node.children) {
+      if (releases.length >= CANIMUS_MAX_RELEASES_PER_ARTIST) break;
+      const release = parseCanimusRelease(child, host, now);
+      if (!release || seenUrls.has(release.url)) continue;
+      seenUrls.add(release.url);
+      releases.push(release);
+    }
+  }
+
+  return { name, url: String(node.url), slug, links, releases };
+}
+
+function parseCanimusRelease(node: unknown, host: string, now: Date): CanimusRelease | null {
+  if (!isRecord(node) || node.type !== 'album') return null;
+
+  // Drafts reach the catalogue with an empty name. A release row is a public claim that an
+  // artist made a record, so an untitled one is dropped rather than shown as "Untitled".
+  const title = typeof node.name === 'string' ? node.name.trim() : '';
+  if (!title) return null;
+
+  const url = sameHostUrl(node.url, host);
+  if (!url) return null;
+
+  const { date, precision } = parseReleaseDate(
+    typeof node.release_date === 'string' ? node.release_date.slice(0, 10) : null,
+    now
+  );
+
+  return {
+    title,
+    url,
+    releaseDate: date,
+    datePrecision: precision,
+    // Canimus exposes no pre-order flag, unlike the REST shape's `isPreorder`, so a future
+    // date is the only signal available.
+    status: deriveStatus(date, false, now),
+    artworkUrl: canimusCoverUrl(node.images),
+  };
+}
+
+function canimusCoverUrl(images: unknown): string | null {
+  if (!isRecord(images)) return null;
+  const cover = images.cover;
+  if (!isRecord(cover) || typeof cover.src !== 'string') return null;
+  const src = cover.src.trim();
+  // Artwork is rendered in an <img>, so http(s) only — a data: or javascript: src has no
+  // business reaching the page.
+  if (!/^https?:\/\//i.test(src)) return null;
+  return src;
+}
+
+/** The artist slug from a `https://{host}/{slug}` artist URL, or null if it isn't one. */
+function canimusArtistSlug(raw: unknown, host: string): string | null {
+  const url = sameHostUrl(raw, host);
+  if (!url) return null;
+
+  const segments = new URL(url).pathname.split('/').filter(Boolean);
+  if (segments.length !== 1) return null;
+  return segments[0].toLowerCase();
+}
+
+function sameHostUrl(raw: unknown, host: string): string | null {
+  if (typeof raw !== 'string') return null;
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
+    if (url.host !== host) return null;
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+export interface MirloReleaseToPersist {
+  title: string;
+  slug: string;
+  matchKey: string;
+  releaseType: ReleaseType;
+  releaseDate: string | null;
+  datePrecision: DatePrecision;
+  status: ReleaseStatus;
+  artworkUrl: string | null;
+  externalUrl: string;
+}
+
+/**
+ * Turn one artist's Canimus entry into rows ready to persist.
+ *
+ * Release type comes from the title alone, the same fallback Faircamp and Jam.coop use.
+ * Canimus types every release `"album"` regardless of length, so the field carries no
+ * information. The track list is right there and a count was again considered and rejected
+ * for the reason recorded on `buildJamcoopRelease`: a one-track release is as likely to be a
+ * long-form ambient piece as a single, and `'other'` is an honest "we don't know".
+ */
+export function buildMirloReleases(artist: CanimusArtist): MirloReleaseToPersist[] {
+  const out: MirloReleaseToPersist[] = [];
+  const takenSlugs = new Set<string>();
+
+  for (const release of artist.releases) {
+    const matchKey = releaseMatchKey(release.title);
+    if (!matchKey) continue;
+
+    const slug = uniqueReleaseSlug(release.title, takenSlugs);
+    takenSlugs.add(slug);
+
+    out.push({
+      title: release.title,
+      slug,
+      matchKey,
+      releaseType: mapDiscogsFormatToReleaseType(null, release.title),
+      releaseDate: release.releaseDate,
+      datePrecision: release.datePrecision,
+      status: release.status,
+      artworkUrl: release.artworkUrl,
+      externalUrl: release.url,
+    });
+  }
+
+  return out;
+}
+
+/**
+ * The Mirlo artist slug for a stored `mirlo` link, for joining against the Canimus catalog.
+ *
+ * Stored links come from the search fan-out and from claimed artists editing their own
+ * profile, so the shapes in the database vary: `/{slug}`, `/{slug}/`, and `/{slug}/releases`
+ * all appear in live data. All three resolve to the same artist. Anything that isn't a Mirlo
+ * host, or that has no slug at all, returns null rather than a guess.
+ */
+export function mirloArtistSlug(storedUrl: string): string | null {
+  try {
+    const url = new URL(storedUrl);
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
+
+    const host = url.hostname.toLowerCase();
+    if (host !== 'mirlo.space' && !host.endsWith('.mirlo.space')) return null;
+
+    const segments = url.pathname.split('/').filter(Boolean);
+    if (segments.length === 0) return null;
+
+    // Reserved first segments that are pages, not artists. `/v1/...` in particular must never
+    // be mistaken for an artist slug.
+    const slug = segments[0].toLowerCase();
+    if (MIRLO_RESERVED_SEGMENTS.has(slug)) return null;
+
+    return slug;
+  } catch {
+    return null;
+  }
+}
+
+const MIRLO_RESERVED_SEGMENTS = new Set([
+  'v1',
+  'api',
+  'auth',
+  'login',
+  'signup',
+  'profile',
+  'widget',
+  'pages',
+  'releases',
+  'artists',
+  'about',
+  'docs',
+  'admin',
+]);
 
 // ---------------------------------------------------------------------------
 // Discovered links — a specific release, spotted on a page we fetched for another reason

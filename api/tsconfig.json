@@ -37,6 +37,10 @@
     "functions/me-feed-token.ts",
     "functions/feed-releases.ts",
     "functions/release-detail.ts",
+    // Pulls in release-ingest.ts, release-utils.ts and the whole catalog write path — the
+    // release feature's parsers and its only writer of `releases` rows.
+    "functions/catalog-artist-background.ts",
+    "functions/__tests__/mirlo-canimus.test.ts",
     "functions/redis.ts",
     "functions/cache.ts",
     "shared/feed-format.ts",

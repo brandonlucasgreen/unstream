@@ -994,6 +994,7 @@ export interface ArtistForCatalog {
   discogsUrl: string | null;
   faircampUrl: string | null;
   jamcoopUrl: string | null;
+  mirloUrl: string | null;
   officialSiteUrl: string | null;
 }
 
@@ -1015,7 +1016,7 @@ export async function getArtistForCatalog(artistId: string): Promise<ArtistForCa
         .from('artist_links')
         .select('platform, url')
         .eq('artist_id', artistId)
-        .in('platform', ['bandcamp', 'discogs', 'faircamp', 'jamcoop', 'officialsite']),
+        .in('platform', ['bandcamp', 'discogs', 'faircamp', 'jamcoop', 'mirlo', 'officialsite']),
     ]);
 
     if (artistError || !artistRow) {
@@ -1031,6 +1032,7 @@ export async function getArtistForCatalog(artistId: string): Promise<ArtistForCa
       discogsUrl: links.find(l => l.platform === 'discogs')?.url ?? null,
       faircampUrl: links.find(l => l.platform === 'faircamp')?.url ?? null,
       jamcoopUrl: links.find(l => l.platform === 'jamcoop')?.url ?? null,
+      mirloUrl: links.find(l => l.platform === 'mirlo')?.url ?? null,
       officialSiteUrl: links.find(l => l.platform === 'officialsite')?.url ?? null,
     };
   } catch (error) {
@@ -1657,6 +1659,182 @@ export async function persistJamcoopReleases(
     return written;
   } catch (error) {
     console.error('[DB] persistJamcoopReleases error:', error);
+    return [];
+  }
+}
+
+/**
+ * Write a Mirlo catalog pass, from the Canimus federation document.
+ *
+ * Matches on `match_key` alone, for the same reason `persistJamcoopReleases` and
+ * `persistFaircampReleases` do: Canimus types every release `"album"`, so the type we store is
+ * inferred from the title and is far too weak to partition identity by. Partitioning on it
+ * would mint a duplicate row every time Bandcamp had already typed the same record correctly —
+ * which, on the artists most likely to be on both, is most of them.
+ *
+ * Dates behave like the Jam.coop writer: Canimus publishes one, so this fills
+ * `release_date`/`date_precision` on a row that lacks them, under the same never-overwrite
+ * rules — a stored date wins over a new one, and a date a verified artist curated is never
+ * touched at all.
+ *
+ * No offers are written. The Canimus shape carries no price (see the Mirlo section of
+ * release-ingest), and a source row with no offer is an honest "we know it's here, we don't
+ * know what it costs" — whereas inventing a zero would read as "name your price" and misstate
+ * an artist's own terms.
+ */
+interface MirloReleaseToPersistRow {
+  title: string;
+  slug: string;
+  matchKey: string;
+  releaseType: string;
+  releaseDate: string | null;
+  datePrecision: string;
+  status: string;
+  artworkUrl: string | null;
+  externalUrl: string;
+}
+
+export async function persistMirloReleases(
+  artistId: string,
+  releases: MirloReleaseToPersistRow[]
+): Promise<PersistedRelease[]> {
+  const client = getClient();
+  if (!client || releases.length === 0) return [];
+
+  try {
+    const { data: existingRows, error: readError } = await client
+      .from('releases')
+      .select('id, slug, match_key, release_type, release_date, artwork_url, curated_fields')
+      .eq('artist_id', artistId);
+
+    if (readError) {
+      console.error('[DB] persistMirloReleases read failed:', readError.message);
+      return [];
+    }
+
+    type ExistingRow = {
+      id: string;
+      slug: string;
+      match_key: string;
+      release_type: string;
+      release_date: string | null;
+      artwork_url: string | null;
+      curated_fields: string[] | null;
+    };
+    const existing = (existingRows as ExistingRow[]) || [];
+    const byMatchKey = new Map(existing.map(r => [r.match_key, r]));
+    const takenSlugs = new Set(existing.map(r => r.slug));
+    const claimedKeys = await getClaimedSourceKeys(client, existing.map(r => r.id));
+
+    const written: PersistedRelease[] = [];
+
+    for (const release of releases) {
+      const prior = byMatchKey.get(release.matchKey);
+
+      let releaseId: string;
+      let curatedFields: string[];
+
+      if (prior) {
+        const curated = new Set(prior.curated_fields ?? []);
+        curatedFields = [...curated];
+        const patch: Record<string, unknown> = {};
+
+        if (!curated.has('artwork_url') && release.artworkUrl && !prior.artwork_url) {
+          patch.artwork_url = release.artworkUrl;
+        }
+        if (!curated.has('release_date') && release.releaseDate && !prior.release_date) {
+          patch.release_date = release.releaseDate;
+          patch.date_precision = release.datePrecision;
+          // Status moves with the date, but only when this pass is the one supplying it.
+          patch.status = release.status;
+        }
+
+        if (Object.keys(patch).length > 0) {
+          const { error } = await client.from('releases').update(patch).eq('id', prior.id);
+          if (error) {
+            console.error('[DB] persistMirloReleases update failed:', error.message);
+            continue;
+          }
+        }
+        releaseId = prior.id;
+      } else {
+        const fuzzy = existing.find(c => isFuzzyReleaseMatch(c.match_key, release.matchKey));
+
+        let slug = release.slug;
+        if (takenSlugs.has(slug)) slug = `${slug}-${release.matchKey.slice(0, 6)}`;
+        takenSlugs.add(slug);
+
+        const { data: inserted, error } = await client
+          .from('releases')
+          .insert({
+            artist_id: artistId,
+            title: release.title,
+            slug,
+            match_key: release.matchKey,
+            release_type: release.releaseType,
+            release_date: release.releaseDate,
+            date_precision: release.datePrecision,
+            status: release.status,
+            artwork_url: release.artworkUrl,
+            source: 'auto',
+            ...(fuzzy && { needs_review: true, flagged_against_release_id: fuzzy.id }),
+          })
+          .select('id')
+          .single();
+
+        if (error || !inserted) {
+          console.error('[DB] persistMirloReleases insert failed:', error?.message);
+          continue;
+        }
+        releaseId = (inserted as { id: string }).id;
+        curatedFields = [];
+
+        const createdRow: ExistingRow = {
+          id: releaseId,
+          slug,
+          match_key: release.matchKey,
+          release_type: release.releaseType,
+          release_date: release.releaseDate,
+          artwork_url: release.artworkUrl,
+          curated_fields: [],
+        };
+        byMatchKey.set(release.matchKey, createdRow);
+        existing.push(createdRow);
+
+        if (fuzzy) {
+          const { error: flagError } = await client
+            .from('releases')
+            .update({ needs_review: true, flagged_against_release_id: releaseId })
+            .eq('id', fuzzy.id);
+          if (flagError) console.error('[DB] persistMirloReleases fuzzy-flag failed:', flagError.message);
+        }
+      }
+
+      const source = await upsertReleaseSource(
+        client,
+        releaseId,
+        'mirlo',
+        release.externalUrl,
+        release.externalUrl,
+        claimedKeys
+      );
+      if (!source) {
+        console.error('[DB] persistMirloReleases source write failed for release', releaseId);
+        continue;
+      }
+
+      written.push({
+        releaseId,
+        sourceId: source.id,
+        url: source.url,
+        detailCheckedAt: source.detail_checked_at,
+        curatedFields,
+      });
+    }
+
+    return written;
+  } catch (error) {
+    console.error('[DB] persistMirloReleases error:', error);
     return [];
   }
 }
