@@ -1144,3 +1144,125 @@ body {
 .toggle-setting input:checked + .toggle-switch::before {
   transform: translateX(20px);
 }
+
+/* Artist releases — the catalogue, expanded from the result card. */
+.artist-releases-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid #4B5563;
+  border-radius: 8px;
+  color: #F9FAFB;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.artist-releases-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #6B7280;
+}
+
+.artist-releases-chevron {
+  color: #9CA3AF;
+  font-size: 16px;
+  transition: transform 0.2s;
+}
+
+.artist-releases-toggle[aria-expanded="true"] .artist-releases-chevron {
+  transform: rotate(90deg);
+}
+
+.artist-releases {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.artist-release {
+  border: 1px solid #374151;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.artist-release.is-open {
+  border-color: #4B5563;
+}
+
+.artist-release-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.artist-release-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.artist-release-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.artist-release-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: #F9FAFB;
+}
+
+.artist-release-price {
+  font-size: 10px;
+  color: #6EE7B7;
+}
+
+.artist-release-date {
+  font-size: 10px;
+  color: #9CA3AF;
+}
+
+.artist-release-chevron {
+  color: #6B7280;
+  font-size: 14px;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.artist-release-row[aria-expanded="true"] .artist-release-chevron {
+  transform: rotate(90deg);
+}
+
+/* The guide nests one level deeper here than under an alert row, so it needs its own inset. */
+.artist-release .release-guide {
+  margin: 0;
+  padding: 10px;
+  border-top: 1px solid #374151;
+}
+
+/* The `hidden` class is the popup's only visibility toggle in JS, but the stylesheet only ever
+   defined it for two specific components (`.section.hidden`, `.detect-enable-btn.hidden`). Every
+   other element toggled with it — `.auth-form`, `.auth-error`, `.magic-link-sent`, and the
+   release panels — was never actually hidden; they only looked hidden while they happened to be
+   empty. Filling one with content made it appear as a stray gap.
+
+   `!important` is deliberate rather than lazy: component rules like `.artist-releases` and
+   `.release-guide` set `display: flex`, and at equal specificity the later rule wins, so a plain
+   `.hidden { display: none }` would lose to whichever component was defined after it. */
+.hidden {
+  display: none !important;
+}
