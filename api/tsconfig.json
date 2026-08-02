@@ -35,6 +35,7 @@
     "functions/me-password.ts",
     "functions/me-feed-token.ts",
     "functions/feed-releases.ts",
+    "functions/release-detail.ts",
     "functions/redis.ts",
     "functions/cache.ts",
     "shared/feed-format.ts",
@@ -43,6 +44,8 @@
     "functions/__tests__/me-password.test.ts",
     "functions/__tests__/feed-format.test.ts",
     "functions/__tests__/feed-releases.test.ts",
+    "functions/__tests__/release-detail.test.ts",
+    "functions/__tests__/release-detail-query.test.ts",
     "functions/__tests__/redis-resilience.test.ts"
   ]
 }

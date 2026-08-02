@@ -281,6 +281,19 @@
   to = "/.netlify/functions/me-feed-token"
   status = 200
 
+# One release's buying guide as JSON — the twin of the HTML page at /a/:artist/:release, for the
+# Mac app and the browser extension.
+#
+# The function reads the two slugs out of `rawUrl`, the same way feed-releases.ts above does.
+# This was first written as `to = ".../release-detail?artist=:artist&release=:release"`, on the
+# assumption that Netlify substitutes `from` placeholders into the destination's query string.
+# **It does not.** Verified on deploy preview 393: the rewrite matched and the function ran, but
+# `queryStringParameters` was empty, so every request 400'd. Don't reintroduce that form.
+[[redirects]]
+  from = "/api/release/:artist/:release"
+  to = "/.netlify/functions/release-detail"
+  status = 200
+
 [[redirects]]
   from = "/plus"
   to = "/support"

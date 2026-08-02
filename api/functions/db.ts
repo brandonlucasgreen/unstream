@@ -3074,6 +3074,172 @@ export async function getArtistReleases(
   }
 }
 
+// --- One release's buying guide ---
+
+/** One format on one platform: what it is, what it costs, and whether you can still get it. */
+export interface ReleaseDetailOffer {
+  format: string;
+  price: number | null;
+  currency: string | null;
+  availability: string;
+  capturedAt: string;
+}
+
+export interface ReleaseDetailSource {
+  platform: string;
+  /** The platform's own page for this release — where "Buy" actually goes. */
+  url: string;
+  /** When this platform's page was last read for prices. Null means never, which is not the
+   *  same as "it has no formats" — the caller has to be able to tell those apart. */
+  detailCheckedAt: string | null;
+  offers: ReleaseDetailOffer[];
+}
+
+export interface ReleaseDetail {
+  artist: { slug: string; name: string; imageUrl: string | null };
+  release: {
+    slug: string;
+    title: string;
+    releaseType: string;
+    releaseDate: string | null;
+    datePrecision: string | null;
+    status: string;
+    artworkUrl: string | null;
+    sources: ReleaseDetailSource[];
+  };
+}
+
+/**
+ * Three outcomes, deliberately distinguishable, for the same reason `getArtistProfileBySlug`
+ * distinguishes them: a caller that can't tell "no such release" from "the database didn't
+ * answer" turns a Supabase outage into a wall of convincing 404s.
+ *   { detail }           — found
+ *   { detail: null }     — no such artist, or no such (visible) release under them
+ *   { failed: true }     — the lookup itself failed
+ */
+export interface ReleaseDetailLookup {
+  detail: ReleaseDetail | null;
+  failed: boolean;
+}
+
+/**
+ * Everything the buying guide for one release needs — the same query
+ * `api/edge/release-page.ts` runs, because this is that page's JSON twin and a native client
+ * must not describe a release differently from the web page at the same URL.
+ *
+ * Two filters, and the asymmetry between them is the point:
+ *   - `is_hidden` is filtered, in the query rather than after, so a release an artist has
+ *     deliberately suppressed is indistinguishable from one that was never catalogued.
+ *   - `needs_review` is deliberately **not** filtered, unlike the alert and feed reads. A
+ *     tier-3 fuzzy flag means "we aren't sure this release is *distinct*", not "this is
+ *     wrong". That's a good reason to keep it out of someone's calendar and a bad reason to
+ *     404 a person who followed a direct link to it.
+ *
+ * Ordering is left to the caller: sorting by payout needs the platform registry, which this
+ * data layer deliberately knows nothing about.
+ */
+export async function getReleaseDetail(
+  artistSlugValue: string,
+  releaseSlugValue: string
+): Promise<ReleaseDetailLookup> {
+  const client = getClient();
+  // Missing credentials mean we can't answer, not that the release doesn't exist.
+  if (!client) return { detail: null, failed: true };
+
+  try {
+    const { data: artist, error: artistError } = await client
+      .from('artists')
+      .select('id, name, image_url')
+      .eq('slug', artistSlugValue)
+      .maybeSingle();
+
+    if (artistError) {
+      console.error('[DB] getReleaseDetail artist read failed:', artistError.message);
+      return { detail: null, failed: true };
+    }
+    if (!artist) return { detail: null, failed: false };
+    const artistRow = artist as { id: string; name: string; image_url: string | null };
+
+    // One round trip for the release, its sources and their offers. Scoped by `artist_id`
+    // rather than by joining on the artist slug, because a release slug is only unique per
+    // artist — two artists can each have a `self-titled`.
+    const { data, error } = await client
+      .from('releases')
+      .select(
+        'slug, title, release_type, release_date, date_precision, status, artwork_url,' +
+        ' release_sources ( platform, url, detail_checked_at,' +
+        ' release_offers ( format, price, currency, availability, captured_at ) )'
+      )
+      .eq('artist_id', artistRow.id)
+      .eq('slug', releaseSlugValue)
+      .eq('is_hidden', false)
+      .maybeSingle();
+
+    if (error) {
+      console.error('[DB] getReleaseDetail release read failed:', error.message);
+      return { detail: null, failed: true };
+    }
+    if (!data) return { detail: null, failed: false };
+
+    type Row = {
+      slug: string;
+      title: string;
+      release_type: string;
+      release_date: string | null;
+      date_precision: string | null;
+      status: string;
+      artwork_url: string | null;
+      release_sources: {
+        platform: string;
+        url: string;
+        detail_checked_at: string | null;
+        release_offers: {
+          format: string;
+          price: number | null;
+          currency: string | null;
+          availability: string;
+          captured_at: string;
+        }[] | null;
+      }[] | null;
+    };
+
+    // Through `unknown`: PostgREST types a nested select as a union that includes an error
+    // shape, so a direct cast is rejected. The runtime shape is checked by the query above.
+    const row = data as unknown as Row;
+
+    return {
+      detail: {
+        artist: { slug: artistSlugValue, name: artistRow.name, imageUrl: artistRow.image_url },
+        release: {
+          slug: row.slug,
+          title: row.title,
+          releaseType: row.release_type,
+          releaseDate: row.release_date,
+          datePrecision: row.date_precision,
+          status: row.status,
+          artworkUrl: row.artwork_url,
+          sources: (row.release_sources || []).map(s => ({
+            platform: s.platform,
+            url: s.url,
+            detailCheckedAt: s.detail_checked_at,
+            offers: (s.release_offers || []).map(o => ({
+              format: o.format,
+              price: o.price,
+              currency: o.currency,
+              availability: o.availability,
+              capturedAt: o.captured_at,
+            })),
+          })),
+        },
+      },
+      failed: false,
+    };
+  } catch (error) {
+    console.error('[DB] getReleaseDetail error:', error);
+    return { detail: null, failed: true };
+  }
+}
+
 // --- Releases for alerts ---
 
 export interface AlertRelease {
