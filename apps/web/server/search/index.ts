@@ -101,13 +101,8 @@ export async function searchAllPlatforms(query: string): Promise<AggregatedResul
         url: 'https://buymeacoffee.com/explore-creators',
       });
 
-      // Fallback Bandcamp search link when no direct Bandcamp URL from MusicBrainz
-      if (!result.platforms.some(p => p.sourceId === 'bandcamp')) {
-        result.platforms.push({
-          sourceId: 'bandcamp',
-          url: `https://bandcamp.com/search?q=${encodeURIComponent(result.name)}`,
-        });
-      }
+      // No Bandcamp search-link fallback — kept in step with api/functions/search-utils.ts,
+      // where it was removed because it claimed a presence we hadn't found.
 
       const normalizedName = normalizeForComparison(result.name);
 

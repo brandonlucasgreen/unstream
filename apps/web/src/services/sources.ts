@@ -644,9 +644,10 @@ export function buildMusicBrainzFallbackResult(
       platforms.push({ sourceId: social.platform, url: social.url });
     }
   }
-  // Search links last, so real destinations stay on top.
+  // Search links last, so real destinations stay on top. No Bandcamp one: a
+  // `bandcamp.com/search` placeholder claims a presence we haven't found, and the backend
+  // stores it as an ordinary bandcamp link that later gets crawled as an artist page (#407).
   platforms.push(
-    { sourceId: 'bandcamp', url: `https://bandcamp.com/search?q=${encoded}` },
     { sourceId: 'ampwall', url: `https://ampwall.com/explore?searchStyle=search&query=${encoded}` },
     { sourceId: 'subvert', url: `https://www.subvert.fm/discover?q=${encoded}&type=artist` },
     { sourceId: 'kofi', url: `https://duckduckgo.com/?q=site:ko-fi.com+${encoded}` },
