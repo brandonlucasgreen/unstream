@@ -74,6 +74,23 @@ export interface DuplicatePair {
    * blocker set is refused unless the caller passes `force`.
    */
   blockers: string[];
+  /**
+   * A human has confirmed these are different artists. Still returned, not dropped, so the decision
+   * can be seen and undone — a one-way hide would mean a mis-click silently loses a real duplicate.
+   */
+  dismissed: boolean;
+  /** Why they were dismissed, and by whom. Null unless `dismissed`. */
+  dismissal: { note: string | null; dismissedBy: string | null; at: string } | null;
+}
+
+/**
+ * The canonical key for a dismissal row: ids sorted, because the table enforces `a < b` so a pair has
+ * exactly one representation and a lookup never has to try both orders.
+ */
+export function dismissalKey(idA: string, idB: string): { artist_id_a: string; artist_id_b: string } {
+  return idA < idB
+    ? { artist_id_a: idA, artist_id_b: idB }
+    : { artist_id_a: idB, artist_id_b: idA };
 }
 
 /**
@@ -173,6 +190,15 @@ export async function findDuplicateArtistPairs(
   const analytics = await read<{ artist_id: string }>('artist_analytics', 'artist_id', 'artist_id');
   if (!analytics) return { ok: false, reason: 'Could not read artist_analytics' };
 
+  const dismissals = await read<{
+    artist_id_a: string; artist_id_b: string; note: string | null; dismissed_by: string | null; created_at: string;
+  }>('artist_duplicate_dismissals', 'artist_id_a, artist_id_b, note, dismissed_by, created_at', 'artist_id_a');
+  if (!dismissals) return { ok: false, reason: 'Could not read artist_duplicate_dismissals' };
+
+  const dismissedBy = new Map(
+    dismissals.map(d => [`${d.artist_id_a}|${d.artist_id_b}`, d]),
+  );
+
   const count = (rows: { artist_id: string }[]) => {
     const m = new Map<string, number>();
     for (const r of rows) m.set(r.artist_id, (m.get(r.artist_id) ?? 0) + 1);
@@ -226,17 +252,78 @@ export async function findDuplicateArtistPairs(
     if (winner.releaseCount > 0 && loser.releaseCount > 0 && sharedTitles.length === 0) {
       blockers.push('both rows have releases and share none — probably different artists');
     }
-    pairs.push({ key, winner, loser, evidence, sharedTitles, blockers });
+    const dk = dismissalKey(winner.id, loser.id);
+    const dismissal = dismissedBy.get(`${dk.artist_id_a}|${dk.artist_id_b}`);
+
+    pairs.push({
+      key, winner, loser, evidence, sharedTitles, blockers,
+      dismissed: !!dismissal,
+      dismissal: dismissal
+        ? { note: dismissal.note, dismissedBy: dismissal.dismissed_by, at: dismissal.created_at }
+        : null,
+    });
   }
 
-  // Mergeable first, then by how much is at stake.
+  // Dismissed last — they are settled. Then mergeable, then by how much is at stake.
   pairs.sort((a, b) => {
     const rank = (p: DuplicatePair) =>
-      p.blockers.length > 0 ? 2 : p.evidence === 'name-only' ? 1 : 0;
+      p.dismissed ? 3 : p.blockers.length > 0 ? 2 : p.evidence === 'name-only' ? 1 : 0;
     return rank(a) - rank(b) || b.loser.linkCount - a.loser.linkCount;
   });
 
   return { ok: true, pairs };
+}
+
+/**
+ * Record that two same-named artists are different artists, so the review queue stops listing them.
+ *
+ * Idempotent: dismissing twice is a no-op rather than an error, because the admin page can be open in
+ * two tabs and a duplicate click should not surface a constraint violation.
+ */
+export async function dismissArtistDuplicatePair(
+  client: SupabaseClient,
+  artistIdA: string,
+  artistIdB: string,
+  opts: { note?: string | null; dismissedBy?: string | null } = {},
+): Promise<{ ok: boolean; error?: string }> {
+  if (artistIdA === artistIdB) return { ok: false, error: 'An artist cannot be dismissed against itself' };
+
+  const { error } = await client
+    .from('artist_duplicate_dismissals')
+    .upsert(
+      {
+        ...dismissalKey(artistIdA, artistIdB),
+        note: opts.note ?? null,
+        dismissed_by: opts.dismissedBy ?? null,
+      },
+      { onConflict: 'artist_id_a,artist_id_b' },
+    );
+
+  if (error) {
+    console.error('[merge] failed to dismiss pair:', error.message);
+    return { ok: false, error: error.message };
+  }
+  return { ok: true };
+}
+
+/** Undo a dismissal, putting the pair back in the review queue. */
+export async function restoreArtistDuplicatePair(
+  client: SupabaseClient,
+  artistIdA: string,
+  artistIdB: string,
+): Promise<{ ok: boolean; error?: string }> {
+  // One `.match()` rather than two chained `.eq()` — the key is composite, so this reads as the
+  // single lookup it is.
+  const { error } = await client
+    .from('artist_duplicate_dismissals')
+    .delete()
+    .match(dismissalKey(artistIdA, artistIdB));
+
+  if (error) {
+    console.error('[merge] failed to restore pair:', error.message);
+    return { ok: false, error: error.message };
+  }
+  return { ok: true };
 }
 
 export interface MergeStep {
@@ -289,6 +376,16 @@ export async function mergeArtistPair(
   };
 
   if (winner.id === loser.id) return { ...base, refused: 'winner and loser are the same row' };
+  // A human already decided these are different artists. Refuse even under `force`: force exists to
+  // override the *automatic* checks, not a recorded human decision. Restore the pair first — that is
+  // an explicit, visible step, whereas silently merging over a dismissal would make the review
+  // queue's own record untrustworthy.
+  if (pair.dismissed) {
+    return {
+      ...base,
+      refused: 'this pair was dismissed as different artists — restore it first if that was wrong',
+    };
+  }
   if (pair.blockers.length > 0 && !opts.force) {
     return { ...base, refused: `blocked: ${pair.blockers.join('; ')}` };
   }

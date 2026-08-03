@@ -18,6 +18,9 @@ interface Op { table: string; kind: 'select' | 'update' | 'delete' | 'upsert'; p
 const ops: Op[] = [];
 const tables: Record<string, Record<string, unknown>[]> = {};
 
+/** Set to a table name to make that table's paged read fail, as a dropped connection would. */
+let failingTable: string | null = null;
+
 function makeClient() {
   const match = (rows: Record<string, unknown>[], filters: [string, unknown][], ins: [string, unknown[]][]) =>
     rows.filter(r => filters.every(([c, v]) => r[c] === v) && ins.every(([c, vs]) => vs.includes(r[c])));
@@ -37,6 +40,9 @@ function makeClient() {
         in(c: string, v: unknown[]) { ins.push([c, v]); return builder; },
         order() { return builder; },
         range(from: number, to: number) {
+          if (failingTable === table) {
+            return Promise.resolve({ data: null, error: { message: 'connection reset' } });
+          }
           const rows = match(rowsOf(), filters, ins).slice(from, to + 1);
           return Promise.resolve({ data: rows, error: null });
         },
@@ -62,7 +68,12 @@ function makeClient() {
             return Promise.resolve({ data: null, error: null });
           };
           return { eq: (c: string, v: unknown) => { filters.push([c, v]); return apply(); },
-                   in: (c: string, v: unknown[]) => { ins.push([c, v]); return apply(); } };
+                   in: (c: string, v: unknown[]) => { ins.push([c, v]); return apply(); },
+                   // Composite-key delete, as restoreArtistDuplicatePair uses.
+                   match: (obj: Record<string, unknown>) => {
+                     for (const [c, v] of Object.entries(obj)) filters.push([c, v]);
+                     return apply();
+                   } };
         },
         upsert(row: Record<string, unknown>) {
           ops.push({ table, kind: 'upsert', payload: row });
@@ -82,8 +93,10 @@ vi.mock('@supabase/supabase-js', () => ({ createClient: () => makeClient() }));
 process.env.SUPABASE_URL = 'https://example.supabase.co';
 process.env.SUPABASE_SERVICE_KEY = 'k';
 
-const { findDuplicateArtistPairs, mergeArtistPair, findReslugCandidates, reslugArtist } =
-  await import('../artist-merge');
+const {
+  findDuplicateArtistPairs, mergeArtistPair, findReslugCandidates, reslugArtist,
+  dismissArtistDuplicatePair, restoreArtistDuplicatePair, dismissalKey,
+} = await import('../artist-merge');
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const client = makeClient() as any;
@@ -104,6 +117,8 @@ beforeEach(() => {
   tables.verification_requests = [];
   tables.saved_artists = [];
   tables.artist_slug_aliases = [];
+  tables.artist_duplicate_dismissals = [];
+  failingTable = null;
 });
 
 async function onlyPair() {
@@ -384,6 +399,106 @@ describe('mergeArtistPair — what it writes', () => {
     const writes = ops.filter(o => o.kind !== 'select');
     expect(writes.at(-1)).toMatchObject({ table: 'artists', kind: 'delete' });
     expect(tables.artists.map(a => a.id)).toEqual(['w']);
+  });
+});
+
+describe('dismissing a pair as different artists', () => {
+  async function tigercubPair() {
+    // The real case: two bands, zero shared titles, so it sits in the review queue forever.
+    tables.artists = [artist('w', 'Tigercub', 'tigercub'), artist('l', 'Tiger Cub', 'tiger-cub')];
+    tables.artist_links = [{ id: 'lk', artist_id: 'w', platform: 'bandcamp' }];
+    return onlyPair();
+  }
+
+  it('canonicalises the id order, so a pair has one representation', () => {
+    // The table enforces artist_id_a < artist_id_b; without sorting, (A,B) and (B,A) would both be
+    // attempted and one would violate the CHECK constraint depending on which row won.
+    expect(dismissalKey('bbb', 'aaa')).toEqual({ artist_id_a: 'aaa', artist_id_b: 'bbb' });
+    expect(dismissalKey('aaa', 'bbb')).toEqual({ artist_id_a: 'aaa', artist_id_b: 'bbb' });
+  });
+
+  it('refuses to dismiss an artist against itself', async () => {
+    const r = await dismissArtistDuplicatePair(client, 'same', 'same');
+    expect(r.ok).toBe(false);
+    expect(tables.artist_duplicate_dismissals ?? []).toEqual([]);
+  });
+
+  it('records the decision with a note and who made it', async () => {
+    const pair = await tigercubPair();
+    const r = await dismissArtistDuplicatePair(client, pair.winner.id, pair.loser.id, {
+      note: 'two bands, Brighton vs Leeds', dismissedBy: 'admin@example.test',
+    });
+
+    expect(r.ok).toBe(true);
+    expect(tables.artist_duplicate_dismissals[0]).toMatchObject({
+      artist_id_a: 'l', artist_id_b: 'w',
+      note: 'two bands, Brighton vs Leeds', dismissed_by: 'admin@example.test',
+    });
+  });
+
+  it('marks the pair dismissed rather than hiding it', async () => {
+    const pair = await tigercubPair();
+    await dismissArtistDuplicatePair(client, pair.winner.id, pair.loser.id, { note: 'different bands' });
+
+    const again = await onlyPair();
+    // Still returned, so the decision is visible and reversible. A one-way hide would mean a
+    // mis-click silently loses a real duplicate.
+    expect(again.dismissed).toBe(true);
+    expect(again.dismissal).toMatchObject({ note: 'different bands' });
+  });
+
+  it('refuses a merge on a dismissed pair EVEN with force', async () => {
+    const pair = await tigercubPair();
+    await dismissArtistDuplicatePair(client, pair.winner.id, pair.loser.id);
+    const dismissedPair = await onlyPair();
+
+    const result = await mergeArtistPair(client, dismissedPair, { dryRun: false, force: true });
+
+    // `force` overrides the automatic checks, not a recorded human decision. Restoring is the
+    // explicit, visible way back — otherwise the queue's own record would be untrustworthy.
+    expect(result.ok).toBe(false);
+    expect(result.refused).toContain('dismissed as different artists');
+    expect(tables.artists).toHaveLength(2);
+  });
+
+  it('restores a pair to the queue', async () => {
+    const pair = await tigercubPair();
+    await dismissArtistDuplicatePair(client, pair.winner.id, pair.loser.id);
+    expect((await onlyPair()).dismissed).toBe(true);
+
+    // Deliberately passed in the opposite order to the dismissal, to prove the key is canonical.
+    const r = await restoreArtistDuplicatePair(client, pair.loser.id, pair.winner.id);
+
+    expect(r.ok).toBe(true);
+    expect(tables.artist_duplicate_dismissals).toEqual([]);
+    expect((await onlyPair()).dismissed).toBe(false);
+  });
+
+  it('sorts dismissed pairs last', async () => {
+    tables.artists = [
+      artist('w1', 'Kid Lightbulbs', 'kid-lightbulbs', 'claimed'), artist('l1', 'kidlightbulbs', 'kidlightbulbs'),
+      artist('w2', 'Tigercub', 'tigercub'), artist('l2', 'Tiger Cub', 'tiger-cub'),
+    ];
+    await dismissArtistDuplicatePair(client, 'w2', 'l2');
+
+    const r = await findDuplicateArtistPairs(client);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    // Settled decisions belong at the bottom; the actionable ones are what the queue is for.
+    expect(r.pairs.map(p => p.dismissed)).toEqual([false, true]);
+  });
+
+  it('reports a failed dismissals read rather than showing every pair as active', async () => {
+    tables.artists = [artist('w', 'Tigercub', 'tigercub'), artist('l', 'Tiger Cub', 'tiger-cub')];
+    failingTable = 'artist_duplicate_dismissals';
+
+    const r = await findDuplicateArtistPairs(client);
+
+    // "Couldn't read the dismissals" must not render as "nothing is dismissed" — that would put
+    // settled pairs back in front of the admin and invite a merge they already rejected.
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.reason).toContain('artist_duplicate_dismissals');
   });
 });
 

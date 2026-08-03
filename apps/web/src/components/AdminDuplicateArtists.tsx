@@ -30,6 +30,8 @@ interface DuplicatePair {
   evidence: 'provenance' | 'release-overlap' | 'accent-fold' | 'name-only';
   sharedTitles: string[];
   blockers: string[];
+  dismissed: boolean;
+  dismissal: { note: string | null; dismissedBy: string | null; at: string } | null;
 }
 
 interface ReslugCandidate {
@@ -91,6 +93,8 @@ export function AdminDuplicateArtists({ session }: { session: Session | null }) 
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [previews, setPreviews] = useState<Record<string, MergeResult>>({});
+  /** Per-pair note, saved with a dismissal so a surprising decision can be understood later. */
+  const [notes, setNotes] = useState<Record<string, string>>({});
 
   const token = session?.access_token;
 
@@ -131,21 +135,30 @@ export function AdminDuplicateArtists({ session }: { session: Session | null }) 
     return data as MergeResult;
   }
 
-  async function preview(pair: DuplicatePair) {
+  /**
+   * `force` matches whatever the Apply button will send. Without it a review-list dry run just comes
+   * back refused, so the admin would be asked to confirm a merge they were never shown.
+   */
+  async function preview(pair: DuplicatePair, force = false) {
     setBusy(pair.key);
     setError(null);
     const result = await post({
-      action: 'merge', winnerId: pair.winner.id, loserId: pair.loser.id, dryRun: true,
+      action: 'merge', winnerId: pair.winner.id, loserId: pair.loser.id, dryRun: true, force,
     });
     if (result) setPreviews(prev => ({ ...prev, [pair.key]: result }));
     setBusy(null);
   }
 
-  async function apply(pair: DuplicatePair) {
+  /**
+   * `force` is passed only from the review list, where the pair has no automatic evidence and the
+   * admin is the evidence. It overrides the automatic checks — it does NOT override a recorded
+   * dismissal, which the server refuses outright.
+   */
+  async function apply(pair: DuplicatePair, force = false) {
     setBusy(pair.key);
     setError(null);
     const result = await post({
-      action: 'merge', winnerId: pair.winner.id, loserId: pair.loser.id, dryRun: false,
+      action: 'merge', winnerId: pair.winner.id, loserId: pair.loser.id, dryRun: false, force,
     });
     setBusy(null);
     if (result?.ok) {
@@ -168,8 +181,31 @@ export function AdminDuplicateArtists({ session }: { session: Session | null }) 
     await load();
   }
 
-  const mergeable = pairs.filter(p => p.evidence !== 'name-only' && p.blockers.length === 0);
-  const review = pairs.filter(p => p.evidence === 'name-only' || p.blockers.length > 0);
+  async function dismiss(pair: DuplicatePair) {
+    setBusy(pair.key);
+    setError(null);
+    await post({
+      action: 'dismiss',
+      winnerId: pair.winner.id,
+      loserId: pair.loser.id,
+      note: notes[pair.key]?.trim() || undefined,
+    });
+    setBusy(null);
+    await load();
+  }
+
+  async function restore(pair: DuplicatePair) {
+    setBusy(pair.key);
+    setError(null);
+    await post({ action: 'restore', winnerId: pair.winner.id, loserId: pair.loser.id });
+    setBusy(null);
+    await load();
+  }
+
+  const active = pairs.filter(p => !p.dismissed);
+  const mergeable = active.filter(p => p.evidence !== 'name-only' && p.blockers.length === 0);
+  const review = active.filter(p => p.evidence === 'name-only' || p.blockers.length > 0);
+  const ignored = pairs.filter(p => p.dismissed);
 
   if (loading) return <p className="text-text-muted text-sm">Loading duplicate artists…</p>;
 
@@ -254,20 +290,105 @@ export function AdminDuplicateArtists({ session }: { session: Session | null }) 
       <h3 className="text-text-secondary text-sm font-semibold pt-2">
         Needs a look ({review.length})
       </h3>
-      {review.map(pair => (
-        <div key={pair.key} className="p-4 rounded-xl bg-surface border border-border space-y-2">
-          <span className={`inline-block px-2 py-0.5 rounded border text-xs ${EVIDENCE_STYLE[pair.evidence]}`}>
-            {pair.evidence}
-          </span>
-          <div className="space-y-1">
-            <RowSummary row={pair.winner} keep />
-            <RowSummary row={pair.loser} keep={false} />
+      <p className="text-text-muted text-sm">
+        Nothing here has evidence beyond the names, so decide each one yourself. If they really are one
+        artist, preview and merge. If they are two different acts, mark them as such and they’ll stop
+        appearing — that decision is recorded and can be undone.
+      </p>
+      {review.map(pair => {
+        const p = previews[pair.key];
+        return (
+          <div key={pair.key} className="p-4 rounded-xl bg-surface border border-border space-y-3">
+            <span className={`inline-block px-2 py-0.5 rounded border text-xs ${EVIDENCE_STYLE[pair.evidence]}`}>
+              {pair.evidence} — {EVIDENCE_LABEL[pair.evidence]}
+            </span>
+            <div className="space-y-1">
+              <RowSummary row={pair.winner} keep />
+              <RowSummary row={pair.loser} keep={false} />
+            </div>
+            {pair.blockers.map((b, i) => (
+              <p key={i} className="text-yellow-400 text-xs">⚠ {b}</p>
+            ))}
+
+            {p && (
+              <div className="p-3 rounded-lg bg-bg-secondary text-xs space-y-1">
+                <span className="text-text-muted block">
+                  This merge would write, then delete /{pair.loser.slug} and alias it to /{pair.winner.slug}:
+                </span>
+                {p.steps.map((s, i) => (
+                  <span key={i} className="block text-text-secondary font-mono">
+                    {s.table}: {s.action} ×{s.count}
+                  </span>
+                ))}
+                {p.refused && <span className="block text-red-400">{p.refused}</span>}
+              </div>
+            )}
+
+            <input
+              type="text"
+              value={notes[pair.key] ?? ''}
+              onChange={e => setNotes(prev => ({ ...prev, [pair.key]: e.target.value }))}
+              placeholder="Why are they different? (optional, saved with the decision)"
+              className="w-full px-3 py-1.5 rounded-lg bg-bg-secondary border border-border text-text-primary text-sm placeholder:text-text-muted"
+            />
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => void preview(pair, true)}
+                disabled={busy === pair.key}
+                className="px-3 py-1.5 rounded-lg bg-bg-secondary text-text-primary text-sm hover:bg-border disabled:opacity-50"
+              >
+                {busy === pair.key ? 'Working…' : 'Preview merge'}
+              </button>
+              {/* Apply only after a preview, and `force` because these have no automatic evidence. */}
+              {p && (
+                <button
+                  onClick={() => void apply(pair, true)}
+                  disabled={busy === pair.key}
+                  className="px-3 py-1.5 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-sm hover:bg-red-500/25 disabled:opacity-50"
+                >
+                  Merge anyway
+                </button>
+              )}
+              <button
+                onClick={() => void dismiss(pair)}
+                disabled={busy === pair.key}
+                className="px-3 py-1.5 rounded-lg bg-bg-secondary border border-border text-text-secondary text-sm hover:bg-border disabled:opacity-50"
+              >
+                Not duplicates
+              </button>
+            </div>
           </div>
-          {pair.blockers.map((b, i) => (
-            <p key={i} className="text-yellow-400 text-xs">⚠ {b}</p>
+        );
+      })}
+
+      {ignored.length > 0 && (
+        <>
+          <h3 className="text-text-secondary text-sm font-semibold pt-2">
+            Marked as different artists ({ignored.length})
+          </h3>
+          {ignored.map(pair => (
+            <div key={pair.key} className="p-3 rounded-xl bg-surface/50 border border-border space-y-2">
+              <div className="space-y-1 opacity-70">
+                <RowSummary row={pair.winner} keep />
+                <RowSummary row={pair.loser} keep={false} />
+              </div>
+              <p className="text-text-muted text-xs">
+                {pair.dismissal?.note || 'No reason recorded'}
+                {pair.dismissal?.dismissedBy && ` — ${pair.dismissal.dismissedBy}`}
+                {pair.dismissal?.at && `, ${new Date(pair.dismissal.at).toLocaleDateString()}`}
+              </p>
+              <button
+                onClick={() => void restore(pair)}
+                disabled={busy === pair.key}
+                className="px-3 py-1.5 rounded-lg bg-bg-secondary text-text-primary text-sm hover:bg-border disabled:opacity-50"
+              >
+                {busy === pair.key ? 'Working…' : 'Put back in the queue'}
+              </button>
+            </div>
           ))}
-        </div>
-      ))}
+        </>
+      )}
 
       {reslugs.length > 0 && (
         <>
