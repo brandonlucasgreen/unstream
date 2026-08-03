@@ -109,9 +109,20 @@ const HOUR = 3600_000;
 const now = Date.now();
 const ago = (hours: number) => new Date(now - hours * HOUR).toISOString();
 
-/** Give an artist something to crawl. Without this they aren't in the pool at all. */
-function link(artistId: string | null, platform = 'bandcamp') {
-  return { artist_id: artistId, platform };
+/**
+ * Give an artist something to crawl. Without this they aren't in the pool at all.
+ *
+ * The URL is part of the fixture because the pool now judges shape as well as platform: a
+ * `bandcamp.com/search?q=` row is a placeholder, not an artist page. `artist_links.url` is
+ * `not null` in the schema, so every row here carries one.
+ */
+function link(artistId: string | null, platform = 'bandcamp', url?: string) {
+  return { artist_id: artistId, platform, url: url ?? `https://${platform}.example/artist` };
+}
+
+/** The "go search Bandcamp yourself" placeholder search-utils writes when nothing resolved. */
+function searchPlaceholder(artistId: string, name = 'Some Artist') {
+  return link(artistId, 'bandcamp', `https://bandcamp.com/search?q=${encodeURIComponent(name)}`);
 }
 
 function saved(artistId: string | null) {
@@ -179,6 +190,42 @@ describe('getStaleCatalogCandidates — who is in the pool', () => {
       expect(result.ok && result.candidates.map(c => c.artistId)).toEqual(['a']);
     }
   );
+
+  it('excludes an artist whose only Bandcamp link is a search placeholder', async () => {
+    // `https://bandcamp.com/search?q=X` is a UI affordance, not an artist page. bandcampMusicUrl
+    // reduces any URL to origin + /music, so every one of these derives https://bandcamp.com/music
+    // — a hard 404. Measured 2026-08-03: 189 such rows, and the 16 that had been swept were the
+    // *only* failures in release_catalog_state, each climbing a backoff it could never escape.
+    tables.artist_links = [searchPlaceholder('placeholder-only'), link('real')];
+
+    const result = await getStaleCatalogCandidates(10);
+
+    expect(result.ok && result.candidates.map(c => c.artistId)).toEqual(['real']);
+    expect(result.ok && result.catalogueable).toBe(1);
+  });
+
+  it('keeps an artist who has a placeholder Bandcamp link but a real Discogs one', async () => {
+    // The placeholder is worthless; the Discogs link is not. Dropping the artist entirely would
+    // lose a catalogue we can actually build.
+    tables.artist_links = [
+      searchPlaceholder('mixed'),
+      link('mixed', 'discogs', 'https://www.discogs.com/artist/12345'),
+    ];
+
+    const result = await getStaleCatalogCandidates(10);
+
+    expect(result.ok && result.candidates.map(c => c.artistId)).toEqual(['mixed']);
+  });
+
+  it('keeps a real Bandcamp artist page whose path happens to be deep', async () => {
+    // Only the search URL is the placeholder. An album-depth link is a perfectly good artist
+    // page — bandcampMusicUrl strips it back to the origin.
+    tables.artist_links = [link('deep', 'bandcamp', 'https://warrenharrison.bandcamp.com/album/x')];
+
+    const result = await getStaleCatalogCandidates(10);
+
+    expect(result.ok && result.candidates.map(c => c.artistId)).toEqual(['deep']);
+  });
 
   it('counts an artist once however many platforms they are on', async () => {
     tables.artist_links = [link('a', 'bandcamp'), link('a', 'discogs'), link('a', 'faircamp')];

@@ -2,7 +2,7 @@
 // All operations are optional — if Supabase is not configured, they no-op gracefully.
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { normalizeUrlForMatch, urlMatchPrefilter } from './search-utils';
+import { isBandcampSearchLink, normalizeUrlForMatch, urlMatchPrefilter } from './search-utils';
 import {
   deriveStatus,
   isFuzzyReleaseMatch,
@@ -655,6 +655,25 @@ export type StaleCatalogResult =
 const CATALOGUEABLE_PLATFORMS = ['bandcamp', 'discogs', 'faircamp', 'jamcoop'] as const;
 
 /**
+ * Whether a stored link is something the catalog pass can actually crawl.
+ *
+ * The platform being catalogue-able is not enough: a `bandcamp` row may hold
+ * `https://bandcamp.com/search?q=<name>`, the "go search Bandcamp yourself" placeholder that
+ * `attachAmpwallAndSearchLinks` writes when nothing resolved a real artist page. It is a UI
+ * affordance, not an artist link, and `bandcampMusicUrl()` reduces any URL to its origin plus
+ * `/music` — so every one of them derives `https://bandcamp.com/music`, which 404s. Measured
+ * 2026-08-03: 189 such rows, and the 16 that had been swept were the *only* failures in
+ * `release_catalog_state`, each climbing a backoff it could never escape.
+ *
+ * Used by both `getStaleCatalogCandidates` and `getArtistForCatalog` so the sweep's pool and
+ * `catalogArtist`'s "is there anything to fetch" check cannot disagree about who is worth a run.
+ */
+function isCatalogueableLink(platform: string, url: string): boolean {
+  if (platform === 'bandcamp') return !isBandcampSearchLink(url);
+  return true;
+}
+
+/**
  * Read a whole table through PostgREST, a page at a time.
  *
  * **`.limit(n)` does not do this.** PostgREST caps every response at its configured `max-rows`
@@ -723,11 +742,11 @@ export async function getStaleCatalogCandidates(limit: number): Promise<StaleCat
   const client = getClient();
   if (!client) return { ok: false, reason: 'Supabase is not configured on this deploy' };
 
-  const links = await readAllPages<{ artist_id: string | null }>(
+  const links = await readAllPages<{ artist_id: string | null; platform: string; url: string }>(
     (from, to) =>
       client
         .from('artist_links')
-        .select('artist_id')
+        .select('artist_id, platform, url')
         .in('platform', CATALOGUEABLE_PLATFORMS as unknown as string[])
         .range(from, to),
     'catalogue-able artist links'
@@ -736,7 +755,11 @@ export async function getStaleCatalogCandidates(limit: number): Promise<StaleCat
 
   // One artist commonly has several of these platforms, so this is a set, not a count.
   const pool = new Set<string>();
-  for (const row of links.rows) if (row.artist_id) pool.add(row.artist_id);
+  for (const row of links.rows) {
+    if (!row.artist_id) continue;
+    if (!isCatalogueableLink(row.platform, row.url)) continue;
+    pool.add(row.artist_id);
+  }
 
   if (pool.size === 0) {
     return { ok: true, candidates: [], catalogueable: 0, savedArtists: 0, inCooldown: 0, eligible: 0 };
@@ -1270,7 +1293,13 @@ export async function getArtistForCatalog(artistId: string): Promise<ArtistForCa
     }
     if (linkError) console.error('[DB] getArtistForCatalog link read failed:', linkError.message);
 
-    const links = (linkRows as { platform: string; url: string }[] | null) || [];
+    // A placeholder search link is dropped here rather than handed to the crawler, so an artist
+    // whose only Bandcamp row is one falls through to catalogArtist's "nothing stored" branch
+    // instead of failing on a 404 forever. `officialsite` is not catalogue-able on its own and
+    // is filtered by platform above, so it needs no URL-shape check.
+    const links = ((linkRows as { platform: string; url: string }[] | null) || []).filter(l =>
+      isCatalogueableLink(l.platform, l.url)
+    );
     return {
       name: (artistRow as { name: string }).name,
       bandcampUrl: links.find(l => l.platform === 'bandcamp')?.url ?? null,
