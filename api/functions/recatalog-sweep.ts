@@ -1,4 +1,4 @@
-// The scheduled re-catalogue sweep: keep saved artists' catalogues from going stale.
+// The scheduled catalogue sweep: build and refresh release catalogues in the background.
 //
 // ## Why this exists
 //
@@ -8,8 +8,12 @@
 // reads that same catalogue forever: `check-releases` reads the catalogue and returns, and only
 // falls back to a live scrape for an artist the catalogue has *never* seen. So if nobody ever
 // searches that artist again, their new releases are never discovered and the alerts quietly
-// stop. Popular artists stay fresh incidentally because people search them; the long tail of
-// saved-but-not-searched artists is exactly who this feature was for.
+// stop.
+//
+// Alerts are not the only thing that goes stale. `/a/:slug` renders a release list for any
+// catalogued artist, and those pages exist because somebody *searched* — so an unrefreshed
+// catalogue is also a visibly out-of-date artist page. Hence the pool is every artist with
+// something to crawl, not only the saved ones; see `getStaleCatalogCandidates`.
 //
 // This sweep is the missing half. Invoked by .github/workflows/recatalog-sweep.yml — there are
 // no scheduled Netlify functions in this repo, and a GitHub Actions cron is the precedent.
@@ -29,7 +33,7 @@
 // so this is an ordinary function: it says how many artists it asked for and how stale the
 // stalest one was, the workflow prints that, and a non-2xx fails the workflow out loud.
 
-import { getStaleSavedArtistCatalogs } from './db';
+import { getStaleCatalogCandidates } from './db';
 import { isInternalRequest } from './middleware';
 import { isCatalogEnabled, requestArtistCatalog } from './request-catalog';
 import { Sentry } from '../lib/sentry';
@@ -38,11 +42,11 @@ import { Sentry } from '../lib/sentry';
  * How many artists one sweep asks for.
  *
  * 25 matches MAX_ARTISTS_PER_RUN in catalog-artist-background, so a sweep is exactly one
- * background invocation. Combined with the daily cadence that refreshes up to 175 artists a
- * week, comfortably more than the saved population, so every saved artist comes round well
- * within their 7-day cooldown. If the saved population ever outgrows that, the stalest-first
- * ordering degrades gracefully — everyone still gets refreshed, just less often — and the
- * lever is the cron cadence, not this number, which is bounded by what one invocation can do.
+ * background invocation — asking for more would silently drop the overflow. **The lever for
+ * total throughput is the cron cadence, not this number.** At four runs a day that is 100
+ * artists daily: saved artists (single figures) come round as soon as their 7-day cooldown
+ * expires, and the ~2,500-artist tail rotates about monthly, which is the right shape for
+ * artist-page freshness. Raise the cron frequency if the tail needs to be tighter.
  */
 const SWEEP_BATCH_SIZE = 25;
 
@@ -73,7 +77,7 @@ export async function handler(event: {
     };
   }
 
-  const selection = await getStaleSavedArtistCatalogs(SWEEP_BATCH_SIZE);
+  const selection = await getStaleCatalogCandidates(SWEEP_BATCH_SIZE);
 
   if (!selection.ok) {
     Sentry.captureMessage('[recatalog-sweep] could not select artists', {
@@ -84,18 +88,24 @@ export async function handler(event: {
     return { statusCode: 503, body: JSON.stringify({ error: selection.reason }) };
   }
 
-  const { candidates, savedArtists, inCooldown } = selection;
+  const { candidates, catalogueable, savedArtists, inCooldown, eligible } = selection;
 
-  // Every saved artist catalogued inside the last 7 days is a good, quiet outcome, not a
-  // failure — so this is a 200. The counts are what tell the two apart in the workflow log:
-  // savedArtists dropping to 0, or inCooldown never falling, is the shape of a broken sweep.
+  // Every catalogue-able artist being inside their cooldown is a good, quiet outcome, not a
+  // failure — so that case is a 200. The counts are what tell the two apart in the workflow log:
+  // `catalogueable` collapsing, or `eligible` sitting at 0 while `inCooldown` doesn't account
+  // for the pool, is the shape of a broken selection rather than a caught-up one.
   const summary = {
     requested: candidates.length,
+    catalogueable,
     savedArtists,
     inCooldown,
+    eligible,
+    /** Of this batch, how many are saved — the artists an alert actually depends on. */
+    savedInBatch: candidates.filter(c => c.saved).length,
+    /** Of this batch, how many have no catalogue at all: coverage rather than refresh. */
+    neverAttempted: candidates.filter(c => c.lastAttemptedAt === null).length,
     /** How stale the stalest artist was. Null means one had never been attempted at all. */
     stalestAttemptedAt: candidates[0]?.lastAttemptedAt ?? null,
-    neverAttempted: candidates.filter(c => c.lastAttemptedAt === null).length,
   };
 
   if (candidates.length === 0) {

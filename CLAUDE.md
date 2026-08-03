@@ -220,13 +220,27 @@ command — and `check-releases` only *reads* the catalogue. So without a schedu
 who is saved but never searched gets catalogued once and their release alerts quietly stop. That
 is what `api/functions/recatalog-sweep.ts` fixes, run daily by `.github/workflows/recatalog-sweep.yml`.
 
-The sweep selects the stalest catalogues **among artists somebody has saved** (`getStaleSavedArtistCatalogs`
-in `db.ts`: never-attempted first, then oldest `last_attempted_at`, savers only as a tiebreak) and
-asks `requestArtistCatalog` for up to 25 of them under the `scheduled` trigger. It adds no rate
-limiting of its own — the 7-day cooldown and the hourly cap in `claimArtistForCatalog` still decide
-— so running it twice is a no-op. It returns a real summary rather than 202, and any refusal is a
-non-2xx that fails the workflow: a scheduled job that reports success while doing nothing is the
-same silent failure it was built to fix.
+The pool is **every artist with a bandcamp, discogs, faircamp or jamcoop link** — measured
+2026-08-02: 2,564 of them, against 9 artists saved by anybody, so a saved-only sweep sat idle
+almost every run. Alerts aren't the only consumer either: `/a/:slug` renders a release list for
+any catalogued artist, and those pages exist because somebody *searched*. Keep that platform list
+identical to `catalogArtist`'s "no bandcamp, discogs, faircamp, or jam.coop link stored" check —
+an artist with only an official site is recorded as a *failure*, so sweeping them poisons
+`consecutive_failures`.
+
+`getStaleCatalogCandidates` in `db.ts` orders them: saved first (an alert is a promise to a
+person, and there are few enough that they never starve behind the backfill), then never
+catalogued, then oldest `last_attempted_at`, then savers as a pure tiebreak. It asks
+`requestArtistCatalog` for up to 25 under the `scheduled` trigger. No rate limiting of its own —
+the 7-day cooldown and the hourly cap in `claimArtistForCatalog` still decide — so running it
+twice is a no-op. It returns a real summary rather than 202, and any refusal is a non-2xx that
+fails the workflow: a scheduled job that reports success while doing nothing is the same silent
+failure it was built to fix.
+
+**Paging, not `.limit()`.** PostgREST caps every response at 1,000 rows whatever limit you ask
+for, and truncates *silently*. A single `.select()` over `artist_links` returns 1,000 of ~3,900
+rows and looks completely successful — which would hide three quarters of the sweep's pool. Use
+`readAllPages` (or `.range()` in a loop) for any read whose table can exceed 1,000 rows.
 
 ### Platform registry
 
@@ -344,7 +358,7 @@ GitHub Actions (`.github/workflows/`):
 - `schedule-social-posts.yml` — weekly (Mondays) social post generation, committed back to the repo.
 - `semantic-revert-check.yml` — runs `scripts/semantic-revert-check.py` on every PR to flag changes that quietly undo earlier fixes. If it flags your PR, take it seriously: the bug loops it was built for are described in `docs/retros/UNS-100-bifurcation-retro.md`.
 - `upstash-keepalive.yml` — twice weekly, writes one Redis key so the free-tier database isn't reaped for inactivity (which silently killed caching and rate limiting once).
-- `recatalog-sweep.yml` — daily, POSTs `/.netlify/functions/recatalog-sweep` so saved artists' release catalogues stay fresh. See "Keeping catalogues fresh" below.
+- `recatalog-sweep.yml` — every 6 hours, POSTs `/.netlify/functions/recatalog-sweep` so release catalogues get built and stay fresh. See "Keeping catalogues fresh" below.
 
 ## Engineering principles
 

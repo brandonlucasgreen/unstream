@@ -609,12 +609,14 @@ export async function getCatalogState(artistId: string): Promise<CatalogStateRes
   return { ok: true, state: (data as CatalogStateRow | null) ?? null };
 }
 
-/** One artist the scheduled sweep could re-crawl, with the facts it was chosen on. */
+/** One artist the scheduled sweep could crawl, with the facts it was chosen on. */
 export interface StaleCatalogCandidate {
   artistId: string;
-  /** How many people have this artist saved. Used only to break ties — see the sort below. */
+  /** Somebody has this artist saved, so an alert depends on this catalogue being current. */
+  saved: boolean;
+  /** How many people have them saved. A tiebreak only — see the sort below. */
   savers: number;
-  /** Null means never attempted: saved, but no catalog run has ever claimed them. */
+  /** Null means no catalog run has ever claimed them: this is coverage, not refresh. */
   lastAttemptedAt: string | null;
   /** What the last successful run found, so a sweep run can be read against it afterwards. */
   releasesFound: number | null;
@@ -626,64 +628,138 @@ export interface StaleCatalogCandidate {
  * a quiet, successful run, and they look identical if collapsed.
  */
 export type StaleCatalogResult =
-  | { ok: true; candidates: StaleCatalogCandidate[]; savedArtists: number; inCooldown: number }
+  | {
+      ok: true;
+      candidates: StaleCatalogCandidate[];
+      /** Artists with something to crawl — the pool, not the batch. */
+      catalogueable: number;
+      /** How many of those are saved by somebody. */
+      savedArtists: number;
+      /** Dropped because they were catalogued inside the cooldown. */
+      inCooldown: number;
+      /** Eligible right now, of which only `limit` fit in this batch. */
+      eligible: number;
+    }
   | { ok: false; reason: string };
 
-/** Bounds the sweep's first read. Well above the current saved population; a guard, not a limit. */
-const MAX_SAVED_ARTISTS_SCANNED = 10_000;
-
-/** How many ids to put in one `in()` filter, which becomes a URL query string. */
-const CATALOG_STATE_CHUNK = 200;
+/**
+ * The platforms `catalogArtist` can actually crawl.
+ *
+ * Deliberately **not** including `officialsite`: that link is only followed to *discover* other
+ * platforms, and `catalogArtist` treats an artist with nothing but an official site as having
+ * "no bandcamp, discogs, faircamp, or jam.coop link stored" — which it records as an **error**,
+ * incrementing `consecutive_failures` and writing `last_error`. Keep this list identical to that
+ * condition or the sweep will spend its batch on artists with nothing to fetch and turn the
+ * failure counters into noise.
+ */
+const CATALOGUEABLE_PLATFORMS = ['bandcamp', 'discogs', 'faircamp', 'jamcoop'] as const;
 
 /**
- * The stalest catalogues among artists somebody has actually saved.
+ * Read a whole table through PostgREST, a page at a time.
  *
- * **Saved artists only, not every artist row.** There are thousands of artists in the database
- * and only a fraction are saved by anyone; a save is what creates the obligation, because it is
- * what makes someone expect an alert. An artist nobody has saved gets catalogued when they're
- * searched, which is the demand-driven behaviour that already works.
+ * **`.limit(n)` does not do this.** PostgREST caps every response at its configured `max-rows`
+ * (1,000 on this project) regardless of the limit asked for, and it truncates *silently* — the
+ * rows simply aren't there. A single `.select()` over `artist_links` returns 1,000 of ~3,900
+ * rows and looks perfectly successful, which would quietly hide three quarters of the sweep's
+ * pool. Measured on production 2026-08-02.
+ */
+async function readAllPages<T>(
+  run: (from: number, to: number) => PromiseLike<{ data: unknown; error: { message: string } | null }>,
+  label: string
+): Promise<{ ok: true; rows: T[] } | { ok: false; reason: string }> {
+  const PAGE = 1_000;
+  /** A backstop against an unbounded loop, not an expected ceiling. */
+  const MAX_PAGES = 50;
+  const rows: T[] = [];
+
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const from = page * PAGE;
+    const { data, error } = await run(from, from + PAGE - 1);
+    if (error) {
+      console.error(`[DB] ${label} read failed:`, error.message);
+      return { ok: false, reason: `Could not read ${label}: ${error.message}` };
+    }
+    const batch = (data as T[]) ?? [];
+    rows.push(...batch);
+    if (batch.length < PAGE) return { ok: true, rows };
+  }
+
+  // Hitting this means the table outgrew the backstop. Say so rather than returning a truncated
+  // pool that reads as complete — the whole point of this helper.
+  console.error(`[DB] ${label} exceeded ${MAX_PAGES * PAGE} rows; refusing a truncated read`);
+  return { ok: false, reason: `${label} is larger than the sweep can page through` };
+}
+
+/**
+ * The artists whose release catalogue most needs building or refreshing.
+ *
+ * **The pool is every artist with something to crawl, not just saved artists.** It was
+ * saved-only when this shipped, on the reasoning that a save is what makes someone expect an
+ * alert. The numbers killed that: 9 distinct saved artists against 2,564 with a catalogue-able
+ * link, so the sweep's entire universe fit inside a single batch and it would have sat idle
+ * almost every run. Alerts are also not the only consumer — `/a/:slug` renders a release list
+ * for any catalogued artist, and those pages exist because somebody *searched*, so a stale
+ * catalogue there is a visibly out-of-date artist page.
  *
  * Ordering, in priority order:
  *
- *   1. **Never attempted first.** Saved but no catalog state at all means the crawl requested at
- *      save time never got through — usually the hourly cap. Nothing else will retry it, so it
- *      goes to the front.
- *   2. **Then stalest `last_attempted_at`.** Staleness is the thing that makes alerts go quiet,
- *      so it is what the sweep is for.
- *   3. **Then most savers.** A tiebreak only. Sorting by popularity first would starve exactly
- *      the long tail this exists to serve — popular artists already stay fresh because people
- *      search them.
+ *   1. **Saved artists first.** An alert is a promise to a person, so they can never starve
+ *      behind the backfill of everyone else. There are few enough of them that this costs the
+ *      rest of the pool almost nothing.
+ *   2. **Then never catalogued.** No state row at all means we have no releases for them, which
+ *      is worse than having slightly old ones.
+ *   3. **Then stalest `last_attempted_at`.** Staleness is what makes alerts go quiet and artist
+ *      pages go out of date, so it is what the sweep is for.
+ *   4. **Then most savers.** A tiebreak only. Sorting by popularity any higher would starve
+ *      exactly the long tail this exists to serve — popular artists already stay fresh because
+ *      people search them.
  *
  * Artists inside the re-catalog cooldown are dropped here rather than left for
  * `claimArtistForCatalog` to refuse. That's not a second rate limiter — the same constant, read
  * up front — it's what stops a bounded batch being spent entirely on artists that will be
  * refused a moment later. The claim remains the authority; this only decides who to ask about.
  */
-export async function getStaleSavedArtistCatalogs(limit: number): Promise<StaleCatalogResult> {
+export async function getStaleCatalogCandidates(limit: number): Promise<StaleCatalogResult> {
   const client = getClient();
   if (!client) return { ok: false, reason: 'Supabase is not configured on this deploy' };
 
+  const links = await readAllPages<{ artist_id: string | null }>(
+    (from, to) =>
+      client
+        .from('artist_links')
+        .select('artist_id')
+        .in('platform', CATALOGUEABLE_PLATFORMS as unknown as string[])
+        .range(from, to),
+    'catalogue-able artist links'
+  );
+  if (!links.ok) return links;
+
+  // One artist commonly has several of these platforms, so this is a set, not a count.
+  const pool = new Set<string>();
+  for (const row of links.rows) if (row.artist_id) pool.add(row.artist_id);
+
+  if (pool.size === 0) {
+    return { ok: true, candidates: [], catalogueable: 0, savedArtists: 0, inCooldown: 0, eligible: 0 };
+  }
+
   // `deleted` is a tombstone, not a hard delete (migration 017) — an unsaved artist keeps a row
   // so other devices can prune it, and re-crawling for someone who unsaved them is waste.
-  const { data: saved, error: savedError } = await client
-    .from('saved_artists')
-    .select('artist_id')
-    .eq('deleted', false)
-    .not('artist_id', 'is', null)
-    .limit(MAX_SAVED_ARTISTS_SCANNED);
-
-  if (savedError) {
-    console.error('[DB] getStaleSavedArtistCatalogs saved read failed:', savedError.message);
-    return { ok: false, reason: `Could not read saved artists: ${savedError.message}` };
-  }
+  const saved = await readAllPages<{ artist_id: string | null }>(
+    (from, to) =>
+      client
+        .from('saved_artists')
+        .select('artist_id')
+        .eq('deleted', false)
+        .not('artist_id', 'is', null)
+        .range(from, to),
+    'saved artists'
+  );
+  if (!saved.ok) return saved;
 
   const savers = new Map<string, number>();
-  for (const row of (saved as { artist_id: string | null }[]) ?? []) {
-    if (!row.artist_id) continue;
-    savers.set(row.artist_id, (savers.get(row.artist_id) ?? 0) + 1);
+  for (const row of saved.rows) {
+    if (row.artist_id) savers.set(row.artist_id, (savers.get(row.artist_id) ?? 0) + 1);
   }
-
-  if (savers.size === 0) return { ok: true, candidates: [], savedArtists: 0, inCooldown: 0 };
 
   interface StateRow {
     artist_id: string;
@@ -692,34 +768,35 @@ export async function getStaleSavedArtistCatalogs(limit: number): Promise<StaleC
     releases_found: number | null;
   }
 
-  const ids = [...savers.keys()];
+  // The whole table rather than an `in()` filter per chunk of ids: it holds one row per artist
+  // ever attempted, so it is bounded by the same population and paging it is fewer round trips.
+  const stateRows = await readAllPages<StateRow>(
+    (from, to) =>
+      client
+        .from('release_catalog_state')
+        .select('artist_id, last_attempted_at, last_catalogued_at, releases_found')
+        .range(from, to),
+    'catalog state'
+  );
+  if (!stateRows.ok) return stateRows;
+
   const state = new Map<string, StateRow>();
-
-  for (let i = 0; i < ids.length; i += CATALOG_STATE_CHUNK) {
-    const { data, error } = await client
-      .from('release_catalog_state')
-      .select('artist_id, last_attempted_at, last_catalogued_at, releases_found')
-      .in('artist_id', ids.slice(i, i + CATALOG_STATE_CHUNK));
-
-    if (error) {
-      console.error('[DB] getStaleSavedArtistCatalogs state read failed:', error.message);
-      return { ok: false, reason: `Could not read catalog state: ${error.message}` };
-    }
-    for (const row of (data as StateRow[]) ?? []) state.set(row.artist_id, row);
-  }
+  for (const row of stateRows.rows) state.set(row.artist_id, row);
 
   const cooldownCutoff = Date.now() - RECATALOG_COOLDOWN_HOURS * 3600_000;
   const candidates: StaleCatalogCandidate[] = [];
   let inCooldown = 0;
 
-  for (const [artistId, count] of savers) {
+  for (const artistId of pool) {
     const row = state.get(artistId);
     if (row?.last_catalogued_at && new Date(row.last_catalogued_at).getTime() > cooldownCutoff) {
       inCooldown++;
       continue;
     }
+    const count = savers.get(artistId) ?? 0;
     candidates.push({
       artistId,
+      saved: count > 0,
       savers: count,
       lastAttemptedAt: row?.last_attempted_at ?? null,
       releasesFound: row?.releases_found ?? null,
@@ -727,6 +804,7 @@ export async function getStaleSavedArtistCatalogs(limit: number): Promise<StaleC
   }
 
   candidates.sort((a, b) => {
+    if (a.saved !== b.saved) return a.saved ? -1 : 1;
     if (a.lastAttemptedAt === null || b.lastAttemptedAt === null) {
       if (a.lastAttemptedAt !== b.lastAttemptedAt) return a.lastAttemptedAt === null ? -1 : 1;
     } else {
@@ -740,8 +818,10 @@ export async function getStaleSavedArtistCatalogs(limit: number): Promise<StaleC
   return {
     ok: true,
     candidates: candidates.slice(0, limit),
-    savedArtists: savers.size,
+    catalogueable: pool.size,
+    savedArtists: [...savers.keys()].filter(id => pool.has(id)).length,
     inCooldown,
+    eligible: candidates.length,
   };
 }
 
