@@ -116,6 +116,7 @@ npm run generate:social   # Generate social media posts via Buffer
 npm run sync:bandcamp-dates  # Sync Bandcamp release dates
 npm run ingest:try -- <artist>   # Dry-run release ingest against a real Bandcamp page
 npm run sentry:sourcemaps    # Upload source maps to Sentry
+npm run migrate:link      # One-time: link this checkout to the Supabase project
 npm run migrate:dry-run   # supabase db push --dry-run against the linked project
 npm run migrate:list      # List applied vs pending migrations
 ```
@@ -334,7 +335,17 @@ Schema lives in `supabase/schema.sql`; changes are applied as timestamp-prefixed
 
 When adding a table or column: create a new migration in `supabase/migrations/`, include RLS policies, use `IF NOT EXISTS` / `DROP ... IF EXISTS` guards for idempotency, and explain the change in comments. Server-only tables (like `bandcamp_slug_probes`) enable RLS with *no* policies — the service-role client bypasses RLS, anon gets nothing — and should say so in a comment so the missing policies don't read as an oversight.
 
-**Auto-deploy:** `.github/workflows/supabase-migrate.yml` runs `supabase db push --linked` on every push to `main` that changes `supabase/migrations/`. Migrations deploy automatically — no manual SQL editor needed. Required GitHub secrets: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`. Local dry-run: `npm run migrate:dry-run`.
+**Auto-deploy:** `.github/workflows/supabase-migrate.yml` runs `supabase db push --linked` on every push to `main` that changes `supabase/migrations/`. Migrations deploy automatically — no manual SQL editor needed. Required GitHub secrets: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`.
+
+**Local dry-run:** `npm run migrate:link` once per checkout, then `npm run migrate:dry-run`. Both
+that and `migrate:list` use `--linked`, matching the workflow — the CLI dropped `--project-ref`
+from these commands, and passing it makes them print a help blob and exit *without* checking
+anything, which reads like a clean run. If you see `Cannot find project ref`, run the link step.
+`supabase link` writes only to the gitignored `supabase/.temp/`.
+
+The dry run needs credentials, so it can't be a substitute for validating a migration's SQL. For
+that, run it against a throwaway Postgres in Docker — that's what caught the scoping on
+`20260803000000_clear-bandcamp-placeholder-404-backoff.sql`.
 
 ## Testing
 
