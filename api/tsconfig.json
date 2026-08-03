@@ -56,6 +56,7 @@
     "functions/__tests__/artist-slug-accents.test.ts",
     "functions/artist-merge.ts",
     "functions/admin-artist-duplicates.ts",
-    "functions/__tests__/artist-merge.test.ts"
+    "functions/__tests__/artist-merge.test.ts",
+    "functions/__tests__/persist-identity-match.test.ts"
   ]
 }
