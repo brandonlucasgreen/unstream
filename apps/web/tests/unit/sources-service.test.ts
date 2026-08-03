@@ -591,7 +591,11 @@ describe('buildMusicBrainzFallbackResult', () => {
     expect(result!.unverifiedReason).toBeUndefined();
     const ids = result!.platforms.map(p => p.sourceId);
     expect(ids.slice(0, 4)).toEqual(['officialsite', 'discogs', 'instagram', 'youtube']);
-    expect(ids).toContain('bandcamp');
+    // No Bandcamp entry: MusicBrainz gave us no Bandcamp URL, and the card used to fill that
+    // silence with `bandcamp.com/search?q=`. That placeholder claimed a presence we had not
+    // found, and the backend stored it as an ordinary bandcamp link (#407).
+    expect(ids).not.toContain('bandcamp');
+    expect(result!.platforms.every(p => !p.url.includes('bandcamp.com/search'))).toBe(true);
     expect(result!.location?.city).toBe('Abingdon-on-Thames');
   });
 
@@ -607,7 +611,9 @@ describe('buildMusicBrainzFallbackResult', () => {
       socialLinks: [],
     });
     const ids = bare!.platforms.map(p => p.sourceId);
-    expect(ids[0]).toBe('bandcamp');
+    // Ampwall now leads, because the Bandcamp placeholder that used to sit here is gone.
+    expect(ids[0]).toBe('ampwall');
+    expect(ids).not.toContain('bandcamp');
     expect(ids).not.toContain('officialsite');
   });
 

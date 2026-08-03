@@ -37,11 +37,17 @@ export function artistSlug(name: string): string {
 
 // Determine if a platform URL is a direct link (not a search URL).
 // Exported so scripts/backfill-published-artist-rows.ts stores exactly what a search would store.
+//
+// This is not only a label: persistSearchResults filters on it, so it decides which links get a
+// row at all. `bandcamp.com/search` is listed because it did not used to be — the search-link
+// fallback that produced it is gone now, but 189 rows reached the database through this gate
+// first, and the crawler then treated every one of them as an artist page (#407).
 export function isDirectLink(url: string): boolean {
   const lower = url.toLowerCase();
   return (
     !lower.includes('duckduckgo.com') &&
     !lower.includes('google.com/search') &&
+    !lower.includes('bandcamp.com/search') &&
     !lower.includes('searchstyle=search') &&
     !lower.includes('explore-creators')
   );

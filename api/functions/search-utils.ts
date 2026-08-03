@@ -829,9 +829,15 @@ export function attachAmpwallAndSearchLinks(
       { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
     );
 
-    // Bandcamp: prefer direct URL from MusicBrainz relations, fall back to search link
+    // Bandcamp: a direct URL from MusicBrainz relations, or nothing.
+    //
+    // There used to be a `https://bandcamp.com/search?q=<name>` fallback here — "go search
+    // Bandcamp yourself". It is gone deliberately. It claimed a presence we had not found, and
+    // because it was stored as an ordinary `bandcamp` link it became indistinguishable from a
+    // real artist page downstream: the release crawler dutifully derived `/music` from it and
+    // got a 404 every time (#407). Saying nothing is the honest answer when the probe came back
+    // absent, and it is what the probe's verdict already means.
     if (!result.platforms.some(p => p.sourceId === 'bandcamp')) {
-      // Check if MusicBrainz has a direct Bandcamp URL for this artist
       const mbBandcampUrl = mbData?.bandcampUrl && mbData.artistName &&
         normalizeForComparison(mbData.artistName) === normalizedName
         ? mbData.bandcampUrl
@@ -839,11 +845,6 @@ export function attachAmpwallAndSearchLinks(
 
       if (mbBandcampUrl) {
         result.platforms.push({ sourceId: 'bandcamp', url: mbBandcampUrl });
-      } else {
-        result.platforms.push({
-          sourceId: 'bandcamp',
-          url: `https://bandcamp.com/search?q=${encodeURIComponent(result.name)}`,
-        });
       }
     }
 

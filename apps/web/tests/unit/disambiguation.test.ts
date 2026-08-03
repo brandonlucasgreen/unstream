@@ -196,6 +196,61 @@ describe('attachAmpwallAndSearchLinks', () => {
     const platformIds = results[0].platforms.map(p => p.sourceId);
     expect(platformIds[0]).toBe('bandcamp');
   });
+
+  it('adds no Bandcamp link at all when nothing resolved one', () => {
+    // There used to be a `https://bandcamp.com/search?q=` fallback here. It claimed a presence
+    // we had not found, and being stored as an ordinary `bandcamp` link made it
+    // indistinguishable from a real artist page: the release crawler derived `/music` from each
+    // one and got a 404 every time (#407, 189 rows). Saying nothing is the honest answer.
+    const results = [makeResult('Darkitecture', [
+      { sourceId: 'subvert', url: 'https://www.subvert.fm/discover?q=Darkitecture&type=artist' },
+    ])];
+
+    attachAmpwallAndSearchLinks(results, new Map());
+
+    expect(results[0].platforms.find(p => p.sourceId === 'bandcamp')).toBeUndefined();
+    expect(results[0].platforms.every(p => !p.url.includes('bandcamp.com/search'))).toBe(true);
+  });
+
+  it('still adds a real Bandcamp URL from MusicBrainz when the name matches', () => {
+    // Removing the fallback must not cost us the genuine URLs. This is the branch that survives.
+    const results = [makeResult('Warren Harrison', [
+      { sourceId: 'subvert', url: 'https://www.subvert.fm/discover?q=x&type=artist' },
+    ])];
+
+    attachAmpwallAndSearchLinks(results, new Map(), {
+      artistName: 'Warren Harrison',
+      bandcampUrl: 'https://warrenharrison.bandcamp.com',
+    } as Parameters<typeof attachAmpwallAndSearchLinks>[2]);
+
+    expect(results[0].platforms.find(p => p.sourceId === 'bandcamp')?.url)
+      .toBe('https://warrenharrison.bandcamp.com');
+  });
+
+  it('leaves a Bandcamp link that a platform search already found', () => {
+    const results = [makeResult('Artist', [
+      { sourceId: 'bandcamp', url: 'https://artist.bandcamp.com' },
+    ])];
+
+    attachAmpwallAndSearchLinks(results, new Map());
+
+    const bandcamp = results[0].platforms.filter(p => p.sourceId === 'bandcamp');
+    expect(bandcamp).toHaveLength(1);
+    expect(bandcamp[0].url).toBe('https://artist.bandcamp.com');
+  });
+
+  it('keeps a result alive that has no Bandcamp link', () => {
+    // The placeholder was never counted as search-only, so it used to prop results up in
+    // filterAndSort. Subvert still does that job, but assert it rather than assume — dropping
+    // real artists from search results would be a silent, serious regression.
+    const results = [makeResult('Darkitecture', [
+      { sourceId: 'subvert', url: 'https://www.subvert.fm/discover?q=Darkitecture&type=artist' },
+    ])];
+
+    attachAmpwallAndSearchLinks(results, new Map());
+
+    expect(filterAndSort(results, 'Darkitecture')).toHaveLength(1);
+  });
 });
 
 describe('filterAndSort', () => {

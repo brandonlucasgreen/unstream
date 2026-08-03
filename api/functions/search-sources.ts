@@ -1806,11 +1806,11 @@ async function searchAllPlatforms(query: string, mode: SearchMode): Promise<{ re
     );
     if (!existingMatch) {
       const mbPlatforms = [];
-      // Add Bandcamp direct URL from MB if available, otherwise search fallback
+      // Bandcamp only when MusicBrainz gave us a real artist URL. No search-link fallback —
+      // see the note in attachAmpwallAndSearchLinks: a placeholder here is stored as an
+      // ordinary bandcamp link and later crawled as if it were an artist page.
       if (mbData.bandcampUrl) {
         mbPlatforms.push({ sourceId: 'bandcamp' as SourceId, url: mbData.bandcampUrl });
-      } else {
-        mbPlatforms.push({ sourceId: 'bandcamp' as SourceId, url: `https://bandcamp.com/search?q=${encodeURIComponent(mbData.artistName)}` });
       }
       mbPlatforms.push(
         { sourceId: 'ampwall' as SourceId, url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(mbData.artistName)}` },
