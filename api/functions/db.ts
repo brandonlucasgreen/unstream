@@ -2,7 +2,12 @@
 // All operations are optional — if Supabase is not configured, they no-op gracefully.
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { isBandcampSearchLink, normalizeUrlForMatch, urlMatchPrefilter } from './search-utils';
+import {
+  foldToAscii,
+  isBandcampSearchLink,
+  normalizeUrlForMatch,
+  urlMatchPrefilter,
+} from './search-utils';
 import {
   deriveStatus,
   isFuzzyReleaseMatch,
@@ -30,9 +35,28 @@ export function getClient(): SupabaseClient | null {
   return supabase;
 }
 
-// Generate a URL-safe slug from an artist name
+/**
+ * Generate a URL-safe slug from an artist name.
+ *
+ * Accents are **folded, not stripped**. The old version ran the raw name through
+ * `[^a-z0-9]+ -> '-'`, which mangled every accented artist into something unfindable:
+ *
+ *   Björk             -> bj-rk               (now bjork)
+ *   Sébastien Tellier -> s-bastien-tellier   (now sebastien-tellier)
+ *   Hüsker Dü         -> h-sker-d            (now husker-du)
+ *   Łukasz            -> ukasz               (now lukasz — the Ł used to vanish outright)
+ *
+ * Fans reported being unable to find accented artists, and it was worse than an ugly URL: the
+ * mangled form is what `persistSearchResults` upserts `on conflict (slug)`, so an artist typed with
+ * accents and one typed without produced two rows and two half-populated pages.
+ *
+ * **Changing this changes what an existing artist's slug computes to**, which is why
+ * `artist_slug_aliases` exists — a row whose stored slug is the old mangled form has to be
+ * re-slugged and its old slug aliased, or the next search creates a third row. See
+ * `scripts/merge-duplicate-artists.ts` and migration 20260803180000.
+ */
 export function artistSlug(name: string): string {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return foldToAscii(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
 // Determine if a platform URL is a direct link (not a search URL).
@@ -2812,6 +2836,45 @@ export async function putBandcampProbe(
 }
 
 // --- Read Operations ---
+
+/**
+ * Resolve a retired slug to the slug that replaced it, or null if it isn't an alias.
+ *
+ * A **separate** function rather than a fallback inside `getArtistBySlug`, deliberately.
+ * `getArtistBySlug` runs at the front of every search and misses on almost all of them, so folding
+ * an alias read into its miss path would add a round trip to nearly every query. Only the callers
+ * that serve a URL — the artist page and the v1 lookup — should pay for it, and they call this after
+ * `getArtistBySlug` has already returned null.
+ *
+ * Order matters and is the caller's responsibility: a **live** `artists.slug` always wins, so an
+ * alias can never shadow a real artist that later takes that slug.
+ */
+export async function resolveArtistSlugAlias(slug: string): Promise<string | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  // Same guard as getArtistBySlug: stored slugs only ever hold [a-z0-9-], so anything else cannot
+  // match, and rejecting it here keeps the value safe to interpolate into a PostgREST filter.
+  if (!/^[A-Za-z0-9-]+$/.test(slug)) return null;
+
+  try {
+    const { data, error } = await client
+      .from('artist_slug_aliases')
+      .select('artist_id, artists!inner(slug)')
+      .eq('alias', slug.toLowerCase())
+      .maybeSingle();
+
+    if (error) {
+      console.error('[DB] Failed to resolve artist slug alias:', error.message);
+      return null;
+    }
+    const target = (data as { artists?: { slug?: string } } | null)?.artists?.slug;
+    return target ?? null;
+  } catch (error) {
+    console.error('[DB] resolveArtistSlugAlias error:', error);
+    return null;
+  }
+}
 
 /**
  * Look up an artist by slug. Returns null if not found or Supabase is not configured.

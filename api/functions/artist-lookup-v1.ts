@@ -4,7 +4,7 @@
 
 import { authenticateApiKey, buildCorsHeaders, generateRequestId, v1Response } from './middleware';
 import { checkApiRateLimit, getClientIp } from './ratelimit';
-import { getArtistBySlug } from './db';
+import { getArtistBySlug, resolveArtistSlugAlias } from './db';
 
 interface NetlifyEvent {
   httpMethod: string;
@@ -64,7 +64,14 @@ export async function handler(event: NetlifyEvent) {
   }
 
   try {
-    const artist = await getArtistBySlug(slug);
+    let artist = await getArtistBySlug(slug);
+
+    // A retired slug (merge loser, or an accent re-slug) still resolves. Third-party integrations
+    // hold onto these, so silently 404ing one would break their stored links.
+    if (!artist) {
+      const canonical = await resolveArtistSlugAlias(slug);
+      if (canonical) artist = await getArtistBySlug(canonical);
+    }
 
     if (!artist) {
       return {

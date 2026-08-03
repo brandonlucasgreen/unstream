@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { attachArtistPageSlugs } from '../search-sources';
+import { artistSlug } from '../db';
 import type { AggregatedResult } from '../search-utils';
 
 // The address of an artist's page, returned so a native client can actually reach their releases.
@@ -74,9 +75,23 @@ describe('attachArtistPageSlugs', () => {
     attachArtistPageSlugs(results);
 
     expect(results[0].knownSlug).toBe('godspeed-you-black-emperor');
-    // Non-ASCII collapses to a separator, and leading/trailing separators are trimmed — the
-    // point is only that it agrees with `artistSlug`, which is what wrote the row.
-    expect(results[1].knownSlug).toBe('sigur-r-s');
+    // Accents fold rather than collapsing to a separator (they used to give `sigur-r-s`), and
+    // leading/trailing separators are trimmed.
+    expect(results[1].knownSlug).toBe('sigur-ros');
+  });
+
+  it('agrees with artistSlug rather than with a hardcoded string', () => {
+    // The assertion above is a readable example; this is the actual invariant. `knownSlug` is used
+    // to link a search result at the row `persistSearchResults` wrote, so the two must derive the
+    // slug identically — a hand-maintained expected value silently drifts the day artistSlug
+    // changes, which is exactly what happened when accent folding landed.
+    const names = ['Sigur Rós', 'Björk', 'Błoto', 'Hüsker Dü', 'j:dead', 'girl in red', '  padded  '];
+    const results = names.map((name, i) => result({ id: `id-${i}`, name }));
+    attachArtistPageSlugs(results);
+
+    for (const [i, name] of names.entries()) {
+      expect(results[i].knownSlug).toBe(artistSlug(name));
+    }
   });
 
   it('handles a mixed result set without cross-contamination', () => {
