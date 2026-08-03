@@ -23,10 +23,12 @@ import { createClient } from '@supabase/supabase-js';
 import { config } from 'dotenv';
 import { resolve } from 'path';
 import {
+  dismissArtistDuplicatePair,
   findDuplicateArtistPairs,
   findReslugCandidates,
   mergeArtistPair,
   reslugArtist,
+  restoreArtistDuplicatePair,
   type DuplicatePair,
 } from '../api/functions/artist-merge';
 
@@ -60,14 +62,23 @@ async function list() {
   const result = await findDuplicateArtistPairs(client);
   if (!result.ok) { console.error(result.reason); process.exit(1); }
 
-  const mergeable = result.pairs.filter(p => p.evidence !== 'name-only' && p.blockers.length === 0);
-  const needsReview = result.pairs.filter(p => p.evidence === 'name-only' || p.blockers.length > 0);
+  const active = result.pairs.filter(p => !p.dismissed);
+  const ignored = result.pairs.filter(p => p.dismissed);
+  const mergeable = active.filter(p => p.evidence !== 'name-only' && p.blockers.length === 0);
+  const needsReview = active.filter(p => p.evidence === 'name-only' || p.blockers.length > 0);
 
-  console.log(`${result.pairs.length} duplicate pairs\n`);
+  console.log(`${result.pairs.length} duplicate pairs (${ignored.length} marked as different artists)\n`);
   console.log(`MERGEABLE — evidence, no blockers (${mergeable.length}):`);
   for (const p of mergeable) console.log(describe(p));
   console.log(`\nNEEDS A HUMAN (${needsReview.length}):`);
   for (const p of needsReview) console.log(describe(p));
+
+  if (ignored.length > 0) {
+    console.log(`\nMARKED AS DIFFERENT ARTISTS (${ignored.length}) — 'unignore' puts one back:`);
+    for (const p of ignored) {
+      console.log(`  ${p.winner.slug} / ${p.loser.slug}${p.dismissal?.note ? ` — ${p.dismissal.note}` : ''}`);
+    }
+  }
 
   const reslugs = await findReslugCandidates(client);
   if (reslugs.ok) {
@@ -124,11 +135,44 @@ async function reslug() {
   }
 }
 
+/** Record that two same-named artists are different, so `list` stops showing them. */
+async function ignore(restoreInstead: boolean) {
+  const [slugA, slugB] = positional;
+  if (!slugA || !slugB) {
+    console.error(`Usage: ${restoreInstead ? 'unignore' : 'ignore'} <slugA> <slugB> [--note "reason"]`);
+    process.exit(1);
+  }
+  const result = await findDuplicateArtistPairs(client);
+  if (!result.ok) { console.error(result.reason); process.exit(1); }
+
+  const pair = result.pairs.find(
+    p => (p.winner.slug === slugA && p.loser.slug === slugB)
+      || (p.winner.slug === slugB && p.loser.slug === slugA),
+  );
+  if (!pair) { console.error(`No duplicate pair for ${slugA} / ${slugB}`); process.exit(1); }
+
+  const noteIndex = argv.indexOf('--note');
+  const note = noteIndex > -1 ? argv[noteIndex + 1] : undefined;
+
+  const r = restoreInstead
+    ? await restoreArtistDuplicatePair(client, pair.winner.id, pair.loser.id)
+    : await dismissArtistDuplicatePair(client, pair.winner.id, pair.loser.id, { note, dismissedBy: 'cli' });
+
+  if (!r.ok) { console.error(r.error); process.exit(1); }
+  console.log(restoreInstead
+    ? `${slugA} / ${slugB} back in the review queue`
+    : `${slugA} / ${slugB} marked as different artists${note ? ` — ${note}` : ''}`);
+}
+
 switch (command) {
   case 'list': await list(); break;
   case 'merge': await merge(); break;
   case 'reslug': await reslug(); break;
+  case 'ignore': await ignore(false); break;
+  case 'unignore': await ignore(true); break;
   default:
-    console.error('Usage: list | merge [--all | <winnerSlug> <loserSlug>] [--apply] [--force] | reslug [--apply]');
+    console.error(
+      'Usage: list | merge [--all | <winnerSlug> <loserSlug>] [--apply] [--force] | reslug [--apply]\n' +
+      '     | ignore <slugA> <slugB> [--note "reason"] | unignore <slugA> <slugB>');
     process.exit(1);
 }

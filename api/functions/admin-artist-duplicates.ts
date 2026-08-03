@@ -8,10 +8,12 @@
 
 import { getClient } from './db';
 import {
+  dismissArtistDuplicatePair,
   findDuplicateArtistPairs,
   findReslugCandidates,
   mergeArtistPair,
   reslugArtist,
+  restoreArtistDuplicatePair,
 } from './artist-merge';
 import { authenticateAdmin, buildCorsHeaders } from './middleware';
 import { Sentry } from '../lib/sentry';
@@ -65,11 +67,47 @@ export async function handler(event: {
     return json(405, { error: 'Method not allowed' });
   }
 
-  let body: { action?: string; winnerId?: string; loserId?: string; artistId?: string; dryRun?: boolean; force?: boolean };
+  let body: {
+    action?: string;
+    winnerId?: string;
+    loserId?: string;
+    artistId?: string;
+    dryRun?: boolean;
+    force?: boolean;
+    note?: string;
+  };
   try {
     body = JSON.parse(event.body || '{}');
   } catch {
     return json(400, { error: 'Invalid JSON body' });
+  }
+
+  // dismiss/restore act on a pair of artist ids and never touch artist data, so they share one
+  // validation path and skip the dry-run convention that the destructive actions use.
+  if (body.action === 'dismiss' || body.action === 'restore') {
+    const { winnerId, loserId } = body;
+    if (!winnerId || !loserId || !UUID_REGEX.test(winnerId) || !UUID_REGEX.test(loserId)) {
+      return json(400, { error: 'winnerId and loserId must be artist UUIDs' });
+    }
+    if (winnerId === loserId) return json(400, { error: 'An artist cannot be dismissed against itself' });
+
+    const note = body.note?.slice(0, 500)?.trim() || null;
+    const result = body.action === 'dismiss'
+      ? await dismissArtistDuplicatePair(client, winnerId, loserId, { note, dismissedBy: admin.email })
+      : await restoreArtistDuplicatePair(client, winnerId, loserId);
+
+    if (!result.ok) return json(503, { error: result.error ?? 'Failed' });
+
+    // The stored values come back so the admin page can update the row it just acted on instead of
+    // re-fetching the whole listing — that read pages ~20,000 rows and takes seconds, and reloading
+    // costs the reviewer their place in the queue.
+    return json(200, {
+      ok: true,
+      action: body.action,
+      dismissal: body.action === 'dismiss'
+        ? { note, dismissedBy: admin.email, at: new Date().toISOString() }
+        : null,
+    });
   }
 
   // Default to a dry run. An admin has to ask for the write explicitly — this deletes artist rows.
@@ -139,5 +177,5 @@ export async function handler(event: {
     return json(result.ok ? 200 : 409, result);
   }
 
-  return json(400, { error: "action must be 'merge' or 'reslug'" });
+  return json(400, { error: "action must be 'merge', 'reslug', 'dismiss' or 'restore'" });
 }
