@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Header } from '../components/Header';
 import { SkeletonScreen } from '../components/Skeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
+import { AdminDuplicateArtists } from '../components/AdminDuplicateArtists';
 
 interface VerificationRequest {
   id: string;
@@ -273,6 +274,9 @@ export function AdminVerifyPage() {
                   ))}
                 </section>
               )}
+
+              {/* Duplicate artist rows — the other half of reviewing an artist's identity. */}
+              <AdminDuplicateArtists session={session} />
             </>
           )}
         </div>

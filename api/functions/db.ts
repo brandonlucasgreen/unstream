@@ -2,7 +2,12 @@
 // All operations are optional — if Supabase is not configured, they no-op gracefully.
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { isBandcampSearchLink, normalizeUrlForMatch, urlMatchPrefilter } from './search-utils';
+import {
+  foldToAscii,
+  isBandcampSearchLink,
+  normalizeUrlForMatch,
+  urlMatchPrefilter,
+} from './search-utils';
 import {
   deriveStatus,
   isFuzzyReleaseMatch,
@@ -30,9 +35,28 @@ export function getClient(): SupabaseClient | null {
   return supabase;
 }
 
-// Generate a URL-safe slug from an artist name
+/**
+ * Generate a URL-safe slug from an artist name.
+ *
+ * Accents are **folded, not stripped**. The old version ran the raw name through
+ * `[^a-z0-9]+ -> '-'`, which mangled every accented artist into something unfindable:
+ *
+ *   Björk             -> bj-rk               (now bjork)
+ *   Sébastien Tellier -> s-bastien-tellier   (now sebastien-tellier)
+ *   Hüsker Dü         -> h-sker-d            (now husker-du)
+ *   Łukasz            -> ukasz               (now lukasz — the Ł used to vanish outright)
+ *
+ * Fans reported being unable to find accented artists, and it was worse than an ugly URL: the
+ * mangled form is what `persistSearchResults` upserts `on conflict (slug)`, so an artist typed with
+ * accents and one typed without produced two rows and two half-populated pages.
+ *
+ * **Changing this changes what an existing artist's slug computes to**, which is why
+ * `artist_slug_aliases` exists — a row whose stored slug is the old mangled form has to be
+ * re-slugged and its old slug aliased, or the next search creates a third row. See
+ * `scripts/merge-duplicate-artists.ts` and migration 20260803180000.
+ */
 export function artistSlug(name: string): string {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return foldToAscii(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
 // Determine if a platform URL is a direct link (not a search URL).
@@ -2814,6 +2838,45 @@ export async function putBandcampProbe(
 // --- Read Operations ---
 
 /**
+ * Resolve a retired slug to the slug that replaced it, or null if it isn't an alias.
+ *
+ * A **separate** function rather than a fallback inside `getArtistBySlug`, deliberately.
+ * `getArtistBySlug` runs at the front of every search and misses on almost all of them, so folding
+ * an alias read into its miss path would add a round trip to nearly every query. Only the callers
+ * that serve a URL — the artist page and the v1 lookup — should pay for it, and they call this after
+ * `getArtistBySlug` has already returned null.
+ *
+ * Order matters and is the caller's responsibility: a **live** `artists.slug` always wins, so an
+ * alias can never shadow a real artist that later takes that slug.
+ */
+export async function resolveArtistSlugAlias(slug: string): Promise<string | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  // Same guard as getArtistBySlug: stored slugs only ever hold [a-z0-9-], so anything else cannot
+  // match, and rejecting it here keeps the value safe to interpolate into a PostgREST filter.
+  if (!/^[A-Za-z0-9-]+$/.test(slug)) return null;
+
+  try {
+    const { data, error } = await client
+      .from('artist_slug_aliases')
+      .select('artist_id, artists!inner(slug)')
+      .eq('alias', slug.toLowerCase())
+      .maybeSingle();
+
+    if (error) {
+      console.error('[DB] Failed to resolve artist slug alias:', error.message);
+      return null;
+    }
+    const target = (data as { artists?: { slug?: string } } | null)?.artists?.slug;
+    return target ?? null;
+  } catch (error) {
+    console.error('[DB] resolveArtistSlugAlias error:', error);
+    return null;
+  }
+}
+
+/**
  * Look up an artist by slug. Returns null if not found or Supabase is not configured.
  */
 export async function getArtistBySlug(
@@ -3078,6 +3141,93 @@ export async function findKnownArtistSlugsByName(term: string, limit = 6): Promi
 }
 
 /**
+ * Platforms whose URL identifies the artist's own catalogue, rather than a handle.
+ *
+ * Used as the evidence that an incoming search result is an artist we already have under a different
+ * spelling. Socials and patronage are **deliberately excluded**, and that exclusion is the whole
+ * reason this works. Measured across all 27 duplicate pairs on 2026-08-03:
+ *
+ *   - With socials included, `Honeycrush` and `Honey Crush` share `patreon.com/honeycrush`, and
+ *     `Boto` and `Błoto` share `facebook.com/blotoquartet` — so both pairs look like one artist.
+ *     They are not: those links were mis-attached by the homonym bug fixed in July, and using them
+ *     as evidence would re-fuse exactly what that fix separated.
+ *   - With only these platforms, both drop to "no evidence", `Tigercub`/`Tiger Cub` stays separate,
+ *     and the genuine same-artist pairs still resolve — `Big Thief`/`Bigthief`,
+ *     `Creepy Nuts`/`Creepynuts`, `Cry Wolf`/`Crywolf`, `I.O.I`/`Ioi`, `Rue Oberkampf`/`Rueoberkampf`
+ *     all via a shared Discogs artist id or Bandcamp subdomain.
+ */
+const IDENTITY_PLATFORMS = new Set([
+  'bandcamp', 'mirlo', 'jamcoop', 'faircamp', 'discogs', 'beatport', 'bandwagon', 'subvert', 'even', 'nina',
+]);
+
+/** At most this many URLs are checked per artist, to bound the query. Ordered by trustworthiness. */
+const IDENTITY_LOOKUP_LIMIT = 3;
+
+/**
+ * The slug of an existing artist who already owns one of these platform URLs, or null.
+ *
+ * This is what stops a second row being created for an artist a different source spells differently.
+ * `artistSlug` derives the slug from whichever name won aggregation, and that varies between
+ * searches with which platforms answered — so "Big Thief" and "Bigthief" became two rows, two pages
+ * and two half-populated link sets. Matching on a shared catalogue URL says "this is the artist we
+ * already have" without ever claiming two similarly-named artists are one.
+ *
+ * Returns null when **nothing** matches (a genuinely new artist) and also when **more than one**
+ * artist matches. Two artists sharing an identity URL means the data is already wrong somewhere;
+ * quietly picking one would attach this result to a coin-flip. Falling through creates the row under
+ * its own slug, which is today's behaviour.
+ *
+ * Called only when no row exists at the computed slug — i.e. only when a new row would otherwise be
+ * minted. `persistSearchResults` is awaited before the search response is sent, so an already-known
+ * artist must not pay for this.
+ */
+async function findArtistSlugByIdentityUrl(
+  client: SupabaseClient,
+  platforms: { sourceId: string; url: string }[],
+): Promise<string | null> {
+  const urls = platforms
+    .filter(p => IDENTITY_PLATFORMS.has(p.sourceId))
+    .slice(0, IDENTITY_LOOKUP_LIMIT);
+  if (urls.length === 0) return null;
+
+  // Coarse prefilter on host+path, so a row stored as http://, with a www. prefix, or with a
+  // trailing slash is still a candidate — measured: of 4,782 stored identity links, 2,804 carry
+  // www. and 581 a trailing slash, so exact matching would miss a large share. Same escaping as
+  // deleteStoredLinksForUrl: ilike treats % and _ as wildcards and a URL may contain either.
+  const filters = urls.map(
+    p => `url.ilike.%${urlMatchPrefilter(p.url).replace(/[%_\\]/g, m => `\\${m}`)}%`,
+  );
+
+  try {
+    const { data, error } = await client
+      .from('artist_links')
+      .select('artist_id, url, artists!inner(slug)')
+      .in('platform', [...IDENTITY_PLATFORMS])
+      .or(filters.join(','));
+
+    if (error) {
+      console.error('[DB] identity-url lookup failed:', error.message);
+      return null;
+    }
+
+    // The prefilter is a substring match, so confirm each hit on the normalized URL before trusting
+    // it — otherwise `discogs.com/artist/123` would match `discogs.com/artist/1234`.
+    const wanted = new Set(urls.map(p => normalizeUrlForMatch(p.url)));
+    const slugs = new Set<string>();
+    for (const row of (data ?? []) as { url: string; artists?: { slug?: string } }[]) {
+      if (!wanted.has(normalizeUrlForMatch(row.url))) continue;
+      if (row.artists?.slug) slugs.add(row.artists.slug);
+    }
+
+    if (slugs.size !== 1) return null;
+    return [...slugs][0];
+  } catch (error) {
+    console.error('[DB] findArtistSlugByIdentityUrl error:', error);
+    return null;
+  }
+}
+
+/**
  * Persist artist search results to the database.
  * Only persists artist-type results. Runs as fire-and-forget after search.
  */
@@ -3104,7 +3254,7 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
     // Only persist artists with at least 1 real direct link
     if (validPlatforms.length === 0) return;
 
-    const slug = artistSlug(result.name);
+    let slug = artistSlug(result.name);
 
     try {
       // Check if this artist is already claimed — never overwrite claimed status
@@ -3113,6 +3263,30 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
         .select('id, match_confidence')
         .eq('slug', slug)
         .single();
+
+      // No row at this slug, so a new one is about to be created. Before doing that, check whether
+      // we already hold this artist under a different spelling — different sources spell one artist
+      // differently ("Big Thief" vs "Bigthief"), the slug follows whichever name won aggregation, and
+      // the result was two rows and two half-populated pages. Only reached on the create path, so a
+      // known artist pays nothing for it.
+      if (!existing) {
+        const owned = await findArtistSlugByIdentityUrl(client, validPlatforms);
+        if (owned && owned !== slug) {
+          console.log(`[DB] "${result.name}" already stored as "${owned}" — reusing that row instead of creating ${slug}`);
+          slug = owned;
+          // Re-check the claimed guard against the row we are now writing to: that row may be a
+          // claimed profile, and skipping this would let a stranger's search overwrite it.
+          const { data: owner } = await client
+            .from('artists')
+            .select('match_confidence')
+            .eq('slug', slug)
+            .single();
+          if (owner?.match_confidence === 'claimed') {
+            console.log(`[DB] Skipping persist for claimed artist "${result.name}" (matched via ${slug})`);
+            return;
+          }
+        }
+      }
 
       if (existing?.match_confidence === 'claimed') {
         console.log(`[DB] Skipping persist for claimed artist "${result.name}"`);

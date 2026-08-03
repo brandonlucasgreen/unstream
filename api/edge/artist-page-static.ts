@@ -232,11 +232,37 @@ export default async function handler(request: Request, context: Context) {
         .single()
         .abortSignal(controller.signal);
 
-      if (!artistData) {
-        clearTimeout(timeoutId);
-        return context.next();
-      }
       artist = artistData;
+
+      // A retired slug still resolves: the artist was merged into another row, or re-slugged when
+      // accent folding was fixed (`bj-rk` -> `bjork`). Checked only *after* the live slug misses, so
+      // a real artist who later takes that slug always wins.
+      //
+      // A 301 rather than rendering the page here — this branch only ever serves crawlers, and
+      // rendering identical content at two URLs is duplicate content plus a second page competing
+      // with the canonical one. Humans never reach this code (see the crawler check above): they
+      // fall through to the SPA, whose data endpoint resolves the alias itself.
+      //
+      // Duplicates resolveArtistSlugAlias in api/functions/db.ts — edge functions run on Deno and
+      // cannot import from api/functions.
+      if (!artist) {
+        const { data: alias } = await supabase
+          .from('artist_slug_aliases')
+          .select('artists!inner(slug)')
+          .eq('alias', slug.toLowerCase())
+          .maybeSingle()
+          .abortSignal(controller.signal);
+
+        const canonical = (alias as { artists?: { slug?: string } } | null)?.artists?.slug;
+        clearTimeout(timeoutId);
+        if (!canonical) return context.next();
+
+        const prefix = url.pathname.startsWith('/artist/') ? '/artist/' : '/a/';
+        return new Response(null, {
+          status: 301,
+          headers: { Location: `${prefix}${canonical}`, 'Cache-Control': 'public, max-age=3600' },
+        });
+      }
 
       const { data: profileData } = await supabase
         .from('artist_profiles')
