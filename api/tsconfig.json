@@ -52,6 +52,10 @@
     "functions/__tests__/release-detail-query.test.ts",
     "functions/__tests__/redis-resilience.test.ts",
     "functions/__tests__/recatalog-sweep.test.ts",
-    "functions/__tests__/recatalog-sweep-selection.test.ts"
+    "functions/__tests__/recatalog-sweep-selection.test.ts",
+    "functions/__tests__/artist-slug-accents.test.ts",
+    "functions/artist-merge.ts",
+    "functions/admin-artist-duplicates.ts",
+    "functions/__tests__/artist-merge.test.ts"
   ]
 }
