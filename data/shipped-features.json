@@ -109,6 +109,6 @@
     "title": "Release pages",
     "description": "Releases now have their own pages: every format and price we can find, on every platform that carries them, with an estimate of how much of it reaches the artist. Release alerts point here now instead of sending you straight to one shop.",
     "date": "2026-08-02",
-    "announced": false
+    "announced": true
   }
 ]
