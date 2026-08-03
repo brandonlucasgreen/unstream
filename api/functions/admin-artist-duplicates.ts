@@ -91,15 +91,23 @@ export async function handler(event: {
     }
     if (winnerId === loserId) return json(400, { error: 'An artist cannot be dismissed against itself' });
 
+    const note = body.note?.slice(0, 500)?.trim() || null;
     const result = body.action === 'dismiss'
-      ? await dismissArtistDuplicatePair(client, winnerId, loserId, {
-          note: body.note?.slice(0, 500) ?? null,
-          dismissedBy: admin.email,
-        })
+      ? await dismissArtistDuplicatePair(client, winnerId, loserId, { note, dismissedBy: admin.email })
       : await restoreArtistDuplicatePair(client, winnerId, loserId);
 
     if (!result.ok) return json(503, { error: result.error ?? 'Failed' });
-    return json(200, { ok: true, action: body.action });
+
+    // The stored values come back so the admin page can update the row it just acted on instead of
+    // re-fetching the whole listing — that read pages ~20,000 rows and takes seconds, and reloading
+    // costs the reviewer their place in the queue.
+    return json(200, {
+      ok: true,
+      action: body.action,
+      dismissal: body.action === 'dismiss'
+        ? { note, dismissedBy: admin.email, at: new Date().toISOString() }
+        : null,
+    });
   }
 
   // Default to a dry run. An admin has to ask for the write explicitly — this deletes artist rows.
