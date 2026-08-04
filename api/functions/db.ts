@@ -711,8 +711,11 @@ function isCatalogueableLink(platform: string, url: string): boolean {
  * rows simply aren't there. A single `.select()` over `artist_links` returns 1,000 of ~3,900
  * rows and looks perfectly successful, which would quietly hide three quarters of the sweep's
  * pool. Measured on production 2026-08-02.
+ *
+ * Exported because the cap is not the sweep's problem, it's every read's problem: use this for
+ * any query whose table can exceed 1,000 rows, and pass the caller's own `.range(from, to)`.
  */
-async function readAllPages<T>(
+export async function readAllPages<T>(
   run: (from: number, to: number) => PromiseLike<{ data: unknown; error: { message: string } | null }>,
   label: string
 ): Promise<{ ok: true; rows: T[] } | { ok: false; reason: string }> {
@@ -736,7 +739,7 @@ async function readAllPages<T>(
   // Hitting this means the table outgrew the backstop. Say so rather than returning a truncated
   // pool that reads as complete — the whole point of this helper.
   console.error(`[DB] ${label} exceeded ${MAX_PAGES * PAGE} rows; refusing a truncated read`);
-  return { ok: false, reason: `${label} is larger than the sweep can page through` };
+  return { ok: false, reason: `${label} is larger than this read can page through` };
 }
 
 /**

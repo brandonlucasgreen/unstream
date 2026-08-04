@@ -54,6 +54,8 @@
     "functions/__tests__/recatalog-sweep.test.ts",
     "functions/__tests__/recatalog-sweep-selection.test.ts",
     "functions/__tests__/artist-slug-accents.test.ts",
+    "functions/artist-directory.ts",
+    "functions/__tests__/artist-directory.test.ts",
     "functions/artist-merge.ts",
     "functions/admin-artist-duplicates.ts",
     "functions/__tests__/artist-merge.test.ts",
