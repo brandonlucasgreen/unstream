@@ -18,6 +18,7 @@ import {
 } from './release-utils';
 import { requestArtistCatalog } from './request-catalog';
 import { Sentry } from '../lib/sentry';
+import { isNonArtistSlug } from '../lib/non-artist-names';
 
 let supabase: SupabaseClient | null = null;
 
@@ -3258,6 +3259,16 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
     if (validPlatforms.length === 0) return;
 
     let slug = artistSlug(result.name);
+
+    // Software products, brands and TV shows can carry a MusicBrainz entry and a Beatport
+    // listing, and the pipeline's default verdict is 'verified', so without this gate one
+    // search mints them a permanent /artist/ page. Checked here rather than earlier because
+    // the search response may still legitimately show what it found — it is the durable row
+    // that must not exist. See api/lib/non-artist-names.ts.
+    if (isNonArtistSlug(slug)) {
+      console.log(`[DB] Skipping persist for non-artist "${result.name}" (${slug})`);
+      return;
+    }
 
     try {
       // Check if this artist is already claimed — never overwrite claimed status
