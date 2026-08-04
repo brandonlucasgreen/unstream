@@ -19,6 +19,7 @@ import {
 import { requestArtistCatalog } from './request-catalog';
 import { Sentry } from '../lib/sentry';
 import { isNonArtistSlug } from '../lib/non-artist-names';
+import { isExcludedArtistSlug } from '../lib/excluded-artists';
 
 let supabase: SupabaseClient | null = null;
 
@@ -67,12 +68,19 @@ export function artistSlug(name: string): string {
 // row at all. `bandcamp.com/search` is listed because it did not used to be — the search-link
 // fallback that produced it is gone now, but 189 rows reached the database through this gate
 // first, and the crawler then treated every one of them as an artist page (#407).
+//
+// `subvert.fm/discover` is the same mistake caught later: Subvert is `searchOnly: true` in
+// sources.ts and its `searchUrlTemplate` IS that discover URL, so every search-discovered Subvert
+// "link" was the search box — 321 of the 349 stored. The other 28 are real `subvert.fm/<handle>`
+// pages that artists added themselves, which is why this matches the /discover path and not the
+// host: excluding the platform would delete those.
 export function isDirectLink(url: string): boolean {
   const lower = url.toLowerCase();
   return (
     !lower.includes('duckduckgo.com') &&
     !lower.includes('google.com/search') &&
     !lower.includes('bandcamp.com/search') &&
+    !lower.includes('subvert.fm/discover') &&
     !lower.includes('searchstyle=search') &&
     !lower.includes('explore-creators')
   );
@@ -3267,6 +3275,12 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
     // that must not exist. See api/lib/non-artist-names.ts.
     if (isNonArtistSlug(slug)) {
       console.log(`[DB] Skipping persist for non-artist "${result.name}" (${slug})`);
+      return;
+    }
+
+    // Acts excluded on ethical grounds — a separate, editorial list. See api/lib/excluded-artists.ts.
+    if (isExcludedArtistSlug(slug)) {
+      console.log(`[DB] Skipping persist for excluded artist "${result.name}" (${slug})`);
       return;
     }
 

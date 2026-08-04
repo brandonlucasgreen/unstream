@@ -1,9 +1,11 @@
 /**
- * Delete artist rows for entities that are not musical acts.
+ * Delete artist rows that must not exist: entities that are not musical acts
+ * (api/lib/non-artist-names.ts) and acts excluded on ethical grounds
+ * (api/lib/excluded-artists.ts).
  *
- * The list lives in api/lib/non-artist-names.ts, which is also the gate in
- * `persistSearchResults` that stops a search recreating them. This script only removes what is
- * already stored; the gate is what makes the removal stick, so the two must stay together.
+ * Both lists are also the gate in `persistSearchResults` that stops a search recreating those
+ * rows. This script only removes what is already stored; the gate is what makes the removal
+ * stick, so the two must stay together.
  *
  * Usage:
  *   npx tsx scripts/prune-non-artist-rows.ts            # dry run — lists what would go
@@ -25,6 +27,7 @@ import { createClient } from '@supabase/supabase-js';
 import { config } from 'dotenv';
 import { resolve } from 'path';
 import { NON_ARTIST_SLUGS } from '../api/lib/non-artist-names';
+import { EXCLUDED_ARTIST_SLUGS } from '../api/lib/excluded-artists';
 
 config({ path: resolve(import.meta.dirname ?? '.', '../.env') });
 
@@ -58,7 +61,7 @@ async function count(table: string, column: string, value: string): Promise<numb
 }
 
 async function main() {
-  const slugs = [...NON_ARTIST_SLUGS];
+  const slugs = [...new Set([...NON_ARTIST_SLUGS, ...EXCLUDED_ARTIST_SLUGS])];
   const { data: rows, error } = await client
     .from('artists')
     .select('id, slug, name, match_confidence')

@@ -20,8 +20,21 @@ describe('isDirectLink — what reaches artist_links', () => {
     ['a Google search', 'https://google.com/search?q=Artist'],
     ['the Ampwall explore fallback', 'https://ampwall.com/explore?searchStyle=search&query=Artist'],
     ['the BuyMeACoffee explore page', 'https://buymeacoffee.com/explore-creators'],
+    ['the Subvert discover template', 'https://www.subvert.fm/discover?q=Mount%20Eerie&type=artist'],
+    ['the same without www', 'https://subvert.fm/discover?q=Absurd&type=artist'],
   ])('rejects %s', (_label, url) => {
     expect(isDirectLink(url)).toBe(false);
+  });
+
+  it('keeps real Subvert artist pages while rejecting the discover template', () => {
+    // The gate has to split one platform in two, so pin both halves. 349 Subvert links are
+    // stored: 321 are the discover template (source 'search'), and 28 are real artist pages that
+    // artists added themselves (source 'claimed'). Rejecting the platform outright would have
+    // deleted those 28 — which is why this matches on the /discover path, not on the host.
+    expect(isDirectLink('https://www.subvert.fm/discover?q=Coca%E2%80%90Cola&type=artist')).toBe(false);
+    expect(isDirectLink('https://www.subvert.fm/discover?type=artist&q=Spectrum')).toBe(false);
+    expect(isDirectLink('https://www.subvert.fm/kid-lightbulbs')).toBe(true);
+    expect(isDirectLink('http://subvert.fm/valoy')).toBe(true);
   });
 
   it.each([

@@ -598,13 +598,27 @@ function loadArtistList(): ArtistListEntry[] {
 }
 
 /**
- * Query Wikidata to find which MusicBrainz IDs belong to non-music artists
- * (comedians, actors, etc.). Returns a Set of slugs to exclude.
+ * Query Wikidata for the artists these posts must not feature, by MusicBrainz ID:
+ *
+ *   * non-music artists — comedians, actors, athletes, whose Bandcamp page is usually a different
+ *     person with the same name;
+ *   * artists who have died. Every post says some variant of "support them directly", and 107 of
+ *     the artists in this pool are dead. Five had already gone out — Sara Tavares, Dusty Hill,
+ *     Brook Benton, Lhasa de Sela and Lex Barker — before anything checked.
+ *
+ * Returns the slugs to exclude plus whether the lookup was **complete**. That flag is the point:
+ * every batch here is wrapped in a try/catch that warns and moves on, so a Wikidata outage used
+ * to produce an empty exclusion set, which reads identically to "nobody needs excluding" and
+ * would let exactly the posts this guards against go out. A failed lookup is not a negative
+ * result; the caller drops the pool rather than trusting a partial answer.
  *
  * Runs a single SPARQL query in batches to stay within Wikidata limits.
  */
-async function findNonMusicArtists(artistList: ArtistListEntry[]): Promise<Set<string>> {
+async function findExcludedArtists(
+  artistList: ArtistListEntry[]
+): Promise<{ slugs: Set<string>; complete: boolean }> {
   const excludeSlugs = new Set<string>();
+  let complete = true;
   const mbidToSlug = new Map(artistList.map(a => [a.musicbrainzId, a.slug]));
 
   // Process in batches of 200 (Wikidata VALUES clause limit)
@@ -618,12 +632,19 @@ async function findNonMusicArtists(artistList: ArtistListEntry[]): Promise<Set<s
     const valuesClause = batch.map(id => `"${id}"`).join(' ');
 
     const occupationValues = NON_MUSIC_OCCUPATIONS.map(q => `wd:${q}`).join(' ');
+    // One query, two reasons to exclude: a non-music occupation (P106) or a date of death (P570).
+    // Matched through the artist's own MusicBrainz ID (P434), never by name — a name match pairs
+    // "Sebastian Bach" with Johann Sebastian Bach and "Jack White" with a footballer.
     const sparql = `
 SELECT DISTINCT ?mbid WHERE {
   VALUES ?mbid { ${valuesClause} }
-  VALUES ?nonMusicOccupation { ${occupationValues} }
   ?artist wdt:P434 ?mbid .
-  ?artist wdt:P106 ?nonMusicOccupation .
+  {
+    VALUES ?nonMusicOccupation { ${occupationValues} }
+    ?artist wdt:P106 ?nonMusicOccupation .
+  } UNION {
+    ?artist wdt:P570 ?dateOfDeath .
+  }
 }`;
 
     try {
@@ -654,9 +675,11 @@ SELECT DISTINCT ?mbid WHERE {
         }
       } else {
         console.warn(`  ⚠ Wikidata batch ${batchNum}/${totalBatches} returned ${res.status}`);
+        complete = false;
       }
     } catch (err) {
       console.warn(`  ⚠ Wikidata batch ${batchNum}/${totalBatches} failed: ${err instanceof Error ? err.message : err}`);
+      complete = false;
     }
 
     // Be nice to Wikidata
@@ -665,7 +688,7 @@ SELECT DISTINCT ?mbid WHERE {
     }
   }
 
-  return excludeSlugs;
+  return { slugs: excludeSlugs, complete };
 }
 
 function loadArtistData(slug: string): ArtistData | null {
@@ -967,24 +990,37 @@ async function main() {
     console.warn('⚠ No verified artists found. Indie days will be skipped.');
   }
 
-  // Filter out non-music artists (comedians, actors, etc.) via Wikidata
-  console.log('  Checking Wikidata for non-music artists...');
-  const nonMusicSlugs = await findNonMusicArtists(artistList);
-  if (nonMusicSlugs.size > 0) {
-    console.log(`  Excluding ${nonMusicSlugs.size} non-music artists (comedians, actors, etc.)`);
+  // Filter out non-music artists (comedians, actors, etc.) and artists who have died, via Wikidata
+  console.log('  Checking Wikidata for non-music and deceased artists...');
+  const excluded = await findExcludedArtists(artistList);
+  if (excluded.slugs.size > 0) {
+    console.log(`  Excluding ${excluded.slugs.size} non-music or deceased artists`);
   }
 
   // Merge Wikidata exclusions with hardcoded safety net
-  for (const slug of MANUAL_EXCLUDE_SLUGS) nonMusicSlugs.add(slug);
+  for (const slug of MANUAL_EXCLUDE_SLUGS) excluded.slugs.add(slug);
 
-  // Filter manifest to only music artists with good data
-  const prominentPool = manifest.filter(a => {
-    if (nonMusicSlugs.has(a.slug)) return false;
-    const data = loadArtistData(a.slug);
-    if (!data) return false;
-    return data.platforms.some(p => HIGHLIGHT_PLATFORMS.has(p.sourceId) && !p.url.includes('duckduckgo'));
-  });
+  // Filter manifest to only music artists with good data.
+  //
+  // An incomplete Wikidata lookup empties the exclusion set, which is indistinguishable from
+  // "nothing to exclude" — and the thing being excluded is posts telling people to go support a
+  // dead artist. So an incomplete lookup drops this pool entirely for the run: the verified indie
+  // artists below need no Wikidata check and can carry the week on their own.
+  const prominentPool = !excluded.complete
+    ? []
+    : manifest.filter(a => {
+        if (excluded.slugs.has(a.slug)) return false;
+        const data = loadArtistData(a.slug);
+        if (!data) return false;
+        return data.platforms.some(p => HIGHLIGHT_PLATFORMS.has(p.sourceId) && !p.url.includes('duckduckgo'));
+      });
 
+  if (!excluded.complete) {
+    console.warn(
+      '  ⚠ Wikidata lookup was incomplete — skipping the prominent-artist pool for this run ' +
+        'rather than risk featuring a deceased or non-music artist.'
+    );
+  }
   console.log(`  ${prominentPool.length} prominent artists with direct-support platforms\n`);
 
   const weekDir = join(SOCIAL_DIR, week);
