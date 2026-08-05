@@ -167,3 +167,52 @@ describe('ReleasesSection', () => {
     expect(screen.queryByText(/more$/)).toBeNull();
   });
 });
+
+describe('release type label', () => {
+  afterEach(cleanup);
+
+  it('shows Digital for a Mirlo release whose kind Mirlo never told us', () => {
+    // Mirlo leaves `type` null on the overwhelming majority of releases (204 of 209 measured
+    // live), so 'other' is the normal outcome and this row would otherwise carry no type at all.
+    show([
+      release({
+        releaseType: 'other',
+        sources: [{ platform: 'mirlo', offers: [{ price: 4, currency: 'USD', availability: 'available' }] }],
+      }),
+    ]);
+
+    expect(screen.getByText(/Digital/)).toBeTruthy();
+  });
+
+  it('does not claim Digital when the release is also on a platform that sells physical', () => {
+    // Bandcamp presses vinyl. "Digital" on a row that links to a vinyl listing is a wrong claim
+    // about a physical product, so one non-digital platform drops the label entirely.
+    show([
+      release({
+        releaseType: 'other',
+        sources: [
+          { platform: 'mirlo', offers: [{ price: 4, currency: 'USD', availability: 'available' }] },
+          { platform: 'bandcamp', offers: [{ price: 25, currency: 'USD', availability: 'available' }] },
+        ],
+      }),
+    ]);
+
+    expect(screen.queryByText(/Digital/)).toBeNull();
+  });
+
+  it('never renders the word "Other" to a fan', () => {
+    show([release({ releaseType: 'other', sources: [] })]);
+    expect(screen.queryByText(/\bOther\b/)).toBeNull();
+  });
+
+  it('still prefers a real upstream type over the digital fallback', () => {
+    show([
+      release({
+        releaseType: 'ep',
+        sources: [{ platform: 'mirlo', offers: [] }],
+      }),
+    ]);
+    expect(screen.getByText(/Ep/)).toBeTruthy();
+    expect(screen.queryByText(/Digital/)).toBeNull();
+  });
+});

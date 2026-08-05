@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { PLATFORMS } from "../shared/platform-registry.ts";
 import { isBandcampFriday } from "../shared/bandcamp-friday.ts";
 import { mainLinkDividerIndexes } from "../shared/link-dividers.ts";
-import { leadingOfferSummary, orderedSourcePlatforms, formatReleaseDate } from "../shared/release-display.ts";
+import { leadingOfferSummary, orderedSourcePlatforms, formatReleaseDate, releaseTypeLabel } from "../shared/release-display.ts";
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
 
 /**
@@ -77,13 +77,11 @@ function renderReleaseRow(release: ReleaseRow, artistSlug: string): string {
   const title = escapeHtml(release.title);
   const date = formatReleaseDate(release.release_date, release.date_precision);
 
-  // Capitalized here rather than with `text-transform: capitalize`, which applies to the whole
-  // line and would turn "from $7" into "From $7" and "Name your price" into "Name Your Price".
-  const type = release.release_type === 'other'
-    ? ''
-    : release.release_type.charAt(0).toUpperCase() + release.release_type.slice(1);
-
   const sources = (release.release_sources || []).map(s => ({ platform: s.platform, offers: s.release_offers || [] }));
+
+  // Capitalized in the helper rather than with `text-transform: capitalize`, which applies to the
+  // whole line and would turn "from $7" into "From $7" and "Name your price" into "Name Your Price".
+  const type = releaseTypeLabel(release.release_type, sources.map(s => s.platform));
   // leadingOfferSummary, not the globally cheapest price across every source — see the
   // function's own doc for why picking the absolute cheapest could rank a Discogs secondhand
   // listing above a Bandcamp direct purchase.

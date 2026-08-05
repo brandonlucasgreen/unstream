@@ -19,6 +19,18 @@ export interface PlatformMeta {
   homepageUrl?: string;
   aiPolicy?: 'formal' | 'discouraged';
   aiPolicyUrl?: string;
+  /**
+   * The platform sells downloads and nothing physical.
+   *
+   * Read by `releaseTypeLabel` to say "Digital" about a release whose *kind* (album/EP/single)
+   * the upstream never told us — which is the normal case on exactly these platforms, since none
+   * of them expose a type field. Absent means "not established", not "sells physical": Bandcamp
+   * and Discogs are deliberately unflagged because they genuinely sell vinyl, cassettes and CDs,
+   * and so is anything we haven't verified. An unflagged platform simply produces no label, which
+   * is the honest outcome — this field exists to state a fact about a shop, so a guess here would
+   * put a wrong claim about a physical product on a release page.
+   */
+  digitalOnly?: true;
 }
 
 export const PLATFORMS: Record<string, PlatformMeta> = {
@@ -40,6 +52,9 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     icon: '🪺',
     category: 'marketplace',
     payoutPercent: '86-90%',
+    // Verified live 2026-08-05: every trackGroup is a download. Artists can link a merch store
+    // (`merchStoreURL`), but that is off-platform and never a release row.
+    digitalOnly: true,
     homepageUrl: 'https://mirlo.space',
     aiPolicy: 'formal',
     aiPolicyUrl: 'https://mirlo.space/pages/content-policy',
@@ -104,6 +119,9 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     // on a £1.00 sale the fee is 20p (20%), not 15p — and plenty of Jam.coop releases
     // sell for £0.75–£3.00, so the effective payout at the low end is under 85%.
     payoutPercent: '82-85%',
+    // Every album page states "Digital download. MP3 and FLAC"; there is no physical stock,
+    // which is also why `ingestJamcoopAlbumPage` types every offer 'digital'.
+    digitalOnly: true,
     homepageUrl: 'https://jam.coop',
   },
   discogs: {
@@ -130,6 +148,8 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     icon: '🏕️',
     category: 'decentralized',
     payoutPercent: '90-97%',
+    // A static-site generator for selling downloads. No cart, no stock, no shipping.
+    digitalOnly: true,
     homepageUrl: 'https://simonrepp.com/faircamp',
   },
 

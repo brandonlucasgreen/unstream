@@ -165,6 +165,41 @@ export function payoutRank(platform: string): number {
   return first ? Number(first) : -1;
 }
 
+/**
+ * The type label for a release list row — "Album", "EP", "Digital", or nothing.
+ *
+ * Two jobs in one function so every surface agrees, which matters more than it sounds: the same
+ * release appears on the public artist page, in the artist's own management list, and in the
+ * admin review queue, and a label that showed up in one but not another would read as a bug in
+ * whichever view the person happened to be looking at.
+ *
+ * When the upstream told us the kind of release, that wins. When it didn't — `'other'`, our
+ * honest "we don't know" — a release sold only on download-only platforms is labelled **Digital**.
+ * That is the normal case on Mirlo, Faircamp and Jam.coop: none of them expose a type field, so
+ * every release from them would otherwise show no label at all.
+ *
+ * `'other'` deliberately does not become "Other" — it never has. A row reading "Other · 4 July
+ * 2026 · $4" tells a fan nothing; omitting it and showing "4 July 2026 · $4" is cleaner, and
+ * "Digital · 4 July 2026 · $4" is better still where it's true.
+ *
+ * **Every** platform must be download-only, not just one. A release on both Mirlo and Bandcamp
+ * may well exist as a vinyl pressing, and "Digital" would then be wrong about a physical product
+ * — so a single unflagged or unknown platform is enough to fall back to no label.
+ *
+ * Returns a plain capitalized label; callers apply their own casing (the release page shouts it).
+ */
+export function releaseTypeLabel(releaseType: string | null, platforms: string[]): string {
+  if (releaseType && releaseType !== 'other') {
+    return releaseType.charAt(0).toUpperCase() + releaseType.slice(1);
+  }
+
+  // No platforms means nothing is known about where it's sold, which is not evidence of digital.
+  if (platforms.length === 0) return '';
+  if (platforms.every(p => PLATFORMS[p]?.digitalOnly)) return 'Digital';
+
+  return '';
+}
+
 /** One release's source, with just enough offer data to summarize or badge with. */
 export interface ReleaseSourceSummary {
   platform: string;

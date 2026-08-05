@@ -6,7 +6,7 @@ import { SkeletonScreen } from '../components/Skeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
 import { PlatformIcon } from '../components/PlatformIcon';
 import { PLATFORMS } from '../../../../api/shared/platform-registry';
-import { formatReleaseDate } from '../../../../api/shared/release-display';
+import { formatReleaseDate, releaseTypeLabel } from '../../../../api/shared/release-display';
 import type { SourceId } from '../types';
 
 interface ReleaseReviewItem {
@@ -155,8 +155,7 @@ export function AdminReleaseReviewPage() {
 
 function ReleaseSummary({ item }: { item: ReleaseReviewItem }) {
   const date = formatReleaseDate(item.releaseDate, item.datePrecision);
-  const type =
-    item.releaseType === 'other' ? '' : item.releaseType.charAt(0).toUpperCase() + item.releaseType.slice(1);
+  const type = releaseTypeLabel(item.releaseType, item.platforms);
   const meta = [type, date].filter(Boolean).join(' · ');
 
   return (

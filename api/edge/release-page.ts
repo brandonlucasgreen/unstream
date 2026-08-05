@@ -28,6 +28,7 @@ import {
   payoutEstimate,
   payoutRank,
   relativeDays,
+  releaseTypeLabel,
 } from "../shared/release-display.ts";
 
 function escapeHtml(str: string): string {
@@ -220,7 +221,13 @@ export default async function handler(request: Request, context: Context) {
     const bcFriday = isBandcampFriday();
 
     const dateText = formatReleaseDate(release.release_date, release.date_precision);
-    const typeLabel = release.release_type === 'other' ? '' : release.release_type.toUpperCase();
+    // Upper-cased here, not in the helper: this page shouts the label where the lists sentence-case
+    // it. Platforms come from the release's own sources, so a download-only release reads DIGITAL
+    // rather than showing nothing where its kind is unknown.
+    const typeLabel = releaseTypeLabel(
+      release.release_type,
+      (release.release_sources || []).map(s => s.platform)
+    ).toUpperCase();
     const statusText = release.status === 'announced'
       ? (dateText ? `Coming ${dateText}` : 'Announced')
       : dateText;
