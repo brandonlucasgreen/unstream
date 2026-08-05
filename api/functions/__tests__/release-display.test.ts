@@ -15,6 +15,7 @@ import {
   payoutEstimate,
   payoutRank,
   relativeDays,
+  releaseTypeLabel,
 } from '../../shared/release-display';
 
 describe('formatMoney', () => {
@@ -179,5 +180,47 @@ describe('leadingOfferSummary', () => {
     expect(leadingOfferSummary([])).toBe('');
     expect(leadingOfferSummary([source('bandcamp', [])])).toBe('');
     expect(leadingOfferSummary([source('bandcamp', [offer(null)])])).toBe('');
+  });
+});
+
+describe('releaseTypeLabel', () => {
+  it('uses the upstream type when there is one', () => {
+    expect(releaseTypeLabel('album', ['bandcamp'])).toBe('Album');
+    expect(releaseTypeLabel('ep', ['mirlo'])).toBe('Ep');
+    expect(releaseTypeLabel('compilation', ['discogs'])).toBe('Compilation');
+  });
+
+  it('says Digital for an unknown type sold only on download-only platforms', () => {
+    // The normal case on Mirlo, Faircamp and Jam.coop: none of them expose a type field, so
+    // without this every one of their releases shows no label at all.
+    expect(releaseTypeLabel('other', ['mirlo'])).toBe('Digital');
+    expect(releaseTypeLabel('other', ['faircamp'])).toBe('Digital');
+    expect(releaseTypeLabel('other', ['jamcoop'])).toBe('Digital');
+    expect(releaseTypeLabel('other', ['mirlo', 'jamcoop'])).toBe('Digital');
+  });
+
+  it('refuses Digital when ANY platform might sell something physical', () => {
+    // The failure this prevents: a release on Mirlo *and* Bandcamp may well exist as a vinyl
+    // pressing, and "Digital" would then be a wrong claim about a physical product. One
+    // unflagged platform is enough to fall back to no label.
+    expect(releaseTypeLabel('other', ['mirlo', 'bandcamp'])).toBe('');
+    expect(releaseTypeLabel('other', ['bandcamp'])).toBe('');
+    expect(releaseTypeLabel('other', ['discogs'])).toBe('');
+    // An unrecognized platform is unknown, not digital.
+    expect(releaseTypeLabel('other', ['mirlo', 'somethingnew'])).toBe('');
+  });
+
+  it('says nothing when there are no platforms at all', () => {
+    // No sources is an absence of evidence, not evidence of digital — the same distinction the
+    // ingest layer draws between "no price configured" and "free".
+    expect(releaseTypeLabel('other', [])).toBe('');
+    expect(releaseTypeLabel(null, [])).toBe('');
+  });
+
+  it('never renders the literal word "Other"', () => {
+    // It never has, on any surface. "Other · 4 July 2026 · $4" tells a fan nothing.
+    for (const platforms of [[], ['bandcamp'], ['mirlo'], ['discogs', 'mirlo']]) {
+      expect(releaseTypeLabel('other', platforms)).not.toBe('Other');
+    }
   });
 });

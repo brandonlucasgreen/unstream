@@ -7,7 +7,7 @@ import { PageSkeleton } from '../components/PageSkeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
 import { PlatformIcon } from '../components/PlatformIcon';
 import { PLATFORMS } from '../../../../api/shared/platform-registry';
-import { formatReleaseDate } from '../../../../api/shared/release-display';
+import { formatReleaseDate, releaseTypeLabel } from '../../../../api/shared/release-display';
 import { sources } from '../services/sources';
 import { applyPendingOrder } from '../utils/releaseOrder';
 import type { SourceId } from '../types';
@@ -560,7 +560,7 @@ function ReleaseCard({
 }) {
   const busy = (key: string) => actionLoading === key;
   const date = formatReleaseDate(release.releaseDate, release.datePrecision);
-  const type = release.releaseType === 'other' ? '' : release.releaseType.charAt(0).toUpperCase() + release.releaseType.slice(1);
+  const type = releaseTypeLabel(release.releaseType, release.sources.map(s => s.platform));
   const meta = [type, date].filter(Boolean).join(' · ');
 
   return (

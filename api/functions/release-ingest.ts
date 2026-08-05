@@ -1041,6 +1041,241 @@ export function jamcoopArtistUrl(storedUrl: string): string | null {
 }
 
 // ---------------------------------------------------------------------------
+// Mirlo — the REST API: one request per artist for the whole discography *and* its prices
+// ---------------------------------------------------------------------------
+//
+// `GET https://api.mirlo.space/v1/artists/{slug}` returns the artist with `trackGroups[]`
+// embedded, so a Mirlo artist costs **one** request — no detail pass at all, where Bandcamp and
+// Jam.coop each need 1+N. It is the cheapest and richest release source in the codebase.
+//
+// Mirlo's robots.txt carries `Disallow: /v1/` under a hand-written "# Disallow crawling the API"
+// comment. We poll it anyway because Mirlo granted Unstream permission directly (2026-08-05) and
+// issued an API key. That permission, not the key, is what makes this allowed: verified live the
+// same day, the endpoint returns byte-identical responses with the key, with a bearer token, and
+// with no auth at all. The key is still sent — it identifies us, and it is what they asked us to
+// use — but it gates nothing, so nothing here may assume an authenticated response differs.
+//
+// Everything below was verified against 209 real releases across 31 artists on 2026-08-05. The
+// field-level surprises are commented where they bite; three are worth reading before editing:
+// prices are integer cents with `null` distinct from `0`, `currency` casing is inconsistent, and
+// `platformPercent` is deliberately ignored.
+
+/** One `trackGroups[]` entry, as `/v1/artists/{slug}` actually returns it. */
+export interface MirloTrackGroupRaw {
+  title?: string | null;
+  urlSlug?: string | null;
+  type?: string | null;
+  releaseDate?: string | null;
+  minPrice?: number | null;
+  currency?: string | null;
+  isPreorder?: boolean | null;
+  isPublic?: boolean | null;
+  hideFromSearch?: boolean | null;
+  isGettable?: boolean | null;
+  deletedAt?: string | null;
+  cover?: { sizes?: Record<string, string> | null } | null;
+}
+
+export interface MirloReleaseToPersist {
+  title: string;
+  slug: string;
+  matchKey: string;
+  releaseType: ReleaseType;
+  releaseDate: string | null;
+  datePrecision: DatePrecision;
+  status: ReleaseStatus;
+  artworkUrl: string | null;
+  externalUrl: string;
+  offers: IngestedOffer[];
+}
+
+/**
+ * Which `cover.sizes` key to store.
+ *
+ * `cover.url` is an array of opaque size-suffixed **ids**, not URLs — using it would store
+ * `"<uuid>-x600"` as an image src. `cover.sizes` is the parallel map of real CDN URLs.
+ */
+const MIRLO_COVER_SIZE = '600';
+
+/** The `mi-temp-slug-` prefix Mirlo gives an unpublished draft's auto-generated slug. */
+const MIRLO_DRAFT_SLUG_PREFIX = 'mi-temp-slug-';
+
+/**
+ * Read one artist's `/v1/artists/{slug}` response into rows ready to persist.
+ *
+ * Returns **null** when the body isn't a Mirlo artist document at all — an error envelope, a
+ * challenge page, a redirect's HTML. That is the "never cache uncertainty" rule applied at the
+ * parse boundary: an unrecognized body must not reduce to an empty list, because an empty list
+ * is indistinguishable from "this artist has released nothing" and would be recorded as a
+ * perfectly ordinary success. An artist who genuinely has no releases still returns `[]`.
+ */
+export function ingestMirloArtist(
+  body: unknown,
+  artistSlug: string,
+  now: Date = new Date()
+): MirloReleaseToPersist[] | null {
+  if (!body || typeof body !== 'object') return null;
+
+  // `/v1/artists/{slug}` wraps in `result` (singular). The search endpoint uses `results`
+  // (plural) and is a different shape entirely — don't accept it here by accident.
+  const result = (body as { result?: unknown }).result;
+  if (!result || typeof result !== 'object') return null;
+
+  const artist = result as { urlSlug?: unknown; trackGroups?: unknown };
+
+  // The document must be the artist we asked for. A redirect that landed on someone else's
+  // profile would otherwise file their records under this artist.
+  if (typeof artist.urlSlug !== 'string' || artist.urlSlug.toLowerCase() !== artistSlug.toLowerCase()) {
+    return null;
+  }
+  if (!Array.isArray(artist.trackGroups)) return null;
+
+  const out: MirloReleaseToPersist[] = [];
+  const takenSlugs = new Set<string>();
+
+  for (const node of artist.trackGroups) {
+    const release = buildMirloRelease(node as MirloTrackGroupRaw, artistSlug, takenSlugs, now);
+    if (!release) continue;
+    takenSlugs.add(release.slug);
+    out.push(release);
+  }
+
+  return out;
+}
+
+/**
+ * Turn one `trackGroups[]` entry into a persistable row, or null to skip it.
+ *
+ * Skipped: anything the artist has hidden (`isPublic: false`, `hideFromSearch: true`,
+ * `deletedAt` set) — those are deliberate settings and ingesting past them is a trust violation
+ * — and **drafts**, which need their own rule. A draft carries an empty `title` and a
+ * `mi-temp-slug-…` slug while still reporting `isPublic: true`, `hideFromSearch: false` and
+ * `isGettable: true`, so the visibility flags do not catch it. Both draft shapes were live on
+ * 2026-08-05 (`mi-temp-slug-new-album-0` and `mi-temp-slug-new-album-<uuid>`), so the prefix is
+ * matched rather than the uuid suffix.
+ */
+export function buildMirloRelease(
+  raw: MirloTrackGroupRaw,
+  artistSlug: string,
+  takenSlugs: ReadonlySet<string>,
+  now: Date = new Date()
+): MirloReleaseToPersist | null {
+  if (!raw || typeof raw !== 'object') return null;
+  if (raw.isPublic === false || raw.hideFromSearch === true || raw.deletedAt) return null;
+
+  const urlSlug = typeof raw.urlSlug === 'string' ? raw.urlSlug.trim() : '';
+  if (!urlSlug || urlSlug.startsWith(MIRLO_DRAFT_SLUG_PREFIX)) return null;
+
+  const title = typeof raw.title === 'string' ? raw.title.trim() : '';
+  if (!title) return null;
+
+  const matchKey = releaseMatchKey(title);
+  if (!matchKey) return null;
+
+  const { date, precision } = parseReleaseDate(raw.releaseDate, now);
+  const isPreorder = raw.isPreorder === true;
+
+  return {
+    title,
+    slug: uniqueReleaseSlug(title, takenSlugs),
+    matchKey,
+    // `type` is populated on only a small minority of releases (5 of 209 live), so the title is
+    // the usual signal — and an effective one here, since Mirlo artists often prefix titles
+    // "[Single]" / "[EP]" / "[Compilation]". `mapReleaseType` already folds 'lp' into 'album'.
+    releaseType: raw.type ? mapReleaseType(raw.type) : mapDiscogsFormatToReleaseType(null, title),
+    releaseDate: date,
+    datePrecision: precision,
+    // Mirlo publishes a real pre-order flag, so status has a true signal rather than an
+    // inference from the date.
+    status: deriveStatus(date, isPreorder, now),
+    artworkUrl: raw.cover?.sizes?.[MIRLO_COVER_SIZE]?.trim() || null,
+    externalUrl: mirloReleaseUrl(artistSlug, urlSlug),
+    offers: mirloOffers(raw),
+  };
+}
+
+/**
+ * The single digital offer for a Mirlo release, or none.
+ *
+ * Three price states, and conflating any two of them would misstate an artist's own terms:
+ *
+ * - `minPrice: null` (56 of 209 live, always alongside `suggestedPrice: null`) — **no price
+ *   configured**. Yields no offer. Not zero: `price: 0` renders as "Name your price", which
+ *   would advertise terms the artist never set.
+ * - `minPrice: 0` — genuinely name-your-price. Yields `price: 0`, which the display layer
+ *   already renders correctly.
+ * - `minPrice: N` — a real floor, in **integer cents**. `400` is $4.00.
+ *
+ * `isGettable: false` (3 of 209) means it isn't purchasable at all, whatever the price says, so
+ * it yields no offer either.
+ *
+ * `platformPercent` is **deliberately unused.** It looks like a payout share and is not
+ * trustworthy as one: it contradicts the artist's own `defaultPlatformFee` (one artist had
+ * `defaultPlatformFee: 7` with every release at `50`), and one free release carried
+ * `platformPercent: 100`, which is meaningless as a fee. None of the outliers correlated with
+ * `fundraiser` or `isAllOrNothing`. Payout comes from the platform registry until Mirlo tells us
+ * what this field means — a wrong number about someone's money is worse than a coarse one.
+ */
+function mirloOffers(raw: MirloTrackGroupRaw): IngestedOffer[] {
+  if (raw.isGettable === false) return [];
+
+  const cents = raw.minPrice;
+  if (typeof cents !== 'number' || !Number.isFinite(cents) || cents < 0) return [];
+
+  return [
+    {
+      format: 'digital',
+      price: cents / 100,
+      // Casing is inconsistent upstream — 'GBP' and 'gbp' both occur for the same currency, as
+      // do 'usd' and 'USD'. Left raw, one currency would be stored as two.
+      currency: typeof raw.currency === 'string' && raw.currency.trim()
+        ? raw.currency.trim().toUpperCase()
+        : null,
+      availability: raw.isPreorder === true ? 'preorder' : 'available',
+    },
+  ];
+}
+
+/** Verified live 2026-08-05: `https://mirlo.space/{artistSlug}/release/{urlSlug}` returns 200. */
+function mirloReleaseUrl(artistSlug: string, releaseSlug: string): string {
+  return `https://mirlo.space/${encodeURIComponent(artistSlug)}/release/${encodeURIComponent(releaseSlug)}`;
+}
+
+/**
+ * The Mirlo artist slug for a stored `mirlo` link, for building the API URL.
+ *
+ * Stored links come from search's own Mirlo lookup, but a claimed artist can save any URL to
+ * their profile, so the shape is not assumed. Live `artist_links` (measured 2026-08-02) held 50
+ * bare `/{slug}`, 15 with a second segment (mostly `/releases`), 1 with three, and trailing
+ * slashes throughout — the first path segment is the slug in every case.
+ */
+export function mirloArtistSlug(storedUrl: string): string | null {
+  try {
+    const u = new URL(storedUrl);
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return null;
+
+    const host = u.hostname.toLowerCase();
+    if (host !== 'mirlo.space' && !host.endsWith('.mirlo.space')) return null;
+
+    const slug = u.pathname.split('/').filter(Boolean)[0]?.toLowerCase();
+    if (!slug) return null;
+    // Mirlo's own routes live at the same depth as artist profiles, so a link to one of these
+    // would otherwise be requested as though it were an artist.
+    if (MIRLO_RESERVED_SEGMENTS.has(slug)) return null;
+
+    return slug;
+  } catch {
+    return null;
+  }
+}
+
+const MIRLO_RESERVED_SEGMENTS: ReadonlySet<string> = new Set([
+  'login', 'signup', 'password-reset', 'profile', 'widget', 'pages', 'post', 'posts',
+  'releases', 'artists', 'about', 'faq', 'terms', 'privacy', 'support', 'admin', 'api',
+  'v1', 'search', 'settings', 'checkout', 'cart', 'label', 'labels',
+]);
+
+// ---------------------------------------------------------------------------
 // Discovered links — a specific release, spotted on a page we fetched for another reason
 // ---------------------------------------------------------------------------
 //

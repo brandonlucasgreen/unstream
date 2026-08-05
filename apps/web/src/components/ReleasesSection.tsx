@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { leadingOfferSummary, orderedSourcePlatforms, formatReleaseDate } from '../../../../api/shared/release-display';
+import { leadingOfferSummary, orderedSourcePlatforms, formatReleaseDate, releaseTypeLabel } from '../../../../api/shared/release-display';
 import { PLATFORMS } from '../../../../api/shared/platform-registry';
 import { PlatformIcon } from './PlatformIcon';
 import type { ArtistPagePayload } from '../types/artist-page';
@@ -141,12 +141,12 @@ function PageButton({
 function ReleaseRow({ release, artistSlug }: { release: Release; artistSlug: string }) {
   const date = formatReleaseDate(release.releaseDate, release.datePrecision);
 
-  // Capitalised here rather than with a `capitalize` class, which would apply to the whole line
-  // and turn "from $7" into "From $7" and "Name your price" into "Name Your Price".
-  const type =
-    release.releaseType === 'other'
-      ? ''
-      : release.releaseType.charAt(0).toUpperCase() + release.releaseType.slice(1);
+  // Capitalised in the helper rather than with a `capitalize` class, which would apply to the
+  // whole line and turn "from $7" into "From $7" and "Name your price" into "Name Your Price".
+  const type = releaseTypeLabel(
+    release.releaseType,
+    release.sources.map(s => s.platform)
+  );
 
   // leadingOfferSummary, not the globally cheapest price: once a release has more than one
   // source, picking the absolute cheapest could rank a Discogs secondhand copy above a

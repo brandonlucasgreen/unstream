@@ -16,6 +16,7 @@ import {
   persistDiscogsReleases,
   persistFaircampReleases,
   persistJamcoopReleases,
+  persistMirloReleases,
   persistMusicBrainzEnrichment,
   persistReleaseDetail,
   persistReleases,
@@ -40,8 +41,10 @@ import {
   ingestFaircampReleasePage,
   ingestJamcoopAlbumPage,
   ingestJamcoopArtistPage,
+  ingestMirloArtist,
   ingestMusicBrainzReleaseGroups,
   jamcoopArtistUrl,
+  mirloArtistSlug,
   type DiscogsArtistReleaseEntry,
   type DiscogsReleaseDetailRaw,
   type IngestedOffer,
@@ -186,6 +189,42 @@ interface JamcoopBudget {
   deadline: number;
 }
 
+// --- Mirlo budgets -------------------------------------------------------------
+//
+// The cheapest source in the codebase: `/v1/artists/{slug}` returns the whole discography **and
+// its prices** in one request, so an artist costs exactly one fetch and there is no detail pass.
+// Compare Bandcamp (grid + one page per release) and Jam.coop (artist page + one per album).
+//
+// Mirlo granted Unstream permission to use this endpoint and issued an API key (2026-08-05), so
+// the `Disallow: /v1/` in their robots.txt is superseded by direct consent rather than ignored.
+// The pacing below is still deliberately gentle: a small co-op's own servers, and the recatalog
+// sweep runs four times a day.
+
+const DELAY_BETWEEN_MIRLO_FETCHES_MS = 1_000;
+
+/**
+ * Invocation-wide. One request per artist, so this is effectively "how many Mirlo artists can one
+ * batch cover" — set to the batch ceiling (`MAX_ARTISTS_PER_RUN`) since no artist needs a second.
+ */
+const MAX_MIRLO_FETCHES_PER_RUN = 25;
+
+interface MirloBudget {
+  fetchesLeft: number;
+  deadline: number;
+}
+
+/**
+ * Sent as `mirlo-api-key` when set.
+ *
+ * Verified live 2026-08-05: this endpoint returns byte-identical responses with the key, with a
+ * bearer token, and with no auth at all — so the key is **not** what grants access, and an absent
+ * key must not disable the pass. It is sent because Mirlo issued it for this use and it lets them
+ * attribute our traffic; if they later gate or rate-limit by key, we are already correct.
+ */
+const MIRLO_API_KEY = process.env.MIRLO_API_KEY;
+
+const MIRLO_USER_AGENT = 'Unstream/1.0 (https://unstream.stream - ethical music finder)';
+
 export async function handler(event: {
   httpMethod?: string;
   headers?: Record<string, string | undefined>;
@@ -244,6 +283,10 @@ export async function handler(event: {
     fetchesLeft: MAX_JAMCOOP_FETCHES_PER_RUN,
     deadline: Date.now() + ENRICHMENT_CUTOFF_MS,
   };
+  const mirloBudget: MirloBudget = {
+    fetchesLeft: MAX_MIRLO_FETCHES_PER_RUN,
+    deadline: Date.now() + ENRICHMENT_CUTOFF_MS,
+  };
   const enrichmentDeadline = Date.now() + ENRICHMENT_CUTOFF_MS;
 
   for (const [index, artistId] of artistIds.entries()) {
@@ -263,6 +306,7 @@ export async function handler(event: {
         discogsBudget,
         faircampBudget,
         jamcoopBudget,
+        mirloBudget,
         enrichmentDeadline
       );
       if (found === null) {
@@ -297,6 +341,7 @@ async function catalogArtist(
   discogsBudget: DiscogsBudget,
   faircampBudget: FaircampBudget,
   jamcoopBudget: JamcoopBudget,
+  mirloBudget: MirloBudget,
   enrichmentDeadline: number
 ): Promise<number | null> {
   const artist = await getArtistForCatalog(artistId);
@@ -304,8 +349,18 @@ async function catalogArtist(
     await recordCatalogOutcome(artistId, { error: 'artist not found' });
     return null;
   }
-  if (!artist.bandcampUrl && !artist.discogsUrl && !artist.faircampUrl && !artist.jamcoopUrl) {
-    await recordCatalogOutcome(artistId, { error: 'no bandcamp, discogs, faircamp, or jam.coop link stored' });
+  // Keep this list identical to CATALOGUEABLE_PLATFORMS in db.ts — the sweep picks its pool from
+  // that constant, and an artist it sweeps but this rejects is recorded as a failure.
+  if (
+    !artist.bandcampUrl &&
+    !artist.discogsUrl &&
+    !artist.faircampUrl &&
+    !artist.jamcoopUrl &&
+    !artist.mirloUrl
+  ) {
+    await recordCatalogOutcome(artistId, {
+      error: 'no bandcamp, discogs, faircamp, jam.coop, or mirlo link stored',
+    });
     return null;
   }
 
@@ -339,6 +394,12 @@ async function catalogArtist(
       const { found, detailed } = await catalogJamcoop(artistId, artist.jamcoopUrl, jamcoopBudget);
       totalFound += found;
       totalDetailed += detailed;
+    }
+    if (artist.mirloUrl) {
+      // Not counted in totalDetailed: Mirlo has no detail pass to run, so every release it
+      // writes arrives complete. Counting them as "detailed" would inflate a figure whose whole
+      // meaning is "how many second fetches did we spend".
+      totalFound += await catalogMirlo(artistId, artist.mirloUrl, mirloBudget);
     }
     if (artist.officialSiteUrl) {
       await catalogOfficialSite(artistId, artist.officialSiteUrl);
@@ -787,6 +848,97 @@ async function catalogJamcoop(
   } catch (error) {
     console.warn('[catalog] jam.coop ingest failed:', error instanceof Error ? error.message : String(error));
     return { found: 0, detailed: 0 };
+  }
+}
+
+/**
+ * The Mirlo pass: one request, the whole discography, prices included.
+ *
+ * There is no detail pass and no per-release loop, because there is nothing left to fetch — the
+ * offers written below came out of the same response as the release rows.
+ *
+ * Fetched with `globalThis.fetch` rather than `safeFetch`, matching the Discogs and MusicBrainz
+ * passes and for the same reason: the URL is **ours**, built against a hardcoded
+ * `api.mirlo.space` host. The only external input is a single path segment derived by
+ * `mirloArtistSlug()` (which itself refuses any URL that isn't on mirlo.space) and URL-encoded
+ * here. `safeFetch` exists to vet attacker-influenced *hosts*, and there isn't one; it also
+ * cannot send the API key, since it hardcodes its headers.
+ *
+ * A non-200, an unparseable body, or a document for the wrong artist all yield 0 rather than a
+ * thrown error — one source declining to answer is not the artist's whole run failing. But they
+ * are logged distinctly from "this artist has no releases", which is the case `ingestMirloArtist`
+ * returning `null` versus `[]` exists to keep apart.
+ */
+async function catalogMirlo(
+  artistId: string,
+  storedUrl: string,
+  budget: MirloBudget
+): Promise<number> {
+  try {
+    const slug = mirloArtistSlug(storedUrl);
+    if (!slug) {
+      console.warn(`[catalog] could not derive mirlo slug for artist ${artistId}`);
+      return 0;
+    }
+
+    if (budget.fetchesLeft <= 0 || Date.now() > budget.deadline) return 0;
+    budget.fetchesLeft--;
+
+    const apiUrl = `https://api.mirlo.space/v1/artists/${encodeURIComponent(slug)}`;
+    const headers: Record<string, string> = { 'User-Agent': MIRLO_USER_AGENT };
+    if (MIRLO_API_KEY) headers['mirlo-api-key'] = MIRLO_API_KEY;
+
+    const response = await globalThis.fetch(apiUrl, { headers });
+    if (!response.ok) {
+      console.warn(`[catalog] mirlo responded ${response.status} for artist ${artistId}`);
+      return 0;
+    }
+
+    let body: unknown;
+    try {
+      body = await response.json();
+    } catch {
+      // A 200 whose body isn't JSON is the upstream not answering — a challenge page, an HTML
+      // error. Reported rather than swallowed, because it is indistinguishable from success by
+      // status code alone.
+      console.error(`[catalog] mirlo returned a 200 with a non-JSON body for artist ${artistId}`);
+      return 0;
+    }
+
+    const releases = ingestMirloArtist(body, slug);
+    if (releases === null) {
+      console.error(`[catalog] mirlo 200 was not an artist document for ${slug} (artist ${artistId})`);
+      return 0;
+    }
+    if (releases.length === 0) return 0;
+
+    const written = await persistMirloReleases(artistId, releases);
+
+    // Offers hang off a `release_sources.id` that only exists after the rows are written, so the
+    // prices from the one response are attached here rather than in the same call.
+    const offersByUrl = new Map(
+      releases.filter(r => r.offers.length > 0).map(r => [r.externalUrl, r.offers])
+    );
+    for (const release of written) {
+      const offers = offersByUrl.get(release.url);
+      if (!offers) continue;
+
+      // status null: the date and status were already written by persistMirloReleases from this
+      // same response, so restating them would be a second write of the same fact — and could
+      // overwrite a date another source got more precisely.
+      await persistReleaseDetail(release, {
+        releaseDate: null,
+        datePrecision: 'unknown',
+        status: null,
+        offers,
+      });
+    }
+
+    await sleep(DELAY_BETWEEN_MIRLO_FETCHES_MS);
+    return written.length;
+  } catch (error) {
+    console.warn('[catalog] mirlo ingest failed:', error instanceof Error ? error.message : String(error));
+    return 0;
   }
 }
 
