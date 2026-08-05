@@ -170,7 +170,7 @@ describe('getStaleCatalogCandidates — who is in the pool', () => {
   });
 
   it('excludes artists with nothing crawlable', async () => {
-    // catalogArtist records an artist with no bandcamp/discogs/faircamp/jamcoop link as an
+    // catalogArtist records an artist with no bandcamp/discogs/faircamp/jamcoop/mirlo link as an
     // *error*, which bumps consecutive_failures and writes last_error. Sweeping them would
     // spend the batch on artists with nothing to fetch and turn the failure counters to noise.
     tables.artist_links = [link('real', 'bandcamp'), link('site-only', 'officialsite')];
@@ -180,7 +180,11 @@ describe('getStaleCatalogCandidates — who is in the pool', () => {
     expect(result.ok && result.candidates.map(c => c.artistId)).toEqual(['real']);
   });
 
-  it.each(['bandcamp', 'discogs', 'faircamp', 'jamcoop'])(
+  // This list must stay identical to catalogArtist's "is there anything to fetch" condition in
+  // catalog-artist-background.ts. The two disagreeing is the specific failure this pins: a
+  // platform the sweep considers crawlable but catalogArtist doesn't gets swept, rejected, and
+  // recorded as a failure, poisoning consecutive_failures for an artist who was never at fault.
+  it.each(['bandcamp', 'discogs', 'faircamp', 'jamcoop', 'mirlo'])(
     'treats a %s link as crawlable',
     async platform => {
       tables.artist_links = [link('a', platform)];
@@ -190,6 +194,16 @@ describe('getStaleCatalogCandidates — who is in the pool', () => {
       expect(result.ok && result.candidates.map(c => c.artistId)).toEqual(['a']);
     }
   );
+
+  it('treats a platform outside the catalogueable list as not crawlable', async () => {
+    // The negative half of the case above: without it, the it.each only proves the listed
+    // platforms are *included*, so a stray addition to CATALOGUEABLE_PLATFORMS would go unnoticed.
+    tables.artist_links = [link('a', 'spotify'), link('b', 'ampwall'), link('c', 'subvert')];
+
+    const result = await getStaleCatalogCandidates(10);
+
+    expect(result.ok && result.candidates).toEqual([]);
+  });
 
   it('excludes an artist whose only Bandcamp link is a search placeholder', async () => {
     // `https://bandcamp.com/search?q=X` is a UI affordance, not an artist page. bandcampMusicUrl
