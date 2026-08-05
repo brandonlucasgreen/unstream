@@ -14,6 +14,13 @@ interface ResultCardHeaderProps {
   onSave?: (e: React.MouseEvent) => void;
 }
 
+/** Where this result's artist page lives, or null if it doesn't have one. */
+function artistPagePath(result: SearchResult): string | null {
+  if (result.matchConfidence === 'claimed') return `/a/${result.claimedSlug || result.id}`;
+  if (result.knownSlug) return `/artist/${result.knownSlug}`;
+  return null;
+}
+
 export function ResultCardHeader({
   result,
   isAdmin,
@@ -25,6 +32,7 @@ export function ResultCardHeader({
   onSave,
 }: ResultCardHeaderProps) {
   const [imageError, setImageError] = useState(false);
+  const artistPath = artistPagePath(result);
 
   return (
     <div
@@ -93,28 +101,17 @@ export function ResultCardHeader({
             by {result.artist}
           </p>
         )}
-        {result.matchConfidence === 'claimed' ? (
-          /* React Router <Link>: SPA-internal navigation keeps history in the SPA
-             (back button works on Safari 26). The rich profile lives in the edge
-             function today; UNS-100 ports it into React. The hard-navigation path
-             was a regression in #269 (UNS-99) — see hotfix/uns-99-restore-link-routing. */
+        {/* One treatment for both destinations: a claimed profile lives at /a/:slug,
+            an unclaimed pre-generated page (seeded from data/artists-manifest.json)
+            at /artist/:slug, but to a fan they're the same promise — "here's more
+            about this artist" — so the link looks the same either way.
+            React Router <Link>: SPA-internal navigation keeps history in the SPA
+            (back button works on Safari 26). The rich profile lives in the edge
+            function today; UNS-100 ports it into React. The hard-navigation path
+            was a regression in #269 (UNS-99) — see hotfix/uns-99-restore-link-routing. */}
+        {artistPath && (
           <Link
-            to={`/a/${result.claimedSlug || result.id}`}
-            className="mt-1 inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-accent-primary/15 text-accent-primary hover:bg-accent-primary/20 transition-colors whitespace-nowrap"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-            View profile
-          </Link>
-        ) : result.knownSlug ? (
-          // Unclaimed artists still have a pre-generated /artist/ page (seeded
-          // from data/artists-manifest.json) — muted styling distinguishes it
-          // from the accent-colored claimed "View profile" pill above, since
-          // this isn't an owner-verified identity.
-          <Link
-            to={`/artist/${result.knownSlug}`}
+            to={artistPath}
             className="mt-1 inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-bg-secondary text-text-secondary hover:text-text-primary hover:bg-bg-secondary/70 transition-colors whitespace-nowrap"
             onClick={(e) => e.stopPropagation()}
           >
@@ -123,7 +120,7 @@ export function ResultCardHeader({
             </svg>
             View artist page
           </Link>
-        ) : null}
+        )}
       </div>
 
       {/* Action buttons */}
