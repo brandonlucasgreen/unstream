@@ -33,11 +33,16 @@ function cappedQuery<T>(rows: T[]) {
   };
 }
 
+/** A Bandcamp link, which is what makes an artist eligible for this index at all. */
+const bandcamp = (sub: string) => [{ platform: 'bandcamp', url: `https://${sub}.bandcamp.com` }];
+
 function verifiedArtists(count: number) {
   return Array.from({ length: count }, (_, i) => ({
     slug: `artist-${String(i).padStart(4, '0')}`,
     name: `Artist ${String(i).padStart(4, '0')}`,
     image_url: null,
+    died_on: null,
+    artist_links: bandcamp(`artist${i}`),
   }));
 }
 
@@ -56,8 +61,8 @@ describe('artist-directory handler', () => {
           expect(column).toBe('match_confidence');
           expect(value).toBe('verified');
           return cappedQuery([
-            { slug: 'zzz-artist', name: 'ZZZ Artist', image_url: null },
-            { slug: 'patrick-hardy', name: 'Patrick Hardy', image_url: 'https://img/p.jpg' },
+            { slug: 'zzz-artist', name: 'ZZZ Artist', image_url: null, died_on: null, artist_links: bandcamp('zzz') },
+            { slug: 'patrick-hardy', name: 'Patrick Hardy', image_url: 'https://img/p.jpg', died_on: null, artist_links: bandcamp('patrickhardy') },
           ]);
         }),
       })),
@@ -107,6 +112,76 @@ describe('artist-directory handler', () => {
 
     const res = await handler({ queryStringParameters: { scope: 'known' } });
     expect(res.statusCode).toBe(500);
+  });
+
+  it('leaves out artists who have died', async () => {
+    // Their /artist/ pages stay — an estate really does sell the music, and pointing a fan there is
+    // the point of the site. It is this index that would misrepresent them, because its subtitle
+    // addresses them as artists available to support.
+    mocks.mockFrom.mockReturnValue({
+      select: vi.fn(() => ({
+        eq: vi.fn(() =>
+          cappedQuery([
+            { slug: 'living', name: 'Living Artist', image_url: null, died_on: null, artist_links: bandcamp('living') },
+            { slug: 'elliott-smith', name: 'Elliott Smith', image_url: null, died_on: '2003-10-21', artist_links: bandcamp('elliottsmith') },
+          ])
+        ),
+      })),
+    });
+
+    const res = await handler({ queryStringParameters: { scope: 'known' } });
+    expect(JSON.parse(res.body).artists.map((a: { slug: string }) => a.slug)).toEqual(['living']);
+  });
+
+  it('leaves out artists with nothing a fan can buy from', async () => {
+    // The page promises these artists "have music available for direct purchase". Instagram and a
+    // Subvert search placeholder are not that — three rows had exactly this shape.
+    mocks.mockFrom.mockReturnValue({
+      select: vi.fn(() => ({
+        eq: vi.fn(() =>
+          cappedQuery([
+            { slug: 'smashcolor', name: 'Smashcolor', image_url: null, died_on: null, artist_links: [
+              { platform: 'instagram', url: 'https://instagram.com/smashcolor' },
+              { platform: 'subvert', url: 'https://www.subvert.fm/discover?q=Smashcolor&type=artist' },
+            ] },
+            { slug: 'nine-inch-nails', name: 'Nine Inch Nails', image_url: null, died_on: null, artist_links: [
+              { platform: 'youtube', url: 'https://youtube.com/nin' },
+              { platform: 'qobuz', url: 'https://www.qobuz.com/us-en/interpreter/nine-inch-nails/12345' },
+            ] },
+            { slug: 'no-links', name: 'No Links', image_url: null, died_on: null, artist_links: null },
+          ])
+        ),
+      })),
+    });
+
+    const res = await handler({ queryStringParameters: { scope: 'known' } });
+    // Qobuz is a marketplace, so Nine Inch Nails qualifies; a social account and a search URL do not.
+    expect(JSON.parse(res.body).artists.map((a: { slug: string }) => a.slug)).toEqual(['nine-inch-nails']);
+  });
+
+  it('still serves the index if died_on does not exist yet', async () => {
+    // A push to main deploys the functions and runs supabase-migrate concurrently, so there is a
+    // window where this function is live and migration 20260804130000 has not run. Degrade to an
+    // unfiltered index rather than a 500.
+    const selects: string[] = [];
+    mocks.mockFrom.mockReturnValue({
+      select: vi.fn((columns: string) => {
+        selects.push(columns);
+        return {
+          eq: vi.fn(() =>
+            columns.includes('died_on')
+              ? { range: vi.fn(() => Promise.resolve({ data: null, error: { message: 'column artists.died_on does not exist' } })) }
+              : cappedQuery([{ slug: 'a', name: 'A', image_url: null, artist_links: bandcamp('a') }])
+          ),
+        };
+      }),
+    });
+
+    const res = await handler({ queryStringParameters: { scope: 'known' } });
+    expect(res.statusCode).toBe(200);
+    expect(JSON.parse(res.body).artists.map((a: { slug: string }) => a.slug)).toEqual(['a']);
+    expect(selects[0]).toContain('died_on');
+    expect(selects[selects.length - 1]).not.toContain('died_on');
   });
 
   it('default scope lists claimed (verified profile) artists via the artist_profiles join', async () => {
