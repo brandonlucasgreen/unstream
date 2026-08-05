@@ -10,7 +10,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useEffect } from 'react';
-import { render, screen, waitFor, cleanup, act } from '@testing-library/react';
+import { render, waitFor, cleanup, act } from '@testing-library/react';
 import { AuthProvider, useAuth } from 'src/contexts/AuthContext';
 
 const mocks = vi.hoisted(() => ({
@@ -54,7 +54,7 @@ const held: { current: ReturnType<typeof useAuth> | null } = { current: null };
 function Probe() {
   const auth = useAuth();
   useEffect(() => { held.current = auth; });
-  return <div data-testid="probe">{auth.session ? 'signed-in' : 'signed-out'}</div>;
+  return null;
 }
 
 function api(): ReturnType<typeof useAuth> {
@@ -62,15 +62,31 @@ function api(): ReturnType<typeof useAuth> {
   return held.current;
 }
 
+// Waits on the captured context, not on a rendered proxy for it. Waiting for the DOM to say
+// "signed-in" was a race: that text lands when React commits, but `held.current` is written by a
+// passive effect React flushes later, and waitFor can resolve on the commit's MutationObserver
+// microtask. `api()` then handed back the pre-session snapshot, whose saveArtist hits
+// `if (!session) return` — so the call reported nothing and every assertion below failed.
 async function mountSignedIn() {
   mocks.getSession.mockResolvedValue({ data: { session } });
   render(<AuthProvider><Probe /></AuthProvider>);
-  await waitFor(() => expect(screen.getByTestId('probe').textContent).toBe('signed-in'));
+  await waitFor(() => expect(held.current?.session).toBeTruthy());
 }
 
-/** The options passed alongside the first captureMessage call. */
-function reportOptions() {
-  return mocks.captureMessage.mock.calls[0][1] as {
+/**
+ * The options passed alongside the named report. Looked up by message rather than taken from
+ * call 0 so a test reads the report it claims to be inspecting, and so a missing report says so
+ * instead of throwing on an empty call list.
+ */
+function reportOptions(message: string) {
+  const call = mocks.captureMessage.mock.calls.find(([m]) => m === message);
+  if (!call) {
+    throw new Error(
+      `No captureMessage call for "${message}". Reported instead: ` +
+      `${JSON.stringify(mocks.captureMessage.mock.calls.map(([m]) => m))}`
+    );
+  }
+  return call[1] as {
     level: string;
     tags: Record<string, string>;
     extra: Record<string, unknown>;
@@ -98,7 +114,7 @@ describe('AuthContext — reporting a failed save', () => {
     });
 
     expect(mocks.captureMessage).toHaveBeenCalledWith('Save artist failed (rolled back)', expect.anything());
-    const options = reportOptions();
+    const options = reportOptions('Save artist failed (rolled back)');
     expect(options.tags.status_code).toBe('400');
     expect(options.tags.context).toBe('auth.saveArtist');
     expect(options.extra.serverError).toBe('Invalid artist slug format');
@@ -116,8 +132,9 @@ describe('AuthContext — reporting a failed save', () => {
       await api().saveArtist('radiohead', undefined, 'Radiohead');
     });
 
-    expect(reportOptions().tags.status_code).toBe('401');
-    expect(reportOptions().extra.serverError).toBe('Not authenticated');
+    const options = reportOptions('Save artist failed (rolled back)');
+    expect(options.tags.status_code).toBe('401');
+    expect(options.extra.serverError).toBe('Not authenticated');
   });
 
   it('survives a response with no JSON body', async () => {
@@ -131,8 +148,9 @@ describe('AuthContext — reporting a failed save', () => {
       await api().saveArtist('radiohead', undefined, 'Radiohead');
     });
 
-    expect(reportOptions().tags.status_code).toBe('502');
-    expect(reportOptions().extra.serverError).toBe('(no body)');
+    const options = reportOptions('Save artist failed (rolled back)');
+    expect(options.tags.status_code).toBe('502');
+    expect(options.extra.serverError).toBe('(no body)');
   });
 
   it('rolls the optimistic save back as well as reporting it', async () => {
@@ -179,8 +197,9 @@ describe('AuthContext — reporting a failed save', () => {
     });
 
     expect(mocks.captureMessage).toHaveBeenCalledWith('Remove artist failed (rolled back)', expect.anything());
-    expect(reportOptions().tags.status_code).toBe('400');
-    expect(reportOptions().extra.serverError).toBe('artistId must be an artist slug, not an id');
+    const options = reportOptions('Remove artist failed (rolled back)');
+    expect(options.tags.status_code).toBe('400');
+    expect(options.extra.serverError).toBe('artistId must be an artist slug, not an id');
   });
 
   it('reports a failed saved-artists load with its status code', async () => {
@@ -195,7 +214,8 @@ describe('AuthContext — reporting a failed save', () => {
     });
 
     expect(mocks.captureMessage).toHaveBeenCalledWith('Dashboard saved-artists load failed', expect.anything());
-    expect(reportOptions().tags.status_code).toBe('500');
-    expect(reportOptions().extra.serverError).toBe('Database not configured');
+    const options = reportOptions('Dashboard saved-artists load failed');
+    expect(options.tags.status_code).toBe('500');
+    expect(options.extra.serverError).toBe('Database not configured');
   });
 });
