@@ -30,6 +30,15 @@ describe('isStaleBuildAssetError', () => {
     )).toBe(true);
   });
 
+  it("matches WebKit's wording for the same MIME rejection", () => {
+    // Real event from iOS 18.7 / Mobile Safari 26.6 on 2026-08-06, reaching the
+    // error boundary on /artist-edit/:slug/releases. WebKit words the MIME
+    // rejection nothing like Chromium does, so it escaped the clause above.
+    expect(isStaleBuildAssetError(
+      "TypeError: 'text/html' is not a valid JavaScript MIME type."
+    )).toBe(true);
+  });
+
   it("matches Vite's CSS preload failure", () => {
     expect(isStaleBuildAssetError(
       'Unable to preload CSS for /assets/ArtistEditPage-Bq1x9fLm.css'

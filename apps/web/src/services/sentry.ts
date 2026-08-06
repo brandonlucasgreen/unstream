@@ -29,10 +29,15 @@ export function isStaleBuildAssetError(message: string): boolean {
     message.includes('Failed to fetch dynamically imported module') ||
     // Firefox
     message.includes('error loading dynamically imported module') ||
-    // Safari
+    // Safari, when the fetch itself failed
     message.includes('Importing a module script failed') ||
-    // Any engine, when the SPA catch-all serves index.html in place of the chunk
+    // Chromium, when the SPA catch-all serves index.html in place of the chunk
     message.includes('Expected a JavaScript module script') ||
+    // WebKit's wording for the same MIME rejection: "'text/html' is not a valid
+    // JavaScript MIME type." Different enough from the Chromium sentence above
+    // that it needs its own clause — missing it meant every iOS visitor caught by
+    // a deploy got the error screen instead of the reload.
+    message.includes('is not a valid JavaScript MIME type') ||
     // Vite's preload helper, when a stylesheet for a route chunk is missing
     message.includes('Unable to preload CSS for')
   )
