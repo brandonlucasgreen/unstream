@@ -45,12 +45,30 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect, onLink
   // actually drop the link from its list afterwards.
   const handleRemoveLink = isAdmin && onLinkRemoved ? setLinkToRemove : undefined;
 
+  // The key this card saves under, and checks saved-ness with. **One expression, deliberately.**
+  //
+  // `result.id` is a search-pipeline key — `nameonly-…`, `known-…`, or a platform-derived handle
+  // like `rodneyowl` — and matches no row in the artists table. Saving under one wrote
+  // `artist_id: null`, which made the save invisible to every feature keyed on the artist: the
+  // release feeds, the /dashboard shortlist, and the `requestArtistCatalog` call that is supposed
+  // to make a save the strongest signal to go and crawl someone.
+  //
+  // `knownSlug` is the fix and it was already in the payload: `attachArtistPageSlugs` gives every
+  // placeable result the slug of its page, deliberately server-side so the rule isn't
+  // reimplemented per client. `ResultCardHeader` has always used it to build the /artist/ link,
+  // so before this the same card linked to one address and saved under another. The extension
+  // (`popup.js`) already had the three-way expression; this brings the web into line.
+  //
+  // It is one `const` rather than two matching expressions because it used to be two: the save
+  // handler and the saved-state effect each derived it, so fixing one and not the other would
+  // leave the star dark on an artist you had just saved.
+  const saveKey = result.claimedSlug || result.knownSlug || result.id;
+
   useEffect(() => {
     if (result.type === 'artist' && result.id) {
-      // Match the slug we use for save so the saved state stays in sync
-      setSaved(isArtistSaved(result.claimedSlug || result.id));
+      setSaved(isArtistSaved(saveKey));
     }
-  }, [result.type, result.id, result.claimedSlug, isArtistSaved]);
+  }, [result.type, result.id, saveKey, isArtistSaved]);
 
   const handleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -58,21 +76,15 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect, onLink
 
     if (result.type !== 'artist' || !result.id) return;
 
-    // Prefer the verified /a/{slug} over the synthetic search-result id.
-    // For verified-but-not-claimed artists the result id is a "nameonly-..." key
-    // that won't match a row in the artists table, so findExistingArtist fails
-    // and the saved record falls back to "Saved from Search".
-    const saveId = result.claimedSlug || result.id;
-
     if (saved) {
-      await removeSavedArtist(saveId);
+      await removeSavedArtist(saveKey);
       setSaved(false);
     } else {
       if (!session) {
         setShowLoginInterstitial(true);
         return;
       }
-      await saveArtist(saveId, undefined, result.name, result.imageUrl);
+      await saveArtist(saveKey, undefined, result.name, result.imageUrl);
       setSaved(true);
     }
   };

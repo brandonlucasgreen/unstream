@@ -4279,6 +4279,124 @@ function feedSince(now: Date): string {
 }
 
 /**
+ * Resolve the artists this user has saved, to artist-table ids.
+ *
+ * **`saved_artists.artist_id` alone is not enough, and assuming it was is how the dashboard
+ * shipped empty.** The column is populated only when the save request's slug matched an artists
+ * row at the time; a save made from a search result used to send a synthetic key
+ * (`rodneyowl`, `qobuz-pearljam`, `nameonly-…`), which matched nothing, so the row was written
+ * with `artist_id: null`. Measured 2026-08-07: **25 of 37 live rows**. Every feature keyed on
+ * `artist_id` — this feed, the /dashboard shortlist — was silently blind to two thirds of
+ * everyone's saved artists.
+ *
+ * The client that wrote those keys is fixed, but the rows are already in the database and a
+ * fan's calendar should not stay wrong until a backfill runs. So `artist_slug` is resolved as a
+ * fallback here, through the same alias table the artist page uses, since a slug retired by the
+ * accent-folding reslug (#410) is the other way a stored slug stops matching.
+ *
+ * `deleted = false` matters as much: `saved_artists` uses tombstones (migration 017), so without
+ * it an artist you *unsaved* keeps feeding your calendar forever.
+ */
+async function savedArtistIdsForUser(
+  client: NonNullable<ReturnType<typeof getClient>>,
+  userId: string
+): Promise<string[] | null> {
+  const { data: saved, error: savedError } = await client
+    .from('saved_artists')
+    .select('artist_id, artist_slug, artist_name')
+    .eq('user_id', userId)
+    .eq('deleted', false);
+
+  if (savedError) {
+    console.error('[DB] savedArtistIdsForUser read failed:', savedError.message);
+    return null;
+  }
+
+  const rows = (saved as { artist_id: string | null; artist_slug: string | null; artist_name: string | null }[]) || [];
+  const ids = new Set<string>();
+  const unresolved: { slug: string; name: string | null }[] = [];
+
+  for (const row of rows) {
+    if (row.artist_id) ids.add(row.artist_id);
+    else if (row.artist_slug) unresolved.push({ slug: row.artist_slug.toLowerCase(), name: row.artist_name });
+  }
+  if (unresolved.length === 0) return [...ids];
+
+  // Two candidates per row, because the stored slugs are two different kinds of wrong.
+  //
+  // The stored slug itself covers a *retired* slug (the accent-folding reslug, #410 — 44 aliases
+  // exist), and is tried against the alias table below.
+  //
+  // `artistSlug(artist_name)` covers the synthetic search keys, which is what the rows actually
+  // hold: measured on production, **not one** unlinked slug matched an artists row or an alias
+  // directly — they are squashed names (`rodneyowl`, `seoulmetro`, `modelactriz`) and prefixed
+  // platform keys (`qobuz-robertlogan`). Re-deriving from the name is the only thing that
+  // recovers them, and it is the same expression `persistSearchResults` upserts the artist under,
+  // so it names a row that exists rather than guessing at one.
+  const candidates = new Set<string>();
+  for (const row of unresolved) {
+    candidates.add(row.slug);
+    if (row.name) candidates.add(artistSlug(row.name));
+  }
+
+  // One `.in()` is safe without chunking here in a way it usually isn't: this is one person's
+  // saved list, not a table scan. The PostgREST 1,000-row cap is nowhere near.
+  const { data: bySlug, error: slugError } = await client
+    .from('artists')
+    .select('id, slug, name')
+    .in('slug', [...candidates]);
+
+  if (slugError) {
+    // Reported rather than swallowed: returning the partial set would look exactly like "those
+    // artists have nothing new", which is the confusion this whole function exists to stop. The
+    // ids we did resolve are still returned — they are not in doubt.
+    console.error('[DB] savedArtistIdsForUser slug resolution failed:', slugError.message);
+    return [...ids];
+  }
+
+  const artistsBySlug = new Map<string, { id: string; name: string }>();
+  for (const row of (bySlug as { id: string; slug: string; name: string }[]) || []) {
+    artistsBySlug.set(row.slug.toLowerCase(), { id: row.id, name: row.name });
+  }
+
+  const stillUnmatched: string[] = [];
+  for (const row of unresolved) {
+    // An exact slug match is accepted outright — the saved row named this artist's page.
+    const direct = artistsBySlug.get(row.slug);
+    if (direct) {
+      ids.add(direct.id);
+      continue;
+    }
+
+    // A name-derived match has to prove itself, because a name is a much weaker key than a slug.
+    // Requiring the found artist's own name to normalize identically stops a saved row with a
+    // generic or wrong name ("Music") from silently adopting an unrelated artist's releases —
+    // which would put someone else's record in a fan's calendar, a worse failure than showing
+    // nothing.
+    const derived = row.name ? artistSlug(row.name) : '';
+    const byName = derived ? artistsBySlug.get(derived) : undefined;
+    if (byName && artistSlug(byName.name) === derived) {
+      ids.add(byName.id);
+      continue;
+    }
+
+    stillUnmatched.push(row.slug);
+  }
+
+  if (stillUnmatched.length > 0) {
+    const { data: aliased, error: aliasError } = await client
+      .from('artist_slug_aliases')
+      .select('artist_id, alias')
+      .in('alias', stillUnmatched);
+
+    if (aliasError) console.error('[DB] savedArtistIdsForUser alias resolution failed:', aliasError.message);
+    else for (const row of (aliased as { artist_id: string }[]) || []) ids.add(row.artist_id);
+  }
+
+  return [...ids];
+}
+
+/**
  * Every release worth putting in one fan's feed: across all their saved artists, dated within
  * the trailing window or still to come.
  *
@@ -4291,17 +4409,8 @@ export async function getFeedReleasesForUser(userId: string, now: Date = new Dat
   if (!client) return [];
 
   try {
-    const { data: saved, error: savedError } = await client
-      .from('saved_artists')
-      .select('artist_id')
-      .eq('user_id', userId);
-
-    if (savedError) {
-      console.error('[DB] getFeedReleasesForUser saved read failed:', savedError.message);
-      return [];
-    }
-
-    const artistIds = ((saved as { artist_id: string }[]) || []).map(r => r.artist_id);
+    const artistIds = await savedArtistIdsForUser(client, userId);
+    if (artistIds === null) return [];
     if (artistIds.length === 0) return [];
 
     const { data, error } = await client
