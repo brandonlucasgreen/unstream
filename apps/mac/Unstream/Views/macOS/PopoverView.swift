@@ -9,12 +9,14 @@ enum PopoverTab {
 enum PopoverRoute: Hashable {
     case artistReleases(slug: String, name: String)
     case releaseGuide(ReleaseGuideTarget)
+    case newReleases
 
     /// Shown centred in the back header, so it's obvious which level you're on.
     var title: String {
         switch self {
         case .artistReleases: return "Releases"
         case .releaseGuide: return "Where to Buy"
+        case .newReleases: return "New Releases"
         }
     }
 }
@@ -128,6 +130,10 @@ struct PopoverView: View {
                     }
                 case let .releaseGuide(target):
                     ReleaseGuideView(target: target)
+                case .newReleases:
+                    NewReleasesListView(releaseAlertManager: releaseAlertManager) { target in
+                        route.append(.releaseGuide(target))
+                    }
                 }
             }
             .frame(maxHeight: 350)
@@ -141,12 +147,16 @@ struct PopoverView: View {
             // A real segmented control: correct selection emphasis in both appearances
             // and in an inactive window, which the hand-rolled accent-tinted pills got
             // wrong (they read as a heavy blue slab in dark mode).
-            Picker("View", selection: $selectedTab) {
-                Text("Search").tag(PopoverTab.search)
-                Text(savedTabTitle).tag(PopoverTab.supportList)
+            HStack(spacing: 8) {
+                Picker("View", selection: $selectedTab) {
+                    Text("Search").tag(PopoverTab.search)
+                    Text(savedTabTitle).tag(PopoverTab.supportList)
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+
+                newReleasesButton
             }
-            .pickerStyle(.segmented)
-            .labelsHidden()
             .padding(.horizontal, 12)
             .padding(.top, 10)
 
@@ -342,6 +352,32 @@ struct PopoverView: View {
         .padding(.vertical, 8)
     }
 
+    /// The way into the unread-releases list, shown only when there are some.
+    ///
+    /// A bell beside the segmented control rather than a third segment: this is news that comes
+    /// and goes, not a place the app always has. When there is nothing unread there is nothing
+    /// to offer, and an always-present empty tab would be a worse trade in a 320-point popover.
+    @ViewBuilder
+    private var newReleasesButton: some View {
+        let count = releaseAlertManager.newReleases.count
+        if count > 0 {
+            Button(action: { route = [.newReleases] }) {
+                HStack(spacing: 3) {
+                    Image(systemName: "bell.badge.fill")
+                        .foregroundColor(.yellow)
+                    Text("\(count)")
+                        .font(.caption.weight(.medium))
+                        .foregroundColor(.secondary)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .fixedSize()
+            .help(count == 1 ? "1 new release" : "\(count) new releases")
+            .accessibilityLabel(count == 1 ? "1 new release" : "\(count) new releases")
+        }
+    }
+
     /// The saved count rides in the segment label — a segmented control has no badge
     /// slot, and the count is useful enough to keep.
     private var savedTabTitle: String {
@@ -382,6 +418,13 @@ struct PopoverView: View {
                 selectedTab = .supportList
             }
             .keyboardShortcut("2", modifiers: .command)
+
+            // Registered only while there is something to show, matching the button beside the
+            // segmented control — a shortcut to an empty list would be a dead key.
+            if !releaseAlertManager.newReleases.isEmpty {
+                Button("New Releases") { route = [.newReleases] }
+                    .keyboardShortcut("3", modifiers: .command)
+            }
 
             // Escape backs out of a drill-down, which is what Escape should do. Registered only
             // while one is open, so everywhere else Escape keeps its usual job of dismissing the

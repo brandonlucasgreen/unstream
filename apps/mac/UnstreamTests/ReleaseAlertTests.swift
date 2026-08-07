@@ -242,4 +242,197 @@ final class ReleaseAlertTests: XCTestCase {
         XCTAssertEqual(decoded.offerSummary, "")
         XCTAssertFalse(decoded.isUpcoming)
     }
+
+    // MARK: - Stable identity (the iCloud dismissal sync)
+
+    /// `NewRelease.id` was a fresh `UUID()` per device, and the iCloud dismissal sync published
+    /// those ids as the dismissed set. Device A dismissed a release and synced UUID X; device B
+    /// held the same release under UUID Y; nothing ever matched, so the sync did nothing at all.
+    /// These pin the property that makes it work: same release, same id, wherever it's built.
+
+    func testTwoDevicesDeriveTheSameIdForTheSameCatalogRelease() {
+        let onOneMac = release()
+        let onAnother = release()
+
+        XCTAssertEqual(onOneMac.id, onAnother.id, "A release's id must not depend on where it was built")
+    }
+
+    func testCatalogIdComesFromTheReleasePageNotTheDisplayNames() {
+        // Same catalogue entry, two spellings of the artist as the server happened to send it.
+        let accented = NewRelease(
+            artistName: "Sigur Rós",
+            releaseName: "Á",
+            releaseDate: Date(timeIntervalSince1970: 0),
+            releaseUrl: "https://unstream.stream/a/sigur-ros/a",
+            platform: "bandcamp"
+        )
+        let plain = NewRelease(
+            artistName: "Sigur Ros",
+            releaseName: "A",
+            releaseDate: Date(timeIntervalSince1970: 0),
+            releaseUrl: "https://unstream.stream/a/sigur-ros/a",
+            platform: "bandcamp"
+        )
+
+        XCTAssertEqual(accented.id, "release:sigur-ros/a")
+        XCTAssertEqual(accented.id, plain.id)
+    }
+
+    /// The live-scrape path hands back a *platform* URL, which carries no slugs — so the key
+    /// degrades to the artist and title, and says so in its prefix rather than pretending to be
+    /// a catalogue key.
+    func testScrapedAlertsKeyOnArtistAndTitleInstead() {
+        let onBandcamp = NewRelease(
+            artistName: "Kid Lightbulbs",
+            releaseName: "Infinite Normal",
+            releaseDate: Date(timeIntervalSince1970: 0),
+            releaseUrl: "https://kidlightbulbs.bandcamp.com/album/infinite-normal",
+            platform: "bandcamp"
+        )
+        let onMirlo = NewRelease(
+            artistName: "kid lightbulbs ",
+            releaseName: "Infinite Normal",
+            releaseDate: Date(timeIntervalSince1970: 0),
+            releaseUrl: "https://mirlo.space/kidlightbulbs/release/infinite-normal",
+            platform: "mirlo"
+        )
+
+        XCTAssertEqual(onBandcamp.id, "name:kid lightbulbs/infinite normal")
+        XCTAssertEqual(
+            onBandcamp.id, onMirlo.id,
+            "Two devices handed different shop URLs for one record must still agree on its id"
+        )
+    }
+
+    func testAScrapedKeyCanNeverBeMistakenForACatalogKey() {
+        let scraped = NewRelease(
+            artistName: "a/b",
+            releaseName: "c",
+            releaseDate: Date(timeIntervalSince1970: 0),
+            releaseUrl: "https://example.bandcamp.com/album/c",
+            platform: "bandcamp"
+        )
+
+        XCTAssertTrue(scraped.id.hasPrefix("name:"), scraped.id)
+        XCTAssertFalse(scraped.id.hasPrefix("release:"), scraped.id)
+    }
+
+    /// The id is also the SwiftUI `ForEach` key, so two live alerts must never share one.
+    func testTwoReleasesByOneArtistHaveDifferentIds() {
+        var state = ReleaseCheckState()
+        let found = ReleaseAlertManager.selectUnseen(
+            [result("First Record"), result("Second Record")], artistName: "Someone", state: &state
+        )
+
+        XCTAssertEqual(Set(found.map(\.id)).count, 2)
+    }
+
+    /// A v3.4.0 build persisted a random UUID under `id`. Reading it back would keep that device
+    /// pinned to an identity no other device shares, so decoding recomputes instead.
+    func testDecodingRecomputesTheIdRatherThanTrustingAStoredUUID() throws {
+        let stored = UUID().uuidString
+        let legacy = """
+        {
+          "id": "\(stored)",
+          "artistName": "Kid Lightbulbs",
+          "releaseName": "Infinite Normal",
+          "releaseDate": 750000000,
+          "releaseUrl": "https://unstream.stream/a/kid-lightbulbs/infinite-normal",
+          "platform": "bandcamp",
+          "detectedAt": 750000000
+        }
+        """.data(using: .utf8)!
+
+        let decoded = try JSONDecoder().decode(NewRelease.self, from: legacy)
+
+        XCTAssertEqual(decoded.id, "release:kid-lightbulbs/infinite-normal")
+        XCTAssertNotEqual(decoded.id, stored)
+    }
+
+    func testAnAlertSurvivesAnEncodeDecodeRoundTripWithItsIdIntact() throws {
+        let original = release()
+        let data = try JSONEncoder().encode(original)
+
+        let decoded = try JSONDecoder().decode(NewRelease.self, from: data)
+
+        XCTAssertEqual(decoded.id, original.id)
+    }
+
+    // MARK: - Which links get sent (the three-platform gate)
+
+    private func entry(_ platforms: [(String, String)]) -> SupportEntry {
+        SupportEntry(
+            artistName: "Someone",
+            imageUrl: nil,
+            platforms: platforms.map { SavedPlatform(sourceId: $0.0, url: $0.1) }
+        )
+    }
+
+    /// The old client built its platforms dictionary from bandcamp, faircamp and mirlo alone and
+    /// then skipped the artist when it came out empty — even though the server answers from the
+    /// release catalogue first and never reads the dictionary on that path. Discogs is the
+    /// largest link population we have, so this skipped more artists than it covered.
+    func testDiscogsOnlyArtistStillGetsTheirLinksSent() {
+        let urls = ReleaseAlertManager.platformUrls(for: entry([("discogs", "https://discogs.com/artist/1")]))
+
+        XCTAssertEqual(urls, ["discogs": "https://discogs.com/artist/1"])
+    }
+
+    func testEverySavedLinkIsSentNotJustTheScrapableThree() {
+        let urls = ReleaseAlertManager.platformUrls(for: entry([
+            ("bandcamp", "https://someone.bandcamp.com"),
+            ("jamcoop", "https://jam.coop/someone"),
+            ("instagram", "https://instagram.com/someone"),
+        ]))
+
+        XCTAssertEqual(Set(urls.keys), ["bandcamp", "jamcoop", "instagram"])
+    }
+
+    func testBlankUrlsAreDroppedAndTheFirstLinkPerPlatformWins() {
+        let urls = ReleaseAlertManager.platformUrls(for: entry([
+            ("bandcamp", "https://first.bandcamp.com"),
+            ("bandcamp", "https://second.bandcamp.com"),
+            ("faircamp", ""),
+        ]))
+
+        XCTAssertEqual(urls, ["bandcamp": "https://first.bandcamp.com"])
+    }
+
+    // MARK: - How far back to look (the closed laptop)
+
+    private func daysAgo(_ days: Double, from now: Date) -> Date {
+        now.addingTimeInterval(-days * 24 * 60 * 60)
+    }
+
+    func testFirstEverCheckLetsTheServerChooseTheWindow() {
+        XCTAssertNil(ReleaseAlertManager.lookbackDays(since: nil))
+    }
+
+    /// The defect: a laptop closed for six weeks woke up, asked for the server's default 31 days,
+    /// and permanently lost everything that had aged past that window while it slept.
+    func testASixWeekGapAsksForSixWeeksPlusPadding() {
+        let now = Date()
+
+        let days = ReleaseAlertManager.lookbackDays(since: daysAgo(42, from: now), now: now)
+
+        XCTAssertEqual(days, 49)
+    }
+
+    func testAShortGapStillAsksForTheFullMonthWeUsedToGet() {
+        let now = Date()
+
+        XCTAssertEqual(ReleaseAlertManager.lookbackDays(since: daysAgo(1, from: now), now: now), 31)
+    }
+
+    func testAVeryOldCheckIsCappedAtTheServersCeiling() {
+        let now = Date()
+
+        XCTAssertEqual(ReleaseAlertManager.lookbackDays(since: daysAgo(900, from: now), now: now), 365)
+    }
+
+    func testALastCheckDateInTheFutureFallsBackToTheDefault() {
+        let now = Date()
+
+        XCTAssertNil(ReleaseAlertManager.lookbackDays(since: now.addingTimeInterval(3600), now: now))
+    }
 }

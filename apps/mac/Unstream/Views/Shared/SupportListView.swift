@@ -62,7 +62,7 @@ struct SupportListView: View {
                     SupportEntryView(
                         entry: entry,
                         isRefreshing: supportListManager.isRefreshing(entry),
-                        newRelease: releaseAlertManager.newRelease(for: entry.artistName),
+                        newReleases: releaseAlertManager.newReleases(for: entry.artistName),
                         onRemove: {
                             supportListManager.removeEntry(entry)
                         },
@@ -132,7 +132,9 @@ struct SavedArtistsSearchBar: View {
 struct SupportEntryView: View {
     let entry: SupportEntry
     let isRefreshing: Bool
-    var newRelease: NewRelease?
+    /// All of this artist's unread releases, not just the newest — two records in one week is
+    /// exactly the case a fan most wants to see, and it was the case that got truncated.
+    var newReleases: [NewRelease] = []
     let onRemove: () -> Void
     let onRefresh: () -> Void
 
@@ -209,8 +211,8 @@ struct SupportEntryView: View {
                 #endif
             }
 
-            // New release indicator
-            if let release = newRelease {
+            // New release indicators, one per unread release
+            ForEach(newReleases) { release in
                 NewReleaseBadge(release: release)
             }
 
