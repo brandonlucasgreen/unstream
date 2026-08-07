@@ -47,6 +47,13 @@ import { Sentry } from '../lib/sentry';
  * artists daily: saved artists (single figures) come round as soon as their 7-day cooldown
  * expires, and the ~2,500-artist tail rotates about monthly, which is the right shape for
  * artist-page freshness. Raise the cron frequency if the tail needs to be tighter.
+ *
+ * That "cadence, not this number" rule is about **artists reached**, and it still holds. It did
+ * not hold for *releases priced*, which is a different quantity and was starved somewhere else
+ * entirely: `MAX_DETAIL_FETCHES_PER_RUN` rationed one invocation's release-page reads across the
+ * whole batch, so the artists late in every sweep were reached and then left unpriced. Raising the
+ * cadence would not have fixed that — it would have re-reached the same artists sooner and starved
+ * them again, at four times the request rate. The fix belonged at that cap; see its comment.
  */
 const SWEEP_BATCH_SIZE = 25;
 
