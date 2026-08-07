@@ -1,9 +1,22 @@
 // Unstream Chrome Extension - Service Worker
 // Handles API calls, caching, badge updates, release alerts, and auth
+//
+// This file uses ES module imports, so **both** manifests must declare it as a module —
+// `"type": "module"` alongside `service_worker` in manifest.json and alongside `scripts` in
+// manifest-firefox.json. Firefox's manifest was missing it, which meant the first `import` was a
+// syntax error and none of this ran there at all: no release alerts, no badge, no auth. It fails
+// silently unless you open the extension's console, so check both files when adding an import.
 
 import { ALLOWED_RELEASE_DOMAINS } from '../lib/constants.js';
 import { getStoredSession, handleMagicLinkCallback, getAccessToken, signOut } from '../lib/supabase.js';
 import { reconcileCustomSites } from '../lib/custom-sites.js';
+import {
+  releasesFromResponse,
+  releaseNotificationBody,
+  releaseNotificationTitle,
+  selectUnseenReleases,
+  sinceDaysForCheck,
+} from '../lib/release-alerts.js';
 
 const API_BASE = 'https://unstream.stream/api';
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
@@ -546,62 +559,41 @@ async function checkForNewReleases() {
 
   // Get current state
   const { releaseCheckState = { knownReleases: {}, newReleases: [] } } = await chrome.storage.local.get('releaseCheckState');
+  if (!releaseCheckState.knownReleases) releaseCheckState.knownReleases = {};
+
+  // How far back to ask. Left unsent, the server looks back 31 days, so a browser that was closed
+  // for six weeks came back, found nothing older than that, and recorded a fresh check date —
+  // losing the gap permanently.
+  const sinceDays = sinceDaysForCheck(releaseCheckState.lastCheckDate);
 
   const foundNewReleases = [];
 
   for (const artistName of artistNames) {
     const artistData = savedArtistsData[artistName];
-    if (!artistData || !artistData.platforms) continue;
+    if (!artistData) continue;
 
-    // Build platforms dict
+    // Every link we hold for this artist, keyed by source.
+    //
+    // No filtering, and no skipping an artist who has none: the endpoint reads the catalogue
+    // first and ignores these entirely on that path — only its live-scrape fallback uses them,
+    // and only the sources it can scrape. Skipping anyone without a Bandcamp, Faircamp or Mirlo
+    // link meant never asking about the largest link population we have (there are more Discogs
+    // artist links in production than Bandcamp ones) over a question one database read answers.
     const platforms = {};
-    for (const p of artistData.platforms) {
-      if (['bandcamp', 'faircamp', 'mirlo'].includes(p.sourceId)) {
-        platforms[p.sourceId] = p.url;
-      }
+    for (const p of artistData.platforms || []) {
+      if (p && p.sourceId && p.url) platforms[p.sourceId] = p.url;
     }
-
-    if (Object.keys(platforms).length === 0) continue;
 
     // Call release check API
     try {
-      const result = await checkReleaseAPI(artistName, platforms);
+      const result = await checkReleaseAPI(artistName, platforms, sinceDays);
 
-      if (result && result.release) {
-        const release = result.release;
-        const key = artistName.toLowerCase();
-
-        // Check if already known (by release name across all platforms)
-        const knownReleases = releaseCheckState.knownReleases[key] || [];
-        const alreadyKnown = knownReleases.some(
-          kr => kr.releaseName.toLowerCase() === release.releaseName.toLowerCase()
-        );
-
-        if (!alreadyKnown) {
-          // New release found!
-          const newRelease = {
-            id: crypto.randomUUID(),
-            artistName: artistName,
-            releaseName: release.releaseName,
-            releaseDate: release.releaseDate,
-            releaseUrl: release.releaseUrl,
-            platform: release.platform,
-            detectedAt: new Date().toISOString(),
-          };
-
-          foundNewReleases.push(newRelease);
-
-          // Add to known releases
-          if (!releaseCheckState.knownReleases[key]) {
-            releaseCheckState.knownReleases[key] = [];
-          }
-          releaseCheckState.knownReleases[key].push({
-            releaseName: release.releaseName,
-            releaseDate: release.releaseDate,
-            platform: release.platform,
-          });
-        }
-      }
+      // Every release in the window, not just the newest — an artist who put out two records
+      // since the last check produces two alerts. selectUnseenReleases marks each one known as
+      // it accepts it, and is the only dedup point.
+      foundNewReleases.push(
+        ...selectUnseenReleases(releasesFromResponse(result), artistName, releaseCheckState.knownReleases)
+      );
     } catch (error) {
       console.error(`Release check failed for ${artistName}:`, error);
     }
@@ -631,13 +623,13 @@ async function checkForNewReleases() {
 }
 
 // Call the release check API
-async function checkReleaseAPI(artistName, platforms) {
+async function checkReleaseAPI(artistName, platforms, sinceDays) {
   const url = `${API_BASE}/check-releases`;
 
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ artistName, platforms }),
+    body: JSON.stringify({ artistName, platforms, sinceDays }),
   });
 
   if (!response.ok) {
@@ -676,14 +668,16 @@ async function dismissRelease(releaseId) {
   return { success: true };
 }
 
-// Send notification for new release
+// Send notification for new release.
+// Title and body come from release-alerts.js so this says the same thing the Mac app does — and,
+// for an announced release, stops claiming a record dated next month is already out.
 async function sendReleaseNotification(release) {
   try {
     await chrome.notifications.create(`release-${release.id}`, {
       type: 'basic',
       iconUrl: chrome.runtime.getURL('icons/icon128.png'),
-      title: `New Release from ${release.artistName}`,
-      message: `"${release.releaseName}" is out now on ${release.platform.charAt(0).toUpperCase() + release.platform.slice(1)}!`,
+      title: releaseNotificationTitle(release),
+      message: releaseNotificationBody(release),
       priority: 2,
     });
   } catch (error) {
