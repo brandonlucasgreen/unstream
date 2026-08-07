@@ -166,6 +166,19 @@ describe('ReleasesSection', () => {
     show([release()], 1);
     expect(screen.queryByText(/more$/)).toBeNull();
   });
+
+  // Measured in a real browser at a 375px viewport: without `min-w-0` on the row anchor the
+  // document's scrollWidth was 569px against a 343px grid, so the whole artist page scrolled
+  // sideways on a phone. The row is a grid item, and a grid item's automatic minimum size is its
+  // content — the title's `truncate` sets `white-space: nowrap`, so a long title sized the row to
+  // its own text. `min-w-0` on the inner text column is not enough; it has to be on the item.
+  //
+  // Asserted as a class because jsdom does no layout and reports scrollWidth as 0 either way.
+  it('lets a long title shrink the row rather than widening the page', () => {
+    show([release({ title: 'A Wilderness of Mirrors and Other Extremely Long Album Titles' })]);
+    const row = screen.getByRole('link', { name: /Wilderness/ });
+    expect(row.className.split(/\s+/)).toContain('min-w-0');
+  });
 });
 
 describe('release type label', () => {

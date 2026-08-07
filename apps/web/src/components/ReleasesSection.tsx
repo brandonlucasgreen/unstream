@@ -157,10 +157,14 @@ function ReleaseRow({ release, artistSlug }: { release: Release; artistSlug: str
   // itself, so the platform a fan sees leading the row is also the one the price came from.
   const platforms = orderedSourcePlatforms(release.sources);
 
+  // `min-w-0` on the row itself, not only on the text column inside it. This anchor is a grid
+  // item, and a grid item's automatic minimum size is its content — the title's `truncate` sets
+  // `white-space: nowrap`, so a long title made the row as wide as its own text and pushed the
+  // whole page sideways: 569px of scroll in a 375px viewport before this class.
   return (
     <a
       href={`/a/${encodeURIComponent(artistSlug)}/${encodeURIComponent(release.slug)}`}
-      className="flex items-center gap-3 px-3 py-2 rounded-xl border border-border hover:bg-bg-hover transition-colors"
+      className="flex items-center gap-3 px-3 py-2 rounded-xl border border-border hover:bg-bg-hover transition-colors min-w-0"
     >
       {release.artworkUrl ? (
         <img
