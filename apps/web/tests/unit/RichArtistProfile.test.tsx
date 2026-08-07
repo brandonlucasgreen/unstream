@@ -2,7 +2,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import { RichArtistProfile } from 'src/components/RichArtistProfile';
+import { isBandcampFriday } from 'src/utils/bandcamp-friday';
 import type { ArtistPagePayload } from 'src/types/artist-page';
+
+// SourceBadge reads the real clock to decide whether Bandcamp's payout shows as its usual
+// percentage or the Bandcamp Friday override, so the payout tests below freeze the clock
+// rather than asserting whatever today happens to be. Both dates are Pacific noon, the
+// timezone isBandcampFriday() compares in. Keep them in step with BANDCAMP_FRIDAY_DATES in
+// src/utils/bandcamp-friday.ts when that list is updated for a new year.
+const ORDINARY_FRIDAY = new Date('2026-08-14T12:00:00-07:00');
+const BANDCAMP_FRIDAY = new Date('2026-08-07T12:00:00-07:00');
 
 const basePayload: ArtistPagePayload = {
   artist: {
@@ -54,6 +63,7 @@ describe('RichArtistProfile', () => {
 
   afterEach(() => {
     cleanup();
+    vi.useRealTimers();
   });
 
   it('renders the artist name and image', () => {
@@ -130,8 +140,24 @@ describe('RichArtistProfile', () => {
   });
 
   it('renders the payout percent on each pill', () => {
+    expect(isBandcampFriday(ORDINARY_FRIDAY)).toBe(false);
+    vi.useFakeTimers();
+    vi.setSystemTime(ORDINARY_FRIDAY);
+
     render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" />);
     expect(screen.getByText('80-85%')).toBeTruthy();
+    expect(screen.getByText('86-90%')).toBeTruthy();
+  });
+
+  it('shows Bandcamp\'s payout as ~97% on a Bandcamp Friday', () => {
+    expect(isBandcampFriday(BANDCAMP_FRIDAY)).toBe(true);
+    vi.useFakeTimers();
+    vi.setSystemTime(BANDCAMP_FRIDAY);
+
+    render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" />);
+    expect(screen.getByText('~97%')).toBeTruthy();
+    expect(screen.queryByText('80-85%')).toBeNull();
+    // Only Bandcamp waives its share — every other platform keeps its usual payout.
     expect(screen.getByText('86-90%')).toBeTruthy();
   });
 
