@@ -12,13 +12,11 @@
 // query (`getReleaseDetail`) and apply the same payout rules, so a native client can never
 // describe a release differently from the web page a fan would see for it.
 //
-// **Retired artist slugs resolve here and not on the HTML page.** This endpoint reads
-// `artist_slug_aliases` on a miss, the way /api/artist and the artist page do. `release-page.ts`
-// does not: on an unknown artist slug it falls through to the SPA, which has no route for a
-// two-segment /a/ path, so /a/{retired-slug}/{release} renders nothing in a browser today. That
-// is a gap in the page, not a reason to reproduce it here — the answers still agree wherever the
-// page produces one, and `pageUrl` below is built from the canonical slug so a client's "open the
-// full guide" lands on a URL that renders.
+// **Retired artist slugs resolve, here and on the HTML page.** This endpoint reads
+// `artist_slug_aliases` on a miss, the way /api/artist and the artist page do; `release-page.ts`
+// does the same and 301s to the canonical URL. The two answer a retired slug differently on
+// purpose — a redirect is right for a page and wrong for a client that asked a question — but
+// neither leaves a fan holding an alias URL with nothing behind it.
 //
 // **`payoutPercent` is computed here, per source, on purpose.** Payout figures are duplicated by
 // hand across eight files in this repo, and that drift is what let the Discord bot quote an
@@ -244,9 +242,8 @@ export async function handler(event: {
         },
         // The page URL, so a native client can offer "open the full guide" without rebuilding
         // the URL shape — and so the two surfaces stay tied together if it ever changes. Built
-        // from the canonical slug rather than the requested one: the HTML page does *not* resolve
-        // aliases (see the file header), so echoing a retired slug back here would hand a client
-        // a link that renders nothing.
+        // from the canonical slug rather than the requested one: echoing a retired slug back
+        // would hand a client a link that only works by way of a redirect.
         pageUrl: `https://unstream.stream/a/${encodeURIComponent(artistSlug)}/${encodeURIComponent(release)}`,
         bandcampFriday,
       }),
