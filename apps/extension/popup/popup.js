@@ -3,6 +3,7 @@
 import { isBandcampFriday } from '../lib/bandcamp-friday.js';
 import { ALLOWED_RELEASE_DOMAINS, SOURCE_CONFIG, PAYOUT_PERCENTAGES } from '../lib/constants.js';
 import { releaseSlugsFromUrl } from '../lib/release-display.js';
+import { releaseSummaryLine } from '../lib/release-alerts.js';
 import { renderReleaseGuide, guideMessage, guideLink } from '../lib/release-guide.js';
 import { renderArtistReleases } from '../lib/artist-releases.js';
 import { signInWithPassword, signInWithOtp, signOut, getStoredSession, getAccessToken, getDeviceId } from '../lib/supabase.js';
@@ -1179,12 +1180,11 @@ function buildReleaseItem(release) {
 
   const subtitle = document.createElement('span');
   subtitle.className = 'release-platform';
-  // The price line is the reason to open the guide, so it leads when we have one. Falling back
-  // to the platform's proper name where we have one \u2014 SOURCE_CONFIG renders "Jam.coop", not
-  // "Jamcoop". Platforms it doesn't list (Subvert) at least get a capital letter rather than
-  // the bare id; the CSS used to do that with `text-transform`, which can't stay now that this
-  // line is usually a price.
-  subtitle.textContent = release.offerSummary || `on ${platformDisplayName(release.platform)}`;
+  // "out now on Bandcamp and Mirlo \u00b7 from $8 \u00b7 \u2248$6.80 to artist" \u2014 every platform the record is
+  // on, then the price, which is the reason to open the guide. Word for word what the
+  // notification says, and it names every platform rather than the one the alert leads with:
+  // the payout comparison is the product, and this is the moment someone decides where to buy.
+  subtitle.textContent = releaseSummaryLine(release);
 
   infoDiv.appendChild(artistSpan);
   infoDiv.appendChild(titleSpan);
@@ -1238,11 +1238,6 @@ function openReleaseUrl(url) {
   if (isAllowedReleaseUrl(url)) {
     chrome.tabs.create({ url });
   }
-}
-
-function platformDisplayName(platform) {
-  if (SOURCE_CONFIG[platform]?.name) return SOURCE_CONFIG[platform].name;
-  return platform ? platform[0].toUpperCase() + platform.slice(1) : '';
 }
 
 /** Fetched guides, keyed by "artist/release", so reopening a row doesn't refetch. */
