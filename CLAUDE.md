@@ -219,24 +219,34 @@ Sentry, since it is otherwise recorded as a perfectly ordinary success.
 Every other catalog trigger is demand-driven — a save, a search, an artist's own button, the admin
 command — and `check-releases` only *reads* the catalogue. So without a scheduled refresh an artist
 who is saved but never searched gets catalogued once and their release alerts quietly stop. That
-is what `api/functions/recatalog-sweep.ts` fixes, run daily by `.github/workflows/recatalog-sweep.yml`.
+is what `api/functions/recatalog-sweep.ts` fixes, run every six hours by
+`.github/workflows/recatalog-sweep.yml` (25 artists per run, so 100 a day).
 
-The pool is **every artist with a bandcamp, discogs, faircamp or jamcoop link** — measured
-2026-08-02: 2,564 of them, against 9 artists saved by anybody, so a saved-only sweep sat idle
-almost every run. Alerts aren't the only consumer either: `/a/:slug` renders a release list for
-any catalogued artist, and those pages exist because somebody *searched*. Keep that platform list
-identical to `catalogArtist`'s "no bandcamp, discogs, faircamp, or jam.coop link stored" check —
-an artist with only an official site is recorded as a *failure*, so sweeping them poisons
-`consecutive_failures`.
+The pool is **every artist with a bandcamp, discogs, faircamp, jam.coop or mirlo link** —
+`CATALOGUEABLE_PLATFORMS` in `db.ts` is the list. Keep it identical to `catalogArtist`'s "no
+bandcamp, discogs, faircamp, jam.coop, or mirlo link stored" check — an artist with only an
+official site is recorded as a *failure*, so sweeping them poisons `consecutive_failures`. The two
+have to change together: Mirlo was added to both in the same PR (#415) for exactly that reason.
+
+Why the pool isn't saved-only, which is how it shipped: measured 2026-08-02 there were 2,564
+artists with a catalogue-able link against 9 saved by anybody, so the sweep's whole universe fit
+in one batch and it sat idle almost every run. Alerts aren't the only consumer either — `/a/:slug`
+renders a release list for any catalogued artist, and those pages exist because somebody
+*searched*. The ratio is what matters and it hasn't moved: as of 2026-08-07 there are 5,977
+releases across 803 catalogued artists, and 36 live `saved_artists` rows in total. Treat every
+number in this paragraph as a dated measurement, not a current count — re-measure before
+reasoning from one.
 
 `getStaleCatalogCandidates` in `db.ts` orders them: saved first (an alert is a promise to a
 person, and there are few enough that they never starve behind the backfill), then never
 catalogued, then oldest `last_attempted_at`, then savers as a pure tiebreak. It asks
-`requestArtistCatalog` for up to 25 under the `scheduled` trigger. No rate limiting of its own —
-the 7-day cooldown and the hourly cap in `claimArtistForCatalog` still decide — so running it
-twice is a no-op. It returns a real summary rather than 202, and any refusal is a non-2xx that
-fails the workflow: a scheduled job that reports success while doing nothing is the same silent
-failure it was built to fix.
+`requestArtistCatalog` for up to 25 under the `scheduled` trigger. It adds no limit of its own: it
+drops artists inside the 7-day re-catalogue cooldown up front, reading the same
+`RECATALOG_COOLDOWN_HOURS` constant so a bounded batch isn't spent on artists that would be
+refused a moment later, but `claimArtistForCatalog` — that cooldown plus the per-trigger hourly cap
+— stays the authority. So running the sweep twice is a no-op. It returns a real summary rather than
+202, and any refusal is a non-2xx that fails the workflow: a scheduled job that reports success
+while doing nothing is the same silent failure it was built to fix.
 
 **Paging, not `.limit()`.** PostgREST caps every response at 1,000 rows whatever limit you ask
 for, and truncates *silently*. A single `.select()` over `artist_links` returns 1,000 of ~3,900
@@ -369,7 +379,7 @@ GitHub Actions (`.github/workflows/`):
 - `schedule-social-posts.yml` — weekly (Mondays) social post generation, committed back to the repo.
 - `semantic-revert-check.yml` — runs `scripts/semantic-revert-check.py` on every PR to flag changes that quietly undo earlier fixes. If it flags your PR, take it seriously: the bug loops it was built for are described in `docs/retros/UNS-100-bifurcation-retro.md`.
 - `upstash-keepalive.yml` — twice weekly, writes one Redis key so the free-tier database isn't reaped for inactivity (which silently killed caching and rate limiting once).
-- `recatalog-sweep.yml` — every 6 hours, POSTs `/.netlify/functions/recatalog-sweep` so release catalogues get built and stay fresh. See "Keeping catalogues fresh" below.
+- `recatalog-sweep.yml` — every 6 hours, POSTs `/.netlify/functions/recatalog-sweep` so release catalogues get built and stay fresh. See "Keeping catalogues fresh" above.
 
 ## Engineering principles
 

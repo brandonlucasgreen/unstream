@@ -10,6 +10,9 @@
 //     direct purchase from the artist.
 //   - A failed lookup is a 503 that is never cached, not a 404. This response carries a CDN
 //     s-maxage, so a 404 on an outage would be a convincing lie the CDN then holds.
+//   - A retired artist slug resolves through `artist_slug_aliases`, and only on a miss. Without it
+//     a release URL minted before an artist was re-slugged 404s in the native buying guide while
+//     /api/artist answers the same alias fine.
 //
 // The two query-level properties — `is_hidden` filtered, `needs_review` deliberately not — can't
 // be seen from here, because this file mocks `../db` out. They're covered in
@@ -21,6 +24,7 @@ const mocks = vi.hoisted(() => ({
   checkRateLimit: vi.fn(),
   getClientIp: vi.fn(() => '1.2.3.4'),
   getReleaseDetail: vi.fn(),
+  resolveArtistSlugAlias: vi.fn(),
   isBandcampFriday: vi.fn(() => false),
   captureMessage: vi.fn(),
 }));
@@ -29,7 +33,10 @@ vi.mock('../ratelimit', () => ({
   checkRateLimit: mocks.checkRateLimit,
   getClientIp: mocks.getClientIp,
 }));
-vi.mock('../db', () => ({ getReleaseDetail: mocks.getReleaseDetail }));
+vi.mock('../db', () => ({
+  getReleaseDetail: mocks.getReleaseDetail,
+  resolveArtistSlugAlias: mocks.resolveArtistSlugAlias,
+}));
 vi.mock('../../shared/bandcamp-friday', () => ({ isBandcampFriday: mocks.isBandcampFriday }));
 vi.mock('../../lib/sentry', () => ({ Sentry: { captureMessage: mocks.captureMessage } }));
 
@@ -100,6 +107,7 @@ beforeEach(() => {
   mocks.checkRateLimit.mockResolvedValue({ limited: false });
   mocks.isBandcampFriday.mockReturnValue(false);
   mocks.getReleaseDetail.mockResolvedValue({ detail: detail(), failed: false });
+  mocks.resolveArtistSlugAlias.mockResolvedValue(null);
 });
 
 // The bug this suite missed the first time. The endpoint originally read its slugs from
@@ -266,6 +274,98 @@ describe('absence versus failure', () => {
     const res = await get();
     expect(res.statusCode).toBe(500);
     expect(res.body).not.toContain('boom');
+  });
+});
+
+// `artist_slug_aliases` holds 44 rows in production, most of them minted by the accent-folding
+// reslug in #410 (`beyonc` -> `beyonce`). A release URL built under the old slug is a URL a fan can
+// still be holding — in a months-old alert, a shared link, a Mac app cache — and before this the
+// native "Where to buy" panel 404'd every one of them while /api/artist resolved the same alias
+// happily.
+describe('retired artist slugs', () => {
+  /** The lookup answers only for `beyonce`, the slug that survived the reslug. */
+  function onlyCanonical() {
+    const canonical = { ...detail(), artist: { slug: 'beyonce', name: 'Beyoncé', imageUrl: null } };
+    mocks.getReleaseDetail.mockImplementation(async (artistSlug: string) =>
+      artistSlug === 'beyonce' ? { detail: canonical, failed: false } : { detail: null, failed: false }
+    );
+  }
+
+  it('resolves a retired slug through the alias table and serves the release', async () => {
+    onlyCanonical();
+    mocks.resolveArtistSlugAlias.mockResolvedValue('beyonce');
+
+    const res = await get({ artist: 'beyonc', release: 'get-mean' });
+    const json = await body(res);
+
+    expect(res.statusCode).toBe(200);
+    expect(mocks.resolveArtistSlugAlias).toHaveBeenCalledWith('beyonc');
+    expect(mocks.getReleaseDetail).toHaveBeenNthCalledWith(1, 'beyonc', 'get-mean');
+    expect(mocks.getReleaseDetail).toHaveBeenNthCalledWith(2, 'beyonce', 'get-mean');
+    expect(json.artist.slug).toBe('beyonce');
+  });
+
+  // A client offers this as "open the full guide". release-page.ts doesn't resolve aliases, so
+  // echoing the requested slug back would hand a fan a URL that renders nothing.
+  it('reports the canonical slug in pageUrl and the cache tag, not the one asked for', async () => {
+    onlyCanonical();
+    mocks.resolveArtistSlugAlias.mockResolvedValue('beyonce');
+
+    const res = await get({ artist: 'beyonc', release: 'get-mean' });
+    expect((await body(res)).pageUrl).toBe('https://unstream.stream/a/beyonce/get-mean');
+    expect(res.headers['Cache-Tag']).toBe('release-detail-beyonce-get-mean');
+  });
+
+  // The live slug always wins, and the overwhelming majority of requests use one — so the alias
+  // read must not happen on the hit path at all.
+  it('never reads the alias table when the live slug answers', async () => {
+    const res = await get();
+
+    expect(res.statusCode).toBe(200);
+    expect(mocks.resolveArtistSlugAlias).not.toHaveBeenCalled();
+    expect(mocks.getReleaseDetail).toHaveBeenCalledTimes(1);
+  });
+
+  it('404s when the slug is neither live nor an alias', async () => {
+    mocks.getReleaseDetail.mockResolvedValue({ detail: null, failed: false });
+    mocks.resolveArtistSlugAlias.mockResolvedValue(null);
+
+    const res = await get({ artist: 'nobody', release: 'get-mean' });
+    expect(res.statusCode).toBe(404);
+    expect(mocks.getReleaseDetail).toHaveBeenCalledTimes(1);
+  });
+
+  // The alias exists but the release under the canonical artist doesn't — a renamed or suppressed
+  // record. Still one 404, and not a third query.
+  it('404s when the alias resolves but the release is gone', async () => {
+    mocks.getReleaseDetail.mockResolvedValue({ detail: null, failed: false });
+    mocks.resolveArtistSlugAlias.mockResolvedValue('beyonce');
+
+    const res = await get({ artist: 'beyonc', release: 'no-such-release' });
+    expect(res.statusCode).toBe(404);
+    expect(mocks.getReleaseDetail).toHaveBeenCalledTimes(2);
+  });
+
+  // A Supabase outage is not evidence that a slug was retired. Retrying through the alias table
+  // would spend a second query to arrive at the same 503 — and the 503 is what must survive.
+  it('does not consult the alias table when the lookup itself failed', async () => {
+    mocks.getReleaseDetail.mockResolvedValue({ detail: null, failed: true });
+
+    const res = await get({ artist: 'beyonc', release: 'get-mean' });
+    expect(res.statusCode).toBe(503);
+    expect(mocks.resolveArtistSlugAlias).not.toHaveBeenCalled();
+    expect(mocks.getReleaseDetail).toHaveBeenCalledTimes(1);
+  });
+
+  // A stale alias row pointing at the slug that was just tried would otherwise buy a second
+  // identical query for nothing.
+  it('does not re-query when the alias points at the slug already tried', async () => {
+    mocks.getReleaseDetail.mockResolvedValue({ detail: null, failed: false });
+    mocks.resolveArtistSlugAlias.mockResolvedValue('boy-harsher');
+
+    const res = await get({ artist: 'boy-harsher', release: 'get-mean' });
+    expect(res.statusCode).toBe(404);
+    expect(mocks.getReleaseDetail).toHaveBeenCalledTimes(1);
   });
 });
 

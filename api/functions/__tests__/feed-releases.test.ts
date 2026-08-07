@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
   getFeedReleasesForUser: vi.fn(),
   getFeedReleasesForArtist: vi.fn(),
   getFeedReleasesForHandle: vi.fn(),
+  resolveArtistSlugAlias: vi.fn(),
 }));
 
 vi.mock('../ratelimit', () => ({
@@ -25,6 +26,7 @@ vi.mock('../db', () => ({
   getFeedReleasesForUser: mocks.getFeedReleasesForUser,
   getFeedReleasesForArtist: mocks.getFeedReleasesForArtist,
   getFeedReleasesForHandle: mocks.getFeedReleasesForHandle,
+  resolveArtistSlugAlias: mocks.resolveArtistSlugAlias,
 }));
 
 import { handler, parsePath, requestPath } from '../feed-releases';
@@ -70,6 +72,7 @@ beforeEach(() => {
   mocks.getFeedReleasesForUser.mockResolvedValue([]);
   mocks.getFeedReleasesForArtist.mockResolvedValue(null);
   mocks.getFeedReleasesForHandle.mockResolvedValue(null);
+  mocks.resolveArtistSlugAlias.mockResolvedValue(null);
 });
 
 describe('requestPath', () => {
@@ -236,6 +239,44 @@ describe('the public artist feed', () => {
   it('404s an unknown artist', async () => {
     const r = await get('/a/nobody/releases.xml');
     expect(r.statusCode).toBe(404);
+  });
+
+  // A calendar client keeps fetching whatever URL it was handed and never reports a 404 to
+  // anybody, so an artist re-slugged after somebody subscribed would silently lose them.
+  it('resolves a retired artist slug through the alias table', async () => {
+    mocks.getFeedReleasesForArtist.mockImplementation(async (slug: string) =>
+      slug === 'beyonce' ? { artistName: 'Beyoncé', releases: [row()] } : null
+    );
+    mocks.resolveArtistSlugAlias.mockResolvedValue('beyonce');
+
+    const r = await get('/a/beyonc/releases.xml');
+
+    expect(r.statusCode).toBe(200);
+    expect(mocks.resolveArtistSlugAlias).toHaveBeenCalledWith('beyonc');
+    // Self-link and feed id both canonical: the link should point at the address that still
+    // works, and one id per artist keeps a reslug from splitting subscribers across two feeds.
+    expect(r.body).toContain('/a/beyonce/releases.xml');
+    expect(r.body).toContain('tag:unstream.stream,2026:feed/a/beyonce');
+    expect(r.body).not.toContain('beyonc/releases.xml');
+  });
+
+  it('never reads the alias table when the live slug answers', async () => {
+    mocks.getFeedReleasesForArtist.mockResolvedValue({ artistName: 'Kid Lightbulbs', releases: [row()] });
+
+    const r = await get('/a/kid-lightbulbs/releases.xml');
+
+    expect(r.statusCode).toBe(200);
+    expect(mocks.resolveArtistSlugAlias).not.toHaveBeenCalled();
+    expect(mocks.getFeedReleasesForArtist).toHaveBeenCalledTimes(1);
+  });
+
+  it('404s when the slug is neither live nor an alias', async () => {
+    mocks.resolveArtistSlugAlias.mockResolvedValue(null);
+
+    const r = await get('/a/nobody/releases.ics');
+
+    expect(r.statusCode).toBe(404);
+    expect(mocks.getFeedReleasesForArtist).toHaveBeenCalledTimes(1);
   });
 });
 

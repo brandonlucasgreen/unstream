@@ -28,6 +28,7 @@ import {
   getFeedReleasesForHandle,
   getFeedReleasesForUser,
   getFeedTokenOwner,
+  resolveArtistSlugAlias,
   type FeedReleaseRow,
 } from './db';
 import { buildAtom, buildIcs, type FeedRelease } from '../shared/feed-format';
@@ -217,7 +218,22 @@ export async function handler(event: {
     );
   }
 
-  const artist = await getFeedReleasesForArtist(route.slug);
+  let slug = route.slug;
+  let artist = await getFeedReleasesForArtist(slug);
+
+  // A retired artist slug still resolves, for the same reason release-detail.ts resolves one and
+  // with more at stake: a calendar client keeps fetching whatever URL it was handed, forever and
+  // silently. A 404 here is a subscription that stops updating without ever telling the fan, so
+  // an artist re-slugged after somebody subscribed would quietly lose them.
+  //
+  // Only after the live slug misses, so a real artist who later takes that slug always wins.
+  if (!artist) {
+    const canonical = await resolveArtistSlugAlias(slug);
+    if (canonical && canonical !== slug) {
+      slug = canonical;
+      artist = await getFeedReleasesForArtist(slug);
+    }
+  }
   if (!artist) return notFound();
 
   return render(
@@ -226,8 +242,11 @@ export async function handler(event: {
     {
       title: `${artist.artistName} — releases`,
       description: `Releases by ${artist.artistName}, from Unstream`,
-      selfUrl: `${SITE}/a/${encodeURIComponent(route.slug)}/releases.${route.format}`,
-      feedId: `tag:unstream.stream,2026:feed/a/${route.slug}`,
+      // Both derived from the canonical slug: the self-link should point at the address that
+      // still works, and one feed id per artist means a reslug doesn't split subscribers into
+      // two feeds as far as their reader is concerned.
+      selfUrl: `${SITE}/a/${encodeURIComponent(slug)}/releases.${route.format}`,
+      feedId: `tag:unstream.stream,2026:feed/a/${slug}`,
     },
     false
   );
