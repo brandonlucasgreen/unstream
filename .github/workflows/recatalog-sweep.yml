@@ -22,10 +22,23 @@ name: Release catalogue sweep
 #   - The ~2,400 artists with no catalogue at all drain in about three weeks.
 #
 # What it costs the sites we crawl: the background function paces itself at one second between
-# artists, at most 100 Bandcamp release-page fetches per run on top of one grid page each. Four
-# runs is on the order of 400-500 sequential Bandcamp requests a day — well under one a minute
-# averaged, against robots-permitted paths. The lever if the tail needs to be tighter is this
-# cadence, not the batch size, which is capped by what one invocation can do.
+# artists and one second between release-page fetches, and stops starting them nine minutes into
+# a fifteen-minute invocation. At the response times measured on 2026-08-07 that deadline allows
+# roughly 160 release pages per run, on top of one grid page per Bandcamp artist (~17 of a
+# 25-artist batch). Four runs is therefore on the order of 700 sequential Bandcamp requests a day,
+# with a hard ceiling of 1,300 if Bandcamp ever answers fast enough to reach the 300-fetch
+# backstop — around one request a minute averaged, and never more than one a second, against
+# robots-permitted paths.
+#
+# That was ~470/day until the detail cap was raised from 100, which had been rationing one
+# invocation's release-page reads across the whole batch and leaving the artists late in each
+# sweep unpriced. The extra cost is also self-limiting: a release page is re-read only every 30
+# days, so once the backlog drains the raised cap goes largely unspent and the steady state is
+# roughly 170 re-reads a day.
+#
+# The lever if the *artist* tail needs to be tighter is this cadence, not the batch size, which is
+# capped by what one invocation can do. Note the two are different problems — see the
+# SWEEP_BATCH_SIZE comment in api/functions/recatalog-sweep.ts.
 #
 # Safe to over-run. A duplicate invocation finds the same artists claimed and does nothing, so
 # re-running by hand is free.

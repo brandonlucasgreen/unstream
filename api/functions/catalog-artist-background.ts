@@ -76,19 +76,55 @@ const DELAY_BETWEEN_ARTISTS_MS = 1_000;
  * permanently unread. 40 covers every catalogue measured so far — 22 for Kid Lightbulbs, 16 for
  * Sufjan Stevens, 33 for the largest live Mirlo artist — and costs 40 paced seconds for one
  * artist. The invocation-wide cap below still bounds a whole batch.
+ *
+ * Left alone deliberately when that invocation-wide cap was raised: measured 2026-08-07, the
+ * largest catalogue in the database is 25 releases (p90 19, median 7), so this has never been the
+ * binding constraint and raising it would change nothing. It stays as headroom for a discography
+ * larger than anything seen yet.
  */
 const MAX_DETAIL_FETCHES_PER_ARTIST = 40;
 
-/** Invocation-wide, so a 25-artist batch can't multiply into hundreds of requests. */
-const MAX_DETAIL_FETCHES_PER_RUN = 100;
+/**
+ * Invocation-wide backstop, shared across the batch. **`DETAIL_BUDGET_MS` below is what is meant
+ * to stop this pass; this number only exists so a pathologically fast run can't sprint.**
+ *
+ * It was 100, which inverted that: measured against production on 2026-08-07, a 25-artist batch
+ * spent ~2.05s per detail fetch (1s spacing plus ~1s of Bandcamp response) and finished the whole
+ * invocation in a 5-7 minute span — nowhere near the 9-minute deadline. It stopped because it ran
+ * out of *count*. Averaged over `MAX_ARTISTS_PER_RUN` that was 4 fetches per artist against a
+ * per-artist cap of 40, so the artists late in each batch got no detail pass at all: 1,057
+ * `release_sources` had never been read, 867 of them Bandcamp, across 141 artists. Once a source
+ * is read it gets a price 99%+ of the time, so this was never a parser problem.
+ *
+ * 300 is a backstop rather than a target. The 9-minute deadline leaves ~325s for detail work once
+ * the batch's fixed overhead is paid (~215s measured: inter-artist sleeps, grid fetches,
+ * MusicBrainz's mandatory ~1/sec, Discogs at 2.6s), which is ~158 fetches at the measured pace —
+ * so the deadline binds first, as intended. 300 sits above that and still well below the 540 that
+ * `DELAY_BETWEEN_DETAIL_FETCHES_MS` alone would permit in 9 minutes, so a run where Bandcamp
+ * answers unusually fast is bounded instead of unbounded.
+ *
+ * Raising a count under a fixed deadline cannot extend the invocation: the pass stops *starting*
+ * fetches at the deadline whatever this says. The rate is untouched — see the delay below.
+ */
+const MAX_DETAIL_FETCHES_PER_RUN = 300;
 
-/** Roughly one request per second sustained — far below what one browser page load costs. */
+/**
+ * Roughly one request per second sustained — far below what one browser page load costs.
+ *
+ * This is the courtesy, and it is deliberately **not** the thing to turn up for throughput. These
+ * paths are robots-permitted, but several outages here were self-inflicted by crawling harder than
+ * a host wanted; raising the count above is the safe axis, raising this rate is not.
+ */
 const DELAY_BETWEEN_DETAIL_FETCHES_MS = 1_000;
 
 /**
  * Stop starting detail fetches this long into the invocation. Netlify background functions get
  * 15 minutes; leaving headroom means a run ends by finishing rather than by being killed
  * mid-write.
+ *
+ * This — not `MAX_DETAIL_FETCHES_PER_RUN` — is the intended stopping condition, so the log line
+ * in `catalogDetails` says which of the two actually fired. A run that reports the count is a run
+ * whose ceiling has drifted back into being arbitrary.
  */
 const DETAIL_BUDGET_MS = 9 * 60_000;
 
@@ -150,19 +186,53 @@ const ENRICHMENT_CUTOFF_MS = 13 * 60_000;
 /** One request per candidate release page, spaced out rather than in a burst. */
 const DELAY_BETWEEN_FAIRCAMP_FETCHES_MS = 1_000;
 
-/** Bounds cost for an artist with an unusually large Faircamp archive. */
-const MAX_FAIRCAMP_RELEASES_PER_ARTIST = 20;
+/**
+ * Bounds cost for an artist with an unusually large Faircamp archive.
+ *
+ * Raised from 20 once the live instances were counted (2026-08-07): music.kidlightbulbs.com offers
+ * 23 release candidates and www.willchatham.com at least 30, so at 20 the tail of both sites could
+ * never be reached at all — not "reached late", never.
+ *
+ * 30 rather than more because `ingestFaircampHomeLinks` stops at `FAIRCAMP_MAX_CANDIDATES`, which
+ * is also 30: a larger number here would be dead, since the parser never hands over a 31st
+ * candidate to spend it on. Keep the two together if either moves.
+ */
+const MAX_FAIRCAMP_RELEASES_PER_ARTIST = 30;
 
 /**
- * Invocation-wide, across every artist in the batch: homepage, release pages and purchase
- * pages combined. A release costs up to two requests, not one, because Faircamp keeps the price
- * on a separate purchase page — hence the headroom over the old ceiling of 100.
+ * Invocation-wide, across every artist in the batch: homepage and release pages.
+ *
+ * A Faircamp release costs up to **two** requests, not one, because Faircamp keeps the price on a
+ * separate purchase page — which is why this ceiling was raised from 100 to 150 when prices were
+ * first read, and why there are now two budgets rather than one.
+ *
+ * Purchase pages are no longer counted here; they have their own allowance below. They used to
+ * share this one, and because they are fetched *after* the release-page pass they inherited
+ * whatever was left of it, which made prices structurally last in line for a budget the release
+ * pages had already spent.
  */
 const MAX_FAIRCAMP_FETCHES_PER_RUN = 150;
+
+/**
+ * Invocation-wide allowance for purchase pages — the second of a release's two requests — held
+ * separately from the release-page budget above so a large archive can't consume the prices' share
+ * before the prices are read.
+ *
+ * Sized off the same measurement: ~0.9 Faircamp artists land in a 25-artist batch, and one artist
+ * needs at most `MAX_FAIRCAMP_RELEASES_PER_ARTIST` purchase pages, so this covers roughly four
+ * Faircamp-heavy artists arriving in one batch — which the sweep's "never catalogued first"
+ * ordering can genuinely do, since artists added together sort together.
+ *
+ * Unlike Bandcamp there is no central rate limit being respected here: every Faircamp instance is a
+ * different self-hosted domain, so this bounds pages-per-artist rather than a shared API's tolerance.
+ */
+const MAX_FAIRCAMP_PRICE_FETCHES_PER_RUN = 120;
 
 interface FaircampBudget {
   fetchesLeft: number;
   deadline: number;
+  /** Purchase pages only. See MAX_FAIRCAMP_PRICE_FETCHES_PER_RUN. */
+  priceFetchesLeft: number;
 }
 
 // --- Jam.coop budgets ----------------------------------------------------------
@@ -278,6 +348,7 @@ export async function handler(event: {
   const faircampBudget: FaircampBudget = {
     fetchesLeft: MAX_FAIRCAMP_FETCHES_PER_RUN,
     deadline: Date.now() + ENRICHMENT_CUTOFF_MS,
+    priceFetchesLeft: MAX_FAIRCAMP_PRICE_FETCHES_PER_RUN,
   };
   const jamcoopBudget: JamcoopBudget = {
     fetchesLeft: MAX_JAMCOOP_FETCHES_PER_RUN,
@@ -684,6 +755,10 @@ async function catalogFaircamp(artistId: string, faircampUrl: string, budget: Fa
  * doesn't exist until `persistFaircampReleases` has created it. Same 30-day rule as Bandcamp's
  * detail pass, so a re-catalog of an unchanged Faircamp site costs nothing extra.
  *
+ * Spends `priceFetchesLeft`, not the release-page budget: running after that pass used to mean
+ * inheriting its remainder, so on a large archive the prices were rationed by how many release
+ * pages had already been read.
+ *
  * Never throws — a purchase page that won't load leaves the release with no price, which is what
  * it already had.
  */
@@ -693,15 +768,32 @@ async function catalogFaircampPrices(
   budget: FaircampBudget
 ): Promise<void> {
   for (const release of written) {
-    const purchaseUrl = purchaseUrls.get(release.url);
-    if (!purchaseUrl || !needsDetail(release)) continue;
+    if (!needsDetail(release)) continue;
 
-    if (budget.fetchesLeft <= 0 || Date.now() > budget.deadline) {
-      console.log('[catalog] faircamp budget spent before prices were read');
+    const purchaseUrl = purchaseUrls.get(release.url);
+    if (!purchaseUrl) {
+      // Not a failure and not a gap: Faircamp emits no purchase page for a free, unlisted or
+      // code-unlocked release, so there is no price to read and there never will be. Recorded
+      // rather than skipped, because leaving `detail_checked_at` null files a settled fact under
+      // "we haven't looked yet" — which is what made 73+ of these look like budget starvation
+      // when the catalogue was cross-tabbed. Measured 2026-08-07: whole instances are like this
+      // (music.bedlamsteps.uk, www.willchatham.com, music.lminiero.it, music.axwax.eu,
+      // music.futzle.com). The 30-day rule still brings it back round if the artist adds one.
+      await persistReleaseDetail(release, {
+        releaseDate: null,
+        datePrecision: 'unknown',
+        status: null,
+        offers: [],
+      });
+      continue;
+    }
+
+    if (budget.priceFetchesLeft <= 0 || Date.now() > budget.deadline) {
+      console.log('[catalog] faircamp price budget spent before prices were read');
       return;
     }
     await sleep(DELAY_BETWEEN_FAIRCAMP_FETCHES_MS);
-    budget.fetchesLeft--;
+    budget.priceFetchesLeft--;
 
     try {
       const response = await safeFetch(purchaseUrl, 10_000);
@@ -1022,11 +1114,20 @@ async function catalogDetails(
   let attempted = 0;
 
   for (const release of due) {
-    if (budget.fetchesLeft <= 0 || Date.now() > budget.deadline) {
+    const outOfFetches = budget.fetchesLeft <= 0;
+    const pastDeadline = Date.now() > budget.deadline;
+    if (outOfFetches || pastDeadline) {
       // Said out loud rather than returning quietly: a silent cap reads as "we checked
       // everything and there were no prices", which is the wrong conclusion to hand anyone
       // looking at why a release page is bare.
-      console.log(`[catalog] detail budget spent — ${due.length - attempted} release(s) left for a later run`);
+      //
+      // Which limit fired is the useful half. The deadline is the intended stopping condition;
+      // `run-cap` means MAX_DETAIL_FETCHES_PER_RUN has drifted back below what the deadline
+      // allows and is rationing the batch again, which is the bug this pass had for months.
+      const limit = pastDeadline ? 'deadline' : 'run-cap';
+      console.log(
+        `[catalog] detail budget spent (${limit}) — ${due.length - attempted} release(s) left for a later run`
+      );
       break;
     }
 
