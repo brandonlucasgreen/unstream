@@ -12,13 +12,21 @@
 // query (`getReleaseDetail`) and apply the same payout rules, so a native client can never
 // describe a release differently from the web page a fan would see for it.
 //
+// **Retired artist slugs resolve here and not on the HTML page.** This endpoint reads
+// `artist_slug_aliases` on a miss, the way /api/artist and the artist page do. `release-page.ts`
+// does not: on an unknown artist slug it falls through to the SPA, which has no route for a
+// two-segment /a/ path, so /a/{retired-slug}/{release} renders nothing in a browser today. That
+// is a gap in the page, not a reason to reproduce it here — the answers still agree wherever the
+// page produces one, and `pageUrl` below is built from the canonical slug so a client's "open the
+// full guide" lands on a URL that renders.
+//
 // **`payoutPercent` is computed here, per source, on purpose.** Payout figures are duplicated by
 // hand across eight files in this repo, and that drift is what let the Discord bot quote an
 // unsourced '86-95%' for Jam.coop to users for months (fixed in PR #389). A client that reads
 // the number off the response cannot drift. It also can't miss the Bandcamp Friday override
 // below, which no client currently knows exists.
 
-import { getReleaseDetail, type ReleaseDetailSource } from './db';
+import { getReleaseDetail, resolveArtistSlugAlias, type ReleaseDetailSource } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { Sentry } from '../lib/sentry';
 import { PLATFORMS } from '../shared/platform-registry';
@@ -139,7 +147,26 @@ export async function handler(event: {
   }
 
   try {
-    const { detail, failed } = await getReleaseDetail(artist, release);
+    // The artist slug the answer is actually about, which is not always the one asked for.
+    let artistSlug = artist;
+    let { detail, failed } = await getReleaseDetail(artistSlug, release);
+
+    // A retired slug still resolves, the same way /api/artist and the artist page resolve one.
+    // Most of the 44 aliases in production came from the accent-folding reslug in #410
+    // (`beyonc` -> `beyonce`), and a release URL minted before that — in an alert, a shared link,
+    // a Mac app cache — is a URL a fan can still be holding.
+    //
+    // Only on a miss, and only after the live slug has had its go, so a real artist who later
+    // takes that slug always wins. `failed` is excluded deliberately: a lookup that broke is not
+    // evidence that a slug is retired, and running the alias read anyway would spend a second
+    // query during an outage to arrive at the same 503.
+    if (!detail && !failed) {
+      const canonical = await resolveArtistSlugAlias(artistSlug);
+      if (canonical && canonical !== artistSlug) {
+        artistSlug = canonical;
+        ({ detail, failed } = await getReleaseDetail(artistSlug, release));
+      }
+    }
 
     // The lookup itself broke. A 503 with no caching, never a 404 — a Supabase outage rendered
     // as "this release doesn't exist" would be a convincing lie, and one the CDN would then
@@ -198,7 +225,9 @@ export async function handler(event: {
         ...CORS_HEADERS,
         'Cache-Control': 'public, max-age=0, must-revalidate',
         'Netlify-CDN-Cache-Control': 's-maxage=300, stale-while-revalidate=86400',
-        'Cache-Tag': `release-detail-${artist}-${release}`,
+        // Tagged by the canonical slug, so one purge clears the response whichever slug was
+        // asked for — an alias URL and the live URL are separate CDN entries of the same answer.
+        'Cache-Tag': `release-detail-${artistSlug}-${release}`,
       },
       body: JSON.stringify({
         artist: detail.artist,
@@ -214,8 +243,11 @@ export async function handler(event: {
           sources,
         },
         // The page URL, so a native client can offer "open the full guide" without rebuilding
-        // the URL shape — and so the two surfaces stay tied together if it ever changes.
-        pageUrl: `https://unstream.stream/a/${encodeURIComponent(artist)}/${encodeURIComponent(release)}`,
+        // the URL shape — and so the two surfaces stay tied together if it ever changes. Built
+        // from the canonical slug rather than the requested one: the HTML page does *not* resolve
+        // aliases (see the file header), so echoing a retired slug back here would hand a client
+        // a link that renders nothing.
+        pageUrl: `https://unstream.stream/a/${encodeURIComponent(artistSlug)}/${encodeURIComponent(release)}`,
         bandcampFriday,
       }),
     };
