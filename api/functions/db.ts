@@ -4199,6 +4199,13 @@ export interface FeedReleaseRow {
   title: string;
   releaseSlug: string;
   releaseDate: string;
+  /**
+   * How precisely `releaseDate` is actually known. MusicBrainz gives year- and month-only dates,
+   * and the dashboard prints the date in words — so it needs this to avoid claiming "1 January
+   * 2023" for a release we only know the year of. The feeds place an event *on* the date and
+   * have nothing finer to say, so they ignore it.
+   */
+  datePrecision: string | null;
   offerSummary: string;
   platforms: string[];
   /** Cover art, so a feed entry can show the record rather than just name it. */
@@ -4231,6 +4238,7 @@ type FeedQueryRow = {
   slug: string;
   title: string;
   release_date: string | null;
+  date_precision: string | null;
   artwork_url: string | null;
   artists: { name: string; slug: string } | null;
   release_sources: {
@@ -4249,6 +4257,7 @@ function toFeedRows(rows: FeedQueryRow[]): FeedReleaseRow[] {
       title: r.title,
       releaseSlug: r.slug,
       releaseDate: r.release_date!,
+      datePrecision: r.date_precision,
       offerSummary: '',
       platforms: [],
       artworkUrl: r.artwork_url,
@@ -4261,7 +4270,7 @@ function toFeedRows(rows: FeedQueryRow[]): FeedReleaseRow[] {
 }
 
 const FEED_SELECT =
-  'slug, title, release_date, artwork_url, artists!inner ( name, slug ),' +
+  'slug, title, release_date, date_precision, artwork_url, artists!inner ( name, slug ),' +
   ' release_sources ( platform, url, release_offers ( price, currency, availability ) )';
 
 /** Soonest first — a calendar and a reader both want the next thing at the top. */

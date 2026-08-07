@@ -8,6 +8,8 @@ import { ArtistAnalytics } from '../components/ArtistAnalytics';
 import { Footer } from '../components/Footer';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { DashboardSkeleton } from '../components/LoadingSkeletons';
+import { RecentReleasesSection, type RecentRelease } from '../components/RecentReleasesSection';
+import { ReleaseFeedControls } from '../components/ReleaseFeedControls';
 
 interface ClaimedProfile {
   id: string;
@@ -37,6 +39,8 @@ export function DashboardPage() {
   const { session, isLoading: authLoading } = useAuth();
   const [claimedProfiles, setClaimedProfiles] = useState<ClaimedProfile[]>([]);
   const [savedArtists, setSavedArtists] = useState<SavedArtist[]>([]);
+  const [recentReleases, setRecentReleases] = useState<RecentRelease[]>([]);
+  const [releasesError, setReleasesError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,6 +59,22 @@ export function DashboardPage() {
       return;
     }
 
+    // Recent releases are a secondary section: if this read fails the rest of the dashboard is
+    // still worth showing, so it reports into the section rather than the page-level error.
+    async function loadRecentReleases() {
+      try {
+        const response = await fetch('/api/me/recent-releases', {
+          headers: { 'Authorization': `Bearer ${session!.access_token}` },
+        });
+        if (!response.ok) throw new Error(`recent-releases failed: ${response.status}`);
+        const data = await response.json();
+        setRecentReleases(data.releases || []);
+      } catch (e) {
+        Sentry.captureException(e, { extra: { context: 'dashboard.loadRecentReleases' } });
+        setReleasesError("Couldn't load recent releases. Try refreshing.");
+      }
+    }
+
     async function loadData() {
       try {
         const [claimedResponse, savedResponse] = await Promise.all([
@@ -64,6 +84,7 @@ export function DashboardPage() {
           fetch('/api/saved-artists', {
             headers: { 'Authorization': `Bearer ${session!.access_token}` },
           }),
+          loadRecentReleases(),
         ]);
 
         if (!claimedResponse.ok) {
@@ -324,6 +345,20 @@ export function DashboardPage() {
                 ))}
               </div>
             </section>
+          )}
+
+          {/*
+            Recent Releases — above Saved Artists because it is the part of this page that
+            changes, and only rendered once the fan has saved somebody: an empty releases box for
+            a fan with no saved artists would be a second empty state saying the same thing as the
+            one below it.
+          */}
+          {savedArtists.length > 0 && (
+            <RecentReleasesSection
+              releases={recentReleases}
+              error={releasesError}
+              subscribePanel={<ReleaseFeedControls />}
+            />
           )}
 
           {/* Saved Artists Section */}
