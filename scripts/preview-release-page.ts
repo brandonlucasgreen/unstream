@@ -24,8 +24,9 @@
  * the type/date/offer mapping, and the entire rendered page including payout estimates and
  * Bandcamp Friday handling.
  *
- * Faked: only the two database reads. Nothing is written anywhere — there is no database
- * connection at all, which is the point.
+ * Faked: only the database reads, including one alias row so the retired-slug redirect can be
+ * seen (there is a link for it on the index page). Nothing is written anywhere — there is no
+ * database connection at all, which is the point.
  *
  * One Bandcamp request for the grid, then one per release page you open. Be a good neighbour.
  */
@@ -87,20 +88,35 @@ const stubDir = mkdtempSync(join(tmpdir(), 'unstream-release-preview-'));
 
 writeFileSync(join(stubDir, 'edge.ts'), `export type Context = { next: () => Response };\n`);
 
-// The two database reads the edge function makes, answered from memory. `_table` is set by
-// from() and read by then(), which works because the function awaits each query before
-// starting the next one.
+// The three database reads the edge function makes, answered from memory. `_table` and the
+// `.eq()` filters are recorded by the builder and read by then(), which works because the
+// function awaits each query before starting the next one.
+//
+// The filters matter: the artists read has to *miss* for a retired slug, or the alias branch
+// this harness exists to show can never run.
 writeFileSync(join(stubDir, 'supabase.ts'), `
 export let artist: any = null;
 export let release: any = null;
-export function setRows(a: any, r: any) { artist = a; release = r; }
+export let alias: any = null;
+export function setRows(a: any, r: any, al: any = null) { artist = a; release = r; alias = al; }
 export function createClient() {
   const q: any = {
     _table: '',
-    select: () => q, eq: () => q, abortSignal: () => q, maybeSingle: () => q,
-    then: (resolve: any) => resolve({ data: q._table === 'artists' ? artist : release }),
+    _filters: {} as Record<string, unknown>,
+    select: () => q,
+    eq: (column: string, value: unknown) => { q._filters[column] = value; return q; },
+    abortSignal: () => q,
+    maybeSingle: () => q,
+    then: (resolve: any) => resolve({ data: rowFor() }),
   };
-  return { from(table: string) { q._table = table; return q; } };
+  function rowFor() {
+    if (q._table === 'artists') return q._filters.slug === artist?.slug ? artist : null;
+    if (q._table === 'artist_slug_aliases') {
+      return q._filters.alias === alias?.alias ? { artists: { slug: artist?.slug } } : null;
+    }
+    return release;
+  }
+  return { from(table: string) { q._table = table; q._filters = {}; return q; } };
 }
 `);
 
@@ -133,11 +149,18 @@ function escape(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+/**
+ * A stand-in for a row in `artist_slug_aliases`. Requests under it miss the artists table and
+ * take the alias branch in the edge function, which 301s to the canonical URL.
+ */
+const RETIRED_SLUG = `${artistSlug}-retired`;
+
 function indexPage(): string {
   const rows = releases.map(r =>
     `<li style="margin:6px 0"><a href="/a/${artistSlug}/${r.slug}">${escape(r.title)}</a>
      <span style="color:#888;font-size:13px"> — ${r.releaseType}${detailCache.has(r.slug) ? ' · fetched' : ''}</span></li>`
   ).join('');
+  const first = releases[0];
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Release page preview</title>
     <style>body{font-family:system-ui;max-width:640px;margin:40px auto;padding:0 24px;line-height:1.5}
     a{color:#e55a2b}code{background:#eee;padding:1px 5px;border-radius:4px}</style></head><body>
@@ -145,7 +168,12 @@ function indexPage(): string {
     <p style="color:#666">${releases.length} releases from <code>${escape(landedUrl)}</code>.
     Opening one fetches its release page from Bandcamp (one request) and renders it through the
     real edge function. Nothing is written anywhere.</p>
-    <ul style="padding-left:18px">${rows}</ul></body></html>`;
+    <ul style="padding-left:18px">${rows}</ul>
+    ${first ? `<p style="color:#666">Retired slug:
+      <a href="/a/${RETIRED_SLUG}/${first.slug}"><code>/a/${RETIRED_SLUG}/${escape(first.slug)}</code></a>
+      — misses the artists table, resolves through <code>artist_slug_aliases</code>, and 301s to
+      the canonical URL.</p>` : ''}
+    </body></html>`;
 }
 
 const server = createServer(async (req, res) => {
@@ -157,15 +185,17 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  const match = path.match(/^\/a\/[^/]+\/([^/]+)\/?$/);
-  const release = match ? releases.find(r => r.slug === match[1]) : undefined;
+  const match = path.match(/^\/a\/([^/]+)\/([^/]+)\/?$/);
+  const requestedArtist = match?.[1];
+  const release = match ? releases.find(r => r.slug === match[2]) : undefined;
   if (!release) {
     res.writeHead(302, { Location: '/' });
     res.end();
     return;
   }
 
-  if (!detailCache.has(release.slug)) {
+  // A retired slug redirects before the release is ever read, so there is nothing to fetch for it.
+  if (requestedArtist === artistSlug && !detailCache.has(release.slug)) {
     console.log(`  fetching ${release.source.url}`);
     const detailResponse = await safeFetch(release.source.url, 15_000);
     const outcome = detailResponse?.ok
@@ -186,7 +216,7 @@ const server = createServer(async (req, res) => {
     | undefined;
 
   setRows(
-    { id: 'preview-artist', name: artistName, image_url: null },
+    { id: 'preview-artist', slug: artistSlug, name: artistName, image_url: null },
     {
       title: release.title,
       release_type: release.releaseType,
@@ -205,7 +235,8 @@ const server = createServer(async (req, res) => {
           })),
         },
       ],
-    }
+    },
+    { alias: RETIRED_SLUG }
   );
 
   const response = await renderReleasePage(
@@ -213,7 +244,11 @@ const server = createServer(async (req, res) => {
     { next: () => new Response('fell through to the SPA', { status: 404 }) }
   );
 
-  res.writeHead(response.status, { 'Content-Type': 'text/html; charset=utf-8' });
+  // The function's own headers, not a hand-set Content-Type: a redirect carries its answer in
+  // Location and Cache-Control, and dropping those would make the redirect branches unviewable.
+  const headers: Record<string, string> = {};
+  response.headers.forEach((value, key) => { headers[key] = value; });
+  res.writeHead(response.status, headers);
   res.end(await response.text());
 });
 

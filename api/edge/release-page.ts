@@ -172,9 +172,45 @@ export default async function handler(request: Request, context: Context) {
         .maybeSingle()
         .abortSignal(controller.signal);
 
+      // A retired slug still resolves. Most of the aliases in production (44 of them as of
+      // 2026-08-07) came from the accent-folding reslug in #410 (`beyonc` -> `beyonce`), and a
+      // release URL minted before that — in an alert, a shared link, a Mac app cache — is a URL
+      // a fan can still be holding.
+      // Falling through instead would hand it to artist-page-static, which hands non-crawlers to
+      // the SPA, which has no route for a two-segment /a/ path: a blank page.
+      //
+      // Checked only *after* the live slug misses, so a real artist who later takes that slug
+      // always wins.
+      //
+      // A 301 to the canonical URL rather than rendering here, matching artist-page-static:
+      // rendering the same page at two URLs is duplicate content. The redirect is about the
+      // artist slug alone — if the release doesn't exist under the canonical slug either, that
+      // request answers with the usual bounce to the artist page.
+      //
+      // Duplicates resolveArtistSlugAlias in api/functions/db.ts — edge functions run on Deno and
+      // cannot import from api/functions.
       if (!artistData) {
+        const { data: alias } = await supabase
+          .from('artist_slug_aliases')
+          .select('artists!inner(slug)')
+          .eq('alias', artistSlug.toLowerCase())
+          .maybeSingle()
+          .abortSignal(controller.signal);
+
+        const canonical = (alias as { artists?: { slug?: string } } | null)?.artists?.slug;
         clearTimeout(timeoutId);
-        return context.next();
+        if (!canonical) return context.next();
+
+        // max-age=3600, not the year a permanent redirect invites: browsers cache a 301
+        // aggressively, and a slug that gets reassigned to a real artist has to be able to stop
+        // redirecting. Same cap artist-page-static uses.
+        return new Response(null, {
+          status: 301,
+          headers: {
+            Location: `/a/${encodeURIComponent(canonical)}/${encodeURIComponent(releaseSlug)}`,
+            'Cache-Control': 'public, max-age=3600',
+          },
+        });
       }
       artist = artistData;
 
