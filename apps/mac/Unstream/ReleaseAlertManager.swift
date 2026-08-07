@@ -18,7 +18,11 @@ class ReleaseAlertManager: ObservableObject {
 
     private let releaseAPI = ReleaseCheckAPI()
     private let iCloudStore = NSUbiquitousKeyValueStore.default
-    private let dismissedIdsKey = "dismissedReleaseIds"
+    // A new key, not the old "dismissedReleaseIds". That one holds per-device random UUIDs from
+    // v3.4.0 and earlier, which can never match a stable release id — reusing it would only let
+    // dead entries push real ones out of the 200-entry cap. It's left in place rather than
+    // deleted so an older device still syncing against it isn't fighting this one.
+    private let dismissedIdsKey = "dismissedReleaseKeys"
 
     private weak var supportListManager: SupportListManager?
 
@@ -58,9 +62,10 @@ class ReleaseAlertManager: ObservableObject {
 
     // MARK: - Public Methods
 
-    /// Get the new release for a specific artist, if any
-    func newRelease(for artistName: String) -> NewRelease? {
-        newReleases.first { $0.artistName.lowercased() == artistName.lowercased() && $0.isActive }
+    /// Every unread release for one artist — plural, because an artist can put out two records
+    /// between checks and the saved-artists list used to show only `.first` of them.
+    func newReleases(for artistName: String) -> [NewRelease] {
+        newReleases.filter { $0.artistName.lowercased() == artistName.lowercased() && $0.isActive }
     }
 
     /// Dismiss a new release notification (syncs dismissed state via iCloud KVS)
@@ -200,25 +205,23 @@ class ReleaseAlertManager: ObservableObject {
         let entries = supportListManager.entries
         var foundNewReleases: [NewRelease] = []
 
-        for entry in entries {
-            // Build platforms dictionary for API call
-            var platforms: [String: String] = [:]
+        // Asked once, before the loop, because the `defer` above moves `lastCheckDate` to now.
+        let sinceDays = Self.lookbackDays(since: checkState.lastCheckDate)
 
-            if let bandcampUrl = entry.platforms.first(where: { $0.sourceId == "bandcamp" })?.url {
-                platforms["bandcamp"] = bandcampUrl
-            }
-            if let faircampUrl = entry.platforms.first(where: { $0.sourceId == "faircamp" })?.url {
-                platforms["faircamp"] = faircampUrl
-            }
-            if let mirloUrl = entry.platforms.first(where: { $0.sourceId == "mirlo" })?.url {
-                platforms["mirlo"] = mirloUrl
-            }
-            // Skip if no supported platforms
-            guard !platforms.isEmpty else { continue }
+        for entry in entries {
+            // Every link we hold, and no gate on which ones. The server tries the release
+            // catalogue first and ignores `platforms` entirely on that path, so an artist known
+            // only through Discogs or Jam.coop — Discogs is the *largest* link population we
+            // have — used to be skipped over a question one database read answers.
+            let platforms = Self.platformUrls(for: entry)
 
             // The server returns every release in the window, not just the newest, so an artist
             // who put out two records since the last check produces two alerts.
-            foundNewReleases.append(contentsOf: await checkViaAPI(artistName: entry.artistName, platforms: platforms))
+            foundNewReleases.append(contentsOf: await checkViaAPI(
+                artistName: entry.artistName,
+                platforms: platforms,
+                sinceDays: sinceDays
+            ))
         }
 
         // Update state with new releases.
@@ -244,14 +247,64 @@ class ReleaseAlertManager: ObservableObject {
     }
 
     /// Ask the server what's new for one artist, and keep only what we haven't seen before.
-    private func checkViaAPI(artistName: String, platforms: [String: String]) async -> [NewRelease] {
+    private func checkViaAPI(
+        artistName: String,
+        platforms: [String: String],
+        sinceDays: Int?
+    ) async -> [NewRelease] {
         do {
-            let results = try await releaseAPI.checkReleases(artistName: artistName, platforms: platforms)
+            let results = try await releaseAPI.checkReleases(
+                artistName: artistName,
+                platforms: platforms,
+                sinceDays: sinceDays
+            )
             return Self.selectUnseen(results, artistName: artistName, state: &checkState)
         } catch {
             print("API check failed for \(artistName): \(error)")
             return []
         }
+    }
+
+    /// Which of a saved artist's links to send with an alert check.
+    ///
+    /// All of them, keyed by platform id. The server reads this only on its live-scrape
+    /// fallback, and only for the platforms it can scrape, so anything else is ignored rather
+    /// than harmful — while filtering here is what caused the bug: the old version built a
+    /// dictionary from bandcamp, faircamp and mirlo alone and then skipped the artist entirely
+    /// when it came out empty, even though the catalogue path never looks at it.
+    ///
+    /// First link wins if an artist somehow has two for one platform, and empty URLs are
+    /// dropped rather than sent as blanks for the server to reject.
+    nonisolated static func platformUrls(for entry: SupportEntry) -> [String: String] {
+        var urls: [String: String] = [:]
+        for platform in entry.platforms where !platform.url.isEmpty {
+            if urls[platform.sourceId] == nil {
+                urls[platform.sourceId] = platform.url
+            }
+        }
+        return urls
+    }
+
+    /// How far back to ask the server to look, given when we last checked.
+    ///
+    /// Nil means "use the server's default" (31 days), which is right on a first run and was
+    /// also — wrongly — what every run sent before this. A laptop closed for six weeks woke up,
+    /// asked for the last 31 days, and permanently missed everything that had aged past that
+    /// window while it slept.
+    ///
+    /// The window is the gap since the last check plus a week of padding, because a release can
+    /// be *dated* days before it appears anywhere we can see it. It never asks for less than
+    /// the 31 days it used to get, and never more than the 365 the server caps at — asking for
+    /// more would be silently clamped, and a request that means what it says is easier to debug.
+    nonisolated static func lookbackDays(since lastCheck: Date?, now: Date = Date()) -> Int? {
+        guard let lastCheck else { return nil }
+
+        let elapsed = now.timeIntervalSince(lastCheck) / (24 * 60 * 60)
+        // A last-check date in the future is a clock change, not a time machine: fall back to
+        // the default rather than deriving a nonsense window from it.
+        guard elapsed > 0 else { return nil }
+
+        return min(365, max(31, Int(elapsed.rounded(.up)) + 7))
     }
 
     /// Which of these results haven't we alerted on before? Marks each one it returns as known.
@@ -317,9 +370,7 @@ class ReleaseAlertManager: ObservableObject {
 
         let where_ = formatPlatformList(release.platforms)
         if release.isUpcoming {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "d MMMM"
-            let date = formatter.string(from: release.releaseDate)
+            let date = release.displayDate
             parts.append(where_.isEmpty ? "announced for \(date)" : "announced for \(date) on \(where_)")
         } else {
             parts.append(where_.isEmpty ? "out now" : "out now on \(where_)")
@@ -363,7 +414,7 @@ class ReleaseAlertManager: ObservableObject {
             content.userInfo = ["releaseUrl": release.releaseUrl]
 
             let request = UNNotificationRequest(
-                identifier: "releaseAlert-\(release.id.uuidString)",
+                identifier: "releaseAlert-\(release.id)",
                 content: content,
                 trigger: nil
             )
@@ -394,18 +445,17 @@ class ReleaseAlertManager: ObservableObject {
 
     // MARK: - Dismissed Release Sync (iCloud KVS)
 
-    private func loadDismissedIds() -> Set<UUID> {
+    private func loadDismissedIds() -> Set<String> {
         guard let strings = iCloudStore.array(forKey: dismissedIdsKey) as? [String] else {
             return []
         }
-        return Set(strings.compactMap { UUID(uuidString: $0) })
+        return Set(strings)
     }
 
-    private func saveDismissedId(_ id: UUID) {
+    private func saveDismissedId(_ id: String) {
         var ids = (iCloudStore.array(forKey: dismissedIdsKey) as? [String]) ?? []
-        let idString = id.uuidString
-        if !ids.contains(idString) {
-            ids.append(idString)
+        if !ids.contains(id) {
+            ids.append(id)
             // Cap at 200 entries to avoid unbounded growth
             if ids.count > 200 {
                 ids = Array(ids.suffix(200))

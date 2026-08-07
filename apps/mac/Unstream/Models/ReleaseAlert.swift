@@ -2,7 +2,8 @@ import Foundation
 
 /// A new release detected for a saved artist
 struct NewRelease: Codable, Identifiable {
-    let id: UUID
+    /// Derived from the release, never generated. See `stableId(releaseUrl:artistName:releaseName:)`.
+    let id: String
     let artistName: String
     let releaseName: String
     let releaseDate: Date
@@ -31,6 +32,15 @@ struct NewRelease: Codable, Identifiable {
         platformCatalog[platform]?.name ?? platform.capitalized
     }
 
+    /// "1 September". Day and month only — an alert is always about the near future or the
+    /// recent past, so the year is noise. One property rather than two formatters so the
+    /// notification and the releases list can't drift into different date shapes.
+    var displayDate: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "d MMMM"
+        return formatter.string(from: releaseDate)
+    }
+
     init(
         artistName: String,
         releaseName: String,
@@ -41,7 +51,7 @@ struct NewRelease: Codable, Identifiable {
         status: String = "released",
         offerSummary: String = ""
     ) {
-        self.id = UUID()
+        self.id = Self.stableId(releaseUrl: releaseUrl, artistName: artistName, releaseName: releaseName)
         self.artistName = artistName
         self.releaseName = releaseName
         self.releaseDate = releaseDate
@@ -53,11 +63,52 @@ struct NewRelease: Codable, Identifiable {
         self.detectedAt = Date()
     }
 
+    /// A release's identity, and the one thing about it that has to be the same on every device.
+    ///
+    /// This used to be a fresh `UUID()`, generated independently per device, and the iCloud
+    /// dismissal sync published *those*: one Mac dismissed "Infinite Normal" and synced its
+    /// UUID, the other held the same release under a different one, and nothing ever matched.
+    /// The only cross-device behaviour the app claimed did nothing at all.
+    ///
+    /// Two schemes, each prefixed so one can never be mistaken for the other:
+    ///
+    /// - `release:{artistSlug}/{releaseSlug}` when `releaseUrl` is an Unstream release page,
+    ///   which is what a catalog-backed alert carries. Both devices are naming the same
+    ///   catalogue entry, so this is a real shared key.
+    /// - `name:{artist}/{title}` for an alert from the server's live-scrape fallback, whose
+    ///   `releaseUrl` is one platform's page and carries no slugs. Deliberately weaker, and the
+    ///   prefix says so: it keys on the artist and title the server hands both devices rather
+    ///   than on a URL that could differ between them. It is also exactly the identity
+    ///   `isKnownReleaseByName` already dedups on, so the two agree about what "the same
+    ///   release" means.
+    ///
+    /// Not a UUID any more. A readable key is worth more here — it shows up in the iCloud store
+    /// and in notification identifiers — and deriving a UUID from a string would mean
+    /// hand-rolling UUIDv5 for no gain.
+    static func stableId(releaseUrl: String, artistName: String, releaseName: String) -> String {
+        if let slugs = ReleaseDetailService.slugs(fromReleaseURL: releaseUrl) {
+            return "release:\(slugs.artist)/\(slugs.release)"
+        }
+        return "name:\(idComponent(artistName))/\(idComponent(releaseName))"
+    }
+
+    /// Case and surrounding whitespace shouldn't split one release into two identities. A
+    /// slash is folded because the key uses one as its separator.
+    private static func idComponent(_ raw: String) -> String {
+        raw.trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+            .replacingOccurrences(of: "/", with: "-")
+    }
+
     // Decoded with defaults so alerts persisted by an earlier build — which had none of the
-    // three new fields — still load instead of throwing the whole stored list away.
+    // three newer fields — still load instead of throwing the whole stored list away.
+    //
+    // `id` is recomputed rather than read back for the same reason it changed shape: a stored
+    // id is either a v3.4.0 random UUID, which is worthless, or a key this same function would
+    // produce anyway. Recomputing is what makes two devices that upgrade separately converge on
+    // the same identity for a release they both already had.
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
-        id = try c.decode(UUID.self, forKey: .id)
         artistName = try c.decode(String.self, forKey: .artistName)
         releaseName = try c.decode(String.self, forKey: .releaseName)
         releaseDate = try c.decode(Date.self, forKey: .releaseDate)
@@ -67,6 +118,7 @@ struct NewRelease: Codable, Identifiable {
         platforms = try c.decodeIfPresent([String].self, forKey: .platforms) ?? [platform]
         status = try c.decodeIfPresent(String.self, forKey: .status) ?? "released"
         offerSummary = try c.decodeIfPresent(String.self, forKey: .offerSummary) ?? ""
+        id = Self.stableId(releaseUrl: releaseUrl, artistName: artistName, releaseName: releaseName)
     }
 }
 
