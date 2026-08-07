@@ -286,6 +286,13 @@
   to = "/.netlify/functions/me-feed-token"
   status = 200
 
+# The "Recent Releases" shortlist on /dashboard — the same window the private feed above serves,
+# read straight rather than as a calendar.
+[[redirects]]
+  from = "/api/me/recent-releases"
+  to = "/.netlify/functions/me-recent-releases"
+  status = 200
+
 # One release's buying guide as JSON — the twin of the HTML page at /a/:artist/:release, for the
 # Mac app and the browser extension.
 #
