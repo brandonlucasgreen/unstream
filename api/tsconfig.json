@@ -67,6 +67,8 @@
     "functions/claim-artist.ts",
     "functions/admin-verify.ts",
     "functions/__tests__/resend.test.ts",
-    "functions/__tests__/notifications.test.ts"
+    "functions/__tests__/notifications.test.ts",
+    "functions/weekly-analytics-recap.ts",
+    "functions/__tests__/weekly-analytics-recap.test.ts"
   ]
 }

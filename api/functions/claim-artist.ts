@@ -7,7 +7,7 @@ import { createClient } from '@supabase/supabase-js';
 import { Sentry } from '../lib/sentry';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
-import { sendNotificationOnce } from './notifications';
+import { sendNotificationOnce, notifySavedArtistsOfNewLinks } from './notifications';
 import { escapeHtml } from '../lib/html';
 
 const PLATFORM_PATTERNS: [string, RegExp][] = [
@@ -680,6 +680,21 @@ export async function handler(event: {
         subject: `Your claim of ${artist.name} on Unstream is verified`,
         html: `<p>Your claim of <strong>${escapeHtml(artist.name)}</strong> on Unstream has been verified — your profile is now live at <a href="https://unstream.stream/a/${escapeHtml(slug)}">unstream.stream/a/${escapeHtml(slug)}</a>.</p><p>You can edit your bio, photo, and links any time from your dashboard.</p>`,
         text: `Your claim of ${artist.name} on Unstream has been verified — your profile is now live at https://unstream.stream/a/${slug}.\n\nYou can edit your bio, photo, and links any time from your dashboard.`,
+      });
+    }
+
+    if (discoveredLinks.length > 0) {
+      // Excludes the claimant themselves — they already got the claim-approved email above and
+      // just added these links, so it isn't news to them.
+      void notifySavedArtistsOfNewLinks({
+        client,
+        artistId: artist.id,
+        artistName: artist.name,
+        artistSlug: slug,
+        platforms: discoveredLinks.map(l => l.platform),
+        excludeUserId: userId,
+      }).catch(err => {
+        Sentry.captureException(err, { extra: { context: 'notifySavedArtistsOfNewLinks', artistId: artist.id } });
       });
     }
 
