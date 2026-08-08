@@ -9,7 +9,7 @@ import type { Handler } from '@netlify/functions';
 const VERSION_INFO = {
   latestVersion: '3.5.0',
   downloadUrl: 'https://github.com/brandonlucasgreen/unstream/releases/latest',
-  releaseNotes: 'Fixes release alerts: cross-device dismissal sync, missing platforms, and alerts lost after time away',
+  releaseNotes: 'Release alerts now sync dismissals across your Macs, catch more platforms, and never lose releases after time away',
 };
 
 export const handler: Handler = async (event) => {
