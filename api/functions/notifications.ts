@@ -115,6 +115,41 @@ async function resolveEmails(client: SupabaseClient, userIds: string[]): Promise
   return emails;
 }
 
+export type NotificationPreferenceColumn = 'new_release' | 'new_platform_link' | 'weekly_analytics_recap';
+
+/**
+ * Drops user ids who have explicitly turned this notification off. A user with no row in
+ * notification_preferences has never touched their settings and is treated as enabled — see
+ * the migration comment. A lookup failure fails *open* (keeps everyone) rather than closed:
+ * silently suppressing a notification someone opted into by default is the "cache uncertainty
+ * as a negative" mistake this codebase specifically avoids elsewhere, and it would look
+ * identical to nothing being wrong.
+ */
+export async function filterByPreference(
+  client: SupabaseClient,
+  userIds: string[],
+  column: NotificationPreferenceColumn,
+): Promise<string[]> {
+  if (userIds.length === 0) return userIds;
+
+  const { data, error } = await client
+    .from('notification_preferences')
+    .select(`user_id, ${column}`)
+    .in('user_id', userIds);
+
+  if (error) {
+    Sentry.captureException(error, { extra: { context: 'filterByPreference', column } });
+    return userIds;
+  }
+
+  const optedOut = new Set(
+    (data as Record<string, unknown>[] | null || [])
+      .filter(row => row[column] === false)
+      .map(row => row.user_id as string),
+  );
+  return userIds.filter(id => !optedOut.has(id));
+}
+
 interface NewReleaseParams {
   client: SupabaseClient;
   artistId: string;
@@ -134,7 +169,10 @@ interface NewReleaseParams {
 export async function notifySavedArtistsOfNewRelease(params: NewReleaseParams): Promise<void> {
   const { client, artistId, releasesFound } = params;
 
-  const userIds = await getActiveSavers(client, artistId);
+  let userIds = await getActiveSavers(client, artistId);
+  if (userIds.length === 0) return;
+
+  userIds = await filterByPreference(client, userIds, 'new_release');
   if (userIds.length === 0) return;
 
   const { data: artist, error } = await client
@@ -185,7 +223,10 @@ export async function notifySavedArtistsOfNewLinks(params: NewPlatformLinkParams
   const { client, artistId, artistName, artistSlug, platforms, excludeUserId } = params;
   if (platforms.length === 0) return;
 
-  const userIds = await getActiveSavers(client, artistId, excludeUserId);
+  let userIds = await getActiveSavers(client, artistId, excludeUserId);
+  if (userIds.length === 0) return;
+
+  userIds = await filterByPreference(client, userIds, 'new_platform_link');
   if (userIds.length === 0) return;
 
   const emails = await resolveEmails(client, userIds);

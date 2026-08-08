@@ -6,12 +6,16 @@ const originalEnv = { ...process.env };
 const mocks = vi.hoisted(() => ({
   getClient: vi.fn(),
   sendNotificationOnce: vi.fn(),
+  filterByPreference: vi.fn(),
   captureMessage: vi.fn(),
   captureException: vi.fn(),
 }));
 
 vi.mock('../db', () => ({ getClient: mocks.getClient }));
-vi.mock('../notifications', () => ({ sendNotificationOnce: mocks.sendNotificationOnce }));
+vi.mock('../notifications', () => ({
+  sendNotificationOnce: mocks.sendNotificationOnce,
+  filterByPreference: mocks.filterByPreference,
+}));
 vi.mock('../../lib/sentry', () => ({
   Sentry: { captureMessage: mocks.captureMessage, captureException: mocks.captureException },
 }));
@@ -48,6 +52,8 @@ function makeClient(opts: {
 beforeEach(() => {
   vi.clearAllMocks();
   process.env.INTERNAL_FUNCTION_SECRET = SECRET;
+  // Default: nobody has opted out. Individual tests override to exercise the filter.
+  mocks.filterByPreference.mockImplementation((_client, userIds) => Promise.resolve(userIds));
 });
 
 afterEach(() => {
@@ -74,7 +80,7 @@ describe('weekly-analytics-recap', () => {
     const r = await post();
 
     expect(r.statusCode).toBe(200);
-    expect(JSON.parse(r.body)).toEqual({ sent: 0, skipped: 0 });
+    expect(JSON.parse(r.body)).toEqual({ sent: 0, skipped: 0, optedOut: 0 });
     expect(mocks.sendNotificationOnce).not.toHaveBeenCalled();
   });
 
@@ -82,7 +88,7 @@ describe('weekly-analytics-recap', () => {
     mocks.getClient.mockReturnValue(makeClient({
       profiles: {
         data: [
-          { artist_id: 'a1', email: 'artist1@example.com', artists: { name: 'Artist One', slug: 'artist-one' } },
+          { artist_id: 'a1', user_id: 'u1', email: 'artist1@example.com', artists: { name: 'Artist One', slug: 'artist-one' } },
         ],
         error: null,
       },
@@ -99,7 +105,7 @@ describe('weekly-analytics-recap', () => {
     const r = await post();
 
     expect(r.statusCode).toBe(200);
-    expect(JSON.parse(r.body)).toEqual({ sent: 1, skipped: 0 });
+    expect(JSON.parse(r.body)).toEqual({ sent: 1, skipped: 0, optedOut: 0 });
     expect(mocks.sendNotificationOnce).toHaveBeenCalledTimes(1);
     const call = mocks.sendNotificationOnce.mock.calls[0][0];
     expect(call.recipientEmail).toBe('artist1@example.com');
@@ -113,15 +119,35 @@ describe('weekly-analytics-recap', () => {
   it('skips a profile missing an artist slug rather than sending a broken link', async () => {
     mocks.getClient.mockReturnValue(makeClient({
       profiles: {
-        data: [{ artist_id: 'a1', email: 'artist1@example.com', artists: null }],
+        data: [{ artist_id: 'a1', user_id: 'u1', email: 'artist1@example.com', artists: null }],
         error: null,
       },
     }));
 
     const r = await post();
 
-    expect(JSON.parse(r.body)).toEqual({ sent: 0, skipped: 1 });
+    expect(JSON.parse(r.body)).toEqual({ sent: 0, skipped: 1, optedOut: 0 });
     expect(mocks.sendNotificationOnce).not.toHaveBeenCalled();
+  });
+
+  it('does not email an artist who turned the weekly recap off', async () => {
+    mocks.getClient.mockReturnValue(makeClient({
+      profiles: {
+        data: [
+          { artist_id: 'a1', user_id: 'opted-out', email: 'quiet@example.com', artists: { name: 'Quiet Artist', slug: 'quiet-artist' } },
+          { artist_id: 'a2', user_id: 'opted-in', email: 'loud@example.com', artists: { name: 'Loud Artist', slug: 'loud-artist' } },
+        ],
+        error: null,
+      },
+    }));
+    mocks.filterByPreference.mockResolvedValue(['opted-in']);
+
+    const r = await post();
+
+    expect(mocks.filterByPreference).toHaveBeenCalledWith(expect.anything(), ['opted-out', 'opted-in'], 'weekly_analytics_recap');
+    expect(JSON.parse(r.body)).toEqual({ sent: 1, skipped: 0, optedOut: 1 });
+    expect(mocks.sendNotificationOnce).toHaveBeenCalledTimes(1);
+    expect(mocks.sendNotificationOnce.mock.calls[0][0].recipientEmail).toBe('loud@example.com');
   });
 
   it('reports an upstream failure instead of claiming success', async () => {

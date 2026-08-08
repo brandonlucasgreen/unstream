@@ -1,0 +1,54 @@
+name: Weekly analytics recap
+
+# Sends a weekly analytics recap email to every claimed, verified artist profile that hasn't
+# turned it off (see /settings' Notifications section). See
+# api/functions/weekly-analytics-recap.ts.
+#
+# A GitHub Actions cron rather than a scheduled Netlify function: there are no scheduled
+# Netlify functions in this repo — same precedent as recatalog-sweep.yml,
+# schedule-social-posts.yml, and upstash-keepalive.yml.
+#
+# ## Cadence: once a week, Monday mornings US time
+#
+# '0 13 * * 1' is 13:00 UTC Monday — 6am PT / 9am ET, so the recap lands at the start of an
+# artist's work week rather than overnight. Every run recomputes the "last 7 days" window from
+# when it actually fires, so this is safe to reschedule without a backfill.
+#
+# Safe to over-run: the function's own idempotency guard (email_log, keyed on artistId + the
+# Monday date of that week) means a duplicate invocation the same week sends nothing twice.
+
+on:
+  schedule:
+    - cron: '0 13 * * 1'
+  workflow_dispatch: # Manual trigger from the GitHub UI
+
+jobs:
+  recap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send the weekly analytics recap
+        env:
+          INTERNAL_FUNCTION_SECRET: ${{ secrets.INTERNAL_FUNCTION_SECRET }}
+        run: |
+          if [ -z "$INTERNAL_FUNCTION_SECRET" ]; then
+            echo "::error::INTERNAL_FUNCTION_SECRET secret is not set"
+            exit 1
+          fi
+
+          response=$(curl -sS -X POST -w '\n%{http_code}' \
+            -H "Authorization: Bearer $INTERNAL_FUNCTION_SECRET" \
+            https://unstream.stream/.netlify/functions/weekly-analytics-recap)
+
+          status=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+
+          # Any non-200 fails the run on purpose — a recap job that reports success while
+          # refusing to do anything (database unreadable, auth misconfigured) is exactly the
+          # kind of silent failure worth catching instead of finding out from an artist asking
+          # where their email went.
+          if [ "$status" != "200" ]; then
+            echo "::error::Recap failed with HTTP $status: $body"
+            exit 1
+          fi
+
+          echo "Recap OK: $body"

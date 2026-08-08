@@ -69,6 +69,8 @@
     "functions/__tests__/resend.test.ts",
     "functions/__tests__/notifications.test.ts",
     "functions/weekly-analytics-recap.ts",
-    "functions/__tests__/weekly-analytics-recap.test.ts"
+    "functions/__tests__/weekly-analytics-recap.test.ts",
+    "functions/me-notifications.ts",
+    "functions/__tests__/me-notifications.test.ts"
   ]
 }

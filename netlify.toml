@@ -147,6 +147,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/me/notification-preferences"
+  to = "/.netlify/functions/me-notifications"
+  status = 200
+
+[[redirects]]
   from = "/api/public/saved-artists/*"
   to = "/.netlify/functions/public-saved-artists"
   status = 200

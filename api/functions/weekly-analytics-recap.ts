@@ -1,10 +1,7 @@
-// Scheduled job: a weekly analytics recap email for every claimed, verified artist profile.
-//
-// Not yet wired to a cron. This function is complete and tested, but unlike recatalog-sweep
-// there is no .github/workflows/*.yml invoking it — sending a recurring email to every
-// verified artist on a schedule is a product decision (cadence, opt-out) worth a deliberate
-// go-ahead rather than shipping silently alongside its plumbing. Wire it up the same way as
-// recatalog-sweep.yml (a POST with the internal bearer secret) once that's decided.
+// Scheduled job: a weekly analytics recap email for every claimed, verified artist profile
+// that hasn't opted out. Invoked by .github/workflows/weekly-analytics-recap.yml, the same
+// GitHub Actions cron pattern as recatalog-sweep.ts — there are no scheduled Netlify functions
+// in this repo.
 //
 // Reuses the same tables the artist-facing dashboard reads (api/functions/analytics-stats.ts)
 // rather than its RPC — this runs with the service-role client, which bypasses RLS, so a
@@ -12,7 +9,7 @@
 
 import { getClient } from './db';
 import { isInternalRequest } from './middleware';
-import { sendNotificationOnce } from './notifications';
+import { sendNotificationOnce, filterByPreference } from './notifications';
 import { escapeHtml } from '../lib/html';
 import { Sentry } from '../lib/sentry';
 
@@ -28,6 +25,7 @@ function weekStartKey(date: Date): string {
 
 interface VerifiedProfileRow {
   artist_id: string;
+  user_id: string;
   email: string;
   artists: { name: string; slug: string } | { name: string; slug: string }[] | null;
 }
@@ -66,7 +64,7 @@ export async function handler(event: {
 
   const { data: profiles, error: profilesError } = await client
     .from('artist_profiles')
-    .select('artist_id, email, artists(name, slug)')
+    .select('artist_id, user_id, email, artists(name, slug)')
     .not('verified_at', 'is', null);
 
   if (profilesError) {
@@ -79,16 +77,26 @@ export async function handler(event: {
 
   const rows = (profiles || []) as VerifiedProfileRow[];
   if (rows.length === 0) {
-    return { statusCode: 200, body: JSON.stringify({ sent: 0, skipped: 0 }) };
+    return { statusCode: 200, body: JSON.stringify({ sent: 0, skipped: 0, optedOut: 0 }) };
   }
+
+  const enabledUserIds = new Set(
+    await filterByPreference(client, rows.map(r => r.user_id), 'weekly_analytics_recap'),
+  );
 
   const since = new Date(Date.now() - RECAP_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const weekKey = weekStartKey(new Date());
 
   let sent = 0;
   let skipped = 0;
+  let optedOut = 0;
 
   for (const row of rows) {
+    if (!enabledUserIds.has(row.user_id)) {
+      optedOut++;
+      continue;
+    }
+
     const artist = Array.isArray(row.artists) ? row.artists[0] : row.artists;
     if (!artist?.slug || !row.email) {
       skipped++;
@@ -130,5 +138,5 @@ export async function handler(event: {
     sent++;
   }
 
-  return { statusCode: 200, body: JSON.stringify({ sent, skipped }) };
+  return { statusCode: 200, body: JSON.stringify({ sent, skipped, optedOut }) };
 }

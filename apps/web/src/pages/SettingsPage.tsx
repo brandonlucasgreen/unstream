@@ -10,6 +10,7 @@ import { PasswordChangeForm } from '../components/PasswordChangeForm';
 import { SharingControls } from '../components/SharingControls';
 import { ReleaseFeedControls } from '../components/ReleaseFeedControls';
 import { NewsletterSignup } from '../components/NewsletterSignup';
+import { NotificationPreferences } from '../components/NotificationPreferences';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
 
@@ -115,6 +116,9 @@ export function SettingsPage() {
               blurb="Subscribe to the Unstream newsletter for new features, music news, tips and tricks for getting more out of Unstream, and more."
               defaultEmail={settings?.email ?? ''}
             />
+            <div className="pt-4 border-t border-border">
+              <NotificationPreferences />
+            </div>
           </section>
 
           {/* Password section */}
