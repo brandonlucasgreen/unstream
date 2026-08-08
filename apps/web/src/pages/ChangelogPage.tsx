@@ -81,7 +81,7 @@ export function ChangelogPage() {
             <NewsletterSignup
               source="changelog"
               heading="Get new features in your inbox"
-              blurb="A short email when something ships, plus what we're working on next."
+              blurb="Plus updates on what we're working on, tips, and occasional writing on how to support music."
               feedUrl="/changelog.xml"
             />
           </div>
