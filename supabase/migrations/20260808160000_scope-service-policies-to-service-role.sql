@@ -1,5 +1,11 @@
 -- Migration: stop "Service …" policies from granting access to anon
 --
+-- Renamed from 20260808120000. Supabase keys migration history on the timestamp prefix alone,
+-- and 20260808120000 was already applied to production by a manual workflow_dispatch run of
+-- supabase-migrate.yml against an unmerged branch (notification_preferences). Sharing that
+-- prefix would have made this file look already-applied and skipped it in silence — the worst
+-- possible outcome for a migration whose job is closing a hole.
+--
 -- Several policies written early on are named for the service role but never say so. A
 -- CREATE POLICY with no TO clause applies to PUBLIC, and PUBLIC includes `anon` — the role a
 -- request carrying the public anon key runs as. The anon key ships in the client bundle, so
