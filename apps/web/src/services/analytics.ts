@@ -14,13 +14,34 @@
 declare global {
   interface Window {
     goatcounter?: {
-      count: (vars: { path: string; event: boolean }) => void;
+      // Both optional, and that is the whole point. `index.html` sets window.goatcounter to a
+      // settings object *before* count.js loads, so the object exists from the first paint;
+      // count.js is what adds `count` later, if it ever arrives.
+      count?: (vars: { path: string; event: boolean }) => void;
+      path?: () => string;
     };
   }
 }
 
+/**
+ * Record a GoatCounter event.
+ *
+ * Guard `count`, not just `window.goatcounter`. Private windows and content blockers stop
+ * count.js loading, which used to leave `window.goatcounter` undefined — so an optional chain on
+ * the object was enough. It isn't any more: our own settings script defines the object, so a
+ * blocked count.js leaves a real object with no `count` on it, and calling it throws.
+ *
+ * That threw inside trackSearch(), which App.tsx calls just above the try block wrapping the
+ * search itself — so search never ran and the page sat on its skeletons forever, in private
+ * windows only. Analytics must never be able to break the product: the try/catch is the
+ * backstop for whatever the next blocker does differently.
+ */
 function trackEvent(path: string): void {
-  window.goatcounter?.count({ path, event: true });
+  try {
+    window.goatcounter?.count?.({ path, event: true });
+  } catch {
+    // Best-effort by design. A missing pageview is not worth a broken search.
+  }
 }
 
 /** Fire-and-forget POST to our analytics API for artist-level metrics. */
