@@ -41,8 +41,9 @@ dashboard, and it is genuinely anonymous.
 
 > The HMAC degrades to a plain SHA-256 if `SESSION_HASH_SECRET` is unset — and a plain SHA-256 of
 > an IP is reversible, because the input space is small enough to enumerate. The fallback logs a
-> warning. **Confirm the variable is set in the Netlify Functions environment**; the honesty of
-> this whole row depends on it.
+> warning. Confirmed 2026-08-08: the variable is set as a secret in Netlify's production
+> environment, so the keyed path is the live one. Re-check it if the environment is ever rebuilt;
+> the honesty of this whole row depends on it.
 
 **Rate-limit keys in Upstash** — `rl:standard:<ip>`, `rl:daily:strict:<ip>` and friends, holding
 raw IP addresses in sliding windows of up to 24 hours. An IP is personal data under GDPR. It is
@@ -79,29 +80,29 @@ all detached from any person:
    every artist who isn't on it. The migration says "No PII" and that's correct.
 3. **Netlify function logs** — cache keys are logged (`[Cache] SET: artist:mirlo:radiohead`), so
    artist names appear in short-lived operational logs.
-4. **GoatCounter page paths** — see below.
+4. ~~**GoatCounter page paths**~~ — no longer, see below.
 
-### GoatCounter records the search term
+### GoatCounter used to record the search term — fixed 2026-08-08
 
-`apps/web/index.html` loads `count.js` with no settings object. GoatCounter's default path is
+`count.js` was loaded with no settings object. GoatCounter's default path is
 `location.pathname + location.search`, and a search sets `/?q=artist+name` via `setSearchParams`
-in `App.tsx`. So every search is recorded by GoatCounter as a page view of a path containing the
-artist name.
+in `App.tsx`, so every search was recorded as a page view of a path containing the artist name —
+on a dashboard the README advertises as public.
 
-It sits against GoatCounter's daily-rotating visitor hash rather than against a person, so it
-isn't a search history. But the term does leave our servers, and if the dashboard at
-`unstream.goatcounter.com` is set to public — the README advertises it as "public metrics" — those
-paths are visible to anyone.
-
-Fixable in one line if we'd rather it didn't, by setting the path to `location.pathname` before
-`count.js` loads:
+`index.html` now sets the path explicitly before `count.js` loads:
 
 ```html
-<script>window.goatcounter = { path: function() { return location.pathname || '/' } }</script>
+<script>window.goatcounter = { path: function () { return location.pathname || '/' } }</script>
 ```
 
-The trade-off is losing per-query analytics, which is a product call, not a technical one. Until
-it's made, the privacy policy discloses the behaviour.
+Keep that script tag ahead of `count.js` — settings are read at load time, so ordering is what
+makes it work, and a silent revert to the default is the failure mode. Events fired from
+`services/analytics.ts` pass an explicit path and were never affected. Only the SPA loads
+GoatCounter; the edge-rendered pages don't include it at all.
+
+The deliberate exception is Sentry, which still receives the full page URL on an error. That is
+the point: a search that returns nothing useful is only diagnosable if you know what was searched
+for. Disclosed in the privacy policy rather than quietly stripped.
 
 ## Private by default — verified, not assumed
 
@@ -153,9 +154,10 @@ receive an artist name to search for and nothing about the person searching.
 
 ## Open items
 
-- [ ] Confirm `SESSION_HASH_SECRET` is set in Netlify Functions (production). Without it the
-      session hash is reversible.
-- [ ] Decide whether GoatCounter should stop receiving `?q=` search terms, and whether the
-      GoatCounter dashboard should be public.
+- [x] Confirm `SESSION_HASH_SECRET` is set in Netlify Functions (production) — confirmed
+      2026-08-08, set as a secret.
+- [x] Stop GoatCounter receiving `?q=` search terms — done 2026-08-08.
+- [ ] Purge the historical `/?q=…` paths already in GoatCounter (Settings → Manage pageviews).
+      The fix stops new ones; it doesn't touch what's already recorded.
 - [ ] Add a retention sweep for `app_events`. "Indefinite" is a weak answer for anything with a
       session identifier on it, even a daily-rotating one.

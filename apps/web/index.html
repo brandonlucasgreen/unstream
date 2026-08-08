@@ -69,6 +69,14 @@
       </div>
     </noscript>
     <script type="module" src="/src/main.tsx"></script>
+    <!-- Give GoatCounter the page, not the query string. Its default path is
+         `location.pathname + location.search`, and a search puts the artist name straight into
+         the URL (/?q=artist+name), so the default records every search term as a page path — on
+         a dashboard that's public. We only want page-level counts here; a search that goes wrong
+         is Sentry's job, not the analytics tool's.
+         Events fired from services/analytics.ts pass an explicit path and are unaffected.
+         This must stay ahead of count.js: settings are read when it loads. -->
+    <script>window.goatcounter = { path: function () { return location.pathname || '/' } }</script>
     <script data-goatcounter="https://unstream.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
   </body>

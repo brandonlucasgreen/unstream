@@ -104,8 +104,9 @@ export function PrivacyPolicyPage() {
                 </li>
                 <li>
                   <strong>Website analytics.</strong> GoatCounter, which is privacy-focused and
-                  cookie-free, records page views using its own daily-rotating visitor hash. See
-                  "About your searches" below for one important detail about this.
+                  cookie-free, records page views using its own daily-rotating visitor hash. It's
+                  configured to receive the page you visited and not the query string, so a search
+                  reaches it as a visit to the home page rather than as an artist name.
                 </li>
               </ul>
 
@@ -164,12 +165,13 @@ export function PrivacyPolicyPage() {
                 </li>
               </ul>
               <P>
-                One thing worth knowing: because a search puts the artist name in the page address
-                (<code>unstream.stream/?q=artist+name</code>), that address — artist name included
-                — is also recorded by our website analytics as an ordinary page view. It sits
-                against a daily-rotating visitor hash, not against you, but it does mean the search
-                term leaves our servers. If you'd rather it didn't, the artist index and the
-                artist pages get you to the same place without a query in the URL.
+                A search does put the artist name in the page address
+                (<code>unstream.stream/?q=artist+name</code>), so it's worth saying where that
+                address does and doesn't go. Our website analytics is deliberately configured to
+                drop the query string, so it records a visit to the home page and never the search
+                term. The one exception is an error report: if a search fails, the report sent to
+                Sentry includes the page address, artist name and all, because that's usually the
+                only way to work out what broke.
               </P>
             </Section>
 
@@ -212,7 +214,7 @@ export function PrivacyPolicyPage() {
                 <li><strong>Supabase</strong> — the database and authentication.</li>
                 <li><strong>Upstash</strong> — the temporary cache and rate-limiting store.</li>
                 <li><strong>GoatCounter</strong> — cookie-free website analytics.</li>
-                <li><strong>Sentry</strong> — error reports, configured not to send IP addresses, cookies or request headers.</li>
+                <li><strong>Sentry</strong> — error reports, configured not to send IP addresses, cookies or request headers. An error report does include the address of the page it happened on.</li>
                 <li><strong>Buttondown</strong> — the newsletter, if you subscribe.</li>
                 <li><strong>Liberapay</strong> and <strong>Apple</strong> — donations and in-app support purchases. We never see your payment details.</li>
                 <li><strong>Discord</strong> — if you use the Unstream bot in a Discord server.</li>
