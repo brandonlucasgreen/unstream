@@ -68,15 +68,21 @@ export function GuidesIndexPage() {
       <Header />
       <div className="pt-6 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary mb-2">Guides</h1>
-          <p className="text-text-secondary text-lg">
-            How streaming payouts work, platforms worth knowing about, and ways to put more money in artists' pockets.
-          </p>
+          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary">Guides</h1>
         </div>
       </div>
 
       <main className="px-4 pb-16">
         <div className="max-w-3xl mx-auto">
+          <div className="mb-10 bg-surface-secondary rounded-xl p-6 border border-border">
+            <NewsletterSignup
+              source="guides"
+              heading="New guides, straight to you"
+              blurb="Writing on where your money goes, platforms worth knowing about, and how to support artists directly — plus what's new in Unstream."
+              feedUrl="/guides.xml"
+            />
+          </div>
+
           {loading ? (
             <SkeletonScreen label="Loading guides">
               <ArticleListSkeleton />
@@ -106,15 +112,6 @@ export function GuidesIndexPage() {
               ))}
             </div>
           )}
-
-          <div className="mt-12 bg-surface-secondary rounded-xl p-6 border border-border">
-            <NewsletterSignup
-              source="guides"
-              heading="New guides, straight to you"
-              blurb="Writing on where your money goes, platforms worth knowing about, and how to support artists directly — plus what's new in Unstream."
-              feedUrl="/guides.xml"
-            />
-          </div>
         </div>
       </main>
 

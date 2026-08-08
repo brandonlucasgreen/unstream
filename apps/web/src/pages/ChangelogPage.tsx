@@ -71,15 +71,21 @@ export function ChangelogPage() {
 
       <div className="pt-6 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary mb-2">Changelog</h1>
-          <p className="text-text-secondary text-lg">
-            What's new in Unstream.
-          </p>
+          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary">Changelog</h1>
         </div>
       </div>
 
       <main className="px-4 pb-16">
         <div className="max-w-2xl mx-auto">
+          <div className="mb-10 bg-surface-secondary rounded-xl p-6 border border-border">
+            <NewsletterSignup
+              source="changelog"
+              heading="Get new features in your inbox"
+              blurb="A short email when something ships, plus what we're working on next."
+              feedUrl="/changelog.xml"
+            />
+          </div>
+
           {loading ? (
             <SkeletonScreen label="Loading the changelog">
               <Skeleton className="h-3 w-28 mb-4" />
@@ -112,15 +118,6 @@ export function ChangelogPage() {
               ))}
             </div>
           )}
-
-          <div className="mt-12 bg-surface-secondary rounded-xl p-6 border border-border">
-            <NewsletterSignup
-              source="changelog"
-              heading="Get new features in your inbox"
-              blurb="A short email when something ships, plus what we're working on next."
-              feedUrl="/changelog.xml"
-            />
-          </div>
         </div>
       </main>
 
