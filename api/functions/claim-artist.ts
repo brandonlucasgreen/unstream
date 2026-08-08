@@ -7,6 +7,8 @@ import { createClient } from '@supabase/supabase-js';
 import { Sentry } from '../lib/sentry';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
+import { sendNotificationOnce, notifySavedArtistsOfNewLinks } from './notifications';
+import { escapeHtml } from '../lib/html';
 
 const PLATFORM_PATTERNS: [string, RegExp][] = [
   ['bandcamp', /([a-z0-9-]+)\.bandcamp\.com/i],
@@ -665,6 +667,36 @@ export async function handler(event: {
     }
 
     console.log(`[Claim] Verified "${artist.name}" — discovered ${discoveredLinks.length} platform links from website`);
+
+    const notifyEmail = (profile.email || authUser.email || '').trim();
+    if (notifyEmail) {
+      // Fire-and-forget: a failed notification email must never fail a successful claim.
+      // sendNotificationOnce logs its own failures to Sentry and is a no-op on retry.
+      void sendNotificationOnce({
+        client,
+        notificationType: 'claim_approved_auto',
+        referenceId: artist.id,
+        recipientEmail: notifyEmail,
+        subject: `Your claim of ${artist.name} on Unstream is verified`,
+        html: `<p>Your claim of <strong>${escapeHtml(artist.name)}</strong> on Unstream has been verified — your profile is now live at <a href="https://unstream.stream/a/${escapeHtml(slug)}">unstream.stream/a/${escapeHtml(slug)}</a>.</p><p>You can edit your bio, photo, and links any time from your dashboard.</p>`,
+        text: `Your claim of ${artist.name} on Unstream has been verified — your profile is now live at https://unstream.stream/a/${slug}.\n\nYou can edit your bio, photo, and links any time from your dashboard.`,
+      });
+    }
+
+    if (discoveredLinks.length > 0) {
+      // Excludes the claimant themselves — they already got the claim-approved email above and
+      // just added these links, so it isn't news to them.
+      void notifySavedArtistsOfNewLinks({
+        client,
+        artistId: artist.id,
+        artistName: artist.name,
+        artistSlug: slug,
+        platforms: discoveredLinks.map(l => l.platform),
+        excludeUserId: userId,
+      }).catch(err => {
+        Sentry.captureException(err, { extra: { context: 'notifySavedArtistsOfNewLinks', artistId: artist.id } });
+      });
+    }
 
     // Build full link list for the review step (existing + newly discovered, deduplicated)
     const allLinksMap = new Map<string, { platform: string; url: string }>();

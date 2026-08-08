@@ -9,7 +9,7 @@ import { LocationField } from '../components/LocationField';
 import { PasswordChangeForm } from '../components/PasswordChangeForm';
 import { SharingControls } from '../components/SharingControls';
 import { ReleaseFeedControls } from '../components/ReleaseFeedControls';
-import { NewsletterSignup } from '../components/NewsletterSignup';
+import { NotificationPreferences } from '../components/NotificationPreferences';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
 
@@ -110,11 +110,10 @@ export function SettingsPage() {
           {/* Notifications section */}
           <section className="p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
             <h2 className="text-lg font-semibold">Notifications</h2>
-            <NewsletterSignup
-              source="settings"
-              blurb="Subscribe to the Unstream newsletter for new features, music news, tips and tricks for getting more out of Unstream, and more."
-              defaultEmail={settings?.email ?? ''}
-            />
+            <p className="text-sm text-text-muted">
+              Emails about artists you've saved and, if you've claimed a profile, your own stats.
+            </p>
+            <NotificationPreferences />
           </section>
 
           {/* Password section */}

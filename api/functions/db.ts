@@ -17,6 +17,7 @@ import {
   uniqueReleaseSlug,
 } from './release-utils';
 import { requestArtistCatalog } from './request-catalog';
+import { notifySavedArtistsOfNewRelease } from './notifications';
 import { Sentry } from '../lib/sentry';
 import { isNonArtistSlug } from '../lib/non-artist-names';
 import { isExcludedArtistSlug } from '../lib/excluded-artists';
@@ -577,25 +578,37 @@ export async function recordCatalogOutcome(
         .maybeSingle();
       const prev = (data as { consecutive_failures: number } | null)?.consecutive_failures ?? 0;
       patch.consecutive_failures = prev + 1;
-    } else if (outcome.releasesFound === 0) {
-      // A run that finds 0 releases where it previously found 20 is a parser break or a bot
-      // challenge, not an artist deleting their catalogue — and it is recorded as a *success*,
-      // so nothing else about it looks wrong. Report the transition, because the alternative
-      // is a pipeline that degrades into finding nothing and never says so.
-      //
-      // Only the transition: an artist who has always had 0 releases is not news, and this
-      // fires on every trigger, not just the scheduled sweep.
+    } else {
+      // Read once and branch: a drop to zero is a parser/bot-challenge alert (see below), an
+      // increase is news for anyone who saved this artist. Fetched for every successful run,
+      // not just the sweep, since demand-driven catalog triggers (a save, a search) are exactly
+      // where a fan is most likely to be waiting on this.
       const { data } = await client
         .from('release_catalog_state')
         .select('releases_found')
         .eq('artist_id', artistId)
         .maybeSingle();
       const previous = (data as { releases_found: number | null } | null)?.releases_found ?? 0;
-      if (previous > 0) {
+
+      if (outcome.releasesFound === 0 && previous > 0) {
+        // A run that finds 0 releases where it previously found 20 is a parser break or a bot
+        // challenge, not an artist deleting their catalogue — and it is recorded as a *success*,
+        // so nothing else about it looks wrong. Report the transition, because the alternative
+        // is a pipeline that degrades into finding nothing and never says so.
+        //
+        // Only the transition: an artist who has always had 0 releases is not news, and this
+        // fires on every trigger, not just the scheduled sweep.
         Sentry.captureMessage('[catalog] release count dropped to zero', {
           level: 'warning',
           tags: { area: 'release-catalog', kind: 'releases-dropped-to-zero' },
           extra: { artistId, previousReleasesFound: previous },
+        });
+      } else if (outcome.releasesFound > previous) {
+        // Fire-and-forget: notifySavedArtistsOfNewRelease bails out immediately if nobody saved
+        // this artist (true for nearly everything the sweep touches) and logs its own failures
+        // to Sentry — a notification email must never affect cataloging's own success/failure.
+        void notifySavedArtistsOfNewRelease({ client, artistId, releasesFound: outcome.releasesFound }).catch(err => {
+          Sentry.captureException(err, { extra: { context: 'notifySavedArtistsOfNewRelease', artistId } });
         });
       }
     }

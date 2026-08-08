@@ -4,6 +4,8 @@
 import { getClient } from './db';
 import { authenticateAdmin, buildCorsHeaders } from './middleware';
 import { Sentry } from '../lib/sentry';
+import { sendNotificationOnce } from './notifications';
+import { escapeHtml } from '../lib/html';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -201,6 +203,14 @@ export async function handler(event: {
     };
   }
 
+  // Needed for the decision email below regardless of outcome.
+  const { data: artistInfo } = await client
+    .from('artists')
+    .select('name, slug')
+    .eq('id', request.artist_id)
+    .single();
+  const artistName = artistInfo?.name || 'your artist profile';
+
   const now = new Date().toISOString();
 
   if (action === 'approve') {
@@ -312,6 +322,17 @@ export async function handler(event: {
         adminId: admin.userId,
       },
     });
+
+    const profileUrl = artistInfo?.slug ? `https://unstream.stream/a/${artistInfo.slug}` : 'https://unstream.stream';
+    void sendNotificationOnce({
+      client,
+      notificationType: 'claim_approved_manual',
+      referenceId: requestId,
+      recipientEmail: request.email,
+      subject: `Your claim of ${artistName} on Unstream is approved`,
+      html: `<p>Your claim of <strong>${escapeHtml(artistName)}</strong> on Unstream has been reviewed and approved — your profile is now live at <a href="${profileUrl}">${profileUrl}</a>.</p><p>You can edit your bio, photo, and links any time from your dashboard.</p>`,
+      text: `Your claim of ${artistName} on Unstream has been reviewed and approved — your profile is now live at ${profileUrl}.\n\nYou can edit your bio, photo, and links any time from your dashboard.`,
+    });
   } else {
     // Reject: just update the request status
     const { error: updateError } = await client
@@ -331,6 +352,16 @@ export async function handler(event: {
         body: JSON.stringify({ error: 'Failed to update verification request' }),
       };
     }
+
+    void sendNotificationOnce({
+      client,
+      notificationType: 'claim_rejected',
+      referenceId: requestId,
+      recipientEmail: request.email,
+      subject: `Your claim of ${artistName} on Unstream wasn't approved`,
+      html: `<p>Your claim of <strong>${escapeHtml(artistName)}</strong> on Unstream wasn't approved this time.${reviewerNotes ? ` The reviewer left this note: "${escapeHtml(reviewerNotes)}"` : ''}</p><p>If you think this was a mistake, reply to this email and we'll take another look.</p>`,
+      text: `Your claim of ${artistName} on Unstream wasn't approved this time.${reviewerNotes ? ` The reviewer left this note: "${reviewerNotes}"` : ''}\n\nIf you think this was a mistake, reply to this email and we'll take another look.`,
+    });
   }
 
   return {

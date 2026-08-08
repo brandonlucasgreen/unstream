@@ -71,6 +71,23 @@ function makeClientMock() {
     }
     if (table === 'artists') {
       return {
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            single: vi.fn().mockResolvedValue({ data: { name: 'Test Artist', slug: 'test-artist' }, error: null }),
+          })),
+        })),
+        update: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ error: null }),
+        }),
+      };
+    }
+    if (table === 'email_log') {
+      return {
+        insert: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: { id: 'log-1' }, error: null }),
+          }),
+        }),
         update: vi.fn().mockReturnValue({
           eq: vi.fn().mockResolvedValue({ error: null }),
         }),
@@ -208,6 +225,11 @@ describe('admin-verify: approve with stale request (artist already claimed)', ()
       }
       if (table === 'artists') {
         return {
+          select: vi.fn(() => ({
+            eq: vi.fn(() => ({
+              single: vi.fn().mockResolvedValue({ data: { name: 'Test Artist', slug: 'test-artist' }, error: null }),
+            })),
+          })),
           update: vi.fn().mockReturnValue({
             eq: vi.fn().mockResolvedValue({ error: null }),
           }),
@@ -267,6 +289,23 @@ describe('admin-verify: approve with stale request (artist already claimed)', ()
       }
       if (table === 'artists') {
         return {
+          select: vi.fn(() => ({
+            eq: vi.fn(() => ({
+              single: vi.fn().mockResolvedValue({ data: { name: 'Test Artist', slug: 'test-artist' }, error: null }),
+            })),
+          })),
+          update: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({ error: null }),
+          }),
+        };
+      }
+      if (table === 'email_log') {
+        return {
+          insert: vi.fn().mockReturnValue({
+            select: vi.fn().mockReturnValue({
+              single: vi.fn().mockResolvedValue({ data: { id: 'log-1' }, error: null }),
+            }),
+          }),
           update: vi.fn().mockReturnValue({
             eq: vi.fn().mockResolvedValue({ error: null }),
           }),
