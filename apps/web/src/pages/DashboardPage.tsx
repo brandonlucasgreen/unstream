@@ -39,6 +39,7 @@ export function DashboardPage() {
   const { session, isLoading: authLoading } = useAuth();
   const [claimedProfiles, setClaimedProfiles] = useState<ClaimedProfile[]>([]);
   const [savedArtists, setSavedArtists] = useState<SavedArtist[]>([]);
+  const [upcomingReleases, setUpcomingReleases] = useState<RecentRelease[]>([]);
   const [recentReleases, setRecentReleases] = useState<RecentRelease[]>([]);
   const [releasesError, setReleasesError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -68,7 +69,8 @@ export function DashboardPage() {
         });
         if (!response.ok) throw new Error(`recent-releases failed: ${response.status}`);
         const data = await response.json();
-        setRecentReleases(data.releases || []);
+        setUpcomingReleases(data.upcoming || []);
+        setRecentReleases(data.recent || []);
       } catch (e) {
         Sentry.captureException(e, { extra: { context: 'dashboard.loadRecentReleases' } });
         setReleasesError("Couldn't load recent releases. Try refreshing.");
@@ -348,14 +350,15 @@ export function DashboardPage() {
           )}
 
           {/*
-            Recent Releases — above Saved Artists because it is the part of this page that
-            changes, and only rendered once the fan has saved somebody: an empty releases box for
-            a fan with no saved artists would be a second empty state saying the same thing as the
-            one below it.
+            Upcoming and Recent Releases — above Saved Artists because they are the part of this
+            page that changes, and only rendered once the fan has saved somebody: an empty releases
+            box for a fan with no saved artists would be a second empty state saying the same thing
+            as the one below it.
           */}
           {savedArtists.length > 0 && (
             <RecentReleasesSection
-              releases={recentReleases}
+              upcoming={upcomingReleases}
+              recent={recentReleases}
               error={releasesError}
               subscribePanel={<ReleaseFeedControls />}
             />
