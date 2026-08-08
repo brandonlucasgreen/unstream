@@ -128,7 +128,7 @@ for. Disclosed in the privacy policy rather than quietly stripped.
 | Rate-limit keys | ≤ 24 hours |
 | `bandcamp_slug_probes` | Indefinite (no personal data) |
 | `artist_analytics` | Indefinite (anonymous) |
-| `app_events` | Indefinite — **no GC exists**; worth adding one |
+| `app_events` | Rows kept indefinitely; `session_hash` nulled after 90 days by a nightly sweep, after which the row is fully anonymous |
 | Newsletter | Until unsubscribe |
 
 ## Processors
@@ -159,5 +159,25 @@ receive an artist name to search for and nothing about the person searching.
 - [x] Stop GoatCounter receiving `?q=` search terms — done 2026-08-08.
 - [ ] Purge the historical `/?q=…` paths already in GoatCounter (Settings → Manage pageviews).
       The fix stops new ones; it doesn't touch what's already recorded.
-- [ ] Add a retention sweep for `app_events`. "Indefinite" is a weak answer for anything with a
-      session identifier on it, even a daily-rotating one.
+- [x] Add a retention sweep for `app_events` — done 2026-08-08. `session_hash` is nulled at 90
+      days rather than the row deleted, so every dashboard count survives and the row stops
+      being personal data. `session_hash` only ever deduplicated within a single day, so past 90
+      days it had no analytical value left.
+
+## A note on writing RLS policies here
+
+Two mistakes have now been made twice in this repo, and both are cheap to avoid:
+
+1. **RLS is row-level, not column-level.** A policy that exposes a row exposes every column in
+   it. Migration 023 learned this on `usernames.user_id`; `artist_profiles.email` was the same
+   bug, found in the 2026-08-08 audit.
+2. **`CREATE POLICY` with no `TO` clause applies to `PUBLIC`, which includes `anon`.** A policy
+   named "Service role full access" that omits `TO service_role` grants that access to anyone
+   holding the public anon key. The service role has `BYPASSRLS` and never needed a policy in
+   the first place — so the correct fix is to delete the policy, not re-scope it.
+
+The model to copy is in `20260731120000_releases.sql`: public reads via an explicit `SELECT`
+policy, writes left with no policy at all, and a comment saying the absence is deliberate.
+Supabase's `ALTER DEFAULT PRIVILEGES` also grants `anon`/`authenticated` full table privileges on
+every *new* table, so anything holding private data wants an explicit
+`REVOKE INSERT, UPDATE, DELETE … FROM anon, authenticated` too.

@@ -285,7 +285,8 @@ export function PrivacyPolicyPage() {
                 <li><strong>Search results cache</strong> — usually 30 minutes.</li>
                 <li><strong>Rate-limiting records</strong> — at most 24 hours.</li>
                 <li><strong>The record of which artist names we've checked on Bandcamp</strong> — kept indefinitely. It contains no personal data.</li>
-                <li><strong>Artist performance stats and product usage events</strong> — kept indefinitely as historical trends. Neither is linked to an account.</li>
+                <li><strong>Artist performance stats</strong> — kept indefinitely as historical trends. Anonymous from the moment they're recorded.</li>
+                <li><strong>Product usage events</strong> — the session token is erased after 90 days, leaving a count with nothing identifying attached. The counts themselves are kept as historical trends.</li>
                 <li><strong>Newsletter subscription</strong> — until you unsubscribe.</li>
                 <li><strong>Backups</strong> — deleted data can persist in backups for a short period after deletion before ageing out.</li>
               </ul>
