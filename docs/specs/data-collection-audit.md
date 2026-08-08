@@ -78,9 +78,14 @@ all detached from any person:
 2. **`bandcamp_slug_probes.query_norm`** — the normalized artist name is the primary key, stored
    indefinitely. This is deliberate and load-bearing: it's what stops us re-probing Bandcamp for
    every artist who isn't on it. The migration says "No PII" and that's correct.
-3. **Netlify function logs** — cache keys are logged (`[Cache] SET: artist:mirlo:radiohead`), so
-   artist names appear in short-lived operational logs.
-4. ~~**GoatCounter page paths**~~ — no longer, see below.
+3. ~~**Netlify function logs**~~ — removed 2026-08-08. Cache keys were logged in full
+   (`[Cache] SET: artist:mirlo:radiohead`); `redactKey()` now trims them to
+   `artist:mirlo:…`, and the MusicBrainz, enrichment, probe and Sepia log lines no longer
+   interpolate the query. Which platform answered and how is the diagnostic value; the artist
+   name never was. The same redaction covers the Redis failure reports that reach Sentry.
+4. ~~**GoatCounter page paths**~~ — removed 2026-08-08, see below.
+5. **Sentry `search_query` tag on zero-result searches** — deliberate, and the one place a search
+   term is recorded on purpose. See below.
 
 ### GoatCounter used to record the search term — fixed 2026-08-08
 
@@ -100,9 +105,24 @@ makes it work, and a silent revert to the default is the failure mode. Events fi
 `services/analytics.ts` pass an explicit path and were never affected. Only the SPA loads
 GoatCounter; the edge-rendered pages don't include it at all.
 
-The deliberate exception is Sentry, which still receives the full page URL on an error. That is
-the point: a search that returns nothing useful is only diagnosable if you know what was searched
-for. Disclosed in the privacy policy rather than quietly stripped.
+The client-side Sentry `beforeSend` now strips the query string from `event.request.url` too, so
+an unrelated crash on a search page no longer carries the artist name along with it.
+
+### The one place a search term is recorded on purpose
+
+`search-sources.ts` reports zero-result searches to Sentry with the normalized query as a
+**tag** (`search_query:radiohead`), deduplicated to once per term per 24 hours.
+
+This is a product signal, not a diagnostic: it's the list of artists people want and Unstream
+can't find, which is the only direct evidence of where coverage is missing. The comment above it
+explains why it has to be a tag rather than an `extra` — every zero-result event shares one
+message, so Sentry folds them into a single issue where `extra` is readable one event at a time,
+while tags get an aggregated distribution on the issue page.
+
+It carries no identity, and the dedup means the record is "this term found nothing today", not
+"somebody searched this". Keep it in mind when editing the searches section of the privacy
+policy: it is the reason that section says "we record the term on its own" rather than "we don't
+keep searches at all". Removing it would cost the coverage signal and gain very little privacy.
 
 ## Private by default — verified, not assumed
 

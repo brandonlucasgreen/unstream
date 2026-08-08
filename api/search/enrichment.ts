@@ -444,12 +444,12 @@ export async function searchPeerTubeChannels(artistName: string): Promise<Social
         (normalizedQuery.includes(normalizedDisplay) && normalizedDisplay.length > normalizedQuery.length * 0.5);
 
       if (isMatch) {
-        console.log(`[Sepia Search] Found PeerTube channel for "${artistName}": ${channel.displayName} on ${channel.host} (${channel.videosCount} videos)`);
+        console.log(`[Sepia Search] Found PeerTube channel on ${channel.host} (${channel.videosCount} videos)`);
         return { platform: 'peertube', url: channel.url };
       }
     }
 
-    console.log(`[Sepia Search] No matching PeerTube channel for "${artistName}" (${data.total} total results)`);
+    console.log(`[Sepia Search] No matching PeerTube channel (${data.total} total results)`);
     return null;
   } catch (error: unknown) {
     const err = error as { message?: string };

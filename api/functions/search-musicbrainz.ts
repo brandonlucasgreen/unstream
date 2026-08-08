@@ -96,14 +96,14 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     const artists = data.artists || [];
 
     if (artists.length === 0) {
-      console.log(`[MusicBrainz] No results for "${query}", falling back to Bandcamp/Mirlo location`);
+      console.log('[MusicBrainz] No results, falling back to Bandcamp/Mirlo location');
       return { ...emptyResult, location: await enrichLocationFallback(query) };
     }
 
     const artist = artists[0];
     // Only consider exact/near-exact matches
     if (artist.score < 95) {
-      console.log(`[MusicBrainz] Low confidence match for "${query}" (score ${artist.score}), falling back to Bandcamp/Mirlo location`);
+      console.log(`[MusicBrainz] Low confidence match (score ${artist.score}), falling back to Bandcamp/Mirlo location`);
       return { ...emptyResult, location: await enrichLocationFallback(query) };
     }
 
@@ -122,7 +122,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       artistNormalized.includes(queryNormalized) && queryNormalized.length > artistNormalized.length * 0.7;
 
     if (!isNameMatch) {
-      console.log(`[MusicBrainz] Skipping "${artist.name}" - doesn't match query "${query}", falling back to Bandcamp/Mirlo location`);
+      console.log('[MusicBrainz] Top match does not match the query, falling back to Bandcamp/Mirlo location');
       return { ...emptyResult, location: await enrichLocationFallback(query) };
     }
 
@@ -446,7 +446,7 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     );
 
     if (cached) {
-      console.log(`[MusicBrainz] Cache hit for "${normalizedQuery}"`);
+      console.log('[MusicBrainz] Cache hit');
     }
 
     if (result === null) {

@@ -167,6 +167,14 @@ export function initSentry(): void {
         return null
       }
 
+      // A search puts the artist name in the URL (/?q=artist), and Sentry attaches the page URL
+      // to every event. Strip the query string: the route is what makes an error diagnosable,
+      // and zero-result searches already report themselves server-side with a deduplicated
+      // `search_query` tag, which is a better signal than a stray URL on an unrelated crash.
+      if (event.request?.url) {
+        event.request.url = event.request.url.split('?')[0]
+      }
+
       const errorMessage = sentryErrorMessage(event, hint)
 
       // Classified BEFORE the dropped-request filter so a stale-build failure can

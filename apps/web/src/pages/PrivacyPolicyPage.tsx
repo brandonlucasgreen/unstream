@@ -159,19 +159,27 @@ export function PrivacyPolicyPage() {
                   forever. It stores the normalized artist name and the result — nothing about who
                   asked.
                 </li>
-                <li>
-                  Short-lived server logs, which include the artist name being looked up, kept
-                  briefly by our hosting provider for debugging.
-                </li>
               </ul>
               <P>
-                A search does put the artist name in the page address
-                (<code>unstream.stream/?q=artist+name</code>), so it's worth saying where that
-                address does and doesn't go. Our website analytics is deliberately configured to
-                drop the query string, so it records a visit to the home page and never the search
-                term. The one exception is an error report: if a search fails, the report sent to
-                Sentry includes the page address, artist name and all, because that's usually the
-                only way to work out what broke.
+                Those two exist so that looking up a popular artist doesn't cost a dozen platforms
+                a fresh round of requests every time somebody asks. A cache has to be keyed by the
+                thing it's caching for, so the search term is the key — but nothing is stored
+                beside it that could connect it to a person.
+              </P>
+              <P>
+                Everywhere the search term <em>isn't</em> needed, we've taken it out. It's kept out
+                of our server logs, which record which platform answered and how, not what was
+                asked for. A search puts the artist name in the page address
+                (<code>unstream.stream/?q=artist+name</code>), and our website analytics is
+                configured to drop the query string, so it records a visit to the home page and
+                never the term. Error reports have the query stripped from the page address too.
+              </P>
+              <P>
+                The one deliberate exception: when a search comes back with nothing at all, we
+                record the term on its own so we can see which artists people are looking for and
+                failing to find. It's what tells us where our coverage is missing, it's recorded
+                once per term per day however many people search it, and it carries nothing about
+                who searched.
               </P>
             </Section>
 
@@ -214,7 +222,7 @@ export function PrivacyPolicyPage() {
                 <li><strong>Supabase</strong> — the database and authentication.</li>
                 <li><strong>Upstash</strong> — the temporary cache and rate-limiting store.</li>
                 <li><strong>GoatCounter</strong> — cookie-free website analytics.</li>
-                <li><strong>Sentry</strong> — error reports, configured not to send IP addresses, cookies or request headers. An error report does include the address of the page it happened on.</li>
+                <li><strong>Sentry</strong> — error reports, configured not to send IP addresses, cookies or request headers, and with the query string stripped from the page address.</li>
                 <li><strong>Buttondown</strong> — the newsletter, if you subscribe.</li>
                 <li><strong>Liberapay</strong> and <strong>Apple</strong> — donations and in-app support purchases. We never see your payment details.</li>
                 <li><strong>Discord</strong> — if you use the Unstream bot in a Discord server.</li>

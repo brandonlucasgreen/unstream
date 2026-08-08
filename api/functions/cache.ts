@@ -11,6 +11,17 @@ import { getRedis, reportRedisFailure } from './redis';
 const DEFAULT_TTL = 30 * 60;
 
 /**
+ * Cache keys are `artist:<platform>:<normalized query>` — the query is the key, that's what a
+ * cache is. But it doesn't belong in a log line or a Sentry breadcrumb: knowing *which* platform
+ * hit or missed is the whole diagnostic value, and the artist name adds nothing to it. Keep the
+ * shape, drop the term.
+ */
+function redactKey(key: string): string {
+  const parts = key.split(':');
+  return parts.length > 2 ? `${parts.slice(0, 2).join(':')}:…` : key;
+}
+
+/**
  * Get a value from cache
  */
 export async function cacheGet<T>(key: string): Promise<T | null> {
@@ -20,12 +31,12 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
   try {
     const value = await client.get<T>(key);
     if (value) {
-      console.log(`[Cache] HIT: ${key}`);
+      console.log(`[Cache] HIT: ${redactKey(key)}`);
     }
     return value;
   } catch (error) {
     // Indistinguishable from a miss to the caller, which is why it must be reported.
-    reportRedisFailure(`cacheGet(${key})`, error);
+    reportRedisFailure(`cacheGet(${redactKey(key)})`, error);
     return null;
   }
 }
@@ -39,10 +50,10 @@ export async function cacheSet<T>(key: string, value: T, ttlSeconds: number = DE
 
   try {
     await client.set(key, value, { ex: ttlSeconds });
-    console.log(`[Cache] SET: ${key} (TTL: ${ttlSeconds}s)`);
+    console.log(`[Cache] SET: ${redactKey(key)} (TTL: ${ttlSeconds}s)`);
     return true;
   } catch (error) {
-    reportRedisFailure(`cacheSet(${key})`, error);
+    reportRedisFailure(`cacheSet(${redactKey(key)})`, error);
     return false;
   }
 }
@@ -97,10 +108,10 @@ export async function cacheDelete(key: string): Promise<boolean> {
 
   try {
     await client.del(key);
-    console.log(`[Cache] DEL: ${key}`);
+    console.log(`[Cache] DEL: ${redactKey(key)}`);
     return true;
   } catch (error) {
-    reportRedisFailure(`cacheDelete(${key})`, error);
+    reportRedisFailure(`cacheDelete(${redactKey(key)})`, error);
     return false;
   }
 }
@@ -125,10 +136,10 @@ export async function cacheDeleteByArtist(artistName: string): Promise<void> {
 
     if (keys.length > 0) {
       await Promise.all(keys.map(k => client.del(k)));
-      console.log(`[Cache] Purged ${keys.length} cached entries for artist "${artistName}"`);
+      console.log(`[Cache] Purged ${keys.length} cached entries for one artist`);
     }
   } catch (error) {
-    reportRedisFailure(`cacheDeleteByArtist(${artistName})`, error);
+    reportRedisFailure('cacheDeleteByArtist', error);
   }
 }
 
