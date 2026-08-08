@@ -1,0 +1,671 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Unstream Guides</title>
+    <link>https://unstream.stream/guides</link>
+    <atom:link href="https://unstream.stream/guides.xml" rel="self" type="application/rss+xml" />
+    <description>How streaming payouts work, platforms worth knowing about, and ways to put more money in artists&apos; pockets.</description>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 08 Aug 2026 00:21:59 GMT</lastBuildDate>
+    <item>
+      <title>Every platform Unstream supports: compared</title>
+      <link>https://unstream.stream/guides/every-platform-unstream-supports-compared</link>
+      <guid isPermaLink="false">unstream-guide-every-platform-unstream-supports-compared</guid>
+      <pubDate>Sat, 11 Apr 2026 14:00:00 GMT</pubDate>
+      <description>A complete comparison of all 15 music platforms Unstream searches — payout rates, what they&apos;re best for, and who should use them.</description>
+      <content:encoded><![CDATA[<p>Unstream searches 15 music platforms at once so you can see everywhere an artist sells their music — and how much of your money actually reaches them. But what&#39;s the difference between all of these? Here&#39;s a full breakdown.</p>
+<h2>Quick comparison</h2>
+<table>
+<thead>
+<tr>
+<th>Platform</th>
+<th>Category</th>
+<th>Artist payout</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Bandcamp</td>
+<td>Marketplace</td>
+<td>80–85% (up to ~97% on Fridays)</td>
+<td>Everything — the default for indie music</td>
+</tr>
+<tr>
+<td>Mirlo</td>
+<td>Marketplace</td>
+<td>86–90%</td>
+<td>Artists who care about cooperative ownership</td>
+</tr>
+<tr>
+<td>Ampwall</td>
+<td>Marketplace</td>
+<td>92–95%</td>
+<td>Simple, high-payout storefronts</td>
+</tr>
+<tr>
+<td>Qobuz</td>
+<td>Marketplace</td>
+<td>~70%</td>
+<td>Hi-res audio purchases</td>
+</tr>
+<tr>
+<td>Beatport</td>
+<td>Marketplace</td>
+<td>55–70%</td>
+<td>Electronic and DJ music</td>
+</tr>
+<tr>
+<td>EVEN</td>
+<td>Marketplace</td>
+<td>~80%</td>
+<td>Direct-to-fan marketplace</td>
+</tr>
+<tr>
+<td>Jam.coop</td>
+<td>Marketplace</td>
+<td>Co-op model</td>
+<td>Listener-owned cooperative</td>
+</tr>
+<tr>
+<td>Discogs</td>
+<td>Marketplace</td>
+<td>Varies</td>
+<td>Physical records (used and new)</td>
+</tr>
+<tr>
+<td>Ko-fi</td>
+<td>Patronage</td>
+<td>92–97%</td>
+<td>Tips and small purchases</td>
+</tr>
+<tr>
+<td>Buy Me a Coffee</td>
+<td>Patronage</td>
+<td>~92%</td>
+<td>Simple one-time support</td>
+</tr>
+<tr>
+<td>Patreon</td>
+<td>Patronage</td>
+<td>86–90%</td>
+<td>Memberships and ongoing support</td>
+</tr>
+<tr>
+<td>Faircamp</td>
+<td>Decentralized</td>
+<td>90–97%</td>
+<td>Self-hosted storefronts</td>
+</tr>
+<tr>
+<td>Bandwagon</td>
+<td>Decentralized</td>
+<td>—</td>
+<td>ActivityPub-based music community</td>
+</tr>
+<tr>
+<td>Hoopla</td>
+<td>Library</td>
+<td>—</td>
+<td>Free listening with a library card</td>
+</tr>
+<tr>
+<td>Freegal</td>
+<td>Library</td>
+<td>—</td>
+<td>Free listening with a library card</td>
+</tr>
+</tbody></table>
+<p>Payout percentages represent what artists keep after platform fees, before payment processing costs. &quot;~97% on Fridays&quot; for Bandcamp reflects the Bandcamp Friday promotion when their fee is waived.</p>
+<hr>
+<h2>Music marketplaces</h2>
+<p>These are platforms where you buy music directly and the artist keeps a cut of the sale.</p>
+<h3>Bandcamp</h3>
+<p><strong>Payout: 80–85%, up to ~97% on Bandcamp Fridays</strong></p>
+<p>The biggest and most established artist-friendly marketplace. Over a million artists have pages here — if you&#39;re looking for an indie artist, they&#39;re almost certainly on Bandcamp. You can buy digital downloads in any format (MP3, FLAC, WAV, and more) plus physical releases like vinyl, CDs, and cassettes. Artists can also run fan subscriptions.</p>
+<p>On the first Friday of each month (<a href="https://unstream.stream/guides/bandcamp-friday-explained">Bandcamp Friday</a>), Bandcamp waives their revenue share, so artists keep nearly everything. If you&#39;re going to buy music, those days are worth timing your purchases around.</p>
+<p>Bandcamp went through a rough patch in 2023–2024 (sold twice, some layoffs), but the platform stabilized. The catalog and community remain strong. It&#39;s still the best default for independent music.</p>
+<p><strong>Best for:</strong> Fans who want to buy music digitally or physically and support artists as directly as possible.</p>
+<hr>
+<h3>Mirlo</h3>
+<p><strong>Payout: 86–90%</strong></p>
+<p>Mirlo is a platform cooperative — meaning it&#39;s collectively owned by its community rather than investors. That ownership model is what distinguishes it: artists here are investing in a platform that has structural reasons to prioritize them. The interface is clean, focused, and still developing; they&#39;re actively building features like community playlists and listener profiles.</p>
+<p>Smaller catalog than Bandcamp, but growing steadily and attracting artists who think carefully about where they sell.</p>
+<p><strong>Best for:</strong> Fans who want to support artists on a platform that won&#39;t be sold to a private equity firm.</p>
+<hr>
+<h3>Ampwall</h3>
+<p><strong>Payout: 92–95%</strong></p>
+<p>One of the highest payout rates out there. Ampwall is intentionally minimal — a clean storefront for buying music, without the social features and community mechanics of Bandcamp. You get in, find the music, buy it, get the files. For artists who want a straightforward way to sell without overhead, it works well.</p>
+<p>Still a growing catalog, but worth checking for newer indie and experimental artists.</p>
+<p><strong>Best for:</strong> Fans who want to maximize the percentage going to the artist on a direct purchase.</p>
+<hr>
+<h3>Qobuz</h3>
+<p><strong>Payout: ~70%</strong></p>
+<p>Qobuz sits in a different category: hi-res audio. You can buy albums in lossless formats up to 24-bit/192kHz — meaningfully better than CD quality and far above streaming. The catalog leans toward jazz, classical, and established indie. They also have a streaming subscription tier, but the purchase side is where Qobuz stands out from everything else.</p>
+<p>If you care about sound quality and want to own music in the best possible format, this is the place.</p>
+<p><strong>Best for:</strong> Audiophiles who want to actually own music in the highest-quality format available.</p>
+<hr>
+<h3>Beatport</h3>
+<p><strong>Payout: 55–70%</strong></p>
+<p>The dominant marketplace for electronic music and DJs. Beatport specializes in dance, techno, house, and related genres — it&#39;s where DJs go to buy tracks to play out, and it&#39;s the place most electronic artists use for their official releases. DRM-free downloads, so you actually own what you buy.</p>
+<p>The payout rate is lower than the other marketplaces here, which matters — but for electronic music, Beatport is often the only option for a proper release outside streaming.</p>
+<p><strong>Best for:</strong> Fans of electronic, DJ, and dance music who want to buy tracks legally and DRM-free.</p>
+<hr>
+<h3>EVEN</h3>
+<p><strong>Payout: ~80%</strong></p>
+<p>EVEN is a direct-to-fan marketplace focused on giving artists more control over how they sell. Artist keeps roughly 80% of each sale. Smaller platform, but worth checking if you&#39;re looking for artists who prioritize ownership and direct relationships with fans.</p>
+<p><strong>Best for:</strong> Fans interested in supporting artists on emerging direct-sales platforms.</p>
+<hr>
+<h3>Jam.coop</h3>
+<p><strong>Payout: Co-op model</strong></p>
+<p>Jam.coop is building a listener-owned cooperative music service. The goal: instead of the pro-rata streaming model (where your subscription gets pooled across millions of streams), your money goes to the artists you actually listen to. Still developing, but the concept is genuinely different from anything else in this list.</p>
+<p><strong>Best for:</strong> Fans who want a streaming experience that&#39;s structured around direct support rather than market share.</p>
+<hr>
+<h3>Discogs</h3>
+<p><strong>Payout: Varies (marketplace)</strong></p>
+<p>Discogs is the world&#39;s largest physical music marketplace and database. It&#39;s primarily a secondary market — used vinyl, CDs, cassettes — but many artists and labels also sell new releases through their Discogs shops. The database is comprehensive to an almost absurd degree, covering millions of releases across every genre.</p>
+<p>Payout varies because it&#39;s a marketplace: sellers (often independent record dealers or collectors) set prices, and Discogs takes a fee. When you buy direct from a label or artist&#39;s Discogs shop, more goes to them.</p>
+<p><strong>Best for:</strong> Collectors, crate-diggers, and anyone who wants to buy physical music.</p>
+<hr>
+<h2>Patronage platforms</h2>
+<p>These let fans support artists with tips or recurring subscriptions, separate from buying specific releases.</p>
+<h3>Ko-fi</h3>
+<p><strong>Payout: 92–97%</strong></p>
+<p>Ko-fi started as a simple tipping tool (&quot;buy me a coffee&quot;) and has grown into a lightweight shop and membership platform. Artists keep an exceptional percentage — 97% of tips, 92% of sales. Many musicians use it as a low-pressure way to accept support alongside their main sales platform. Also good for selling individual tracks, digital zines, or other small-format goods.</p>
+<p><strong>Best for:</strong> Fans who want to give artists a direct tip or buy small digital goods with minimal platform overhead.</p>
+<hr>
+<h3>Buy Me a Coffee</h3>
+<p><strong>Payout: ~92%</strong></p>
+<p>Similar to Ko-fi in concept — one-time tips and monthly memberships. Slightly simpler interface, slightly fewer features. Artists keep about 92%. A good option for artists who want something minimal that just works.</p>
+<p><strong>Best for:</strong> Quick, direct support for artists who don&#39;t need complex membership tiers.</p>
+<hr>
+<h3>Patreon</h3>
+<p><strong>Payout: 86–90%</strong></p>
+<p>The original creator membership platform. Artists keep 86–90% of subscription revenue. Works best for artists who put out content consistently — new music, demos, behind-the-scenes content, early access, livestreams. A dedicated Patreon community can give an artist genuinely stable, predictable income.</p>
+<p>The tradeoff: Patreon rewards consistency. It takes real effort to keep members engaged, and fans who don&#39;t see regular updates tend to cancel.</p>
+<p><strong>Best for:</strong> Fans who want to support artists they follow closely and get ongoing access to their work.</p>
+<hr>
+<h2>Decentralized platforms</h2>
+<p>These push further — artists control their own infrastructure or use open protocols, with no central platform in the middle.</p>
+<h3>Faircamp</h3>
+<p><strong>Payout: 90–97%</strong></p>
+<p>Faircamp is an open-source tool that generates a beautiful static website for selling music — think self-hosted Bandcamp. Because there&#39;s no platform fee, artists keep 90–97% of sales (just payment processor costs). The tradeoff is that it takes some technical comfort to set up. But the result is a fast, fully artist-controlled storefront.</p>
+<p>The <a href="https://faircamp.webr.ing">Faircamp Webring</a> connects Faircamp sites together and helps solve the discovery problem.</p>
+<p><strong>Best for:</strong> Fans who want to buy direct from artists running their own store, with nothing in between.</p>
+<hr>
+<h3>Bandwagon</h3>
+<p><strong>Payout: —</strong></p>
+<p>Bandwagon is built on ActivityPub — the open protocol behind Mastodon and the fediverse — applied to music. The idea is a decentralized marketplace where artists aren&#39;t locked into any single company&#39;s decisions or survival. It&#39;s still early, but it&#39;s the most direct attempt to do for music commerce what Mastodon did for social.</p>
+<p><strong>Best for:</strong> Fans interested in the future of decentralized music platforms.</p>
+<hr>
+<h2>Library services</h2>
+<p>These aren&#39;t about buying — they&#39;re about accessing music for free through your local public library.</p>
+<h3>Hoopla</h3>
+<p>Free with a library card. Hoopla has a surprisingly large catalog of music alongside ebooks, audiobooks, and films. Artists don&#39;t get paid per stream the way they do on commercial platforms — the library licenses content through distribution deals — but you&#39;re not paying a streaming giant, either. Great for discovery and exploration.</p>
+<p><strong>Best for:</strong> Fans who want to explore music at no cost while supporting their local library system.</p>
+<hr>
+<h3>Freegal</h3>
+<p>Also free with a library card. Freegal partners with Sony Music Distribution and offers streaming and even permanent downloads (you typically get a set number per week). Catalog skews toward major labels and some indie. Less discovery-oriented than Hoopla, but the download option is genuinely useful.</p>
+<p><strong>Best for:</strong> Fans who want to legally download some music for free each month.</p>
+<hr>
+<h2>Finding artists across all of these</h2>
+<p>The biggest friction with this whole ecosystem is fragmentation. An artist might sell on Bandcamp, accept tips on Ko-fi, and have a Faircamp site — but you&#39;d have to check each one separately.</p>
+<p><a href="https://unstream.stream">Unstream</a> searches all 15 of these platforms at once. Search for any artist and see everywhere they sell, how much they keep on each platform, and where you can support them most directly.</p>
+
+<p><a href="https://unstream.stream/guides/every-platform-unstream-supports-compared">Read this on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Labels vs. independence: what artists actually keep</title>
+      <link>https://unstream.stream/guides/labels-vs-independence-what-artists-actually-keep</link>
+      <guid isPermaLink="false">unstream-guide-labels-vs-independence-what-artists-actually-keep</guid>
+      <pubDate>Sun, 29 Mar 2026 14:00:00 GMT</pubDate>
+      <description>How the label-artist relationship shapes payouts, and why more musicians are finding that staying independent can mean earning more from every sale and stream.</description>
+      <content:encoded><![CDATA[<p>The music industry runs on a simple premise: labels invest in artists, artists make music, everyone gets paid. The split is a lot less even than that sounds.</p>
+<p>Understanding how labels and independent distribution actually work helps explain why so many artists are going it alone — and why the ones who do often earn more per fan, even if they reach fewer fans overall.</p>
+<h2>The traditional label deal</h2>
+<p>When an artist signs with a major label (Universal, Sony, Warner) or one of their subsidiaries, the label typically covers recording costs, marketing, distribution, and sometimes tour support. In exchange, the label takes ownership of the master recordings — usually forever — and pays the artist a royalty on sales and streams.</p>
+<p>The standard royalty rate for a new artist on a major label is <a href="https://www.otherrecordlabels.com/record-label-royalties"><strong>15–20% of revenue</strong></a>. That sounds low, and it is, but it gets worse. Most deals are structured so that recording costs, advances, marketing spend, and various fees are <em>recouped</em> from the artist&#39;s royalty share before they see a dollar. An artist can sell 100,000 copies of an album and still owe the label money.</p>
+<p>Here&#39;s a rough breakdown of where a $10 album sale goes under a typical major label deal:</p>
+<table>
+<thead>
+<tr>
+<th>Slice</th>
+<th>Amount</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Retailer/platform cut</td>
+<td>$3.00</td>
+</tr>
+<tr>
+<td>Label share</td>
+<td>$5.50</td>
+</tr>
+<tr>
+<td>Artist royalty (pre-recoupment)</td>
+<td>$1.50</td>
+</tr>
+<tr>
+<td>After recoupment deductions</td>
+<td>Often $0</td>
+</tr>
+</tbody></table>
+<p>Streaming makes this starker. If a major-label track earns <a href="https://dittomusic.com/en/blog/how-much-does-spotify-pay-per-stream">$0.003–0.005 per stream on Spotify</a>, the artist&#39;s 15–20% share works out to roughly <strong>$0.0005–0.001 per stream</strong>. An artist needs well over a million streams to earn $1,000. And that&#39;s before the label recoups whatever they spent.</p>
+<p>Most major label deals today are <a href="https://www.corderolawgroup.com/blog/2025/360-deals-music-industry">360 deals</a> — the label takes a percentage of <em>everything</em>: recordings, touring, merch, sync licensing, brand deals. The label&#39;s cut on non-recording revenue typically ranges from 10–30%, and all of it can be cross-collateralized against the advance. A successful tour might just be paying off the cost of a failed album.</p>
+<h2>Why labels still exist</h2>
+<p>Given those numbers, why would anyone sign? Because labels offer things that are genuinely hard to replicate on your own:</p>
+<ul>
+<li><strong>Upfront money.</strong> Advances let artists pay rent and make music without a day job. Even if the advance is recoupable, it&#39;s cash now versus royalties maybe later.</li>
+<li><strong>Scale.</strong> Major labels have relationships with playlist curators, radio programmers, sync licensing teams, and international distributors that independent artists can&#39;t easily access.</li>
+<li><strong>Infrastructure.</strong> Marketing campaigns, press outreach, physical distribution, legal teams — all of this costs money and expertise that most artists don&#39;t have.</li>
+<li><strong>Credibility signal.</strong> Fair or not, being on a known label still opens doors in parts of the industry.</li>
+</ul>
+<p>For some artists — especially those aiming for mainstream pop or hip-hop where massive reach matters most — the trade-off can make sense. The label takes most of the money, but the total pie is so much bigger that the artist&#39;s small slice is still substantial. Drake&#39;s 15% of a billion streams is a lot more than most indie artists&#39; 85% of ten thousand.</p>
+<h2>The indie label middle ground</h2>
+<p>Independent labels — <a href="https://www.subpop.com">Sub Pop</a>, <a href="https://www.mergerecords.com">Merge</a>, <a href="https://secretlygroup.com">Secretly Group</a>, <a href="https://jagjaguwar.com">Jagjaguwar</a>, and hundreds of others — typically offer better terms. The most common structure at indie labels is a <a href="https://www.otherrecordlabels.com/record-label-royalties">50/50 net profit split</a>, though some offer traditional royalty rates in the <strong>40–50%</strong> range. Many indie deals let artists keep their masters or revert ownership after a set period.</p>
+<p>The trade-off is that indie labels have smaller marketing budgets and less mainstream reach. But for artists whose audiences are in the tens of thousands rather than millions, the math often works out better. Earning 50% of a smaller number can beat 15% of a bigger one, especially when you factor in creative control and long-term ownership.</p>
+<p>Some indie labels have also adapted to the direct-sales model well. Plenty of indie label artists sell through <a href="https://bandcamp.com">Bandcamp</a> and keep significantly more per sale than they would through streaming alone.</p>
+<h2>Going fully independent</h2>
+<p>The infrastructure for independent music distribution has gotten dramatically better in the last decade. Services like <a href="https://distrokid.com">DistroKid</a> ($22.99/year, keep 100% of royalties), <a href="https://tunecore.com">TuneCore</a> (annual subscription, keep 100%), and <a href="https://cdbaby.com">CD Baby</a> (one-time fee, keep <a href="https://aristake.com/digital-distribution-comparison/">91% of royalties</a>) let artists distribute to all major streaming platforms — and crucially, the artist keeps their masters.</p>
+<p>Combine that with direct-sales platforms and the economics shift dramatically:</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Artist keeps per $10 album</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Major label (physical/digital)</td>
+<td>$0–1.50</td>
+</tr>
+<tr>
+<td>Indie label (50/50 net split)</td>
+<td>$3.50–5.00</td>
+</tr>
+<tr>
+<td>Independent via <a href="https://bandcamp.com">Bandcamp</a></td>
+<td><a href="https://bandcamp.com/fair_trade_music_policy">$8.00–8.50</a></td>
+</tr>
+<tr>
+<td>Independent via <a href="https://mirlo.space">Mirlo</a></td>
+<td><a href="https://funmusic.place/blog/introducing-mirlo/">$8.50–9.00</a></td>
+</tr>
+<tr>
+<td>Independent via <a href="https://ampwall.com">Ampwall</a></td>
+<td><a href="https://ampwall.com/selling">$9.00–9.50</a></td>
+</tr>
+<tr>
+<td>Independent via <a href="https://simonrepp.com/faircamp/">Faircamp</a></td>
+<td><a href="https://codeberg.org/Be.ing/faircamp">~$9.70+</a></td>
+</tr>
+</tbody></table>
+<p>That&#39;s not a marginal difference. An independent artist selling 1,000 albums on Bandcamp earns roughly the same as a major-label artist selling 5,000–8,000 copies. And the independent artist owns everything.</p>
+<h2>The real cost of a label: control</h2>
+<p>Money is the obvious difference, but control matters just as much. Signed artists often can&#39;t:</p>
+<ul>
+<li>Release music on their own schedule (labels control release timing)</li>
+<li>Choose which songs become singles</li>
+<li>Set their own prices or offer pay-what-you-want</li>
+<li>Sell directly to fans without the label&#39;s involvement</li>
+<li>Use their own recordings in other projects without permission</li>
+</ul>
+<p>Independence means deciding all of that yourself. Want to release an album next week? Do it. Want to offer a pay-what-you-want download? Go ahead. Want to put your music on platforms that pay artists fairly and skip the ones that don&#39;t? Your call.</p>
+<p>This is where the &quot;1,000 true fans&quot; math gets real. A thousand fans each buying a $10 album generates $8,000–9,500 on direct-sales platforms. Getting that same $8,000 from Spotify alone would require roughly <a href="https://dittomusic.com/en/blog/how-much-does-spotify-pay-per-stream"><strong>2 million streams</strong></a> — at the current $0.003–0.005 per stream rate. That&#39;s the gap.</p>
+<h2>The discovery problem (and how it&#39;s changing)</h2>
+<p>The biggest challenge for independent artists is still discovery. Labels have marketing machines. Independent artists have social media, word of mouth, and whatever organic growth they can build.</p>
+<p>But this is shifting. Tools like <a href="https://unstream.stream">Unstream</a> help listeners find where their favorite artists sell directly across 15+ platforms. Communities on <a href="https://bandcamp.com">Bandcamp</a>, <a href="https://mirlo.space">Mirlo</a>, and music forums actively champion independent releases. Music blogs and independent publications still cover artists who aren&#39;t on major labels.</p>
+<p>And the artists who build direct relationships with fans — through email lists, community platforms like <a href="https://www.patreon.com">Patreon</a> or <a href="https://ko-fi.com">Ko-fi</a>, and direct-sales storefronts — tend to have more durable careers than those who rely on algorithmic discovery. An algorithm can stop recommending you tomorrow. A fan who bought your last three albums on Bandcamp is going to buy the next one too.</p>
+<h2>What this means if you&#39;re buying music</h2>
+<p>If you care about artists keeping more of what they earn:</p>
+<ul>
+<li><strong>Buy directly</strong> whenever you can. The difference between a streaming listen and a direct purchase is enormous for the artist.</li>
+<li><strong>Check whether your favorite artists are independent</strong> — if they are, your direct purchases matter even more because there&#39;s no label taking a cut.</li>
+<li><strong>Search on <a href="https://unstream.stream">Unstream</a></strong> to find where artists sell and compare what they keep on each platform.</li>
+<li><strong>Support artists on <a href="https://www.patreon.com">Patreon</a> or <a href="https://ko-fi.com">Ko-fi</a></strong> if they have a presence there — recurring support is the closest thing to a sustainable income for independent musicians.</li>
+</ul>
+<p>The tools for artists to go independent have never been better. The missing piece is listeners knowing where to find them.</p>
+
+<p><a href="https://unstream.stream/guides/labels-vs-independence-what-artists-actually-keep">Read this on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Why music platforms hide what they pay artists</title>
+      <link>https://unstream.stream/guides/why-music-platforms-hide-artist-payout-rates</link>
+      <guid isPermaLink="false">unstream-guide-why-music-platforms-hide-artist-payout-rates</guid>
+      <pubDate>Sun, 29 Mar 2026 14:00:00 GMT</pubDate>
+      <description>Most music platforms don&apos;t clearly disclose how much of your money reaches artists. Here&apos;s why that opacity exists, who it benefits, and why transparency matters.</description>
+      <content:encoded><![CDATA[<p>Try to find out exactly how much <a href="https://spotify.com">Spotify</a> pays per stream. Or what percentage of a sale <a href="https://music.apple.com">Apple Music</a> passes to an independent artist. Or how <a href="https://music.amazon.com">Amazon Music</a>&#39;s royalty calculations actually work.</p>
+<p>You&#39;ll find estimates, leaked figures, third-party analyses, and a lot of hedging. What you won&#39;t find is a clear, public, standardized disclosure from the platforms themselves. That&#39;s not an accident.</p>
+<h2>What we know (and how we know it)</h2>
+<p>The per-stream payout figures that get cited — <a href="https://dittomusic.com/en/blog/how-much-does-spotify-pay-per-stream">$0.003–0.005 for Spotify</a>, <a href="https://dittomusic.com/en/blog/how-much-does-apple-music-pay-per-stream">roughly $0.007–0.01 for Apple Music</a>, <a href="https://labelgrid.com/blog/royalties/youtube-pay-per-stream/">less for YouTube Music</a> — aren&#39;t published by the platforms. They come from artists sharing their royalty statements, aggregated data from distributors like <a href="https://distrokid.com">DistroKid</a> and <a href="https://cdbaby.com">CD Baby</a>, and investigative journalism.</p>
+<p>These figures are also averages, which obscures a lot. Per-stream rates vary based on:</p>
+<ul>
+<li><strong>Which country the listener is in</strong> (a stream from a US premium subscriber is worth more than one from a free-tier listener in a lower-income country)</li>
+<li><strong>Whether the listener is on a free or paid tier</strong> (Apple Music avoids this problem entirely — no free tier, every listener pays)</li>
+<li><strong>The total number of streams on the platform that month</strong> (Spotify uses a pro-rata model: the pool is fixed, more streams means each one is worth less)</li>
+<li><strong>Negotiated rates</strong> between the platform and different rights holders (major labels negotiate different deals than independent distributors)</li>
+</ul>
+<p>And since 2024, Spotify has added another wrinkle: tracks need <a href="https://artists.spotify.com/en/blog/modernizing-our-royalty-system">at least 1,000 streams in the prior 12 months</a> to generate any royalties at all. Below that threshold, you earn nothing.</p>
+<p>This complexity isn&#39;t inherently bad — music licensing is genuinely complicated. But the platforms use that complexity as cover. &quot;It depends on too many factors&quot; becomes a justification for publishing nothing at all.</p>
+<h2>Why platforms benefit from opacity</h2>
+<h3>It prevents comparison shopping</h3>
+<p>If every platform published a clear &quot;artists receive X% of revenue&quot; figure, listeners could compare them side by side and choose the one that pays artists best. That would create competitive pressure to increase payouts — which directly cuts into platform margins.</p>
+<p>Right now, most listeners have no idea that <a href="https://bandcamp.com">Bandcamp</a> passes <a href="https://bandcamp.com/fair_trade_music_policy">an average of 82% to artists</a> while Spotify&#39;s effective artist payout rate is a fraction of that. If that comparison were obvious and standardized, it would be much harder for low-paying platforms to retain users who care about artists.</p>
+<h3>It protects negotiated deals</h3>
+<p>Major labels negotiate their own royalty rates with streaming platforms, and those rates are confidential. Spotify&#39;s deal with Universal Music Group is different from its deal with an independent distributor, which is different from its deal with Sony. Publishing clear payout rates would reveal these differences and create pressure to equalize them — which neither the platforms nor the major labels want.</p>
+<p>This also means that when Spotify says it has <a href="https://newsroom.spotify.com/2026-01-28/2025-music-industry-payouts-whats-next-for-artists/">&quot;paid nearly $70 billion to rights holders&quot;</a> over its lifetime, that number is technically true but misleading. The three major labels — Universal, Sony, and Warner — <a href="https://www.billboard.com/business/record-labels/record-label-market-share-q1-2024-universal-warner-1235655068/">control roughly 65–70% of the recorded music market</a>. A huge portion of that money went to those three companies, not to the independent artists most people imagine when they hear &quot;rights holders.&quot;</p>
+<h3>It shifts blame downstream</h3>
+<p>When an artist complains about low payouts, the platform can point to the complexity of the system — labels take their cut, distributors take their cut, publishing rights are separate from recording rights, and so on. All true. But the opacity makes it impossible for artists or listeners to pinpoint exactly where value is being extracted, which means nobody is accountable for the final number.</p>
+<p>A signed artist earning $0.0007 per stream can&#39;t easily determine how much went to the platform, how much to their label, and how much to their distributor — because none of those parties publish clear breakdowns. Everyone points at everyone else.</p>
+<h3>It maintains the illusion of fairness</h3>
+<p>Streaming platforms market themselves as democratizing music — anyone can upload, anyone can be discovered, the playing field is level. Publishing actual payout distributions would undermine that narrative pretty quickly.</p>
+<p>According to Spotify&#39;s own <a href="https://newsroom.spotify.com/2026-03-11/loud-and-clear-music-economics-highlights/">2026 Loud &amp; Clear report</a>, about 1,500 artists earned over $1 million from Spotify in 2025, while 80 artists generated over $10 million each. Meanwhile, the vast majority of artists on the platform earn almost nothing. But as long as the exact distribution stays fuzzy, platforms can keep telling the story that streaming works for everyone.</p>
+<h2>The platforms that do disclose</h2>
+<p>Not every platform hides this. The ones that are most transparent tend to be the ones that pay artists the most:</p>
+<table>
+<thead>
+<tr>
+<th>Platform</th>
+<th>Disclosed artist share</th>
+<th>How we know</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><a href="https://simonrepp.com/faircamp/">Faircamp</a></strong></td>
+<td>~97%+ (only hosting costs; credit card fees may apply depending on payment method)</td>
+<td><a href="https://codeberg.org/Be.ing/faircamp">Self-hosted, no platform fees</a></td>
+</tr>
+<tr>
+<td><strong><a href="https://ampwall.com">Ampwall</a></strong></td>
+<td>~92–95%</td>
+<td><a href="https://ampwall.com/selling">5% platform fee</a>, often covered by buyers</td>
+</tr>
+<tr>
+<td><strong><a href="https://ko-fi.com">Ko-fi</a></strong></td>
+<td>92–97% (0% platform fee on tips, 5% on sales; Gold plan: 0% — credit card fees apply)</td>
+<td><a href="https://help.ko-fi.com/hc/en-us/articles/360002506494-Does-Ko-fi-take-a-fee">Published on site</a></td>
+</tr>
+<tr>
+<td><strong><a href="https://mirlo.space">Mirlo</a></strong></td>
+<td>~87–90% (default 10% fee, artist-adjustable)</td>
+<td><a href="https://funmusic.place/blog/introducing-mirlo/">Published on site, co-op model</a></td>
+</tr>
+<tr>
+<td><strong><a href="https://bandcamp.com">Bandcamp</a></strong></td>
+<td>~82% average (~97% on Bandcamp Fridays)</td>
+<td><a href="https://bandcamp.com/fair_trade_music_policy">Published on site</a></td>
+</tr>
+<tr>
+<td><strong><a href="https://www.qobuz.com">Qobuz</a></strong></td>
+<td>Pays ~<a href="https://community.qobuz.com/press-en/qobuz-unveils-its-average-payout-per-stream">$0.0187/stream</a> (audited, ~5x Spotify); download store pays ~70% to rights holder</td>
+<td>First platform to have per-stream rate independently verified</td>
+</tr>
+</tbody></table>
+<p>These platforms don&#39;t have anything to hide because their model is straightforward: you buy something, the artist gets most of the money, the platform takes a transparent cut. It&#39;s a selling point, not a liability.</p>
+<p>Contrast that with streaming platforms, where even the <em>concept</em> of &quot;per-stream rate&quot; is something the platforms avoid defining publicly.</p>
+<h2>Why this matters if you&#39;re spending money on music</h2>
+<p>If part of your motivation is supporting artists, you deserve to know how much actually reaches them. Right now, the burden is on you to research this — and most people don&#39;t, because the information is scattered, inconsistent, and deliberately hard to find.</p>
+<p>If payout rates were visible and comparable:</p>
+<ul>
+<li><strong>You could pick platforms based on artist pay</strong> the same way you consider price, catalog size, or audio quality.</li>
+<li><strong>Platforms that pay poorly would face real pressure</strong> to improve — or explain why they don&#39;t.</li>
+<li><strong>Artists could see exactly where their money goes</strong> and make informed decisions about distribution.</li>
+<li><strong>Platforms that treat artists fairly could prove it</strong> instead of just claiming it. (Qobuz is already doing this — they had their per-stream rate <a href="https://community.qobuz.com/press-en/qobuz-unveils-its-average-payout-per-stream">independently audited and published</a>.)</li>
+</ul>
+<p>Some of this is starting to happen anyway. Artists share royalty screenshots on social media. Publications like <a href="https://thetrichordist.com">The Trichordist</a> publish <a href="https://thetrichordist.com/tag/streaming-price-bible/">streaming rate analyses</a>. But it&#39;s still piecemeal, and it still requires effort to find and interpret.</p>
+<h2>What you can do</h2>
+<p>Until platforms are required or pressured to disclose payout rates in a standardized way:</p>
+<ul>
+<li><strong>Favor platforms that publish their rates.</strong> <a href="https://bandcamp.com">Bandcamp</a>, <a href="https://mirlo.space">Mirlo</a>, <a href="https://ampwall.com">Ampwall</a>, and others are upfront about what artists keep. That transparency is a feature.</li>
+<li><strong>Use <a href="https://unstream.stream">Unstream</a></strong> to search for artists across 15+ platforms and see payout percentages for each one.</li>
+<li><strong>Ask the question.</strong> When a platform says it &quot;supports artists,&quot; ask how much. If the answer is vague or unavailable, that tells you something.</li>
+<li><strong>Buy directly when you can.</strong> A $10 album on Bandcamp puts <a href="https://bandcamp.com/fair_trade_music_policy">about $8.20 in the artist&#39;s pocket</a>. No ambiguity, no opaque royalty pool, no six-month delay.</li>
+</ul>
+<p>The music industry has operated on opacity for decades — from label contracts to streaming royalties. The platforms that break with that pattern and show their work are the ones worth paying attention to.</p>
+
+<p><a href="https://unstream.stream/guides/why-music-platforms-hide-artist-payout-rates">Read this on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Bandcamp and beyond: alternative music platforms worth knowing</title>
+      <link>https://unstream.stream/guides/bandcamp-and-beyond-alternative-music-platforms-worth-knowing</link>
+      <guid isPermaLink="false">unstream-guide-bandcamp-and-beyond-alternative-music-platforms-worth-knowing</guid>
+      <pubDate>Sat, 28 Mar 2026 14:00:00 GMT</pubDate>
+      <description>A guide to the growing ecosystem of artist-friendly music platforms, from Bandcamp to Faircamp to Mirlo and more.</description>
+      <content:encoded><![CDATA[<p>Most people who want to support artists more directly know about Bandcamp. But there&#39;s a whole ecosystem of artist-friendly platforms out there, and some of them are really interesting. Here&#39;s a tour.</p>
+<h2>Buy and own</h2>
+<p>These are platforms where you purchase music — digital downloads, sometimes physical — and the artist keeps most of the money.</p>
+<p><strong><a href="https://bandcamp.com">Bandcamp</a></strong> is the big one. Artists keep 80–85% of every sale, and on <a href="https://isitbandcampfriday.com">Bandcamp Fridays</a> (first Friday of each month) that jumps to ~97% because Bandcamp waives their cut. You can buy digital downloads in pretty much any format (MP3, FLAC, WAV, and more), plus vinyl, CDs, cassettes, and merch. Artists can also offer subscriptions where fans pay monthly for access to their full catalog and new releases as they come out.</p>
+<p>The catalog is massive — over a million artists — and the editorial side is genuinely good. <a href="https://daily.bandcamp.com/">Bandcamp Daily</a> publishes real music journalism with reviews, interviews, and genre deep-dives that are worth reading on their own. If you like independent music, most of your favorite artists are probably already here, and the discovery features (tags, recommendations, the fan-curated feed) make it easy to find new stuff.</p>
+<p>Bandcamp had a rough stretch in 2023-2024 — Epic Games bought them, then sold them to Songtradr, and there were layoffs. But the platform stabilized and is still the default for most indie artists. The community around it is strong.</p>
+<p><strong><a href="https://mirlo.space">Mirlo</a></strong> is a community-owned cooperative where artists keep 86–90%. The ownership model is what sets it apart — the platform is governed by its community, not investors or a parent company. Think of it as what Bandcamp would look like if it were a co-op. The interface is clean and focused, and they&#39;re building features like community playlists and listener profiles. It&#39;s smaller than Bandcamp but growing steadily, and it attracts artists who care about the politics of where they sell, not just the payout rate.</p>
+<p><strong><a href="https://ampwall.com">Ampwall</a></strong> is newer and gives artists 92–95% of sales — one of the highest rates out there. It&#39;s intentionally simple: a clean storefront for selling music without a ton of extra features or social mechanics. Artists get a profile page, fans can buy and download. The bet is that the economics and simplicity are enough to draw people in, and so far it seems to be working. Good option for artists who want a no-fuss alternative.</p>
+<p><strong><a href="https://www.qobuz.com">Qobuz</a></strong> sits between streaming and purchasing. You can buy individual albums in hi-res audio — up to 24-bit/192kHz, which is meaningfully better than CD quality — and artists get about 70% of the sale price. They also have a streaming tier, but the purchasing side is where they stand apart. Qobuz is popular with audiophiles, and the catalog leans more toward jazz, classical, and established indie than some of the other platforms here. If you care about sound quality and want to actually own your music in the best possible format, this is the place.</p>
+<h2>Self-hosted and decentralized</h2>
+<p>These push things further — artists run their own infrastructure.</p>
+<p><strong><a href="https://simonrepp.com/faircamp/">Faircamp</a></strong> is an open-source tool that generates a static website for selling music — essentially your own self-hosted Bandcamp. Because there&#39;s no platform in the middle, artists keep 90–97% of sales (just payment processor fees). You write some config files, point it at your audio, and it spits out a website you can host anywhere. It takes some technical comfort to set up, but the result is a fast, beautiful storefront that the artist fully controls. The <a href="https://faircamp.webr.ing">Faircamp Webring</a> connects Faircamp sites together and helps with the discovery problem.</p>
+<p><strong><a href="https://bandwagon.fm">Bandwagon</a></strong> is built on ActivityPub — the same open protocol behind Mastodon and the fediverse. The idea is a decentralized music marketplace where artists aren&#39;t dependent on any single company&#39;s decisions, business model, or survival. It&#39;s still early, but if you&#39;re the kind of person who likes what Mastodon did for social media, the concept here is similar for music. Worth keeping an eye on.</p>
+<h2>Ongoing support</h2>
+<p>Not everything has to be a one-time purchase. These let fans support artists on a recurring basis.</p>
+<p><strong><a href="https://ko-fi.com">Ko-fi</a></strong> started as a tipping platform (&quot;buy me a coffee&quot;) and has grown into a lightweight shop and membership tool. Artists keep 97% of tips and 92% of sales, which is excellent. Lots of musicians use it as a simple, low-pressure way to accept support alongside their main platform — a Ko-fi link in a bio or at the bottom of a Bandcamp page. It&#39;s also good for selling individual tracks, zines, or other small digital goods.</p>
+<p><strong><a href="https://www.patreon.com">Patreon</a></strong> is the original membership platform. Artists keep 86–90% of membership revenue. It works best for musicians who put out content regularly — new tracks, demos, behind-the-scenes updates, early access to releases, livestreams. The subscription model gives artists more predictable income than one-off sales, and some musicians have built their entire career around a dedicated Patreon community. The tradeoff is that it takes consistent effort to keep members engaged.</p>
+<p><strong><a href="https://www.buymeacoffee.com">Buy Me a Coffee</a></strong> is similar to Ko-fi with a slightly different interface. Artists get about 92%. It supports one-time tips and monthly memberships. Simpler than Patreon, with fewer features but also less overhead.</p>
+<h2>Community platforms</h2>
+<p><strong><a href="https://jam.coop">Jam.coop</a></strong> is building a listener-owned cooperative streaming service. Instead of <a href="https://spotify.com">Spotify</a>&#39;s pro-rata model (where your subscription gets pooled and divided by market share), Jam.coop aims to distribute your money directly to the artists you actually listen to. It&#39;s small and still growing, but the model is genuinely different from anything else out there. Worth trying if you want streaming that isn&#39;t extractive.</p>
+<p><strong><a href="https://www.discogs.com">Discogs</a></strong> is the largest physical music marketplace in the world. If you collect vinyl, CDs, or cassettes, it&#39;s essential — the database is absurdly comprehensive, covering millions of releases across every genre and format. It&#39;s primarily a secondary market (used records), but plenty of artists and labels sell new releases through their Discogs shops too. The community around it is dedicated — serious collectors, crate-diggers, and people who care about pressing details and catalog numbers.</p>
+<h2>Free and legal</h2>
+<p>Don&#39;t sleep on your local library. <strong><a href="https://www.hoopladigital.com">Hoopla</a></strong> and <strong><a href="https://www.freegalmusic.com">Freegal</a></strong> both offer music streaming and downloads with just a library card. The catalogs are bigger than you&#39;d expect — Hoopla in particular has a lot of indie and major label releases. You typically get a set number of borrows per month. Great for exploring new music without spending anything, and they support your local library system.</p>
+<h2>Finding artists on all of this</h2>
+<p>The biggest pain point with this whole ecosystem is fragmentation. Your favorite artist might be on Bandcamp, Mirlo, <em>and</em> Ko-fi — but you&#39;d have no idea unless you checked each platform separately.</p>
+<p>That&#39;s what <a href="https://unstream.stream">Unstream</a> does. Search for any artist and it checks 15+ platforms at once, showing you everywhere they sell and how much of your money actually reaches them on each one.</p>
+
+<p><a href="https://unstream.stream/guides/bandcamp-and-beyond-alternative-music-platforms-worth-knowing">Read this on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Bandcamp Friday, explained</title>
+      <link>https://unstream.stream/guides/bandcamp-friday-explained</link>
+      <guid isPermaLink="false">unstream-guide-bandcamp-friday-explained</guid>
+      <pubDate>Sat, 28 Mar 2026 14:00:00 GMT</pubDate>
+      <description>What Bandcamp Friday is, when it happens, and how to make the most of it.</description>
+      <content:encoded><![CDATA[<p>On the <strong>first Friday of every month</strong>, <a href="https://bandcamp.com">Bandcamp</a> waives their revenue share on all sales. Normally they take 10–15% (which is already pretty good compared to most platforms). On Bandcamp Fridays, that drops to zero.</p>
+<p>Artists take home about <strong>97%</strong> of every sale — the only deduction is credit card processing fees. It&#39;s about as close as you can get to handing someone cash for their music, but that someone is any independent artist in the world from your laptop or smartphone.</p>
+<h2>How it started</h2>
+<p>Bandcamp Friday launched in <strong>March 2020</strong> when COVID shut down live music overnight. Independent musicians lost their primary income source — touring and merch sales at shows — pretty much instantly. Bandcamp waived their fees for a day to push sales directly to artists who needed it.</p>
+<p>The first one did $4.3 million in a single day. It obviously hit a nerve — fans wanted to support artists directly, they just needed a moment and a mechanism to do it. What started as an emergency measure became a monthly tradition. It&#39;s now permanent, and the music community treats it like a small holiday.</p>
+<h2>The math</h2>
+<p>On a normal day, a $10 album on Bandcamp nets the artist about <strong>$8.00–8.50</strong> after Bandcamp&#39;s cut and payment processing. That&#39;s already excellent — far better than streaming, where an artist might need 2,000+ plays to earn the same.</p>
+<p>On Bandcamp Friday, that same $10 purchase nets about <strong>$9.70</strong>. The per-transaction difference isn&#39;t huge, but the real impact is the concentration. Bandcamp Fridays drive massively more total sales than a normal Friday — artists promote their catalogs, fans set aside budget, labels time their releases, and the whole thing becomes a collective event. The shared ritual of it matters.</p>
+<p>For context: an artist would need roughly 2,500 <a href="https://spotify.com">Spotify</a> streams to earn what one $10 Bandcamp Friday purchase gives them.</p>
+<h2>Getting the most out of it</h2>
+<p><strong>Build a wishlist throughout the month.</strong> When you hear something you like — a recommendation from a friend, something in a review, a track that comes up in a playlist — add it to your Bandcamp wishlist. Bandcamp makes this easy with a heart/wishlist button on every release. When Bandcamp Friday comes around, you just work through the list instead of trying to decide in the moment.</p>
+<p><strong>Set a budget.</strong> Even $10–15 a month set aside for Bandcamp Friday is meaningful. Over a year that&#39;s 12+ albums you permanently own, with nearly all the money going to artists. Think of it as redirecting part of what you&#39;d spend on streaming.</p>
+<p><strong>Look for specials.</strong> Artists and labels often run Bandcamp Friday promotions: exclusive releases only available that day, discount codes shared on social media, bundle deals on discographies or merch + music packages, new albums timed to drop for maximum impact. Worth following your favorite artists on social media in the days leading up — they&#39;ll usually announce their plans.</p>
+<p><strong>Buy from smaller artists.</strong> Major artists with millions of streams have plenty of income sources. The artists who benefit most from Bandcamp Friday are independent and unsigned musicians who rely on direct sales as a primary income. Your $10 means a lot more to someone with 500 fans than to someone with 500,000. If you&#39;ve been meaning to check out a smaller artist someone recommended, Bandcamp Friday is a great excuse.</p>
+<p><strong>Share what you buy.</strong> Post about it, tell friends, leave a comment on the Bandcamp page — artists actually read those and it genuinely means a lot. Word of mouth is still the best discovery tool in music, and a personal recommendation from someone who just bought the album carries more weight than any algorithm.</p>
+<h2>Unstream on Bandcamp Fridays</h2>
+<p><a href="https://unstream.stream">Unstream</a> flags Bandcamp Friday automatically — search results show the adjusted ~97% payout for Bandcamp listings and a &quot;BC Friday!&quot; label. Quick way to check if an artist you&#39;re thinking about has a Bandcamp page, and a nudge to buy there today.</p>
+<p>Bandcamp Friday is the first Friday of most months! <a href="https://isitbandcampfriday.com">isitbandcampfriday.com</a> will tell you if today&#39;s the day.</p>
+
+<p><a href="https://unstream.stream/guides/bandcamp-friday-explained">Read this on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>How to build a music library without streaming</title>
+      <link>https://unstream.stream/guides/how-to-build-a-music-library-without-streaming</link>
+      <guid isPermaLink="false">unstream-guide-how-to-build-a-music-library-without-streaming</guid>
+      <pubDate>Sat, 28 Mar 2026 14:00:00 GMT</pubDate>
+      <description>A practical guide to buying, owning, and playing your own music collection.</description>
+      <content:encoded><![CDATA[<p>I still have my <a href="https://music.apple.com">Apple Music</a> subscription, but I’ve relied on it less and less in the last few years thanks to the music library I’ve been slowly building. It turns out that it’s still possible to buy music from artists, own that music, and build a library that you can access from anywhere just like a streaming service. Here&#39;s the practical stuff I’ve learned along this journey.</p>
+<h2>Figure out what you actually listen to</h2>
+<p>Before you buy anything, it helps to know what you actually care about versus what you just have on in the background. Most streaming services show your listening history: <a href="https://spotify.com">Spotify</a> has Wrapped and tools like <a href="https://stats.fm">stats.fm</a> for detailed all-time data. Apple Music has Replay playlists. If you scrobble with <a href="https://www.last.fm">Last.fm</a> or <a href="https://listenbrainz.org">ListenBrainz</a>, you already have this.</p>
+<p>Make a short list of your top 15–20 artists. These are the ones worth buying from first — the artists whose music you&#39;d actually miss if it disappeared.</p>
+<h2>Start small</h2>
+<p>You don&#39;t need to replace your whole library at once. That way lies madness and an empty bank account.</p>
+<ul>
+<li>Set a monthly budget. $10–15 is plenty — roughly what streaming costs anyway.</li>
+<li>Buy one or two albums a month from artists you genuinely love. Prioritize the ones you listen to most.</li>
+<li>Go for digital downloads (FLAC if you care about quality, MP3 if you don&#39;t) unless you&#39;re into vinyl. Digital is cheaper, instant, and plays on everything.</li>
+</ul>
+<p>Over a year that&#39;s 12–24 albums you permanently own, with $100+ going directly to artists. And unlike streaming, the collection only grows. You don&#39;t lose anything if you stop buying for a month.</p>
+<h2>Find where artists sell</h2>
+<p>This used to be the annoying part. Artists sell across tons of platforms — <a href="https://bandcamp.com">Bandcamp</a>, <a href="https://mirlo.space">Mirlo</a>, <a href="https://ampwall.com">Ampwall</a>, their own websites, <a href="https://ko-fi.com">Ko-fi</a> — and checking each one individually is tedious enough that most people just don&#39;t bother.</p>
+<p><a href="https://unstream.stream">Unstream</a> does this in one search. Type in an artist and it shows everywhere they sell across 15+ platforms, with how much of your money reaches them on each one. Free, no account needed.</p>
+<h2>Pick a music player</h2>
+<p>Once you have files, you need something to play them. There are more options than you&#39;d think.</p>
+<p><strong>Desktop:</strong> Apple Music / iTunes still works great as a local library manager even without a subscription — it was built for this before it was built for streaming. <a href="https://www.strawberrymusicplayer.org">Strawberry</a> is a solid open-source alternative on Mac, Linux, and Windows. <a href="https://www.foobar2000.org">foobar2000</a> is the classic choice on Windows if you like customization.</p>
+<p><strong>Mobile:</strong> Apple Music syncs local files from your Mac to your iPhone, which is convenient if you&#39;re in that ecosystem. <a href="https://powerampapp.com">Poweramp</a> is the go-to on Android — great interface, plays everything. <a href="https://www.plex.tv/plexamp/">Plexamp</a> is excellent if you run a <a href="https://www.plex.tv">Plex</a> server at home (more on that below).</p>
+<p><strong>Self-hosted:</strong> This is the fun rabbit hole. <a href="https://www.navidrome.org">Navidrome</a> or <a href="https://jellyfin.org">Jellyfin</a> let you run your own streaming server for your purchased music, accessible from anywhere on any device. It&#39;s like having your own private Spotify, except it&#39;s your music and nobody&#39;s tracking what you listen to. Takes a little setup but it&#39;s surprisingly easy if you have a computer that&#39;s always on or a cheap VPS.</p>
+<p>The main point: you don&#39;t need a subscription service to have music on your phone. Local files work fine, and have for decades.</p>
+<h2>Use your actual library</h2>
+<p>Your public library probably offers free music through <strong><a href="https://www.hoopladigital.com">Hoopla</a></strong> and <strong><a href="https://www.freegalmusic.com">Freegal</a></strong> — just need a library card. Hoopla in particular has a surprisingly large catalog including a lot of indie releases. You typically get a set number of borrows per month (varies by library, usually 8–20).</p>
+<p>These are great for exploring new music without spending anything. Hear something interesting? Buy it on Bandcamp. Didn&#39;t love it? No money spent. They also support your local library system, which is nice.</p>
+<h2>Find music without algorithms</h2>
+<p>This is honestly one of the better parts of relying less on streaming. When an algorithm isn&#39;t steering all your listening, you start finding music on your own terms again:</p>
+<p><strong>People.</strong> Ask friends what they&#39;re into. Join music forums, subreddits, Discord servers, Mastodon communities. The recommendations you get from actual humans who know your taste are better than anything Spotify&#39;s algorithm produces.</p>
+<p><strong>Music blogs and publications.</strong> <a href="https://daily.bandcamp.com/">Bandcamp Daily</a> is excellent — real music journalism with in-depth reviews and genre deep-dives. <a href="https://thequietus.com">The Quietus</a>, <a href="https://pitchfork.com">Pitchfork</a>, and genre-specific blogs all do good curation work. These are people who spend their lives listening to music and writing about what&#39;s worth your time.</p>
+<p><strong>Radio.</strong> College radio, community radio, and internet stations like <a href="https://kexp.org">KEXP</a> and <a href="https://www.nts.live">NTS</a> are goldmines for discovery. KEXP in particular has an incredible archive of live sessions. The DJ-curated experience is fundamentally different from algorithmic playlists — someone with actual taste picked these songs and put them in this order.</p>
+<p><strong>Live shows.</strong> Nothing beats seeing an artist live and buying their record at the merch table. You get to talk to them, they sign it, and you have a memory attached to the music. Streaming can&#39;t do that.</p>
+<p><strong>Artists themselves.</strong> Follow the musicians you like on social media — they constantly share music from peers and influences. Some of the best stuff I&#39;ve found came from an artist I already like posting about someone I&#39;d never heard of.</p>
+<h2>You don&#39;t have to be all-or-nothing</h2>
+<p>That&#39;s basically what I do — I still stream casually, but I also buy from the artists I care about most. The goal isn&#39;t to quit streaming cold turkey. It&#39;s to shift more of your spending toward models that actually pay artists, and to build something that&#39;s yours in the process.</p>
+<p>Start with one album this month from someone you love. See how it feels to own it.</p>
+
+<p><a href="https://unstream.stream/guides/how-to-build-a-music-library-without-streaming">Read this on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>The real cost of &quot;free&quot; music</title>
+      <link>https://unstream.stream/guides/the-real-cost-of-free-music</link>
+      <guid isPermaLink="false">unstream-guide-the-real-cost-of-free-music</guid>
+      <pubDate>Sat, 28 Mar 2026 14:00:00 GMT</pubDate>
+      <description>How streaming turned music from something you buy into something you rent, and what that&apos;s meant for the people who make it.</description>
+      <content:encoded><![CDATA[<p>Every song ever recorded, on demand, for $10.99 a month (or free with ads). As a listener, it&#39;s hard to argue with that.</p>
+<p>But the economics behind it are pretty grim if you&#39;re the one making the music. Here&#39;s how we got here.</p>
+<h2>The short version of a long shift</h2>
+<p><strong>CDs and vinyl:</strong> You bought a physical thing. A $15 CD might net an independent artist $5–10. Major label artists got less per unit because of the label&#39;s cut, but volume made up for it. The important part: every sale was a meaningful transaction.</p>
+<p><strong>iTunes and downloads (2003–2015):</strong> You bought files. A $0.99 track or $9.99 album. Per-sale economics similar to physical — artists got a real cut. You owned the files and could play them on any device. Apple took 30%, which wasn&#39;t great, but the per-transaction value was still high enough to sustain a career.</p>
+<p><strong>Streaming (2015–now):</strong> You rent access to everything. Per-stream payouts dropped to <strong>$0.003–0.005</strong>. A fraction of a fraction of what a sale used to be worth. The listener experience improved enormously — infinite music, anywhere, on demand — but the value of an individual fan&#39;s engagement with an individual artist basically collapsed.</p>
+<p>Each step made music cheaper and more convenient for listeners. Each step also reduced what an individual artist could earn from a single fan.</p>
+<h2>Who this works for</h2>
+<p>The streaming model isn&#39;t broken for everyone. Major labels — Universal, Sony, Warner — control 60–70% of the market and negotiated equity stakes in the platforms themselves. When <a href="https://spotify.com">Spotify</a>&#39;s stock goes up, so does their portfolio. The pro-rata royalty model (where all streams get pooled and divided by market share) naturally funnels money toward their massive catalogs. They&#39;re doing fine.</p>
+<p>Spotify itself has never consistently turned a profit from <em>music</em> — the growth story is about subscriber count, ad revenue, and increasingly podcasts and audiobooks. The music is basically a loss leader to keep you subscribed.</p>
+<p>And then there&#39;s the AI content farm thing, which is getting worse. Thousands of AI-generated tracks get uploaded to streaming platforms to capture streams from algorithmic playlists — lo-fi beats, ambient focus music, generic background stuff. These cost almost nothing to produce, and because the royalty pool is shared, every stream they capture is money that doesn&#39;t go to human artists. Spotify and others have started trying to address it, but the incentive structure makes it hard to fix. As long as platforms pay per-stream and algorithms drive listening, there&#39;s money in flooding the system.</p>
+<h2>Who it doesn&#39;t</h2>
+<p>An independent artist with 10,000 monthly listeners on Spotify — which is a respectable number if you&#39;re building a career without a label — might earn <strong>$30–50/month</strong>. That doesn&#39;t cover a day of studio time, let alone rent or gear or touring costs.</p>
+<p>Even mid-tier artists feel it. Musicians who could&#39;ve sustained a career selling 50,000 albums now struggle to earn the equivalent from streaming, because the per-unit value collapsed so dramatically. An album sale used to be worth $5–10 to an independent artist. Now a fan needs to stream that album hundreds of times to generate the same income.</p>
+<p>And organic discovery keeps getting harder. Streaming platforms optimize for engagement metrics and algorithmic curation, editorial playlist placement is limited and opaque, and independent artists are basically invisible unless they also become social media marketers — which has very little to do with making good music.</p>
+<h2>The alternative that already exists</h2>
+<p>On platforms like <a href="https://bandcamp.com">Bandcamp</a>, <a href="https://mirlo.space">Mirlo</a>, <a href="https://ampwall.com">Ampwall</a>, and <a href="https://simonrepp.com/faircamp/">Faircamp</a>, the economics are different:</p>
+<ul>
+<li>You pay for a specific thing — an album, a track, a membership</li>
+<li>The artist gets 80–97% of your payment, depending on the platform</li>
+<li>Your money goes to the artist you chose, not a pool divided by global market share</li>
+<li>You own what you buy — it&#39;s a file on your computer, not a revocable license</li>
+</ul>
+<p>This isn&#39;t theoretical. Bandcamp alone has paid artists over a billion dollars. Mirlo is growing as a community-owned co-op. Faircamp lets artists run their own storefronts with near-zero fees. The infrastructure is there and it works.</p>
+<h2>What to do about it</h2>
+<p>You don&#39;t have to quit streaming. But a few things go a long way:</p>
+<ol>
+<li><strong>Pick the artists you care about most</strong> and buy their music directly. One $10 album purchase on Bandcamp gives an artist more than thousands of streams.</li>
+<li><strong>Use <a href="https://unstream.stream">Unstream</a></strong> to find where artists sell across 15+ platforms and see how much of your money reaches them on each one.</li>
+<li><strong>Buy on Bandcamp Fridays</strong> (first Friday of every month) when artists keep ~97%.</li>
+<li><strong>Tell people.</strong> Most listeners have no idea how any of this works. The streaming experience is so smooth that it&#39;s easy to assume the artists behind it are being taken care of. They&#39;re mostly not.</li>
+</ol>
+
+<p><a href="https://unstream.stream/guides/the-real-cost-of-free-music">Read this on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Where your money goes when you stream vs. buy music</title>
+      <link>https://unstream.stream/guides/where-your-money-goes-streaming-vs-buying</link>
+      <guid isPermaLink="false">unstream-guide-where-your-money-goes-streaming-vs-buying</guid>
+      <pubDate>Sat, 28 Mar 2026 14:00:00 GMT</pubDate>
+      <description>A breakdown of how streaming royalties work compared to direct purchases, and why the difference matters for independent artists.</description>
+      <content:encoded><![CDATA[<p>You pay $10.99 a month for <a href="https://spotify.com">Spotify</a>. You listen to hundreds of songs. Some of that money goes to artists, right?</p>
+<p>Sort of. The amount is small enough — and the system weird enough — that it&#39;s worth understanding what actually happens to your money before it reaches anyone who made the music.</p>
+<h2>How streaming payouts work</h2>
+<p>Most streaming platforms use a <strong>pro-rata model</strong>. All subscription and ad revenue for a given period goes into one pool. That pool gets divided among rights holders based on their share of <em>total</em> streams on the platform.</p>
+<p>The key thing: your individual listening doesn&#39;t matter. If you exclusively listen to one indie artist all month, your $10.99 doesn&#39;t go to them. It gets split based on what everyone on the platform listened to. So the biggest artists — mostly those on major labels with billions of streams — capture the bulk of that pool, and everyone else gets whatever&#39;s left.</p>
+<p>There&#39;s been talk about switching to a &quot;user-centric&quot; model where your subscription goes to the artists <em>you</em> actually listen to, but Spotify and most others still use pro-rata. <a href="https://www.deezer.com">Deezer</a> has started experimenting with user-centric payouts, and it does seem to help smaller artists, but it&#39;s not the norm yet.</p>
+<p>The commonly cited figure is <strong>$0.003 to $0.005 per stream</strong> on Spotify. An artist needs roughly 250,000 streams to earn $1,000. Most independent musicians are nowhere near that. And that number has been <em>declining</em> over time as the platform adds more subscribers but also more content (including AI-generated tracks competing for the same pool).</p>
+<h2>What happens when you buy instead</h2>
+<p>When you buy music directly on a platform like <a href="https://bandcamp.com">Bandcamp</a>, <a href="https://mirlo.space">Mirlo</a>, or <a href="https://ampwall.com">Ampwall</a>, the math is completely different. Your money goes to the artist you chose, minus the platform&#39;s cut:</p>
+<table>
+<thead>
+<tr>
+<th>Platform</th>
+<th>Artist keeps</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><a href="https://ampwall.com">Ampwall</a></strong></td>
+<td>~92–95%</td>
+</tr>
+<tr>
+<td><strong><a href="https://ko-fi.com">Ko-fi</a></strong></td>
+<td>~92–97%</td>
+</tr>
+<tr>
+<td><strong><a href="https://mirlo.space">Mirlo</a></strong></td>
+<td>~86–90%</td>
+</tr>
+<tr>
+<td><strong><a href="https://bandcamp.com">Bandcamp</a></strong></td>
+<td>~80–85%</td>
+</tr>
+<tr>
+<td><strong><a href="https://www.qobuz.com">Qobuz</a></strong></td>
+<td>~70%</td>
+</tr>
+</tbody></table>
+<p>A $10 album on Bandcamp puts <strong>$8–8.50 in the artist&#39;s pocket</strong>. To earn that same amount from Spotify, they&#39;d need about 2,100 streams of a single track. And on Bandcamp Fridays (first Friday of every month), Bandcamp waives their cut entirely — artists take home ~97%, basically everything minus credit card fees.</p>
+<p>The other big difference: you own what you buy. You get actual files — MP3, FLAC, WAV, whatever you want — that you can play on any device, any app, forever. No algorithm deciding what you hear next. No platform removing something from your library because of a licensing dispute. Cancel a streaming subscription and your whole library disappears. Purchased music doesn&#39;t.</p>
+<h2>The yearly math</h2>
+<p>Say you spend $10.99/month on streaming. That&#39;s about <strong>$132/year</strong>. Of that, maybe $1–2 reaches the independent artists you actually listen to — the rest goes to the platform, major labels, and the pro-rata pool.</p>
+<p>Spend that same $11/month buying one album directly and over a year you&#39;ve got <strong>12 albums you permanently own</strong> and roughly <strong>$100–110 that went to the artists who made them</strong>. That&#39;s a pretty stark difference.</p>
+<p>And it compounds in a way streaming doesn&#39;t. After three years of streaming you own nothing and the artists have received almost nothing from you specifically. After three years of buying, you have 36 albums and you&#39;ve put $300+ directly in artists&#39; hands.</p>
+<h2>Shifting the balance</h2>
+<p>You don&#39;t need to cancel streaming — plenty of people keep it for casual listening and convenience while also buying from artists they care about. That&#39;s fine. Even small shifts matter:</p>
+<ul>
+<li><strong>Buy from one or two artists a month</strong> instead of just streaming them. Prioritize the ones who seem like they need it most — independent, unsigned, small following.</li>
+<li><strong>Search on <a href="https://unstream.stream">Unstream</a></strong> to find where your favorite artists sell across 15+ platforms and see exactly how much reaches them on each one.</li>
+<li><strong>Buy on Bandcamp Fridays</strong> to maximize what goes to the artist.</li>
+<li><strong>Check your library&#39;s music services</strong> — <a href="https://www.hoopladigital.com">Hoopla</a> and <a href="https://www.freegalmusic.com">Freegal</a> are free with a library card and good for exploring new stuff without spending.</li>
+</ul>
+<p>The per-stream payout isn&#39;t going to get better anytime soon. But you can route around it.</p>
+
+<p><a href="https://unstream.stream/guides/where-your-money-goes-streaming-vs-buying">Read this on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Why I built Unstream</title>
+      <link>https://unstream.stream/guides/why-i-built-unstream</link>
+      <guid isPermaLink="false">unstream-guide-why-i-built-unstream</guid>
+      <pubDate>Sat, 28 Mar 2026 14:00:00 GMT</pubDate>
+      <description>The story behind Unstream - from indie musician earning $2,200 on Bandcamp to building a tool that helps fans support artists directly.</description>
+      <content:encoded><![CDATA[<p>I make music under the name <a href="https://kidlightbulbs.com">Kid Lightbulbs</a>. I&#39;m not famous. I haven&#39;t performed live in years. By every metric the streaming industry cares about, I shouldn&#39;t be making money from music.</p>
+<p>But I&#39;ve earned over <strong>$2,200 on Bandcamp</strong> in the past couple of years. From a small group of people who wanted to buy my music and own it. No playlist gatekeepers, no algorithmic favor. Just music and people.</p>
+<p>That kind of broke my brain. It made the whole streaming model — fractions of a penny per play, no relationship with listeners, everything mediated by an algorithm — feel like a choice rather than an inevitability. There are other ways to do this, and they actually work.</p>
+<h2>The other side</h2>
+<p>At the same time, I&#39;d been paying for <a href="https://music.apple.com">Apple Music</a> for over a decade and wanted to cancel. Not because it&#39;s bad — it&#39;s incredibly convenient. But I missed <em>owning</em> things. I wanted to find something new, buy it, and have it be mine. I wanted more of my money going to artists and one fewer subscription.</p>
+<p>I&#39;d also been getting increasingly uncomfortable with the economics. I knew the per-stream payout numbers were bad, but when I did the math on my own listening — how many times I&#39;d played certain albums, what those artists actually earned from my subscription — it felt pretty gross. I was paying $10.99 a month and the artists I cared about most were seeing pennies.</p>
+<p>When I started looking around for alternatives, I was surprised by how much was already out there. So many artists I like were selling on <a href="https://bandcamp.com">Bandcamp</a>. A bunch were on platforms most people have never heard of — <a href="https://mirlo.space">Mirlo</a>, <a href="https://ampwall.com">Ampwall</a>, <a href="https://simonrepp.com/faircamp/">Faircamp</a>. Some had <a href="https://ko-fi.com">Ko-fi</a> pages or <a href="https://www.patreon.com">Patreon</a> memberships. The whole infrastructure for supporting artists directly was already there.</p>
+<p>The problem was just knowing where to look.</p>
+<h2>So I built the thing</h2>
+<p>If I wanted to know where I could buy music, I&#39;d have to check each platform one by one. Multiply that by every artist I listen to and it&#39;s a real pain. End the conversation entirely if you’re <em>not</em> me and don’t know these platforms exist at all or what to search for.</p>
+<p>So I built a tool to do it over a holiday break. <a href="https://unstream.stream">Unstream</a> searches over a dozen alternative music platforms at once. Type in an artist name and it shows you everywhere they sell, stream, or accept support — with the approximate percentage that goes to the artist on each one. So you&#39;re not just finding where to buy, you&#39;re making an informed choice about where your money has the most impact.</p>
+<p>The name is a verb. <em>Unstream</em> your music — move it off the rental platforms and into something you own, on platforms where artists keep 80–97% instead of fractions of a penny.</p>
+<h2>How I think about it</h2>
+<p>There are a few important principles behind Unstream:</p>
+<p><strong>Free, always.</strong> The entire point is getting money to artists. Charging you to find them would defeat the purpose. Unstream is donation-supported — you can chip in if you want to keep the lights on, but you never have to.</p>
+<p><strong>No tracking.</strong> No accounts required to search (artists can optionally create accounts to claim their profiles). No advertising cookies. No selling your listening habits. Your music taste is your business.</p>
+<p><strong>Open source.</strong> The whole codebase is <a href="https://github.com/brandonlucasgreen/unstream">on GitHub</a>. Anyone can see how it works, suggest improvements, or contribute.</p>
+<p><strong>Not <em>entirely</em> anti-streaming.</strong> I&#39;m not here to shame anyone for using <a href="https://spotify.com">Spotify</a>. I still use Apple Music myself for some things. But I think people should know alternatives exist, and that those alternatives pay artists dramatically better. Unstream just makes them easier to find.</p>
+<h2>What it&#39;s turned into</h2>
+<p>What started as a simple search page has grown more than I expected:</p>
+<ul>
+<li>A <strong>browser extension</strong> for Chrome and Firefox that detects what you&#39;re listening to on Spotify or YouTube Music and shows you where to support that artist directly — a little popup that says &quot;hey, this artist is on Bandcamp and Mirlo too&quot;</li>
+<li>A <strong>macOS menu bar app</strong> that does the same thing with whatever&#39;s currently playing on your computer, sitting quietly in your menu bar until you want it</li>
+<li><strong>Artist profiles</strong> where musicians can claim their page on Unstream, verify their identity through their website, customize their presence, and see how fans are finding them — sort of a Linktree for artist-friendly platforms</li>
+<li><strong>Transparent payout info</strong> on every search result, so you can see at a glance which platform gives the most to the artist</li>
+</ul>
+<p>It&#39;s one person&#39;s project, built in nights and weekends, driven by the experience of being both an artist who benefits from direct sales and a fan who wants to put more money in artists&#39; pockets. If you&#39;re a musician, you can <a href="https://unstream.stream/artist-login">claim your artist page</a>. If you&#39;re a listener, try searching for someone you love. You might be surprised where you find them.</p>
+
+<p><a href="https://unstream.stream/guides/why-i-built-unstream">Read this on Unstream</a></p>]]></content:encoded>
+    </item>
+  </channel>
+</rss>

@@ -11,7 +11,7 @@ export function FaqPage() {
 
       <div className="pt-6 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="font-display text-3xl md:text-4xl font-semibold text-text-primary mb-2">Frequently Asked Questions</h1>
+          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary mb-2">Frequently Asked Questions</h1>
           <p className="text-text-secondary text-lg max-w-2xl mx-auto">
             Learn more about Unstream, streaming economics, and how to support artists directly.
           </p>

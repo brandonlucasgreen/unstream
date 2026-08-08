@@ -9,6 +9,16 @@ function sendJson(res: ServerResponse, status: number, data: unknown) {
   res.end(JSON.stringify(data));
 }
 
+async function readJsonBody(req: IncomingMessage): Promise<Record<string, unknown>> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of req) chunks.push(chunk as Buffer);
+  try {
+    return JSON.parse(Buffer.concat(chunks).toString('utf-8') || '{}');
+  } catch {
+    return {};
+  }
+}
+
 export async function handleApiRequest(req: IncomingMessage, res: ServerResponse): Promise<boolean> {
   const url = new URL(req.url || '', `http://${req.headers.host}`);
 
@@ -105,6 +115,29 @@ export async function handleApiRequest(req: IncomingMessage, res: ServerResponse
       console.error('Embed error:', error);
       sendJson(res, 500, { error: 'Failed to fetch embed data' });
     }
+    return true;
+  }
+
+  if (url.pathname === '/api/newsletter/subscribe') {
+    // Dev-only stub. Production runs api/functions/newsletter-subscribe.ts, which posts to
+    // Buttondown. A dev server that really subscribed people would put test addresses on the
+    // live list every time somebody clicked the button while styling the form — so this
+    // mirrors the response shapes and writes to the console instead.
+    if (req.method !== 'POST') {
+      sendJson(res, 405, { error: 'Method not allowed' });
+      return true;
+    }
+
+    const body = await readJsonBody(req);
+    const email = typeof body.email === 'string' ? body.email.trim() : '';
+
+    if (!email || !/^[^\s@]+@[^\s@.]+\.[^\s@]+$/.test(email)) {
+      sendJson(res, 400, { error: "That doesn't look like an email address." });
+      return true;
+    }
+
+    console.log(`[dev] newsletter signup (not sent to Buttondown): ${email} via ${body.source}`);
+    sendJson(res, 200, { status: 'pending' });
     return true;
   }
 

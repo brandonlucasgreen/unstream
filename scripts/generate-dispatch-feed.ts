@@ -12,6 +12,9 @@
  *
  * README.md and PROMPT.md in the dispatch directory are ignored.
  *
+ * The Dispatch itself moved to Discord in April 2026 and nothing new is written here — this
+ * keeps the historical feed rendering. See data/dispatch/README.md.
+ *
  * Output: apps/web/public/dispatch.xml
  * Usage: npx tsx scripts/generate-dispatch-feed.ts
  */
@@ -21,70 +24,24 @@ import { join, basename, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { marked } from 'marked';
 
+import { SITE_URL, toRfc822, parseFrontmatter, buildRssFeed, type RssItem } from './rss';
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DISPATCH_DIR = join(__dirname, '..', 'data', 'dispatch');
 const OUTPUT_PATH = join(__dirname, '..', 'apps', 'web', 'public', 'dispatch.xml');
 
-const SITE_URL = 'https://unstream.stream';
 const FEED_URL = `${SITE_URL}/dispatch.xml`;
 const FEED_TITLE = 'The Unstream Dispatch';
 const FEED_DESCRIPTION = 'Weekly music industry intelligence — platform news, streaming economics, and what it means for independent artists. Written by Unstream.';
 
 const IGNORED_FILES = new Set(['README.md', 'PROMPT.md']);
 
-interface DispatchEntry {
-  slug: string;
-  title: string;
-  week: string;
-  published: string;
-  summary: string;
-  bodyMarkdown: string;
-}
-
-function parseFrontmatter(content: string): { fields: Record<string, string>; body: string } | null {
-  const match = content.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
-  if (!match) return null;
-
-  const fields: Record<string, string> = {};
-  for (const line of match[1].split('\n')) {
-    const colon = line.indexOf(':');
-    if (colon === -1) continue;
-    const key = line.slice(0, colon).trim();
-    let value = line.slice(colon + 1).trim();
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-      value = value.slice(1, -1);
-    }
-    value = value.replace(/\\"/g, '"').replace(/\\'/g, "'");
-    fields[key] = value;
-  }
-  return { fields, body: match[2].trim() };
-}
-
-function escapeXml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
-}
-
-function toRfc822(isoDate: string): string {
-  // Interpret the date as 10:00 ET on that day (the publish time).
-  // Using UTC -04:00 as a stable offset avoids DST surprises in the feed — RSS readers only care about ordering.
-  const date = new Date(`${isoDate}T14:00:00Z`);
-  if (isNaN(date.getTime())) {
-    throw new Error(`Invalid published date: "${isoDate}" — use YYYY-MM-DD format`);
-  }
-  return date.toUTCString();
-}
-
 function main() {
   const files = readdirSync(DISPATCH_DIR).filter(
     (f) => f.endsWith('.md') && !IGNORED_FILES.has(f)
   );
 
-  const entries: DispatchEntry[] = [];
+  const items: RssItem[] = [];
 
   for (const file of files) {
     const content = readFileSync(join(DISPATCH_DIR, file), 'utf-8');
@@ -115,53 +72,29 @@ function main() {
       continue;
     }
 
-    entries.push({
-      slug: basename(file, '.md'),
+    const slug = basename(file, '.md');
+
+    items.push({
       title: fields.title,
-      week: fields.week,
-      published: fields.published,
-      summary: fields.summary,
-      bodyMarkdown: body,
+      link: `${SITE_URL}/dispatch/${slug}`,
+      guid: `unstream-dispatch-${slug}`,
+      pubDate: fields.published,
+      description: fields.summary,
+      contentHtml: marked.parse(body, { async: false }) as string,
     });
   }
 
   // Sort newest first
-  entries.sort((a, b) => b.published.localeCompare(a.published));
+  items.sort((a, b) => b.pubDate.localeCompare(a.pubDate));
 
-  const now = new Date().toUTCString();
-
-  const itemsXml = entries
-    .map((entry) => {
-      const html = marked.parse(entry.bodyMarkdown, { async: false }) as string;
-      // Escape the CDATA terminator so body content can never break the XML structure.
-      const cdataSafe = html.replace(/]]>/g, ']]]]><![CDATA[>');
-      return `    <item>
-      <title>${escapeXml(entry.title)}</title>
-      <link>${escapeXml(`${SITE_URL}/dispatch/${entry.slug}`)}</link>
-      <guid isPermaLink="false">unstream-dispatch-${escapeXml(entry.slug)}</guid>
-      <pubDate>${toRfc822(entry.published)}</pubDate>
-      <description>${escapeXml(entry.summary)}</description>
-      <content:encoded><![CDATA[${cdataSafe}]]></content:encoded>
-    </item>`;
-    })
-    .join('\n');
-
-  const feed = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>${escapeXml(FEED_TITLE)}</title>
-    <link>${escapeXml(SITE_URL)}</link>
-    <atom:link href="${escapeXml(FEED_URL)}" rel="self" type="application/rss+xml" />
-    <description>${escapeXml(FEED_DESCRIPTION)}</description>
-    <language>en-us</language>
-    <lastBuildDate>${now}</lastBuildDate>
-${itemsXml}
-  </channel>
-</rss>
-`;
+  const feed = buildRssFeed(
+    { title: FEED_TITLE, description: FEED_DESCRIPTION, link: SITE_URL, feedUrl: FEED_URL },
+    items,
+    new Date(),
+  );
 
   writeFileSync(OUTPUT_PATH, feed);
-  console.log(`Wrote ${entries.length} dispatch${entries.length === 1 ? '' : 'es'} to ${OUTPUT_PATH}`);
+  console.log(`Wrote ${items.length} dispatch${items.length === 1 ? '' : 'es'} to ${OUTPUT_PATH}`);
 }
 
 main();
