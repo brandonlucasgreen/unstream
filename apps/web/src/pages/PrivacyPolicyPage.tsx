@@ -4,136 +4,369 @@ import { Link } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 
+/**
+ * Privacy Policy for the hosted service and the clients that sign into it.
+ *
+ * Every claim on this page was checked against the code and the migrations, because the previous
+ * version had drifted: it still said saved artists lived only on your device, which stopped
+ * being true when sync shipped, and it predated public sharing, the newsletter, the release
+ * feeds and the public API.
+ *
+ * The rule for editing: if a feature changes what is collected, where it goes, or how long it's
+ * kept, this page changes in the same PR. A privacy policy that describes last year's product
+ * is a liability, not a protection. `docs/specs/data-collection-audit.md` is the working
+ * inventory this page is written from — update it alongside.
+ */
 export function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen">
 
       <Header />
 
-      {/* Content */}
       <main className="pt-8 px-4 pb-16">
         <div className="max-w-3xl mx-auto">
           <article className="prose prose-lg dark:prose-invert max-w-none prose-a:text-accent-primary text-text-primary">
             <h2 className="font-display text-3xl font-semibold text-text-primary mb-6">Privacy Policy</h2>
-            <p className="text-text-muted text-sm mb-8">Last updated: March 13, 2026</p>
+            <p className="text-text-muted text-sm mb-8">Last updated: August 8, 2026</p>
 
-            <section className="mb-8">
-              <h3 className="font-display text-xl font-semibold text-text-primary mb-3">Overview</h3>
-              <p className="text-text-primary/90 leading-relaxed mb-3">
-                Unstream is committed to protecting your privacy. This policy explains what data we collect, how we use it, and your rights regarding that data.
-              </p>
-              <p className="text-text-primary/90 leading-relaxed mb-3">
-                <strong>The short version:</strong> We collect minimal data, we don't sell your information, and we don't track you across the web.
-              </p>
-              <p className="text-text-primary/90 leading-relaxed mb-3">
-                Our{' '}
+            <div className="mb-10 p-5 rounded-lg bg-bg-secondary border border-border not-prose">
+              <h3 className="font-display text-xl font-semibold text-text-primary mb-3">The short version</h3>
+              <ul className="list-disc ml-5 text-text-primary/90 space-y-2 text-base">
+                <li>
+                  You can use Unstream without an account, and we'd rather you didn't have to make one.
+                </li>
+                <li>
+                  We don't sell your data, we don't run ad trackers, and we don't follow you around
+                  the web.
+                </li>
+                <li>
+                  <strong>We don't record who searched for what.</strong> We do keep the search
+                  terms themselves — cached so the next person's search is fast — with nothing
+                  attached that says it was you.
+                </li>
+                <li>
+                  Your saved artists are stored on our servers, tied to your account, so they can
+                  sync between your devices. They're private unless you deliberately publish them.
+                </li>
+                <li>
+                  Your username, your location, and public sharing are all optional and all off
+                  until you turn them on.
+                </li>
+                <li>
+                  Ask us for your data or ask us to delete it at{' '}
+                  <a href="mailto:support@unstream.stream" className="text-accent-primary hover:text-accent-secondary transition-colors underline">
+                    support@unstream.stream
+                  </a>
+                  , and we'll do it.
+                </li>
+              </ul>
+            </div>
+
+            <Section title="How much we know about you, honestly">
+              <P>
+                "Anonymous" is a word that gets used loosely, so here's the real breakdown. Three
+                categories, and we've been strict about which is which.
+              </P>
+
+              <h4 className="font-semibold text-text-primary mt-5 mb-2">Genuinely anonymous</h4>
+              <P>
+                Nothing identifies you, not even indirectly, and there's no way for us to work
+                backwards to a person.
+              </P>
+              <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
+                <li>
+                  <strong>Artist performance stats.</strong> The numbers on an artist's dashboard
+                  are daily totals per artist: how many searches they appeared in, how many times
+                  their page was viewed, how many times each platform link was clicked. A counter
+                  goes up by one. No user ID, no session, no IP address, nothing about who did it
+                  or what else they did.
+                </li>
+              </ul>
+
+              <h4 className="font-semibold text-text-primary mt-5 mb-2">Pseudonymous — not linked to you, but not nothing</h4>
+              <P>
+                No name or email is attached, but there's some kind of identifier involved. We call
+                this out rather than filing it under "anonymous", because that would be a stretch.
+              </P>
+              <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
+                <li>
+                  <strong>Product usage events.</strong> Things like "a search happened and
+                  returned 12 results" or "somebody clicked a Bandcamp link", so we can tell
+                  whether a feature works. Each carries a session token that is a one-way keyed
+                  hash of your IP address, your browser's user agent, and today's date. It changes
+                  every day, we can't reverse it into an IP, and it can't follow you from one day
+                  to the next. We never store the raw IP.
+                </li>
+                <li>
+                  <strong>Rate-limiting records.</strong> To stop abuse we count requests per IP
+                  address in a temporary store. This one is a raw IP address, held for at most 24
+                  hours, and used for nothing else.
+                </li>
+                <li>
+                  <strong>Website analytics.</strong> GoatCounter, which is privacy-focused and
+                  cookie-free, records page views using its own daily-rotating visitor hash. See
+                  "About your searches" below for one important detail about this.
+                </li>
+              </ul>
+
+              <h4 className="font-semibold text-text-primary mt-5 mb-2">Linked to your account</h4>
+              <P>Once you create an account, this is tied to you and we can look it up:</P>
+              <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
+                <li>Your email address, and a securely hashed password if you set one.</li>
+                <li>
+                  The artists you've saved, any notes you attached, which ones you've marked as
+                  supported, and when.
+                </li>
+                <li>
+                  A device identifier for each device you sync from — a random ID generated on
+                  install, used to work out which device made which change. It isn't a hardware
+                  identifier and it tells us nothing about your device.
+                </li>
+                <li>Your username and location, if you set them.</li>
+                <li>The secret token behind your personal release feed, if you've created one.</li>
+                <li>
+                  For artists: your claimed profile — bio, photo, links, featured release — and
+                  anything you wrote in a manual verification request.
+                </li>
+                <li>For API users: your email, a label for each key, and a hash of the key itself.</li>
+              </ul>
+            </Section>
+
+            <Section title="About your searches">
+              <P>
+                People assume searches are the sensitive part, so this gets its own section rather
+                than a footnote.
+              </P>
+              <P>
+                <strong>We do not record who searched for what.</strong> No search is ever written
+                against your account, and signing in doesn't change that — your search history
+                isn't something we hold, because we never build one.
+              </P>
+              <P>
+                <strong>We do store the search terms themselves</strong>, detached from any person,
+                in three places:
+              </P>
+              <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
+                <li>
+                  A results cache, so a popular artist doesn't cost every visitor a fresh round of
+                  requests to a dozen platforms. Entries are keyed by the artist name and normally
+                  expire within 30 minutes.
+                </li>
+                <li>
+                  A permanent record of which artist names we've already checked on Bandcamp, and
+                  what we found. This is what stops us hammering Bandcamp with the same lookups
+                  forever. It stores the normalized artist name and the result — nothing about who
+                  asked.
+                </li>
+                <li>
+                  Short-lived server logs, which include the artist name being looked up, kept
+                  briefly by our hosting provider for debugging.
+                </li>
+              </ul>
+              <P>
+                One thing worth knowing: because a search puts the artist name in the page address
+                (<code>unstream.stream/?q=artist+name</code>), that address — artist name included
+                — is also recorded by our website analytics as an ordinary page view. It sits
+                against a daily-rotating visitor hash, not against you, but it does mean the search
+                term leaves our servers. If you'd rather it didn't, the artist index and the
+                artist pages get you to the same place without a query in the URL.
+              </P>
+            </Section>
+
+            <Section title="What's public, and only if you choose">
+              <P>
+                Everything in your account is private by default. There are exactly two ways
+                something becomes publicly visible, and both are things you have to switch on.
+              </P>
+              <P>
+                <strong>Sharing your saved artists.</strong> Setting a username doesn't publish
+                anything on its own. Turning on sharing publishes a page at{' '}
+                <code>unstream.stream/u/your-username</code> showing your username, the artists
+                you've saved, which ones you've marked as supported, and your location if you've
+                set one. Anyone can open it without an account, and search engines can index it.
+                Your email address is never published, and neither are your notes.
+              </P>
+              <P>
+                You can turn sharing off, change your username, or clear your location at any time
+                in your settings. The page goes down, but copies already made by caches, archives
+                or other people are beyond our reach. There's more on this in section 6 of the{' '}
+                <Link to="/terms#section-6" className="text-accent-primary hover:text-accent-secondary transition-colors underline">
+                  Terms of Use
+                </Link>
+                .
+              </P>
+              <P>
+                <strong>Claiming an artist profile.</strong> Once verified, your bio, photo, links,
+                location and featured release are shown publicly on your artist page. That's the
+                point of claiming it. The email address you claimed with is not shown.
+              </P>
+            </Section>
+
+            <Section title="Where your data goes">
+              <P>
+                We use a small number of providers to run the Service. They process data on our
+                behalf, and none of them get your data to use for their own purposes.
+              </P>
+              <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
+                <li><strong>Netlify</strong> — hosting and serverless functions.</li>
+                <li><strong>Supabase</strong> — the database and authentication.</li>
+                <li><strong>Upstash</strong> — the temporary cache and rate-limiting store.</li>
+                <li><strong>GoatCounter</strong> — cookie-free website analytics.</li>
+                <li><strong>Sentry</strong> — error reports, configured not to send IP addresses, cookies or request headers.</li>
+                <li><strong>Buttondown</strong> — the newsletter, if you subscribe.</li>
+                <li><strong>Liberapay</strong> and <strong>Apple</strong> — donations and in-app support purchases. We never see your payment details.</li>
+                <li><strong>Discord</strong> — if you use the Unstream bot in a Discord server.</li>
+              </ul>
+              <P>
+                Separately, we read from public music and metadata sources — MusicBrainz, Wikidata,
+                Wikipedia, Discogs, Bandcamp, Mirlo and the other platforms we list. We send them
+                an artist name to search for. We never send them anything about you.
+              </P>
+              <P>
+                These providers are based in the United States, and that's where your data is
+                stored and processed. If you're in the UK or EEA, that means your data is
+                transferred outside your home region.
+              </P>
+            </Section>
+
+            <Section title="The apps and the extension">
+              <P>
+                <strong>Browser extension.</strong> It reads the artist and track showing on the
+                streaming sites it supports, so it can look them up. That reading happens in your
+                browser; the artist name is sent to our search API the same way a search on the
+                website is. It never reads your credentials, your listening history, your playlists,
+                or anything on other sites. Saved artists live in your browser's local storage, and
+                sync to your account only if you sign in.
+              </P>
+              <P>
+                <strong>macOS and iOS apps.</strong> They read now-playing information from your
+                device for the same purpose. Saved artists are stored on your device, and sync to
+                your account only if you sign in. Optional extras stay on your device: if you
+                connect ListenBrainz, your listening data goes from your device to ListenBrainz
+                under their privacy policy and never through us, and if you connect Plex, your
+                token and server address stay in your device's keychain and talk only to your own
+                server.
+              </P>
+            </Section>
+
+            <Section title="What we don't collect">
+              <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
+                <li>A history of your searches, tied to you.</li>
+                <li>Credentials for any streaming service.</li>
+                <li>Your listening history or playlists, except where you've explicitly connected ListenBrainz, which we don't see.</li>
+                <li>Advertising or cross-site tracking cookies. We don't run ads.</li>
+                <li>Your payment details.</li>
+                <li>Anything from web pages other than the streaming player pages the extension supports.</li>
+                <li>Precise or device-derived location. The only location we hold is one you typed in yourself.</li>
+                <li>Special-category data — health, politics, religion, biometrics. We have no use for it and don't ask.</li>
+              </ul>
+              <P>We also don't sell personal data, and we don't share it for advertising. There's no version of this where that changes without us telling you first.</P>
+            </Section>
+
+            <Section title="Why we're allowed to hold it">
+              <P>
+                If you're in the UK or EEA, the legal bases we rely on are: <strong>contract</strong>{' '}
+                for the things your account needs in order to work (your email, your saved artists,
+                sync); <strong>consent</strong> for anything optional you switched on (the
+                newsletter, public sharing, a location); and <strong>legitimate interests</strong>{' '}
+                for keeping the Service running, secure, and not overwhelmed by abuse — the
+                rate-limiting records, the error reports, and the anonymous and pseudonymous usage
+                counts. Where we rely on consent, you can withdraw it at any time without affecting
+                what came before.
+              </P>
+            </Section>
+
+            <Section title="How long we keep it">
+              <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
+                <li><strong>Account data</strong> — until you delete your account.</li>
+                <li><strong>Removed saved artists</strong> — a deletion marker is kept for 30 days so your other devices learn about the removal, then permanently erased.</li>
+                <li><strong>Search results cache</strong> — usually 30 minutes.</li>
+                <li><strong>Rate-limiting records</strong> — at most 24 hours.</li>
+                <li><strong>The record of which artist names we've checked on Bandcamp</strong> — kept indefinitely. It contains no personal data.</li>
+                <li><strong>Artist performance stats and product usage events</strong> — kept indefinitely as historical trends. Neither is linked to an account.</li>
+                <li><strong>Newsletter subscription</strong> — until you unsubscribe.</li>
+                <li><strong>Backups</strong> — deleted data can persist in backups for a short period after deletion before ageing out.</li>
+              </ul>
+            </Section>
+
+            <Section title="Your rights">
+              <P>
+                Depending on where you live you may have the right to access your data, correct it,
+                delete it, take a copy elsewhere, object to or restrict how we use it, and withdraw
+                consent. We extend all of these to everyone, wherever you are, because running two
+                standards would be worse for everybody.
+              </P>
+              <P>
+                Some you can exercise yourself, right now: your saved artists, username, location
+                and sharing setting are all editable in{' '}
+                <Link to="/settings" className="text-accent-primary hover:text-accent-secondary transition-colors underline">
+                  your settings
+                </Link>
+                , your newsletter subscription has an unsubscribe link on every issue, and your
+                release feed token can be rotated or revoked.
+              </P>
+              <P>
+                For anything else — a copy of everything we hold on you, or deletion of your
+                account and its data — email{' '}
+                <a href="mailto:support@unstream.stream" className="text-accent-primary hover:text-accent-secondary transition-colors underline">
+                  support@unstream.stream
+                </a>
+                . We'll respond within 30 days and we won't make you justify the request. If you're
+                in the UK or EEA you also have the right to complain to your data protection
+                authority.
+              </P>
+              <P>
+                You can clear local data without involving us at all: remove the browser extension
+                or clear its storage, or delete the app from your device.
+              </P>
+            </Section>
+
+            <Section title="Security">
+              <P>
+                Access to the database is restricted by row-level security policies, so accounts
+                can only reach their own rows. API keys are stored as hashes, never in plaintext.
+                Passwords are handled by Supabase Auth and we never see them. Traffic is encrypted
+                in transit.
+              </P>
+              <P>
+                No system is perfectly secure, and we won't pretend otherwise. If you find a
+                vulnerability, please tell us at support@unstream.stream — we'll take it seriously
+                and we won't come after you for reporting it in good faith. If a breach affects
+                your personal data, we'll tell you and the relevant regulator as the law requires.
+              </P>
+            </Section>
+
+            <Section title="Children">
+              <P>
+                Unstream isn't directed at children under 13, and we don't knowingly collect their
+                data. You must be at least 13 to create an account, or older where your country
+                requires it. If you believe a child under 13 has an account, tell us and we'll
+                remove it.
+              </P>
+            </Section>
+
+            <Section title="Changes to this policy">
+              <P>
+                We'll update this page as the Service changes, and update the "Last updated" date
+                when we do. For changes that materially affect how we handle your data, we'll give
+                notice on the site and, if you have an account, by email — before the change takes
+                effect where we reasonably can.
+              </P>
+            </Section>
+
+            <Section title="Contact">
+              <P>
+                Questions, requests, or corrections:{' '}
+                <a href="mailto:support@unstream.stream" className="text-accent-primary hover:text-accent-secondary transition-colors underline">
+                  support@unstream.stream
+                </a>
+                . The{' '}
                 <Link to="/terms" className="text-accent-primary hover:text-accent-secondary transition-colors underline">
                   Terms of Use
                 </Link>{' '}
-                cover the rest of the relationship: what Unstream does, what you agree to when you create an account, and what becomes public if you share your saved artists.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h3 className="font-display text-xl font-semibold text-text-primary mb-3">What We Collect</h3>
-
-              <h4 className="font-semibold text-text-primary mt-4 mb-2">Web App (unstream.stream)</h4>
-              <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
-                <li>Search queries you enter (artist names) - used only to fetch results</li>
-                <li>Basic analytics (page views, search counts) - no personal identifiers</li>
-                <li>Anonymous, aggregate artist engagement data (search appearances, page views, link clicks) - stored as daily totals per artist with no personal identifiers, IP addresses, or session data. Used to provide verified artists with performance insights on their dashboard.</li>
-              </ul>
-
-              <h4 className="font-semibold text-text-primary mt-4 mb-2">Artist Profiles (for artists who claim their page)</h4>
-              <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
-                <li>Email address - used for authentication and account recovery via Supabase Auth</li>
-                <li>Artist profile information you provide (bio, platform links, featured release embeds) - stored in our database and displayed publicly on your artist page</li>
-                <li>Your artist page URL slug - publicly visible</li>
-              </ul>
-
-              <h4 className="font-semibold text-text-primary mt-4 mb-2">Browser Extension (Chrome / Firefox)</h4>
-              <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
-                <li>Currently playing track information (artist name, song title) from Spotify, YouTube, YouTube Music, and Apple Music - used only to search for alternative platforms</li>
-                <li>Saved artists - stored locally in your browser</li>
-                <li>Anonymous, aggregate artist engagement signals (search appearances, link clicks) - no personal identifiers stored, only daily totals per artist</li>
-              </ul>
-
-              <h4 className="font-semibold text-text-primary mt-4 mb-2">macOS App</h4>
-              <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
-                <li>Currently playing track information from your system - used only to search for alternative platforms</li>
-                <li>Saved artists - stored locally on your device</li>
-                <li>Anonymous, aggregate artist engagement signals (search appearances, link clicks) - no personal identifiers stored, only daily totals per artist</li>
-              </ul>
-            </section>
-
-            <section className="mb-8">
-              <h3 className="font-display text-xl font-semibold text-text-primary mb-3">What We Don't Collect</h3>
-              <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
-                <li>Personal information (name, email, address) - unless you contact support or create an artist profile</li>
-                <li>Login credentials for streaming services</li>
-                <li>Listening history or playlists</li>
-                <li>Cookies for tracking or advertising</li>
-                <li>Any data from pages other than the specific streaming service player pages</li>
-              </ul>
-            </section>
-
-            <section className="mb-8">
-              <h3 className="font-display text-xl font-semibold text-text-primary mb-3">Third-Party Services</h3>
-              <p className="text-text-primary/90 leading-relaxed mb-3">
-                We use the following third-party services:
-              </p>
-              <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
-                <li><strong>Liberapay</strong> - for processing optional donations</li>
-                <li><strong>Supabase</strong> - for artist account authentication and profile data storage</li>
-                <li><strong>MusicBrainz</strong> - for fetching artist metadata and social links</li>
-                <li><strong>Bandcamp, Qobuz, and other music platforms</strong> - for searching artist availability</li>
-              </ul>
-              <p className="text-text-primary/90 leading-relaxed mb-3">
-                We do not share your personal data with these services beyond what is necessary to provide the functionality (e.g., sending an artist name to search for results).
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h3 className="font-display text-xl font-semibold text-text-primary mb-3">Data Storage</h3>
-              <p className="text-text-primary/90 leading-relaxed mb-3">
-                For listeners, all user preferences and saved artists are stored locally on your device using browser storage (for the extension) or app storage (for macOS).
-              </p>
-              <p className="text-text-primary/90 leading-relaxed mb-3">
-                For artists who claim their page, account and profile data (email, bio, links, embeds) is stored in our database hosted by Supabase. You can request deletion of your artist account and all associated data by contacting us at{' '}
-                <a href="mailto:support@unstream.stream" className="text-accent-primary hover:text-accent-secondary transition-colors underline">
-                  support@unstream.stream
-                </a>.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h3 className="font-display text-xl font-semibold text-text-primary mb-3">Your Rights</h3>
-              <p className="text-text-primary/90 leading-relaxed mb-3">
-                You can clear all locally stored data at any time by:
-              </p>
-              <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
-                <li><strong>Browser Extension:</strong> Remove the extension or clear extension data in your browser settings</li>
-                <li><strong>macOS App:</strong> Delete the app and its associated data from your system</li>
-                <li><strong>Artist Profile:</strong> Contact us at support@unstream.stream to request deletion of your account and all associated profile data</li>
-              </ul>
-            </section>
-
-            <section className="mb-8">
-              <h3 className="font-display text-xl font-semibold text-text-primary mb-3">Changes to This Policy</h3>
-              <p className="text-text-primary/90 leading-relaxed mb-3">
-                We may update this privacy policy from time to time. We will notify users of any material changes by updating the "Last updated" date at the top of this page.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h3 className="font-display text-xl font-semibold text-text-primary mb-3">Contact</h3>
-              <p className="text-text-primary/90 leading-relaxed mb-3">
-                If you have any questions about this privacy policy, please contact us at{' '}
-                <a href="mailto:support@unstream.stream" className="text-accent-primary hover:text-accent-secondary transition-colors underline">
-                  support@unstream.stream
-                </a>.
-              </p>
-            </section>
+                cover the rest of the relationship.
+              </P>
+            </Section>
           </article>
         </div>
       </main>
@@ -141,4 +374,17 @@ export function PrivacyPolicyPage() {
       <Footer />
     </div>
   );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="mb-8">
+      <h3 className="font-display text-xl font-semibold text-text-primary mb-3">{title}</h3>
+      {children}
+    </section>
+  );
+}
+
+function P({ children }: { children: React.ReactNode }) {
+  return <p className="text-text-primary/90 leading-relaxed mb-3">{children}</p>;
 }
