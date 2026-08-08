@@ -63,6 +63,10 @@
     "functions/artist-merge.ts",
     "functions/admin-artist-duplicates.ts",
     "functions/__tests__/artist-merge.test.ts",
-    "functions/__tests__/persist-identity-match.test.ts"
+    "functions/__tests__/persist-identity-match.test.ts",
+    "functions/claim-artist.ts",
+    "functions/admin-verify.ts",
+    "functions/__tests__/resend.test.ts",
+    "functions/__tests__/notifications.test.ts"
   ]
 }
