@@ -10,7 +10,7 @@ export function SupportPage() {
 
       <div className="pt-8 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="font-display text-3xl md:text-4xl font-semibold text-text-primary mb-4">Support Unstream</h1>
+          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary mb-4">Support Unstream</h1>
         </div>
       </div>
 

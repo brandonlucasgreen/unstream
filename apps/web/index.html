@@ -17,6 +17,10 @@
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://unstream.stream/og-image.png" />
+    <!-- Feed auto-discovery. Site-wide rather than per-page: these are static tags and the
+         SPA doesn't rewrite them, so a reader finds both feeds from any URL. -->
+    <link rel="alternate" type="application/rss+xml" title="Unstream Guides" href="/guides.xml" />
+    <link rel="alternate" type="application/rss+xml" title="Unstream Changelog" href="/changelog.xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Darker Grotesque carries the headings; Stack Sans Headline stays the body face. -->

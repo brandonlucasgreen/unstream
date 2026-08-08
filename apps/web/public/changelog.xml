@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Unstream Changelog</title>
+    <link>https://unstream.stream/changelog</link>
+    <atom:link href="https://unstream.stream/changelog.xml" rel="self" type="application/rss+xml" />
+    <description>What&apos;s new in Unstream — a running log of shipped features and improvements.</description>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 08 Aug 2026 00:21:59 GMT</lastBuildDate>
+    <item>
+      <title>Release pages</title>
+      <link>https://unstream.stream/changelog#release-pages</link>
+      <guid isPermaLink="false">unstream-changelog-release-pages</guid>
+      <pubDate>Sun, 02 Aug 2026 14:00:00 GMT</pubDate>
+      <description>Releases now have their own pages: every format and price we can find, on every platform that carries them, with an estimate of how much of it reaches the artist. Release alerts point here now instead of sending you straight to one shop.</description>
+      <content:encoded><![CDATA[<p>Releases now have their own pages: every format and price we can find, on every platform that carries them, with an estimate of how much of it reaches the artist. Release alerts point here now instead of sending you straight to one shop.</p><p><a href="https://unstream.stream/changelog#release-pages">See it on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Share your saved artists list</title>
+      <link>https://unstream.stream/changelog#share-saved-artists</link>
+      <guid isPermaLink="false">unstream-changelog-share-saved-artists</guid>
+      <pubDate>Sat, 27 Jun 2026 14:00:00 GMT</pubDate>
+      <description>Make your saved artists list public and share a link with friends — they can browse who you support on Unstream without signing in. Set a username in Settings, then toggle sharing from your dashboard.</description>
+      <content:encoded><![CDATA[<p>Make your saved artists list public and share a link with friends — they can browse who you support on Unstream without signing in. Set a username in Settings, then toggle sharing from your dashboard.</p><p><a href="https://unstream.stream/changelog#share-saved-artists">See it on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Sync saved artists on Mac and iOS</title>
+      <link>https://unstream.stream/changelog#mac-ios-sync</link>
+      <guid isPermaLink="false">unstream-changelog-mac-ios-sync</guid>
+      <pubDate>Sat, 20 Jun 2026 14:00:00 GMT</pubDate>
+      <description>Sign in on the Mac menu bar app or iOS app to sync your saved artists across devices. Saved artists from the web, extension, and native apps all stay in sync.</description>
+      <content:encoded><![CDATA[<p>Sign in on the Mac menu bar app or iOS app to sync your saved artists across devices. Saved artists from the web, extension, and native apps all stay in sync.</p><p><a href="https://unstream.stream/changelog#mac-ios-sync">See it on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Save artists on web</title>
+      <link>https://unstream.stream/changelog#pwa-save-artists</link>
+      <guid isPermaLink="false">unstream-changelog-pwa-save-artists</guid>
+      <pubDate>Sun, 31 May 2026 14:00:00 GMT</pubDate>
+      <description>You can now save artists you care about on unstream.stream — sign in and tap the heart on any artist page to keep them in your dashboard.</description>
+      <content:encoded><![CDATA[<p>You can now save artists you care about on unstream.stream — sign in and tap the heart on any artist page to keep them in your dashboard.</p><p><a href="https://unstream.stream/changelog#pwa-save-artists">See it on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Search from your dashboard</title>
+      <link>https://unstream.stream/changelog#pwa-dashboard-search</link>
+      <guid isPermaLink="false">unstream-changelog-pwa-dashboard-search</guid>
+      <pubDate>Sun, 31 May 2026 14:00:00 GMT</pubDate>
+      <description>Find a new artist without leaving the app. The Saved Artists section on your dashboard has its own search bar that takes you straight to results.</description>
+      <content:encoded><![CDATA[<p>Find a new artist without leaving the app. The Saved Artists section on your dashboard has its own search bar that takes you straight to results.</p><p><a href="https://unstream.stream/changelog#pwa-dashboard-search">See it on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Add Unstream to your Home Screen</title>
+      <link>https://unstream.stream/changelog#pwa-simplified-ui</link>
+      <guid isPermaLink="false">unstream-changelog-pwa-simplified-ui</guid>
+      <pubDate>Sun, 31 May 2026 14:00:00 GMT</pubDate>
+      <description>Unstream is now a Progressive Web App. Add it to your Home Screen on iOS or Android for a full-screen, app-like experience — no browser chrome, faster loads, and offline-ready.</description>
+      <content:encoded><![CDATA[<p>Unstream is now a Progressive Web App. Add it to your Home Screen on iOS or Android for a full-screen, app-like experience — no browser chrome, faster loads, and offline-ready.</p><p><a href="https://unstream.stream/changelog#pwa-simplified-ui">See it on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Browser extension notifications</title>
+      <link>https://unstream.stream/changelog#10</link>
+      <guid isPermaLink="false">unstream-changelog-10</guid>
+      <pubDate>Fri, 22 May 2026 14:00:00 GMT</pubDate>
+      <description>When the extension detects a new artist during playback, it sends a browser notification showing where to support them directly.</description>
+      <content:encoded><![CDATA[<p>When the extension detects a new artist during playback, it sends a browser notification showing where to support them directly.</p><p><a href="https://unstream.stream/changelog#10">See it on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>AI music policy badges</title>
+      <link>https://unstream.stream/changelog#ai-policy-indicator</link>
+      <guid isPermaLink="false">unstream-changelog-ai-policy-indicator</guid>
+      <pubDate>Fri, 17 Apr 2026 14:00:00 GMT</pubDate>
+      <description>See which platforms ban or restrict AI-generated music right on the search results. Badges for banned (🚫) and AI-cautious (🛡️) platforms, with a legend at the bottom of each result.</description>
+      <content:encoded><![CDATA[<p>See which platforms ban or restrict AI-generated music right on the search results. Badges for banned (🚫) and AI-cautious (🛡️) platforms, with a legend at the bottom of each result.</p><p><a href="https://unstream.stream/changelog#ai-policy-indicator">See it on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Public API v1</title>
+      <link>https://unstream.stream/changelog#public-api</link>
+      <guid isPermaLink="false">unstream-changelog-public-api</guid>
+      <pubDate>Sat, 11 Apr 2026 14:00:00 GMT</pubDate>
+      <description>Developers can now build on top of Unstream. The public API supports artist search, artist lookup, URL resolution, and a full platform list — with API key auth and tiered rate limiting.</description>
+      <content:encoded><![CDATA[<p>Developers can now build on top of Unstream. The public API supports artist search, artist lookup, URL resolution, and a full platform list — with API key auth and tiered rate limiting.</p><p><a href="https://unstream.stream/changelog#public-api">See it on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>No-JavaScript search</title>
+      <link>https://unstream.stream/changelog#noscript-search</link>
+      <guid isPermaLink="false">unstream-changelog-noscript-search</guid>
+      <pubDate>Sat, 11 Apr 2026 14:00:00 GMT</pubDate>
+      <description>Unstream now works without JavaScript. The search experience is fully server-rendered for accessibility, crawlers, and anyone who prefers a leaner web.</description>
+      <content:encoded><![CDATA[<p>Unstream now works without JavaScript. The search experience is fully server-rendered for accessibility, crawlers, and anyone who prefers a leaner web.</p><p><a href="https://unstream.stream/changelog#noscript-search">See it on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>iOS app coming soon</title>
+      <link>https://unstream.stream/changelog#ios-app</link>
+      <guid isPermaLink="false">unstream-changelog-ios-app</guid>
+      <pubDate>Sat, 11 Apr 2026 14:00:00 GMT</pubDate>
+      <description>An iOS app is in the works — search for artists, save your favorites, and get release alerts on your iPhone and iPad. Stay tuned.</description>
+      <content:encoded><![CDATA[<p>An iOS app is in the works — search for artists, save your favorites, and get release alerts on your iPhone and iPad. Stay tuned.</p><p><a href="https://unstream.stream/changelog#ios-app">See it on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Claim your artist page</title>
+      <link>https://unstream.stream/changelog#verified-artist-claims</link>
+      <guid isPermaLink="false">unstream-changelog-verified-artist-claims</guid>
+      <pubDate>Sun, 22 Mar 2026 14:00:00 GMT</pubDate>
+      <description>Indie artists can now claim and verify their page for free — every artist we feature in our daily posts has one. Claim yours and get all your direct-support links in one place.</description>
+      <content:encoded><![CDATA[<p>Indie artists can now claim and verify their page for free — every artist we feature in our daily posts has one. Claim yours and get all your direct-support links in one place.</p><p><a href="https://unstream.stream/changelog#verified-artist-claims">See it on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>ListenBrainz scrobbling</title>
+      <link>https://unstream.stream/changelog#listenbrainz-scrobbling</link>
+      <guid isPermaLink="false">unstream-changelog-listenbrainz-scrobbling</guid>
+      <pubDate>Sun, 22 Mar 2026 14:00:00 GMT</pubDate>
+      <description>The Mac app now scrobbles to ListenBrainz — open-source music tracking that actually respects your data.</description>
+      <content:encoded><![CDATA[<p>The Mac app now scrobbles to ListenBrainz — open-source music tracking that actually respects your data.</p><p><a href="https://unstream.stream/changelog#listenbrainz-scrobbling">See it on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Release alerts</title>
+      <link>https://unstream.stream/changelog#release-alerts</link>
+      <guid isPermaLink="false">unstream-changelog-release-alerts</guid>
+      <pubDate>Sun, 22 Mar 2026 14:00:00 GMT</pubDate>
+      <description>Save artists in the Mac app or browser extension and get notified when they drop something new. No more missing releases from the artists you care about.</description>
+      <content:encoded><![CDATA[<p>Save artists in the Mac app or browser extension and get notified when they drop something new. No more missing releases from the artists you care about.</p><p><a href="https://unstream.stream/changelog#release-alerts">See it on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Browser extension</title>
+      <link>https://unstream.stream/changelog#browser-extension</link>
+      <guid isPermaLink="false">unstream-changelog-browser-extension</guid>
+      <pubDate>Fri, 20 Mar 2026 14:00:00 GMT</pubDate>
+      <description>Browser extensions for Chrome and Firefox! See direct-support links for whatever artist you&apos;re listening to on Spotify or Apple Music.</description>
+      <content:encoded><![CDATA[<p>Browser extensions for Chrome and Firefox! See direct-support links for whatever artist you&apos;re listening to on Spotify or Apple Music.</p><p><a href="https://unstream.stream/changelog#browser-extension">See it on Unstream</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Verified artist pages</title>
+      <link>https://unstream.stream/changelog#artist-profiles</link>
+      <guid isPermaLink="false">unstream-changelog-artist-profiles</guid>
+      <pubDate>Sun, 01 Mar 2026 14:00:00 GMT</pubDate>
+      <description>Artists can claim a free page with all their direct-support links in one place.</description>
+      <content:encoded><![CDATA[<p>Artists can claim a free page with all their direct-support links in one place.</p><p><a href="https://unstream.stream/changelog#artist-profiles">See it on Unstream</a></p>]]></content:encoded>
+    </item>
+  </channel>
+</rss>

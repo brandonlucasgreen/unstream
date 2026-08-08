@@ -35,6 +35,8 @@
     "functions/me-username.ts",
     "functions/me-password.ts",
     "functions/me-feed-token.ts",
+    "functions/newsletter-subscribe.ts",
+    "functions/__tests__/newsletter-subscribe.test.ts",
     "functions/me-recent-releases.ts",
     "functions/feed-releases.ts",
     "functions/release-detail.ts",

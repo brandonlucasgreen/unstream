@@ -6,6 +6,7 @@ import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { SkeletonScreen } from '../components/Skeleton';
 import { ArticleListSkeleton } from '../components/LoadingSkeletons';
+import { NewsletterSignup } from '../components/NewsletterSignup';
 import { DEFAULT_PAGE_TITLE } from '../data/seo';
 
 interface GuideEntry {
@@ -18,6 +19,22 @@ interface GuideEntry {
 
 const INDEX_TITLE = 'Guides - Unstream';
 const INDEX_DESCRIPTION = 'How streaming payouts work, platforms worth knowing about, and ways to put more money in artists\' pockets.';
+
+// The four pillars a guide's frontmatter can declare — see scripts/generate-guides-manifest.ts.
+// An unrecognised value falls back to the raw slug rather than disappearing, so a typo in
+// frontmatter shows up on the page instead of silently rendering nothing.
+const PILLAR_LABELS: Record<string, string> = {
+  'artist-economics': 'Artist economics',
+  'platform-discovery': 'Platform discovery',
+  'how-to': 'How to',
+  builder: 'Builder',
+};
+
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr + 'T00:00:00');
+  if (isNaN(date.getTime())) return dateStr;
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
 
 export function GuidesIndexPage() {
   const [guides, setGuides] = useState<GuideEntry[]>([]);
@@ -51,15 +68,21 @@ export function GuidesIndexPage() {
       <Header />
       <div className="pt-6 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="font-display text-3xl md:text-4xl font-semibold text-text-primary mb-2">Guides</h1>
-          <p className="text-text-secondary text-lg">
-            How streaming payouts work, platforms worth knowing about, and ways to put more money in artists' pockets.
-          </p>
+          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary">Guides</h1>
         </div>
       </div>
 
       <main className="px-4 pb-16">
         <div className="max-w-3xl mx-auto">
+          <div className="mb-10 bg-surface-secondary rounded-xl p-6 border border-border">
+            <NewsletterSignup
+              source="guides"
+              heading="New guides, straight to you"
+              blurb="Writing on where your money goes, platforms worth knowing about, and how to support artists directly — plus what's new in Unstream."
+              feedUrl="/guides.xml"
+            />
+          </div>
+
           {loading ? (
             <SkeletonScreen label="Loading guides">
               <ArticleListSkeleton />
@@ -75,6 +98,11 @@ export function GuidesIndexPage() {
                   className="block bg-surface-secondary rounded-xl p-6 border border-border hover:border-accent-primary/40 transition-colors"
                 >
                   <div>
+                    <p className="text-text-muted text-xs mb-2">
+                      <time dateTime={guide.published}>{formatDate(guide.published)}</time>
+                      <span aria-hidden="true"> · </span>
+                      {PILLAR_LABELS[guide.pillar] ?? guide.pillar}
+                    </p>
                     <h2 className="font-display text-lg font-semibold text-text-primary mb-1">
                       {guide.title}
                     </h2>

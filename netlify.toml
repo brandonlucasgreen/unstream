@@ -134,6 +134,13 @@
   to = "/.netlify/functions/me-password"
   status = 200
 
+# Newsletter signup. Proxies to Buttondown server-side so the API key stays out of the
+# browser and the CSP doesn't need a third-party script host. Requires BUTTONDOWN_API_KEY.
+[[redirects]]
+  from = "/api/newsletter/subscribe"
+  to = "/.netlify/functions/newsletter-subscribe"
+  status = 200
+
 [[redirects]]
   from = "/api/me/saved-artists-sharing"
   to = "/.netlify/functions/user-sharing"

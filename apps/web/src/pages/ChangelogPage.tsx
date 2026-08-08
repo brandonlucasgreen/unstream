@@ -5,6 +5,7 @@ import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { Skeleton, SkeletonScreen } from '../components/Skeleton';
 import { ArticleListSkeleton } from '../components/LoadingSkeletons';
+import { NewsletterSignup } from '../components/NewsletterSignup';
 import { DEFAULT_PAGE_TITLE } from '../data/seo';
 
 interface ChangelogEntry {
@@ -45,6 +46,16 @@ export function ChangelogPage() {
     };
   }, []);
 
+  // Entries arrive after the browser has already resolved the URL's hash, so a link from
+  // changelog.xml (/changelog#some-entry) would otherwise land at the top of the page with
+  // its target nowhere on screen. Scroll to it once the entry it names actually exists.
+  useEffect(() => {
+    if (entries.length === 0) return;
+    const id = window.location.hash.slice(1);
+    if (!id) return;
+    document.getElementById(id)?.scrollIntoView();
+  }, [entries.length]);
+
   // Group entries by date
   const grouped = entries.reduce<Record<string, ChangelogEntry[]>>((acc, entry) => {
     if (!acc[entry.date]) acc[entry.date] = [];
@@ -60,15 +71,21 @@ export function ChangelogPage() {
 
       <div className="pt-6 pb-8 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="font-display text-3xl md:text-4xl font-semibold text-text-primary mb-2">Changelog</h1>
-          <p className="text-text-secondary text-lg">
-            What's new in Unstream.
-          </p>
+          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary">Changelog</h1>
         </div>
       </div>
 
       <main className="px-4 pb-16">
         <div className="max-w-2xl mx-auto">
+          <div className="mb-10 bg-surface-secondary rounded-xl p-6 border border-border">
+            <NewsletterSignup
+              source="changelog"
+              heading="Get new features in your inbox"
+              blurb="Plus updates on what we're working on, tips, and occasional writing on how to support music."
+              feedUrl="/changelog.xml"
+            />
+          </div>
+
           {loading ? (
             <SkeletonScreen label="Loading the changelog">
               <Skeleton className="h-3 w-28 mb-4" />
@@ -85,7 +102,10 @@ export function ChangelogPage() {
                     {grouped[date].map(entry => (
                       <div
                         key={entry.id}
-                        className="bg-surface-secondary rounded-xl p-5 border border-border"
+                        // The id is the anchor changelog.xml links each item to
+                        // (scripts/generate-changelog-feed.ts) — scroll-mt clears the header.
+                        id={entry.id}
+                        className="bg-surface-secondary rounded-xl p-5 border border-border scroll-mt-24"
                       >
                         <h2 className="font-display text-base font-semibold text-text-primary mb-1">
                           {entry.title}
