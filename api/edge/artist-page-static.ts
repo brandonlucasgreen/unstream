@@ -525,6 +525,8 @@ export default async function handler(request: Request, context: Context) {
         <a href="https://letterbird.co/hi-d2078591" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Contact</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
         <a href="/privacy-policy" style="color:var(--muted);text-decoration:none">Privacy policy</a>
+        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <a href="/terms" style="color:var(--muted);text-decoration:none">Terms of use</a>
       </nav>
     </div>
   </footer>
@@ -628,6 +630,8 @@ export default async function handler(request: Request, context: Context) {
         <a href="https://letterbird.co/hi-d2078591" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Contact</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
         <a href="/privacy-policy" style="color:var(--muted);text-decoration:none">Privacy policy</a>
+        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <a href="/terms" style="color:var(--muted);text-decoration:none">Terms of use</a>
       </nav>
     </div>
   </footer>

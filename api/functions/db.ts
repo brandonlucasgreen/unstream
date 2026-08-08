@@ -2988,7 +2988,7 @@ export async function getBandcampProbe(
 
     // A negative from a narrower candidate set must not answer for a wider one.
     if (candidates.length > 0 && !negativeCoversCandidates(row.probed_slugs, candidates)) {
-      console.log(`[DB] Re-probing "${queryNorm}": cached negative covered ${JSON.stringify(row.probed_slugs)}, query needs ${JSON.stringify(candidates)}`);
+      console.log(`[DB] Re-probing: cached negative covered ${row.probed_slugs?.length ?? 0} slug(s), query needs ${candidates.length}`);
       return null;
     }
 
@@ -3604,7 +3604,7 @@ export async function persistEnrichment(
 
     // Never overwrite links for claimed artists — they manage their own links
     if (artist.match_confidence === 'claimed') {
-      console.log(`[DB] Skipping enrichment for claimed artist "${artistName}"`);
+      console.log('[DB] Skipping enrichment for a claimed artist');
       return;
     }
 
@@ -3677,9 +3677,9 @@ export async function persistEnrichment(
       .eq('id', artistId);
 
     const locationLog = mbData.location ? ` + location` : '';
-    console.log(`[DB] Enriched "${artistName}" with ${enrichmentLinks.length} MusicBrainz links${locationLog}`);
+    console.log(`[DB] Enriched with ${enrichmentLinks.length} MusicBrainz links${locationLog}`);
   } catch (error) {
-    console.error(`[DB] Error enriching "${artistName}":`, error);
+    console.error('[DB] Error enriching artist:', error);
   }
 }
 

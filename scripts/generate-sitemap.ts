@@ -98,6 +98,7 @@ async function main() {
     { url: '/', changefreq: 'weekly', priority: '1.0' },
     { url: '/guides', changefreq: 'weekly', priority: '0.8' },
     { url: '/privacy-policy', changefreq: 'yearly', priority: '0.3' },
+    { url: '/terms', changefreq: 'yearly', priority: '0.3' },
   ];
 
   let urls = staticPages.map(page => `  <url>

@@ -67,8 +67,14 @@ We also link to a number of alternative services that can help you reduce your d
     content: `Unstream uses the [Faircamp Webring](http://faircamp.webr.ing) as a source for finding Faircamp sites for independent artists. If your Faircamp site isn't appearing in the results, consider joining the webring [at this link](https://faircamp.webr.ing/#instructions). Or, you can [email me](mailto:support@unstream.stream) your Faircamp URL and I'll have it added to the results.`
   },
   {
-    title: "What data does Unstream track?",
-    content: `Virtually nothing. We track visit and visitor counts, by location and source (ie. where you came to Unstream from), but no personal data is captured.`
+    title: "What data does Unstream track? Are my searches anonymous?",
+    content: `**Your searches are not linked to you.** There's no search history attached to your account, because we never build one — signing in doesn't change that. We do keep the search terms themselves for a short while, cached so the next person looking for the same artist doesn't cost a dozen platforms another round of requests, but there's nothing stored alongside them that says who searched. Search terms are deliberately kept out of our analytics and our server logs.
+
+**Without an account, nothing identifies you.** We count visits and page views through [GoatCounter](https://www.goatcounter.com), which is cookie-free and doesn't track you between sites, and we count things like "a search returned no results" so we can tell what's broken. The stats artists see on their dashboard are pure daily totals — how many searches an artist appeared in, how many clicks each platform link got — with no user, no session, and no IP attached to them.
+
+**With an account, we store what the account is for:** your email address, the artists you've saved, and any notes you added, so they can sync between the website, the extension and the apps. A username and a location are optional extras, and both are private until you choose to share your list.
+
+We don't sell any of it, we don't run ads, and there are no third-party trackers on the site. The [privacy policy](/privacy-policy) is the long version, and it's specific rather than vague — it names every place data goes and how long each thing is kept. You can ask for a copy of everything we hold on you, or ask us to delete it, by [emailing support](mailto:support@unstream.stream).`
   },
   {
     title: "I am ethically opposed to AI in music. Is AI at all used in Unstream?",

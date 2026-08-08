@@ -37,6 +37,8 @@ export function Footer() {
           </a>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <Link to="/privacy-policy" className="hover:text-text-primary transition-colors">Privacy policy</Link>
+          <span className="text-text-muted/40 text-xs">&#x2022;</span>
+          <Link to="/terms" className="hover:text-text-primary transition-colors">Terms of use</Link>
         </nav>
       </div>
     </footer>

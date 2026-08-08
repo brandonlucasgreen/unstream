@@ -259,6 +259,8 @@ function renderPage(query: string, results: SearchResult[], error?: string): str
         <a href="https://liberapay.com/brandonlucasgreen/donate" target="_blank" rel="noopener noreferrer">Donate</a>
         <span class="footer-dot">&#x2022;</span>
         <a href="/privacy-policy">Privacy</a>
+        <span class="footer-dot">&#x2022;</span>
+        <a href="/terms">Terms</a>
       </nav>
     </div>
   </footer>

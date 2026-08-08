@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
+import { LegalConsent } from './LegalConsent';
 
 interface LoginInterstitialProps {
   artistId: string;
@@ -155,6 +156,10 @@ export function LoginInterstitial({ artistId, artistName, onClose }: LoginInters
                 </button>
               </form>
             )}
+
+            <div className="mt-3">
+              <LegalConsent />
+            </div>
 
             <button
               onClick={onClose}

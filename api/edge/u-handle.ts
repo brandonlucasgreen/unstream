@@ -219,6 +219,8 @@ export default async function handler(request: Request, context: Context) {
         <a href="/support" style="color:var(--muted);text-decoration:none">Support</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
         <a href="/privacy-policy" style="color:var(--muted);text-decoration:none">Privacy policy</a>
+        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <a href="/terms" style="color:var(--muted);text-decoration:none">Terms of use</a>
       </nav>
     </div>
   </footer>

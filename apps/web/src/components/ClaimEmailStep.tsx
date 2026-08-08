@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { LegalConsent } from './LegalConsent';
 
 interface ClaimEmailStepProps {
   email: string;
@@ -31,10 +31,9 @@ export function ClaimEmailStep({ email, setEmail, loading, onSubmit }: ClaimEmai
       >
         {loading ? 'Sending...' : 'Send sign-in link'}
       </button>
-      <p className="text-xs text-text-muted text-center">
-        By clicking you accept Unstream's{' '}
-        <Link to="/privacy-policy" className="text-accent-primary hover:underline">Privacy Policy</Link>
-      </p>
+      <LegalConsent>
+        You also confirm you're this artist, or authorized to act for them.
+      </LegalConsent>
     </form>
   );
 }
