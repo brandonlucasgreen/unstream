@@ -8,6 +8,7 @@ import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
+import { LegalConsent } from '../components/LegalConsent';
 
 type ViewMode = 'form' | 'magicLinkSent' | 'resetSent';
 
@@ -202,6 +203,8 @@ export function LoginPage() {
                   <p className="text-center text-xs text-text-muted">
                     Don't have an account yet? <a href="https://unstream.stream" className="text-accent-primary hover:underline">Search for an artist</a> you like and click Save.
                   </p>
+
+                  <LegalConsent />
                 </>
               )}
             </>

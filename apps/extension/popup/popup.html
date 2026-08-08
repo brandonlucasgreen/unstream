@@ -129,6 +129,14 @@
             <div id="auth-error" class="auth-error hidden"></div>
           </form>
           <button id="auth-magic-link" class="auth-magic-link">Send magic link instead</button>
+          <!-- A magic link creates an account when there isn't one, so this form is a sign-up
+               form too. Same consent line as the web app's LegalConsent component. -->
+          <p class="auth-legal">
+            By continuing you agree to Unstream's
+            <a href="https://unstream.stream/terms" target="_blank" rel="noopener noreferrer">Terms of Use</a>
+            and
+            <a href="https://unstream.stream/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
+          </p>
           <div id="magic-link-sent" class="magic-link-sent hidden">
             <span class="empty-icon">📧</span>
             <p>Check your email for a sign-in link.</p>

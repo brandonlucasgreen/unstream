@@ -123,4 +123,5 @@ When adding a new migration, create a file in `supabase/migrations/` named `YYYY
 - [Roadmap](https://github.com/users/brandonlucasgreen/projects/4)
 - [Public metrics](https://unstream.goatcounter.com)
 - [Privacy policy](https://unstream.stream/privacy-policy)
+- [Terms of use](https://unstream.stream/terms)
 - [Support Unstream](https://unstream.stream/support)

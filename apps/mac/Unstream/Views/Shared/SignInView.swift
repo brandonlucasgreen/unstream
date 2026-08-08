@@ -103,6 +103,15 @@ struct SignInView: View {
                 .buttonStyle(.bordered)
                 .disabled(email.isEmpty || password.isEmpty || auth.isLoading)
             }
+
+            // A magic link creates an account when there isn't one, and this sheet also has an
+            // explicit Create Account button — so the consent line belongs here, matching the
+            // web app's LegalConsent component word for word.
+            Text("By continuing you agree to Unstream's [Terms of Use](https://unstream.stream/terms) and [Privacy Policy](https://unstream.stream/privacy-policy).")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
         }
         .padding()
         .frame(maxWidth: 320)

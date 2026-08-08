@@ -1,4 +1,6 @@
 
+import { Link } from 'react-router-dom';
+
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 
@@ -22,6 +24,13 @@ export function PrivacyPolicyPage() {
               </p>
               <p className="text-text-primary/90 leading-relaxed mb-3">
                 <strong>The short version:</strong> We collect minimal data, we don't sell your information, and we don't track you across the web.
+              </p>
+              <p className="text-text-primary/90 leading-relaxed mb-3">
+                Our{' '}
+                <Link to="/terms" className="text-accent-primary hover:text-accent-secondary transition-colors underline">
+                  Terms of Use
+                </Link>{' '}
+                cover the rest of the relationship: what Unstream does, what you agree to when you create an account, and what becomes public if you share your saved artists.
               </p>
             </section>
 

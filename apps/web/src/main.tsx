@@ -31,6 +31,7 @@ const KnownArtistsPage = lazyWithRetry(() => import('./pages/KnownArtistsPage.ts
 const RoadmapPage = lazyWithRetry(() => import('./pages/RoadmapPage.tsx').then(m => ({ default: m.RoadmapPage })))
 const SupportPage = lazyWithRetry(() => import('./pages/SupportPage.tsx').then(m => ({ default: m.SupportPage })))
 const PrivacyPolicyPage = lazyWithRetry(() => import('./pages/PrivacyPolicyPage.tsx').then(m => ({ default: m.PrivacyPolicyPage })))
+const TermsOfUsePage = lazyWithRetry(() => import('./pages/TermsOfUsePage.tsx').then(m => ({ default: m.TermsOfUsePage })))
 const AdminMergePage = lazyWithRetry(() => import('./pages/AdminMergePage.tsx').then(m => ({ default: m.AdminMergePage })))
 const AdminVerifyPage = lazyWithRetry(() => import('./pages/AdminVerifyPage.tsx').then(m => ({ default: m.AdminVerifyPage })))
 const AdminLinksPage = lazyWithRetry(() => import('./pages/AdminLinksPage.tsx').then(m => ({ default: m.AdminLinksPage })))
@@ -90,6 +91,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/roadmap" element={<RoadmapPage />} />
               <Route path="/support" element={<SupportPage />} />
               <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+              <Route path="/terms" element={<TermsOfUsePage />} />
               <Route path="/guides" element={<GuidesIndexPage />} />
               <Route path="/guides/:slug" element={<GuidePage />} />
               <Route path="/admin/merge" element={<AdminMergePage />} />

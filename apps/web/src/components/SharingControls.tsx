@@ -119,6 +119,12 @@ export function SharingControls() {
     return (
       <div className="rounded-lg border border-border p-4 bg-bg-secondary">
         <p className="text-sm text-text-primary">Your saved artists are private.</p>
+        <p className="text-xs text-text-muted mt-1">
+          Making them public publishes your username, the artists you've saved, and your location
+          if you've set one, at a link anyone can open and search engines can index. Your email
+          address is never published. See the{' '}
+          <Link to="/terms#section-6" className="text-accent-primary hover:underline">Terms of Use</Link>.
+        </p>
         {error && <p className="text-sm text-red-400 mt-2">{error}</p>}
         <button
           onClick={() => handleToggle(true)}

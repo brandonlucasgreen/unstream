@@ -1068,6 +1068,23 @@ body {
   cursor: not-allowed;
 }
 
+.auth-legal {
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: center;
+  color: #8B95A5;
+  margin-top: 8px;
+}
+
+.auth-legal a {
+  color: #60A5FA;
+  text-decoration: none;
+}
+
+.auth-legal a:hover {
+  text-decoration: underline;
+}
+
 .magic-link-sent {
   text-align: center;
   padding: 16px 0;
