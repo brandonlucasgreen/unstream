@@ -323,10 +323,10 @@ export function PrivacyPolicyPage() {
 
             <Section title="Security">
               <P>
-                Access to the database is restricted by row-level security policies, so accounts
-                can only reach their own rows. API keys are stored as hashes, never in plaintext.
-                Passwords are handled by Supabase Auth and we never see them. Traffic is encrypted
-                in transit.
+                Your account data — your saved artists, your username and location, your feed
+                token — is protected by database policies that scope every row to its owner. API
+                keys are stored as hashes, never in plaintext. Passwords are handled by Supabase
+                Auth and we never see them. Traffic is encrypted in transit.
               </P>
               <P>
                 No system is perfectly secure, and we won't pretend otherwise. If you find a
