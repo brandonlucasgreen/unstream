@@ -5,12 +5,9 @@ type Status = 'idle' | 'submitting' | 'pending' | 'already_subscribed' | 'error'
 
 interface NewsletterSignupProps {
   /** Where the signup happened. Sent to Buttondown as a tag; the API rejects anything else. */
-  source: 'changelog' | 'guides' | 'settings';
-  /** Omit where the surrounding container already provides one, as /settings sections do. */
+  source: 'changelog' | 'guides';
   heading?: string;
   blurb: string;
-  /** Pre-fill the field — used on /settings, where we already know the signed-in address. */
-  defaultEmail?: string;
   /** Absolute or root-relative URL of the matching RSS feed, offered as the no-email option. */
   feedUrl?: string;
   feedLabel?: string;
@@ -30,11 +27,10 @@ export function NewsletterSignup({
   source,
   heading,
   blurb,
-  defaultEmail = '',
   feedUrl,
   feedLabel = 'RSS feed',
 }: NewsletterSignupProps) {
-  const [email, setEmail] = useState(defaultEmail);
+  const [email, setEmail] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState<string | null>(null);
 

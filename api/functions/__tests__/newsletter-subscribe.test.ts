@@ -88,7 +88,7 @@ describe('newsletter-subscribe handler', () => {
   it('sends the API key as a Token header and never in the body', async () => {
     fetchMock.mockResolvedValue(buttondownReply(201, { id: 'abc' }));
 
-    await handler(post({ email: 'fan@example.com', source: 'settings' }));
+    await handler(post({ email: 'fan@example.com', source: 'changelog' }));
 
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe('https://api.buttondown.com/v1/subscribers');

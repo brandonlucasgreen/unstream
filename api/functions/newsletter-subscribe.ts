@@ -1,6 +1,12 @@
 // API endpoint: /api/newsletter/subscribe
 // POST — adds an email address to the Unstream newsletter on Buttondown.
-// Body: { email: string, source?: 'changelog' | 'guides' | 'settings' }
+// Body: { email: string, source?: 'changelog' | 'guides' }
+//
+// Deliberately not offered from /settings: that page already has its own opt-out toggles for
+// product email (see notification_preferences / NotificationPreferences.tsx), and pairing that
+// with an opt-*in* newsletter form in the same section read as "you still need to sign up for
+// this" even to people already getting product email. Buttondown signup lives only where
+// someone has just shown interest in a specific kind of content — guides, changelog.
 //
 // Why a proxy rather than Buttondown's own embed: the embed needs third-party script and
 // frame hosts in the CSP and can't be styled to match the site. Going through a function
@@ -36,7 +42,7 @@ const UPSTREAM_TIMEOUT_MS = 8000;
 // Tags let Buttondown segment by where somebody signed up. `source` is client-supplied and
 // Buttondown creates tags on demand, so anything off this list is dropped rather than
 // forwarded — otherwise a stranger with curl could fill the account with junk tags.
-const ALLOWED_SOURCES = new Set(['changelog', 'guides', 'settings']);
+const ALLOWED_SOURCES = new Set(['changelog', 'guides']);
 
 // Deliberately loose. Address syntax is far more permissive than any regex people actually
 // write, and the confirmation email is the real check — this only catches obvious typos and

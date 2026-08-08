@@ -93,10 +93,9 @@ describe('NewsletterSignup', () => {
     expect(screen.queryByRole('status')).toBeNull();
   });
 
-  it('pre-fills a known address and offers the feed as the no-email option', () => {
-    renderSignup({ defaultEmail: 'me@example.com', feedUrl: '/changelog.xml' });
+  it('offers the feed as the no-email option when a feedUrl is given', () => {
+    renderSignup({ feedUrl: '/changelog.xml' });
 
-    expect((screen.getByLabelText('Email address') as HTMLInputElement).value).toBe('me@example.com');
     expect(screen.getByRole('link', { name: /RSS feed/ }).getAttribute('href')).toBe('/changelog.xml');
   });
 });
