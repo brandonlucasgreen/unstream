@@ -24,6 +24,20 @@ export interface DiscoveredPlatformLink {
   url: string;
 }
 
+/**
+ * A location as it is displayed, not a full address. Every client renders it the same
+ * two-slot way — `city`, then `country ?? countryCode` — so the fields mean:
+ *
+ *   city        the most specific place we know. A state or province lands here when
+ *               that is all a source gave us ("Michigan, United States").
+ *   country     the broader label rendered after the city. That is a country name when
+ *               we know one, but it is a state or province when the source only offered
+ *               a city-and-region ("Portland, Oregon"). Do not read it as an actual
+ *               country — nothing does.
+ *   countryCode ISO 3166-1 alpha-2, used only as the `country` fallback in display.
+ *
+ * The one hard rule: all three fields come from a *single* source. See pickLocation.
+ */
 export interface ArtistLocation {
   city?: string;
   country?: string;
@@ -468,16 +482,95 @@ export function parseLocationString(raw: string): ArtistLocation {
   return { country: parts[0] };
 }
 
-// Merge location objects: fields from `primary` take precedence; missing fields filled from `fallback`.
-export function mergeLocations(...sources: (ArtistLocation | null | undefined)[]): ArtistLocation | undefined {
-  const result: ArtistLocation = {};
-  for (const src of sources) {
-    if (!src) continue;
-    if (!result.city && src.city) result.city = src.city;
-    if (!result.country && src.country) result.country = src.country;
-    if (!result.countryCode && src.countryCode) result.countryCode = src.countryCode;
+/**
+ * A MusicBrainz `area` / `begin-area` entity, trimmed to the fields we read.
+ *
+ * `type` is null on most community-entered areas, so it is not a usable discriminator.
+ * The ISO code arrays are: `iso-3166-1-codes` means the area *is* a country,
+ * `iso-3166-2-codes` means it is a state/province/subdivision. Neither means a city.
+ */
+export interface MusicBrainzArea {
+  name: string;
+  type?: string | null;
+  'iso-3166-1-codes'?: string[];
+  'iso-3166-2-codes'?: string[];
+}
+
+type AreaKind = 'country' | 'subdivision' | 'city';
+
+function classifyArea(area: MusicBrainzArea): AreaKind {
+  if (area['iso-3166-1-codes']?.length || area.type === 'Country') return 'country';
+  if (area['iso-3166-2-codes']?.length || area.type === 'Subdivision') return 'subdivision';
+  return 'city';
+}
+
+/**
+ * Build a location from a MusicBrainz artist's `area`, `begin-area` and country code.
+ *
+ * `begin-area` is where the artist is *from*, so it wins on specificity; `area` is where
+ * they are now and usually carries the country. Reading either one's `type` is what broke
+ * this before: Foo Fighters' area is "United States" with `type: null`, which the old code
+ * filed as a city.
+ */
+export function parseMusicBrainzArea(
+  area: MusicBrainzArea | null | undefined,
+  beginArea: MusicBrainzArea | null | undefined,
+  topLevelCountryCode?: string,
+): ArtistLocation | undefined {
+  const areas = [beginArea, area].filter((a): a is MusicBrainzArea => !!a?.name);
+  const find = (kind: AreaKind) => areas.find(a => classifyArea(a) === kind);
+
+  const countryArea = find('country');
+  const subdivision = find('subdivision')?.name;
+  const city = find('city')?.name;
+  const countryCode = countryArea?.['iso-3166-1-codes']?.[0] ?? topLevelCountryCode;
+  // Most artists' only country signal is the top-level code, with no country area to
+  // name it — MusicBrainz files Destroy Boys under area "Sacramento", country "US".
+  // Without this the page reads "Sacramento, US".
+  const countryName = countryArea?.name ?? countryNameFor(countryCode);
+
+  // Two display slots, filled most-specific first. With a city we show the subdivision
+  // beside it when there is one ("Seattle, Washington") and the country otherwise
+  // ("Seattle, United States"); with no city the subdivision takes the specific slot.
+  if (city) return trimLocation({ city, country: subdivision ?? countryName, countryCode });
+  if (subdivision) return trimLocation({ city: subdivision, country: countryName, countryCode });
+  if (countryName || countryCode) return trimLocation({ country: countryName, countryCode });
+  return undefined;
+}
+
+// ISO 3166-1 alpha-2 -> English country name. Intl is in both runtimes we deploy to, so
+// this needs no table of its own; an unrecognised code just stays a code.
+let regionNames: Intl.DisplayNames | undefined;
+function countryNameFor(code: string | undefined): string | undefined {
+  if (!code) return undefined;
+  try {
+    regionNames ??= new Intl.DisplayNames(['en'], { type: 'region' });
+    const name = regionNames.of(code.toUpperCase());
+    return name === code.toUpperCase() ? undefined : name;
+  } catch {
+    return undefined;
   }
-  return (result.city || result.country) ? result : undefined;
+}
+
+function trimLocation(location: ArtistLocation): ArtistLocation {
+  return {
+    ...(location.city ? { city: location.city } : {}),
+    ...(location.country ? { country: location.country } : {}),
+    ...(location.countryCode ? { countryCode: location.countryCode } : {}),
+  };
+}
+
+/**
+ * Choose one source's location outright — the most specific one that answered.
+ *
+ * Locations are never assembled field by field across sources. MusicBrainz says Foo
+ * Fighters formed in Seattle; their Bandcamp page says "California". Filling the empty
+ * country slot from the second source produced "Seattle, California", a place that does
+ * not exist. Each source is internally consistent; the combination of two is not.
+ */
+export function pickLocation(...sources: (ArtistLocation | null | undefined)[]): ArtistLocation | undefined {
+  const answered = sources.filter((s): s is ArtistLocation => !!s && !!(s.city || s.country || s.countryCode));
+  return answered.find(s => s.city) ?? answered.find(s => s.country) ?? answered[0];
 }
 
 /**
@@ -639,5 +732,5 @@ export async function enrichLocationFallback(query: string): Promise<ArtistLocat
     ? parseLocationString(bandcampMatch.location)
     : null;
 
-  return mergeLocations(bandcampLocation, mirloLocation);
+  return pickLocation(bandcampLocation, mirloLocation);
 }
