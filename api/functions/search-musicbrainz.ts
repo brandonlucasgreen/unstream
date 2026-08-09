@@ -28,7 +28,9 @@ import {
   mergeSocialLinks,
   searchPeerTubeChannels,
   parseLocationString,
-  mergeLocations,
+  parseMusicBrainzArea,
+  MusicBrainzArea,
+  pickLocation,
   fetchBandcampLocation,
   checkBandcampSubdomain,
   fetchMirloLocation,
@@ -157,8 +159,8 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
         relations?: { type: string; url?: { resource: string } }[];
         // Top-level ISO 3166-1 alpha-2 country code (e.g. "US"), separate from area
         country?: string;
-        area?: { name: string; type?: string | null; 'iso-3166-1-codes'?: string[] };
-        'begin-area'?: { name: string; type?: string | null };
+        area?: MusicBrainzArea;
+        'begin-area'?: MusicBrainzArea;
         // Present because of inc=release-groups; feeds the pre-2005 check below.
         'release-groups'?: { 'first-release-date'?: string }[];
       };
@@ -173,40 +175,11 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
         }
       }
 
-      // Parse location from area / begin-area fields.
-      // MB area types: 'Country', 'Subdivision', 'City', 'Municipality', 'District', 'Island'.
-      // Critically: type is often null for community-entered data — treat null-type areas as
-      // cities/regions (the most common case) rather than silently dropping them.
-      // The top-level `country` field (ISO 3166-1 alpha-2) is read separately for countryCode.
-      const topLevelCountryCode = artistData.country;
-      const cityTypes = new Set(['City', 'Municipality', 'District', 'Subdivision', 'Island']);
-      if (artistData.area) {
-        if (artistData.area.type === 'Country') {
-          mbLocation = {
-            country: artistData.area.name,
-            countryCode: artistData.area['iso-3166-1-codes']?.[0] ?? topLevelCountryCode,
-          };
-        } else {
-          // Null type or explicit sub-country type — treat as city/region.
-          // Attach the top-level country code so we have it for display context.
-          mbLocation = {
-            city: artistData.area.name,
-            countryCode: topLevelCountryCode,
-          };
-        }
-      } else if (topLevelCountryCode) {
-        // No area at all, but MB still gives us a country code
-        mbLocation = { countryCode: topLevelCountryCode };
-      }
-      if (artistData['begin-area'] && artistData['begin-area'].name !== artistData.area?.name) {
-        const beginType = artistData['begin-area'].type;
-        if (beginType === 'Country' && !mbLocation?.country) {
-          mbLocation = { ...mbLocation, country: artistData['begin-area'].name };
-        } else if (beginType !== 'Country') {
-          // null type or city/subdivision — use as city (more specific than area)
-          mbLocation = { ...mbLocation, city: artistData['begin-area'].name };
-        }
-      }
+      mbLocation = parseMusicBrainzArea(
+        artistData.area,
+        artistData['begin-area'],
+        artistData.country,
+      );
 
       const relations = artistData.relations || [];
 
@@ -317,8 +290,9 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       platformUrls = platformUrls.filter(u => u !== mbBandcampUrl);
     }
 
-    // Merge locations: MusicBrainz is authoritative; Bandcamp and Mirlo fill in missing fields
-    const location = mergeLocations(mbLocation, bandcampLocation, mirloLocation);
+    // Pick one source outright — MusicBrainz first, then Bandcamp, then Mirlo. Fields are
+    // never combined across sources; see pickLocation.
+    const location = pickLocation(mbLocation, bandcampLocation, mirloLocation);
 
     // If we found a Linktree URL from MusicBrainz or official site, scrape it for additional links
     // Prefer MusicBrainz Linktree (more authoritative), fall back to official site

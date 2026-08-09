@@ -52,7 +52,9 @@ import {
   mergeSocialLinks,
   searchPeerTubeChannels,
   fetchLinktreeLinks,
-  mergeLocations,
+  parseMusicBrainzArea,
+  type MusicBrainzArea,
+  pickLocation,
   fetchBandcampLocation,
   checkBandcampSubdomain,
   fetchMirloLocation,
@@ -502,35 +504,15 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
       const artistData = await artistResponse.json() as {
         relations?: { type: string; url?: { resource: string } }[];
         country?: string;
-        area?: { name: string; type?: string | null; 'iso-3166-1-codes'?: string[] };
-        'begin-area'?: { name: string; type?: string | null };
+        area?: MusicBrainzArea;
+        'begin-area'?: MusicBrainzArea;
       };
 
-      // Parse location from area / begin-area fields
-      const topLevelCountryCode = artistData.country;
-      if (artistData.area) {
-        if (artistData.area.type === 'Country') {
-          mbLocation = {
-            country: artistData.area.name,
-            countryCode: artistData.area['iso-3166-1-codes']?.[0] ?? topLevelCountryCode,
-          };
-        } else {
-          mbLocation = {
-            city: artistData.area.name,
-            countryCode: topLevelCountryCode,
-          };
-        }
-      } else if (topLevelCountryCode) {
-        mbLocation = { countryCode: topLevelCountryCode };
-      }
-      if (artistData['begin-area'] && artistData['begin-area'].name !== artistData.area?.name) {
-        const beginType = artistData['begin-area'].type;
-        if (beginType === 'Country' && !mbLocation?.country) {
-          mbLocation = { ...mbLocation, country: artistData['begin-area'].name };
-        } else if (beginType !== 'Country') {
-          mbLocation = { ...mbLocation, city: artistData['begin-area'].name };
-        }
-      }
+      mbLocation = parseMusicBrainzArea(
+        artistData.area,
+        artistData['begin-area'],
+        artistData.country,
+      );
 
       const relations = artistData.relations || [];
 
@@ -676,8 +658,8 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
       bandcampUrl = null;
     }
 
-    // Merge locations
-    const location = mergeLocations(mbLocation, bandcampLocation, mirloLocation);
+    // One source, whole — never a city from one and a region from another.
+    const location = pickLocation(mbLocation, bandcampLocation, mirloLocation);
 
     // Scrape Linktree if found
     let linktreeSocialLinks: SocialLink[] = [];
