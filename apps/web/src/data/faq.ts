@@ -82,7 +82,7 @@ We don't sell any of it, we don't run ads, and there are no third-party trackers
   },
   {
     title: "Is there a Windows app / iOS app / Android app / Chrome extension / Firefox extension for Unstream?",
-    content: `Yes! Unstream is available on [macOS](https://apps.apple.com/app/unstream/id6743129755) [iOS](https://apps.apple.com/app/unstream/id6743129755) [Chrome](https://chromewebstore.google.com/detail/unstream/ekgpnodajpmdfcbdnbmgcichhbaipnmc) [Firefox](https://addons.mozilla.org/en-US/firefox/addon/unstream/) and [the web](https://unstream.stream).`
+    content: `Yes! Unstream is available for [macOS](https://github.com/brandonlucasgreen/unstream/releases/latest), [Chrome](https://chromewebstore.google.com/detail/unstream/ekgpnodajpmdfcbdnbmgcichhbaipnmc), [Firefox](https://addons.mozilla.org/en-US/firefox/addon/unstream/), and [the web](https://unstream.stream).`
   },
   {
     title: "I'd like to request a feature or improvement. How can I do that?",
