@@ -535,7 +535,16 @@ export function PressPage() {
                   >
                     Kid Lightbulbs
                   </a>{' '}
-                  and works in product at Buffer. He built Unstream after years of selling music
+                  and works in product at{' '}
+                  <a
+                    href="https://buffer.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent-primary hover:underline"
+                  >
+                    Buffer
+                  </a>
+                  . He built Unstream after years of selling music
                   directly and realizing most of his listeners had no idea the option existed.
                 </p>
                 <p className="text-sm text-text-muted mt-3">
