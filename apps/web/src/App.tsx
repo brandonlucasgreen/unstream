@@ -540,7 +540,10 @@ function App() {
             <p className="text-text-secondary mb-6 text-center md:text-left">
               Can't find the artist you want to support? Have a feature idea? Reach out below.
             </p>
-            <div ref={letterbirdRef}></div>
+            {/* .letterbird-contact is the hook index.css uses to let the embed auto-size. Without
+                it the iframe stays at its default ~150px and the form is cramped — the rule was
+                there, but nothing had ever matched it. */}
+            <div ref={letterbirdRef} className="letterbird-contact"></div>
           </div>
         </div>
       </section>

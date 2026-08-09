@@ -5,7 +5,7 @@ type Status = 'idle' | 'submitting' | 'pending' | 'already_subscribed' | 'error'
 
 interface NewsletterSignupProps {
   /** Where the signup happened. Sent to Buttondown as a tag; the API rejects anything else. */
-  source: 'changelog' | 'guides';
+  source: 'changelog' | 'guides' | 'contact';
   heading?: string;
   blurb: string;
   /** Absolute or root-relative URL of the matching RSS feed, offered as the no-email option. */

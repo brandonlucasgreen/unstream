@@ -97,6 +97,8 @@ async function main() {
   const staticPages = [
     { url: '/', changefreq: 'weekly', priority: '1.0' },
     { url: '/guides', changefreq: 'weekly', priority: '0.8' },
+    { url: '/press', changefreq: 'monthly', priority: '0.5' },
+    { url: '/contact', changefreq: 'monthly', priority: '0.5' },
     { url: '/privacy-policy', changefreq: 'yearly', priority: '0.3' },
     { url: '/terms', changefreq: 'yearly', priority: '0.3' },
   ];

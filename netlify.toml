@@ -59,6 +59,16 @@
   excludedPattern = "^/u/[^/]+/releases\\.(ics|xml)$"
   function = "u-handle"
 
+# Link previews for the hand-written static pages. Their titles are set client-side, so without
+# this an unfurl of /press — the URL that goes in every press pitch — shows the homepage's card.
+[[edge_functions]]
+  path = "/press"
+  function = "static-page-meta"
+
+[[edge_functions]]
+  path = "/contact"
+  function = "static-page-meta"
+
 [[redirects]]
   from = "/api/artist-directory"
   to = "/.netlify/functions/artist-directory"

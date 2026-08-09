@@ -122,7 +122,7 @@ export function Header() {
     : [
         { to: '/guides', label: 'Guides' },
         { to: '/faq', label: 'FAQ' },
-        { to: 'https://letterbird.co/hi-d2078591', label: 'Contact', external: true },
+        { to: '/contact', label: 'Contact' },
         { to: '/login', label: 'Login', button: true },
       ];
 
