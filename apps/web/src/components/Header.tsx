@@ -122,6 +122,7 @@ export function Header() {
     : [
         { to: '/guides', label: 'Guides' },
         { to: '/faq', label: 'FAQ' },
+        { to: '/press', label: 'Press kit' },
         { to: '/contact', label: 'Contact' },
         { to: '/login', label: 'Login', button: true },
       ];

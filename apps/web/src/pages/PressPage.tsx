@@ -334,14 +334,7 @@ export function PressPage() {
           <h1 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary mb-4">
             Press kit
           </h1>
-          <p className="text-lg text-text-secondary mb-4">
-            Everything you'd otherwise have to email me for. If something's missing, it shouldn't be —{' '}
-            <Link to="/contact" className="text-accent-primary hover:underline">
-              tell me
-            </Link>{' '}
-            and I'll add it.
-          </p>
-          <p className="text-text-secondary mb-12">
+          <p className="text-lg text-text-secondary mb-12">
             Unstream is made by one person. Everything here is free to use, quote, edit for length,
             and reproduce without asking.
           </p>

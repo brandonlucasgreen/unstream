@@ -18,7 +18,7 @@ export function Footer() {
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <Link to="/faq" className="hover:text-text-primary transition-colors">FAQ</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
-          <Link to="/press" className="hover:text-text-primary transition-colors">Press</Link>
+          <Link to="/press" className="hover:text-text-primary transition-colors">Press kit</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <Link to="/contact" className="hover:text-text-primary transition-colors">Contact</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
