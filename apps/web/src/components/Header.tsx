@@ -119,7 +119,12 @@ export function Header() {
         { to: '/dashboard', label: 'Dashboard', emphasis: true },
         { to: '/settings', label: 'Settings' },
       ]
-    : [{ to: '/login', label: 'Login', button: true }];
+    : [
+        { to: '/guides', label: 'Guides' },
+        { to: '/faq', label: 'FAQ' },
+        { to: 'https://letterbird.co/hi-d2078591', label: 'Contact', external: true },
+        { to: '/login', label: 'Login', button: true },
+      ];
 
   // The sticky header keeps a solid background rather than a blurred one: a
   // backdrop-filter would become the containing block for MobileNav's fixed
@@ -169,6 +174,16 @@ export function Header() {
           <nav className="hidden sm:flex items-center gap-3 text-sm">
             {navItems.map(entry => isNavGroup(entry) ? (
               <NavDropdown key={entry.label} group={entry} />
+            ) : entry.external ? (
+              <a
+                key={entry.to}
+                href={entry.to}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-text-muted hover:text-text-primary transition-colors"
+              >
+                {entry.label}
+              </a>
             ) : (
               <Link
                 key={entry.to}

@@ -12,6 +12,8 @@ export type NavItem = {
    * colour, so a button inside the list would only add noise.
    */
   button?: boolean;
+  /** `to` is a full URL to an outside site (e.g. Contact) — render a plain `<a>`, not a router `Link`. */
+  external?: boolean;
 };
 
 /** A labelled set of links — a dropdown on desktop, an indented block here. */
@@ -159,6 +161,19 @@ export function MobileNav({
                   </Link>
                 ))}
               </div>
+            ) : entry.external ? (
+              <a
+                key={entry.to}
+                href={entry.to}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={close}
+                className={`border-b border-border px-6 py-4 text-base hover:bg-bg-hover transition-colors ${
+                  entry.emphasis ? 'text-accent-primary font-medium' : 'text-text-primary'
+                }`}
+              >
+                {entry.label}
+              </a>
             ) : (
               <Link
                 key={entry.to}
