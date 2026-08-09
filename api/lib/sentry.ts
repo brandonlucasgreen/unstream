@@ -14,10 +14,30 @@
  *
  * Set the env var in Netlify UI:
  *   SENTRY_DSN = https://a1c8d202cd8df4fc88a2fd54f2e4490b@o4510896048242688.ingest.us.sentry.io/4511275115151360
- *   SENTRY_ENV  = production  (or staging, etc.)
+ *
+ * Environment tagging used to fall back to `NODE_ENV`, which Netlify Functions never set at
+ * runtime (same gotcha as `CONTEXT` in request-catalog.ts — it's a build-time-only variable),
+ * so every deployed function reported `environment: development` regardless of context. `URL`
+ * *is* exposed to functions at runtime, so that's what production detection is based on now.
+ * `SENTRY_ENV` still wins when set, for anyone who wants an explicit override (e.g. `staging`).
  */
 
 import * as Sentry from '@sentry/node';
+
+const PRODUCTION_HOSTNAME = 'unstream.stream';
+
+/**
+ * `SENTRY_ENV` overrides everything else. Otherwise: no `URL` means a non-Netlify runtime
+ * (local `npm run dev`, a test run) → `development`; `URL` matching the production domain →
+ * `production`; any other `URL` (a `*.netlify.app` deploy preview or branch deploy) → `preview`.
+ */
+function detectEnvironment(): string {
+  if (process.env.SENTRY_ENV) return process.env.SENTRY_ENV;
+
+  const url = process.env.URL;
+  if (!url) return 'development';
+  return url.includes(PRODUCTION_HOSTNAME) ? 'production' : 'preview';
+}
 
 let initialized = false;
 
@@ -32,7 +52,7 @@ export function initSentry(): void {
 
   Sentry.init({
     dsn,
-    environment: process.env.SENTRY_ENV || process.env.NODE_ENV || 'development',
+    environment: detectEnvironment(),
     // SENTRY_RELEASE takes priority if set in Netlify (allows pinning release names
     // independent of build SHA). Fall back through SENTRY_RELEASE → COMMIT_REF →
     // COMMIT_SHA → 'unknown' so version tracking works reliably on Netlify.
