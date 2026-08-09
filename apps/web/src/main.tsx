@@ -40,6 +40,8 @@ const ResetPasswordPage = lazyWithRetry(() => import('./pages/ResetPasswordPage.
 const GuidesIndexPage = lazyWithRetry(() => import('./pages/GuidesIndexPage.tsx').then(m => ({ default: m.GuidesIndexPage })))
 const GuidePage = lazyWithRetry(() => import('./pages/GuidePage.tsx').then(m => ({ default: m.GuidePage })))
 const DevelopersPage = lazyWithRetry(() => import('./pages/DevelopersPage.tsx').then(m => ({ default: m.DevelopersPage })))
+const PressPage = lazyWithRetry(() => import('./pages/PressPage.tsx').then(m => ({ default: m.PressPage })))
+const ContactPage = lazyWithRetry(() => import('./pages/ContactPage.tsx').then(m => ({ default: m.ContactPage })))
 const ChangelogPage = lazyWithRetry(() => import('./pages/ChangelogPage.tsx').then(m => ({ default: m.ChangelogPage })))
 const ExtensionPage = lazyWithRetry(() => import('./pages/ExtensionPage.tsx').then(m => ({ default: m.ExtensionPage })))
 const ImportPage = lazyWithRetry(() => import('./pages/ImportPage.tsx').then(m => ({ default: m.ImportPage })))
@@ -100,6 +102,8 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/admin/release-review" element={<AdminReleaseReviewPage />} />
               <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
               <Route path="/developers" element={<DevelopersPage />} />
+              <Route path="/press" element={<PressPage />} />
+              <Route path="/contact" element={<ContactPage />} />
               <Route path="/extension" element={<ExtensionPage />} />
               <Route path="/import" element={<ImportPage />} />
               <Route path="/changelog" element={<ChangelogPage />} />
