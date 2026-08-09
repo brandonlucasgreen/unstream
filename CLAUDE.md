@@ -2,7 +2,7 @@
 
 ## Project overview
 
-Unstream helps music listeners find their favorite artists on alternative platforms outside streaming, so they can support artists directly. It searches ~17 platforms (Bandcamp, Mirlo, Ampwall, Subvert, Beatport, Faircamp, Jam.coop, Patreon, etc.) and shows verified links grouped by category with artist payout percentages. On Bandcamp Fridays, results highlight the platforms that pay artists 100%.
+Unstream helps music listeners find their favorite artists on alternative platforms outside streaming, so they can support artists directly. It searches 17+ platforms (Bandcamp, Mirlo, Ampwall, Subvert, Beatport, Faircamp, Jam.coop, Patreon, etc.) and shows verified links grouped by category with artist payout percentages. On Bandcamp Fridays, results highlight the platforms that pay artists 100%.
 
 The product runs at [unstream.stream](https://unstream.stream).
 

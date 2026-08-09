@@ -1,12 +1,12 @@
 ---
 title: "Every platform Unstream supports: compared"
-description: A complete comparison of all 15 music platforms Unstream searches — payout rates, what they're best for, and who should use them.
+description: A complete comparison of all 17 music platforms Unstream searches — payout rates, what they're best for, and who should use them.
 pillar: platform-discovery
 published: 2026-04-11
 draft: false
 ---
 
-Unstream searches 15 music platforms at once so you can see everywhere an artist sells their music — and how much of your money actually reaches them. But what's the difference between all of these? Here's a full breakdown.
+Unstream searches 17 music platforms at once so you can see everywhere an artist sells their music — and how much of your money actually reaches them. But what's the difference between all of these? Here's a full breakdown.
 
 ## Quick comparison
 
@@ -19,10 +19,12 @@ Unstream searches 15 music platforms at once so you can see everywhere an artist
 | Beatport | Marketplace | 55–70% | Electronic and DJ music |
 | EVEN | Marketplace | ~80% | Direct-to-fan marketplace |
 | Jam.coop | Marketplace | Co-op model | Listener-owned cooperative |
+| Subvert | Marketplace | 97% | Collectively owned marketplace, 0% platform fee |
 | Discogs | Marketplace | Varies | Physical records (used and new) |
 | Ko-fi | Patronage | 92–97% | Tips and small purchases |
 | Buy Me a Coffee | Patronage | ~92% | Simple one-time support |
 | Patreon | Patronage | 86–90% | Memberships and ongoing support |
+| Liberapay | Patronage | ~97% | Recurring donations, no platform fee |
 | Faircamp | Decentralized | 90–97% | Self-hosted storefronts |
 | Bandwagon | Decentralized | — | ActivityPub-based music community |
 | Hoopla | Library | — | Free listening with a library card |
@@ -118,6 +120,16 @@ Jam.coop is building a listener-owned cooperative music service. The goal: inste
 
 ---
 
+### Subvert
+
+**Payout: 97%, 0% platform fee**
+
+Subvert is a collectively owned music marketplace — no outside investors, no platform cut. It also has one of the industry's few formal, written AI policies, spelling out how the platform treats AI-generated music. Unstream can only link to Subvert's search results for an artist rather than a specific artist page, so you'll do one extra click to land on their storefront.
+
+**Best for:** Fans who want their purchase to go to a platform with no fee sitting between them and the artist.
+
+---
+
 ### Discogs
 
 **Payout: Varies (marketplace)**
@@ -163,6 +175,16 @@ The original creator membership platform. Artists keep 86–90% of subscription 
 The tradeoff: Patreon rewards consistency. It takes real effort to keep members engaged, and fans who don't see regular updates tend to cancel.
 
 **Best for:** Fans who want to support artists they follow closely and get ongoing access to their work.
+
+---
+
+### Liberapay
+
+**Payout: ~97%**
+
+Liberapay is a nonprofit, open-source recurring-donations platform — it takes no cut of its own, so artists only lose what payment processors charge. It's a simpler, no-frills alternative to Patreon: no membership tiers or exclusive content, just a straightforward way to send an artist a small amount every week or month.
+
+**Best for:** Fans who want to set up ongoing support without paying for a platform fee or committing to a tiered membership.
 
 ---
 
@@ -216,4 +238,4 @@ Also free with a library card. Freegal partners with Sony Music Distribution and
 
 The biggest friction with this whole ecosystem is fragmentation. An artist might sell on Bandcamp, accept tips on Ko-fi, and have a Faircamp site — but you'd have to check each one separately.
 
-[Unstream](https://unstream.stream) searches all 15 of these platforms at once. Search for any artist and see everywhere they sell, how much they keep on each platform, and where you can support them most directly.
+[Unstream](https://unstream.stream) searches all 17 of these platforms at once. Search for any artist and see everywhere they sell, how much they keep on each platform, and where you can support them most directly.

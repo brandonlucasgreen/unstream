@@ -29,7 +29,7 @@ Over a year that's 12–24 albums you permanently own, with $100+ going directly
 
 This used to be the annoying part. Artists sell across tons of platforms — [Bandcamp](https://bandcamp.com), [Mirlo](https://mirlo.space), [Ampwall](https://ampwall.com), their own websites, [Ko-fi](https://ko-fi.com) — and checking each one individually is tedious enough that most people just don't bother.
 
-[Unstream](https://unstream.stream) does this in one search. Type in an artist and it shows everywhere they sell across 15+ platforms, with how much of your money reaches them on each one. Free, no account needed.
+[Unstream](https://unstream.stream) does this in one search. Type in an artist and it shows everywhere they sell across 17+ platforms, with how much of your money reaches them on each one. Free, no account needed.
 
 ## Pick a music player
 

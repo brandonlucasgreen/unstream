@@ -9,7 +9,7 @@ export function DevelopersPage() {
         <div className="prose prose-gray dark:prose-invert max-w-none">
           <h1>Unstream API</h1>
           <p className="text-lg text-gray-600 dark:text-gray-400">
-            Find your favorite artists on alternative music platforms. Search across 15+ platforms
+            Find your favorite artists on alternative music platforms. Search across 17+ platforms
             including Bandcamp, Mirlo, Qobuz, Beatport, Faircamp, Patreon, and more.
           </p>
           <p>

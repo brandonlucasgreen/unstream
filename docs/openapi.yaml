@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Unstream API
   description: |
-    Find your favorite artists on alternative music platforms. Search across 15+ platforms
+    Find your favorite artists on alternative music platforms. Search across 17+ platforms
     including Bandcamp, Mirlo, Qobuz, Beatport, Faircamp, Patreon, and more.
 
     ## Authentication

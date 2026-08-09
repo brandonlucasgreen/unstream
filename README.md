@@ -4,7 +4,7 @@
 
 [unstream.stream](https://unstream.stream)
 
-Unstream searches 17 platforms to find where your favorite artists sell music, accept patronage, or share music for free outside the streaming ecosystem. It shows artist payout percentages so you can make informed choices about where your money goes.
+Unstream searches 17+ platforms to find where your favorite artists sell music, accept patronage, or share music for free outside the streaming ecosystem. It shows artist payout percentages so you can make informed choices about where your money goes.
 
 ## How it works
 

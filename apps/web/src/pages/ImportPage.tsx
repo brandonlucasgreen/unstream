@@ -58,7 +58,7 @@ export function ImportPage() {
                 <div>
                   <p className="font-medium text-text-primary">We match your artists across platforms</p>
                   <p className="text-sm text-text-secondary mt-1">
-                    Unstream searches every artist in your library across 17 alternative platforms and shows you which ones have direct-support options.
+                    Unstream searches every artist in your library across 17+ alternative platforms and shows you which ones have direct-support options.
                   </p>
                 </div>
               </div>

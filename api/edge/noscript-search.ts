@@ -135,7 +135,7 @@ function renderPage(query: string, results: SearchResult[], error?: string): str
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${query ? `${escapedQuery} - Unstream Search` : 'Search - Unstream'}</title>
-  <meta name="description" content="Search any artist. See where your money actually goes. Unstream shows artist payout percentages across 17 platforms.">
+  <meta name="description" content="Search any artist. See where your money actually goes. Unstream shows artist payout percentages across 17+ platforms.">
   <meta name="robots" content="noindex">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

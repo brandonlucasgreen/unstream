@@ -6,14 +6,14 @@
     <atom:link href="https://unstream.stream/guides.xml" rel="self" type="application/rss+xml" />
     <description>How streaming payouts work, platforms worth knowing about, and ways to put more money in artists&apos; pockets.</description>
     <language>en-us</language>
-    <lastBuildDate>Sat, 08 Aug 2026 00:21:59 GMT</lastBuildDate>
+    <lastBuildDate>Sun, 09 Aug 2026 13:36:38 GMT</lastBuildDate>
     <item>
       <title>Every platform Unstream supports: compared</title>
       <link>https://unstream.stream/guides/every-platform-unstream-supports-compared</link>
       <guid isPermaLink="false">unstream-guide-every-platform-unstream-supports-compared</guid>
       <pubDate>Sat, 11 Apr 2026 14:00:00 GMT</pubDate>
-      <description>A complete comparison of all 15 music platforms Unstream searches — payout rates, what they&apos;re best for, and who should use them.</description>
-      <content:encoded><![CDATA[<p>Unstream searches 15 music platforms at once so you can see everywhere an artist sells their music — and how much of your money actually reaches them. But what&#39;s the difference between all of these? Here&#39;s a full breakdown.</p>
+      <description>A complete comparison of all 17 music platforms Unstream searches — payout rates, what they&apos;re best for, and who should use them.</description>
+      <content:encoded><![CDATA[<p>Unstream searches 17 music platforms at once so you can see everywhere an artist sells their music — and how much of your money actually reaches them. But what&#39;s the difference between all of these? Here&#39;s a full breakdown.</p>
 <h2>Quick comparison</h2>
 <table>
 <thead>
@@ -67,6 +67,12 @@
 <td>Listener-owned cooperative</td>
 </tr>
 <tr>
+<td>Subvert</td>
+<td>Marketplace</td>
+<td>97%</td>
+<td>Collectively owned marketplace, 0% platform fee</td>
+</tr>
+<tr>
 <td>Discogs</td>
 <td>Marketplace</td>
 <td>Varies</td>
@@ -89,6 +95,12 @@
 <td>Patronage</td>
 <td>86–90%</td>
 <td>Memberships and ongoing support</td>
+</tr>
+<tr>
+<td>Liberapay</td>
+<td>Patronage</td>
+<td>~97%</td>
+<td>Recurring donations, no platform fee</td>
 </tr>
 <tr>
 <td>Faircamp</td>
@@ -160,6 +172,11 @@
 <p>Jam.coop is building a listener-owned cooperative music service. The goal: instead of the pro-rata streaming model (where your subscription gets pooled across millions of streams), your money goes to the artists you actually listen to. Still developing, but the concept is genuinely different from anything else in this list.</p>
 <p><strong>Best for:</strong> Fans who want a streaming experience that&#39;s structured around direct support rather than market share.</p>
 <hr>
+<h3>Subvert</h3>
+<p><strong>Payout: 97%, 0% platform fee</strong></p>
+<p>Subvert is a collectively owned music marketplace — no outside investors, no platform cut. It also has one of the industry&#39;s few formal, written AI policies, spelling out how the platform treats AI-generated music. Unstream can only link to Subvert&#39;s search results for an artist rather than a specific artist page, so you&#39;ll do one extra click to land on their storefront.</p>
+<p><strong>Best for:</strong> Fans who want their purchase to go to a platform with no fee sitting between them and the artist.</p>
+<hr>
 <h3>Discogs</h3>
 <p><strong>Payout: Varies (marketplace)</strong></p>
 <p>Discogs is the world&#39;s largest physical music marketplace and database. It&#39;s primarily a secondary market — used vinyl, CDs, cassettes — but many artists and labels also sell new releases through their Discogs shops. The database is comprehensive to an almost absurd degree, covering millions of releases across every genre.</p>
@@ -183,6 +200,11 @@
 <p>The original creator membership platform. Artists keep 86–90% of subscription revenue. Works best for artists who put out content consistently — new music, demos, behind-the-scenes content, early access, livestreams. A dedicated Patreon community can give an artist genuinely stable, predictable income.</p>
 <p>The tradeoff: Patreon rewards consistency. It takes real effort to keep members engaged, and fans who don&#39;t see regular updates tend to cancel.</p>
 <p><strong>Best for:</strong> Fans who want to support artists they follow closely and get ongoing access to their work.</p>
+<hr>
+<h3>Liberapay</h3>
+<p><strong>Payout: ~97%</strong></p>
+<p>Liberapay is a nonprofit, open-source recurring-donations platform — it takes no cut of its own, so artists only lose what payment processors charge. It&#39;s a simpler, no-frills alternative to Patreon: no membership tiers or exclusive content, just a straightforward way to send an artist a small amount every week or month.</p>
+<p><strong>Best for:</strong> Fans who want to set up ongoing support without paying for a platform fee or committing to a tiered membership.</p>
 <hr>
 <h2>Decentralized platforms</h2>
 <p>These push further — artists control their own infrastructure or use open protocols, with no central platform in the middle.</p>
@@ -209,7 +231,7 @@
 <hr>
 <h2>Finding artists across all of these</h2>
 <p>The biggest friction with this whole ecosystem is fragmentation. An artist might sell on Bandcamp, accept tips on Ko-fi, and have a Faircamp site — but you&#39;d have to check each one separately.</p>
-<p><a href="https://unstream.stream">Unstream</a> searches all 15 of these platforms at once. Search for any artist and see everywhere they sell, how much they keep on each platform, and where you can support them most directly.</p>
+<p><a href="https://unstream.stream">Unstream</a> searches all 17 of these platforms at once. Search for any artist and see everywhere they sell, how much they keep on each platform, and where you can support them most directly.</p>
 
 <p><a href="https://unstream.stream/guides/every-platform-unstream-supports-compared">Read this on Unstream</a></p>]]></content:encoded>
     </item>
@@ -313,7 +335,7 @@
 <p>This is where the &quot;1,000 true fans&quot; math gets real. A thousand fans each buying a $10 album generates $8,000–9,500 on direct-sales platforms. Getting that same $8,000 from Spotify alone would require roughly <a href="https://dittomusic.com/en/blog/how-much-does-spotify-pay-per-stream"><strong>2 million streams</strong></a> — at the current $0.003–0.005 per stream rate. That&#39;s the gap.</p>
 <h2>The discovery problem (and how it&#39;s changing)</h2>
 <p>The biggest challenge for independent artists is still discovery. Labels have marketing machines. Independent artists have social media, word of mouth, and whatever organic growth they can build.</p>
-<p>But this is shifting. Tools like <a href="https://unstream.stream">Unstream</a> help listeners find where their favorite artists sell directly across 15+ platforms. Communities on <a href="https://bandcamp.com">Bandcamp</a>, <a href="https://mirlo.space">Mirlo</a>, and music forums actively champion independent releases. Music blogs and independent publications still cover artists who aren&#39;t on major labels.</p>
+<p>But this is shifting. Tools like <a href="https://unstream.stream">Unstream</a> help listeners find where their favorite artists sell directly across 17+ platforms. Communities on <a href="https://bandcamp.com">Bandcamp</a>, <a href="https://mirlo.space">Mirlo</a>, and music forums actively champion independent releases. Music blogs and independent publications still cover artists who aren&#39;t on major labels.</p>
 <p>And the artists who build direct relationships with fans — through email lists, community platforms like <a href="https://www.patreon.com">Patreon</a> or <a href="https://ko-fi.com">Ko-fi</a>, and direct-sales storefronts — tend to have more durable careers than those who rely on algorithmic discovery. An algorithm can stop recommending you tomorrow. A fan who bought your last three albums on Bandcamp is going to buy the next one too.</p>
 <h2>What this means if you&#39;re buying music</h2>
 <p>If you care about artists keeping more of what they earn:</p>
@@ -416,7 +438,7 @@
 <p>Until platforms are required or pressured to disclose payout rates in a standardized way:</p>
 <ul>
 <li><strong>Favor platforms that publish their rates.</strong> <a href="https://bandcamp.com">Bandcamp</a>, <a href="https://mirlo.space">Mirlo</a>, <a href="https://ampwall.com">Ampwall</a>, and others are upfront about what artists keep. That transparency is a feature.</li>
-<li><strong>Use <a href="https://unstream.stream">Unstream</a></strong> to search for artists across 15+ platforms and see payout percentages for each one.</li>
+<li><strong>Use <a href="https://unstream.stream">Unstream</a></strong> to search for artists across 17+ platforms and see payout percentages for each one.</li>
 <li><strong>Ask the question.</strong> When a platform says it &quot;supports artists,&quot; ask how much. If the answer is vague or unavailable, that tells you something.</li>
 <li><strong>Buy directly when you can.</strong> A $10 album on Bandcamp puts <a href="https://bandcamp.com/fair_trade_music_policy">about $8.20 in the artist&#39;s pocket</a>. No ambiguity, no opaque royalty pool, no six-month delay.</li>
 </ul>
@@ -455,7 +477,7 @@
 <p>Don&#39;t sleep on your local library. <strong><a href="https://www.hoopladigital.com">Hoopla</a></strong> and <strong><a href="https://www.freegalmusic.com">Freegal</a></strong> both offer music streaming and downloads with just a library card. The catalogs are bigger than you&#39;d expect — Hoopla in particular has a lot of indie and major label releases. You typically get a set number of borrows per month. Great for exploring new music without spending anything, and they support your local library system.</p>
 <h2>Finding artists on all of this</h2>
 <p>The biggest pain point with this whole ecosystem is fragmentation. Your favorite artist might be on Bandcamp, Mirlo, <em>and</em> Ko-fi — but you&#39;d have no idea unless you checked each platform separately.</p>
-<p>That&#39;s what <a href="https://unstream.stream">Unstream</a> does. Search for any artist and it checks 15+ platforms at once, showing you everywhere they sell and how much of your money actually reaches them on each one.</p>
+<p>That&#39;s what <a href="https://unstream.stream">Unstream</a> does. Search for any artist and it checks 17+ platforms at once, showing you everywhere they sell and how much of your money actually reaches them on each one.</p>
 
 <p><a href="https://unstream.stream/guides/bandcamp-and-beyond-alternative-music-platforms-worth-knowing">Read this on Unstream</a></p>]]></content:encoded>
     </item>
@@ -506,7 +528,7 @@
 <p>Over a year that&#39;s 12–24 albums you permanently own, with $100+ going directly to artists. And unlike streaming, the collection only grows. You don&#39;t lose anything if you stop buying for a month.</p>
 <h2>Find where artists sell</h2>
 <p>This used to be the annoying part. Artists sell across tons of platforms — <a href="https://bandcamp.com">Bandcamp</a>, <a href="https://mirlo.space">Mirlo</a>, <a href="https://ampwall.com">Ampwall</a>, their own websites, <a href="https://ko-fi.com">Ko-fi</a> — and checking each one individually is tedious enough that most people just don&#39;t bother.</p>
-<p><a href="https://unstream.stream">Unstream</a> does this in one search. Type in an artist and it shows everywhere they sell across 15+ platforms, with how much of your money reaches them on each one. Free, no account needed.</p>
+<p><a href="https://unstream.stream">Unstream</a> does this in one search. Type in an artist and it shows everywhere they sell across 17+ platforms, with how much of your money reaches them on each one. Free, no account needed.</p>
 <h2>Pick a music player</h2>
 <p>Once you have files, you need something to play them. There are more options than you&#39;d think.</p>
 <p><strong>Desktop:</strong> Apple Music / iTunes still works great as a local library manager even without a subscription — it was built for this before it was built for streaming. <a href="https://www.strawberrymusicplayer.org">Strawberry</a> is a solid open-source alternative on Mac, Linux, and Windows. <a href="https://www.foobar2000.org">foobar2000</a> is the classic choice on Windows if you like customization.</p>
@@ -563,7 +585,7 @@
 <p>You don&#39;t have to quit streaming. But a few things go a long way:</p>
 <ol>
 <li><strong>Pick the artists you care about most</strong> and buy their music directly. One $10 album purchase on Bandcamp gives an artist more than thousands of streams.</li>
-<li><strong>Use <a href="https://unstream.stream">Unstream</a></strong> to find where artists sell across 15+ platforms and see how much of your money reaches them on each one.</li>
+<li><strong>Use <a href="https://unstream.stream">Unstream</a></strong> to find where artists sell across 17+ platforms and see how much of your money reaches them on each one.</li>
 <li><strong>Buy on Bandcamp Fridays</strong> (first Friday of every month) when artists keep ~97%.</li>
 <li><strong>Tell people.</strong> Most listeners have no idea how any of this works. The streaming experience is so smooth that it&#39;s easy to assume the artists behind it are being taken care of. They&#39;re mostly not.</li>
 </ol>
@@ -623,7 +645,7 @@
 <p>You don&#39;t need to cancel streaming — plenty of people keep it for casual listening and convenience while also buying from artists they care about. That&#39;s fine. Even small shifts matter:</p>
 <ul>
 <li><strong>Buy from one or two artists a month</strong> instead of just streaming them. Prioritize the ones who seem like they need it most — independent, unsigned, small following.</li>
-<li><strong>Search on <a href="https://unstream.stream">Unstream</a></strong> to find where your favorite artists sell across 15+ platforms and see exactly how much reaches them on each one.</li>
+<li><strong>Search on <a href="https://unstream.stream">Unstream</a></strong> to find where your favorite artists sell across 17+ platforms and see exactly how much reaches them on each one.</li>
 <li><strong>Buy on Bandcamp Fridays</strong> to maximize what goes to the artist.</li>
 <li><strong>Check your library&#39;s music services</strong> — <a href="https://www.hoopladigital.com">Hoopla</a> and <a href="https://www.freegalmusic.com">Freegal</a> are free with a library card and good for exploring new stuff without spending.</li>
 </ul>
