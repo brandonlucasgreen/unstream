@@ -561,12 +561,18 @@ function trimLocation(location: ArtistLocation): ArtistLocation {
 }
 
 /**
- * Choose one source's location outright — the most specific one that answered.
+ * Choose one source's location outright.
  *
  * Locations are never assembled field by field across sources. MusicBrainz says Foo
  * Fighters formed in Seattle; their Bandcamp page says "California". Filling the empty
  * country slot from the second source produced "Seattle, California", a place that does
  * not exist. Each source is internally consistent; the combination of two is not.
+ *
+ * Selection is by *precision tier*, then by argument order within a tier: the first source
+ * naming a city wins, else the first naming a country, else the first that answered at all.
+ * So callers pass sources most-trusted first — a country-only answer from a trusted source
+ * still loses to a city from a less trusted one, which is what keeps an artist who is only
+ * on Bandcamp from collapsing to a bare country.
  */
 export function pickLocation(...sources: (ArtistLocation | null | undefined)[]): ArtistLocation | undefined {
   const answered = sources.filter((s): s is ArtistLocation => !!s && !!(s.city || s.country || s.countryCode));

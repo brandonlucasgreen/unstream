@@ -173,6 +173,18 @@ async function main() {
       .from('artists')
       .select('id, slug, name, city, country, country_code')
       .or('city.not.is.null,country.not.is.null,country_code.not.is.null')
+      // Claimed artists set their own location and enrichment must never overwrite it.
+      // persistEnrichment returns early on match_confidence === 'claimed' before it reaches
+      // the location write; this script has to honour the same rule, and did not at first —
+      // its first production run rewrote 15 claimed rows, moving kingtriumph from Olympia to
+      // Phoenix and Tye Newton from Portland, Maine to Portland, New Hampshire. Exactly the
+      // duplicate-city-name failure this feature's design notes warn about, inflicted on the
+      // one set of rows a human had curated by hand.
+      //
+      // Spelled as an `or` rather than `.neq('match_confidence', 'claimed')` because SQL `<>`
+      // is false for NULL, so a plain neq would also drop every row whose confidence is unset —
+      // silently shrinking the pool instead of excluding claimed rows.
+      .or('match_confidence.is.null,match_confidence.neq.claimed')
       .order('slug')
       .range(from, to)
   );
