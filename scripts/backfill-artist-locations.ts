@@ -110,42 +110,61 @@ function wouldLoseACity(stored: ArtistLocation, derived: ArtistLocation): boolea
 }
 
 /**
- * The location the live pipeline would derive from MusicBrainz today, or null when MusicBrainz
- * did not confidently identify the artist.
- *
- * `null` is also what an upstream failure returns. That is deliberate: it means "leave the row
- * alone", never "this artist has no location".
+ * What MusicBrainz had to say. `no-match` and `unavailable` both leave the row alone, but they
+ * are not the same answer and the report must not blur them: the first run reported 108 rows
+ * "left alone" as though MusicBrainz had genuinely not recognised them, when a large share were
+ * 503s from its rate limiter. Modest Mouse scores 100 and was still skipped.
  */
-async function deriveFromMusicBrainz(name: string): Promise<ArtistLocation | null> {
+type Derivation =
+  | { kind: 'ok'; location: ArtistLocation }
+  | { kind: 'no-match' }
+  | { kind: 'unavailable'; reason: string };
+
+/** MusicBrainz answers 503 when its limiter trips. Backing off recovers; giving up looks like a miss. */
+async function fetchMusicBrainz(url: string): Promise<Response | { failed: string }> {
+  for (let attempt = 0; attempt < 4; attempt++) {
+    let response: Response;
+    try {
+      response = await globalThis.fetch(url, { headers: { 'User-Agent': USER_AGENT } });
+    } catch (error) {
+      await sleep(MB_DELAY_MS * (attempt + 2));
+      if (attempt === 3) return { failed: (error as Error).message };
+      continue;
+    }
+    await sleep(MB_DELAY_MS);
+    if (response.ok) return response;
+    if (response.status !== 503) return { failed: `HTTP ${response.status}` };
+    await sleep(MB_DELAY_MS * (attempt + 2));
+  }
+  return { failed: 'HTTP 503 after 4 attempts' };
+}
+
+async function deriveFromMusicBrainz(name: string): Promise<Derivation> {
   const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=${encodeURIComponent(musicBrainzArtistQuery(name))}&fmt=json&limit=1`;
-  const searchResponse = await globalThis.fetch(searchUrl, { headers: { 'User-Agent': USER_AGENT } });
-  await sleep(MB_DELAY_MS);
-  if (!searchResponse.ok) return null;
+  const searchResponse = await fetchMusicBrainz(searchUrl);
+  if ('failed' in searchResponse) return { kind: 'unavailable', reason: searchResponse.failed };
 
   const searchData = await searchResponse.json() as { artists?: { id: string; name: string; score: number }[] };
   const artist = searchData.artists?.[0];
-  if (!artist || artist.score < 95) return null;
+  if (!artist || artist.score < 95) return { kind: 'no-match' };
 
   const queryNormalized = normalizeForComparison(name);
   const artistNormalized = normalizeForComparison(artist.name);
   const isNameMatch = queryNormalized === artistNormalized ||
     queryNormalized.includes(artistNormalized) && artistNormalized.length > queryNormalized.length * 0.7 ||
     artistNormalized.includes(queryNormalized) && queryNormalized.length > artistNormalized.length * 0.7;
-  if (!isNameMatch) return null;
+  if (!isNameMatch) return { kind: 'no-match' };
 
-  const lookupResponse = await globalThis.fetch(
-    `https://musicbrainz.org/ws/2/artist/${artist.id}?fmt=json`,
-    { headers: { 'User-Agent': USER_AGENT } },
-  );
-  await sleep(MB_DELAY_MS);
-  if (!lookupResponse.ok) return null;
+  const lookupResponse = await fetchMusicBrainz(`https://musicbrainz.org/ws/2/artist/${artist.id}?fmt=json`);
+  if ('failed' in lookupResponse) return { kind: 'unavailable', reason: lookupResponse.failed };
 
   const data = await lookupResponse.json() as {
     country?: string;
     area?: MusicBrainzArea;
     'begin-area'?: MusicBrainzArea;
   };
-  return parseMusicBrainzArea(data.area, data['begin-area'], data.country) ?? null;
+  const location = parseMusicBrainzArea(data.area, data['begin-area'], data.country);
+  return location ? { kind: 'ok', location } : { kind: 'no-match' };
 }
 
 async function main() {
@@ -165,7 +184,8 @@ async function main() {
   let changed = 0;
   let unchanged = 0;
   let kept = 0;
-  let skipped = 0;
+  let noMatch = 0;
+  const unavailable: string[] = [];
 
   for (const row of targets) {
     const stored: ArtistLocation = {
@@ -174,19 +194,18 @@ async function main() {
       ...(row.country_code ? { countryCode: row.country_code } : {}),
     };
 
-    let derived: ArtistLocation | null;
-    try {
-      derived = await deriveFromMusicBrainz(row.name);
-    } catch (error) {
-      console.log(`SKIP    ${row.slug} — MusicBrainz lookup failed: ${(error as Error).message}`);
-      skipped++;
-      continue;
-    }
+    const result = await deriveFromMusicBrainz(row.name);
 
-    if (!derived) {
-      skipped++;
+    if (result.kind === 'unavailable') {
+      console.log(`RETRY   ${row.name}: MusicBrainz did not answer (${result.reason})`);
+      unavailable.push(row.name);
       continue;
     }
+    if (result.kind === 'no-match') {
+      noMatch++;
+      continue;
+    }
+    const derived = result.location;
 
     if (display(derived) === display(stored) && derived.countryCode === stored.countryCode) {
       unchanged++;
@@ -215,7 +234,15 @@ async function main() {
     }
   }
 
-  console.log(`\n${changed} changed, ${unchanged} already correct, ${kept} kept (MusicBrainz less specific), ${skipped} left alone (no confident MusicBrainz match).`);
+  console.log(
+    `\n${changed} changed, ${unchanged} already correct, ${kept} kept (MusicBrainz less specific), ` +
+    `${noMatch} not recognised by MusicBrainz, ${unavailable.length} unanswered.`
+  );
+  if (unavailable.length) {
+    // Not the same as "MusicBrainz has never heard of them" — these are worth another pass.
+    console.log(`\nMusicBrainz did not answer for ${unavailable.length}: ${unavailable.join(', ')}`);
+    console.log('Re-run to retry them; rows already correct are skipped, so it is safe to repeat.');
+  }
   if (!WRITE && changed > 0) console.log('Dry run — nothing was written. Re-run with --write to apply.');
 }
 
