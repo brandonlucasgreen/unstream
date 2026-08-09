@@ -13,7 +13,7 @@ import { Sentry } from './sentry';
 const RESEND_SEND_URL = 'https://api.resend.com/emails';
 const UPSTREAM_TIMEOUT_MS = 8000;
 
-const FROM_ADDRESS = 'Unstream <notifications@unstream.stream>';
+const FROM_ADDRESS = 'Unstream <mail@unstream.stream>';
 
 export interface SendEmailParams {
   to: string;
