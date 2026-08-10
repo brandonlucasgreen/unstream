@@ -226,7 +226,11 @@ export async function filterByPreference(
 interface NewReleaseParams {
   client: SupabaseClient;
   artistId: string;
-  releasesFound: number;
+  /**
+   * `release_catalog_state.releases_found` as it stood *before* this catalog run. Zero means
+   * this is the first run that has ever found anything for this artist, which is a backfill
+   * rather than news — see notifySavedArtistsOfNewRelease.
+   */
   previousReleasesFound: number;
 }
 
@@ -234,6 +238,7 @@ interface NewReleaseParams {
 const MAX_LISTED_RELEASES = 5;
 
 interface NewReleaseSummary {
+  id: string;
   title: string;
   slug: string;
   /** "12 August 2026", "August 2026", "2026" — or '' when the upstream never gave us a date. */
@@ -242,53 +247,108 @@ interface NewReleaseSummary {
   platforms: string[];
 }
 
+interface ClaimedRow {
+  id: string;
+  title: string;
+  slug: string;
+  release_date: string | null;
+  date_precision: string | null;
+  created_at: string;
+}
+
+/** Newest release date first, undated last, ties broken by the order we discovered them. */
+function byNewest(a: ClaimedRow, b: ClaimedRow): number {
+  if (a.release_date !== b.release_date) {
+    if (!a.release_date) return 1;
+    if (!b.release_date) return -1;
+    return a.release_date < b.release_date ? 1 : -1;
+  }
+  return a.created_at < b.created_at ? 1 : -1;
+}
+
 /**
- * The releases this catalog run added, newest first.
+ * Takes ownership of every release for this artist that no alert has accounted for yet, and
+ * returns them. An empty result means there is nothing new to say — the caller sends no email
+ * at all rather than repeating itself.
  *
- * "Newest" is `created_at`, not `release_date`: persistReleases inserts rows it has never seen
- * before and updates the rest in place, so insertion order is what "new since the last run"
- * actually means. Release dates are frequently much older than that — an artist's first
- * catalogue run picks up their entire back catalogue at once — and ordering by them would name
- * the wrong records in the email.
+ * This is what stops a release being announced twice. The alert used to infer "what's new" from
+ * releases_found before and after a run, and a count can't express which records those are: a run
+ * that drops one release and adds two leaves the total up by one and re-announces something
+ * already sent. `alert_sent_at` states it directly, and the UPDATE ... RETURNING is atomic, so
+ * two catalog runs racing on the same artist split the new releases between them instead of both
+ * claiming the lot.
  *
- * Returns [] on any read failure. The caller falls back to the generic wording rather than
- * dropping the alert: a detail lookup that failed is not a reason to withhold the news.
+ * Claiming *before* checking who (if anyone) is going to be emailed is deliberate. Releases
+ * discovered while nobody was saving the artist are marked seen and never announced, so somebody
+ * saving that artist a year later gets alerts from that point forward rather than a mail-out of
+ * everything they missed.
  */
-async function getNewestReleases(
+async function claimUnalertedReleases(
   client: SupabaseClient,
   artistId: string,
-  count: number,
 ): Promise<NewReleaseSummary[]> {
   const { data, error } = await client
     .from('releases')
-    .select('title, slug, release_date, date_precision, release_sources ( platform )')
+    .update({ alert_sent_at: new Date().toISOString() })
     .eq('artist_id', artistId)
     .eq('is_hidden', false)
-    .order('created_at', { ascending: false })
-    .limit(count);
+    .is('alert_sent_at', null)
+    .select('id, title, slug, release_date, date_precision, created_at');
 
   if (error) {
-    Sentry.captureException(error, { extra: { context: 'getNewestReleases', artistId } });
+    // Nothing was claimed, so nothing is lost: report it and let the next catalog run retry.
+    // Sending a vaguer email instead would be guessing at exactly the thing this claim exists
+    // to know for certain.
+    Sentry.captureException(error, { extra: { context: 'claimUnalertedReleases', artistId } });
     return [];
   }
 
-  type Row = {
-    title: string;
-    slug: string;
-    release_date: string | null;
-    date_precision: string | null;
-    release_sources: { platform: string }[] | null;
-  };
+  const rows = ((data as ClaimedRow[]) || []).sort(byNewest);
+  if (rows.length === 0) return [];
 
-  return ((data as unknown as Row[]) || []).map(row => ({
+  const platformsByRelease = await getPlatformsByRelease(client, rows.map(row => row.id));
+
+  return rows.map(row => ({
+    id: row.id,
     title: row.title,
     slug: row.slug,
     dateText: formatReleaseDate(row.release_date, row.date_precision),
-    platforms: (row.release_sources || [])
-      .map(source => source.platform)
+    platforms: (platformsByRelease.get(row.id) || [])
       .sort((a, b) => payoutRank(b) - payoutRank(a))
       .map(platform => PLATFORMS[platform]?.name ?? platform),
   }));
+}
+
+/**
+ * Where each of these releases can be bought. A separate read rather than an embed on the claim
+ * above, because the claim is a mutation and its returned representation is the one thing that
+ * must stay simple enough to trust.
+ *
+ * A failure here degrades the email to titles and dates instead of dropping it: the releases are
+ * already claimed by this point, so returning nothing would mean they are never announced at all.
+ */
+async function getPlatformsByRelease(
+  client: SupabaseClient,
+  releaseIds: string[],
+): Promise<Map<string, string[]>> {
+  const byRelease = new Map<string, string[]>();
+
+  const { data, error } = await client
+    .from('release_sources')
+    .select('release_id, platform')
+    .in('release_id', releaseIds);
+
+  if (error) {
+    Sentry.captureException(error, { extra: { context: 'getPlatformsByRelease' } });
+    return byRelease;
+  }
+
+  for (const row of (data as { release_id: string; platform: string }[] | null) || []) {
+    const platforms = byRelease.get(row.release_id);
+    if (platforms) platforms.push(row.platform);
+    else byRelease.set(row.release_id, [row.platform]);
+  }
+  return byRelease;
 }
 
 /** "12 August 2026 · Available on Bandcamp, Mirlo" — whichever of the two we actually know. */
@@ -299,19 +359,26 @@ function releaseDetailLine(release: NewReleaseSummary): string {
 }
 
 /**
- * Tells everyone who saved this artist that a new release showed up. Called from
- * recordCatalogOutcome whenever releases_found increases; cheap to call on every catalog run
- * because it bails out before any lookup if nobody has saved the artist — true for the large
- * majority of catalogued artists (see CLAUDE.md's saved-vs-catalogued ratio).
+ * Tells everyone who saved this artist about the releases they haven't been told about yet.
+ * Called from recordCatalogOutcome whenever releases_found increases.
+ *
+ * Every release is announced at most once, and only ever in one email: claimUnalertedReleases
+ * is the authority on what counts as new, and an empty claim means no email is sent at all.
  *
  * Currently admin-only on the way out — see restrictToAdmins.
- *
- * referenceId encodes the *count*, not just the artist, so a later increase (5 -> 8 -> 12)
- * sends a fresh notification each time instead of being deduped against the first one ever
- * sent for that artist.
  */
 export async function notifySavedArtistsOfNewRelease(params: NewReleaseParams): Promise<void> {
-  const { client, artistId, releasesFound, previousReleasesFound } = params;
+  const { client, artistId, previousReleasesFound } = params;
+
+  const releases = await claimUnalertedReleases(client, artistId);
+  if (releases.length === 0) return;
+
+  // An artist's first successful catalogue arrives as their whole discography at once, which is
+  // a backfill and not news — "Test Artist has 34 new releases" is wrong about every record in
+  // the list. Those releases are claimed above and deliberately not announced, so the next
+  // genuinely new one is the first thing anybody hears about. Zero also covers a catalogue that
+  // previously found nothing at all (a broken parser, since recovered), which is the same story.
+  if (previousReleasesFound === 0) return;
 
   let userIds = await getActiveSavers(client, artistId);
   if (userIds.length === 0) return;
@@ -332,63 +399,55 @@ export async function notifySavedArtistsOfNewRelease(params: NewReleaseParams): 
   const emails = restrictToAdmins(await resolveEmails(client, userIds), 'new_release');
   if (emails.length === 0) return;
 
-  // The count can only be inferred from the before/after totals, so floor it at one: a total
-  // that went up means at least one row is new even if rows were also removed in the same run.
-  const newCount = Math.max(1, releasesFound - previousReleasesFound);
-  const releases = await getNewestReleases(client, artistId, Math.min(newCount, MAX_LISTED_RELEASES));
-  const undisclosed = Math.max(0, newCount - releases.length);
+  const listed = releases.slice(0, MAX_LISTED_RELEASES);
+  const undisclosed = releases.length - listed.length;
 
   const profileUrl = `https://unstream.stream/a/${artist.slug}`;
-  const referenceId = `${artistId}:${releasesFound}`;
   const footer = subscriptionFooter(`you saved ${artist.name} on Unstream`);
 
-  // No trailing punctuation: the two bodies below finish the sentence differently.
+  // A release is claimed exactly once, so the lowest id in this batch appears in no other batch
+  // — a stable, short key for email_log's per-recipient guard against a double send.
+  const referenceId = `${artistId}:${releases.map(release => release.id).sort()[0]}`;
+
+  // No trailing punctuation: the sentence is finished differently in each body below.
   const newsHtml =
-    newCount === 1
+    releases.length === 1
       ? `<strong>${escapeHtml(artist.name)}</strong>, an artist you saved on Unstream, has a new release`
-      : `<strong>${escapeHtml(artist.name)}</strong>, an artist you saved on Unstream, has ${newCount} new releases`;
+      : `<strong>${escapeHtml(artist.name)}</strong>, an artist you saved on Unstream, has ${releases.length} new releases`;
   const newsText =
-    newCount === 1
+    releases.length === 1
       ? `${artist.name}, an artist you saved on Unstream, has a new release`
-      : `${artist.name}, an artist you saved on Unstream, has ${newCount} new releases`;
+      : `${artist.name}, an artist you saved on Unstream, has ${releases.length} new releases`;
 
   const subject =
-    releases.length === 1 && newCount === 1
+    releases.length === 1
       ? `New release from ${artist.name}: ${releases[0].title}`
-      : newCount === 1
-        ? `New release from ${artist.name}`
-        : `${newCount} new releases from ${artist.name}`;
+      : `${releases.length} new releases from ${artist.name}`;
 
-  // An empty or failed detail read still sends, with the wording this email had before it
-  // learned to name releases — a lookup that failed is not a reason to withhold the news.
-  const html = releases.length === 0
-    ? `<p>${newsHtml}. See it at <a href="${profileUrl}">${profileUrl}</a>.</p>${footer.html}`
-    : [
-        `<p>${newsHtml}:</p>`,
-        '<ul style="padding-left:18px">',
-        ...releases.map(release =>
-          `  <li style="margin-bottom:10px">` +
-          `<a href="${profileUrl}/${escapeHtml(release.slug)}"><strong>${escapeHtml(release.title)}</strong></a><br>` +
-          `<span style="color:#555555">${escapeHtml(releaseDetailLine(release))}</span></li>`,
-        ),
-        '</ul>',
-        ...(undisclosed > 0 ? [`<p>…and ${undisclosed} more.</p>`] : []),
-        `<p>See everything they've put out at <a href="${profileUrl}">${profileUrl}</a>.</p>`,
-        footer.html,
-      ].join('\n');
+  const html = [
+    `<p>${newsHtml}:</p>`,
+    '<ul style="padding-left:18px">',
+    ...listed.map(release =>
+      `  <li style="margin-bottom:10px">` +
+      `<a href="${profileUrl}/${escapeHtml(release.slug)}"><strong>${escapeHtml(release.title)}</strong></a><br>` +
+      `<span style="color:#555555">${escapeHtml(releaseDetailLine(release))}</span></li>`,
+    ),
+    '</ul>',
+    ...(undisclosed > 0 ? [`<p>…and ${undisclosed} more.</p>`] : []),
+    `<p>See everything they've put out at <a href="${profileUrl}">${profileUrl}</a>.</p>`,
+    footer.html,
+  ].join('\n');
 
-  const text = releases.length === 0
-    ? `${newsText}. See it at ${profileUrl}.${footer.text}`
-    : [
-        `${newsText}:`,
-        '',
-        ...releases.map(release =>
-          `- ${release.title}\n  ${releaseDetailLine(release)}\n  ${profileUrl}/${release.slug}`,
-        ),
-        ...(undisclosed > 0 ? ['', `…and ${undisclosed} more.`] : []),
-        '',
-        `See everything they've put out at ${profileUrl}.`,
-      ].join('\n') + footer.text;
+  const text = [
+    `${newsText}:`,
+    '',
+    ...listed.map(release =>
+      `- ${release.title}\n  ${releaseDetailLine(release)}\n  ${profileUrl}/${release.slug}`,
+    ),
+    ...(undisclosed > 0 ? ['', `…and ${undisclosed} more.`] : []),
+    '',
+    `See everything they've put out at ${profileUrl}.`,
+  ].join('\n') + footer.text;
 
   for (const email of emails) {
     void sendNotificationOnce({

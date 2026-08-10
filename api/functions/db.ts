@@ -604,13 +604,14 @@ export async function recordCatalogOutcome(
           extra: { artistId, previousReleasesFound: previous },
         });
       } else if (outcome.releasesFound > previous) {
-        // Fire-and-forget: notifySavedArtistsOfNewRelease bails out immediately if nobody saved
-        // this artist (true for nearly everything the sweep touches) and logs its own failures
-        // to Sentry — a notification email must never affect cataloging's own success/failure.
+        // Fire-and-forget: notifySavedArtistsOfNewRelease decides for itself whether there is
+        // anything to say (it sends nothing unless this run added releases no alert has covered
+        // yet) and logs its own failures to Sentry — a notification email must never affect
+        // cataloging's own success/failure. The count comparison here is only a cheap gate:
+        // a total that didn't go up can't have added rows worth claiming.
         void notifySavedArtistsOfNewRelease({
           client,
           artistId,
-          releasesFound: outcome.releasesFound,
           previousReleasesFound: previous,
         }).catch(err => {
           Sentry.captureException(err, { extra: { context: 'notifySavedArtistsOfNewRelease', artistId } });
