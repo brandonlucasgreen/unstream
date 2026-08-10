@@ -39,23 +39,36 @@ interface MatchedRelease {
   artwork_url: string | null;
 }
 
+interface MatchedArtist {
+  id: string;
+  slug: string;
+  name: string;
+  imageUrl: string | null;
+}
+
+interface LibraryMatches {
+  /** Subsonic album id → Unstream release, where title + artist matched exactly. */
+  releases: Map<string, MatchedRelease>;
+  /** Unstream artist id → artist, for every album whose artist matched unambiguously. */
+  artists: Map<string, MatchedArtist>;
+}
+
 /**
- * Match imported albums to Unstream releases by normalized artist name + normalized title
- * (releases.match_key is already normalizeForComparison output). Conservative on purpose:
- * an ambiguous artist name — two artist rows normalizing identically — matches nothing,
- * because a wrong release_id asserts the wrong record on a public page.
+ * Match imported albums to Unstream artists (by normalized name) and releases (by
+ * normalized artist name + normalized title — releases.match_key is already
+ * normalizeForComparison output). Conservative on purpose: an ambiguous artist name — two
+ * artist rows normalizing identically — matches nothing, because a wrong release_id or a
+ * wrong "supported" mark asserts the wrong fact about a user's support.
  */
-async function matchReleases(
-  albums: SubsonicAlbum[]
-): Promise<Map<string, MatchedRelease>> {
+async function matchLibrary(albums: SubsonicAlbum[]): Promise<LibraryMatches> {
   const client = getClient();
-  const matches = new Map<string, MatchedRelease>();
+  const matches: LibraryMatches = { releases: new Map(), artists: new Map() };
   if (!client || albums.length === 0) return matches;
 
   // The artists table is a few thousand rows; normalization has to happen in JS, so read
   // it once and match in memory rather than issuing a query per imported artist name.
-  const artistRead = await readAllPages<{ id: string; name: string }>(
-    (from, to) => client.from('artists').select('id, name').order('id').range(from, to),
+  const artistRead = await readAllPages<{ id: string; slug: string; name: string; image_url: string | null }>(
+    (from, to) => client.from('artists').select('id, slug, name, image_url').order('id').range(from, to),
     'artists (bandcamp-sync matching)'
   );
   if (!artistRead.ok) {
@@ -64,26 +77,30 @@ async function matchReleases(
     return matches;
   }
 
-  const artistsByNorm = new Map<string, string | 'ambiguous'>();
+  const artistsByNorm = new Map<string, MatchedArtist | 'ambiguous'>();
   for (const row of artistRead.rows) {
     const norm = normalizeForComparison(row.name);
     if (!norm) continue;
-    artistsByNorm.set(norm, artistsByNorm.has(norm) ? 'ambiguous' : row.id);
+    artistsByNorm.set(
+      norm,
+      artistsByNorm.has(norm)
+        ? 'ambiguous'
+        : { id: row.id, slug: row.slug, name: row.name, imageUrl: row.image_url }
+    );
   }
 
-  // Album -> candidate artist id, and the set of artist ids whose releases we need.
-  const albumArtistId = new Map<string, string>();
-  const neededArtistIds = new Set<string>();
+  // Album -> candidate artist, and the set of artist ids whose releases we need.
+  const albumArtist = new Map<string, MatchedArtist>();
   for (const album of albums) {
-    const artistId = artistsByNorm.get(normalizeForComparison(album.artist));
-    if (!artistId || artistId === 'ambiguous') continue;
-    albumArtistId.set(album.id, artistId);
-    neededArtistIds.add(artistId);
+    const artist = artistsByNorm.get(normalizeForComparison(album.artist));
+    if (!artist || artist === 'ambiguous') continue;
+    albumArtist.set(album.id, artist);
+    matches.artists.set(artist.id, artist);
   }
-  if (neededArtistIds.size === 0) return matches;
+  if (matches.artists.size === 0) return matches;
 
   const releaseByKey = new Map<string, MatchedRelease>();
-  const ids = [...neededArtistIds];
+  const ids = [...matches.artists.keys()];
   for (let i = 0; i < ids.length; i += RELEASE_LOOKUP_CHUNK) {
     const chunk = ids.slice(i, i + RELEASE_LOOKUP_CHUNK);
     const { data, error } = await client
@@ -106,12 +123,116 @@ async function matchReleases(
   }
 
   for (const album of albums) {
-    const artistId = albumArtistId.get(album.id);
-    if (!artistId) continue;
-    const release = releaseByKey.get(`${artistId}:${normalizeForComparison(album.name)}`);
-    if (release) matches.set(album.id, release);
+    const artist = albumArtist.get(album.id);
+    if (!artist) continue;
+    const release = releaseByKey.get(`${artist.id}:${normalizeForComparison(album.name)}`);
+    if (release) matches.releases.set(album.id, release);
   }
   return matches;
+}
+
+/** Slugs per saved_artists read — stays far below PostgREST's 1,000-row response cap. */
+const SAVED_LOOKUP_CHUNK = 100;
+
+/**
+ * Buying an artist's record IS supporting them, so a Bandcamp import marks every matched
+ * artist as saved + supported (Brandon, 2026-08-09, spec open question 6). Collection and
+ * saved list are two views of the same relationship.
+ *
+ * Three rules keep this from fighting the user:
+ *   - a row the user tombstoned (deleted=true) is left completely alone — permanent
+ *     dismissal is a locked spec decision and a re-sync must never resurrect it;
+ *   - an already-supported row keeps its original supported_at;
+ *   - only supported goes true; nothing here can ever un-support or overwrite notes.
+ *
+ * Failure here degrades, not fails: items are the sync's primary artifact, and the mark
+ * is derived state the next re-sync recomputes.
+ */
+async function markArtistsSupported(userId: string, artists: MatchedArtist[]): Promise<void> {
+  const client = getClient();
+  if (!client || artists.length === 0) return;
+
+  const bySlug = new Map(artists.map(a => [a.slug, a]));
+  const slugs = [...bySlug.keys()];
+  const existing = new Map<string, { supported: boolean; deleted: boolean }>();
+
+  for (let i = 0; i < slugs.length; i += SAVED_LOOKUP_CHUNK) {
+    const chunk = slugs.slice(i, i + SAVED_LOOKUP_CHUNK);
+    const { data, error } = await client
+      .from('saved_artists')
+      .select('artist_slug, supported, deleted')
+      .eq('user_id', userId)
+      .in('artist_slug', chunk);
+    if (error) {
+      // Without a reliable view of existing rows we can't insert safely (we might
+      // resurrect a tombstone), so skip this chunk's artists entirely.
+      console.warn('[bandcamp-sync] saved_artists read failed:', error.message);
+      Sentry.captureException(new Error(`saved_artists read failed: ${error.message}`), {
+        tags: { function: 'bandcamp-sync' },
+        extra: { stage: 'mark-supported' },
+      });
+      for (const slug of chunk) bySlug.delete(slug);
+      continue;
+    }
+    for (const row of data ?? []) {
+      existing.set(row.artist_slug, { supported: row.supported, deleted: row.deleted === true });
+    }
+  }
+
+  const serverNow = new Date().toISOString();
+  const toInsert = [...bySlug.values()]
+    .filter(a => !existing.has(a.slug))
+    .map(a => ({
+      user_id: userId,
+      artist_id: a.id,
+      artist_slug: a.slug,
+      artist_name: a.name,
+      artist_image_url: a.imageUrl,
+      supported: true,
+      supported_at: serverNow,
+      // Stamped server-side on insert so the row is immediately visible to the Apple
+      // app's ?since= incremental pulls — same reasoning as saved-artists.ts.
+      last_modified: serverNow,
+    }));
+
+  const toSupport = [...bySlug.values()]
+    .filter(a => {
+      const row = existing.get(a.slug);
+      return row !== undefined && !row.deleted && !row.supported;
+    })
+    .map(a => a.slug);
+
+  for (let i = 0; i < toInsert.length; i += SAVED_LOOKUP_CHUNK) {
+    const { error } = await client
+      .from('saved_artists')
+      .upsert(toInsert.slice(i, i + SAVED_LOOKUP_CHUNK), { onConflict: 'user_id,artist_slug' });
+    if (error) {
+      console.warn('[bandcamp-sync] saved_artists insert failed:', error.message);
+      Sentry.captureException(new Error(`saved_artists insert failed: ${error.message}`), {
+        tags: { function: 'bandcamp-sync' },
+        extra: { stage: 'mark-supported' },
+      });
+    }
+  }
+
+  for (let i = 0; i < toSupport.length; i += SAVED_LOOKUP_CHUNK) {
+    const { error } = await client
+      .from('saved_artists')
+      .update({ supported: true, supported_at: serverNow, last_modified: serverNow })
+      .eq('user_id', userId)
+      .in('artist_slug', toSupport.slice(i, i + SAVED_LOOKUP_CHUNK));
+    if (error) {
+      console.warn('[bandcamp-sync] saved_artists support update failed:', error.message);
+      Sentry.captureException(new Error(`saved_artists support update failed: ${error.message}`), {
+        tags: { function: 'bandcamp-sync' },
+        extra: { stage: 'mark-supported' },
+      });
+    }
+  }
+
+  if (toInsert.length > 0 || toSupport.length > 0) {
+    console.log(`[bandcamp-sync] marked supported: ${toInsert.length} new, ${toSupport.length} upgraded`);
+  }
 }
 
 export async function handler(event: {
@@ -189,7 +310,7 @@ export async function handler(event: {
     }
     const uniqueAlbums = [...byId.values()];
 
-    const releaseMatches = await matchReleases(uniqueAlbums);
+    const matches = await matchLibrary(uniqueAlbums);
 
     const rows = uniqueAlbums.map(album => ({
       user_id: userId,
@@ -197,11 +318,11 @@ export async function handler(event: {
       external_id: album.id,
       title: album.name,
       artist_name: album.artist,
-      art_url: releaseMatches.get(album.id)?.artwork_url ?? null,
+      art_url: matches.releases.get(album.id)?.artwork_url ?? null,
       acquired_at: album.created ?? null,
       provenance: 'purchased', // a Bandcamp collection is proof of purchase — spec §5
       acquisition: 'unknown',
-      release_id: releaseMatches.get(album.id)?.id ?? null,
+      release_id: matches.releases.get(album.id)?.id ?? null,
       // `hidden` deliberately omitted: re-syncs must not un-hide items the user hid.
     }));
 
@@ -214,6 +335,10 @@ export async function handler(event: {
         throw new Error(`collection_items upsert failed: ${error.message}`);
       }
     }
+
+    // Buying is supporting: mark every matched artist saved + supported. After the items
+    // land — the mark is derived state, and a failure inside degrades rather than throwing.
+    await markArtistsSupported(userId, [...matches.artists.values()]);
 
     const { error: doneError } = await client
       .from('bandcamp_connections')
@@ -228,11 +353,15 @@ export async function handler(event: {
       throw new Error(`connection status update failed: ${doneError.message}`);
     }
 
-    console.log(`[bandcamp-sync] imported ${uniqueAlbums.length} albums (${releaseMatches.size} matched to releases)`);
+    console.log(`[bandcamp-sync] imported ${uniqueAlbums.length} albums (${matches.releases.size} matched to releases, ${matches.artists.size} artists)`);
     return {
       statusCode: 200,
       headers: RESPONSE_HEADERS,
-      body: JSON.stringify({ imported: uniqueAlbums.length, matched: releaseMatches.size }),
+      body: JSON.stringify({
+        imported: uniqueAlbums.length,
+        matched: matches.releases.size,
+        artistsMarked: matches.artists.size,
+      }),
     };
   } catch (error) {
     const isAuth = error instanceof SubsonicError && error.isAuthFailure;

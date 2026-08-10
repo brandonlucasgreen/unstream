@@ -31,12 +31,16 @@ function internalEvent(body: unknown) {
 interface TableMocks {
   connectionRow?: Record<string, unknown> | null;
   releases?: Record<string, unknown>[];
+  savedRows?: Record<string, unknown>[];
 }
 
-// Routes supabase table calls; records connection updates and item upserts.
-function setupDb({ connectionRow = null, releases = [] }: TableMocks) {
+// Routes supabase table calls; records connection updates, item upserts, and
+// saved_artists writes (the auto-mark-supported side effect).
+function setupDb({ connectionRow = null, releases = [], savedRows = [] }: TableMocks) {
   const connectionUpdates: Record<string, unknown>[] = [];
   const upsertBatches: Record<string, unknown>[][] = [];
+  const savedInserts: Record<string, unknown>[][] = [];
+  const savedUpdates: { patch: Record<string, unknown>; slugs: unknown }[] = [];
 
   mocks.mockFrom.mockImplementation((table: string) => {
     if (table === 'bandcamp_connections') {
@@ -69,11 +73,34 @@ function setupDb({ connectionRow = null, releases = [] }: TableMocks) {
         })),
       };
     }
+    if (table === 'saved_artists') {
+      return {
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            in: vi.fn(() => Promise.resolve({ data: savedRows, error: null })),
+          })),
+        })),
+        upsert: vi.fn((rows: Record<string, unknown>[]) => {
+          savedInserts.push(rows);
+          return Promise.resolve({ error: null });
+        }),
+        update: vi.fn((patch: Record<string, unknown>) => ({
+          eq: vi.fn(() => ({
+            in: vi.fn((_col: string, slugs: unknown) => {
+              savedUpdates.push({ patch, slugs });
+              return Promise.resolve({ error: null });
+            }),
+          })),
+        })),
+      };
+    }
     throw new Error(`unexpected table ${table}`);
   });
 
-  return { connectionUpdates, upsertBatches };
+  return { connectionUpdates, upsertBatches, savedInserts, savedUpdates };
 }
+
+const SUFJAN = { id: 'artist-1', slug: 'sufjan-stevens', name: 'Sufjan Stevens', image_url: 'https://img/s.jpg' };
 
 describe('bandcamp-sync-background handler', () => {
   beforeEach(() => {
@@ -149,9 +176,9 @@ describe('bandcamp-sync-background handler', () => {
     mocks.mockReadAllPages.mockResolvedValue({
       ok: true,
       rows: [
-        { id: 'artist-1', name: 'Sufjan Stevens' },
-        { id: 'artist-2', name: 'Ambiguous' },
-        { id: 'artist-3', name: 'ambiguous' }, // normalizes identically → no matching
+        SUFJAN,
+        { id: 'artist-2', slug: 'ambiguous', name: 'Ambiguous', image_url: null },
+        { id: 'artist-3', slug: 'ambiguous-2', name: 'ambiguous', image_url: null }, // normalizes identically → no matching
       ],
     });
     mocks.mockFetchAllAlbums.mockResolvedValue([
@@ -166,6 +193,95 @@ describe('bandcamp-sync-background handler', () => {
     expect(byExternal['al-1']).toMatchObject({ release_id: 'rel-1', art_url: 'https://f4.bcbits.com/a.jpg' });
     expect(byExternal['al-2'].release_id).toBeNull();
     expect(byExternal['al-3'].release_id).toBeNull();
+  });
+
+  describe('auto-mark supported (spec OQ6: buying is supporting)', () => {
+    const ciphertext = () => encryptCredential(JSON.stringify({ t: 'tok', s: 'salt' }));
+    const albums = [{ id: 'al-1', name: 'Illinois', artist: 'Sufjan Stevens' }];
+
+    function withArtists() {
+      mocks.mockReadAllPages.mockResolvedValue({ ok: true, rows: [SUFJAN] });
+      mocks.mockFetchAllAlbums.mockResolvedValue(albums);
+    }
+
+    it('saves a matched artist as supported when they have no saved row', async () => {
+      const { savedInserts, savedUpdates } = setupDb({
+        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext() },
+        savedRows: [],
+      });
+      withArtists();
+
+      await handler(internalEvent({ userId: 'user-1' }));
+
+      const inserted = savedInserts.flat();
+      expect(inserted).toHaveLength(1);
+      expect(inserted[0]).toMatchObject({
+        user_id: 'user-1',
+        artist_id: 'artist-1',
+        artist_slug: 'sufjan-stevens',
+        artist_name: 'Sufjan Stevens',
+        supported: true,
+      });
+      expect(inserted[0].supported_at).toBeTruthy();
+      expect(inserted[0].last_modified).toBeTruthy();
+      expect(savedUpdates).toHaveLength(0);
+    });
+
+    it('upgrades an existing unsupported row instead of inserting', async () => {
+      const { savedInserts, savedUpdates } = setupDb({
+        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext() },
+        savedRows: [{ artist_slug: 'sufjan-stevens', supported: false, deleted: false }],
+      });
+      withArtists();
+
+      await handler(internalEvent({ userId: 'user-1' }));
+
+      expect(savedInserts).toHaveLength(0);
+      expect(savedUpdates).toHaveLength(1);
+      expect(savedUpdates[0].patch).toMatchObject({ supported: true });
+      expect(savedUpdates[0].slugs).toEqual(['sufjan-stevens']);
+    });
+
+    it('leaves an already-supported row untouched (original supported_at preserved)', async () => {
+      const { savedInserts, savedUpdates } = setupDb({
+        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext() },
+        savedRows: [{ artist_slug: 'sufjan-stevens', supported: true, deleted: false }],
+      });
+      withArtists();
+
+      await handler(internalEvent({ userId: 'user-1' }));
+
+      expect(savedInserts).toHaveLength(0);
+      expect(savedUpdates).toHaveLength(0);
+    });
+
+    it('never resurrects a tombstoned row — permanent dismissal sticks across re-syncs', async () => {
+      const { savedInserts, savedUpdates } = setupDb({
+        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext() },
+        savedRows: [{ artist_slug: 'sufjan-stevens', supported: false, deleted: true }],
+      });
+      withArtists();
+
+      await handler(internalEvent({ userId: 'user-1' }));
+
+      expect(savedInserts).toHaveLength(0);
+      expect(savedUpdates).toHaveLength(0);
+    });
+
+    it('marks nothing for unmatched artists', async () => {
+      const { savedInserts, savedUpdates } = setupDb({
+        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext() },
+      });
+      mocks.mockReadAllPages.mockResolvedValue({ ok: true, rows: [SUFJAN] });
+      mocks.mockFetchAllAlbums.mockResolvedValue([
+        { id: 'al-9', name: 'Some Album', artist: 'Nobody We Know' },
+      ]);
+
+      await handler(internalEvent({ userId: 'user-1' }));
+
+      expect(savedInserts).toHaveLength(0);
+      expect(savedUpdates).toHaveLength(0);
+    });
   });
 
   it('records an error — not a partial success — when the fetch dies mid-sync', async () => {
