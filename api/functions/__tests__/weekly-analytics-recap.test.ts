@@ -12,10 +12,16 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('../db', () => ({ getClient: mocks.getClient }));
-vi.mock('../notifications', () => ({
-  sendNotificationOnce: mocks.sendNotificationOnce,
-  filterByPreference: mocks.filterByPreference,
-}));
+// The two senders are stubbed; the footer helpers are kept real, so the recap's opt-out block
+// is asserted against the same code every other notification email uses.
+vi.mock('../notifications', async importOriginal => {
+  const actual = await importOriginal<typeof import('../notifications')>();
+  return {
+    ...actual,
+    sendNotificationOnce: mocks.sendNotificationOnce,
+    filterByPreference: mocks.filterByPreference,
+  };
+});
 vi.mock('../../lib/sentry', () => ({
   Sentry: { captureMessage: mocks.captureMessage, captureException: mocks.captureException },
 }));
@@ -114,6 +120,9 @@ describe('weekly-analytics-recap', () => {
     expect(call.html).toContain('10 search appearances');
     expect(call.html).toContain('4 profile views');
     expect(call.html).toContain('3 link clicks');
+    expect(call.html).toContain('https://unstream.stream/settings#notifications');
+    expect(call.text).toContain('https://unstream.stream/settings#notifications');
+    expect(call.headers).toEqual({ 'List-Unsubscribe': '<https://unstream.stream/settings#notifications>' });
   });
 
   it('skips a profile missing an artist slug rather than sending a broken link', async () => {

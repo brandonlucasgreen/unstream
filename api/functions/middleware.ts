@@ -5,6 +5,7 @@ import { createHash, randomUUID, timingSafeEqual } from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 import { jwtVerify, createRemoteJWKSet, decodeProtectedHeader, errors as joseErrors } from 'jose';
 import { getClient } from './db';
+import { isAdminEmail } from '../lib/admin';
 
 // ---------------------------------------------------------------------------
 // CORS
@@ -187,10 +188,7 @@ export async function authenticateAdmin(
   const user = await authenticateBearer(authHeader);
   if (!user) return null;
 
-  const adminEmail = process.env.ADMIN_EMAIL;
-  if (!adminEmail) return null;
-
-  if (user.email.toLowerCase() !== adminEmail.toLowerCase()) return null;
+  if (!isAdminEmail(user.email)) return null;
   return user;
 }
 

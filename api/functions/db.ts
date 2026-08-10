@@ -607,7 +607,12 @@ export async function recordCatalogOutcome(
         // Fire-and-forget: notifySavedArtistsOfNewRelease bails out immediately if nobody saved
         // this artist (true for nearly everything the sweep touches) and logs its own failures
         // to Sentry — a notification email must never affect cataloging's own success/failure.
-        void notifySavedArtistsOfNewRelease({ client, artistId, releasesFound: outcome.releasesFound }).catch(err => {
+        void notifySavedArtistsOfNewRelease({
+          client,
+          artistId,
+          releasesFound: outcome.releasesFound,
+          previousReleasesFound: previous,
+        }).catch(err => {
           Sentry.captureException(err, { extra: { context: 'notifySavedArtistsOfNewRelease', artistId } });
         });
       }
