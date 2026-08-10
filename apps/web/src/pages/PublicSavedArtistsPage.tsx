@@ -13,10 +13,58 @@ interface SavedArtistPublic {
   supported: boolean;
 }
 
+interface CollectionItemPublic {
+  title: string;
+  artist_name: string;
+  art_url: string | null;
+  acquired_at: string | null;
+  url: string | null;
+}
+
 interface PublicSharingData {
   owner_display_name: string;
   owner_location: string | null;
   saved_artists: SavedArtistPublic[];
+  collection?: CollectionItemPublic[];
+}
+
+// One collection tile: album art (or a titled placeholder), caption underneath. Matched
+// items link to the release page so a viewer can buy the same record — the loop closes.
+function CollectionTile({ item }: { item: CollectionItemPublic }) {
+  const art = item.art_url ? (
+    <img
+      src={item.art_url}
+      alt={`${item.title} by ${item.artist_name}`}
+      loading="lazy"
+      className="w-full aspect-square object-cover rounded-lg bg-bg-hover"
+    />
+  ) : (
+    <div className="w-full aspect-square rounded-lg bg-bg-hover flex items-center justify-center p-3">
+      <span className="text-text-muted text-xs text-center line-clamp-4">{item.title}</span>
+    </div>
+  );
+
+  const caption = (
+    <div className="mt-1.5 min-w-0">
+      <p className="text-xs font-medium truncate">{item.title}</p>
+      <p className="text-xs text-text-muted truncate">{item.artist_name}</p>
+    </div>
+  );
+
+  if (item.url) {
+    return (
+      <Link to={item.url} className="block group">
+        <div className="group-hover:opacity-90 transition-opacity">{art}</div>
+        {caption}
+      </Link>
+    );
+  }
+  return (
+    <div>
+      {art}
+      {caption}
+    </div>
+  );
 }
 
 export function PublicSavedArtistsPage() {
@@ -98,15 +146,28 @@ export function PublicSavedArtistsPage() {
     );
   }
 
+  const collection = data.collection ?? [];
+  const supportedCount = data.saved_artists.filter(a => a.supported).length;
+  const countParts: string[] = [];
+  if (collection.length > 0) {
+    countParts.push(`${collection.length} release${collection.length === 1 ? '' : 's'} collected`);
+  }
+  if (supportedCount > 0) {
+    countParts.push(`${supportedCount} artist${supportedCount === 1 ? '' : 's'} supported`);
+  }
+
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
       <Header />
       <main className="flex-1 p-6">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold">{data.owner_display_name}'s saved artists</h1>
+            <h1 className="text-2xl font-bold">{data.owner_display_name}'s collection</h1>
             {data.owner_location && (
               <p className="text-text-primary text-sm mt-2">{data.owner_location}</p>
+            )}
+            {countParts.length > 0 && (
+              <p className="text-text-muted text-sm mt-2">{countParts.join(' · ')}</p>
             )}
             <button
               onClick={handleCopy}
@@ -123,9 +184,25 @@ export function PublicSavedArtistsPage() {
             </button>
           </div>
 
-          {data.saved_artists.length === 0 ? (
+          {/* The collection — evidence, not intent. Album art is what makes the page
+              worth screenshotting; omitted entirely when empty. */}
+          {collection.length > 0 && (
+            <section className="mb-10">
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                {collection.map((item, i) => (
+                  <CollectionTile key={`${item.artist_name}:${item.title}:${i}`} item={item} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {collection.length > 0 && data.saved_artists.length > 0 && (
+            <h2 className="text-lg font-semibold mb-4">Artists</h2>
+          )}
+
+          {data.saved_artists.length === 0 && collection.length === 0 ? (
             <div className="text-center py-12 rounded-lg border border-border border-dashed">
-              <p className="text-text-muted">No saved artists yet.</p>
+              <p className="text-text-muted">Nothing here yet.</p>
             </div>
           ) : (
             <div className="grid gap-3">

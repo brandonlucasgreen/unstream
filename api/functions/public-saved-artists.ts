@@ -1,9 +1,14 @@
 // API endpoint: /api/public/saved-artists/:handle
-// GET — public, anonymous-accessible. Returns a user's saved artists list if sharing is enabled.
-// 404 on private, unknown handle, or missing username.
+// GET — public, anonymous-accessible. Returns a user's saved artists list and public
+// collection if sharing is enabled. 404 on private, unknown handle, or missing username.
 // Rate limited at 'standard' tier (30/min/IP) per amendment 1.
+//
+// The collection and the saved list are two views of the same relationship — artists you
+// support, and the releases you bought to support them (Support Loop Step 3). Only
+// provenance='purchased', non-hidden items are ever public: a page that counted anything
+// else as support would be lying, and the whole value of the artifact is that it isn't.
 
-import { getClient } from './db';
+import { getClient, readAllPages } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 
 const CORS_HEADERS = {
@@ -89,6 +94,47 @@ export async function handler(event: {
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
     }
 
+    // Public collection: purchased and not hidden, most recently acquired first. Paged read
+    // because a real Bandcamp collection can exceed PostgREST's silent 1,000-row cap.
+    const collectionRead = await readAllPages<{
+      title: string;
+      artist_name: string;
+      art_url: string | null;
+      acquired_at: string | null;
+      releases: { slug: string; artwork_url: string | null; artists: { slug: string } | null } | null;
+    }>(
+      (from, to) =>
+        client
+          .from('collection_items')
+          .select('title, artist_name, art_url, acquired_at, releases!left (slug, artwork_url, artists (slug))')
+          .eq('user_id', userId)
+          .eq('provenance', 'purchased')
+          .eq('hidden', false)
+          .order('acquired_at', { ascending: false, nullsFirst: false })
+          .order('created_at', { ascending: false })
+          .range(from, to),
+      'collection_items (public page)'
+    );
+
+    if (!collectionRead.ok) {
+      console.error('[public-saved-artists] Error fetching collection:', collectionRead.reason);
+      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+    }
+
+    const collection = collectionRead.rows.map(row => {
+      const release = row.releases;
+      const artistSlug = release?.artists?.slug || null;
+      return {
+        title: row.title,
+        artist_name: row.artist_name,
+        art_url: row.art_url || release?.artwork_url || null,
+        acquired_at: row.acquired_at,
+        // Matched items link to the release page, so a viewer can buy the same record —
+        // the loop closes. Unmatched items still render, just without a link.
+        url: release?.slug && artistSlug ? `/a/${artistSlug}/${release.slug}` : null,
+      };
+    });
+
     // Shape the response — NEVER include email, user_id, or account metadata
     const savedArtists = (saved || []).map((row: any) => {
       const artistRow = row.artists;
@@ -107,6 +153,7 @@ export async function handler(event: {
         owner_display_name: ownerDisplayName,
         owner_location: ownerLocation,
         saved_artists: savedArtists,
+        collection,
       }),
     };
   } catch (error) {
