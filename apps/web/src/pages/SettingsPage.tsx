@@ -112,7 +112,7 @@ export function SettingsPage() {
           <section id="notifications" className="scroll-mt-24 p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
             <h2 className="text-lg font-semibold">Notifications</h2>
             <p className="text-sm text-text-muted">
-              Emails about artists you've saved and, if you've claimed a profile, your own stats.
+              Emails about the artists you've saved.
             </p>
             <NotificationPreferences />
           </section>
