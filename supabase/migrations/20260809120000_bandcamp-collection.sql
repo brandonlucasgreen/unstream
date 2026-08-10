@@ -1,5 +1,10 @@
 -- Migration: bandcamp_connections, collection_items, listening_signals
 --
+-- Applied to production ahead of the PR merge (workflow_dispatch, 2026-08-09) so the
+-- deploy preview — which shares the production database — could exercise the connect
+-- flow. Purely additive, so the early application is the safe side of the
+-- migration/deploy race.
+--
 -- The Support Loop, Step 1 (docs: support-loop-spec.md, collection-spec.md §4–5).
 -- Three tables:
 --
