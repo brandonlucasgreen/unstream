@@ -8,19 +8,36 @@ name: Weekly analytics recap
 # Netlify functions in this repo — same precedent as recatalog-sweep.yml,
 # schedule-social-posts.yml, and upstash-keepalive.yml.
 #
-# ## Cadence: once a week, Monday mornings US time
+# ## PAUSED — no schedule, manual dispatch only
 #
-# '0 13 * * 1' is 13:00 UTC Monday — 6am PT / 9am ET, so the recap lands at the start of an
-# artist's work week rather than overnight. Every run recomputes the "last 7 days" window from
-# when it actually fires, so this is safe to reschedule without a backfill.
+# The weekly cron ('0 13 * * 1' — 13:00 UTC Monday, 6am PT / 9am ET) is deliberately removed,
+# for two reasons that both need to stop being true before it goes back.
 #
-# Safe to over-run: the function's own idempotency guard (email_log, keyed on artistId + the
-# Monday date of that week) means a duplicate invocation the same week sends nothing twice.
+# 1. Volume. This is the only email that fans out to the whole roster at once: one send per
+#    verified claimed profile, all in the same minute. On Resend's free plan (100/day) a single
+#    Monday run exhausts the entire day's allowance and starves the saved-artist alerts, which
+#    are the ones a fan is actually waiting on. Nothing here throttles or spreads the batch.
+#
+# 2. Content. Most claimed artists don't yet get enough searches, views or clicks in a week for
+#    the recap to say anything worth reading. "3 views, 0 clicks" is an honest number and a
+#    discouraging email, and it makes Unstream look smaller than it is to exactly the people
+#    we most want to convince.
+#
+# Turning it back on means: enough traffic that a typical recap reports numbers worth sending
+# (and/or a floor below which an artist is skipped), plus either a paid Resend plan or a send
+# budget that can't crowd out the release alerts. A monthly cadence would ease both at once.
+#
+# The function, its tests and the /settings toggle all stay — this is a pause, not a removal.
+# The toggle is hidden while it's paused (see TOGGLES in NotificationPreferences.tsx); restore
+# it in the same change that restores the schedule.
+#
+# Manual dispatch is kept on purpose: running it by hand is a deliberate act by somebody who
+# can see the day's remaining allowance. Safe to over-run — the function's idempotency guard
+# (email_log, keyed on artistId + the Monday date of that week) means a second invocation in
+# the same week sends nothing twice.
 
 on:
-  schedule:
-    - cron: '0 13 * * 1'
-  workflow_dispatch: # Manual trigger from the GitHub UI
+  workflow_dispatch: # Manual trigger from the GitHub UI. No schedule — see above.
 
 jobs:
   recap:
