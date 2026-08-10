@@ -190,6 +190,24 @@ describe('me-bandcamp handler', () => {
       );
     });
 
+    it('treats a non-202 dispatch (e.g. 404 on a deploy preview) as sync-start failure', async () => {
+      mocks.mockPing.mockResolvedValue(undefined);
+      mocks.mockArtistCount.mockResolvedValue(1);
+      // The background function isn't deployed at the target URL — Netlify answers 404,
+      // which fetch does NOT throw on. Claiming "syncing" here would spin forever.
+      fetchMock.mockResolvedValue({ ok: false, status: 404 });
+      const upsert = vi.fn((..._args: unknown[]) => Promise.resolve({ error: null }));
+      const updateEq = vi.fn(() => Promise.resolve({ error: null }));
+      const update = vi.fn(() => ({ eq: updateEq }));
+      mocks.mockFrom.mockReturnValue({ upsert, update });
+
+      const res = await handler(authedEvent('POST', { username: 'fan', password: PASSWORD }));
+      expect(JSON.parse(res!.body).syncStatus).toBe('error');
+      expect(update).toHaveBeenCalledWith(
+        expect.objectContaining({ sync_status: 'error', sync_error: expect.stringContaining('Re-sync') })
+      );
+    });
+
     it('validates the body', async () => {
       const res = await handler(authedEvent('POST', { username: '', password: PASSWORD }));
       expect(res!.statusCode).toBe(400);

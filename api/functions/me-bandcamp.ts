@@ -83,8 +83,9 @@ async function requestSync(userId: string): Promise<boolean> {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3_000);
+    let response: Response;
     try {
-      await fetch(`${siteUrl}/.netlify/functions/bandcamp-sync-background`, {
+      response = await fetch(`${siteUrl}/.netlify/functions/bandcamp-sync-background`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,6 +96,14 @@ async function requestSync(userId: string): Promise<boolean> {
       });
     } finally {
       clearTimeout(timeoutId);
+    }
+    // Netlify's dispatcher answers 202 when it accepts a background invocation. Anything
+    // else means the sync will never run — notably a 404 when this code runs on a deploy
+    // preview, whose `URL` points at production before the function has shipped there.
+    // Claiming "syncing" on that response would spin forever.
+    if (!response.ok) {
+      console.warn(`[me-bandcamp] sync dispatch refused: HTTP ${response.status}`);
+      return false;
     }
     return true;
   } catch (error) {
