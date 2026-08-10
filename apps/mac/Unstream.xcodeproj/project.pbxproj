@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0038D14301F153EF60346193 /* SocialIconButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFEA3443AD56B9950B43AAE /* SocialIconButton.swift */; };
+		0E161EA41C6EFF9BD9475897 /* MusicLibrarySettingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA481812D2AD036F2B085F41 /* MusicLibrarySettingsSection.swift */; platformFilters = (macos, ); };
 		0EC3D68464514744CE3AA448 /* BandcampReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43017BB6FDE57EBD35755D7B /* BandcampReleaseChecker.swift */; };
 		0F9D0A7FD89742003BD8D140 /* TipJarStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C40AC0CB901A9F09846258C /* TipJarStore.swift */; };
 		1132043919606896183DF5BC /* IndieArtist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752DBE41E6259FE62017B41D /* IndieArtist.swift */; };
@@ -16,6 +17,7 @@
 		1590E33E06825362DA54B4F0 /* ReleaseGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 715AD54711A079021408FD57 /* ReleaseGuideView.swift */; };
 		194D5CB6D2373174426884C5 /* FaircampReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE9F88505AF840EC94B5C0BC /* FaircampReleaseChecker.swift */; };
 		1C82AF206862EABE1F4F856E /* ReleaseAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F71936662EEAC06B0C1F008 /* ReleaseAlert.swift */; };
+		22BA82A9C303B9321803E7BC /* MusicLibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 907C0C72B8E51096129D4EEA /* MusicLibraryTests.swift */; };
 		259CF8CA44756A194690A76D /* PlatformCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = E488821D948022DCF94F9759 /* PlatformCatalog.swift */; };
 		26D515CC48F859D85DD6CD60 /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2724397667CCEE30A098B9CE /* ColorExtensions.swift */; };
 		27A98FF82168ECEF095C04D6 /* NowPlayingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B08A02BD24EAF475A2689D6 /* NowPlayingView.swift */; platformFilters = (macos, ); };
@@ -56,6 +58,7 @@
 		917C407BBA300BE70B9BDEFB /* ScrobbleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEEE83E95439F19BFC679216 /* ScrobbleManager.swift */; platformFilters = (macos, ); };
 		93956240B6028E760C791028 /* SavedArtistsSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16504D9BC91FD976CD10D549 /* SavedArtistsSyncTests.swift */; };
 		943B6AACF5076051E8596676 /* ArtistReleases.swift in Sources */ = {isa = PBXBuildFile; fileRef = B23E1517361AB51417316732 /* ArtistReleases.swift */; };
+		9B4F5CD4A3A48DC9436B2D4E /* AppleMusicLibraryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF02C234C6A7FF3142DC12BF /* AppleMusicLibraryService.swift */; platformFilters = (macos, ); };
 		A3526462820B7494F5463BE2 /* UnstreamApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 913EEE8809001930E4F88F8C /* UnstreamApp.swift */; };
 		A8FD43FE100F214CA8E6241C /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE9E59C365D8F116C435B8BC /* EmptyStateView.swift */; };
 		A91A7A297319DD5233D5CAC3 /* ArtistResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94E30B61F5B6C06CA39DB0E2 /* ArtistResultView.swift */; };
@@ -68,6 +71,7 @@
 		C79BDDA2535271F460C71568 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B245CC3DBF71C4B066A96632 /* AuthService.swift */; };
 		CC626E6B835C52240F626B7C /* PopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF4E58F91C106A97A5179125 /* PopoverView.swift */; platformFilters = (macos, ); };
 		CDC7954A307466412F1510F7 /* ReleaseDetailTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F9816B25DDD3F9083C4796 /* ReleaseDetailTests.swift */; };
+		D9BD96BE052427D253DC2B97 /* MusicLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1398F260541794BA531DCA87 /* MusicLibrary.swift */; };
 		DAE01DF2F57D1D3074895182 /* SavedArtistsSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = B733B6764210C3CAE08F12E0 /* SavedArtistsSync.swift */; };
 		DAF5726D4B93EA321E5D4643 /* MediaObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 385B09E1C63EAE37830E8A04 /* MediaObserver.swift */; platformFilters = (macos, ); };
 		DCA4950DEB8FCA6734B3E003 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E82B185A730210A472CD947F /* UpdateChecker.swift */; platformFilters = (macos, ); };
@@ -114,6 +118,7 @@
 
 /* Begin PBXFileReference section */
 		1003A79CD2A20BF7227C6FB0 /* SupportEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportEntry.swift; sourceTree = "<group>"; };
+		1398F260541794BA531DCA87 /* MusicLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicLibrary.swift; sourceTree = "<group>"; };
 		1581BE8FAF07C7C9D3CD99F5 /* SearchResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResponse.swift; sourceTree = "<group>"; };
 		16504D9BC91FD976CD10D549 /* SavedArtistsSyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedArtistsSyncTests.swift; sourceTree = "<group>"; };
 		1B86644D0E7917D893B1E7A3 /* UnstreamShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnstreamShortcuts.swift; sourceTree = "<group>"; };
@@ -156,6 +161,7 @@
 		84D714AAE0DE5A5032D0C0F3 /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
 		89D2DBDD53C2C9158EA698C4 /* SupportListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportListView.swift; sourceTree = "<group>"; };
 		8A74C90B5D9AAB9C4BE4A2BC /* ReleaseDetailService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseDetailService.swift; sourceTree = "<group>"; };
+		907C0C72B8E51096129D4EEA /* MusicLibraryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicLibraryTests.swift; sourceTree = "<group>"; };
 		913EEE8809001930E4F88F8C /* UnstreamApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnstreamApp.swift; sourceTree = "<group>"; };
 		94E30B61F5B6C06CA39DB0E2 /* ArtistResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtistResultView.swift; sourceTree = "<group>"; };
 		99D11E8AD4C3856F744DAA65 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -181,8 +187,10 @@
 		BEFF951B15732D3AD206D247 /* DeviceIDManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIDManager.swift; sourceTree = "<group>"; };
 		C2ACE9E0FA5F270656066467 /* UnstreamShareExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = UnstreamShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC8A2405B5A74531E19338D9 /* PlatformBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformBadge.swift; sourceTree = "<group>"; };
+		CF02C234C6A7FF3142DC12BF /* AppleMusicLibraryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleMusicLibraryService.swift; sourceTree = "<group>"; };
 		D144E8586F19DBA63C2F37B1 /* SafariView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariView.swift; sourceTree = "<group>"; };
 		D7D7374CAB7B2AF10890C2D2 /* LinkActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkActions.swift; sourceTree = "<group>"; };
+		DA481812D2AD036F2B085F41 /* MusicLibrarySettingsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicLibrarySettingsSection.swift; sourceTree = "<group>"; };
 		DC148A11F868801384A78672 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		E330692CA1EC213166D9351F /* SearchTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTab.swift; sourceTree = "<group>"; };
 		E488821D948022DCF94F9759 /* PlatformCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformCatalog.swift; sourceTree = "<group>"; };
@@ -279,6 +287,7 @@
 			isa = PBXGroup;
 			children = (
 				99D11E8AD4C3856F744DAA65 /* Info.plist */,
+				907C0C72B8E51096129D4EEA /* MusicLibraryTests.swift */,
 				66C32A6DB203A3FC0A26D719 /* ReleaseAlertTests.swift */,
 				52F9816B25DDD3F9083C4796 /* ReleaseDetailTests.swift */,
 				16504D9BC91FD976CD10D549 /* SavedArtistsSyncTests.swift */,
@@ -332,6 +341,7 @@
 		990B6FFF44AB5ACA6B926B4C /* macOS */ = {
 			isa = PBXGroup;
 			children = (
+				CF02C234C6A7FF3142DC12BF /* AppleMusicLibraryService.swift */,
 				6B52C116B5CC91BC40D028AF /* GlobalHotkeyManager.swift */,
 				757215FB463E24C4101FECCF /* ListenBrainzService.swift */,
 				385B09E1C63EAE37830E8A04 /* MediaObserver.swift */,
@@ -349,6 +359,7 @@
 				DC148A11F868801384A78672 /* AppState.swift */,
 				B23E1517361AB51417316732 /* ArtistReleases.swift */,
 				752DBE41E6259FE62017B41D /* IndieArtist.swift */,
+				1398F260541794BA531DCA87 /* MusicLibrary.swift */,
 				BC8C8A39D8800BDBA893E0EA /* NowPlaying.swift */,
 				E488821D948022DCF94F9759 /* PlatformCatalog.swift */,
 				1F71936662EEAC06B0C1F008 /* ReleaseAlert.swift */,
@@ -391,6 +402,7 @@
 		F284A719009A53D4D7A04F14 /* macOS */ = {
 			isa = PBXGroup;
 			children = (
+				DA481812D2AD036F2B085F41 /* MusicLibrarySettingsSection.swift */,
 				BAF3C1FFEBBA8D8B753BDB0B /* NewReleasesListView.swift */,
 				9B08A02BD24EAF475A2689D6 /* NowPlayingView.swift */,
 				EF4E58F91C106A97A5179125 /* PopoverView.swift */,
@@ -534,6 +546,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				22BA82A9C303B9321803E7BC /* MusicLibraryTests.swift in Sources */,
 				63E898D2663789CC76EF14C1 /* ReleaseAlertTests.swift in Sources */,
 				CDC7954A307466412F1510F7 /* ReleaseDetailTests.swift in Sources */,
 				93956240B6028E760C791028 /* SavedArtistsSyncTests.swift in Sources */,
@@ -553,6 +566,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DEAB976819E6E900B9C1114A /* AppState.swift in Sources */,
+				9B4F5CD4A3A48DC9436B2D4E /* AppleMusicLibraryService.swift in Sources */,
 				943B6AACF5076051E8596676 /* ArtistReleases.swift in Sources */,
 				777C57218E913093E047A57A /* ArtistReleasesView.swift in Sources */,
 				A91A7A297319DD5233D5CAC3 /* ArtistResultView.swift in Sources */,
@@ -575,6 +589,8 @@
 				7FA2720BFA00323DC8E66A9A /* ListenBrainzService.swift in Sources */,
 				DAF5726D4B93EA321E5D4643 /* MediaObserver.swift in Sources */,
 				47ADDB550C3A545314574336 /* MirloReleaseChecker.swift in Sources */,
+				D9BD96BE052427D253DC2B97 /* MusicLibrary.swift in Sources */,
+				0E161EA41C6EFF9BD9475897 /* MusicLibrarySettingsSection.swift in Sources */,
 				8AE1365921AE81ECF06371F4 /* NewReleasesListView.swift in Sources */,
 				F20D83D3642078C9B2C45ED0 /* NowPlaying.swift in Sources */,
 				64514560D09214DE420ED24D /* NowPlayingNotificationManager.swift in Sources */,

@@ -17,6 +17,7 @@ enum SettingsTab: String, CaseIterable {
 
 struct SettingsView: View {
     var releaseAlertManager: ReleaseAlertManager?
+    var libraryService: AppleMusicLibraryService?
 
     @AppStorage("musicListeningEnabled") private var musicListeningEnabled = true
     @AppStorage("artistNotificationsEnabled") private var artistNotificationsEnabled = true
@@ -312,6 +313,11 @@ struct SettingsView: View {
                 Text("Submit your listening history to ListenBrainz.")
                     .font(.caption)
                     .foregroundColor(.secondary)
+            }
+
+            // Apple Music library import (support-loop-spec.md Step 2)
+            if let libraryService {
+                MusicLibrarySettingsSection(service: libraryService)
             }
 
             // Plex Integration

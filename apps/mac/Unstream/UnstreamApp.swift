@@ -29,6 +29,7 @@ class AppStateContainer: ObservableObject {
     let mediaObserver = MediaObserver()
     let scrobbleManager = ScrobbleManager.shared
     let nowPlayingNotificationManager = NowPlayingNotificationManager()
+    let appleMusicLibraryService = AppleMusicLibraryService()
     #endif
 
     private var cancellables = Set<AnyCancellable>()
@@ -129,7 +130,10 @@ struct UnstreamApp: App {
         // SwiftUI Settings scene: that's what gives us the standard settings window,
         // its frame persistence, and a working "Unstream ▸ Settings… ⌘," menu item.
         Settings {
-            SettingsView(releaseAlertManager: container.releaseAlertManager)
+            SettingsView(
+                releaseAlertManager: container.releaseAlertManager,
+                libraryService: container.appleMusicLibraryService
+            )
         }
         #else
         // iOS: Standard windowed app
