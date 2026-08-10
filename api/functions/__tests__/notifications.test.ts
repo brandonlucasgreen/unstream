@@ -104,6 +104,7 @@ interface ReleaseRow {
   slug: string;
   release_date: string | null;
   date_precision: string | null;
+  status: string;
   created_at: string;
 }
 
@@ -113,14 +114,15 @@ interface ReleaseRow {
  * `saved_artists`, `artists`, `releases`, `release_sources`, `email_log`,
  * `notification_preferences`, and `auth.admin.getUserById` all in one client.
  *
- * The `releases` update is modelled as a real claim: it hands back the rows that are still
- * unclaimed and empties the pool, so a second call to the same client sees what production
- * would see on the next catalog run — nothing.
+ * `releases` is modelled as the real two-step claim: a select of everything still unclaimed,
+ * then an update over the ids the caller chose, which marks exactly those and reports back which
+ * it won. A second call sees what the next catalog run would see, so anything the caller declines
+ * to claim — an undated release — stays pending exactly as it does in the database.
  */
 function makeFanoutClient(opts: {
   savedArtists?: { data: { user_id: string }[] | null; error?: unknown };
   artistRow?: { data: { name: string; slug: string } | null; error?: unknown };
-  releases?: { data: ReleaseRow[] | null; error?: unknown };
+  releases?: { data: ReleaseRow[] | null; error?: unknown; claimError?: unknown; stolenIds?: string[] };
   releaseSources?: { data: { release_id: string; platform: string }[] | null; error?: unknown };
   emails?: Record<string, string>;
   optedOut?: Record<string, boolean>;
@@ -133,10 +135,17 @@ function makeFanoutClient(opts: {
   const optedOut = opts.optedOut ?? {};
 
   let unclaimed = releasesResult.data;
-  const claimReleases = vi.fn(() => {
-    const claimed = unclaimed;
-    unclaimed = unclaimed ? [] : null;
-    return Promise.resolve({ data: claimed, error: releasesResult.error ?? null });
+  const readUnclaimed = vi.fn(() =>
+    Promise.resolve({ data: unclaimed, error: releasesResult.error ?? null }),
+  );
+  const claimByIds = vi.fn((_col: string, ids: string[]) => {
+    // `stolenIds` stand in for rows a concurrent catalog run claimed between our read and our
+    // write: still asked for, but not won.
+    const stolen = opts.releases?.stolenIds ?? [];
+    const won = (unclaimed || []).filter(row => ids.includes(row.id) && !stolen.includes(row.id));
+    unclaimed = unclaimed ? unclaimed.filter(row => !ids.includes(row.id)) : null;
+    const result = { data: won.map(row => ({ id: row.id })), error: releasesResult.claimError ?? null };
+    return { is: () => ({ select: () => Promise.resolve(result) }) };
   });
 
   const from = vi.fn((table: string) => {
@@ -147,7 +156,10 @@ function makeFanoutClient(opts: {
       return { select: () => ({ eq: () => ({ maybeSingle: () => Promise.resolve(artistRowResult) }) }) };
     }
     if (table === 'releases') {
-      return { update: () => ({ eq: () => ({ eq: () => ({ is: () => ({ select: claimReleases }) }) }) }) };
+      return {
+        select: () => ({ eq: () => ({ eq: () => ({ is: readUnclaimed }) }) }),
+        update: () => ({ in: claimByIds }),
+      };
     }
     if (table === 'release_sources') {
       return { select: () => ({ in: () => Promise.resolve(releaseSourcesResult) }) };
@@ -183,7 +195,7 @@ function makeFanoutClient(opts: {
   return { from, auth: { admin: { getUserById } } } as never;
 }
 
-/** Two savers and one newly discovered release — the shape most of these tests need. */
+/** Two savers and one release out two days ago — the shape most of these tests need. */
 function releaseClient(overrides: Parameters<typeof makeFanoutClient>[0] = {}) {
   return makeFanoutClient({
     savedArtists: { data: [{ user_id: 'u1' }, { user_id: 'u2' }], error: null },
@@ -194,13 +206,19 @@ function releaseClient(overrides: Parameters<typeof makeFanoutClient>[0] = {}) {
   });
 }
 
+/** An ISO date `offsetDays` from today — negative for the past. Relative, so no clock stubbing. */
+function isoDate(offsetDays: number): string {
+  return new Date(Date.now() + offsetDays * 86_400_000).toISOString().slice(0, 10);
+}
+
 function release(id: string, title: string, overrides: Partial<ReleaseRow> = {}): ReleaseRow {
   return {
     id,
     title,
     slug: title.toLowerCase().replace(/ /g, '-'),
-    release_date: '2026-08-12',
+    release_date: isoDate(-2),
     date_precision: 'day',
+    status: 'released',
     created_at: '2026-08-12T00:00:00Z',
     ...overrides,
   };
@@ -215,7 +233,7 @@ describe('notifySavedArtistsOfNewRelease', () => {
   it('sends nothing when no release is unaccounted for', async () => {
     const client = releaseClient({ releases: { data: [], error: null } });
 
-    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1', previousReleasesFound: 4 });
+    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1' });
 
     expect(mocks.sendTransactionalEmail).not.toHaveBeenCalled();
   });
@@ -224,32 +242,85 @@ describe('notifySavedArtistsOfNewRelease', () => {
     const client = releaseClient();
 
     // One email per saver on the first run, and not one more on the second.
-    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1', previousReleasesFound: 4 });
+    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1' });
     expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(2);
 
-    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1', previousReleasesFound: 4 });
+    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1' });
     expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(2);
   });
 
-  it('claims an artist’s first catalogue without announcing it as new', async () => {
+  it('says nothing about a release that came out years ago', async () => {
     const client = releaseClient({
-      releases: { data: [release('r1', 'Old Album'), release('r2', 'Older Album')], error: null },
+      releases: { data: [release('r1', 'Old Album', { release_date: '2019-04-01' })], error: null },
     });
 
-    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1', previousReleasesFound: 0 });
+    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1' });
 
     expect(mocks.sendTransactionalEmail).not.toHaveBeenCalled();
+  });
 
-    // The back catalogue was claimed all the same, so a later run can't announce it either —
-    // the next genuinely new release is the first thing anyone hears about.
-    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1', previousReleasesFound: 2 });
+  it('counts a release from exactly a week ago as news, and one from the day before as not', async () => {
+    const onTheEdge = releaseClient({
+      releases: { data: [release('r1', 'Just Inside', { release_date: isoDate(-7) })], error: null },
+    });
+    await notifySavedArtistsOfNewRelease({ client: onTheEdge, artistId: 'artist-1' });
+    expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(2);
+
+    mocks.sendTransactionalEmail.mockClear();
+
+    const justOutside = releaseClient({
+      releases: { data: [release('r2', 'Just Outside', { release_date: isoDate(-8) })], error: null },
+    });
+    await notifySavedArtistsOfNewRelease({ client: justOutside, artistId: 'artist-1' });
     expect(mocks.sendTransactionalEmail).not.toHaveBeenCalled();
+  });
+
+  it('announces a release that has not come out yet', async () => {
+    const client = releaseClient({
+      releases: { data: [release('r1', 'Next Month', { release_date: isoDate(30), status: 'announced' })], error: null },
+    });
+
+    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1' });
+
+    expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(2);
+    expect(mocks.sendTransactionalEmail.mock.calls[0][0].html).toContain('Next Month');
+  });
+
+  it('announces a pre-order that reached us without a date', async () => {
+    const client = releaseClient({
+      releases: {
+        data: [release('r1', 'Pre Order', { release_date: null, date_precision: null, status: 'announced' })],
+        error: null,
+      },
+    });
+
+    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1' });
+
+    expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(2);
+    // Nothing is invented about when it lands — we say we don't know.
+    expect(mocks.sendTransactionalEmail.mock.calls[0][0].html).toContain('Release date not listed');
+  });
+
+  it('leaves an undated release pending, and announces it once a date arrives', async () => {
+    const pending = release('r1', 'No Date Yet', { release_date: null, date_precision: null });
+    const client = releaseClient({ releases: { data: [pending], error: null } });
+
+    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1' });
+    expect(mocks.sendTransactionalEmail).not.toHaveBeenCalled();
+
+    // A later run's detail pass fills the date in. Because the row was never claimed, it is still
+    // there to be judged — an unknown date was not cached as a permanent "not news".
+    pending.release_date = isoDate(-1);
+    pending.date_precision = 'day';
+
+    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1' });
+    expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(2);
   });
 
   it('does nothing when nobody saved the artist', async () => {
     const client = releaseClient({ savedArtists: { data: [], error: null } });
 
-    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1', previousReleasesFound: 4 });
+    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1' });
 
     expect(mocks.sendTransactionalEmail).not.toHaveBeenCalled();
   });
@@ -257,7 +328,7 @@ describe('notifySavedArtistsOfNewRelease', () => {
   it('emails every saver about the artist by name, linking to their profile', async () => {
     const client = releaseClient();
 
-    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1', previousReleasesFound: 4 });
+    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1' });
 
     expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(2);
     const recipients = mocks.sendTransactionalEmail.mock.calls.map(([params]) => params.to);
@@ -267,6 +338,7 @@ describe('notifySavedArtistsOfNewRelease', () => {
 
   it('names the release, its date, and the platforms it can be bought on', async () => {
     const client = releaseClient({
+      releases: { data: [release('r1', 'Fine Motor Control', { release_date: '2026-08-12' })], error: null },
       releaseSources: {
         // Deliberately lowest-payout-first, to prove the artist-paying-first ordering is applied.
         data: [{ release_id: 'r1', platform: 'discogs' }, { release_id: 'r1', platform: 'bandcamp' }],
@@ -274,7 +346,7 @@ describe('notifySavedArtistsOfNewRelease', () => {
       },
     });
 
-    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1', previousReleasesFound: 4 });
+    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1' });
 
     const sent = mocks.sendTransactionalEmail.mock.calls[0][0];
     expect(sent.subject).toBe('New release from Test Artist: Fine Motor Control');
@@ -284,63 +356,81 @@ describe('notifySavedArtistsOfNewRelease', () => {
     expect(sent.text).toContain('12 August 2026 · Available on Bandcamp, Discogs');
   });
 
-  it('says the date is not listed rather than inventing one', async () => {
-    const client = releaseClient({
-      releases: { data: [release('r1', 'Untitled', { release_date: null, date_precision: null })], error: null },
-    });
-
-    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1', previousReleasesFound: 4 });
-
-    expect(mocks.sendTransactionalEmail.mock.calls[0][0].html).toContain('Release date not listed');
-  });
-
   it('still names the releases when the platform lookup fails', async () => {
     const client = releaseClient({ releaseSources: { data: null, error: { message: 'boom' } } });
 
-    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1', previousReleasesFound: 4 });
+    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1' });
 
     expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(2);
     expect(mocks.sendTransactionalEmail.mock.calls[0][0].html).toContain('Fine Motor Control');
     expect(mocks.captureException).toHaveBeenCalled();
   });
 
-  it('sends nothing when the claim itself fails, so nothing is announced twice later', async () => {
+  it('sends nothing when the read fails, so nothing is announced twice later', async () => {
     const client = releaseClient({ releases: { data: null, error: { message: 'boom' } } });
 
-    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1', previousReleasesFound: 4 });
+    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1' });
 
     expect(mocks.sendTransactionalEmail).not.toHaveBeenCalled();
     expect(mocks.captureException).toHaveBeenCalled();
   });
 
-  it('lists newest first, caps the list at five, and counts the rest', async () => {
+  it('sends nothing when the claim write fails, rather than announcing unclaimed releases', async () => {
+    const client = releaseClient({
+      releases: { data: [release('r1', 'Fine Motor Control')], claimError: { message: 'boom' } },
+    });
+
+    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1' });
+
+    expect(mocks.sendTransactionalEmail).not.toHaveBeenCalled();
+    expect(mocks.captureException).toHaveBeenCalled();
+  });
+
+  it('announces only the releases it won, when a concurrent run claims some first', async () => {
+    const client = releaseClient({
+      releases: {
+        data: [release('mine', 'Mine'), release('theirs', 'Theirs')],
+        stolenIds: ['theirs'],
+        error: null,
+      },
+    });
+
+    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1' });
+
+    const sent = mocks.sendTransactionalEmail.mock.calls[0][0];
+    expect(sent.subject).toBe('New release from Test Artist: Mine');
+    expect(sent.html).not.toContain('Theirs');
+  });
+
+  it('counts and lists only the newsworthy releases, newest first, capped at five', async () => {
     const client = releaseClient({
       releases: {
         data: [
-          release('r1', 'Oldest', { release_date: '2020-01-01' }),
-          release('r2', 'Undated', { release_date: null, date_precision: null }),
+          release('old', 'Old Album', { release_date: '2019-04-01' }),
+          release('undated', 'No Date Yet', { release_date: null, date_precision: null }),
           ...Array.from({ length: 6 }, (_, i) =>
-            release(`n${i}`, `Recent ${i}`, { release_date: `2026-0${i + 1}-01` }),
+            release(`n${i}`, `Recent ${i}`, { release_date: isoDate(-(i + 1)) }),
           ),
         ],
         error: null,
       },
     });
 
-    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1', previousReleasesFound: 4 });
+    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1' });
 
     const sent = mocks.sendTransactionalEmail.mock.calls[0][0];
-    expect(sent.subject).toBe('8 new releases from Test Artist');
-    expect(sent.html.indexOf('Recent 5')).toBeLessThan(sent.html.indexOf('Recent 4'));
-    expect(sent.html).not.toContain('Undated');
-    expect(sent.html).not.toContain('Oldest');
-    expect(sent.html).toContain('…and 3 more.');
+    expect(sent.subject).toBe('6 new releases from Test Artist');
+    expect(sent.html.indexOf('Recent 0')).toBeLessThan(sent.html.indexOf('Recent 1'));
+    expect(sent.html).not.toContain('Recent 5');
+    expect(sent.html).not.toContain('Old Album');
+    expect(sent.html).not.toContain('No Date Yet');
+    expect(sent.html).toContain('…and 1 more.');
   });
 
   it('carries the opt-out footer and a List-Unsubscribe header', async () => {
     const client = releaseClient();
 
-    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1', previousReleasesFound: 4 });
+    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1' });
 
     const sent = mocks.sendTransactionalEmail.mock.calls[0][0];
     expect(sent.html).toContain('https://unstream.stream/settings#notifications');
@@ -352,7 +442,7 @@ describe('notifySavedArtistsOfNewRelease', () => {
   it('does not email a saver who turned new-release alerts off', async () => {
     const client = releaseClient({ optedOut: { u1: true } });
 
-    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1', previousReleasesFound: 4 });
+    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1' });
 
     expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(1);
     expect(mocks.sendTransactionalEmail.mock.calls[0][0].to).toBe('fan2@example.com');

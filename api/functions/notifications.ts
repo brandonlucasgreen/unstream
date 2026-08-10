@@ -200,22 +200,22 @@ export async function filterByPreference(
 interface NewReleaseParams {
   client: SupabaseClient;
   artistId: string;
-  /**
-   * `release_catalog_state.releases_found` as it stood *before* this catalog run. Zero means
-   * this is the first run that has ever found anything for this artist, which is a backfill
-   * rather than news — see notifySavedArtistsOfNewRelease.
-   */
-  previousReleasesFound: number;
 }
 
 /** How many of the new releases get named in the email before it falls back to "and N more". */
 const MAX_LISTED_RELEASES = 5;
 
+/**
+ * How recently a release must have come out for the alert to treat it as news. Anything older is
+ * a catalogue gap we have only just filled, not something that happened.
+ */
+const RECENT_RELEASE_WINDOW_DAYS = 7;
+
 interface NewReleaseSummary {
   id: string;
   title: string;
   slug: string;
-  /** "12 August 2026", "August 2026", "2026" — or '' when the upstream never gave us a date. */
+  /** "12 August 2026", "August 2026", "2026" — or '' for an upcoming release with no date yet. */
   dateText: string;
   /** Display names, artist-paying platforms first. */
   platforms: string[];
@@ -227,6 +227,7 @@ interface ClaimedRow {
   slug: string;
   release_date: string | null;
   date_precision: string | null;
+  status: string;
   created_at: string;
 }
 
@@ -241,45 +242,109 @@ function byNewest(a: ClaimedRow, b: ClaimedRow): number {
 }
 
 /**
- * Takes ownership of every release for this artist that no alert has accounted for yet, and
- * returns them. An empty result means there is nothing new to say — the caller sends no email
- * at all rather than repeating itself.
+ * Whether a release is worth emailing about: out in the last week, or still to come.
+ *
+ * Cataloguing discovers records, it doesn't witness them being released. A parser improvement, a
+ * newly linked platform or a Discogs pass can surface an album from 1998 for the first time, and
+ * to this code that looks exactly like an album published this morning. Telling somebody
+ * "new release from X" about a record they may well have owned for twenty years is noise, and
+ * noise in the first alerts anybody receives is the expensive kind.
+ *
+ * Dates are compared as ISO strings, which sort chronologically, so this needs no date parsing.
+ * A future date passes on the same comparison, which is what makes an upcoming release news.
+ */
+function isNewsworthy(row: ClaimedRow, now: Date): boolean {
+  // 'announced' means dated in the future or flagged as a pre-order upstream, and a pre-order can
+  // reach us with no date at all — still the most newsworthy thing an artist does.
+  if (row.status === 'announced') return true;
+  if (!row.release_date) return false;
+
+  const cutoff = new Date(now.getTime() - RECENT_RELEASE_WINDOW_DAYS * 86_400_000);
+  return row.release_date >= cutoff.toISOString().slice(0, 10);
+}
+
+/**
+ * Whether we know enough about a release's age to rule on it at all. An undated release could
+ * be from this morning or from 1998, and the detail pass that would settle it is budgeted — so a
+ * release can arrive dateless in one run and dated in the next.
+ */
+function canJudgeAge(row: ClaimedRow): boolean {
+  return row.release_date !== null || row.status === 'announced';
+}
+
+/**
+ * Takes ownership of every release for this artist that no alert has accounted for yet *and whose
+ * age we can actually judge*, and returns them. The caller decides which of them are worth an
+ * email; claiming is about never saying the same thing twice, not about what gets said.
  *
  * This is what stops a release being announced twice. The alert used to infer "what's new" from
  * releases_found before and after a run, and a count can't express which records those are: a run
  * that drops one release and adds two leaves the total up by one and re-announces something
- * already sent. `alert_sent_at` states it directly, and the UPDATE ... RETURNING is atomic, so
- * two catalog runs racing on the same artist split the new releases between them instead of both
- * claiming the lot.
+ * already sent. `alert_sent_at` states it directly.
+ *
+ * Read first, then claim by id. The obvious version is one UPDATE with the age filter inlined,
+ * but that puts the rule in a PostgREST filter string used nowhere else in this codebase, where a
+ * mistake wouldn't fail — it would quietly match the wrong rows and mail them out. The decision
+ * lives in canJudgeAge instead, where it is typechecked and unit-tested, and the UPDATE only has
+ * to handle ids. Atomicity is unaffected: `alert_sent_at IS NULL` is still on the write, and its
+ * RETURNING is still the authority, so two catalog runs racing on the same artist split the rows
+ * between them rather than both claiming the lot.
+ *
+ * Undated releases are deliberately left unclaimed. "We don't know when this came out" is not
+ * "this is old", and marking it accounted-for would cache that uncertainty as a permanent no —
+ * the single most repeated bug in this codebase. It stays pending until a date settles it in
+ * either direction. A release that never gets a date is therefore never announced, which is the
+ * honest outcome: we have nothing to tell anyone about when it happened.
  *
  * Claiming *before* checking who (if anyone) is going to be emailed is deliberate. Releases
  * discovered while nobody was saving the artist are marked seen and never announced, so somebody
  * saving that artist a year later gets alerts from that point forward rather than a mail-out of
  * everything they missed.
  */
-async function claimUnalertedReleases(
+async function claimDatedReleases(
   client: SupabaseClient,
   artistId: string,
-): Promise<NewReleaseSummary[]> {
+): Promise<ClaimedRow[]> {
   const { data, error } = await client
     .from('releases')
-    .update({ alert_sent_at: new Date().toISOString() })
+    .select('id, title, slug, release_date, date_precision, status, created_at')
     .eq('artist_id', artistId)
     .eq('is_hidden', false)
-    .is('alert_sent_at', null)
-    .select('id, title, slug, release_date, date_precision, created_at');
+    .is('alert_sent_at', null);
 
   if (error) {
     // Nothing was claimed, so nothing is lost: report it and let the next catalog run retry.
     // Sending a vaguer email instead would be guessing at exactly the thing this claim exists
     // to know for certain.
-    Sentry.captureException(error, { extra: { context: 'claimUnalertedReleases', artistId } });
+    Sentry.captureException(error, { extra: { context: 'claimDatedReleases.read', artistId } });
     return [];
   }
 
-  const rows = ((data as ClaimedRow[]) || []).sort(byNewest);
-  if (rows.length === 0) return [];
+  const candidates = ((data as ClaimedRow[]) || []).filter(canJudgeAge);
+  if (candidates.length === 0) return [];
 
+  const { data: claimed, error: claimError } = await client
+    .from('releases')
+    .update({ alert_sent_at: new Date().toISOString() })
+    .in('id', candidates.map(row => row.id))
+    .is('alert_sent_at', null)
+    .select('id');
+
+  if (claimError) {
+    Sentry.captureException(claimError, { extra: { context: 'claimDatedReleases.claim', artistId } });
+    return [];
+  }
+
+  // Only the rows this call actually won — a concurrent run may have taken some of them.
+  const won = new Set(((claimed as { id: string }[]) || []).map(row => row.id));
+  return candidates.filter(row => won.has(row.id)).sort(byNewest);
+}
+
+/** Adds the display detail — formatted date, platform names — to the releases being announced. */
+async function toSummaries(
+  client: SupabaseClient,
+  rows: ClaimedRow[],
+): Promise<NewReleaseSummary[]> {
   const platformsByRelease = await getPlatformsByRelease(client, rows.map(row => row.id));
 
   return rows.map(row => ({
@@ -333,24 +398,27 @@ function releaseDetailLine(release: NewReleaseSummary): string {
 }
 
 /**
- * Tells everyone who saved this artist about the releases they haven't been told about yet.
- * Called from recordCatalogOutcome whenever releases_found increases.
+ * Tells everyone who saved this artist about their genuinely new releases — out in the last week,
+ * or still to come. Called from recordCatalogOutcome whenever releases_found increases.
  *
- * Every release is announced at most once, and only ever in one email: claimUnalertedReleases
- * is the authority on what counts as new, and an empty claim means no email is sent at all.
+ * Two independent guarantees, and both have to hold for an email to go out. claimDatedReleases
+ * makes sure nothing is ever announced twice; isNewsworthy makes sure nothing is announced that
+ * isn't news. Everything else this run turned up is claimed and quietly filed, so it can't
+ * resurface later either. Nothing to announce means no email at all.
+ *
+ * The date window also stands in for what used to be a separate first-catalogue special case. An
+ * artist's opening crawl arrives as their entire discography, and "34 new releases" was wrong
+ * about every record in it — but that is only ever true of *old* records, which the window now
+ * excludes on their own merits. A first crawl that happens to include last week's single is real
+ * news, and no longer suppressed for being first.
  */
 export async function notifySavedArtistsOfNewRelease(params: NewReleaseParams): Promise<void> {
-  const { client, artistId, previousReleasesFound } = params;
+  const { client, artistId } = params;
 
-  const releases = await claimUnalertedReleases(client, artistId);
-  if (releases.length === 0) return;
-
-  // An artist's first successful catalogue arrives as their whole discography at once, which is
-  // a backfill and not news — "Test Artist has 34 new releases" is wrong about every record in
-  // the list. Those releases are claimed above and deliberately not announced, so the next
-  // genuinely new one is the first thing anybody hears about. Zero also covers a catalogue that
-  // previously found nothing at all (a broken parser, since recovered), which is the same story.
-  if (previousReleasesFound === 0) return;
+  const claimed = await claimDatedReleases(client, artistId);
+  const now = new Date();
+  const newsworthy = claimed.filter(row => isNewsworthy(row, now));
+  if (newsworthy.length === 0) return;
 
   let userIds = await getActiveSavers(client, artistId);
   if (userIds.length === 0) return;
@@ -371,6 +439,7 @@ export async function notifySavedArtistsOfNewRelease(params: NewReleaseParams): 
   const emails = await resolveEmails(client, userIds);
   if (emails.length === 0) return;
 
+  const releases = await toSummaries(client, newsworthy);
   const listed = releases.slice(0, MAX_LISTED_RELEASES);
   const undisclosed = releases.length - listed.length;
 

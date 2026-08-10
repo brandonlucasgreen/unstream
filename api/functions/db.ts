@@ -605,15 +605,11 @@ export async function recordCatalogOutcome(
         });
       } else if (outcome.releasesFound > previous) {
         // Fire-and-forget: notifySavedArtistsOfNewRelease decides for itself whether there is
-        // anything to say (it sends nothing unless this run added releases no alert has covered
-        // yet) and logs its own failures to Sentry — a notification email must never affect
-        // cataloging's own success/failure. The count comparison here is only a cheap gate:
-        // a total that didn't go up can't have added rows worth claiming.
-        void notifySavedArtistsOfNewRelease({
-          client,
-          artistId,
-          previousReleasesFound: previous,
-        }).catch(err => {
+        // anything to say (it sends nothing unless this run turned up a release that is both
+        // unannounced and actually recent) and logs its own failures to Sentry — a notification
+        // email must never affect cataloging's own success/failure. The count comparison here is
+        // only a cheap gate: a total that didn't go up can't have added rows worth claiming.
+        void notifySavedArtistsOfNewRelease({ client, artistId }).catch(err => {
           Sentry.captureException(err, { extra: { context: 'notifySavedArtistsOfNewRelease', artistId } });
         });
       }
