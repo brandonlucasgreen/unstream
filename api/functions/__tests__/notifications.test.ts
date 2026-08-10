@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   sendTransactionalEmail: vi.fn(),
@@ -183,15 +183,13 @@ function makeFanoutClient(opts: {
   return { from, auth: { admin: { getUserById } } } as never;
 }
 
-const ADMIN_EMAIL = 'admin@example.com';
-
-/** One admin saver (u2) and one ordinary fan (u1) — the shape every admin-gating test needs. */
+/** Two savers and one newly discovered release — the shape most of these tests need. */
 function releaseClient(overrides: Parameters<typeof makeFanoutClient>[0] = {}) {
   return makeFanoutClient({
     savedArtists: { data: [{ user_id: 'u1' }, { user_id: 'u2' }], error: null },
     artistRow: { data: { name: 'Test Artist', slug: 'test-artist' }, error: null },
     releases: { data: [release('r1', 'Fine Motor Control')], error: null },
-    emails: { u1: 'fan1@example.com', u2: ADMIN_EMAIL },
+    emails: { u1: 'fan1@example.com', u2: 'fan2@example.com' },
     ...overrides,
   });
 }
@@ -211,12 +209,7 @@ function release(id: string, title: string, overrides: Partial<ReleaseRow> = {})
 describe('notifySavedArtistsOfNewRelease', () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    process.env.ADMIN_EMAIL = ADMIN_EMAIL;
     mocks.sendTransactionalEmail.mockResolvedValue({ ok: true, messageId: 'msg_1' });
-  });
-
-  afterEach(() => {
-    delete process.env.ADMIN_EMAIL;
   });
 
   it('sends nothing when no release is unaccounted for', async () => {
@@ -230,11 +223,12 @@ describe('notifySavedArtistsOfNewRelease', () => {
   it('never repeats a release: the run after an alert has nothing left to claim', async () => {
     const client = releaseClient();
 
+    // One email per saver on the first run, and not one more on the second.
     await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1', previousReleasesFound: 4 });
-    expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(1);
+    expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(2);
 
     await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1', previousReleasesFound: 4 });
-    expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(1);
+    expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(2);
   });
 
   it('claims an artist’s first catalogue without announcing it as new', async () => {
@@ -260,24 +254,15 @@ describe('notifySavedArtistsOfNewRelease', () => {
     expect(mocks.sendTransactionalEmail).not.toHaveBeenCalled();
   });
 
-  it('emails admin savers only, and leaves ordinary fans out', async () => {
+  it('emails every saver about the artist by name, linking to their profile', async () => {
     const client = releaseClient();
 
     await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1', previousReleasesFound: 4 });
 
-    expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(1);
-    expect(mocks.sendTransactionalEmail.mock.calls[0][0].to).toBe(ADMIN_EMAIL);
+    expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(2);
+    const recipients = mocks.sendTransactionalEmail.mock.calls.map(([params]) => params.to);
+    expect(recipients).toEqual(['fan1@example.com', 'fan2@example.com']);
     expect(mocks.sendTransactionalEmail.mock.calls[0][0].html).toContain('unstream.stream/a/test-artist');
-  });
-
-  it('sends to nobody and reports it when ADMIN_EMAIL is not configured', async () => {
-    delete process.env.ADMIN_EMAIL;
-    const client = releaseClient();
-
-    await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1', previousReleasesFound: 4 });
-
-    expect(mocks.sendTransactionalEmail).not.toHaveBeenCalled();
-    expect(mocks.captureMessage).toHaveBeenCalledWith(expect.stringContaining('ADMIN_EMAIL'), 'error');
   });
 
   it('names the release, its date, and the platforms it can be bought on', async () => {
@@ -314,7 +299,7 @@ describe('notifySavedArtistsOfNewRelease', () => {
 
     await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1', previousReleasesFound: 4 });
 
-    expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(1);
+    expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(2);
     expect(mocks.sendTransactionalEmail.mock.calls[0][0].html).toContain('Fine Motor Control');
     expect(mocks.captureException).toHaveBeenCalled();
   });
@@ -364,12 +349,13 @@ describe('notifySavedArtistsOfNewRelease', () => {
     expect(sent.headers).toEqual({ 'List-Unsubscribe': '<https://unstream.stream/settings#notifications>' });
   });
 
-  it('does not email an admin who turned new-release alerts off', async () => {
-    const client = releaseClient({ optedOut: { u2: true } });
+  it('does not email a saver who turned new-release alerts off', async () => {
+    const client = releaseClient({ optedOut: { u1: true } });
 
     await notifySavedArtistsOfNewRelease({ client, artistId: 'artist-1', previousReleasesFound: 4 });
 
-    expect(mocks.sendTransactionalEmail).not.toHaveBeenCalled();
+    expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(1);
+    expect(mocks.sendTransactionalEmail.mock.calls[0][0].to).toBe('fan2@example.com');
   });
 });
 
@@ -383,12 +369,7 @@ describe('notifySavedArtistsOfNewLinks', () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
-    process.env.ADMIN_EMAIL = ADMIN_EMAIL;
     mocks.sendTransactionalEmail.mockResolvedValue({ ok: true, messageId: 'msg_1' });
-  });
-
-  afterEach(() => {
-    delete process.env.ADMIN_EMAIL;
   });
 
   it('does nothing when no platforms were discovered', async () => {
@@ -399,57 +380,45 @@ describe('notifySavedArtistsOfNewLinks', () => {
     expect(mocks.sendTransactionalEmail).not.toHaveBeenCalled();
   });
 
-  it('emails admin savers only, naming the platforms as people know them', async () => {
+  it('emails every saver, naming the platforms as people know them', async () => {
     const client = makeFanoutClient({
       savedArtists: { data: [{ user_id: 'u1' }, { user_id: 'u2' }], error: null },
-      emails: { u1: 'fan1@example.com', u2: ADMIN_EMAIL },
+      emails: { u1: 'fan1@example.com', u2: 'fan2@example.com' },
     });
 
     await notifySavedArtistsOfNewLinks({ client, ...linkParams });
 
-    expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(1);
+    expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(2);
     const sent = mocks.sendTransactionalEmail.mock.calls[0][0];
-    expect(sent.to).toBe(ADMIN_EMAIL);
+    expect(sent.to).toBe('fan1@example.com');
     expect(sent.html).toContain('Patreon');
     expect(sent.html).toContain('https://unstream.stream/settings#notifications');
     expect(sent.headers).toEqual({ 'List-Unsubscribe': '<https://unstream.stream/settings#notifications>' });
   });
 
-  it('sends to nobody and reports it when ADMIN_EMAIL is not configured', async () => {
-    delete process.env.ADMIN_EMAIL;
-    const client = makeFanoutClient({
-      savedArtists: { data: [{ user_id: 'u1' }], error: null },
-      emails: { u1: 'fan1@example.com' },
-    });
-
-    await notifySavedArtistsOfNewLinks({ client, ...linkParams });
-
-    expect(mocks.sendTransactionalEmail).not.toHaveBeenCalled();
-    expect(mocks.captureMessage).toHaveBeenCalledWith(expect.stringContaining('ADMIN_EMAIL'), 'error');
-  });
-
   it('excludes the claimant from the saver fanout', async () => {
     const client = makeFanoutClient({
       savedArtists: { data: [{ user_id: 'claimer' }, { user_id: 'fan' }], error: null },
-      emails: { claimer: 'claimer@example.com', fan: ADMIN_EMAIL },
+      emails: { claimer: 'claimer@example.com', fan: 'fan@example.com' },
     });
 
     await notifySavedArtistsOfNewLinks({ client, ...linkParams, excludeUserId: 'claimer' });
 
     expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(1);
-    expect(mocks.sendTransactionalEmail.mock.calls[0][0].to).toBe(ADMIN_EMAIL);
+    expect(mocks.sendTransactionalEmail.mock.calls[0][0].to).toBe('fan@example.com');
   });
 
-  it('does not email an admin who turned new-platform-link alerts off', async () => {
+  it('does not email a saver who turned new-platform-link alerts off', async () => {
     const client = makeFanoutClient({
       savedArtists: { data: [{ user_id: 'u1' }, { user_id: 'u2' }], error: null },
-      emails: { u1: 'fan1@example.com', u2: ADMIN_EMAIL },
+      emails: { u1: 'fan1@example.com', u2: 'fan2@example.com' },
       optedOut: { u2: true },
     });
 
     await notifySavedArtistsOfNewLinks({ client, ...linkParams });
 
-    expect(mocks.sendTransactionalEmail).not.toHaveBeenCalled();
+    expect(mocks.sendTransactionalEmail).toHaveBeenCalledTimes(1);
+    expect(mocks.sendTransactionalEmail.mock.calls[0][0].to).toBe('fan1@example.com');
   });
 });
 

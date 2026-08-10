@@ -14,9 +14,7 @@ import { NotificationPreferences } from '../../src/components/NotificationPrefer
 
 describe('NotificationPreferences', () => {
   beforeEach(() => {
-    // Admin by default: two of the three toggles are admin-only while the saved-artist alerts
-    // are restricted, and the tests below drive one of them.
-    mockUseAuth.mockReturnValue({ session: { access_token: 'test-token' }, isAdmin: true });
+    mockUseAuth.mockReturnValue({ session: { access_token: 'test-token' } });
     mockFetch.mockReset();
   });
 
@@ -24,7 +22,7 @@ describe('NotificationPreferences', () => {
     cleanup();
   });
 
-  it('renders all three toggles for an admin, reflecting the fetched state', async () => {
+  it('renders all three toggles reflecting the fetched state', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ newRelease: true, newPlatformLink: false, weeklyAnalyticsRecap: true }),
@@ -41,23 +39,6 @@ describe('NotificationPreferences', () => {
     expect(screen.getByRole('switch', { name: 'New releases' }).getAttribute('aria-checked')).toBe('true');
     expect(screen.getByRole('switch', { name: 'New places to support' }).getAttribute('aria-checked')).toBe('false');
     expect(screen.getByRole('switch', { name: 'Weekly analytics recap' }).getAttribute('aria-checked')).toBe('true');
-  });
-
-  it('hides the saved-artist alerts from everyone but admins', async () => {
-    mockUseAuth.mockReturnValue({ session: { access_token: 'test-token' }, isAdmin: false });
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ newRelease: true, newPlatformLink: true, weeklyAnalyticsRecap: true }),
-    });
-
-    render(<NotificationPreferences />);
-
-    // Only the recap is actually sent to non-admins, so it's the only switch offered.
-    await waitFor(() => {
-      expect(screen.getByText('Weekly analytics recap')).not.toBeNull();
-    });
-    expect(screen.queryByText('New releases')).toBeNull();
-    expect(screen.queryByText('New places to support')).toBeNull();
   });
 
   it('toggles a preference off and reflects the server response', async () => {

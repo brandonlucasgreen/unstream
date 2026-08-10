@@ -11,7 +11,6 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { sendTransactionalEmail } from '../lib/resend';
 import { Sentry } from '../lib/sentry';
 import { escapeHtml } from '../lib/html';
-import { isAdminEmail } from '../lib/admin';
 import { PLATFORMS } from '../shared/platform-registry';
 import { formatReleaseDate, payoutRank } from '../shared/release-display';
 
@@ -161,31 +160,6 @@ export function subscriptionFooter(reason: string): { html: string; text: string
       `Manage your email notifications, or turn them off entirely: ${NOTIFICATION_SETTINGS_URL}\n` +
       'Unstream · https://unstream.stream',
   };
-}
-
-/**
- * The saved-artist alerts (new release, new platform link) are deliberately restricted to admin
- * recipients while their content is still being refined. They fire unattended from the catalog
- * sweep and the claim flow, so until we're happy with what they say, only people who can see and
- * fix a bad send should receive one.
- *
- * Applied *after* filterByPreference, so an opt-out still wins and stays honored when the
- * restriction is lifted. Fails closed — an unset ADMIN_EMAIL sends to nobody rather than to
- * everybody — but says so out loud, because sending nothing silently looks identical to nothing
- * having happened.
- */
-function restrictToAdmins(emails: string[], notificationType: string): string[] {
-  if (emails.length === 0) return emails;
-
-  if (!process.env.ADMIN_EMAIL) {
-    Sentry.captureMessage(
-      `restrictToAdmins: ADMIN_EMAIL is not set, so no ${notificationType} alert was sent`,
-      'error',
-    );
-    return [];
-  }
-
-  return emails.filter(isAdminEmail);
 }
 
 export type NotificationPreferenceColumn = 'new_release' | 'new_platform_link' | 'weekly_analytics_recap';
@@ -364,8 +338,6 @@ function releaseDetailLine(release: NewReleaseSummary): string {
  *
  * Every release is announced at most once, and only ever in one email: claimUnalertedReleases
  * is the authority on what counts as new, and an empty claim means no email is sent at all.
- *
- * Currently admin-only on the way out — see restrictToAdmins.
  */
 export async function notifySavedArtistsOfNewRelease(params: NewReleaseParams): Promise<void> {
   const { client, artistId, previousReleasesFound } = params;
@@ -396,7 +368,7 @@ export async function notifySavedArtistsOfNewRelease(params: NewReleaseParams): 
     return;
   }
 
-  const emails = restrictToAdmins(await resolveEmails(client, userIds), 'new_release');
+  const emails = await resolveEmails(client, userIds);
   if (emails.length === 0) return;
 
   const listed = releases.slice(0, MAX_LISTED_RELEASES);
@@ -479,8 +451,6 @@ interface NewPlatformLinkParams {
  * search/enrichment upsert paths in db.ts, since those run on every search and don't yet
  * distinguish a genuinely new link from a refreshed existing one. Wiring those in needs the
  * same before/after comparison recordCatalogOutcome uses for releases.
- *
- * Currently admin-only on the way out — see restrictToAdmins.
  */
 export async function notifySavedArtistsOfNewLinks(params: NewPlatformLinkParams): Promise<void> {
   const { client, artistId, artistName, artistSlug, platforms, excludeUserId } = params;
@@ -492,7 +462,7 @@ export async function notifySavedArtistsOfNewLinks(params: NewPlatformLinkParams
   userIds = await filterByPreference(client, userIds, 'new_platform_link');
   if (userIds.length === 0) return;
 
-  const emails = restrictToAdmins(await resolveEmails(client, userIds), 'new_platform_link');
+  const emails = await resolveEmails(client, userIds);
   if (emails.length === 0) return;
 
   const profileUrl = `https://unstream.stream/a/${artistSlug}`;

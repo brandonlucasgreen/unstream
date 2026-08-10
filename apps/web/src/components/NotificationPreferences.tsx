@@ -8,25 +8,16 @@ interface Preferences {
   weeklyAnalyticsRecap: boolean;
 }
 
-/**
- * `adminOnly` mirrors restrictToAdmins in api/functions/notifications.ts: the saved-artist
- * alerts are only sent to admins while their content is being refined, and a toggle for an
- * email nobody receives is a promise the product doesn't keep. The preference itself is still
- * stored and honored for everyone, so hiding the switch changes nothing about who gets what —
- * these rows come back the moment the restriction lifts.
- */
-const TOGGLES: { key: keyof Preferences; label: string; description: string; adminOnly?: true }[] = [
+const TOGGLES: { key: keyof Preferences; label: string; description: string }[] = [
   {
     key: 'newRelease',
     label: 'New releases',
     description: 'When an artist you saved puts out a new release.',
-    adminOnly: true,
   },
   {
     key: 'newPlatformLink',
     label: 'New places to support',
     description: 'When an artist you saved adds a link to a new platform.',
-    adminOnly: true,
   },
   {
     key: 'weeklyAnalyticsRecap',
@@ -36,7 +27,7 @@ const TOGGLES: { key: keyof Preferences; label: string; description: string; adm
 ];
 
 export function NotificationPreferences() {
-  const { session, isAdmin } = useAuth();
+  const { session } = useAuth();
   const [preferences, setPreferences] = useState<Preferences | null>(null);
   const [loading, setLoading] = useState(true);
   const [togglingKey, setTogglingKey] = useState<keyof Preferences | null>(null);
@@ -99,12 +90,10 @@ export function NotificationPreferences() {
     return error ? <p className="text-sm text-red-400">{error}</p> : null;
   }
 
-  const visibleToggles = TOGGLES.filter(toggle => isAdmin || !toggle.adminOnly);
-
   return (
     <div className="space-y-3">
       {error && <p className="text-sm text-red-400">{error}</p>}
-      {visibleToggles.map(({ key, label, description }) => {
+      {TOGGLES.map(({ key, label, description }) => {
         const enabled = preferences[key];
         const busy = togglingKey === key;
         return (
