@@ -6,6 +6,23 @@ Unstream helps music listeners find their favorite artists on alternative platfo
 
 The product runs at [unstream.stream](https://unstream.stream).
 
+## Mission, vision, and values
+
+**Mission:** To deepen the connection between fans and artists so appreciation turns into lasting support.
+
+**Vision:** A world where more people support the arts and where more artists are sustainably supported.
+
+**Values:** Unwavering respect for artists · Patience · Curiosity · Transparency
+
+**Operating principles:**
+
+- Artists first, supporters second
+- Build for connection, not just transaction
+- Solve from first principles; don't be afraid to be scrappy
+- No ego in the face of conflict
+
+These principles should inform product and engineering trade-offs, not just marketing copy — e.g. when a decision pits fan convenience against artist payout or transparency, artists first wins.
+
 ## Architecture
 
 - **Frontend**: React 19 SPA with React Router 7, Tailwind CSS v4, Vite 7, TypeScript. PWA-enabled (`vite-plugin-pwa`). Most pages are lazy-loaded in `apps/web/src/main.tsx`.

@@ -6,6 +6,21 @@
 
 Unstream searches 17+ platforms to find where your favorite artists sell music, accept patronage, or share music for free outside the streaming ecosystem. It shows artist payout percentages so you can make informed choices about where your money goes.
 
+## Mission, vision, and values
+
+**Mission:** To deepen the connection between fans and artists so appreciation turns into lasting support.
+
+**Vision:** A world where more people support the arts and where more artists are sustainably supported.
+
+**Values:** Unwavering respect for artists · Patience · Curiosity · Transparency
+
+**Operating principles:**
+
+- Artists first, supporters second
+- Build for connection, not just transaction
+- Solve from first principles; don't be afraid to be scrappy
+- No ego in the face of conflict
+
 ## How it works
 
 Search for any artist, album, or track. Unstream checks platforms like Bandcamp, Mirlo, Faircamp, Patreon, Qobuz, and more, then shows you verified links grouped by category:
