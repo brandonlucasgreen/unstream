@@ -144,6 +144,19 @@
   to = "/.netlify/functions/me-password"
   status = 200
 
+# Bandcamp collection connection (Subsonic beta). The connect POST carries a credential,
+# which is why it's proxied server-side and stored encrypted — requires
+# BANDCAMP_CREDENTIAL_KEY (see api/functions/credential-crypto.ts).
+[[redirects]]
+  from = "/api/me/bandcamp"
+  to = "/.netlify/functions/me-bandcamp"
+  status = 200
+
+[[redirects]]
+  from = "/api/me/collection"
+  to = "/.netlify/functions/me-collection"
+  status = 200
+
 # Newsletter signup. Proxies to Buttondown server-side so the API key stays out of the
 # browser and the CSP doesn't need a third-party script host. Requires BUTTONDOWN_API_KEY.
 [[redirects]]

@@ -71,6 +71,16 @@
     "functions/weekly-analytics-recap.ts",
     "functions/__tests__/weekly-analytics-recap.test.ts",
     "functions/me-notifications.ts",
-    "functions/__tests__/me-notifications.test.ts"
+    "functions/__tests__/me-notifications.test.ts",
+    "functions/me-bandcamp.ts",
+    "functions/me-collection.ts",
+    "functions/bandcamp-sync-background.ts",
+    "functions/credential-crypto.ts",
+    "functions/bandcamp-subsonic.ts",
+    "functions/__tests__/me-bandcamp.test.ts",
+    "functions/__tests__/me-collection.test.ts",
+    "functions/__tests__/bandcamp-sync.test.ts",
+    "functions/__tests__/credential-crypto.test.ts",
+    "functions/__tests__/bandcamp-subsonic.test.ts"
   ]
 }

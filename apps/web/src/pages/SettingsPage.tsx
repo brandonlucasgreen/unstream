@@ -10,6 +10,7 @@ import { PasswordChangeForm } from '../components/PasswordChangeForm';
 import { SharingControls } from '../components/SharingControls';
 import { ReleaseFeedControls } from '../components/ReleaseFeedControls';
 import { NotificationPreferences } from '../components/NotificationPreferences';
+import { BandcampConnect } from '../components/BandcampConnect';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
 
@@ -99,6 +100,12 @@ export function SettingsPage() {
           <section className="p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
             <h2 className="text-lg font-semibold">Sharing</h2>
             <SharingControls />
+          </section>
+
+          {/* Bandcamp collection section */}
+          <section className="p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
+            <h2 className="text-lg font-semibold">Bandcamp collection</h2>
+            <BandcampConnect />
           </section>
 
           {/* Release feed section */}
