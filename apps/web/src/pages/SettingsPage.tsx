@@ -107,8 +107,9 @@ export function SettingsPage() {
             <ReleaseFeedControls />
           </section>
 
-          {/* Notifications section */}
-          <section className="p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
+          {/* Notifications section. The id is the anchor every notification email's opt-out
+              footer links to (see subscriptionFooter in api/functions/notifications.ts). */}
+          <section id="notifications" className="scroll-mt-24 p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
             <h2 className="text-lg font-semibold">Notifications</h2>
             <p className="text-sm text-text-muted">
               Emails about artists you've saved and, if you've claimed a profile, your own stats.

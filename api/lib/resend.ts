@@ -20,6 +20,8 @@ export interface SendEmailParams {
   subject: string;
   html: string;
   text: string;
+  /** Extra MIME headers, e.g. List-Unsubscribe on the subscription emails. */
+  headers?: Record<string, string>;
 }
 
 export interface SendEmailResult {
@@ -51,6 +53,7 @@ export async function sendTransactionalEmail(params: SendEmailParams): Promise<S
         subject: params.subject,
         html: params.html,
         text: params.text,
+        ...(params.headers ? { headers: params.headers } : {}),
       }),
       signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     });

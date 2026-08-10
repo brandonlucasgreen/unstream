@@ -11,6 +11,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { sendTransactionalEmail } from '../lib/resend';
 import { Sentry } from '../lib/sentry';
 import { escapeHtml } from '../lib/html';
+import { PLATFORMS } from '../shared/platform-registry';
+import { formatReleaseDate, payoutRank } from '../shared/release-display';
 
 interface NotifyOnceParams {
   client: SupabaseClient;
@@ -20,6 +22,8 @@ interface NotifyOnceParams {
   subject: string;
   html: string;
   text: string;
+  /** Extra MIME headers — SUBSCRIPTION_EMAIL_HEADERS for anything with an opt-out toggle. */
+  headers?: Record<string, string>;
 }
 
 const UNIQUE_VIOLATION = '23505';
@@ -30,7 +34,7 @@ const UNIQUE_VIOLATION = '23505';
  * notification email is never allowed to fail the request that triggered it.
  */
 export async function sendNotificationOnce(params: NotifyOnceParams): Promise<void> {
-  const { client, notificationType, referenceId, recipientEmail, subject, html, text } = params;
+  const { client, notificationType, referenceId, recipientEmail, subject, html, text, headers } = params;
 
   const { data: logRow, error: insertError } = await client
     .from('email_log')
@@ -53,7 +57,7 @@ export async function sendNotificationOnce(params: NotifyOnceParams): Promise<vo
     return;
   }
 
-  const result = await sendTransactionalEmail({ to: recipientEmail, subject, html, text });
+  const result = await sendTransactionalEmail({ to: recipientEmail, subject, html, text, headers });
 
   const { error: updateError } = await client
     .from('email_log')
@@ -115,6 +119,49 @@ async function resolveEmails(client: SupabaseClient, userIds: string[]): Promise
   return emails;
 }
 
+// ---------------------------------------------------------------------------
+// Opt-out footer
+// ---------------------------------------------------------------------------
+
+/** Where every opt-out link points. SettingsPage renders the toggles under this anchor. */
+const NOTIFICATION_SETTINGS_URL = 'https://unstream.stream/settings#notifications';
+
+/**
+ * RFC 2369. Mail clients turn this into their own unsubscribe affordance, and the bulk-sender
+ * rules at Gmail and Yahoo expect it on anything that isn't a direct reply to something the
+ * recipient just did. Deliberately not one-click (RFC 8058): that needs an unauthenticated POST
+ * endpoint, and these toggles are per-user settings behind a login, so the header points at the
+ * same settings page the footer does.
+ *
+ * Only for the emails backed by a notification_preferences column. The claim approved/rejected
+ * emails answer an action the person took and have nothing to unsubscribe from.
+ */
+export const SUBSCRIPTION_EMAIL_HEADERS: Record<string, string> = {
+  'List-Unsubscribe': `<${NOTIFICATION_SETTINGS_URL}>`,
+};
+
+/**
+ * The footer every subscription email ends with: who sent it, why this person is getting it, and
+ * how to stop. `reason` completes the sentence "You're receiving this because …" and is escaped
+ * on the HTML side, so it can carry an artist name.
+ */
+export function subscriptionFooter(reason: string): { html: string; text: string } {
+  return {
+    html:
+      '<hr style="border:none;border-top:1px solid #e0e0e0;margin:32px 0 12px">' +
+      '<p style="margin:0;font-size:12px;line-height:1.6;color:#666666">' +
+      `You're receiving this because ${escapeHtml(reason)}.<br>` +
+      `<a href="${NOTIFICATION_SETTINGS_URL}">Manage your email notifications</a> ` +
+      'to change which of these Unstream sends you, or turn them off entirely.<br>' +
+      'Unstream · <a href="https://unstream.stream">unstream.stream</a>' +
+      '</p>',
+    text:
+      `\n\n—\nYou're receiving this because ${reason}.\n` +
+      `Manage your email notifications, or turn them off entirely: ${NOTIFICATION_SETTINGS_URL}\n` +
+      'Unstream · https://unstream.stream',
+  };
+}
+
 export type NotificationPreferenceColumn = 'new_release' | 'new_platform_link' | 'weekly_analytics_recap';
 
 /**
@@ -153,21 +200,157 @@ export async function filterByPreference(
 interface NewReleaseParams {
   client: SupabaseClient;
   artistId: string;
-  releasesFound: number;
+  /**
+   * `release_catalog_state.releases_found` as it stood *before* this catalog run. Zero means
+   * this is the first run that has ever found anything for this artist, which is a backfill
+   * rather than news — see notifySavedArtistsOfNewRelease.
+   */
+  previousReleasesFound: number;
+}
+
+/** How many of the new releases get named in the email before it falls back to "and N more". */
+const MAX_LISTED_RELEASES = 5;
+
+interface NewReleaseSummary {
+  id: string;
+  title: string;
+  slug: string;
+  /** "12 August 2026", "August 2026", "2026" — or '' when the upstream never gave us a date. */
+  dateText: string;
+  /** Display names, artist-paying platforms first. */
+  platforms: string[];
+}
+
+interface ClaimedRow {
+  id: string;
+  title: string;
+  slug: string;
+  release_date: string | null;
+  date_precision: string | null;
+  created_at: string;
+}
+
+/** Newest release date first, undated last, ties broken by the order we discovered them. */
+function byNewest(a: ClaimedRow, b: ClaimedRow): number {
+  if (a.release_date !== b.release_date) {
+    if (!a.release_date) return 1;
+    if (!b.release_date) return -1;
+    return a.release_date < b.release_date ? 1 : -1;
+  }
+  return a.created_at < b.created_at ? 1 : -1;
 }
 
 /**
- * Tells everyone who saved this artist that a new release showed up. Called from
- * recordCatalogOutcome whenever releases_found increases; cheap to call on every catalog run
- * because it bails out before any lookup if nobody has saved the artist — true for the large
- * majority of catalogued artists (see CLAUDE.md's saved-vs-catalogued ratio).
+ * Takes ownership of every release for this artist that no alert has accounted for yet, and
+ * returns them. An empty result means there is nothing new to say — the caller sends no email
+ * at all rather than repeating itself.
  *
- * referenceId encodes the *count*, not just the artist, so a later increase (5 -> 8 -> 12)
- * sends a fresh notification each time instead of being deduped against the first one ever
- * sent for that artist.
+ * This is what stops a release being announced twice. The alert used to infer "what's new" from
+ * releases_found before and after a run, and a count can't express which records those are: a run
+ * that drops one release and adds two leaves the total up by one and re-announces something
+ * already sent. `alert_sent_at` states it directly, and the UPDATE ... RETURNING is atomic, so
+ * two catalog runs racing on the same artist split the new releases between them instead of both
+ * claiming the lot.
+ *
+ * Claiming *before* checking who (if anyone) is going to be emailed is deliberate. Releases
+ * discovered while nobody was saving the artist are marked seen and never announced, so somebody
+ * saving that artist a year later gets alerts from that point forward rather than a mail-out of
+ * everything they missed.
+ */
+async function claimUnalertedReleases(
+  client: SupabaseClient,
+  artistId: string,
+): Promise<NewReleaseSummary[]> {
+  const { data, error } = await client
+    .from('releases')
+    .update({ alert_sent_at: new Date().toISOString() })
+    .eq('artist_id', artistId)
+    .eq('is_hidden', false)
+    .is('alert_sent_at', null)
+    .select('id, title, slug, release_date, date_precision, created_at');
+
+  if (error) {
+    // Nothing was claimed, so nothing is lost: report it and let the next catalog run retry.
+    // Sending a vaguer email instead would be guessing at exactly the thing this claim exists
+    // to know for certain.
+    Sentry.captureException(error, { extra: { context: 'claimUnalertedReleases', artistId } });
+    return [];
+  }
+
+  const rows = ((data as ClaimedRow[]) || []).sort(byNewest);
+  if (rows.length === 0) return [];
+
+  const platformsByRelease = await getPlatformsByRelease(client, rows.map(row => row.id));
+
+  return rows.map(row => ({
+    id: row.id,
+    title: row.title,
+    slug: row.slug,
+    dateText: formatReleaseDate(row.release_date, row.date_precision),
+    platforms: (platformsByRelease.get(row.id) || [])
+      .sort((a, b) => payoutRank(b) - payoutRank(a))
+      .map(platform => PLATFORMS[platform]?.name ?? platform),
+  }));
+}
+
+/**
+ * Where each of these releases can be bought. A separate read rather than an embed on the claim
+ * above, because the claim is a mutation and its returned representation is the one thing that
+ * must stay simple enough to trust.
+ *
+ * A failure here degrades the email to titles and dates instead of dropping it: the releases are
+ * already claimed by this point, so returning nothing would mean they are never announced at all.
+ */
+async function getPlatformsByRelease(
+  client: SupabaseClient,
+  releaseIds: string[],
+): Promise<Map<string, string[]>> {
+  const byRelease = new Map<string, string[]>();
+
+  const { data, error } = await client
+    .from('release_sources')
+    .select('release_id, platform')
+    .in('release_id', releaseIds);
+
+  if (error) {
+    Sentry.captureException(error, { extra: { context: 'getPlatformsByRelease' } });
+    return byRelease;
+  }
+
+  for (const row of (data as { release_id: string; platform: string }[] | null) || []) {
+    const platforms = byRelease.get(row.release_id);
+    if (platforms) platforms.push(row.platform);
+    else byRelease.set(row.release_id, [row.platform]);
+  }
+  return byRelease;
+}
+
+/** "12 August 2026 · Available on Bandcamp, Mirlo" — whichever of the two we actually know. */
+function releaseDetailLine(release: NewReleaseSummary): string {
+  const parts = [release.dateText || 'Release date not listed'];
+  if (release.platforms.length > 0) parts.push(`Available on ${release.platforms.join(', ')}`);
+  return parts.join(' · ');
+}
+
+/**
+ * Tells everyone who saved this artist about the releases they haven't been told about yet.
+ * Called from recordCatalogOutcome whenever releases_found increases.
+ *
+ * Every release is announced at most once, and only ever in one email: claimUnalertedReleases
+ * is the authority on what counts as new, and an empty claim means no email is sent at all.
  */
 export async function notifySavedArtistsOfNewRelease(params: NewReleaseParams): Promise<void> {
-  const { client, artistId, releasesFound } = params;
+  const { client, artistId, previousReleasesFound } = params;
+
+  const releases = await claimUnalertedReleases(client, artistId);
+  if (releases.length === 0) return;
+
+  // An artist's first successful catalogue arrives as their whole discography at once, which is
+  // a backfill and not news — "Test Artist has 34 new releases" is wrong about every record in
+  // the list. Those releases are claimed above and deliberately not announced, so the next
+  // genuinely new one is the first thing anybody hears about. Zero also covers a catalogue that
+  // previously found nothing at all (a broken parser, since recovered), which is the same story.
+  if (previousReleasesFound === 0) return;
 
   let userIds = await getActiveSavers(client, artistId);
   if (userIds.length === 0) return;
@@ -186,8 +369,57 @@ export async function notifySavedArtistsOfNewRelease(params: NewReleaseParams): 
   }
 
   const emails = await resolveEmails(client, userIds);
+  if (emails.length === 0) return;
+
+  const listed = releases.slice(0, MAX_LISTED_RELEASES);
+  const undisclosed = releases.length - listed.length;
+
   const profileUrl = `https://unstream.stream/a/${artist.slug}`;
-  const referenceId = `${artistId}:${releasesFound}`;
+  const footer = subscriptionFooter(`you saved ${artist.name} on Unstream`);
+
+  // A release is claimed exactly once, so the lowest id in this batch appears in no other batch
+  // — a stable, short key for email_log's per-recipient guard against a double send.
+  const referenceId = `${artistId}:${releases.map(release => release.id).sort()[0]}`;
+
+  // No trailing punctuation: the sentence is finished differently in each body below.
+  const newsHtml =
+    releases.length === 1
+      ? `<strong>${escapeHtml(artist.name)}</strong>, an artist you saved on Unstream, has a new release`
+      : `<strong>${escapeHtml(artist.name)}</strong>, an artist you saved on Unstream, has ${releases.length} new releases`;
+  const newsText =
+    releases.length === 1
+      ? `${artist.name}, an artist you saved on Unstream, has a new release`
+      : `${artist.name}, an artist you saved on Unstream, has ${releases.length} new releases`;
+
+  const subject =
+    releases.length === 1
+      ? `New release from ${artist.name}: ${releases[0].title}`
+      : `${releases.length} new releases from ${artist.name}`;
+
+  const html = [
+    `<p>${newsHtml}:</p>`,
+    '<ul style="padding-left:18px">',
+    ...listed.map(release =>
+      `  <li style="margin-bottom:10px">` +
+      `<a href="${profileUrl}/${escapeHtml(release.slug)}"><strong>${escapeHtml(release.title)}</strong></a><br>` +
+      `<span style="color:#555555">${escapeHtml(releaseDetailLine(release))}</span></li>`,
+    ),
+    '</ul>',
+    ...(undisclosed > 0 ? [`<p>…and ${undisclosed} more.</p>`] : []),
+    `<p>See everything they've put out at <a href="${profileUrl}">${profileUrl}</a>.</p>`,
+    footer.html,
+  ].join('\n');
+
+  const text = [
+    `${newsText}:`,
+    '',
+    ...listed.map(release =>
+      `- ${release.title}\n  ${releaseDetailLine(release)}\n  ${profileUrl}/${release.slug}`,
+    ),
+    ...(undisclosed > 0 ? ['', `…and ${undisclosed} more.`] : []),
+    '',
+    `See everything they've put out at ${profileUrl}.`,
+  ].join('\n') + footer.text;
 
   for (const email of emails) {
     void sendNotificationOnce({
@@ -195,9 +427,10 @@ export async function notifySavedArtistsOfNewRelease(params: NewReleaseParams): 
       notificationType: 'new_release',
       referenceId,
       recipientEmail: email,
-      subject: `New release from ${artist.name}`,
-      html: `<p><strong>${escapeHtml(artist.name)}</strong>, an artist you saved on Unstream, has a new release up. See it at <a href="${profileUrl}">${profileUrl}</a>.</p>`,
-      text: `${artist.name}, an artist you saved on Unstream, has a new release up. See it at ${profileUrl}.`,
+      subject,
+      html,
+      text,
+      headers: SUBSCRIPTION_EMAIL_HEADERS,
     });
   }
 }
@@ -230,9 +463,12 @@ export async function notifySavedArtistsOfNewLinks(params: NewPlatformLinkParams
   if (userIds.length === 0) return;
 
   const emails = await resolveEmails(client, userIds);
+  if (emails.length === 0) return;
+
   const profileUrl = `https://unstream.stream/a/${artistSlug}`;
-  const platformList = platforms.join(', ');
+  const platformList = platforms.map(platform => PLATFORMS[platform]?.name ?? platform).join(', ');
   const referenceId = `${artistId}:${[...platforms].sort().join(',')}`;
+  const footer = subscriptionFooter(`you saved ${artistName} on Unstream`);
 
   for (const email of emails) {
     void sendNotificationOnce({
@@ -241,8 +477,9 @@ export async function notifySavedArtistsOfNewLinks(params: NewPlatformLinkParams
       referenceId,
       recipientEmail: email,
       subject: `${artistName} added new places to support them`,
-      html: `<p><strong>${escapeHtml(artistName)}</strong>, an artist you saved on Unstream, just added links on: ${escapeHtml(platformList)}. See them at <a href="${profileUrl}">${profileUrl}</a>.</p>`,
-      text: `${artistName}, an artist you saved on Unstream, just added links on: ${platformList}. See them at ${profileUrl}.`,
+      html: `<p><strong>${escapeHtml(artistName)}</strong>, an artist you saved on Unstream, just added links on: ${escapeHtml(platformList)}. See them at <a href="${profileUrl}">${profileUrl}</a>.</p>${footer.html}`,
+      text: `${artistName}, an artist you saved on Unstream, just added links on: ${platformList}. See them at ${profileUrl}.${footer.text}`,
+      headers: SUBSCRIPTION_EMAIL_HEADERS,
     });
   }
 }
