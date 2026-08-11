@@ -28,6 +28,7 @@ import {
 } from './db';
 import { authenticateBearer, buildCorsHeaders } from './middleware';
 import { cacheDeleteByArtist } from './cache';
+import { purgeArtistReleaseCaches } from './purge-cache';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { triggerCatalogNow } from './request-catalog';
 import { PLATFORMS } from '../shared/platform-registry';
@@ -108,19 +109,10 @@ async function purgeArtistCaches(artistName: string, slug: string): Promise<void
     console.error('[ArtistReleases] Redis cache purge failed:', e);
   }
 
-  try {
-    const siteId = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
-    const token = process.env.NETLIFY_API_TOKEN;
-    if (siteId && token) {
-      await fetch('https://api.netlify.com/api/v1/purge', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ site_id: siteId, cache_tags: [`artist-${slug}`] }),
-      });
-    }
-  } catch (e) {
-    console.error('[ArtistReleases] CDN cache purge failed:', e);
-  }
+  // Purges the artist page *and* every one of their release pages. The latter matters because
+  // those pages are now CDN-cached for an hour rather than five minutes, so without the purge an
+  // artist's own edit would sit invisible.
+  await purgeArtistReleaseCaches(slug, 'ArtistReleases');
 }
 
 export async function handler(event: {

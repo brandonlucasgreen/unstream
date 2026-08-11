@@ -16,6 +16,7 @@ import {
   releaseMatchKey,
   uniqueReleaseSlug,
 } from './release-utils';
+import { cacheDelete, cacheGetOrFetch } from './cache';
 import { requestArtistCatalog } from './request-catalog';
 import { notifySavedArtistsOfNewRelease } from './notifications';
 import { Sentry } from '../lib/sentry';
@@ -93,6 +94,58 @@ export const EXCLUDED_PLATFORMS = new Set(['buymeacoffee', 'kofi', 'ampwall']);
 
 // How long before artist data is considered stale (24 hours)
 const FRESHNESS_TTL_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * How often a search is allowed to touch an artist row that hasn't actually changed.
+ *
+ * `persistSearchResults` used to upsert the `artists` row on *every* search, always stamping
+ * `updated_at` — so searching an artist we already knew perfectly still rewrote the row. Postgres
+ * has no in-place update: each write is a new tuple version plus an entry in all five of this
+ * table's indexes, one of which is a GIN trigram index on `name`. It was the hottest path in the
+ * product doing pure write churn, and a contributor to the Disk IO Budget alert.
+ *
+ * **It cannot simply be skipped when nothing changed, though**, because `updated_at` on this table
+ * does not mean "when the data changed" — `getArtistBySlug` reads it as "when we last verified
+ * this artist against live sources" and refuses the row once it passes FRESHNESS_TTL_MS. Stop
+ * advancing it and stored cards silently expire, so every search re-runs the full live pipeline:
+ * cheaper on Postgres, much more expensive everywhere else, and a behaviour change nobody asked
+ * for. (search-sources.ts makes the same point from the other direction: DB-served cards are
+ * deliberately excluded from persist so re-serving stored data can't refresh `updated_at` and
+ * mask genuine staleness.)
+ *
+ * So the write is *throttled*, not removed: an unchanged row is refreshed at most once an hour.
+ * Well inside the 24-hour freshness window, so no row can expire because of this, while N searches
+ * for the same artist within the hour collapse into one write instead of N.
+ *
+ * Keep this comfortably below FRESHNESS_TTL_MS. Raising it towards 24 hours would start letting
+ * rows expire between refreshes.
+ */
+const PERSIST_REFRESH_FLOOR_MS = 60 * 60 * 1000;
+
+/**
+ * Whether a search needs to write to an artist row it already found.
+ *
+ * True when the row would actually change, or when it is due a freshness refresh. False means the
+ * write is pure churn and is skipped.
+ */
+function artistNeedsRefresh(
+  existing: { name: string | null; image_url: string | null; match_confidence: string | null; updated_at: string | null },
+  name: string,
+  imageUrl: string | null,
+  matchConfidence: string
+): boolean {
+  if (existing.name !== name) return true;
+  if (existing.image_url !== imageUrl) return true;
+  if (existing.match_confidence !== matchConfidence) return true;
+
+  // An unparseable or missing timestamp is treated as due, so a bad value can't pin a row
+  // permanently unrefreshed — the failure mode has to be "one extra write", never "never again".
+  if (!existing.updated_at) return true;
+  const updatedAt = new Date(existing.updated_at).getTime();
+  if (Number.isNaN(updatedAt)) return true;
+
+  return Date.now() - updatedAt > PERSIST_REFRESH_FLOOR_MS;
+}
 
 // --- Types matching the search-sources response ---
 
@@ -255,25 +308,66 @@ export interface MergeOverrideRow {
   canonical_image_url: string | null;
 }
 
+/**
+ * Both admin tables below are read in full on *every search* and change only when an admin acts,
+ * which made them two uncached full-table reads on the hottest path in the product. Five minutes
+ * in Redis removes them; the admin endpoints invalidate on write (see `invalidateAdminListCache`),
+ * so a merge or a suppression still takes effect immediately.
+ *
+ * The TTL is what covers the CLI (`scripts/merge-override.ts`), which writes the same table
+ * without going through a function and has no Redis credentials to invalidate with. A CLI edit
+ * lands within five minutes rather than instantly — the reason the TTL is short rather than long.
+ */
+const ADMIN_LIST_CACHE_TTL = 5 * 60;
+const MERGE_OVERRIDES_CACHE_KEY = 'admin:merge-overrides';
+const LINK_SUPPRESSIONS_CACHE_KEY = 'admin:link-suppressions';
+
+/**
+ * A read that knows whether it succeeded.
+ *
+ * Both of these functions return `[]` on failure *and* `[]` when the table is genuinely empty,
+ * which is fine for a caller that fails open but is exactly the shape you must not put in a
+ * cache — see "Never cache uncertainty" in CLAUDE.md. Caching a failed read would suppress every
+ * merge override for a full TTL because Supabase blipped once. So the cached value carries `ok`,
+ * and only `ok: true` is written.
+ */
+interface CachedAdminList<T> {
+  ok: boolean;
+  rows: T[];
+}
+
+export async function invalidateAdminListCache(list: 'merge-overrides' | 'link-suppressions'): Promise<void> {
+  await cacheDelete(list === 'merge-overrides' ? MERGE_OVERRIDES_CACHE_KEY : LINK_SUPPRESSIONS_CACHE_KEY);
+}
+
 export async function getMergeOverrides(): Promise<MergeOverrideRow[]> {
   const client = getClient();
   if (!client) return [];
 
-  try {
-    const { data, error } = await client
-      .from('artist_merge_overrides')
-      .select('id, group_name, platform_urls, excluded_urls, canonical_image_url');
+  const { data } = await cacheGetOrFetch<CachedAdminList<MergeOverrideRow>>(
+    MERGE_OVERRIDES_CACHE_KEY,
+    async () => {
+      try {
+        const { data, error } = await client
+          .from('artist_merge_overrides')
+          .select('id, group_name, platform_urls, excluded_urls, canonical_image_url');
 
-    if (error) {
-      console.error('[DB] Failed to fetch merge overrides:', error);
-      return [];
-    }
+        if (error) {
+          console.error('[DB] Failed to fetch merge overrides:', error);
+          return { ok: false, rows: [] };
+        }
 
-    return (data as MergeOverrideRow[]) || [];
-  } catch (error) {
-    console.error('[DB] getMergeOverrides error:', error);
-    return [];
-  }
+        return { ok: true, rows: (data as MergeOverrideRow[]) || [] };
+      } catch (error) {
+        console.error('[DB] getMergeOverrides error:', error);
+        return { ok: false, rows: [] };
+      }
+    },
+    ADMIN_LIST_CACHE_TTL,
+    result => result.ok
+  );
+
+  return data.rows;
 }
 
 // --- Platform link suppressions ---
@@ -299,24 +393,35 @@ export interface LinkSuppressionRow {
 export async function getLinkSuppressions(): Promise<
   Pick<LinkSuppressionRow, 'url' | 'artist_name_norm'>[]
 > {
+  type Row = Pick<LinkSuppressionRow, 'url' | 'artist_name_norm'>;
+
   const client = getClient();
   if (!client) return [];
 
-  try {
-    const { data, error } = await client
-      .from('platform_link_suppressions')
-      .select('url, artist_name_norm');
+  const { data } = await cacheGetOrFetch<CachedAdminList<Row>>(
+    LINK_SUPPRESSIONS_CACHE_KEY,
+    async () => {
+      try {
+        const { data, error } = await client
+          .from('platform_link_suppressions')
+          .select('url, artist_name_norm');
 
-    if (error) {
-      console.error('[DB] Failed to fetch link suppressions:', error);
-      return [];
-    }
+        if (error) {
+          console.error('[DB] Failed to fetch link suppressions:', error);
+          return { ok: false, rows: [] };
+        }
 
-    return (data as Pick<LinkSuppressionRow, 'url' | 'artist_name_norm'>[]) || [];
-  } catch (error) {
-    console.error('[DB] getLinkSuppressions error:', error);
-    return [];
-  }
+        return { ok: true, rows: (data as Row[]) || [] };
+      } catch (error) {
+        console.error('[DB] getLinkSuppressions error:', error);
+        return { ok: false, rows: [] };
+      }
+    },
+    ADMIN_LIST_CACHE_TTL,
+    result => result.ok
+  );
+
+  return data.rows;
 }
 
 /**
@@ -1017,27 +1122,74 @@ export interface PersistedRelease {
  * exact "ingest clobbers a curated edit" bug `curated_fields` exists to prevent on `releases`
  * itself, just one table over.
  */
-async function getClaimedSourceKeys(client: SupabaseClient, releaseIds: string[]): Promise<Set<string>> {
-  if (releaseIds.length === 0) return new Set();
+export interface ExistingReleaseSource {
+  id: string;
+  release_id: string;
+  platform: string;
+  url: string;
+  external_id: string | null;
+  source: string | null;
+  detail_checked_at: string | null;
+}
+
+/** Keyed `${releaseId}:${platform}` — the table's own conflict target. */
+export type ExistingSourceMap = Map<string, ExistingReleaseSource>;
+
+/**
+ * Every `release_sources` row these releases already have.
+ *
+ * This used to read only the *claimed* keys, as a Set, so `upsertReleaseSource` knew what not to
+ * overwrite. It now reads the whole row for every source, which lets that function answer two more
+ * questions without a round trip: what a claimed row already says (previously a per-release read),
+ * and whether an unclaimed row would actually change (previously an unconditional write).
+ *
+ * Same one query either way — just more columns.
+ */
+async function getExistingSources(client: SupabaseClient, releaseIds: string[]): Promise<ExistingSourceMap> {
+  const map: ExistingSourceMap = new Map();
+  if (releaseIds.length === 0) return map;
 
   const { data, error } = await client
     .from('release_sources')
-    .select('release_id, platform')
-    .eq('source', 'claimed')
+    .select('id, release_id, platform, url, external_id, source, detail_checked_at')
     .in('release_id', releaseIds);
 
   if (error) {
-    console.error('[DB] getClaimedSourceKeys failed:', error.message);
-    return new Set();
+    // An empty map means "assume nothing exists", so every source is written as before. Failing
+    // towards writing is right: the alternative is skipping a real update because a read blipped.
+    console.error('[DB] getExistingSources failed:', error.message);
+    return map;
   }
 
-  return new Set((data as { release_id: string; platform: string }[] || []).map(r => `${r.release_id}:${r.platform}`));
+  for (const row of (data as ExistingReleaseSource[]) || []) {
+    map.set(`${row.release_id}:${row.platform}`, row);
+  }
+  return map;
 }
 
 /**
- * Write one release's source row — or, if an artist has claimed this exact release+platform,
- * read the existing (untouched) row back instead. The one place every ingest path goes through
- * to write `release_sources`, so "never overwrite a claimed URL" only has to be correct once.
+ * Write one release's source row — or don't, when writing it would change nothing.
+ *
+ * The one place every ingest path goes through to write `release_sources`, so the two rules below
+ * only have to be correct once:
+ *
+ * 1. **Never overwrite a claimed source.** `source: 'claimed'` means an artist added or corrected
+ *    this URL themselves; a re-crawl silently replacing it in 30 days is the same bug
+ *    `curated_fields` prevents on `releases`, one table over. The claimed row is returned as-is.
+ * 2. **Never rewrite an unchanged row.** This used to upsert unconditionally on every pass, which
+ *    meant every re-catalogue rewrote every source row it already held — new tuple version, index
+ *    entries, WAL, dead tuple — to restate a URL that hadn't moved. Platform URLs almost never
+ *    move, so almost all of that was waste, and it contributed to the Disk IO Budget alert.
+ *
+ * **`last_seen_at` is the casualty of rule 2 and is worth knowing about.** It used to be stamped on
+ * every pass, so it meant "when we last confirmed this source exists"; it now only advances when
+ * something else about the row changes, so it effectively means "when this row was last written".
+ * Nothing reads the column — it has no consumer anywhere in the codebase — which is what makes the
+ * trade acceptable. If a real "last confirmed" signal is ever needed, it wants its own cheap
+ * mechanism (a periodic batched touch), not a rewrite of every row on every crawl.
+ *
+ * `detail_checked_at` is read back rather than written, in every branch: it belongs to the detail
+ * pass, and a grid re-crawl must not reset it or every crawl would re-fetch every release page.
  */
 async function upsertReleaseSource(
   client: SupabaseClient,
@@ -1045,21 +1197,18 @@ async function upsertReleaseSource(
   platform: string,
   url: string,
   externalId: string | null,
-  claimedKeys: Set<string>
+  existingSources: ExistingSourceMap
 ): Promise<{ id: string; url: string; detail_checked_at: string | null } | null> {
-  if (claimedKeys.has(`${releaseId}:${platform}`)) {
-    const { data, error } = await client
-      .from('release_sources')
-      .select('id, url, detail_checked_at')
-      .eq('release_id', releaseId)
-      .eq('platform', platform)
-      .maybeSingle();
-    if (error || !data) return null;
-    return data as { id: string; url: string; detail_checked_at: string | null };
+  const prior = existingSources.get(`${releaseId}:${platform}`);
+
+  if (prior?.source === 'claimed') {
+    return { id: prior.id, url: prior.url, detail_checked_at: prior.detail_checked_at };
   }
 
-  // detail_checked_at is read back rather than written: it belongs to the detail pass, and a
-  // grid re-crawl must not reset it or every crawl would re-fetch every release page.
+  if (prior && prior.url === url && prior.external_id === externalId) {
+    return { id: prior.id, url: prior.url, detail_checked_at: prior.detail_checked_at };
+  }
+
   const { data, error } = await client
     .from('release_sources')
     .upsert(
@@ -1083,7 +1232,8 @@ export async function persistReleases(
   try {
     const { data: existingRows, error: readError } = await client
       .from('releases')
-      .select('id, slug, match_key, release_type, release_date, artwork_url, curated_fields')
+      // `title` is read so the patch below can compare instead of assigning unconditionally.
+      .select('id, slug, title, match_key, release_type, release_date, artwork_url, curated_fields')
       .eq('artist_id', artistId);
 
     if (readError) {
@@ -1094,6 +1244,7 @@ export async function persistReleases(
     type ExistingRow = {
       id: string;
       slug: string;
+      title: string | null;
       match_key: string;
       release_type: string;
       release_date: string | null;
@@ -1103,7 +1254,7 @@ export async function persistReleases(
     const existing = (existingRows as ExistingRow[]) || [];
     const byIdentity = new Map(existing.map(r => [`${r.release_type}:${r.match_key}`, r]));
     const takenSlugs = new Set(existing.map(r => r.slug));
-    const claimedKeys = await getClaimedSourceKeys(client, existing.map(r => r.id));
+    const existingSources = await getExistingSources(client, existing.map(r => r.id));
 
     const written: PersistedRelease[] = [];
 
@@ -1118,7 +1269,13 @@ export async function persistReleases(
         const patch: Record<string, unknown> = {};
         // COALESCE semantics, applied in JS: only fill what's missing, never blank what's set,
         // and never touch what the artist edited.
-        if (!curated.has('title')) patch.title = release.title;
+        //
+        // `!== prior.title` matters more than it looks: this used to assign the title
+        // unconditionally, which meant every re-catalogue rewrote every release row it already
+        // held — six indexes each — even when the title was byte-identical, which it almost always
+        // is. With the comparison, an unchanged release now falls through to an empty patch and
+        // does no write at all. See PERSIST_REFRESH_FLOOR_MS for the same problem on `artists`.
+        if (!curated.has('title') && release.title !== prior.title) patch.title = release.title;
         if (!curated.has('artwork_url') && release.artworkUrl && !prior.artwork_url) {
           patch.artwork_url = release.artworkUrl;
         }
@@ -1166,6 +1323,7 @@ export async function persistReleases(
         byIdentity.set(identity, {
           id: releaseId,
           slug,
+          title: release.title,
           match_key: release.matchKey,
           release_type: release.releaseType,
           release_date: release.releaseDate,
@@ -1180,7 +1338,7 @@ export async function persistReleases(
         release.source.platform,
         release.source.url,
         release.source.externalId,
-        claimedKeys
+        existingSources
       );
 
       if (!source) {
@@ -1410,7 +1568,8 @@ export async function persistDiscogsReleases(
   try {
     const { data: existingRows, error: readError } = await client
       .from('releases')
-      .select('id, slug, match_key, release_type, release_date, curated_fields, discogs_master_id')
+      // `title` is read so the patch below can compare instead of assigning unconditionally.
+      .select('id, slug, title, match_key, release_type, release_date, curated_fields, discogs_master_id')
       .eq('artist_id', artistId);
 
     if (readError) {
@@ -1421,6 +1580,7 @@ export async function persistDiscogsReleases(
     type ExistingRow = {
       id: string;
       slug: string;
+      title: string | null;
       match_key: string;
       release_type: string;
       release_date: string | null;
@@ -1439,7 +1599,7 @@ export async function persistDiscogsReleases(
       else byType.set(row.release_type, [row]);
     }
     const takenSlugs = new Set(existing.map(r => r.slug));
-    const claimedKeys = await getClaimedSourceKeys(client, existing.map(r => r.id));
+    const existingSources = await getExistingSources(client, existing.map(r => r.id));
 
     const written: PersistedRelease[] = [];
 
@@ -1474,7 +1634,11 @@ export async function persistDiscogsReleases(
         // already know is this one). A tier-2 title-equality match means the two titles
         // already normalize the same — overwriting risks nothing informative and risks
         // clobbering a display-quality title Bandcamp already got right.
-        if (!curated.has('title') && matchedByMasterId) patch.title = release.title;
+        // Compared rather than assigned, for the same reason as persistReleases above: a re-crawl
+        // that finds the identical title should write nothing.
+        if (!curated.has('title') && matchedByMasterId && release.title !== prior.title) {
+          patch.title = release.title;
+        }
         if (!prior.discogs_master_id) patch.discogs_master_id = release.masterId;
         if (!curated.has('release_date') && release.releaseDate && !prior.release_date) {
           patch.release_date = release.releaseDate;
@@ -1524,6 +1688,7 @@ export async function persistDiscogsReleases(
         const createdRow: ExistingRow = {
           id: releaseId,
           slug,
+          title: release.title,
           match_key: release.matchKey,
           release_type: release.releaseType,
           release_date: release.releaseDate,
@@ -1555,7 +1720,7 @@ export async function persistDiscogsReleases(
         // real listing page, unlike the abstract master page.
         `https://www.discogs.com/release/${release.mainReleaseId}`,
         release.masterId,
-        claimedKeys
+        existingSources
       );
 
       if (!source) {
@@ -1724,7 +1889,7 @@ export async function persistFaircampReleases(
     const existing = (existingRows as ExistingRow[]) || [];
     const byMatchKey = new Map(existing.map(r => [r.match_key, r]));
     const takenSlugs = new Set(existing.map(r => r.slug));
-    const claimedKeys = await getClaimedSourceKeys(client, existing.map(r => r.id));
+    const existingSources = await getExistingSources(client, existing.map(r => r.id));
 
     const written: PersistedRelease[] = [];
 
@@ -1801,7 +1966,7 @@ export async function persistFaircampReleases(
         }
       }
 
-      const source = await upsertReleaseSource(client, releaseId, 'faircamp', release.externalUrl, release.externalUrl, claimedKeys);
+      const source = await upsertReleaseSource(client, releaseId, 'faircamp', release.externalUrl, release.externalUrl, existingSources);
       if (!source) {
         console.error('[DB] persistFaircampReleases source write failed for release', releaseId);
         continue;
@@ -1878,7 +2043,7 @@ export async function persistJamcoopReleases(
     const existing = (existingRows as ExistingRow[]) || [];
     const byMatchKey = new Map(existing.map(r => [r.match_key, r]));
     const takenSlugs = new Set(existing.map(r => r.slug));
-    const claimedKeys = await getClaimedSourceKeys(client, existing.map(r => r.id));
+    const existingSources = await getExistingSources(client, existing.map(r => r.id));
 
     const written: PersistedRelease[] = [];
 
@@ -1972,7 +2137,7 @@ export async function persistJamcoopReleases(
         'jamcoop',
         release.externalUrl,
         release.externalUrl,
-        claimedKeys
+        existingSources
       );
       if (!source) {
         console.error('[DB] persistJamcoopReleases source write failed for release', releaseId);
@@ -2053,7 +2218,7 @@ export async function persistMirloReleases(
     const existing = (existingRows as ExistingRow[]) || [];
     const byMatchKey = new Map(existing.map(r => [r.match_key, r]));
     const takenSlugs = new Set(existing.map(r => r.slug));
-    const claimedKeys = await getClaimedSourceKeys(client, existing.map(r => r.id));
+    const existingSources = await getExistingSources(client, existing.map(r => r.id));
 
     const written: PersistedRelease[] = [];
 
@@ -2147,7 +2312,7 @@ export async function persistMirloReleases(
         'mirlo',
         release.externalUrl,
         release.externalUrl,
-        claimedKeys
+        existingSources
       );
       if (!source) {
         console.error('[DB] persistMirloReleases source write failed for release', releaseId);
@@ -2780,7 +2945,7 @@ export async function updateArtistReleaseFields(
 
 /**
  * "Add a platform link we missed" — or correct one ingest got wrong. Written with
- * `source: 'claimed'`, which `getClaimedSourceKeys` (used by every ingest path) checks before
+ * `source: 'claimed'`, which `getExistingSources` (used by every ingest path) checks before
  * ever overwriting a source's URL — the same "never clobber a curated edit" rule `curated_fields`
  * enforces on the release row itself, one table over.
  */
@@ -3435,6 +3600,87 @@ async function findArtistSlugByIdentityUrl(
  * Persist artist search results to the database.
  * Only persists artist-type results. Runs as fire-and-forget after search.
  */
+/** A link row as persistSearchResults builds it, before it goes to Postgres. */
+interface LinkRowToWrite {
+  artist_id: string;
+  platform: string;
+  url: string;
+  source: string;
+  is_direct: boolean;
+  latest_release: unknown;
+  display_order: number;
+}
+
+/**
+ * Key-order-independent comparison for the one jsonb column involved (`latest_release`).
+ *
+ * We build the object in JS and compare it against what PostgREST hands back, and nothing
+ * guarantees the two serialize their keys in the same order — so a plain JSON.stringify compare
+ * would report "changed" constantly and defeat the whole point.
+ *
+ * Deliberately biased: anything this can't confidently prove identical is reported as *different*.
+ * A false "different" costs one unnecessary write; a false "same" would skip a real update and
+ * leave stale data on an artist's page, which is the far worse failure.
+ */
+function sameJsonValue(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (a === null || b === null || a === undefined || b === undefined) return false;
+  if (typeof a !== 'object' || typeof b !== 'object') return false;
+
+  if (Array.isArray(a) || Array.isArray(b)) {
+    if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+    return a.every((item, i) => sameJsonValue(item, b[i]));
+  }
+
+  const aObj = a as Record<string, unknown>;
+  const bObj = b as Record<string, unknown>;
+  const aKeys = Object.keys(aObj).sort();
+  const bKeys = Object.keys(bObj).sort();
+  if (aKeys.length !== bKeys.length || aKeys.some((k, i) => k !== bKeys[i])) return false;
+  return aKeys.every(k => sameJsonValue(aObj[k], bObj[k]));
+}
+
+/**
+ * Narrow a set of link rows to the ones that would actually change something.
+ *
+ * One indexed read replaces up to N row rewrites. Returns every row unchanged if the read fails —
+ * failing towards "write it" keeps the old behaviour rather than silently dropping a real update
+ * because a lookup blipped.
+ */
+async function filterUnchangedLinks(
+  client: SupabaseClient,
+  artistId: string,
+  rows: LinkRowToWrite[]
+): Promise<LinkRowToWrite[]> {
+  if (rows.length === 0) return rows;
+
+  const { data, error } = await client
+    .from('artist_links')
+    .select('platform, url, source, is_direct, latest_release, display_order')
+    .eq('artist_id', artistId);
+
+  if (error) {
+    console.error('[DB] filterUnchangedLinks read failed, writing all links:', error.message);
+    return rows;
+  }
+
+  type StoredLink = Omit<LinkRowToWrite, 'artist_id'>;
+  const stored = new Map<string, StoredLink>();
+  for (const row of (data as StoredLink[]) || []) stored.set(row.platform, row);
+
+  return rows.filter(row => {
+    const prior = stored.get(row.platform);
+    if (!prior) return true;
+    return !(
+      prior.url === row.url &&
+      prior.source === row.source &&
+      prior.is_direct === row.is_direct &&
+      prior.display_order === row.display_order &&
+      sameJsonValue(prior.latest_release, row.latest_release)
+    );
+  });
+}
+
 export async function persistSearchResults(results: ArtistResult[]): Promise<void> {
   const client = getClient();
   if (!client) return;
@@ -3477,10 +3723,12 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
     }
 
     try {
-      // Check if this artist is already claimed — never overwrite claimed status
+      // Check if this artist is already claimed — never overwrite claimed status.
+      // `name`, `image_url` and `updated_at` come back too, so the write below can be skipped
+      // when it would change nothing. See PERSIST_REFRESH_FLOOR_MS.
       const { data: existing } = await client
         .from('artists')
-        .select('id, match_confidence')
+        .select('id, name, image_url, match_confidence, updated_at')
         .eq('slug', slug)
         .single();
 
@@ -3519,28 +3767,40 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
       // table (partial-name discovery, typeahead) could never distinguish a
       // release-corroborated artist from name-match junk. Rows refresh on
       // every search, so the stored verdict tracks the latest pipeline run.
-      const { data: artist, error: artistError } = await client
-        .from('artists')
-        .upsert(
-          {
-            slug,
-            name: result.name,
-            image_url: result.imageUrl || null,
-            match_confidence: result.matchConfidence === 'verified' ? 'verified' : 'unverified',
-            source: 'auto',
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'slug' }
-        )
-        .select('id')
-        .single();
+      const matchConfidence = result.matchConfidence === 'verified' ? 'verified' : 'unverified';
+      const imageUrl = result.imageUrl || null;
 
-      if (artistError || !artist) {
-        console.error(`[DB] Failed to upsert artist "${result.name}":`, artistError);
-        return;
+      let artistId: string;
+
+      if (existing && !artistNeedsRefresh(existing, result.name, imageUrl, matchConfidence)) {
+        // Nothing to say about this artist that the row doesn't already say, and it was
+        // refreshed recently enough that `updated_at` doesn't need moving. Skipping the write
+        // is the point: see artistNeedsRefresh.
+        artistId = existing.id;
+      } else {
+        const { data: artist, error: artistError } = await client
+          .from('artists')
+          .upsert(
+            {
+              slug,
+              name: result.name,
+              image_url: imageUrl,
+              match_confidence: matchConfidence,
+              source: 'auto',
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: 'slug' }
+          )
+          .select('id')
+          .single();
+
+        if (artistError || !artist) {
+          console.error(`[DB] Failed to upsert artist "${result.name}":`, artistError);
+          return;
+        }
+
+        artistId = artist.id;
       }
-
-      const artistId = artist.id;
 
       // Bulk-upsert links (only valid platforms) in a single request.
       // Deduped by platform (last wins, matching the old one-at-a-time loop) —
@@ -3559,15 +3819,35 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
       ]));
       const linkRows = [...linkRowsByPlatform.values()];
 
-      const { error: linkError } = await client
-        .from('artist_links')
-        .upsert(linkRows, { onConflict: 'artist_id,platform' });
+      // Only write links that would actually differ from what's stored.
+      //
+      // This bulk upsert used to run on every search, rewriting every one of an artist's link
+      // rows whether or not anything had moved — and platform URLs almost never move. That is the
+      // larger half of the churn described on PERSIST_REFRESH_FLOOR_MS, because it is N rows per
+      // artist per search rather than one.
+      //
+      // Unlike `artists.updated_at`, nothing reads `artist_links.updated_at` as a freshness
+      // signal, so an unchanged link row genuinely has no reason to be touched and there is no
+      // throttle here — just a comparison. The read that makes the comparison possible is one
+      // indexed lookup on `idx_artist_links_artist_id`, which is far cheaper than the writes it
+      // avoids: a read costs no WAL, no index maintenance and no dead tuples.
+      const changedLinkRows = existing
+        ? await filterUnchangedLinks(client, artistId, linkRows)
+        : linkRows;
 
-      if (linkError) {
-        console.error(`[DB] Failed to upsert links for "${result.name}":`, linkError);
+      if (changedLinkRows.length > 0) {
+        const { error: linkError } = await client
+          .from('artist_links')
+          .upsert(changedLinkRows, { onConflict: 'artist_id,platform' });
+
+        if (linkError) {
+          console.error(`[DB] Failed to upsert links for "${result.name}":`, linkError);
+        }
       }
 
-      console.log(`[DB] Persisted "${result.name}" with ${linkRows.length} links`);
+      console.log(
+        `[DB] Persisted "${result.name}": ${changedLinkRows.length} of ${linkRows.length} links written`
+      );
 
       // Only worth cataloging artists we can actually catalog — ingest is Bandcamp-only for
       // now, so an artist without a Bandcamp link would just be a wasted claim.
