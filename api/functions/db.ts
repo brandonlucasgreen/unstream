@@ -16,6 +16,7 @@ import {
   releaseMatchKey,
   uniqueReleaseSlug,
 } from './release-utils';
+import { cacheDelete, cacheGetOrFetch } from './cache';
 import { requestArtistCatalog } from './request-catalog';
 import { notifySavedArtistsOfNewRelease } from './notifications';
 import { Sentry } from '../lib/sentry';
@@ -255,25 +256,66 @@ export interface MergeOverrideRow {
   canonical_image_url: string | null;
 }
 
+/**
+ * Both admin tables below are read in full on *every search* and change only when an admin acts,
+ * which made them two uncached full-table reads on the hottest path in the product. Five minutes
+ * in Redis removes them; the admin endpoints invalidate on write (see `invalidateAdminListCache`),
+ * so a merge or a suppression still takes effect immediately.
+ *
+ * The TTL is what covers the CLI (`scripts/merge-override.ts`), which writes the same table
+ * without going through a function and has no Redis credentials to invalidate with. A CLI edit
+ * lands within five minutes rather than instantly — the reason the TTL is short rather than long.
+ */
+const ADMIN_LIST_CACHE_TTL = 5 * 60;
+const MERGE_OVERRIDES_CACHE_KEY = 'admin:merge-overrides';
+const LINK_SUPPRESSIONS_CACHE_KEY = 'admin:link-suppressions';
+
+/**
+ * A read that knows whether it succeeded.
+ *
+ * Both of these functions return `[]` on failure *and* `[]` when the table is genuinely empty,
+ * which is fine for a caller that fails open but is exactly the shape you must not put in a
+ * cache — see "Never cache uncertainty" in CLAUDE.md. Caching a failed read would suppress every
+ * merge override for a full TTL because Supabase blipped once. So the cached value carries `ok`,
+ * and only `ok: true` is written.
+ */
+interface CachedAdminList<T> {
+  ok: boolean;
+  rows: T[];
+}
+
+export async function invalidateAdminListCache(list: 'merge-overrides' | 'link-suppressions'): Promise<void> {
+  await cacheDelete(list === 'merge-overrides' ? MERGE_OVERRIDES_CACHE_KEY : LINK_SUPPRESSIONS_CACHE_KEY);
+}
+
 export async function getMergeOverrides(): Promise<MergeOverrideRow[]> {
   const client = getClient();
   if (!client) return [];
 
-  try {
-    const { data, error } = await client
-      .from('artist_merge_overrides')
-      .select('id, group_name, platform_urls, excluded_urls, canonical_image_url');
+  const { data } = await cacheGetOrFetch<CachedAdminList<MergeOverrideRow>>(
+    MERGE_OVERRIDES_CACHE_KEY,
+    async () => {
+      try {
+        const { data, error } = await client
+          .from('artist_merge_overrides')
+          .select('id, group_name, platform_urls, excluded_urls, canonical_image_url');
 
-    if (error) {
-      console.error('[DB] Failed to fetch merge overrides:', error);
-      return [];
-    }
+        if (error) {
+          console.error('[DB] Failed to fetch merge overrides:', error);
+          return { ok: false, rows: [] };
+        }
 
-    return (data as MergeOverrideRow[]) || [];
-  } catch (error) {
-    console.error('[DB] getMergeOverrides error:', error);
-    return [];
-  }
+        return { ok: true, rows: (data as MergeOverrideRow[]) || [] };
+      } catch (error) {
+        console.error('[DB] getMergeOverrides error:', error);
+        return { ok: false, rows: [] };
+      }
+    },
+    ADMIN_LIST_CACHE_TTL,
+    result => result.ok
+  );
+
+  return data.rows;
 }
 
 // --- Platform link suppressions ---
@@ -299,24 +341,35 @@ export interface LinkSuppressionRow {
 export async function getLinkSuppressions(): Promise<
   Pick<LinkSuppressionRow, 'url' | 'artist_name_norm'>[]
 > {
+  type Row = Pick<LinkSuppressionRow, 'url' | 'artist_name_norm'>;
+
   const client = getClient();
   if (!client) return [];
 
-  try {
-    const { data, error } = await client
-      .from('platform_link_suppressions')
-      .select('url, artist_name_norm');
+  const { data } = await cacheGetOrFetch<CachedAdminList<Row>>(
+    LINK_SUPPRESSIONS_CACHE_KEY,
+    async () => {
+      try {
+        const { data, error } = await client
+          .from('platform_link_suppressions')
+          .select('url, artist_name_norm');
 
-    if (error) {
-      console.error('[DB] Failed to fetch link suppressions:', error);
-      return [];
-    }
+        if (error) {
+          console.error('[DB] Failed to fetch link suppressions:', error);
+          return { ok: false, rows: [] };
+        }
 
-    return (data as Pick<LinkSuppressionRow, 'url' | 'artist_name_norm'>[]) || [];
-  } catch (error) {
-    console.error('[DB] getLinkSuppressions error:', error);
-    return [];
-  }
+        return { ok: true, rows: (data as Row[]) || [] };
+      } catch (error) {
+        console.error('[DB] getLinkSuppressions error:', error);
+        return { ok: false, rows: [] };
+      }
+    },
+    ADMIN_LIST_CACHE_TTL,
+    result => result.ok
+  );
+
+  return data.rows;
 }
 
 /**
