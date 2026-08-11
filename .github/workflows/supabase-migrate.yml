@@ -1,5 +1,28 @@
 name: Supabase migrations
 
+# Applies new migrations to production on every push to main that touches
+# supabase/migrations/. Also runnable by hand (workflow_dispatch) from a feature branch, to get a
+# migration into production ahead of its PR merging — the deploy preview shares the production
+# database, so an additive migration sometimes has to land early for the preview to exercise it.
+#
+# ⚠️ If you run it from a branch, MERGE THAT BRANCH PROMPTLY, or split the migration into its own
+# PR and merge that first.
+#
+# `supabase db push` refuses to run at all when the remote has an applied version that isn't in
+# supabase/migrations/ locally — "Remote migration versions not found in local migrations
+# directory" — and it aborts *before* applying anything. So a migration applied from an unmerged
+# branch silently blocks every later migration on main, including everybody else's.
+#
+# That is not hypothetical: 20260809120000_bandcamp-collection.sql was applied this way on
+# 2026-08-09 from the still-open PR #438, and from 2026-08-10 to 2026-08-11 three consecutive runs
+# on main failed without applying a thing. One of the migrations left stranded added
+# `releases.alert_sent_at`, which api/functions/notifications.ts had already shipped code against —
+# so release alerts were broken for about 30 hours while this workflow reported the failure to
+# nobody in particular.
+#
+# The failure is loud in Actions and invisible everywhere else. Check this workflow went green
+# after any merge that adds a migration.
+
 on:
   push:
     branches: [main]
