@@ -283,6 +283,40 @@ async function markArtistsSupported(userId: string, artists: MatchedArtist[]): P
   }
 }
 
+/**
+ * Find the artists behind the collection items this account already holds.
+ *
+ * **Runs whether or not the fetch above succeeded, because it needs nothing the fetch
+ * provides.** It reads `collection_items` that are already stored and probes
+ * `<slug>.bandcamp.com/music` — neither the Subsonic API nor the credential is involved. This
+ * originally sat inside the success path, which coupled it to something unrelated: a Subsonic
+ * 500 is routine in this beta, and the first one in production (Sentry, 2026-08-14 — twelve
+ * requests, every page size down to the floor, all failing at offset 0) also blocked discovery
+ * for items imported days earlier, which had nothing to do with that failure.
+ *
+ * A Bandcamp-wide outage will simply make the probes inconclusive, and the probe cache refuses
+ * to record an `undecided` verdict — so the worst case is a wasted pass, never a stored
+ * "this artist isn't on Bandcamp".
+ *
+ * Never throws: the import is the primary artifact and its outcome is already decided by the
+ * time this runs. Reported to Sentry rather than logged, because a pass that always fails
+ * would otherwise look exactly like a collection whose artists simply aren't on Bandcamp.
+ */
+async function resolveArtistsSafely(userId: string): Promise<CollectionResolveSummary | null> {
+  try {
+    const resolved = await resolveCollectionArtists(userId);
+    console.log('[bandcamp-sync] resolved collection artists:', JSON.stringify(resolved));
+    return resolved;
+  } catch (error) {
+    console.error('[bandcamp-sync] artist resolution failed:', error instanceof Error ? error.message : String(error));
+    Sentry.captureException(error, {
+      tags: { function: 'bandcamp-sync' },
+      extra: { stage: 'resolve-collection-artists' },
+    });
+    return null;
+  }
+}
+
 export async function handler(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
@@ -333,6 +367,8 @@ export async function handler(event: {
       .update({ sync_status: 'error', sync_error: message })
       .eq('user_id', userId);
   }
+
+  let outcome: { statusCode: number; body: Record<string, unknown> };
 
   try {
     let credential: SubsonicCredential;
@@ -412,39 +448,13 @@ export async function handler(event: {
 
     console.log(`[bandcamp-sync] imported ${uniqueAlbums.length} albums (${matches.releases.size} matched to releases, ${matches.artists.size} artists)`);
 
-    // Everything above this line is the sync. What follows is discovery for the items it could
-    // not match — most of a real collection, because most artists a fan buys from have never
-    // been searched and so have no `artists` row to match against.
-    //
-    // Deliberately *after* the connection is marked idle: the collection is complete and worth
-    // showing whether or not the artists behind it resolve, the pass costs a paced probe per
-    // unknown name, and a failure in it must never be recorded as a failed import. Still inside
-    // this invocation rather than a second background function — a background function has 15
-    // minutes and this needs about two.
-    let resolved: CollectionResolveSummary | null = null;
-    try {
-      resolved = await resolveCollectionArtists(userId);
-      console.log('[bandcamp-sync] resolved collection artists:', JSON.stringify(resolved));
-    } catch (error) {
-      // Reported, not thrown: the import succeeded, and the next re-sync tries again. Sentry
-      // rather than a log line because a pass that always fails would otherwise look exactly
-      // like a collection whose artists simply aren't on Bandcamp.
-      console.error('[bandcamp-sync] artist resolution failed:', error instanceof Error ? error.message : String(error));
-      Sentry.captureException(error, {
-        tags: { function: 'bandcamp-sync' },
-        extra: { stage: 'resolve-collection-artists' },
-      });
-    }
-
-    return {
+    outcome = {
       statusCode: 200,
-      headers: RESPONSE_HEADERS,
-      body: JSON.stringify({
+      body: {
         imported: uniqueAlbums.length,
         matched: matches.releases.size,
         artistsMarked: matches.artists.size,
-        resolved,
-      }),
+      },
     };
   } catch (error) {
     const isAuth = error instanceof SubsonicError && error.isAuthFailure;
@@ -463,6 +473,15 @@ export async function handler(event: {
         ? 'Bandcamp rejected the stored login. Disconnect and reconnect with a fresh username and password from Fan Settings → Subsonic.'
         : 'The sync failed partway through. Bandcamp’s Subsonic support is in beta — use Re-sync to try again.'
     );
-    return { statusCode: 500, headers: RESPONSE_HEADERS, body: JSON.stringify({ error: 'Sync failed' }) };
+    outcome = { statusCode: 500, body: { error: 'Sync failed' } };
   }
+
+  // Discovery for the items we hold, on both paths — see resolveArtistsSafely.
+  const resolved = await resolveArtistsSafely(userId);
+
+  return {
+    statusCode: outcome.statusCode,
+    headers: RESPONSE_HEADERS,
+    body: JSON.stringify({ ...outcome.body, resolved }),
+  };
 }
