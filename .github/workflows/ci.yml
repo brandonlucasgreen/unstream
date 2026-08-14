@@ -1,0 +1,38 @@
+name: CI
+
+# The typecheck and test gate that used to live inside the Netlify build. It moved here
+# so a deploy only builds the site: GitHub Actions minutes are free on public repos,
+# and running the suites here gives PR feedback without spending a deploy.
+#
+# This does mean a red main no longer blocks a deploy on its own. Requiring this check
+# in the branch protection rules for `main` is what restores that gate — see the
+# "Testing" section of CLAUDE.md.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: API function tests
+        run: npm run test:api
+
+      - name: Web unit tests
+        run: npm run test:unit

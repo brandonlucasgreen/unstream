@@ -3,6 +3,10 @@
   publish = "apps/web/dist"
   functions = "api/functions"
   edge_functions = "api/edge"
+  # Cancel deploys for pushes that cannot change what we publish — Apple app,
+  # browser extension, migrations, docs. Note the inverted exit code (0 cancels the
+  # build); the script explains itself and errs toward deploying.
+  ignore = "bash scripts/netlify-ignore-build.sh"
 
 [[headers]]
   for = "/*"

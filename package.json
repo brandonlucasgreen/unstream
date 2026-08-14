@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "cd apps/web && npx vite",
     "typecheck:api": "cd api && npx tsc --noEmit",
-    "build": "npx tsx scripts/generate-guides-manifest.ts && npx tsx scripts/generate-dispatch-feed.ts && npx tsx scripts/generate-changelog-feed.ts && npx tsx scripts/generate-guides-feed.ts && npx tsc -b && npx vitest run api/functions/ && cd apps/web && npx tsc -b && npx vitest run tests/unit && npx vite build && npx tsx ../../scripts/generate-sitemap.ts",
+    "typecheck": "npx tsc -b && cd apps/web && npx tsc -b",
+    "verify": "npm run typecheck && npm run test:api && npm run test:unit",
+    "build": "npx tsx scripts/generate-guides-manifest.ts && npx tsx scripts/generate-dispatch-feed.ts && npx tsx scripts/generate-changelog-feed.ts && npx tsx scripts/generate-guides-feed.ts && npx tsc -b && cd apps/web && npx tsc -b && npx vite build && npx tsx ../../scripts/generate-sitemap.ts",
     "generate:artists": "tsx scripts/generate-artist-list.ts",
     "generate:data": "tsx scripts/generate-artist-data.ts",
     "generate:social": "tsx scripts/generate-social-posts.ts",
