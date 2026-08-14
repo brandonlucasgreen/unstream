@@ -427,6 +427,27 @@ describe('bandcamp-sync-background handler', () => {
     expect(JSON.parse(res.body).resolved).toMatchObject({ created: 1 });
   });
 
+  it('still resolves stored artists when Bandcamp refuses to hand over the collection', async () => {
+    const ciphertext = encryptCredential(JSON.stringify({ t: 'tok', s: 'salt' }));
+    const { connectionUpdates } = setupDb({
+      connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext },
+    });
+    mocks.mockFetchAllAlbums.mockRejectedValue(
+      new SubsonicError('getAlbumList2: HTTP 500 (offset 0, size 100)', null, true)
+    );
+    mocks.mockResolveArtists.mockResolvedValue({ created: 3, catalogRequested: 3 });
+
+    const res = await handler(internalEvent({ userId: 'user-1' }));
+
+    // The sync failed and says so. Resolution reads items imported by *earlier* syncs and
+    // never touches the Subsonic API, so a Bandcamp outage has no business blocking it —
+    // that coupling is what a real HTTP 500 exposed on the day this shipped.
+    expect(res.statusCode).toBe(500);
+    expect(connectionUpdates.at(-1)).toMatchObject({ sync_status: 'error' });
+    expect(mocks.mockResolveArtists).toHaveBeenCalledWith('user-1');
+    expect(JSON.parse(res.body)).toMatchObject({ error: 'Sync failed', resolved: { created: 3 } });
+  });
+
   it('still reports a successful import when artist resolution fails', async () => {
     const ciphertext = encryptCredential(JSON.stringify({ t: 'tok', s: 'salt' }));
     const { connectionUpdates, upsertBatches } = setupDb({

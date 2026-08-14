@@ -316,12 +316,14 @@ row to match against.
 
 `collection-matching.ts` closes the gap in two halves that become possible at different times:
 
-- `resolveCollectionArtists(userId)` runs at the end of a sync, *after* the connection is marked
-  idle so a discovery failure is never recorded as a failed import. It probes Bandcamp for each
-  unknown artist name (cached forever, negatives included), stores the artist plus their Bandcamp
-  link, and requests catalogues for up to 25 — matching `MAX_ARTISTS_PER_REQUEST`, which silently
-  slices anything longer. The rest ride the six-hourly sweep, whose pool is every artist with a
-  catalogue-able link.
+- `resolveCollectionArtists(userId)` runs at the end of a sync, on **both** the success and the
+  failure path, and after the connection row is written either way — it reads stored
+  `collection_items` and probes `<slug>.bandcamp.com/music`, touching neither the Subsonic API
+  nor the credential, so a Subsonic 500 (routine in this beta) must not block discovery for
+  items imported days earlier. It stores each artist plus their Bandcamp link and requests
+  catalogues for up to 25 — matching `MAX_ARTISTS_PER_REQUEST`, which silently slices anything
+  longer. The rest ride the six-hourly sweep, whose pool is every artist with a catalogue-able
+  link.
 - `linkCollectionItemsForArtist(artistId, name)` runs at the end of every catalogue pass in
   `catalog-artist-background.ts` — the moment the releases exist — and attaches them to the items
   that were waiting. It re-runs forever, so a release added later still finds fans who own it.
