@@ -43,7 +43,17 @@ const CSS = `
   .copy-btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg2); color: var(--text); font-size: 14px; cursor: pointer; transition: background 0.15s; }
   .copy-btn:hover { background: var(--border); }
   .copy-btn.copied { color: #22c55e; border-color: rgba(34,197,94,0.3); }
+  .collection-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 640px) { .collection-grid { grid-template-columns: repeat(3, 1fr); } }
+  .collection-tile { display: block; text-decoration: none; color: var(--text); min-width: 0; }
+  .collection-art { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; background: var(--border); display: block; }
+  .collection-art-fallback { width: 100%; aspect-ratio: 1; border-radius: 8px; background: var(--border); display: flex; align-items: center; justify-content: center; padding: 8px; font-size: 11px; color: var(--muted); text-align: center; overflow: hidden; }
+  .collection-caption { margin-top: 6px; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .collection-caption .caption-artist { color: var(--muted); }
 `;
+
+/** Tiles on the crawler render. A deliberate cap for page weight — the SPA shows everything. */
+const CRAWLER_COLLECTION_LIMIT = 60;
 
 export default async function handler(request: Request, context: Context) {
   try {
@@ -69,6 +79,7 @@ export default async function handler(request: Request, context: Context) {
 
     let usernameRow: any;
     let savedArtists: any[];
+    let collectionItems: any[] = [];
 
     try {
       // Look up the username row to check sharing flag + get user_id + location
@@ -107,6 +118,21 @@ export default async function handler(request: Request, context: Context) {
         .abortSignal(controller.signal);
 
       savedArtists = savedData || [];
+
+      // Public collection: purchased and not hidden only — the provenance gate is what
+      // keeps the page honest (Support Loop Step 3).
+      const { data: collectionData } = await supabase
+        .from('collection_items')
+        .select('id, title, artist_name, art_url, acquired_at, releases!left (slug, artwork_url, artists (slug))')
+        .eq('user_id', unameData.user_id)
+        .eq('provenance', 'purchased')
+        .eq('hidden', false)
+        .order('acquired_at', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false })
+        .limit(CRAWLER_COLLECTION_LIMIT)
+        .abortSignal(controller.signal);
+
+      collectionItems = collectionData || [];
     } catch {
       clearTimeout(timeoutId);
       return context.next();
@@ -117,6 +143,35 @@ export default async function handler(request: Request, context: Context) {
     const ownerName = escapeHtml(usernameRow.username);
     const ownerLocation = usernameRow.location ? escapeHtml(usernameRow.location) : null;
     const pageUrl = `https://unstream.stream/u/${handle}`;
+
+    // Collection tiles — matched items link to the release page so a viewer can buy the
+    // same record. Everything interpolated is escaped.
+    const collectionTilesHtml = collectionItems.map((row: any) => {
+      const release = row.releases;
+      const artistSlug = release?.artists?.slug || '';
+      const title = escapeHtml(row.title || '');
+      const artistName = escapeHtml(row.artist_name || '');
+      // Unmatched items fall back to the art proxy, which fetches the cover from Bandcamp
+      // server-side — most of a real collection has no matched release to borrow art from.
+      const artUrl = row.art_url || release?.artwork_url || `/api/collection/art/${row.id}`;
+      const artHtml = `<img src="${escapeHtml(artUrl)}" alt="${title} by ${artistName}" class="collection-art" loading="lazy">`;
+      const caption = `<div class="collection-caption">${title}</div><div class="collection-caption caption-artist">${artistName}</div>`;
+      const releaseUrl = release?.slug && artistSlug
+        ? `https://unstream.stream/a/${escapeHtml(artistSlug)}/${escapeHtml(release.slug)}`
+        : null;
+      return releaseUrl
+        ? `<a href="${releaseUrl}" class="collection-tile">${artHtml}${caption}</a>`
+        : `<div class="collection-tile">${artHtml}${caption}</div>`;
+    }).join('');
+
+    const supportedCount = savedArtists.filter((row: any) => row.supported === true).length;
+    const countParts: string[] = [];
+    if (collectionItems.length > 0) {
+      countParts.push(`${collectionItems.length} release${collectionItems.length === 1 ? '' : 's'} collected`);
+    }
+    if (supportedCount > 0) {
+      countParts.push(`${supportedCount} artist${supportedCount === 1 ? '' : 's'} supported`);
+    }
 
     // Build artist cards HTML
     const artistCardsHtml = savedArtists.length > 0
@@ -136,15 +191,15 @@ export default async function handler(request: Request, context: Context) {
 
           return `<a href="${profileUrl}" class="artist-card">${avatarHtml}<div style="flex:1;min-width:0"><div class="artist-name">${escapeHtml(name)}</div>${supportedBadge}</div></a>`;
         }).join('')
-      : '<p style="color:var(--muted);text-align:center;padding:48px 0">No saved artists yet.</p>';
+      : (collectionTilesHtml ? '' : '<p style="color:var(--muted);text-align:center;padding:48px 0">No saved artists yet.</p>');
 
     // JSON-LD structured data
     const jsonLd = {
       '@context': 'https://schema.org',
       '@type': 'CollectionPage',
-      name: `${usernameRow.username}'s saved artists on Unstream`,
+      name: `${usernameRow.username}'s collection on Unstream`,
       url: pageUrl,
-      description: `Artists saved by ${usernameRow.username} on Unstream — platforms that pay artists fairly.`,
+      description: `Music ${usernameRow.username} has bought and artists they support on Unstream — platforms that pay artists fairly.`,
     };
 
     const html = `<!DOCTYPE html>
@@ -152,16 +207,16 @@ export default async function handler(request: Request, context: Context) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${ownerName}'s saved artists - Unstream</title>
-  <meta name="description" content="Artists saved by ${ownerName} on Unstream — platforms that pay artists fairly.">
-  <meta property="og:title" content="${ownerName}'s saved artists - Unstream">
-  <meta property="og:description" content="Artists saved by ${ownerName} on Unstream — platforms that pay artists fairly.">
+  <title>${ownerName}'s collection - Unstream</title>
+  <meta name="description" content="Music ${ownerName} has bought and artists they support on Unstream — platforms that pay artists fairly.">
+  <meta property="og:title" content="${ownerName}'s collection - Unstream">
+  <meta property="og:description" content="Music ${ownerName} has bought and artists they support on Unstream — platforms that pay artists fairly.">
   <meta property="og:url" content="${pageUrl}">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Unstream">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="${ownerName}'s saved artists - Unstream">
-  <meta name="twitter:description" content="Artists saved by ${ownerName} on Unstream — platforms that pay artists fairly.">
+  <meta name="twitter:title" content="${ownerName}'s collection - Unstream">
+  <meta name="twitter:description" content="Music ${ownerName} has bought and artists they support on Unstream — platforms that pay artists fairly.">
   <link rel="canonical" href="${pageUrl}">
   <script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>
   <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@300..900&family=Stack+Sans+Headline:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -182,8 +237,9 @@ export default async function handler(request: Request, context: Context) {
 
   <div class="page-content">
     <div class="container" style="padding-top:48px;padding-bottom:16px;text-align:center">
-      <h1 style="font-size:24px;font-weight:700">${ownerName}'s saved artists</h1>
+      <h1 style="font-size:24px;font-weight:700">${ownerName}'s collection</h1>
       ${ownerLocation ? `<p style="color:var(--text);font-size:14px;margin-top:4px">${ownerLocation}</p>` : ''}
+      ${countParts.length > 0 ? `<p style="color:var(--muted);font-size:14px;margin-top:4px">${countParts.join(' &#x2022; ')}</p>` : ''}
       <div data-share-mount style="margin-top:24px">
         <button class="copy-btn" id="copy-url-btn" data-url="${pageUrl}">
           <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
@@ -192,7 +248,14 @@ export default async function handler(request: Request, context: Context) {
       </div>
     </div>
 
+    ${collectionTilesHtml ? `<div class="container" style="padding-bottom:40px">
+      <div class="collection-grid">
+        ${collectionTilesHtml}
+      </div>
+    </div>` : ''}
+
     <div class="container" style="padding-bottom:48px">
+      ${collectionTilesHtml && savedArtists.length > 0 ? '<h2 style="font-size:18px;font-weight:600;margin-bottom:12px">Artists</h2>' : ''}
       <div style="display:grid;gap:8px">
         ${artistCardsHtml}
       </div>
