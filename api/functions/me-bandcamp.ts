@@ -30,21 +30,50 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
 };
 
+const CONNECTION_SELECT =
+  'bandcamp_username, sync_status, sync_error, item_count, last_synced_at, updated_at';
+
 interface ConnectionRow {
   bandcamp_username: string;
   sync_status: string;
   sync_error: string | null;
   item_count: number | null;
   last_synced_at: string | null;
+  updated_at: string | null;
+}
+
+/**
+ * How long a row may claim 'syncing' before we stop believing it. Netlify kills a background
+ * function at 15 minutes, so past that the sync is gone — and it died without reaching the
+ * catch block that records an error.
+ *
+ * Nothing else rescues that row: the settings UI hides Re-sync while a sync is running and
+ * the resync endpoint answers 409, so a killed sync leaves the user stuck on "Importing…"
+ * forever with no way to retry. `updated_at` is the sync's start time here, because the row
+ * is stamped 'syncing' immediately before the background function is asked to run and
+ * nothing writes it again until the sync finishes.
+ */
+const STALE_SYNC_MS = 20 * 60 * 1000;
+
+const STALE_SYNC_MESSAGE =
+  'The last import didn’t finish. Bandcamp’s Subsonic support is in beta and can stall on large collections — use Re-sync to try again.';
+
+function isStaleSync(row: { sync_status: string; updated_at: string | null }): boolean {
+  if (row.sync_status !== 'syncing' || !row.updated_at) return false;
+  const startedAt = new Date(row.updated_at).getTime();
+  return Number.isFinite(startedAt) && Date.now() - startedAt > STALE_SYNC_MS;
 }
 
 function toStatusShape(row: ConnectionRow | null) {
   if (!row) return { connected: false as const };
+  const stale = isStaleSync(row);
   return {
     connected: true as const,
     username: row.bandcamp_username,
-    syncStatus: row.sync_status,
-    syncError: row.sync_error,
+    // Reported as an error rather than written back as one: a GET shouldn't mutate, and the
+    // next Re-sync overwrites the status anyway.
+    syncStatus: stale ? 'error' : row.sync_status,
+    syncError: stale ? STALE_SYNC_MESSAGE : row.sync_error,
     itemCount: row.item_count,
     lastSyncedAt: row.last_synced_at,
   };
@@ -170,7 +199,7 @@ export async function handler(event: {
   if (event.httpMethod === 'GET') {
     const { data: row, error } = await client
       .from('bandcamp_connections')
-      .select('bandcamp_username, sync_status, sync_error, item_count, last_synced_at')
+      .select(CONNECTION_SELECT)
       .eq('user_id', user.userId)
       .maybeSingle();
 
@@ -194,7 +223,7 @@ export async function handler(event: {
     if (body.resync === true) {
       const { data: existing, error } = await client
         .from('bandcamp_connections')
-        .select('sync_status')
+        .select('sync_status, updated_at')
         .eq('user_id', user.userId)
         .maybeSingle();
       if (error) {
@@ -204,7 +233,9 @@ export async function handler(event: {
       if (!existing) {
         return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'No Bandcamp connection to sync' }) };
       }
-      if (existing.sync_status === 'syncing') {
+      // A stale 'syncing' row is a sync that was killed, not one still running — refusing it
+      // would leave the user with no way to retry at all.
+      if (existing.sync_status === 'syncing' && !isStaleSync(existing)) {
         return { statusCode: 409, headers: CORS_HEADERS, body: JSON.stringify({ error: 'A sync is already running' }) };
       }
 
@@ -229,7 +260,7 @@ export async function handler(event: {
 
       const { data: row, error: readError } = await client
         .from('bandcamp_connections')
-        .select('bandcamp_username, sync_status, sync_error, item_count, last_synced_at')
+        .select(CONNECTION_SELECT)
         .eq('user_id', user.userId)
         .single();
       if (readError) {

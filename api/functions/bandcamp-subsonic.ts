@@ -24,13 +24,22 @@ const CLIENT_NAME = 'unstream';
 // Max page size the Subsonic spec allows for getAlbumList2.
 const PAGE_SIZE = 500;
 
-// Backstop against a server that never returns a short page (40 pages = 20,000 albums —
-// far past any real collection). Hitting it is reported as a failure, not a truncation:
-// a sync that silently stopped early would record a partial collection as complete.
-const MAX_PAGES = 40;
+// The smallest page worth asking for. A page that keeps failing is retried smaller (see
+// subsonicFetchAllAlbums) — below this the request count stops being worth the trade.
+const MIN_PAGE_SIZE = 100;
+
+// Backstop against a server that never returns a short page — far past any real collection.
+// Hitting it is reported as a failure, not a truncation: a sync that silently stopped early
+// would record a partial collection as complete.
+const MAX_ALBUMS = 20_000;
 
 // Bandcamp warns large libraries are slow in the beta; be generous per request.
 const REQUEST_TIMEOUT_MS = 30_000;
+
+// Backoff between retries of a transient failure. Only the collection fetch retries — it
+// runs in a background function with minutes to spare, while connect runs on the request
+// path where a Netlify function is killed in seconds.
+const RETRY_DELAYS_MS = [1_000, 4_000];
 
 /** The stored credential: t = md5(password + s). The password itself is never stored. */
 export interface SubsonicCredential {
@@ -53,16 +62,25 @@ export interface SubsonicAlbum {
 /** Subsonic error code 40 is "wrong username or password". */
 export class SubsonicError extends Error {
   readonly code: number | null;
+  /**
+   * The server failed to answer rather than answering "no" — a 5xx, a 429, a dropped
+   * connection or a timeout. Those are worth retrying; a rejected credential, a malformed
+   * body or a Subsonic error envelope are the server's actual answer and are not.
+   */
+  readonly retryable: boolean;
 
-  constructor(message: string, code: number | null = null) {
+  constructor(message: string, code: number | null = null, retryable = false) {
     super(message);
     this.name = 'SubsonicError';
     this.code = code;
+    this.retryable = retryable;
   }
   get isAuthFailure(): boolean {
     return this.code === 40 || this.code === 41;
   }
 }
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
  * Derive the salted-token pair from a password, per the Subsonic spec:
@@ -101,7 +119,7 @@ interface SubsonicResponseBody {
  * One Subsonic call. Throws SubsonicError on transport failure, non-JSON, or a
  * status:"failed" envelope. Never includes the URL in any error.
  */
-async function subsonicRequest(
+async function subsonicRequestOnce(
   credential: SubsonicCredential,
   method: string,
   params: Record<string, string> = {}
@@ -115,13 +133,15 @@ async function subsonicRequest(
     });
   } catch (error) {
     const aborted = error instanceof Error && error.name === 'AbortError';
-    throw new SubsonicError(`${method}: ${aborted ? 'timed out' : 'request failed'}`);
+    throw new SubsonicError(`${method}: ${aborted ? 'timed out' : 'request failed'}`, null, true);
   } finally {
     clearTimeout(timeoutId);
   }
 
   if (!response.ok) {
-    throw new SubsonicError(`${method}: HTTP ${response.status}`);
+    // 5xx and 429 are the server struggling, not an answer about the collection.
+    const retryable = response.status >= 500 || response.status === 429;
+    throw new SubsonicError(`${method}: HTTP ${response.status}`, null, retryable);
   }
 
   let body: SubsonicResponseBody;
@@ -143,6 +163,27 @@ async function subsonicRequest(
     );
   }
   return envelope;
+}
+
+/**
+ * A Subsonic call that retries a transient failure. `retries` defaults to 0 because most
+ * callers run on the request path, where waiting is worse than reporting.
+ */
+async function subsonicRequest(
+  credential: SubsonicCredential,
+  method: string,
+  params: Record<string, string> = {},
+  retries = 0
+): Promise<NonNullable<SubsonicResponseBody['subsonic-response']>> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await subsonicRequestOnce(credential, method, params);
+    } catch (error) {
+      const retryable = error instanceof SubsonicError && error.retryable;
+      if (!retryable || attempt >= retries) throw error;
+      await sleep(RETRY_DELAYS_MS[Math.min(attempt, RETRY_DELAYS_MS.length - 1)]);
+    }
+  }
 }
 
 /** Verify a credential works. Throws SubsonicError (isAuthFailure for bad credentials). */
@@ -218,13 +259,14 @@ export async function subsonicFetchCoverArt(
     });
   } catch (error) {
     const aborted = error instanceof Error && error.name === 'AbortError';
-    throw new SubsonicError(`getCoverArt: ${aborted ? 'timed out' : 'request failed'}`);
+    throw new SubsonicError(`getCoverArt: ${aborted ? 'timed out' : 'request failed'}`, null, true);
   } finally {
     clearTimeout(timeoutId);
   }
 
   if (!response.ok) {
-    throw new SubsonicError(`getCoverArt: HTTP ${response.status}`);
+    const retryable = response.status >= 500 || response.status === 429;
+    throw new SubsonicError(`getCoverArt: HTTP ${response.status}`, null, retryable);
   }
 
   const contentType = response.headers.get('content-type') || '';
@@ -234,26 +276,72 @@ export async function subsonicFetchCoverArt(
 }
 
 /**
+ * Add the page that failed to an error's message. Offsets and page sizes are not sensitive;
+ * the request URL — which carries the credential — is still never included. Without this a
+ * sync failure reports only "getAlbumList2: HTTP 500", which can't distinguish "Bandcamp is
+ * down" from "Bandcamp can't build page 4 of this collection".
+ */
+function withPageContext(error: unknown, offset: number, size: number): unknown {
+  if (!(error instanceof SubsonicError)) return error;
+  return new SubsonicError(
+    `${error.message} (offset ${offset}, size ${size})`,
+    error.code,
+    error.retryable
+  );
+}
+
+/**
  * Fetch the whole collection via paginated getAlbumList2. Throws mid-pagination rather
  * than returning what it has: a partial result recorded as a complete sync would be a
  * silently wrong collection, which is the "never cache uncertainty" bug class.
+ *
+ * Two concessions to the beta, which returns HTTP 500 on collections it imports fine at
+ * other times (Sentry, 2026-08-14):
+ *   - a transient failure is retried before it is believed;
+ *   - a page that still fails is asked for again, smaller, from the same offset. A 500 that
+ *     only some users see, on the one call that asks for 500 records at once, reads like
+ *     Bandcamp timing out while building a big page — so making the page smaller is the
+ *     one lever we have. Halving stops at MIN_PAGE_SIZE, then the sync fails honestly.
  */
 export async function subsonicFetchAllAlbums(
   credential: SubsonicCredential
 ): Promise<SubsonicAlbum[]> {
   const albums: SubsonicAlbum[] = [];
-  for (let page = 0; page < MAX_PAGES; page++) {
-    const envelope = await subsonicRequest(credential, 'getAlbumList2', {
-      type: 'alphabeticalByArtist',
-      size: String(PAGE_SIZE),
-      offset: String(page * PAGE_SIZE),
-    });
+  let pageSize = PAGE_SIZE;
+  let offset = 0;
+
+  // Bounded on rows consumed, not rows kept: a server answering with full pages of entries
+  // that all fail toAlbum would otherwise loop forever.
+  while (offset < MAX_ALBUMS) {
+    let envelope;
+    try {
+      envelope = await subsonicRequest(
+        credential,
+        'getAlbumList2',
+        {
+          type: 'alphabeticalByArtist',
+          size: String(pageSize),
+          offset: String(offset),
+        },
+        RETRY_DELAYS_MS.length
+      );
+    } catch (error) {
+      if (error instanceof SubsonicError && error.retryable && pageSize > MIN_PAGE_SIZE) {
+        pageSize = Math.max(MIN_PAGE_SIZE, Math.floor(pageSize / 2));
+        continue;
+      }
+      throw withPageContext(error, offset, pageSize);
+    }
+
     const rawAlbums = envelope.albumList2?.album ?? [];
     for (const raw of rawAlbums) {
       const album = toAlbum(raw);
       if (album) albums.push(album);
     }
-    if (rawAlbums.length < PAGE_SIZE) return albums;
+    // A short page is the end of the collection. Advance by what arrived, not by what was
+    // asked for, so a shrunken page can't leave a gap.
+    if (rawAlbums.length < pageSize) return albums;
+    offset += rawAlbums.length;
   }
-  throw new SubsonicError('getAlbumList2: exceeded maximum page count');
+  throw new SubsonicError(`getAlbumList2: collection exceeded ${MAX_ALBUMS} albums`);
 }

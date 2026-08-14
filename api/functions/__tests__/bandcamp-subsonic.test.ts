@@ -19,6 +19,26 @@ function okEnvelope(extra: Record<string, unknown> = {}) {
   } as Response;
 }
 
+/**
+ * Runs a call that may back off between retries without waiting out the backoff. The
+ * rejection is captured before timers advance so it never surfaces as an unhandled one.
+ */
+async function runWithTimers<T>(run: () => Promise<T>): Promise<T> {
+  vi.useFakeTimers();
+  try {
+    const settled = run().then(
+      value => ({ ok: true as const, value }),
+      error => ({ ok: false as const, error })
+    );
+    await vi.runAllTimersAsync();
+    const result = await settled;
+    if (!result.ok) throw result.error;
+    return result.value;
+  } finally {
+    vi.useRealTimers();
+  }
+}
+
 describe('bandcamp-subsonic', () => {
   const fetchMock = vi.fn();
 
@@ -155,8 +175,72 @@ describe('bandcamp-subsonic', () => {
       const fullPage = Array.from({ length: 500 }, (_, i) => album(i));
       fetchMock
         .mockResolvedValueOnce(okEnvelope({ albumList2: { album: fullPage } }))
-        .mockResolvedValueOnce({ ok: false, status: 500 } as Response);
-      await expect(subsonicFetchAllAlbums(CRED)).rejects.toThrow(SubsonicError);
+        .mockResolvedValue({ ok: false, status: 500 } as Response);
+      await expect(runWithTimers(() => subsonicFetchAllAlbums(CRED))).rejects.toThrow(SubsonicError);
+    });
+
+    // Bandcamp's beta 500s on collections it imports fine at other times, so a failure is
+    // retried, then retried smaller, before it is believed.
+    it('retries a transient 500 and succeeds', async () => {
+      fetchMock
+        .mockResolvedValueOnce({ ok: false, status: 500 } as Response)
+        .mockResolvedValueOnce(okEnvelope({ albumList2: { album: [album(1)] } }));
+
+      const albums = await runWithTimers(() => subsonicFetchAllAlbums(CRED));
+      expect(albums).toHaveLength(1);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('asks for a smaller page when a page keeps failing, from the same offset', async () => {
+      const fullPage = Array.from({ length: 500 }, (_, i) => album(i));
+      fetchMock.mockImplementation((url: string) => {
+        const params = new URL(url).searchParams;
+        if (params.get('offset') === '0') {
+          return Promise.resolve(okEnvelope({ albumList2: { album: fullPage } }));
+        }
+        // The second page is only servable in smaller bites.
+        return params.get('size') === '500'
+          ? Promise.resolve({ ok: false, status: 500 } as Response)
+          : Promise.resolve(okEnvelope({ albumList2: { album: [album(500)] } }));
+      });
+
+      const albums = await runWithTimers(() => subsonicFetchAllAlbums(CRED));
+      expect(albums).toHaveLength(501);
+
+      const retried = new URL(fetchMock.mock.calls.at(-1)![0] as string).searchParams;
+      expect(retried.get('offset')).toBe('500');
+      expect(Number(retried.get('size'))).toBeLessThan(500);
+    });
+
+    it('names the page that failed, without leaking the credential', async () => {
+      const fullPage = Array.from({ length: 500 }, (_, i) => album(i));
+      fetchMock.mockImplementation((url: string) =>
+        new URL(url).searchParams.get('offset') === '0'
+          ? Promise.resolve(okEnvelope({ albumList2: { album: fullPage } }))
+          : Promise.resolve({ ok: false, status: 500 } as Response)
+      );
+
+      const err = await runWithTimers(() => subsonicFetchAllAlbums(CRED)).catch(e => e);
+      expect(err.message).toContain('offset 500');
+      expect(err.message).not.toContain('deadbeef');
+      expect(err.message).not.toContain('salt1234');
+    });
+
+    it('does not retry a rejected credential', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          'subsonic-response': {
+            status: 'failed',
+            error: { code: 40, message: 'Wrong username or password' },
+          },
+        }),
+      } as Response);
+
+      const err = await runWithTimers(() => subsonicFetchAllAlbums(CRED)).catch(e => e);
+      expect(err.isAuthFailure).toBe(true);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
     });
   });
 });

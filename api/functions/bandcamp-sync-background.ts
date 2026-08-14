@@ -417,7 +417,15 @@ export async function handler(event: {
   } catch (error) {
     const isAuth = error instanceof SubsonicError && error.isAuthFailure;
     console.error('[bandcamp-sync] sync failed:', error instanceof Error ? error.message : String(error));
-    Sentry.captureException(error, { tags: { function: 'bandcamp-sync' }, extra: { stage: 'sync' } });
+    Sentry.captureException(error, {
+      tags: { function: 'bandcamp-sync' },
+      // `retryable` separates "Bandcamp couldn't answer even after retries" from a failure
+      // of ours — the two look identical in the message alone.
+      extra: {
+        stage: 'sync',
+        retryable: error instanceof SubsonicError ? error.retryable : null,
+      },
+    });
     await recordFailure(
       isAuth
         ? 'Bandcamp rejected the stored login. Disconnect and reconnect with a fresh username and password from Fan Settings → Subsonic.'
