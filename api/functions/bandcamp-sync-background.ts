@@ -23,6 +23,8 @@ import {
   type SubsonicAlbum,
   type SubsonicCredential,
 } from './bandcamp-subsonic';
+import { resolveCollectionArtists, type CollectionResolveSummary } from './collection-matching';
+import { releaseMatchKey } from './release-utils';
 import { normalizeForComparison } from './search-utils';
 
 const RESPONSE_HEADERS = { 'Content-Type': 'application/json' };
@@ -125,7 +127,11 @@ async function matchLibrary(albums: SubsonicAlbum[]): Promise<LibraryMatches> {
   for (const album of albums) {
     const artist = albumArtist.get(album.id);
     if (!artist) continue;
-    const release = releaseByKey.get(`${artist.id}:${normalizeForComparison(album.name)}`);
+    // `releaseMatchKey`, not `normalizeForComparison`: the former is the function that produced
+    // `releases.match_key`, and the two disagree. normalizeForComparison strips to [a-z0-9], so
+    // it renders any title with no Latin characters — Japanese, Cyrillic, Greek — as the empty
+    // string, which can never equal the stored key. Those albums silently never matched.
+    const release = releaseByKey.get(`${artist.id}:${releaseMatchKey(album.name)}`);
     if (release) matches.releases.set(album.id, release);
   }
   return matches;
@@ -405,6 +411,31 @@ export async function handler(event: {
     }
 
     console.log(`[bandcamp-sync] imported ${uniqueAlbums.length} albums (${matches.releases.size} matched to releases, ${matches.artists.size} artists)`);
+
+    // Everything above this line is the sync. What follows is discovery for the items it could
+    // not match — most of a real collection, because most artists a fan buys from have never
+    // been searched and so have no `artists` row to match against.
+    //
+    // Deliberately *after* the connection is marked idle: the collection is complete and worth
+    // showing whether or not the artists behind it resolve, the pass costs a paced probe per
+    // unknown name, and a failure in it must never be recorded as a failed import. Still inside
+    // this invocation rather than a second background function — a background function has 15
+    // minutes and this needs about two.
+    let resolved: CollectionResolveSummary | null = null;
+    try {
+      resolved = await resolveCollectionArtists(userId);
+      console.log('[bandcamp-sync] resolved collection artists:', JSON.stringify(resolved));
+    } catch (error) {
+      // Reported, not thrown: the import succeeded, and the next re-sync tries again. Sentry
+      // rather than a log line because a pass that always fails would otherwise look exactly
+      // like a collection whose artists simply aren't on Bandcamp.
+      console.error('[bandcamp-sync] artist resolution failed:', error instanceof Error ? error.message : String(error));
+      Sentry.captureException(error, {
+        tags: { function: 'bandcamp-sync' },
+        extra: { stage: 'resolve-collection-artists' },
+      });
+    }
+
     return {
       statusCode: 200,
       headers: RESPONSE_HEADERS,
@@ -412,6 +443,7 @@ export async function handler(event: {
         imported: uniqueAlbums.length,
         matched: matches.releases.size,
         artistsMarked: matches.artists.size,
+        resolved,
       }),
     };
   } catch (error) {

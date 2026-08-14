@@ -5,11 +5,19 @@ const mocks = vi.hoisted(() => ({
   mockFrom: vi.fn(),
   mockReadAllPages: vi.fn(),
   mockFetchAllAlbums: vi.fn(),
+  mockResolveArtists: vi.fn(),
 }));
 
 vi.mock('../db', () => ({
   getClient: () => ({ from: mocks.mockFrom }),
   readAllPages: mocks.mockReadAllPages,
+}));
+// Stubbed so these tests stay about the import. The pass it replaces probes Bandcamp for every
+// unknown artist name; left real against this file's mocked `../db` it would throw, and the
+// handler catches that on purpose, so the whole suite would go on passing while the pass did
+// nothing. Its own behaviour is covered in collection-matching.test.ts.
+vi.mock('../collection-matching', () => ({
+  resolveCollectionArtists: mocks.mockResolveArtists,
 }));
 vi.mock('../bandcamp-subsonic', async importOriginal => {
   const original = await importOriginal<typeof import('../bandcamp-subsonic')>();
@@ -117,6 +125,7 @@ describe('bandcamp-sync-background handler', () => {
     process.env.INTERNAL_FUNCTION_SECRET = 'internal-secret';
     process.env.BANDCAMP_CREDENTIAL_KEY = randomBytes(32).toString('base64');
     mocks.mockReadAllPages.mockResolvedValue({ ok: true, rows: [] });
+    mocks.mockResolveArtists.mockResolvedValue({ created: 0, catalogRequested: 0 });
   });
 
   afterEach(() => {
@@ -395,5 +404,45 @@ describe('bandcamp-sync-background handler', () => {
       sync_status: 'error',
       sync_error: expect.stringContaining('reconnect'),
     });
+  });
+
+  it('looks for the artists behind unmatched items only after the import is recorded', async () => {
+    const ciphertext = encryptCredential(JSON.stringify({ t: 'tok', s: 'salt' }));
+    const { connectionUpdates } = setupDb({
+      connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext },
+    });
+    mocks.mockFetchAllAlbums.mockResolvedValue([
+      { id: 'al-1', name: 'Bias', artist: 'King Triumph' },
+    ]);
+    // The order is the point: resolution probes Bandcamp for every unknown name, and a fan's
+    // collection must be complete and visible before that starts rather than after it.
+    mocks.mockResolveArtists.mockImplementation(() => {
+      expect(connectionUpdates.at(-1)).toMatchObject({ sync_status: 'idle' });
+      return Promise.resolve({ created: 1, catalogRequested: 1 });
+    });
+
+    const res = await handler(internalEvent({ userId: 'user-1' }));
+    expect(res.statusCode).toBe(200);
+    expect(mocks.mockResolveArtists).toHaveBeenCalledWith('user-1');
+    expect(JSON.parse(res.body).resolved).toMatchObject({ created: 1 });
+  });
+
+  it('still reports a successful import when artist resolution fails', async () => {
+    const ciphertext = encryptCredential(JSON.stringify({ t: 'tok', s: 'salt' }));
+    const { connectionUpdates, upsertBatches } = setupDb({
+      connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext },
+    });
+    mocks.mockFetchAllAlbums.mockResolvedValue([
+      { id: 'al-1', name: 'Bias', artist: 'King Triumph' },
+    ]);
+    mocks.mockResolveArtists.mockRejectedValue(new Error('bandcamp said no'));
+
+    const res = await handler(internalEvent({ userId: 'user-1' }));
+    // The items are imported and the connection is idle. Discovery is an extra on top of a
+    // finished sync, so its failure must never be recorded as a failed import.
+    expect(res.statusCode).toBe(200);
+    expect(upsertBatches.flat()).toHaveLength(1);
+    expect(connectionUpdates.at(-1)).toMatchObject({ sync_status: 'idle', sync_error: null });
+    expect(JSON.parse(res.body).resolved).toBeNull();
   });
 });

@@ -25,6 +25,7 @@ import {
   type CatalogTrigger,
   type PersistedRelease,
 } from './db';
+import { linkCollectionItemsForArtist } from './collection-matching';
 import { isInternalRequest, isUrlHostnameAllowed } from './middleware';
 import { safeFetch, safeHostname } from './safe-fetch';
 import {
@@ -486,6 +487,19 @@ async function catalogArtist(
     releasesFound: totalFound,
     releasesDetailed: totalDetailed,
   });
+
+  // A catalogue existing is what makes a fan's collection item linkable, and this is the moment
+  // it starts existing — the import that created those items ran days earlier against an artist
+  // we held no releases for. Runs on every pass, not only the first, so a release added to a
+  // discography later still finds the fans who already own it. Never fails the run: a link is an
+  // improvement to somebody's profile page, not part of cataloguing.
+  if (totalFound > 0) {
+    const linked = await linkCollectionItemsForArtist(artistId, artist.name);
+    if (linked > 0) {
+      console.log(`[catalog] linked ${linked} collection item(s) to ${artist.name}`);
+    }
+  }
+
   return totalFound;
 }
 

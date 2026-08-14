@@ -27,7 +27,7 @@ create table artist_links (
   artist_id uuid not null references artists(id) on delete cascade,
   platform text not null,
   url text not null,
-  source text not null default 'search', -- 'search' | 'musicbrainz' | 'claimed'
+  source text not null default 'search', -- 'search' | 'musicbrainz' | 'claimed' | 'collection'
   is_direct boolean not null default true,
   latest_release jsonb, -- { title, type, url, imageUrl, releaseDate }
   display_order integer,
