@@ -10,12 +10,17 @@ const mocks = vi.hoisted(() => {
   };
 });
 
-vi.mock('../db', () => ({
-  getClient: () => ({
-    from: mocks.mockFrom,
-  }),
-  readAllPages: mocks.mockReadAllPages,
-}));
+// artistSlug is the REAL one: artist links are derived by slugging the Bandcamp name, and a
+// stub here would let this test pass while the derived slug drifted from what the artists
+// table actually stores.
+vi.mock('../db', async importOriginal => {
+  const actual = await importOriginal<typeof import('../db')>();
+  return {
+    getClient: () => ({ from: mocks.mockFrom }),
+    readAllPages: mocks.mockReadAllPages,
+    artistSlug: actual.artistSlug,
+  };
+});
 vi.mock('../ratelimit', () => ({
   checkRateLimit: mocks.mockCheckRateLimit,
   getClientIp: mocks.mockGetClientIp,
@@ -162,6 +167,7 @@ describe('public-saved-artists handler', () => {
         ok: true,
         rows: [
           {
+            id: 'i-1',
             title: 'Illinois',
             artist_name: 'Sufjan Stevens',
             art_url: null,
@@ -169,6 +175,7 @@ describe('public-saved-artists handler', () => {
             releases: { slug: 'illinois', artwork_url: 'https://f4.bcbits.com/a.jpg', artists: { slug: 'sufjan-stevens' } },
           },
           {
+            id: 'i-2',
             title: 'Obscure Tape',
             artist_name: 'Nobody We Know',
             art_url: null,
@@ -177,22 +184,61 @@ describe('public-saved-artists handler', () => {
           },
         ],
       });
+      // Neither unmatched artist has a page.
+      mocks.mockFrom.mockReturnValue({
+        select: vi.fn(() => ({ in: vi.fn(() => Promise.resolve({ data: [], error: null })) })),
+      });
 
       const res = await handler(validEvent);
       expect(res!.statusCode).toBe(200);
       const body = JSON.parse(res!.body);
       expect(body.collection).toHaveLength(2);
-      // Matched: release-page link and artwork fallback from the joined release.
+      // Matched: release-page link, artist link, and artwork from the joined release.
       expect(body.collection[0]).toEqual({
+        id: 'i-1',
         title: 'Illinois',
         artist_name: 'Sufjan Stevens',
         art_url: 'https://f4.bcbits.com/a.jpg',
         acquired_at: '2026-01-01T00:00:00Z',
         url: '/a/sufjan-stevens/illinois',
+        artist_url: '/a/sufjan-stevens',
       });
-      // Unmatched items still appear — they just don't link anywhere.
-      expect(body.collection[1].url).toBeNull();
-      expect(body.collection[1].title).toBe('Obscure Tape');
+      // Unmatched items still appear: art comes from the proxy, and nothing is linked.
+      expect(body.collection[1]).toMatchObject({
+        title: 'Obscure Tape',
+        art_url: '/api/collection/art/i-2',
+        url: null,
+        artist_url: null,
+      });
+    });
+
+    it('links the artist when their page exists, even with no matched release', async () => {
+      setupPublicUser();
+      mocks.mockReadAllPages.mockResolvedValue({
+        ok: true,
+        rows: [
+          {
+            id: 'i-3',
+            title: 'under the blankets',
+            artist_name: 'Anne Sulikowski',
+            art_url: null,
+            acquired_at: null,
+            releases: null,
+          },
+        ],
+      });
+      // The artists table has the slug derived from that name.
+      mocks.mockFrom.mockReturnValue({
+        select: vi.fn(() => ({
+          in: vi.fn(() => Promise.resolve({ data: [{ slug: 'anne-sulikowski' }], error: null })),
+        })),
+      });
+
+      const res = await handler(validEvent);
+      const body = JSON.parse(res!.body);
+      expect(body.collection[0].artist_url).toBe('/a/anne-sulikowski');
+      // The release still isn't linked — only the artist page exists.
+      expect(body.collection[0].url).toBeNull();
     });
 
     it('never exposes account metadata alongside the collection', async () => {

@@ -8,10 +8,15 @@ const mocks = vi.hoisted(() => ({
   mockGetClientIp: vi.fn(() => '127.0.0.1'),
 }));
 
-vi.mock('../db', () => ({
-  getClient: () => ({ from: mocks.mockFrom }),
-  readAllPages: mocks.mockReadAllPages,
-}));
+// Real artistSlug — see the note in public-saved-artists.test.ts.
+vi.mock('../db', async importOriginal => {
+  const actual = await importOriginal<typeof import('../db')>();
+  return {
+    getClient: () => ({ from: mocks.mockFrom }),
+    readAllPages: mocks.mockReadAllPages,
+    artistSlug: actual.artistSlug,
+  };
+});
 vi.mock('@supabase/supabase-js', () => ({ createClient: mocks.mockCreateClient }));
 vi.mock('../ratelimit', () => ({
   checkRateLimit: mocks.mockCheckRateLimit,
@@ -50,15 +55,54 @@ describe('me-collection handler', () => {
   });
 
   it('GET returns the owner view including hidden items, via paged reads', async () => {
-    const items = [
-      { id: 'i-1', title: 'Illinois', hidden: false, provenance: 'purchased' },
-      { id: 'i-2', title: 'Secret Album', hidden: true, provenance: 'purchased' },
-    ];
-    mocks.mockReadAllPages.mockResolvedValue({ ok: true, rows: items });
+    mocks.mockReadAllPages.mockResolvedValue({
+      ok: true,
+      rows: [
+        {
+          id: 'i-1',
+          title: 'Illinois',
+          artist_name: 'Sufjan Stevens',
+          art_url: null,
+          hidden: false,
+          provenance: 'purchased',
+          releases: { slug: 'illinois', artwork_url: 'https://f4.bcbits.com/a.jpg', artists: { slug: 'sufjan-stevens' } },
+        },
+        {
+          id: 'i-2',
+          title: 'Secret Album',
+          artist_name: 'Nobody We Know',
+          art_url: null,
+          hidden: true,
+          provenance: 'purchased',
+          releases: null,
+        },
+      ],
+    });
+    // No artist rows exist for the unmatched item's artist.
+    mocks.mockFrom.mockReturnValue({
+      select: vi.fn(() => ({ in: vi.fn(() => Promise.resolve({ data: [], error: null })) })),
+    });
 
     const res = await handler(authedEvent('GET'));
     expect(res!.statusCode).toBe(200);
-    expect(JSON.parse(res!.body)).toEqual({ items, total: 2 });
+    const body = JSON.parse(res!.body);
+    expect(body.total).toBe(2);
+    // Hidden items belong in the owner's view — the public page is what filters them.
+    expect(body.items.map((i: { hidden: boolean }) => i.hidden)).toEqual([false, true]);
+    // Matched item: art and links from the joined release.
+    expect(body.items[0]).toMatchObject({
+      art_url: 'https://f4.bcbits.com/a.jpg',
+      url: '/a/sufjan-stevens/illinois',
+      artist_url: '/a/sufjan-stevens',
+    });
+    // Unmatched item: art falls back to the proxy, and nothing is linked.
+    expect(body.items[1]).toMatchObject({
+      art_url: '/api/collection/art/i-2',
+      url: null,
+      artist_url: null,
+    });
+    // The join column is dropped rather than echoed back to the client.
+    expect(body.items[0].releases).toBeUndefined();
     // The paged reader is what guards PostgREST's silent 1,000-row cap.
     expect(mocks.mockReadAllPages).toHaveBeenCalled();
   });

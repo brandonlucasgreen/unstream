@@ -9,6 +9,7 @@
 // else as support would be lying, and the whole value of the artifact is that it isn't.
 
 import { getClient, readAllPages } from './db';
+import { artistUrlFor, releaseUrlFor, resolveArtistPages } from './collection-utils';
 import { checkRateLimit, getClientIp } from './ratelimit';
 
 const CORS_HEADERS = {
@@ -97,6 +98,7 @@ export async function handler(event: {
     // Public collection: purchased and not hidden, most recently acquired first. Paged read
     // because a real Bandcamp collection can exceed PostgREST's silent 1,000-row cap.
     const collectionRead = await readAllPages<{
+      id: string;
       title: string;
       artist_name: string;
       art_url: string | null;
@@ -106,7 +108,7 @@ export async function handler(event: {
       (from, to) =>
         client
           .from('collection_items')
-          .select('title, artist_name, art_url, acquired_at, releases!left (slug, artwork_url, artists (slug))')
+          .select('id, title, artist_name, art_url, acquired_at, releases!left (slug, artwork_url, artists (slug))')
           .eq('user_id', userId)
           .eq('provenance', 'purchased')
           .eq('hidden', false)
@@ -121,19 +123,21 @@ export async function handler(event: {
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
     }
 
-    const collection = collectionRead.rows.map(row => {
-      const release = row.releases;
-      const artistSlug = release?.artists?.slug || null;
-      return {
-        title: row.title,
-        artist_name: row.artist_name,
-        art_url: row.art_url || release?.artwork_url || null,
-        acquired_at: row.acquired_at,
-        // Matched items link to the release page, so a viewer can buy the same record —
-        // the loop closes. Unmatched items still render, just without a link.
-        url: release?.slug && artistSlug ? `/a/${artistSlug}/${release.slug}` : null,
-      };
-    });
+    const artistPages = await resolveArtistPages(collectionRead.rows.map(r => r.artist_name));
+
+    const collection = collectionRead.rows.map(row => ({
+      id: row.id,
+      title: row.title,
+      artist_name: row.artist_name,
+      // Falls back to the art proxy, which fetches from Bandcamp server-side. Only ~28% of a
+      // real collection matches an Unstream release, so without this most tiles are blank.
+      art_url: row.art_url || row.releases?.artwork_url || `/api/collection/art/${row.id}`,
+      acquired_at: row.acquired_at,
+      // Matched items link to the release page, so a viewer can buy the same record —
+      // the loop closes. Unmatched items still render, just without a link.
+      url: releaseUrlFor(row),
+      artist_url: artistUrlFor(row, artistPages),
+    }));
 
     // Shape the response — NEVER include email, user_id, or account metadata
     const savedArtists = (saved || []).map((row: any) => {

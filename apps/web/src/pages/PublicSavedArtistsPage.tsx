@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
+import { CollectionGrid } from '../components/CollectionGrid';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { ArtistRowsSkeleton } from '../components/LoadingSkeletons';
 import { Skeleton } from '../components/Skeleton';
@@ -14,11 +15,13 @@ interface SavedArtistPublic {
 }
 
 interface CollectionItemPublic {
+  id: string;
   title: string;
   artist_name: string;
   art_url: string | null;
   acquired_at: string | null;
   url: string | null;
+  artist_url: string | null;
 }
 
 interface PublicSharingData {
@@ -26,45 +29,6 @@ interface PublicSharingData {
   owner_location: string | null;
   saved_artists: SavedArtistPublic[];
   collection?: CollectionItemPublic[];
-}
-
-// One collection tile: album art (or a titled placeholder), caption underneath. Matched
-// items link to the release page so a viewer can buy the same record — the loop closes.
-function CollectionTile({ item }: { item: CollectionItemPublic }) {
-  const art = item.art_url ? (
-    <img
-      src={item.art_url}
-      alt={`${item.title} by ${item.artist_name}`}
-      loading="lazy"
-      className="w-full aspect-square object-cover rounded-lg bg-bg-hover"
-    />
-  ) : (
-    <div className="w-full aspect-square rounded-lg bg-bg-hover flex items-center justify-center p-3">
-      <span className="text-text-muted text-xs text-center line-clamp-4">{item.title}</span>
-    </div>
-  );
-
-  const caption = (
-    <div className="mt-1.5 min-w-0">
-      <p className="text-xs font-medium truncate">{item.title}</p>
-      <p className="text-xs text-text-muted truncate">{item.artist_name}</p>
-    </div>
-  );
-
-  if (item.url) {
-    return (
-      <Link to={item.url} className="block group">
-        <div className="group-hover:opacity-90 transition-opacity">{art}</div>
-        {caption}
-      </Link>
-    );
-  }
-  return (
-    <div>
-      {art}
-      {caption}
-    </div>
-  );
 }
 
 export function PublicSavedArtistsPage() {
@@ -188,11 +152,17 @@ export function PublicSavedArtistsPage() {
               worth screenshotting; omitted entirely when empty. */}
           {collection.length > 0 && (
             <section className="mb-10">
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                {collection.map((item, i) => (
-                  <CollectionTile key={`${item.artist_name}:${item.title}:${i}`} item={item} />
-                ))}
-              </div>
+              <CollectionGrid
+                items={collection.map(item => ({
+                  key: item.id,
+                  title: item.title,
+                  artistName: item.artist_name,
+                  artUrl: item.art_url,
+                  acquiredAt: item.acquired_at,
+                  releaseUrl: item.url,
+                  artistUrl: item.artist_url,
+                }))}
+              />
             </section>
           )}
 

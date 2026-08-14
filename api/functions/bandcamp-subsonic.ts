@@ -178,6 +178,62 @@ function toAlbum(raw: unknown): SubsonicAlbum | null {
 }
 
 /**
+ * The `coverArt` id for one album, read from getAlbum.
+ *
+ * Needed because Subsonic's cover-art id is not required to equal the album id, and we
+ * don't store it — collection rows keep only the album id. Returns null when the server
+ * reports no art rather than throwing: a missing cover is an ordinary answer, not a fault.
+ */
+export async function subsonicAlbumCoverArtId(
+  credential: SubsonicCredential,
+  albumId: string
+): Promise<string | null> {
+  const envelope = await subsonicRequest(credential, 'getAlbum', { id: albumId });
+  const album = (envelope as Record<string, unknown>).album;
+  if (typeof album !== 'object' || album === null) return null;
+  const coverArt = (album as Record<string, unknown>).coverArt;
+  return typeof coverArt === 'string' && coverArt ? coverArt : null;
+}
+
+/**
+ * Fetch cover-art bytes. Unlike every other call here, a successful response is an image,
+ * not JSON — so a JSON body means the server is reporting an error (no art, bad id) and is
+ * returned as null. Callers must treat null as "no art", never as a failure worth caching
+ * as permanent.
+ */
+export async function subsonicFetchCoverArt(
+  credential: SubsonicCredential,
+  coverArtId: string,
+  size?: number
+): Promise<{ bytes: ArrayBuffer; contentType: string } | null> {
+  const params: Record<string, string> = { id: coverArtId };
+  if (size) params.size = String(size);
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  let response: Response;
+  try {
+    response = await fetch(buildUrl(credential, 'getCoverArt', params), {
+      signal: controller.signal,
+    });
+  } catch (error) {
+    const aborted = error instanceof Error && error.name === 'AbortError';
+    throw new SubsonicError(`getCoverArt: ${aborted ? 'timed out' : 'request failed'}`);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+
+  if (!response.ok) {
+    throw new SubsonicError(`getCoverArt: HTTP ${response.status}`);
+  }
+
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.startsWith('image/')) return null;
+
+  return { bytes: await response.arrayBuffer(), contentType };
+}
+
+/**
  * Fetch the whole collection via paginated getAlbumList2. Throws mid-pagination rather
  * than returning what it has: a partial result recorded as a complete sync would be a
  * silently wrong collection, which is the "never cache uncertainty" bug class.

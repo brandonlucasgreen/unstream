@@ -291,11 +291,20 @@ export async function handler(event: {
     try {
       const { t, s } = JSON.parse(decryptCredential(connection.credential_ciphertext));
       credential = { username: connection.bandcamp_username, t, s };
-    } catch (error) {
+    } catch {
       // Undecryptable means unusable (key rotated, blob corrupted) — the user has to
       // reconnect; retrying can never succeed.
+      //
+      // The caught error is deliberately NOT forwarded. If decryption succeeded but
+      // JSON.parse rejected the result, V8 embeds a snippet of the parsed string in the
+      // SyntaxError message — and that string is the decrypted credential. Reporting a
+      // synthetic error keeps the rule absolute: the credential never reaches Sentry, even
+      // inside an exception message.
       console.error('[bandcamp-sync] credential decrypt failed');
-      Sentry.captureException(error, { tags: { function: 'bandcamp-sync' }, extra: { stage: 'decrypt' } });
+      Sentry.captureException(new Error('bandcamp credential could not be decrypted or parsed'), {
+        tags: { function: 'bandcamp-sync' },
+        extra: { stage: 'decrypt' },
+      });
       await recordFailure('The stored credential is no longer readable. Disconnect and reconnect Bandcamp.');
       return { statusCode: 500, headers: RESPONSE_HEADERS, body: JSON.stringify({ error: 'Credential unusable' }) };
     }

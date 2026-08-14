@@ -10,6 +10,12 @@
 import { createClient } from '@supabase/supabase-js';
 import { getClient, readAllPages } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
+import {
+  artistUrlFor,
+  releaseUrlFor,
+  resolveArtistPages,
+  type CollectionRowWithRelease,
+} from './collection-utils';
 
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
@@ -20,6 +26,9 @@ const CORS_HEADERS = {
 
 const ITEM_COLUMNS =
   'id, source, title, artist_name, art_url, acquired_at, provenance, acquisition, hidden, release_id';
+
+/** The same columns plus the joins the grid needs to build release and artist links. */
+const ITEM_COLUMNS_WITH_LINKS = `${ITEM_COLUMNS}, releases!left (slug, artwork_url, artists (slug))`;
 
 async function authenticateRequest(authHeader: string | undefined): Promise<{ userId: string } | null> {
   if (!authHeader?.startsWith('Bearer ')) return null;
@@ -60,11 +69,11 @@ export async function handler(event: {
 
   if (event.httpMethod === 'GET') {
     // Paged read: a real Bandcamp collection can exceed PostgREST's silent 1,000-row cap.
-    const read = await readAllPages<Record<string, unknown>>(
+    const read = await readAllPages<Record<string, unknown> & CollectionRowWithRelease & { id: string }>(
       (from, to) =>
         client
           .from('collection_items')
-          .select(ITEM_COLUMNS)
+          .select(ITEM_COLUMNS_WITH_LINKS)
           .eq('user_id', user.userId)
           .order('acquired_at', { ascending: false, nullsFirst: false })
           .order('created_at', { ascending: false })
@@ -77,10 +86,21 @@ export async function handler(event: {
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to load collection' }) };
     }
 
+    const artistPages = await resolveArtistPages(read.rows.map(r => r.artist_name));
+
+    const items = read.rows.map(({ releases, ...row }) => ({
+      ...row,
+      // Same art fallback as the public page: unmatched items get their cover from Bandcamp
+      // via the proxy rather than rendering an empty box.
+      art_url: row.art_url || releases?.artwork_url || `/api/collection/art/${row.id}`,
+      url: releaseUrlFor({ ...row, releases }),
+      artist_url: artistUrlFor({ ...row, releases }, artistPages),
+    }));
+
     return {
       statusCode: 200,
       headers: CORS_HEADERS,
-      body: JSON.stringify({ items: read.rows, total: read.rows.length }),
+      body: JSON.stringify({ items, total: items.length }),
     };
   }
 

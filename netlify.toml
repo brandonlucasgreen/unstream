@@ -157,6 +157,14 @@
   to = "/.netlify/functions/me-collection"
   status = 200
 
+# Cover art for a collection item, proxied from Bandcamp. Subsonic serves art from an
+# authenticated endpoint whose credentials ride the query string, so the image cannot be
+# linked directly from a page — see api/functions/collection-art.ts.
+[[redirects]]
+  from = "/api/collection/art/*"
+  to = "/.netlify/functions/collection-art"
+  status = 200
+
 # Newsletter signup. Proxies to Buttondown server-side so the API key stays out of the
 # browser and the CSP doesn't need a third-party script host. Requires BUTTONDOWN_API_KEY.
 [[redirects]]

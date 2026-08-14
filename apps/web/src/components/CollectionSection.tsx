@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
+import { CollectionGrid } from './CollectionGrid';
 
 // Dashboard section: the owner's view of their collection (Support Loop Step 3).
 // The public page (/u/:handle) shows only purchased, non-hidden items; here the owner
@@ -18,6 +19,8 @@ interface CollectionItem {
   provenance: string;
   hidden: boolean;
   release_id: string | null;
+  url: string | null;
+  artist_url: string | null;
 }
 
 export function CollectionSection() {
@@ -97,25 +100,17 @@ export function CollectionSection() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-          {items.map(item => (
-            <div key={item.id} className="relative group">
-              {item.art_url ? (
-                <img
-                  src={item.art_url}
-                  alt={`${item.title} by ${item.artist_name}`}
-                  loading="lazy"
-                  className={`w-full aspect-square object-cover rounded-lg bg-bg-hover ${item.hidden ? 'opacity-40' : ''}`}
-                />
-              ) : (
-                <div className={`w-full aspect-square rounded-lg bg-bg-hover flex items-center justify-center p-2 ${item.hidden ? 'opacity-40' : ''}`}>
-                  <span className="text-text-muted text-xs text-center line-clamp-4">{item.title}</span>
-                </div>
-              )}
-              <div className="mt-1.5 min-w-0">
-                <p className={`text-xs font-medium truncate ${item.hidden ? 'text-text-muted' : ''}`}>{item.title}</p>
-                <p className="text-xs text-text-muted truncate">{item.artist_name}</p>
-              </div>
+        <CollectionGrid
+          items={items.map(item => ({
+            key: item.id,
+            title: item.title,
+            artistName: item.artist_name,
+            artUrl: item.art_url,
+            acquiredAt: item.acquired_at,
+            releaseUrl: item.url,
+            artistUrl: item.artist_url,
+            dimmed: item.hidden,
+            overlay: (
               <button
                 type="button"
                 onClick={() => handleToggleHidden(item)}
@@ -137,9 +132,9 @@ export function CollectionSection() {
                   </svg>
                 )}
               </button>
-            </div>
-          ))}
-        </div>
+            ),
+          }))}
+        />
       )}
     </section>
   );

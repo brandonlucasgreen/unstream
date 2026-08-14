@@ -123,7 +123,7 @@ export default async function handler(request: Request, context: Context) {
       // keeps the page honest (Support Loop Step 3).
       const { data: collectionData } = await supabase
         .from('collection_items')
-        .select('title, artist_name, art_url, acquired_at, releases!left (slug, artwork_url, artists (slug))')
+        .select('id, title, artist_name, art_url, acquired_at, releases!left (slug, artwork_url, artists (slug))')
         .eq('user_id', unameData.user_id)
         .eq('provenance', 'purchased')
         .eq('hidden', false)
@@ -151,10 +151,10 @@ export default async function handler(request: Request, context: Context) {
       const artistSlug = release?.artists?.slug || '';
       const title = escapeHtml(row.title || '');
       const artistName = escapeHtml(row.artist_name || '');
-      const artUrl = row.art_url || release?.artwork_url || '';
-      const artHtml = artUrl
-        ? `<img src="${escapeHtml(artUrl)}" alt="${title} by ${artistName}" class="collection-art" loading="lazy">`
-        : `<span class="collection-art-fallback">${title}</span>`;
+      // Unmatched items fall back to the art proxy, which fetches the cover from Bandcamp
+      // server-side — most of a real collection has no matched release to borrow art from.
+      const artUrl = row.art_url || release?.artwork_url || `/api/collection/art/${row.id}`;
+      const artHtml = `<img src="${escapeHtml(artUrl)}" alt="${title} by ${artistName}" class="collection-art" loading="lazy">`;
       const caption = `<div class="collection-caption">${title}</div><div class="collection-caption caption-artist">${artistName}</div>`;
       const releaseUrl = release?.slug && artistSlug
         ? `https://unstream.stream/a/${escapeHtml(artistSlug)}/${escapeHtml(release.slug)}`
