@@ -449,8 +449,23 @@ export default async function handler(request: Request, context: Context) {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
         'Cache-Control': 'public, max-age=0, must-revalidate',
-        'Netlify-CDN-Cache-Control': 'public, s-maxage=300, stale-while-revalidate=300',
-        'Cache-Tag': `release-${artistSlug}-${releaseSlug}`,
+        // Unlike the artist page, this route is pure SSR for *everyone* — there is no SPA
+        // fallback — so every human view and every crawler hit that misses the CDN costs two
+        // Supabase queries, one of them a two-level nested embed. There are ~6,000 of these URLs
+        // against ~800 artist pages, which is what makes the TTL here worth more than anywhere
+        // else on the site.
+        //
+        // An hour rather than a day because the content is user-visible, paired with a long
+        // stale-while-revalidate so a stale entry is still served instantly while one background
+        // request refreshes it: steady-state cost is one query per URL per hour regardless of
+        // traffic. Artist edits don't wait for it — they purge (see purgeArtistCaches in
+        // api/functions/artist-releases.ts).
+        'Netlify-CDN-Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+        // Two tags: the specific page, plus one shared by every release page of this artist.
+        // Netlify purges by exact tag with no wildcards, and an artist editing their catalogue
+        // needs all of their release pages gone at once — this is the only way to say that in
+        // one purge call.
+        'Cache-Tag': `release-${artistSlug}-${releaseSlug},artist-releases-${artistSlug}`,
       },
     });
   } catch {

@@ -6,6 +6,7 @@
 
 import { getClient, getReleaseReviewQueue, dismissReleaseReview, mergeReleases } from './db';
 import { authenticateAdmin, buildCorsHeaders } from './middleware';
+import { purgeArtistReleaseCaches } from './purge-cache';
 import { Sentry } from '../lib/sentry';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -138,6 +139,19 @@ export async function handler(event: {
     level: 'info',
     extra: { keepId, dropId, adminId: admin.userId },
   });
+
+  // Release pages are CDN-cached for an hour, so a merge would otherwise stay invisible to the
+  // public for that long. The artist endpoint purges via its shared `purgeArtistCaches`; this
+  // path had no purge at all, which was self-healing only while the TTL was five minutes.
+  // One extra read on a rare admin action, resolved from the surviving release.
+  const { data: merged } = await client
+    .from('releases')
+    .select('artists ( slug )')
+    .eq('id', keepId)
+    .maybeSingle();
+
+  const mergedSlug = (merged as { artists?: { slug?: string } } | null)?.artists?.slug;
+  if (mergedSlug) await purgeArtistReleaseCaches(mergedSlug);
 
   return {
     statusCode: 200,

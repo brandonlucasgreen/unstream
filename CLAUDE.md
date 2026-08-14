@@ -364,6 +364,24 @@ When adding a table or column: create a new migration in `supabase/migrations/`,
 
 **Auto-deploy:** `.github/workflows/supabase-migrate.yml` runs `supabase db push --linked` on every push to `main` that changes `supabase/migrations/`. Migrations deploy automatically — no manual SQL editor needed. Required GitHub secrets: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`.
 
+**Applying a migration to production from an unmerged branch poisons every later migration.** The
+workflow can be run by hand (`workflow_dispatch`) from a feature branch, which is sometimes
+necessary — deploy previews share the production database, so an additive migration has to land
+early for the preview to exercise it. But `supabase db push` refuses to run when production has an
+applied version that isn't in `supabase/migrations/` locally, and it aborts *before applying
+anything*. So one migration applied from a branch that then sits unmerged blocks everybody's
+migrations on `main`, silently.
+
+This happened: `20260809120000_bandcamp-collection.sql` went to production on 2026-08-09 from the
+still-open PR #438, and three consecutive runs on `main` then failed without applying anything.
+One stranded migration added `releases.alert_sent_at`, which `api/functions/notifications.ts` had
+already shipped code against — so release alerts were down for about 30 hours. The fix was to add
+the missing file to `main` so the repo again records what production has.
+
+If you apply a migration ahead of its merge: merge it promptly, or put the migration in its own PR
+and merge that first. Either way, **check this workflow went green** — the failure is loud in
+Actions and invisible everywhere else.
+
 **Local dry-run:** `npm run migrate:link` once per checkout, then `npm run migrate:dry-run`. Both
 that and `migrate:list` use `--linked`, matching the workflow — the CLI dropped `--project-ref`
 from these commands, and passing it makes them print a help blob and exit *without* checking

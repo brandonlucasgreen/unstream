@@ -15,6 +15,20 @@ import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.
  */
 const MAX_RELEASES_SHOWN = 24;
 
+/**
+ * A day, not the five minutes this used to be.
+ *
+ * This render only ever reaches crawlers — real browsers are handed to the SPA above, before any
+ * database query — so the only thing a long TTL delays is how quickly Google sees an edit, and a
+ * day is well inside how often it recrawls. Meanwhile each miss costs four Supabase queries, one
+ * of them a two-level nested embed over `releases`, and there are ~800 of these pages for
+ * crawlers to sweep.
+ *
+ * Claimed-artist edits don't wait for the TTL: they purge the `artist-${slug}` tag below (see
+ * purgeArtistCaches in api/functions/artist-releases.ts and artist-profile.ts).
+ */
+const CDN_CACHE_CONTROL = 'public, s-maxage=86400, stale-while-revalidate=86400';
+
 interface ReleaseRow {
   slug: string;
   title: string;
@@ -537,7 +551,7 @@ export default async function handler(request: Request, context: Context) {
         headers: {
           'Content-Type': 'text/html; charset=utf-8',
           'Cache-Control': 'public, max-age=0, must-revalidate',
-          'Netlify-CDN-Cache-Control': 'public, s-maxage=300, stale-while-revalidate=300',
+          'Netlify-CDN-Cache-Control': CDN_CACHE_CONTROL,
           'Cache-Tag': `artist-${slug}`,
         },
       });
@@ -642,7 +656,7 @@ export default async function handler(request: Request, context: Context) {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
         'Cache-Control': 'public, max-age=0, must-revalidate',
-        'Netlify-CDN-Cache-Control': 'public, s-maxage=300, stale-while-revalidate=300',
+        'Netlify-CDN-Cache-Control': CDN_CACHE_CONTROL,
         'Cache-Tag': `artist-${slug}`,
       },
     });

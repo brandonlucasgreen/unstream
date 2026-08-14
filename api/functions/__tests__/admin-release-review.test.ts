@@ -10,13 +10,32 @@ const mocks = vi.hoisted(() => ({
   getReleaseReviewQueue: vi.fn(),
   dismissReleaseReview: vi.fn(),
   mergeReleases: vi.fn(),
+  purgeArtistReleaseCaches: vi.fn(),
+  /** What the post-merge slug lookup resolves to. Null stands in for "release vanished". */
+  mergedArtistSlug: { value: 'sufjan-stevens' as string | null },
 }));
 
 vi.mock('../db', () => ({
-  getClient: () => ({}),
+  // Chainable enough for the one read the merge path makes: resolving the surviving release's
+  // artist slug so the CDN purge can name a cache tag.
+  getClient: () => ({
+    from: () => ({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: async () => ({
+            data: mocks.mergedArtistSlug.value ? { artists: { slug: mocks.mergedArtistSlug.value } } : null,
+          }),
+        }),
+      }),
+    }),
+  }),
   getReleaseReviewQueue: mocks.getReleaseReviewQueue,
   dismissReleaseReview: mocks.dismissReleaseReview,
   mergeReleases: mocks.mergeReleases,
+}));
+
+vi.mock('../purge-cache', () => ({
+  purgeArtistReleaseCaches: mocks.purgeArtistReleaseCaches,
 }));
 
 vi.mock('../middleware', () => ({
@@ -44,6 +63,7 @@ beforeEach(() => {
   mocks.getReleaseReviewQueue.mockResolvedValue([]);
   mocks.dismissReleaseReview.mockResolvedValue(true);
   mocks.mergeReleases.mockResolvedValue({ ok: true });
+  mocks.mergedArtistSlug.value = 'sufjan-stevens';
 });
 
 afterEach(() => {
@@ -103,6 +123,28 @@ describe('POST — merge', () => {
     const r = await post({ action: 'merge', keepId: KEEP, dropId: DROP });
     expect(r.statusCode).toBe(200);
     expect(mocks.mergeReleases).toHaveBeenCalledWith(KEEP, DROP);
+  });
+
+  // Release pages are CDN-cached for an hour, so a merge that doesn't purge stays invisible to
+  // the public for that long. Before the TTL went up this path had no purge at all and healed
+  // itself in five minutes; now the purge is what makes the merge visible.
+  it('purges the artist caches so the merge is visible before the TTL expires', async () => {
+    await post({ action: 'merge', keepId: KEEP, dropId: DROP });
+    expect(mocks.purgeArtistReleaseCaches).toHaveBeenCalledWith('sufjan-stevens');
+  });
+
+  it('does not purge when a merge fails', async () => {
+    mocks.mergeReleases.mockResolvedValue({ ok: false, error: 'Both releases already have a source on: bandcamp' });
+    await post({ action: 'merge', keepId: KEEP, dropId: DROP });
+    expect(mocks.purgeArtistReleaseCaches).not.toHaveBeenCalled();
+  });
+
+  // A merge that succeeded is still a success even if we can't work out which caches to clear.
+  it('still reports success when the artist slug cannot be resolved', async () => {
+    mocks.mergedArtistSlug.value = null;
+    const r = await post({ action: 'merge', keepId: KEEP, dropId: DROP });
+    expect(r.statusCode).toBe(200);
+    expect(mocks.purgeArtistReleaseCaches).not.toHaveBeenCalled();
   });
 
   // A merge conflict (both sides already have a source on the same platform) is a real
