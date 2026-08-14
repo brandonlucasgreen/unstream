@@ -34,13 +34,6 @@ interface StreamingStat {
   activations: number;
 }
 
-interface RecentEvent {
-  event_type: string;
-  app: string;
-  context: Record<string, unknown>;
-  created_at: string;
-}
-
 interface DashboardData {
   summary: {
     searches_today: number;
@@ -54,7 +47,6 @@ interface DashboardData {
   by_app: AppStat[];
   platforms: PlatformStat[];
   streaming_services: StreamingStat[];
-  recent: RecentEvent[];
 }
 
 // ─── Bar chart ───────────────────────────────────────────────────────────────
@@ -245,20 +237,6 @@ function DataTable<T extends Record<string, unknown>>({
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-function formatEventType(t: string) {
-  return t.replace(/_/g, ' ');
-}
-
-function formatRelativeTime(iso: string) {
-  const diff = Date.now() - new Date(iso).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
-}
-
 export function AdminAnalyticsPage() {
   const { isAdmin, isLoading: authLoading, session } = useAuth();
   const navigate = useNavigate();
@@ -313,22 +291,13 @@ export function AdminAnalyticsPage() {
 
   if (!data) return null;
 
-  const { summary, daily, by_app, platforms, streaming_services, recent } = data;
+  const { summary, daily, by_app, platforms, streaming_services } = data;
 
   const appRows = by_app.map(a => ({
     app: a.app,
     searches: a.searches,
     clicks: a.clicks,
     total: a.searches + a.clicks,
-  }));
-
-  const recentRows = recent.map(e => ({
-    type: formatEventType(e.event_type),
-    app: e.app,
-    detail: Object.entries(e.context)
-      .map(([k, v]) => `${k}: ${v}`)
-      .join(', ') || '—',
-    when: formatRelativeTime(e.created_at),
   }));
 
   return (
@@ -432,21 +401,6 @@ export function AdminAnalyticsPage() {
                   { key: 'activations', label: 'Activations', align: 'right' },
                 ]}
                 emptyLabel="No extension activations yet"
-              />
-            </div>
-
-            {/* Recent events */}
-            <div className="bg-surface-secondary rounded-xl border border-border p-5">
-              <h2 className="font-display text-sm font-semibold text-text-primary mb-4">Recent events</h2>
-              <DataTable
-                rows={recentRows as unknown as Record<string, unknown>[]}
-                columns={[
-                  { key: 'type', label: 'Event' },
-                  { key: 'app', label: 'App' },
-                  { key: 'detail', label: 'Detail' },
-                  { key: 'when', label: 'When', align: 'right' },
-                ]}
-                emptyLabel="No events yet"
               />
             </div>
           </div>
