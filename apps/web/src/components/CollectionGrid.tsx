@@ -54,9 +54,17 @@ function Tile({ item }: { item: CollectionGridItem }) {
 
       <div className="mt-1.5 min-w-0">
         {item.releaseUrl ? (
-          <Link to={item.releaseUrl} className="block text-xs font-medium truncate hover:underline">
+          // A plain anchor, never <Link>: /a/{artist}/{release} is rendered by the release-page
+          // edge function and has NO route in main.tsx, so React Router's client-side navigation
+          // pushed the URL and then rendered nothing — a blank page at the release's own URL. The
+          // browser only showed the real page once the visitor reloaded, and Back afterwards
+          // restored that release document under the profile's URL, which is the "hard refresh to
+          // get back" report. Same reasoning, and the same plain <a>, as ReleasesSection and
+          // RecentReleasesSection. The artist link below is a <Link> because /a/{artist} *is* an
+          // SPA route.
+          <a href={item.releaseUrl} className="block text-xs font-medium truncate hover:underline">
             {item.title}
-          </Link>
+          </a>
         ) : (
           <p className="text-xs font-medium truncate">{item.title}</p>
         )}
