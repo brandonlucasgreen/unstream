@@ -139,6 +139,29 @@ describe('CollectionGrid', () => {
     expect(screen.getByText('Obscure Tape')).not.toBeNull();
   });
 
+  it('navigates to a release as a document, not through the client-side router', () => {
+    // /a/{artist}/{release} is rendered by an edge function and has no route in main.tsx. A
+    // <Link> there pushed the URL and rendered nothing — a blank page at the release's own URL,
+    // and a Back button that needed a hard refresh afterwards. A router <Link> cancels the
+    // click; a plain anchor lets the browser navigate, which is the whole fix.
+    renderGrid([
+      item({
+        key: 'linked',
+        title: 'Illinois',
+        artistName: 'Sufjan Stevens',
+        releaseUrl: '/a/sufjan-stevens/illinois',
+        artistUrl: '/a/sufjan-stevens',
+      }),
+    ]);
+
+    const release = screen.getByRole('link', { name: 'Illinois' });
+    expect(fireEvent.click(release)).toBe(true);
+
+    // The artist page is a real SPA route, so that one stays client-side.
+    const artist = screen.getByRole('link', { name: 'Sufjan Stevens' });
+    expect(fireEvent.click(artist)).toBe(false);
+  });
+
   it('drops to the placeholder, keeping the caption, when cover art fails to load', () => {
     renderGrid([item({ key: 'a', title: 'Missing Art', artUrl: '/api/collection/art/a' })]);
 

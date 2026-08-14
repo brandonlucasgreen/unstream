@@ -3597,6 +3597,21 @@ async function findArtistSlugByIdentityUrl(
 }
 
 /**
+ * The slug of an artist who already holds this Bandcamp URL, or null.
+ *
+ * The single-URL case of `findArtistSlugByIdentityUrl`, exported for the collection matcher.
+ * An artist discovered from a fan's Bandcamp collection is often one we already hold under a
+ * different spelling — the collection carries Bandcamp's spelling, the stored row carries
+ * whichever name won aggregation — and creating a second row would split their releases across
+ * two pages exactly as "Big Thief" / "Bigthief" once did.
+ */
+export async function findArtistSlugByBandcampUrl(url: string): Promise<string | null> {
+  const client = getClient();
+  if (!client) return null;
+  return findArtistSlugByIdentityUrl(client, [{ sourceId: 'bandcamp', url }]);
+}
+
+/**
  * Persist artist search results to the database.
  * Only persists artist-type results. Runs as fire-and-forget after search.
  */

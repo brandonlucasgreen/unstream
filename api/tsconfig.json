@@ -86,6 +86,8 @@
     "functions/__tests__/public-saved-artists.test.ts",
     "functions/collection-art.ts",
     "functions/collection-utils.ts",
-    "functions/__tests__/collection-art.test.ts"
+    "functions/collection-matching.ts",
+    "functions/__tests__/collection-art.test.ts",
+    "functions/__tests__/collection-matching.test.ts"
   ]
 }

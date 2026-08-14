@@ -302,6 +302,35 @@ Artists claim profiles via `/claim/:slug` (email magic link or password auth, wi
 
 Signed-in fans can save artists and mark artists as supported (migrations 013–018), synced to the Apple app via `saved-artists-sync.ts` with tombstones and scheduled GC. Users can claim a public username (migration 021) and opt into sharing their list (migration 022); the public list renders at `/u/:handle` via the `u-handle` edge function, backed by `public-saved-artists.ts`. Reserved handles live in `api/lib/reserved-handles.ts`.
 
+### Collections, and why most items start unlinked
+
+A Bandcamp import (`bandcamp-sync-background.ts`) writes a `collection_items` row per album and
+attaches an Unstream release only when one already exists. Most of a real collection therefore
+arrives unlinked — the fan bought from artists nobody has ever searched, so there is no `artists`
+row to match against.
+
+**There is no source URL to fall back to.** Bandcamp's Subsonic API returns `id`, `name`,
+`artist`, `coverArt`, `year`, `genre`, `created` and nothing else — no album or artist URL — so
+"just link to Bandcamp" is not available, and deriving `<artist>.bandcamp.com/album/<title>` mints
+404s. Don't reach for it.
+
+`collection-matching.ts` closes the gap in two halves that become possible at different times:
+
+- `resolveCollectionArtists(userId)` runs at the end of a sync, *after* the connection is marked
+  idle so a discovery failure is never recorded as a failed import. It probes Bandcamp for each
+  unknown artist name (cached forever, negatives included), stores the artist plus their Bandcamp
+  link, and requests catalogues for up to 25 — matching `MAX_ARTISTS_PER_REQUEST`, which silently
+  slices anything longer. The rest ride the six-hourly sweep, whose pool is every artist with a
+  catalogue-able link.
+- `linkCollectionItemsForArtist(artistId, name)` runs at the end of every catalogue pass in
+  `catalog-artist-background.ts` — the moment the releases exist — and attaches them to the items
+  that were waiting. It re-runs forever, so a release added later still finds fans who own it.
+
+Matching is exact on `releases.match_key` via `releaseMatchKey`, the function that produced the
+column. Use that one, never `normalizeForComparison`: it strips to `[a-z0-9]`, so any title with
+no Latin characters normalizes to the empty string and can never match. A near-miss stays
+unlinked on purpose — a collection page asserts a specific person bought a specific record.
+
 ### Account settings
 
 `/settings` is backed by the `me-*` functions: `me-settings.ts`, `me-username.ts`, `me-location.ts`, `me-password.ts`, plus `user-sharing.ts` for the sharing toggle. These are the only files in `api/tsconfig.json`'s typecheck include, and each has a test in `api/functions/__tests__/` — follow that pattern for new account endpoints.
