@@ -22,7 +22,7 @@ describe('NotificationPreferences', () => {
     cleanup();
   });
 
-  it('renders all three toggles reflecting the fetched state', async () => {
+  it('renders the saved-artist toggles reflecting the fetched state', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ newRelease: true, newPlatformLink: false, weeklyAnalyticsRecap: true }),
@@ -34,11 +34,23 @@ describe('NotificationPreferences', () => {
       expect(screen.getByText('New releases')).not.toBeNull();
     });
     expect(screen.getByText('New places to support')).not.toBeNull();
-    expect(screen.getByText('Weekly analytics recap')).not.toBeNull();
 
     expect(screen.getByRole('switch', { name: 'New releases' }).getAttribute('aria-checked')).toBe('true');
     expect(screen.getByRole('switch', { name: 'New places to support' }).getAttribute('aria-checked')).toBe('false');
-    expect(screen.getByRole('switch', { name: 'Weekly analytics recap' }).getAttribute('aria-checked')).toBe('true');
+  });
+
+  it('offers no switch for the paused weekly recap, even though the preference still exists', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ newRelease: true, newPlatformLink: true, weeklyAnalyticsRecap: true }),
+    });
+
+    render(<NotificationPreferences />);
+
+    await waitFor(() => {
+      expect(screen.getByText('New releases')).not.toBeNull();
+    });
+    expect(screen.queryByText('Weekly analytics recap')).toBeNull();
   });
 
   it('toggles a preference off and reflects the server response', async () => {

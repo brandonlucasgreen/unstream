@@ -9,7 +9,7 @@
 
 import { getClient } from './db';
 import { isInternalRequest } from './middleware';
-import { sendNotificationOnce, filterByPreference } from './notifications';
+import { sendNotificationOnce, filterByPreference, subscriptionFooter, SUBSCRIPTION_EMAIL_HEADERS } from './notifications';
 import { escapeHtml } from '../lib/html';
 import { Sentry } from '../lib/sentry';
 
@@ -119,6 +119,7 @@ export async function handler(event: {
 
     const { searches, views, clicks } = summarize((analyticsRows || []) as AnalyticsRow[]);
     const profileUrl = `https://unstream.stream/a/${artist.slug}`;
+    const footer = subscriptionFooter(`you claimed ${artist.name} on Unstream`);
 
     await sendNotificationOnce({
       client,
@@ -132,8 +133,9 @@ export async function handler(event: {
   <li>${views} profile views</li>
   <li>${clicks} link clicks</li>
 </ul>
-<p>See the full breakdown on your <a href="${profileUrl}">artist dashboard</a>.</p>`,
-      text: `Here's how ${artist.name} did on Unstream over the last 7 days:\n\n- ${searches} search appearances\n- ${views} profile views\n- ${clicks} link clicks\n\nSee the full breakdown on your artist dashboard: ${profileUrl}`,
+<p>See the full breakdown on your <a href="${profileUrl}">artist dashboard</a>.</p>${footer.html}`,
+      text: `Here's how ${artist.name} did on Unstream over the last 7 days:\n\n- ${searches} search appearances\n- ${views} profile views\n- ${clicks} link clicks\n\nSee the full breakdown on your artist dashboard: ${profileUrl}${footer.text}`,
+      headers: SUBSCRIPTION_EMAIL_HEADERS,
     });
     sent++;
   }

@@ -1,7 +1,7 @@
 // API endpoint: POST /api/admin/merge-override
 // Admin-only endpoint for creating artist merge overrides from the UI.
 
-import { getClient } from './db';
+import { getClient, invalidateAdminListCache } from './db';
 import { authenticateAdmin } from './middleware';
 import { isSearchOnlyLink, sourceIdFromUrl } from './search-utils';
 
@@ -121,6 +121,10 @@ export async function handler(event: {
       }),
     };
   }
+
+  // The search path caches this table for five minutes, so without this the duplicate results
+  // the admin just merged stay unmerged for up to five minutes.
+  await invalidateAdminListCache('merge-overrides');
 
   return {
     statusCode: 201,

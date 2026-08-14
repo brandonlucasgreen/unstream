@@ -8,6 +8,13 @@ interface Preferences {
   weeklyAnalyticsRecap: boolean;
 }
 
+/**
+ * The weekly analytics recap is deliberately absent: it is paused at the sender
+ * (.github/workflows/weekly-analytics-recap.yml has no schedule), and a switch for an email
+ * nobody receives is a promise the product doesn't keep. The preference itself is untouched —
+ * still stored, still returned by the API, still honored — so restoring this entry alongside
+ * the schedule brings back whatever each artist had already chosen.
+ */
 const TOGGLES: { key: keyof Preferences; label: string; description: string }[] = [
   {
     key: 'newRelease',
@@ -18,11 +25,6 @@ const TOGGLES: { key: keyof Preferences; label: string; description: string }[] 
     key: 'newPlatformLink',
     label: 'New places to support',
     description: 'When an artist you saved adds a link to a new platform.',
-  },
-  {
-    key: 'weeklyAnalyticsRecap',
-    label: 'Weekly analytics recap',
-    description: 'A weekly summary of searches, views, and clicks for artists you\'ve claimed.',
   },
 ];
 

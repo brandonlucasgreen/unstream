@@ -59,6 +59,24 @@ describe('sendTransactionalEmail', () => {
     });
   });
 
+  it('passes extra MIME headers through, so List-Unsubscribe reaches the recipient', async () => {
+    fetchMock.mockResolvedValue(resendReply(200, { id: 'msg_123' }));
+
+    await sendTransactionalEmail({ ...params, headers: { 'List-Unsubscribe': '<https://unstream.stream/settings#notifications>' } });
+
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).headers).toEqual({
+      'List-Unsubscribe': '<https://unstream.stream/settings#notifications>',
+    });
+  });
+
+  it('omits the headers field entirely when there are none', async () => {
+    fetchMock.mockResolvedValue(resendReply(200, { id: 'msg_123' }));
+
+    await sendTransactionalEmail(params);
+
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).not.toHaveProperty('headers');
+  });
+
   it('fails loudly when RESEND_API_KEY is missing, so a lost notification is visible', async () => {
     delete process.env.RESEND_API_KEY;
 

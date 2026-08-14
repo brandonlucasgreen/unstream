@@ -5,7 +5,7 @@
 // plausible-looking *.bandcamp.com page attached to a major artist who has no
 // Bandcamp presence at all.
 
-import { getClient, deleteStoredLinksForUrl } from './db';
+import { getClient, deleteStoredLinksForUrl, invalidateAdminListCache } from './db';
 import { authenticateAdmin, buildCorsHeaders } from './middleware';
 import { normalizeForComparison, normalizeUrlForMatch } from './search-utils';
 import { Sentry } from '../lib/sentry';
@@ -114,6 +114,10 @@ export async function handler(event: {
       };
     }
 
+    // The search path caches this table for five minutes, so without this the link stays
+    // suppressed for up to five minutes after an admin undid the suppression.
+    await invalidateAdminListCache('link-suppressions');
+
     return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ success: true }) };
   }
 
@@ -207,6 +211,10 @@ export async function handler(event: {
       }),
     };
   }
+
+  // The search path caches this table for five minutes, so without this the suppressed link
+  // keeps appearing in results for up to five minutes after the admin suppressed it.
+  await invalidateAdminListCache('link-suppressions');
 
   // Also clear stored copies, so the link disappears from the artist page and
   // from DB-backed search cards rather than only from freshly fetched results.
