@@ -75,7 +75,9 @@ struct SignInView: View {
                 .buttonStyle(.bordered)
                 .disabled(email.isEmpty || auth.isLoading)
 
-                Text("A sign-in window will open — complete the steps there to continue.")
+                Text(auth.magicLinkSent
+                     ? "Check your email for a link to finish signing in."
+                     : "We'll email you a link — no password needed.")
                     .font(.caption2)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
