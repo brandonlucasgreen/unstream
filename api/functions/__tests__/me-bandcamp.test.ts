@@ -25,9 +25,41 @@ vi.mock('../bandcamp-subsonic', async importOriginal => {
   };
 });
 
-import { handler } from '../me-bandcamp';
+import { handler, selfDispatchOrigin } from '../me-bandcamp';
 import { SubsonicError } from '../bandcamp-subsonic';
 import { decryptCredential } from '../credential-crypto';
+
+// The dispatch target carries INTERNAL_FUNCTION_SECRET, and Host is client-supplied, so
+// this allowlist is a security boundary, not a convenience.
+describe('selfDispatchOrigin', () => {
+  it('accepts this site\'s own production and Netlify deploy hostnames', () => {
+    expect(selfDispatchOrigin('unstream.stream')).toBe('https://unstream.stream');
+    expect(selfDispatchOrigin('www.unstream.stream')).toBe('https://www.unstream.stream');
+    expect(selfDispatchOrigin('unstream.netlify.app')).toBe('https://unstream.netlify.app');
+    expect(selfDispatchOrigin('deploy-preview-438--unstream.netlify.app')).toBe(
+      'https://deploy-preview-438--unstream.netlify.app'
+    );
+    // Case and port are normalised away before matching.
+    expect(selfDispatchOrigin('Unstream.Stream:443')).toBe('https://unstream.stream');
+  });
+
+  it('refuses any hostname that is not ours, so the secret cannot be redirected', () => {
+    for (const host of [
+      'evil.com',
+      'unstream.stream.evil.com',
+      'unstream.netlify.app.evil.com',
+      'evil.com--unstream.netlify.app',
+      'deploy-preview-438--unstream.netlify.app.evil.com',
+      'notunstream.stream',
+      '169.254.169.254',
+      'localhost',
+      '',
+      undefined,
+    ]) {
+      expect(selfDispatchOrigin(host)).toBeNull();
+    }
+  });
+});
 
 const PASSWORD = 'bandcamp-generated-credential';
 
@@ -206,6 +238,46 @@ describe('me-bandcamp handler', () => {
       expect(update).toHaveBeenCalledWith(
         expect.objectContaining({ sync_status: 'error', sync_error: expect.stringContaining('Re-sync') })
       );
+    });
+
+    it('dispatches to the deploy that served the request, not always production', async () => {
+      // The bug this fixes: a deploy preview handed its sync to production, where the
+      // branch's background function 404s.
+      mocks.mockPing.mockResolvedValue(undefined);
+      mocks.mockArtistCount.mockResolvedValue(1);
+      const upsert = vi.fn((..._args: unknown[]) => Promise.resolve({ error: null }));
+      mocks.mockFrom.mockReturnValue({ upsert });
+
+      await handler({
+        httpMethod: 'POST',
+        headers: {
+          authorization: 'Bearer valid-token',
+          host: 'deploy-preview-438--unstream.netlify.app',
+        },
+        body: JSON.stringify({ username: 'fan', password: PASSWORD }),
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://deploy-preview-438--unstream.netlify.app/.netlify/functions/bandcamp-sync-background',
+        expect.anything()
+      );
+    });
+
+    it('ignores a spoofed Host, so the internal secret never leaves our own deploys', async () => {
+      mocks.mockPing.mockResolvedValue(undefined);
+      mocks.mockArtistCount.mockResolvedValue(1);
+      const upsert = vi.fn((..._args: unknown[]) => Promise.resolve({ error: null }));
+      mocks.mockFrom.mockReturnValue({ upsert });
+
+      await handler({
+        httpMethod: 'POST',
+        headers: { authorization: 'Bearer valid-token', host: 'evil.example.com' },
+        body: JSON.stringify({ username: 'fan', password: PASSWORD }),
+      });
+
+      const dispatched = fetchMock.mock.calls[0][0] as string;
+      expect(dispatched).toBe('https://unstream.stream/.netlify/functions/bandcamp-sync-background');
+      expect(dispatched).not.toContain('evil.example.com');
     });
 
     it('validates the body', async () => {

@@ -65,16 +65,46 @@ async function authenticateRequest(authHeader: string | undefined): Promise<{ us
 }
 
 /**
- * Ask the background function to run the import. Returns false when it couldn't be asked
- * (missing config, network) — the caller records that as a sync error rather than leaving
- * the row claiming a sync that will never happen. Same handshake as request-catalog.ts:
- * Netlify answers 202 immediately, so there is no result to read back.
+ * The origin to dispatch the background job to: the deploy that is actually serving this
+ * request, when we can prove it's one of ours.
+ *
+ * Netlify exposes only `URL`, `SITE_NAME` and `SITE_ID` to a function at runtime, and `URL`
+ * always names *production* — so a deploy preview would hand its work to production, which
+ * on a branch-only function is a 404 and on a shipped one is the wrong deploy running it.
+ * The `Host` header does name the current deploy.
+ *
+ * But `Host` is client-supplied, and dispatching to it unchecked would POST
+ * INTERNAL_FUNCTION_SECRET to whatever hostname an attacker sent. So it is honoured only
+ * when it is one of this site's own Netlify hostnames; anything else falls back to `URL`,
+ * which is the safe (if less useful) old behaviour.
+ *
+ * Unlike catalog dispatch — which writes shared artist data and spends a shared crawl
+ * budget, and so stays pinned behind request-catalog.ts's production gate — a Bandcamp sync
+ * writes only the rows of the user who asked for it, so letting a preview run its own is
+ * both safe and the point.
  */
-async function requestSync(userId: string): Promise<boolean> {
+export function selfDispatchOrigin(host: string | undefined): string | null {
+  if (!host) return null;
+  const hostname = host.split(':')[0].trim().toLowerCase();
+  if (hostname === 'unstream.stream' || hostname === 'www.unstream.stream') {
+    return `https://${hostname}`;
+  }
+  // Deploy previews and branch deploys: <deploy-name>--unstream.netlify.app
+  if (hostname === 'unstream.netlify.app' || /^[a-z0-9-]+--unstream\.netlify\.app$/.test(hostname)) {
+    return `https://${hostname}`;
+  }
+  return null;
+}
+
+/**
+ * Ask the background function to run the import. Returns false when it couldn't be asked
+ * (missing config, network, a non-202 answer) — the caller records that as a sync error
+ * rather than leaving the row claiming a sync that will never happen. Same handshake as
+ * request-catalog.ts: Netlify answers 202 immediately, so there is no result to read back.
+ */
+async function requestSync(userId: string, host: string | undefined): Promise<boolean> {
   const secret = process.env.INTERNAL_FUNCTION_SECRET;
-  // `URL` and not `DEPLOY_PRIME_URL`: only URL, SITE_NAME and SITE_ID reach a function at
-  // runtime — see request-catalog.ts.
-  const siteUrl = process.env.URL;
+  const siteUrl = selfDispatchOrigin(host) ?? process.env.URL;
   if (!secret || !siteUrl) {
     console.log('[me-bandcamp] sync not requested — INTERNAL_FUNCTION_SECRET or site URL not configured');
     return false;
@@ -189,7 +219,7 @@ export async function handler(event: {
         return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to start sync' }) };
       }
 
-      const started = await requestSync(user.userId);
+      const started = await requestSync(user.userId, event.headers.host);
       if (!started) {
         await client
           .from('bandcamp_connections')
@@ -281,7 +311,7 @@ export async function handler(event: {
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to save the connection' }) };
     }
 
-    const started = await requestSync(user.userId);
+    const started = await requestSync(user.userId, event.headers.host);
     if (!started) {
       await client
         .from('bandcamp_connections')
