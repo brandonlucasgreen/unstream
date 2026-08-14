@@ -131,8 +131,19 @@ async function matchLibrary(albums: SubsonicAlbum[]): Promise<LibraryMatches> {
   return matches;
 }
 
-/** Slugs per saved_artists read — stays far below PostgREST's 1,000-row response cap. */
+/** Artists per saved_artists read — stays far below PostgREST's 1,000-row response cap. */
 const SAVED_LOOKUP_CHUNK = 100;
+
+/** The saved_artists columns needed to decide insert vs. upgrade vs. leave alone. */
+const SAVED_SELECT = 'id, artist_id, artist_slug, supported, deleted';
+
+interface SavedRow {
+  id: string;
+  artist_id: string | null;
+  artist_slug: string | null;
+  supported: boolean;
+  deleted: boolean;
+}
 
 /**
  * Buying an artist's record IS supporting them, so a Bandcamp import marks every matched
@@ -145,6 +156,16 @@ const SAVED_LOOKUP_CHUNK = 100;
  *   - an already-supported row keeps its original supported_at;
  *   - only supported goes true; nothing here can ever un-support or overwrite notes.
  *
+ * **An existing row is looked up by `artist_id` as well as by slug, and matching on the slug
+ * alone broke the first of those rules.** `(user_id, artist_slug)` is the table's natural key
+ * (migration 014), but a row saved from a search result carries a *synthetic* slug —
+ * `modelactriz`, `seoulmetro`, `qobuz-robertlogan` — that the canonical slug never equals, and
+ * `artist_id` is then the only thing identifying the artist. So the slug-only check found
+ * nothing and inserted a **second live row for an artist already saved** (measured on
+ * production 2026-08-14: Model/Actriz, Rodney Owl and Seoul Metro each duplicated by one
+ * import), and it equally missed a **tombstone** filed under the other slug, resurrecting a
+ * dismissal this function promises is permanent.
+ *
  * Failure here degrades, not fails: items are the sync's primary artifact, and the mark
  * is derived state the next re-sync recomputes.
  */
@@ -152,55 +173,76 @@ async function markArtistsSupported(userId: string, artists: MatchedArtist[]): P
   const client = getClient();
   if (!client || artists.length === 0) return;
 
-  const bySlug = new Map(artists.map(a => [a.slug, a]));
-  const slugs = [...bySlug.keys()];
-  const existing = new Map<string, { supported: boolean; deleted: boolean }>();
+  const serverNow = new Date().toISOString();
+  const toInsert: Record<string, unknown>[] = [];
+  /** Row ids, not slugs: a row matched by `artist_id` may be filed under a different slug. */
+  const toSupport: string[] = [];
 
-  for (let i = 0; i < slugs.length; i += SAVED_LOOKUP_CHUNK) {
-    const chunk = slugs.slice(i, i + SAVED_LOOKUP_CHUNK);
-    const { data, error } = await client
-      .from('saved_artists')
-      .select('artist_slug, supported, deleted')
-      .eq('user_id', userId)
-      .in('artist_slug', chunk);
-    if (error) {
+  for (let i = 0; i < artists.length; i += SAVED_LOOKUP_CHUNK) {
+    const chunk = artists.slice(i, i + SAVED_LOOKUP_CHUNK);
+
+    // Two reads rather than one, because a saved row can name this artist either way and
+    // neither column alone finds both (see the doc comment above).
+    const [byId, bySlug] = await Promise.all([
+      client
+        .from('saved_artists')
+        .select(SAVED_SELECT)
+        .eq('user_id', userId)
+        .in('artist_id', chunk.map(a => a.id)),
+      client
+        .from('saved_artists')
+        .select(SAVED_SELECT)
+        .eq('user_id', userId)
+        .in('artist_slug', chunk.map(a => a.slug)),
+    ]);
+
+    const failure = byId.error || bySlug.error;
+    if (failure) {
       // Without a reliable view of existing rows we can't insert safely (we might
       // resurrect a tombstone), so skip this chunk's artists entirely.
-      console.warn('[bandcamp-sync] saved_artists read failed:', error.message);
-      Sentry.captureException(new Error(`saved_artists read failed: ${error.message}`), {
+      console.warn('[bandcamp-sync] saved_artists read failed:', failure.message);
+      Sentry.captureException(new Error(`saved_artists read failed: ${failure.message}`), {
         tags: { function: 'bandcamp-sync' },
         extra: { stage: 'mark-supported' },
       });
-      for (const slug of chunk) bySlug.delete(slug);
       continue;
     }
-    for (const row of data ?? []) {
-      existing.set(row.artist_slug, { supported: row.supported, deleted: row.deleted === true });
+
+    const rows = [...(byId.data ?? []), ...(bySlug.data ?? [])] as SavedRow[];
+
+    for (const artist of chunk) {
+      // Both reads can return the same row, and an already-duplicated artist returns two — so
+      // decide over every candidate rather than picking one.
+      const candidates = rows.filter(
+        row => (row.artist_id && row.artist_id === artist.id) || row.artist_slug === artist.slug
+      );
+
+      if (candidates.length === 0) {
+        toInsert.push({
+          user_id: userId,
+          artist_id: artist.id,
+          artist_slug: artist.slug,
+          artist_name: artist.name,
+          artist_image_url: artist.imageUrl,
+          supported: true,
+          supported_at: serverNow,
+          // Stamped server-side on insert so the row is immediately visible to the Apple
+          // app's ?since= incremental pulls — same reasoning as saved-artists.ts.
+          last_modified: serverNow,
+        });
+        continue;
+      }
+
+      // A tombstone wins only when nothing live is left for this artist — then the dismissal
+      // is untouchable, and no row is inserted either. A tombstone sitting *beside* a live row
+      // means that row was superseded, not the artist dismissed (deduplicating an account
+      // leaves exactly that shape), and skipping there would strand the live row unsupported.
+      const live = candidates.filter(row => !row.deleted);
+      for (const row of live) {
+        if (!row.supported && !toSupport.includes(row.id)) toSupport.push(row.id);
+      }
     }
   }
-
-  const serverNow = new Date().toISOString();
-  const toInsert = [...bySlug.values()]
-    .filter(a => !existing.has(a.slug))
-    .map(a => ({
-      user_id: userId,
-      artist_id: a.id,
-      artist_slug: a.slug,
-      artist_name: a.name,
-      artist_image_url: a.imageUrl,
-      supported: true,
-      supported_at: serverNow,
-      // Stamped server-side on insert so the row is immediately visible to the Apple
-      // app's ?since= incremental pulls — same reasoning as saved-artists.ts.
-      last_modified: serverNow,
-    }));
-
-  const toSupport = [...bySlug.values()]
-    .filter(a => {
-      const row = existing.get(a.slug);
-      return row !== undefined && !row.deleted && !row.supported;
-    })
-    .map(a => a.slug);
 
   for (let i = 0; i < toInsert.length; i += SAVED_LOOKUP_CHUNK) {
     const { error } = await client
@@ -220,7 +262,7 @@ async function markArtistsSupported(userId: string, artists: MatchedArtist[]): P
       .from('saved_artists')
       .update({ supported: true, supported_at: serverNow, last_modified: serverNow })
       .eq('user_id', userId)
-      .in('artist_slug', toSupport.slice(i, i + SAVED_LOOKUP_CHUNK));
+      .in('id', toSupport.slice(i, i + SAVED_LOOKUP_CHUNK));
     if (error) {
       console.warn('[bandcamp-sync] saved_artists support update failed:', error.message);
       Sentry.captureException(new Error(`saved_artists support update failed: ${error.message}`), {
