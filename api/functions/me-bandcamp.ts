@@ -213,10 +213,10 @@ export async function handler(event: {
     const username = typeof body.username === 'string' ? body.username.trim() : '';
     const password = typeof body.password === 'string' ? body.password : '';
     if (!username || username.length > 200) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'A Bandcamp username is required' }) };
+      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'The username Bandcamp generated is required' }) };
     }
     if (!password || password.length > 500) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'The credential from Bandcamp’s Fan Settings is required' }) };
+      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'The password Bandcamp generated is required' }) };
     }
 
     if (!isCredentialKeyConfigured()) {
@@ -240,7 +240,7 @@ export async function handler(event: {
         return {
           statusCode: 400,
           headers: CORS_HEADERS,
-          body: JSON.stringify({ error: 'Bandcamp rejected that username or credential. Check both in Bandcamp’s Fan Settings → Subsonic.' }),
+          body: JSON.stringify({ error: 'Bandcamp rejected that username or password. Check both against Fan Settings → Subsonic on Bandcamp.' }),
         };
       }
       console.warn('[me-bandcamp] Bandcamp ping failed:', error instanceof Error ? error.message : String(error));

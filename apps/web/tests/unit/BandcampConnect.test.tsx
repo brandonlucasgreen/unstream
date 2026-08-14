@@ -32,11 +32,11 @@ describe('BandcampConnect', () => {
     render(<BandcampConnect />);
 
     await waitFor(() => {
-      expect(screen.getByLabelText('Bandcamp username')).not.toBeNull();
+      expect(screen.getByLabelText('Username (from Bandcamp)')).not.toBeNull();
     });
-    expect(screen.getByLabelText('Subsonic credential')).not.toBeNull();
+    expect(screen.getByLabelText('Password (from Bandcamp)')).not.toBeNull();
     const link = screen.getByRole('link', { name: /Fan Settings/ }) as HTMLAnchorElement;
-    expect(link.href).toBe('https://bandcamp.com/settings');
+    expect(link.href).toBe('https://bandcamp.com/settings?pane=fan');
     // The beta caveat is part of the honesty contract in the spec.
     expect(screen.getByText(/beta/)).not.toBeNull();
   });
@@ -49,11 +49,11 @@ describe('BandcampConnect', () => {
 
     render(<BandcampConnect />);
     await waitFor(() => {
-      expect(screen.getByLabelText('Bandcamp username')).not.toBeNull();
+      expect(screen.getByLabelText('Username (from Bandcamp)')).not.toBeNull();
     });
 
-    fireEvent.change(screen.getByLabelText('Bandcamp username'), { target: { value: 'fan' } });
-    fireEvent.change(screen.getByLabelText('Subsonic credential'), { target: { value: 'sekrit' } });
+    fireEvent.change(screen.getByLabelText('Username (from Bandcamp)'), { target: { value: 'fan' } });
+    fireEvent.change(screen.getByLabelText('Password (from Bandcamp)'), { target: { value: 'sekrit' } });
     fireEvent.click(screen.getByRole('button', { name: 'Connect Bandcamp' }));
 
     await waitFor(() => {
@@ -78,18 +78,18 @@ describe('BandcampConnect', () => {
 
     render(<BandcampConnect />);
     await waitFor(() => {
-      expect(screen.getByLabelText('Bandcamp username')).not.toBeNull();
+      expect(screen.getByLabelText('Username (from Bandcamp)')).not.toBeNull();
     });
 
-    fireEvent.change(screen.getByLabelText('Bandcamp username'), { target: { value: 'fan' } });
-    fireEvent.change(screen.getByLabelText('Subsonic credential'), { target: { value: 'wrong' } });
+    fireEvent.change(screen.getByLabelText('Username (from Bandcamp)'), { target: { value: 'fan' } });
+    fireEvent.change(screen.getByLabelText('Password (from Bandcamp)'), { target: { value: 'wrong' } });
     fireEvent.click(screen.getByRole('button', { name: 'Connect Bandcamp' }));
 
     await waitFor(() => {
       expect(screen.getByText(/rejected that username or credential/)).not.toBeNull();
     });
     // Still on the form so the user can retry.
-    expect(screen.getByLabelText('Bandcamp username')).not.toBeNull();
+    expect(screen.getByLabelText('Username (from Bandcamp)')).not.toBeNull();
   });
 
   it('shows sync results and offers re-sync when connected and idle', async () => {
@@ -130,7 +130,7 @@ describe('BandcampConnect', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Disconnect and delete items' }));
 
     await waitFor(() => {
-      expect(screen.getByLabelText('Bandcamp username')).not.toBeNull();
+      expect(screen.getByLabelText('Username (from Bandcamp)')).not.toBeNull();
     });
     expect(mockFetch).toHaveBeenCalledWith(
       '/api/me/bandcamp',

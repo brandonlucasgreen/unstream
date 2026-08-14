@@ -369,7 +369,7 @@ export async function handler(event: {
     Sentry.captureException(error, { tags: { function: 'bandcamp-sync' }, extra: { stage: 'sync' } });
     await recordFailure(
       isAuth
-        ? 'Bandcamp rejected the stored credential. Disconnect and reconnect with a fresh credential from Fan Settings → Subsonic.'
+        ? 'Bandcamp rejected the stored login. Disconnect and reconnect with a fresh username and password from Fan Settings → Subsonic.'
         : 'The sync failed partway through. Bandcamp’s Subsonic support is in beta — use Re-sync to try again.'
     );
     return { statusCode: 500, headers: RESPONSE_HEADERS, body: JSON.stringify({ error: 'Sync failed' }) };

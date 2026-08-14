@@ -162,22 +162,26 @@ export function BandcampConnect() {
           <li>
             Open{' '}
             <a
-              href="https://bandcamp.com/settings"
+              href="https://bandcamp.com/settings?pane=fan"
               target="_blank"
               rel="noopener noreferrer"
               className="text-accent-primary hover:underline"
             >
               Bandcamp's Fan Settings
             </a>{' '}
-            and generate credentials under <strong className="text-text-primary">Subsonic</strong>.
+            and turn on <strong className="text-text-primary">Subsonic</strong>. Bandcamp shows
+            you a server address, a username, and a password.
           </li>
-          <li>Paste your Bandcamp username and the generated credential below.</li>
+          <li>
+            Paste the username and password below. Skip the server address — it's always the
+            same, and Unstream fills it in.
+          </li>
         </ol>
         {error && <p className="text-sm text-red-400">{error}</p>}
         <form onSubmit={handleConnect} className="space-y-3">
           <div>
             <label htmlFor="bandcamp-username" className="block text-sm text-text-primary mb-1">
-              Bandcamp username
+              Username (from Bandcamp)
             </label>
             <input
               id="bandcamp-username"
@@ -190,7 +194,7 @@ export function BandcampConnect() {
           </div>
           <div>
             <label htmlFor="bandcamp-credential" className="block text-sm text-text-primary mb-1">
-              Subsonic credential
+              Password (from Bandcamp)
             </label>
             <input
               id="bandcamp-credential"
