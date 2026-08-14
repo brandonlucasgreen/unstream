@@ -96,9 +96,9 @@ export function SettingsPage() {
             />
           </section>
 
-          {/* Sharing section */}
+          {/* Public profile section */}
           <section className="p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
-            <h2 className="text-lg font-semibold">Sharing</h2>
+            <h2 className="text-lg font-semibold">Public profile</h2>
             <SharingControls />
           </section>
 

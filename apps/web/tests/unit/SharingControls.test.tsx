@@ -40,7 +40,7 @@ describe('SharingControls', () => {
 
     renderWithRouter();
     await waitFor(() => {
-      expect(screen.getByText('Set a username to share your saved artists.')).not.toBeNull();
+      expect(screen.getByText('Set a username to publish your public profile.')).not.toBeNull();
     });
     expect(screen.getByText('Set username').getAttribute('href')).toBe('/settings');
   });
@@ -53,7 +53,7 @@ describe('SharingControls', () => {
 
     renderWithRouter();
     await waitFor(() => {
-      expect(screen.getByText('Your saved artists are private.')).not.toBeNull();
+      expect(screen.getByText('Your profile is private.')).not.toBeNull();
     });
     expect(screen.getByText('Make public')).not.toBeNull();
   });
@@ -70,11 +70,50 @@ describe('SharingControls', () => {
 
     renderWithRouter();
     await waitFor(() => {
-      expect(screen.getByText('Your saved artists are public.')).not.toBeNull();
+      expect(screen.getByText('Your profile is public.')).not.toBeNull();
     });
     expect(screen.getByText('https://unstream.stream/u/testuser')).not.toBeNull();
     expect(screen.getByText('Copy')).not.toBeNull();
     expect(screen.getByText('Make private')).not.toBeNull();
+  });
+
+  it('offers a View profile link that opens the public page in a new tab', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        public: true,
+        public_handle: 'testuser',
+        public_url: 'https://unstream.stream/u/testuser',
+      }),
+    });
+
+    renderWithRouter();
+    await waitFor(() => {
+      expect(screen.getByText('Your profile is public.')).not.toBeNull();
+    });
+
+    const view = screen.getByRole('link', { name: 'View profile' });
+    expect(view.getAttribute('href')).toBe('https://unstream.stream/u/testuser');
+    expect(view.getAttribute('target')).toBe('_blank');
+    // rel is not optional on a target=_blank link: without it the opened page gets
+    // window.opener and can navigate this tab.
+    expect(view.getAttribute('rel')).toBe('noopener noreferrer');
+  });
+
+  it('says the collection is published, not just saved artists', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ public: false, public_handle: 'testuser', public_url: null }),
+    });
+
+    renderWithRouter();
+    await waitFor(() => {
+      expect(screen.getByText('Your profile is private.')).not.toBeNull();
+    });
+    // The collection is the bigger disclosure of the two — it must be named before someone
+    // opts in, not discovered afterwards.
+    expect(screen.getByText(/releases in your collection/)).not.toBeNull();
+    expect(screen.getByText(/Hidden items stay private/)).not.toBeNull();
   });
 
   it('calls API to enable sharing when Make public is clicked', async () => {
@@ -99,7 +138,7 @@ describe('SharingControls', () => {
     fireEvent.click(screen.getByText('Make public'));
 
     await waitFor(() => {
-      expect(screen.getByText('Your saved artists are public.')).not.toBeNull();
+      expect(screen.getByText('Your profile is public.')).not.toBeNull();
     });
 
     expect(mockFetch).toHaveBeenCalledWith(
@@ -133,7 +172,7 @@ describe('SharingControls', () => {
     fireEvent.click(screen.getByText('Make private'));
 
     await waitFor(() => {
-      expect(screen.getByText('Your saved artists are private.')).not.toBeNull();
+      expect(screen.getByText('Your profile is private.')).not.toBeNull();
     });
 
     expect(mockFetch).toHaveBeenCalledWith(
