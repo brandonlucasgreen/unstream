@@ -63,6 +63,8 @@ describe('selfDispatchOrigin', () => {
 
 const PASSWORD = 'bandcamp-generated-credential';
 
+const hoursAgo = (hours: number) => new Date(Date.now() - hours * 3_600_000).toISOString();
+
 function authedEvent(method: string, body: unknown = null) {
   return {
     httpMethod: method,
@@ -101,6 +103,17 @@ describe('me-bandcamp handler', () => {
     delete process.env.URL;
   });
 
+  /** One connection row answering the GET's select().eq().maybeSingle() chain. */
+  function mockConnectionRow(row: Record<string, unknown>) {
+    mocks.mockFrom.mockReturnValue({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          maybeSingle: vi.fn(() => Promise.resolve({ data: { bandcamp_username: 'fan', ...row }, error: null })),
+        })),
+      })),
+    });
+  }
+
   it('returns 401 when not authenticated', async () => {
     const res = await handler({ httpMethod: 'GET', headers: {}, body: null });
     expect(res!.statusCode).toBe(401);
@@ -117,6 +130,26 @@ describe('me-bandcamp handler', () => {
     const res = await handler(authedEvent('GET'));
     expect(res!.statusCode).toBe(200);
     expect(JSON.parse(res!.body)).toEqual({ connected: false });
+  });
+
+  // A sync that Netlify killed leaves the row claiming 'syncing' forever. The settings page
+  // hides Re-sync while a sync runs, so believing that row strands the user on "Importing…".
+  it('GET reports a long-running sync as a failure the user can retry', async () => {
+    mockConnectionRow({ sync_status: 'syncing', sync_error: null, updated_at: hoursAgo(1) });
+    const body = JSON.parse((await handler(authedEvent('GET')))!.body);
+    expect(body.syncStatus).toBe('error');
+    expect(body.syncError).toContain('Re-sync');
+  });
+
+  it('GET still reports a recently started sync as running', async () => {
+    mockConnectionRow({
+      sync_status: 'syncing',
+      sync_error: null,
+      updated_at: new Date(Date.now() - 60_000).toISOString(),
+    });
+    const body = JSON.parse((await handler(authedEvent('GET')))!.body);
+    expect(body.syncStatus).toBe('syncing');
+    expect(body.syncError).toBeNull();
   });
 
   it('GET returns connection status without any credential material', async () => {
@@ -305,12 +338,48 @@ describe('me-bandcamp handler', () => {
       mocks.mockFrom.mockReturnValue({
         select: vi.fn(() => ({
           eq: vi.fn(() => ({
-            maybeSingle: vi.fn(() => Promise.resolve({ data: { sync_status: 'syncing' }, error: null })),
+            maybeSingle: vi.fn(() =>
+              Promise.resolve({
+                data: { sync_status: 'syncing', updated_at: new Date().toISOString() },
+                error: null,
+              })
+            ),
           })),
         })),
       });
       const res = await handler(authedEvent('POST', { resync: true }));
       expect(res!.statusCode).toBe(409);
+    });
+
+    // Netlify kills a background function at 15 minutes, and it dies without recording an
+    // error — so refusing here would leave the user with no way to retry, ever.
+    it('starts a sync when the running one is old enough to be dead', async () => {
+      const row = { sync_status: 'syncing', updated_at: hoursAgo(1) };
+      const update = vi.fn(() => ({ eq: vi.fn(() => Promise.resolve({ error: null })) }));
+      mocks.mockFrom.mockReturnValue({
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            maybeSingle: vi.fn(() => Promise.resolve({ data: row, error: null })),
+            single: vi.fn(() =>
+              Promise.resolve({
+                data: { ...row, bandcamp_username: 'fan', updated_at: new Date().toISOString() },
+                error: null,
+              })
+            ),
+          })),
+        })),
+        update,
+      });
+
+      const res = await handler(authedEvent('POST', { resync: true }));
+      expect(res!.statusCode).toBe(200);
+      expect(update).toHaveBeenCalledWith(
+        expect.objectContaining({ sync_status: 'syncing', sync_error: null })
+      );
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://unstream.stream/.netlify/functions/bandcamp-sync-background',
+        expect.anything()
+      );
     });
   });
 
