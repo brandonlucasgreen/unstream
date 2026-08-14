@@ -275,10 +275,12 @@ async function handleMagicLink(email) {
   elements.authMagicLink.disabled = true;
   elements.authError.classList.add('hidden');
 
-  // Send the magic link email — the user will click the link in their email
-  // which opens unstream.stream and establishes a session there.
-  // The extension picks up the session on next popup open.
-  const result = await signInWithOtp(email);
+  // Send the magic link email, redirecting to /login — the same page the web
+  // app itself uses. content/auth-bridge.js watches that page for the
+  // resulting access_token and forwards it to the background service worker,
+  // which stores the session. The extension picks up the session on next
+  // popup open.
+  const result = await signInWithOtp(email, 'https://unstream.stream/login');
 
   if (result.error) {
     elements.authError.textContent = result.error;
