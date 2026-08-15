@@ -27,7 +27,7 @@ These principles should inform product and engineering trade-offs, not just mark
 
 - **Frontend**: React 19 SPA with React Router 7, Tailwind CSS v4, Vite 7, TypeScript. PWA-enabled (`vite-plugin-pwa`). Most pages are lazy-loaded in `apps/web/src/main.tsx`.
 - **Backend**: Netlify Functions (serverless API, `api/functions/`) + Edge Functions (SSR/SEO, `api/edge/`). Functions are TypeScript on Node; edge functions run on Deno (see `deno.lock`).
-- **Local dev API**: a Vite middleware in `apps/web/server/` — a *separate* implementation from `api/functions/`. See "Local dev API vs production API" below; this trips people up.
+- **Local dev**: `npm run dev` runs `netlify dev` — the real functions and edge functions against production Supabase. `npm run dev:fast` is a Vite-only shortcut backed by a *separate* API implementation in `apps/web/server/`. See "Local dev: the full stack, and the fast shim" below; the difference trips people up.
 - **Database**: Supabase (Postgres with RLS) for artist profiles, analytics, merge overrides, API keys, verification requests, saved/supported artists, public usernames, and the Bandcamp probe cache.
 - **Data enrichment**: MusicBrainz, Wikidata, Wikipedia, Discogs, Linktree, Bandcamp artist pages.
 - **Caching / rate limiting**: Upstash Redis (`@upstash/ratelimit`, `api/functions/cache.ts`, `api/functions/ratelimit.ts`).
@@ -113,7 +113,9 @@ unstream/
 
 ```bash
 npm install               # Install dependencies
-npm run dev               # Start Vite dev server (apps/web) with the dev API middleware
+npm run dev               # Full local stack: netlify dev on :8888 — real functions + edge
+                          #   functions + production Supabase data and auth. Use this by default.
+npm run dev:fast          # Vite only on :5173 (no functions, no auth). CSS/layout work only.
 npm run build             # Full build — see below for exactly what it runs
 npm run lint              # ESLint (apps/web)
 
@@ -218,10 +220,15 @@ real Postgres. To test the write path, point `SUPABASE_URL` at a branch database
 
 ### Seeing the release page locally
 
-`npm run dev` **cannot** show you `/a/{artist}/{release}` — the Vite dev server doesn't run edge
-functions at all. `netlify dev` does, but it reads the production Supabase, where a release only
-exists once demand-driven cataloging has run for that artist. So the page you most want to look
-at is the one neither of those can render.
+`npm run dev` renders `/a/{artist}/{release}` through the real `api/edge/release-page.ts` — the
+edge functions run under `netlify dev`, and behaviour matches production exactly (verified
+2026-08-15: an uncatalogued release 302s to the artist page locally and in production alike).
+`npm run dev:fast` cannot: the bare Vite server runs no edge functions at all.
+
+The remaining gap is data, not rendering. `netlify dev` reads production Supabase, where a
+release only exists once demand-driven cataloging has run for that artist — so a release nobody
+has triggered a catalogue for is still unviewable that way. That is what `preview:release` is
+for:
 
 ```bash
 npm run preview:release -- explosionsinthesky    # then open http://localhost:8788
@@ -287,15 +294,62 @@ grep -r "PLATFORM_INFO" api/edge/ apps/web/src/
 
 `apps/web/src/services/sources.ts` mirrors the registry and adds client-only fields (description, `searchUrlTemplate`, `hasEmbed`, `searchOnly`). Keep the shared fields in sync between the two.
 
-### Local dev API vs production API
+### Local dev: the full stack, and the fast shim
 
-`npm run dev` does **not** run the Netlify functions. `apps/web/vite.config.ts` installs `handleApiRequest` from `apps/web/server/api.ts`, which has its own search implementation in `apps/web/server/search/*`. So:
+There are two local modes. **Use `npm run dev` — the real one — by default.**
 
-- Editing `api/functions/search-sources.ts` does not change what `npm run dev` returns.
-- Editing `apps/web/server/*` does not change production.
-- The two have drifted. Treat `api/functions/` as the real behavior; treat `apps/web/server/` as a convenience shim for UI work, and update it only when you need dev parity.
+This is now the *only* way to exercise the real backend before merging: #451 disabled Deploy
+Previews outright (`[context.deploy-preview] ignore = "exit 0"` in `netlify.toml`), because they
+were ~280 of a 300-minute monthly allowance. That block's own comment says previews should come
+back "once local dev can stand in for them" — this section is that standing-in. Treat a gap here
+as a real gap, not an inconvenience: there is no preview to fall back on.
 
-When a change must be verified against the real backend, test the deployed branch (Netlify deploy preview) or write a function test rather than trusting the dev server.
+| | `npm run dev` (`netlify dev`, :8888) | `npm run dev:fast` (Vite only, :5173) |
+|---|---|---|
+| Netlify functions (`api/functions/`) | **real** | not run — `apps/web/server/` shim instead |
+| Edge functions (`api/edge/`) | **real** | not run at all |
+| `netlify.toml` redirects, headers, edge routing order | **applied** | ignored |
+| Supabase data | **production** | none |
+| Auth (sign-in, sessions, admin) | **works** | dead — "Auth not configured" |
+| `/data/**` (guides, changelog) | served | 404s as the SPA shell |
+| Boot | ~15s | ~1s |
+
+`dev:fast` is for pure CSS/layout iteration. Anything touching data, auth, an API response, SEO
+markup, or routing needs `npm run dev`.
+
+**It reads and writes PRODUCTION Supabase.** `netlify dev` injects the live site's environment,
+so functions hold `SUPABASE_SERVICE_KEY` and bypass RLS exactly as production does. Reads are
+free; **writes are real** — saving an artist, claiming a profile, or changing settings locally
+mutates production rows, and `RESEND_API_KEY` / `BUTTONDOWN_API_KEY` mean notification paths can
+send real email. Release cataloguing is the one thing that stays off: `RELEASE_CATALOG_ENABLED`
+is set for the production context only, and `netlify dev` uses the dev context, so it is absent
+locally. Don't "fix" that by setting it — see "Testing release ingest locally".
+
+Two traps, both of which produce a *silently wrong* page rather than an error:
+
+- **The empty-value shadow.** A key present but blank in the local `.env` overrides the real
+  value from the Netlify site settings; `netlify dev` reports it as `Ignored project settings env
+  var: X (defined in .env file)`. Three keys were blank this way until 2026-08-15
+  (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `SUPABASE_ANON_KEY`), which is why local auth
+  never worked and every signed-in endpoint failed. **Delete a key from `.env` rather than
+  leaving it blank.** Check the startup log's `Injected project settings env vars` list — a key
+  you need should appear there, not in an `Ignored` line.
+- **The stale port.** `dev:fast` passes `--strictPort` on purpose; see the `[dev]` block in
+  `netlify.toml` for why removing it lets another checkout's leftover server answer everything.
+
+Running `npm run dev` rewrites `deno.lock` (it re-resolves the edge functions' imports against
+the current `package.json`). That shows up as an unrelated modified file — `git checkout --
+deno.lock` before committing, same habit as the generated feed XML. The drift it keeps
+re-applying is real, though: the committed lock predates `@sentry/node` and
+`@testing-library/*` being added, so it's worth refreshing deliberately in its own PR.
+
+The old shim still exists: `apps/web/vite.config.ts` installs `handleApiRequest` from
+`apps/web/server/api.ts`, with its own search implementation in `apps/web/server/search/*`. It
+has drifted from `api/functions/` and only `dev:fast` uses it. Editing
+`api/functions/search-sources.ts` does not change what `dev:fast` returns, and editing
+`apps/web/server/*` does not change production. Concretely: the shim's `/api/suggest` returns a
+hardcoded empty list, where `npm run dev` returns real rows from the `artists` table. Treat
+`api/functions/` as the real behavior and reach for the shim only when boot speed matters.
 
 ### Dead code in `api/search/`
 

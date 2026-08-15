@@ -23,6 +23,26 @@
 [context.deploy-preview]
   ignore = "exit 0"
 
+# `netlify dev` — the local full stack, and what `npm run dev` runs. Serves the real functions
+# and edge functions on :8888 in front of Vite, so local behaviour matches production instead of
+# the drifted `apps/web/server/` shim (see "Local dev API vs production API" in CLAUDE.md).
+#
+# `targetPort` must match the port in `dev:fast`, and that script passes `--strictPort` on
+# purpose. Without it Vite silently moves to the next free port when 5173 is taken, `netlify dev`
+# keeps proxying to whatever else is on 5173 — a stale server from another checkout, say — and
+# every page you look at is somebody else's build with no error anywhere. That happened here on
+# 2026-08-15: a Vite left running two days earlier answered every request through :8888.
+# `--strictPort` turns that silent wrong answer into a startup failure.
+#
+# `framework = "#custom"` disables auto-detection, which otherwise guesses the port it just
+# watched Vite fail to bind.
+[dev]
+  command = "npm run dev:fast"
+  targetPort = 5173
+  port = 8888
+  framework = "#custom"
+  autoLaunch = false
+
 [[headers]]
   for = "/*"
   # connect-src note: Sentry's ingest host is region-scoped — ours is
