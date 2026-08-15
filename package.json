@@ -4,7 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "cd apps/web && npx vite",
+    "dev": "npx netlify dev",
+    "dev:fast": "cd apps/web && npx vite --port 5173 --strictPort",
     "typecheck:api": "cd api && npx tsc --noEmit",
     "typecheck": "npx tsc -b && cd apps/web && npx tsc -b",
     "verify": "npm run typecheck && npm run test:api && npm run test:unit",
