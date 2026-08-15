@@ -3,6 +3,25 @@
   publish = "apps/web/dist"
   functions = "api/functions"
   edge_functions = "api/edge"
+  # Cancel deploys for pushes that cannot change what we publish — Apple app,
+  # browser extension, migrations, docs. Note the inverted exit code (0 cancels the
+  # build); the script explains itself and errs toward deploying.
+  ignore = "bash scripts/netlify-ignore-build.sh"
+
+# Deploy Previews are the single largest consumer of build minutes here: ~200 PRs a
+# month at ~1.4 min each is ~280 of a 300-minute allowance, spent on previews that are
+# rarely opened because testing happens against production instead. Production deploys
+# at the same cadence cost ~196 min and fit comfortably — so this block, not the
+# per-path script above, is what keeps the site inside the free tier.
+#
+# Context settings override the [build] ones, so previews get this instead of the
+# script. Same inverted exit code: 0 cancels the build.
+#
+# To get previews back — which is the right move once local dev can stand in for them,
+# since this removes the last chance to exercise the real backend before merging —
+# delete this block. Nothing else depends on it.
+[context.deploy-preview]
+  ignore = "exit 0"
 
 [[headers]]
   for = "/*"

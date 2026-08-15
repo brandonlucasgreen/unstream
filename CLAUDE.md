@@ -117,13 +117,15 @@ npm run dev               # Start Vite dev server (apps/web) with the dev API mi
 npm run build             # Full build — see below for exactly what it runs
 npm run lint              # ESLint (apps/web)
 
+npm run verify            # The CI gate: typecheck + API function tests + web unit tests
 npm run test              # Everything: web tests + API function tests
 npm run test:web          # All apps/web tests (unit + integration)
-npm run test:unit         # apps/web/tests/unit only (runs in the build pipeline)
+npm run test:unit         # apps/web/tests/unit only (runs in CI)
 npm run test:integration  # apps/web/tests/integration only (hits live APIs; run separately)
-npm run test:api          # api/functions/**/*.test.ts (runs in the build pipeline)
+npm run test:api          # api/functions/**/*.test.ts (runs in CI)
 npm run test:watch        # Vitest watch mode (apps/web)
 
+npm run typecheck         # tsc -b over the root and apps/web (runs in CI and the build)
 npm run typecheck:api     # tsc --noEmit over api/ (NOTE: narrow include — see below)
 npm run preview           # Preview the built SPA
 
@@ -138,7 +140,12 @@ npm run migrate:dry-run   # supabase db push --dry-run against the linked projec
 npm run migrate:list      # List applied vs pending migrations
 ```
 
-`npm run build` runs, in order: guides manifest → dispatch feed → root `tsc -b` → API function tests → `apps/web` `tsc -b` → web unit tests → `vite build` → sitemap. **Any failure blocks the Netlify deploy.** Run `npm run build` (or at minimum `npm run lint`, `npm run test:unit`, `npm run test:api`) before considering work done.
+`npm run build` runs, in order: guides manifest → dispatch feed → changelog feed → guides feed → root `tsc -b` → `apps/web` `tsc -b` → `vite build` → sitemap. Any failure blocks the Netlify deploy, so a type error still can't ship.
+
+**The test suites are no longer part of the build.** They run in GitHub Actions (`.github/workflows/ci.yml`) on every PR and every push to `main`, because Actions minutes are free on this public repo while a Netlify deploy is not — see "Deployment" below. Two consequences worth internalizing:
+
+- **Run `npm run verify` before considering work done** (typecheck + both suites, ~45s). `npm run build` no longer tells you the tests pass.
+- **A red CI run does not, by itself, stop a deploy.** Netlify builds whatever lands on `main`. Requiring the `verify` check in GitHub's branch protection rules for `main` is what restores the old guarantee; until that's enabled, merging a red PR deploys it.
 
 **Typecheck coverage gotcha:** `api/tsconfig.json` has a narrow `include` — the `me-*` functions, `search-sources.ts`, and their tests. Files reachable from those *are* checked, so the search backend (`db.ts`, `search-utils.ts`, `search-parsers.ts`, `middleware.ts`, `api/search/*`) is now covered. Everything else in `api/` — the edge functions, `artist-profile.ts`, the release and admin endpoints — is not: a type error there won't fail the build, it will fail at runtime in production. When you touch an unlisted file, rely on the function tests and read carefully — and if it's worth typechecking, add it to that `include` list and fix whatever strict mode surfaces.
 
@@ -427,9 +434,11 @@ that, run it against a throwaway Postgres in Docker — that's what caught the s
 
 Tests use Vitest, in two places:
 
-- `apps/web/tests/unit/` — component and pure-logic tests. Run in the build pipeline.
-- `apps/web/tests/integration/` — search accuracy against live APIs (`apps/web/tests/fixtures/expected-results.json`). Run separately; not in the build.
-- `api/functions/__tests__/` — function tests (cache behavior, probe cache coverage, XSS defense, the `me-*` endpoints). Run in the build pipeline via `npm run test:api`.
+- `apps/web/tests/unit/` — component and pure-logic tests. Run in CI.
+- `apps/web/tests/integration/` — search accuracy against live APIs (`apps/web/tests/fixtures/expected-results.json`). Run separately; not in CI.
+- `api/functions/__tests__/` — function tests (cache behavior, probe cache coverage, XSS defense, the `me-*` endpoints). Run in CI via `npm run test:api`.
+
+`npm run verify` runs the CI gate locally — the same typecheck and two suites, in the same order. `npm run lint` is *not* in that gate: ESLint currently reports 64 pre-existing errors (unused vars and `any` in test files, plus a few pages), so enforcing it would fail every PR for reasons unrelated to the change. Worth clearing separately; until then, lint is advisory.
 
 Config: the root `vitest.config.ts` lets `npx vitest` work from the repo root and covers both trees; `apps/web/vitest.config.ts` covers the web tree. Default environment is `node` — add `// @vitest-environment jsdom` at the top of a `.tsx` test that needs a DOM. Both configs alias `src` → `apps/web/src`.
 
@@ -439,8 +448,13 @@ The Apple app has XCTest coverage in `apps/mac/UnstreamTests/`; the Xcode projec
 
 Pushes to `main` trigger Netlify builds (`npm run build`). Functions deploy from `api/functions/`, edge functions from `api/edge/`. Edge routes, `/api/*` redirects, and security headers/CSP are configured in `netlify.toml`.
 
+**Not every push deploys.** `netlify.toml`'s `ignore` setting runs `scripts/netlify-ignore-build.sh`, which cancels the build when a push touches only paths Netlify never publishes — `apps/mac/`, `apps/extension/`, `supabase/`, `docs/`, `.github/`, `README.md`, `CLAUDE.md`. A production deploy costs a flat 15 credits on Netlify's credit plans (build minutes on the legacy plans), and an Apple-app bugfix used to buy a full deploy of the website. The script's exit code is inverted — **0 cancels the build, 1 runs it** — and every branch in it defaults to deploying, because a skipped deploy leaves production silently stale. If you add a path whose contents reach the built site, check it isn't shadowed by that list: `data/` and `scripts/` are deliberately absent, since the whole `data/` tree is copied into `dist/` and `scripts/` generates the manifests, feeds and sitemap.
+
+**Deploy Previews are off.** `[context.deploy-preview]` in `netlify.toml` cancels them (`ignore = "exit 0"`), so a PR gets no preview URL and the Netlify checks on it don't run — that's configuration, not breakage. Previews were ~200 builds a month against a 300-minute allowance, the largest single cost on the site; production deploys at the same cadence fit. The trade is real, though: **there is now no way to exercise the real backend before merging**, which matters because `npm run dev` runs a different search implementation and can't render edge-function routes at all. Delete the block to bring previews back once local dev can stand in for them.
+
 GitHub Actions (`.github/workflows/`):
 
+- `ci.yml` — typecheck plus both test suites on every PR and every push to `main`. This is the gate that used to live inside the Netlify build; see "Commands" above for what moving it changed.
 - `supabase-migrate.yml` — auto-applies new migrations on push to `main`.
 - `schedule-social-posts.yml` — weekly (Mondays) social post generation, committed back to the repo.
 - `semantic-revert-check.yml` — runs `scripts/semantic-revert-check.py` on every PR to flag changes that quietly undo earlier fixes. If it flags your PR, take it seriously: the bug loops it was built for are described in `docs/retros/UNS-100-bifurcation-retro.md`.
