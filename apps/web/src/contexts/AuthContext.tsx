@@ -5,7 +5,7 @@ import { getSupabaseClient, waitForMagicLinkSession } from '../services/auth';
 
 const ADMIN_EMAIL = 'info@kidlightbulbs.com';
 
-interface SavedArtist {
+export interface SavedArtist {
   artistId: string;
   name: string;
   slug: string;
@@ -13,6 +13,20 @@ interface SavedArtist {
   notes?: string;
   addedAt: string;
   claimed?: boolean;
+  supported?: boolean;
+  supportedAt?: string;
+}
+
+/** A profile this user has claimed — what powers the "Your artists" nav section. */
+export interface ClaimedProfile {
+  id: string;
+  artistId: string;
+  name: string;
+  slug: string;
+  imageUrl?: string;
+  websiteUrl?: string;
+  bio?: string;
+  claimedAt: string;
 }
 
 interface AuthContextValue {
@@ -28,9 +42,14 @@ interface AuthContextValue {
   savedArtistIds: Set<string>;
   isArtistSaved: (artistId: string) => boolean;
   saveArtist: (artistId: string, notes?: string, artistName?: string, artistImageUrl?: string) => Promise<void>;
-  removeSavedArtist: (artistId: string) => Promise<void>;
+  /** Resolves false when the server refused and the removal was rolled back. */
+  removeSavedArtist: (artistId: string) => Promise<boolean>;
+  setArtistSupported: (artistId: string, supported: boolean) => Promise<void>;
   loadSavedArtists: (signal?: AbortSignal) => Promise<void>;
   artistsLoaded: boolean;
+  claimedProfiles: ClaimedProfile[];
+  claimedProfilesLoaded: boolean;
+  loadClaimedProfiles: (signal?: AbortSignal) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -61,6 +80,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [savedArtists, setSavedArtists] = useState<SavedArtist[]>([]);
   const [savedArtistIds, setSavedArtistIds] = useState<Set<string>>(new Set());
   const [artistsLoaded, setArtistsLoaded] = useState(false);
+  const [claimedProfiles, setClaimedProfiles] = useState<ClaimedProfile[]>([]);
+  const [claimedProfilesLoaded, setClaimedProfilesLoaded] = useState(false);
 
   // The auth listener below is installed once, so it cannot read `session` state:
   // that closure is pinned to the initial null forever, which is why the
@@ -112,6 +133,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSavedArtists([]);
         setSavedArtistIds(new Set());
         setArtistsLoaded(false);
+        setClaimedProfiles([]);
+        setClaimedProfilesLoaded(false);
       }
     }
 
@@ -259,7 +282,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session, savedArtistIds]);
 
   const removeSavedArtist = useCallback(async (artistId: string) => {
-    if (!session) return;
+    if (!session) return false;
 
     // Snapshot for rollback
     const removedFromList = savedArtists.find(a => a.artistId === artistId);
@@ -294,7 +317,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (removedFromList) {
           setSavedArtists(prev => [...prev, removedFromList]);
         }
+        return false;
       }
+      return true;
     } catch (e) {
       Sentry.captureException(e, { extra: { context: 'auth.removeSavedArtist' } });
       Sentry.captureMessage('Remove artist failed (rolled back)', {
@@ -307,6 +332,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (removedFromList) {
         setSavedArtists(prev => [...prev, removedFromList]);
       }
+      return false;
     }
   }, [session, savedArtists]);
 
@@ -354,11 +380,96 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [session, artistsLoaded]);
 
+  /**
+   * Mark a saved artist as supported, or take the mark off again.
+   *
+   * Optimistic like save/remove, and rolled back the same way — the button is a statement
+   * about something the fan already did, so it should never sit spinning.
+   */
+  const setArtistSupported = useCallback(async (artistId: string, supported: boolean) => {
+    if (!session) return;
+
+    const previous = savedArtists.find(a => a.artistId === artistId);
+    setSavedArtists(prev => prev.map(a =>
+      a.artistId === artistId
+        ? { ...a, supported, supportedAt: supported ? new Date().toISOString() : undefined }
+        : a
+    ));
+
+    try {
+      const response = await fetch('/api/saved-artists', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ action: supported ? 'support' : 'unsupport', artistId }),
+      });
+
+      if (!response.ok) {
+        const { statusCode, serverError } = await describeFailure(response);
+        Sentry.captureMessage('Set supported failed (rolled back)', {
+          level: 'warning',
+          extra: { artistId, supported, serverError },
+          tags: { context: 'auth.setArtistSupported', status_code: String(statusCode) },
+        });
+        throw new Error(serverError);
+      }
+
+      const data = await response.json();
+      setSavedArtists(prev => prev.map(a =>
+        a.artistId === artistId
+          ? { ...a, supported: data.savedArtist.supported, supportedAt: data.savedArtist.supportedAt }
+          : a
+      ));
+    } catch (e) {
+      Sentry.captureException(e, { extra: { context: 'auth.setArtistSupported' } });
+      setSavedArtists(prev => prev.map(a =>
+        a.artistId === artistId
+          ? { ...a, supported: previous?.supported, supportedAt: previous?.supportedAt }
+          : a
+      ));
+      throw e;
+    }
+  }, [session, savedArtists]);
+
+  /**
+   * The profiles this user has claimed. Loaded once per session, like the saved artists
+   * above: the account sidebar lists them on every logged-in page, so refetching per
+   * navigation would put /api/artist-auth on the same churn treadmill that made the
+   * signed-in app 429 on itself (UNSTREAM-WEB-12).
+   */
+  const loadClaimedProfiles = useCallback(async (signal?: AbortSignal) => {
+    if (!session) return;
+    if (claimedProfilesLoaded) return;
+    try {
+      const response = await fetch('/api/artist-auth', {
+        headers: { 'Authorization': `Bearer ${session.access_token}` },
+        signal,
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setClaimedProfiles(data.profiles || []);
+        setClaimedProfilesLoaded(true);
+      } else {
+        const { statusCode, serverError } = await describeFailure(response);
+        Sentry.captureMessage('Claimed profiles load failed', {
+          level: 'warning',
+          extra: { statusCode, serverError },
+          tags: { context: 'auth.loadClaimedProfiles', status_code: String(statusCode) },
+        });
+      }
+    } catch (e) {
+      if (signal?.aborted) return;
+      Sentry.captureException(e, { extra: { context: 'auth.loadClaimedProfiles' } });
+    }
+  }, [session, claimedProfilesLoaded]);
+
   const isAdmin = !!user?.email && user.email.toLowerCase() === ADMIN_EMAIL;
   const hasPassword = !!user?.user_metadata?.has_password;
 
   return (
-    <AuthContext.Provider value={{ session, user, isAdmin, isLoading, hasPassword, signOut: handleSignOut, signInWithMagicLink: handleSignInWithMagicLink, signInWithPassword: handleSignInWithPassword, savedArtists, savedArtistIds, isArtistSaved, saveArtist, removeSavedArtist, loadSavedArtists, artistsLoaded }}>
+    <AuthContext.Provider value={{ session, user, isAdmin, isLoading, hasPassword, signOut: handleSignOut, signInWithMagicLink: handleSignInWithMagicLink, signInWithPassword: handleSignInWithPassword, savedArtists, savedArtistIds, isArtistSaved, saveArtist, removeSavedArtist, setArtistSupported, loadSavedArtists, artistsLoaded, claimedProfiles, claimedProfilesLoaded, loadClaimedProfiles }}>
       {children}
     </AuthContext.Provider>
   );

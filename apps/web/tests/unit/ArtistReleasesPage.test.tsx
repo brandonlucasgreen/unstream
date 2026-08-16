@@ -16,8 +16,12 @@ vi.mock('src/contexts/AuthContext', () => ({
   useAuth: () => ({ session: mockSession }),
 }));
 
-vi.mock('src/components/Header', () => ({
-  Header: () => null,
+// The account shell (header, sidebar nav, footer) is exercised by its own test — here it
+// would only add an auth gate and two fetches between the test and the release list.
+vi.mock('src/components/AccountLayout', () => ({
+  AccountLayout: ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <div><h1>{title}</h1>{children}</div>
+  ),
 }));
 
 vi.mock('@sentry/react', () => ({

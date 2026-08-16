@@ -113,11 +113,18 @@ export function Header() {
 
   // Shared by the inline desktop nav and the mobile hamburger menu, so new
   // items only need adding in one place.
+  //
+  // Signed in, the header is deliberately just Dashboard and Sign out: every other account
+  // destination — collection, saved artists, each claimed artist, settings — is in the account
+  // nav that AccountLayout renders down the side of those pages. Two navigations listing the
+  // same places is how the header grew a Settings link nobody could find anyway.
+  //
+  // Admin is the exception and stays here, because the admin pages don't use AccountLayout.
+  // If they ever adopt it, this group should move into the sidebar with everything else.
   const navItems: NavEntry[] = session
     ? [
         ...(isAdmin ? [adminGroup] : []),
         { to: '/dashboard', label: 'Dashboard', emphasis: true },
-        { to: '/settings', label: 'Settings' },
       ]
     : [
         { to: '/guides', label: 'Guides' },

@@ -4,9 +4,8 @@ import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { sources } from '../services/sources';
 
-import { Header } from '../components/Header';
-import { Footer } from '../components/Footer';
-import { PageSkeleton } from '../components/PageSkeleton';
+import { AccountLayout } from '../components/AccountLayout';
+import { SkeletonScreen } from '../components/Skeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
 import type { SourceId } from '../types';
 
@@ -420,9 +419,11 @@ export function ArtistEditPage() {
 
   if (form.loading) {
     return (
-      <PageSkeleton label="Loading artist profile">
-        <FormSkeleton sections={3} fields={2} />
-      </PageSkeleton>
+      <AccountLayout title="Edit artist">
+        <SkeletonScreen label="Loading artist profile">
+          <FormSkeleton sections={3} fields={2} />
+        </SkeletonScreen>
+      </AccountLayout>
     );
   }
 
@@ -433,38 +434,13 @@ export function ArtistEditPage() {
     form.removeConfirmText.trim().length > 0 &&
     form.removeConfirmText.trim().toLowerCase() === form.originalName.trim().toLowerCase();
 
+  // "View live profile", "Manage releases" and "Back to dashboard" used to sit under the
+  // heading. The account nav carries all three now — the first two as this artist's sub-items,
+  // which only appear while you're on them — so repeating them here would be a second set of
+  // controls for the same destinations.
   return (
-    <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
-
-      <Header />
-
-      <main className="flex-1 p-6">
-        <div className="max-w-2xl mx-auto space-y-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Edit {form.artistName}</h1>
-              <Link
-                to={`/a/${form.currentSlug}`}
-                className="text-sm text-accent-primary hover:underline"
-              >
-                View live profile
-              </Link>
-              {' · '}
-              <Link
-                to={`/artist-edit/${form.currentSlug}/releases`}
-                className="text-sm text-accent-primary hover:underline"
-              >
-                Manage releases
-              </Link>
-            </div>
-            <Link
-              to="/artist-dashboard"
-              className="text-sm text-text-muted hover:text-text-primary transition-colors"
-            >
-              Back to dashboard
-            </Link>
-          </div>
-
+    <AccountLayout title={`Edit ${form.artistName}`}>
+        <div className="max-w-2xl space-y-8">
           {form.error && (
             <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
               {form.error}
@@ -875,9 +851,6 @@ export function ArtistEditPage() {
             )}
           </section>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+    </AccountLayout>
   );
 }

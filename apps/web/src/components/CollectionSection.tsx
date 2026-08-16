@@ -1,13 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { CollectionGrid } from './CollectionGrid';
 
-// Dashboard section: the owner's view of their collection (Support Loop Step 3).
+// The owner's view of their collection on /collection (Support Loop Step 3).
 // The public page (/u/:handle) shows only purchased, non-hidden items; here the owner
 // sees everything, including hidden items (marked), and can hide/unhide each one.
-// The empty state points at the import — that's the action that fills this in.
+//
+// No heading of its own: /collection is titled "My Collection" and a second "Your Collection"
+// under it would be the same words twice. The empty state points at the Bandcamp connect panel
+// further down the same page — that's the action that fills this in, and it used to send people
+// to /settings to find it.
 
 interface CollectionItem {
   id: string;
@@ -77,13 +80,6 @@ export function CollectionSection() {
 
   return (
     <section>
-      <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-        <svg className="w-5 h-5 text-accent-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-        </svg>
-        Your Collection
-      </h2>
-
       {error && <p className="text-sm text-red-400 mb-3">{error}</p>}
 
       {items === null ? (
@@ -93,9 +89,9 @@ export function CollectionSection() {
           <p className="text-text-muted">No releases in your collection yet.</p>
           <p className="text-text-muted text-sm mt-1">
             Bought music on Bandcamp?{' '}
-            <Link to="/settings" className="text-accent-primary hover:underline">
-              Connect your collection in Settings
-            </Link>{' '}
+            <a href="#bandcamp-connect" className="text-accent-primary hover:underline">
+              Connect your collection below
+            </a>{' '}
             and it fills in from what you've actually bought.
           </p>
         </div>

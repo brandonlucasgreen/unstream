@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
-import { Header } from '../components/Header';
-import { PageSkeleton } from '../components/PageSkeleton';
+import { AccountLayout } from '../components/AccountLayout';
+import { SkeletonScreen } from '../components/Skeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
 import { PlatformIcon } from '../components/PlatformIcon';
 import { PLATFORMS } from '../../../../api/shared/platform-registry';
@@ -178,24 +178,11 @@ export function ArtistReleasesPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      <Header />
-      <div className="px-4 py-8">
-        <div className="max-w-2xl mx-auto space-y-6">
-          <div>
-            <Link
-              to={`/artist-edit/${slug}`}
-              className="text-sm text-text-muted hover:text-text-primary transition-colors"
-            >
-              &larr; Back to profile
-            </Link>
-            <h1 className="font-display text-2xl font-bold text-text-primary mt-1">Manage Releases</h1>
-            <p className="text-text-muted text-sm mt-1">
-              Hide anything that isn't yours, fix a title or date, merge a duplicate, add
-              something we missed, or put them in the order you want fans to see.
-            </p>
-          </div>
-
+    <AccountLayout
+      title="Manage Releases"
+      description="Hide anything that isn't yours, fix a title or date, merge a duplicate, add something we missed, or put them in the order you want fans to see."
+    >
+        <div className="max-w-2xl space-y-6">
           {error && (
             <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
               {error}
@@ -203,9 +190,9 @@ export function ArtistReleasesPage() {
           )}
 
           {loading ? (
-            <PageSkeleton label="Loading releases">
+            <SkeletonScreen label="Loading releases">
               <FormSkeleton sections={2} fields={2} />
-            </PageSkeleton>
+            </SkeletonScreen>
           ) : (
             <>
               {/* Above the list, not below it: scanning is where an artist starts, and on a real
@@ -318,8 +305,7 @@ export function ArtistReleasesPage() {
             </>
           )}
         </div>
-      </div>
-    </div>
+    </AccountLayout>
   );
 }
 

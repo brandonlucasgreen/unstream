@@ -47,6 +47,8 @@ const ExtensionPage = lazyWithRetry(() => import('./pages/ExtensionPage.tsx').th
 const ImportPage = lazyWithRetry(() => import('./pages/ImportPage.tsx').then(m => ({ default: m.ImportPage })))
 const FaqPage = lazyWithRetry(() => import('./pages/FaqPage.tsx').then(m => ({ default: m.FaqPage })))
 const SettingsPage = lazyWithRetry(() => import('./pages/SettingsPage.tsx').then(m => ({ default: m.SettingsPage })))
+const CollectionPage = lazyWithRetry(() => import('./pages/CollectionPage.tsx').then(m => ({ default: m.CollectionPage })))
+const SavedArtistsPage = lazyWithRetry(() => import('./pages/SavedArtistsPage.tsx').then(m => ({ default: m.SavedArtistsPage })))
 const PublicSavedArtistsPage = lazyWithRetry(() => import('./pages/PublicSavedArtistsPage.tsx').then(m => ({ default: m.PublicSavedArtistsPage })))
 const AdminAnalyticsPage = lazyWithRetry(() => import('./pages/AdminAnalyticsPage.tsx').then(m => ({ default: m.AdminAnalyticsPage })))
 
@@ -86,6 +88,8 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/login" element={<LoginPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/collection" element={<CollectionPage />} />
+              <Route path="/saved" element={<SavedArtistsPage />} />
               <Route path="/artist-edit/:slug" element={<ArtistEditPage />} />
               <Route path="/artist-edit/:slug/releases" element={<ArtistReleasesPage />} />
               <Route path="/artists" element={<ArtistDirectoryPage />} />

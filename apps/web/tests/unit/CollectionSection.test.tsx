@@ -43,15 +43,15 @@ describe('CollectionSection', () => {
     cleanup();
   });
 
-  it('empty state points at the Bandcamp import, not at search', async () => {
+  it('empty state points at the Bandcamp connect panel on the same page, not at search', async () => {
     mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ items: [], total: 0 }) });
     renderSection();
 
     await waitFor(() => {
       expect(screen.getByText(/No releases in your collection yet/)).not.toBeNull();
     });
-    const link = screen.getByRole('link', { name: /Connect your collection in Settings/ }) as HTMLAnchorElement;
-    expect(link.getAttribute('href')).toBe('/settings');
+    const link = screen.getByRole('link', { name: /Connect your collection below/ }) as HTMLAnchorElement;
+    expect(link.getAttribute('href')).toBe('#bandcamp-connect');
   });
 
   it('renders items as an art grid with a hide control', async () => {
