@@ -3,7 +3,7 @@
 // Supports tiered limits: anonymous (strict), free, pro, internal
 
 import { Ratelimit } from '@upstash/ratelimit';
-import type { ApiKeyInfo } from './middleware';
+import { authenticateBearerFast, type ApiKeyInfo } from './middleware';
 import { getRedis, reportRedisFailure } from './redis';
 
 // ---------------------------------------------------------------------------
@@ -14,11 +14,13 @@ import { getRedis, reportRedisFailure } from './redis';
 let standardLimiter: Ratelimit | null = null;   // 30 req/min for general endpoints
 let strictLimiter: Ratelimit | null = null;      // 10 req/min for expensive endpoints
 let lenientLimiter: Ratelimit | null = null;     // 120 req/min for cheap high-frequency endpoints (typeahead)
+let accountLimiter: Ratelimit | null = null;     // 60 req/min for a signed-in user's own account endpoints
 
 // Per-day quota limiters (new)
 let standardDailyLimiter: Ratelimit | null = null;  // 1000 req/day for general
 let strictDailyLimiter: Ratelimit | null = null;    // 500 req/day for expensive
 let lenientDailyLimiter: Ratelimit | null = null;   // 5000 req/day for cheap high-frequency
+let accountDailyLimiter: Ratelimit | null = null;   // 2000 req/day for account endpoints
 
 // API key tiers
 let freeLimiter: Ratelimit | null = null;        // 30 req/min
@@ -66,6 +68,35 @@ function getLenientLimiter(): Ratelimit | null {
     prefix: 'rl:lenient',
   });
   return lenientLimiter;
+}
+
+// A signed-in user's own account endpoints (/api/me/*, sharing, saved artists). These are
+// cheap authenticated reads, but /settings alone fans out to six of them on a single load —
+// sharing 'standard' meant browsing a few artist pages first could spend the budget and 429
+// the settings page on itself (Sentry UNSTREAM-WEB-12). Same reasoning as 'lenient' above:
+// unrelated traffic shouldn't be able to lock a user out of their own account.
+function getAccountLimiter(): Ratelimit | null {
+  if (accountLimiter) return accountLimiter;
+  const r = getRedis();
+  if (!r) return null;
+  accountLimiter = new Ratelimit({
+    redis: r,
+    limiter: Ratelimit.slidingWindow(60, '1 m'),
+    prefix: 'rl:account',
+  });
+  return accountLimiter;
+}
+
+function getAccountDailyLimiter(): Ratelimit | null {
+  if (accountDailyLimiter) return accountDailyLimiter;
+  const r = getRedis();
+  if (!r) return null;
+  accountDailyLimiter = new Ratelimit({
+    redis: r,
+    limiter: Ratelimit.slidingWindow(2000, '24 h'),
+    prefix: 'rl:daily:account',
+  });
+  return accountDailyLimiter;
 }
 
 function getLenientDailyLimiter(): Ratelimit | null {
@@ -168,7 +199,44 @@ function getProDailyLimiter(): Ratelimit | null {
 // Original rate limit check (for web app / anonymous requests)
 // ---------------------------------------------------------------------------
 
-export type RateLimitTier = 'standard' | 'strict' | 'lenient';
+/**
+ * The identifier to rate-limit an account endpoint by: the signed-in user when the
+ * request carries a valid token, their IP otherwise.
+ *
+ * Why not IP alone, which is what these endpoints used to do: everyone behind one NAT
+ * — an office, a café, a household — shares a single budget, so one person loading
+ * /settings can 429 a colleague. A user's own account requests should be bounded by
+ * *their* usage and nothing else.
+ *
+ * Why this can't be gamed: the token is verified, not just decoded. A forged or
+ * garbage token fails and falls back to the IP key, so it buys a different bucket,
+ * never an extra one. Verification is local (JWKS/HS256, cached in module scope) and
+ * costs no network call on a warm invocation, which is what keeps this cheap enough
+ * to run *before* the limit — the point of limiting first is that unauthenticated
+ * floods must not reach the auth server.
+ *
+ * This derives a bucket name only. It is not authorization: callers still run their
+ * own auth check, and `authenticateBearerFast` deliberately accepts a token until it
+ * expires even if the session was revoked (PR #331). The two endpoints that already
+ * use the fast path therefore verify the same token twice — deliberately. It is two
+ * local signature checks against a memoized key set, and one call shape across all
+ * nine account endpoints is worth more than shaving it.
+ */
+export async function accountRateLimitKey(
+  authHeader: string | undefined,
+  ip: string
+): Promise<string> {
+  try {
+    const user = await authenticateBearerFast(authHeader);
+    if (user) return `user:${user.userId}`;
+  } catch {
+    // Verification is best-effort here — a failure means we don't know who this is,
+    // which is exactly what the IP fallback is for. Never let it fail the request.
+  }
+  return `ip:${ip}`;
+}
+
+export type RateLimitTier = 'standard' | 'strict' | 'lenient' | 'account';
 
 interface RateLimitResult {
   limited: boolean;
@@ -193,9 +261,11 @@ export async function checkRateLimit(
 ): Promise<RateLimitResult> {
   const limiter = tier === 'strict' ? getStrictLimiter()
     : tier === 'lenient' ? getLenientLimiter()
+    : tier === 'account' ? getAccountLimiter()
     : getStandardLimiter();
   const dailyLimiter = tier === 'strict' ? getStrictDailyLimiter()
     : tier === 'lenient' ? getLenientDailyLimiter()
+    : tier === 'account' ? getAccountDailyLimiter()
     : getStandardDailyLimiter();
 
   // If Redis isn't configured, allow the request (fail open). The getRedis() call is not

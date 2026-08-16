@@ -13,6 +13,7 @@ import { NotificationPreferences } from '../components/NotificationPreferences';
 import { BandcampConnect } from '../components/BandcampConnect';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
+import { RATE_LIMIT_MESSAGE } from '../utils/rateLimit';
 
 interface Settings {
   username: string | null;
@@ -37,12 +38,13 @@ export function SettingsPage() {
           headers: { 'Authorization': `Bearer ${session!.access_token}` },
         });
 
-        if (!response.ok) {
+        if (response.status === 429) {
+          setError(RATE_LIMIT_MESSAGE);
+        } else if (!response.ok) {
           throw new Error('Failed to load settings');
+        } else {
+          setSettings(await response.json());
         }
-
-        const data = await response.json();
-        setSettings(data);
       } catch (e) {
         Sentry.captureException(e, { extra: { context: 'settings.loadSettings' } });
         setError('Failed to load settings. Please try again.');

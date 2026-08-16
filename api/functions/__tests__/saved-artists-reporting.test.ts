@@ -21,6 +21,8 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('../db', () => ({ getClient: () => ({ from: mocks.mockFrom }) }));
 vi.mock('../ratelimit', () => ({
+  // Only a bucket name; the endpoints' own auth is mocked separately.
+  accountRateLimitKey: async () => 'user:test-user',
   checkRateLimit: mocks.mockCheckRateLimit,
   checkSentryDedup: mocks.mockCheckSentryDedup,
   getClientIp: mocks.mockGetClientIp,

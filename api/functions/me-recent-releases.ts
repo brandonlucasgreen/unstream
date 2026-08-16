@@ -8,7 +8,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { getFeedReleasesForUser, type FeedReleaseRow } from './db';
-import { checkRateLimit, getClientIp } from './ratelimit';
+import { checkRateLimit, accountRateLimitKey, getClientIp } from './ratelimit';
 
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
@@ -111,7 +111,8 @@ export async function handler(event: {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   }
 
-  const rl = await checkRateLimit(getClientIp(event.headers), 'standard', CORS_HEADERS);
+  const rlKey = await accountRateLimitKey(event.headers.authorization, getClientIp(event.headers));
+  const rl = await checkRateLimit(rlKey, 'account', CORS_HEADERS);
   if (rl.limited) return rl.response as JsonResponse;
 
   if (event.httpMethod !== 'GET') {

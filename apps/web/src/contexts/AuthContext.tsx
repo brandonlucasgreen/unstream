@@ -80,6 +80,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     let cancelled = false;
 
+    // Supabase hands back a fresh Session object on every emission — tab focus,
+    // cross-tab sync, token refresh — and its INITIAL_SESSION event lands right
+    // after init() has already set an identical one. Setting state unconditionally
+    // changed `session`'s *identity* each time, which re-fired every `[session]`
+    // effect in the app: /settings refetched all six of its panels twice on a
+    // single load, and repeat emissions spent the shared per-IP rate-limit budget
+    // until the page 429'd on itself (Sentry UNSTREAM-WEB-12). Only a different
+    // access token is a change worth propagating.
+    function applySession(newSession: Session | null) {
+      const tokenUnchanged = newSession?.access_token === sessionRef.current?.access_token;
+      sessionRef.current = newSession;
+
+      // The *user* propagates whether or not the token changed. Supabase fires
+      // USER_UPDATED with fresh metadata on the same token — that's the event
+      // updatePassword() produces when it sets has_password — so guarding this on the
+      // token would leave `hasPassword` (line ~348) stale and PasswordSection showing
+      // "Set password" to someone who had just set one. Safe to do unguarded because
+      // nothing keys an *effect* on `user`: Header renders it, PasswordSection reads a
+      // derived boolean. It costs a render, not a refetch. `session` is the identity
+      // that six /settings panels fetch on, and that's the one the guard below protects.
+      setUser(newSession?.user ?? null);
+
+      if (tokenUnchanged) return;
+
+      setSession(newSession);
+      // Clear saved artists on sign out. This has to stay inside the guard —
+      // `new Set()` is a new identity every call, so running it on a no-op
+      // emission would recreate exactly the churn above.
+      if (!newSession) {
+        setSavedArtists([]);
+        setSavedArtistIds(new Set());
+        setArtistsLoaded(false);
+      }
+    }
+
     async function init() {
       // If URL has magic link hash, handle it before anything else
       if (window.location.hash.includes('access_token')) {
@@ -87,17 +122,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Clear the hash from the URL
         window.history.replaceState(null, '', window.location.pathname + window.location.search);
         if (!cancelled && magicSession) {
-          sessionRef.current = magicSession;
-          setSession(magicSession);
-          setUser(magicSession.user);
+          applySession(magicSession);
         }
       } else {
         // Check for existing session — fast, no domain data
         const { data } = await supabase!.auth.getSession();
         if (!cancelled && data.session) {
-          sessionRef.current = data.session;
-          setSession(data.session);
-          setUser(data.session.user);
+          applySession(data.session);
         }
       }
 
@@ -125,15 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             tags: { context: 'auth.session', auth_event: event },
           });
         }
-        sessionRef.current = newSession;
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
-        // Clear saved artists on sign out
-        if (!newSession) {
-          setSavedArtists([]);
-          setSavedArtistIds(new Set());
-          setArtistsLoaded(false);
-        }
+        applySession(newSession);
       }
     });
 

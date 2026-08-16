@@ -6,7 +6,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
-import { checkRateLimit, getClientIp } from './ratelimit';
+import { checkRateLimit, accountRateLimitKey, getClientIp } from './ratelimit';
 
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
@@ -41,7 +41,8 @@ export async function handler(event: {
   }
 
   const ip = getClientIp(event.headers);
-  const rl = await checkRateLimit(ip, 'standard', CORS_HEADERS);
+  const rlKey = await accountRateLimitKey(event.headers.authorization, ip);
+  const rl = await checkRateLimit(rlKey, 'account', CORS_HEADERS);
   if (rl.limited) return rl.response;
 
   const client = getClient();
