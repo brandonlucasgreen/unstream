@@ -102,7 +102,7 @@ export function SharingControls() {
     return (
       <div className="rounded-lg border border-border p-4 bg-bg-secondary">
         <p className="text-sm text-text-primary">
-          Set a username to share your saved artists.
+          Set a username to publish your public profile.
         </p>
         <Link
           to="/settings"
@@ -118,11 +118,12 @@ export function SharingControls() {
   if (!sharing.public) {
     return (
       <div className="rounded-lg border border-border p-4 bg-bg-secondary">
-        <p className="text-sm text-text-primary">Your saved artists are private.</p>
+        <p className="text-sm text-text-primary">Your profile is private.</p>
         <p className="text-xs text-text-muted mt-1">
-          Making them public publishes your username, the artists you've saved, and your location
-          if you've set one, at a link anyone can open and search engines can index. Your email
-          address is never published. See the{' '}
+          Making it public publishes your username, the releases in your collection, the artists
+          you've saved, and your location if you've set one, at a link anyone can open and search
+          engines can index. Hidden items stay private, and your email address is never published.
+          See the{' '}
           <Link to="/terms#section-6" className="text-accent-primary hover:underline">Terms of Use</Link>.
         </p>
         {error && <p className="text-sm text-red-400 mt-2">{error}</p>}
@@ -140,12 +141,24 @@ export function SharingControls() {
   // State 3: Public (sharing on)
   return (
     <div className="rounded-lg border border-border p-4 bg-bg-secondary">
-      <p className="text-sm text-text-primary">Your saved artists are public.</p>
+      <p className="text-sm text-text-primary">Your profile is public.</p>
+      <p className="text-xs text-text-muted mt-1">
+        Anyone with the link can see the releases in your collection and the artists you've
+        saved. Items you've hidden stay private.
+      </p>
       {error && <p className="text-sm text-red-400 mt-2">{error}</p>}
       <div className="flex items-center gap-2 mt-2 flex-wrap">
         <span className="text-sm text-text-muted font-mono truncate max-w-xs">
           {sharing.public_url}
         </span>
+        <a
+          href={sharing.public_url ?? '#'}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm font-medium hover:text-text-primary hover:border-border-hover transition-colors"
+        >
+          View profile
+        </a>
         <button
           onClick={handleCopy}
           className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${

@@ -129,11 +129,17 @@ struct UnstreamApp: App {
         // The popover is driven by AppDelegate (NSStatusItem), but Settings is a real
         // SwiftUI Settings scene: that's what gives us the standard settings window,
         // its frame persistence, and a working "Unstream ▸ Settings… ⌘," menu item.
+        // It also registers this app's `unstream://` URL-scheme handling, which is
+        // what lets a magic-link email complete sign-in even though nothing opened
+        // the browser from inside the app (see handleAuthCallbackURL below).
         Settings {
             SettingsView(
                 releaseAlertManager: container.releaseAlertManager,
                 libraryService: container.appleMusicLibraryService
             )
+        }
+        .onOpenURL { url in
+            _ = handleAuthCallbackURL(url)
         }
         #else
         // iOS: Standard windowed app
@@ -144,6 +150,7 @@ struct UnstreamApp: App {
                 .environmentObject(container.releaseAlertManager)
                 .environmentObject(container.indieArtistDirectory)
                 .onOpenURL { url in
+                    if handleAuthCallbackURL(url) { return }
                     handleNonAuthIncomingURL(url)
                 }
                 .onAppear {
@@ -162,6 +169,15 @@ struct UnstreamApp: App {
                 }
         }
         #endif
+    }
+
+    /// Routes `unstream://auth/callback` (the redirect target for the magic-link
+    /// email) to `AuthService`. Returns whether the URL was handled, so callers
+    /// can fall through to other deeplink handling otherwise.
+    private func handleAuthCallbackURL(_ url: URL) -> Bool {
+        guard url.scheme == "unstream", url.host == "auth" else { return false }
+        Task { await AuthService.shared.handleAuthCallback(url: url) }
+        return true
     }
 
     #if os(iOS)

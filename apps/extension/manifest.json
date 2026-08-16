@@ -80,6 +80,11 @@
       ],
       "js": ["content/common.js", "content/generic.js"],
       "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://unstream.stream/login*"],
+      "js": ["content/auth-bridge.js"],
+      "run_at": "document_start"
     }
   ],
   "permissions": [

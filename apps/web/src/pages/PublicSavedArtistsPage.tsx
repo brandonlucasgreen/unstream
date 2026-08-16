@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
+import { CollectionGrid } from '../components/CollectionGrid';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { ArtistRowsSkeleton } from '../components/LoadingSkeletons';
 import { Skeleton } from '../components/Skeleton';
@@ -13,10 +14,21 @@ interface SavedArtistPublic {
   supported: boolean;
 }
 
+interface CollectionItemPublic {
+  id: string;
+  title: string;
+  artist_name: string;
+  art_url: string | null;
+  acquired_at: string | null;
+  url: string | null;
+  artist_url: string | null;
+}
+
 interface PublicSharingData {
   owner_display_name: string;
   owner_location: string | null;
   saved_artists: SavedArtistPublic[];
+  collection?: CollectionItemPublic[];
 }
 
 export function PublicSavedArtistsPage() {
@@ -98,15 +110,28 @@ export function PublicSavedArtistsPage() {
     );
   }
 
+  const collection = data.collection ?? [];
+  const supportedCount = data.saved_artists.filter(a => a.supported).length;
+  const countParts: string[] = [];
+  if (collection.length > 0) {
+    countParts.push(`${collection.length} release${collection.length === 1 ? '' : 's'} collected`);
+  }
+  if (supportedCount > 0) {
+    countParts.push(`${supportedCount} artist${supportedCount === 1 ? '' : 's'} supported`);
+  }
+
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
       <Header />
       <main className="flex-1 p-6">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold">{data.owner_display_name}'s saved artists</h1>
+            <h1 className="text-2xl font-bold">{data.owner_display_name}'s collection</h1>
             {data.owner_location && (
               <p className="text-text-primary text-sm mt-2">{data.owner_location}</p>
+            )}
+            {countParts.length > 0 && (
+              <p className="text-text-muted text-sm mt-2">{countParts.join(' · ')}</p>
             )}
             <button
               onClick={handleCopy}
@@ -123,9 +148,31 @@ export function PublicSavedArtistsPage() {
             </button>
           </div>
 
-          {data.saved_artists.length === 0 ? (
+          {/* The collection — evidence, not intent. Album art is what makes the page
+              worth screenshotting; omitted entirely when empty. */}
+          {collection.length > 0 && (
+            <section className="mb-10">
+              <CollectionGrid
+                items={collection.map(item => ({
+                  key: item.id,
+                  title: item.title,
+                  artistName: item.artist_name,
+                  artUrl: item.art_url,
+                  acquiredAt: item.acquired_at,
+                  releaseUrl: item.url,
+                  artistUrl: item.artist_url,
+                }))}
+              />
+            </section>
+          )}
+
+          {collection.length > 0 && data.saved_artists.length > 0 && (
+            <h2 className="text-lg font-semibold mb-4">Artists</h2>
+          )}
+
+          {data.saved_artists.length === 0 && collection.length === 0 ? (
             <div className="text-center py-12 rounded-lg border border-border border-dashed">
-              <p className="text-text-muted">No saved artists yet.</p>
+              <p className="text-text-muted">Nothing here yet.</p>
             </div>
           ) : (
             <div className="grid gap-3">

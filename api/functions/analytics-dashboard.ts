@@ -50,7 +50,6 @@ export async function handler(event: {
       byApp30d,
       platforms30d,
       streamingServices30d,
-      recentEvents,
     ] = await Promise.all([
       // Searches today
       client
@@ -110,13 +109,6 @@ export async function handler(event: {
         .select('context')
         .eq('event_type', 'extension_activated')
         .gte('created_at', ago30),
-
-      // Recent 20 events
-      client
-        .from('app_events')
-        .select('event_type, app, context, created_at')
-        .order('created_at', { ascending: false })
-        .limit(20),
     ]);
 
     // Surface query errors early — Supabase returns { error } rather than throwing
@@ -215,12 +207,6 @@ export async function handler(event: {
         by_app: byApp,
         platforms,
         streaming_services: streamingServices,
-        recent: (recentEvents.data || []).map(e => ({
-          event_type: e.event_type,
-          app: e.app,
-          context: e.context,
-          created_at: e.created_at,
-        })),
       }),
     };
   } catch (err) {

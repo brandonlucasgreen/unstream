@@ -9,6 +9,7 @@ import { Footer } from '../components/Footer';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { DashboardSkeleton } from '../components/LoadingSkeletons';
 import { RecentReleasesSection, type RecentRelease } from '../components/RecentReleasesSection';
+import { CollectionSection } from '../components/CollectionSection';
 import { ReleaseFeedControls } from '../components/ReleaseFeedControls';
 
 interface ClaimedProfile {
@@ -363,6 +364,13 @@ export function DashboardPage() {
               subscribePanel={<ReleaseFeedControls />}
             />
           )}
+
+          {/*
+            The collection — releases actually bought (Support Loop Step 3). Its empty state
+            points at the Bandcamp import, a different action from the saved-artists empty
+            state below, so the two never say the same thing twice.
+          */}
+          <CollectionSection />
 
           {/* Saved Artists Section */}
           <section>

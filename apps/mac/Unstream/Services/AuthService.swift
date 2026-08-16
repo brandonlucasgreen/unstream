@@ -1,5 +1,4 @@
 import Foundation
-import AuthenticationServices
 import Supabase
 
 /// Manages Supabase auth state for the Unstream app.
@@ -18,11 +17,7 @@ class AuthService: ObservableObject {
     @Published var session: Session?
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
-
-    #if os(macOS)
-    private var authPresentationAnchor: AuthPresentationAnchor?
-    private var pendingWebSession: ASWebAuthenticationSession?
-    #endif
+    @Published var magicLinkSent: Bool = false
 
     private init() {
         let anonKey = Bundle.main.infoDictionary?["SUPABASE_ANON_KEY"] as? String ?? ""
@@ -97,84 +92,36 @@ class AuthService: ObservableObject {
 
     // MARK: - Magic Link
 
-    /// Starts a magic-link sign-in via `ASWebAuthenticationSession`.
+    /// Sends a magic-link sign-in email via Supabase's OTP endpoint.
     ///
-    /// Gets the OAuth authorize URL for `provider: .email` (Supabase's hosted
-    /// email auth page) via `getOAuthSignInURL`, then opens it in an
-    /// `ASWebAuthenticationSession` with PKCE. The web session validates the
-    /// caller and binds the callback to the original code challenge,
-    /// closing the custom-URL-scheme interception risk on macOS.
+    /// The email links to `unstream://auth/callback`. There's no interactive
+    /// window to wait on here — the user opens the email in their own time,
+    /// possibly on a different device, so this only confirms the email was
+    /// sent. The app's URL-scheme handling (`onOpenURL` in `UnstreamApp`)
+    /// hands the resulting callback URL to `handleAuthCallback` below.
     func sendMagicLink(email: String) {
         isLoading = true
         errorMessage = nil
-
-        let redirectURL = URL(string: "unstream://auth/callback")!
-
-        #if os(macOS)
-        let anchor = AuthPresentationAnchor()
-        authPresentationAnchor = anchor
-        #endif
+        magicLinkSent = false
 
         Task {
             do {
-                let authURL = try client.auth.getOAuthSignInURL(
-                    provider: .email,
-                    redirectTo: redirectURL,
-                    queryParams: [("email", email)]
+                try await client.auth.signInWithOTP(
+                    email: email,
+                    redirectTo: URL(string: "unstream://auth/callback")!
                 )
-
-                let callbackURL = try await openWebAuthSession(
-                    url: authURL,
-                    callbackScheme: redirectURL.scheme!
-                )
-
-                let result = try await client.auth.session(from: callbackURL)
-                session = result
+                magicLinkSent = true
             } catch {
                 errorMessage = error.localizedDescription
             }
             isLoading = false
-            #if os(macOS)
-            authPresentationAnchor = nil
-            #endif
-        }
-    }
-
-    /// Opens a URL in `ASWebAuthenticationSession` and returns the callback URL.
-    @MainActor
-    private func openWebAuthSession(url: URL, callbackScheme: String) async throws -> URL {
-        try await withCheckedThrowingContinuation { continuation in
-            let webSession = ASWebAuthenticationSession(
-                url: url,
-                callbackURLScheme: callbackScheme
-            ) { callbackURL, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else if let callbackURL {
-                    continuation.resume(returning: callbackURL)
-                } else {
-                    continuation.resume(throwing: URLError(.unknown))
-                }
-            }
-
-            webSession.prefersEphemeralWebBrowserSession = true
-
-            #if os(macOS)
-            webSession.presentationContextProvider = authPresentationAnchor
-            pendingWebSession = webSession
-            #endif
-
-            webSession.start()
         }
     }
 
     #if os(macOS)
-    /// Cancels any in-flight ASWebAuthenticationSession and resets loading state.
-    /// Called when the popover closes so the sign-in sheet doesn't reopen locked.
+    /// Resets loading state when the popover closes, so a slow magic-link
+    /// request doesn't leave the sign-in sheet stuck locked next time it opens.
     func cancelPendingAuth() {
-        let session = pendingWebSession
-        pendingWebSession = nil
-        session?.cancel()
         if isLoading {
             isLoading = false
             errorMessage = nil
@@ -184,9 +131,9 @@ class AuthService: ObservableObject {
 
     // MARK: - Deeplink handling
 
-    /// Handles an auth callback URL received outside `ASWebAuthenticationSession`
-    /// (e.g. via universal link or residual custom-scheme delivery).
-    /// The PKCE code-verifier in the SDK validates the token contents.
+    /// Completes a magic-link sign-in from the `unstream://auth/callback` URL
+    /// the browser opens after the user clicks the emailed link. The SDK
+    /// validates the token (or PKCE code) contained in the URL.
     func handleAuthCallback(url: URL) async {
         isLoading = true
         errorMessage = nil
@@ -194,6 +141,7 @@ class AuthService: ObservableObject {
         do {
             let result = try await client.auth.session(from: url)
             session = result
+            magicLinkSent = false
         } catch {
             errorMessage = "Sign-in failed: \(error.localizedDescription)"
         }
@@ -252,17 +200,3 @@ class AuthService: ObservableObject {
         UserDefaults.standard.set(true, forKey: migrationFlag)
     }
 }
-
-// MARK: - ASWebAuthenticationPresentationContextProviding
-
-#if os(macOS)
-/// Provides a presentation anchor for `ASWebAuthenticationSession` on macOS.
-/// Returns the app's key window so the web auth sheet attaches to the
-/// running app rather than a detached empty window.
-final class AuthPresentationAnchor: NSObject, ASWebAuthenticationPresentationContextProviding, @unchecked Sendable {
-    @MainActor
-    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        NSApp.keyWindow ?? ASPresentationAnchor()
-    }
-}
-#endif

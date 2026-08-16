@@ -27,7 +27,7 @@ These principles should inform product and engineering trade-offs, not just mark
 
 - **Frontend**: React 19 SPA with React Router 7, Tailwind CSS v4, Vite 7, TypeScript. PWA-enabled (`vite-plugin-pwa`). Most pages are lazy-loaded in `apps/web/src/main.tsx`.
 - **Backend**: Netlify Functions (serverless API, `api/functions/`) + Edge Functions (SSR/SEO, `api/edge/`). Functions are TypeScript on Node; edge functions run on Deno (see `deno.lock`).
-- **Local dev API**: a Vite middleware in `apps/web/server/` — a *separate* implementation from `api/functions/`. See "Local dev API vs production API" below; this trips people up.
+- **Local dev**: `npm run dev` runs `netlify dev` — the real functions and edge functions against production Supabase. `npm run dev:fast` is a Vite-only shortcut backed by a *separate* API implementation in `apps/web/server/`. See "Local dev: the full stack, and the fast shim" below; the difference trips people up.
 - **Database**: Supabase (Postgres with RLS) for artist profiles, analytics, merge overrides, API keys, verification requests, saved/supported artists, public usernames, and the Bandcamp probe cache.
 - **Data enrichment**: MusicBrainz, Wikidata, Wikipedia, Discogs, Linktree, Bandcamp artist pages.
 - **Caching / rate limiting**: Upstash Redis (`@upstash/ratelimit`, `api/functions/cache.ts`, `api/functions/ratelimit.ts`).
@@ -113,17 +113,21 @@ unstream/
 
 ```bash
 npm install               # Install dependencies
-npm run dev               # Start Vite dev server (apps/web) with the dev API middleware
+npm run dev               # Full local stack: netlify dev on :8888 — real functions + edge
+                          #   functions + production Supabase data and auth. Use this by default.
+npm run dev:fast          # Vite only on :5173 (no functions, no auth). CSS/layout work only.
 npm run build             # Full build — see below for exactly what it runs
 npm run lint              # ESLint (apps/web)
 
+npm run verify            # The CI gate: typecheck + API function tests + web unit tests
 npm run test              # Everything: web tests + API function tests
 npm run test:web          # All apps/web tests (unit + integration)
-npm run test:unit         # apps/web/tests/unit only (runs in the build pipeline)
+npm run test:unit         # apps/web/tests/unit only (runs in CI)
 npm run test:integration  # apps/web/tests/integration only (hits live APIs; run separately)
-npm run test:api          # api/functions/**/*.test.ts (runs in the build pipeline)
+npm run test:api          # api/functions/**/*.test.ts (runs in CI)
 npm run test:watch        # Vitest watch mode (apps/web)
 
+npm run typecheck         # tsc -b over the root and apps/web (runs in CI and the build)
 npm run typecheck:api     # tsc --noEmit over api/ (NOTE: narrow include — see below)
 npm run preview           # Preview the built SPA
 
@@ -138,7 +142,12 @@ npm run migrate:dry-run   # supabase db push --dry-run against the linked projec
 npm run migrate:list      # List applied vs pending migrations
 ```
 
-`npm run build` runs, in order: guides manifest → dispatch feed → root `tsc -b` → API function tests → `apps/web` `tsc -b` → web unit tests → `vite build` → sitemap. **Any failure blocks the Netlify deploy.** Run `npm run build` (or at minimum `npm run lint`, `npm run test:unit`, `npm run test:api`) before considering work done.
+`npm run build` runs, in order: guides manifest → dispatch feed → changelog feed → guides feed → root `tsc -b` → `apps/web` `tsc -b` → `vite build` → sitemap. Any failure blocks the Netlify deploy, so a type error still can't ship.
+
+**The test suites are no longer part of the build.** They run in GitHub Actions (`.github/workflows/ci.yml`) on every PR and every push to `main`, because Actions minutes are free on this public repo while a Netlify deploy is not — see "Deployment" below. Two consequences worth internalizing:
+
+- **Run `npm run verify` before considering work done** (typecheck + both suites, ~45s). `npm run build` no longer tells you the tests pass.
+- **A red CI run does not, by itself, stop a deploy.** Netlify builds whatever lands on `main`. Requiring the `verify` check in GitHub's branch protection rules for `main` is what restores the old guarantee; until that's enabled, merging a red PR deploys it.
 
 **Typecheck coverage gotcha:** `api/tsconfig.json` has a narrow `include` — the `me-*` functions, `search-sources.ts`, and their tests. Files reachable from those *are* checked, so the search backend (`db.ts`, `search-utils.ts`, `search-parsers.ts`, `middleware.ts`, `api/search/*`) is now covered. Everything else in `api/` — the edge functions, `artist-profile.ts`, the release and admin endpoints — is not: a type error there won't fail the build, it will fail at runtime in production. When you touch an unlisted file, rely on the function tests and read carefully — and if it's worth typechecking, add it to that `include` list and fix whatever strict mode surfaces.
 
@@ -211,10 +220,15 @@ real Postgres. To test the write path, point `SUPABASE_URL` at a branch database
 
 ### Seeing the release page locally
 
-`npm run dev` **cannot** show you `/a/{artist}/{release}` — the Vite dev server doesn't run edge
-functions at all. `netlify dev` does, but it reads the production Supabase, where a release only
-exists once demand-driven cataloging has run for that artist. So the page you most want to look
-at is the one neither of those can render.
+`npm run dev` renders `/a/{artist}/{release}` through the real `api/edge/release-page.ts` — the
+edge functions run under `netlify dev`, and behaviour matches production exactly (verified
+2026-08-15: an uncatalogued release 302s to the artist page locally and in production alike).
+`npm run dev:fast` cannot: the bare Vite server runs no edge functions at all.
+
+The remaining gap is data, not rendering. `netlify dev` reads production Supabase, where a
+release only exists once demand-driven cataloging has run for that artist — so a release nobody
+has triggered a catalogue for is still unviewable that way. That is what `preview:release` is
+for:
 
 ```bash
 npm run preview:release -- explosionsinthesky    # then open http://localhost:8788
@@ -280,15 +294,62 @@ grep -r "PLATFORM_INFO" api/edge/ apps/web/src/
 
 `apps/web/src/services/sources.ts` mirrors the registry and adds client-only fields (description, `searchUrlTemplate`, `hasEmbed`, `searchOnly`). Keep the shared fields in sync between the two.
 
-### Local dev API vs production API
+### Local dev: the full stack, and the fast shim
 
-`npm run dev` does **not** run the Netlify functions. `apps/web/vite.config.ts` installs `handleApiRequest` from `apps/web/server/api.ts`, which has its own search implementation in `apps/web/server/search/*`. So:
+There are two local modes. **Use `npm run dev` — the real one — by default.**
 
-- Editing `api/functions/search-sources.ts` does not change what `npm run dev` returns.
-- Editing `apps/web/server/*` does not change production.
-- The two have drifted. Treat `api/functions/` as the real behavior; treat `apps/web/server/` as a convenience shim for UI work, and update it only when you need dev parity.
+This is now the *only* way to exercise the real backend before merging: #451 disabled Deploy
+Previews outright (`[context.deploy-preview] ignore = "exit 0"` in `netlify.toml`), because they
+were ~280 of a 300-minute monthly allowance. That block's own comment says previews should come
+back "once local dev can stand in for them" — this section is that standing-in. Treat a gap here
+as a real gap, not an inconvenience: there is no preview to fall back on.
 
-When a change must be verified against the real backend, test the deployed branch (Netlify deploy preview) or write a function test rather than trusting the dev server.
+| | `npm run dev` (`netlify dev`, :8888) | `npm run dev:fast` (Vite only, :5173) |
+|---|---|---|
+| Netlify functions (`api/functions/`) | **real** | not run — `apps/web/server/` shim instead |
+| Edge functions (`api/edge/`) | **real** | not run at all |
+| `netlify.toml` redirects, headers, edge routing order | **applied** | ignored |
+| Supabase data | **production** | none |
+| Auth (sign-in, sessions, admin) | **works** | dead — "Auth not configured" |
+| `/data/**` (guides, changelog) | served | 404s as the SPA shell |
+| Boot | ~15s | ~1s |
+
+`dev:fast` is for pure CSS/layout iteration. Anything touching data, auth, an API response, SEO
+markup, or routing needs `npm run dev`.
+
+**It reads and writes PRODUCTION Supabase.** `netlify dev` injects the live site's environment,
+so functions hold `SUPABASE_SERVICE_KEY` and bypass RLS exactly as production does. Reads are
+free; **writes are real** — saving an artist, claiming a profile, or changing settings locally
+mutates production rows, and `RESEND_API_KEY` / `BUTTONDOWN_API_KEY` mean notification paths can
+send real email. Release cataloguing is the one thing that stays off: `RELEASE_CATALOG_ENABLED`
+is set for the production context only, and `netlify dev` uses the dev context, so it is absent
+locally. Don't "fix" that by setting it — see "Testing release ingest locally".
+
+Two traps, both of which produce a *silently wrong* page rather than an error:
+
+- **The empty-value shadow.** A key present but blank in the local `.env` overrides the real
+  value from the Netlify site settings; `netlify dev` reports it as `Ignored project settings env
+  var: X (defined in .env file)`. Three keys were blank this way until 2026-08-15
+  (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `SUPABASE_ANON_KEY`), which is why local auth
+  never worked and every signed-in endpoint failed. **Delete a key from `.env` rather than
+  leaving it blank.** Check the startup log's `Injected project settings env vars` list — a key
+  you need should appear there, not in an `Ignored` line.
+- **The stale port.** `dev:fast` passes `--strictPort` on purpose; see the `[dev]` block in
+  `netlify.toml` for why removing it lets another checkout's leftover server answer everything.
+
+Running `npm run dev` rewrites `deno.lock` (it re-resolves the edge functions' imports against
+the current `package.json`). That shows up as an unrelated modified file — `git checkout --
+deno.lock` before committing, same habit as the generated feed XML. The drift it keeps
+re-applying is real, though: the committed lock predates `@sentry/node` and
+`@testing-library/*` being added, so it's worth refreshing deliberately in its own PR.
+
+The old shim still exists: `apps/web/vite.config.ts` installs `handleApiRequest` from
+`apps/web/server/api.ts`, with its own search implementation in `apps/web/server/search/*`. It
+has drifted from `api/functions/` and only `dev:fast` uses it. Editing
+`api/functions/search-sources.ts` does not change what `dev:fast` returns, and editing
+`apps/web/server/*` does not change production. Concretely: the shim's `/api/suggest` returns a
+hardcoded empty list, where `npm run dev` returns real rows from the `artists` table. Treat
+`api/functions/` as the real behavior and reach for the shim only when boot speed matters.
 
 ### Dead code in `api/search/`
 
@@ -301,6 +362,37 @@ Artists claim profiles via `/claim/:slug` (email magic link or password auth, wi
 ### Saved & supported artists, and public sharing
 
 Signed-in fans can save artists and mark artists as supported (migrations 013–018), synced to the Apple app via `saved-artists-sync.ts` with tombstones and scheduled GC. Users can claim a public username (migration 021) and opt into sharing their list (migration 022); the public list renders at `/u/:handle` via the `u-handle` edge function, backed by `public-saved-artists.ts`. Reserved handles live in `api/lib/reserved-handles.ts`.
+
+### Collections, and why most items start unlinked
+
+A Bandcamp import (`bandcamp-sync-background.ts`) writes a `collection_items` row per album and
+attaches an Unstream release only when one already exists. Most of a real collection therefore
+arrives unlinked — the fan bought from artists nobody has ever searched, so there is no `artists`
+row to match against.
+
+**There is no source URL to fall back to.** Bandcamp's Subsonic API returns `id`, `name`,
+`artist`, `coverArt`, `year`, `genre`, `created` and nothing else — no album or artist URL — so
+"just link to Bandcamp" is not available, and deriving `<artist>.bandcamp.com/album/<title>` mints
+404s. Don't reach for it.
+
+`collection-matching.ts` closes the gap in two halves that become possible at different times:
+
+- `resolveCollectionArtists(userId)` runs at the end of a sync, on **both** the success and the
+  failure path, and after the connection row is written either way — it reads stored
+  `collection_items` and probes `<slug>.bandcamp.com/music`, touching neither the Subsonic API
+  nor the credential, so a Subsonic 500 (routine in this beta) must not block discovery for
+  items imported days earlier. It stores each artist plus their Bandcamp link and requests
+  catalogues for up to 25 — matching `MAX_ARTISTS_PER_REQUEST`, which silently slices anything
+  longer. The rest ride the six-hourly sweep, whose pool is every artist with a catalogue-able
+  link.
+- `linkCollectionItemsForArtist(artistId, name)` runs at the end of every catalogue pass in
+  `catalog-artist-background.ts` — the moment the releases exist — and attaches them to the items
+  that were waiting. It re-runs forever, so a release added later still finds fans who own it.
+
+Matching is exact on `releases.match_key` via `releaseMatchKey`, the function that produced the
+column. Use that one, never `normalizeForComparison`: it strips to `[a-z0-9]`, so any title with
+no Latin characters normalizes to the empty string and can never match. A near-miss stays
+unlinked on purpose — a collection page asserts a specific person bought a specific record.
 
 ### Account settings
 
@@ -396,9 +488,11 @@ that, run it against a throwaway Postgres in Docker — that's what caught the s
 
 Tests use Vitest, in two places:
 
-- `apps/web/tests/unit/` — component and pure-logic tests. Run in the build pipeline.
-- `apps/web/tests/integration/` — search accuracy against live APIs (`apps/web/tests/fixtures/expected-results.json`). Run separately; not in the build.
-- `api/functions/__tests__/` — function tests (cache behavior, probe cache coverage, XSS defense, the `me-*` endpoints). Run in the build pipeline via `npm run test:api`.
+- `apps/web/tests/unit/` — component and pure-logic tests. Run in CI.
+- `apps/web/tests/integration/` — search accuracy against live APIs (`apps/web/tests/fixtures/expected-results.json`). Run separately; not in CI.
+- `api/functions/__tests__/` — function tests (cache behavior, probe cache coverage, XSS defense, the `me-*` endpoints). Run in CI via `npm run test:api`.
+
+`npm run verify` runs the CI gate locally — the same typecheck and two suites, in the same order. `npm run lint` is *not* in that gate: ESLint currently reports 64 pre-existing errors (unused vars and `any` in test files, plus a few pages), so enforcing it would fail every PR for reasons unrelated to the change. Worth clearing separately; until then, lint is advisory.
 
 Config: the root `vitest.config.ts` lets `npx vitest` work from the repo root and covers both trees; `apps/web/vitest.config.ts` covers the web tree. Default environment is `node` — add `// @vitest-environment jsdom` at the top of a `.tsx` test that needs a DOM. Both configs alias `src` → `apps/web/src`.
 
@@ -408,8 +502,13 @@ The Apple app has XCTest coverage in `apps/mac/UnstreamTests/`; the Xcode projec
 
 Pushes to `main` trigger Netlify builds (`npm run build`). Functions deploy from `api/functions/`, edge functions from `api/edge/`. Edge routes, `/api/*` redirects, and security headers/CSP are configured in `netlify.toml`.
 
+**Not every push deploys.** `netlify.toml`'s `ignore` setting runs `scripts/netlify-ignore-build.sh`, which cancels the build when a push touches only paths Netlify never publishes — `apps/mac/`, `apps/extension/`, `supabase/`, `docs/`, `.github/`, `README.md`, `CLAUDE.md`. A production deploy costs a flat 15 credits on Netlify's credit plans (build minutes on the legacy plans), and an Apple-app bugfix used to buy a full deploy of the website. The script's exit code is inverted — **0 cancels the build, 1 runs it** — and every branch in it defaults to deploying, because a skipped deploy leaves production silently stale. If you add a path whose contents reach the built site, check it isn't shadowed by that list: `data/` and `scripts/` are deliberately absent, since the whole `data/` tree is copied into `dist/` and `scripts/` generates the manifests, feeds and sitemap.
+
+**Deploy Previews are off.** `[context.deploy-preview]` in `netlify.toml` cancels them (`ignore = "exit 0"`), so a PR gets no preview URL and the Netlify checks on it don't run — that's configuration, not breakage. Previews were ~200 builds a month against a 300-minute allowance, the largest single cost on the site; production deploys at the same cadence fit. The trade is real, though: **there is now no way to exercise the real backend before merging**, which matters because `npm run dev` runs a different search implementation and can't render edge-function routes at all. Delete the block to bring previews back once local dev can stand in for them.
+
 GitHub Actions (`.github/workflows/`):
 
+- `ci.yml` — typecheck plus both test suites on every PR and every push to `main`. This is the gate that used to live inside the Netlify build; see "Commands" above for what moving it changed.
 - `supabase-migrate.yml` — auto-applies new migrations on push to `main`.
 - `schedule-social-posts.yml` — weekly (Mondays) social post generation, committed back to the repo.
 - `semantic-revert-check.yml` — runs `scripts/semantic-revert-check.py` on every PR to flag changes that quietly undo earlier fixes. If it flags your PR, take it seriously: the bug loops it was built for are described in `docs/retros/UNS-100-bifurcation-retro.md`.
