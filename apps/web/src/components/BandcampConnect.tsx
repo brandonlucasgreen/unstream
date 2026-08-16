@@ -17,7 +17,20 @@ interface ConnectionStatus {
   lastSyncedAt?: string | null;
 }
 
-const SYNC_POLL_MS = 5_000;
+/**
+ * How long to wait before the next status check, given how long the sync has been running.
+ *
+ * People watch closely for the first few seconds and not at all after that, so the gap
+ * widens. The ceiling on all of this is the server's, not ours: me-bandcamp.ts reports a
+ * sync as failed once it has been 'syncing' for STALE_SYNC_MS (20 minutes), which flips
+ * syncStatus and ends the poll. A flat 5s spent ~240 requests reaching that point; this
+ * spends ~58, with no perceptible change while anyone is actually looking.
+ */
+function pollDelayMs(elapsedMs: number): number {
+  if (elapsedMs < 60_000) return 5_000;
+  if (elapsedMs < 5 * 60_000) return 15_000;
+  return 30_000;
+}
 
 export function BandcampConnect() {
   const { session } = useAuth();
@@ -30,21 +43,31 @@ export function BandcampConnect() {
   const [submitting, setSubmitting] = useState(false);
   const [confirmingDisconnect, setConfirmingDisconnect] = useState(false);
 
-  const fetchStatus = useCallback(async () => {
-    if (!session) return;
+  /**
+   * Returns false when the caller should stop polling.
+   *
+   * Only a 429 stops it. Continuing to poll a rate-limited endpoint re-spends the budget
+   * the moment it refills, so the poll can never recover on its own — it just holds a
+   * share of the user's account budget until the sync goes stale. An ordinary error is
+   * different: it may well be transient, and the widening delay already bounds the cost.
+   */
+  const fetchStatus = useCallback(async (): Promise<boolean> => {
+    if (!session) return false;
     try {
       const res = await fetch('/api/me/bandcamp', {
         headers: { 'Authorization': `Bearer ${session.access_token}` },
       });
       if (res.status === 429) {
         setError(RATE_LIMIT_MESSAGE);
-        return;
+        return false;
       }
       if (!res.ok) throw new Error('Failed to fetch Bandcamp connection status');
       setStatus(await res.json());
+      return true;
     } catch (e) {
       Sentry.captureException(e, { extra: { context: 'BandcampConnect.fetchStatus' } });
       setError('Failed to load Bandcamp connection status.');
+      return true;
     } finally {
       setLoading(false);
     }
@@ -54,11 +77,51 @@ export function BandcampConnect() {
     fetchStatus();
   }, [fetchStatus]);
 
-  // While a sync runs in the background, keep the status fresh.
+  // While a sync runs in the background, keep the status fresh. A self-scheduling timeout
+  // rather than setInterval, because the gap widens as the sync goes on (pollDelayMs).
   useEffect(() => {
     if (status?.syncStatus !== 'syncing') return;
-    const id = setInterval(fetchStatus, SYNC_POLL_MS);
-    return () => clearInterval(id);
+
+    const startedAt = Date.now();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let cancelled = false;
+    // Set when a tick is skipped for a hidden tab, so returning to the tab refreshes
+    // immediately instead of waiting out a 30s gap — and so flipping between tabs
+    // without missing anything costs no requests at all.
+    let missedWhileHidden = false;
+
+    const schedule = () => {
+      if (cancelled) return;
+      timer = setTimeout(tick, pollDelayMs(Date.now() - startedAt));
+    };
+
+    const tick = async () => {
+      // Nobody is watching a hidden tab's status, so don't spend a request refreshing it.
+      if (document.hidden) {
+        missedWhileHidden = true;
+        schedule();
+        return;
+      }
+      const keepPolling = await fetchStatus();
+      if (keepPolling) schedule();
+    };
+
+    const onVisible = async () => {
+      if (document.hidden || !missedWhileHidden || cancelled) return;
+      missedWhileHidden = false;
+      clearTimeout(timer);
+      const keepPolling = await fetchStatus();
+      if (keepPolling) schedule();
+    };
+
+    document.addEventListener('visibilitychange', onVisible);
+    schedule();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
   }, [status?.syncStatus, fetchStatus]);
 
   const handleConnect = async (e: React.FormEvent) => {
