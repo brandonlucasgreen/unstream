@@ -90,6 +90,8 @@
     "functions/__tests__/collection-art.test.ts",
     "functions/__tests__/feed-collection-artists.test.ts",
     "functions/__tests__/collection-matching.test.ts",
-    "functions/__tests__/sentry-environment.test.ts"
+    "functions/__tests__/sentry-environment.test.ts",
+    "functions/me-listening.ts",
+    "functions/__tests__/me-listening.test.ts"
   ]
 }
