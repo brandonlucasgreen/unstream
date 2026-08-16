@@ -29,6 +29,7 @@ class AppStateContainer: ObservableObject {
     let mediaObserver = MediaObserver()
     let scrobbleManager = ScrobbleManager.shared
     let nowPlayingNotificationManager = NowPlayingNotificationManager()
+    let appleMusicLibraryService = AppleMusicLibraryService()
     #endif
 
     private var cancellables = Set<AnyCancellable>()
@@ -134,7 +135,10 @@ struct UnstreamApp: App {
         // as a View modifier it would only fire while the Settings window happened to be
         // open, which is exactly when a magic-link callback is least likely to arrive.
         Settings {
-            SettingsView(releaseAlertManager: container.releaseAlertManager)
+            SettingsView(
+                releaseAlertManager: container.releaseAlertManager,
+                libraryService: container.appleMusicLibraryService
+            )
         }
         #else
         // iOS: Standard windowed app
