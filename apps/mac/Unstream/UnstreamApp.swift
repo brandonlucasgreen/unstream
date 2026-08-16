@@ -128,14 +128,13 @@ struct UnstreamApp: App {
         // The popover is driven by AppDelegate (NSStatusItem), but Settings is a real
         // SwiftUI Settings scene: that's what gives us the standard settings window,
         // its frame persistence, and a working "Unstream ▸ Settings… ⌘," menu item.
-        // It also registers this app's `unstream://` URL-scheme handling, which is
-        // what lets a magic-link email complete sign-in even though nothing opened
-        // the browser from inside the app (see handleAuthCallbackURL below).
+        //
+        // `unstream://` URLs are handled in AppDelegate, NOT here. `.onOpenURL` is a View
+        // modifier, not a Scene one — attaching it to `Settings` did not compile — and even
+        // as a View modifier it would only fire while the Settings window happened to be
+        // open, which is exactly when a magic-link callback is least likely to arrive.
         Settings {
             SettingsView(releaseAlertManager: container.releaseAlertManager)
-        }
-        .onOpenURL { url in
-            _ = handleAuthCallbackURL(url)
         }
         #else
         // iOS: Standard windowed app
@@ -170,6 +169,9 @@ struct UnstreamApp: App {
     /// Routes `unstream://auth/callback` (the redirect target for the magic-link
     /// email) to `AuthService`. Returns whether the URL was handled, so callers
     /// can fall through to other deeplink handling otherwise.
+    ///
+    /// macOS routes the same URLs through `AppDelegate.application(_:open:)` instead —
+    /// see the note on the Settings scene above.
     private func handleAuthCallbackURL(_ url: URL) -> Bool {
         guard url.scheme == "unstream", url.host == "auth" else { return false }
         Task { await AuthService.shared.handleAuthCallback(url: url) }
@@ -288,6 +290,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     private static var hasCreatedStatusItem = false
 
     private var popover: NSPopover!
+
+    /// `unstream://` URLs, chiefly the magic-link callback. This lives in the delegate
+    /// because the app is a menu-bar accessory with no persistent window: a SwiftUI
+    /// `.onOpenURL` needs a view in the hierarchy to receive it, and there usually isn't one.
+    func application(_ application: NSApplication, open urls: [URL]) {
+        for url in urls where url.scheme == "unstream" && url.host == "auth" {
+            Task { await AuthService.shared.handleAuthCallback(url: url) }
+        }
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         AppDelegate.shared = self
