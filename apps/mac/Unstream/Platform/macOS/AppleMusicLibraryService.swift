@@ -53,10 +53,19 @@ final class AppleMusicLibraryService: ObservableObject {
     @Published private(set) var isImporting = false
     @Published private(set) var lastError: String?
 
+    /// When a snapshot was last sent to the signed-in account. Surfaced in the UI because
+    /// "nothing leaves this Mac" stops being true the moment this is set, and the user is
+    /// owed a plain statement of which of the two states they're in.
+    @Published private(set) var lastSyncedAt: Date?
+    @Published private(set) var syncError: String?
+
     private static let storageKey = "appleMusicLibrarySnapshot"
+    private static let syncedAtKey = "appleMusicLibrarySyncedAt"
 
     init() {
         snapshot = Self.loadSnapshot()
+        let stamp = UserDefaults.standard.double(forKey: Self.syncedAtKey)
+        lastSyncedAt = stamp > 0 ? Date(timeIntervalSince1970: stamp) : nil
     }
 
     /// Read the whole library and replace the stored snapshot. The read runs off the main
@@ -77,6 +86,9 @@ final class AppleMusicLibraryService: ObservableObject {
             snapshot = snap
             Self.saveSnapshot(snap)
             print("[AppleMusicLibrary] imported \(snap.trackTotal) tracks, \(snap.artists.count) artists (\(snap.ownedTotal) owned, \(snap.subscriptionTotal) subscription)")
+            // Signed in, the import is only useful once the gap can be computed server-side.
+            // Signed out this returns immediately and nothing leaves the Mac.
+            await syncToAccount()
         case .failure(let error):
             lastError = error.localizedDescription
             print("[AppleMusicLibrary] import failed: \(error)")
@@ -173,7 +185,70 @@ final class AppleMusicLibraryService: ObservableObject {
     /// with — it lives only in UserDefaults).
     func clearSnapshot() {
         snapshot = nil
+        lastSyncedAt = nil
+        syncError = nil
         UserDefaults.standard.removeObject(forKey: Self.storageKey)
+        UserDefaults.standard.removeObject(forKey: Self.syncedAtKey)
+
+        // Forgetting locally has to forget remotely too, or "Forget Imported Data" quietly
+        // leaves a copy on the server — the exact claim the button is making.
+        Task { await deleteRemoteSignals() }
+    }
+
+    // MARK: - Sync to the account
+
+    /// Send the per-artist play counts to Unstream so the gap report works on the web and in
+    /// the app. Only when signed in: signed out, the snapshot stays on this Mac and this is a
+    /// no-op, which is what the Settings copy promises.
+    func syncToAccount() async {
+        guard let snapshot else { return }
+        guard AuthService.shared.isSignedIn,
+              let token = try? await AuthService.shared.currentAccessToken() else { return }
+
+        syncError = nil
+
+        // Only artist name and play count leave the device. Not track titles, not album
+        // names, not which tracks are subscription streams — the gap needs none of it.
+        let signals = snapshot.artists.map { ["artistName": $0.name, "playCount": $0.playCount] }
+        let body: [String: Any] = ["source": "apple_music", "signals": signals]
+
+        guard let url = URL(string: "https://unstream.stream/api/me/listening"),
+              let payload = try? JSONSerialization.data(withJSONObject: body) else { return }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.httpBody = payload
+
+        do {
+            let (_, response) = try await URLSession.shared.data(for: request)
+            let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+            guard (200..<300).contains(status) else {
+                syncError = status == 401
+                    ? "Session expired — sign in again to sync your library."
+                    : "Couldn't sync your library to Unstream (error \(status))."
+                print("[AppleMusicLibrary] sync failed: HTTP \(status)")
+                return
+            }
+            let now = Date()
+            lastSyncedAt = now
+            UserDefaults.standard.set(now.timeIntervalSince1970, forKey: Self.syncedAtKey)
+            print("[AppleMusicLibrary] synced \(signals.count) artists to the account")
+        } catch {
+            syncError = "Couldn't reach Unstream to sync your library."
+            print("[AppleMusicLibrary] sync failed: \(error.localizedDescription)")
+        }
+    }
+
+    private func deleteRemoteSignals() async {
+        guard AuthService.shared.isSignedIn,
+              let token = try? await AuthService.shared.currentAccessToken(),
+              let url = URL(string: "https://unstream.stream/api/me/listening") else { return }
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        _ = try? await URLSession.shared.data(for: request)
     }
 }
 #endif

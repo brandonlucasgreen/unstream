@@ -7,6 +7,9 @@ import SwiftUI
 /// SettingsView holds its managers as plain optionals.
 struct MusicLibrarySettingsSection: View {
     @ObservedObject var service: AppleMusicLibraryService
+    @ObservedObject private var auth = AuthService.shared
+
+    private var isSignedIn: Bool { auth.isSignedIn }
 
     var body: some View {
         Section {
@@ -19,6 +22,16 @@ struct MusicLibrarySettingsSection: View {
                 LabeledContent("Last imported") {
                     Text(snapshot.importedAt.formatted(.relative(presentation: .named)))
                         .foregroundColor(.secondary)
+                }
+
+                LabeledContent("Synced to your account") {
+                    if let syncedAt = service.lastSyncedAt {
+                        Text(syncedAt.formatted(.relative(presentation: .named)))
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text(isSignedIn ? "Not yet — re-import to sync" : "No — you're signed out")
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
 
@@ -53,6 +66,12 @@ struct MusicLibrarySettingsSection: View {
                     .font(.caption)
                     .foregroundColor(.red)
             }
+
+            if let syncError = service.syncError {
+                Text(syncError)
+                    .font(.caption)
+                    .foregroundColor(.red)
+            }
         } header: {
             HStack {
                 Text("iCloud Music Library")
@@ -64,10 +83,20 @@ struct MusicLibrarySettingsSection: View {
                 }
             }
         } footer: {
-            Text("Reads your iCloud Music Library from the Music app — play counts, and whether each track is a file you own or an Apple Music subscription stream — so Unstream can show which artists you actually listen to and have never paid. The first import asks permission to control Music. Nothing is uploaded: this stays on your Mac.")
+            Text(privacyFooter)
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
+    }
+
+    /// The privacy claim has to track what is actually true right now, not the general case:
+    /// signed out this really is local-only, and signed in it really isn't.
+    private var privacyFooter: String {
+        let base = "Reads your iCloud Music Library from the Music app — play counts, and whether each track is a file you own or an Apple Music subscription stream — so Unstream can show which artists you actually listen to and have never paid. The first import asks permission to control Music."
+        if isSignedIn {
+            return base + " Because you're signed in, the artist names and play counts are synced to your Unstream account so the same list works on the web. Nothing else is uploaded, and none of it is ever public."
+        }
+        return base + " You're signed out, so this stays on your Mac — sign in if you want the same list on the web."
     }
 
     private func summaryLine(for snapshot: LibrarySnapshot) -> String {
