@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
+import { RATE_LIMIT_MESSAGE } from '../utils/rateLimit';
 
 // Settings section for connecting a Bandcamp collection via Bandcamp's Subsonic API
 // (open beta). The credential goes straight to /api/me/bandcamp over one POST and is never
@@ -35,6 +36,10 @@ export function BandcampConnect() {
       const res = await fetch('/api/me/bandcamp', {
         headers: { 'Authorization': `Bearer ${session.access_token}` },
       });
+      if (res.status === 429) {
+        setError(RATE_LIMIT_MESSAGE);
+        return;
+      }
       if (!res.ok) throw new Error('Failed to fetch Bandcamp connection status');
       setStatus(await res.json());
     } catch (e) {

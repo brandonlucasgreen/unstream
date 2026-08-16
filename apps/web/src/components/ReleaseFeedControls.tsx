@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
+import { RATE_LIMIT_MESSAGE } from '../utils/rateLimit';
 
 interface FeedUrls {
   ics: string;
@@ -37,6 +38,10 @@ export function ReleaseFeedControls() {
           method,
           headers: { Authorization: `Bearer ${session.access_token}` },
         });
+        if (res.status === 429) {
+          setError(RATE_LIMIT_MESSAGE);
+          return;
+        }
         if (!res.ok) throw new Error(`feed-token ${method} failed: ${res.status}`);
 
         const data = await res.json();

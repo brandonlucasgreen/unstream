@@ -134,7 +134,7 @@ export async function handler(event: {
   // Rate-limit check (Redis) and token validation (Supabase Auth) are both
   // network round-trips with no data dependency — run them concurrently.
   const ip = getClientIp(event.headers);
-  const rlPromise = checkRateLimit(ip, 'standard', CORS_HEADERS);
+  const rlPromise = checkRateLimit(ip, 'account', CORS_HEADERS);
   const userPromise = authenticateBearerFast(event.headers.authorization).catch(() => null);
   const rl = await rlPromise;
   if (rl.limited) return rl.response;

@@ -44,7 +44,7 @@ export async function handler(event: {
   }
 
   const ip = getClientIp(event.headers);
-  const rl = await checkRateLimit(ip, 'standard', CORS_HEADERS);
+  const rl = await checkRateLimit(ip, 'account', CORS_HEADERS);
   if (rl.limited) return rl.response;
 
   if (event.httpMethod !== 'POST') {

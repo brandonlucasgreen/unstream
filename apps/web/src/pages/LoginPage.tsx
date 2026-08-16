@@ -12,6 +12,15 @@ import { LegalConsent } from '../components/LegalConsent';
 
 type ViewMode = 'form' | 'magicLinkSent' | 'resetSent';
 
+// The email input's `type="email"` only validates on native form submit, and both
+// the reset and magic-link buttons are `type="button"` with onClick handlers — so
+// the browser never checks them. Without this a mistyped address goes straight to
+// Supabase and comes back as a raw 400 ("Unable to validate email address: invalid
+// format") in the error box. Same shape as the server-side check in
+// api/functions/artist-auth.ts.
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const INVALID_EMAIL_MESSAGE = "That email address doesn't look right. Check it and try again.";
+
 export function LoginPage() {
   const navigate = useNavigate();
   const { session, isLoading: authLoading } = useAuth();
@@ -46,12 +55,17 @@ export function LoginPage() {
   }
 
   async function handleSendMagicLink() {
+    const trimmed = email.trim();
+    if (!EMAIL_PATTERN.test(trimmed)) {
+      setError(INVALID_EMAIL_MESSAGE);
+      return;
+    }
     setError(null);
     setLoading(true);
 
     try {
       const redirectTo = `${window.location.origin}/login`;
-      const { error: authError } = await signInWithMagicLink(email.trim(), redirectTo);
+      const { error: authError } = await signInWithMagicLink(trimmed, redirectTo);
 
       if (authError) {
         setError(authError);
@@ -67,9 +81,13 @@ export function LoginPage() {
   }
 
   async function handleForgotPassword() {
-    if (!email.trim()) {
+    const trimmed = email.trim();
+    if (!trimmed) {
       setError('Enter your email address first.');
-      setLoading(false);
+      return;
+    }
+    if (!EMAIL_PATTERN.test(trimmed)) {
+      setError(INVALID_EMAIL_MESSAGE);
       return;
     }
     setError(null);
@@ -77,7 +95,7 @@ export function LoginPage() {
 
     try {
       const redirectTo = `${window.location.origin}/reset-password`;
-      const { error: resetError } = await resetPasswordForEmail(email.trim(), redirectTo);
+      const { error: resetError } = await resetPasswordForEmail(trimmed, redirectTo);
 
       if (resetError) {
         setError(resetError);

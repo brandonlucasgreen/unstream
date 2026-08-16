@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
+import { RATE_LIMIT_MESSAGE } from '../utils/rateLimit';
 
 interface SharingState {
   public: boolean;
@@ -26,6 +27,10 @@ export function SharingControls() {
       if (res.status === 404) {
         // No username set — sharing unavailable
         setSharing(null);
+        return;
+      }
+      if (res.status === 429) {
+        setError(RATE_LIMIT_MESSAGE);
         return;
       }
       if (!res.ok) throw new Error('Failed to fetch sharing status');
