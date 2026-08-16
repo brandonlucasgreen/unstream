@@ -204,6 +204,13 @@
   to = "/.netlify/functions/collection-art"
   status = 200
 
+# Listening signals from the Mac app's iCloud Music Library import, and the gap derived from
+# them. Never public, and deliberately never writes saved_artists — see me-listening.ts.
+[[redirects]]
+  from = "/api/me/listening"
+  to = "/.netlify/functions/me-listening"
+  status = 200
+
 # Newsletter signup. Proxies to Buttondown server-side so the API key stays out of the
 # browser and the CSP doesn't need a third-party script host. Requires BUTTONDOWN_API_KEY.
 [[redirects]]

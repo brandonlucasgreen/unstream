@@ -213,152 +213,23 @@ describe('bandcamp-sync-background handler', () => {
     expect(byExternal['al-3'].release_id).toBeNull();
   });
 
-  describe('auto-mark supported (spec OQ6: buying is supporting)', () => {
-    const ciphertext = () => encryptCredential(JSON.stringify({ t: 'tok', s: 'salt' }));
-    const albums = [{ id: 'al-1', name: 'Illinois', artist: 'Sufjan Stevens' }];
-
-    function withArtists() {
-      mocks.mockReadAllPages.mockResolvedValue({ ok: true, rows: [SUFJAN] });
-      mocks.mockFetchAllAlbums.mockResolvedValue(albums);
-    }
-
-    it('saves a matched artist as supported when they have no saved row', async () => {
-      const { savedInserts, savedUpdates } = setupDb({
-        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext() },
-        savedRows: [],
-      });
-      withArtists();
-
-      await handler(internalEvent({ userId: 'user-1' }));
-
-      const inserted = savedInserts.flat();
-      expect(inserted).toHaveLength(1);
-      expect(inserted[0]).toMatchObject({
-        user_id: 'user-1',
-        artist_id: 'artist-1',
-        artist_slug: 'sufjan-stevens',
-        artist_name: 'Sufjan Stevens',
-        supported: true,
-      });
-      expect(inserted[0].supported_at).toBeTruthy();
-      expect(inserted[0].last_modified).toBeTruthy();
-      expect(savedUpdates).toHaveLength(0);
-    });
-
-    it('upgrades an existing unsupported row instead of inserting', async () => {
-      const { savedInserts, savedUpdates } = setupDb({
-        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext() },
-        // No artist_id: the legacy shape, where only the slug identifies the artist.
-        savedRows: [{ id: 'row-1', artist_slug: 'sufjan-stevens', supported: false, deleted: false }],
-      });
-      withArtists();
-
-      await handler(internalEvent({ userId: 'user-1' }));
-
-      expect(savedInserts).toHaveLength(0);
-      expect(savedUpdates).toHaveLength(1);
-      expect(savedUpdates[0].patch).toMatchObject({ supported: true });
-      expect(savedUpdates[0].column).toBe('id');
-      expect(savedUpdates[0].values).toEqual(['row-1']);
-    });
-
-    it('leaves an already-supported row untouched (original supported_at preserved)', async () => {
-      const { savedInserts, savedUpdates } = setupDb({
-        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext() },
-        savedRows: [{ id: 'row-1', artist_slug: 'sufjan-stevens', supported: true, deleted: false }],
-      });
-      withArtists();
-
-      await handler(internalEvent({ userId: 'user-1' }));
-
-      expect(savedInserts).toHaveLength(0);
-      expect(savedUpdates).toHaveLength(0);
-    });
-
-    it('never resurrects a tombstoned row — permanent dismissal sticks across re-syncs', async () => {
-      const { savedInserts, savedUpdates } = setupDb({
-        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext() },
-        savedRows: [{ id: 'row-1', artist_slug: 'sufjan-stevens', supported: false, deleted: true }],
-      });
-      withArtists();
-
-      await handler(internalEvent({ userId: 'user-1' }));
-
-      expect(savedInserts).toHaveLength(0);
-      expect(savedUpdates).toHaveLength(0);
-    });
-
-    // The two cases the slug-only lookup got wrong. A row saved from a search result is filed
-    // under a synthetic slug (`sufjanstevens`), which the canonical slug never equals, so only
-    // artist_id finds it — measured on production 2026-08-14, one import duplicated three of
-    // Brandon's saved artists this way.
-    it('upgrades a row saved under a synthetic slug rather than duplicating the artist', async () => {
-      const { savedInserts, savedUpdates } = setupDb({
-        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext() },
-        savedRows: [
-          { id: 'row-1', artist_id: 'artist-1', artist_slug: 'sufjanstevens', supported: false, deleted: false },
-        ],
-      });
-      withArtists();
-
-      await handler(internalEvent({ userId: 'user-1' }));
-
-      expect(savedInserts).toHaveLength(0);
-      expect(savedUpdates).toHaveLength(1);
-      expect(savedUpdates[0].column).toBe('id');
-      expect(savedUpdates[0].values).toEqual(['row-1']);
-    });
-
-    it('never resurrects a tombstone filed under a synthetic slug', async () => {
-      const { savedInserts, savedUpdates } = setupDb({
-        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext() },
-        savedRows: [
-          { id: 'row-1', artist_id: 'artist-1', artist_slug: 'sufjanstevens', supported: false, deleted: true },
-        ],
-      });
-      withArtists();
-
-      await handler(internalEvent({ userId: 'user-1' }));
-
-      expect(savedInserts).toHaveLength(0);
-      expect(savedUpdates).toHaveLength(0);
-    });
-
-    // The shape deduplicating an account leaves behind: the superseded row tombstoned, the
-    // canonical one live. The tombstone must not be read as "artist dismissed" — that would
-    // strand the live row unsupported through every future re-sync — and neither row may be
-    // duplicated by a fresh insert.
-    it('supports the live row when a tombstone for the same artist sits beside it', async () => {
-      const { savedInserts, savedUpdates } = setupDb({
-        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext() },
-        savedRows: [
-          { id: 'row-1', artist_id: 'artist-1', artist_slug: 'sufjanstevens', supported: false, deleted: true },
-          { id: 'row-2', artist_id: 'artist-1', artist_slug: 'sufjan-stevens', supported: false, deleted: false },
-        ],
-      });
-      withArtists();
-
-      await handler(internalEvent({ userId: 'user-1' }));
-
-      expect(savedInserts).toHaveLength(0);
-      expect(savedUpdates).toHaveLength(1);
-      expect(savedUpdates[0].column).toBe('id');
-      expect(savedUpdates[0].values).toEqual(['row-2']);
-    });
-
-    it('marks nothing for unmatched artists', async () => {
-      const { savedInserts, savedUpdates } = setupDb({
-        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext() },
-      });
+  describe('collection import does not touch saved artists', () => {
+    // Reversed 2026-08-16 (Brandon): "Collection Imports should always add to the collection
+    // NOT saved artists." A purchase belongs in the collection; saving is a deliberate act
+    // that also subscribes you to alerts. Releases by collection artists still reach the
+    // dashboard — getFeedReleasesForUser unions both lists — without conscripting the list.
+    it('writes no saved_artists rows even when every artist matches', async () => {
+      const ciphertext = encryptCredential(JSON.stringify({ t: 'tok', s: 'salt' }));
+      setupDb({ connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext } });
       mocks.mockReadAllPages.mockResolvedValue({ ok: true, rows: [SUFJAN] });
       mocks.mockFetchAllAlbums.mockResolvedValue([
-        { id: 'al-9', name: 'Some Album', artist: 'Nobody We Know' },
+        { id: 'al-1', name: 'Illinois', artist: 'Sufjan Stevens' },
       ]);
 
-      await handler(internalEvent({ userId: 'user-1' }));
+      const res = await handler(internalEvent({ userId: 'user-1' }));
 
-      expect(savedInserts).toHaveLength(0);
-      expect(savedUpdates).toHaveLength(0);
+      expect(res.statusCode).toBe(200);
+      expect(mocks.mockFrom).not.toHaveBeenCalledWith('saved_artists');
     });
   });
 
