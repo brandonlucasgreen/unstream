@@ -13,6 +13,14 @@ vi.mock('../redis', () => ({
   reportRedisFailure: vi.fn(),
 }));
 
+// Stands in for JWT verification. Whether a given token verifies is middleware's contract,
+// not this module's — what's tested here is only what accountRateLimitKey does with the
+// answer, which is the part that decides who shares a bucket with whom.
+const authenticateBearerFast = vi.fn();
+vi.mock('../middleware', () => ({
+  authenticateBearerFast: (...args: unknown[]) => authenticateBearerFast(...args),
+}));
+
 vi.mock('@upstash/ratelimit', () => {
   class FakeRatelimit {
     prefix: string;
@@ -61,5 +69,44 @@ describe('account rate limit tier', () => {
     // even with a token refresh partway through.
     const perMinute = built.find(b => b.prefix === 'rl:account');
     expect(perMinute?.window).toEqual({ tokens: 60, window: '1 m' });
+  });
+});
+
+describe('accountRateLimitKey', () => {
+  beforeEach(() => {
+    authenticateBearerFast.mockReset();
+    vi.resetModules();
+  });
+
+  it('gives two users on one IP separate budgets', async () => {
+    const { accountRateLimitKey } = await import('../ratelimit');
+
+    authenticateBearerFast.mockResolvedValueOnce({ userId: 'user-a', email: 'a@example.com' });
+    const a = await accountRateLimitKey('Bearer a', '203.0.113.1');
+    authenticateBearerFast.mockResolvedValueOnce({ userId: 'user-b', email: 'b@example.com' });
+    const b = await accountRateLimitKey('Bearer b', '203.0.113.1');
+
+    // The whole point of the change: one office network is no longer one budget.
+    expect(a).toBe('user:user-a');
+    expect(b).toBe('user:user-b');
+    expect(a).not.toBe(b);
+  });
+
+  it('falls back to the IP when the token does not verify', async () => {
+    const { accountRateLimitKey } = await import('../ratelimit');
+
+    // A forged token has to buy a *different* bucket, never an extra one — otherwise
+    // rotating the `sub` claim would be unlimited requests.
+    authenticateBearerFast.mockResolvedValue(null);
+
+    expect(await accountRateLimitKey('Bearer forged', '203.0.113.1')).toBe('ip:203.0.113.1');
+    expect(await accountRateLimitKey(undefined, '203.0.113.1')).toBe('ip:203.0.113.1');
+  });
+
+  it('falls back to the IP rather than failing the request when verification throws', async () => {
+    const { accountRateLimitKey } = await import('../ratelimit');
+    authenticateBearerFast.mockRejectedValue(new Error('JWKS unreachable'));
+
+    expect(await accountRateLimitKey('Bearer x', '203.0.113.1')).toBe('ip:203.0.113.1');
   });
 });

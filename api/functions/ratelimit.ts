@@ -3,7 +3,7 @@
 // Supports tiered limits: anonymous (strict), free, pro, internal
 
 import { Ratelimit } from '@upstash/ratelimit';
-import type { ApiKeyInfo } from './middleware';
+import { authenticateBearerFast, type ApiKeyInfo } from './middleware';
 import { getRedis, reportRedisFailure } from './redis';
 
 // ---------------------------------------------------------------------------
@@ -198,6 +198,43 @@ function getProDailyLimiter(): Ratelimit | null {
 // ---------------------------------------------------------------------------
 // Original rate limit check (for web app / anonymous requests)
 // ---------------------------------------------------------------------------
+
+/**
+ * The identifier to rate-limit an account endpoint by: the signed-in user when the
+ * request carries a valid token, their IP otherwise.
+ *
+ * Why not IP alone, which is what these endpoints used to do: everyone behind one NAT
+ * — an office, a café, a household — shares a single budget, so one person loading
+ * /settings can 429 a colleague. A user's own account requests should be bounded by
+ * *their* usage and nothing else.
+ *
+ * Why this can't be gamed: the token is verified, not just decoded. A forged or
+ * garbage token fails and falls back to the IP key, so it buys a different bucket,
+ * never an extra one. Verification is local (JWKS/HS256, cached in module scope) and
+ * costs no network call on a warm invocation, which is what keeps this cheap enough
+ * to run *before* the limit — the point of limiting first is that unauthenticated
+ * floods must not reach the auth server.
+ *
+ * This derives a bucket name only. It is not authorization: callers still run their
+ * own auth check, and `authenticateBearerFast` deliberately accepts a token until it
+ * expires even if the session was revoked (PR #331). The two endpoints that already
+ * use the fast path therefore verify the same token twice — deliberately. It is two
+ * local signature checks against a memoized key set, and one call shape across all
+ * nine account endpoints is worth more than shaving it.
+ */
+export async function accountRateLimitKey(
+  authHeader: string | undefined,
+  ip: string
+): Promise<string> {
+  try {
+    const user = await authenticateBearerFast(authHeader);
+    if (user) return `user:${user.userId}`;
+  } catch {
+    // Verification is best-effort here — a failure means we don't know who this is,
+    // which is exactly what the IP fallback is for. Never let it fail the request.
+  }
+  return `ip:${ip}`;
+}
 
 export type RateLimitTier = 'standard' | 'strict' | 'lenient' | 'account';
 

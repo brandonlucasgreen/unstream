@@ -5,7 +5,7 @@
 // successful pull and passes it as `since` on the next request.
 
 import { getClient } from './db';
-import { checkRateLimit, getClientIp } from './ratelimit';
+import { checkRateLimit, accountRateLimitKey, getClientIp } from './ratelimit';
 import { authenticateBearerFast } from './middleware';
 
 const CORS_HEADERS = {
@@ -28,9 +28,11 @@ export async function handler(event: {
   }
 
   // Rate-limit check (Redis) and token validation (Supabase Auth) are both
-  // network round-trips with no data dependency — run them concurrently.
+  // network round-trips with no data dependency — run them concurrently. Deriving
+  // the rate-limit key first costs nothing to that: it verifies the JWT locally.
   const ip = getClientIp(event.headers);
-  const rlPromise = checkRateLimit(ip, 'account', CORS_HEADERS);
+  const rlKey = await accountRateLimitKey(event.headers.authorization, ip);
+  const rlPromise = checkRateLimit(rlKey, 'account', CORS_HEADERS);
   const userPromise = authenticateBearerFast(event.headers.authorization).catch(() => null);
   const rl = await rlPromise;
   if (rl.limited) return rl.response;
