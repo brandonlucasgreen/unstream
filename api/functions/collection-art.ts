@@ -87,7 +87,13 @@ export async function handler(event: {
     return { statusCode: 404, headers: JSON_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
   }
 
-  const rl = await checkRateLimit(getClientIp(event.headers), 'standard', JSON_HEADERS);
+  // 'lenient', not 'standard'. One collection page renders 15 tiles and most of them miss
+  // `art_url` (only ~28% of a real import matches an Unstream release), so a single page view
+  // fires a dozen or more requests here. On the 30/min 'standard' bucket that spends a
+  // person's whole budget in two page views and 429s them out of their own settings and
+  // release lists — which is exactly the failure the lenient tier's own comment describes for
+  // typeahead. High-frequency and low-cost (a CDN hit after the first view) is the same shape.
+  const rl = await checkRateLimit(getClientIp(event.headers), 'lenient', JSON_HEADERS);
   // `response` is optional on the rate-limit result, so returning it bare can hand Netlify
   // `undefined`. Substitute a plain 429 rather than relying on the caller's shape.
   if (rl.limited) {

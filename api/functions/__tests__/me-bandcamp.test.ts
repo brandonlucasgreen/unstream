@@ -13,6 +13,8 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../db', () => ({ getClient: () => ({ from: mocks.mockFrom }) }));
 vi.mock('@supabase/supabase-js', () => ({ createClient: mocks.mockCreateClient }));
 vi.mock('../ratelimit', () => ({
+  // Only a bucket name; the endpoints' own auth is mocked separately.
+  accountRateLimitKey: async () => 'user:test-user',
   checkRateLimit: mocks.mockCheckRateLimit,
   getClientIp: mocks.mockGetClientIp,
 }));
@@ -411,5 +413,36 @@ describe('me-bandcamp handler', () => {
       expect(userEq).toHaveBeenCalledWith('user_id', 'user-1');
       expect(sourceEq).toHaveBeenCalledWith('source', 'bandcamp');
     });
+  });
+});
+
+// POST is the one account route that submits a third-party credential and verifies it live
+// against Bandcamp, which makes it a credential-checking oracle. It therefore does NOT share
+// the reads' generous per-user budget: per-user keying would let an attacker buy more guessing
+// budget by holding more Unstream accounts, which is backwards for a credential path.
+describe('me-bandcamp rate limiting', () => {
+  beforeEach(() => {
+    mocks.mockCheckRateLimit.mockClear();
+    mocks.mockCheckRateLimit.mockResolvedValue({ limited: false });
+  });
+
+  it('limits credential submission per IP on the strict tier', async () => {
+    mocks.mockPing.mockResolvedValue(undefined);
+    mocks.mockArtistCount.mockResolvedValue(1);
+    mocks.mockFrom.mockReturnValue({ upsert: vi.fn(() => Promise.resolve({ error: null })) });
+
+    await handler(authedEvent('POST', { username: 'fan', password: PASSWORD }));
+
+    expect(mocks.mockCheckRateLimit).toHaveBeenCalledWith('127.0.0.1', 'strict', expect.anything());
+  });
+
+  it('limits the status read per user on the account tier', async () => {
+    mocks.mockFrom.mockReturnValue({
+      select: vi.fn(() => ({ eq: vi.fn(() => ({ maybeSingle: async () => ({ data: null, error: null }) })) })),
+    });
+
+    await handler({ httpMethod: 'GET', headers: { authorization: 'Bearer valid-token' }, body: null });
+
+    expect(mocks.mockCheckRateLimit).toHaveBeenCalledWith('user:test-user', 'account', expect.anything());
   });
 });

@@ -4,7 +4,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
-import { checkRateLimit, getClientIp } from './ratelimit';
+import { checkRateLimit, accountRateLimitKey, getClientIp } from './ratelimit';
 
 // CORS: matches the hand-rolled pattern in saved-artists.ts (permissive origin).
 // The shared middleware (buildCorsHeaders) restricts to unstream.stream for
@@ -48,9 +48,11 @@ export async function handler(event: {
   }
 
   // Rate-limit check (Redis) and token validation (Supabase Auth) are both
-  // network round-trips with no data dependency — run them concurrently.
+  // network round-trips with no data dependency — run them concurrently. Deriving
+  // the rate-limit key first costs nothing to that: it verifies the JWT locally.
   const ip = getClientIp(event.headers);
-  const rlPromise = checkRateLimit(ip, 'standard', CORS_HEADERS);
+  const rlKey = await accountRateLimitKey(event.headers.authorization, ip);
+  const rlPromise = checkRateLimit(rlKey, 'account', CORS_HEADERS);
   const userPromise = authenticateRequest(event.headers.authorization).catch(() => null);
   const rl = await rlPromise;
   if (rl.limited) return rl.response;

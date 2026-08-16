@@ -13,7 +13,7 @@
 // We store the search result data (slug, name, imageUrl) directly in saved_artists.
 
 import { getClient } from './db';
-import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
+import { checkRateLimit, accountRateLimitKey, checkSentryDedup, getClientIp } from './ratelimit';
 import { authenticateBearerFast } from './middleware';
 import { requestArtistCatalog } from './request-catalog';
 import { Sentry } from '../lib/sentry';
@@ -132,9 +132,11 @@ export async function handler(event: {
   }
 
   // Rate-limit check (Redis) and token validation (Supabase Auth) are both
-  // network round-trips with no data dependency — run them concurrently.
+  // network round-trips with no data dependency — run them concurrently. Deriving
+  // the rate-limit key first costs nothing to that: it verifies the JWT locally.
   const ip = getClientIp(event.headers);
-  const rlPromise = checkRateLimit(ip, 'standard', CORS_HEADERS);
+  const rlKey = await accountRateLimitKey(event.headers.authorization, ip);
+  const rlPromise = checkRateLimit(rlKey, 'account', CORS_HEADERS);
   const userPromise = authenticateBearerFast(event.headers.authorization).catch(() => null);
   const rl = await rlPromise;
   if (rl.limited) return rl.response;

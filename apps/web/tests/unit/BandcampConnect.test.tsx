@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, cleanup, act } from '@testing-library/react';
 
 const mockUseAuth = vi.fn();
 vi.mock('../../src/contexts/AuthContext', () => ({
@@ -157,5 +157,96 @@ describe('BandcampConnect', () => {
       expect(screen.getByText('The sync failed partway through.')).not.toBeNull();
     });
     expect(screen.getByRole('button', { name: 'Re-sync' })).not.toBeNull();
+  });
+});
+
+// The poll that runs while a sync is in flight. Its ceiling has always been the server's —
+// me-bandcamp.ts reports a sync as failed after 20 minutes, which flips syncStatus and ends
+// the loop — but a flat 5s reached that ceiling in ~240 requests, kept running in a tab
+// nobody was looking at, and could not escape a 429 at all.
+describe('BandcampConnect sync polling', () => {
+  function setHidden(hidden: boolean) {
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => hidden });
+  }
+
+  async function renderSyncing() {
+    mockFetch.mockResolvedValue(
+      statusResponse({ connected: true, username: 'fan', syncStatus: 'syncing', syncError: null })
+    );
+    render(<BandcampConnect />);
+    await act(async () => {});
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  }
+
+  beforeEach(() => {
+    mockUseAuth.mockReturnValue({ session: { access_token: 'test-token' } });
+    mockFetch.mockReset();
+    setHidden(false);
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    setHidden(false);
+    cleanup();
+  });
+
+  it('stops polling after a 429 rather than re-spending the budget as it refills', async () => {
+    await renderSyncing();
+
+    mockFetch.mockResolvedValue({ ok: false, status: 429, json: async () => ({}) });
+    await act(async () => { vi.advanceTimersByTime(5_000); });
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+
+    // Ten more minutes buy nothing: the loop is over until the user acts.
+    await act(async () => { vi.advanceTimersByTime(10 * 60_000); });
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps polling through an ordinary error, which may well be transient', async () => {
+    await renderSyncing();
+
+    mockFetch.mockResolvedValue({ ok: false, status: 500, json: async () => ({}) });
+    await act(async () => { vi.advanceTimersByTime(5_000); });
+    await act(async () => { vi.advanceTimersByTime(5_000); });
+
+    expect(mockFetch).toHaveBeenCalledTimes(3);
+  });
+
+  it('widens the gap between checks as the sync goes on', async () => {
+    await renderSyncing();
+
+    // First minute: one check every 5s, while someone is plausibly watching.
+    for (let i = 0; i < 12; i++) {
+      await act(async () => { vi.advanceTimersByTime(5_000); });
+    }
+    expect(mockFetch).toHaveBeenCalledTimes(13);
+
+    // Past a minute the gap is 15s, so 14.9s buys nothing.
+    await act(async () => { vi.advanceTimersByTime(14_900); });
+    expect(mockFetch).toHaveBeenCalledTimes(13);
+    await act(async () => { vi.advanceTimersByTime(100); });
+    expect(mockFetch).toHaveBeenCalledTimes(14);
+  });
+
+  it('spends no requests on a hidden tab, and refreshes on the way back', async () => {
+    await renderSyncing();
+
+    setHidden(true);
+    await act(async () => { vi.advanceTimersByTime(30_000); });
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+
+    // Returning shouldn't mean waiting out the gap to see whether the sync finished.
+    setHidden(false);
+    await act(async () => { document.dispatchEvent(new Event('visibilitychange')); });
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not fetch on a visibility change that missed nothing', async () => {
+    await renderSyncing();
+
+    // Flipping to another tab and straight back, between ticks, is not a reason to poll.
+    await act(async () => { document.dispatchEvent(new Event('visibilitychange')); });
+    expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 });

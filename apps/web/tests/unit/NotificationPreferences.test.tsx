@@ -7,15 +7,20 @@ vi.mock('../../src/contexts/AuthContext', () => ({
   useAuth: () => mockUseAuth(),
 }));
 
+const captureException = vi.fn();
+vi.mock('@sentry/react', () => ({ captureException: (...args: unknown[]) => captureException(...args) }));
+
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
 import { NotificationPreferences } from '../../src/components/NotificationPreferences';
+import { RATE_LIMIT_MESSAGE } from '../../src/utils/rateLimit';
 
 describe('NotificationPreferences', () => {
   beforeEach(() => {
     mockUseAuth.mockReturnValue({ session: { access_token: 'test-token' } });
     mockFetch.mockReset();
+    captureException.mockReset();
   });
 
   afterEach(() => {
@@ -106,5 +111,20 @@ describe('NotificationPreferences', () => {
       expect(screen.getByText('Failed to update notification preferences')).not.toBeNull();
     });
     expect(screen.getByRole('switch', { name: 'New releases' }).getAttribute('aria-checked')).toBe('true');
+  });
+
+  // A 429 is the shared per-IP budget refilling, not a fault. Reporting it as an exception is
+  // what turned one rate-limited /settings load into five Sentry errors (UNSTREAM-WEB-12), none
+  // of which said what had happened.
+  it('explains a rate limit without reporting it to Sentry', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 429, json: async () => ({}) });
+
+    render(<NotificationPreferences />);
+
+    await waitFor(() => {
+      expect(screen.getByText(RATE_LIMIT_MESSAGE)).not.toBeNull();
+    });
+    expect(captureException).not.toHaveBeenCalled();
+    expect(screen.queryByText('Failed to load notification preferences.')).toBeNull();
   });
 });

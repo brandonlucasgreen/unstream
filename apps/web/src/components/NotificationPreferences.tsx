@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
+import { RATE_LIMIT_MESSAGE } from '../utils/rateLimit';
 
 interface Preferences {
   newRelease: boolean;
@@ -41,6 +42,10 @@ export function NotificationPreferences() {
       const res = await fetch('/api/me/notification-preferences', {
         headers: { 'Authorization': `Bearer ${session.access_token}` },
       });
+      if (res.status === 429) {
+        setError(RATE_LIMIT_MESSAGE);
+        return;
+      }
       if (!res.ok) throw new Error('Failed to fetch notification preferences');
       const data = await res.json();
       setPreferences(data);
