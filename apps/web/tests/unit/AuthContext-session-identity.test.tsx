@@ -36,23 +36,31 @@ vi.mock('src/services/auth', () => ({
   waitForMagicLinkSession: vi.fn(),
 }));
 
-function makeSession(accessToken: string) {
+function makeSession(accessToken: string, userMetadata: Record<string, unknown> = {}) {
   return {
     access_token: accessToken,
     refresh_token: 'refresh',
     token_type: 'bearer',
     expires_in: 3600,
     expires_at: 1_000_000,
-    user: { id: 'user-1', email: 'fan@example.com', aud: 'authenticated', role: 'authenticated' },
+    user: {
+      id: 'user-1',
+      email: 'fan@example.com',
+      aud: 'authenticated',
+      role: 'authenticated',
+      user_metadata: userMetadata,
+    },
   };
 }
 
 // Stands in for the six panels on /settings: one fetch, keyed on the session object.
 const sessionEffectRuns = { count: 0 };
 const tokensSeen: (string | null)[] = [];
+const hasPasswordSeen: boolean[] = [];
 function Panel() {
-  const { session } = useAuth();
+  const { session, hasPassword } = useAuth();
   tokensSeen.push(session?.access_token ?? null);
+  hasPasswordSeen.push(hasPassword);
   useEffect(() => {
     if (session) sessionEffectRuns.count += 1;
   }, [session]);
@@ -65,6 +73,7 @@ describe('AuthContext session identity', () => {
   beforeEach(() => {
     sessionEffectRuns.count = 0;
     tokensSeen.length = 0;
+    hasPasswordSeen.length = 0;
     mocks.getSession.mockReset();
     mocks.onAuthStateChange.mockReset();
     mocks.onAuthStateChange.mockImplementation((cb: (e: string, s: unknown) => void) => {
@@ -119,5 +128,22 @@ describe('AuthContext session identity', () => {
     });
 
     expect(tokensSeen[tokensSeen.length - 1]).toBeNull();
+  });
+
+  // The guard keys on the access token, which is right for the session and wrong for the
+  // user: Supabase fires USER_UPDATED with fresh metadata on the *same* token, and that is
+  // exactly what updatePassword() produces. Guarding setUser on the token left hasPassword
+  // stale, so PasswordSection kept offering "Set password" to someone who had just set one.
+  it('propagates updated user metadata that arrives on the same token', async () => {
+    await renderSignedIn();
+    expect(hasPasswordSeen[hasPasswordSeen.length - 1]).toBe(false);
+
+    await act(async () => {
+      emitAuthEvent('USER_UPDATED', makeSession('token-abc', { has_password: true }));
+    });
+
+    expect(hasPasswordSeen[hasPasswordSeen.length - 1]).toBe(true);
+    // ...and it still must not re-fire the fetches that caused the original bug.
+    expect(sessionEffectRuns.count).toBe(1);
   });
 });

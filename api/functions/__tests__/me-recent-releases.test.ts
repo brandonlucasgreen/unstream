@@ -14,6 +14,8 @@ vi.mock('@supabase/supabase-js', () => ({
   createClient: () => ({ auth: { getUser: mocks.authGetUser } }),
 }));
 vi.mock('../ratelimit', () => ({
+  // Only a bucket name; the endpoint's own auth is mocked separately.
+  accountRateLimitKey: async () => 'user:test-user',
   checkRateLimit: mocks.checkRateLimit,
   getClientIp: mocks.getClientIp,
 }));

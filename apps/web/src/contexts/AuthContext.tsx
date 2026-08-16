@@ -89,12 +89,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // until the page 429'd on itself (Sentry UNSTREAM-WEB-12). Only a different
     // access token is a change worth propagating.
     function applySession(newSession: Session | null) {
-      const unchanged = newSession?.access_token === sessionRef.current?.access_token;
+      const tokenUnchanged = newSession?.access_token === sessionRef.current?.access_token;
       sessionRef.current = newSession;
-      if (unchanged) return;
+
+      // The *user* propagates whether or not the token changed. Supabase fires
+      // USER_UPDATED with fresh metadata on the same token — that's the event
+      // updatePassword() produces when it sets has_password — so guarding this on the
+      // token would leave `hasPassword` (line ~348) stale and PasswordSection showing
+      // "Set password" to someone who had just set one. Safe to do unguarded because
+      // nothing keys an *effect* on `user`: Header renders it, PasswordSection reads a
+      // derived boolean. It costs a render, not a refetch. `session` is the identity
+      // that six /settings panels fetch on, and that's the one the guard below protects.
+      setUser(newSession?.user ?? null);
+
+      if (tokenUnchanged) return;
 
       setSession(newSession);
-      setUser(newSession?.user ?? null);
       // Clear saved artists on sign out. This has to stay inside the guard —
       // `new Set()` is a new identity every call, so running it on a no-op
       // emission would recreate exactly the churn above.

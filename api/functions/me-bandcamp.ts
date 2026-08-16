@@ -182,9 +182,26 @@ export async function handler(event: {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   }
 
+  // POST carries a Bandcamp username and password that this endpoint verifies live against
+  // Bandcamp (subsonicPing), which makes it a credential-checking oracle — the one account
+  // route where that is true. It is limited per IP on the strict tier, like me-password:
+  //
+  //   - per IP, not per user, because keying it by user would let an attacker buy more
+  //     guessing budget simply by holding more Unstream accounts. For a credential path
+  //     that is backwards, even though per-user is right for the reads below.
+  //   - 'strict' (10/min), not 'account' (60/min), because nobody legitimately submits a
+  //     credential or hits Re-sync more than a few times a minute.
+  //
+  // GET and DELETE are ordinary account traffic and stay on the per-user account budget,
+  // which is what keeps the sync poll from competing with a colleague on the same network.
   const ip = getClientIp(event.headers);
-  const rlKey = await accountRateLimitKey(event.headers.authorization, ip);
-  const rl = await checkRateLimit(rlKey, 'account', CORS_HEADERS);
+  const rl = event.httpMethod === 'POST'
+    ? await checkRateLimit(ip, 'strict', CORS_HEADERS)
+    : await checkRateLimit(
+        await accountRateLimitKey(event.headers.authorization, ip),
+        'account',
+        CORS_HEADERS
+      );
   if (rl.limited) return rl.response;
 
   const client = getClient();
