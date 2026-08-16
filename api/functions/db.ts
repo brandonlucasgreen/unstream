@@ -4707,8 +4707,60 @@ async function savedArtistIdsForUser(
 }
 
 /**
- * Every release worth putting in one fan's feed: across all their saved artists, dated within
- * the trailing window or still to come.
+ * The artists a fan owns a record by, resolved to artist ids.
+ *
+ * `collection_items` stores the artist as the source spells it, not a foreign key, so this
+ * resolves two ways: exactly, through a matched release's `artist_id`, and by deriving the
+ * slug with `artistSlug()` — the same key every other writer uses — for items that never
+ * matched a release. Unresolvable artists simply contribute nothing.
+ *
+ * Read failures return an empty list rather than null: the collection is an *addition* to the
+ * saved-artist feed, so a failure here should quietly narrow the feed, never blank it.
+ */
+async function collectionArtistIdsForUser(
+  client: NonNullable<ReturnType<typeof getClient>>,
+  userId: string
+): Promise<string[]> {
+  const read = await readAllPages<{ artist_name: string; releases: { artist_id: string } | null }>(
+    (from, to) =>
+      client
+        .from('collection_items')
+        .select('artist_name, releases!left (artist_id)')
+        .eq('user_id', userId)
+        .range(from, to),
+    'collection_items (feed)'
+  );
+  if (!read.ok) return [];
+
+  const ids = new Set<string>();
+  const slugs = new Set<string>();
+  for (const row of read.rows) {
+    if (row.releases?.artist_id) ids.add(row.releases.artist_id);
+    else if (row.artist_name) {
+      const slug = artistSlug(row.artist_name);
+      if (slug) slugs.add(slug);
+    }
+  }
+
+  const pending = [...slugs];
+  for (let i = 0; i < pending.length; i += 100) {
+    const { data, error } = await client
+      .from('artists')
+      .select('id')
+      .in('slug', pending.slice(i, i + 100));
+    if (error) {
+      console.error('[DB] collectionArtistIdsForUser slug resolution failed:', error.message);
+      break;
+    }
+    for (const row of (data as { id: string }[]) || []) ids.add(row.id);
+  }
+
+  return [...ids];
+}
+
+/**
+ * Every release worth putting in one fan's feed: across their saved artists *and* the artists
+ * in their collection, dated within the trailing window or still to come.
  *
  * Two exclusions match the alert path for the same reasons — hidden releases are suppressed by
  * an artist and must stay invisible, and a `needs_review` tier-3 fuzzy flag means we aren't sure
@@ -4719,8 +4771,13 @@ export async function getFeedReleasesForUser(userId: string, now: Date = new Dat
   if (!client) return [];
 
   try {
-    const artistIds = await savedArtistIdsForUser(client, userId);
-    if (artistIds === null) return [];
+    // Saved artists AND artists you own a record by. Buying somebody's album is at least as
+    // strong a signal that you want their next one as saving them is — but the two lists stay
+    // separate everywhere else, because saving is a deliberate act and an import is not.
+    const savedIds = await savedArtistIdsForUser(client, userId);
+    if (savedIds === null) return [];
+    const collectionIds = await collectionArtistIdsForUser(client, userId);
+    const artistIds = [...new Set([...savedIds, ...collectionIds])];
     if (artistIds.length === 0) return [];
 
     const { data, error } = await client
