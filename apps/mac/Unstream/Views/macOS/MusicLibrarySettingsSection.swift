@@ -55,16 +55,16 @@ struct MusicLibrarySettingsSection: View {
             }
         } header: {
             HStack {
-                Text("Music Library")
+                Text("iCloud Music Library")
                 if service.snapshot != nil {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundColor(.green)
                         .font(.caption)
-                        .accessibilityLabel("Music library imported")
+                        .accessibilityLabel("iCloud Music Library imported")
                 }
             }
         } footer: {
-            Text("Reads your Music library — play counts, and whether each track is a file you own or a subscription stream — so Unstream can show which artists you actually listen to. The first import will ask permission to control Music. The data never leaves this Mac.")
+            Text("Reads your iCloud Music Library from the Music app — play counts, and whether each track is a file you own or an Apple Music subscription stream — so Unstream can show which artists you actually listen to and have never paid. The first import asks permission to control Music. Nothing is uploaded: this stays on your Mac.")
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
