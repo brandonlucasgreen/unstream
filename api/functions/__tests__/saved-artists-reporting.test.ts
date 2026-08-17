@@ -21,13 +21,18 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('../db', () => ({ getClient: () => ({ from: mocks.mockFrom }) }));
 vi.mock('../ratelimit', () => ({
-  // Only a bucket name; the endpoints' own auth is mocked separately.
-  accountRateLimitKey: async () => 'user:test-user',
+  // The endpoint now takes its user from here rather than authenticating separately, so this
+  // stands in for the real helper: one local verification, reported as both the bucket and
+  // the caller. Driving it off the same mock keeps every mockAuthenticateBearerFast(...) in
+  // the tests below meaningful.
+  resolveAccountRequest: async (authHeader?: string) => {
+    const user = await mocks.mockAuthenticateBearerFast(authHeader);
+    return { key: user ? `user:${user.userId}` : 'ip:127.0.0.1', user: user ?? null };
+  },
   checkRateLimit: mocks.mockCheckRateLimit,
   checkSentryDedup: mocks.mockCheckSentryDedup,
   getClientIp: mocks.mockGetClientIp,
 }));
-vi.mock('../middleware', () => ({ authenticateBearerFast: mocks.mockAuthenticateBearerFast }));
 vi.mock('../request-catalog', () => ({ requestArtistCatalog: mocks.mockRequestArtistCatalog }));
 vi.mock('../../lib/sentry', () => ({
   Sentry: { captureMessage: mocks.mockCaptureMessage, captureException: mocks.mockCaptureException },

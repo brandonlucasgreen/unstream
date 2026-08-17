@@ -5,8 +5,7 @@
 // successful pull and passes it as `since` on the next request.
 
 import { getClient } from './db';
-import { checkRateLimit, accountRateLimitKey, getClientIp } from './ratelimit';
-import { authenticateBearerFast } from './middleware';
+import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
@@ -27,14 +26,12 @@ export async function handler(event: {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   }
 
-  // Rate-limit check (Redis) and token validation (Supabase Auth) are both
-  // network round-trips with no data dependency — run them concurrently. Deriving
-  // the rate-limit key first costs nothing to that: it verifies the JWT locally.
+  // The per-user rate-limit bucket can only exist once the token has been verified, so
+  // resolving the bucket resolves the caller too — one local JWT check, not two, and no
+  // round trip to the auth server on a warm invocation (see resolveAccountRequest).
   const ip = getClientIp(event.headers);
-  const rlKey = await accountRateLimitKey(event.headers.authorization, ip);
-  const rlPromise = checkRateLimit(rlKey, 'account', CORS_HEADERS);
-  const userPromise = authenticateBearerFast(event.headers.authorization).catch(() => null);
-  const rl = await rlPromise;
+  const { key, user } = await resolveAccountRequest(event.headers.authorization, ip);
+  const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
   if (rl.limited) return rl.response;
 
   const client = getClient();
@@ -46,7 +43,6 @@ export async function handler(event: {
     return { statusCode: 405, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
-  const user = await userPromise;
   if (!user) {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authenticated' }) };
   }

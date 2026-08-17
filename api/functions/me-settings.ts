@@ -20,6 +20,16 @@ const CORS_HEADERS = {
 // getUser(token) validates the token against the auth server and returns the
 // user's *current* record (not the stale token claims), so email and
 // user_metadata here are as fresh as a separate admin.getUserById lookup.
+//
+// This is the one account endpoint that still pays for that round trip. The others take
+// their user from resolveAccountRequest, which verifies the JWT locally — but local
+// verification surfaces only `sub` and `email`, and this endpoint needs
+// `user_metadata.has_password`. Reading that from token claims would be a guess about what
+// Supabase puts in an access token, and getting it wrong shows somebody who has a password
+// the "your account was created with a magic link" branch of /settings. So it stays.
+//
+// The cost is smaller here than it looks: the call below is started *before* the rate-limit
+// check and awaited after, so the round trip overlaps Redis rather than following it.
 async function authenticateRequest(authHeader: string | undefined): Promise<{ userId: string; email: string; hasPassword: boolean } | null> {
   if (!authHeader?.startsWith('Bearer ')) return null;
   const token = authHeader.slice(7);

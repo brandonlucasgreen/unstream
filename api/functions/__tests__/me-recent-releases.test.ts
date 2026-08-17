@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   getFeedReleasesForUser: vi.fn(),
-  authGetUser: vi.fn(),
+  resolveAccountRequest: vi.fn(),
   checkRateLimit: vi.fn(),
   getClientIp: vi.fn(() => '127.0.0.1'),
 }));
@@ -10,12 +10,10 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../db', () => ({
   getFeedReleasesForUser: mocks.getFeedReleasesForUser,
 }));
-vi.mock('@supabase/supabase-js', () => ({
-  createClient: () => ({ auth: { getUser: mocks.authGetUser } }),
-}));
+// The endpoint takes its user from here now rather than calling the auth server itself:
+// deriving the per-user rate-limit bucket already verified the token.
 vi.mock('../ratelimit', () => ({
-  // Only a bucket name; the endpoint's own auth is mocked separately.
-  accountRateLimitKey: async () => 'user:test-user',
+  resolveAccountRequest: mocks.resolveAccountRequest,
   checkRateLimit: mocks.checkRateLimit,
   getClientIp: mocks.getClientIp,
 }));
@@ -154,7 +152,13 @@ describe('me-recent-releases handler', () => {
     process.env.SUPABASE_ANON_KEY = 'anon-key';
     mocks.checkRateLimit.mockResolvedValue({ limited: false });
     mocks.getClientIp.mockReturnValue('127.0.0.1');
-    mocks.authGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null });
+    // Default: whatever the real helper would do — a request carrying a token resolves to a
+    // user, one without doesn't. Tests that need a rejected token override it.
+    mocks.resolveAccountRequest.mockImplementation(async (authHeader?: string) =>
+      authHeader
+        ? { key: 'user:test-user', user: { userId: 'user-1', email: 'fan@example.com' } }
+        : { key: 'ip:127.0.0.1', user: null }
+    );
     mocks.getFeedReleasesForUser.mockResolvedValue([]);
   });
 
@@ -192,7 +196,9 @@ describe('me-recent-releases handler', () => {
   });
 
   it('401s without a valid bearer token, and never reads the database', async () => {
-    mocks.authGetUser.mockResolvedValue({ data: { user: null }, error: { message: 'bad token' } });
+    // Header present, signature bad: verification fails inside the helper, so there is no
+    // user even though the request looked authenticated.
+    mocks.resolveAccountRequest.mockResolvedValue({ key: 'ip:127.0.0.1', user: null });
 
     const res = await handler(GET);
 

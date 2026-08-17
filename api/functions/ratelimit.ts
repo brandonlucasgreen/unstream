@@ -3,7 +3,8 @@
 // Supports tiered limits: anonymous (strict), free, pro, internal
 
 import { Ratelimit } from '@upstash/ratelimit';
-import { authenticateBearerFast, type ApiKeyInfo } from './middleware';
+import { Sentry } from '../lib/sentry';
+import { authenticateBearerFast, type ApiKeyInfo, type BearerUser } from './middleware';
 import { getRedis, reportRedisFailure } from './redis';
 
 // ---------------------------------------------------------------------------
@@ -215,25 +216,69 @@ function getProDailyLimiter(): Ratelimit | null {
  * to run *before* the limit — the point of limiting first is that unauthenticated
  * floods must not reach the auth server.
  *
- * This derives a bucket name only. It is not authorization: callers still run their
- * own auth check, and `authenticateBearerFast` deliberately accepts a token until it
- * expires even if the session was revoked (PR #331). The two endpoints that already
- * use the fast path therefore verify the same token twice — deliberately. It is two
- * local signature checks against a memoized key set, and one call shape across all
- * nine account endpoints is worth more than shaving it.
+ * Prefer `resolveAccountRequest` below, which hands back the verified user alongside the
+ * key so the caller doesn't re-verify. This narrower version remains for callers that
+ * genuinely only want a bucket name.
  */
 export async function accountRateLimitKey(
   authHeader: string | undefined,
   ip: string
 ): Promise<string> {
+  return (await resolveAccountRequest(authHeader, ip)).key;
+}
+
+/** A rate-limit bucket plus whoever the request's token says it belongs to. */
+export interface AccountRequest {
+  /** `user:<id>` when the token verified, `ip:<addr>` when it didn't. */
+  key: string;
+  /** The verified user, or null when the request carries no usable token. */
+  user: BearerUser | null;
+}
+
+/**
+ * Derive the rate-limit bucket *and* keep the user that deriving it already produced.
+ *
+ * The bucket can only be keyed by user if the token has been verified, so by the time a
+ * key exists the work of authenticating is done. Discarding the result meant nine account
+ * endpoints then called `anonClient.auth.getUser(token)` to learn the same user id — a
+ * round trip to the auth server on every request, on top of a local check that had
+ * already answered.
+ *
+ * #458 noted the double verification and judged it fine, correctly, for the two endpoints
+ * on the fast path: two local signature checks against a memoized key set cost nothing.
+ * That reasoning didn't extend to the rest, where the second check leaves the building.
+ *
+ * The trade this makes explicit is PR #331's, now applied to these endpoints too: a
+ * session revoked server-side keeps working until its access token expires (~1 hour).
+ * That is fine for reads and for a user's own settings. Where a fresh server-side check
+ * matters more than latency — `me-password`, which changes a credential, and the admin
+ * paths — keep using `authenticateBearer`.
+ */
+export async function resolveAccountRequest(
+  authHeader: string | undefined,
+  ip: string
+): Promise<AccountRequest> {
   try {
     const user = await authenticateBearerFast(authHeader);
-    if (user) return `user:${user.userId}`;
-  } catch {
-    // Verification is best-effort here — a failure means we don't know who this is,
-    // which is exactly what the IP fallback is for. Never let it fail the request.
+    if (user) return { key: `user:${user.userId}`, user };
+  } catch (error) {
+    // Verification is best-effort for the *bucket* — not knowing who this is, is exactly
+    // what the IP fallback is for, and this must never fail the request.
+    //
+    // But it decides the *user* too now, and "we couldn't check the token" is not the same
+    // answer as "the token is bad". A throw here needs both local verification to be
+    // unavailable and the auth-server fallback inside authenticateBearerFast to fail
+    // outright, so it means Supabase Auth is unreachable — and the caller will answer 401,
+    // telling a signed-in person they aren't. Before this helper owned the auth decision
+    // that same outage surfaced as an unhandled 500, which at least reached Sentry. So it
+    // is reported rather than swallowed: a wave of these is an outage, not expired sessions.
+    Sentry.captureException(error, {
+      level: 'warning',
+      tags: { context: 'ratelimit.resolveAccountRequest' },
+      extra: { note: 'token verification unavailable — request will be treated as signed out' },
+    });
   }
-  return `ip:${ip}`;
+  return { key: `ip:${ip}`, user: null };
 }
 
 export type RateLimitTier = 'standard' | 'strict' | 'lenient' | 'account';

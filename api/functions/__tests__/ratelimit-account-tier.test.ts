@@ -13,6 +13,11 @@ vi.mock('../redis', () => ({
   reportRedisFailure: vi.fn(),
 }));
 
+const captureException = vi.fn();
+vi.mock('../../lib/sentry', () => ({
+  Sentry: { captureException: (...args: unknown[]) => captureException(...args) },
+}));
+
 // Stands in for JWT verification. Whether a given token verifies is middleware's contract,
 // not this module's — what's tested here is only what accountRateLimitKey does with the
 // answer, which is the part that decides who shares a bucket with whom.
@@ -108,5 +113,73 @@ describe('accountRateLimitKey', () => {
     authenticateBearerFast.mockRejectedValue(new Error('JWKS unreachable'));
 
     expect(await accountRateLimitKey('Bearer x', '203.0.113.1')).toBe('ip:203.0.113.1');
+  });
+});
+
+// The account endpoints take their user from here rather than calling the auth server a
+// second time for a user id the bucket already required. What has to hold is that the user
+// reported alongside the key is the one the key was derived from, and that "no bucket for
+// this user" and "no user" stay the same answer — otherwise an endpoint could act on a
+// caller whose token never verified.
+describe('resolveAccountRequest', () => {
+  beforeEach(() => {
+    authenticateBearerFast.mockReset();
+    captureException.mockReset();
+    vi.resetModules();
+  });
+
+  it('reports the verified user alongside the key derived from it', async () => {
+    const { resolveAccountRequest } = await import('../ratelimit');
+    authenticateBearerFast.mockResolvedValue({ userId: 'user-a', email: 'a@example.com' });
+
+    expect(await resolveAccountRequest('Bearer a', '203.0.113.1')).toEqual({
+      key: 'user:user-a',
+      user: { userId: 'user-a', email: 'a@example.com' },
+    });
+  });
+
+  it('reports no user whenever it falls back to the IP bucket', async () => {
+    const { resolveAccountRequest } = await import('../ratelimit');
+
+    authenticateBearerFast.mockResolvedValue(null);
+    expect(await resolveAccountRequest('Bearer forged', '203.0.113.1')).toEqual({
+      key: 'ip:203.0.113.1',
+      user: null,
+    });
+    expect(await resolveAccountRequest(undefined, '203.0.113.1')).toEqual({
+      key: 'ip:203.0.113.1',
+      user: null,
+    });
+
+    // A verification that throws is "we don't know who this is", not "trust them".
+    authenticateBearerFast.mockRejectedValue(new Error('JWKS unreachable'));
+    expect(await resolveAccountRequest('Bearer x', '203.0.113.1')).toEqual({
+      key: 'ip:203.0.113.1',
+      user: null,
+    });
+  });
+
+  it('reports a verification it could not perform, rather than swallowing it', async () => {
+    const { resolveAccountRequest } = await import('../ratelimit');
+    // Reaching this needs local verification to be unavailable *and* the auth-server fallback
+    // inside authenticateBearerFast to fail outright — i.e. Supabase Auth is unreachable. The
+    // caller will answer 401, telling a signed-in person they aren't signed in, so a wave of
+    // these has to be visible as an outage rather than looking like expired sessions.
+    authenticateBearerFast.mockRejectedValue(new Error('JWKS unreachable'));
+
+    const resolved = await resolveAccountRequest('Bearer x', '203.0.113.1');
+
+    expect(resolved).toEqual({ key: 'ip:203.0.113.1', user: null });
+    expect(captureException).toHaveBeenCalledTimes(1);
+  });
+
+  it('verifies the token once per request', async () => {
+    const { resolveAccountRequest } = await import('../ratelimit');
+    authenticateBearerFast.mockResolvedValue({ userId: 'user-a', email: 'a@example.com' });
+
+    await resolveAccountRequest('Bearer a', '203.0.113.1');
+
+    // The whole point: one check answers both "which bucket" and "which user".
+    expect(authenticateBearerFast).toHaveBeenCalledTimes(1);
   });
 });

@@ -23,9 +23,20 @@ vi.mock('../db', () => ({
 vi.mock('@supabase/supabase-js', () => ({
   createClient: mocks.mockCreateClient,
 }));
+/** An Authorization header whose token does not verify — see the ratelimit mock below. */
+const REJECTED_TOKEN = 'Bearer rejected-token';
+
 vi.mock('../ratelimit', () => ({
   // Only a bucket name; the endpoints' own auth is mocked separately.
-  accountRateLimitKey: async () => 'user:test-user',
+  // Mirrors the real helper: deriving the bucket verifies the token, so a request that
+  // carries a good one resolves to a user. A missing header and the REJECTED_TOKEN sentinel
+  // both resolve to null — the second is how a test says "header present, signature bad",
+  // which is the case an auth regression would actually hide. Treating every truthy header
+  // as authenticated would let such a test pass without exercising anything.
+  resolveAccountRequest: async (authHeader?: string) =>
+    authHeader && authHeader !== REJECTED_TOKEN
+      ? { key: 'user:test-user', user: { userId: 'user-1', email: 'test@example.com' } }
+      : { key: 'ip:127.0.0.1', user: null },
   checkRateLimit: mocks.mockCheckRateLimit,
   getClientIp: mocks.mockGetClientIp,
 }));
@@ -60,6 +71,11 @@ describe('user-sharing handler', () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+  });
+
+  it('returns 401 when the token was checked and rejected, not just absent', async () => {
+    const res = await handler({ ...validEvent, headers: { authorization: REJECTED_TOKEN } });
+    expect(res!.statusCode).toBe(401);
   });
 
   it('returns 401 when not authenticated', async () => {
