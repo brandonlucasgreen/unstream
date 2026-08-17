@@ -3,6 +3,7 @@
 // Supports tiered limits: anonymous (strict), free, pro, internal
 
 import { Ratelimit } from '@upstash/ratelimit';
+import { Sentry } from '../lib/sentry';
 import { authenticateBearerFast, type ApiKeyInfo, type BearerUser } from './middleware';
 import { getRedis, reportRedisFailure } from './redis';
 
@@ -260,9 +261,22 @@ export async function resolveAccountRequest(
   try {
     const user = await authenticateBearerFast(authHeader);
     if (user) return { key: `user:${user.userId}`, user };
-  } catch {
-    // Verification is best-effort here — a failure means we don't know who this is,
-    // which is exactly what the IP fallback is for. Never let it fail the request.
+  } catch (error) {
+    // Verification is best-effort for the *bucket* — not knowing who this is, is exactly
+    // what the IP fallback is for, and this must never fail the request.
+    //
+    // But it decides the *user* too now, and "we couldn't check the token" is not the same
+    // answer as "the token is bad". A throw here needs both local verification to be
+    // unavailable and the auth-server fallback inside authenticateBearerFast to fail
+    // outright, so it means Supabase Auth is unreachable — and the caller will answer 401,
+    // telling a signed-in person they aren't. Before this helper owned the auth decision
+    // that same outage surfaced as an unhandled 500, which at least reached Sentry. So it
+    // is reported rather than swallowed: a wave of these is an outage, not expired sessions.
+    Sentry.captureException(error, {
+      level: 'warning',
+      tags: { context: 'ratelimit.resolveAccountRequest' },
+      extra: { note: 'token verification unavailable — request will be treated as signed out' },
+    });
   }
   return { key: `ip:${ip}`, user: null };
 }

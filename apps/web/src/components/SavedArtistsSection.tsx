@@ -16,7 +16,7 @@ import { ArtistRowsSkeleton } from './LoadingSkeletons';
 const PAGE_SIZE = 10;
 
 export function SavedArtistsSection() {
-  const { session, savedArtists, artistsLoaded, loadSavedArtists, removeSavedArtist, saveArtist, setArtistSupported } = useAuth();
+  const { session, savedArtists, artistsLoaded, savedArtistsError, loadSavedArtists, removeSavedArtist, saveArtist, setArtistSupported } = useAuth();
 
   const [error, setError] = useState<string | null>(null);
   const [undo, setUndo] = useState<SavedArtist | null>(null);
@@ -57,14 +57,22 @@ export function SavedArtistsSection() {
 
   async function handleUndo(artist: SavedArtist) {
     setUndo(null);
-    await saveArtist(artist.artistId, artist.notes, artist.name, artist.imageUrl);
+    const restored = await saveArtist(artist.artistId, artist.notes, artist.name, artist.imageUrl);
+    if (!restored) {
+      setError(`Couldn't restore ${artist.name}. Search for them to save them again.`);
+      return;
+    }
     // Restoring the save doesn't restore the supported mark, and that mark records something
-    // the fan actually did — so it goes back too rather than being quietly dropped.
+    // the fan actually did — so it goes back too rather than being quietly dropped. The two
+    // calls aren't atomic and can't be: they're two writes to one row through an endpoint
+    // that takes one action at a time. What matters is that a half-done restore says which
+    // half — checking `restored` first is why this message can't blame the mark for a save
+    // that never landed.
     if (artist.supported) {
       try {
         await setArtistSupported(artist.artistId, true);
       } catch {
-        setError("Restored, but couldn't restore the supported mark. Try setting it again.");
+        setError(`Restored ${artist.name}, but not the supported mark. Press Support to set it again.`);
       }
     }
   }
@@ -92,7 +100,23 @@ export function SavedArtistsSection() {
 
       {error && <p className="text-sm text-red-400 mb-3">{error}</p>}
 
-      {!artistsLoaded ? (
+      {!artistsLoaded && savedArtistsError ? (
+        /*
+          Not a skeleton. `artistsLoaded` stays false when the load fails — deliberately, so an
+          empty list is never presented as "you have saved nobody" — which would leave this
+          section shimmering forever. The old page-level error is what covered this before the
+          sections became independent.
+        */
+        <div className="text-center py-12 rounded-lg border border-border border-dashed">
+          <p className="text-text-muted">{savedArtistsError}</p>
+          <button
+            onClick={() => loadSavedArtists()}
+            className="mt-4 px-4 py-2 rounded-lg border border-border text-sm text-text-primary hover:border-border-hover transition-colors"
+          >
+            Try again
+          </button>
+        </div>
+      ) : !artistsLoaded ? (
         <SkeletonScreen label="Loading your saved artists">
           <ArtistRowsSkeleton count={4} />
         </SkeletonScreen>

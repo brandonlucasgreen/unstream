@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback, useRef, ty
 import type { Session, User } from '@supabase/supabase-js';
 import * as Sentry from '@sentry/react';
 import { getSupabaseClient, waitForMagicLinkSession } from '../services/auth';
+import { RATE_LIMIT_MESSAGE } from '../utils/rateLimit';
 
 const ADMIN_EMAIL = 'info@kidlightbulbs.com';
 
@@ -30,13 +31,20 @@ interface AuthContextValue {
   savedArtists: SavedArtist[];
   savedArtistIds: Set<string>;
   isArtistSaved: (artistId: string) => boolean;
-  saveArtist: (artistId: string, notes?: string, artistName?: string, artistImageUrl?: string) => Promise<void>;
+  /** Resolves false when the server refused and the save was rolled back. */
+  saveArtist: (artistId: string, notes?: string, artistName?: string, artistImageUrl?: string) => Promise<boolean>;
   /** Resolves false when the server refused and the removal was rolled back. */
   removeSavedArtist: (artistId: string) => Promise<boolean>;
   /** Mark a saved artist as supported, or take the mark off. Throws if the server refuses. */
   setArtistSupported: (artistId: string, supported: boolean) => Promise<void>;
   loadSavedArtists: (signal?: AbortSignal) => Promise<void>;
   artistsLoaded: boolean;
+  /**
+   * Set when the saved-artists load failed. `artistsLoaded` deliberately stays false in that
+   * case — an empty list must never be presented as "you have saved nobody" when we simply
+   * don't know — so consumers need this to tell a load in progress from one that gave up.
+   */
+  savedArtistsError: string | null;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -67,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [savedArtists, setSavedArtists] = useState<SavedArtist[]>([]);
   const [savedArtistIds, setSavedArtistIds] = useState<Set<string>>(new Set());
   const [artistsLoaded, setArtistsLoaded] = useState(false);
+  const [savedArtistsError, setSavedArtistsError] = useState<string | null>(null);
 
   // The auth listener below is installed once, so it cannot read `session` state:
   // that closure is pinned to the initial null forever, which is why the
@@ -118,6 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSavedArtists([]);
         setSavedArtistIds(new Set());
         setArtistsLoaded(false);
+        setSavedArtistsError(null);
       }
     }
 
@@ -211,10 +221,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isArtistSaved = useCallback((artistId: string) => savedArtistIds.has(artistId), [savedArtistIds]);
 
   const saveArtist = useCallback(async (artistId: string, notes?: string, artistName?: string, artistImageUrl?: string) => {
-    if (!session) return;
+    if (!session) return false;
 
-    // Skip if already saved (dedup)
-    if (savedArtistIds.has(artistId)) return;
+    // Skip if already saved (dedup). Reported as success: the artist is saved, which is what
+    // the caller asked for.
+    if (savedArtistIds.has(artistId)) return true;
 
     // Optimistic update
     setSavedArtistIds(prev => new Set(prev).add(artistId));
@@ -232,6 +243,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (response.ok) {
         const data = await response.json();
         setSavedArtists(prev => [...prev, data.savedArtist]);
+        return true;
       } else {
         const { statusCode, serverError } = await describeFailure(response);
         Sentry.captureMessage('Save artist failed (rolled back)', {
@@ -246,6 +258,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return next;
         });
         setSavedArtists(prev => prev.filter(a => a.artistId !== artistId));
+        return false;
       }
     } catch (e) {
       Sentry.captureException(e, { extra: { context: 'auth.saveArtist' } });
@@ -261,6 +274,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return next;
       });
       setSavedArtists(prev => prev.filter(a => a.artistId !== artistId));
+      return false;
     }
   }, [session, savedArtistIds]);
 
@@ -397,6 +411,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loadSavedArtists = useCallback(async (signal?: AbortSignal) => {
     if (!session) return;
     if (artistsLoaded) return;
+    setSavedArtistsError(null);
     try {
       const response = await fetch('/api/saved-artists', {
         headers: { 'Authorization': `Bearer ${session.access_token}` },
@@ -414,11 +429,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           extra: { statusCode, hasSession: !!session, serverError },
           tags: { context: 'auth.loadSavedArtists', status_code: String(statusCode) },
         });
+        setSavedArtistsError(
+          statusCode === 429
+            ? RATE_LIMIT_MESSAGE
+            : "Couldn't load your saved artists."
+        );
       }
     } catch (e) {
       if (signal?.aborted) return;
       Sentry.captureException(e, { extra: { context: 'auth.loadSavedArtists' } });
       console.error('Failed to load saved artists');
+      setSavedArtistsError("Couldn't load your saved artists.");
     }
   }, [session, artistsLoaded]);
 
@@ -426,7 +447,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasPassword = !!user?.user_metadata?.has_password;
 
   return (
-    <AuthContext.Provider value={{ session, user, isAdmin, isLoading, hasPassword, signOut: handleSignOut, signInWithMagicLink: handleSignInWithMagicLink, signInWithPassword: handleSignInWithPassword, savedArtists, savedArtistIds, isArtistSaved, saveArtist, removeSavedArtist, setArtistSupported, loadSavedArtists, artistsLoaded }}>
+    <AuthContext.Provider value={{ session, user, isAdmin, isLoading, hasPassword, signOut: handleSignOut, signInWithMagicLink: handleSignInWithMagicLink, signInWithPassword: handleSignInWithPassword, savedArtists, savedArtistIds, isArtistSaved, saveArtist, removeSavedArtist, setArtistSupported, loadSavedArtists, artistsLoaded, savedArtistsError }}>
       {children}
     </AuthContext.Provider>
   );

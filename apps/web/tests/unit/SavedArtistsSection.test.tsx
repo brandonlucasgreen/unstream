@@ -36,9 +36,10 @@ function auth(overrides: Record<string, unknown> = {}) {
     session: { access_token: 'token' },
     savedArtists: [ARTIST],
     artistsLoaded: true,
+    savedArtistsError: null,
     loadSavedArtists: vi.fn(),
     removeSavedArtist: vi.fn(async () => true),
-    saveArtist: vi.fn(async () => {}),
+    saveArtist: vi.fn(async () => true),
     setArtistSupported: vi.fn(async () => {}),
     ...overrides,
   };
@@ -129,7 +130,7 @@ describe('SavedArtistsSection', () => {
   });
 
   it('restores the supported mark on Undo, not just the save', async () => {
-    const saveArtist = vi.fn(async () => {});
+    const saveArtist = vi.fn(async () => true);
     const setArtistSupported = vi.fn(async () => {});
     mockUseAuth.mockReturnValue(auth({
       savedArtists: [{ ...ARTIST, supported: true }],
@@ -147,6 +148,64 @@ describe('SavedArtistsSection', () => {
     // Supporting an artist is a record of something the fan did; restoring the save without it
     // would drop that silently.
     expect(setArtistSupported).toHaveBeenCalledWith('kid-lightbulbs', true);
+  });
+
+  it('shows an error with a retry when the list failed to load, not a skeleton forever', () => {
+    // artistsLoaded stays false on failure — on purpose, so an empty list is never presented
+    // as "you have saved nobody". Without reading the error that leaves this section
+    // shimmering indefinitely, which is what the old page-level error used to catch.
+    const loadSavedArtists = vi.fn();
+    mockUseAuth.mockReturnValue(auth({
+      savedArtists: [],
+      artistsLoaded: false,
+      savedArtistsError: "Couldn't load your saved artists.",
+      loadSavedArtists,
+    }));
+
+    renderSection();
+
+    expect(screen.getByText(/Couldn't load your saved artists/)).not.toBeNull();
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(screen.queryByText(/No saved artists yet/)).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    expect(loadSavedArtists).toHaveBeenCalledTimes(2); // once on mount, once on retry
+  });
+
+  it('does not blame the supported mark when the restore itself failed', async () => {
+    const setArtistSupported = vi.fn(async () => {});
+    mockUseAuth.mockReturnValue(auth({
+      savedArtists: [{ ...ARTIST, supported: true }],
+      saveArtist: vi.fn(async () => false),
+      setArtistSupported,
+    }));
+
+    renderSection();
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Kid Lightbulbs' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Undo' }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Couldn't restore Kid Lightbulbs/)).not.toBeNull();
+    });
+    // The save never landed, so there is no row to mark — attempting it would produce an
+    // error message about the mark for a restore that didn't happen.
+    expect(setArtistSupported).not.toHaveBeenCalled();
+  });
+
+  it('says which half of a restore succeeded when the mark fails', async () => {
+    mockUseAuth.mockReturnValue(auth({
+      savedArtists: [{ ...ARTIST, supported: true }],
+      saveArtist: vi.fn(async () => true),
+      setArtistSupported: vi.fn(async () => { throw new Error('nope'); }),
+    }));
+
+    renderSection();
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Kid Lightbulbs' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Undo' }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Restored Kid Lightbulbs, but not the supported mark/)).not.toBeNull();
+    });
   });
 
   it('shows a skeleton until the context reports the list loaded', () => {

@@ -13,6 +13,11 @@ vi.mock('../redis', () => ({
   reportRedisFailure: vi.fn(),
 }));
 
+const captureException = vi.fn();
+vi.mock('../../lib/sentry', () => ({
+  Sentry: { captureException: (...args: unknown[]) => captureException(...args) },
+}));
+
 // Stands in for JWT verification. Whether a given token verifies is middleware's contract,
 // not this module's — what's tested here is only what accountRateLimitKey does with the
 // answer, which is the part that decides who shares a bucket with whom.
@@ -119,6 +124,7 @@ describe('accountRateLimitKey', () => {
 describe('resolveAccountRequest', () => {
   beforeEach(() => {
     authenticateBearerFast.mockReset();
+    captureException.mockReset();
     vi.resetModules();
   });
 
@@ -151,6 +157,20 @@ describe('resolveAccountRequest', () => {
       key: 'ip:203.0.113.1',
       user: null,
     });
+  });
+
+  it('reports a verification it could not perform, rather than swallowing it', async () => {
+    const { resolveAccountRequest } = await import('../ratelimit');
+    // Reaching this needs local verification to be unavailable *and* the auth-server fallback
+    // inside authenticateBearerFast to fail outright — i.e. Supabase Auth is unreachable. The
+    // caller will answer 401, telling a signed-in person they aren't signed in, so a wave of
+    // these has to be visible as an outage rather than looking like expired sessions.
+    authenticateBearerFast.mockRejectedValue(new Error('JWKS unreachable'));
+
+    const resolved = await resolveAccountRequest('Bearer x', '203.0.113.1');
+
+    expect(resolved).toEqual({ key: 'ip:203.0.113.1', user: null });
+    expect(captureException).toHaveBeenCalledTimes(1);
   });
 
   it('verifies the token once per request', async () => {
