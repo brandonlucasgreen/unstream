@@ -9,9 +9,8 @@
 // files in api/tsconfig.json's typecheck include — keep this one in it.
 
 import { randomBytes } from 'crypto';
-import { createClient } from '@supabase/supabase-js';
 import { deleteFeedToken, getFeedToken, setFeedToken } from './db';
-import { checkRateLimit, accountRateLimitKey, getClientIp } from './ratelimit';
+import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
@@ -38,20 +37,6 @@ function generateToken(): string {
   return randomBytes(32).toString('base64url');
 }
 
-async function authenticateRequest(authHeader: string | undefined): Promise<string | null> {
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const token = authHeader.slice(7);
-
-  const url = process.env.SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return null;
-
-  const anonClient = createClient(url, anonKey);
-  const { data, error } = await anonClient.auth.getUser(token);
-  if (error || !data.user) return null;
-  return data.user.id;
-}
-
 function feedUrls(token: string) {
   return {
     ics: `${SITE}/feed/f/${token}.ics`,
@@ -76,12 +61,14 @@ export async function handler(event: {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   }
 
-  const rlKey = await accountRateLimitKey(event.headers.authorization, getClientIp(event.headers));
-  const rl = await checkRateLimit(rlKey, 'account', CORS_HEADERS);
+  // One verification, not two: deriving the rate-limit bucket already checked the token
+  // (see resolveAccountRequest), so the user it found is the user this handler uses.
+  const { key, user } = await resolveAccountRequest(event.headers.authorization, getClientIp(event.headers));
+  const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
   if (rl.limited) return rl.response;
 
-  const userId = await authenticateRequest(event.headers.authorization);
-  if (!userId) return json(401, { error: 'Not signed in' });
+  if (!user) return json(401, { error: 'Not signed in' });
+  const userId = user.userId;
 
   if (event.httpMethod === 'GET') {
     // Created on first read rather than at signup: most fans will never subscribe, and a token

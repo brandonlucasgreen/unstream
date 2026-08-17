@@ -5,7 +5,7 @@ import { getSupabaseClient, waitForMagicLinkSession } from '../services/auth';
 
 const ADMIN_EMAIL = 'info@kidlightbulbs.com';
 
-interface SavedArtist {
+export interface SavedArtist {
   artistId: string;
   name: string;
   slug: string;
@@ -13,6 +13,9 @@ interface SavedArtist {
   notes?: string;
   addedAt: string;
   claimed?: boolean;
+  /** Whether the fan has marked this artist as one they've actually supported. */
+  supported?: boolean;
+  supportedAt?: string;
 }
 
 interface AuthContextValue {
@@ -28,7 +31,10 @@ interface AuthContextValue {
   savedArtistIds: Set<string>;
   isArtistSaved: (artistId: string) => boolean;
   saveArtist: (artistId: string, notes?: string, artistName?: string, artistImageUrl?: string) => Promise<void>;
-  removeSavedArtist: (artistId: string) => Promise<void>;
+  /** Resolves false when the server refused and the removal was rolled back. */
+  removeSavedArtist: (artistId: string) => Promise<boolean>;
+  /** Mark a saved artist as supported, or take the mark off. Throws if the server refuses. */
+  setArtistSupported: (artistId: string, supported: boolean) => Promise<void>;
   loadSavedArtists: (signal?: AbortSignal) => Promise<void>;
   artistsLoaded: boolean;
 }
@@ -259,7 +265,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session, savedArtistIds]);
 
   const removeSavedArtist = useCallback(async (artistId: string) => {
-    if (!session) return;
+    if (!session) return false;
 
     // Snapshot for rollback
     const removedFromList = savedArtists.find(a => a.artistId === artistId);
@@ -294,7 +300,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (removedFromList) {
           setSavedArtists(prev => [...prev, removedFromList]);
         }
+        return false;
       }
+      return true;
     } catch (e) {
       Sentry.captureException(e, { extra: { context: 'auth.removeSavedArtist' } });
       Sentry.captureMessage('Remove artist failed (rolled back)', {
@@ -307,6 +315,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (removedFromList) {
         setSavedArtists(prev => [...prev, removedFromList]);
       }
+      return false;
+    }
+  }, [session, savedArtists]);
+
+  /**
+   * Mark a saved artist as supported, or take the mark off again.
+   *
+   * Lives here rather than on the dashboard because it mutates the list this context owns.
+   * The dashboard used to keep its own copy of the saved artists and its own remove and
+   * support handlers, which is how removing an artist there left `savedArtistIds` stale and
+   * the save button on search results still showing saved for the rest of the session.
+   *
+   * Optimistic, and rolled back the same way save and remove are: the button records
+   * something the fan already did, so it shouldn't sit spinning. It throws on failure so the
+   * caller can say so — the two callers of save/remove above ignore failure by design, but a
+   * support toggle that silently flips back needs to explain itself.
+   */
+  const setArtistSupported = useCallback(async (artistId: string, supported: boolean) => {
+    if (!session) return;
+
+    const previous = savedArtists.find(a => a.artistId === artistId);
+    setSavedArtists(prev => prev.map(a =>
+      a.artistId === artistId
+        ? { ...a, supported, supportedAt: supported ? new Date().toISOString() : undefined }
+        : a
+    ));
+
+    try {
+      const response = await fetch('/api/saved-artists', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ action: supported ? 'support' : 'unsupport', artistId }),
+      });
+
+      if (!response.ok) {
+        const { statusCode, serverError } = await describeFailure(response);
+        Sentry.captureMessage('Set supported failed (rolled back)', {
+          level: 'warning',
+          extra: { artistId, supported, serverError },
+          tags: { context: 'auth.setArtistSupported', status_code: String(statusCode) },
+        });
+        throw new Error(serverError);
+      }
+
+      const data = await response.json();
+      setSavedArtists(prev => prev.map(a =>
+        a.artistId === artistId
+          ? { ...a, supported: data.savedArtist.supported, supportedAt: data.savedArtist.supportedAt }
+          : a
+      ));
+    } catch (e) {
+      setSavedArtists(prev => prev.map(a =>
+        a.artistId === artistId
+          ? { ...a, supported: previous?.supported, supportedAt: previous?.supportedAt }
+          : a
+      ));
+      throw e;
     }
   }, [session, savedArtists]);
 
@@ -358,7 +426,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasPassword = !!user?.user_metadata?.has_password;
 
   return (
-    <AuthContext.Provider value={{ session, user, isAdmin, isLoading, hasPassword, signOut: handleSignOut, signInWithMagicLink: handleSignInWithMagicLink, signInWithPassword: handleSignInWithPassword, savedArtists, savedArtistIds, isArtistSaved, saveArtist, removeSavedArtist, loadSavedArtists, artistsLoaded }}>
+    <AuthContext.Provider value={{ session, user, isAdmin, isLoading, hasPassword, signOut: handleSignOut, signInWithMagicLink: handleSignInWithMagicLink, signInWithPassword: handleSignInWithPassword, savedArtists, savedArtistIds, isArtistSaved, saveArtist, removeSavedArtist, setArtistSupported, loadSavedArtists, artistsLoaded }}>
       {children}
     </AuthContext.Provider>
   );

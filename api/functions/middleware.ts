@@ -95,7 +95,7 @@ function getJwks(supabaseUrl: string): ReturnType<typeof createRemoteJWKSet> {
   return jwks;
 }
 
-interface BearerUser {
+export interface BearerUser {
   userId: string;
   email: string;
 }

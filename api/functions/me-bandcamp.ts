@@ -11,10 +11,9 @@
 // (t, s) pair, encrypted (credential-crypto.ts), and discarded. It must never be logged,
 // stored, echoed back, or attached to a Sentry event.
 
-import { createClient } from '@supabase/supabase-js';
 import { Sentry } from '../lib/sentry';
 import { getClient } from './db';
-import { checkRateLimit, accountRateLimitKey, getClientIp } from './ratelimit';
+import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 import { encryptCredential, isCredentialKeyConfigured } from './credential-crypto';
 import {
   deriveSubsonicToken,
@@ -77,20 +76,6 @@ function toStatusShape(row: ConnectionRow | null) {
     itemCount: row.item_count,
     lastSyncedAt: row.last_synced_at,
   };
-}
-
-async function authenticateRequest(authHeader: string | undefined): Promise<{ userId: string } | null> {
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const token = authHeader.slice(7);
-
-  const url = process.env.SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return null;
-
-  const anonClient = createClient(url, anonKey);
-  const { data, error } = await anonClient.auth.getUser(token);
-  if (error || !data.user) return null;
-  return { userId: data.user.id };
 }
 
 /**
@@ -194,22 +179,32 @@ export async function handler(event: {
   //
   // GET and DELETE are ordinary account traffic and stay on the per-user account budget,
   // which is what keeps the sync poll from competing with a colleague on the same network.
+  //
+  // The two orders below are deliberate, and this is the one endpoint where they differ.
+  // POST is limited *before* its token is examined at all, so a flood of unauthenticated
+  // credential attempts can't reach the auth server even on a cold invocation. GET and
+  // DELETE need the user to derive their per-user bucket, so they verify first — locally,
+  // at no round-trip cost on a warm invocation (see resolveAccountRequest).
   const ip = getClientIp(event.headers);
-  const rl = event.httpMethod === 'POST'
-    ? await checkRateLimit(ip, 'strict', CORS_HEADERS)
-    : await checkRateLimit(
-        await accountRateLimitKey(event.headers.authorization, ip),
-        'account',
-        CORS_HEADERS
-      );
-  if (rl.limited) return rl.response;
+  const isCredentialWrite = event.httpMethod === 'POST';
+
+  if (isCredentialWrite) {
+    const rl = await checkRateLimit(ip, 'strict', CORS_HEADERS);
+    if (rl.limited) return rl.response;
+  }
+
+  const { key, user } = await resolveAccountRequest(event.headers.authorization, ip);
+
+  if (!isCredentialWrite) {
+    const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
+    if (rl.limited) return rl.response;
+  }
 
   const client = getClient();
   if (!client) {
     return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
   }
 
-  const user = await authenticateRequest(event.headers.authorization);
   if (!user) {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authenticated' }) };
   }

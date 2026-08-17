@@ -110,3 +110,56 @@ describe('accountRateLimitKey', () => {
     expect(await accountRateLimitKey('Bearer x', '203.0.113.1')).toBe('ip:203.0.113.1');
   });
 });
+
+// The account endpoints take their user from here rather than calling the auth server a
+// second time for a user id the bucket already required. What has to hold is that the user
+// reported alongside the key is the one the key was derived from, and that "no bucket for
+// this user" and "no user" stay the same answer — otherwise an endpoint could act on a
+// caller whose token never verified.
+describe('resolveAccountRequest', () => {
+  beforeEach(() => {
+    authenticateBearerFast.mockReset();
+    vi.resetModules();
+  });
+
+  it('reports the verified user alongside the key derived from it', async () => {
+    const { resolveAccountRequest } = await import('../ratelimit');
+    authenticateBearerFast.mockResolvedValue({ userId: 'user-a', email: 'a@example.com' });
+
+    expect(await resolveAccountRequest('Bearer a', '203.0.113.1')).toEqual({
+      key: 'user:user-a',
+      user: { userId: 'user-a', email: 'a@example.com' },
+    });
+  });
+
+  it('reports no user whenever it falls back to the IP bucket', async () => {
+    const { resolveAccountRequest } = await import('../ratelimit');
+
+    authenticateBearerFast.mockResolvedValue(null);
+    expect(await resolveAccountRequest('Bearer forged', '203.0.113.1')).toEqual({
+      key: 'ip:203.0.113.1',
+      user: null,
+    });
+    expect(await resolveAccountRequest(undefined, '203.0.113.1')).toEqual({
+      key: 'ip:203.0.113.1',
+      user: null,
+    });
+
+    // A verification that throws is "we don't know who this is", not "trust them".
+    authenticateBearerFast.mockRejectedValue(new Error('JWKS unreachable'));
+    expect(await resolveAccountRequest('Bearer x', '203.0.113.1')).toEqual({
+      key: 'ip:203.0.113.1',
+      user: null,
+    });
+  });
+
+  it('verifies the token once per request', async () => {
+    const { resolveAccountRequest } = await import('../ratelimit');
+    authenticateBearerFast.mockResolvedValue({ userId: 'user-a', email: 'a@example.com' });
+
+    await resolveAccountRequest('Bearer a', '203.0.113.1');
+
+    // The whole point: one check answers both "which bucket" and "which user".
+    expect(authenticateBearerFast).toHaveBeenCalledTimes(1);
+  });
+});

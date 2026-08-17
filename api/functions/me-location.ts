@@ -4,9 +4,8 @@
 // Body: { location: string | null }
 // Returns the new location on success, or a friendly error on failure.
 
-import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
-import { checkRateLimit, accountRateLimitKey, getClientIp } from './ratelimit';
+import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
@@ -16,20 +15,6 @@ const CORS_HEADERS = {
 };
 
 const MAX_LENGTH = 100;
-
-async function authenticateRequest(authHeader: string | undefined): Promise<{ userId: string; email: string } | null> {
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const token = authHeader.slice(7);
-
-  const url = process.env.SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return null;
-
-  const anonClient = createClient(url, anonKey);
-  const { data, error } = await anonClient.auth.getUser(token);
-  if (error || !data.user) return null;
-  return { userId: data.user.id, email: data.user.email || '' };
-}
 
 export async function handler(event: {
   httpMethod: string;
@@ -41,8 +26,10 @@ export async function handler(event: {
   }
 
   const ip = getClientIp(event.headers);
-  const rlKey = await accountRateLimitKey(event.headers.authorization, ip);
-  const rl = await checkRateLimit(rlKey, 'account', CORS_HEADERS);
+  // One verification, not two: deriving the rate-limit bucket already checked the token
+  // (see resolveAccountRequest), so the user it found is the user this handler uses.
+  const { key, user } = await resolveAccountRequest(event.headers.authorization, ip);
+  const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
   if (rl.limited) return rl.response;
 
   const client = getClient();
@@ -50,7 +37,6 @@ export async function handler(event: {
     return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
   }
 
-  const user = await authenticateRequest(event.headers.authorization);
   if (!user) {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authenticated' }) };
   }

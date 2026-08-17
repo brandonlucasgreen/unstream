@@ -7,9 +7,8 @@
 // from this. Writes to collection_items happen only in sync code (bandcamp-sync-background)
 // — this endpoint can flip `hidden` and nothing else, so provenance stays server-asserted.
 
-import { createClient } from '@supabase/supabase-js';
 import { getClient, readAllPages } from './db';
-import { checkRateLimit, accountRateLimitKey, getClientIp } from './ratelimit';
+import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 import {
   artistUrlFor,
   releaseUrlFor,
@@ -30,20 +29,6 @@ const ITEM_COLUMNS =
 /** The same columns plus the joins the grid needs to build release and artist links. */
 const ITEM_COLUMNS_WITH_LINKS = `${ITEM_COLUMNS}, releases!left (slug, artwork_url, artists (slug))`;
 
-async function authenticateRequest(authHeader: string | undefined): Promise<{ userId: string } | null> {
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const token = authHeader.slice(7);
-
-  const url = process.env.SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return null;
-
-  const anonClient = createClient(url, anonKey);
-  const { data, error } = await anonClient.auth.getUser(token);
-  if (error || !data.user) return null;
-  return { userId: data.user.id };
-}
-
 export async function handler(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
@@ -53,9 +38,11 @@ export async function handler(event: {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   }
 
+  // One verification, not two: deriving the rate-limit bucket already checked the token
+  // (see resolveAccountRequest), so the user it found is the user this handler uses.
   const ip = getClientIp(event.headers);
-  const rlKey = await accountRateLimitKey(event.headers.authorization, ip);
-  const rl = await checkRateLimit(rlKey, 'account', CORS_HEADERS);
+  const { key, user } = await resolveAccountRequest(event.headers.authorization, ip);
+  const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
   if (rl.limited) return rl.response;
 
   const client = getClient();
@@ -63,7 +50,6 @@ export async function handler(event: {
     return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
   }
 
-  const user = await authenticateRequest(event.headers.authorization);
   if (!user) {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authenticated' }) };
   }
