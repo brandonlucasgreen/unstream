@@ -96,6 +96,8 @@ The dominant marketplace for electronic music and DJs. Beatport specializes in d
 
 The payout rate is lower than the other marketplaces here, which matters — but for electronic music, Beatport is often the only option for a proper release outside streaming.
 
+In August 2026, Beatport [banned fully and majority AI-generated tracks](https://support.beatport.com/hc/en-us/articles/52381231418004-Beatport-s-Stance-on-Artificial-Intelligence) from the platform — AI-assisted production like mixing, mastering, and stem separation is still allowed, but tagged as such.
+
 **Best for:** Fans of electronic, DJ, and dance music who want to buy tracks legally and DRM-free.
 
 ---

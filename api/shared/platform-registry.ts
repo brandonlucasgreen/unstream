@@ -98,8 +98,11 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     category: 'marketplace',
     payoutPercent: '55-70%',
     homepageUrl: 'https://www.beatport.com',
-    aiPolicy: 'discouraged',
-    aiPolicyUrl: 'https://greenroomsupport.beatport.com/hc/en-us/articles/19093504988820-Content-Policy',
+    // Formal ban on fully/majority AI-generated tracks (Aug 2026): withheld at ingestion,
+    // rights holders notified. AI-assisted tracks (mixing/mastering/stem separation) are
+    // still allowed but tagged as such. Detection via Beatdapp.
+    aiPolicy: 'formal',
+    aiPolicyUrl: 'https://support.beatport.com/hc/en-us/articles/52381231418004-Beatport-s-Stance-on-Artificial-Intelligence',
   },
   even: {
     name: 'EVEN',
