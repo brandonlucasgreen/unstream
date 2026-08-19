@@ -129,21 +129,10 @@ export function SettingsPage() {
           {/* Password section */}
           <section className="p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
             <h2 className="text-lg font-semibold">Password</h2>
-            {settings?.hasPassword ? (
-              <PasswordChangeForm accessToken={session!.access_token} />
-            ) : (
-              <div className="space-y-2">
-                <p className="text-sm text-text-muted">
-                  Your account was created with a magic link. To set a password, use the password reset flow.
-                </p>
-                <a
-                  href="/login"
-                  className="inline-block text-sm text-accent-primary hover:underline"
-                >
-                  Send password-setup email &rarr;
-                </a>
-              </div>
-            )}
+            <PasswordChangeForm
+              accessToken={session!.access_token}
+              hasPassword={!!settings?.hasPassword}
+            />
           </section>
         </div>
       </main>
