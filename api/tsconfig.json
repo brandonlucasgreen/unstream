@@ -93,6 +93,7 @@
     "functions/__tests__/sentry-environment.test.ts",
     "functions/analytics-event.ts",
     "functions/__tests__/analytics-event.test.ts",
-    "functions/__tests__/persist-release-detail-churn.test.ts"
+    "functions/__tests__/persist-release-detail-churn.test.ts",
+    "functions/__tests__/get-artists-by-slugs.test.ts"
   ]
 }

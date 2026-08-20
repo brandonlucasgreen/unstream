@@ -3399,48 +3399,131 @@ export async function getArtistBySlug(
 
     if (linksError) return null;
 
-    const platforms: PlatformLink[] = (links as LinkRow[]).map(link => ({
-      sourceId: link.platform,
-      url: link.url,
-      ...(link.display_name ? { displayName: link.display_name } : {}),
-      ...(link.latest_release ? { latestRelease: link.latest_release as PlatformLink['latestRelease'] } : {}),
-    }));
-
-    let profile: ArtistProfile | undefined;
-    if (row.match_confidence === 'claimed') {
-      if (profileData) {
-        profile = {
-          bio: profileData.bio || undefined,
-          customImageUrl: profileData.custom_image_url || undefined,
-          websiteUrl: profileData.website_url || undefined,
-          featuredEmbed: profileData.featured_embed || undefined,
-          verified: !!profileData.verified_at,
-          ...(profileData.link_dividers?.length ? { linkDividers: profileData.link_dividers } : {}),
-        };
-      }
-    }
-
-    const location = (row.city || row.country || row.country_code)
-      ? {
-          ...(row.city ? { city: row.city } : {}),
-          ...(row.country ? { country: row.country } : {}),
-          ...(row.country_code ? { countryCode: row.country_code } : {}),
-        }
-      : undefined;
-
-    return {
-      id: row.slug,
-      name: row.name,
-      type: 'artist',
-      imageUrl: profile?.customImageUrl || row.image_url || undefined,
-      platforms,
-      matchConfidence: (row.match_confidence as ArtistResult['matchConfidence']) || undefined,
-      profile,
-      location,
-    };
+    return artistRowToResult(row, (links as LinkRow[]) ?? [], profileData as ProfileRow | null);
   } catch (error) {
     console.error('[DB] getArtistBySlug error:', error);
     return null;
+  }
+}
+
+interface ProfileRow {
+  bio: string | null;
+  custom_image_url: string | null;
+  website_url: string | null;
+  featured_embed: string | null;
+  verified_at: string | null;
+  link_dividers: number[] | null;
+}
+
+/**
+ * The one place a stored artist row becomes an ArtistResult, shared by the single-slug and
+ * batched lookups so the two can't drift in what a card carries.
+ */
+function artistRowToResult(row: ArtistRow, links: LinkRow[], profileData: ProfileRow | null): ArtistResult {
+  const platforms: PlatformLink[] = links.map(link => ({
+    sourceId: link.platform,
+    url: link.url,
+    ...(link.display_name ? { displayName: link.display_name } : {}),
+    ...(link.latest_release ? { latestRelease: link.latest_release as PlatformLink['latestRelease'] } : {}),
+  }));
+
+  let profile: ArtistProfile | undefined;
+  if (row.match_confidence === 'claimed' && profileData) {
+    profile = {
+      bio: profileData.bio || undefined,
+      customImageUrl: profileData.custom_image_url || undefined,
+      websiteUrl: profileData.website_url || undefined,
+      featuredEmbed: profileData.featured_embed || undefined,
+      verified: !!profileData.verified_at,
+      ...(profileData.link_dividers?.length ? { linkDividers: profileData.link_dividers } : {}),
+    };
+  }
+
+  const location = (row.city || row.country || row.country_code)
+    ? {
+        ...(row.city ? { city: row.city } : {}),
+        ...(row.country ? { country: row.country } : {}),
+        ...(row.country_code ? { countryCode: row.country_code } : {}),
+      }
+    : undefined;
+
+  return {
+    id: row.slug,
+    name: row.name,
+    type: 'artist',
+    imageUrl: profile?.customImageUrl || row.image_url || undefined,
+    platforms,
+    matchConfidence: (row.match_confidence as ArtistResult['matchConfidence']) || undefined,
+    profile,
+    location,
+  };
+}
+
+/**
+ * The batched form of getArtistBySlug, for the name-contains search channel: it gets back up
+ * to six slugs from findKnownArtistSlugsByName and used to resolve each one separately — 2-3
+ * uncached queries per slug, so 12-18 reads inside every fuzzy search. This answers the whole
+ * list in at most three: the artist rows, all their links, and the claimed ones's profiles.
+ *
+ * Exact slug match only, no variants: these slugs just came out of the artists table, so they
+ * are stored spellings by construction. Freshness is deliberately not checked — the one caller
+ * passed allowStale, for the reason documented on getArtistBySlug's allowStale option.
+ */
+export async function getArtistsBySlugs(slugs: string[]): Promise<Map<string, ArtistResult>> {
+  const results = new Map<string, ArtistResult>();
+  const client = getClient();
+  if (!client) return results;
+
+  // Same guard as getArtistBySlug: anything else can't match a stored slug.
+  const safe = [...new Set(slugs.filter(s => /^[A-Za-z0-9-]+$/.test(s)))];
+  if (safe.length === 0) return results;
+
+  try {
+    const { data: artistRows, error: artistError } = await client
+      .from('artists')
+      .select('*')
+      .in('slug', safe);
+
+    if (artistError || !artistRows || artistRows.length === 0) return results;
+    const rows = artistRows as ArtistRow[];
+
+    const claimedIds = rows.filter(r => r.match_confidence === 'claimed').map(r => r.id);
+    const [{ data: links, error: linksError }, { data: profiles }] = await Promise.all([
+      client
+        .from('artist_links')
+        .select('*')
+        .in('artist_id', rows.map(r => r.id))
+        .order('display_order', { ascending: true, nullsFirst: false }),
+      claimedIds.length > 0
+        ? client
+            .from('artist_profiles')
+            .select('artist_id, bio, custom_image_url, website_url, featured_embed, verified_at, link_dividers')
+            .in('artist_id', claimedIds)
+        : Promise.resolve({ data: [] }),
+    ]);
+
+    if (linksError) return results;
+
+    const linksByArtist = new Map<string, LinkRow[]>();
+    for (const link of (links as LinkRow[]) ?? []) {
+      const list = linksByArtist.get(link.artist_id);
+      if (list) list.push(link);
+      else linksByArtist.set(link.artist_id, [link]);
+    }
+    const profileByArtist = new Map(
+      ((profiles as (ProfileRow & { artist_id: string })[]) ?? []).map(p => [p.artist_id, p])
+    );
+
+    for (const row of rows) {
+      results.set(
+        row.slug,
+        artistRowToResult(row, linksByArtist.get(row.id) ?? [], profileByArtist.get(row.id) ?? null)
+      );
+    }
+    return results;
+  } catch (error) {
+    console.error('[DB] getArtistsBySlugs error:', error);
+    return results;
   }
 }
 

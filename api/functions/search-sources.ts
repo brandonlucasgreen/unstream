@@ -2,7 +2,7 @@ import { parse } from 'node-html-parser';
 import { Sentry } from '../lib/sentry';
 import { findBandcampArtist } from '../search/bandcamp-probe';
 import { cacheGetOrFetch, artistCacheKey } from './cache';
-import { persistSearchResults, getArtistBySlug, artistSlug, getMergeOverrides, getLinkSuppressions, findKnownArtistSlugsByName } from './db';
+import { persistSearchResults, getArtistBySlug, getArtistsBySlugs, artistSlug, getMergeOverrides, getLinkSuppressions, findKnownArtistSlugsByName } from './db';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
 import { parseMirloArtistSearch } from './search-parsers';
@@ -1988,16 +1988,16 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       });
     // Name-contains is a fuzzy-only channel: a detection query IS the artist's
     // exact name, so a known artist merely containing it is someone else.
+    // Resolved as ONE batched lookup: per-slug getArtistBySlug calls cost 2-3
+    // queries each, which made this channel 12-18 reads per fuzzy search. The
+    // slugs stay in ranked order — the map lookup preserves it.
     const knownByNamePromise: Promise<AggregatedResult[]> = mode === 'exact'
       ? Promise.resolve([])
       : findKnownArtistSlugsByName(normalizedQuery)
-        .then(slugs => Promise.all(
-          slugs.map(s =>
-            getArtistBySlug(s, { allowStale: true })
-              .then(dbArtist => toStoredResult(dbArtist, s))
-              .catch(() => null)
-          )
-        ))
+        .then(async slugs => {
+          const bySlug = await getArtistsBySlugs(slugs);
+          return slugs.map(s => toStoredResult(bySlug.get(s) ?? null, s));
+        })
         .then(list => list.filter((r): r is AggregatedResult => r !== null))
         .catch(err => {
           console.error('[DB] Known artist name search failed:', err);
