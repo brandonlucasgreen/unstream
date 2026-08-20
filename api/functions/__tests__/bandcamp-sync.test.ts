@@ -213,6 +213,121 @@ describe('bandcamp-sync-background handler', () => {
     expect(byExternal['al-3'].release_id).toBeNull();
   });
 
+  // A re-sync used to upsert every album every time, and the table's updated_at trigger makes
+  // any upsert a real row rewrite — 190 rewrites to record that nothing changed, repeated on
+  // every retry of a stalled sync. These tests pin the diff: unchanged rows are not written,
+  // and "no match this run" never erases what a previous run or the linker already stored.
+  describe('re-sync write churn', () => {
+    const ciphertext = () => encryptCredential(JSON.stringify({ t: 'tok', s: 'salt' }));
+
+    /** Route the two paged reads by label: artists for matching, stored items for the diff. */
+    function withStored(existing: Record<string, unknown>[], artists: Record<string, unknown>[] = []) {
+      mocks.mockReadAllPages.mockImplementation(async (_run: unknown, label: string) =>
+        label.startsWith('collection_items') ? { ok: true, rows: existing } : { ok: true, rows: artists }
+      );
+    }
+
+    const stored = (overrides: Record<string, unknown> = {}) => ({
+      external_id: 'al-1',
+      title: 'Illinois',
+      artist_name: 'Sufjan Stevens',
+      art_url: null,
+      // Postgres serialization (+00:00), where Subsonic sends Z — a string compare would call
+      // this changed and quietly turn the whole diff into a no-op. That's the point of the test.
+      acquired_at: '2026-01-01T00:00:00+00:00',
+      release_id: null,
+      ...overrides,
+    });
+
+    const album = (overrides: Record<string, unknown> = {}) => ({
+      id: 'al-1',
+      name: 'Illinois',
+      artist: 'Sufjan Stevens',
+      created: '2026-01-01T00:00:00Z',
+      ...overrides,
+    });
+
+    it('writes nothing when the stored collection already matches the library', async () => {
+      const { upsertBatches, connectionUpdates } = setupDb({
+        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext() },
+      });
+      withStored([stored()]);
+      mocks.mockFetchAllAlbums.mockResolvedValue([album()]);
+
+      const res = await handler(internalEvent({ userId: 'user-1' }));
+
+      expect(res.statusCode).toBe(200);
+      expect(upsertBatches).toHaveLength(0);
+      // The sync itself still completes and reports the full collection.
+      expect(connectionUpdates.at(-1)).toMatchObject({ sync_status: 'idle', item_count: 1 });
+    });
+
+    it('writes only the rows that actually changed', async () => {
+      const { upsertBatches } = setupDb({
+        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext() },
+      });
+      withStored([stored(), stored({ external_id: 'al-2', title: 'Old Title' })]);
+      mocks.mockFetchAllAlbums.mockResolvedValue([
+        album(),
+        album({ id: 'al-2', name: 'Carrie & Lowell', created: null }),
+        album({ id: 'al-3', name: 'Javelin' }), // the new purchase
+      ]);
+
+      await handler(internalEvent({ userId: 'user-1' }));
+
+      const written = upsertBatches.flat().map(r => (r as Record<string, unknown>).external_id);
+      expect(written.sort()).toEqual(['al-2', 'al-3']);
+    });
+
+    it('never erases a release link the linker set after the last sync', async () => {
+      const { upsertBatches } = setupDb({
+        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext() },
+      });
+      // Stored row is linked; this run matches nothing (no artists), so the built row would
+      // carry release_id: null. Null means "no new information", not "unlink".
+      withStored([stored({ release_id: 'rel-1', art_url: 'https://f4.bcbits.com/a.jpg' })]);
+      mocks.mockFetchAllAlbums.mockResolvedValue([album()]);
+
+      await handler(internalEvent({ userId: 'user-1' }));
+
+      expect(upsertBatches).toHaveLength(0);
+    });
+
+    it('does write a newly matched release link', async () => {
+      const { upsertBatches } = setupDb({
+        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext() },
+        releases: [
+          { id: 'rel-1', artist_id: 'artist-1', match_key: 'illinois', artwork_url: 'https://f4.bcbits.com/a.jpg' },
+        ],
+      });
+      withStored([stored()], [SUFJAN]);
+      mocks.mockFetchAllAlbums.mockResolvedValue([album()]);
+
+      await handler(internalEvent({ userId: 'user-1' }));
+
+      const rows = upsertBatches.flat();
+      expect(rows).toHaveLength(1);
+      expect(rows[0]).toMatchObject({ external_id: 'al-1', release_id: 'rel-1' });
+    });
+
+    it('falls back to writing everything when the stored read fails', async () => {
+      const { upsertBatches } = setupDb({
+        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext() },
+      });
+      mocks.mockReadAllPages.mockImplementation(async (_run: unknown, label: string) =>
+        label.startsWith('collection_items')
+          ? { ok: false, reason: 'read blipped' }
+          : { ok: true, rows: [] }
+      );
+      mocks.mockFetchAllAlbums.mockResolvedValue([album()]);
+
+      await handler(internalEvent({ userId: 'user-1' }));
+
+      // Skipping a real update because a read blipped is the worse trade — write as before.
+      expect(upsertBatches.flat()).toHaveLength(1);
+    });
+  });
+
   describe('auto-mark supported (spec OQ6: buying is supporting)', () => {
     const ciphertext = () => encryptCredential(JSON.stringify({ t: 'tok', s: 'salt' }));
     const albums = [{ id: 'al-1', name: 'Illinois', artist: 'Sufjan Stevens' }];

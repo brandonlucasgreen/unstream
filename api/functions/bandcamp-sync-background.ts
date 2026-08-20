@@ -55,6 +55,29 @@ interface LibraryMatches {
   artists: Map<string, MatchedArtist>;
 }
 
+/** The stored columns a re-sync compares against before writing a row back. */
+interface StoredCollectionItem {
+  external_id: string;
+  title: string | null;
+  artist_name: string | null;
+  art_url: string | null;
+  acquired_at: string | null;
+  release_id: string | null;
+}
+
+/**
+ * Timestamp equality across serializations. Postgres reads a timestamptz back as
+ * `2024-05-01T10:00:00+00:00` where Subsonic sent `2024-05-01T10:00:00Z` — a raw string
+ * compare would call every row changed and quietly turn the re-sync diff into a no-op.
+ */
+function sameInstant(a: string | null, b: string | null): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  const parsedA = Date.parse(a);
+  const parsedB = Date.parse(b);
+  return Number.isFinite(parsedA) && Number.isFinite(parsedB) && parsedA === parsedB;
+}
+
 /**
  * Match imported albums to Unstream artists (by normalized name) and releases (by
  * normalized artist name + normalized title — releases.match_key is already
@@ -419,8 +442,46 @@ export async function handler(event: {
       // `hidden` deliberately omitted: re-syncs must not un-hide items the user hid.
     }));
 
-    for (let i = 0; i < rows.length; i += UPSERT_CHUNK) {
-      const chunk = rows.slice(i, i + UPSERT_CHUNK);
+    // Write only what a re-sync actually changes. This used to upsert every row every time,
+    // and the table's updated_at trigger guarantees an upsert dirties the row — so a re-sync
+    // of a 190-album collection where nothing changed rewrote 190 rows plus their indexes to
+    // say nothing, and a stalled sync retried after the 20-minute staleness window re-paid
+    // that on every attempt. In the usual case the only rows worth writing are the new
+    // purchases. A failed read degrades to writing everything, exactly as before — skipping a
+    // real update because a read blipped is the worse trade.
+    const existingRead = await readAllPages<StoredCollectionItem>(
+      (from, to) => client
+        .from('collection_items')
+        .select('external_id, title, artist_name, art_url, acquired_at, release_id')
+        .eq('user_id', userId)
+        .eq('source', 'bandcamp')
+        .order('external_id')
+        .range(from, to),
+      'collection_items (bandcamp-sync diff)'
+    );
+    const existingById = new Map(
+      existingRead.ok ? existingRead.rows.map(row => [row.external_id, row]) : []
+    );
+
+    const toWrite = rows.filter(row => {
+      const prior = existingById.get(row.external_id);
+      if (!prior) return true;
+      // Matching is best-effort: a null from this run means "no new information", not "unlink
+      // this item" — linkCollectionItemsForArtist sets release_id after the fact, and a re-sync
+      // whose artist read blipped must not undo it.
+      row.release_id = row.release_id ?? prior.release_id;
+      row.art_url = row.art_url ?? prior.art_url;
+      return (
+        row.title !== prior.title ||
+        row.artist_name !== prior.artist_name ||
+        row.art_url !== prior.art_url ||
+        row.release_id !== prior.release_id ||
+        !sameInstant(row.acquired_at, prior.acquired_at)
+      );
+    });
+
+    for (let i = 0; i < toWrite.length; i += UPSERT_CHUNK) {
+      const chunk = toWrite.slice(i, i + UPSERT_CHUNK);
       const { error } = await client
         .from('collection_items')
         .upsert(chunk, { onConflict: 'user_id,source,external_id' });
@@ -446,7 +507,7 @@ export async function handler(event: {
       throw new Error(`connection status update failed: ${doneError.message}`);
     }
 
-    console.log(`[bandcamp-sync] imported ${uniqueAlbums.length} albums (${matches.releases.size} matched to releases, ${matches.artists.size} artists)`);
+    console.log(`[bandcamp-sync] imported ${uniqueAlbums.length} albums (${toWrite.length} written, ${uniqueAlbums.length - toWrite.length} unchanged, ${matches.releases.size} matched to releases, ${matches.artists.size} artists)`);
 
     outcome = {
       statusCode: 200,
