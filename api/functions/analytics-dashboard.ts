@@ -73,8 +73,10 @@ export async function handler(event: {
         .gte('created_at', ago30),
 
       // All search events (with context) last 7 days — filtered in JS for success rate.
-      // We fire two 'search' events per query: initiation (no has_results) and completion
-      // (has_results: true/false). We filter in JS to avoid flaky JSONB null checks.
+      // The web app writes one 'search' event per query, on completion (has_results:
+      // true/false). Rows from before 2026-08-19 include a second, context-free initiation
+      // event per query — the JS filter below excludes those from the success rate, and it's
+      // why search counts stepped down (and became accurate) on that date.
       client
         .from('app_events')
         .select('context')

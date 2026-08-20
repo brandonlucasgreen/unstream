@@ -53,6 +53,28 @@ function trackArtistEvent(slug: string, metric: string): void {
   }).catch(() => {});
 }
 
+/**
+ * Search appearances arrive as a burst — one per claimed artist the moment the results render —
+ * and each used to be its own POST, which cost one database transaction per card. Buffer the
+ * burst and send it as a single batched request instead. The window is generous because it only
+ * delays analytics, never the UI; enrichment results that land seconds later simply start a
+ * second batch.
+ */
+let appearanceBuffer: string[] = [];
+let appearanceTimer: ReturnType<typeof setTimeout> | null = null;
+
+function flushSearchAppearances(): void {
+  const slugs = [...new Set(appearanceBuffer)];
+  appearanceBuffer = [];
+  appearanceTimer = null;
+  if (slugs.length === 0) return;
+  fetch('/api/analytics/event', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slugs, metric: 'search' }),
+  }).catch(() => {});
+}
+
 /** Fire-and-forget POST to the product analytics endpoint. */
 function trackAppEvent(
   event_type: string,
@@ -85,13 +107,14 @@ export const analytics = {
   },
   trackReportIssue: () => trackEvent('/report-issue'),
 
-  // Search initiated (GoatCounter + product analytics)
+  // Search initiated (GoatCounter only — the app_events row is written once, on completion,
+  // by trackSearchResults. Firing both wrote two 'search' rows per query, which doubled the
+  // admin dashboard's search counts and doubled the write cost for no information.)
   trackSearch: () => {
     trackEvent('/search');
-    trackAppEvent('search', {});
   },
 
-  // Search results received (product analytics only)
+  // Search completed (product analytics — the one 'search' event per query)
   trackSearchResults: (hasResults: boolean, resultCount: number) => {
     trackAppEvent('search', { has_results: hasResults, result_count: resultCount });
   },
@@ -102,11 +125,6 @@ export const analytics = {
     trackAppEvent('platform_click', { platform: platformName.toLowerCase() });
   },
 
-  // Page views (product analytics only — GoatCounter handles page views automatically)
-  trackPageView: (page: string) => {
-    trackAppEvent('page_view', { page });
-  },
-
   // Artist-specific events (GoatCounter + Supabase artist analytics + product analytics)
   trackArtistPageView: (slug: string) => {
     trackEvent('/artist-view');
@@ -115,8 +133,13 @@ export const analytics = {
   },
   trackArtistSearchAppearance: (slug: string) => {
     trackEvent('/artist-search');
-    trackArtistEvent(slug, 'search');
+    appearanceBuffer.push(slug);
+    if (!appearanceTimer) appearanceTimer = setTimeout(flushSearchAppearances, 1000);
   },
+  // Fires everything a link click means: GoatCounter, the artist's own dashboard metric, and
+  // the product 'platform_click' event. A call site with a claimed slug calls this INSTEAD OF
+  // trackPlatformClick, never alongside it — calling both wrote the product event twice, which
+  // double-counted clicks for claimed artists (and only claimed artists) in the admin dashboard.
   trackArtistLinkClick: (slug: string, platform: string) => {
     trackEvent(`/artist-click/${platform.toLowerCase()}`);
     trackArtistEvent(slug, `click:${platform.toLowerCase()}`);
