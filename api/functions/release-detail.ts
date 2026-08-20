@@ -209,11 +209,16 @@ export async function handler(event: {
         };
       });
 
-    // The oldest price across every source is the honest freshness claim: saying "checked today"
+    // The oldest check across every source is the honest freshness claim: saying "checked today"
     // because *one* source was re-read would overstate the rest. ISO rather than the page's
     // "3 days ago" — a native client formats dates in the user's own locale.
+    //
+    // `detail_checked_at`, not the offers' `captured_at`: the detail pass skips rewriting
+    // offers whose prices haven't moved, so `captured_at` now means "when this price last
+    // changed" — it stops advancing on a quiet release and would read as stale data we had in
+    // fact just re-verified. `detail_checked_at` is stamped on every pass, changed or not.
     const pricesCheckedAt = sources
-      .flatMap(s => s.offers.map(o => o.capturedAt))
+      .map(s => s.detailCheckedAt)
       .filter(Boolean)
       .sort()[0] ?? null;
 

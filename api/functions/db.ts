@@ -1380,6 +1380,48 @@ interface DetailToPersist {
   }>;
 }
 
+interface ReleaseDetailColumns {
+  status: string | null;
+  release_date: string | null;
+  date_precision: string | null;
+}
+
+interface StoredOffer {
+  format: string;
+  price: number | string | null;
+  currency: string | null;
+  availability: string;
+}
+
+/** Would writing this detail's status/date change the release row at all? */
+function releaseRowMatchesDetail(prior: ReleaseDetailColumns | null, detail: DetailToPersist): boolean {
+  if (!prior) return false;
+  if (prior.status !== detail.status) return false;
+  if (!detail.releaseDate) return true;
+  // A `date` column reads back as YYYY-MM-DD whatever ISO shape was written into it, so
+  // compare on that prefix — a raw string compare against a full timestamp would never match
+  // and would quietly turn this skip into a no-op.
+  const priorDate = prior.release_date ? String(prior.release_date).slice(0, 10) : null;
+  return priorDate === detail.releaseDate.slice(0, 10) && prior.date_precision === detail.datePrecision;
+}
+
+/** Same offers, field for field? Order-independent; formats are unique per source. */
+function offersMatch(prior: StoredOffer[], offers: DetailToPersist['offers']): boolean {
+  if (prior.length !== offers.length) return false;
+  const byFormat = new Map(prior.map(o => [o.format, o]));
+  return offers.every(offer => {
+    const stored = byFormat.get(offer.format);
+    if (!stored) return false;
+    // `price` is numeric in Postgres; normalize so a string-serialized number still matches.
+    const storedPrice = stored.price == null ? null : Number(stored.price);
+    return (
+      storedPrice === (offer.price ?? null) &&
+      (stored.currency ?? null) === (offer.currency ?? null) &&
+      stored.availability === offer.availability
+    );
+  });
+}
+
 /**
  * Write what a release's own page told us: its date, and what you can buy there.
  *
@@ -1395,6 +1437,18 @@ interface DetailToPersist {
  *   erase real prices.
  * - Stamping last means an interrupted run is retried next cycle instead of being recorded as
  *   done.
+ *
+ * Both writes are read-compare-skip, for the same reason as persistReleases' title comparison:
+ * in steady state a 30-day re-check re-derives exactly what the rows already say, and writing
+ * it anyway costs a new tuple plus every index to restate nothing — at ~hundreds of detail
+ * refreshes a day, that was the largest remaining write source after the first Disk IO audit.
+ * A failed pre-read falls through to writing (same rule as getExistingSources): skipping a real
+ * update because a read blipped is the worse trade.
+ *
+ * The casualty is `release_offers.captured_at`, which now advances only when an offer actually
+ * changes — it means "when this price last moved", not "when we last confirmed it". The
+ * "prices checked" freshness shown to users comes from `release_sources.detail_checked_at`,
+ * which IS stamped on every pass (release-detail.ts and release-page.ts both read it).
  *
  * Returns false when nothing could be written, so the caller can count it as a failure.
  */
@@ -1415,42 +1469,60 @@ export async function persistReleaseDetail(
         patch.date_precision = detail.datePrecision;
       }
 
-      const { error } = await client.from('releases').update(patch).eq('id', release.releaseId);
-      if (error) {
-        console.error('[DB] persistReleaseDetail release update failed:', error.message);
-        return false;
+      const { data: prior } = await client
+        .from('releases')
+        .select('status, release_date, date_precision')
+        .eq('id', release.releaseId)
+        .maybeSingle();
+
+      if (!releaseRowMatchesDetail(prior as ReleaseDetailColumns | null, detail)) {
+        const { error } = await client.from('releases').update(patch).eq('id', release.releaseId);
+        if (error) {
+          console.error('[DB] persistReleaseDetail release update failed:', error.message);
+          return false;
+        }
       }
     }
 
     if (detail.offers.length > 0) {
-      const capturedAt = new Date().toISOString();
-      const { error: offerError } = await client.from('release_offers').upsert(
-        detail.offers.map(offer => ({
-          release_source_id: release.sourceId,
-          format: offer.format,
-          price: offer.price,
-          currency: offer.currency,
-          availability: offer.availability,
-          captured_at: capturedAt,
-        })),
-        { onConflict: 'release_source_id,format' }
-      );
-
-      if (offerError) {
-        console.error('[DB] persistReleaseDetail offer upsert failed:', offerError.message);
-        return false;
-      }
-
-      const { error: pruneError } = await client
+      const { data: priorOffers, error: priorOffersError } = await client
         .from('release_offers')
-        .delete()
-        .eq('release_source_id', release.sourceId)
-        .not('format', 'in', `(${detail.offers.map(o => o.format).join(',')})`);
+        .select('format, price, currency, availability')
+        .eq('release_source_id', release.sourceId);
 
-      // A failed prune leaves a stale format listed, which is worth logging but not worth
-      // failing the whole detail write over — the prices we did just refresh are still good.
-      if (pruneError) {
-        console.error('[DB] persistReleaseDetail offer prune failed:', pruneError.message);
+      const unchanged =
+        !priorOffersError && offersMatch((priorOffers as StoredOffer[]) ?? [], detail.offers);
+
+      if (!unchanged) {
+        const capturedAt = new Date().toISOString();
+        const { error: offerError } = await client.from('release_offers').upsert(
+          detail.offers.map(offer => ({
+            release_source_id: release.sourceId,
+            format: offer.format,
+            price: offer.price,
+            currency: offer.currency,
+            availability: offer.availability,
+            captured_at: capturedAt,
+          })),
+          { onConflict: 'release_source_id,format' }
+        );
+
+        if (offerError) {
+          console.error('[DB] persistReleaseDetail offer upsert failed:', offerError.message);
+          return false;
+        }
+
+        const { error: pruneError } = await client
+          .from('release_offers')
+          .delete()
+          .eq('release_source_id', release.sourceId)
+          .not('format', 'in', `(${detail.offers.map(o => o.format).join(',')})`);
+
+        // A failed prune leaves a stale format listed, which is worth logging but not worth
+        // failing the whole detail write over — the prices we did just refresh are still good.
+        if (pruneError) {
+          console.error('[DB] persistReleaseDetail offer prune failed:', pruneError.message);
+        }
       }
     }
 

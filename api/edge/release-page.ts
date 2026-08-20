@@ -123,7 +123,6 @@ interface OfferRow {
   price: number | null;
   currency: string | null;
   availability: string;
-  captured_at: string;
 }
 
 interface SourceRow {
@@ -222,7 +221,7 @@ export default async function handler(request: Request, context: Context) {
         .select(`
           title, release_type, release_date, date_precision, status, artwork_url,
           release_sources ( platform, url, detail_checked_at,
-            release_offers ( format, price, currency, availability, captured_at )
+            release_offers ( format, price, currency, availability )
           )
         `)
         .eq('artist_id', artist.id)
@@ -272,10 +271,13 @@ export default async function handler(request: Request, context: Context) {
       (a, b) => payoutRank(b.platform) - payoutRank(a.platform)
     );
 
-    // The oldest price on the page is the honest freshness claim: saying "checked today"
-    // because *one* source was re-read would overstate the rest.
+    // The oldest check on the page is the honest freshness claim: saying "checked today"
+    // because *one* source was re-read would overstate the rest. `detail_checked_at`, not the
+    // offers' `captured_at`: the detail pass skips rewriting offers whose prices haven't moved,
+    // so `captured_at` only advances when a price changes and would read as stale data we had
+    // in fact just re-verified. `detail_checked_at` is stamped on every pass.
     const capturedTimes = sources
-      .flatMap(s => (s.release_offers || []).map(o => o.captured_at))
+      .map(s => s.detail_checked_at)
       .filter(Boolean)
       .sort();
     const oldestCapture = capturedTimes[0] ?? null;
