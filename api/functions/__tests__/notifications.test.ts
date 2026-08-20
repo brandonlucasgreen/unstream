@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   sendTransactionalEmail: vi.fn(),
@@ -230,6 +230,12 @@ describe('notifySavedArtistsOfNewRelease', () => {
     mocks.sendTransactionalEmail.mockResolvedValue({ ok: true, messageId: 'msg_1' });
   });
 
+  // Only one test below pins the clock, and it has to hand it back — otherwise every test after
+  // it would judge recency against that date instead of today.
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('sends nothing when no release is unaccounted for', async () => {
     const client = releaseClient({ releases: { data: [], error: null } });
 
@@ -336,7 +342,25 @@ describe('notifySavedArtistsOfNewRelease', () => {
     expect(mocks.sendTransactionalEmail.mock.calls[0][0].html).toContain('unstream.stream/a/test-artist');
   });
 
+  /**
+   * The only test here that asserts on a *formatted* date, and so the only one that pins the
+   * clock. Deriving the expected string from the same `Date.now()` as the fixture would make the
+   * assertion agree with itself even if the formatter broke, which is the one thing this test is
+   * for — so the date stays a literal and the clock moves to meet it.
+   *
+   * It also has to: this test failed on 2026-08-20 because a fixture dated 2026-08-12 had aged
+   * out of the seven-day window in `isNewsworthy`, so no email was sent at all and the failure
+   * read as a missing-mock TypeError rather than a stale date. Every other test in this file uses
+   * `isoDate` for exactly that reason — reach for that first, and only pin the clock when the
+   * rendered date itself is the thing under test.
+   *
+   * `toFake: ['Date']` leaves setTimeout and promise scheduling real, so the awaits below still
+   * resolve on their own.
+   */
   it('names the release, its date, and the platforms it can be bought on', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-08-13T12:00:00Z'));
+
     const client = releaseClient({
       releases: { data: [release('r1', 'Fine Motor Control', { release_date: '2026-08-12' })], error: null },
       releaseSources: {
