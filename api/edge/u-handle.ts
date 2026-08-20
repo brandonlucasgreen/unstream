@@ -316,7 +316,12 @@ export default async function handler(request: Request, context: Context) {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
         'Cache-Control': 'public, max-age=0, must-revalidate',
-        'Netlify-CDN-Cache-Control': 'public, s-maxage=300, stale-while-revalidate=300',
+        // An hour, not five minutes: every write that changes this page purges the
+        // user-share tag (save/unsave, the sharing toggle, hiding an item, a collection
+        // sync), so the TTL only bounds staleness if a purge is missed — it is not the
+        // freshness mechanism, and at 300s this was 3 queries per handle per five minutes
+        // of crawler traffic.
+        'Netlify-CDN-Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
         'Cache-Tag': `user-share-${handle}`,
       },
     });

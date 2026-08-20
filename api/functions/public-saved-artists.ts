@@ -154,7 +154,18 @@ export async function handler(event: {
 
     return {
       statusCode: 200,
-      headers: CORS_HEADERS,
+      headers: {
+        ...CORS_HEADERS,
+        // Fully public and identical for every viewer, yet this served four fresh queries per
+        // view of a shared link. Five minutes at the CDN absorbs a share going around, and the
+        // Cache-Tag is the SAME tag the u-handle edge page carries — every write that changes
+        // this page (save/unsave, the sharing toggle, hiding an item, a collection sync)
+        // already purges it or does as of this change, so the TTL is a backstop, not the
+        // freshness mechanism.
+        'Cache-Control': 'public, max-age=0, must-revalidate',
+        'Netlify-CDN-Cache-Control': 'public, s-maxage=300, stale-while-revalidate=3600',
+        'Cache-Tag': `user-share-${handle}`,
+      },
       body: JSON.stringify({
         owner_display_name: ownerDisplayName,
         owner_location: ownerLocation,

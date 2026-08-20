@@ -16,6 +16,7 @@
 import { Sentry } from '../lib/sentry';
 import { artistSlug, getClient, readAllPages } from './db';
 import { cacheGetOrFetch } from './cache';
+import { purgeUserShareCacheForUser } from './purge-cache';
 import { isInternalRequest } from './middleware';
 import { decryptCredential } from './credential-crypto';
 import {
@@ -516,6 +517,12 @@ export async function handler(event: {
     // Buying is supporting: mark every matched artist saved + supported. After the items
     // land — the mark is derived state, and a failure inside degrades rather than throwing.
     await markArtistsSupported(userId, [...matches.artists.values()]);
+
+    // The public page renders these items and is CDN-cached; a sync that wrote nothing
+    // changed nothing, so only a real write pays for the purge.
+    if (toWrite.length > 0) {
+      await purgeUserShareCacheForUser(userId, 'bandcamp-sync');
+    }
 
     const { error: doneError } = await client
       .from('bandcamp_connections')

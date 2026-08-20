@@ -8,6 +8,7 @@
 // — this endpoint can flip `hidden` and nothing else, so provenance stays server-asserted.
 
 import { getClient, readAllPages } from './db';
+import { purgeUserShareCacheForUser } from './purge-cache';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 import {
   artistUrlFor,
@@ -128,6 +129,10 @@ export async function handler(event: {
     if (!row) {
       return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Item not found' }) };
     }
+
+    // Hiding an item changes the public page, which is CDN-cached under this tag. Awaited:
+    // a serverless response ends the invocation, so fire-and-forget purges never happen.
+    await purgeUserShareCacheForUser(user.userId, 'me-collection');
 
     return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify(row) };
   }
