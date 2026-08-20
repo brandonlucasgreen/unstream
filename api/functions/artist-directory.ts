@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { isDirectLink, readAllPages } from './db';
+import { cacheGetOrFetch } from './cache';
 import { PLATFORMS } from '../shared/platform-registry';
 
 /**
@@ -91,19 +92,32 @@ export async function handler(event: { queryStringParameters?: Record<string, st
   //   * artists who have died — 107 of them, whose estates do still sell the music, but who the
   //     surrounding copy addresses as though they were here to be supported.
   if (event.queryStringParameters?.scope === 'known') {
-    const rows = await readVerifiedArtists(supabase);
+    // Redis-cached: this is the single largest-volume read in the codebase — every verified
+    // artist WITH their links embedded, ~3 paged requests of 1,000 rows each — behind only a
+    // 5-minute CDN window on a crawlable page. The index changes when an artist gains a
+    // buyable link or a page is verified, both of which tolerate an hour of lag. A failed
+    // read is never cached (the null check below 500s instead, and 5xx isn't CDN-cached
+    // either — same reasoning as the claimed path).
+    const { data: artists } = await cacheGetOrFetch(
+      'artist-directory:known',
+      async () => {
+        const rows = await readVerifiedArtists(supabase);
+        if (!rows) return null;
+        return rows
+          .filter(a => !a.died_on)
+          .filter(a =>
+            (a.artist_links || []).some(l => BUYABLE_PLATFORMS.has(l.platform) && isDirectLink(l.url))
+          )
+          .map(a => ({ slug: a.slug, name: a.name, imageUrl: a.image_url || null }))
+          .sort((a, b) => a.name.localeCompare(b.name));
+      },
+      3600,
+      result => result !== null
+    );
 
-    if (!rows) {
+    if (!artists) {
       return { statusCode: 500, body: JSON.stringify({ error: 'Failed to fetch artists' }) };
     }
-
-    const artists = rows
-      .filter(a => !a.died_on)
-      .filter(a =>
-        (a.artist_links || []).some(l => BUYABLE_PLATFORMS.has(l.platform) && isDirectLink(l.url))
-      )
-      .map(a => ({ slug: a.slug, name: a.name, imageUrl: a.image_url || null }))
-      .sort((a, b) => a.name.localeCompare(b.name));
 
     return { statusCode: 200, headers: JSON_HEADERS, body: JSON.stringify({ artists }) };
   }

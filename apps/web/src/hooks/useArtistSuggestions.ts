@@ -7,7 +7,9 @@ export interface ArtistSuggestion {
 }
 
 const SUGGEST_DEBOUNCE_MS = 250;
-const SUGGEST_MIN_CHARS = 2;
+// 3, not 2: every uncached prefix is its own trigram query against the artists table, and
+// two-character prefixes are both the most numerous and the least useful suggestions.
+const SUGGEST_MIN_CHARS = 3;
 
 /**
  * Typeahead against /api/suggest, shared by the header search and the larger

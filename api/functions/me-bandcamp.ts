@@ -13,6 +13,7 @@
 
 import { Sentry } from '../lib/sentry';
 import { getClient } from './db';
+import { purgeUserShareCacheForUser } from './purge-cache';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 import { encryptCredential, isCredentialKeyConfigured } from './credential-crypto';
 import {
@@ -410,6 +411,8 @@ export async function handler(event: {
         };
       }
       itemsDeleted = count ?? 0;
+      // The public page rendered these items and is CDN-cached under the user-share tag.
+      await purgeUserShareCacheForUser(user.userId, 'me-bandcamp');
     }
 
     return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ connected: false, itemsDeleted }) };

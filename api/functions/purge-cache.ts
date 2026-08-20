@@ -9,6 +9,8 @@
 // shared `artist-releases-${slug}` tag alongside their own: it's the only way to clear all of one
 // artist's release pages in a single call.
 
+import { getClient } from './db';
+
 /**
  * Fire the purge and report what happened, without ever throwing at the caller.
  *
@@ -45,4 +47,34 @@ export async function purgeCacheTags(tags: string[], label: string): Promise<voi
  */
 export async function purgeArtistReleaseCaches(slug: string, label = 'PurgeCache'): Promise<void> {
   await purgeCacheTags([`artist-${slug}`, `artist-releases-${slug}`], label);
+}
+
+/**
+ * Purge one user's shared-list page (`/u/:handle` and its data endpoint) by looking up their
+ * handle. The tag is only worth purging when the user has a handle at all — no handle, no
+ * public page, nothing cached. Costs one usernames read per *mutation* (hide an item, finish
+ * a sync, disconnect), which is what pays for the page itself being CDN-cached per *view*.
+ */
+export async function purgeUserShareCacheForUser(userId: string, label: string): Promise<void> {
+  // Same rule as purgeCacheTags: never throw at the caller. The write this purge follows has
+  // already succeeded, and stale-for-the-TTL beats failing a user's action over cache hygiene.
+  try {
+    const client = getClient();
+    if (!client) return;
+
+    const { data, error } = await client
+      .from('usernames')
+      .select('username')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error) {
+      console.warn(`[${label}] could not resolve handle for share-page purge:`, error.message);
+      return;
+    }
+    const handle = (data as { username: string } | null)?.username;
+    if (handle) await purgeCacheTags([`user-share-${handle}`], label);
+  } catch (error) {
+    console.warn(`[${label}] share-page purge failed:`, error instanceof Error ? error.message : String(error));
+  }
 }

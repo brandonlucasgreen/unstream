@@ -14,7 +14,9 @@
 // import as a completed sync — that would show a user a quietly wrong collection.
 
 import { Sentry } from '../lib/sentry';
-import { getClient, readAllPages } from './db';
+import { artistSlug, getClient, readAllPages } from './db';
+import { cacheGetOrFetch } from './cache';
+import { purgeUserShareCacheForUser } from './purge-cache';
 import { isInternalRequest } from './middleware';
 import { decryptCredential } from './credential-crypto';
 import {
@@ -60,7 +62,9 @@ interface StoredCollectionItem {
   external_id: string;
   title: string | null;
   artist_name: string | null;
+  artist_slug: string | null;
   art_url: string | null;
+  art_ref: string | null;
   acquired_at: string | null;
   release_id: string | null;
 }
@@ -92,10 +96,21 @@ async function matchLibrary(albums: SubsonicAlbum[]): Promise<LibraryMatches> {
 
   // The artists table is a few thousand rows; normalization has to happen in JS, so read
   // it once and match in memory rather than issuing a query per imported artist name.
-  const artistRead = await readAllPages<{ id: string; slug: string; name: string; image_url: string | null }>(
-    (from, to) => client.from('artists').select('id, slug, name, image_url').order('id').range(from, to),
-    'artists (bandcamp-sync matching)'
-  );
+  //
+  // Redis-cached because the map is identical across all users and all syncs, and reading it
+  // fresh was 3-4 paged requests streaming the whole table per sync. An hour of staleness is
+  // the same trade the failed-read path below already accepts: an artist created inside the
+  // window imports unmatched, and the next re-sync — or linkCollectionItemsForArtist, which is
+  // the real linking path and reads live — picks them up.
+  const artistRead = await cacheGetOrFetch(
+    'collection:artist-name-map',
+    () => readAllPages<{ id: string; slug: string; name: string; image_url: string | null }>(
+      (from, to) => client.from('artists').select('id, slug, name, image_url').order('id').range(from, to),
+      'artists (bandcamp-sync matching)'
+    ),
+    3600,
+    read => read.ok // never cache a failed read as an empty map
+  ).then(r => r.data);
   if (!artistRead.ok) {
     // Matching is enrichment: a failed read degrades to an unmatched import, not a failed sync.
     console.warn('[bandcamp-sync] artist read failed, importing unmatched:', artistRead.reason);
@@ -434,7 +449,13 @@ export async function handler(event: {
       external_id: album.id,
       title: album.name,
       artist_name: album.artist,
+      // The normalized slug is what linkCollectionItemsForArtist probes on (an indexed
+      // equality, where matching the raw name was a full ILIKE scan per catalogue pass).
+      artist_slug: artistSlug(album.artist) || null,
       art_url: matches.releases.get(album.id)?.artwork_url ?? null,
+      // The Subsonic cover-art id, so the art proxy can fetch the image directly instead of
+      // asking Bandcamp for the album first on every uncached tile.
+      art_ref: album.coverArt ?? null,
       acquired_at: album.created ?? null,
       provenance: 'purchased', // a Bandcamp collection is proof of purchase — spec §5
       acquisition: 'unknown',
@@ -452,7 +473,7 @@ export async function handler(event: {
     const existingRead = await readAllPages<StoredCollectionItem>(
       (from, to) => client
         .from('collection_items')
-        .select('external_id, title, artist_name, art_url, acquired_at, release_id')
+        .select('external_id, title, artist_name, artist_slug, art_url, art_ref, acquired_at, release_id')
         .eq('user_id', userId)
         .eq('source', 'bandcamp')
         .order('external_id')
@@ -471,10 +492,13 @@ export async function handler(event: {
       // whose artist read blipped must not undo it.
       row.release_id = row.release_id ?? prior.release_id;
       row.art_url = row.art_url ?? prior.art_url;
+      row.art_ref = row.art_ref ?? prior.art_ref;
       return (
         row.title !== prior.title ||
         row.artist_name !== prior.artist_name ||
+        row.artist_slug !== prior.artist_slug ||
         row.art_url !== prior.art_url ||
+        row.art_ref !== prior.art_ref ||
         row.release_id !== prior.release_id ||
         !sameInstant(row.acquired_at, prior.acquired_at)
       );
@@ -493,6 +517,12 @@ export async function handler(event: {
     // Buying is supporting: mark every matched artist saved + supported. After the items
     // land — the mark is derived state, and a failure inside degrades rather than throwing.
     await markArtistsSupported(userId, [...matches.artists.values()]);
+
+    // The public page renders these items and is CDN-cached; a sync that wrote nothing
+    // changed nothing, so only a real write pays for the purge.
+    if (toWrite.length > 0) {
+      await purgeUserShareCacheForUser(userId, 'bandcamp-sync');
+    }
 
     const { error: doneError } = await client
       .from('bandcamp_connections')
