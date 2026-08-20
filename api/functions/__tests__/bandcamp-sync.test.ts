@@ -8,10 +8,16 @@ const mocks = vi.hoisted(() => ({
   mockResolveArtists: vi.fn(),
 }));
 
-vi.mock('../db', () => ({
-  getClient: () => ({ from: mocks.mockFrom }),
-  readAllPages: mocks.mockReadAllPages,
-}));
+// artistSlug passes through from the real module: the sync stores its output on every row, and a
+// test-local reimplementation would drift from the one the linker probes with.
+vi.mock('../db', async importOriginal => {
+  const original = await importOriginal<typeof import('../db')>();
+  return {
+    ...original,
+    getClient: () => ({ from: mocks.mockFrom }),
+    readAllPages: mocks.mockReadAllPages,
+  };
+});
 // Stubbed so these tests stay about the import. The pass it replaces probes Bandcamp for every
 // unknown artist name; left real against this file's mocked `../db` it would throw, and the
 // handler catches that on purpose, so the whole suite would go on passing while the pass did
@@ -231,7 +237,9 @@ describe('bandcamp-sync-background handler', () => {
       external_id: 'al-1',
       title: 'Illinois',
       artist_name: 'Sufjan Stevens',
+      artist_slug: 'sufjan-stevens',
       art_url: null,
+      art_ref: null,
       // Postgres serialization (+00:00), where Subsonic sends Z — a string compare would call
       // this changed and quietly turn the whole diff into a no-op. That's the point of the test.
       acquired_at: '2026-01-01T00:00:00+00:00',
@@ -308,6 +316,24 @@ describe('bandcamp-sync-background handler', () => {
       const rows = upsertBatches.flat();
       expect(rows).toHaveLength(1);
       expect(rows[0]).toMatchObject({ external_id: 'al-1', release_id: 'rel-1' });
+    });
+
+    it('backfills a pre-migration row missing artist_slug, exactly once', async () => {
+      const { upsertBatches } = setupDb({
+        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext() },
+      });
+      // A row synced before the artist_slug/art_ref columns existed: NULLs where the built row
+      // has values. The diff must write it once — that write IS the backfill the linker's
+      // fallback read exists to bridge — and the fixture above proves a backfilled row is then
+      // left alone.
+      withStored([stored({ artist_slug: null })]);
+      mocks.mockFetchAllAlbums.mockResolvedValue([album()]);
+
+      await handler(internalEvent({ userId: 'user-1' }));
+
+      const rows = upsertBatches.flat();
+      expect(rows).toHaveLength(1);
+      expect(rows[0]).toMatchObject({ external_id: 'al-1', artist_slug: 'sufjan-stevens' });
     });
 
     it('falls back to writing everything when the stored read fails', async () => {

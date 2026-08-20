@@ -133,21 +133,49 @@ export async function linkCollectionItemsForArtist(
     // Every user's unlinked items, not just one person's: a catalogue is built once and whoever
     // owns that record benefits. Paged because `collection_items` holds a row per purchase per
     // fan and PostgREST truncates a plain select at 1,000 rows without saying so.
+    //
+    // The probe is an equality on `artist_slug`, served by its partial index — this runs at the
+    // end of every catalogue pass (100+/day) and almost always finds nothing, and as an
+    // `artist_name ILIKE` it was a full scan of every user's items each time. Matching on the
+    // slug rather than the name is also deliberately accent-insensitive, the same equivalence
+    // resolveCollectionArtists already applies when it dedupes names ("Björk" and "Bjork" are
+    // one artist to it, so they should be one artist here).
+    const slug = artistSlug(artistName);
+    if (!slug) return 0;
     const itemRead = await readAllPages<{ id: string; title: string }>(
       (from, to) =>
         client
           .from('collection_items')
           .select('id, title')
           .is('release_id', null)
-          .ilike('artist_name', escapeLikePattern(artistName))
+          .eq('artist_slug', slug)
           .order('id')
           .range(from, to),
       'collection_items (awaiting a release)'
     );
     if (!itemRead.ok) return 0;
 
+    // Rows imported before artist_slug existed have it NULL until their owner's next re-sync
+    // backfills them (the sync's diff writes the new column once). This fallback keeps those
+    // items linkable in the meantime; it's a scan, but only of a population that shrinks to
+    // zero — delete it once `count(*) WHERE artist_slug IS NULL` reads 0 in production.
+    const legacyRead = await readAllPages<{ id: string; title: string }>(
+      (from, to) =>
+        client
+          .from('collection_items')
+          .select('id, title')
+          .is('release_id', null)
+          .is('artist_slug', null)
+          .ilike('artist_name', escapeLikePattern(artistName))
+          .order('id')
+          .range(from, to),
+      'collection_items (awaiting a release, pre-slug rows)'
+    );
+
+    const items = legacyRead.ok ? [...itemRead.rows, ...legacyRead.rows] : itemRead.rows;
+
     const itemsByRelease = new Map<string, string[]>();
-    for (const item of itemRead.rows) {
+    for (const item of items) {
       const releaseId = releaseByKey.get(releaseMatchKey(item.title));
       if (!releaseId) continue;
       const waiting = itemsByRelease.get(releaseId);
@@ -228,6 +256,39 @@ async function artistAtSlug(
   if (!data) return null;
   const row = data as { id: string; match_confidence: string | null };
   return { id: row.id, matchConfidence: row.match_confidence };
+}
+
+/** Slugs per artists lookup — keeps the id list well inside URL-length limits. */
+const SLUG_LOOKUP_CHUNK = 100;
+
+/**
+ * Every artist we already hold from one list of slugs, in one query per chunk. A resolve pass
+ * checks up to MAX_ARTISTS_PER_RESOLVE names, and asking one-at-a-time cost ~100 round trips
+ * per sync attempt — including failed syncs, which also run this pass. A failed chunk read just
+ * leaves its slugs out of the map, so those names fall through to the probe: more work, never a
+ * wrong answer.
+ */
+async function artistsAtSlugs(
+  client: SupabaseClient,
+  slugs: string[]
+): Promise<Map<string, { id: string; matchConfidence: string | null }>> {
+  const known = new Map<string, { id: string; matchConfidence: string | null }>();
+  for (let i = 0; i < slugs.length; i += SLUG_LOOKUP_CHUNK) {
+    const chunk = slugs.slice(i, i + SLUG_LOOKUP_CHUNK);
+    const { data, error } = await client
+      .from('artists')
+      .select('id, slug, match_confidence')
+      .in('slug', chunk);
+
+    if (error) {
+      console.error('[collection-match] artist batch lookup failed:', error.message);
+      continue;
+    }
+    for (const row of (data ?? []) as { id: string; slug: string; match_confidence: string | null }[]) {
+      known.set(row.slug, { id: row.id, matchConfidence: row.match_confidence });
+    }
+  }
+  return known;
 }
 
 /**
@@ -346,6 +407,13 @@ export async function resolveCollectionArtists(userId: string): Promise<Collecti
   const artistIds: string[] = [];
   const deadline = Date.now() + RESOLVE_DEADLINE_MS;
 
+  // One batched read answers "which of these do we already hold?" for the whole pass — the
+  // overwhelmingly common case, since a collection's artists only need probing once ever.
+  const knownBySlug = await artistsAtSlugs(
+    client,
+    toResolve.map(name => artistSlug(name)).filter(Boolean)
+  );
+
   for (const [index, name] of toResolve.entries()) {
     if (Date.now() > deadline) {
       summary.deferred += toResolve.length - index;
@@ -364,7 +432,7 @@ export async function resolveCollectionArtists(userId: string): Promise<Collecti
       continue;
     }
 
-    const existing = await artistAtSlug(client, slug);
+    const existing = knownBySlug.get(slug) ?? null;
     if (existing) {
       summary.alreadyKnown++;
       // A claimed profile is left entirely alone — its links are the artist's own curation — but

@@ -120,6 +120,20 @@ describe('linkCollectionItemsForArtist', () => {
     expect(updates[0].releaseId).toBe('rel-jp');
   });
 
+  it('still links rows imported before artist_slug existed', async () => {
+    // The indexed probe reads slugged rows; a second read catches pre-migration rows whose
+    // artist_slug is NULL until their owner's next re-sync backfills it. Both must link.
+    const { updates } = setupLinkDb({ releases: [{ id: 'rel-bias', match_key: 'bias' }] });
+    pagedRows(
+      [{ id: 'item-new', title: 'Bias' }],   // artist_slug = 'king-triumph'
+      [{ id: 'item-old', title: 'bias' }]    // artist_slug IS NULL, matched by name
+    );
+
+    expect(await linkCollectionItemsForArtist('artist-1', 'King Triumph')).toBe(2);
+    expect(updates).toEqual([{ releaseId: 'rel-bias', itemIds: ['item-new', 'item-old'] }]);
+    expect(mocks.mockReadAllPages).toHaveBeenCalledTimes(2);
+  });
+
   it('does nothing, and reads no items, when the artist has no releases yet', async () => {
     const { updates } = setupLinkDb({ releases: [] });
 
@@ -155,6 +169,16 @@ function setupResolveDb({ artists = {} }: ResolveTables) {
     if (table === 'artists') {
       return {
         select: vi.fn(() => ({
+          // The batched whole-pass lookup — answers only the slugs that exist.
+          in: vi.fn((_column: string, slugs: string[]) =>
+            Promise.resolve({
+              data: slugs
+                .filter(slug => artists[slug])
+                .map(slug => ({ id: artists[slug].id, slug, match_confidence: artists[slug].match_confidence })),
+              error: null,
+            })
+          ),
+          // The per-slug lookup the Bandcamp-URL-owner path still uses.
           eq: vi.fn((_column: string, slug: string) => ({
             maybeSingle: vi.fn(() => Promise.resolve({ data: artists[slug] ?? null, error: null })),
           })),
