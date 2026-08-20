@@ -27,7 +27,7 @@ vi.mock('../bandcamp-subsonic', async importOriginal => {
   };
 });
 
-import { handler } from '../collection-art';
+import { handler, clearConnectionCacheForTests } from '../collection-art';
 import { encryptCredential } from '../credential-crypto';
 
 const ITEM_ID = '11111111-1111-4111-8111-111111111111';
@@ -99,6 +99,9 @@ function signedInAs(userId: string | null) {
 describe('collection-art handler', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    // The warm-invocation connection cache is real module state; without this, one case's
+    // connection (encrypted under that case's key) leaks into the next.
+    clearConnectionCacheForTests();
     process.env.SUPABASE_URL = 'https://test.supabase.co';
     process.env.SUPABASE_ANON_KEY = 'anon-key';
     process.env.BANDCAMP_CREDENTIAL_KEY = randomBytes(32).toString('base64');
@@ -193,5 +196,77 @@ describe('collection-art handler', () => {
     expect(res.body).not.toContain('tok');
     expect(res.body).not.toContain('salt');
     expect(res.body).not.toContain('ciphertext');
+  });
+
+  // The tokened path: an <img> tag carries no Authorization header, so the endpoints that
+  // already decided the viewer may see an item mint its URL with proof of that decision.
+  describe('art URL tokens', () => {
+    beforeEach(() => {
+      process.env.INTERNAL_FUNCTION_SECRET = 'art-token-secret';
+    });
+    afterEach(() => {
+      delete process.env.INTERNAL_FUNCTION_SECRET;
+    });
+
+    async function mintedToken() {
+      // The real minting function, so this can't pass with a token scheme the minters don't use.
+      const { collectionArtToken } = await import('../collection-utils');
+      return collectionArtToken(ITEM_ID)!;
+    }
+
+    it('serves a private, hidden item to a bare <img> request carrying a minted token', async () => {
+      // The bug this path fixes: a non-public owner's own dashboard art 404ing, because the
+      // browser sends no auth on images and sharing is off.
+      setupDb({ item: { ...PUBLIC_ITEM, hidden: true }, sharingPublic: false });
+      signedInAs(null);
+
+      const res = await handler({
+        httpMethod: 'GET',
+        headers: {},
+        pathParameters: { id: ITEM_ID },
+        queryStringParameters: { t: await mintedToken() },
+      });
+
+      expect(res.statusCode).toBe(200);
+      // And it cost no permission reads: only the item and the connection were consulted.
+      const tables = mocks.mockFrom.mock.calls.map(([table]) => table);
+      expect(tables).not.toContain('usernames');
+      expect(mocks.mockCreateClient).not.toHaveBeenCalled();
+    });
+
+    it('treats a forged token as no token at all', async () => {
+      setupDb({ item: { ...PUBLIC_ITEM, hidden: true }, sharingPublic: false });
+      signedInAs(null);
+
+      const res = await handler({
+        httpMethod: 'GET',
+        headers: {},
+        pathParameters: { id: ITEM_ID },
+        queryStringParameters: { t: 'f'.repeat(32) },
+      });
+
+      expect(res.statusCode).toBe(404);
+      expect(mocks.mockFetchCoverArt).not.toHaveBeenCalled();
+    });
+  });
+
+  it('uses the stored art_ref instead of asking Bandcamp for the album', async () => {
+    setupDb({ item: { ...PUBLIC_ITEM, art_ref: 'stored-art-9' }, sharingPublic: true });
+
+    const res = await get();
+
+    expect(res.statusCode).toBe(200);
+    expect(mocks.mockCoverArtId).not.toHaveBeenCalled();
+    expect(mocks.mockFetchCoverArt).toHaveBeenCalledWith(expect.anything(), 'stored-art-9', 600);
+  });
+
+  it('reuses the warm connection cache across a burst of tiles', async () => {
+    setupDb({ item: PUBLIC_ITEM, sharingPublic: true });
+
+    await get();
+    await get();
+
+    const connectionReads = mocks.mockFrom.mock.calls.filter(([t]) => t === 'bandcamp_connections');
+    expect(connectionReads).toHaveLength(1);
   });
 });

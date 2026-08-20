@@ -11,6 +11,7 @@ import { getClient, readAllPages } from './db';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 import {
   artistUrlFor,
+  collectionArtUrl,
   releaseUrlFor,
   resolveArtistPages,
   type CollectionRowWithRelease,
@@ -78,8 +79,11 @@ export async function handler(event: {
     const items = read.rows.map(({ releases, ...row }) => ({
       ...row,
       // Same art fallback as the public page: unmatched items get their cover from Bandcamp
-      // via the proxy rather than rendering an empty box.
-      art_url: row.art_url || releases?.artwork_url || `/api/collection/art/${row.id}`,
+      // via the proxy rather than rendering an empty box. Tokened, because this response just
+      // authenticated the owner and an <img> tag can't carry that proof itself — the token is
+      // what lets a non-public owner see their own art (browsers send no auth on images), and
+      // what saves the proxy re-deriving permission from the database per tile.
+      art_url: row.art_url || releases?.artwork_url || collectionArtUrl(row.id),
       url: releaseUrlFor({ ...row, releases }),
       artist_url: artistUrlFor({ ...row, releases }, artistPages),
     }));

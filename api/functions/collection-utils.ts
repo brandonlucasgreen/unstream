@@ -1,7 +1,48 @@
 // Shared shaping for collection reads — used by the owner's view (me-collection) and the
 // public page (public-saved-artists), so the two can't drift in what they link to.
 
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { artistSlug, getClient } from './db';
+
+/**
+ * Capability tokens for the cover-art proxy.
+ *
+ * A collection grid renders art as plain <img> tags, and a browser sends no Authorization
+ * header on an image subresource — so the proxy could never tell an owner from a stranger and
+ * answered a non-public owner's own dashboard with 404s, while re-deriving permission from two
+ * database reads on every tile for everyone else. Instead, the endpoints that already decided
+ * the viewer may see an item mint its art URL with a token proving that decision, and the proxy
+ * verifies the token instead of re-asking the database.
+ *
+ * Deliberately unexpiring: the token grants exactly one thing — the cover art of one purchased
+ * album, an image that is public on Bandcamp anyway — and a stable URL is what lets the CDN
+ * keep an image for its full month. It does NOT grant the collection listing, which stays
+ * behind its own endpoints' auth and sharing checks. HMAC output truncated to 128 bits, which
+ * is a capability, not a stored hash.
+ *
+ * Uses INTERNAL_FUNCTION_SECRET (already present wherever functions run) with a context prefix
+ * so an art token can never pass for an internal-dispatch credential or vice versa. Without the
+ * secret the URL is minted bare and the proxy falls back to its database permission check.
+ */
+export function collectionArtToken(itemId: string): string | null {
+  const secret = process.env.INTERNAL_FUNCTION_SECRET;
+  if (!secret) return null;
+  return createHmac('sha256', secret).update(`collection-art:${itemId}`).digest('hex').slice(0, 32);
+}
+
+/** The proxy URL for one item's art, tokened when the secret is available. */
+export function collectionArtUrl(itemId: string): string {
+  const token = collectionArtToken(itemId);
+  return token ? `/api/collection/art/${itemId}?t=${token}` : `/api/collection/art/${itemId}`;
+}
+
+/** Constant-time verification, so the token can't be guessed byte by byte. */
+export function isValidCollectionArtToken(itemId: string, token: string | null | undefined): boolean {
+  if (!token) return false;
+  const expected = collectionArtToken(itemId);
+  if (!expected || token.length !== expected.length) return false;
+  return timingSafeEqual(Buffer.from(token), Buffer.from(expected));
+}
 
 /** Slugs per lookup. A 190-item collection is ~96 artists, so this is one query in practice. */
 const ARTIST_LOOKUP_CHUNK = 100;

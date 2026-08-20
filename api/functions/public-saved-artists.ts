@@ -9,7 +9,7 @@
 // else as support would be lying, and the whole value of the artifact is that it isn't.
 
 import { getClient, readAllPages } from './db';
-import { artistUrlFor, releaseUrlFor, resolveArtistPages } from './collection-utils';
+import { artistUrlFor, collectionArtUrl, releaseUrlFor, resolveArtistPages } from './collection-utils';
 import { checkRateLimit, getClientIp } from './ratelimit';
 
 const CORS_HEADERS = {
@@ -131,7 +131,9 @@ export async function handler(event: {
       artist_name: row.artist_name,
       // Falls back to the art proxy, which fetches from Bandcamp server-side. Only ~28% of a
       // real collection matches an Unstream release, so without this most tiles are blank.
-      art_url: row.art_url || row.releases?.artwork_url || `/api/collection/art/${row.id}`,
+      // Tokened: this endpoint has already applied the public-page rules (sharing on,
+      // purchased, not hidden), so the proxy can trust the URL instead of re-checking them.
+      art_url: row.art_url || row.releases?.artwork_url || collectionArtUrl(row.id),
       acquired_at: row.acquired_at,
       // Matched items link to the release page, so a viewer can buy the same record —
       // the loop closes. Unmatched items still render, just without a link.

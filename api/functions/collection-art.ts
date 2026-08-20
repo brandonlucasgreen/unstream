@@ -19,6 +19,7 @@ import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { decryptCredential } from './credential-crypto';
+import { isValidCollectionArtToken } from './collection-utils';
 import {
   subsonicAlbumCoverArtId,
   subsonicFetchCoverArt,
@@ -52,8 +53,51 @@ const MISS_CACHE_HEADERS = {
 interface ItemRow {
   user_id: string;
   external_id: string | null;
+  art_ref: string | null;
   provenance: string;
   hidden: boolean;
+}
+
+interface ConnectionRow {
+  bandcamp_username: string;
+  credential_ciphertext: string;
+}
+
+/**
+ * The owner's Bandcamp connection, cached per warm invocation. A collection page fires 12-15
+ * art requests in one burst and every one needs the same connection row — this makes that one
+ * read instead of fifteen. Short TTL, module-scoped: nothing new at rest, and a disconnect is
+ * honoured within ten minutes (sooner in practice — a disconnect that deletes items makes the
+ * item lookup 404 first).
+ */
+const CONNECTION_CACHE_TTL_MS = 10 * 60 * 1000;
+const connectionCache = new Map<string, { row: ConnectionRow | null; expires: number }>();
+
+/** Test hook: module state would otherwise leak one case's connection into the next. */
+export function clearConnectionCacheForTests(): void {
+  connectionCache.clear();
+}
+
+async function connectionForUser(
+  client: NonNullable<ReturnType<typeof getClient>>,
+  userId: string
+): Promise<ConnectionRow | null> {
+  const cached = connectionCache.get(userId);
+  if (cached && cached.expires > Date.now()) return cached.row;
+
+  const { data, error } = await client
+    .from('bandcamp_connections')
+    .select('bandcamp_username, credential_ciphertext')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  // A failed read is not "no connection" — don't cache it, just answer this request.
+  if (error) {
+    console.error('[collection-art] connection lookup failed:', error.message);
+    return null;
+  }
+  connectionCache.set(userId, { row: (data as ConnectionRow | null) ?? null, expires: Date.now() + CONNECTION_CACHE_TTL_MS });
+  return (data as ConnectionRow | null) ?? null;
 }
 
 /** Declared so header lookups stay typed — this handler returns images as well as JSON. */
@@ -79,6 +123,7 @@ export async function handler(event: {
   headers: Record<string, string | undefined>;
   path?: string;
   pathParameters?: Record<string, string | undefined>;
+  queryStringParameters?: Record<string, string | undefined>;
 }): Promise<FunctionResponse> {
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers: BASE_HEADERS, body: '' };
@@ -112,7 +157,7 @@ export async function handler(event: {
 
   const { data: item, error: itemError } = await client
     .from('collection_items')
-    .select('user_id, external_id, provenance, hidden')
+    .select('user_id, external_id, art_ref, provenance, hidden')
     .eq('id', itemId)
     .maybeSingle<ItemRow>();
 
@@ -124,11 +169,23 @@ export async function handler(event: {
     return { statusCode: 404, headers: { ...JSON_HEADERS, ...MISS_CACHE_HEADERS }, body: JSON.stringify({ error: 'Not found' }) };
   }
 
-  // Two ways to be allowed to see this: you own it, or it is on a page anyone can see.
-  // The public test mirrors the public page exactly — purchased, not hidden, sharing on —
-  // so this endpoint can never expose a tile the page itself would withhold.
-  const viewerId = await authenticatedUserId(event.headers.authorization);
-  let allowed = viewerId === item.user_id;
+  // Three ways to be allowed to see this, checked cheapest first:
+  //
+  // 1. The URL carries a valid token, minted by an endpoint that already decided this viewer
+  //    may see this item (the owner's dashboard, or the public page after its own filters).
+  //    This is the only path a browser's <img> tag can actually take with credentials — images
+  //    carry no Authorization header, which is why non-public owners used to 404 on their own
+  //    dashboard art — and it costs zero extra reads.
+  // 2. You own it (a non-browser client sending a bearer token).
+  // 3. It is on a page anyone can see — the legacy bare-URL path, kept for URLs minted before
+  //    tokens existed (u-handle's crawler pages also still mint bare URLs; the check mirrors
+  //    the public page exactly: purchased, not hidden, sharing on).
+  let allowed = isValidCollectionArtToken(itemId, event.queryStringParameters?.t);
+
+  if (!allowed) {
+    const viewerId = await authenticatedUserId(event.headers.authorization);
+    allowed = viewerId === item.user_id;
+  }
 
   if (!allowed) {
     if (item.provenance !== 'purchased' || item.hidden) {
@@ -147,11 +204,7 @@ export async function handler(event: {
     return { statusCode: 404, headers: JSON_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
   }
 
-  const { data: connection } = await client
-    .from('bandcamp_connections')
-    .select('bandcamp_username, credential_ciphertext')
-    .eq('user_id', item.user_id)
-    .maybeSingle();
+  const connection = await connectionForUser(client, item.user_id);
 
   if (!connection) {
     return { statusCode: 404, headers: { ...JSON_HEADERS, ...MISS_CACHE_HEADERS }, body: JSON.stringify({ error: 'No art available' }) };
@@ -169,8 +222,10 @@ export async function handler(event: {
   }
 
   try {
-    // The album id is not guaranteed to be the cover-art id, so ask the album for it.
-    const coverArtId = await subsonicAlbumCoverArtId(credential, item.external_id);
+    // The album id is not guaranteed to be the cover-art id. The sync stores the real one on
+    // the item (`art_ref`); asking the album is the fallback for rows imported before that
+    // column existed, and costs one extra authenticated Bandcamp request.
+    const coverArtId = item.art_ref ?? await subsonicAlbumCoverArtId(credential, item.external_id);
     const art = coverArtId ? await subsonicFetchCoverArt(credential, coverArtId, 600) : null;
 
     if (!art) {
