@@ -5,7 +5,7 @@
 
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
-import { type SourceId, CURATED_PLATFORMS, SEARCH_ONLY_PLATFORMS } from './search-utils';
+import { CURATED_PLATFORMS, SEARCH_ONLY_PLATFORMS } from './search-utils';
 
 // Build set of valid source IDs for click: metrics from the SourceId union + platform sets
 const VALID_SOURCE_IDS = new Set<string>([
@@ -39,6 +39,9 @@ function isValidMetric(metric: string): boolean {
 // Module-level cache: slug → artist_id (persists across warm invocations)
 const slugCache = new Map<string, string>();
 
+// More slugs than any real search renders is abuse, not analytics.
+const MAX_BATCH_SLUGS = 24;
+
 export async function handler(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
@@ -58,18 +61,23 @@ export async function handler(event: {
   const rl = await checkRateLimit(ip, 'standard', CORS_HEADERS);
   if (rl.limited) return rl.response;
 
-  // Parse and validate
-  let slug: string;
+  // Parse and validate. Two body shapes: { slug, metric } — one event, what the extension and
+  // Mac app send — and { slugs: [...], metric } — the web app's batched search appearances,
+  // one request for every claimed artist a search rendered instead of one request per card.
+  let slugs: string[];
   let metric: string;
   try {
     const body = JSON.parse(event.body || '{}');
-    slug = body.slug;
     metric = body.metric;
+    slugs = Array.isArray(body.slugs) ? body.slugs : [body.slug];
   } catch {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' }; // silent no-op on bad JSON
   }
 
-  if (!slug || !metric || !isValidMetric(metric)) {
+  slugs = [...new Set(slugs.filter(s => typeof s === 'string' && s.length > 0 && s.length <= 200))]
+    .slice(0, MAX_BATCH_SLUGS);
+
+  if (slugs.length === 0 || !metric || !isValidMetric(metric)) {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' }; // silent no-op
   }
 
@@ -78,30 +86,47 @@ export async function handler(event: {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' }; // DB not configured
   }
 
-  // Resolve artist_id from slug (with cache)
-  let artistId = slugCache.get(slug);
-  if (!artistId) {
-    const { data: artist } = await client
+  // Resolve artist ids from slugs — cache first, then one query for whatever's left
+  const ids: string[] = [];
+  const missing: string[] = [];
+  for (const slug of slugs) {
+    const cached = slugCache.get(slug);
+    if (cached) ids.push(cached);
+    else missing.push(slug);
+  }
+  if (missing.length > 0) {
+    const { data: artists } = await client
       .from('artists')
-      .select('id')
-      .eq('slug', slug)
-      .single();
-
-    if (!artist) {
-      return { statusCode: 204, headers: CORS_HEADERS, body: '' }; // unknown artist
+      .select('id, slug')
+      .in('slug', missing);
+    for (const artist of (artists as Array<{ id: string; slug: string }>) ?? []) {
+      slugCache.set(artist.slug, artist.id);
+      ids.push(artist.id);
     }
-    artistId = artist.id;
-    slugCache.set(slug, artistId);
+    // Unknown slugs are dropped silently, same as the single-event path always has.
   }
 
-  // Atomic upsert-increment
+  if (ids.length === 0) {
+    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+  }
+
+  // Atomic upsert-increment: the single-row RPC for one event, the batch RPC for many —
+  // one transaction either way.
   const today = new Date().toISOString().split('T')[0];
   try {
-    await client.rpc('increment_analytics', {
-      p_artist_id: artistId,
-      p_date: today,
-      p_metric: metric,
-    });
+    if (ids.length === 1) {
+      await client.rpc('increment_analytics', {
+        p_artist_id: ids[0],
+        p_date: today,
+        p_metric: metric,
+      });
+    } else {
+      await client.rpc('increment_analytics_batch', {
+        p_artist_ids: ids,
+        p_date: today,
+        p_metric: metric,
+      });
+    }
   } catch {
     // Silent fail — don't break the caller's experience for analytics
   }

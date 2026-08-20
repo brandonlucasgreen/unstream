@@ -551,20 +551,32 @@ describe('offers and freshness', () => {
     expect(byPlatform.bandcamp.detailCheckedAt).toBeNull();
   });
 
-  // The *oldest* capture across every source. Claiming "checked today" because one source was
-  // re-read would overstate the rest.
-  it('reports the oldest capture across all sources as the freshness claim', async () => {
+  // The *oldest* check across every source. Claiming "checked today" because one source was
+  // re-read would overstate the rest. Derived from detail_checked_at, NOT the offers'
+  // captured_at: the detail pass skips rewriting offers whose prices haven't moved, so
+  // captured_at sits still on a quiet release that was in fact re-verified yesterday. The
+  // fixture's deliberately ancient capturedAt values are the proof — deriving from them would
+  // return April, not August.
+  it('reports the oldest detail check across all sources as the freshness claim', async () => {
     mocks.getReleaseDetail.mockResolvedValue({
       detail: detail({
         sources: [
-          source({ platform: 'bandcamp', offers: [offer({ capturedAt: '2026-08-01T00:00:00.000Z' })] }),
-          source({ platform: 'faircamp', offers: [offer({ capturedAt: '2026-07-04T00:00:00.000Z' })] }),
+          source({
+            platform: 'bandcamp',
+            detailCheckedAt: '2026-08-15T00:00:00.000Z',
+            offers: [offer({ capturedAt: '2026-05-01T00:00:00.000Z' })],
+          }),
+          source({
+            platform: 'faircamp',
+            detailCheckedAt: '2026-08-10T00:00:00.000Z',
+            offers: [offer({ capturedAt: '2026-04-01T00:00:00.000Z' })],
+          }),
         ],
       }),
       failed: false,
     });
 
-    expect((await body(await get())).release.pricesCheckedAt).toBe('2026-07-04T00:00:00.000Z');
+    expect((await body(await get())).release.pricesCheckedAt).toBe('2026-08-10T00:00:00.000Z');
   });
 
   it('reports null freshness rather than a date when nothing has been captured', async () => {

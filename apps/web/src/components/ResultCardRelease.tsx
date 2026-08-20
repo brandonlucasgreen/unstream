@@ -51,8 +51,10 @@ export function ResultCardRelease({ result, latestRelease, platformsWithRelease,
                 }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  analytics.trackPlatformClick(platform.displayName ?? getSource(platform.sourceId).name);
+                  // One tracker per click: trackArtistLinkClick already records the platform_click
+                  // product event, so also calling trackPlatformClick double-counted claimed clicks.
                   if (result.claimedSlug) analytics.trackArtistLinkClick(result.claimedSlug, platform.sourceId);
+                  else analytics.trackPlatformClick(platform.displayName ?? getSource(platform.sourceId).name);
                 }}
               >
                 <span>{getSource(platform.sourceId).icon}</span>

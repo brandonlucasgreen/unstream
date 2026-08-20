@@ -29,8 +29,10 @@ export function ResultCardSocial({ platforms, claimedSlug, onRemoveLink }: Resul
             title={platform.displayName ?? getSource(platform.sourceId).name}
             onClick={(e) => {
               e.stopPropagation();
-              analytics.trackPlatformClick(platform.displayName ?? getSource(platform.sourceId).name);
+              // One tracker per click: trackArtistLinkClick already records the platform_click
+              // product event, so also calling trackPlatformClick double-counted claimed clicks.
               if (claimedSlug) analytics.trackArtistLinkClick(claimedSlug, platform.sourceId);
+              else analytics.trackPlatformClick(platform.displayName ?? getSource(platform.sourceId).name);
             }}
           >
             <SocialIcon platform={platform.sourceId} />
