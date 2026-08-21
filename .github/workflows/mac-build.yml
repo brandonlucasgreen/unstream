@@ -29,19 +29,28 @@ concurrency:
 
 jobs:
   build:
-    # Pinned rather than macos-latest: `macos-latest` moves to a new Xcode without warning, and
-    # a compiler that is newer than the one on Brandon's Mac reports errors that don't reproduce
-    # locally. If GitHub retires this image, bump it deliberately and expect to fix warnings.
-    runs-on: macos-15
+    # Must carry Xcode 26+. The first attempt pinned macos-15 to guard against CI having a
+    # *newer* compiler than the dev machine; the real mismatch was the opposite. macos-15 ships
+    # Xcode 16.4, and `GlobalHotkeyManager.swift` uses `nonisolated deinit` — a Swift 6.2 feature
+    # that 16.4 rejects outright ("requires frontend flag -enable-experimental-feature
+    # IsolatedDeinit"). Local Xcode is 26.6, so the app is fine; the runner was the problem.
+    runs-on: macos-26
     timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@v4
 
-      # Printed so a CI-only failure can be checked against the local Xcode before anyone
-      # assumes the code is broken.
-      - name: Xcode version
-        run: xcodebuild -version
+      # Fails with an explanation rather than 500 lines of SwiftCompile output, which is how
+      # the first run of this workflow presented the same problem.
+      - name: Check the toolchain is new enough
+        run: |
+          ls /Applications | grep -i '^Xcode' || true
+          xcodebuild -version
+          major=$(xcodebuild -version | head -1 | sed -E 's/Xcode ([0-9]+).*/\1/')
+          if [ "$major" -lt 26 ]; then
+            echo "::error::Xcode $major is too old for apps/mac. It uses Swift 6.2 features (nonisolated deinit in GlobalHotkeyManager.swift) that need Xcode 26+. Either the runner image regressed or macos-26 is gone — pick an image with Xcode 26 or newer."
+            exit 1
+          fi
 
       - name: Install XcodeGen
         run: brew install xcodegen
