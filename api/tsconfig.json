@@ -82,6 +82,7 @@
     "functions/__tests__/me-bandcamp.test.ts",
     "functions/__tests__/me-collection.test.ts",
     "functions/__tests__/bandcamp-sync.test.ts",
+    "functions/__tests__/feed-collection-artists.test.ts",
     "functions/__tests__/credential-crypto.test.ts",
     "functions/__tests__/bandcamp-subsonic.test.ts",
     "functions/public-saved-artists.ts",

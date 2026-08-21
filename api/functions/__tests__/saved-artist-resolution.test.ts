@@ -12,7 +12,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-interface Filter { kind: 'eq' | 'in' | 'gte' | 'order' | 'limit'; column?: string; value?: unknown }
+interface Filter { kind: 'eq' | 'in' | 'gte' | 'order' | 'limit' | 'range'; column?: string; value?: unknown }
 interface Query { table: string; columns: string; filters: Filter[] }
 
 const queries: Query[] = [];
@@ -22,6 +22,9 @@ const tables: Record<string, Record<string, unknown>[]> = {
   artists: [],
   artist_slug_aliases: [],
   releases: [],
+  // Empty in every case here: the feed's collection half has its own file
+  // (feed-collection-artists.test.ts). It still has to answer, because the feed now reads it.
+  collection_items: [],
 };
 
 /** Set to a table name to make that table's read fail. */
@@ -41,6 +44,7 @@ function makeClient() {
             gte(column: string, value: unknown) { query.filters.push({ kind: 'gte', column, value }); return builder; },
             order(column: string, value: unknown) { query.filters.push({ kind: 'order', column, value }); return builder; },
             limit(value: number) { query.filters.push({ kind: 'limit', value }); return builder; },
+            range(from: number, to: number) { query.filters.push({ kind: 'range', value: [from, to] }); return builder; },
             then(resolve: (r: unknown) => unknown, reject: (e: unknown) => unknown) {
               if (failingTable === table) {
                 return Promise.resolve({ data: null, error: { message: 'connection reset' } }).then(resolve, reject);
@@ -52,6 +56,11 @@ function makeClient() {
                   const wanted = new Set(f.value as unknown[]);
                   rows = rows.filter(r => wanted.has(r[f.column as string]));
                 }
+              }
+              const range = query.filters.find(f => f.kind === 'range');
+              if (range) {
+                const [from, to] = range.value as [number, number];
+                rows = rows.slice(from, to + 1);
               }
               return Promise.resolve({ data: rows, error: null }).then(resolve, reject);
             },

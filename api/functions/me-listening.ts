@@ -2,20 +2,28 @@
 // POST   — imports streaming-side play counts from the Mac app's Apple Music library scan.
 //          Body: { source: 'apple_music', signals: [{ artistName: string, playCount: number }] }
 //          Upserts into listening_signals; feeds the private gap report.
+// GET    — the gap report: artists you play a lot and have never paid, ranked by plays.
 // DELETE — removes all of the user's apple_music rows (the app's "remove my data" action).
 //
 // Only apple_music is accepted today because the Mac app is the only writer. The table's
 // CHECK constraint also allows 'lastfm' and 'mac_app' — extend the POST validation and the
 // DELETE filter together when a second source ships.
+//
+// **None of this is ever public.** Listening is not support: an Apple Music play, and even an
+// iTunes purchase, maps to `owned`/`listened` rather than `purchased`, so none of it reaches
+// the public collection page. Nothing here touches saved_artists either — saving is a
+// deliberate act that subscribes you to release alerts, and a library scan choosing it for you
+// would bury the alerts that matter (the 2026-08-16 reversal of spec OQ6).
 
-import { getClient, readAllPages } from './db';
+import { artistSlug, getClient, readAllPages } from './db';
+import { resolveArtistPages } from './collection-utils';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'POST, DELETE, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
 };
 
 /** Rows per upsert batch — keeps each PostgREST request comfortably sized (matches bandcamp-sync). */
@@ -28,6 +36,9 @@ const MAX_ARTIST_NAME_LENGTH = 500;
 
 /** Postgres `integer` max — a play count beyond this is a client bug, not a big library. */
 const MAX_PLAY_COUNT = 2_147_483_647;
+
+/** How many gap rows to return. The list is a shopping list, not a database dump. */
+const GAP_LIMIT = 100;
 
 interface Signal {
   artistName: string;
@@ -187,6 +198,107 @@ export async function handler(event: {
       console.error('[me-listening] DELETE error:', error);
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
     }
+  }
+
+  if (event.httpMethod === 'GET') {
+    // Deliberately unfiltered by source: the same artist can arrive from the library scan and
+    // (later) the now-playing monitor, and the gap should rank them on total plays. DELETE
+    // stays scoped to apple_music because it answers for the one source the app owns.
+    const signals = await readAllPages<{ artist_name: string; play_count: number; last_played: string | null }>(
+      (from, to) => client
+        .from('listening_signals')
+        .select('artist_name, play_count, last_played')
+        .eq('user_id', user.userId)
+        .order('play_count', { ascending: false })
+        .range(from, to),
+      'listening_signals (gap)'
+    );
+    if (!signals.ok) {
+      // A read that failed is not an empty gap. Reporting one would read as "you already
+      // support everyone you listen to" — the most misleading answer this endpoint can give.
+      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to load listening signals' }) };
+    }
+
+    const saved = await readAllPages<{ artist_slug: string | null; artist_name: string | null; supported: boolean }>(
+      (from, to) => client
+        .from('saved_artists')
+        .select('artist_slug, artist_name, supported')
+        .eq('user_id', user.userId)
+        .eq('deleted', false)
+        .range(from, to),
+      'saved_artists (gap)'
+    );
+    const collection = await readAllPages<{ artist_name: string }>(
+      (from, to) => client
+        .from('collection_items')
+        .select('artist_name')
+        .eq('user_id', user.userId)
+        .range(from, to),
+      'collection_items (gap)'
+    );
+
+    // Who is already covered: an artist you marked supported, or one you own a record by.
+    // Everything is compared on the derived slug — the same key the collection matcher and the
+    // feed use — so the halves cannot disagree about who counts as covered.
+    //
+    // Unlike the signals read, a failure here degrades instead of failing: the cost is a gap
+    // row for somebody already supported, where blanking the report is the bigger wrong.
+    // readAllPages has already logged the reason.
+    const covered = new Set<string>();
+    for (const row of saved.ok ? saved.rows : []) {
+      if (!row.supported) continue;
+      // Both spellings. A row saved from a search result carries a *synthetic* slug
+      // (`sufjanstevens`) that the canonical one never equals, and re-deriving from the name is
+      // the only thing that recovers it — the same two candidates `savedArtistIdsForUser`
+      // resolves in db.ts, for the same reason.
+      if (row.artist_slug) covered.add(row.artist_slug.toLowerCase());
+      if (row.artist_name) {
+        const derived = artistSlug(row.artist_name);
+        if (derived) covered.add(derived);
+      }
+    }
+    for (const row of collection.ok ? collection.rows : []) {
+      const slug = artistSlug(row.artist_name);
+      if (slug) covered.add(slug);
+    }
+
+    // One artist, one row: merge on the slug so a name arriving from two sources ranks by its
+    // combined plays rather than appearing twice.
+    const totals = new Map<string, { artistName: string; playCount: number; lastPlayed: string | null }>();
+    for (const row of signals.rows) {
+      const slug = artistSlug(row.artist_name);
+      if (!slug || covered.has(slug)) continue;
+      const existing = totals.get(slug);
+      if (!existing) {
+        totals.set(slug, {
+          artistName: row.artist_name,
+          playCount: row.play_count,
+          lastPlayed: row.last_played,
+        });
+        continue;
+      }
+      existing.playCount += row.play_count;
+      if (row.last_played && (!existing.lastPlayed || row.last_played > existing.lastPlayed)) {
+        existing.lastPlayed = row.last_played;
+      }
+    }
+
+    const ranked = [...totals.values()].sort((a, b) => b.playCount - a.playCount).slice(0, GAP_LIMIT);
+    const artistPages = await resolveArtistPages(ranked.map(r => r.artistName));
+
+    return {
+      statusCode: 200,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({
+        gap: ranked.map(r => ({
+          artistName: r.artistName,
+          playCount: r.playCount,
+          lastPlayed: r.lastPlayed,
+          artistUrl: artistPages.has(r.artistName) ? `/a/${artistPages.get(r.artistName)}` : null,
+        })),
+        totalArtists: signals.rows.length,
+      }),
+    };
   }
 
   return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
