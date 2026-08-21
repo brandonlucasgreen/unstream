@@ -94,8 +94,8 @@ targets:
         CFBundleName: UnstreamShare
         CFBundleDisplayName: Share to Unstream
         CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
-        CFBundleVersion: "15"
-        CFBundleShortVersionString: "3.5.0"
+        CFBundleVersion: "16"
+        CFBundleShortVersionString: "3.6.0"
         CFBundlePackageType: XPC!
         NSExtension:
           NSExtensionAttributes:
