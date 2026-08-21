@@ -27,6 +27,7 @@ struct PopoverView: View {
     @EnvironmentObject var releaseAlertManager: ReleaseAlertManager
     @ObservedObject private var auth = AuthService.shared
     @ObservedObject private var sync = SavedArtistsSync.shared
+    @ObservedObject private var updater = SparkleUpdater.shared
     @State private var selectedTab: PopoverTab = .search
     @State private var showSignIn = false
     @State private var pollTask: Task<Void, Never>?
@@ -40,6 +41,8 @@ struct PopoverView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            updateRow
+
             // A release guide takes over the popover rather than opening a window: this is a
             // menu-bar app, and a second window for a page this small would be a heavier answer
             // than the question deserves. The footer stays put so the popover doesn't resize
@@ -141,6 +144,38 @@ struct PopoverView: View {
     }
 
     // MARK: - Search / saved tabs
+
+    /// The app's only ambient "there's an update" signal, and the reason `SparkleUpdater`
+    /// takes over showing scheduled updates rather than letting Sparkle present them: a
+    /// menu-bar accessory has no Dock icon to badge and no window to decorate, and Sparkle's
+    /// own scheduled alert for a dockless app lands behind everything with no way back to it.
+    ///
+    /// Above the drill-down as well as the tabs, so it can't be buried a level deep.
+    @ViewBuilder
+    private var updateRow: some View {
+        if let version = updater.availableVersion {
+            Button {
+                // Hands off to Sparkle's alert, which owns the release notes and the install.
+                updater.checkForUpdates()
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.down.circle.fill")
+                    Text("Install Unstream \(version)")
+                    Spacer()
+                }
+                .font(.caption)
+                .foregroundStyle(Color.accentColor)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .background(Color.accentColor.opacity(0.1))
+            .help("Unstream \(version) is available — click to see what changed and install it")
+
+            Divider()
+        }
+    }
 
     private var browseContent: some View {
         VStack(spacing: 0) {

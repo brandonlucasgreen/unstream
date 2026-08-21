@@ -121,15 +121,32 @@ a "Skip this version" click.
 
 ## Behaviour in a menu bar app
 
-Unstream has no window and no Dock icon, so Sparkle's default "show an update alert" would belong
-to an app the person can't see or command-tab to. `SparkleUpdater` implements Sparkle's gentle
-reminders instead: a *scheduled* update briefly gives the app a Dock icon with a badge and, only
-if notifications are already authorized, posts a notification that opens Sparkle's alert. The Dock
-icon goes away again when the update session ends. User-initiated checks (Settings ▸ About ▸ Check
-for Updates…) always show Sparkle's UI directly.
+A dockless accessory app *can* put up an update alert — it can activate and show a key window
+with no Dock icon and no pre-existing window. What it can't do is let Sparkle choose the moment.
+Sparkle's two scheduled paths both go wrong here:
 
-It deliberately never *asks* for notification permission — the Dock badge carries the reminder on
-its own, and prompting somebody for notifications in order to mention an update is a bad trade.
+- **With immediate focus** it shows a modal straight away. For an app that launches at login,
+  that means a window in front of whatever you're doing, seconds after you sit down.
+- **Without it**, the docs say a dockless app's alert is *"presented behind other apps and
+  windows"* — and an accessory app has no Dock icon and no Command-Tab entry, so there's nothing
+  to click to bring it back. It's effectively invisible.
+
+So `SparkleUpdater` returns `false` from `standardUserDriverShouldHandleShowingScheduledUpdate`
+and announces the update itself: an "Install Unstream X.Y.Z" row appears at the top of the
+popover, above the tabs and above any drill-down so it can't be buried. Clicking it calls
+`checkForUpdates()`, which is how Sparkle's docs say to pull an already-prepared update into
+focus; the alert then appears with its release notes and Install button. The row clears when the
+user gives the alert attention or the session ends.
+
+A notification is posted alongside it, but **only if authorization already exists** — this
+deliberately never prompts for notification permission just to mention an update. The popover row
+is the actual channel; the notification is a nudge for people who aren't looking at the menu bar.
+
+**The activation policy is never changed and the Dock is never touched.** Sparkle's own
+background-app example flips to `.regular` and badges the Dock icon, and an earlier draft of this
+did too — it was dropped because a menu bar app briefly materialising in the Dock is a jolt, and
+the popover is a better home for the reminder. (For reference, of the LSUIElement + Sparkle apps
+surveyed on this Mac, three implement gentle reminders and none badges the Dock.)
 
 ## What was removed
 
