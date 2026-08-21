@@ -253,6 +253,14 @@
   to = "/.netlify/functions/desktop-version"
   status = 200
 
+# Sparkle's feed for the Mac app. The path is baked into shipped builds (SUFeedURL in
+# apps/mac/Unstream/Info-macOS.plist), so it can't be renamed without orphaning every
+# install that already has it — treat it as a permanent route.
+[[redirects]]
+  from = "/appcast.xml"
+  to = "/.netlify/functions/desktop-appcast"
+  status = 200
+
 [[redirects]]
   from = "/api/analytics/event"
   to = "/.netlify/functions/analytics-event"

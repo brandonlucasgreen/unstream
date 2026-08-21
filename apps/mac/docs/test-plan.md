@@ -102,7 +102,8 @@ This test plan covers the universal Apple app (macOS + iOS) built from a single 
 - [ ] **Integrations**: ListenBrainz token validation succeeds with valid token, shows username
 - [ ] **Integrations**: ListenBrainz invalid token shows error, clears stored token
 - [ ] **Integrations**: "Disconnect" clears token and disables scrobbling
-- [ ] **About**: "Check for Updates" calls UpdateChecker, shows result
+- [ ] **About**: "Check for Updates…" opens Sparkle's own alert (an update, or "you're up to date")
+- [ ] **About**: both update toggles persist across a relaunch; the second is disabled while the first is off
 - [ ] **About**: Version number matches CFBundleShortVersionString (3.0.0)
 - [ ] **About**: Links to unstream.stream open in browser
 

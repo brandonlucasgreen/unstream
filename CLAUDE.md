@@ -398,6 +398,26 @@ unlinked on purpose — a collection page asserts a specific person bought a spe
 
 `/settings` is backed by the `me-*` functions: `me-settings.ts`, `me-username.ts`, `me-location.ts`, `me-password.ts`, plus `user-sharing.ts` for the sharing toggle. These are the only files in `api/tsconfig.json`'s typecheck include, and each has a test in `api/functions/__tests__/` — follow that pattern for new account endpoints.
 
+### Mac app updates (Sparkle)
+
+The Mac app ships as a direct GitHub release and updates itself with Sparkle 2, added via SPM and
+filtered to macOS (`apps/mac/project.yml`). `api/shared/desktop-release.ts` is the single source of
+truth for the current Mac release; `api/functions/desktop-appcast.ts` renders it as the appcast at
+`/appcast.xml`, and the legacy `/api/desktop/version` endpoint reads the same constant for installs
+older than 3.6.0.
+
+Two traps worth knowing before touching any of it — full detail in
+`apps/mac/docs/sparkle-updates.md`:
+
+- **Sparkle compares `CFBundleVersion`, not the marketing version.** An appcast whose
+  `sparkle:version` is `3.6.0` against an installed `CFBundleVersion` of `15` offers no update.
+  Bump the build number on every release.
+- **The sandbox needs three things at once**: `SUEnableInstallerLauncherService` in
+  `Info-macOS.plist`, the `-spks`/`-spki` `mach-lookup` exceptions in the entitlements, and the app
+  staying sandboxed. Break one and updates download fine and then fail to install — which reads as
+  success right up to the last step. The Developer ID `archive` + `-exportArchive` path is also
+  what re-signs Sparkle's XPC helpers; don't hand-roll `codesign --deep`.
+
 ### Public API (v1)
 
 A versioned REST API for third parties, documented in `docs/openapi.yaml` and surfaced on `/developers`. Routes (see `netlify.toml`): `/api/v1/search`, `/api/v1/artist/*`, `/api/v1/resolve`, `/api/v1/platforms`, `/api/v1/status`, `/api/v1/keys`. API keys are stored hashed in Supabase (migration 007); requests carrying a key get permissive CORS, anonymous requests are restricted to `unstream.stream`. See `api/functions/middleware.ts`.

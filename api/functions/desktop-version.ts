@@ -1,18 +1,16 @@
-import type { Handler } from '@netlify/functions';
+import { MAC_RELEASE } from '../shared/desktop-release';
 
-// Desktop app version info — update this on every Mac release.
-//
-// This is what the Mac app's automatic update check reads. It sat at 2.1.0 while the
-// app shipped 3.2.0, which went unnoticed because nothing called the checker; as of
-// v3.3.0 it runs at launch, so a stale value here means users are told they're up to
-// date when they aren't. Keep it in step with Info-macOS.plist.
+// The pre-Sparkle update check: versions up to 3.5.0 poll this at launch and, if it reports
+// something newer, post a notification linking to the download. 3.6.0 and later use Sparkle
+// (/appcast.xml) and never call this — but old installs are exactly the ones that need to be
+// told an update exists, so it stays, reading the same release constant as the appcast.
 const VERSION_INFO = {
-  latestVersion: '3.5.0',
-  downloadUrl: 'https://github.com/brandonlucasgreen/unstream/releases/latest',
-  releaseNotes: 'Fixes release alerts: cross-device dismissal sync, missing platforms, and alerts lost after time away',
+  latestVersion: MAC_RELEASE.shortVersion,
+  downloadUrl: MAC_RELEASE.releasesPageUrl,
+  releaseNotes: MAC_RELEASE.releaseNotes,
 };
 
-export const handler: Handler = async (event) => {
+export async function handler(event: { httpMethod?: string }) {
   // Handle CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -37,4 +35,4 @@ export const handler: Handler = async (event) => {
     headers,
     body: JSON.stringify(VERSION_INFO),
   };
-};
+}

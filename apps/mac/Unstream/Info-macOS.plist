@@ -62,6 +62,18 @@
 			</array>
 		</dict>
 	</array>
+	<key>SUAllowsAutomaticUpdates</key>
+	<true/>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUEnableInstallerLauncherService</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://unstream.stream/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>B7RS84O0N7JK6Fv3uqBMuD6+1Qo7mg8o9nbYMp1FLnc=</string>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
 	<key>SUPABASE_ANON_KEY</key>
 	<string>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3b2djbHF6cHNidnFieWhocWJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMTMyODcsImV4cCI6MjA4ODg4OTI4N30.AUcgWjqcsIbcTm-RkjaY2jtVMYmAHaPVE52oGeOsblM</string>
 </dict>

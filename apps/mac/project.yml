@@ -26,6 +26,12 @@ packages:
   Supabase:
     url: https://github.com/supabase/supabase-swift.git
     exactVersion: 2.44.1
+  # Sparkle ships as a binary XCFramework, and the Installer/Downloader XPC services
+  # the sandbox needs live inside Sparkle.framework — nothing extra to bundle. macOS
+  # only: the iOS app updates through the App Store.
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle.git
+    exactVersion: 2.9.6
 
 targets:
   Unstream:
@@ -64,6 +70,9 @@ targets:
         destinationFilters: [iOS]
       - package: Supabase
         product: Supabase
+      - package: Sparkle
+        product: Sparkle
+        destinationFilters: [macOS]
 
   UnstreamShareExtension:
     type: app-extension
