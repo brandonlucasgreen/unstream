@@ -72,6 +72,8 @@
     "functions/__tests__/weekly-analytics-recap.test.ts",
     "functions/me-notifications.ts",
     "functions/__tests__/me-notifications.test.ts",
+    "functions/me-listening.ts",
+    "functions/__tests__/me-listening.test.ts",
     "functions/me-bandcamp.ts",
     "functions/me-collection.ts",
     "functions/bandcamp-sync-background.ts",
