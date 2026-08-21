@@ -1,0 +1,95 @@
+# Compiles the Apple app on every change to apps/mac.
+#
+# Why this exists: ci.yml runs on ubuntu-latest and cannot build Swift, so nothing in GitHub
+# Actions ever compiled the Mac app. On 2026-08-16 that let a macOS compile error land on main
+# and sit there green — `.onOpenURL` attached to the SwiftUI `Settings` *scene*, which is a View
+# modifier, not a Scene one. This job would have caught it in about five minutes.
+#
+# It deliberately does NOT archive, sign, notarize, or upload anything. It answers one question:
+# does the app still compile, and do its tests still pass. Releases stay manual.
+
+name: Mac app build
+
+on:
+  pull_request:
+    paths:
+      - 'apps/mac/**'
+      - '.github/workflows/mac-build.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mac/**'
+      - '.github/workflows/mac-build.yml'
+
+# A second push to the same branch cancels the first — macOS runners are the slowest thing
+# in this repo and there is no value in finishing a build for a commit already replaced.
+concurrency:
+  group: mac-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    # Must carry Xcode 26+. The first attempt pinned macos-15 to guard against CI having a
+    # *newer* compiler than the dev machine; the real mismatch was the opposite. macos-15 ships
+    # Xcode 16.4, and `GlobalHotkeyManager.swift` uses `nonisolated deinit` — a Swift 6.2 feature
+    # that 16.4 rejects outright ("requires frontend flag -enable-experimental-feature
+    # IsolatedDeinit"). Local Xcode is 26.6, so the app is fine; the runner was the problem.
+    runs-on: macos-26
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Fails with an explanation rather than 500 lines of SwiftCompile output, which is how
+      # the first run of this workflow presented the same problem.
+      - name: Check the toolchain is new enough
+        run: |
+          ls /Applications | grep -i '^Xcode' || true
+          xcodebuild -version
+          major=$(xcodebuild -version | head -1 | sed -E 's/Xcode ([0-9]+).*/\1/')
+          if [ "$major" -lt 26 ]; then
+            echo "::error::Xcode $major is too old for apps/mac. It uses Swift 6.2 features (nonisolated deinit in GlobalHotkeyManager.swift) that need Xcode 26+. Either the runner image regressed or macos-26 is gone — pick an image with Xcode 26 or newer."
+            exit 1
+          fi
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      # apps/mac/Unstream.xcodeproj is committed but generated; project.yml is the source of
+      # truth. Regenerating here means a project.yml change is exercised even if somebody
+      # forgot to commit the regenerated pbxproj.
+      - name: Generate the Xcode project
+        working-directory: apps/mac
+        run: xcodegen generate
+
+      - name: Build (macOS)
+        run: |
+          xcodebuild -project apps/mac/Unstream.xcodeproj \
+            -scheme Unstream \
+            -destination 'platform=macOS' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      # The XCTest suite (saved-artists sync, release alerts, release detail, music library).
+      # Runs on the macOS destination, so it needs no simulator.
+      - name: Test (macOS)
+        run: |
+          xcodebuild -project apps/mac/Unstream.xcodeproj \
+            -scheme Unstream \
+            -destination 'platform=macOS' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            test
+
+      # The same target builds for iOS, and the two platforms diverge through
+      # `#if os(...)` and XcodeGen destinationFilters — so a macOS-only build proves nothing
+      # about iOS. Sparkle is macOS-filtered and must stay out of this one.
+      - name: Build (iOS Simulator)
+        run: |
+          xcodebuild -project apps/mac/Unstream.xcodeproj \
+            -scheme Unstream \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            build
