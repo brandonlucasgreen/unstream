@@ -43,11 +43,9 @@ interface MatchedRelease {
   artwork_url: string | null;
 }
 
+/** Just the id: matching an artist is how we find their releases, and nothing more. */
 interface MatchedArtist {
   id: string;
-  slug: string;
-  name: string;
-  imageUrl: string | null;
 }
 
 interface LibraryMatches {
@@ -86,8 +84,8 @@ function sameInstant(a: string | null, b: string | null): boolean {
  * Match imported albums to Unstream artists (by normalized name) and releases (by
  * normalized artist name + normalized title — releases.match_key is already
  * normalizeForComparison output). Conservative on purpose: an ambiguous artist name — two
- * artist rows normalizing identically — matches nothing, because a wrong release_id or a
- * wrong "supported" mark asserts the wrong fact about a user's support.
+ * artist rows normalizing identically — matches nothing, because a wrong release_id puts a
+ * record somebody else made into a fan's collection.
  */
 async function matchLibrary(albums: SubsonicAlbum[]): Promise<LibraryMatches> {
   const client = getClient();
@@ -104,8 +102,8 @@ async function matchLibrary(albums: SubsonicAlbum[]): Promise<LibraryMatches> {
   // the real linking path and reads live — picks them up.
   const artistRead = await cacheGetOrFetch(
     'collection:artist-name-map',
-    () => readAllPages<{ id: string; slug: string; name: string; image_url: string | null }>(
-      (from, to) => client.from('artists').select('id, slug, name, image_url').order('id').range(from, to),
+    () => readAllPages<{ id: string; name: string }>(
+      (from, to) => client.from('artists').select('id, name').order('id').range(from, to),
       'artists (bandcamp-sync matching)'
     ),
     3600,
@@ -123,9 +121,7 @@ async function matchLibrary(albums: SubsonicAlbum[]): Promise<LibraryMatches> {
     if (!norm) continue;
     artistsByNorm.set(
       norm,
-      artistsByNorm.has(norm)
-        ? 'ambiguous'
-        : { id: row.id, slug: row.slug, name: row.name, imageUrl: row.image_url }
+      artistsByNorm.has(norm) ? 'ambiguous' : { id: row.id }
     );
   }
 
@@ -173,152 +169,6 @@ async function matchLibrary(albums: SubsonicAlbum[]): Promise<LibraryMatches> {
     if (release) matches.releases.set(album.id, release);
   }
   return matches;
-}
-
-/** Artists per saved_artists read — stays far below PostgREST's 1,000-row response cap. */
-const SAVED_LOOKUP_CHUNK = 100;
-
-/** The saved_artists columns needed to decide insert vs. upgrade vs. leave alone. */
-const SAVED_SELECT = 'id, artist_id, artist_slug, supported, deleted';
-
-interface SavedRow {
-  id: string;
-  artist_id: string | null;
-  artist_slug: string | null;
-  supported: boolean;
-  deleted: boolean;
-}
-
-/**
- * Buying an artist's record IS supporting them, so a Bandcamp import marks every matched
- * artist as saved + supported (Brandon, 2026-08-09, spec open question 6). Collection and
- * saved list are two views of the same relationship.
- *
- * Three rules keep this from fighting the user:
- *   - a row the user tombstoned (deleted=true) is left completely alone — permanent
- *     dismissal is a locked spec decision and a re-sync must never resurrect it;
- *   - an already-supported row keeps its original supported_at;
- *   - only supported goes true; nothing here can ever un-support or overwrite notes.
- *
- * **An existing row is looked up by `artist_id` as well as by slug, and matching on the slug
- * alone broke the first of those rules.** `(user_id, artist_slug)` is the table's natural key
- * (migration 014), but a row saved from a search result carries a *synthetic* slug —
- * `modelactriz`, `seoulmetro`, `qobuz-robertlogan` — that the canonical slug never equals, and
- * `artist_id` is then the only thing identifying the artist. So the slug-only check found
- * nothing and inserted a **second live row for an artist already saved** (measured on
- * production 2026-08-14: Model/Actriz, Rodney Owl and Seoul Metro each duplicated by one
- * import), and it equally missed a **tombstone** filed under the other slug, resurrecting a
- * dismissal this function promises is permanent.
- *
- * Failure here degrades, not fails: items are the sync's primary artifact, and the mark
- * is derived state the next re-sync recomputes.
- */
-async function markArtistsSupported(userId: string, artists: MatchedArtist[]): Promise<void> {
-  const client = getClient();
-  if (!client || artists.length === 0) return;
-
-  const serverNow = new Date().toISOString();
-  const toInsert: Record<string, unknown>[] = [];
-  /** Row ids, not slugs: a row matched by `artist_id` may be filed under a different slug. */
-  const toSupport: string[] = [];
-
-  for (let i = 0; i < artists.length; i += SAVED_LOOKUP_CHUNK) {
-    const chunk = artists.slice(i, i + SAVED_LOOKUP_CHUNK);
-
-    // Two reads rather than one, because a saved row can name this artist either way and
-    // neither column alone finds both (see the doc comment above).
-    const [byId, bySlug] = await Promise.all([
-      client
-        .from('saved_artists')
-        .select(SAVED_SELECT)
-        .eq('user_id', userId)
-        .in('artist_id', chunk.map(a => a.id)),
-      client
-        .from('saved_artists')
-        .select(SAVED_SELECT)
-        .eq('user_id', userId)
-        .in('artist_slug', chunk.map(a => a.slug)),
-    ]);
-
-    const failure = byId.error || bySlug.error;
-    if (failure) {
-      // Without a reliable view of existing rows we can't insert safely (we might
-      // resurrect a tombstone), so skip this chunk's artists entirely.
-      console.warn('[bandcamp-sync] saved_artists read failed:', failure.message);
-      Sentry.captureException(new Error(`saved_artists read failed: ${failure.message}`), {
-        tags: { function: 'bandcamp-sync' },
-        extra: { stage: 'mark-supported' },
-      });
-      continue;
-    }
-
-    const rows = [...(byId.data ?? []), ...(bySlug.data ?? [])] as SavedRow[];
-
-    for (const artist of chunk) {
-      // Both reads can return the same row, and an already-duplicated artist returns two — so
-      // decide over every candidate rather than picking one.
-      const candidates = rows.filter(
-        row => (row.artist_id && row.artist_id === artist.id) || row.artist_slug === artist.slug
-      );
-
-      if (candidates.length === 0) {
-        toInsert.push({
-          user_id: userId,
-          artist_id: artist.id,
-          artist_slug: artist.slug,
-          artist_name: artist.name,
-          artist_image_url: artist.imageUrl,
-          supported: true,
-          supported_at: serverNow,
-          // Stamped server-side on insert so the row is immediately visible to the Apple
-          // app's ?since= incremental pulls — same reasoning as saved-artists.ts.
-          last_modified: serverNow,
-        });
-        continue;
-      }
-
-      // A tombstone wins only when nothing live is left for this artist — then the dismissal
-      // is untouchable, and no row is inserted either. A tombstone sitting *beside* a live row
-      // means that row was superseded, not the artist dismissed (deduplicating an account
-      // leaves exactly that shape), and skipping there would strand the live row unsupported.
-      const live = candidates.filter(row => !row.deleted);
-      for (const row of live) {
-        if (!row.supported && !toSupport.includes(row.id)) toSupport.push(row.id);
-      }
-    }
-  }
-
-  for (let i = 0; i < toInsert.length; i += SAVED_LOOKUP_CHUNK) {
-    const { error } = await client
-      .from('saved_artists')
-      .upsert(toInsert.slice(i, i + SAVED_LOOKUP_CHUNK), { onConflict: 'user_id,artist_slug' });
-    if (error) {
-      console.warn('[bandcamp-sync] saved_artists insert failed:', error.message);
-      Sentry.captureException(new Error(`saved_artists insert failed: ${error.message}`), {
-        tags: { function: 'bandcamp-sync' },
-        extra: { stage: 'mark-supported' },
-      });
-    }
-  }
-
-  for (let i = 0; i < toSupport.length; i += SAVED_LOOKUP_CHUNK) {
-    const { error } = await client
-      .from('saved_artists')
-      .update({ supported: true, supported_at: serverNow, last_modified: serverNow })
-      .eq('user_id', userId)
-      .in('id', toSupport.slice(i, i + SAVED_LOOKUP_CHUNK));
-    if (error) {
-      console.warn('[bandcamp-sync] saved_artists support update failed:', error.message);
-      Sentry.captureException(new Error(`saved_artists support update failed: ${error.message}`), {
-        tags: { function: 'bandcamp-sync' },
-        extra: { stage: 'mark-supported' },
-      });
-    }
-  }
-
-  if (toInsert.length > 0 || toSupport.length > 0) {
-    console.log(`[bandcamp-sync] marked supported: ${toInsert.length} new, ${toSupport.length} upgraded`);
-  }
 }
 
 /**
@@ -514,9 +364,11 @@ export async function handler(event: {
       }
     }
 
-    // Buying is supporting: mark every matched artist saved + supported. After the items
-    // land — the mark is derived state, and a failure inside degrades rather than throwing.
-    await markArtistsSupported(userId, [...matches.artists.values()]);
+    // An import writes collection_items and stops there. It used to also mark every matched
+    // artist saved + supported (spec OQ6) — reversed 2026-08-16: "Collection Imports should
+    // always add to the collection NOT saved artists." Saving is a deliberate act, and
+    // conscripting a whole library into someone's saved list buried the release alerts they
+    // chose. Their releases still reach the feed: getFeedReleasesForUser unions the two lists.
 
     // The public page renders these items and is CDN-cached; a sync that wrote nothing
     // changed nothing, so only a real write pays for the purge.
@@ -544,7 +396,7 @@ export async function handler(event: {
       body: {
         imported: uniqueAlbums.length,
         matched: matches.releases.size,
-        artistsMarked: matches.artists.size,
+        artistsMatched: matches.artists.size,
       },
     };
   } catch (error) {
