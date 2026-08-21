@@ -38,20 +38,51 @@ Updates are signed with an EdDSA (ed25519) key pair, separate from the Developer
 
 - **Public key** — `SUPublicEDKey` in `Info-macOS.plist`. Baked into every shipped build.
 - **Private key** — generated 2026-08-21, stored in the **login keychain** on Brandon's Mac as
-  *"Private key for signing Sparkle updates"*. It is not in the repo and must never be.
+  *"Private key for signing Sparkle updates"* (service `https://sparkle-project.org`, account
+  `ed25519`). It is not in the repo and must never be.
 
-**Back the private key up somewhere safe.** If it's lost, no future release can be signed with it,
-and every already-installed copy of the app will reject updates signed with a new key — those
-people would have to download a fresh DMG by hand, which is the situation Sparkle was adopted to
-end. Export it with:
+**The tools live at `~/Developer/sparkle-2.9.6/bin/`** — `generate_keys`, `sign_update`,
+`generate_appcast`. They ship inside `Sparkle-for-Swift-Package-Manager.zip` but SPM doesn't put
+them anywhere findable, so they were copied out by hand. Every command below assumes that path.
+
+### The key does NOT sync to iCloud
+
+Sparkle stores it as a **non-synchronizable** login-keychain item, so it does not appear in the
+Passwords app and is not in iCloud Keychain. It exists on exactly one Mac. Lose that Mac and no
+future release can be signed with it — and every already-installed copy of the app rejects updates
+signed with a replacement key, leaving those people to download a DMG by hand forever. That's the
+situation Sparkle was adopted to end, so this backup is not optional.
+
+Check whether it's still the right key before any release — one read-only command, no prompt:
 
 ```bash
-./bin/generate_keys -x sparkle-private-key.txt
+~/Developer/sparkle-2.9.6/bin/generate_keys -p
+/usr/libexec/PlistBuddy -c 'Print :SUPublicEDKey' apps/mac/Unstream/Info-macOS.plist
 ```
 
-(from an unpacked Sparkle distribution; store the file in the Brain vault alongside the App Store
-Connect key, then delete the local copy). To restore it on a new machine:
-`./bin/generate_keys -f sparkle-private-key.txt`.
+Those two must print the same string. If they ever diverge, every signature is rejected and it
+looks to users like "no update available".
+
+### Backing it up into the Passwords app
+
+```bash
+~/Developer/sparkle-2.9.6/bin/generate_keys -x ~/Desktop/sparkle-private-key.txt
+```
+
+macOS will ask permission for the tool to read the key — click **Allow**. Then:
+
+1. Open `~/Desktop/sparkle-private-key.txt` and copy the long key string out of it.
+2. Passwords app → **+ New Password**. Title it something findable, e.g. *Unstream — Sparkle
+   update signing key*. Paste the key into the **Password** field. Save.
+3. Delete `~/Desktop/sparkle-private-key.txt`.
+
+To restore it onto a new Mac: copy the string back into a file and run
+`generate_keys -f thatfile`.
+
+Alternative, matching what's already done with the App Store Connect `.p8`: keep the exported file
+in the Brain vault next to `AuthKey_XDBZJJA474.p8`. Less protected than the Passwords app (iCloud
+Drive holds it as plain text) but consistent with the existing habit, and it's a file rather than
+a copy-paste.
 
 ## Releasing an update
 
@@ -71,10 +102,10 @@ the end. Nothing before step 6 changes.
 3. `create-dmg` as before.
 4. `xcrun notarytool submit` the DMG.
 5. `xcrun stapler staple` the DMG.
-6. **Sign the DMG for Sparkle.** From an unpacked Sparkle distribution:
+6. **Sign the DMG for Sparkle:**
 
    ```bash
-   ./bin/sign_update /path/to/build/Unstream-3.6.0.dmg
+   ~/Developer/sparkle-2.9.6/bin/sign_update /path/to/build/Unstream-3.6.0.dmg
    ```
 
    It prints the two values the appcast needs:
