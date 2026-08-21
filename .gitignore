@@ -76,3 +76,14 @@ next-env.d.ts
 
 # Supabase CLI temp
 supabase/.temp/
+
+# Signing keys and credentials. Nothing here has ever been committed, and these patterns keep it
+# that way — the App Store Connect API key (AuthKey_*.p8) and Sparkle's exported EdDSA key are
+# both plain text, and both are the kind of file that ends up in the project folder "just for a
+# minute" during a release. A leaked .p8 lets anyone upload builds as this developer.
+*.p8
+*.p12
+*.cer
+*.mobileprovision
+sparkle-private-key*.txt
+
