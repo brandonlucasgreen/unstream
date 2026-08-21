@@ -221,6 +221,13 @@
   to = "/.netlify/functions/me-notifications"
   status = 200
 
+# Streaming-side play counts from the Mac app's Apple Music library import
+# (Support Loop Step 2). Feeds the private gap report; never public.
+[[redirects]]
+  from = "/api/me/listening"
+  to = "/.netlify/functions/me-listening"
+  status = 200
+
 [[redirects]]
   from = "/api/public/saved-artists/*"
   to = "/.netlify/functions/public-saved-artists"
