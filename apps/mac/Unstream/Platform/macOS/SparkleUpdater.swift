@@ -25,7 +25,9 @@ import UserNotifications
 ///    alert is "presented behind other apps and windows", and an accessory app has no Dock icon
 ///    and no Command-Tab entry, so there is nothing to click to find it again. So this takes
 ///    over showing scheduled updates (Sparkle's gentle-reminder API) and announces them in the
-///    popover, where the app lives, with the alert appearing only once it's asked for.
+///    popover, where the app lives, with the alert appearing only once it's asked for. While an
+///    alert *is* up, the app takes a Dock icon so the window can be found again — the same thing
+///    CleanShot X, Ice and Reminders MenuBar do. No Dock badge, which none of them do either.
 @MainActor
 final class SparkleUpdater: NSObject, ObservableObject {
     static let shared = SparkleUpdater()
@@ -157,25 +159,37 @@ extension SparkleUpdater: SPUStandardUserDriverDelegate {
         forUpdate update: SUAppcastItem,
         state: SPUUserUpdateState
     ) {
-        // `true` means Sparkle is showing this one itself — a user-initiated check, which needs
-        // no reminder from us. The activation policy is left alone in both cases: this app has
-        // no business appearing in the Dock, and an accessory app's alert can come to the front
-        // without one.
-        guard !handleShowingUpdate else { return }
-
-        let version = update.displayVersionString
         MainActor.assumeIsolated {
+            // A Dock icon for the duration of the update session, then back to accessory in
+            // `willFinishUpdateSession`. This is the one thing a menu bar app genuinely can't do
+            // without: Sparkle's alert is a window you can walk away from, and an accessory app's
+            // windows are in neither the Dock nor the app switcher, so clicking through to Safari
+            // mid-decision would strand the alert behind everything with no route back to it.
+            // Applied to user-initiated checks too, so "where did that window go" has one answer
+            // rather than two.
+            NSApp.setActivationPolicy(.regular)
+
+            // `true` means Sparkle is showing this one itself — a user-initiated check, which
+            // needs no reminder from us.
+            guard !handleShowingUpdate else { return }
+
+            let version = update.displayVersionString
             availableVersion = version
             Task { await self.postUpdateNotification(version: version) }
         }
     }
 
+    /// Fires when the alert is first brought into focus *or* acted on — so by here the Dock
+    /// icon, not this row, is what leads back to the update.
     nonisolated func standardUserDriverDidReceiveUserAttention(forUpdate update: SUAppcastItem) {
         MainActor.assumeIsolated { clearReminder() }
     }
 
     nonisolated func standardUserDriverWillFinishUpdateSession() {
-        MainActor.assumeIsolated { clearReminder() }
+        MainActor.assumeIsolated {
+            clearReminder()
+            NSApp.setActivationPolicy(.accessory)
+        }
     }
 }
 

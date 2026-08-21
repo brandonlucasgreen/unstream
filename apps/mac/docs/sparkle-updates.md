@@ -142,11 +142,18 @@ A notification is posted alongside it, but **only if authorization already exist
 deliberately never prompts for notification permission just to mention an update. The popover row
 is the actual channel; the notification is a nudge for people who aren't looking at the menu bar.
 
-**The activation policy is never changed and the Dock is never touched.** Sparkle's own
-background-app example flips to `.regular` and badges the Dock icon, and an earlier draft of this
-did too — it was dropped because a menu bar app briefly materialising in the Dock is a jolt, and
-the popover is a better home for the reminder. (For reference, of the LSUIElement + Sparkle apps
-surveyed on this Mac, three implement gentle reminders and none badges the Dock.)
+**While an alert is up, the app takes a Dock icon** (`.regular`), and goes back to `.accessory`
+when the session ends. This is the one piece a menu bar app can't skip, and it's what CleanShot X,
+Ice and Reminders MenuBar all do. The reason is `standardUserDriverDidReceiveUserAttention`: it
+fires when the alert is merely *focused*, not only when it's acted on, so the popover row is gone
+by then. Without a Dock icon, somebody who clicks the row and then switches to their browser
+mid-decision has an alert sitting behind everything, absent from both the Dock and the app
+switcher, with no route back to it. It's applied to user-initiated checks too, so "where did that
+window go" has one answer rather than two.
+
+**No Dock badge**, though — of the LSUIElement + Sparkle apps surveyed on this Mac, three
+implement gentle reminders and none badges the Dock. An earlier draft did; it read as shouting for
+a menu bar utility.
 
 ## What was removed
 
