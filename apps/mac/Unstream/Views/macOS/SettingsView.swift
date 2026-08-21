@@ -21,14 +21,13 @@ struct SettingsView: View {
 
     @AppStorage("musicListeningEnabled") private var musicListeningEnabled = true
     @AppStorage("artistNotificationsEnabled") private var artistNotificationsEnabled = true
-    @AppStorage("checkForUpdatesAutomatically") private var checkForUpdatesAutomatically = true
     @AppStorage("listenBrainzEnabled") private var listenBrainzEnabled = false
     @State private var launchAtLogin = false
-    @State private var updateStatus: String? = nil
-    @State private var updateAvailable = false
-    @State private var updateDownloadUrl: String? = nil
-    @State private var isCheckingForUpdates = false
     @State private var selectedTab: SettingsTab = .general
+
+    /// Sparkle owns the update settings and reports the result of a check in its own UI,
+    /// so there is no status string or "Download Update" link to render here any more.
+    @ObservedObject private var updater = SparkleUpdater.shared
 
     // ListenBrainz state
     @State private var listenBrainzToken: String = ""
@@ -396,47 +395,27 @@ struct SettingsView: View {
     private var aboutTab: some View {
         Form {
             // Updates
-            Section("Updates") {
-                Toggle("Check for updates automatically", isOn: $checkForUpdatesAutomatically)
+            Section {
+                Toggle("Check for updates automatically", isOn: $updater.automaticallyChecksForUpdates)
+
+                Toggle("Download and install updates automatically",
+                       isOn: $updater.automaticallyDownloadsUpdates)
+                    .disabled(!updater.automaticallyChecksForUpdates)
 
                 HStack {
-                    Button("Check for Updates") {
-                        checkForUpdates()
+                    Button("Check for Updates…") {
+                        updater.checkForUpdates()
                     }
-                    .disabled(isCheckingForUpdates)
-
-                    if isCheckingForUpdates {
-                        ProgressView()
-                            .controlSize(.small)
-                    }
+                    .disabled(!updater.canCheckForUpdates)
 
                     Spacer()
                 }
-
-                if let status = updateStatus {
-                    HStack(spacing: 4) {
-                        if updateAvailable {
-                            Image(systemName: "arrow.down.circle.fill")
-                                .foregroundColor(.blue)
-                        } else {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
-                        }
-                        Text(status)
-                            .font(.caption)
-                            .foregroundColor(updateAvailable ? .primary : .secondary)
-                    }
-
-                    if updateAvailable, let url = updateDownloadUrl, let downloadURL = URL(string: url) {
-                        Link(destination: downloadURL) {
-                            HStack(spacing: 4) {
-                                Image(systemName: "arrow.down.to.line")
-                                Text("Download Update")
-                            }
-                            .font(.caption)
-                        }
-                    }
-                }
+            } header: {
+                Text("Updates")
+            } footer: {
+                Text("Updates are signed and verified before they're installed.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
 
             // Support Unstream
@@ -582,32 +561,6 @@ struct SettingsView: View {
 
     private func getLaunchAtLoginStatus() -> Bool {
         return SMAppService.mainApp.status == .enabled
-    }
-
-    private func checkForUpdates() {
-        isCheckingForUpdates = true
-        updateStatus = nil
-        updateAvailable = false
-        updateDownloadUrl = nil
-
-        Task {
-            do {
-                let result = try await UpdateChecker.shared.checkForUpdates()
-                await MainActor.run {
-                    updateStatus = result.message
-                    updateAvailable = result.updateAvailable
-                    updateDownloadUrl = result.downloadUrl
-                    isCheckingForUpdates = false
-                }
-            } catch {
-                await MainActor.run {
-                    updateStatus = "Failed to check for updates"
-                    updateAvailable = false
-                    updateDownloadUrl = nil
-                    isCheckingForUpdates = false
-                }
-            }
-        }
     }
 }
 

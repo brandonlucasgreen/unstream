@@ -97,6 +97,9 @@
     "functions/analytics-event.ts",
     "functions/__tests__/analytics-event.test.ts",
     "functions/__tests__/persist-release-detail-churn.test.ts",
-    "functions/__tests__/get-artists-by-slugs.test.ts"
+    "functions/__tests__/get-artists-by-slugs.test.ts",
+    "functions/desktop-appcast.ts",
+    "functions/desktop-version.ts",
+    "functions/__tests__/desktop-appcast.test.ts"
   ]
 }

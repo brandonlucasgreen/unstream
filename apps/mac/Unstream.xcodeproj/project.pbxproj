@@ -23,6 +23,7 @@
 		27A98FF82168ECEF095C04D6 /* NowPlayingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B08A02BD24EAF475A2689D6 /* NowPlayingView.swift */; platformFilters = (macos, ); };
 		2BED69986D4A24D5265D26BE /* IndieArtistSuggestionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F3423CC7E1B40B24DC4BC7 /* IndieArtistSuggestionsView.swift */; platformFilters = (ios, ); };
 		2DAD19C15BCCBCC785AC823F /* SupportListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89D2DBDD53C2C9158EA698C4 /* SupportListView.swift */; };
+		2FB8BE35C153B82BCEA8B63F /* Sparkle in Frameworks */ = {isa = PBXBuildFile; platformFilters = (macos, ); productRef = 7EEB50E4D5EEBA77EA0DB2F3 /* Sparkle */; };
 		2FD47D4336B60E85FE2E82E7 /* SupportEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1003A79CD2A20BF7227C6FB0 /* SupportEntry.swift */; };
 		30E246B538D9B06340964314 /* ReleaseCheckAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673FC4B1F41A233725896DB8 /* ReleaseCheckAPI.swift */; };
 		3294EBBFDE0151CE9B05A48E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2CD0614342CC41833D04FDEA /* PrivacyInfo.xcprivacy */; };
@@ -32,6 +33,7 @@
 		45220D6B5414D8728BE175C4 /* UnstreamAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829FB6D91FC50FBA72747788 /* UnstreamAPI.swift */; };
 		461E318C0B5687BD71C42E75 /* ShortcutRecorderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CDD15E71A80A31952A7720C /* ShortcutRecorderView.swift */; platformFilters = (macos, ); };
 		47ADDB550C3A545314574336 /* MirloReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 397ABE663954D6016159C13E /* MirloReleaseChecker.swift */; };
+		49B08E42C2BFF55C8B76C40C /* SparkleUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6178F0E103676E400247BABE /* SparkleUpdater.swift */; platformFilters = (macos, ); };
 		5669C87F79BF30EBCC921AB0 /* UnstreamShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C2ACE9E0FA5F270656066467 /* UnstreamShareExtension.appex */; platformFilters = (ios, ); settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		5708291E100158963205FAA6 /* FindArtistIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3522A2E5601A58A396FDF7C4 /* FindArtistIntent.swift */; };
 		584FBF6DA0057BC30EB4C786 /* BrandIcons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FEFD60988639A1ECC95D56A /* BrandIcons.swift */; };
@@ -74,7 +76,6 @@
 		D9BD96BE052427D253DC2B97 /* MusicLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1398F260541794BA531DCA87 /* MusicLibrary.swift */; };
 		DAE01DF2F57D1D3074895182 /* SavedArtistsSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = B733B6764210C3CAE08F12E0 /* SavedArtistsSync.swift */; };
 		DAF5726D4B93EA321E5D4643 /* MediaObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 385B09E1C63EAE37830E8A04 /* MediaObserver.swift */; platformFilters = (macos, ); };
-		DCA4950DEB8FCA6734B3E003 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E82B185A730210A472CD947F /* UpdateChecker.swift */; platformFilters = (macos, ); };
 		DEAB976819E6E900B9C1114A /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC148A11F868801384A78672 /* AppState.swift */; };
 		E4239CF7D84048CD92446197 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590FD31A0B703B21FFCCBEA7 /* ShareViewController.swift */; };
 		E7D6B491DE0D9B5CB5ACF98C /* SyncedArtistsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CDBA3376D2900CCBE870B2 /* SyncedArtistsView.swift */; };
@@ -146,6 +147,7 @@
 		52F9816B25DDD3F9083C4796 /* ReleaseDetailTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseDetailTests.swift; sourceTree = "<group>"; };
 		590FD31A0B703B21FFCCBEA7 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		607E17AC019A1B8698E64ACC /* Unstream.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Unstream.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6178F0E103676E400247BABE /* SparkleUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkleUpdater.swift; sourceTree = "<group>"; };
 		66C32A6DB203A3FC0A26D719 /* ReleaseAlertTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseAlertTests.swift; sourceTree = "<group>"; };
 		673FC4B1F41A233725896DB8 /* ReleaseCheckAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseCheckAPI.swift; sourceTree = "<group>"; };
 		6B52C116B5CC91BC40D028AF /* GlobalHotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotkeyManager.swift; sourceTree = "<group>"; };
@@ -194,7 +196,6 @@
 		DC148A11F868801384A78672 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		E330692CA1EC213166D9351F /* SearchTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTab.swift; sourceTree = "<group>"; };
 		E488821D948022DCF94F9759 /* PlatformCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformCatalog.swift; sourceTree = "<group>"; };
-		E82B185A730210A472CD947F /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		EEEE83E95439F19BFC679216 /* ScrobbleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrobbleManager.swift; sourceTree = "<group>"; };
 		EF4E58F91C106A97A5179125 /* PopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverView.swift; sourceTree = "<group>"; };
 		F7F3423CC7E1B40B24DC4BC7 /* IndieArtistSuggestionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndieArtistSuggestionsView.swift; sourceTree = "<group>"; };
@@ -207,6 +208,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3BDD7C5F082F8D4B5574F2F3 /* Supabase in Frameworks */,
+				2FB8BE35C153B82BCEA8B63F /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -348,7 +350,7 @@
 				A93B97CDB100943ECCA942E6 /* NowPlayingNotificationManager.swift */,
 				EEEE83E95439F19BFC679216 /* ScrobbleManager.swift */,
 				1DEF52280B036F1EB34F4127 /* ServicesProvider.swift */,
-				E82B185A730210A472CD947F /* UpdateChecker.swift */,
+				6178F0E103676E400247BABE /* SparkleUpdater.swift */,
 			);
 			path = macOS;
 			sourceTree = "<group>";
@@ -433,6 +435,7 @@
 			name = Unstream;
 			packageProductDependencies = (
 				5A08814F4D49B63F8C355614 /* Supabase */,
+				7EEB50E4D5EEBA77EA0DB2F3 /* Sparkle */,
 			);
 			productName = Unstream;
 			productReference = 607E17AC019A1B8698E64ACC /* Unstream.app */;
@@ -507,6 +510,7 @@
 			mainGroup = 8FAB1B835E79317CB7A4F886;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				0BC4E1EAD2426A809A58F4A2 /* XCRemoteSwiftPackageReference "Sparkle" */,
 				49BEC0699CEDCF97A7E75306 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -617,6 +621,7 @@
 				461E318C0B5687BD71C42E75 /* ShortcutRecorderView.swift in Sources */,
 				BF58D857FC19F2147E12C7D5 /* SignInView.swift in Sources */,
 				0038D14301F153EF60346193 /* SocialIconButton.swift in Sources */,
+				49B08E42C2BFF55C8B76C40C /* SparkleUpdater.swift in Sources */,
 				2FD47D4336B60E85FE2E82E7 /* SupportEntry.swift in Sources */,
 				7182754E06D41AE6FB47653A /* SupportListManager.swift in Sources */,
 				BEE6889852F609316894074E /* SupportListTab.swift in Sources */,
@@ -627,7 +632,6 @@
 				45220D6B5414D8728BE175C4 /* UnstreamAPI.swift in Sources */,
 				A3526462820B7494F5463BE2 /* UnstreamApp.swift in Sources */,
 				5AF682136B14D6BDCBF42E4A /* UnstreamShortcuts.swift in Sources */,
-				DCA4950DEB8FCA6734B3E003 /* UpdateChecker.swift in Sources */,
 				640AB7A350949FAA23C72A53 /* iOSContentView.swift in Sources */,
 				5B170D71E9A7E9A471424F16 /* iOSSettingsTab.swift in Sources */,
 			);
@@ -945,6 +949,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		0BC4E1EAD2426A809A58F4A2 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle.git";
+			requirement = {
+				kind = exactVersion;
+				version = 2.9.6;
+			};
+		};
 		49BEC0699CEDCF97A7E75306 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/supabase/supabase-swift.git";
@@ -960,6 +972,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 49BEC0699CEDCF97A7E75306 /* XCRemoteSwiftPackageReference "supabase-swift" */;
 			productName = Supabase;
+		};
+		7EEB50E4D5EEBA77EA0DB2F3 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0BC4E1EAD2426A809A58F4A2 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
