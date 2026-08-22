@@ -43,6 +43,15 @@
   framework = "#custom"
   autoLaunch = false
 
+# The staleness probe in buildFreshness.ts compares this file's id against the one baked into
+# the running bundle. A cached response would echo the tab's own build back to it forever, so
+# the banner would never appear. `no-store` on the request isn't enough on its own — the CDN
+# would still be free to hand out a stale copy.
+[[headers]]
+  for = "/build-id.json"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0"
+
 [[headers]]
   for = "/*"
   # connect-src note: Sentry's ingest host is region-scoped — ours is
@@ -407,6 +416,25 @@
   from = "/plus"
   to = "/support"
   status = 301
+
+# Build assets must 404 when they're missing, instead of falling through to the SPA
+# catch-all below. Without this rule a request for a superseded chunk gets `200 text/html`,
+# and the browser rejects it as a MIME error whose wording differs per engine — Chromium says
+# "Expected a JavaScript module script...", WebKit says "'text/html' is not a valid JavaScript
+# MIME type." We chased those strings twice (PR #390, then #417 for WebKit's) and every new
+# engine wording silently broke the auto-reload in `lazyWithRetry` until someone noticed in
+# Sentry. A real 404 is a fetch failure instead of a MIME failure, which every engine already
+# reports in wording `isStaleBuildAssetError` matches, so the reload no longer depends on
+# guessing sentences.
+#
+# `force` is deliberately absent: Netlify serves a matching file from the publish directory
+# ahead of any unforced redirect rule, so real assets are untouched and only genuinely missing
+# ones reach this. The `/*` rule below is the proof — every asset request matches it too, and
+# assets are still served as themselves.
+[[redirects]]
+  from = "/assets/*"
+  to = "/index.html"
+  status = 404
 
 # SPA catch-all: serve index.html for all routes (must be last)
 [[redirects]]
