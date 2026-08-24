@@ -808,6 +808,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = lol.bgreen.Unstream;
 				PRODUCT_NAME = Unstream;
 				SDKROOT = auto;
@@ -836,6 +837,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = lol.bgreen.Unstream;
 				PRODUCT_NAME = Unstream;
 				SDKROOT = auto;
