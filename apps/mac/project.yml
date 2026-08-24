@@ -65,6 +65,14 @@ targets:
       "CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]": Unstream/Unstream-iOS.entitlements
       "CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]": Unstream/Unstream-iOS.entitlements
       ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      # XcodeGen emits one LD_RUNPATH_SEARCH_PATHS for this multi-platform target and picks
+      # the iOS layout (@executable_path/Frameworks). A macOS app keeps embedded frameworks in
+      # Contents/Frameworks, one level ABOVE Contents/MacOS, so with only the iOS path dyld
+      # can't find Sparkle and the app dies at launch with "Library not loaded:
+      # @rpath/Sparkle.framework". A Debug build hides this (everything links through
+      # Unstream.debug.dylib) and CI only compiles, so nothing but launching an exported
+      # Release build catches it.
+      "LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]": "$(inherited) @executable_path/../Frameworks"
     dependencies:
       - target: UnstreamShareExtension
         destinationFilters: [iOS]
