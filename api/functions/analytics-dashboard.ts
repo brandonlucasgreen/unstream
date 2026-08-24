@@ -3,6 +3,15 @@
 
 import { getClient } from './db';
 import { authenticateAdmin } from './middleware';
+import { Sentry } from '../lib/sentry';
+
+// Row shapes returned by the analytics_* functions added in
+// supabase/migrations/20260823120000_analytics-dashboard-aggregates.sql.
+interface DailyRow { day: string; event_type: string; events: number }
+interface ByAppRow { app: string; event_type: string; events: number }
+interface PlatformRow { platform: string; clicks: number }
+interface StreamingRow { service: string; activations: number }
+interface SuccessRow { completed: number; with_results: number }
 
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
@@ -40,12 +49,16 @@ export async function handler(event: {
   const todayStart = `${today}T00:00:00.000Z`;
 
   try {
-    // Run all queries in parallel
+    // Every aggregate is computed in Postgres. It used to pull raw app_events rows and count
+    // them in a JS loop, which PostgREST silently truncated at 1,000 rows — the dashboard
+    // reported 641 of 10,380 searches, and because the daily query ordered created_at ASC the
+    // surviving rows were the oldest, so the most recent 26 days rendered as zero. See
+    // supabase/migrations/20260823120000_analytics-dashboard-aggregates.sql.
     const [
       searchesToday,
       searches7d,
       searches30d,
-      successfulSearches7d,
+      searchSuccess7d,
       daily30d,
       byApp30d,
       platforms30d,
@@ -72,58 +85,46 @@ export async function handler(event: {
         .eq('event_type', 'search')
         .gte('created_at', ago30),
 
-      // All search events (with context) last 7 days — filtered in JS for success rate.
-      // The web app writes one 'search' event per query, on completion (has_results:
-      // true/false). Rows from before 2026-08-19 include a second, context-free initiation
-      // event per query — the JS filter below excludes those from the success rate, and it's
-      // why search counts stepped down (and became accurate) on that date.
-      client
-        .from('app_events')
-        .select('context')
-        .eq('event_type', 'search')
-        .gte('created_at', ago7),
+      // Completed searches and how many found something, last 7 days. Searches from before
+      // 2026-08-19 wrote a second, context-free initiation event per query; the function counts
+      // only events carrying a has_results key, so those sit outside both sides of the ratio.
+      // That is why search counts stepped down (and became accurate) on that date.
+      client.rpc('analytics_search_success', { p_since: ago7 }),
 
-      // Daily event counts for last 30 days (searches + clicks)
-      client
-        .from('app_events')
-        .select('created_at, event_type')
-        .in('event_type', ['search', 'platform_click', 'extension_activated'])
-        .gte('created_at', ago30)
-        .order('created_at', { ascending: true }),
+      // Daily event counts for last 30 days (searches + clicks + activations)
+      client.rpc('analytics_daily_events', { p_since: ago30 }),
 
       // Breakdown by app (last 30 days)
-      client
-        .from('app_events')
-        .select('app, event_type')
-        .in('event_type', ['search', 'platform_click'])
-        .gte('created_at', ago30),
+      client.rpc('analytics_events_by_app', { p_since: ago30 }),
 
-      // Platform click breakdown (last 30 days)
-      client
-        .from('app_events')
-        .select('context')
-        .eq('event_type', 'platform_click')
-        .gte('created_at', ago30),
+      // Platform click breakdown (last 30 days), most-clicked first
+      client.rpc('analytics_platform_clicks', { p_since: ago30 }),
 
-      // Extension streaming service breakdown (last 30 days)
-      client
-        .from('app_events')
-        .select('context')
-        .eq('event_type', 'extension_activated')
-        .gte('created_at', ago30),
+      // Extension streaming service breakdown (last 30 days), most-active first
+      client.rpc('analytics_streaming_services', { p_since: ago30 }),
     ]);
 
-    // Surface query errors early — Supabase returns { error } rather than throwing
+    // Any failure fails the whole response. Supabase returns { error } rather than throwing, and
+    // the old code logged a partial failure and carried on — which is how a dashboard ends up
+    // rendering confident zeros for a query that never ran. Wrong numbers are worse here than
+    // no numbers: these drive product decisions.
     const queryErrors = [
-      searchesToday.error, searches7d.error, searches30d.error,
-      successfulSearches7d.error, daily30d.error,
+      searchesToday.error, searches7d.error, searches30d.error, searchSuccess7d.error,
+      daily30d.error, byApp30d.error, platforms30d.error, streamingServices30d.error,
     ].filter(Boolean);
     if (queryErrors.length > 0) {
-      console.error('[Analytics Dashboard] Query errors:', queryErrors.map(e => e?.message));
-      // If the core count queries all errored (e.g. app_events table missing), surface it
-      if (queryErrors.length >= 3) {
-        return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Analytics table unavailable — migration may not have been applied' }) };
-      }
+      const messages = queryErrors.map(e => e?.message).join('; ');
+      console.error('[Analytics Dashboard] Query errors:', messages);
+      Sentry.captureMessage('Analytics dashboard query failed', {
+        level: 'error',
+        extra: { messages, failed: queryErrors.length },
+        tags: { context: 'analytics.dashboard' },
+      });
+      return {
+        statusCode: 500,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: 'Failed to fetch analytics' }),
+      };
     }
 
     // --- Build daily chart data (last 30 days) ---
@@ -136,12 +137,14 @@ export async function handler(event: {
       dailyMap[dateStr] = { searches: 0, clicks: 0, activations: 0 };
     }
 
-    for (const row of (daily30d.data || [])) {
-      const dateStr = row.created_at.split('T')[0];
-      if (!dailyMap[dateStr]) continue;
-      if (row.event_type === 'search') dailyMap[dateStr].searches++;
-      else if (row.event_type === 'platform_click') dailyMap[dateStr].clicks++;
-      else if (row.event_type === 'extension_activated') dailyMap[dateStr].activations++;
+    // `day` is a Postgres DATE, so it arrives as a bare 'YYYY-MM-DD' string — the same shape
+    // the pre-filled keys above use.
+    for (const row of (daily30d.data || []) as DailyRow[]) {
+      const bucket = dailyMap[row.day];
+      if (!bucket) continue;
+      if (row.event_type === 'search') bucket.searches += row.events;
+      else if (row.event_type === 'platform_click') bucket.clicks += row.events;
+      else if (row.event_type === 'extension_activated') bucket.activations += row.events;
     }
 
     const daily = Object.entries(dailyMap).map(([date, counts]) => ({ date, ...counts }));
@@ -152,45 +155,26 @@ export async function handler(event: {
       extension: { searches: 0, clicks: 0 },
       mac: { searches: 0, clicks: 0 },
     };
-    for (const row of (byApp30d.data || [])) {
+    for (const row of (byApp30d.data || []) as ByAppRow[]) {
       if (!appMap[row.app]) appMap[row.app] = { searches: 0, clicks: 0 };
-      if (row.event_type === 'search') appMap[row.app].searches++;
-      else if (row.event_type === 'platform_click') appMap[row.app].clicks++;
+      if (row.event_type === 'search') appMap[row.app].searches += row.events;
+      else if (row.event_type === 'platform_click') appMap[row.app].clicks += row.events;
     }
     const byApp = Object.entries(appMap)
       .map(([app, counts]) => ({ app, ...counts }))
       .sort((a, b) => (b.searches + b.clicks) - (a.searches + a.clicks));
 
     // --- Platform breakdown ---
-    const platformMap: Record<string, number> = {};
-    for (const row of (platforms30d.data || [])) {
-      const platform = (row.context as Record<string, string>)?.platform;
-      if (platform) platformMap[platform] = (platformMap[platform] || 0) + 1;
-    }
-    const platforms = Object.entries(platformMap)
-      .map(([platform, clicks]) => ({ platform, clicks }))
-      .sort((a, b) => b.clicks - a.clicks)
-      .slice(0, 10);
+    // Already grouped and ordered most-clicked first by the function.
+    const platforms = ((platforms30d.data || []) as PlatformRow[]).slice(0, 10);
 
     // --- Streaming service breakdown ---
-    const serviceMap: Record<string, number> = {};
-    for (const row of (streamingServices30d.data || [])) {
-      const service = (row.context as Record<string, string>)?.streaming_service;
-      if (service) serviceMap[service] = (serviceMap[service] || 0) + 1;
-    }
-    const streamingServices = Object.entries(serviceMap)
-      .map(([service, activations]) => ({ service, activations }))
-      .sort((a, b) => b.activations - a.activations);
+    const streamingServices = (streamingServices30d.data || []) as StreamingRow[];
 
     // --- Success rate ---
-    // Filter in JS: only count events where has_results is present (completion events).
-    // Initiation events have no has_results field and are excluded from both sides.
-    const allSearchRows7d = (successfulSearches7d.data || []) as Array<{ context: Record<string, unknown> | null }>;
-    const completedRows = allSearchRows7d.filter(r => r.context != null && 'has_results' in r.context);
-    const completedCount = completedRows.length;
-    const successCount = completedRows.filter(r => r.context?.has_results === true).length;
-    const successRate7d = completedCount > 0
-      ? Math.round((successCount / completedCount) * 100)
+    const success = ((searchSuccess7d.data || []) as SuccessRow[])[0];
+    const successRate7d = success && success.completed > 0
+      ? Math.round((success.with_results / success.completed) * 100)
       : null;
 
     return {
