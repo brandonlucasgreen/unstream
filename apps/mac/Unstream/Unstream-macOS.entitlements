@@ -13,7 +13,15 @@
 		<key>com.apple.Music</key>
 		<array>
 			<string>com.apple.Music.playback</string>
-			<string>com.apple.Music.library</string>
+			<!-- `.read`, not `com.apple.Music.library` — that identifier does not exist.
+			     `sdef /System/Applications/Music.app` publishes exactly four groups:
+			     com.apple.Music.playback, com.apple.Music.library.read,
+			     com.apple.Music.library.read-write and com.apple.Music.user-interface. A
+			     name matching none of them grants nothing, so every library read failed
+			     with errAEPrivilegeError (-10004) while now-playing kept working — the
+			     playback identifier was the one spelled right. Read-only is deliberate:
+			     the import only reads. Verify any new group against the sdef. -->
+			<string>com.apple.Music.library.read</string>
 		</array>
 		<key>com.spotify.client</key>
 		<array>

@@ -5,6 +5,12 @@ import AppKit
 // Reads the Music.app library over Apple events and rolls it up into a LibrarySnapshot
 // (support-loop-spec.md Step 2). The pure aggregation half lives in Models/MusicLibrary.swift.
 //
+// NOTE: nothing in the app calls this today — the Settings "Import Library" button was removed
+// on 2026-08-23 (see docs/specs/library-support-scan.md). Do not delete it as dead code: it is
+// the reader the library support scan is built on, it is covered by UnstreamTests, and the three
+// sandbox traps documented below cost a full session to find. The scan replaces the *product*
+// around this file, not the file.
+//
 // Why AppleScript and not MusicKit or iTunesLibrary.framework: only the scripting
 // interface exposes the per-track `cloud status` enumeration, which is what distinguishes
 // a file the user owns from a subscription stream — the whole point of the import
@@ -19,6 +25,7 @@ import AppKit
 
 enum LibraryImportError: LocalizedError {
     case permissionDenied
+    case sandboxDenied
     case scriptFailed(Int)
     case malformedResult
 
@@ -26,6 +33,8 @@ enum LibraryImportError: LocalizedError {
         switch self {
         case .permissionDenied:
             return "Unstream isn't allowed to read your Music library. Open System Settings → Privacy & Security → Automation and allow Unstream to control Music."
+        case .sandboxDenied:
+            return "This build of Unstream isn't entitled to read your Music library, so there's nothing to change in Settings — it's a bug on our side. Please report it."
         case .scriptFailed(let code):
             return "Couldn't read the Music library (error \(code)). Make sure Music is installed, then try again."
         case .malformedResult:
@@ -36,13 +45,21 @@ enum LibraryImportError: LocalizedError {
 
 /// File-scoped rather than a member of the @MainActor class so the off-main read can use it
 /// without actor-isolation complaints.
+//
+// The tracks are read from the **application**, not from `library playlist 1`. That reads like
+// the more precise phrasing and it is what most AppleScript examples use, but the sandbox
+// rejects it with errAEPrivilegeError (-10004): `sdef /System/Applications/Music.app` declares
+// `library playlist` only as a *class* (inheriting `playlist`), and the `application` class
+// publishes no `library playlist` **element** — so no access group covers addressing one, and
+// `com.apple.Music.library.read` cannot help. The `track` and `playlist` elements of
+// `application` do carry that group. Measured in the real sandbox 2026-08-22: `library playlist
+// 1` → -10004, `every track` → 33,909 tracks, the same count `playlist 1` returns.
 private let musicLibraryScriptSource = """
 tell application "Music"
-    set lib to library playlist 1
-    set artistNames to artist of every track of lib
-    set albumNames to album of every track of lib
-    set playCounts to played count of every track of lib
-    set cloudStatuses to cloud status of every track of lib
+    set artistNames to artist of every track
+    set albumNames to album of every track
+    set playCounts to played count of every track
+    set cloudStatuses to cloud status of every track
     return {artistNames, albumNames, playCounts, cloudStatuses}
 end tell
 """
@@ -105,10 +122,22 @@ final class AppleMusicLibraryService: ObservableObject {
         let result = script.executeAndReturnError(&errorDict)
         if let error = errorDict {
             let code = error["NSAppleScriptErrorNumber"] as? Int ?? 0
-            // -1743: the user declined the Automation prompt. Everything else (Music
-            // missing, script broke against a new Music version) is a generic failure —
-            // report the code so it's diagnosable.
-            return .failure(code == -1743 ? .permissionDenied : .scriptFailed(code))
+            // The two denials look identical to a user and have opposite fixes, so they must
+            // not share a message:
+            //   -1743 errAEEventNotPermitted — the user declined the Automation prompt. They
+            //         can grant it in System Settings.
+            //   -10004 errAEPrivilegeError — the *sandbox* refused: our scripting-targets
+            //         entitlement doesn't cover what the script asked for. No user action
+            //         helps. This shipped once, with `com.apple.Music.library` in place of
+            //         `com.apple.Music.library.read`, and the old generic copy sent Brandon
+            //         to check whether Music was installed while it was open in front of him.
+            // Everything else (Music missing, script broke against a new Music version) stays
+            // generic — report the code so it's diagnosable.
+            switch code {
+            case -1743: return .failure(.permissionDenied)
+            case -10004: return .failure(.sandboxDenied)
+            default: return .failure(.scriptFailed(code))
+            }
         }
 
         guard result.numberOfItems == 4,

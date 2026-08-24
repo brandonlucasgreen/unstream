@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		0038D14301F153EF60346193 /* SocialIconButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFEA3443AD56B9950B43AAE /* SocialIconButton.swift */; };
-		0E161EA41C6EFF9BD9475897 /* MusicLibrarySettingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA481812D2AD036F2B085F41 /* MusicLibrarySettingsSection.swift */; platformFilters = (macos, ); };
 		0EC3D68464514744CE3AA448 /* BandcampReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43017BB6FDE57EBD35755D7B /* BandcampReleaseChecker.swift */; };
 		0F9D0A7FD89742003BD8D140 /* TipJarStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C40AC0CB901A9F09846258C /* TipJarStore.swift */; };
 		1132043919606896183DF5BC /* IndieArtist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752DBE41E6259FE62017B41D /* IndieArtist.swift */; };
@@ -192,7 +191,6 @@
 		CF02C234C6A7FF3142DC12BF /* AppleMusicLibraryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleMusicLibraryService.swift; sourceTree = "<group>"; };
 		D144E8586F19DBA63C2F37B1 /* SafariView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariView.swift; sourceTree = "<group>"; };
 		D7D7374CAB7B2AF10890C2D2 /* LinkActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkActions.swift; sourceTree = "<group>"; };
-		DA481812D2AD036F2B085F41 /* MusicLibrarySettingsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicLibrarySettingsSection.swift; sourceTree = "<group>"; };
 		DC148A11F868801384A78672 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		E330692CA1EC213166D9351F /* SearchTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTab.swift; sourceTree = "<group>"; };
 		E488821D948022DCF94F9759 /* PlatformCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformCatalog.swift; sourceTree = "<group>"; };
@@ -404,7 +402,6 @@
 		F284A719009A53D4D7A04F14 /* macOS */ = {
 			isa = PBXGroup;
 			children = (
-				DA481812D2AD036F2B085F41 /* MusicLibrarySettingsSection.swift */,
 				BAF3C1FFEBBA8D8B753BDB0B /* NewReleasesListView.swift */,
 				9B08A02BD24EAF475A2689D6 /* NowPlayingView.swift */,
 				EF4E58F91C106A97A5179125 /* PopoverView.swift */,
@@ -594,7 +591,6 @@
 				DAF5726D4B93EA321E5D4643 /* MediaObserver.swift in Sources */,
 				47ADDB550C3A545314574336 /* MirloReleaseChecker.swift in Sources */,
 				D9BD96BE052427D253DC2B97 /* MusicLibrary.swift in Sources */,
-				0E161EA41C6EFF9BD9475897 /* MusicLibrarySettingsSection.swift in Sources */,
 				8AE1365921AE81ECF06371F4 /* NewReleasesListView.swift in Sources */,
 				F20D83D3642078C9B2C45ED0 /* NowPlaying.swift in Sources */,
 				64514560D09214DE420ED24D /* NowPlayingNotificationManager.swift in Sources */,
