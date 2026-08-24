@@ -1,4 +1,4 @@
-import { defineConfig, loadEnv } from 'vite'
+import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
@@ -35,11 +35,44 @@ if (sentryEnabled && !env.SENTRY_AUTH_TOKEN) {
 // maps land on the same release the client reports.
 const release = env.VITE_APP_VERSION || env.COMMIT_REF || 'dev'
 
+/**
+ * Emit `/build-id.json` naming the build that produced this bundle.
+ *
+ * A tab left open across a deploy keeps running old JavaScript, and nothing tells it so — the
+ * service worker is `autoUpdate`, which claims the live page without reloading it, so the page
+ * is old while the precache is new. `buildFreshness.ts` polls this file and compares `id`
+ * against the `VITE_APP_VERSION` baked into the bundle; a mismatch means this tab has been
+ * superseded.
+ *
+ * It reuses the `release` constant above rather than reading COMMIT_REF again, so the id here
+ * and the release the client reports to Sentry can never disagree about which build this is.
+ *
+ * `builtAt` is what makes "stale for more than 24 hours" answerable without a timer having run:
+ * a suspended mobile tab can miss every interval it was scheduled for, so the client subtracts
+ * this timestamp instead of measuring how long it has personally been watching.
+ */
+function emitBuildId(): Plugin {
+  return {
+    name: 'unstream-build-id',
+    apply: 'build',
+    generateBundle() {
+      // Written through generateBundle so it lands in the bundle Vite is already emitting;
+      // a file written to dist/ by hand would race the build's own output cleanup.
+      this.emitFile({
+        type: 'asset',
+        fileName: 'build-id.json',
+        source: JSON.stringify({ id: release, builtAt: new Date().toISOString() }),
+      })
+    },
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    emitBuildId(),
     VitePWA({
       registerType: 'autoUpdate',
       // The generated registerSW.js calls navigator.serviceWorker.register()
