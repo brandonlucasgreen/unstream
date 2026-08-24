@@ -19,7 +19,10 @@ import {
 } from '../lib/release-alerts.js';
 
 const API_BASE = 'https://unstream.stream/api';
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+// 30 minutes, matching PLATFORM_CACHE_TTL in api/functions/search-sources.ts. Being fresher
+// than the backend's own platform cache buys nothing, and at five minutes this cache expired
+// faster than a song is long — so a listener changing tracks missed it every single time.
+const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
 const DEBOUNCE_MS = 2000; // 2 seconds debounce for same artist
 const RELEASE_CHECK_ALARM = 'releaseCheck';
 
@@ -170,42 +173,47 @@ async function handleMusicDetection(data, tabId) {
   // Track extension activation with streaming service
   trackAppEvent('extension_activated', { streaming_service: source || 'unknown' });
 
-  // Fetch results
-  try {
-    const data = await searchArtist(artist);
-    const results = data.results || [];
+  // Read through the cache rather than always fetching.
+  //
+  // This used to call searchArtist() directly, which meant it *wrote* `cache:${artist}` on
+  // every track and never once read it — the cache was populated and then ignored. The
+  // content script sends MUSIC_DETECTED on every title change, so playing one artist's album
+  // fired an identical /api/search/sources for all twelve tracks, and the 2-second debounce
+  // never caught them because tracks are minutes apart. Each of those requests costs real
+  // Upstash commands on a metered free tier.
+  const { results, error } = await getResults(artist);
 
-    // Store results
-    await chrome.storage.local.set({
-      [`cache:${artist}`]: { results, timestamp: now }
-    });
-
-    // Track search (product analytics)
-    trackAppEvent('search', { has_results: results.length > 0, result_count: results.length });
-
-    // Track search appearances for claimed artists
-    for (const result of results) {
-      if (result.type === 'artist' && result.claimedSlug) {
-        trackAnalyticsEvent(result.claimedSlug, 'search');
-      }
-    }
-
-    // Update badge based on results
-    if (results.length > 0) {
-      updateBadge('found', results.length);
-
-      // Send artist detection notification if enabled
-      await maybeNotifyArtist(artist, results);
-    } else {
-      updateBadge('none');
-    }
-
-    // Trigger enrichment in background
-    enrichArtist(artist);
-  } catch (error) {
+  // getResults swallows the failure and reports it, so the error badge has to come from the
+  // reported error — treating a failed fetch as "no results" would tell the listener this
+  // artist isn't on any platform when we simply couldn't ask.
+  if (error) {
     console.error('Search error:', error);
     updateBadge('error');
+    return;
   }
+
+  // Analytics fire on every detection, cache hit or not. A listener really did play this
+  // artist, so the artist's search appearance is a real event wherever the results came
+  // from — suppressing it on a cache hit would under-report to the artist.
+  trackAppEvent('search', { has_results: results.length > 0, result_count: results.length });
+
+  for (const result of results) {
+    if (result.type === 'artist' && result.claimedSlug) {
+      trackAnalyticsEvent(result.claimedSlug, 'search');
+    }
+  }
+
+  if (results.length > 0) {
+    updateBadge('found', results.length);
+
+    // Send artist detection notification if enabled
+    await maybeNotifyArtist(artist, results);
+  } else {
+    updateBadge('none');
+  }
+
+  // Trigger enrichment in background (cached separately, see enrichArtist)
+  enrichArtist(artist);
 }
 
 // Handle when music stops playing
