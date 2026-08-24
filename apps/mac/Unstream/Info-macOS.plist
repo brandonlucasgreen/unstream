@@ -38,7 +38,7 @@
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSAppleEventsUsageDescription</key>
-	<string>Unstream reads what's playing and, if you import it, your Music library — so it can show which artists you actually listen to and where to support them directly. Library data never leaves this Mac.</string>
+	<string>Unstream needs to check what music is playing so it can find the artist on ethical platforms.</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>
