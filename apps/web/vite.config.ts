@@ -131,19 +131,31 @@ export default defineConfig({
           // calendar. /a/ and /u/ above already cover the two public feed shapes.
           /^\/feed\//,
         ],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/unstream\.stream\/api\//,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 5, // 5 minutes
-              },
-            },
-          },
-        ],
+        // No runtimeCaching, deliberately. A NetworkFirst rule used to match every
+        // /api/ GET with a 5-minute `api-cache` bucket. It earned nothing, and it
+        // stored other people's account data on disk to do it:
+        //
+        // - It bought no speed. NetworkFirst with no `networkTimeoutSeconds` always
+        //   goes to the network and reads the cache only when that fetch throws, so
+        //   a repeat search cost exactly what the first one did.
+        // - It bought no offline mode either. Nothing in the app reads Cache Storage,
+        //   checks navigator.onLine, or renders an offline state, so the fallback was
+        //   never surfaced as one — a stale body just rendered as if it were fresh.
+        // - It cached what it had no business keeping. Cache Storage is not the HTTP
+        //   cache, so the `Cache-Control: no-cache` these endpoints send was silently
+        //   overridden, and /api/admin/verify (claimant emails and their free-text
+        //   messages), /api/me/settings, /api/me/collection and
+        //   /api/analytics/dashboard all landed in a bucket keyed on URL alone. None
+        //   of them send `Vary: Authorization`, so on a shared browser one person
+        //   losing their connection could be handed the previous person's response —
+        //   and signing out cleared none of it.
+        //
+        // If an API cache comes back, it needs an explicit allowlist of genuinely
+        // public endpoints and a strategy that actually reads the cache, not a prefix
+        // match over everything — and note that the most tempting candidate, the
+        // platform list, carries the payout percentages, which are the last thing on
+        // this site worth serving stale. `clearApiResponseCache` deletes the bucket
+        // this rule left behind on installs that already have one.
       },
     }),
     // Sentry plugin for source map upload (only if DSN is configured and in production)

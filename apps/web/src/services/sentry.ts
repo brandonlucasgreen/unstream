@@ -16,12 +16,18 @@ export { Sentry }
  * This is what a deploy does to an already-open tab. Pages are lazy-loaded
  * (`lazy(() => import('./pages/LoginPage.tsx'))` and friends in main.tsx), so the
  * chunk filename carries a content hash. A tab still running build N clicks a link,
- * requests `/assets/LoginPage-<oldHash>.js`, and build N+1 doesn't have that file.
- * Netlify's SPA catch-all then answers `200 text/html` instead of 404, so the
- * browser rejects it as a module and the import promise rejects — which React
- * surfaces through the error boundary as "Unstream hit an unexpected error".
+ * requests `/assets/LoginPage-<oldHash>.js`, and build N+1 doesn't have that file, so
+ * the import promise rejects — which React surfaces through the error boundary as
+ * "Unstream hit an unexpected error".
  *
- * Each engine words it differently, hence the list.
+ * Each engine words it differently, hence the list. Two shapes of failure are in there
+ * because the missing chunk has been served two ways. Today production returns a real
+ * 404 for an unknown `/assets/*` path (verified 2026-08-23), and the browser reports
+ * that as a failed fetch — Safari's "Importing a module script failed" and the Chrome
+ * and Firefox wordings above it. The MIME clauses date from when Netlify's SPA
+ * catch-all answered `200 text/html` in place of the chunk; they're kept because a
+ * redirect change could bring that back, and because a tab caught by an older deploy
+ * still reports the old wording.
  */
 export function isStaleBuildAssetError(message: string): boolean {
   return (

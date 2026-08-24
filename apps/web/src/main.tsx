@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import * as Sentry from '@sentry/react'
 import { initSentry } from './services/sentry'
 import { registerServiceWorker } from './services/registerServiceWorker'
+import { clearApiResponseCache } from './services/clearApiResponseCache'
 import { AuthProvider } from './contexts/AuthContext'
 import './index.css'
 import App from './App.tsx'
@@ -17,8 +18,12 @@ initSentry()
 
 // Ours rather than vite-plugin-pwa's injected registerSW.js, which reports a
 // declined registration as an unhandled rejection. Guarded on PROD because the
-// plugin only emits /sw.js for a build, exactly as the injected script was.
-if (import.meta.env.PROD) registerServiceWorker()
+// plugin only emits /sw.js for a build, exactly as the injected script was — which
+// is also the only place the `api-cache` bucket being cleared here ever existed.
+if (import.meta.env.PROD) {
+  registerServiceWorker()
+  clearApiResponseCache()
+}
 
 // Lazy-load non-critical pages to reduce initial bundle size.
 // lazyWithRetry adds a one-shot reload when a chunk belongs to a superseded deploy.

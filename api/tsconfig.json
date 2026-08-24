@@ -102,6 +102,7 @@
     "functions/__tests__/get-artists-by-slugs.test.ts",
     "functions/desktop-appcast.ts",
     "functions/desktop-version.ts",
-    "functions/__tests__/desktop-appcast.test.ts"
+    "functions/__tests__/desktop-appcast.test.ts",
+    "functions/analytics-dashboard.ts"
   ]
 }
