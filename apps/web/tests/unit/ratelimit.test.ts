@@ -4,6 +4,13 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // checkSentryDedup unit tests
 // ---------------------------------------------------------------------------
 //
+// checkSentryDedup fires on the search path — zero-result searches, per-platform failures,
+// dead Bandcamp links — so its cost is paid per search, sometimes several times over. It used
+// to be a GET followed by a SET: two billed Upstash commands to answer one question, and a
+// race where two containers could both read "not seen" and both capture. `SET ... NX EX` does
+// both halves in one command, atomically. These tests pin that, and pin that Redis can never
+// silence Sentry.
+//
 // Strategy: We mock @upstash/redis at the module level. The ratelimit module
 // has a module-level `redis` variable that caches the Redis client created by
 // getRedis(). To test different scenarios (Redis configured vs not), we
@@ -54,43 +61,43 @@ describe('checkSentryDedup', () => {
     delete process.env.UPSTASH_REDIS_REST_TOKEN;
   });
 
-  it('returns true on first call (key not seen before)', async () => {
-    mockGet.mockResolvedValue(null);
+  it('claims the window in one command, not a GET then a SET', async () => {
     mockSet.mockResolvedValue('OK');
 
     const result = await checkSentryDedup('uc5:radiohead', 86400);
     expect(result).toBe(true);
-    expect(mockGet).toHaveBeenCalledWith('sentry:dedup:uc5:radiohead');
-    expect(mockSet).toHaveBeenCalledWith('sentry:dedup:uc5:radiohead', '1', { ex: 86400 });
+    expect(mockGet).not.toHaveBeenCalled();
+    expect(mockSet).toHaveBeenCalledTimes(1);
+    expect(mockSet).toHaveBeenCalledWith('sentry:dedup:uc5:radiohead', '1', { ex: 86400, nx: true });
   });
 
+  // NX returns null when the key already exists — that is the "already captured" answer, and
+  // it costs the same single command the first occurrence did.
   it('returns false on second call (key already seen within TTL)', async () => {
-    mockGet.mockResolvedValue('1');
+    mockSet.mockResolvedValue(null);
 
     const result = await checkSentryDedup('uc5:radiohead', 86400);
     expect(result).toBe(false);
-    // Should NOT set again when already seen
-    expect(mockSet).not.toHaveBeenCalled();
+    expect(mockSet).toHaveBeenCalledTimes(1);
   });
 
+  // Redis must never be able to silence Sentry: an outage that suppressed error reporting is
+  // exactly the failure mode api/functions/redis.ts was written to prevent.
   it('returns true (fail-open) when Redis throws an error', async () => {
-    mockGet.mockRejectedValue(new Error('Redis connection failed'));
+    mockSet.mockRejectedValue(new Error('Redis connection failed'));
 
     const result = await checkSentryDedup('uc5:radiohead', 86400);
     expect(result).toBe(true);
   });
 
   it('uses the provided key and TTL correctly', async () => {
-    mockGet.mockResolvedValue(null);
     mockSet.mockResolvedValue('OK');
 
     await checkSentryDedup('uc6:bandcamp:fetch failed', 3600);
-    expect(mockGet).toHaveBeenCalledWith('sentry:dedup:uc6:bandcamp:fetch failed');
-    expect(mockSet).toHaveBeenCalledWith('sentry:dedup:uc6:bandcamp:fetch failed', '1', { ex: 3600 });
+    expect(mockSet).toHaveBeenCalledWith('sentry:dedup:uc6:bandcamp:fetch failed', '1', { ex: 3600, nx: true });
   });
 
   it('handles empty key strings', async () => {
-    mockGet.mockResolvedValue(null);
     mockSet.mockResolvedValue('OK');
 
     // Edge case: empty normalizedQuery or errorMessage

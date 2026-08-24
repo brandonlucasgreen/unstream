@@ -188,6 +188,53 @@ This is the lesson behind a run of bug fixes (#317–#328) and it applies to eve
 - Cache keys must not collide across inputs that behave differently. `query_norm` strips punctuation, but punctuation is what generates extra slug candidates — hence the `probed_slugs` column, which records which slugs were actually tried so a cached negative can't hide an artist whose name has a hyphen.
 - A silent `200` with an empty parse is a failure. Report it (Sentry) rather than letting it look like "this artist doesn't exist."
 
+### Redis is metered — count round trips, not just correctness
+
+Upstash's free tier is **500,000 commands a month** (~16,600/day), and it is a *command* budget,
+not a bandwidth or storage one. The site went through it in August 2026 at genuinely low traffic,
+because nothing here is expensive per request — there are just a lot of small requests, each
+paying a fixed Redis tax before doing any work.
+
+The arithmetic that matters, per user search: the typeahead fires on every debounced typing
+pause (4-5 requests), then `/api/search/sources`, then `/api/search/musicbrainz`, then two or
+three analytics POSTs, then an artist page. That is ~10 API requests, and *every one of them*
+went through `checkRateLimit`. So the per-request overhead is multiplied by ten before a single
+search happens.
+
+Three rules follow, and they are the reason the current shapes look the way they do:
+
+- **Every extra limiter doubles the bill.** `Ratelimit.limit()` is one round trip whose
+  sliding-window Lua script runs `GET`, `GET`, `INCRBY` and (on a new window) `PEXPIRE`.
+  `checkRateLimit` used to run a per-minute *and* a per-day limiter on every tier, so every
+  request paid twice over. Only `strict` has a daily quota now — it fronts search, which fans
+  out to a dozen partner sites, and its 500/day is a documented promise to anonymous v1 callers
+  (`docs/openapi.yaml`). `standard`, `lenient` and `account` had 1000/5000/2000-a-day quotas no
+  real person has approached; their per-minute windows (30/120/60) still bound the damage. A new
+  daily quota has to earn its round trip.
+- **Batch reads that share a request.** The search fan-out reads one cache key per platform for
+  the same query. `cachePrefetch` does them in one `MGET` and hands the result to each fetcher
+  via `cacheGetOrFetch`'s `prefetched` argument — the fetchers still own their own TTLs,
+  `shouldCache` predicates and write-backs, only the read is shared. Add a new cached platform
+  to that key list in `searchAllPlatforms` rather than letting it issue its own `GET`.
+- **Two commands to answer one question is one too many.** `checkSentryDedup` was `GET` then
+  `SET`; it is now a single `SET ... NX EX`, which is half the cost and atomic besides. Reach
+  for `SET NX`, `INCR`, `MGET` over read-then-write pairs.
+
+Two related traps:
+
+- **Don't cache a constant.** `searchAmpwall` is still a stub with no outbound request, and it
+  used to run its empty result through Redis — a `GET` per search, plus a `SET` per miss, to
+  remember a compile-time constant. Cache a value when there is a real fetch to protect.
+- **A warm container is free; Redis is not.** `getMergeOverrides` / `getLinkSuppressions` are
+  read on every search and again during Phase 2 enrichment, and they are identical for every
+  visitor. They now sit behind a 60-second in-process memo in `db.ts` as well as the Redis
+  cache. Sixty seconds is deliberately short so `invalidateAdminListCache` keeps its meaning —
+  an admin edit still lands everywhere within a minute. This is the exception, not a pattern to
+  spread: those two lists are the only values that are global, tiny, and read on every search.
+
+`.github/workflows/upstash-keepalive.yml` still exists and is unrelated — it writes one key twice
+a week so the free-tier database isn't reaped for inactivity. It costs 8 commands a month.
+
 ### Testing release ingest locally
 
 Release cataloging only runs where `RELEASE_CATALOG_ENABLED=true`, a custom env var scoped to

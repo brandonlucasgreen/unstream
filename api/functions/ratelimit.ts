@@ -17,11 +17,16 @@ let strictLimiter: Ratelimit | null = null;      // 10 req/min for expensive end
 let lenientLimiter: Ratelimit | null = null;     // 120 req/min for cheap high-frequency endpoints (typeahead)
 let accountLimiter: Ratelimit | null = null;     // 60 req/min for a signed-in user's own account endpoints
 
-// Per-day quota limiters (new)
-let standardDailyLimiter: Ratelimit | null = null;  // 1000 req/day for general
+// Per-day quota limiters.
+//
+// Only the 'strict' tier has one, and that is a deliberate cost decision — see
+// "Every daily quota doubles the bill" below. 'standard', 'lenient' and 'account' used to
+// carry 1000/5000/2000-per-day quotas that no real person has ever come close to, at the
+// price of a second Redis round trip on every page view, every typeahead keystroke and every
+// account read. 'strict' keeps its quota because it fronts search, which fans out to a dozen
+// partner sites per request, and because 500/day is a documented promise to anonymous v1 API
+// callers (docs/openapi.yaml).
 let strictDailyLimiter: Ratelimit | null = null;    // 500 req/day for expensive
-let lenientDailyLimiter: Ratelimit | null = null;   // 5000 req/day for cheap high-frequency
-let accountDailyLimiter: Ratelimit | null = null;   // 2000 req/day for account endpoints
 
 // API key tiers
 let freeLimiter: Ratelimit | null = null;        // 30 req/min
@@ -86,42 +91,6 @@ function getAccountLimiter(): Ratelimit | null {
     prefix: 'rl:account',
   });
   return accountLimiter;
-}
-
-function getAccountDailyLimiter(): Ratelimit | null {
-  if (accountDailyLimiter) return accountDailyLimiter;
-  const r = getRedis();
-  if (!r) return null;
-  accountDailyLimiter = new Ratelimit({
-    redis: r,
-    limiter: Ratelimit.slidingWindow(2000, '24 h'),
-    prefix: 'rl:daily:account',
-  });
-  return accountDailyLimiter;
-}
-
-function getLenientDailyLimiter(): Ratelimit | null {
-  if (lenientDailyLimiter) return lenientDailyLimiter;
-  const r = getRedis();
-  if (!r) return null;
-  lenientDailyLimiter = new Ratelimit({
-    redis: r,
-    limiter: Ratelimit.slidingWindow(5000, '24 h'),
-    prefix: 'rl:daily:lenient',
-  });
-  return lenientDailyLimiter;
-}
-
-function getStandardDailyLimiter(): Ratelimit | null {
-  if (standardDailyLimiter) return standardDailyLimiter;
-  const r = getRedis();
-  if (!r) return null;
-  standardDailyLimiter = new Ratelimit({
-    redis: r,
-    limiter: Ratelimit.slidingWindow(1000, '24 h'),
-    prefix: 'rl:daily:standard',
-  });
-  return standardDailyLimiter;
 }
 
 function getStrictDailyLimiter(): Ratelimit | null {
@@ -308,10 +277,9 @@ export async function checkRateLimit(
     : tier === 'lenient' ? getLenientLimiter()
     : tier === 'account' ? getAccountLimiter()
     : getStandardLimiter();
-  const dailyLimiter = tier === 'strict' ? getStrictDailyLimiter()
-    : tier === 'lenient' ? getLenientDailyLimiter()
-    : tier === 'account' ? getAccountDailyLimiter()
-    : getStandardDailyLimiter();
+  // Only 'strict' has a daily quota — see the declaration block above for why the other
+  // three lost theirs.
+  const dailyLimiter = tier === 'strict' ? getStrictDailyLimiter() : null;
 
   // If Redis isn't configured, allow the request (fail open). The getRedis() call is not
   // redundant: the limiter getters above memoize, so a cached limiter cannot tell us that
@@ -323,6 +291,14 @@ export async function checkRateLimit(
     // and this check sits in front of every API request. The cost is that a request
     // already over its daily quota also consumes a per-minute token, which is
     // harmless: the request is rejected either way.
+    //
+    // Every daily quota doubles the bill. `limiter.limit()` is one HTTP round trip to
+    // Upstash whose sliding-window script runs GET, GET, INCRBY and (on a new window)
+    // PEXPIRE, and Upstash charges per command. Adding a second limiter therefore doubles
+    // the fixed Redis cost of *every* request that reaches this function, before the
+    // handler has done any work at all. That is what took a low-traffic site through the
+    // 500k-command free tier, so a daily quota now has to earn its keep rather than being
+    // the default (2026-08-24).
     const [dailyResult, result] = await Promise.all([
       dailyLimiter ? dailyLimiter.limit(identifier) : Promise.resolve(null),
       limiter.limit(identifier),
@@ -511,11 +487,13 @@ export async function checkSentryDedup(key: string, ttlSeconds: number): Promise
   const r = getRedis();
   if (!r) return true; // Redis unavailable → don't gate Sentry on it
   try {
+    // One round trip, not two. `SET ... NX EX` answers "was I the first?" and claims the
+    // window in the same command, where the old GET-then-SET pair cost twice as much and
+    // let two containers both decide they were first. Upstash bills per command and these
+    // fire on the search path, so the halving is worth having on its own.
     const cacheKey = `sentry:dedup:${key}`;
-    const seen = await r.get(cacheKey);
-    if (seen) return false;
-    await r.set(cacheKey, '1', { ex: ttlSeconds });
-    return true;
+    const claimed = await r.set(cacheKey, '1', { ex: ttlSeconds, nx: true });
+    return claimed === 'OK';
   } catch (err) {
     // On Redis error, don't block Sentry capture — fail open
     reportRedisFailure('checkSentryDedup', err);

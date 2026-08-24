@@ -323,6 +323,45 @@ const MERGE_OVERRIDES_CACHE_KEY = 'admin:merge-overrides';
 const LINK_SUPPRESSIONS_CACHE_KEY = 'admin:link-suppressions';
 
 /**
+ * A second, in-process layer in front of the Redis one.
+ *
+ * Redis turned two full-table reads per search into two Redis reads per search — cheaper, but
+ * still two billed Upstash commands on the hottest path, for two lists that are identical for
+ * every visitor and change only when an admin acts. A search and the Phase 2 enrichment that
+ * follows it read them again seconds apart, on the same warm container, for the same answer.
+ *
+ * So a warm container remembers the answer for a minute. That is short enough to keep the
+ * invalidation story honest — an admin merge still lands everywhere within a minute, where the
+ * Redis delete alone made it instant — and long enough that a burst of requests through one
+ * container costs one Redis read instead of one per request. `invalidateAdminListCache` clears
+ * this container's copy too, so the admin who made the change sees it immediately.
+ *
+ * Not worth generalising into `cache.ts`: these two lists are the only values in the codebase
+ * that are global, tiny, and read on every single search.
+ */
+const ADMIN_LIST_MEMO_TTL_MS = 60 * 1000;
+const adminListMemo = new Map<string, { expiresAt: number; rows: unknown[] }>();
+
+function readAdminListMemo<T>(key: string): T[] | null {
+  const entry = adminListMemo.get(key);
+  if (!entry) return null;
+  if (entry.expiresAt <= Date.now()) {
+    adminListMemo.delete(key);
+    return null;
+  }
+  return entry.rows as T[];
+}
+
+function writeAdminListMemo<T>(key: string, rows: T[]): void {
+  adminListMemo.set(key, { expiresAt: Date.now() + ADMIN_LIST_MEMO_TTL_MS, rows });
+}
+
+/** Test seam: drop this process's memoized admin lists. */
+export function resetAdminListMemoForTests(): void {
+  adminListMemo.clear();
+}
+
+/**
  * A read that knows whether it succeeded.
  *
  * Both of these functions return `[]` on failure *and* `[]` when the table is genuinely empty,
@@ -337,12 +376,17 @@ interface CachedAdminList<T> {
 }
 
 export async function invalidateAdminListCache(list: 'merge-overrides' | 'link-suppressions'): Promise<void> {
-  await cacheDelete(list === 'merge-overrides' ? MERGE_OVERRIDES_CACHE_KEY : LINK_SUPPRESSIONS_CACHE_KEY);
+  const key = list === 'merge-overrides' ? MERGE_OVERRIDES_CACHE_KEY : LINK_SUPPRESSIONS_CACHE_KEY;
+  adminListMemo.delete(key);
+  await cacheDelete(key);
 }
 
 export async function getMergeOverrides(): Promise<MergeOverrideRow[]> {
   const client = getClient();
   if (!client) return [];
+
+  const memoized = readAdminListMemo<MergeOverrideRow>(MERGE_OVERRIDES_CACHE_KEY);
+  if (memoized) return memoized;
 
   const { data } = await cacheGetOrFetch<CachedAdminList<MergeOverrideRow>>(
     MERGE_OVERRIDES_CACHE_KEY,
@@ -366,6 +410,11 @@ export async function getMergeOverrides(): Promise<MergeOverrideRow[]> {
     ADMIN_LIST_CACHE_TTL,
     result => result.ok
   );
+
+  // Only memoize a read that succeeded — same rule as the Redis layer, for the same reason.
+  // Remembering a failed read for a minute would suppress every merge override for a minute
+  // because Supabase blipped once.
+  if (data.ok) writeAdminListMemo(MERGE_OVERRIDES_CACHE_KEY, data.rows);
 
   return data.rows;
 }
@@ -398,6 +447,9 @@ export async function getLinkSuppressions(): Promise<
   const client = getClient();
   if (!client) return [];
 
+  const memoized = readAdminListMemo<Row>(LINK_SUPPRESSIONS_CACHE_KEY);
+  if (memoized) return memoized;
+
   const { data } = await cacheGetOrFetch<CachedAdminList<Row>>(
     LINK_SUPPRESSIONS_CACHE_KEY,
     async () => {
@@ -420,6 +472,9 @@ export async function getLinkSuppressions(): Promise<
     ADMIN_LIST_CACHE_TTL,
     result => result.ok
   );
+
+  // As above: never memoize a read that failed.
+  if (data.ok) writeAdminListMemo(LINK_SUPPRESSIONS_CACHE_KEY, data.rows);
 
   return data.rows;
 }
