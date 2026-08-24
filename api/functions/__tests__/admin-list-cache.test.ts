@@ -33,12 +33,17 @@ vi.mock('@supabase/supabase-js', () => ({
   createClient: () => ({ from: () => ({ select: mocks.select }) }),
 }));
 
-const { getMergeOverrides, getLinkSuppressions, invalidateAdminListCache } = await import('../db');
+const { getMergeOverrides, getLinkSuppressions, invalidateAdminListCache, resetAdminListMemoForTests } = await import('../db');
 
 const ROW = { id: 'o1', group_name: 'Big Thief', platform_urls: [], excluded_urls: [], canonical_image_url: null };
+const SUPPRESSION_ROW = { url: 'https://example.bandcamp.com', artist_name_norm: 'someone' };
 
 beforeEach(() => {
   mocks.store.clear();
+  // Both layers, not just Redis: these lists are also memoized in-process for a minute, and a
+  // memo surviving into the next test would make every assertion below read the previous
+  // test's answer.
+  resetAdminListMemoForTests();
   mocks.select.mockReset();
   process.env.SUPABASE_URL = 'https://example.supabase.co';
   process.env.SUPABASE_SERVICE_KEY = 'test-key';
@@ -138,5 +143,53 @@ describe('getLinkSuppressions caching', () => {
 
     mocks.select.mockResolvedValue({ data: [ROW], error: null });
     expect(await getMergeOverrides()).toEqual([ROW]);
+  });
+});
+
+// The in-process memo in front of Redis. It exists because Redis is not free: these two lists
+// are read on every search and again during Phase 2 enrichment, which was two Upstash commands
+// per search for two lists that are identical for every visitor.
+describe('in-process memo', () => {
+  it('answers a repeat read without touching Redis at all', async () => {
+    mocks.select.mockResolvedValue({ data: [ROW], error: null });
+    expect(await getMergeOverrides()).toEqual([ROW]);
+
+    // Emptying the Redis stub would force a Supabase re-read if the memo were not in front
+    // of it. Serving [ROW] anyway is the proof no Redis command was spent.
+    mocks.store.clear();
+    expect(await getMergeOverrides()).toEqual([ROW]);
+    expect(mocks.select).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not memoize a failed read', async () => {
+    mocks.select.mockResolvedValue({ data: null, error: { message: 'connection reset' } });
+    expect(await getMergeOverrides()).toEqual([]);
+
+    mocks.select.mockResolvedValue({ data: [ROW], error: null });
+    expect(await getMergeOverrides()).toEqual([ROW]);
+  });
+
+  it('is cleared by invalidation, so the admin who made the change sees it immediately', async () => {
+    mocks.select.mockResolvedValue({ data: [], error: null });
+    expect(await getMergeOverrides()).toEqual([]);
+
+    await invalidateAdminListCache('merge-overrides');
+    mocks.select.mockResolvedValue({ data: [ROW], error: null });
+
+    expect(await getMergeOverrides()).toEqual([ROW]);
+  });
+
+  it('keeps the two lists apart', async () => {
+    mocks.select.mockResolvedValue({ data: [SUPPRESSION_ROW], error: null });
+    expect(await getLinkSuppressions()).toEqual([SUPPRESSION_ROW]);
+
+    mocks.select.mockResolvedValue({ data: [ROW], error: null });
+    expect(await getMergeOverrides()).toEqual([ROW]);
+
+    // And invalidating one must not drop the other's memo.
+    await invalidateAdminListCache('merge-overrides');
+    mocks.store.clear();
+    mocks.select.mockResolvedValue({ data: null, error: { message: 'should not be reached' } });
+    expect(await getLinkSuppressions()).toEqual([SUPPRESSION_ROW]);
   });
 });

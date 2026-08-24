@@ -1,7 +1,7 @@
 import { parse } from 'node-html-parser';
 import { Sentry } from '../lib/sentry';
 import { findBandcampArtist } from '../search/bandcamp-probe';
-import { cacheGetOrFetch, artistCacheKey } from './cache';
+import { cacheGetOrFetch, cachePrefetch, artistCacheKey, type PrefetchedCache } from './cache';
 import { persistSearchResults, getArtistBySlug, getArtistsBySlugs, artistSlug, getMergeOverrides, getLinkSuppressions, findKnownArtistSlugsByName } from './db';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
@@ -381,7 +381,7 @@ interface EnrichedMusicBrainzResult {
 // artist changes rarely, and the uncached path costs 2+ rate-limit delays plus
 // several fetches — the single slowest leg of the fan-out. Failures and
 // partial enrichments are never cached (see isCacheableMbResult).
-async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResult> {
+async function searchMusicBrainz(query: string, prefetched?: Promise<PrefetchedCache>): Promise<EnrichedMusicBrainzResult> {
   const cacheKey = artistCacheKey('mb-enriched', query);
   const { data } = await cacheGetOrFetch<EnrichedMusicBrainzResult>(
     cacheKey,
@@ -389,6 +389,7 @@ async function searchMusicBrainz(query: string): Promise<EnrichedMusicBrainzResu
     PLATFORM_CACHE_TTL,
     isCacheableMbResult,
     PLATFORM_FAILURE_CACHE_TTL,
+    prefetched,
   );
   return data;
 }
@@ -713,7 +714,7 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
 // partial queries and differently-slugged artists were invisible. The API matches
 // server-side (loosely; parseMirloArtistSearch re-filters), so "argent" now finds
 // "The Argent Grub" at mirlo.space/the-argent-grub.
-async function searchMirlo(query: string): Promise<PlatformResult[]> {
+async function searchMirlo(query: string, prefetched?: Promise<PrefetchedCache>): Promise<PlatformResult[]> {
   const cacheKey = artistCacheKey('mirlo', query);
   // Set when the upstream did not answer. A failure must not be cached as
   // "this artist isn't on mirlo" -- see the shouldCache predicate below.
@@ -752,6 +753,7 @@ async function searchMirlo(query: string): Promise<PlatformResult[]> {
     () => !fetchFailed,
     // ...but remember it briefly so an outage doesn't cost every search the timeout.
     PLATFORM_FAILURE_CACHE_TTL,
+    prefetched,
   );
 
   return data;
@@ -928,7 +930,7 @@ async function searchJamcoop(query: string): Promise<Map<string, NameOnlyEntry>>
   return results;
 }
 
-async function searchPatreon(query: string): Promise<Map<string, NameOnlyEntry>> {
+async function searchPatreon(query: string, prefetched?: Promise<PrefetchedCache>): Promise<Map<string, NameOnlyEntry>> {
   const cacheKey = artistCacheKey('patreon', query);
   // Set when the upstream did not answer. A failure must not be cached as
   // "this artist isn't on patreon" -- see the shouldCache predicate below.
@@ -1001,6 +1003,7 @@ async function searchPatreon(query: string): Promise<Map<string, NameOnlyEntry>>
     () => !fetchFailed,
     // ...but remember it briefly so an outage doesn't cost every search the timeout.
     PLATFORM_FAILURE_CACHE_TTL,
+    prefetched,
   );
 
   return coerceNameOnlyCache(data);
@@ -1015,54 +1018,23 @@ function coerceNameOnlyCache(data: [string, NameOnlyEntry | string][]): Map<stri
   ));
 }
 
-// Search Ampwall with Redis caching to minimize API load
-// Cache TTL: 30 minutes (1800 seconds)
-const AMPWALL_CACHE_TTL = 30 * 60;
-
-async function searchAmpwall(query: string): Promise<Map<string, string>> {
-  const cacheKey = artistCacheKey('ampwall', query);
-  // No shouldCache guard here: this is still a stub with no outbound request, so it
-  // cannot fail and its empty result is a genuine answer rather than a hidden error.
-  const { data, cached } = await cacheGetOrFetch<[string, string][]>(
-    cacheKey,
-    async () => {
-      const results: [string, string][] = [];
-
-      // TODO: Replace this with actual Ampwall API call when available
-      // Expected API format TBD - placeholder implementation
-      //
-      // Example expected implementation:
-      // const apiUrl = `https://api.ampwall.com/search?q=${encodeURIComponent(query)}`;
-      // const response = await fetchWithTimeout(apiUrl, {
-      //   headers: {
-      //     'Authorization': `Bearer ${process.env.AMPWALL_API_KEY}`,
-      //     'Accept': 'application/json',
-      //   },
-      // }, 5000);
-      //
-      // if (response.ok) {
-      //   const data = await response.json();
-      //   for (const artist of data.artists || []) {
-      //     const normalizedName = normalizeForComparison(artist.name);
-      //     results.push([normalizedName, artist.url]);
-      //   }
-      // }
-
-      return results;
-    },
-    AMPWALL_CACHE_TTL
-  );
-
-  if (cached) {
-    console.log('[Ampwall] Cache hit');
-  }
-
-  // Convert array back to Map (Redis doesn't serialize Maps well)
-  return new Map(data);
+// Ampwall has no public search API yet, so this is still a stub: it makes no outbound
+// request and returns nothing.
+//
+// It used to run that empty result through Redis, which cost a GET on every search — and a
+// SET on every miss — to remember an answer that is a compile-time constant. Upstash bills
+// per command, so that was two commands per search buying nothing. Cache it again when there
+// is a real fetch here to cache, and use the same shouldCache/failure-TTL shape the other
+// platforms use so a failed Ampwall call is never stored as "artist not on Ampwall".
+async function searchAmpwall(_query: string): Promise<Map<string, string>> {
+  // TODO: Replace with a real Ampwall API call when one exists. Expected shape:
+  //   GET https://api.ampwall.com/search?q=<query> -> { artists: [{ name, url }] }
+  // keyed into the map as [normalizeForComparison(name), url].
+  return new Map();
 }
 
 // Search Beatport via __NEXT_DATA__ JSON embedded in search page
-async function searchBeatport(query: string): Promise<Map<string, NameOnlyEntry>> {
+async function searchBeatport(query: string, prefetched?: Promise<PrefetchedCache>): Promise<Map<string, NameOnlyEntry>> {
   const cacheKey = artistCacheKey('beatport', query);
   // Set when the upstream did not answer. A failure must not be cached as
   // "this artist isn't on beatport" -- see the shouldCache predicate below.
@@ -1139,13 +1111,14 @@ async function searchBeatport(query: string): Promise<Map<string, NameOnlyEntry>
     () => !fetchFailed,
     // ...but remember it briefly so an outage doesn't cost every search the timeout.
     PLATFORM_FAILURE_CACHE_TTL,
+    prefetched,
   );
 
   return coerceNameOnlyCache(data);
 }
 
 // Search EVEN via Algolia API (direct-to-fan marketplace)
-async function searchEven(query: string): Promise<Map<string, NameOnlyEntry>> {
+async function searchEven(query: string, prefetched?: Promise<PrefetchedCache>): Promise<Map<string, NameOnlyEntry>> {
   const cacheKey = artistCacheKey('even', query);
   // Set when the upstream did not answer. A failure must not be cached as
   // "this artist isn't on even" -- see the shouldCache predicate below.
@@ -1212,6 +1185,7 @@ async function searchEven(query: string): Promise<Map<string, NameOnlyEntry>> {
     () => !fetchFailed,
     // ...but remember it briefly so an outage doesn't cost every search the timeout.
     PLATFORM_FAILURE_CACHE_TTL,
+    prefetched,
   );
 
   return coerceNameOnlyCache(data);
@@ -1667,18 +1641,35 @@ async function searchAllPlatforms(query: string, mode: SearchMode): Promise<{ re
   // Same for admin link suppressions, applied last (Phase 5).
   const suppressionsPromise = getLinkSuppressions();
 
+  // Every Redis-cached platform reads one key derived from this same query, so read them all
+  // in one MGET rather than one GET per platform. Upstash bills per command and this is the
+  // busiest endpoint on the site: five commands and five round trips became one. The fetchers
+  // below still own their own TTLs, shouldCache predicates and write-backs — only the read is
+  // shared.
+  //
+  // Deliberately not awaited: the platforms with no cache (Bandcamp, Bandwagon, Faircamp,
+  // Jam.coop) would otherwise all start a round trip later than they do today, paying latency
+  // for a saving they have no part in. cacheGetOrFetch awaits this promise itself.
+  const prefetched = cachePrefetch([
+    artistCacheKey('mirlo', query),
+    artistCacheKey('patreon', query),
+    artistCacheKey('beatport', query),
+    artistCacheKey('even', query),
+    artistCacheKey('mb-enriched', query),
+  ]);
+
   // Phase 1: Search all platforms in parallel and aggregate Bandcamp/Mirlo results
   const [bandcampResults, bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, ampwallResults, beatportResults, evenResults, musicbrainzResult] = await Promise.allSettled([
     searchBandcamp(query),
     searchBandwagon(query),
-    searchMirlo(query),
+    searchMirlo(query, prefetched),
     searchFaircamp(query),
     searchJamcoop(query),
-    searchPatreon(query),
+    searchPatreon(query, prefetched),
     searchAmpwall(query),
-    searchBeatport(query),
-    searchEven(query),
-    searchMusicBrainz(query),
+    searchBeatport(query, prefetched),
+    searchEven(query, prefetched),
+    searchMusicBrainz(query, prefetched),
   ]);
 
   // UC6: Capture partial platform failures for monitoring

@@ -60,8 +60,6 @@ describe('account rate limit tier', () => {
     const prefixes = limitCalls.map(c => c.prefix).sort();
     expect(prefixes).toEqual([
       'rl:account',
-      'rl:daily:account',
-      'rl:daily:standard',
       'rl:standard',
     ]);
   });
@@ -74,6 +72,36 @@ describe('account rate limit tier', () => {
     // even with a token refresh partway through.
     const perMinute = built.find(b => b.prefix === 'rl:account');
     expect(perMinute?.window).toEqual({ tokens: 60, window: '1 m' });
+  });
+});
+
+// Each limiter is one HTTP round trip to Upstash, and Upstash bills per command — so a second
+// limiter doubles the fixed Redis cost of every request that reaches checkRateLimit, before
+// the handler does any work. That is what carried a low-traffic site through the 500k-command
+// free tier. These pin which tiers are allowed to pay it.
+describe('daily quotas are only where they earn their keep', () => {
+  it('spends one Redis round trip per request on the high-frequency tiers', async () => {
+    const { checkRateLimit } = await import('../ratelimit');
+
+    for (const tier of ['standard', 'lenient', 'account'] as const) {
+      limitCalls.length = 0;
+      await checkRateLimit('1.2.3.4', tier, {});
+      expect(limitCalls.map(c => c.prefix)).toEqual([`rl:${tier}`]);
+    }
+  });
+
+  // 'strict' fronts search, which fans out to a dozen partner sites per request, and 500/day
+  // is a documented promise to anonymous v1 API callers (docs/openapi.yaml). Worth the
+  // second round trip; the other three tiers were not.
+  it('keeps the daily quota on the expensive tier', async () => {
+    const { checkRateLimit } = await import('../ratelimit');
+
+    limitCalls.length = 0;
+    await checkRateLimit('1.2.3.4', 'strict', {});
+
+    expect(limitCalls.map(c => c.prefix).sort()).toEqual(['rl:daily:strict', 'rl:strict']);
+    expect(built.find(b => b.prefix === 'rl:daily:strict')?.window)
+      .toEqual({ tokens: 500, window: '24 h' });
   });
 });
 

@@ -22,6 +22,46 @@ function redactKey(key: string): string {
 }
 
 /**
+ * Values for a set of keys, read up front in a single round trip.
+ *
+ * A key is present iff Redis held a value for it, so `has()` distinguishes a hit from a
+ * miss and an absent key is a miss, not "unknown". Pass one to `cacheGetOrFetch` and it
+ * skips its own `GET` entirely.
+ */
+export type PrefetchedCache = Map<string, unknown>;
+
+/**
+ * Read many keys in one `MGET` instead of one `GET` each.
+ *
+ * Upstash charges per command, and the search fan-out reads one key per platform for the
+ * same query — five separate billed commands, five separate HTTP round trips, every search.
+ * `MGET` is one of each. Returns an empty map when Redis is unavailable, which every caller
+ * already treats as "everything missed".
+ */
+export async function cachePrefetch(keys: string[]): Promise<PrefetchedCache> {
+  const found: PrefetchedCache = new Map();
+  if (keys.length === 0) return found;
+
+  const client = getRedis();
+  if (!client) return found;
+
+  try {
+    const values = await client.mget<unknown[]>(...keys);
+    keys.forEach((key, i) => {
+      const value = values[i];
+      if (value !== null && value !== undefined) found.set(key, value);
+    });
+    console.log(`[Cache] MGET: ${keys.length} keys, ${found.size} hit`);
+  } catch (error) {
+    // A failed prefetch is indistinguishable from a cold cache to the caller, which is
+    // why — as with cacheGet — it has to be reported rather than swallowed.
+    reportRedisFailure(`cachePrefetch(${keys.length} keys)`, error);
+  }
+
+  return found;
+}
+
+/**
  * Get a value from cache
  */
 export async function cacheGet<T>(key: string): Promise<T | null> {
@@ -72,16 +112,28 @@ export async function cacheSet<T>(key: string, value: T, ttlSeconds: number = DE
  * Give it a short value (~60s) for the useful middle ground: a hiccup heals in a minute
  * instead of persisting for the full TTL, while an outage still costs one slow request per
  * minute rather than one per search.
+ *
+ * `prefetched` lets a fan-out pay for one `MGET` instead of one `GET` per key — see
+ * `cachePrefetch`. When it is supplied it is authoritative for this key: the caller has
+ * already asked Redis, so an absent key is a miss and no second read is made.
+ *
+ * It accepts the *promise* as well as the map so the caller doesn't have to await the MGET
+ * before starting its fan-out — the platforms with no cache would otherwise all start one
+ * round trip later than they used to, which is a latency regression in exchange for a cost
+ * saving they don't share in.
  */
 export async function cacheGetOrFetch<T>(
   key: string,
   fetchFn: () => Promise<T>,
   ttlSeconds: number = DEFAULT_TTL,
   shouldCache?: (data: T) => boolean,
-  failureTtlSeconds?: number
+  failureTtlSeconds?: number,
+  prefetched?: PrefetchedCache | Promise<PrefetchedCache>
 ): Promise<{ data: T; cached: boolean }> {
   // Try cache first
-  const cached = await cacheGet<T>(key);
+  const cached = prefetched
+    ? ((await prefetched).get(key) as T | undefined) ?? null
+    : await cacheGet<T>(key);
   if (cached !== null) {
     return { data: cached, cached: true };
   }
