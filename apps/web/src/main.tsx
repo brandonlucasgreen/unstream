@@ -11,6 +11,7 @@ import { ArtistPage } from './pages/ArtistPage.tsx'
 import { AppLoadingFallback, AppErrorFallback } from './components/AppFallback'
 import { ScrollToTop } from './components/ScrollToTop'
 import { lazyWithRetry } from './utils/lazyWithRetry'
+import { StaleBuildBanner } from './components/StaleBuildBanner'
 
 initSentry()
 
@@ -72,6 +73,10 @@ createRoot(document.getElementById('root')!).render(
         scope.setTag('route', window.location.pathname)
       }}
     >
+      {/* Outside the router and Suspense on purpose: it needs neither, and this way it stays
+          mounted across navigations and is still visible while a route chunk is downloading —
+          including the download that is about to fail because this build is the stale one. */}
+      <StaleBuildBanner />
       <AuthProvider>
         <BrowserRouter>
           <ScrollToTop />
