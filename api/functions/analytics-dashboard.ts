@@ -2,7 +2,7 @@
 // Admin-only endpoint returning aggregated product analytics for the dashboard.
 
 import { getClient } from './db';
-import { authenticateAdmin } from './middleware';
+import { authenticateAdmin, buildCorsHeaders } from './middleware';
 import { Sentry } from '../lib/sentry';
 
 // Row shapes returned by the analytics_* functions added in
@@ -13,17 +13,16 @@ interface PlatformRow { platform: string; clicks: number }
 interface StreamingRow { service: string; activations: number }
 interface SuccessRow { completed: number; with_results: number }
 
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
-
 export async function handler(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
 }) {
+  // Restricted to unstream.stream like every other admin endpoint. The '*' this used
+  // to send wasn't exploitable — a cross-origin page can't get the bearer token — but
+  // it read as though permissive CORS were intended here, which it isn't.
+  const origin = event.headers['origin'] || event.headers['Origin'];
+  const CORS_HEADERS = buildCorsHeaders(origin, false);
+
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   }

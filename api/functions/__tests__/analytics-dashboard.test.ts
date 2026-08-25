@@ -22,8 +22,20 @@ vi.mock('../db', () => ({
     rpc: mocks.mockRpc,
   }),
 }));
+// buildCorsHeaders is not stubbed to a constant: this endpoint used to hand back a wildcard
+// origin from a hand-rolled const, and the point of routing it through the shared helper is that
+// it no longer does. Mirrors the real helper's non-API-key behaviour (pin to the canonical
+// origin) so that stays assertable.
 vi.mock('../middleware', () => ({
   authenticateAdmin: async () => ({ userId: 'u1', email: 'admin@example.com' }),
+  buildCorsHeaders: (origin: string | undefined, apiKeyPresent: boolean) => ({
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': apiKeyPresent
+      ? '*'
+      : origin === 'https://unstream.stream'
+        ? origin
+        : 'https://unstream.stream',
+  }),
 }));
 vi.mock('../../lib/sentry', () => ({
   Sentry: { captureMessage: vi.fn(), captureException: vi.fn() },
@@ -57,8 +69,8 @@ const RPC_DATA: Record<string, unknown[]> = {
   ],
 };
 
-function get() {
-  return handler({ httpMethod: 'GET', headers: { authorization: 'Bearer t' } });
+function get(headers: Record<string, string | undefined> = {}) {
+  return handler({ httpMethod: 'GET', headers: { authorization: 'Bearer t', ...headers } });
 }
 
 async function body() {
@@ -121,6 +133,24 @@ describe('aggregation happens in Postgres', () => {
     );
     const d = await body();
     expect(d.summary.success_rate_7d).toBeNull();
+  });
+});
+
+describe('CORS', () => {
+  it('never answers an admin request with a wildcard origin', async () => {
+    // Was `'Access-Control-Allow-Origin': '*'` in a local const here, the one admin endpoint
+    // not using the shared helper. Not exploitable on its own — a cross-origin page can't get
+    // the bearer token — but it contradicted the model every sibling endpoint follows.
+    for (const origin of [undefined, 'https://unstream.stream', 'https://evil.example']) {
+      const res = await get({ origin });
+      expect(res.headers['Access-Control-Allow-Origin']).toBe('https://unstream.stream');
+    }
+  });
+
+  it('answers a preflight with the same headers', async () => {
+    const res = await handler({ httpMethod: 'OPTIONS', headers: {} });
+    expect(res.statusCode).toBe(204);
+    expect(res.headers['Access-Control-Allow-Origin']).toBe('https://unstream.stream');
   });
 });
 
