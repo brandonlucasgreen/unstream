@@ -52,6 +52,25 @@
   [headers.values]
     Cache-Control = "no-store, max-age=0"
 
+# The one file that must never be answered from cache, for the same reason as the one above —
+# and the pair belongs together. `/build-id.json` is how staleness is DETECTED; this is how it
+# gets RESOLVED. The browser discovers a new worker only by re-fetching /sw.js, so under
+# Netlify's default `max-age=14400` that check can be satisfied by a four-hour-old copy while
+# the installed worker keeps serving its precached build.
+#
+# That is not theoretical: on 2026-08-24 a Safari session was pinned to a build whose
+# /assets/* had all been deleted, running that dead code until it threw. Protecting only the
+# detector is the worst of both — the banner appears, and the refresh behind it re-serves the
+# very build it is warning about.
+#
+# `max-age=0, must-revalidate` rather than `no-store`: it still forces a check on every
+# request, but lets the ETag answer 304 instead of resending the file. It is also exactly what
+# Netlify already serves for index.html, which has the identical requirement.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
 [[headers]]
   for = "/*"
   # connect-src note: Sentry's ingest host is region-scoped — ours is

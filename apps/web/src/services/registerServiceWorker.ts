@@ -41,12 +41,67 @@ export function registerServiceWorker(): void {
 }
 
 function register(): void {
-  navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch((error: unknown) => {
-    Sentry.addBreadcrumb({
-      category: 'pwa',
-      level: 'info',
-      message: 'Service worker registration declined',
-      data: { reason: error instanceof Error ? error.message : String(error) },
+  navigator.serviceWorker
+    .register('/sw.js', { scope: '/' })
+    .then(watchForUpdates)
+    .catch((error: unknown) => {
+      Sentry.addBreadcrumb({
+        category: 'pwa',
+        level: 'info',
+        message: 'Service worker registration declined',
+        data: { reason: error instanceof Error ? error.message : String(error) },
+      })
     })
+}
+
+/**
+ * Never re-check more often than this. A tab flipped between repeatedly shouldn't ask on every
+ * flip; half an hour is far quicker than deploys land and costs a conditional request that the
+ * ETag answers with a 304.
+ */
+const MIN_CHECK_INTERVAL_MS = 30 * 60 * 1000
+
+/**
+ * Re-check `/sw.js` whenever the tab comes back to the foreground.
+ *
+ * `register()` above already triggers one check per page load — but this is a single-page app,
+ * so moving between routes is not a navigation and never triggers another. A tab left open for
+ * days therefore asks exactly once, on the load that opened it, and then keeps serving whatever
+ * that worker precached no matter how many deploys go out. When the precached build's chunks
+ * are eventually deleted from the CDN, its routes render deleted code or fail to open at all.
+ *
+ * Coming back to a tab is the moment worth spending a request on: it is when someone is about
+ * to use the page, and it is exactly the long-idle case that a per-load check cannot reach.
+ * It also means the refresh offered by StaleBuildBanner can deliver a new build — a reload with
+ * a stale worker is served the same precached shell, so the banner would otherwise reappear
+ * forever having changed nothing.
+ *
+ * Registration has just performed its own check, so the clock starts now rather than at zero.
+ */
+function watchForUpdates(registration: ServiceWorkerRegistration): void {
+  let lastCheck = Date.now()
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return
+    if (Date.now() - lastCheck < MIN_CHECK_INTERVAL_MS) return
+    lastCheck = Date.now()
+    void checkForUpdate(registration)
   })
+}
+
+/**
+ * Ask the browser to re-fetch `/sw.js` and install a new worker if one is there.
+ *
+ * Exported so the test can await the swallowed rejection — at the call site above the promise
+ * is floating, and an unhandled rejection is precisely what this catch exists to prevent:
+ * Sentry's global handler reports one at error level, which is how the declined-registration
+ * bug in the docstring above reached the issue tracker in the first place.
+ */
+export async function checkForUpdate(registration: ServiceWorkerRegistration): Promise<void> {
+  try {
+    await registration.update()
+  } catch {
+    // Offline, or a browser that refuses the check. Nothing to do and nothing worth
+    // reporting — the next time they focus the tab, we ask again.
+  }
 }
