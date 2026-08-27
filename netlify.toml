@@ -78,8 +78,17 @@
   # suffix match, and `.ingest.sentry.io` is not a suffix of `.ingest.us.sentry.io`. That
   # one missing `us.` silently dropped every browser error event between setup and 2026-08-01.
   # If the Sentry org ever moves region, this host has to move with it.
+  #
+  # Fonts note: coollabs uses TWO hosts, the same split Google Fonts did. The stylesheet comes
+  # from api.fonts.coollabs.io (style-src); the .woff2 files it references come from their
+  # BunnyCDN at cdn.fonts.coollabs.io (font-src). Their README's migration snippet shows only
+  # one preconnect and implies one origin — that is wrong, and following it puts the wrong host
+  # in font-src. Source: the service's own .env-template pins DOMAIN=cdn.fonts.coollabs.io, and
+  # that DOMAIN is what it interpolates into every @font-face src URL.
+  # Getting this wrong fails silently: the faces are blocked and every page falls back to
+  # system-ui without erroring.
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' gc.zgo.at letterbird.co; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://unstream.goatcounter.com https://letterbird.co https://*.ingest.us.sentry.io; img-src 'self' https: data:; frame-src https:; object-src 'none'; base-uri 'self'"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' gc.zgo.at letterbird.co; style-src 'self' 'unsafe-inline' api.fonts.coollabs.io; font-src cdn.fonts.coollabs.io; connect-src 'self' https://*.supabase.co https://unstream.goatcounter.com https://letterbird.co https://*.ingest.us.sentry.io; img-src 'self' https: data:; frame-src https:; object-src 'none'; base-uri 'self'"
 
 [[edge_functions]]
   path = "/"
