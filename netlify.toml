@@ -78,8 +78,14 @@
   # suffix match, and `.ingest.sentry.io` is not a suffix of `.ingest.us.sentry.io`. That
   # one missing `us.` silently dropped every browser error event between setup and 2026-08-01.
   # If the Sentry org ever moves region, this host has to move with it.
+  #
+  # Fonts note: api.fonts.coollabs.io appears in both style-src and font-src because coollabs
+  # serves the stylesheet AND the woff2 files from that one origin — unlike Google Fonts, which
+  # split them across fonts.googleapis.com and fonts.gstatic.com. Dropping either entry breaks
+  # fonts silently: the CSS 404s or the faces are blocked, and every page falls back to
+  # system-ui rather than erroring.
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' gc.zgo.at letterbird.co; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://unstream.goatcounter.com https://letterbird.co https://*.ingest.us.sentry.io; img-src 'self' https: data:; frame-src https:; object-src 'none'; base-uri 'self'"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' gc.zgo.at letterbird.co; style-src 'self' 'unsafe-inline' api.fonts.coollabs.io; font-src api.fonts.coollabs.io; connect-src 'self' https://*.supabase.co https://unstream.goatcounter.com https://letterbird.co https://*.ingest.us.sentry.io; img-src 'self' https: data:; frame-src https:; object-src 'none'; base-uri 'self'"
 
 [[edge_functions]]
   path = "/"

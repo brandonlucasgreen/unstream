@@ -137,9 +137,8 @@ function renderPage(query: string, results: SearchResult[], error?: string): str
   <title>${query ? `${escapedQuery} - Unstream Search` : 'Search - Unstream'}</title>
   <meta name="description" content="Search any artist. See where your money actually goes. Unstream shows artist payout percentages across 17+ platforms.">
   <meta name="robots" content="noindex">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@300..900&family=Stack+Sans+Headline:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://api.fonts.coollabs.io" crossorigin>
+  <link href="https://api.fonts.coollabs.io/css2?family=Darker+Grotesque:wght@300..900&family=Stack+Sans+Headline:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root { --bg: #121212; --bg2: #1a1a1a; --text: #f0f0f0; --muted: #999; --border: #2a2a2a; --accent: #ff6b35; --footer-border: #1a1a1a; }
     @media (prefers-color-scheme: light) {

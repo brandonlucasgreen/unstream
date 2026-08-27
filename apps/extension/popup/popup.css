@@ -5,10 +5,11 @@
    See reference: the stack is declared in six places across web + edge functions; this is the
    seventh, and it can't share them because the extension has no build step.
 
-   Bundled, not linked to fonts.googleapis.com, for two reasons: a remote stylesheet would be a
-   request to Google every time the popup opens — on a product whose whole pitch is not leaking
+   Bundled rather than linked to a font CDN, for two reasons: a remote stylesheet would be a
+   third-party request every time the popup opens — on a product whose whole pitch is not leaking
    your listening to third parties — and MV3 extension pages shouldn't depend on remote resources
    to render. Both families are OFL, so redistribution is fine. Latin subsets only, 76 KB total.
+   (The web app links api.fonts.coollabs.io; the extension deliberately doesn't link anything.)
 
    Darker Grotesque has a notably short cap height (~56 vs ~70 at the same size), so it is used
    only where a size bump comes with it — the logo — rather than across the UI. */

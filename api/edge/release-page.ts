@@ -369,7 +369,7 @@ export default async function handler(request: Request, context: Context) {
   <meta property="og:image:alt" content="${title}">` : ''}
   <meta name="twitter:card" content="${artworkUrl ? 'summary_large_image' : 'summary'}">
   <link rel="canonical" href="${pageUrl}">
-  <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@300..900&family=Stack+Sans+Headline:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://api.fonts.coollabs.io/css2?family=Darker+Grotesque:wght@300..900&family=Stack+Sans+Headline:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>${CSS}</style>
 </head>
 <body>
