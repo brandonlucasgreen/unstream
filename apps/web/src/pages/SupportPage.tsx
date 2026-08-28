@@ -7,7 +7,7 @@ export function SupportPage() {
 
       <Header />
 
-      <div className="pt-8 pb-8 px-4">
+      <div className="pt-8 pb-4 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary mb-4">Support Unstream</h1>
         </div>
@@ -16,12 +16,24 @@ export function SupportPage() {
       {/* Content */}
       <main className="px-4 pb-16">
         <div className="max-w-2xl mx-auto text-center">
-          <p className="text-text-secondary text-lg mb-8">
-            Unstream is free because the money should go to artists, not us. If this tool helps you
-            find and support musicians, chip in to keep it running.
-          </p>
-
-          <div className="bg-surface-secondary rounded-2xl p-8 border border-border mb-8">
+          <div className="mb-8">
+            <div className="flex items-center gap-5 mb-6 text-left">
+              <div className="flex-1">
+                <p className="text-text-secondary text-lg mb-6">
+                  Unstream is free to use because its mission is to expand &amp; deepen support for artists.
+                </p>
+                <p className="text-text-secondary text-lg leading-relaxed">
+                  I'm Brandon. I'm an indie musician and tech worker, and I run Unstream. If you find
+                  it a helpful tool for supporting your favorite artists, consider chipping in to
+                  help me keep it running.
+                </p>
+              </div>
+              <img
+                src="/brandon-lucas-green.webp"
+                alt="Brandon Lucas Green"
+                className="w-32 h-32 rounded-full object-cover shrink-0"
+              />
+            </div>
             <a
               href="https://www.buymeacoffee.com/bgreen"
               target="_blank"
