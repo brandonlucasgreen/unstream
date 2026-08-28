@@ -53,7 +53,7 @@ const FACTS: { label: string; value: React.ReactNode }[] = [
       </a>
     ),
   },
-  { label: 'Price', value: 'Free. No paid tier, no upsell. Optional donations via Liberapay.' },
+  { label: 'Price', value: 'Free. No paid tier, no upsell. Optional support via Buy Me a Coffee.' },
   {
     label: 'License',
     value: (
