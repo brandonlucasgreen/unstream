@@ -130,6 +130,15 @@ export default defineConfig({
           // is a navigation, and the cached shell would hand them an HTML page instead of the
           // calendar. /a/ and /u/ above already cover the two public feed shapes.
           /^\/feed\//,
+          // Static RSS feeds copied straight from apps/web/public/ (scripts/generate-guides-feed.ts,
+          // generate-changelog-feed.ts) — not edge functions, but the same navigateFallback trap:
+          // NavigationRoute's default allowlist (`[/./]`) matches every browser navigation
+          // regardless of file extension, so a returning visitor clicking these RSS links from
+          // /guides or /changelog got the cached SPA shell instead of the feed — a blank page,
+          // since no route renders for /guides.xml. /^\/guides\// above only covers /guides/*
+          // pages, not this sibling file.
+          /^\/guides\.xml$/,
+          /^\/changelog\.xml$/,
         ],
         // No runtimeCaching, deliberately. A NetworkFirst rule used to match every
         // /api/ GET with a 5-minute `api-cache` bucket. It earned nothing, and it
