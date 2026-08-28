@@ -224,7 +224,7 @@ export function PrivacyPolicyPage() {
                 <li><strong>GoatCounter</strong> — cookie-free website analytics.</li>
                 <li><strong>Sentry</strong> — error reports, configured not to send IP addresses, cookies or request headers, and with the query string stripped from the page address.</li>
                 <li><strong>Buttondown</strong> — the newsletter, if you subscribe.</li>
-                <li><strong>Liberapay</strong> and <strong>Apple</strong> — donations and in-app support purchases. We never see your payment details.</li>
+                <li><strong>Buy Me a Coffee</strong> and <strong>Apple</strong> — support and in-app purchases. We never see your payment details.</li>
                 <li><strong>Discord</strong> — if you use the Unstream bot in a Discord server.</li>
               </ul>
               <P>

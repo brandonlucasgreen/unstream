@@ -380,12 +380,12 @@ export function TermsOfUsePage() {
 
             <Section n={13} title="Donations and support purchases">
               <P>
-                Unstream is free. If you choose to support it, you can donate through Liberapay or make an in-app
+                Unstream is free. If you choose to support it, you can do so through Buy Me a Coffee or make an in-app
                 support purchase in the Apple apps. Both are voluntary, and neither buys you a feature, a service
                 level, priority support, or influence over what we build.
               </P>
               <P>
-                We don't handle your payment details. Liberapay and Apple process those payments under their own terms,
+                We don't handle your payment details. Buy Me a Coffee and Apple process those payments under their own terms,
                 and refunds go through them, not us. Donations are generally non-refundable, and Unstream is not a
                 charity — donations aren't tax-deductible.
               </P>
