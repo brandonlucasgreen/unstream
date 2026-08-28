@@ -94,6 +94,6 @@ We don't sell any of it, we don't run ads, and there are no third-party trackers
   },
   {
     title: "I love using Unstream, how can I best support the app?",
-    content: `Unstream is totally free to use, but please consider supporting it by [buying me a coffee](https://www.buymeacoffee.com/brandonlucasgreen)!`
+    content: `Unstream is totally free to use, but please consider supporting it by [buying me a coffee](https://www.buymeacoffee.com/bgreen)!`
   }
 ];

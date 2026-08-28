@@ -23,7 +23,7 @@ export function SupportPage() {
 
           <div className="bg-surface-secondary rounded-2xl p-8 border border-border mb-8">
             <a
-              href="https://www.buymeacoffee.com/brandonlucasgreen"
+              href="https://www.buymeacoffee.com/bgreen"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-[#FFDD00] text-gray-900 hover:bg-[#F5D000] transition-colors font-semibold text-lg shadow-lg"
