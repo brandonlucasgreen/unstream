@@ -412,6 +412,65 @@ Artists claim profiles via `/claim/:slug` (email magic link or password auth, wi
 
 Signed-in fans can save artists and mark artists as supported (migrations 013–018), synced to the Apple app via `saved-artists-sync.ts` with tombstones and scheduled GC. Users can claim a public username (migration 021) and opt into sharing their list (migration 022); the public list renders at `/u/:handle` via the `u-handle` edge function, backed by `public-saved-artists.ts`. Reserved handles live in `api/lib/reserved-handles.ts`.
 
+### Release dedup: what identity is, and what the date is for
+
+One release exists on several platforms and every one of them describes it differently. Three
+tiers decide whether two rows are one record, and the rule that keeps them honest is
+**under-merge, never over-merge** — a false merge silently asserts an artist made a record they
+didn't, and nobody would ever catch it.
+
+1. **A hard identifier.** `discogs_master_id`, `musicbrainz_release_group_id` — someone else's
+   "these pressings are one album" conclusion. Exact, free, and it wins.
+2. **An identical `match_key`, unless the dates disagree** (`findExactReleaseMatch`). Merges.
+3. **A containment match between match keys, unless the dates disagree**
+   (`findFuzzyReleaseMatch`). Never merges — it flags both rows `needs_review` for
+   `/admin/release-review`.
+
+**Release type is not part of identity, and putting it back would be a regression.** Discogs'
+artist listing carries no type field for a master, so 92% of Discogs rows are typed `other`
+while the same record arrives from Bandcamp as `album`. Keying identity on
+`(release_type, match_key)` meant those two could never meet — measured 2026-08-29, 1,181 pairs
+of byte-identical titles under one artist sat on artist pages twice, unmerged and unflagged,
+because flagging was type-scoped too. Where the types genuinely differ and both are meaningful
+the data still says one record: `Live At The Echo` filed 'live' by one source and 'album' by
+the other, same day, is one album.
+
+**`releaseDatesDisagree` is what stands in its place, and it cuts both ways.** It compares only
+as far as the *coarser* of the two precisions vouches for, which is why `date_precision` is
+stored: Discogs' bare year arrives as `2020-01-01` and means "sometime in 2020", so comparing it
+to a Bandcamp day as a full date would call every such pair different. A missing date is never
+disagreement — this answers "do we have evidence these are two records", and silence is no
+evidence.
+
+As a veto it is the reason the review queue is usable: of 858 fuzzy pairs in the catalog, 687
+are pairs whose day-precision dates differ, and every one sampled was a false positive ("Acid
+Dub Versions III" against "II", four volumes of "As I Hear Them In My Head"). A queue that is
+80% noise trains its reviewer to dismiss without reading, which is worse than no queue.
+
+**A release may hold more than one source per platform** since
+`20260829120000_release-sources-multi-per-platform.sql`. Discogs files two masters for one
+record often enough that 59 duplicate pairs had a Discogs source on both sides, and the old
+`UNIQUE (release_id, platform)` made every one of them unmergeable. Uniqueness is now
+`(release_id, platform, COALESCE(external_id, ''))` — several sources per platform, at most one
+of them without an id, because two id-less rows on one platform can never be told apart. The
+global `UNIQUE (platform, external_id)` is untouched and still keeps re-crawls idempotent.
+
+Two consequences worth knowing:
+
+- **Anything rendering a "where to buy" list must go through `oneSourcePerPlatform`**
+  (`api/shared/release-display.ts`, importable from both Node and Deno) or
+  `orderedSourcePlatforms`, which dedupes. "Discogs · Discogs" reads as a bug and prints one
+  platform's payout twice.
+- **`persistDiscogsReleases` looks up a master id in `release_sources` as well as in
+  `releases.discogs_master_id`.** The release column holds exactly one, and a merge keeps the
+  survivor's — so without that second lookup the next catalogue pass wouldn't recognise the
+  merged-away master and would re-create it. That is how a review queue refills itself forever.
+
+Changing any of these rules only changes tomorrow: ingest compares a release it is *writing*
+against what is stored, so nothing already in the catalog is revisited. `npm run
+dedupe:releases` applies the current rules to what's already there — report-only by default,
+`--write` to apply, and it merges through `mergeReleases` rather than a copy of it.
+
 ### Collections, and why most items start unlinked
 
 A Bandcamp import (`bandcamp-sync-background.ts`) writes a `collection_items` row per album and

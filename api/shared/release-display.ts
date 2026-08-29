@@ -210,11 +210,17 @@ export interface ReleaseSourceSummary {
  * Which platforms a release is available on, ordered artist-paying-first — the same ordering
  * the release page itself uses (`payoutRank`). For a compact "where to buy" badge row in a
  * release list, where a fan should see the best options first without having to click through.
+ *
+ * Distinct platforms, not one entry per source row: a release may hold two Discogs sources
+ * since `20260829120000_release-sources-multi-per-platform.sql`, and a badge row reading
+ * "Discogs · Discogs" says nothing a fan can act on.
  */
 export function orderedSourcePlatforms(sources: ReleaseSourceSummary[]): string[] {
-  return [...sources]
-    .sort((a, b) => payoutRank(b.platform) - payoutRank(a.platform))
-    .map(s => s.platform);
+  return [...new Set(
+    [...sources]
+      .sort((a, b) => payoutRank(b.platform) - payoutRank(a.platform))
+      .map(s => s.platform)
+  )];
 }
 
 /**
@@ -252,4 +258,39 @@ export function leadingOfferSummary(sources: ReleaseSourceSummary[]): string {
   }
 
   return '';
+}
+
+/**
+ * One source per platform, for anything that renders a "where to buy" list.
+ *
+ * A release may legitimately hold several sources on one platform since
+ * `20260829120000_release-sources-multi-per-platform.sql` — Discogs files two masters for one
+ * record often enough that merging those duplicates is routine admin work, and the merge keeps
+ * both listings rather than discarding one. Both are real URLs; two *rows* on a buying guide
+ * are not, though. "Discogs · Discogs" reads as a bug, and the payout line would be printed
+ * twice for one platform's cut.
+ *
+ * Which one survives, in order: a source the artist claimed (they corrected it on purpose),
+ * then whichever has actual offers attached (a listing with prices beats an empty shell), then
+ * the one checked most recently. Stable for equal candidates — input order decides.
+ */
+export function oneSourcePerPlatform<
+  T extends { platform: string; source?: string | null; detail_checked_at?: string | null; release_offers?: unknown[] | null }
+>(sources: readonly T[]): T[] {
+  const best = new Map<string, T>();
+
+  for (const source of sources) {
+    const incumbent = best.get(source.platform);
+    if (!incumbent || score(source) > score(incumbent)) best.set(source.platform, source);
+  }
+
+  return sources.filter(s => best.get(s.platform) === s);
+}
+
+function score(source: { source?: string | null; detail_checked_at?: string | null; release_offers?: unknown[] | null }): number {
+  return (
+    (source.source === 'claimed' ? 4 : 0) +
+    ((source.release_offers?.length ?? 0) > 0 ? 2 : 0) +
+    (source.detail_checked_at ? 1 : 0)
+  );
 }

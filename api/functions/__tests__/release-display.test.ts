@@ -11,6 +11,7 @@ import {
   formatOfferPrice,
   formatReleaseDate,
   leadingOfferSummary,
+  oneSourcePerPlatform,
   orderedSourcePlatforms,
   payoutEstimate,
   payoutRank,
@@ -222,5 +223,44 @@ describe('releaseTypeLabel', () => {
     for (const platforms of [[], ['bandcamp'], ['mirlo'], ['discogs', 'mirlo']]) {
       expect(releaseTypeLabel('other', platforms)).not.toBe('Other');
     }
+  });
+});
+
+describe('oneSourcePerPlatform', () => {
+  // A release can hold two Discogs sources since it became possible to merge two masters into
+  // one record. Both URLs are real; two rows on a buying guide are not — the page would read
+  // "Discogs · Discogs" and print one platform's payout cut twice.
+  const withOffers = { platform: 'discogs', external_id: 'master-2', release_offers: [{ price: 12 }], detail_checked_at: null };
+  const bare = { platform: 'discogs', external_id: 'master-1', release_offers: [], detail_checked_at: null };
+
+  it('keeps the listing that actually has offers over an empty one', () => {
+    expect(oneSourcePerPlatform([bare, withOffers])).toEqual([withOffers]);
+  });
+
+  it('prefers a source the artist claimed over anything ingest found', () => {
+    const claimed = { platform: 'discogs', external_id: null, source: 'claimed', release_offers: [], detail_checked_at: null };
+    expect(oneSourcePerPlatform([withOffers, claimed])).toEqual([claimed]);
+  });
+
+  it('leaves distinct platforms alone, in input order', () => {
+    const bandcamp = { platform: 'bandcamp', external_id: 'album-1', release_offers: [], detail_checked_at: null };
+    expect(oneSourcePerPlatform([bandcamp, withOffers])).toEqual([bandcamp, withOffers]);
+  });
+
+  it('picks the first of equally good candidates rather than an arbitrary one', () => {
+    const a = { platform: 'discogs', external_id: 'a', release_offers: [], detail_checked_at: null };
+    const b = { platform: 'discogs', external_id: 'b', release_offers: [], detail_checked_at: null };
+    expect(oneSourcePerPlatform([a, b])).toEqual([a]);
+    expect(oneSourcePerPlatform([b, a])).toEqual([b]);
+  });
+});
+
+describe('orderedSourcePlatforms — duplicates', () => {
+  it('names each platform once even when a release holds two of its sources', () => {
+    expect(orderedSourcePlatforms([
+      { platform: 'discogs', offers: [] },
+      { platform: 'bandcamp', offers: [] },
+      { platform: 'discogs', offers: [] },
+    ])).toEqual(['bandcamp', 'discogs']);
   });
 });
