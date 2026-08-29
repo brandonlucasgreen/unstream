@@ -75,7 +75,7 @@ describe('GET /api/artist-page', () => {
     mocks.getArtistReleases.mockResolvedValue({ releases: [], total: 0 });
     mocks.checkSentryDedup.mockResolvedValue(true);
     mocks.isPublishedArtistSlug.mockReturnValue(false);
-    mocks.resolveArtistSlugAlias.mockResolvedValue(null);
+    mocks.resolveArtistSlugAlias.mockResolvedValue({ canonical: null, failed: false });
   });
 
   it('returns 200 with links for an unclaimed artist', async () => {
@@ -292,7 +292,7 @@ describe('GET /api/artist-page', () => {
           bundle: { artist: artistRow({ slug: 'trentemoller', name: 'Trentemøller' }), profile: null, links: [] },
           failed: false,
         });
-      mocks.resolveArtistSlugAlias.mockResolvedValue('trentemoller');
+      mocks.resolveArtistSlugAlias.mockResolvedValue({ canonical: 'trentemoller', failed: false });
 
       const res = await call('trentem-ller');
 
@@ -308,7 +308,7 @@ describe('GET /api/artist-page', () => {
           bundle: { artist: artistRow({ slug: 'trentemoller' }), profile: null, links: [] },
           failed: false,
         });
-      mocks.resolveArtistSlugAlias.mockResolvedValue('trentemoller');
+      mocks.resolveArtistSlugAlias.mockResolvedValue({ canonical: 'trentemoller', failed: false });
 
       const res = await call('trentem-ller');
 
@@ -331,6 +331,18 @@ describe('GET /api/artist-page', () => {
 
       expect(res.statusCode).toBe(503);
       expect(mocks.resolveArtistSlugAlias).not.toHaveBeenCalled();
+    });
+
+    // An alias lookup that broke is an outage too, not evidence the slug is gone — it must
+    // surface as the same 503 as any other lookup failure, never a 404 that looks like the truth.
+    it('returns the 503 when the alias lookup itself fails', async () => {
+      mocks.getArtistProfileBySlug.mockResolvedValue({ bundle: null, failed: false });
+      mocks.resolveArtistSlugAlias.mockResolvedValue({ canonical: null, failed: true });
+
+      const res = await call('trentem-ller');
+
+      expect(res.statusCode).toBe(503);
+      expect(JSON.parse(res.body).error).toBe('Artist lookup temporarily unavailable');
     });
 
     it('still 404s when the slug is neither an artist nor an alias', async () => {

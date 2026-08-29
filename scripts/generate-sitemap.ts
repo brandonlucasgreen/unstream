@@ -29,7 +29,9 @@
  *     `trentem-ller` to `trentemoller` and left an `artist_slug_aliases` row behind. Dropping the
  *     manifest slug would be correct-but-useless: the canonical slug isn't in the manifest either,
  *     so five real artists would vanish from the sitemap entirely. Listing the canonical URL is
- *     what actually gets them indexed.
+ *     what actually gets them indexed. The canonicals' `updated_at` comes from a second lookup;
+ *     if that one fails, the re-aliased artists stay listed on the manifest's stale date — same
+ *     couldn't-ask rule as the main fallback, not silently omitted.
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
@@ -173,9 +175,19 @@ async function main() {
     // Asked only about the misses, so a healthy manifest costs no extra query at all.
     const misses = updatedAt ? manifest.filter(a => !updatedAt.has(a.slug)).map(a => a.slug) : [];
     const canonicalSlugs = await fetchCanonicalSlugs(client, misses);
-    if (canonicalSlugs.size > 0) {
+
+    // Dates for the canonical slugs. If this lookup fails we know the canonicals exist (the alias
+    // row pointed at a live artist) but not when — the same "couldn't ask" situation the first
+    // lookup's null handles, so the same contract applies: list those artists on the manifest's
+    // stale date rather than silently dropping the five artists the re-aliasing exists to save.
+    let canonicalDatesKnown = true;
+    if (canonicalSlugs.size > 0 && updatedAt) {
       const canonicalUpdatedAt = await fetchArtistUpdatedAt(client, [...new Set(canonicalSlugs.values())]);
-      for (const [slug, at] of canonicalUpdatedAt ?? []) updatedAt?.set(slug, at);
+      if (canonicalUpdatedAt) {
+        for (const [slug, at] of canonicalUpdatedAt) updatedAt.set(slug, at);
+      } else {
+        canonicalDatesKnown = false;
+      }
     }
 
     let omitted = 0;
@@ -190,13 +202,15 @@ async function main() {
       // in which case listing everything (the old behaviour) beats shipping a gutted sitemap.
       if (updatedAt) {
         const canonical = updatedAt.has(slug) ? slug : canonicalSlugs.get(slug);
-        if (!canonical || !updatedAt.has(canonical)) {
+        // A canonical whose date lookup failed is still listed — on the manifest's stale date (see
+        // canonicalDatesKnown). Only an unresolvable slug is known absent.
+        if (!canonical || (!updatedAt.has(canonical) && canonicalDatesKnown)) {
           omitted++;
           continue;
         }
         if (canonical !== slug) realiased++;
         slug = canonical;
-        lastmod = updatedAt.get(canonical)!;
+        lastmod = updatedAt.get(canonical) ?? artist.lastUpdated;
       }
 
       // Two manifest slugs can alias to one artist; the sitemap must not list them twice.

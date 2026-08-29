@@ -18,8 +18,10 @@ import { isExcludedArtistSlug } from '../lib/excluded-artists';
 // endpoint filed a Sentry warning every day for a page we deleted deliberately.
 //
 // Filtering here rather than editing the manifest keeps api/lib/excluded-artists.ts the single
-// source of truth, so removing an artist stays one edit. scripts/generate-sitemap.ts filters the
-// same set for the same reason.
+// source of truth, so removing an artist stays one edit. The other manifest consumers filter the
+// same set for the same reason: scripts/generate-sitemap.ts drops them from the sitemap,
+// scripts/generate-social-posts.ts skips them when picking featured artists, and
+// scripts/generate-artist-data.ts keeps them out of regenerated manifests entirely.
 const publishedSlugs = new Set<string>(
   (manifest as Array<{ slug?: string }>)
     .map(entry => entry.slug)

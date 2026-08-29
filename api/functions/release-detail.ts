@@ -159,8 +159,10 @@ export async function handler(event: {
     // evidence that a slug is retired, and running the alias read anyway would spend a second
     // query during an outage to arrive at the same 503.
     if (!detail && !failed) {
-      const canonical = await resolveArtistSlugAlias(artistSlug);
-      if (canonical && canonical !== artistSlug) {
+      const { canonical, failed: aliasFailed } = await resolveArtistSlugAlias(artistSlug);
+      if (aliasFailed) {
+        failed = true;
+      } else if (canonical && canonical !== artistSlug) {
         artistSlug = canonical;
         ({ detail, failed } = await getReleaseDetail(artistSlug, release));
       }

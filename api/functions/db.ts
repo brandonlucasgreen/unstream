@@ -3334,7 +3334,7 @@ export async function putBandcampProbe(
 // --- Read Operations ---
 
 /**
- * Resolve a retired slug to the slug that replaced it, or null if it isn't an alias.
+ * Resolve a retired slug to the slug that replaced it.
  *
  * A **separate** function rather than a fallback inside `getArtistBySlug`, deliberately.
  * `getArtistBySlug` runs at the front of every search and misses on almost all of them, so folding
@@ -3342,16 +3342,28 @@ export async function putBandcampProbe(
  * that serve a URL — the artist page and the v1 lookup — should pay for it, and they call this after
  * `getArtistBySlug` has already returned null.
  *
+ * Three outcomes, the same distinction `getArtistProfileBySlug` makes — a caller that can't tell
+ * "that isn't an alias" from "the database didn't answer" turns an outage into a confident 404:
+ *   { canonical }        — this slug is a known alias, canonical is live
+ *   { canonical: null }  — genuinely not an alias
+ *   { failed: true }     — the lookup itself failed (no client, query error, exception)
+ *
  * Order matters and is the caller's responsibility: a **live** `artists.slug` always wins, so an
  * alias can never shadow a real artist that later takes that slug.
  */
-export async function resolveArtistSlugAlias(slug: string): Promise<string | null> {
+export interface AliasResolution {
+  canonical: string | null;
+  failed: boolean;
+}
+
+export async function resolveArtistSlugAlias(slug: string): Promise<AliasResolution> {
   const client = getClient();
-  if (!client) return null;
+  // Missing credentials mean the database didn't answer, not that the slug isn't an alias.
+  if (!client) return { canonical: null, failed: true };
 
   // Same guard as getArtistBySlug: stored slugs only ever hold [a-z0-9-], so anything else cannot
   // match, and rejecting it here keeps the value safe to interpolate into a PostgREST filter.
-  if (!/^[A-Za-z0-9-]+$/.test(slug)) return null;
+  if (!/^[A-Za-z0-9-]+$/.test(slug)) return { canonical: null, failed: false };
 
   try {
     const { data, error } = await client
@@ -3362,13 +3374,13 @@ export async function resolveArtistSlugAlias(slug: string): Promise<string | nul
 
     if (error) {
       console.error('[DB] Failed to resolve artist slug alias:', error.message);
-      return null;
+      return { canonical: null, failed: true };
     }
     const target = (data as { artists?: { slug?: string } } | null)?.artists?.slug;
-    return target ?? null;
+    return { canonical: target ?? null, failed: false };
   } catch (error) {
     console.error('[DB] resolveArtistSlugAlias error:', error);
-    return null;
+    return { canonical: null, failed: true };
   }
 }
 

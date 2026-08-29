@@ -69,7 +69,10 @@ export async function handler(event: NetlifyEvent) {
     // A retired slug (merge loser, or an accent re-slug) still resolves. Third-party integrations
     // hold onto these, so silently 404ing one would break their stored links.
     if (!artist) {
-      const canonical = await resolveArtistSlugAlias(slug);
+      const { canonical, failed: aliasFailed } = await resolveArtistSlugAlias(slug);
+      // A broken alias read is an outage, not a verdict — throw into the 500 path below rather
+      // than 404 an artist whose old URL we simply couldn't check.
+      if (aliasFailed) throw new Error('[artist-lookup-v1] alias lookup failed');
       if (canonical) artist = await getArtistBySlug(canonical);
     }
 

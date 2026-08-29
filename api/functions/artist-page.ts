@@ -53,8 +53,14 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     // not-found card while crawlers got a clean 301 from artist-page-static. Adding a URL-serving
     // reader of `artists.slug` means adding it here too.
     if (!bundle && !failed) {
-      const canonical = await resolveArtistSlugAlias(slug);
-      if (canonical) ({ bundle, failed } = await getArtistProfileBySlug(canonical));
+      const { canonical, failed: aliasFailed } = await resolveArtistSlugAlias(slug);
+      // The alias lookup breaking is an outage too, not evidence the slug is gone — same 503
+      // as the branch below, never a 404 that reads as "this artist doesn't exist".
+      if (aliasFailed) {
+        failed = true;
+      } else if (canonical) {
+        ({ bundle, failed } = await getArtistProfileBySlug(canonical));
+      }
     }
 
     // The lookup itself broke. Say so with a 503 instead of claiming the artist doesn't exist —

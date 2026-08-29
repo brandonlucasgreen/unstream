@@ -72,7 +72,7 @@ beforeEach(() => {
   mocks.getFeedReleasesForUser.mockResolvedValue([]);
   mocks.getFeedReleasesForArtist.mockResolvedValue(null);
   mocks.getFeedReleasesForHandle.mockResolvedValue(null);
-  mocks.resolveArtistSlugAlias.mockResolvedValue(null);
+  mocks.resolveArtistSlugAlias.mockResolvedValue({ canonical: null, failed: false });
 });
 
 describe('requestPath', () => {
@@ -247,7 +247,7 @@ describe('the public artist feed', () => {
     mocks.getFeedReleasesForArtist.mockImplementation(async (slug: string) =>
       slug === 'beyonce' ? { artistName: 'Beyoncé', releases: [row()] } : null
     );
-    mocks.resolveArtistSlugAlias.mockResolvedValue('beyonce');
+    mocks.resolveArtistSlugAlias.mockResolvedValue({ canonical: 'beyonce', failed: false });
 
     const r = await get('/a/beyonc/releases.xml');
 
@@ -271,7 +271,7 @@ describe('the public artist feed', () => {
   });
 
   it('404s when the slug is neither live nor an alias', async () => {
-    mocks.resolveArtistSlugAlias.mockResolvedValue(null);
+    mocks.resolveArtistSlugAlias.mockResolvedValue({ canonical: null, failed: false });
 
     const r = await get('/a/nobody/releases.ics');
 
