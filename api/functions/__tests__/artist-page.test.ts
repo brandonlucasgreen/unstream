@@ -16,11 +16,13 @@ const mocks = vi.hoisted(() => ({
   checkSentryDedup: vi.fn(),
   captureMessage: vi.fn(),
   isPublishedArtistSlug: vi.fn(),
+  resolveArtistSlugAlias: vi.fn(),
 }));
 
 vi.mock('../db', () => ({
   getArtistProfileBySlug: mocks.getArtistProfileBySlug,
   getArtistReleases: mocks.getArtistReleases,
+  resolveArtistSlugAlias: mocks.resolveArtistSlugAlias,
 }));
 
 vi.mock('../ratelimit', () => ({
@@ -66,11 +68,14 @@ const call = (slug: string) => handler({ httpMethod: 'GET', queryStringParameter
 
 describe('GET /api/artist-page', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    // reset, not clear: the alias tests queue two `mockResolvedValueOnce` values, and
+    // clearAllMocks leaves an unconsumed one queued to leak into the next test.
+    vi.resetAllMocks();
     mocks.checkRateLimit.mockResolvedValue({ limited: false });
     mocks.getArtistReleases.mockResolvedValue({ releases: [], total: 0 });
     mocks.checkSentryDedup.mockResolvedValue(true);
     mocks.isPublishedArtistSlug.mockReturnValue(false);
+    mocks.resolveArtistSlugAlias.mockResolvedValue(null);
   });
 
   it('returns 200 with links for an unclaimed artist', async () => {
@@ -272,6 +277,68 @@ describe('GET /api/artist-page', () => {
       const body = JSON.parse((await call('funkadelic')).body);
       expect(body.releaseCount).toBe(84);
       expect(body.releases).toHaveLength(1);
+    });
+  });
+
+  // The accent-folding fix (#410) re-slugged five artists we publish and aliased their old slugs.
+  // Every other URL-serving surface learned to resolve those; this endpoint — the one the SPA
+  // renders from — did not, so `/a/trentem-ller` showed a human the not-found card for 26 days
+  // while crawlers got a clean 301 and `/a/trentemoller` worked fine.
+  describe('retired slugs', () => {
+    it('serves the canonical artist when the requested slug is an alias', async () => {
+      mocks.getArtistProfileBySlug
+        .mockResolvedValueOnce({ bundle: null, failed: false })
+        .mockResolvedValueOnce({
+          bundle: { artist: artistRow({ slug: 'trentemoller', name: 'Trentemøller' }), profile: null, links: [] },
+          failed: false,
+        });
+      mocks.resolveArtistSlugAlias.mockResolvedValue('trentemoller');
+
+      const res = await call('trentem-ller');
+
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body).artist.slug).toBe('trentemoller');
+      expect(mocks.resolveArtistSlugAlias).toHaveBeenCalledWith('trentem-ller');
+    });
+
+    it('tags the cached response with the canonical slug, so one purge clears both URLs', async () => {
+      mocks.getArtistProfileBySlug
+        .mockResolvedValueOnce({ bundle: null, failed: false })
+        .mockResolvedValueOnce({
+          bundle: { artist: artistRow({ slug: 'trentemoller' }), profile: null, links: [] },
+          failed: false,
+        });
+      mocks.resolveArtistSlugAlias.mockResolvedValue('trentemoller');
+
+      const res = await call('trentem-ller');
+
+      expect(res.headers['Cache-Tag']).toBe('artist-page-trentemoller');
+    });
+
+    it('does not pay for an alias lookup when the slug resolves', async () => {
+      mocks.getArtistProfileBySlug.mockResolvedValue({ bundle: { artist: artistRow(), profile: null, links }, failed: false });
+
+      await call('funkadelic');
+
+      expect(mocks.resolveArtistSlugAlias).not.toHaveBeenCalled();
+    });
+
+    // An outage is not evidence that a slug was retired, and the 503 has to survive.
+    it('does not look for an alias after a failed lookup', async () => {
+      mocks.getArtistProfileBySlug.mockResolvedValue({ bundle: null, failed: true });
+
+      const res = await call('trentem-ller');
+
+      expect(res.statusCode).toBe(503);
+      expect(mocks.resolveArtistSlugAlias).not.toHaveBeenCalled();
+    });
+
+    it('still 404s when the slug is neither an artist nor an alias', async () => {
+      mocks.getArtistProfileBySlug.mockResolvedValue({ bundle: null, failed: false });
+
+      const res = await call('not-an-artist');
+
+      expect(res.statusCode).toBe(404);
     });
   });
 });

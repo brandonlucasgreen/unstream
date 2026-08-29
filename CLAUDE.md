@@ -142,7 +142,9 @@ npm run migrate:dry-run   # supabase db push --dry-run against the linked projec
 npm run migrate:list      # List applied vs pending migrations
 ```
 
-`npm run build` runs, in order: guides manifest → dispatch feed → changelog feed → guides feed → root `tsc -b` → `apps/web` `tsc -b` → `vite build` → sitemap. Any failure blocks the Netlify deploy, so a type error still can't ship.
+`npm run build` runs, in order: guides manifest → dispatch feed → changelog feed → guides feed → sitemap → root `tsc -b` → `apps/web` `tsc -b` → `vite build`. Any failure blocks the Netlify deploy, so a type error still can't ship.
+
+**Every generator must run before `vite build`, and that ordering is load-bearing.** `publish` is `apps/web/dist`, and `vite build` populates it by copying `apps/web/public/` — so anything written to `public/` afterwards lands in a directory Netlify never publishes. The sitemap step used to run last, which meant `apps/web/public/sitemap.xml` was regenerated on every build and then thrown away: production served the last *committed* copy instead, frozen at 2026-08-01 for four weeks while the generator's own "stop listing URLs that 404" logic (#385) never once took effect. The symptom is invisible in the build log — the generator prints a cheerful success either way — so if you add a generator, put it in the chain **before** `cd apps/web`, and verify by diffing the deployed artifact against the committed file, not by reading the log.
 
 **The test suites are no longer part of the build.** They run in GitHub Actions (`.github/workflows/ci.yml`) on every PR and every push to `main`, because Actions minutes are free on this public repo while a Netlify deploy is not — see "Deployment" below. Two consequences worth internalizing:
 
