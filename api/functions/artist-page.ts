@@ -3,7 +3,7 @@
 // and releases for an unclaimed one.
 // This is the data source for the React SPA artist page (UNS-102).
 
-import { getArtistProfileBySlug, getArtistReleases } from './db';
+import { getArtistProfileBySlug, getArtistReleases, resolveArtistSlugAlias } from './db';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { Sentry } from '../lib/sentry';
 import { isPublishedArtistSlug } from '../shared/published-artist-slugs';
@@ -40,7 +40,28 @@ export async function handler(event: { queryStringParameters?: Record<string, st
   }
 
   try {
-    const { bundle, failed } = await getArtistProfileBySlug(slug);
+    let { bundle, failed } = await getArtistProfileBySlug(slug);
+
+    // A retired slug still resolves: the artist was merged into another row, or re-slugged when
+    // accent folding was fixed (`trentem-ller` -> `trentemoller`). Only on a miss, so a live slug
+    // always wins and the normal path pays nothing; and never after `failed`, because an outage is
+    // not evidence that a slug was retired.
+    //
+    // This endpoint is why the alias table exists and was somehow the one caller that never
+    // consulted it. It shipped in #272, before the aliases of #410, so the accent-folding fix
+    // re-slugged five artists we publish and left every human following their old URL on the
+    // not-found card while crawlers got a clean 301 from artist-page-static. Adding a URL-serving
+    // reader of `artists.slug` means adding it here too.
+    if (!bundle && !failed) {
+      const { canonical, failed: aliasFailed } = await resolveArtistSlugAlias(slug);
+      // The alias lookup breaking is an outage too, not evidence the slug is gone — same 503
+      // as the branch below, never a 404 that reads as "this artist doesn't exist".
+      if (aliasFailed) {
+        failed = true;
+      } else if (canonical) {
+        ({ bundle, failed } = await getArtistProfileBySlug(canonical));
+      }
+    }
 
     // The lookup itself broke. Say so with a 503 instead of claiming the artist doesn't exist —
     // a Supabase outage would otherwise render as every artist page 404ing convincingly.
@@ -198,7 +219,9 @@ export async function handler(event: { queryStringParameters?: Record<string, st
         ...CORS_HEADERS,
         'Cache-Control': 'public, max-age=0, must-revalidate',
         'Netlify-CDN-Cache-Control': 's-maxage=300, stale-while-revalidate=86400',
-        'Cache-Tag': `artist-page-${slug}`,
+        // The canonical slug, not the requested one, so an alias URL's cached copy is purged
+        // by the same call as the artist's own.
+        'Cache-Tag': `artist-page-${artistRow.slug}`,
       },
       body: JSON.stringify(payload),
     };

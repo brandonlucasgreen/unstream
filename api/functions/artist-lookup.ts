@@ -28,7 +28,10 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     // hot path so it must not pay for this. An alias means the artist was merged into another row or
     // re-slugged when accent folding was fixed — either way the old URL should still work.
     if (!artist) {
-      const canonical = await resolveArtistSlugAlias(slug);
+      const { canonical, failed: aliasFailed } = await resolveArtistSlugAlias(slug);
+      // A broken alias read is an outage, not a verdict — throw into the 500 path below rather
+      // than 404 an artist whose old URL we simply couldn't check.
+      if (aliasFailed) throw new Error('[artist-lookup] alias lookup failed');
       if (canonical) artist = await getArtistBySlug(canonical);
     }
 

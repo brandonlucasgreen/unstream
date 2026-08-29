@@ -107,7 +107,7 @@ beforeEach(() => {
   mocks.checkRateLimit.mockResolvedValue({ limited: false });
   mocks.isBandcampFriday.mockReturnValue(false);
   mocks.getReleaseDetail.mockResolvedValue({ detail: detail(), failed: false });
-  mocks.resolveArtistSlugAlias.mockResolvedValue(null);
+  mocks.resolveArtistSlugAlias.mockResolvedValue({ canonical: null, failed: false });
 });
 
 // The bug this suite missed the first time. The endpoint originally read its slugs from
@@ -293,7 +293,7 @@ describe('retired artist slugs', () => {
 
   it('resolves a retired slug through the alias table and serves the release', async () => {
     onlyCanonical();
-    mocks.resolveArtistSlugAlias.mockResolvedValue('beyonce');
+    mocks.resolveArtistSlugAlias.mockResolvedValue({ canonical: 'beyonce', failed: false });
 
     const res = await get({ artist: 'beyonc', release: 'get-mean' });
     const json = await body(res);
@@ -309,7 +309,7 @@ describe('retired artist slugs', () => {
   // echoing the requested slug back would hand a fan a URL that renders nothing.
   it('reports the canonical slug in pageUrl and the cache tag, not the one asked for', async () => {
     onlyCanonical();
-    mocks.resolveArtistSlugAlias.mockResolvedValue('beyonce');
+    mocks.resolveArtistSlugAlias.mockResolvedValue({ canonical: 'beyonce', failed: false });
 
     const res = await get({ artist: 'beyonc', release: 'get-mean' });
     expect((await body(res)).pageUrl).toBe('https://unstream.stream/a/beyonce/get-mean');
@@ -328,7 +328,7 @@ describe('retired artist slugs', () => {
 
   it('404s when the slug is neither live nor an alias', async () => {
     mocks.getReleaseDetail.mockResolvedValue({ detail: null, failed: false });
-    mocks.resolveArtistSlugAlias.mockResolvedValue(null);
+    mocks.resolveArtistSlugAlias.mockResolvedValue({ canonical: null, failed: false });
 
     const res = await get({ artist: 'nobody', release: 'get-mean' });
     expect(res.statusCode).toBe(404);
@@ -339,7 +339,7 @@ describe('retired artist slugs', () => {
   // record. Still one 404, and not a third query.
   it('404s when the alias resolves but the release is gone', async () => {
     mocks.getReleaseDetail.mockResolvedValue({ detail: null, failed: false });
-    mocks.resolveArtistSlugAlias.mockResolvedValue('beyonce');
+    mocks.resolveArtistSlugAlias.mockResolvedValue({ canonical: 'beyonce', failed: false });
 
     const res = await get({ artist: 'beyonc', release: 'no-such-release' });
     expect(res.statusCode).toBe(404);
@@ -361,7 +361,7 @@ describe('retired artist slugs', () => {
   // identical query for nothing.
   it('does not re-query when the alias points at the slug already tried', async () => {
     mocks.getReleaseDetail.mockResolvedValue({ detail: null, failed: false });
-    mocks.resolveArtistSlugAlias.mockResolvedValue('boy-harsher');
+    mocks.resolveArtistSlugAlias.mockResolvedValue({ canonical: 'boy-harsher', failed: false });
 
     const res = await get({ artist: 'boy-harsher', release: 'get-mean' });
     expect(res.statusCode).toBe(404);

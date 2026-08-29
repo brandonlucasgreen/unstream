@@ -28,6 +28,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { isExcludedArtistSlug } from '../api/lib/excluded-artists';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, '..', 'data');
@@ -709,7 +710,7 @@ async function fetchVerifiedArtists(): Promise<VerifiedArtist[]> {
     return data.artists || [];
   }
 
-  // Use Supabase REST API directly to avoid importing the client
+  // Use the Supabase REST API directly to avoid importing the client
   const profilesRes = await fetch(
     `${supabaseUrl}/rest/v1/artist_profiles?verified_at=not.is.null&select=artist_id,custom_image_url`,
     { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
@@ -734,6 +735,40 @@ async function fetchVerifiedArtists(): Promise<VerifiedArtist[]> {
     name: a.name,
     imageUrl: customImages.get(a.id) || a.image_url || null,
   }));
+}
+
+async function fetchCanonicalSlugs(): Promise<Map<string, string>> {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+
+  const canonical = new Map<string, string>();
+  if (!supabaseUrl || !supabaseKey) {
+    console.warn('⚠ SUPABASE_URL/SUPABASE_SERVICE_KEY not set — retired slugs are not re-pointed (they still resolve via the redirect)');
+    return canonical;
+  }
+
+  // Same REST-direct pattern as fetchVerifiedArtists above. Manifest slugs can be retired
+  // (accent re-slugs, merges), and a post advertising /artist/trentem-ller only works as long
+  // as the redirect installed for crawlers exists — the sitemap re-points the same slugs, so
+  // posts must too. An empty map on failure is the graceful answer: posts go out on the
+  // redirecting slug rather than the run failing.
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/artist_slug_aliases?select=alias,artists!inner(slug)`,
+      { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+    );
+    const rows = await res.json() as Array<{ alias: string; artists: { slug: string } | null }> | null;
+    if (!Array.isArray(rows)) {
+      console.warn('⚠ Alias lookup returned no rows — posts keep the manifest slug.');
+      return canonical;
+    }
+    for (const row of rows) {
+      if (row.alias && row.artists?.slug) canonical.set(row.alias, row.artists.slug);
+    }
+  } catch (error) {
+    console.warn(`⚠ Alias lookup failed (${error instanceof Error ? error.message : error}) — posts keep the manifest slug.`);
+  }
+  return canonical;
 }
 
 // --- Week calculation ---
@@ -782,10 +817,12 @@ function getWeekDates(weekStr?: string): { week: string; dates: string[] } {
 // They'll still be featured eventually once the pool cycles.
 const DEPRIORITIZE_SLUGS = new Set(['kid-lightbulbs']);
 
-function pickArtist(
-  pool: { slug: string; name: string; imageUrl: string | null }[],
+// Generic over the pool entry so the caller keeps any extra fields (the prominent pool carries
+// `manifestSlug` alongside the re-pointed slug).
+function pickArtist<T extends { slug: string; name: string; imageUrl: string | null }>(
+  pool: T[],
   history: History
-): { slug: string; name: string; imageUrl: string | null } | null {
+): T | null {
   // Prefer artists not yet featured
   let unfeatured = pool.filter(a => !history.featured.includes(a.slug));
 
@@ -982,6 +1019,7 @@ async function main() {
   const manifest = loadManifest();
   const artistList = loadArtistList();
   const verifiedArtists = await fetchVerifiedArtists();
+  const canonicalSlugsMap = await fetchCanonicalSlugs();
 
   console.log(`  ${verifiedArtists.length} verified indie artists`);
   console.log(`  ${manifest.length} prominent artists in manifest`);
@@ -1008,12 +1046,24 @@ async function main() {
   // artists below need no Wikidata check and can carry the week on their own.
   const prominentPool = !excluded.complete
     ? []
-    : manifest.filter(a => {
-        if (excluded.slugs.has(a.slug)) return false;
-        const data = loadArtistData(a.slug);
-        if (!data) return false;
-        return data.platforms.some(p => HIGHLIGHT_PLATFORMS.has(p.sourceId) && !p.url.includes('duckduckgo'));
-      });
+    : manifest
+        // Acts removed on ethical grounds (api/lib/excluded-artists.ts) still have a manifest
+        // entry and a data file — nothing removes either — so without this check the weekly
+        // post run would feature them again. Static, unlike the Wikidata set: it applies even
+        // when that lookup failed and dropped the pool entirely.
+        .filter(a => !isExcludedArtistSlug(a.slug))
+        .filter(a => {
+          if (excluded.slugs.has(a.slug)) return false;
+          const data = loadArtistData(a.slug);
+          if (!data) return false;
+          return data.platforms.some(p => HIGHLIGHT_PLATFORMS.has(p.sourceId) && !p.url.includes('duckduckgo'));
+        })
+        // Retired slugs (accent re-slugs, merges) post at their canonical URL. The manifest slug
+        // is kept alongside: the generated data files are keyed by it, so platform lookup still
+        // goes through the manifest slug. Two manifest slugs can share a canonical (a merge alias
+        // and a re-slug) — keep the first so one artist isn't featured twice.
+        .map(a => ({ ...a, manifestSlug: a.slug, slug: canonicalSlugsMap.get(a.slug) ?? a.slug }))
+        .filter((a, i, pool) => pool.findIndex(b => b.slug === a.slug) === i);
 
   if (!excluded.complete) {
     console.warn(
@@ -1092,7 +1142,9 @@ async function main() {
       const picked = pickArtist(prominentPool, history);
       if (picked) {
         artist = picked;
-        const data = loadArtistData(picked.slug);
+        // Data files are keyed by the manifest slug; the post URL uses the (possibly
+        // re-pointed) canonical one.
+        const data = loadArtistData(picked.manifestSlug);
         if (data) platforms = data.platforms;
       }
     }

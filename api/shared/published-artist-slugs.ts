@@ -10,11 +10,23 @@
 // merely present in the repo aren't included at runtime.
 
 import manifest from '../../data/artists-manifest.json';
+import { isExcludedArtistSlug } from '../lib/excluded-artists';
 
+// Minus the acts we removed on ethical grounds. The manifest was generated in March and nothing
+// rewrites it when an artist is excluded, so `absurd` stayed "published" for 25 days after its row
+// was pruned — and this file's whole premise ("a 404 here is our bug") inverted for it: the
+// endpoint filed a Sentry warning every day for a page we deleted deliberately.
+//
+// Filtering here rather than editing the manifest keeps api/lib/excluded-artists.ts the single
+// source of truth, so removing an artist stays one edit. The other manifest consumers filter the
+// same set for the same reason: scripts/generate-sitemap.ts drops them from the sitemap,
+// scripts/generate-social-posts.ts skips them when picking featured artists, and
+// scripts/generate-artist-data.ts keeps them out of regenerated manifests entirely.
 const publishedSlugs = new Set<string>(
   (manifest as Array<{ slug?: string }>)
     .map(entry => entry.slug)
     .filter((slug): slug is string => typeof slug === 'string' && slug.length > 0)
+    .filter(slug => !isExcludedArtistSlug(slug))
 );
 
 /** True if we publish /artist/{slug} — i.e. a 404 for it is our bug, not a bad guess by a fan. */

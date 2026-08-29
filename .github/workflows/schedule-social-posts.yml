@@ -31,6 +31,11 @@ jobs:
           BUFFER_ACCESS_TOKEN: ${{ secrets.BUFFER_ACCESS_TOKEN }}
           BUFFER_ORG_ID: ${{ secrets.BUFFER_ORG_ID }}
           BUFFER_CHANNEL_IDS: ${{ secrets.BUFFER_CHANNEL_IDS }}
+          # Needed for the artist_slug_aliases lookup that re-points retired manifest slugs (and
+          # for the verified-artist pool to read Supabase directly). If unset the script warns
+          # and degrades to the manifest slugs, which still resolve via the redirect.
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: npx tsx scripts/generate-social-posts.ts --week ${{ steps.week.outputs.week }} --schedule --publish
 
       - name: Commit updated history

@@ -27,6 +27,7 @@
 import { readFileSync, writeFileSync, existsSync, statSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { isExcludedArtistSlug } from '../api/lib/excluded-artists';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, '..', 'data');
@@ -387,6 +388,13 @@ async function validateArtistMatch(
 async function processArtist(artist: ArtistEntry, force: boolean): Promise<ManifestEntry | null> {
   // Skip blocklisted artists (known false matches)
   if (BLOCKLIST_SLUGS.has(artist.slug)) return null;
+
+  // Skip acts removed on ethical grounds (api/lib/excluded-artists.ts). Consumers — the sitemap,
+  // the social posts, isPublishedArtistSlug on the artist-page endpoint — all filter this list,
+  // but a fresh manifest that includes them would reinstate the published URL everywhere at
+  // once. Keeping the exclusion out of the generated manifest is what keeps the list the one
+  // place that decision is recorded.
+  if (isExcludedArtistSlug(artist.slug)) return null;
 
   const outputPath = join(ARTISTS_DIR, `${artist.slug}.json`);
 

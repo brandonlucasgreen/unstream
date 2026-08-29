@@ -228,7 +228,10 @@ export async function handler(event: {
   //
   // Only after the live slug misses, so a real artist who later takes that slug always wins.
   if (!artist) {
-    const canonical = await resolveArtistSlugAlias(slug);
+    const { canonical, failed: aliasFailed } = await resolveArtistSlugAlias(slug);
+    // A broken alias read is an outage, not a verdict. A 404 would end the subscription
+    // outright, where a thrown 500 reads to a calendar client as "try again soon".
+    if (aliasFailed) throw new Error('[feed-releases] alias lookup failed');
     if (canonical && canonical !== slug) {
       slug = canonical;
       artist = await getFeedReleasesForArtist(slug);
