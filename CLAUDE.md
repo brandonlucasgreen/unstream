@@ -296,11 +296,23 @@ Sentry, since it is otherwise recorded as a perfectly ordinary success.
 
 ### Keeping catalogues fresh
 
-Every other catalog trigger is demand-driven — a save, a search, an artist's own button, the admin
-command — and `check-releases` only *reads* the catalogue. So without a scheduled refresh an artist
-who is saved but never searched gets catalogued once and their release alerts quietly stop. That
-is what `api/functions/recatalog-sweep.ts` fixes, run every six hours by
+Every other catalog trigger is demand-driven — a save, an artist's own button, the admin command,
+a Bandcamp collection import — and `check-releases` only *reads* the catalogue. So without a
+scheduled refresh an artist who is saved once gets catalogued once and their release alerts
+quietly stop. That is what `api/functions/recatalog-sweep.ts` fixes, run every six hours by
 `.github/workflows/recatalog-sweep.yml` (25 artists per run, so 100 a day).
+
+**Search is deliberately not a trigger any more.** `persistSearchResults` used to hand every
+Bandcamp-linked artist in a result set to the crawler, which made an unauthenticated,
+traffic-driven path the site's largest producer of database writes — 60 first-time crawls an hour
+against the sweep's 100 a *day*, each one inserting rows into three six-index tables and then
+re-reading them monthly forever. That is what exhausted the Supabase disk I/O budget for the third
+time, after two rounds of per-operation fixes (#443, #463, #464) that never touched the volume.
+The sweep's pool is every artist with a catalogue-able link, so a searched artist is still
+reached, in about a month rather than a minute. Full reasoning, the confirming SQL, and the
+escalation ladder if the warning returns: `docs/specs/supabase-disk-io-investigation.md`. The
+whole feature's off-switch remains the `RELEASE_CATALOG_ENABLED` env var — deleting it in Netlify
+stops cataloging with no deploy.
 
 The pool is **every artist with a bandcamp, discogs, faircamp, jam.coop or mirlo link** —
 `CATALOGUEABLE_PLATFORMS` in `db.ts` is the list. Keep it identical to `catalogArtist`'s "no
