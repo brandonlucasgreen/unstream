@@ -17,7 +17,6 @@ import {
   uniqueReleaseSlug,
 } from './release-utils';
 import { cacheDelete, cacheGetOrFetch } from './cache';
-import { requestArtistCatalog } from './request-catalog';
 import { notifySavedArtistsOfNewRelease } from './notifications';
 import { Sentry } from '../lib/sentry';
 import { isNonArtistSlug } from '../lib/non-artist-names';
@@ -608,18 +607,18 @@ export const RECATALOG_COOLDOWN_HOURS = 24 * 7;
 /**
  * Hourly ceilings on how many artists we will catalog, by what triggered it.
  *
- * Search is unauthenticated and far higher volume than saving, so it gets the smaller
- * budget: a traffic spike must not turn into us hammering Bandcamp. A save is one person
- * deliberately asking to follow an artist, so it gets a bigger budget and still gets through
- * when searches are being dropped.
+ * A save is one person deliberately asking to follow an artist, so it gets the biggest budget
+ * and still gets through when the scheduled sweep is being dropped. The sweep sits below it:
+ * the cap is compared against every attempt in the last hour whatever triggered it, so a
+ * machine caller must never outrank a person, but the sweep runs at a fixed time and can't
+ * wait for a quieter moment, so it can't have the smallest either.
  *
- * The scheduled sweep sits between the two, and the reason is the shared counter: the cap is
- * compared against every attempt in the last hour, whatever triggered it. Give the sweep the
- * smallest budget and an ordinary hour of search traffic would leave it nothing to spend — it
- * runs once a day at a fixed time, so it can't wait for a quieter moment the way a search can
- * be dropped and re-triggered by the next visitor. Give it the largest and a machine caller
- * would outrank a person. In between, it gets through in normal conditions and still yields
- * during a genuine spike.
+ * `searched` has no caller any more — `persistSearchResults` no longer requests cataloging,
+ * because an unauthenticated, traffic-driven trigger at 60 first-time crawls an hour was what
+ * exhausted the Supabase disk I/O budget (see that function's comment). The entry stays because
+ * it is the fail-closed default the background function falls back to for an unrecognized
+ * trigger, and it is the smallest budget of the three. Adding a caller back means re-doing the
+ * arithmetic in docs/specs/supabase-disk-io-investigation.md first.
  */
 const CATALOG_HOURLY_CAP = { searched: 60, saved: 240, scheduled: 120 } as const;
 
@@ -3918,14 +3917,33 @@ async function filterUnchangedLinks(
   });
 }
 
+/**
+ * Persist the artists and links a search turned up.
+ *
+ * **This does not request release cataloging, deliberately.** It used to: every search handed
+ * every Bandcamp-linked artist in its results to `requestArtistCatalog(..., 'searched')`, which
+ * made an unauthenticated, traffic-driven path the largest producer of database writes on the
+ * site — up to `CATALOG_HOURLY_CAP.searched` (60) full first-time crawls an hour, against the
+ * scheduled sweep's 100 a *day*. Each of those crawls inserts a row per release, a row per
+ * release source and a row or three per offer, into three six-index tables, and then re-reads
+ * every one of them on the 30-day detail refresh. That is what exhausted the Supabase disk I/O
+ * budget; see docs/specs/supabase-disk-io-investigation.md for the numbers and the SQL that
+ * confirms it.
+ *
+ * Cataloging still happens, just from bounded triggers: a save, an artist's own button, the
+ * admin command, a Bandcamp collection import, and the six-hourly sweep — whose pool is every
+ * artist with a catalogue-able link, so a searched artist is still reached, within about a
+ * month rather than within a minute. The cost of that trade is coverage latency on a brand-new
+ * artist page, not lost coverage.
+ *
+ * Do not reintroduce a search-time trigger without a per-run budget that is measured against
+ * the disk I/O headroom, not just against what Bandcamp will tolerate.
+ */
 export async function persistSearchResults(results: ArtistResult[]): Promise<void> {
   const client = getClient();
   if (!client) return;
 
-  // Artists persisted in this run that have a Bandcamp link, collected so cataloging can be
-  // requested in a single call afterwards rather than once per artist. This function is
-  // awaited before the search response is sent, so wall-clock time here is user-visible.
-  const catalogCandidates: string[] = [];
+  // Search does NOT trigger release cataloging. See the note above persistSearchResults.
 
   // This runs before the search response is sent, so wall-clock time matters:
   // artists persist concurrently, and each artist's links go up in one bulk
@@ -4085,21 +4103,10 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
       console.log(
         `[DB] Persisted "${result.name}": ${changedLinkRows.length} of ${linkRows.length} links written`
       );
-
-      // Only worth cataloging artists we can actually catalog — ingest is Bandcamp-only for
-      // now, so an artist without a Bandcamp link would just be a wasted claim.
-      if (linkRowsByPlatform.has('bandcamp')) catalogCandidates.push(artistId);
     } catch (error) {
       console.error(`[DB] Error persisting "${result.name}":`, error);
     }
   }));
-
-  // One request for the whole result set, after the writes, and only a 202 handshake is
-  // awaited. Cooldown and rate-cap checks happen inside the background function, so a search
-  // never pays a database round trip per artist to find out an artist was crawled last week.
-  if (catalogCandidates.length > 0) {
-    await requestArtistCatalog(catalogCandidates, 'searched');
-  }
 }
 
 /**
