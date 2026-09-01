@@ -80,8 +80,21 @@ createRoot(document.getElementById('root')!).render(
     >
       {/* Outside the router and Suspense on purpose: it needs neither, and this way it stays
           mounted across navigations and is still visible while a route chunk is downloading —
-          including the download that is about to fail because this build is the stale one. */}
-      <StaleBuildBanner />
+          including the download that is about to fail because this build is the stale one.
+
+          Its own boundary, separate from the app one below: this banner is a courtesy on top
+          of a working app, not something the app depends on. Without this, a throw in
+          useBuildFreshness would propagate to the outer boundary and blank the entire app —
+          routes, auth, everything — over a freshness check. Fallback renders nothing: if the
+          banner is broken, disappearing is strictly better than replacing the whole page. */}
+      <Sentry.ErrorBoundary
+        fallback={<></>}
+        beforeCapture={scope => {
+          scope.setTag('context', 'staleBuildBanner.errorBoundary')
+        }}
+      >
+        <StaleBuildBanner />
+      </Sentry.ErrorBoundary>
       <AuthProvider>
         <BrowserRouter>
           <ScrollToTop />
