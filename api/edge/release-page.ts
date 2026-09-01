@@ -25,6 +25,7 @@ import {
   FORMAT_LABELS,
   formatOfferPrice,
   formatReleaseDate,
+  oneSourcePerPlatform,
   payoutEstimate,
   payoutRank,
   relativeDays,
@@ -128,6 +129,7 @@ interface OfferRow {
 interface SourceRow {
   platform: string;
   url: string;
+  source: string | null;
   detail_checked_at: string | null;
   release_offers: OfferRow[] | null;
 }
@@ -220,7 +222,7 @@ export default async function handler(request: Request, context: Context) {
         .from('releases')
         .select(`
           title, release_type, release_date, date_precision, status, artwork_url,
-          release_sources ( platform, url, detail_checked_at,
+          release_sources ( platform, url, source, detail_checked_at,
             release_offers ( format, price, currency, availability )
           )
         `)
@@ -267,7 +269,7 @@ export default async function handler(request: Request, context: Context) {
       ? (dateText ? `Coming ${dateText}` : 'Announced')
       : dateText;
 
-    const sources = [...(release.release_sources || [])].sort(
+    const sources = oneSourcePerPlatform(release.release_sources || []).sort(
       (a, b) => payoutRank(b.platform) - payoutRank(a.platform)
     );
 

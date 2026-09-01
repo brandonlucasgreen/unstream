@@ -15,6 +15,9 @@ import {
   mapReleaseType,
   mapMusicBrainzReleaseType,
   isFuzzyReleaseMatch,
+  releaseDatesDisagree,
+  findExactReleaseMatch,
+  findFuzzyReleaseMatch,
   parseReleaseDate,
   deriveStatus,
 } from '../release-utils';
@@ -311,5 +314,113 @@ describe('isFuzzyReleaseMatch', () => {
     // "album" is contained in a much longer, unrelated title — containment alone isn't
     // enough evidence without a length-ratio floor.
     expect(isFuzzyReleaseMatch('album', 'thecompletealbumcollectionboxsetwithbonusdisc')).toBe(false);
+  });
+});
+
+// Every case below is drawn from a real row pair in the production catalog, sampled
+// 2026-08-29. The counts in the comments are measurements, not estimates.
+
+describe('releaseDatesDisagree', () => {
+  it('compares only as far as the coarser precision vouches for', () => {
+    // Discogs gives the bare year 2020 as "2020-01-01"; Bandcamp gives the day. Comparing
+    // those as full dates would call every such pair different, which is the opposite of true.
+    expect(releaseDatesDisagree(
+      { date: '2020-08-21', precision: 'day' },
+      { date: '2020-01-01', precision: 'year' }
+    )).toBe(false);
+
+    expect(releaseDatesDisagree(
+      { date: '2020-03-15', precision: 'day' },
+      { date: '2019-01-01', precision: 'year' }
+    )).toBe(true);
+  });
+
+  it('treats a missing date as no evidence, never as disagreement', () => {
+    expect(releaseDatesDisagree({ date: null, precision: 'day' }, { date: '2020-01-01', precision: 'day' })).toBe(false);
+    expect(releaseDatesDisagree({ date: '2020-01-01', precision: 'day' }, { date: undefined, precision: null })).toBe(false);
+    expect(releaseDatesDisagree({ date: '2020-01-01', precision: 'unknown' }, { date: '1999-01-01', precision: 'day' })).toBe(false);
+  });
+
+  it('separates two day-precision releases a month apart', () => {
+    expect(releaseDatesDisagree(
+      { date: '2023-02-02', precision: 'day' },
+      { date: '2022-02-04', precision: 'day' }
+    )).toBe(true);
+  });
+
+  it('agrees to the month when that is all both sides claim', () => {
+    expect(releaseDatesDisagree(
+      { date: '2021-06-01', precision: 'month' },
+      { date: '2021-06-25', precision: 'day' }
+    )).toBe(false);
+  });
+});
+
+describe('findExactReleaseMatch', () => {
+  const javelinFromDiscogs = { match_key: 'javelin', release_type: 'other', release_date: '2023-10-06', date_precision: 'day' };
+
+  it('matches across release types — the 931-pair Discogs blind spot', () => {
+    // Discogs' artist listing has no type field for a master, so 92% of Discogs rows are
+    // typed 'other' while the same record arrives from Bandcamp as 'album'. Keyed on
+    // (release_type, match_key), those two could never meet.
+    expect(findExactReleaseMatch([javelinFromDiscogs], {
+      matchKey: 'javelin',
+      releaseDate: '2023-10-06',
+      datePrecision: 'day',
+    })).toBe(javelinFromDiscogs);
+  });
+
+  it('still matches when the two types are both meaningful and differ', () => {
+    // "Live At The Echo", filed 'live' by one source and 'album' by the other, same day.
+    const live = { match_key: 'liveattheecho', release_type: 'live', release_date: '2022-04-01', date_precision: 'day' };
+    expect(findExactReleaseMatch([live], {
+      matchKey: 'liveattheecho',
+      releaseDate: '2022-04-01',
+      datePrecision: 'day',
+    })).toBe(live);
+  });
+
+  it('refuses a same-title match when the dates positively disagree', () => {
+    // An artist's single "Home" and their album "Home" are two records, and the date is the
+    // only thing that says so once type is out of the identity test.
+    expect(findExactReleaseMatch([javelinFromDiscogs], {
+      matchKey: 'javelin',
+      releaseDate: '2019-04-02',
+      datePrecision: 'day',
+    })).toBeNull();
+  });
+
+  it('matches on the title alone when neither side has a date', () => {
+    const faircamp = { match_key: 'misalignment', release_type: 'album' };
+    expect(findExactReleaseMatch([faircamp], { matchKey: 'misalignment' })).toBe(faircamp);
+  });
+});
+
+describe('findFuzzyReleaseMatch', () => {
+  it('flags a containment match when nothing rules it out', () => {
+    const carrie = { match_key: 'carrielowell', release_type: 'album', release_date: null, date_precision: null };
+    expect(findFuzzyReleaseMatch([carrie], { matchKey: 'carrielowelldeluxeedition' })).toBe(carrie);
+  });
+
+  it('drops the flag when day-precision dates disagree — 687 of 858 catalog pairs', () => {
+    // "Acid Dub Versions III" (2025) against "II" (2023): a containment match between titles
+    // is a guess, two sources reporting different days is a fact, and the fact wins.
+    const two = { match_key: 'aciddubversionsii', release_type: 'other', release_date: '2023-09-22', date_precision: 'day' };
+    expect(findFuzzyReleaseMatch([two], {
+      matchKey: 'aciddubversionsiii',
+      releaseDate: '2025-11-28',
+      datePrecision: 'day',
+    })).toBeNull();
+  });
+
+  it('keeps the flag when the same-titled pair shares a date', () => {
+    // "32-Bit Rekt Trilogy" on Jam.coop against "[Compilation] 32-Bit Rekt Trilogy" on Mirlo,
+    // both 2022-12-11 — a real duplicate, and one a human should still confirm.
+    const jamcoop = { match_key: '32bitrekttrilogy', release_type: 'other', release_date: '2022-12-11', date_precision: 'day' };
+    expect(findFuzzyReleaseMatch([jamcoop], {
+      matchKey: 'compilation32bitrekttrilogy',
+      releaseDate: '2022-12-11',
+      datePrecision: 'day',
+    })).toBe(jamcoop);
   });
 });

@@ -10,12 +10,14 @@ import {
 } from './search-utils';
 import {
   deriveStatus,
-  isFuzzyReleaseMatch,
+  findExactReleaseMatch,
+  findFuzzyReleaseMatch,
   mapReleaseType,
   parseReleaseDate,
   releaseMatchKey,
   uniqueReleaseSlug,
 } from './release-utils';
+import { oneSourcePerPlatform } from '../shared/release-display';
 import { cacheDelete, cacheGetOrFetch } from './cache';
 import { notifySavedArtistsOfNewRelease } from './notifications';
 import { Sentry } from '../lib/sentry';
@@ -1156,8 +1158,10 @@ export interface PersistedRelease {
  *
  * Three rules that matter more than they look:
  *
- * 1. **Match on `(artist_id, release_type, match_key)`, not on slug.** A slug is derived from
- *    a title and changes when the title does; the match key is what identity means here.
+ * 1. **Match on `(artist_id, match_key)`, not on slug.** A slug is derived from a title and
+ *    changes when the title does; the match key is what identity means here. Release type is
+ *    not part of that identity — see `findExactReleaseMatch` for why it can't be, and for the
+ *    date check that stands in its place.
  * 2. **Never overwrite a stored value with null.** A partial run — Bandcamp slow, artwork
  *    missing — must not erase a date or artwork a previous run found. This is "never cache
  *    uncertainty" in write form.
@@ -1186,8 +1190,17 @@ export interface ExistingReleaseSource {
   detail_checked_at: string | null;
 }
 
-/** Keyed `${releaseId}:${platform}` — the table's own conflict target. */
+/**
+ * Keyed `${releaseId}:${platform}:${externalId ?? ''}` — the table's own uniqueness rule since
+ * `20260829120000_release-sources-multi-per-platform.sql`. The empty-string tail is what a row
+ * with no external id keys under, and there can be at most one of those per platform.
+ */
 export type ExistingSourceMap = Map<string, ExistingReleaseSource>;
+
+/** The one place that key is spelled, so a reader and a writer can't drift apart. */
+export function releaseSourceKey(releaseId: string, platform: string, externalId: string | null): string {
+  return `${releaseId}:${platform}:${externalId ?? ''}`;
+}
 
 /**
  * Every `release_sources` row these releases already have.
@@ -1216,7 +1229,7 @@ async function getExistingSources(client: SupabaseClient, releaseIds: string[]):
   }
 
   for (const row of (data as ExistingReleaseSource[]) || []) {
-    map.set(`${row.release_id}:${row.platform}`, row);
+    map.set(releaseSourceKey(row.release_id, row.platform, row.external_id), row);
   }
   return map;
 }
@@ -1253,7 +1266,13 @@ async function upsertReleaseSource(
   externalId: string | null,
   existingSources: ExistingSourceMap
 ): Promise<{ id: string; url: string; detail_checked_at: string | null } | null> {
-  const prior = existingSources.get(`${releaseId}:${platform}`);
+  // Exact match on the platform's own id first. Failing that, a row for this platform that has
+  // no id yet is the same source before we learned what to call it — an early Bandcamp crawl
+  // that stored a URL and nothing else, say — so it gets upgraded in place rather than joined
+  // by a second row. Only a genuinely new id inserts.
+  const prior =
+    existingSources.get(releaseSourceKey(releaseId, platform, externalId)) ??
+    (externalId ? existingSources.get(releaseSourceKey(releaseId, platform, null)) : undefined);
 
   if (prior?.source === 'claimed') {
     return { id: prior.id, url: prior.url, detail_checked_at: prior.detail_checked_at };
@@ -1263,17 +1282,34 @@ async function upsertReleaseSource(
     return { id: prior.id, url: prior.url, detail_checked_at: prior.detail_checked_at };
   }
 
-  const { data, error } = await client
-    .from('release_sources')
-    .upsert(
-      { release_id: releaseId, platform, url, external_id: externalId, last_seen_at: new Date().toISOString() },
-      { onConflict: 'release_id,platform' }
-    )
-    .select('id, url, detail_checked_at')
-    .single();
+  // Written as an explicit update-or-insert rather than an upsert: PostgREST infers the conflict
+  // target from a plain column list, and this table's uniqueness now lives in an expression
+  // index (COALESCE(external_id, '')) that no column list can name.
+  const row = {
+    release_id: releaseId,
+    platform,
+    url,
+    external_id: externalId,
+    last_seen_at: new Date().toISOString(),
+  };
+
+  const { data, error } = prior
+    ? await client.from('release_sources').update(row).eq('id', prior.id).select('id, url, external_id, source, detail_checked_at').single()
+    : await client.from('release_sources').insert(row).select('id, url, external_id, source, detail_checked_at').single();
 
   if (error || !data) return null;
-  return data as { id: string; url: string; detail_checked_at: string | null };
+
+  // Keep the map honest for the rest of this pass, so a second release resolving to the same
+  // source doesn't insert over the top of a row this call just wrote.
+  const written = data as ExistingReleaseSource;
+  existingSources.delete(releaseSourceKey(releaseId, platform, prior?.external_id ?? externalId));
+  existingSources.set(releaseSourceKey(releaseId, platform, externalId), {
+    ...written,
+    release_id: releaseId,
+    platform,
+  });
+
+  return { id: written.id, url: written.url, detail_checked_at: written.detail_checked_at };
 }
 
 export async function persistReleases(
@@ -1287,7 +1323,7 @@ export async function persistReleases(
     const { data: existingRows, error: readError } = await client
       .from('releases')
       // `title` is read so the patch below can compare instead of assigning unconditionally.
-      .select('id, slug, title, match_key, release_type, release_date, artwork_url, curated_fields')
+      .select('id, slug, title, match_key, release_type, release_date, date_precision, artwork_url, curated_fields')
       .eq('artist_id', artistId);
 
     if (readError) {
@@ -1302,19 +1338,19 @@ export async function persistReleases(
       match_key: string;
       release_type: string;
       release_date: string | null;
+      date_precision: string | null;
       artwork_url: string | null;
       curated_fields: string[] | null;
     };
     const existing = (existingRows as ExistingRow[]) || [];
-    const byIdentity = new Map(existing.map(r => [`${r.release_type}:${r.match_key}`, r]));
     const takenSlugs = new Set(existing.map(r => r.slug));
     const existingSources = await getExistingSources(client, existing.map(r => r.id));
 
     const written: PersistedRelease[] = [];
 
     for (const release of releases) {
-      const identity = `${release.releaseType}:${release.matchKey}`;
-      const prior = byIdentity.get(identity);
+      // Title identity, not `(release_type, match_key)` identity — see findExactReleaseMatch.
+      const prior = findExactReleaseMatch(existing, release);
       const curated = new Set(prior?.curated_fields ?? []);
 
       let releaseId: string;
@@ -1374,13 +1410,15 @@ export async function persistReleases(
           continue;
         }
         releaseId = (inserted as { id: string }).id;
-        byIdentity.set(identity, {
+        // Visible to the rest of this batch, so two titles that normalize alike don't both insert.
+        existing.push({
           id: releaseId,
           slug,
           title: release.title,
           match_key: release.matchKey,
           release_type: release.releaseType,
           release_date: release.releaseDate,
+          date_precision: release.datePrecision,
           artwork_url: release.artworkUrl,
           curated_fields: [],
         });
@@ -1676,13 +1714,17 @@ interface DiscogsReleaseToPersist {
  *
  * 4. **Prefer the hard identifier over the title guess.** `discogs_master_id` is Discogs'
  *    own "these pressings are one album" conclusion — tier 1 in the dedup scheme (spec §4).
- *    Only fall back to `(release_type, match_key)` — tier 2 — when this artist has no row
- *    with that master id yet, and only when that tier-2 candidate doesn't already carry a
- *    *different* master id (which would mean the title match is coincidental, not the same
- *    release). And when nothing matches exactly but a title is merely *close* to an existing
- *    one — `isFuzzyReleaseMatch` — this never merges either: it inserts a new row and flags
- *    both `needs_review`, which is tier 3. A human decides; the catalog never silently
- *    asserts two different albums are the same one.
+ *    Only fall back to the title match — tier 2, `findExactReleaseMatch` — when this artist
+ *    has no row with that master id yet, and only when that tier-2 candidate doesn't already
+ *    carry a *different* master id (which would mean the title match is coincidental, not the
+ *    same release). And when nothing matches exactly but a title is merely *close* to an
+ *    existing one, this never merges either: it inserts a new row and flags both
+ *    `needs_review`, which is tier 3. A human decides; the catalog never silently asserts two
+ *    different albums are the same one.
+ *
+ *    A master id is looked up in `release_sources` as well as in `releases.discogs_master_id`,
+ *    because the release column holds only one and an admin merge of two masters leaves the
+ *    second on the source row. Skipping that read is what would let a merged pair come back.
  */
 export async function persistDiscogsReleases(
   artistId: string,
@@ -1695,7 +1737,7 @@ export async function persistDiscogsReleases(
     const { data: existingRows, error: readError } = await client
       .from('releases')
       // `title` is read so the patch below can compare instead of assigning unconditionally.
-      .select('id, slug, title, match_key, release_type, release_date, curated_fields, discogs_master_id')
+      .select('id, slug, title, match_key, release_type, release_date, date_precision, curated_fields, discogs_master_id')
       .eq('artist_id', artistId);
 
     if (readError) {
@@ -1710,6 +1752,7 @@ export async function persistDiscogsReleases(
       match_key: string;
       release_type: string;
       release_date: string | null;
+      date_precision: string | null;
       curated_fields: string[] | null;
       discogs_master_id: string | null;
     };
@@ -1717,7 +1760,6 @@ export async function persistDiscogsReleases(
     const byMasterId = new Map(
       existing.filter(r => r.discogs_master_id).map(r => [r.discogs_master_id as string, r])
     );
-    const byIdentity = new Map(existing.map(r => [`${r.release_type}:${r.match_key}`, r]));
     const byType = new Map<string, ExistingRow[]>();
     for (const row of existing) {
       const bucket = byType.get(row.release_type);
@@ -1727,14 +1769,37 @@ export async function persistDiscogsReleases(
     const takenSlugs = new Set(existing.map(r => r.slug));
     const existingSources = await getExistingSources(client, existing.map(r => r.id));
 
+    // A release that an admin merged with a second Discogs master carries that master's id on
+    // its *source* row: `releases.discogs_master_id` holds exactly one, and the merge keeps the
+    // survivor's. Reading both is what makes such a merge durable — without it, the very next
+    // catalogue pass wouldn't recognise the second master and would re-create the row the human
+    // just merged away, which is how a review queue refills itself forever.
+    //
+    // Kept in its own map rather than folded into `byMasterId`, because these two answer
+    // different questions. `byMasterId` means "this row *is* that master", which is what
+    // licenses overwriting the stored title from Discogs. A merged-away master means "this row
+    // absorbed that master" — the title on the survivor is the one a human chose to keep, and
+    // the other master's title must not replace it.
+    const byReleaseId = new Map(existing.map(r => [r.id, r]));
+    const byMergedMasterId = new Map<string, ExistingRow>();
+    for (const source of existingSources.values()) {
+      if (source.platform !== 'discogs' || !source.external_id) continue;
+      if (byMasterId.has(source.external_id)) continue;
+      const row = byReleaseId.get(source.release_id);
+      if (row) byMergedMasterId.set(source.external_id, row);
+    }
+
     const written: PersistedRelease[] = [];
 
     for (const release of releases) {
       let prior = byMasterId.get(release.masterId);
-      let matchedByMasterId = Boolean(prior);
+      const matchedByMasterId = Boolean(prior);
+      if (!prior) prior = byMergedMasterId.get(release.masterId);
 
       if (!prior) {
-        const exact = byIdentity.get(`${release.releaseType}:${release.matchKey}`);
+        const exact = findExactReleaseMatch(existing, release);
+        // A tier-2 title match that already carries a *different* master id is Discogs itself
+        // saying these are two records, which outranks our title guess.
         if (exact && (!exact.discogs_master_id || exact.discogs_master_id === release.masterId)) {
           prior = exact;
         }
@@ -1746,7 +1811,7 @@ export async function persistDiscogsReleases(
       // to re-run the fuzzy match to reconstruct what triggered it.
       const fuzzy = prior
         ? null
-        : (byType.get(release.releaseType) ?? []).find(c => isFuzzyReleaseMatch(c.match_key, release.matchKey)) ?? null;
+        : findFuzzyReleaseMatch(byType.get(release.releaseType) ?? [], release);
 
       let releaseId: string;
       let curatedFields: string[];
@@ -1818,10 +1883,12 @@ export async function persistDiscogsReleases(
           match_key: release.matchKey,
           release_type: release.releaseType,
           release_date: release.releaseDate,
+          date_precision: release.datePrecision,
           curated_fields: [],
           discogs_master_id: release.masterId,
         };
         byMasterId.set(release.masterId, createdRow);
+        existing.push(createdRow);
         const bucket = byType.get(release.releaseType);
         if (bucket) bucket.push(createdRow);
         else byType.set(release.releaseType, [createdRow]);
@@ -1889,8 +1956,8 @@ interface MusicBrainzEnrichmentInput {
  * to buy it would be a worse outcome than not having the page at all.
  *
  * Matches tier 1 (an existing `musicbrainz_release_group_id`) first, then tier 2
- * (`release_type` + `match_key`) — and only when that tier-2 candidate doesn't already carry
- * a *different* MBID, which would mean the title match is coincidental. Returns how many rows
+ * (`findExactReleaseMatch`) — and only when that tier-2 candidate doesn't already carry a
+ * *different* MBID, which would mean the title match is coincidental. Returns how many rows
  * were touched.
  */
 export async function persistMusicBrainzEnrichment(
@@ -1903,7 +1970,7 @@ export async function persistMusicBrainzEnrichment(
   try {
     const { data: existingRows, error } = await client
       .from('releases')
-      .select('id, match_key, release_type, release_date, curated_fields, musicbrainz_release_group_id')
+      .select('id, match_key, release_type, release_date, date_precision, curated_fields, musicbrainz_release_group_id')
       .eq('artist_id', artistId);
 
     if (error) {
@@ -1916,6 +1983,7 @@ export async function persistMusicBrainzEnrichment(
       match_key: string;
       release_type: string;
       release_date: string | null;
+      date_precision: string | null;
       curated_fields: string[] | null;
       musicbrainz_release_group_id: string | null;
     };
@@ -1923,14 +1991,13 @@ export async function persistMusicBrainzEnrichment(
     const byMbid = new Map(
       existing.filter(r => r.musicbrainz_release_group_id).map(r => [r.musicbrainz_release_group_id as string, r])
     );
-    const byIdentity = new Map(existing.map(r => [`${r.release_type}:${r.match_key}`, r]));
 
     let touched = 0;
 
     for (const group of groups) {
       let row = byMbid.get(group.mbid);
       if (!row) {
-        const candidate = byIdentity.get(`${group.releaseType}:${group.matchKey}`);
+        const candidate = findExactReleaseMatch(existing, group);
         if (candidate && (!candidate.musicbrainz_release_group_id || candidate.musicbrainz_release_group_id === group.mbid)) {
           row = candidate;
         }
@@ -1966,13 +2033,17 @@ export async function persistMusicBrainzEnrichment(
 /**
  * Write a Faircamp catalog pass.
  *
- * Matches on `match_key` **alone**, not `(release_type, match_key)` like every other source —
- * Faircamp's own release-type guess (`mapDiscogsFormatToReleaseType` reading just a title) is
- * unreliable enough that partitioning by it would systematically block the one thing that
- * makes Faircamp worth ingesting: merging into a release Bandcamp or Discogs already typed
- * correctly, adding Faircamp as a second source on the *same* row instead of a duplicate. When
- * nothing matches exactly, a title merely *close* to an existing one still only ever flags
- * (tier 3, `isFuzzyReleaseMatch`) — never merges — same as Discogs.
+ * Matches on `match_key` via `findExactReleaseMatch`, which ignores release type. Faircamp's
+ * own type guess (`mapDiscogsFormatToReleaseType` reading just a title) is unreliable enough
+ * that partitioning by it would systematically block the one thing that makes Faircamp worth
+ * ingesting: merging into a release Bandcamp or Discogs already typed correctly, adding
+ * Faircamp as a second source on the *same* row instead of a duplicate. That argument turned
+ * out to hold for every source, which is why it is now the rule everywhere rather than this
+ * function's exception. When nothing matches exactly, a title merely *close* to an existing
+ * one still only ever flags (tier 3) — never merges — same as Discogs.
+ *
+ * Faircamp publishes no release date, so the date check inside both matchers is inert here:
+ * with nothing to compare, there is no evidence of difference and the title stands alone.
  *
  * Release type is never overwritten on an existing row; whichever source typed it first stands.
  */
@@ -2013,14 +2084,13 @@ export async function persistFaircampReleases(
       curated_fields: string[] | null;
     };
     const existing = (existingRows as ExistingRow[]) || [];
-    const byMatchKey = new Map(existing.map(r => [r.match_key, r]));
     const takenSlugs = new Set(existing.map(r => r.slug));
     const existingSources = await getExistingSources(client, existing.map(r => r.id));
 
     const written: PersistedRelease[] = [];
 
     for (const release of releases) {
-      const prior = byMatchKey.get(release.matchKey);
+      const prior = findExactReleaseMatch(existing, release);
 
       let releaseId: string;
       let curatedFields: string[];
@@ -2043,7 +2113,7 @@ export async function persistFaircampReleases(
         }
         releaseId = prior.id;
       } else {
-        const fuzzy = existing.find(c => isFuzzyReleaseMatch(c.match_key, release.matchKey));
+        const fuzzy = findFuzzyReleaseMatch(existing, release);
 
         let slug = release.slug;
         if (takenSlugs.has(slug)) slug = `${slug}-${release.matchKey.slice(0, 6)}`;
@@ -2080,7 +2150,6 @@ export async function persistFaircampReleases(
           artwork_url: release.artworkUrl,
           curated_fields: [],
         };
-        byMatchKey.set(release.matchKey, createdRow);
         existing.push(createdRow);
 
         if (fuzzy) {
@@ -2149,7 +2218,7 @@ export async function persistJamcoopReleases(
   try {
     const { data: existingRows, error: readError } = await client
       .from('releases')
-      .select('id, slug, match_key, release_type, release_date, artwork_url, curated_fields')
+      .select('id, slug, match_key, release_type, release_date, date_precision, artwork_url, curated_fields')
       .eq('artist_id', artistId);
 
     if (readError) {
@@ -2163,18 +2232,18 @@ export async function persistJamcoopReleases(
       match_key: string;
       release_type: string;
       release_date: string | null;
+      date_precision: string | null;
       artwork_url: string | null;
       curated_fields: string[] | null;
     };
     const existing = (existingRows as ExistingRow[]) || [];
-    const byMatchKey = new Map(existing.map(r => [r.match_key, r]));
     const takenSlugs = new Set(existing.map(r => r.slug));
     const existingSources = await getExistingSources(client, existing.map(r => r.id));
 
     const written: PersistedRelease[] = [];
 
     for (const release of releases) {
-      const prior = byMatchKey.get(release.matchKey);
+      const prior = findExactReleaseMatch(existing, release);
 
       let releaseId: string;
       let curatedFields: string[];
@@ -2205,7 +2274,7 @@ export async function persistJamcoopReleases(
         }
         releaseId = prior.id;
       } else {
-        const fuzzy = existing.find(c => isFuzzyReleaseMatch(c.match_key, release.matchKey));
+        const fuzzy = findFuzzyReleaseMatch(existing, release);
 
         let slug = release.slug;
         if (takenSlugs.has(slug)) slug = `${slug}-${release.matchKey.slice(0, 6)}`;
@@ -2242,10 +2311,10 @@ export async function persistJamcoopReleases(
           match_key: release.matchKey,
           release_type: release.releaseType,
           release_date: release.releaseDate,
+          date_precision: release.datePrecision,
           artwork_url: release.artworkUrl,
           curated_fields: [],
         };
-        byMatchKey.set(release.matchKey, createdRow);
         existing.push(createdRow);
 
         if (fuzzy) {
@@ -2294,8 +2363,8 @@ export async function persistJamcoopReleases(
  * type is usually title-inferred and too weak to partition identity by. Partitioning on it would
  * mint a duplicate row every time Bandcamp had already typed the same record correctly.
  *
- * Dedup behaviour is unchanged from every other source: an exact `match_key` merges into the
- * existing row, `isFuzzyReleaseMatch` flags a pair for human review, and nothing new
+ * Dedup behaviour is the same as every other source: `findExactReleaseMatch` merges into the
+ * existing row, `findFuzzyReleaseMatch` flags a pair for human review, and nothing new
  * auto-merges. Under-merge is preserved deliberately.
  *
  * Like Jam.coop, Mirlo publishes a date, so this fills `release_date`/`date_precision` on a row
@@ -2324,7 +2393,7 @@ export async function persistMirloReleases(
   try {
     const { data: existingRows, error: readError } = await client
       .from('releases')
-      .select('id, slug, match_key, release_type, release_date, artwork_url, curated_fields')
+      .select('id, slug, match_key, release_type, release_date, date_precision, artwork_url, curated_fields')
       .eq('artist_id', artistId);
 
     if (readError) {
@@ -2338,18 +2407,18 @@ export async function persistMirloReleases(
       match_key: string;
       release_type: string;
       release_date: string | null;
+      date_precision: string | null;
       artwork_url: string | null;
       curated_fields: string[] | null;
     };
     const existing = (existingRows as ExistingRow[]) || [];
-    const byMatchKey = new Map(existing.map(r => [r.match_key, r]));
     const takenSlugs = new Set(existing.map(r => r.slug));
     const existingSources = await getExistingSources(client, existing.map(r => r.id));
 
     const written: PersistedRelease[] = [];
 
     for (const release of releases) {
-      const prior = byMatchKey.get(release.matchKey);
+      const prior = findExactReleaseMatch(existing, release);
 
       let releaseId: string;
       let curatedFields: string[];
@@ -2380,7 +2449,7 @@ export async function persistMirloReleases(
         }
         releaseId = prior.id;
       } else {
-        const fuzzy = existing.find(c => isFuzzyReleaseMatch(c.match_key, release.matchKey));
+        const fuzzy = findFuzzyReleaseMatch(existing, release);
 
         let slug = release.slug;
         if (takenSlugs.has(slug)) slug = `${slug}-${release.matchKey.slice(0, 6)}`;
@@ -2417,10 +2486,10 @@ export async function persistMirloReleases(
           match_key: release.matchKey,
           release_type: release.releaseType,
           release_date: release.releaseDate,
+          date_precision: release.datePrecision,
           artwork_url: release.artworkUrl,
           curated_fields: [],
         };
-        byMatchKey.set(release.matchKey, createdRow);
         existing.push(createdRow);
 
         if (fuzzy) {
@@ -2617,7 +2686,7 @@ export async function getReleaseReviewQueue(): Promise<
         artworkUrl: r.artwork_url,
         artistName: artist?.name ?? '(unknown)',
         artistSlug: artist?.slug ?? '',
-        platforms: (r.release_sources || []).map(s => s.platform),
+        platforms: [...new Set((r.release_sources || []).map(s => s.platform))],
         flaggedAgainst: r.flagged_against_release_id,
       });
     }
@@ -2684,9 +2753,13 @@ export interface MergeReleasesResult {
  * fallible-write (PR #350, an artist's links wiped by a preview), and a release merge is the
  * same shape of risk.
  *
- * Refuses the merge outright if both releases already carry a source on the same platform,
- * rather than silently dropping one — a merge with an ambiguous outcome should stop and ask,
- * not guess which of two conflicting sources to keep.
+ * Two sources on the same platform are carried over rather than refused, as long as the
+ * platform's own ids tell them apart. That is the ordinary shape of the thing this queue is
+ * mostly full of: Discogs holding two masters for one record, both of them real listings worth
+ * keeping. What still stops the merge is a pair that *can't* be told apart — a source on a
+ * shared platform with no external id on one side or the other — because the surviving row
+ * could then hold two indistinguishable entries for one platform, and nothing downstream could
+ * ever reconcile them.
  */
 export async function mergeReleases(keepId: string, dropId: string): Promise<MergeReleasesResult> {
   const client = getClient();
@@ -2722,8 +2795,8 @@ export async function mergeReleases(keepId: string, dropId: string): Promise<Mer
     }
 
     const [{ data: keepSources, error: keepError }, { data: dropSources, error: dropError }] = await Promise.all([
-      client.from('release_sources').select('platform').eq('release_id', keepId),
-      client.from('release_sources').select('id, platform').eq('release_id', dropId),
+      client.from('release_sources').select('platform, external_id').eq('release_id', keepId),
+      client.from('release_sources').select('id, platform, external_id').eq('release_id', dropId),
     ]);
 
     if (keepError || dropError) {
@@ -2731,13 +2804,28 @@ export async function mergeReleases(keepId: string, dropId: string): Promise<Mer
       return { ok: false, error: 'Failed to read sources' };
     }
 
-    const keepPlatforms = new Set((keepSources as { platform: string }[] | null || []).map(s => s.platform));
-    const drop = (dropSources as { id: string; platform: string }[] | null) || [];
-    const conflicting = drop.filter(s => keepPlatforms.has(s.platform));
+    const keep = (keepSources as { platform: string; external_id: string | null }[] | null) || [];
+    const drop = (dropSources as { id: string; platform: string; external_id: string | null }[] | null) || [];
+
+    const keepIdsByPlatform = new Map<string, (string | null)[]>();
+    for (const source of keep) {
+      const bucket = keepIdsByPlatform.get(source.platform);
+      if (bucket) bucket.push(source.external_id);
+      else keepIdsByPlatform.set(source.platform, [source.external_id]);
+    }
+
+    // Only an *indistinguishable* pair blocks. Two Discogs masters carry two ids and merge
+    // fine; a source with no id on either side can't be separated from the one it would sit
+    // beside, and `idx_release_sources_release_platform_external` would reject it anyway.
+    const conflicting = drop.filter(source => {
+      const keepIds = keepIdsByPlatform.get(source.platform);
+      if (!keepIds) return false;
+      return !source.external_id || keepIds.some(id => !id || id === source.external_id);
+    });
 
     if (conflicting.length > 0) {
-      const platforms = conflicting.map(c => c.platform).join(', ');
-      return { ok: false, error: `Both releases already have a source on: ${platforms} — resolve manually` };
+      const platforms = [...new Set(conflicting.map(c => c.platform))].join(', ');
+      return { ok: false, error: `Both releases have an unidentified source on: ${platforms} — resolve manually` };
     }
 
     if (drop.length > 0) {
@@ -2752,26 +2840,54 @@ export async function mergeReleases(keepId: string, dropId: string): Promise<Mer
       }
     }
 
+    const anchors: Record<string, unknown> = {};
+
     const [{ data: keepRow }, { data: dropRow }] = await Promise.all([
-      client.from('releases').select('release_date, artwork_url, curated_fields').eq('id', keepId).maybeSingle(),
-      client.from('releases').select('release_date, date_precision, artwork_url').eq('id', dropId).maybeSingle(),
+      client.from('releases').select('release_date, artwork_url, curated_fields, discogs_master_id, musicbrainz_release_group_id').eq('id', keepId).maybeSingle(),
+      client.from('releases').select('release_date, date_precision, artwork_url, discogs_master_id, musicbrainz_release_group_id').eq('id', dropId).maybeSingle(),
     ]);
 
     if (keepRow && dropRow) {
       const curated = new Set((keepRow as { curated_fields: string[] | null }).curated_fields ?? []);
       const patch: Record<string, unknown> = {};
-      const keep = keepRow as { release_date: string | null; artwork_url: string | null };
-      const drop2 = dropRow as { release_date: string | null; date_precision: string | null; artwork_url: string | null };
+      const keepFields = keepRow as {
+        release_date: string | null;
+        artwork_url: string | null;
+        discogs_master_id: string | null;
+        musicbrainz_release_group_id: string | null;
+      };
+      const dropFields = dropRow as {
+        release_date: string | null;
+        date_precision: string | null;
+        artwork_url: string | null;
+        discogs_master_id: string | null;
+        musicbrainz_release_group_id: string | null;
+      };
 
-      if (!curated.has('release_date') && drop2.release_date && !keep.release_date) {
-        patch.release_date = drop2.release_date;
-        patch.date_precision = drop2.date_precision;
+      if (!curated.has('release_date') && dropFields.release_date && !keepFields.release_date) {
+        patch.release_date = dropFields.release_date;
+        patch.date_precision = dropFields.date_precision;
       }
-      if (!curated.has('artwork_url') && drop2.artwork_url && !keep.artwork_url) {
-        patch.artwork_url = drop2.artwork_url;
+      if (!curated.has('artwork_url') && dropFields.artwork_url && !keepFields.artwork_url) {
+        patch.artwork_url = dropFields.artwork_url;
       }
       if (Object.keys(patch).length > 0) {
         await client.from('releases').update(patch).eq('id', keepId);
+      }
+
+      // Identity anchors move across too, or the next catalogue pass finds no row for the
+      // dropped master/release group and re-creates exactly what was just merged away. Where
+      // the survivor already has one of its own, the dropped id still survives as the
+      // `external_id` on the source row moved above, which is where ingest also looks.
+      //
+      // Written *after* the delete below, not here: both columns are covered by a unique index
+      // per artist, so copying an id onto the survivor while the row it came from still holds
+      // it is a constraint violation, not a merge.
+      if (dropFields.discogs_master_id && !keepFields.discogs_master_id) {
+        anchors.discogs_master_id = dropFields.discogs_master_id;
+      }
+      if (dropFields.musicbrainz_release_group_id && !keepFields.musicbrainz_release_group_id) {
+        anchors.musicbrainz_release_group_id = dropFields.musicbrainz_release_group_id;
       }
     }
 
@@ -2785,7 +2901,7 @@ export async function mergeReleases(keepId: string, dropId: string): Promise<Mer
 
     const { error: clearError } = await client
       .from('releases')
-      .update({ needs_review: false, flagged_against_release_id: null })
+      .update({ needs_review: false, flagged_against_release_id: null, ...anchors })
       .eq('id', keepId);
     if (clearError) console.error('[DB] mergeReleases clear-flag failed:', clearError.message);
 
@@ -3085,20 +3201,36 @@ export async function addArtistReleaseLink(
   if (!client) return false;
   if (!(await verifyReleaseOwnership(artistId, [releaseId]))) return false;
 
-  // `external_id` is deliberately absent, not null. PostgREST's upsert updates only the columns
-  // present in the payload, so leaving it out keeps whatever id ingest already stored for this
-  // platform — writing an explicit null would erase the one thing that makes a re-crawl
-  // idempotent, and the next crawl would mint a duplicate source rather than update this row.
-  const { error } = await client.from('release_sources').upsert(
-    {
-      release_id: releaseId,
-      platform,
-      url,
-      source: 'claimed',
-      last_seen_at: new Date().toISOString(),
-    },
-    { onConflict: 'release_id,platform' }
-  );
+  // `external_id` is never written here, in either branch. It is the one thing that makes a
+  // re-crawl idempotent, so an artist correcting a URL must leave whatever id ingest stored
+  // exactly as it is — writing an explicit null would have the next crawl mint a duplicate
+  // source rather than update this row.
+  const { data: existingRows, error: readError } = await client
+    .from('release_sources')
+    .select('id')
+    .eq('release_id', releaseId)
+    .eq('platform', platform);
+
+  if (readError) {
+    console.error('[DB] addArtistReleaseLink read failed:', readError.message);
+    return false;
+  }
+
+  const rows = (existingRows as { id: string }[] | null) || [];
+
+  // A release can now hold several sources on one platform (two Discogs masters an admin
+  // merged into one record). "Set this platform's link" has no single answer then, and picking
+  // one at random would silently rewrite a URL the artist never looked at.
+  if (rows.length > 1) {
+    console.error('[DB] addArtistReleaseLink: release has multiple', platform, 'sources; refusing to guess');
+    return false;
+  }
+
+  const write = rows.length === 1
+    ? client.from('release_sources').update({ url, source: 'claimed', last_seen_at: new Date().toISOString() }).eq('id', rows[0].id)
+    : client.from('release_sources').insert({ release_id: releaseId, platform, url, source: 'claimed', last_seen_at: new Date().toISOString() });
+
+  const { error } = await write;
 
   if (error) {
     console.error('[DB] addArtistReleaseLink failed:', error.message);
@@ -4409,7 +4541,7 @@ export async function getReleaseDetail(
       .from('releases')
       .select(
         'slug, title, release_type, release_date, date_precision, status, artwork_url,' +
-        ' release_sources ( platform, url, detail_checked_at,' +
+        ' release_sources ( platform, url, source, detail_checked_at,' +
         ' release_offers ( format, price, currency, availability, captured_at ) )'
       )
       .eq('artist_id', artistRow.id)
@@ -4434,6 +4566,7 @@ export async function getReleaseDetail(
       release_sources: {
         platform: string;
         url: string;
+        source: string | null;
         detail_checked_at: string | null;
         release_offers: {
           format: string;
@@ -4460,7 +4593,10 @@ export async function getReleaseDetail(
           datePrecision: row.date_precision,
           status: row.status,
           artworkUrl: row.artwork_url,
-          sources: (row.release_sources || []).map(s => ({
+          // One row per platform, matching the edge page exactly — this is that page's JSON
+          // twin, and a release an admin merged out of two Discogs masters must not describe
+          // itself differently to a native client than it does on the web.
+          sources: oneSourcePerPlatform(row.release_sources || []).map(s => ({
             platform: s.platform,
             url: s.url,
             detailCheckedAt: s.detail_checked_at,

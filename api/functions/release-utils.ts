@@ -210,6 +210,122 @@ export function isFuzzyReleaseMatch(a: string, b: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// Cross-source dedup — the release date as evidence
+// ---------------------------------------------------------------------------
+
+/**
+ * How many leading characters of an ISO date each precision actually vouches for.
+ *
+ * `unknown` is absent on purpose: a date we can't place has nothing to compare.
+ */
+const PRECISION_DIGITS: Record<string, number> = { day: 10, month: 7, year: 4 };
+
+/**
+ * Do two releases carry dates that positively *disagree*?
+ *
+ * Compared only as far as the coarser of the two precisions vouches for, which is the whole
+ * reason `date_precision` is stored. Discogs routinely gives a bare year where Bandcamp gives
+ * a day, and `2020-01-01` there means "sometime in 2020", not "the first of January" — so
+ * comparing those two as full dates would declare every such pair different, which is the
+ * opposite of the truth.
+ *
+ * Silence is never disagreement. A missing date, or a precision we don't recognise, returns
+ * false: this answers "do we have evidence these are different releases", and no date is no
+ * evidence.
+ */
+export function releaseDatesDisagree(
+  a: { date?: string | null; precision?: string | null },
+  b: { date?: string | null; precision?: string | null }
+): boolean {
+  if (!a.date || !b.date) return false;
+
+  const digitsA = PRECISION_DIGITS[a.precision ?? 'day'];
+  const digitsB = PRECISION_DIGITS[b.precision ?? 'day'];
+  if (!digitsA || !digitsB) return false;
+
+  const digits = Math.min(digitsA, digitsB);
+  return a.date.slice(0, digits) !== b.date.slice(0, digits);
+}
+
+/** The columns a stored release has to expose for the two matchers below. */
+export interface ReleaseDedupCandidate {
+  match_key: string;
+  release_date?: string | null;
+  date_precision?: string | null;
+}
+
+/** The same facts, as an ingest pass has them, before anything is written. */
+export interface ReleaseDedupInput {
+  matchKey: string;
+  releaseDate?: string | null;
+  datePrecision?: string | null;
+}
+
+function dateFacts(candidate: ReleaseDedupCandidate) {
+  return { date: candidate.release_date, precision: candidate.date_precision };
+}
+
+function inputDateFacts(incoming: ReleaseDedupInput) {
+  return { date: incoming.releaseDate, precision: incoming.datePrecision };
+}
+
+/**
+ * Tier 2: the stored release this one already is, if any.
+ *
+ * Identical normalized title, and no date saying otherwise. **Release type is deliberately not
+ * part of the test**, which is the fix for the largest single source of duplicates in the
+ * catalog: Discogs' artist listing carries no type field for a master, so 92% of Discogs rows
+ * are typed `other` while the same record arrives from Bandcamp as `album`. Keying identity on
+ * `(release_type, match_key)` meant those two rows could never meet — 931 byte-identical
+ * titles sat side by side on artist pages, never merged and never even flagged, because
+ * flagging is also type-scoped.
+ *
+ * Where the types genuinely differ and both are meaningful, the data says they still describe
+ * one release rather than two: `Live At The Echo` filed as 'live' by one source and 'album' by
+ * the other, on the same day, is one record. The date is what separates a disagreement about
+ * *filing* from a disagreement about *identity* — an artist's single "Home" and album "Home"
+ * do not share a release date, so `releaseDatesDisagree` keeps them apart.
+ */
+export function findExactReleaseMatch<T extends ReleaseDedupCandidate>(
+  candidates: readonly T[],
+  incoming: ReleaseDedupInput
+): T | null {
+  const facts = inputDateFacts(incoming);
+  return (
+    candidates.find(
+      c => c.match_key === incoming.matchKey && !releaseDatesDisagree(dateFacts(c), facts)
+    ) ?? null
+  );
+}
+
+/**
+ * Tier 3: a stored release close enough to this one to be worth a human's time.
+ *
+ * `isFuzzyReleaseMatch` on its own is noisy in a specific, measurable way — of 858 fuzzy pairs
+ * in the catalog, 687 are pairs whose day-precision release dates differ, and every one of
+ * those sampled was a false positive: "Acid Dub Versions III" against "II", "Requiem Mass"
+ * against "Requiem", four volumes of "As I Hear Them In My Head". A containment match between
+ * titles is a guess; two sources independently reporting different days is a fact, and the
+ * fact wins.
+ *
+ * The queue this feeds is a human's time, so a flag that is 80% noise is worse than no flag —
+ * it trains the reviewer to dismiss without reading.
+ */
+export function findFuzzyReleaseMatch<T extends ReleaseDedupCandidate>(
+  candidates: readonly T[],
+  incoming: ReleaseDedupInput
+): T | null {
+  const facts = inputDateFacts(incoming);
+  return (
+    candidates.find(
+      c =>
+        isFuzzyReleaseMatch(c.match_key, incoming.matchKey) &&
+        !releaseDatesDisagree(dateFacts(c), facts)
+    ) ?? null
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Dates
 // ---------------------------------------------------------------------------
 

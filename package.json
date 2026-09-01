@@ -16,6 +16,7 @@
     "sync:bandcamp-dates": "npx tsx scripts/sync-bandcamp-dates.ts",
     "backfill:artist-rows": "npx tsx scripts/backfill-published-artist-rows.ts",
     "backfill:locations": "npx tsx scripts/backfill-artist-locations.ts",
+    "dedupe:releases": "npx tsx scripts/dedupe-releases.ts",
     "ingest:try": "npx tsx scripts/ingest-releases.ts",
     "ingest:mirlo": "npx tsx scripts/ingest-mirlo.ts",
     "preview:release": "npx tsx scripts/preview-release-page.ts",
