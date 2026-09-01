@@ -3207,7 +3207,7 @@ export async function addArtistReleaseLink(
   // source rather than update this row.
   const { data: existingRows, error: readError } = await client
     .from('release_sources')
-    .select('id')
+    .select('id, source')
     .eq('release_id', releaseId)
     .eq('platform', platform);
 
@@ -3216,18 +3216,24 @@ export async function addArtistReleaseLink(
     return false;
   }
 
-  const rows = (existingRows as { id: string }[] | null) || [];
+  const rows = (existingRows as { id: string; source: string }[] | null) || [];
+  const claimedRow = rows.find((row) => row.source === 'claimed');
 
   // A release can now hold several sources on one platform (two Discogs masters an admin
-  // merged into one record). "Set this platform's link" has no single answer then, and picking
-  // one at random would silently rewrite a URL the artist never looked at.
-  if (rows.length > 1) {
+  // merged into one record). If the artist already has their own claimed row, that's
+  // unambiguous — it's theirs, so update it regardless of how many ingest sources sit beside
+  // it. Otherwise, with 2+ ingest sources and no claimed row, "set this platform's link" has
+  // no single answer, and picking one at random would silently rewrite a URL the artist never
+  // looked at.
+  if (!claimedRow && rows.length > 1) {
     console.error('[DB] addArtistReleaseLink: release has multiple', platform, 'sources; refusing to guess');
     return false;
   }
 
-  const write = rows.length === 1
-    ? client.from('release_sources').update({ url, source: 'claimed', last_seen_at: new Date().toISOString() }).eq('id', rows[0].id)
+  const targetId = claimedRow?.id ?? (rows.length === 1 ? rows[0].id : undefined);
+
+  const write = targetId
+    ? client.from('release_sources').update({ url, source: 'claimed', last_seen_at: new Date().toISOString() }).eq('id', targetId)
     : client.from('release_sources').insert({ release_id: releaseId, platform, url, source: 'claimed', last_seen_at: new Date().toISOString() });
 
   const { error } = await write;
