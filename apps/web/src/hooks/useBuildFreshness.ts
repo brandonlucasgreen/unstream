@@ -33,18 +33,27 @@ export function useBuildFreshness(): { isStale: boolean; dismiss: () => void } {
     // the latest verdict from render would mean either re-running the effect (tearing down its
     // own listeners) or writing a ref during render.
     let settled = false
+    // Guards against overlapping fetches: a fast visibilitychange/interval collision (tab
+    // switched back and forth before the in-flight probe resolves) would otherwise fire a
+    // second fetch on top of the first instead of just skipping it.
+    let inFlight = false
 
     const check = async () => {
       // Once stale, stop asking. The answer can only change by this tab reloading, which ends
       // this component's life anyway.
-      if (settled) return
-      const deployed = await fetchDeployedBuild(controller.signal)
-      if (controller.signal.aborted) return
-      // A null probe yields 'unknown', which leaves the banner hidden. Not folded into 'fresh':
-      // see the note on FreshnessVerdict.
-      const next = freshnessVerdict(running, deployed, Date.now())
-      if (next === 'stale') settled = true
-      setVerdict(next)
+      if (settled || inFlight) return
+      inFlight = true
+      try {
+        const deployed = await fetchDeployedBuild(controller.signal)
+        if (controller.signal.aborted) return
+        // A null probe yields 'unknown', which leaves the banner hidden. Not folded into
+        // 'fresh': see the note on FreshnessVerdict.
+        const next = freshnessVerdict(running, deployed, Date.now())
+        if (next === 'stale') settled = true
+        setVerdict(next)
+      } finally {
+        inFlight = false
+      }
     }
 
     const checkIfVisible = () => {
