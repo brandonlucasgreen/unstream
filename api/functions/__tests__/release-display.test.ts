@@ -253,6 +253,21 @@ describe('oneSourcePerPlatform', () => {
     expect(oneSourcePerPlatform([a, b])).toEqual([a]);
     expect(oneSourcePerPlatform([b, a])).toEqual([b]);
   });
+
+  // The winner is tracked by identity, not by index or value — a caller that round-trips the
+  // input through JSON (serializing across a worker boundary, a cache layer) must not lose
+  // every source for a platform just because `===` no longer holds between the input array and
+  // itself.
+  it('survives sources that have been serialized and re-parsed', () => {
+    const roundTripped = JSON.parse(JSON.stringify([bare, withOffers]));
+    expect(oneSourcePerPlatform(roundTripped)).toEqual([withOffers]);
+  });
+
+  // Two array slots pointing at the same object is a degenerate case (a dedupe bug upstream,
+  // say) — it must still keep one source rather than filtering the platform out entirely.
+  it('keeps one source even when the same object appears twice in the input', () => {
+    expect(oneSourcePerPlatform([withOffers, withOffers])).toEqual([withOffers]);
+  });
 });
 
 describe('orderedSourcePlatforms — duplicates', () => {

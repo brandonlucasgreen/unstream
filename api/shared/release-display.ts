@@ -277,14 +277,17 @@ export function leadingOfferSummary(sources: ReleaseSourceSummary[]): string {
 export function oneSourcePerPlatform<
   T extends { platform: string; source?: string | null; detail_checked_at?: string | null; release_offers?: unknown[] | null }
 >(sources: readonly T[]): T[] {
-  const best = new Map<string, T>();
+  const bestIndex = new Map<string, number>();
 
-  for (const source of sources) {
-    const incumbent = best.get(source.platform);
-    if (!incumbent || score(source) > score(incumbent)) best.set(source.platform, source);
+  for (let i = 0; i < sources.length; i++) {
+    const platform = sources[i].platform;
+    const incumbent = bestIndex.get(platform);
+    if (incumbent === undefined || score(sources[i]) > score(sources[incumbent])) {
+      bestIndex.set(platform, i);
+    }
   }
 
-  return sources.filter(s => best.get(s.platform) === s);
+  return sources.filter((s, i) => bestIndex.get(s.platform) === i);
 }
 
 function score(source: { source?: string | null; detail_checked_at?: string | null; release_offers?: unknown[] | null }): number {
