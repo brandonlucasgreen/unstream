@@ -34,7 +34,14 @@ function makeClient() {
             eq: (_c: string, id: unknown) => {
               const row = rowsOf().find(r => r.id === id);
               if (row) Object.assign(row, patch);
-              return Promise.resolve({ error: null });
+              // Real Supabase's builder is both awaitable on its own (`.update().eq()`) and
+              // chainable into `.select().single()` (`.update().eq().select().single()`) — this
+              // has to support both, the same as `insert` below.
+              return {
+                select: () => ({ single: () => Promise.resolve({ data: row ?? null, error: null }) }),
+                then: (resolve: (v: unknown) => unknown, reject?: (e: unknown) => unknown) =>
+                  Promise.resolve({ error: null }).then(resolve, reject),
+              };
             },
           };
         },
@@ -221,6 +228,31 @@ describe('the source row', () => {
     await persistReleases(ARTIST, incoming() as never);
 
     expect(sourceWrites()).toHaveLength(1);
+  });
+
+  // Regression for #507: upsertReleaseSource used to delete the *new* key
+  // (`prior?.external_id ?? externalId` collapses to `externalId` whenever the null-id fallback
+  // matched), leaving the old null-keyed map entry stale. A second source for the same release
+  // and platform later in the same pass would then find that stale entry and overwrite the row
+  // the first source had just upgraded, wiping out the external id it had just been given.
+  it('does not let a second null-external-id source in the same pass clobber the first upgrade', async () => {
+    seedRelease();
+    seedSource({ external_id: null });
+
+    const secondSource = {
+      ...incoming()[0],
+      source: { platform: 'bandcamp', url: 'https://someone.bandcamp.com/album/first-record-alt', externalId: null },
+    };
+
+    await persistReleases(ARTIST, [...incoming(), secondSource] as never);
+
+    const upgraded = tables.release_sources.find((r: Row) => r.id === 's1');
+    expect(upgraded).toMatchObject({ external_id: 'album-111', url: SOURCE_URL });
+
+    // The second source is a genuinely different row — not a clobber of s1.
+    const others = tables.release_sources.filter((r: Row) => r.id !== 's1');
+    expect(others).toHaveLength(1);
+    expect(others[0]).toMatchObject({ external_id: null, url: 'https://someone.bandcamp.com/album/first-record-alt' });
   });
 
   // Rule 1 of upsertReleaseSource. A claimed URL is an artist's own correction and a re-crawl must

@@ -1270,9 +1270,17 @@ async function upsertReleaseSource(
   // no id yet is the same source before we learned what to call it — an early Bandcamp crawl
   // that stored a URL and nothing else, say — so it gets upgraded in place rather than joined
   // by a second row. Only a genuinely new id inserts.
-  const prior =
-    existingSources.get(releaseSourceKey(releaseId, platform, externalId)) ??
-    (externalId ? existingSources.get(releaseSourceKey(releaseId, platform, null)) : undefined);
+  const priorByExternalId = existingSources.get(releaseSourceKey(releaseId, platform, externalId));
+  const priorByNullExternalId = externalId ? existingSources.get(releaseSourceKey(releaseId, platform, null)) : undefined;
+  const prior = priorByExternalId ?? priorByNullExternalId;
+  // The key `prior` actually lives under — `prior?.external_id` is wrong when the null-id
+  // fallback matched and `externalId` is non-null, since it collapses to the *new* key via `??`
+  // and leaves the stale null-keyed entry in the map for a later source in this pass to hit.
+  const priorKey = priorByExternalId
+    ? releaseSourceKey(releaseId, platform, externalId)
+    : priorByNullExternalId
+      ? releaseSourceKey(releaseId, platform, null)
+      : undefined;
 
   if (prior?.source === 'claimed') {
     return { id: prior.id, url: prior.url, detail_checked_at: prior.detail_checked_at };
@@ -1302,7 +1310,7 @@ async function upsertReleaseSource(
   // Keep the map honest for the rest of this pass, so a second release resolving to the same
   // source doesn't insert over the top of a row this call just wrote.
   const written = data as ExistingReleaseSource;
-  existingSources.delete(releaseSourceKey(releaseId, platform, prior?.external_id ?? externalId));
+  if (priorKey) existingSources.delete(priorKey);
   existingSources.set(releaseSourceKey(releaseId, platform, externalId), {
     ...written,
     release_id: releaseId,
