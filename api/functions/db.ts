@@ -3247,6 +3247,36 @@ export async function addArtistReleaseLink(
   const { error } = await write;
 
   if (error) {
+    // The read above is not atomic with the write: two concurrent calls can both see zero rows
+    // and both insert. `idx_release_sources_release_platform_external` — which two id-less rows
+    // on one platform can never both satisfy — is what actually catches that, as a 23505 on the
+    // insert we lost the race on. Whoever won gets treated as "already there"; fall back to
+    // updating their row instead of failing the request.
+    if (rows.length === 0 && error.code === '23505') {
+      const { data: retryRows, error: retryError } = await client
+        .from('release_sources')
+        .select('id')
+        .eq('release_id', releaseId)
+        .eq('platform', platform)
+        .is('external_id', null);
+
+      if (retryError || (retryRows as { id: string }[] | null || []).length !== 1) {
+        console.error('[DB] addArtistReleaseLink: conflict retry did not resolve to one row', retryError?.message);
+        return false;
+      }
+
+      const { error: updateError } = await client
+        .from('release_sources')
+        .update({ url, source: 'claimed', last_seen_at: new Date().toISOString() })
+        .eq('id', (retryRows as { id: string }[])[0].id);
+
+      if (updateError) {
+        console.error('[DB] addArtistReleaseLink conflict-retry update failed:', updateError.message);
+        return false;
+      }
+      return true;
+    }
+
     console.error('[DB] addArtistReleaseLink failed:', error.message);
     return false;
   }
