@@ -98,7 +98,6 @@
 
     var style = document.createElement('style');
     style.textContent = [
-      '@import url("https://api.fonts.coollabs.io/css2?family=Stack+Sans+Headline:wght@400;500;600&display=swap");',
       '.uw-root { font-family: "Stack Sans Headline", system-ui, sans-serif; background: ' + bg + '; border: 1px solid ' + border + '; border-radius: 12px; padding: 16px; max-width: 380px; box-sizing: border-box; }',
       '.uw-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; text-decoration: none; color: inherit; }',
       '.uw-img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: ' + border + '; flex-shrink: 0; }',
