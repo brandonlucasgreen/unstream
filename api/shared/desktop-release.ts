@@ -34,15 +34,15 @@ export interface MacRelease {
 }
 
 export const MAC_RELEASE: MacRelease = {
-  shortVersion: '3.5.0',
-  build: '15',
-  url: 'https://github.com/brandonlucasgreen/unstream/releases/download/v3.5.0/Unstream-3.5.0.dmg',
-  lengthBytes: 0,
-  edSignature: '',
-  publishedAt: '2026-08-16T00:00:00Z',
+  shortVersion: '3.6.1',
+  build: '17',
+  url: 'https://github.com/brandonlucasgreen/unstream/releases/download/v3.6.1/Unstream-3.6.1.dmg',
+  lengthBytes: 4301800,
+  edSignature: 'dPBq5G6415V6qaPj9byMyeENv97VS7rnjZXUeXutb5vaj2QLAQkhg/gVUqxtxJa1YEoVVWiFDpTv/EmDKXEQCw==',
+  publishedAt: '2026-09-06T00:00:00Z',
   minimumSystemVersion: '13.0',
   releaseNotes:
-    'Fixes release alerts: cross-device dismissal sync, missing platforms, and alerts lost after time away',
+    'Unstream now updates itself instead of sending you to GitHub. Also fixes magic-link sign-in.',
   releasesPageUrl: 'https://github.com/brandonlucasgreen/unstream/releases',
 };
 
@@ -51,8 +51,8 @@ export const MAC_RELEASE: MacRelease = {
  *
  * An unsigned or zero-length entry would be served as a perfectly well-formed appcast that
  * every client then rejects at the signature check — a silent failure that looks like "no
- * update available". Better to serve an empty feed and say why. 3.5.0 predates Sparkle and so
- * has no signature; the first signed release fills these in.
+ * update available". Better to serve an empty feed and say why. 3.6.1 is the first signed
+ * release; 3.5.0 and earlier predate Sparkle and were served with these fields empty.
  */
 export function isSparkleReady(release: MacRelease): boolean {
   return release.edSignature.length > 0 && release.lengthBytes > 0;
