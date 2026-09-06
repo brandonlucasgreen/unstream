@@ -131,9 +131,15 @@ const DETAIL_BUDGET_MS = 9 * 60_000;
 
 /**
  * Re-read a release page after this long. Prices change and vinyl sells out, so an offer is a
- * claim with an age — but re-reading weekly would triple the crawl for data that rarely moves.
+ * claim with an age — but re-reading often multiplies the crawl for data that rarely moves.
+ *
+ * 90, up from 30 on 2026-09-06 (disk I/O round 4). Every source ever catalogued is re-fetched,
+ * re-compared and re-stamped on this cycle forever, so it is the compounding term in the
+ * database's write load: a third the frequency is a third the recurring work. The price shown on
+ * a release page can now be up to a quarter old rather than a month; the page already says the
+ * price is as of when it was captured.
  */
-const DETAIL_REFRESH_DAYS = 30;
+const DETAIL_REFRESH_DAYS = 90;
 
 /** What's left of the invocation's detail allowance. Shared across every artist in the batch. */
 interface DetailBudget {
@@ -711,7 +717,7 @@ async function catalogFaircamp(artistId: string, faircampUrl: string, budget: Fa
     const takenSlugs = new Set<string>();
     const toPersist: Parameters<typeof persistFaircampReleases>[1] = [];
     // Where each release's price lives, keyed by the release URL that becomes its source URL.
-    // Read now, fetched after the write, so the 30-day refresh rule can be applied to a source
+    // Read now, fetched after the write, so the DETAIL_REFRESH_DAYS rule can be applied to a source
     // whose `detail_checked_at` only exists once it has been persisted.
     const purchaseUrls = new Map<string, string>();
 
@@ -766,7 +772,7 @@ async function catalogFaircamp(artistId: string, faircampUrl: string, budget: Fa
  *
  * Separate from the release-page pass above because it can only run after the write: whether a
  * release is due a refresh is a fact about its stored source (`detail_checked_at`), and that
- * doesn't exist until `persistFaircampReleases` has created it. Same 30-day rule as Bandcamp's
+ * doesn't exist until `persistFaircampReleases` has created it. Same DETAIL_REFRESH_DAYS rule as Bandcamp's
  * detail pass, so a re-catalog of an unchanged Faircamp site costs nothing extra.
  *
  * Spends `priceFetchesLeft`, not the release-page budget: running after that pass used to mean
@@ -792,7 +798,7 @@ async function catalogFaircampPrices(
       // "we haven't looked yet" — which is what made 73+ of these look like budget starvation
       // when the catalogue was cross-tabbed. Measured 2026-08-07: whole instances are like this
       // (music.bedlamsteps.uk, www.willchatham.com, music.lminiero.it, music.axwax.eu,
-      // music.futzle.com). The 30-day rule still brings it back round if the artist adds one.
+      // music.futzle.com). The DETAIL_REFRESH_DAYS rule still brings it back round if the artist adds one.
       await persistReleaseDetail(release, {
         releaseDate: null,
         datePrecision: 'unknown',
@@ -844,7 +850,7 @@ async function catalogFaircampPrices(
  * page carries the date and the price alongside the title and artwork, so one fetch produces a
  * complete release.
  *
- * That single fetch is also why this pass has no 30-day `detail_checked_at` skip like Bandcamp's
+ * That single fetch is also why this pass has no DETAIL_REFRESH_DAYS `detail_checked_at` skip like Bandcamp's
  * and Faircamp's detail passes do: the album page *is* how a release is identified at all, so
  * there is nothing to skip to. Every run re-reads every album page. That's affordable here and
  * nowhere else — Jam.coop catalogues are tiny (one album is typical across the platform's 231
