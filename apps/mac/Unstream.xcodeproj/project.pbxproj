@@ -801,6 +801,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = CV926C8KS8;
+				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				"INFOPLIST_FILE[sdk=iphoneos*]" = "Unstream/Info-iOS.plist";
 				"INFOPLIST_FILE[sdk=iphonesimulator*]" = "Unstream/Info-iOS.plist";
 				"INFOPLIST_FILE[sdk=macosx*]" = "Unstream/Info-macOS.plist";
@@ -830,6 +831,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = CV926C8KS8;
+				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				"INFOPLIST_FILE[sdk=iphoneos*]" = "Unstream/Info-iOS.plist";
 				"INFOPLIST_FILE[sdk=iphonesimulator*]" = "Unstream/Info-iOS.plist";
 				"INFOPLIST_FILE[sdk=macosx*]" = "Unstream/Info-macOS.plist";

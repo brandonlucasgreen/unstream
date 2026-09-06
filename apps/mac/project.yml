@@ -73,6 +73,13 @@ targets:
       # Unstream.debug.dylib) and CI only compiles, so nothing but launching an exported
       # Release build catches it.
       "LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]": "$(inherited) @executable_path/../Frameworks"
+      # Required for Developer ID notarization, and macOS-only. It defaulted to NO from the
+      # universal-app restructure (3aaf5da) onwards; until Xcode 26 that went unnoticed because
+      # `-exportArchive` with method developer-id added `--options runtime` itself. Xcode 26.6
+      # respects this setting instead, so the export produced an app with flags=0x0(none) and
+      # the notary service rejected it: "The executable does not have the hardened runtime
+      # enabled." Sparkle's XPC helpers were already signed with it, so only the app was wrong.
+      "ENABLE_HARDENED_RUNTIME[sdk=macosx*]": YES
     dependencies:
       - target: UnstreamShareExtension
         destinationFilters: [iOS]
