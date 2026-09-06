@@ -97,6 +97,16 @@
     var badgeBgHover = isDark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.1)';
 
     var style = document.createElement('style');
+    // No @font-face import here, deliberately. This style element lives inside the shadow
+    // root, and font faces declared in a shadow root are never registered with the document's
+    // font set — so the Coollabs @import this used to carry fetched a stylesheet on every
+    // partner page and then applied nothing (measured: shadow text rendered at exactly the
+    // system-ui width, and the .woff2 files were never requested at all).
+    //
+    // The widget runs on other people's sites, where netlify.toml's CSP does not apply, so
+    // that was an unprotected third-party request buying nothing. 'Stack Sans Headline' stays
+    // first in the stack on purpose: document-level @font-face rules *do* reach a shadow root,
+    // so an embedding page that already loads the font gets our branding for free.
     style.textContent = [
       '.uw-root { font-family: "Stack Sans Headline", system-ui, sans-serif; background: ' + bg + '; border: 1px solid ' + border + '; border-radius: 12px; padding: 16px; max-width: 380px; box-sizing: border-box; }',
       '.uw-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; text-decoration: none; color: inherit; }',
