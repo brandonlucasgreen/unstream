@@ -4102,14 +4102,14 @@ async function filterUnchangedLinks(
  * site — up to `CATALOG_HOURLY_CAP.searched` (60) full first-time crawls an hour, against the
  * scheduled sweep's 100 a *day*. Each of those crawls inserts a row per release, a row per
  * release source and a row or three per offer, into three six-index tables, and then re-reads
- * every one of them on the 30-day detail refresh. That is what exhausted the Supabase disk I/O
+ * every one of them on the periodic detail refresh (DETAIL_REFRESH_DAYS). That is what exhausted the Supabase disk I/O
  * budget; see docs/specs/supabase-disk-io-investigation.md for the numbers and the SQL that
  * confirms it.
  *
  * Cataloging still happens, just from bounded triggers: a save, an artist's own button, the
- * admin command, a Bandcamp collection import, and the six-hourly sweep — whose pool is every
- * artist with a catalogue-able link, so a searched artist is still reached, within about a
- * month rather than within a minute. The cost of that trade is coverage latency on a brand-new
+ * admin command, a Bandcamp collection import, and the twice-daily sweep — whose pool is every
+ * artist with a catalogue-able link, so a searched artist is still reached, within a couple of
+ * months rather than within a minute. The cost of that trade is coverage latency on a brand-new
  * artist page, not lost coverage.
  *
  * Do not reintroduce a search-time trigger without a per-run budget that is measured against
