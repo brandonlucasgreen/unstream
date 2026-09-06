@@ -78,7 +78,6 @@ class AppState: ObservableObject {
         hasSearched = true
         isSearching = true
         searchError = nil
-        api.trackAppEvent(eventType: "search")
 
         do {
             // Phase 1: Get initial results — show them immediately.
@@ -87,6 +86,10 @@ class AppState: ObservableObject {
             let (results, hasPendingEnrichment) = try await api.searchArtist(query, mode: .fuzzy)
             searchResults = results
             isSearching = false
+            // The one 'search' product event per query, written on completion so it carries the
+            // outcome. There used to be a second, context-free one fired before the request —
+            // the same double-write the web app removed on 2026-08-19 — which doubled the Mac
+            // app's search counts in /admin/analytics and doubled the database writes for it.
             api.trackAppEvent(eventType: "search", context: ["has_results": results.count > 0, "result_count": results.count])
             trackSearchAppearances(results)
 
@@ -150,7 +153,6 @@ class AppState: ObservableObject {
             do {
                 print("[AppState] Fetching platforms for: \(artist)")
                 // Phase 1: Get initial results — show them immediately
-                api.trackAppEvent(eventType: "search")
                 let (results, hasPendingEnrichment) = try await api.searchArtist(artist)
                 nowPlayingResults = results
                 lastFetchedArtist = artist
