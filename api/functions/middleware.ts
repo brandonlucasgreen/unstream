@@ -207,6 +207,9 @@ export interface ApiKeyInfo {
   ownerEmail: string;
 }
 
+/** How often an API key's last_used_at is refreshed. See the stamp in authenticateApiKey. */
+const API_KEY_LAST_USED_STAMP_MS = 60 * 60 * 1000;
+
 /**
  * Validate an API key from the X-API-Key header.
  * Looks up the key prefix in Supabase, then compares SHA-256 hashes.
@@ -230,7 +233,7 @@ export async function authenticateApiKey(
   // Look up by prefix and compare hash
   const { data: keyRow, error } = await client
     .from('api_keys')
-    .select('id, key_prefix, key_hash, tier, daily_limit, per_minute, owner_email, is_active')
+    .select('id, key_prefix, key_hash, tier, daily_limit, per_minute, owner_email, is_active, last_used_at')
     .eq('key_prefix', prefix)
     .eq('is_active', true)
     .single();
@@ -242,13 +245,19 @@ export async function authenticateApiKey(
   const hashB = Buffer.from(keyHash, 'hex');
   if (hashA.length !== hashB.length || !timingSafeEqual(hashA, hashB)) return null;
 
-  // Update last_used_at (fire-and-forget)
-  Promise.resolve(
-    client
-      .from('api_keys')
-      .update({ last_used_at: new Date().toISOString() })
-      .eq('id', keyRow.id)
-  ).catch(() => { /* no-op */ });
+  // Stamp last_used_at at most once an hour (fire-and-forget). It used to be written on every
+  // request, which made every authenticated v1 call a row rewrite on a metered disk for a column
+  // whose only reader is the "last used" line on /developers — hourly is all the precision that
+  // line needs.
+  const lastUsed = keyRow.last_used_at ? new Date(keyRow.last_used_at).getTime() : 0;
+  if (Date.now() - lastUsed > API_KEY_LAST_USED_STAMP_MS) {
+    Promise.resolve(
+      client
+        .from('api_keys')
+        .update({ last_used_at: new Date().toISOString() })
+        .eq('id', keyRow.id)
+    ).catch(() => { /* no-op */ });
+  }
 
   return {
     id: keyRow.id,

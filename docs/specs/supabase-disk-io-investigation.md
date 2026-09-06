@@ -159,3 +159,267 @@ In escalating order, cheapest first:
    background function check it, so everything stops at once. Note that the six-hourly sweep
    workflow will then fail loudly on a 503 every run — that is deliberate, but disable the
    workflow's schedule at the same time so the failures aren't noise.
+
+---
+
+# Round 4 (2026-09-05): the warning is back — what is still writing
+
+**Trigger:** the disk I/O budget warning returned within a week of #494 removing the `searched`
+catalogue trigger. This section is a fresh code audit of every path that reaches Supabase: what
+each one writes per unit of traffic, how many index entries that write costs, and what would
+remove it. As with the section above, it is derived from the code, not measured on the live
+database — the SQL at the end is what turns it into a measurement.
+
+## The short version
+
+Nothing new appeared. What remains is the sum of five things, in rough order of weight:
+
+1. **Release cataloguing is still the largest writer**, now through the sweep alone. The pool
+   still carries a first-time backlog measured in the thousands, and a first-time catalogue is
+   the expensive case — every row it inserts pays for nine indexes on `releases`.
+2. **Phase 2 enrichment (`persistEnrichment`) rewrites rows on every request**, unchanged or
+   not. It is the one search-time writer that round 1 (#463) did not diff, and it runs *after*
+   the Redis cache read, so a cache hit still writes.
+3. **Every `artists` update is made deliberately expensive by an index nothing queries.**
+   `idx_artists_updated` indexes `updated_at`; every write to the table bumps `updated_at` via
+   trigger; so no update on `artists` can be a cheap in-place ("HOT") update, and every one
+   re-enters the row in all six indexes, including the trigram GIN on `name`.
+4. **`app_events` grows forever, carries six indexes including one exact duplicate, and every
+   row is rewritten a second time at 90 days** by the session-hash scrub.
+5. **Three clients write analytics per track, not per session**, and the Mac app writes two
+   `search` rows per search — the double-write the web app fixed on 2026-08-19.
+
+Four of the five are code and migration changes with no product trade-off. The fifth (retention
+on `app_events`) and the sweep's dials are the owner's call.
+
+## 1. Cataloguing: what one first-time artist costs now
+
+Per artist, from `catalog-artist-background.ts` and `db.ts`:
+
+| Step | Rows written | Indexes maintained per row |
+|---|---|---|
+| `claimArtistForCatalog` | 1 upsert on `release_catalog_state` | 3 (incl. `last_attempted_at`, so never HOT) |
+| `persistReleases` | 1 insert per release into `releases` + 1 into `release_sources` | **9** on `releases`, 4 on `release_sources` |
+| `catalogDetails` (up to 40 pages) | 1 `release_sources` stamp each, plus offers on change | 4 / 3 |
+| `catalogDiscogs` | up to 5 masters → `releases` + `release_sources`, 5 detail stamps | 9 / 4 |
+| `catalogMusicBrainz` | 1 `releases` update per matched group | 9 (via `updated_at` trigger; `updated_at` is not indexed on `releases`, so these *can* be HOT) |
+| `recordCatalogOutcome` | 1 update on `release_catalog_state` | 3 |
+
+Median 7 releases, p90 19. So a mid-sized first-time catalogue is on the order of 150–400
+physical index+heap writes before WAL, and the p90 is roughly triple that. At 100 artists a day
+with a backlog of ~1,700 never-catalogued artists (2,564 in the pool on 2026-08-02 against 803
+catalogued on 2026-08-07 — re-measure), the sweep spends the next ~17 days doing the expensive
+case almost every run, and only then settles into the cheaper 30-day refresh.
+
+The `releases` index count matters because it multiplies everything above:
+
+- `idx_releases_artist_id (artist_id)` is a strict prefix of
+  `idx_releases_artist_chrono (artist_id, release_date, created_at)`. Postgres uses the wider
+  index for any query the narrower one could serve. It is a wasted write on every insert.
+- `idx_releases_match (artist_id, release_type, match_key)` was built when identity was
+  `(release_type, match_key)`. The "Release dedup" section of `CLAUDE.md` records that type was
+  removed from identity on 2026-08-29; the lookup is now by `(artist_id, match_key)` and the
+  middle column only widens the index. Worth confirming its `idx_scan` before touching.
+
+## 2. `persistEnrichment` is the un-diffed writer
+
+`api/functions/search-musicbrainz.ts` → `persistEnrichment` runs on every function invocation
+that resolves an artist name. Per call:
+
+- **One `artist_links` upsert per enrichment link**, sequential, `ON CONFLICT DO UPDATE`.
+  Postgres has no "skip if identical": each one is a new tuple version plus the
+  `artist_links_updated_at` trigger. Official site, Discogs, hoopla, freegal, three to six
+  socials, plus discovered platforms — typically 6–10 rows, every time.
+- **One unconditional `artists.update({ last_enriched_at })`**, which fires the
+  `artists_updated_at` trigger. Nothing reads `last_enriched_at` (grep: written in one place,
+  read nowhere).
+
+It runs after `cacheGetOrFetch`, so the 30-minute Redis cache saves the MusicBrainz round trip
+but not the writes; only the CDN's 5-minute `s-maxage` does. Callers are the web app's Phase 2,
+the extension's `enrichArtist` (per new artist, 30-minute client cache) and the Mac app's
+`fetchMusicBrainzData`.
+
+This is exactly the shape `persistSearchResults` had before #463 fixed it with
+`artistNeedsRefresh` and `filterUnchangedLinks`. The same fix applies: one read of the artist's
+current links, write only the rows that differ, and stamp the artist row at most once an hour
+(or drop the stamp — see below).
+
+## 3. `idx_artists_updated` turns every `artists` update into six index writes
+
+A Postgres update is cheap ("HOT") only when no indexed column changes. `artists` has a trigger
+that sets `updated_at = now()` on every update, and `idx_artists_updated` indexes that column.
+So *every* update on the table — the hourly search refresh, enrichment, `died_on` backfills,
+claims — is non-HOT and re-enters the row in all six indexes: the primary key, the `slug`
+UNIQUE constraint, `idx_artists_slug`, `idx_artists_updated`, `idx_artists_living`, and the
+trigram GIN on `name`. GIN entries are the expensive ones: one per trigram of the name.
+
+No query uses the index. `updated_at` is read in exactly two places, both without a filter or
+ordering on it: `getArtistBySlug` compares it in JavaScript against `FRESHNESS_TTL_MS`, and the
+build-time sitemap selects `slug, updated_at` for every row. Dropping the index does not change a
+single query plan, and turns the majority of `artists` updates into HOT updates.
+
+`idx_artists_slug` is also redundant: `slug text unique not null` already creates a unique index
+on the same column. Two indexes on `artists`, both pure write cost.
+
+## 4. `app_events`: six indexes, no retention, two writes per row
+
+The write path: `analytics-app-event.ts` inserts one row per event. The web app sends one per
+search completion, platform click, artist page view and download. The extension sends **two per
+track detection** (`extension_activated` and `search`), cache hit or not, by design. The Mac app
+sends **two `search` rows per search** — "initiated" and "completed" — which is the double-write
+`apps/web/src/services/analytics.ts` removed on 2026-08-19 with the comment "doubled the write
+cost for no information". Nobody ported the fix.
+
+The indexes, from three migrations that did not all know about each other:
+
+| Index | From | Note |
+|---|---|---|
+| `app_events_pkey` | 2026-04-12 | |
+| `idx_app_events_created_at (created_at desc)` | 2026-04-12 | |
+| `idx_app_events_type_app (event_type, app, created_at desc)` | 2026-04-12 | |
+| `idx_app_events_unscrubbed (created_at) WHERE session_hash IS NOT NULL` | 2026-08-08 | for the scrub |
+| `idx_app_events_type_created (event_type, created_at desc)` | 2026-08-11 | overlaps `type_app` |
+| `idx_app_events_created (created_at desc)` | 2026-08-11 | **exact duplicate** of `created_at` |
+
+The 2026-08-11 migration's own comment says "the table's only index was
+`idx_app_events_unscrubbed`". It wasn't; the original two were still there. Every insert pays six
+index writes where three would do.
+
+Then the nightly scrub (`expire_app_event_session_hashes`) sets `session_hash = NULL` on the
+day that just turned 90. `session_hash` is the *predicate* of the partial index, so the update
+changes index membership and cannot be HOT: each row is rewritten with six more index writes
+and leaves a dead tuple for autovacuum. Every row this table has ever received is written twice.
+
+## 5. Per-track analytics from the clients
+
+Not a bug, but a multiplier worth stating: the extension and the Mac app poll the player every
+3–5 seconds and treat every track change as a detection. Per track, the extension issues two
+`app_events` inserts and one `increment_analytics` RPC per claimed artist in the results, and on
+a 30-minute cache miss a full `/api/search/sources` (with `persistSearchResults` and the probe)
+and a `/api/search/musicbrainz` (with §2's writes). The `extension_activated` event exists only
+for the dashboard's "streaming services" breakdown, which is a per-session question being
+answered with a per-track write.
+
+## Smaller items, for completeness
+
+- **`api_keys.last_used_at`** is rewritten on every authenticated v1 request
+  (`authenticateApiKey` in `middleware.ts`). Stamp it at most hourly.
+- **`artist_analytics` increments** (`increment_analytics` RPC) are `ON CONFLICT DO UPDATE` on a
+  table whose indexed columns don't change, so they are HOT. Fine.
+- **Reads that can miss the buffer cache.** A Nano instance has 0.5 GB of RAM in total; once the
+  `releases` trio, `app_events` and the trigram GIN stop fitting, ordinary indexed reads become
+  disk reads. Per search there are ~25 PostgREST round trips (`getArtistsBySlugs` ×3, the
+  trigram ILIKE in `findKnownArtistSlugsByName`, the probe read, and two reads per persisted
+  artist). Per crawler page view of `/a/:slug`, four queries including a nested
+  releases→sources→offers select with `count: 'exact'`; the CDN holds it for a day but there are
+  ~800 distinct pages and several crawlers. Query 3 below (heap/idx `blks_read`) is how to tell
+  whether this is the dominant term. If it is, the fix is shrinking the working set — which is
+  what §3, §4 and the index drops do anyway.
+- Already right and not worth touching: `persistSearchResults` (throttled and diffed since
+  #463), `me-listening` (diffed), the Bandcamp probe cache (write-once negatives),
+  `saved-artists-sync` (5-minute pull of a ~40-row table), `check-releases` (weekly per client),
+  the two pg_cron jobs (one statement each, nightly).
+
+## Confirm before acting
+
+Run the four queries in the section above first — they still answer "which tables move the
+disk". Then this one, which answers "which indexes earn their writes":
+
+```sql
+-- 5. Index size and how often each has been used since stats were reset.
+--    idx_scan = 0 on an index that isn't a UNIQUE constraint is a drop candidate.
+SELECT s.relname AS table, s.indexrelname AS index,
+       pg_size_pretty(pg_relation_size(s.indexrelid)) AS size,
+       s.idx_scan AS scans,
+       i.indisunique AS is_unique
+FROM pg_stat_user_indexes s
+JOIN pg_index i ON i.indexrelid = s.indexrelid
+ORDER BY s.relname, s.idx_scan;
+```
+
+What confirms §3 and §4: `idx_artists_updated`, `idx_artists_slug`, `idx_app_events_created_at`
+(or `idx_app_events_created` — one of the pair) and `idx_releases_artist_id` at or near zero
+scans while sitting at a meaningful size. What confirms §2: `artist_links` near the top of query
+2's `n_tup_upd` with a `n_dead_tup` to match — those updates have no other high-volume source.
+
+## Proposal, in the order to do it
+
+**Tier A — no product change, each its own small PR.**
+
+1. **Diff `persistEnrichment`.** Read the artist's current `artist_links` once (the same shape as
+   `filterUnchangedLinks`), upsert only rows whose `url`/`source`/`is_direct` differ, and stop
+   writing `last_enriched_at` unconditionally — either throttle it to hourly like
+   `PERSIST_REFRESH_FLOOR_MS`, or drop the column, since nothing reads it. Unit-testable against
+   the existing `db` test pattern.
+2. **Drop the write-only indexes**, one migration, each guarded by the query-5 result:
+   `idx_artists_updated`, `idx_artists_slug`, `idx_app_events_created` (keep the original
+   `idx_app_events_created_at`; same definition), `idx_app_events_type_app` (superseded by
+   `type_created` for every dashboard query; no query filters on `app` together with
+   `event_type`), and `idx_releases_artist_id`. Plain `DROP INDEX`, not `CONCURRENTLY`: the CLI
+   runs each migration in a transaction, where `CONCURRENTLY` is refused, and these tables are
+   small enough that the lock lasts milliseconds. The `artists` drops are the one with leverage:
+   they make most `artists` updates HOT.
+3. **Port the web's search-event fix to the Mac app**: remove the `trackAppEvent("search")` call
+   before each `searchArtist` in `AppState.swift` (four sites; keep the completion call that
+   carries `has_results`). Halves the Mac app's `app_events` volume.
+4. **Throttle `api_keys.last_used_at`** to once an hour: add `last_used_at` to the select in
+   `authenticateApiKey` and skip the update when it's recent.
+
+**Tier B — dials, reversible in a one-line change, product-visible.**
+
+5. **Slow the sweep while the backlog drains**: `.github/workflows/recatalog-sweep.yml` from
+   every 6 hours to every 12 (100 → 50 artists/day), or cut `MAX_DETAIL_FETCHES_PER_RUN` from
+   300 to 150. New artist pages take longer to fill; alerts for *saved* artists are unaffected
+   because saving still catalogues immediately.
+6. **`DETAIL_REFRESH_DAYS` 30 → 90.** Prices refresh quarterly instead of monthly; the recurring
+   workload drops to a third.
+7. **Extension: fire `extension_activated` once per tab-session per streaming service**, not per
+   track. Keep the `search` event and the per-artist `increment_analytics` calls — those are the
+   ones an artist's dashboard is built on.
+
+**Tier C — structural, needs a decision.**
+
+8. **Bounded `app_events` with a daily rollup.** Add `app_events_daily (day, event_type, app,
+   context_key, context_value, count)`, have the nightly job aggregate rows older than 90 days
+   into it and *delete* them, and point the five `analytics_*` SQL functions at
+   `rollup UNION raw`. Every number the dashboard shows is a count by type/app/day/platform, so
+   nothing is lost; the year-over-year argument from 2026-08-08 is preserved by the rollup. The
+   table stops growing, the scrub's second rewrite of every row disappears (a delete is one
+   heap write and no dead-tuple churn on six indexes), and the working set shrinks. This is the
+   one that turns `app_events` from an unbounded term into a constant.
+
+## What landed (2026-09-06)
+
+Tiers A and B, on the `claude/supabase-disk-io-optimization-ly3jne` branch, one commit each:
+
+| # | Change | Where |
+|---|---|---|
+| 1 | `persistEnrichment` diffs links before writing and no longer writes `last_enriched_at` | `api/functions/db.ts`, test in `__tests__/persist-enrichment-churn.test.ts` |
+| 2 | Five write-only indexes dropped | `supabase/migrations/20260906120000_drop-write-only-indexes.sql` |
+| 3 | Mac app writes one `search` event per search, not two | `apps/mac/Unstream/Models/AppState.swift` |
+| 4 | `api_keys.last_used_at` stamped hourly, not per request | `api/functions/middleware.ts` |
+| 5 | Sweep every 12 hours (50 artists/day) | `.github/workflows/recatalog-sweep.yml` |
+| 6 | `DETAIL_REFRESH_DAYS` 30 → 90 | `api/functions/catalog-artist-background.ts` |
+| 7 | Extension fires `extension_activated` hourly per service, not per track | `apps/extension/background/service-worker.js` (2.7.1) |
+
+Two of these need a release to take effect for real users: the Mac app change ships with the
+next Sparkle build, and the extension change with the next store submission. The rest are live
+on merge (the migration applies itself via `supabase-migrate.yml`; check that run went green).
+
+Things deliberately *not* changed, and why:
+
+- `idx_releases_match (artist_id, release_type, match_key)` is still there. Its middle column is
+  dead weight since release type left identity, but it is still the index the match lookup
+  uses; rebuilding it as `(artist_id, match_key)` is a separate, measurable change.
+- The 90-day `app_events` scrub still rewrites rows. Removing that second write is Tier C — a
+  rollup plus retention — and is a product decision about history.
+- The sweep cadence is a dial, not a fix. The workflow comment says when to turn it back.
+
+The measurement that says whether this was enough is the same as before: the Supabase disk I/O
+graph over the two weeks after merge, and queries 2 and 5 above. If `artist_links` updates are
+still climbing, something else writes them; if `releases` inserts dominate, the backlog is
+still draining and the cadence is the lever.
+
+**If the warning is urgent right now**, the no-deploy relief valve from the previous section
+still stands: delete `RELEASE_CATALOG_ENABLED` from the Netlify Functions environment and pause
+the sweep workflow. Everything in Tier A can then land before turning it back on.

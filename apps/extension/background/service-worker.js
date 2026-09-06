@@ -133,6 +133,31 @@ async function trackAnalyticsEvent(slug, metric) {
   }
 }
 
+// How often one streaming service can produce an `extension_activated` event from this browser.
+const ACTIVATION_EVENT_INTERVAL_MS = 60 * 60 * 1000;
+
+// `extension_activated` answers one dashboard question — which streaming services are people
+// using the extension on — and that is a per-session fact, not a per-track one. It used to fire
+// on every track change, which made it the extension's largest single write to the database:
+// two app_events rows per song, one of them saying the same thing as the last.
+//
+// Gated through chrome.storage.local rather than a module variable because an MV3 service
+// worker is shut down between tracks minutes apart; in-memory state would reset every time and
+// gate nothing. One key per service, so there is nothing for pruneStaleCache to clean up.
+async function trackActivation(service) {
+  const key = `activated:${service}`;
+  try {
+    const stored = await chrome.storage.local.get(key);
+    const last = stored[key] || 0;
+    if (Date.now() - last < ACTIVATION_EVENT_INTERVAL_MS) return;
+    await chrome.storage.local.set({ [key]: Date.now() });
+  } catch (error) {
+    // Storage failing must not cost the event — fall through and record it.
+    console.warn('Activation gate unavailable:', error);
+  }
+  trackAppEvent('extension_activated', { streaming_service: service });
+}
+
 // Fire-and-forget product analytics event
 async function trackAppEvent(event_type, context = {}) {
   try {
@@ -170,8 +195,8 @@ async function handleMusicDetection(data, tabId) {
     currentTrack: { artist, title, source, timestamp: now, tabId: tabId ?? null }
   });
 
-  // Track extension activation with streaming service
-  trackAppEvent('extension_activated', { streaming_service: source || 'unknown' });
+  // Track extension activation with streaming service — once an hour per service, not per track.
+  trackActivation(source || 'unknown');
 
   // Read through the cache rather than always fetching.
   //

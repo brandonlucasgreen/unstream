@@ -10,31 +10,36 @@ name: Release catalogue sweep
 # functions in this repo, and this is the established precedent (schedule-social-posts.yml,
 # upstash-keepalive.yml).
 #
-# ## Cadence: every 6 hours
+# ## Cadence: every 12 hours
 #
-# One run asks for at most 25 artists — one background invocation's worth — so four runs a day
-# is 100 artists daily. Measured against the pool on 2026-08-02 (2,564 artists with a
-# catalogue-able link, 9 of them saved by anybody) that means:
+# One run asks for at most 25 artists — one background invocation's worth — so two runs a day is
+# 50 artists daily. It was four runs (100 a day) until 2026-09-06; halved as part of disk I/O
+# round 4 (docs/specs/supabase-disk-io-investigation.md), because with the `searched` trigger
+# gone (#494) the sweep is the largest remaining writer, and most of what it does is first-time
+# catalogues from the backlog — the expensive case, nine indexes on `releases` per row. Restore
+# `0 1,7,13,19 * * *` once the Supabase disk I/O warning has stayed quiet for a month.
+#
+# Measured against the pool on 2026-08-02 (2,564 artists with a catalogue-able link, 9 of them
+# saved by anybody), 50 a day means:
 #
 #   - Saved artists come round as soon as their 7-day cooldown expires. They sort first, and
 #     there are single figures of them, so an alert never waits behind the backfill.
-#   - The rest rotate roughly monthly, which is the right order for artist-page freshness.
-#   - The ~2,400 artists with no catalogue at all drain in about three weeks.
+#   - The rest rotate roughly every seven weeks, which is acceptable for artist-page freshness.
+#   - The never-catalogued tail drains over about six weeks rather than three.
 #
 # What it costs the sites we crawl: the background function paces itself at one second between
 # artists and one second between release-page fetches, and stops starting them nine minutes into
 # a fifteen-minute invocation. At the response times measured on 2026-08-07 that deadline allows
 # roughly 160 release pages per run, on top of one grid page per Bandcamp artist (~17 of a
-# 25-artist batch). Four runs is therefore on the order of 700 sequential Bandcamp requests a day,
-# with a hard ceiling of 1,300 if Bandcamp ever answers fast enough to reach the 300-fetch
+# 25-artist batch). Two runs is therefore on the order of 350 sequential Bandcamp requests a day,
+# with a hard ceiling of 650 if Bandcamp ever answers fast enough to reach the 300-fetch
 # backstop — around one request a minute averaged, and never more than one a second, against
 # robots-permitted paths.
 #
-# That was ~470/day until the detail cap was raised from 100, which had been rationing one
+# At four runs that was ~470/day until the detail cap was raised from 100, which had been rationing one
 # invocation's release-page reads across the whole batch and leaving the artists late in each
-# sweep unpriced. The extra cost is also self-limiting: a release page is re-read only every 30
-# days, so once the backlog drains the raised cap goes largely unspent and the steady state is
-# roughly 170 re-reads a day.
+# sweep unpriced. The extra cost is also self-limiting: a release page is re-read only every 90
+# days (DETAIL_REFRESH_DAYS), so once the backlog drains the raised cap goes largely unspent.
 #
 # The lever if the *artist* tail needs to be tighter is this cadence, not the batch size, which is
 # capped by what one invocation can do. Note the two are different problems — see the
@@ -45,7 +50,7 @@ name: Release catalogue sweep
 
 on:
   schedule:
-    - cron: '0 1,7,13,19 * * *' # Every 6 hours, offset off the top-of-day cron rush
+    - cron: '0 1,13 * * *' # Every 12 hours, offset off the top-of-day cron rush
   workflow_dispatch: # Manual trigger from the GitHub UI
 
 jobs:

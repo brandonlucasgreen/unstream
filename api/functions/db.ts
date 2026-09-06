@@ -4102,14 +4102,14 @@ async function filterUnchangedLinks(
  * site — up to `CATALOG_HOURLY_CAP.searched` (60) full first-time crawls an hour, against the
  * scheduled sweep's 100 a *day*. Each of those crawls inserts a row per release, a row per
  * release source and a row or three per offer, into three six-index tables, and then re-reads
- * every one of them on the 30-day detail refresh. That is what exhausted the Supabase disk I/O
+ * every one of them on the periodic detail refresh (DETAIL_REFRESH_DAYS). That is what exhausted the Supabase disk I/O
  * budget; see docs/specs/supabase-disk-io-investigation.md for the numbers and the SQL that
  * confirms it.
  *
  * Cataloging still happens, just from bounded triggers: a save, an artist's own button, the
- * admin command, a Bandcamp collection import, and the six-hourly sweep — whose pool is every
- * artist with a catalogue-able link, so a searched artist is still reached, within about a
- * month rather than within a minute. The cost of that trade is coverage latency on a brand-new
+ * admin command, a Bandcamp collection import, and the twice-daily sweep — whose pool is every
+ * artist with a catalogue-able link, so a searched artist is still reached, within a couple of
+ * months rather than within a minute. The cost of that trade is coverage latency on a brand-new
  * artist page, not lost coverage.
  *
  * Do not reintroduce a search-time trigger without a per-run budget that is measured against
@@ -4287,6 +4287,18 @@ export async function persistSearchResults(results: ArtistResult[]): Promise<voi
 
 /**
  * Persist MusicBrainz enrichment data for an artist.
+ *
+ * Writes only what differs from what is stored. This used to upsert every enrichment link, one
+ * round trip each, and then stamp `artists.last_enriched_at` — on every Phase 2 call, cache hit or
+ * not, whether or not a single URL had changed. Postgres has no in-place update, so each of those
+ * was a new tuple version plus index entries (six on `artists`, one of them the trigram GIN on
+ * `name`) plus a dead tuple for autovacuum. It was the one search-time writer that the round-1
+ * disk I/O work (#463) left un-diffed; see docs/specs/supabase-disk-io-investigation.md, round 4.
+ *
+ * `last_enriched_at` is no longer written at all. Nothing reads it — it was set in exactly one
+ * place and consulted nowhere — and the write dragged the whole `artists` row through the
+ * `updated_at` trigger for nothing. The column stays (dropping it is a migration for no gain);
+ * it just stops moving.
  */
 export async function persistEnrichment(
   artistName: string,
@@ -4305,10 +4317,11 @@ export async function persistEnrichment(
   const slug = artistSlug(artistName);
 
   try {
-    // Find the artist
+    // Find the artist. Location columns come back too so the location write can be skipped when
+    // it would change nothing.
     const { data: artist, error: findError } = await client
       .from('artists')
-      .select('id, match_confidence')
+      .select('id, match_confidence, city, country, country_code')
       .eq('slug', slug)
       .single();
 
@@ -4352,50 +4365,103 @@ export async function persistEnrichment(
       enrichmentLinks.push({ platform: discovered.platform, url: discovered.url });
     }
 
-    // Upsert each enrichment link (skip excluded platforms and non-direct URLs)
-    for (const link of enrichmentLinks.filter(l => !EXCLUDED_PLATFORMS.has(l.platform) && isDirectLink(l.url))) {
+    // Deduped by platform (last wins) — Postgres rejects a bulk upsert that touches the same
+    // conflict key twice. Excluded platforms and non-direct URLs are dropped here, so every row
+    // that survives is direct.
+    const wanted = new Map<string, string>();
+    for (const link of enrichmentLinks) {
+      if (EXCLUDED_PLATFORMS.has(link.platform) || !isDirectLink(link.url)) continue;
+      wanted.set(link.platform, link.url);
+    }
+
+    // One read of what's stored, then write only the platforms whose URL differs.
+    //
+    // Only the URL is compared, deliberately. `source` records which pipeline wrote the row
+    // ('search' or 'musicbrainz'), and both pipelines can legitimately hold the same URL for the
+    // same platform — comparing it would have the two flip the row back and forth on alternate
+    // requests forever, which is the churn this function is trying to stop. A stored URL that
+    // already matches is left exactly as it is, whoever wrote it.
+    const changedRows = await filterUnchangedEnrichmentLinks(client, artistId, wanted);
+
+    if (changedRows.length > 0) {
       const { error } = await client
         .from('artist_links')
-        .upsert(
-          {
-            artist_id: artistId,
-            platform: link.platform,
-            url: link.url,
-            source: 'musicbrainz',
-            is_direct: isDirectLink(link.url),
-          },
-          { onConflict: 'artist_id,platform', ignoreDuplicates: false }
-        );
+        .upsert(changedRows, { onConflict: 'artist_id,platform' });
 
       if (error) {
-        console.error(`[DB] Failed to upsert enrichment link ${link.platform}:`, error);
+        console.error('[DB] Failed to upsert enrichment links:', error);
       }
     }
 
-    // Mark artist as enriched; persist location if discovered
-    const artistUpdate: {
-      last_enriched_at: string;
-      city?: string | null;
-      country?: string | null;
-      country_code?: string | null;
-    } = { last_enriched_at: new Date().toISOString() };
-
+    // Location: only when discovered, and only when it differs from what's stored.
+    let locationWritten = false;
     if (mbData.location) {
-      artistUpdate.city = mbData.location.city ?? null;
-      artistUpdate.country = mbData.location.country ?? null;
-      artistUpdate.country_code = mbData.location.countryCode ?? null;
+      const patch = {
+        city: mbData.location.city ?? null,
+        country: mbData.location.country ?? null,
+        country_code: mbData.location.countryCode ?? null,
+      };
+      const stored = artist as { city: string | null; country: string | null; country_code: string | null };
+      if (
+        stored.city !== patch.city ||
+        stored.country !== patch.country ||
+        stored.country_code !== patch.country_code
+      ) {
+        const { error } = await client.from('artists').update(patch).eq('id', artistId);
+        if (error) {
+          console.error('[DB] Failed to update artist location:', error);
+        } else {
+          locationWritten = true;
+        }
+      }
     }
 
-    await client
-      .from('artists')
-      .update(artistUpdate)
-      .eq('id', artistId);
-
-    const locationLog = mbData.location ? ` + location` : '';
-    console.log(`[DB] Enriched with ${enrichmentLinks.length} MusicBrainz links${locationLog}`);
+    const locationLog = locationWritten ? ' + location' : '';
+    console.log(
+      `[DB] Enriched: ${changedRows.length} of ${wanted.size} MusicBrainz links written${locationLog}`
+    );
   } catch (error) {
     console.error('[DB] Error enriching artist:', error);
   }
+}
+
+/**
+ * The enrichment link rows whose URL differs from what is stored for that platform.
+ *
+ * Read failure writes everything: an extra write is the cheap failure mode, a link silently
+ * never stored is the expensive one. Same rule as `filterUnchangedLinks`.
+ */
+async function filterUnchangedEnrichmentLinks(
+  client: SupabaseClient,
+  artistId: string,
+  wanted: Map<string, string>
+): Promise<{ artist_id: string; platform: string; url: string; source: string; is_direct: boolean }[]> {
+  const toRow = (platform: string, url: string) => ({
+    artist_id: artistId,
+    platform,
+    url,
+    source: 'musicbrainz',
+    is_direct: true,
+  });
+
+  if (wanted.size === 0) return [];
+
+  const { data, error } = await client
+    .from('artist_links')
+    .select('platform, url')
+    .eq('artist_id', artistId);
+
+  if (error) {
+    console.error('[DB] filterUnchangedEnrichmentLinks read failed, writing all links:', error.message);
+    return [...wanted].map(([platform, url]) => toRow(platform, url));
+  }
+
+  const stored = new Map<string, string>();
+  for (const row of (data as { platform: string; url: string }[]) || []) stored.set(row.platform, row.url);
+
+  return [...wanted]
+    .filter(([platform, url]) => stored.get(platform) !== url)
+    .map(([platform, url]) => toRow(platform, url));
 }
 
 // --- Releases for an artist page ---

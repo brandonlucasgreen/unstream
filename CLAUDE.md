@@ -299,8 +299,9 @@ Sentry, since it is otherwise recorded as a perfectly ordinary success.
 Every other catalog trigger is demand-driven — a save, an artist's own button, the admin command,
 a Bandcamp collection import — and `check-releases` only *reads* the catalogue. So without a
 scheduled refresh an artist who is saved once gets catalogued once and their release alerts
-quietly stop. That is what `api/functions/recatalog-sweep.ts` fixes, run every six hours by
-`.github/workflows/recatalog-sweep.yml` (25 artists per run, so 100 a day).
+quietly stop. That is what `api/functions/recatalog-sweep.ts` fixes, run every twelve hours by
+`.github/workflows/recatalog-sweep.yml` (25 artists per run, so 50 a day — halved from 100 in disk
+I/O round 4; the workflow comment says when to put it back).
 
 **Search is deliberately not a trigger any more.** `persistSearchResults` used to hand every
 Bandcamp-linked artist in a result set to the crawler, which made an unauthenticated,
@@ -309,7 +310,7 @@ against the sweep's 100 a *day*, each one inserting rows into three six-index ta
 re-reading them monthly forever. That is what exhausted the Supabase disk I/O budget for the third
 time, after two rounds of per-operation fixes (#443, #463, #464) that never touched the volume.
 The sweep's pool is every artist with a catalogue-able link, so a searched artist is still
-reached, in about a month rather than a minute. Full reasoning, the confirming SQL, and the
+reached, in a month or two rather than a minute. Full reasoning, the confirming SQL, and the
 escalation ladder if the warning returns: `docs/specs/supabase-disk-io-investigation.md`. The
 whole feature's off-switch remains the `RELEASE_CATALOG_ENABLED` env var — deleting it in Netlify
 stops cataloging with no deploy.
@@ -503,7 +504,7 @@ row to match against.
   nor the credential, so a Subsonic 500 (routine in this beta) must not block discovery for
   items imported days earlier. It stores each artist plus their Bandcamp link and requests
   catalogues for up to 25 — matching `MAX_ARTISTS_PER_REQUEST`, which silently slices anything
-  longer. The rest ride the six-hourly sweep, whose pool is every artist with a catalogue-able
+  longer. The rest ride the twice-daily sweep, whose pool is every artist with a catalogue-able
   link.
 - `linkCollectionItemsForArtist(artistId, name)` runs at the end of every catalogue pass in
   `catalog-artist-background.ts` — the moment the releases exist — and attaches them to the items
@@ -653,7 +654,7 @@ GitHub Actions (`.github/workflows/`):
 - `schedule-social-posts.yml` — weekly (Mondays) social post generation, committed back to the repo.
 - `semantic-revert-check.yml` — runs `scripts/semantic-revert-check.py` on every PR to flag changes that quietly undo earlier fixes. If it flags your PR, take it seriously: the bug loops it was built for are described in `docs/retros/UNS-100-bifurcation-retro.md`.
 - `upstash-keepalive.yml` — twice weekly, writes one Redis key so the free-tier database isn't reaped for inactivity (which silently killed caching and rate limiting once).
-- `recatalog-sweep.yml` — every 6 hours, POSTs `/.netlify/functions/recatalog-sweep` so release catalogues get built and stay fresh. See "Keeping catalogues fresh" above.
+- `recatalog-sweep.yml` — every 12 hours, POSTs `/.netlify/functions/recatalog-sweep` so release catalogues get built and stay fresh. See "Keeping catalogues fresh" above.
 
 ## Engineering principles
 
