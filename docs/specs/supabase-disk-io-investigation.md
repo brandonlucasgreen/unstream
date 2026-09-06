@@ -354,9 +354,11 @@ scans while sitting at a meaningful size. What confirms §2: `artist_links` near
 2. **Drop the write-only indexes**, one migration, each guarded by the query-5 result:
    `idx_artists_updated`, `idx_artists_slug`, `idx_app_events_created` (keep the original
    `idx_app_events_created_at`; same definition), `idx_app_events_type_app` (superseded by
-   `type_created` for every dashboard query; confirm no query filters on `app` first), and
-   `idx_releases_artist_id`. Use `DROP INDEX CONCURRENTLY` so the migration doesn't lock the
-   tables. The `artists` drops are the one with leverage: they make most `artists` updates HOT.
+   `type_created` for every dashboard query; no query filters on `app` together with
+   `event_type`), and `idx_releases_artist_id`. Plain `DROP INDEX`, not `CONCURRENTLY`: the CLI
+   runs each migration in a transaction, where `CONCURRENTLY` is refused, and these tables are
+   small enough that the lock lasts milliseconds. The `artists` drops are the one with leverage:
+   they make most `artists` updates HOT.
 3. **Port the web's search-event fix to the Mac app**: remove the `trackAppEvent("search")` call
    before each `searchArtist` in `AppState.swift` (four sites; keep the completion call that
    carries `has_results`). Halves the Mac app's `app_events` volume.
@@ -385,6 +387,38 @@ scans while sitting at a meaningful size. What confirms §2: `artist_links` near
    table stops growing, the scrub's second rewrite of every row disappears (a delete is one
    heap write and no dead-tuple churn on six indexes), and the working set shrinks. This is the
    one that turns `app_events` from an unbounded term into a constant.
+
+## What landed (2026-09-06)
+
+Tiers A and B, on the `claude/supabase-disk-io-optimization-ly3jne` branch, one commit each:
+
+| # | Change | Where |
+|---|---|---|
+| 1 | `persistEnrichment` diffs links before writing and no longer writes `last_enriched_at` | `api/functions/db.ts`, test in `__tests__/persist-enrichment-churn.test.ts` |
+| 2 | Five write-only indexes dropped | `supabase/migrations/20260906120000_drop-write-only-indexes.sql` |
+| 3 | Mac app writes one `search` event per search, not two | `apps/mac/Unstream/Models/AppState.swift` |
+| 4 | `api_keys.last_used_at` stamped hourly, not per request | `api/functions/middleware.ts` |
+| 5 | Sweep every 12 hours (50 artists/day) | `.github/workflows/recatalog-sweep.yml` |
+| 6 | `DETAIL_REFRESH_DAYS` 30 → 90 | `api/functions/catalog-artist-background.ts` |
+| 7 | Extension fires `extension_activated` hourly per service, not per track | `apps/extension/background/service-worker.js` (2.7.1) |
+
+Two of these need a release to take effect for real users: the Mac app change ships with the
+next Sparkle build, and the extension change with the next store submission. The rest are live
+on merge (the migration applies itself via `supabase-migrate.yml`; check that run went green).
+
+Things deliberately *not* changed, and why:
+
+- `idx_releases_match (artist_id, release_type, match_key)` is still there. Its middle column is
+  dead weight since release type left identity, but it is still the index the match lookup
+  uses; rebuilding it as `(artist_id, match_key)` is a separate, measurable change.
+- The 90-day `app_events` scrub still rewrites rows. Removing that second write is Tier C — a
+  rollup plus retention — and is a product decision about history.
+- The sweep cadence is a dial, not a fix. The workflow comment says when to turn it back.
+
+The measurement that says whether this was enough is the same as before: the Supabase disk I/O
+graph over the two weeks after merge, and queries 2 and 5 above. If `artist_links` updates are
+still climbing, something else writes them; if `releases` inserts dominate, the backlog is
+still draining and the cadence is the lever.
 
 **If the warning is urgent right now**, the no-deploy relief valve from the previous section
 still stands: delete `RELEASE_CATALOG_ENABLED` from the Netlify Functions environment and pause
