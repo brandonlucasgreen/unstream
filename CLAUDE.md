@@ -2,9 +2,9 @@
 
 ## Project overview
 
-Unstream helps music listeners find their favorite artists on alternative platforms outside streaming, so they can support artists directly. It searches 17+ platforms (Bandcamp, Mirlo, Ampwall, Subvert, Beatport, Faircamp, Jam.coop, Patreon, etc.) and shows verified links grouped by category with artist payout percentages. On Bandcamp Fridays, results highlight the platforms that pay artists 100%.
+Unstream helps music listeners find their favorite artists on alternative platforms outside streaming, so they can support artists directly. It searches 17+ platforms (Bandcamp, Mirlo, Ampwall, Subvert, Beatport, Faircamp, Jam.coop, Patreon, etc.) and shows verified links grouped by category with artist payout percentages. On Bandcamp Fridays, results highlight the platforms that pay artists 100%. Runs at [unstream.stream](https://unstream.stream).
 
-The product runs at [unstream.stream](https://unstream.stream).
+**`docs/engineering-history.md` holds the evidence behind the rules in this file** — the measurements, incidents and abandoned approaches that produced them. Read it before changing a rule, or when one looks arbitrary.
 
 ## Mission, vision, and values
 
@@ -14,144 +14,62 @@ The product runs at [unstream.stream](https://unstream.stream).
 
 **Values:** Unwavering respect for artists · Patience · Curiosity · Transparency
 
-**Operating principles:**
+**Operating principles:** Artists first, supporters second · build for connection, not just transaction · solve from first principles, don't be afraid to be scrappy · no ego in the face of conflict.
 
-- Artists first, supporters second
-- Build for connection, not just transaction
-- Solve from first principles; don't be afraid to be scrappy
-- No ego in the face of conflict
-
-These principles should inform product and engineering trade-offs, not just marketing copy — e.g. when a decision pits fan convenience against artist payout or transparency, artists first wins.
+These inform engineering trade-offs, not just marketing copy — when a decision pits fan convenience against artist payout or transparency, artists first wins.
 
 ## Architecture
 
-- **Frontend**: React 19 SPA with React Router 7, Tailwind CSS v4, Vite 7, TypeScript. PWA-enabled (`vite-plugin-pwa`). Most pages are lazy-loaded in `apps/web/src/main.tsx`.
-- **Backend**: Netlify Functions (serverless API, `api/functions/`) + Edge Functions (SSR/SEO, `api/edge/`). Functions are TypeScript on Node; edge functions run on Deno (see `deno.lock`).
-- **Local dev**: `npm run dev` runs `netlify dev` — the real functions and edge functions against production Supabase. `npm run dev:fast` is a Vite-only shortcut backed by a *separate* API implementation in `apps/web/server/`. See "Local dev: the full stack, and the fast shim" below; the difference trips people up.
-- **Database**: Supabase (Postgres with RLS) for artist profiles, analytics, merge overrides, API keys, verification requests, saved/supported artists, public usernames, and the Bandcamp probe cache.
-- **Data enrichment**: MusicBrainz, Wikidata, Wikipedia, Discogs, Linktree, Bandcamp artist pages.
-- **Caching / rate limiting**: Upstash Redis (`@upstash/ratelimit`, `api/functions/cache.ts`, `api/functions/ratelimit.ts`).
-- **Error monitoring**: Sentry — `@sentry/react` on the web app (`apps/web/src/services/sentry.ts`), `@sentry/node` in functions (`api/lib/sentry.ts`). Source maps uploaded via `npm run sentry:sourcemaps`.
-- **Analytics**: GoatCounter (public) + custom Supabase analytics (artist dashboard, `/admin/analytics`).
-- **Integrations**: Public REST API (v1), Discord slash-command bot, social post automation, ListenBrainz scrobbling (apps).
-- **Clients**: web app, universal Apple app (macOS menu bar + iOS, SwiftUI), browser extension (Chrome + Firefox, MV3).
-- **Hosting**: Netlify.
+- **Frontend**: React 19 SPA, React Router 7, Tailwind CSS v4, Vite 7, TypeScript. PWA-enabled (`vite-plugin-pwa`); most pages lazy-loaded in `apps/web/src/main.tsx`.
+- **Backend**: Netlify Functions (serverless API, `api/functions/`, Node) + Edge Functions (SSR/SEO, `api/edge/`, Deno — see `deno.lock`).
+- **Database**: Supabase (Postgres with RLS) — artist profiles, analytics, merge overrides, API keys, verification requests, saved/supported artists, public usernames, releases, collections, Bandcamp probe cache.
+- **Enrichment**: MusicBrainz, Wikidata, Wikipedia, Discogs, Linktree, Bandcamp artist pages. **Caching / rate limiting**: Upstash Redis. **Monitoring**: Sentry (`apps/web/src/services/sentry.ts`, `api/lib/sentry.ts`). **Analytics**: GoatCounter + custom Supabase analytics.
+- **Integrations**: public REST API (v1), Discord bot, social post automation, ListenBrainz scrobbling.
+- **Clients**: web app, universal Apple app (macOS menu bar + iOS, SwiftUI), browser extension (Chrome + Firefox, MV3). **Hosting**: Netlify.
 
 ## Repository structure
 
-```
-unstream/
-├── apps/
-│   ├── web/                    # React + Vite SPA
-│   │   ├── src/
-│   │   │   ├── components/     # Shared UI (ResultCard*, Claim* steps, Header, SearchBar, skeletons, …)
-│   │   │   ├── pages/          # Route page components
-│   │   │   ├── services/       # sources.ts (platform config + search client), auth, analytics, sentry
-│   │   │   ├── contexts/       # AuthContext (Supabase auth + saved artists)
-│   │   │   ├── hooks/          # usePWA, useTheme
-│   │   │   ├── data/           # FAQ content, static data
-│   │   │   ├── types/          # TypeScript interfaces
-│   │   │   └── utils/          # Markdown renderer, colors, bandcamp-friday helpers
-│   │   ├── server/             # DEV-ONLY API served by Vite (see note below)
-│   │   ├── public/             # Static assets + generated sitemap.xml, dispatch.xml
-│   │   └── tests/              # unit/ + integration/ + fixtures/ (Vitest)
-│   ├── mac/                    # Universal Apple app (macOS menu bar + iOS), SwiftUI
-│   │   ├── project.yml         # XcodeGen project definition (source of truth for targets)
-│   │   ├── Unstream/
-│   │   │   ├── Views/          # macOS / iOS / Shared SwiftUI views
-│   │   │   ├── Services/       # Release checkers (Bandcamp, Mirlo, Faircamp), auth, sync, keychain, Plex
-│   │   │   ├── Platform/macOS/ # Media observer, hotkey, scrobbling, notifications, updates
-│   │   │   ├── StoreKit/       # In-app support purchases (tip jar)
-│   │   │   └── Models/         # AppState, NowPlaying, ReleaseAlert, PlatformCatalog, …
-│   │   ├── UnstreamShareExtension/  # Share-sheet extension
-│   │   └── UnstreamTests/      # XCTest (saved-artists sync)
-│   └── extension/              # Browser extension (Chrome + Firefox), MV3
-│       ├── content/            # Content scripts per streaming site (spotify, apple-music, …)
-│       ├── popup/              # Extension popup UI
-│       ├── background/         # Service worker
-│       ├── lib/                # constants, supabase, custom-sites, bandcamp-friday
-│       └── manifest.json / manifest-firefox.json
-├── api/
-│   ├── functions/              # Netlify serverless functions — the live backend
-│   │   ├── search-sources.ts   # Phase 1 search orchestration (the big one)
-│   │   ├── search-musicbrainz.ts  # Phase 2 enrichment endpoint
-│   │   ├── search-utils.ts     # Pure helpers: normalize, aggregate, disambiguate, merge, sort
-│   │   ├── search-parsers.ts   # Pure HTML/JSON parsers per platform
-│   │   ├── middleware.ts       # CORS, auth, query validation, SSRF allowlist
-│   │   ├── cache.ts            # Upstash cache-aside helpers
-│   │   ├── ratelimit.ts        # Rate limits + Sentry dedup
-│   │   ├── db.ts               # Supabase service-role access (profiles, overrides, probes)
-│   │   └── __tests__/          # Vitest tests for functions
-│   ├── edge/                   # Edge functions: og-metadata, artist-page-static, guide-page,
-│   │                           #   noscript-search, u-handle
-│   ├── search/                 # bandcamp-probe.ts + enrichment.ts are LIVE.
-│   │                           #   sources.ts / bandcamp.ts / site-search.ts / musicbrainz.ts are DEAD
-│   │                           #   Vercel-era code — do not edit them (see note below).
-│   ├── embed/                  # Bandcamp embed resolver
-│   ├── shared/                 # platform-registry.ts (canonical platforms), bandcamp-friday.ts
-│   ├── lib/                    # sentry.ts, reserved-handles.ts
-│   └── scripts/                # sentry-test.ts and other function-side scripts
-├── scripts/                    # Data generation + ops (artist list/data, sitemap, social posts,
-│                               #   guides manifest, dispatch feed, bandcamp date sync,
-│                               #   discord command registration, merge-override CLI,
-│                               #   semantic-revert-check, sentry sourcemaps)
-├── data/
-│   ├── artists/                # Pre-generated artist SEO JSON (~790 files)
-│   ├── artists-manifest.json   # Index of those artists (feeds sitemap + social posts)
-│   ├── guides/                 # Markdown guide posts with frontmatter + generated manifest
-│   ├── dispatch/               # Archived Dispatch markdown + README (see Dispatch below)
-│   ├── social-posts/           # Generated/scheduled social post history
-│   ├── artist-list.json        # Wikidata-sourced artist list
-│   └── shipped-features.json   # Changelog/roadmap data (served to /changelog)
-├── supabase/                   # schema.sql + migrations/ (timestamp-prefixed)
-│                               #   + historical migration-NNN-*.sql copies
-├── docs/                       # Specs, research, retros, OpenAPI spec, product/positioning docs
-└── netlify.toml                # Edge function routes, /api/* redirects, headers/CSP
-```
+Only the non-obvious parts; `ls` covers the rest.
+
+- **`api/functions/`** — Netlify serverless functions, **the live backend**: `search-sources.ts` (Phase 1 orchestration, the big one), `search-musicbrainz.ts` (Phase 2), `search-utils.ts` + `search-parsers.ts` (pure, unit-testable logic), `middleware.ts` (CORS, auth, validation, SSRF allowlist), `cache.ts`, `ratelimit.ts`, `db.ts` (service-role Supabase), `__tests__/`.
+- **`api/edge/`** — `og-metadata`, `artist-page-static`, `release-page`, `guide-page`, `noscript-search`, `u-handle`. **`api/search/`** — only `bandcamp-probe.ts` and `enrichment.ts` are live (see below). **`api/shared/`** — `platform-registry.ts`, `bandcamp-friday.ts`, `release-display.ts`, `desktop-release.ts`.
+- **`apps/web/`** — the SPA: `src/services/sources.ts` is platform config + search client, `src/contexts/AuthContext` holds auth and saved artists, `public/` carries the generated `sitemap.xml` / `dispatch.xml`, `tests/` is `unit/` + `integration/` + `fixtures/`.
+- **`apps/web/server/`** — dev-only API served by Vite, **not production**. See "Local dev".
+- **`apps/mac/`** — universal Apple app (macOS menu bar + iOS), SwiftUI. **`project.yml` is the XcodeGen definition and the source of truth for targets — edit it, not the `.xcodeproj`.** **`apps/extension/`** — MV3 extension, one content script per streaming site, two manifests.
+- **`data/`** — `artists/` (~790 pre-generated SEO JSON) + `artists-manifest.json` (feeds sitemap and social posts), `guides/`, `dispatch/` (archive), `social-posts/`, `shipped-features.json` (served to `/changelog`); **`scripts/`** generates all of it plus the feeds and sitemap.
+- **`docs/`** — `engineering-history.md`, `specs/`, `postmortems/`, `openapi.yaml`. **`netlify.toml`** — edge routes, `/api/*` redirects, headers/CSP.
 
 ## Commands
 
 ```bash
-npm install               # Install dependencies
-npm run dev               # Full local stack: netlify dev on :8888 — real functions + edge
-                          #   functions + production Supabase data and auth. Use this by default.
-npm run dev:fast          # Vite only on :5173 (no functions, no auth). CSS/layout work only.
-npm run build             # Full build — see below for exactly what it runs
-npm run lint              # ESLint (apps/web)
+npm run dev        # Full stack: netlify dev :8888 — real functions, edge functions,
+                   #   production Supabase data + auth. Use this by default.
+npm run dev:fast   # Vite only :5173 (no functions, no auth). CSS/layout only.
+npm run verify     # THE CI GATE: typecheck + API + web unit tests (~45s)
+npm run build      # Full build (see below) · npm run preview · npm run lint (advisory)
 
-npm run verify            # The CI gate: typecheck + API function tests + web unit tests
-npm run test              # Everything: web tests + API function tests
-npm run test:web          # All apps/web tests (unit + integration)
-npm run test:unit         # apps/web/tests/unit only (runs in CI)
-npm run test:integration  # apps/web/tests/integration only (hits live APIs; run separately)
-npm run test:api          # api/functions/**/*.test.ts (runs in CI)
-npm run test:watch        # Vitest watch mode (apps/web)
+npm run test       # web + API · test:web · test:unit (CI) · test:api (CI) · test:watch
+npm run test:integration   # live-API search accuracy; separate, not in CI
+npm run typecheck          # root + apps/web (CI and build)
+npm run typecheck:api      # api/ only — narrow include, see below
 
-npm run typecheck         # tsc -b over the root and apps/web (runs in CI and the build)
-npm run typecheck:api     # tsc --noEmit over api/ (NOTE: narrow include — see below)
-npm run preview           # Preview the built SPA
-
-npm run generate:artists  # Fetch artist list from Wikidata
-npm run generate:data     # Generate artist page JSON + artists-manifest.json via APIs
-npm run generate:social   # Generate social media posts via Buffer
-npm run sync:bandcamp-dates  # Sync Bandcamp release dates
-npm run ingest:try -- <artist>   # Dry-run release ingest against a real Bandcamp page
-npm run sentry:sourcemaps    # Upload source maps to Sentry
-npm run migrate:link      # One-time: link this checkout to the Supabase project
-npm run migrate:dry-run   # supabase db push --dry-run against the linked project
-npm run migrate:list      # List applied vs pending migrations
+npm run generate:artists|generate:data|generate:social   # Wikidata list, artist JSON, posts
+npm run sync:bandcamp-dates · backfill:artist-rows · backfill:locations
+npm run dedupe:releases            # Apply dedup rules to the stored catalog (see below)
+npm run catalog:artist -- <slug>   # Catalogue pass for one artist
+npm run ingest:try -- <artist>     # Dry-run Bandcamp ingest (see below); ingest:mirlo too
+npm run preview:release -- <slug>  # Release-page harness :8788 (see below)
+npm run sentry:sourcemaps
+npm run migrate:link|migrate:dry-run|migrate:list        # Supabase CLI, --linked
 ```
 
-`npm run build` runs, in order: guides manifest → dispatch feed → changelog feed → guides feed → sitemap → root `tsc -b` → `apps/web` `tsc -b` → `vite build`. Any failure blocks the Netlify deploy, so a type error still can't ship.
+`npm run build` runs, in order: guides manifest → dispatch feed → changelog feed → guides feed → sitemap → root `tsc -b` → `apps/web` `tsc -b` → `vite build`. Any failure blocks the deploy, so a type error can't ship.
 
-**Every generator must run before `vite build`, and that ordering is load-bearing.** `publish` is `apps/web/dist`, and `vite build` populates it by copying `apps/web/public/` — so anything written to `public/` afterwards lands in a directory Netlify never publishes. The sitemap step used to run last, which meant `apps/web/public/sitemap.xml` was regenerated on every build and then thrown away: production served the last *committed* copy instead, frozen at 2026-08-01 for four weeks while the generator's own "stop listing URLs that 404" logic (#385) never once took effect. The symptom is invisible in the build log — the generator prints a cheerful success either way — so if you add a generator, put it in the chain **before** `cd apps/web`, and verify by diffing the deployed artifact against the committed file, not by reading the log.
+**Every generator must run before `vite build`, and that ordering is load-bearing.** `vite build` fills the published `apps/web/dist` by copying `apps/web/public/`, so anything written there afterwards is never published. Put new generators **before** `cd apps/web`, and verify against the deployed artifact — the log prints success either way. (This shipped a frozen sitemap for four weeks.)
 
-**The test suites are no longer part of the build.** They run in GitHub Actions (`.github/workflows/ci.yml`) on every PR and every push to `main`, because Actions minutes are free on this public repo while a Netlify deploy is not — see "Deployment" below. Two consequences worth internalizing:
+**The test suites are not part of the build** — they run in GitHub Actions (`ci.yml`), because Actions minutes are free here and Netlify builds are not. So **run `npm run verify` before considering work done**, and note that **a red CI run does not stop a deploy**: Netlify builds whatever lands on `main`, which is not branch-protected.
 
-- **Run `npm run verify` before considering work done** (typecheck + both suites, ~45s). `npm run build` no longer tells you the tests pass.
-- **A red CI run does not, by itself, stop a deploy.** Netlify builds whatever lands on `main`. Requiring the `verify` check in GitHub's branch protection rules for `main` is what restores the old guarantee; until that's enabled, merging a red PR deploys it.
-
-**Typecheck coverage gotcha:** `api/tsconfig.json` has a narrow `include` — the `me-*` functions, `search-sources.ts`, and their tests. Files reachable from those *are* checked, so the search backend (`db.ts`, `search-utils.ts`, `search-parsers.ts`, `middleware.ts`, `api/search/*`) is now covered. Everything else in `api/` — the edge functions, `artist-profile.ts`, the release and admin endpoints — is not: a type error there won't fail the build, it will fail at runtime in production. When you touch an unlisted file, rely on the function tests and read carefully — and if it's worth typechecking, add it to that `include` list and fix whatever strict mode surfaces.
+**Typecheck coverage gotcha:** `api/tsconfig.json` has a narrow `include` — the `me-*` functions, `search-sources.ts`, their tests, and whatever those reach (so the search backend is covered). Everything else in `api/` is not: edge functions, `artist-profile.ts`, the release and admin endpoints fail at runtime in production rather than in the build. When touching an unlisted file, lean on the function tests — or add it to that `include` and fix what strict mode surfaces.
 
 ## Key patterns
 
@@ -159,431 +77,167 @@ npm run migrate:list      # List applied vs pending migrations
 
 Two-phase.
 
-- **Phase 1** — `GET /api/search/sources` → `api/functions/search-sources.ts`. Fans out across platforms in parallel (~1-2s), aggregates, disambiguates, and returns results. Also applies MusicBrainz enrichment server-side when it lands in time; the response's `hasPendingEnrichment` tells the client whether Phase 2 is still needed.
-- **Phase 2** — `GET /api/search/musicbrainz` → `api/functions/search-musicbrainz.ts`. Official sites, social profiles, location, release verification, Qobuz links. Merged into the rendered results client-side (`mergeWithMusicBrainzData` in `apps/web/src/services/sources.ts`).
+- **Phase 1** — `GET /api/search/sources` → `search-sources.ts`. Fans out across platforms in parallel (~1-2s), aggregates, disambiguates, returns results. Applies MusicBrainz enrichment server-side when it lands in time; `hasPendingEnrichment` tells the client whether Phase 2 is still needed.
+- **Phase 2** — `GET /api/search/musicbrainz` → `search-musicbrainz.ts`. Official sites, socials, location, release verification, Qobuz links. Merged client-side by `mergeWithMusicBrainzData` in `apps/web/src/services/sources.ts`.
 
-Multi-artist queries (e.g. "Artist feat. Artist2") are split, searched in parallel, then merged and deduplicated.
+Multi-artist queries ("Artist feat. Artist2") are split, searched in parallel, then merged and deduplicated.
 
-Where the code lives:
-
-- `api/functions/search-sources.ts` — orchestration and per-platform fetchers. Large; keep new pure logic out of it.
-- `api/functions/search-utils.ts` — pure helpers (normalization, `aggregateResults`, `splitSuspiciousPlatforms`, `mergeByReleaseOverlap`, `filterAndSort`, `applyMergeOverrides`). Unit-testable, no network.
-- `api/functions/search-parsers.ts` — pure HTML/JSON parsers per platform. Also unit-testable.
-- `api/search/enrichment.ts` and `api/search/bandcamp-probe.ts` — shared modules used by both search functions.
-
-Prefer adding logic to `search-utils.ts` / `search-parsers.ts` with a test over growing `search-sources.ts`.
+`search-sources.ts` holds orchestration and per-platform fetchers, and is already large. `search-utils.ts` holds the pure helpers (`aggregateResults`, `splitSuspiciousPlatforms`, `mergeByReleaseOverlap`, `filterAndSort`, `applyMergeOverrides`) and `search-parsers.ts` the per-platform parsers. **Prefer adding logic there with a test over growing `search-sources.ts`.**
 
 ### Bandcamp discovery by subdomain probing
 
-`bandcamp.com/search` is behind a Fastly bot challenge and `Disallow`ed in Bandcamp's robots.txt, so it cannot be used. Instead `api/search/bandcamp-probe.ts` derives candidate slugs from the query and requests `<slug>.bandcamp.com/music` (robots-permitted). One request per candidate resolves identity (`data-band`), release counts, location, release titles, and the artist photo.
+`bandcamp.com/search` is behind a Fastly bot challenge and `Disallow`ed in robots.txt, so it cannot be used. `api/search/bandcamp-probe.ts` derives candidate slugs from the query and requests `<slug>.bandcamp.com/music` (robots-permitted), resolving identity (`data-band`), release counts, location, titles and photo in one request per candidate.
 
-Both verification steps are load-bearing: a slug existing doesn't mean it's the right artist, and a name matching doesn't mean it's a real presence (parked, empty accounts match `beyonce`, `sufjan`, `jackwhite`). Verdicts: `accepted`, `absent`, `rejected_empty`, `rejected_name`, `undecided`.
+**Verify both identity and substance.** A slug existing doesn't mean it's the right artist; a name matching doesn't mean it's a real presence — parked, empty accounts match `beyonce`, `sufjan`, `jackwhite`. Verdicts: `accepted`, `absent`, `rejected_empty`, `rejected_name`, `undecided`.
 
-Outcomes are cached in Supabase (`bandcamp_slug_probes`, migrations 025–028 plus `20260727090000_bandcamp-probe-probed-slugs.sql`), including negatives — otherwise every search for an artist who simply isn't on Bandcamp re-probes forever. Background: `docs/specs/bandcamp-coverage-research.md`.
+Outcomes — **including negatives** — are cached in `bandcamp_slug_probes` (migrations 025–028 plus `20260727090000_bandcamp-probe-probed-slugs.sql`). The `probed_slugs` column records which slugs were actually tried, so a cached negative can't hide an artist whose name has a hyphen.
 
 ### Never cache uncertainty
 
-This is the lesson behind a run of bug fixes (#317–#328) and it applies to every cached lookup, not just Bandcamp:
+The lesson behind a run of bug fixes (#317–#328); it applies to every cached lookup.
 
-- Distinguish **"the upstream answered with nothing"** (cacheable) from **"the upstream didn't answer"** — timeout, network error, bot challenge, 5xx (not cacheable as a negative). The probe's `undecided` verdict exists precisely so it can be refused by the cache.
-- `cacheGetOrFetch` in `api/functions/cache.ts` takes a `shouldCache` predicate plus an optional short `failureTtlSeconds`. Use them for anything whose failure mode looks like an empty result.
-- Cache keys must not collide across inputs that behave differently. `query_norm` strips punctuation, but punctuation is what generates extra slug candidates — hence the `probed_slugs` column, which records which slugs were actually tried so a cached negative can't hide an artist whose name has a hyphen.
-- A silent `200` with an empty parse is a failure. Report it (Sentry) rather than letting it look like "this artist doesn't exist."
+- Distinguish **"the upstream answered with nothing"** (cacheable) from **"the upstream didn't answer"** — timeout, network error, bot challenge, 5xx (never cacheable as a negative). The probe's `undecided` verdict exists so the cache can refuse it.
+- `cacheGetOrFetch` (`api/functions/cache.ts`) takes a `shouldCache` predicate and an optional short `failureTtlSeconds`. Use them for anything whose failure mode looks like an empty result.
+- Cache keys must not collide across inputs that behave differently — `query_norm` strips punctuation, but punctuation generates extra slug candidates, hence `probed_slugs`.
+- A silent `200` with an empty parse is a failure. Report it to Sentry rather than letting it look like "this artist doesn't exist."
 
 ### Redis is metered — count round trips, not just correctness
 
-Upstash's free tier is **500,000 commands a month** (~16,600/day), and it is a *command* budget,
-not a bandwidth or storage one. The site went through it in August 2026 at genuinely low traffic,
-because nothing here is expensive per request — there are just a lot of small requests, each
-paying a fixed Redis tax before doing any work.
+Upstash's free tier is **500,000 commands a month** (~16,600/day) — a *command* budget — and the site exhausted it in August 2026 at low traffic. One user search costs ~10 API requests, so any per-request Redis overhead is multiplied by ten. Four rules:
 
-The arithmetic that matters, per user search: the typeahead fires on every debounced typing
-pause (4-5 requests), then `/api/search/sources`, then `/api/search/musicbrainz`, then two or
-three analytics POSTs, then an artist page. That is ~10 API requests, and *every one of them*
-went through `checkRateLimit`. So the per-request overhead is multiplied by ten before a single
-search happens.
+- **Every extra limiter has to earn its round trip.** Only `strict` has a daily quota — it fronts search, and its 500/day is a documented promise to anonymous v1 callers (`docs/openapi.yaml`). `standard`, `lenient`, `account` keep per-minute windows only (30/120/60).
+- **Batch reads that share a request.** `cachePrefetch` reads the fan-out's per-platform keys in one `MGET` and passes each fetcher its value via `cacheGetOrFetch`'s `prefetched` argument; fetchers keep their own TTLs, predicates and write-backs. Add new cached platforms to that key list in `searchAllPlatforms` rather than issuing a separate `GET`.
+- **Never spend two commands answering one question.** `checkSentryDedup` is a single `SET ... NX EX`. Prefer `SET NX`, `INCR`, `MGET` over read-then-write pairs.
+- **Don't cache a constant** — only a real fetch is worth protecting.
 
-Three rules follow, and they are the reason the current shapes look the way they do:
-
-- **Every extra limiter doubles the bill.** `Ratelimit.limit()` is one round trip whose
-  sliding-window Lua script runs `GET`, `GET`, `INCRBY` and (on a new window) `PEXPIRE`.
-  `checkRateLimit` used to run a per-minute *and* a per-day limiter on every tier, so every
-  request paid twice over. Only `strict` has a daily quota now — it fronts search, which fans
-  out to a dozen partner sites, and its 500/day is a documented promise to anonymous v1 callers
-  (`docs/openapi.yaml`). `standard`, `lenient` and `account` had 1000/5000/2000-a-day quotas no
-  real person has approached; their per-minute windows (30/120/60) still bound the damage. A new
-  daily quota has to earn its round trip.
-- **Batch reads that share a request.** The search fan-out reads one cache key per platform for
-  the same query. `cachePrefetch` does them in one `MGET` and hands the result to each fetcher
-  via `cacheGetOrFetch`'s `prefetched` argument — the fetchers still own their own TTLs,
-  `shouldCache` predicates and write-backs, only the read is shared. Add a new cached platform
-  to that key list in `searchAllPlatforms` rather than letting it issue its own `GET`.
-- **Two commands to answer one question is one too many.** `checkSentryDedup` was `GET` then
-  `SET`; it is now a single `SET ... NX EX`, which is half the cost and atomic besides. Reach
-  for `SET NX`, `INCR`, `MGET` over read-then-write pairs.
-
-Two related traps:
-
-- **Don't cache a constant.** `searchAmpwall` is still a stub with no outbound request, and it
-  used to run its empty result through Redis — a `GET` per search, plus a `SET` per miss, to
-  remember a compile-time constant. Cache a value when there is a real fetch to protect.
-- **A warm container is free; Redis is not.** `getMergeOverrides` / `getLinkSuppressions` are
-  read on every search and again during Phase 2 enrichment, and they are identical for every
-  visitor. They now sit behind a 60-second in-process memo in `db.ts` as well as the Redis
-  cache. Sixty seconds is deliberately short so `invalidateAdminListCache` keeps its meaning —
-  an admin edit still lands everywhere within a minute. This is the exception, not a pattern to
-  spread: those two lists are the only values that are global, tiny, and read on every search.
-
-`.github/workflows/upstash-keepalive.yml` still exists and is unrelated — it writes one key twice
-a week so the free-tier database isn't reaped for inactivity. It costs 8 commands a month.
+`getMergeOverrides` / `getLinkSuppressions` are the one sanctioned in-process memo (global, tiny, read on every search): 60 seconds in `db.ts` on top of Redis, short enough that `invalidateAdminListCache` keeps its meaning. Don't generalise it.
 
 ### Testing release ingest locally
 
-Release cataloging only runs where `RELEASE_CATALOG_ENABLED=true`, a custom env var scoped to
-Functions and set for the **Production context only**. Deploy previews and local runs both point
-at the **production** Supabase, so an ungated preview would write real `releases` rows and spend
-the real hourly crawl budget. Ingest therefore cannot be exercised on a deploy preview, and
-**setting the flag locally is not a valid workaround** — it would have your laptop writing
-production data.
+Cataloging only runs where `RELEASE_CATALOG_ENABLED=true`, set for the **Production context only**. Previews and local runs both point at **production** Supabase, so **setting the flag locally is not a valid workaround** — it would have your laptop writing production data and spending the real crawl budget. Use `npm run ingest:try -- <artist>` instead (`--json` for full row shapes, `--detail=3` for dates, formats and prices): it exercises the real fetcher, allowlist check, parser and mapping without touching the database. One Bandcamp request per run; don't loop it.
 
-This used to gate on `CONTEXT === 'production'`, which silently disabled cataloging entirely:
-Netlify exposes only `URL`, `SITE_NAME` and `SITE_ID` to a serverless function at runtime, so
-`process.env.CONTEXT` is `undefined` in every deployed function. Don't reach for `CONTEXT` or
-`DEPLOY_PRIME_URL` in a function — neither exists there.
-
-Use the dry run instead:
-
-```bash
-npm run ingest:try -- sufjanstevens              # table of what would be written
-npm run ingest:try -- sufjanstevens --json       # full row shapes
-npm run ingest:try -- sufjanstevens --detail=3   # + dates, formats and prices for the newest 3
-```
-
-It runs the real path — the same SSRF-safe fetcher, the same allowlist check, the same parser
-and mapping production uses — and prints the result without touching the database. One Bandcamp
-request per run; don't loop it.
-
-There is deliberately no `--write` flag. Everything with a decision in it lives upstream of the
-database, and `persistReleases` is covered by unit tests plus a migration validated against a
-real Postgres. To test the write path, point `SUPABASE_URL` at a branch database on purpose.
+There is deliberately no `--write`; to test the write path, point `SUPABASE_URL` at a branch database on purpose. And **don't reach for `CONTEXT` or `DEPLOY_PRIME_URL` in a function** — Netlify exposes only `URL`, `SITE_NAME` and `SITE_ID` at runtime, so an earlier `CONTEXT === 'production'` gate silently disabled cataloging entirely.
 
 ### Seeing the release page locally
 
-`npm run dev` renders `/a/{artist}/{release}` through the real `api/edge/release-page.ts` — the
-edge functions run under `netlify dev`, and behaviour matches production exactly (verified
-2026-08-15: an uncatalogued release 302s to the artist page locally and in production alike).
-`npm run dev:fast` cannot: the bare Vite server runs no edge functions at all.
+`npm run dev` renders `/a/{artist}/{release}` through the real `api/edge/release-page.ts` and matches production; `dev:fast` runs no edge functions at all. The gap is data — production Supabase only holds a release once cataloging has run for that artist — so `npm run preview:release -- <slug>` (then `http://localhost:8788`) renders any release through the **real** edge function, fetching its Bandcamp page on demand. Only the two database reads are stubbed, so nothing can be written.
 
-The remaining gap is data, not rendering. `netlify dev` reads production Supabase, where a
-release only exists once demand-driven cataloging has run for that artist — so a release nobody
-has triggered a catalogue for is still unviewable that way. That is what `preview:release` is
-for:
-
-```bash
-npm run preview:release -- explosionsinthesky    # then open http://localhost:8788
-```
-
-Fetches the real `/music` grid, lists the discography, and renders any release through the
-**real** `api/edge/release-page.ts` — same template, same payout maths — fetching that release's
-page from Bandcamp on demand. Only the two database reads are stubbed; there is no database
-connection, so nothing can be written. One Bandcamp request per release page you open.
-
-Once ingest is live, `release_catalog_state` is the observability surface:
-`last_attempted_at`, `releases_found`, `last_error`, `consecutive_failures`, `last_trigger`. A run
-that suddenly finds 0 releases where it previously found 20 is a parser break or a bot challenge,
-not an artist deleting their catalog — `recordCatalogOutcome` reports exactly that transition to
-Sentry, since it is otherwise recorded as a perfectly ordinary success.
+`release_catalog_state` is the observability surface (`last_attempted_at`, `releases_found`, `last_error`, `consecutive_failures`, `last_trigger`); `recordCatalogOutcome` reports a sudden drop to 0 releases to Sentry, since a parser break otherwise looks like an ordinary success.
 
 ### Keeping catalogues fresh
 
-Every other catalog trigger is demand-driven — a save, an artist's own button, the admin command,
-a Bandcamp collection import — and `check-releases` only *reads* the catalogue. So without a
-scheduled refresh an artist who is saved once gets catalogued once and their release alerts
-quietly stop. That is what `api/functions/recatalog-sweep.ts` fixes, run every twelve hours by
-`.github/workflows/recatalog-sweep.yml` (25 artists per run, so 50 a day — halved from 100 in disk
-I/O round 4; the workflow comment says when to put it back).
+Catalog triggers are all demand-driven — a save, an artist's own button, the admin command, a collection import — and `check-releases` only *reads* the catalogue, so without a scheduled refresh an artist saved once is catalogued once and their alerts quietly stop. `api/functions/recatalog-sweep.ts` fixes that, run every twelve hours by `recatalog-sweep.yml` at 25 artists per run.
 
-**Search is deliberately not a trigger any more.** `persistSearchResults` used to hand every
-Bandcamp-linked artist in a result set to the crawler, which made an unauthenticated,
-traffic-driven path the site's largest producer of database writes — 60 first-time crawls an hour
-against the sweep's 100 a *day*, each one inserting rows into three six-index tables and then
-re-reading them monthly forever. That is what exhausted the Supabase disk I/O budget for the third
-time, after two rounds of per-operation fixes (#443, #463, #464) that never touched the volume.
-The sweep's pool is every artist with a catalogue-able link, so a searched artist is still
-reached, in a month or two rather than a minute. Full reasoning, the confirming SQL, and the
-escalation ladder if the warning returns: `docs/specs/supabase-disk-io-investigation.md`. The
-whole feature's off-switch remains the `RELEASE_CATALOG_ENABLED` env var — deleting it in Netlify
-stops cataloging with no deploy.
+**Search is deliberately not a trigger** — queuing a crawl per Bandcamp-linked search result made an unauthenticated path the site's largest producer of database writes and exhausted the Supabase disk I/O budget. Don't reintroduce it; searched artists are still reached via the sweep. The off-switch is the `RELEASE_CATALOG_ENABLED` env var — deleting it in Netlify stops cataloging with no deploy.
 
-The pool is **every artist with a bandcamp, discogs, faircamp, jam.coop or mirlo link** —
-`CATALOGUEABLE_PLATFORMS` in `db.ts` is the list. Keep it identical to `catalogArtist`'s "no
-bandcamp, discogs, faircamp, jam.coop, or mirlo link stored" check — an artist with only an
-official site is recorded as a *failure*, so sweeping them poisons `consecutive_failures`. The two
-have to change together: Mirlo was added to both in the same PR (#415) for exactly that reason.
+The pool is **every artist with a bandcamp, discogs, faircamp, jam.coop or mirlo link** (`CATALOGUEABLE_PLATFORMS` in `db.ts`). **Keep it identical to `catalogArtist`'s equivalent check** — an artist with only an official site is recorded as a *failure*, so sweeping them poisons `consecutive_failures`; the two change together (#415 added Mirlo to both). The sweep asks `requestArtistCatalog` for up to 25 under the `scheduled` trigger, but `claimArtistForCatalog` (7-day cooldown plus per-trigger hourly cap) is the authority, so running it twice is a no-op.
 
-Why the pool isn't saved-only, which is how it shipped: measured 2026-08-02 there were 2,564
-artists with a catalogue-able link against 9 saved by anybody, so the sweep's whole universe fit
-in one batch and it sat idle almost every run. Alerts aren't the only consumer either — `/a/:slug`
-renders a release list for any catalogued artist, and those pages exist because somebody
-*searched*. The ratio is what matters and it hasn't moved: as of 2026-08-07 there are 5,977
-releases across 803 catalogued artists, and 36 live `saved_artists` rows in total. Treat every
-number in this paragraph as a dated measurement, not a current count — re-measure before
-reasoning from one.
-
-`getStaleCatalogCandidates` in `db.ts` orders them: saved first (an alert is a promise to a
-person, and there are few enough that they never starve behind the backfill), then never
-catalogued, then oldest `last_attempted_at`, then savers as a pure tiebreak. It asks
-`requestArtistCatalog` for up to 25 under the `scheduled` trigger. It adds no limit of its own: it
-drops artists inside the 7-day re-catalogue cooldown up front, reading the same
-`RECATALOG_COOLDOWN_HOURS` constant so a bounded batch isn't spent on artists that would be
-refused a moment later, but `claimArtistForCatalog` — that cooldown plus the per-trigger hourly cap
-— stays the authority. So running the sweep twice is a no-op. It returns a real summary rather than
-202, and any refusal is a non-2xx that fails the workflow: a scheduled job that reports success
-while doing nothing is the same silent failure it was built to fix.
-
-**Paging, not `.limit()`.** PostgREST caps every response at 1,000 rows whatever limit you ask
-for, and truncates *silently*. A single `.select()` over `artist_links` returns 1,000 of ~3,900
-rows and looks completely successful — which would hide three quarters of the sweep's pool. Use
-`readAllPages` (or `.range()` in a loop) for any read whose table can exceed 1,000 rows.
+**Paging, not `.limit()`.** PostgREST caps every response at 1,000 rows whatever limit you ask for, and truncates *silently* — a `.select()` over `artist_links` returns 1,000 of ~3,900 rows and looks successful. Use `readAllPages` (or `.range()` in a loop) for any read whose table can exceed 1,000 rows.
 
 ### Platform registry
 
-`api/shared/platform-registry.ts` is the single source of truth for platform metadata: name, color, icon, category (marketplace, patronage, decentralized, library, official, social), payout percentage, AI policy, and `CATEGORY_ORDER`. Add or change platforms there rather than hardcoding elsewhere, then check for stale copies:
+`api/shared/platform-registry.ts` is the single source of truth for platform metadata: name, color, icon, category (marketplace, patronage, decentralized, library, official, social), payout percentage, AI policy, `CATEGORY_ORDER`. Add or change platforms there rather than hardcoding elsewhere, then check for stale copies:
 
 ```bash
 grep -r "PLATFORM_INFO" api/edge/ apps/web/src/
 ```
 
-`apps/web/src/services/sources.ts` mirrors the registry and adds client-only fields (description, `searchUrlTemplate`, `hasEmbed`, `searchOnly`). Keep the shared fields in sync between the two.
+`apps/web/src/services/sources.ts` mirrors the registry and adds client-only fields (description, `searchUrlTemplate`, `hasEmbed`, `searchOnly`). Keep the shared fields in sync.
 
 ### Local dev: the full stack, and the fast shim
 
-There are two local modes. **Use `npm run dev` — the real one — by default.**
+**Use `npm run dev` — the real one — by default.** It is the *only* way to exercise the real backend before merging, because #451 disabled Deploy Previews outright; treat a gap in it as a real gap.
 
-This is now the *only* way to exercise the real backend before merging: #451 disabled Deploy
-Previews outright (`[context.deploy-preview] ignore = "exit 0"` in `netlify.toml`), because they
-were ~280 of a 300-minute monthly allowance. That block's own comment says previews should come
-back "once local dev can stand in for them" — this section is that standing-in. Treat a gap here
-as a real gap, not an inconvenience: there is no preview to fall back on.
-
-| | `npm run dev` (`netlify dev`, :8888) | `npm run dev:fast` (Vite only, :5173) |
+| | `npm run dev` (`netlify dev`, :8888) | `npm run dev:fast` (Vite, :5173) |
 |---|---|---|
-| Netlify functions (`api/functions/`) | **real** | not run — `apps/web/server/` shim instead |
+| Netlify functions (`api/functions/`) | **real** | not run — `apps/web/server/` shim |
 | Edge functions (`api/edge/`) | **real** | not run at all |
-| `netlify.toml` redirects, headers, edge routing order | **applied** | ignored |
+| `netlify.toml` redirects, headers, routing | **applied** | ignored |
 | Supabase data | **production** | none |
 | Auth (sign-in, sessions, admin) | **works** | dead — "Auth not configured" |
 | `/data/**` (guides, changelog) | served | 404s as the SPA shell |
 | Boot | ~15s | ~1s |
 
-`dev:fast` is for pure CSS/layout iteration. Anything touching data, auth, an API response, SEO
-markup, or routing needs `npm run dev`.
+`dev:fast` is for pure CSS/layout iteration. Anything touching data, auth, an API response, SEO markup or routing needs `npm run dev`.
 
-**It reads and writes PRODUCTION Supabase.** `netlify dev` injects the live site's environment,
-so functions hold `SUPABASE_SERVICE_KEY` and bypass RLS exactly as production does. Reads are
-free; **writes are real** — saving an artist, claiming a profile, or changing settings locally
-mutates production rows, and `RESEND_API_KEY` / `BUTTONDOWN_API_KEY` mean notification paths can
-send real email. Release cataloguing is the one thing that stays off: `RELEASE_CATALOG_ENABLED`
-is set for the production context only, and `netlify dev` uses the dev context, so it is absent
-locally. Don't "fix" that by setting it — see "Testing release ingest locally".
+**It reads and writes PRODUCTION Supabase.** `netlify dev` injects the live site's environment, so functions hold `SUPABASE_SERVICE_KEY` and bypass RLS as production does. Reads are free; **writes are real** — saving an artist, claiming a profile or changing settings mutates production rows, and `RESEND_API_KEY` / `BUTTONDOWN_API_KEY` mean notification paths can send real email. Cataloguing is the one thing that stays off; don't "fix" that.
 
-Two traps, both of which produce a *silently wrong* page rather than an error:
+Three traps, all producing a *silently wrong* result rather than an error:
 
-- **The empty-value shadow.** A key present but blank in the local `.env` overrides the real
-  value from the Netlify site settings; `netlify dev` reports it as `Ignored project settings env
-  var: X (defined in .env file)`. Three keys were blank this way until 2026-08-15
-  (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `SUPABASE_ANON_KEY`), which is why local auth
-  never worked and every signed-in endpoint failed. **Delete a key from `.env` rather than
-  leaving it blank.** Check the startup log's `Injected project settings env vars` list — a key
-  you need should appear there, not in an `Ignored` line.
-- **The stale port.** `dev:fast` passes `--strictPort` on purpose; see the `[dev]` block in
-  `netlify.toml` for why removing it lets another checkout's leftover server answer everything.
+- **The empty-value shadow.** A key present but blank in `.env` overrides the real value from the Netlify site settings, logged as `Ignored project settings env var: X`. **Delete a key from `.env` rather than leaving it blank**, and check the startup log's `Injected project settings env vars` list — a key you need belongs there, not in an `Ignored` line. Three blank keys are why local auth never worked until 2026-08-15.
+- **The stale port.** `dev:fast` passes `--strictPort` on purpose; the `[dev]` block in `netlify.toml` says why removing it lets another checkout's leftover server answer everything.
+- **The shim is not the backend.** Only `dev:fast` uses `apps/web/server/`, whose search implementation has drifted. Editing `search-sources.ts` does not change what `dev:fast` returns; editing `apps/web/server/*` does not change production. Concretely, the shim's `/api/suggest` returns a hardcoded empty list where `npm run dev` returns real `artists` rows.
 
-Running `npm run dev` rewrites `deno.lock` (it re-resolves the edge functions' imports against
-the current `package.json`). That shows up as an unrelated modified file — `git checkout --
-deno.lock` before committing, same habit as the generated feed XML. The drift it keeps
-re-applying is real, though: the committed lock predates `@sentry/node` and
-`@testing-library/*` being added, so it's worth refreshing deliberately in its own PR.
-
-The old shim still exists: `apps/web/vite.config.ts` installs `handleApiRequest` from
-`apps/web/server/api.ts`, with its own search implementation in `apps/web/server/search/*`. It
-has drifted from `api/functions/` and only `dev:fast` uses it. Editing
-`api/functions/search-sources.ts` does not change what `dev:fast` returns, and editing
-`apps/web/server/*` does not change production. Concretely: the shim's `/api/suggest` returns a
-hardcoded empty list, where `npm run dev` returns real rows from the `artists` table. Treat
-`api/functions/` as the real behavior and reach for the shim only when boot speed matters.
+`npm run dev` rewrites `deno.lock`; `git checkout -- deno.lock` before committing, same habit as the generated feed XML.
 
 ### Dead code in `api/search/`
 
-`api/search/sources.ts`, `bandcamp.ts`, `site-search.ts`, and `musicbrainz.ts` are Vercel-era leftovers (they import `@vercel/node`, which isn't even a dependency) and are imported by nothing. Only `bandcamp-probe.ts` and `enrichment.ts` in that directory are live. Editing the dead files is a classic wasted-session trap: the change deploys and nothing happens. Verified in `docs/specs/bandcamp-coverage-research.md` §1.
+`api/search/sources.ts`, `bandcamp.ts`, `site-search.ts` and `musicbrainz.ts` are Vercel-era leftovers (they import `@vercel/node`, which isn't even a dependency) and are imported by nothing — only `bandcamp-probe.ts` and `enrichment.ts` there are live. Editing the dead files is a classic wasted-session trap: the change deploys and nothing happens. Verified in `docs/specs/bandcamp-coverage-research.md` §1.
 
-### Artist profiles
+### Feature surfaces
 
-Artists claim profiles via `/claim/:slug` (email magic link or password auth, with a manual-review fallback path). The claim flow is a multi-step wizard split across `Claim*Step.tsx` components. Claimed profiles are edited at `/artist-edit/:slug` (bio, photo, links, location, featured release embed). Artist pages (claimed and unclaimed) render at `/a/:slug` and `/artist/:slug` via the `artist-page-static` edge function. Analytics (searches, views, clicks) appear on the artist dashboard.
-
-### Saved & supported artists, and public sharing
-
-Signed-in fans can save artists and mark artists as supported (migrations 013–018), synced to the Apple app via `saved-artists-sync.ts` with tombstones and scheduled GC. Users can claim a public username (migration 021) and opt into sharing their list (migration 022); the public list renders at `/u/:handle` via the `u-handle` edge function, backed by `public-saved-artists.ts`. Reserved handles live in `api/lib/reserved-handles.ts`.
+- **Artist profiles.** Artists claim via `/claim/:slug` (magic link or password, with a manual-review fallback); the flow is a wizard split across `Claim*Step.tsx`. Claimed profiles are edited at `/artist-edit/:slug`. Artist pages render at `/a/:slug` and `/artist/:slug` via the `artist-page-static` edge function, and analytics (searches, views, clicks) appear on the artist dashboard.
+- **Saved & supported artists.** Signed-in fans save artists and mark them supported (migrations 013–018), synced to the Apple app via `saved-artists-sync.ts` with tombstones and scheduled GC. A claimed public username (migration 021) plus a sharing opt-in (022) renders a public list at `/u/:handle` via the `u-handle` edge function, backed by `public-saved-artists.ts`; reserved handles live in `api/lib/reserved-handles.ts`.
+- **Account settings.** `/settings` is backed by the `me-*` functions (`me-settings`, `me-username`, `me-location`, `me-password`) plus `user-sharing.ts`. These are the only files in `api/tsconfig.json`'s typecheck include and each has a test in `api/functions/__tests__/` — **follow that pattern for new account endpoints.**
+- **Public API (v1).** Documented in `docs/openapi.yaml`, surfaced on `/developers`, routed in `netlify.toml`: `/api/v1/search`, `/artist/*`, `/resolve`, `/platforms`, `/status`, `/keys`. Keys are stored hashed (migration 007); key-bearing requests get permissive CORS, anonymous ones are restricted to `unstream.stream`.
+- **Discord bot.** `discord-interaction.ts` verifies signatures (tweetnacl) and dispatches to `discord-search-background.ts`; commands are registered with `scripts/discord-register-commands.ts`.
+- **Guides.** Markdown in `data/guides/` with YAML frontmatter (title, description, pillar, published/draft); manifest generated at build time by `scripts/generate-guides-manifest.ts`. Pillars: artist-economics, platform-discovery, how-to, builder.
+- **Admin tools.** Admins (checked by email) merge duplicate results at `/admin/merge`, review verification at `/admin/verify`, and view `/admin/analytics`. Merge overrides live in Supabase (migrations 004–005), are respected during disambiguation, and can be managed with `npx tsx scripts/merge-override.ts`.
 
 ### Release dedup: what identity is, and what the date is for
 
-One release exists on several platforms and every one of them describes it differently. Three
-tiers decide whether two rows are one record, and the rule that keeps them honest is
-**under-merge, never over-merge** — a false merge silently asserts an artist made a record they
-didn't, and nobody would ever catch it.
+One release exists on several platforms, described differently by each. **Under-merge, never over-merge** — a false merge asserts an artist made a record they didn't, and nobody would ever catch it. Three tiers:
 
-1. **A hard identifier.** `discogs_master_id`, `musicbrainz_release_group_id` — someone else's
-   "these pressings are one album" conclusion. Exact, free, and it wins.
-2. **An identical `match_key`, unless the dates disagree** (`findExactReleaseMatch`). Merges.
-3. **A containment match between match keys, unless the dates disagree**
-   (`findFuzzyReleaseMatch`). Never merges — it flags both rows `needs_review` for
-   `/admin/release-review`.
+1. **A hard identifier** (`discogs_master_id`, `musicbrainz_release_group_id`) — someone else's "these pressings are one album" conclusion. Wins outright.
+2. **Identical `match_key`, unless the dates disagree** (`findExactReleaseMatch`). Merges.
+3. **Containment between match keys, unless the dates disagree** (`findFuzzyReleaseMatch`). Never merges — flags both rows `needs_review` for `/admin/release-review`.
 
-**Release type is not part of identity, and putting it back would be a regression.** Discogs'
-artist listing carries no type field for a master, so 92% of Discogs rows are typed `other`
-while the same record arrives from Bandcamp as `album`. Keying identity on
-`(release_type, match_key)` meant those two could never meet — measured 2026-08-29, 1,181 pairs
-of byte-identical titles under one artist sat on artist pages twice, unmerged and unflagged,
-because flagging was type-scoped too. Where the types genuinely differ and both are meaningful
-the data still says one record: `Live At The Echo` filed 'live' by one source and 'album' by
-the other, same day, is one album.
+Three measured rules hold that together:
 
-**`releaseDatesDisagree` is what stands in its place, and it cuts both ways.** It compares only
-as far as the *coarser* of the two precisions vouches for, which is why `date_precision` is
-stored: Discogs' bare year arrives as `2020-01-01` and means "sometime in 2020", so comparing it
-to a Bandcamp day as a full date would call every such pair different. A missing date is never
-disagreement — this answers "do we have evidence these are two records", and silence is no
-evidence.
+- **Release type is not identity, and restoring it would be a regression.** Discogs has no type field for a master, so 92% of its rows are `other` where Bandcamp says `album`; keying on `(release_type, match_key)` left 1,181 identical-title pairs duplicated on artist pages, unmerged *and* unflagged.
+- **`releaseDatesDisagree` replaces it, and cuts both ways.** It compares only as far as the *coarser* precision vouches for — hence the stored `date_precision`, since a Discogs bare year arrives as `2020-01-01`. **A missing date is never disagreement.** As a veto it also keeps the review queue usable.
+- **A release may hold several sources per platform.** Uniqueness is `(release_id, platform, COALESCE(external_id, ''))` — at most one id-less source per platform, since two of those can't be told apart. Global `UNIQUE (platform, external_id)` is untouched and keeps re-crawls idempotent.
 
-As a veto it is the reason the review queue is usable: of 858 fuzzy pairs in the catalog, 687
-are pairs whose day-precision dates differ, and every one sampled was a false positive ("Acid
-Dub Versions III" against "II", four volumes of "As I Hear Them In My Head"). A queue that is
-80% noise trains its reviewer to dismiss without reading, which is worse than no queue.
+Two consequences of that last rule: **render every "where to buy" list through `oneSourcePerPlatform`** (`api/shared/release-display.ts`, Node + Deno) or `orderedSourcePlatforms`, or you print "Discogs · Discogs" and one payout twice; and **`persistDiscogsReleases` must look up master ids in `release_sources` too**, since `releases.discogs_master_id` holds only the survivor's — without it the next pass re-creates the merged-away master and the review queue refills forever.
 
-**A release may hold more than one source per platform** since
-`20260829120000_release-sources-multi-per-platform.sql`. Discogs files two masters for one
-record often enough that 59 duplicate pairs had a Discogs source on both sides, and the old
-`UNIQUE (release_id, platform)` made every one of them unmergeable. Uniqueness is now
-`(release_id, platform, COALESCE(external_id, ''))` — several sources per platform, at most one
-of them without an id, because two id-less rows on one platform can never be told apart. The
-global `UNIQUE (platform, external_id)` is untouched and still keeps re-crawls idempotent.
-
-Two consequences worth knowing:
-
-- **Anything rendering a "where to buy" list must go through `oneSourcePerPlatform`**
-  (`api/shared/release-display.ts`, importable from both Node and Deno) or
-  `orderedSourcePlatforms`, which dedupes. "Discogs · Discogs" reads as a bug and prints one
-  platform's payout twice.
-- **`persistDiscogsReleases` looks up a master id in `release_sources` as well as in
-  `releases.discogs_master_id`.** The release column holds exactly one, and a merge keeps the
-  survivor's — so without that second lookup the next catalogue pass wouldn't recognise the
-  merged-away master and would re-create it. That is how a review queue refills itself forever.
-
-Changing any of these rules only changes tomorrow: ingest compares a release it is *writing*
-against what is stored, so nothing already in the catalog is revisited. `npm run
-dedupe:releases` applies the current rules to what's already there — report-only by default,
-`--write` to apply, and it merges through `mergeReleases` rather than a copy of it.
+Rule changes only affect tomorrow: ingest compares what it is *writing* against what is stored. `npm run dedupe:releases` applies current rules to the existing catalog — report-only by default, `--write` to apply, merging through `mergeReleases`.
 
 ### Collections, and why most items start unlinked
 
-A Bandcamp import (`bandcamp-sync-background.ts`) writes a `collection_items` row per album and
-attaches an Unstream release only when one already exists. Most of a real collection therefore
-arrives unlinked — the fan bought from artists nobody has ever searched, so there is no `artists`
-row to match against.
+A Bandcamp import (`bandcamp-sync-background.ts`) writes a `collection_items` row per album and attaches a release only when one already exists, so most of a real collection arrives unlinked — the fan bought from artists nobody has ever searched.
 
-**There is no source URL to fall back to.** Bandcamp's Subsonic API returns `id`, `name`,
-`artist`, `coverArt`, `year`, `genre`, `created` and nothing else — no album or artist URL — so
-"just link to Bandcamp" is not available, and deriving `<artist>.bandcamp.com/album/<title>` mints
-404s. Don't reach for it.
+**There is no source URL to fall back to.** Bandcamp's Subsonic API returns `id`, `name`, `artist`, `coverArt`, `year`, `genre`, `created` and nothing else, so "just link to Bandcamp" isn't available and deriving `<artist>.bandcamp.com/album/<title>` mints 404s. Don't reach for it.
 
-`collection-matching.ts` closes the gap in two halves that become possible at different times:
+`collection-matching.ts` closes the gap in two halves: `resolveCollectionArtists(userId)` at the end of a sync, on **both** the success and failure paths (it touches neither the Subsonic API nor the credential, so a Subsonic 500 must not block discovery), and `linkCollectionItemsForArtist` at the end of every catalogue pass, attaching releases to waiting items forever after.
 
-- `resolveCollectionArtists(userId)` runs at the end of a sync, on **both** the success and the
-  failure path, and after the connection row is written either way — it reads stored
-  `collection_items` and probes `<slug>.bandcamp.com/music`, touching neither the Subsonic API
-  nor the credential, so a Subsonic 500 (routine in this beta) must not block discovery for
-  items imported days earlier. It stores each artist plus their Bandcamp link and requests
-  catalogues for up to 25 — matching `MAX_ARTISTS_PER_REQUEST`, which silently slices anything
-  longer. The rest ride the twice-daily sweep, whose pool is every artist with a catalogue-able
-  link.
-- `linkCollectionItemsForArtist(artistId, name)` runs at the end of every catalogue pass in
-  `catalog-artist-background.ts` — the moment the releases exist — and attaches them to the items
-  that were waiting. It re-runs forever, so a release added later still finds fans who own it.
-
-Matching is exact on `releases.match_key` via `releaseMatchKey`, the function that produced the
-column. Use that one, never `normalizeForComparison`: it strips to `[a-z0-9]`, so any title with
-no Latin characters normalizes to the empty string and can never match. A near-miss stays
-unlinked on purpose — a collection page asserts a specific person bought a specific record.
-
-### Account settings
-
-`/settings` is backed by the `me-*` functions: `me-settings.ts`, `me-username.ts`, `me-location.ts`, `me-password.ts`, plus `user-sharing.ts` for the sharing toggle. These are the only files in `api/tsconfig.json`'s typecheck include, and each has a test in `api/functions/__tests__/` — follow that pattern for new account endpoints.
+Matching is exact on `releases.match_key` via `releaseMatchKey`, the function that produced the column. **Use that one, never `normalizeForComparison`**: it strips to `[a-z0-9]`, so a title with no Latin characters normalizes to empty and can never match. A near-miss stays unlinked on purpose — a collection page asserts a specific person bought a specific record.
 
 ### Mac app updates (Sparkle)
 
-The Mac app ships as a direct GitHub release and updates itself with Sparkle 2, added via SPM and
-filtered to macOS (`apps/mac/project.yml`). `api/shared/desktop-release.ts` is the single source of
-truth for the current Mac release; `api/functions/desktop-appcast.ts` renders it as the appcast at
-`/appcast.xml`, and the legacy `/api/desktop/version` endpoint reads the same constant for installs
-older than 3.6.0.
+The Mac app ships as a direct GitHub release and updates itself with Sparkle 2 (SPM, filtered to macOS in `project.yml`). `api/shared/desktop-release.ts` is the single source of truth for the current release; `desktop-appcast.ts` renders it at `/appcast.xml`, and the legacy `/api/desktop/version` endpoint reads the same constant for installs older than 3.6.0. Two traps — detail in `apps/mac/docs/sparkle-updates.md`:
 
-Two traps worth knowing before touching any of it — full detail in
-`apps/mac/docs/sparkle-updates.md`:
-
-- **Sparkle compares `CFBundleVersion`, not the marketing version.** An appcast whose
-  `sparkle:version` is `3.6.0` against an installed `CFBundleVersion` of `15` offers no update.
-  Bump the build number on every release.
-- **The sandbox needs three things at once**: `SUEnableInstallerLauncherService` in
-  `Info-macOS.plist`, the `-spks`/`-spki` `mach-lookup` exceptions in the entitlements, and the app
-  staying sandboxed. Break one and updates download fine and then fail to install — which reads as
-  success right up to the last step. The Developer ID `archive` + `-exportArchive` path is also
-  what re-signs Sparkle's XPC helpers; don't hand-roll `codesign --deep`.
-
-### Public API (v1)
-
-A versioned REST API for third parties, documented in `docs/openapi.yaml` and surfaced on `/developers`. Routes (see `netlify.toml`): `/api/v1/search`, `/api/v1/artist/*`, `/api/v1/resolve`, `/api/v1/platforms`, `/api/v1/status`, `/api/v1/keys`. API keys are stored hashed in Supabase (migration 007); requests carrying a key get permissive CORS, anonymous requests are restricted to `unstream.stream`. See `api/functions/middleware.ts`.
-
-### Discord bot
-
-Slash-command bot: `discord-interaction.ts` verifies signatures (tweetnacl) and dispatches to `discord-search-background.ts` for async search responses. Commands are registered with `scripts/discord-register-commands.ts`.
+- **Sparkle compares `CFBundleVersion`, not the marketing version.** An appcast whose `sparkle:version` is `3.6.0` against an installed `CFBundleVersion` of `15` offers no update. Bump the build number on every release.
+- **The sandbox needs three things at once**: `SUEnableInstallerLauncherService` in `Info-macOS.plist`, the `-spks`/`-spki` `mach-lookup` entitlement exceptions, and the app staying sandboxed. Break one and updates download fine then fail to install — which reads as success right up to the last step. The Developer ID `archive` + `-exportArchive` path also re-signs Sparkle's XPC helpers; don't hand-roll `codesign --deep`.
 
 ### Edge functions (SSR/SEO)
 
-Edge functions in `api/edge/` handle SSR for SEO, routed in `netlify.toml`:
+Routed in `netlify.toml`: `/` → `og-metadata`; `/artist/*` and `/a/*` → `artist-page-static`; `/search` → `noscript-search`; `/guides/*` → `guide-page`; `/u/*` → `u-handle`.
 
-| Route | Function |
-|---|---|
-| `/` | `og-metadata` |
-| `/artist/*`, `/a/*` | `artist-page-static` |
-| `/search` | `noscript-search` |
-| `/guides/*` | `guide-page` |
-| `/u/*` | `u-handle` |
-
-`/artists` is SPA-only after UNS-98; the `artist-directory-page` edge function was removed. Edge functions run on Deno and import from URLs (`https://edge.netlify.com`, `https://esm.sh/...`) — they can't import from `api/functions/`, so shared constants get duplicated or pulled from `api/shared/`.
-
-### Guides
-
-Markdown files in `data/guides/` with YAML frontmatter (title, description, pillar, published/draft). A manifest is generated at build time (`scripts/generate-guides-manifest.ts`). Pillars: artist-economics, platform-discovery, how-to, builder.
+`/artists` is SPA-only after UNS-98; `artist-directory-page` was removed. Edge functions run on Deno and import from URLs (`edge.netlify.com`, `esm.sh`) — they can't import from `api/functions/`, so shared constants get duplicated or pulled from `api/shared/`.
 
 ### The Dispatch
 
-A weekly music-industry briefing. **The workflow changed on 2026-04-17:** the Dispatch is now delivered to the `#unstream-dispatch` Discord channel by a scheduled agent, and RSS publishing was retired. Nothing new is written to `data/dispatch/`.
+A weekly music-industry briefing. **The workflow changed on 2026-04-17:** it is delivered to the `#unstream-dispatch` Discord channel by a scheduled agent, and RSS publishing was retired — nothing new is written to `data/dispatch/`. What remains is the archive plus `scripts/generate-dispatch-feed.ts`, which still runs at build time so `/dispatch.xml` renders the historical feed.
 
-What remains in the repo is the archive: `data/dispatch/2026-W16.md` and earlier, plus `scripts/generate-dispatch-feed.ts`, which still runs at build time so `/dispatch.xml` keeps rendering the historical feed. See `data/dispatch/README.md` for the full history.
-
-The old "commit dispatch work directly to `main`" instruction is dead — do not follow it. Dispatch-related repo changes go through the normal branch workflow like everything else.
-
-### Admin tools
-
-Admin users (checked by email) can merge duplicate search results via `/admin/merge`, review verification requests via `/admin/verify`, and view `/admin/analytics`. Merge overrides are stored in Supabase (migrations 004–005) and respected during search disambiguation; they can also be managed from the CLI with `npx tsx scripts/merge-override.ts`.
+The old "commit dispatch work directly to `main`" instruction is dead — do not follow it.
 
 ### API middleware & security
 
-`api/functions/middleware.ts` centralizes CORS (`buildCorsHeaders` / `buildPublicCorsHeaders`), authentication (`authenticateBearer`, `authenticateAdmin`, `authenticateApiKey`), query validation (`validateQuery`), v1 response envelopes (`v1Response`), and SSRF protection.
+`api/functions/middleware.ts` centralizes CORS (`buildCorsHeaders` / `buildPublicCorsHeaders`), auth (`authenticateBearer`, `authenticateAdmin`, `authenticateApiKey`), query validation (`validateQuery`), v1 envelopes (`v1Response`), and SSRF protection.
 
-SSRF protection is an **explicit hostname allowlist** — `ALLOWED_OUTBOUND_HOSTNAMES` + `isUrlHostnameAllowed()`. Any code fetching an external URL must pass through it, and adding a new platform fetch means adding its hostname (wildcards like `*.bandcamp.com` are supported). The allowlist also blocks non-HTTP(S) schemes, localhost, and cloud metadata endpoints. Its comments record *why* hosts were removed (e.g. no `qobuz.com`: robots-disallowed, links come from MusicBrainz relations and are displayed but never fetched) — preserve that reasoning when editing.
+SSRF protection is an **explicit hostname allowlist** — `ALLOWED_OUTBOUND_HOSTNAMES` + `isUrlHostnameAllowed()`. All outbound fetches must pass through it, and a new platform fetch means adding its hostname (wildcards like `*.bandcamp.com` work). It also blocks non-HTTP(S) schemes, localhost and cloud metadata endpoints. Its comments record *why* hosts were removed (e.g. no `qobuz.com`: robots-disallowed, links come from MusicBrainz relations and are displayed but never fetched) — preserve that reasoning when editing.
 
-Rate limits and Sentry event dedup live in `api/functions/ratelimit.ts` (`checkRateLimit`, `checkApiRateLimit`, `checkSentryDedup`); Sentry itself is wired in via `api/lib/sentry.ts`.
+Rate limits and Sentry dedup live in `ratelimit.ts` (`checkRateLimit`, `checkApiRateLimit`, `checkSentryDedup`).
 
 ## Auth
 
@@ -591,107 +245,72 @@ Supabase Auth with magic links and password sign-in. Auth state is managed via `
 
 ## Database / migrations
 
-Schema lives in `supabase/schema.sql`; changes are applied as timestamp-prefixed migration files in `supabase/migrations/` (e.g. `20260726120000_bandcamp-slug-probes.sql`). Filename order is what Supabase applies. Most files also open with a sequential number in a header comment (`-- Migration 025: …`) matching the older `supabase/migration-NNN-*.sql` copies, which are historical and kept for reference only; the sequence has gaps and a few recent files skip the number entirely, so don't treat it as authoritative. Don't edit historical migrations.
+Schema lives in `supabase/schema.sql`; changes ship as timestamp-prefixed files in `supabase/migrations/` (e.g. `20260726120000_bandcamp-slug-probes.sql`), and **filename order is what Supabase applies**. The sequential `-- Migration NNN` header comments and the older `migration-NNN-*.sql` copies are historical reference only — the sequence has gaps. Don't edit historical migrations.
 
-When adding a table or column: create a new migration in `supabase/migrations/`, include RLS policies, use `IF NOT EXISTS` / `DROP ... IF EXISTS` guards for idempotency, and explain the change in comments. Server-only tables (like `bandcamp_slug_probes`) enable RLS with *no* policies — the service-role client bypasses RLS, anon gets nothing — and should say so in a comment so the missing policies don't read as an oversight.
+When adding a table or column: new migration, RLS policies included, `IF NOT EXISTS` / `DROP ... IF EXISTS` guards for idempotency, comments explaining the change. Server-only tables (like `bandcamp_slug_probes`) enable RLS with *no* policies — the service-role client bypasses RLS, anon gets nothing — and should say so in a comment so the missing policies don't read as an oversight.
 
-**Auto-deploy:** `.github/workflows/supabase-migrate.yml` runs `supabase db push --linked` on every push to `main` that changes `supabase/migrations/`. Migrations deploy automatically — no manual SQL editor needed. Required GitHub secrets: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`.
+**Auto-deploy:** `supabase-migrate.yml` runs `supabase db push --linked` on every push to `main` touching `supabase/migrations/`. Secrets: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`.
 
-**Applying a migration to production from an unmerged branch poisons every later migration.** The
-workflow can be run by hand (`workflow_dispatch`) from a feature branch, which is sometimes
-necessary — deploy previews share the production database, so an additive migration has to land
-early for the preview to exercise it. But `supabase db push` refuses to run when production has an
-applied version that isn't in `supabase/migrations/` locally, and it aborts *before applying
-anything*. So one migration applied from a branch that then sits unmerged blocks everybody's
-migrations on `main`, silently.
+**Applying a migration to production from an unmerged branch poisons every later migration.** `supabase db push` aborts *before applying anything* when production has a version missing locally, so one migration left on an unmerged branch silently blocks everybody's migrations on `main` — it happened, and took release alerts down for 30 hours. If you run the workflow by hand from a branch, merge it promptly and **check the workflow went green**; the failure is loud in Actions and invisible everywhere else.
 
-This happened: `20260809120000_bandcamp-collection.sql` went to production on 2026-08-09 from the
-still-open PR #438, and three consecutive runs on `main` then failed without applying anything.
-One stranded migration added `releases.alert_sent_at`, which `api/functions/notifications.ts` had
-already shipped code against — so release alerts were down for about 30 hours. The fix was to add
-the missing file to `main` so the repo again records what production has.
-
-If you apply a migration ahead of its merge: merge it promptly, or put the migration in its own PR
-and merge that first. Either way, **check this workflow went green** — the failure is loud in
-Actions and invisible everywhere else.
-
-**Local dry-run:** `npm run migrate:link` once per checkout, then `npm run migrate:dry-run`. Both
-that and `migrate:list` use `--linked`, matching the workflow — the CLI dropped `--project-ref`
-from these commands, and passing it makes them print a help blob and exit *without* checking
-anything, which reads like a clean run. If you see `Cannot find project ref`, run the link step.
-`supabase link` writes only to the gitignored `supabase/.temp/`.
-
-The dry run needs credentials, so it can't be a substitute for validating a migration's SQL. For
-that, run it against a throwaway Postgres in Docker — that's what caught the scoping on
-`20260803000000_clear-bandcamp-placeholder-404-backoff.sql`.
+**Local dry-run:** `npm run migrate:link` once, then `npm run migrate:dry-run`. Both that and `migrate:list` use `--linked`; the CLI dropped `--project-ref`, and passing it prints a help blob and exits *without checking anything*, which reads like a clean run. If you see `Cannot find project ref`, run the link step. The dry run can't validate SQL — for that, run the migration against a throwaway Postgres in Docker.
 
 ## Testing
 
-Tests use Vitest, in two places:
+Vitest, in three places:
 
 - `apps/web/tests/unit/` — component and pure-logic tests. Run in CI.
-- `apps/web/tests/integration/` — search accuracy against live APIs (`apps/web/tests/fixtures/expected-results.json`). Run separately; not in CI.
-- `api/functions/__tests__/` — function tests (cache behavior, probe cache coverage, XSS defense, the `me-*` endpoints). Run in CI via `npm run test:api`.
+- `apps/web/tests/integration/` — search accuracy against live APIs (`tests/fixtures/expected-results.json`). Separate; not in CI.
+- `api/functions/__tests__/` — function tests (cache behavior, probe cache coverage, XSS defense, the `me-*` endpoints). In CI via `npm run test:api`.
 
-`npm run verify` runs the CI gate locally — the same typecheck and two suites, in the same order. `npm run lint` is *not* in that gate: ESLint currently reports 64 pre-existing errors (unused vars and `any` in test files, plus a few pages), so enforcing it would fail every PR for reasons unrelated to the change. Worth clearing separately; until then, lint is advisory.
+`npm run verify` runs the CI gate locally. `npm run lint` is *not* in it: ESLint reports 64 pre-existing errors (unused vars and `any` in test files, plus a few pages), so enforcing it would fail every PR for unrelated reasons — worth clearing separately, advisory until then.
 
-Config: the root `vitest.config.ts` lets `npx vitest` work from the repo root and covers both trees; `apps/web/vitest.config.ts` covers the web tree. Default environment is `node` — add `// @vitest-environment jsdom` at the top of a `.tsx` test that needs a DOM. Both configs alias `src` → `apps/web/src`.
-
-The Apple app has XCTest coverage in `apps/mac/UnstreamTests/`; the Xcode project is generated from `apps/mac/project.yml` (XcodeGen), so edit that rather than the `.xcodeproj`.
+The root `vitest.config.ts` covers both trees so `npx vitest` works from the repo root; `apps/web/vitest.config.ts` covers the web tree. Default environment is `node` — add `// @vitest-environment jsdom` atop a `.tsx` test needing a DOM. Both alias `src` → `apps/web/src`. The Apple app has XCTest coverage in `apps/mac/UnstreamTests/`.
 
 ## Deployment
 
-Pushes to `main` trigger Netlify builds (`npm run build`). Functions deploy from `api/functions/`, edge functions from `api/edge/`. Edge routes, `/api/*` redirects, and security headers/CSP are configured in `netlify.toml`.
+Pushes to `main` trigger Netlify builds (`npm run build`). Functions deploy from `api/functions/`, edge functions from `api/edge/`; edge routes, `/api/*` redirects and headers/CSP live in `netlify.toml`.
 
-**Not every push deploys.** `netlify.toml`'s `ignore` setting runs `scripts/netlify-ignore-build.sh`, which cancels the build when a push touches only paths Netlify never publishes — `apps/mac/`, `apps/extension/`, `supabase/`, `docs/`, `.github/`, `README.md`, `CLAUDE.md`. A production deploy costs a flat 15 credits on Netlify's credit plans (build minutes on the legacy plans), and an Apple-app bugfix used to buy a full deploy of the website. The script's exit code is inverted — **0 cancels the build, 1 runs it** — and every branch in it defaults to deploying, because a skipped deploy leaves production silently stale. If you add a path whose contents reach the built site, check it isn't shadowed by that list: `data/` and `scripts/` are deliberately absent, since the whole `data/` tree is copied into `dist/` and `scripts/` generates the manifests, feeds and sitemap.
+**Not every push deploys.** `netlify.toml`'s `ignore` setting runs `scripts/netlify-ignore-build.sh`, which cancels the build when a push touches only paths Netlify never publishes — `apps/mac/`, `apps/extension/`, `supabase/`, `docs/`, `.github/`, `README.md`, `CLAUDE.md`. **Its exit code is inverted: 0 cancels, 1 builds**, and every branch defaults to deploying, because a skipped deploy leaves production silently stale. `data/` and `scripts/` are deliberately absent, since `data/` is copied into `dist/` and `scripts/` generates the manifests, feeds and sitemap — so if you add a path whose contents reach the built site, check it isn't shadowed.
 
-**Deploy Previews are off.** `[context.deploy-preview]` in `netlify.toml` cancels them (`ignore = "exit 0"`), so a PR gets no preview URL and the Netlify checks on it don't run — that's configuration, not breakage. Previews were ~200 builds a month against a 300-minute allowance, the largest single cost on the site; production deploys at the same cadence fit. The trade is real, though: **there is now no way to exercise the real backend before merging**, which matters because `npm run dev` runs a different search implementation and can't render edge-function routes at all. Delete the block to bring previews back once local dev can stand in for them.
+**Deploy Previews are off.** `[context.deploy-preview]` cancels them (`ignore = "exit 0"`), so a PR gets no preview URL and its Netlify checks don't run — configuration, not breakage. **`npm run dev` is therefore the only way to exercise the real backend before merging.**
 
-GitHub Actions (`.github/workflows/`):
-
-- `ci.yml` — typecheck plus both test suites on every PR and every push to `main`. This is the gate that used to live inside the Netlify build; see "Commands" above for what moving it changed.
-- `supabase-migrate.yml` — auto-applies new migrations on push to `main`.
-- `schedule-social-posts.yml` — weekly (Mondays) social post generation, committed back to the repo.
-- `semantic-revert-check.yml` — runs `scripts/semantic-revert-check.py` on every PR to flag changes that quietly undo earlier fixes. If it flags your PR, take it seriously: the bug loops it was built for are described in `docs/retros/UNS-100-bifurcation-retro.md`.
-- `upstash-keepalive.yml` — twice weekly, writes one Redis key so the free-tier database isn't reaped for inactivity (which silently killed caching and rate limiting once).
-- `recatalog-sweep.yml` — every 12 hours, POSTs `/.netlify/functions/recatalog-sweep` so release catalogues get built and stay fresh. See "Keeping catalogues fresh" above.
+GitHub Actions: `ci.yml` (typecheck + both suites — the gate that used to live in the Netlify build) · `supabase-migrate.yml` · `schedule-social-posts.yml` (weekly, committed back) · `semantic-revert-check.yml` (runs `scripts/semantic-revert-check.py` to flag changes that quietly undo earlier fixes — take it seriously; bug loops in `docs/postmortems/UNS-100-bifurcation-retro.md`) · `upstash-keepalive.yml` · `recatalog-sweep.yml` (every 12h).
 
 ## Engineering principles
 
-Default to **simple, boring code that a human can read once and understand.** The owner is not an engineer and reviews at the product level, so the codebase has to stay legible to whoever (human or agent) touches it next. When in doubt, choose the more obvious option over the clever one.
+Default to **simple, boring code that a human can read once and understand.** The owner reviews at the product level, so the codebase has to stay legible to whoever (human or agent) touches it next. When in doubt, choose the obvious option over the clever one.
 
-- **Boring beats clever.** Prefer plain, explicit code over abstraction, metaprogramming, or "smart" one-liners. Don't add layers, generics, or config flags for flexibility nobody has asked for. Solve the problem in front of you.
-- **Match the surrounding code.** Follow the naming, structure, and idioms already in the file/module. Consistency matters more than personal preference. Reuse existing helpers (e.g. `api/functions/middleware.ts`, `api/functions/cache.ts`, `api/shared/platform-registry.ts`, `apps/web/src/services/*`) instead of reinventing them.
-- **Small, focused units.** Keep functions and components short and single-purpose — see how `ResultCard*` and `Claim*Step` are split, and how pure search logic was pulled out into `search-utils.ts` / `search-parsers.ts`. If a file is growing a second responsibility, split it.
-- **Name things for what they do.** Clear names and a short comment for non-obvious *why* beat dense code with no explanation. Don't comment the obvious. The comments explaining *why* an approach was abandoned (blocked endpoints, removed allowlist hosts, cache-collision fixes) are load-bearing — keep them current instead of deleting them.
-- **No dead weight.** Don't leave commented-out code, unused exports, speculative "might need later" branches, or TODOs without follow-through. Delete what isn't used.
-- **Scale through clarity, not premature optimization.** Write the straightforward version first; optimize only with a concrete reason (a real hot path, a measured cost). Note the trade-off when you do.
-- **Fail loudly and handle errors explicitly.** Validate inputs at boundaries, surface errors (Sentry is wired up — use it), and avoid silent catches that swallow problems. A scraper that returns an empty array on a bot challenge is a silent failure: report it.
-- **Never cache uncertainty.** A failed lookup is not a negative result. See the section above — this is the single most repeated bug class in this codebase.
-- **One route, one renderer.** If a URL is server-rendered by an edge function, it is not also client-rendered by the SPA. Pick one. The "two renderers for one URL" pattern causes back-button / bfcache breakage and creates bug loops where every fix is a partial revert of the previous fix. See `docs/retros/UNS-100-bifurcation-retro.md` for the full lesson (UNS-70/71/73/94/97/99/100 series). When you need both SEO/no-JS HTML *and* React interactivity, use a pure-SSR edge function as the no-JS/crawler fallback and the SPA as the in-app renderer, and ensure the SPA never tries to "take over" from the static response. (`/u/:handle` is the reference implementation: edge renders, React hydrates only a Copy URL button.)
-- **Respect other people's servers.** Check `robots.txt` before adding a scrape, and honor it — several outages here were self-inflicted by scraping disallowed paths. Prefer documented APIs, directories, and sitemaps; cache aggressively so repeat queries cost one DB read instead of one fetch.
+- **Boring beats clever.** Plain, explicit code over abstraction, metaprogramming or "smart" one-liners. No layers, generics or config flags for flexibility nobody asked for.
+- **Match the surrounding code.** Follow the naming, structure and idioms already in the file, and reuse existing helpers (`middleware.ts`, `cache.ts`, `platform-registry.ts`, `apps/web/src/services/*`) instead of reinventing them.
+- **Small, focused units.** See how `ResultCard*` and `Claim*Step` are split, and how pure search logic moved to `search-utils.ts` / `search-parsers.ts`. If a file grows a second responsibility, split it.
+- **Name things for what they do,** with a short comment for non-obvious *why*; don't comment the obvious. Comments explaining *why* an approach was abandoned (blocked endpoints, removed allowlist hosts, cache-collision fixes) are load-bearing — keep them current instead of deleting them.
+- **No dead weight.** No commented-out code, unused exports, speculative branches or TODOs without follow-through.
+- **Scale through clarity, not premature optimization.** Straightforward version first; optimize only with a concrete reason (a real hot path, a measured cost), and note the trade-off.
+- **Fail loudly.** Validate inputs at boundaries, surface errors to Sentry, avoid silent catches. A scraper returning an empty array on a bot challenge is a silent failure: report it.
+- **Never cache uncertainty.** A failed lookup is not a negative result — the most repeated bug class in this codebase.
+- **One route, one renderer.** If a URL is server-rendered by an edge function, it is not also client-rendered by the SPA. "Two renderers for one URL" causes back-button / bfcache breakage and bug loops where every fix partially reverts the last (`docs/postmortems/UNS-100-bifurcation-retro.md`, UNS-70/71/73/94/97/99/100). When you need both crawler HTML *and* React interactivity, use a pure-SSR edge function as the no-JS fallback and the SPA as the in-app renderer, and never let the SPA "take over" from the static response. `/u/:handle` is the reference: edge renders, React hydrates only a Copy URL button.
+- **Respect other people's servers.** Check `robots.txt` before adding a scrape and honor it — several outages here were self-inflicted by scraping disallowed paths. Prefer documented APIs, directories and sitemaps; cache aggressively.
 
 ### Security practices
 
 Treat security as part of "done," not a later pass. Flag anything you can't fully resolve rather than leaving it silent.
 
-- **Validate and sanitize all external input** at the boundary — query params, request bodies, URL params, webhook payloads. Never trust client-supplied data. Escape anything interpolated into edge-function HTML (`escapeHtml`); `api/functions/__tests__/xss-defense.test.ts` guards this.
-- **SSRF protection is mandatory** for any code that fetches an external URL (resolver, enrichment, probe, embed paths). Route outbound fetches through `isUrlHostnameAllowed()` and add new hosts to `ALLOWED_OUTBOUND_HOSTNAMES`; don't add a raw `fetch(userUrl)`.
-- **Respect the CORS/auth model.** Public endpoints stay restricted to `unstream.stream`; API-key requests get permissive CORS because the key is the authorization. Use the shared middleware rather than hand-rolling headers.
-- **RLS on every table.** New Supabase tables/columns ship with RLS policies in a migration. Server-only tables ship with RLS enabled and no policies, plus a comment saying that's deliberate. Never rely on client-side checks alone for authorization.
-- **No secrets in code or logs.** Use environment variables. Don't log API keys, tokens, magic-link codes, or personal data. API keys are stored hashed, not in plaintext — keep it that way. Cache keys derived from user input should hold normalized search terms, not PII.
-- **Verify signed/authenticated requests** where the pattern exists (e.g. Discord interaction signature verification with tweetnacl). Don't bypass it for convenience.
-- **Keep CSP and security headers intact.** When touching `netlify.toml`, don't loosen CSP or headers without a clear reason; explain any change.
+- **Validate and sanitize all external input** at the boundary — query params, bodies, URL params, webhook payloads. Escape anything interpolated into edge-function HTML (`escapeHtml`); `api/functions/__tests__/xss-defense.test.ts` guards this.
+- **SSRF protection is mandatory** for any code fetching an external URL. Route fetches through `isUrlHostnameAllowed()` and add hosts to `ALLOWED_OUTBOUND_HOSTNAMES`; never add a raw `fetch(userUrl)`.
+- **Respect the CORS/auth model.** Public endpoints stay restricted to `unstream.stream`; API-key requests get permissive CORS because the key is the authorization. Use the shared middleware.
+- **RLS on every table.** New tables/columns ship with policies in a migration. Server-only tables ship with RLS enabled, no policies, and a comment saying that's deliberate. Never rely on client-side checks for authorization.
+- **No secrets in code or logs.** Don't log API keys, tokens, magic-link codes or personal data. API keys are stored hashed — keep it that way. Cache keys derived from user input hold normalized search terms, not PII.
+- **Verify signed requests** where the pattern exists (e.g. Discord signature verification with tweetnacl). Don't bypass it for convenience.
+- **Keep CSP and security headers intact** — don't loosen them in `netlify.toml` without a clear reason.
 - **Least privilege.** Check admin/ownership before privileged actions (merges, verification, profile edits, username claims) on the server, not just in the UI.
 
 ## Working with the project owner
 
-The project owner is a highly experienced product manager with deep familiarity with web technologies, product strategy, UX, and the alternative music platform ecosystem. He can provide detailed product requirements, evaluate trade-offs, review UI/UX decisions, and navigate the codebase at a conceptual level.
+The owner is a highly experienced product manager with deep familiarity with web technologies, product strategy, UX and the alternative music platform ecosystem. He gives detailed product requirements, evaluates trade-offs, reviews UI/UX and navigates the codebase conceptually. He is not a software, security or infrastructure engineer. So:
 
-He is not a software engineer, security engineer, or infrastructure engineer. Claude Code sessions should:
-
-- **Write production-ready code directly** rather than providing snippets to implement. Don't assume he can fill in gaps, wire things up, or debug build/runtime errors on his own.
-- **Handle security concerns proactively** — CSP headers, RLS policies, input validation, SSRF protection, auth edge cases. Flag security issues clearly rather than expecting them to be caught in review.
-- **Manage infrastructure details** — Netlify config, Supabase migrations, edge function routing, environment variables, deployment issues. Explain what changed and why when touching these areas.
-- **Explain technical trade-offs in product terms** — frame decisions around user impact, maintenance burden, and complexity rather than pure implementation details.
+- **Write production-ready code directly** rather than snippets to implement. Don't assume he can fill gaps, wire things up or debug build/runtime errors himself.
+- **Handle security proactively** — CSP, RLS, input validation, SSRF, auth edge cases. Flag issues clearly rather than expecting them to be caught in review.
+- **Manage infrastructure** — Netlify config, migrations, edge routing, env vars, deploys — and explain what changed and why.
+- **Explain trade-offs in product terms**: user impact, maintenance burden, complexity.
 - **Run tests and lint before considering work done.** Don't leave broken builds for him to debug.
