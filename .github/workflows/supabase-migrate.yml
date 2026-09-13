@@ -33,6 +33,14 @@ name: Supabase migrations
 # background function runs multi-table reads for up to fifteen minutes. The push step below
 # retries, with a pause long enough for the other side's statement to finish; a merge landing in
 # those windows is the likeliest way to need it.
+#
+# The re-run eleven minutes later reported "Remote database is up to date" and applied nothing,
+# yet pg_policies showed all 23 rewritten policies in place. So the failed attempt did roll back,
+# and something else applied the same file in between — which is also the shape of the deadlock
+# itself: two sessions taking exclusive locks on the same tables in different orders. If this
+# recurs, check for a second applicator (the Supabase GitHub integration applying `supabase/`
+# from main, or a `supabase db push` run from a laptop) and keep exactly one. Judge success by
+# the schema, not by this workflow's colour or the history table alone.
 
 on:
   push:
