@@ -52,7 +52,15 @@ const SECRET = 'sweep-test-secret';
 const originalEnv = { ...process.env };
 
 function candidate(artistId: string, lastAttemptedAt: string | null = '2026-07-01T00:00:00+00:00') {
-  return { artistId, saved: false, savers: 0, lastAttemptedAt, releasesFound: 12 };
+  return {
+    artistId,
+    saved: false,
+    claimed: false,
+    collected: false,
+    savers: 0,
+    lastAttemptedAt,
+    releasesFound: 12,
+  };
 }
 
 function selection(candidates: ReturnType<typeof candidate>[], extra: Record<string, number> = {}) {
@@ -61,7 +69,10 @@ function selection(candidates: ReturnType<typeof candidate>[], extra: Record<str
     candidates,
     catalogueable: 2_500,
     savedArtists: 9,
-    inCooldown: 2_400,
+    claimedArtists: 4,
+    collectedArtists: 30,
+    awaitingDemand: 1_900,
+    inCooldown: 500,
     eligible: 100,
     ...extra,
   };
@@ -193,7 +204,10 @@ describe('recatalog-sweep dispatch', () => {
       requested: 2,
       catalogueable: 2_500,
       savedArtists: 9,
-      inCooldown: 2_400,
+      claimedArtists: 4,
+      collectedArtists: 30,
+      awaitingDemand: 1_900,
+      inCooldown: 500,
       eligible: 100,
       savedInBatch: 1,
       neverAttempted: 1,
@@ -203,7 +217,7 @@ describe('recatalog-sweep dispatch', () => {
 
   it('is a quiet success when everyone is inside their cooldown', async () => {
     mocks.getStaleCatalogCandidates.mockResolvedValue(
-      selection([], { inCooldown: 2_500, eligible: 0 })
+      selection([], { inCooldown: 600, awaitingDemand: 1_900, eligible: 0 })
     );
 
     const r = await post();

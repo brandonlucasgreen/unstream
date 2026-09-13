@@ -121,23 +121,43 @@ per-operation fixes (#443, #463, #464) that never touched the volume. Full reaso
 the confirming SQL, and the escalation ladder if the warning returns:
 `docs/specs/supabase-disk-io-investigation.md`.
 
-A searched artist is still reached, because the sweep's pool is every artist with a
-catalogue-able link — in a month or two rather than a minute.
+Until 2026-09-13 a searched artist was still reached, because the sweep's pool was every
+artist with a catalogue-able link. It no longer is — see the next section.
 
 The whole feature's off-switch remains the `RELEASE_CATALOG_ENABLED` env var: deleting it
 in Netlify stops cataloging with no deploy.
 
-### Why the sweep's pool isn't saved-only
+### Why the sweep builds only for saved, claimed and collected artists
 
-Saved-only is how it shipped. Measured 2026-08-02, there were 2,564 artists with a
-catalogue-able link against 9 saved by anybody — so the sweep's whole universe fit in one
-batch and it sat idle almost every run.
+**Rule it produced:** a first catalogue needs demand — a save, a verified claim, or a record
+in a connected collection. Already-catalogued artists keep refreshing whoever they are.
 
-Alerts aren't the only consumer either: `/a/:slug` renders a release list for any
-catalogued artist, and those pages exist because somebody *searched*.
+The pool went the other way first. Saved-only is how the sweep shipped; measured 2026-08-02,
+there were 2,564 artists with a catalogue-able link against 9 saved by anybody, so the
+sweep's whole universe fit in one batch and it sat idle almost every run, and `/a/:slug`
+renders a release list for any catalogued artist. So the pool became everyone with a link.
 
-The ratio is what matters, and it hasn't moved. As of 2026-08-07 there were 5,977 releases
-across 803 catalogued artists, and 36 live `saved_artists` rows in total.
+That made the pool a function of search traffic. `persistSearchResults` stores a link row
+for every artist a search resolves, and the sweep's own logs showed the consequence: 2,564
+artists on 2026-08-02, 4,456 on 2026-09-12 — about 46 new a day against a sweep of 50 — and
+21–23 of every 25 picked never attempted before. A first-time catalogue is the expensive
+case (seven indexes on `releases` per row, sources, offers, up to 40 detail pages) and the
+diffing from disk I/O round 4 cannot make it cheaper, so halving the cadence halved the
+writes and the Supabase warning came back within a week. Search still decided what got
+catalogued, one step removed from the trigger removed above.
+
+The product judgement, from the owner: most searches are for large artists whose
+discography is a click away on Bandcamp or Qobuz, and the release pages earn their keep for
+small, claimed artists promoting their own work as an alternative to Linktree or Odesli. So
+a first crawl now needs one of three signals, and the searched-but-unwanted tail is counted
+in the sweep log as `awaitingDemand` rather than crawled. Existing catalogues are not frozen,
+because a page showing a stale price is a transparency problem; if the I/O graph still
+doesn't settle, stopping the refresh of non-demand artists is the next dial.
+
+Collections are in the list because the import asks for only the first 25 artists of a sync
+directly and relies on the sweep for the rest — dropping them would have silently broken the
+gap report. The arithmetic and the advisor findings that turned out to be irrelevant are in
+`docs/specs/supabase-disk-io-investigation.md`, Round 5.
 
 ### Why the pool and `catalogArtist` must agree
 

@@ -28,6 +28,9 @@ const queries: Query[] = [];
 const tables: Record<string, Record<string, unknown>[]> = {
   artist_links: [],
   saved_artists: [],
+  artist_profiles: [],
+  collection_items: [],
+  artists: [],
   release_catalog_state: [],
 };
 
@@ -77,6 +80,10 @@ function makeClient() {
               const eqFilter = query.filters.find(f => f.kind === 'eq');
               if (eqFilter) {
                 rows = rows.filter(r => r[eqFilter.column as string] === eqFilter.value);
+              }
+              // `.not(col, 'is', null)` is the only negation the selection uses.
+              for (const f of query.filters.filter(f => f.kind === 'not' && f.value === 'is null')) {
+                rows = rows.filter(r => r[f.column as string] != null);
               }
 
               // The behaviour that matters: a page is capped at MAX_ROWS whatever was asked for.
@@ -129,6 +136,23 @@ function saved(artistId: string | null) {
   return { artist_id: artistId, deleted: false };
 }
 
+/** An artist_profiles row. Verified is what makes it a claim; unverified is a wizard in progress. */
+function profile(artistId: string, verified = true) {
+  return { artist_id: artistId, verified_at: verified ? ago(500) : null };
+}
+
+/**
+ * A record in somebody's connected collection. Items carry the artist's slug, not their id, so
+ * the artists table has to know the slug too — `artists()` below is that half of the fixture.
+ */
+function collected(artistSlug: string | null) {
+  return { artist_slug: artistSlug, user_id: 'fan' };
+}
+
+function artists(...ids: string[]) {
+  return ids.map(id => ({ id, slug: `${id}-slug` }));
+}
+
 function state(
   artistId: string,
   attemptedHoursAgo: number,
@@ -142,16 +166,26 @@ function state(
   };
 }
 
+/** A successful catalogue `hoursAgo` — the shape that keeps an unsaved artist in the pool. */
+function catalogued(artistId: string, hoursAgo: number, releasesFound = 7) {
+  return state(artistId, hoursAgo, { hoursAgo, releasesFound });
+}
+
+const STALE = RECATALOG_COOLDOWN_HOURS + 24;
+
 beforeEach(() => {
   queries.length = 0;
   tables.artist_links = [];
   tables.saved_artists = [];
+  tables.artist_profiles = [];
+  tables.collection_items = [];
+  tables.artists = [];
   tables.release_catalog_state = [];
   failingTable = null;
 });
 
-describe('getStaleCatalogCandidates — who is in the pool', () => {
-  it('includes artists nobody has saved', async () => {
+describe('getStaleCatalogCandidates — who gets a first catalogue', () => {
+  it('does not build a first catalogue for an artist nobody has saved or claimed', async () => {
     tables.artist_links = [link('searched-only'), link('saved-too')];
     tables.saved_artists = [saved('saved-too')];
 
@@ -159,21 +193,136 @@ describe('getStaleCatalogCandidates — who is in the pool', () => {
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    // The whole point of widening the pool: alerts aren't the only consumer of a catalogue.
-    // /a/:slug renders a release list for any catalogued artist, and those pages exist because
-    // somebody searched.
-    expect(new Set(result.candidates.map(c => c.artistId))).toEqual(
-      new Set(['searched-only', 'saved-too'])
-    );
-    expect(result.catalogueable).toBe(2);
+    // The pool used to be everyone with a crawlable link, so any searched artist eventually got
+    // a first catalogue. persistSearchResults adds ~46 such artists a day (measured 2026-09-12)
+    // against a sweep of 50, so nearly every slot was the expensive first-time case, forever.
+    // The searched-but-unwanted tail is counted, not crawled.
+    expect(result.candidates.map(c => c.artistId)).toEqual(['saved-too']);
+    expect(result.awaitingDemand).toBe(1);
+    expect(result.catalogueable).toBe(2); // still the pool: the tail hasn't vanished, it's waiting
     expect(result.savedArtists).toBe(1);
+    expect(result.eligible).toBe(1);
   });
 
+  it('builds a first catalogue for an artist with a verified claim', async () => {
+    tables.artist_links = [link('claimed'), link('nobody')];
+    tables.artist_profiles = [profile('claimed')];
+
+    const result = await getStaleCatalogCandidates(10);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // A claimed catalogue is the artist's own promotion — the case the release pages exist for.
+    expect(result.candidates.map(c => c.artistId)).toEqual(['claimed']);
+    expect(result.candidates[0].claimed).toBe(true);
+    expect(result.claimedArtists).toBe(1);
+    expect(result.awaitingDemand).toBe(1);
+  });
+
+  it('does not treat an unverified claim as demand', async () => {
+    // A profile row exists from the moment someone opens the claim wizard. Until verification
+    // passes it is a stranger's assertion about an artist, not the artist asking.
+    tables.artist_links = [link('pending')];
+    tables.artist_profiles = [profile('pending', false)];
+
+    const result = await getStaleCatalogCandidates(10);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.candidates).toEqual([]);
+    expect(result.claimedArtists).toBe(0);
+    expect(result.awaitingDemand).toBe(1);
+
+    const profileQuery = queries.find(q => q.table === 'artist_profiles');
+    expect(profileQuery?.filters).toContainEqual({ kind: 'not', column: 'verified_at', value: 'is null' });
+  });
+
+  it('builds a first catalogue for an artist in somebody\'s connected collection', async () => {
+    // The import asks for the first 25 artists of a sync directly and leaves the rest to the
+    // sweep (MAX_CATALOG_REQUESTS in collection-matching.ts). Those artists are neither saved nor
+    // claimed, and a fan has paid for their record — the strongest demand there is.
+    tables.artist_links = [link('bought'), link('nobody')];
+    tables.collection_items = [collected('bought-slug'), collected('bought-slug'), collected(null)];
+    tables.artists = artists('bought', 'nobody');
+
+    const result = await getStaleCatalogCandidates(10);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.candidates.map(c => c.artistId)).toEqual(['bought']);
+    expect(result.candidates[0].collected).toBe(true);
+    expect(result.collectedArtists).toBe(1);
+    expect(result.awaitingDemand).toBe(1);
+
+    // Slugs are resolved to ids in one `in()` per chunk, distinct, and null slugs never asked for.
+    const artistQueries = queries.filter(q => q.table === 'artists');
+    expect(artistQueries).toHaveLength(1);
+    expect(artistQueries[0].filters).toContainEqual({ kind: 'in', column: 'slug', value: ['bought-slug'] });
+  });
+
+  it('resolves a collection with more distinct artists than one chunk in several reads', async () => {
+    const ids = Array.from({ length: 230 }, (_, i) => `owned-${i}`);
+    tables.artist_links = ids.map(id => link(id));
+    tables.collection_items = ids.map(id => collected(`${id}-slug`));
+    tables.artists = artists(...ids);
+
+    const result = await getStaleCatalogCandidates(300);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.collectedArtists).toBe(230);
+    expect(result.candidates).toHaveLength(230);
+    expect(queries.filter(q => q.table === 'artists')).toHaveLength(3); // 100 + 100 + 30
+  });
+
+  it('keeps refreshing an artist already catalogued even when nobody has saved them', async () => {
+    // Their page is showing prices. Freezing the catalogue would leave a stale price on a page
+    // that claims to know it — a transparency problem, not a saving.
+    tables.artist_links = [link('catalogued-unwanted')];
+    tables.release_catalog_state = [catalogued('catalogued-unwanted', STALE)];
+
+    const result = await getStaleCatalogCandidates(10);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.candidates.map(c => c.artistId)).toEqual(['catalogued-unwanted']);
+    expect(result.awaitingDemand).toBe(0);
+  });
+
+  it('drops an unsaved artist whose every attempt has failed', async () => {
+    // A state row with no last_catalogued_at means nothing is stored to keep fresh. Before the
+    // demand gate these were retried for nobody, each climbing a backoff, forever.
+    tables.artist_links = [link('failed-unwanted')];
+    tables.release_catalog_state = [state('failed-unwanted', STALE)];
+
+    const result = await getStaleCatalogCandidates(10);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.candidates).toEqual([]);
+    expect(result.awaitingDemand).toBe(1);
+  });
+
+  it('keeps a saved artist who has only ever failed, however recently attempted', async () => {
+    // last_catalogued_at null means no success ever. The cooldown is about successes; backing
+    // off repeated failures is claimArtistForCatalog's job, not this one's.
+    tables.artist_links = [link('always-failing')];
+    tables.saved_artists = [saved('always-failing')];
+    tables.release_catalog_state = [state('always-failing', 1)];
+
+    const result = await getStaleCatalogCandidates(10);
+
+    expect(result.ok && result.candidates.map(c => c.artistId)).toEqual(['always-failing']);
+  });
+});
+
+describe('getStaleCatalogCandidates — who is in the pool', () => {
   it('excludes artists with nothing crawlable', async () => {
     // catalogArtist records an artist with no bandcamp/discogs/faircamp/jamcoop/mirlo link as an
     // *error*, which bumps consecutive_failures and writes last_error. Sweeping them would
     // spend the batch on artists with nothing to fetch and turn the failure counters to noise.
     tables.artist_links = [link('real', 'bandcamp'), link('site-only', 'officialsite')];
+    tables.saved_artists = [saved('real'), saved('site-only')];
 
     const result = await getStaleCatalogCandidates(10);
 
@@ -188,6 +337,7 @@ describe('getStaleCatalogCandidates — who is in the pool', () => {
     'treats a %s link as crawlable',
     async platform => {
       tables.artist_links = [link('a', platform)];
+      tables.saved_artists = [saved('a')];
 
       const result = await getStaleCatalogCandidates(10);
 
@@ -199,6 +349,7 @@ describe('getStaleCatalogCandidates — who is in the pool', () => {
     // The negative half of the case above: without it, the it.each only proves the listed
     // platforms are *included*, so a stray addition to CATALOGUEABLE_PLATFORMS would go unnoticed.
     tables.artist_links = [link('a', 'spotify'), link('b', 'ampwall'), link('c', 'subvert')];
+    tables.saved_artists = [saved('a'), saved('b'), saved('c')];
 
     const result = await getStaleCatalogCandidates(10);
 
@@ -211,6 +362,7 @@ describe('getStaleCatalogCandidates — who is in the pool', () => {
     // — a hard 404. Measured 2026-08-03: 189 such rows, and the 16 that had been swept were the
     // *only* failures in release_catalog_state, each climbing a backoff it could never escape.
     tables.artist_links = [searchPlaceholder('placeholder-only'), link('real')];
+    tables.saved_artists = [saved('placeholder-only'), saved('real')];
 
     const result = await getStaleCatalogCandidates(10);
 
@@ -225,6 +377,7 @@ describe('getStaleCatalogCandidates — who is in the pool', () => {
       searchPlaceholder('mixed'),
       link('mixed', 'discogs', 'https://www.discogs.com/artist/12345'),
     ];
+    tables.saved_artists = [saved('mixed')];
 
     const result = await getStaleCatalogCandidates(10);
 
@@ -235,6 +388,7 @@ describe('getStaleCatalogCandidates — who is in the pool', () => {
     // Only the search URL is the placeholder. An album-depth link is a perfectly good artist
     // page — bandcampMusicUrl strips it back to the origin.
     tables.artist_links = [link('deep', 'bandcamp', 'https://warrenharrison.bandcamp.com/album/x')];
+    tables.saved_artists = [saved('deep')];
 
     const result = await getStaleCatalogCandidates(10);
 
@@ -243,6 +397,7 @@ describe('getStaleCatalogCandidates — who is in the pool', () => {
 
   it('counts an artist once however many platforms they are on', async () => {
     tables.artist_links = [link('a', 'bandcamp'), link('a', 'discogs'), link('a', 'faircamp')];
+    tables.saved_artists = [saved('a')];
 
     const result = await getStaleCatalogCandidates(10);
 
@@ -256,7 +411,7 @@ describe('getStaleCatalogCandidates — who is in the pool', () => {
     tables.artist_links = [link('fresh'), link('stale')];
     tables.release_catalog_state = [
       state('fresh', 2, { hoursAgo: 2, releasesFound: 12 }),
-      state('stale', RECATALOG_COOLDOWN_HOURS + 24, { hoursAgo: RECATALOG_COOLDOWN_HOURS + 24 }),
+      catalogued('stale', STALE),
     ];
 
     const result = await getStaleCatalogCandidates(10);
@@ -271,19 +426,9 @@ describe('getStaleCatalogCandidates — who is in the pool', () => {
     expect(result.catalogueable).toBe(2);
   });
 
-  it('keeps an artist who has only ever failed, however recently attempted', async () => {
-    // last_catalogued_at null means no success ever. The cooldown is about successes; backing
-    // off repeated failures is claimArtistForCatalog's job, not this one's.
-    tables.artist_links = [link('always-failing')];
-    tables.release_catalog_state = [state('always-failing', 1)];
-
-    const result = await getStaleCatalogCandidates(10);
-
-    expect(result.ok && result.candidates.map(c => c.artistId)).toEqual(['always-failing']);
-  });
-
   it('ignores a link row with no artist id', async () => {
     tables.artist_links = [link(null), link('real')];
+    tables.saved_artists = [saved('real')];
 
     const result = await getStaleCatalogCandidates(10);
 
@@ -306,6 +451,7 @@ describe('getStaleCatalogCandidates — who is in the pool', () => {
   it('does not treat a tombstoned save as saved', async () => {
     tables.artist_links = [link('a')];
     tables.saved_artists = [{ artist_id: 'a', deleted: true }];
+    tables.release_catalog_state = [catalogued('a', STALE)];
 
     const result = await getStaleCatalogCandidates(10);
 
@@ -317,26 +463,69 @@ describe('getStaleCatalogCandidates — who is in the pool', () => {
 });
 
 describe('getStaleCatalogCandidates — ordering', () => {
-  it('puts saved artists ahead of everyone, however fresh they are', async () => {
-    tables.artist_links = [link('saved-recent'), link('unsaved-ancient'), link('unsaved-never')];
-    tables.saved_artists = [saved('saved-recent')];
-    tables.release_catalog_state = [state('saved-recent', 200), state('unsaved-ancient', 5_000)];
+  it('puts saved artists ahead of the unsaved, however fresh they are', async () => {
+    tables.artist_links = [link('saved-recent'), link('unsaved-ancient'), link('saved-never')];
+    tables.saved_artists = [saved('saved-recent'), saved('saved-never')];
+    tables.release_catalog_state = [
+      catalogued('saved-recent', 200),
+      catalogued('unsaved-ancient', 5_000),
+    ];
 
     const result = await getStaleCatalogCandidates(10);
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    // An alert is a promise to a person, so a saved artist can never starve behind the backfill
-    // of everyone else — not even behind an artist who has never been catalogued at all.
+    // An alert is a promise to a person, so a saved artist can never starve behind the refresh
+    // of everyone else — not even behind an artist whose catalogue is far older.
     expect(result.candidates.map(c => c.artistId)).toEqual([
+      'saved-never',
       'saved-recent',
-      'unsaved-never',
+      'unsaved-ancient',
+    ]);
+  });
+
+  it('puts claimed artists in the priority group with saved ones', async () => {
+    tables.artist_links = [link('claimed-recent'), link('unsaved-ancient'), link('saved-middling')];
+    tables.artist_profiles = [profile('claimed-recent')];
+    tables.saved_artists = [saved('saved-middling')];
+    tables.release_catalog_state = [
+      catalogued('claimed-recent', 200),
+      catalogued('unsaved-ancient', 5_000),
+      catalogued('saved-middling', 900),
+    ];
+
+    const result = await getStaleCatalogCandidates(10);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // Saved and claimed are the same tier; staleness orders within it; the unsaved refresh waits.
+    expect(result.candidates.map(c => c.artistId)).toEqual([
+      'saved-middling',
+      'claimed-recent',
+      'unsaved-ancient',
+    ]);
+  });
+
+  it('puts collected artists in the priority group too', async () => {
+    tables.artist_links = [link('bought-recent'), link('unsaved-ancient')];
+    tables.collection_items = [collected('bought-recent-slug')];
+    tables.artists = artists('bought-recent', 'unsaved-ancient');
+    tables.release_catalog_state = [
+      catalogued('bought-recent', 200),
+      catalogued('unsaved-ancient', 5_000),
+    ];
+
+    const result = await getStaleCatalogCandidates(10);
+
+    expect(result.ok && result.candidates.map(c => c.artistId)).toEqual([
+      'bought-recent',
       'unsaved-ancient',
     ]);
   });
 
   it('puts never-catalogued artists first within a group, then the stalest attempt', async () => {
     tables.artist_links = ['recent', 'never', 'ancient', 'middling'].map(id => link(id));
+    tables.saved_artists = ['recent', 'never', 'ancient', 'middling'].map(id => saved(id));
     tables.release_catalog_state = [
       state('recent', 200),
       state('ancient', 5_000),
@@ -368,7 +557,7 @@ describe('getStaleCatalogCandidates — ordering', () => {
     ];
     tables.release_catalog_state = [
       state('popular-fresh', 200),
-      state('also-fresh', 200),
+      catalogued('also-fresh', 200),
       state('lonely-stale', 4_000),
     ];
 
@@ -388,7 +577,9 @@ describe('getStaleCatalogCandidates — ordering', () => {
 
   it('returns at most the requested batch, and reports the pool behind it', async () => {
     tables.artist_links = Array.from({ length: 40 }, (_, i) => link(`artist-${i}`));
-    tables.release_catalog_state = Array.from({ length: 40 }, (_, i) => state(`artist-${i}`, 200 + i));
+    tables.release_catalog_state = Array.from({ length: 40 }, (_, i) =>
+      catalogued(`artist-${i}`, STALE + i)
+    );
 
     const result = await getStaleCatalogCandidates(25);
 
@@ -430,7 +621,8 @@ describe('getStaleCatalogCandidates — paging, not truncation', () => {
   it('pages the catalog state table too, so a big table cannot fake never-attempted', async () => {
     tables.artist_links = Array.from({ length: 1_500 }, (_, i) => link(`artist-${i}`));
     // Everyone has been catalogued recently, so a truncated state read would wrongly report
-    // 1,500 never-attempted artists and re-crawl the lot.
+    // 1,500 never-attempted artists and, with them all saved, re-crawl the lot.
+    tables.saved_artists = Array.from({ length: 1_500 }, (_, i) => saved(`artist-${i}`));
     tables.release_catalog_state = Array.from({ length: 1_500 }, (_, i) =>
       state(`artist-${i}`, 2, { hoursAgo: 2 })
     );
@@ -451,16 +643,31 @@ describe('getStaleCatalogCandidates — paging, not truncation', () => {
 
     expect(result.ok && result.savedArtists).toBe(1_200);
   });
+
+  it('pages the claimed-profiles table', async () => {
+    tables.artist_links = Array.from({ length: 1_200 }, (_, i) => link(`artist-${i}`));
+    tables.artist_profiles = Array.from({ length: 1_200 }, (_, i) => profile(`artist-${i}`));
+
+    const result = await getStaleCatalogCandidates(25);
+
+    expect(result.ok && result.claimedArtists).toBe(1_200);
+  });
 });
 
 describe('getStaleCatalogCandidates — failure is not emptiness', () => {
   it.each([
     ['artist_links', 'catalogue-able artist links'],
     ['saved_artists', 'saved artists'],
+    ['artist_profiles', 'claimed artist profiles'],
+    ['collection_items', 'collection items'],
+    ['artists', 'collection artists'],
     ['release_catalog_state', 'catalog state'],
   ])('reports a failed %s read rather than returning no candidates', async (table, label) => {
     tables.artist_links = [link('a')];
     tables.saved_artists = [saved('a')];
+    tables.artist_profiles = [profile('a')];
+    tables.collection_items = [collected('a-slug')];
+    tables.artists = artists('a');
     tables.release_catalog_state = [state('a', 400)];
     failingTable = table;
 
@@ -482,6 +689,9 @@ describe('getStaleCatalogCandidates — failure is not emptiness', () => {
       candidates: [],
       catalogueable: 0,
       savedArtists: 0,
+      claimedArtists: 0,
+      collectedArtists: 0,
+      awaitingDemand: 0,
       inCooldown: 0,
       eligible: 0,
     });

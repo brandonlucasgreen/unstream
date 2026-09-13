@@ -599,9 +599,42 @@ that don't matter, and it is the only part of the assistant's output that adds a
 environment and disable the sweep workflow's schedule. Everything above can land with the tap
 off and the tap turned back on afterwards.
 
-## What this round is asking the owner to decide
+## What this round asked the owner to decide, and the answer
 
 One thing: whether an artist page for an artist nobody has saved or claimed may show no
-releases. Everything else here is engineering with no product surface. If the answer is yes,
-Tiers 1 and 3 are one PR and Tier 2 is a second; if no, the page-view variant of Tier 1 is the
-alternative, at the cost of one more design pass.
+releases. The owner's reasoning, 2026-09-13: most searches are for large artists whose
+discography is a click away on Bandcamp or Qobuz, so there is little value in mirroring it;
+the release pages earn their keep for small, claimed artists promoting their own work as an
+alternative to Linktree, Odesli or a distributor's smart links. The scraper was built to compete
+with Odesli and for SEO and hasn't demonstrably done either. So: yes.
+
+## What landed (2026-09-13)
+
+Tiers 1 and 3, on `claude/unstream-disk-io-optimization-z7qp1x`:
+
+| # | Change | Where |
+|---|---|---|
+| 1 | `getStaleCatalogCandidates` builds a first catalogue only for saved, claimed or collected artists; already-catalogued artists keep refreshing; the rest are counted as `awaitingDemand` | `api/functions/db.ts`, tests in `__tests__/recatalog-sweep-selection.test.ts` |
+| 1 | The sweep summary gains `claimedArtists`, `collectedArtists`, `awaitingDemand` | `api/functions/recatalog-sweep.ts`, workflow comment |
+| 3 | 23 RLS policies rewritten to `(select auth.uid())`; six dead indexes dropped; the two FK indexes deliberately not added | `supabase/migrations/20260913120000_rls-initplan-and-dead-indexes.sql` |
+
+Two refinements to the Tier 1 proposal above, found while implementing it:
+
+- **Collections are a third kind of demand.** `resolveCollectionArtists` asks for only the
+  first 25 artists of a sync directly and relies on the sweep for the rest (its own comment
+  says so). Without `collection_items.artist_slug` in the demand set those artists would have
+  sat in `awaitingDemand` forever and the gap report would have quietly stopped filling in.
+- **A state row with only failures is "never catalogued".** An unsaved artist whose every
+  attempt failed has nothing stored to keep fresh, so they leave the pool too, instead of being
+  retried for nobody on an exponential backoff.
+
+The selection now costs four paged reads plus one `in()` per hundred distinct collection slugs,
+twice a day — still a rounding error next to one first-time catalogue.
+
+What to watch: the sweep log's `awaitingDemand` should be most of the pool and may grow with
+traffic, which is fine; `eligible` should fall to the few hundred saved, claimed, collected and
+previously-catalogued artists; and the Supabase disk I/O graph over the following two weeks is
+the measurement. If it still doesn't settle, the next dial is to stop refreshing artists with
+no demand signal (drop the `last_catalogued_at` clause from the gate), and after that Tier 2.
+The migration applies itself via `supabase-migrate.yml` on merge; check that run went green, and
+run query 5 afterwards to confirm the dropped indexes were the zero-scan ones.

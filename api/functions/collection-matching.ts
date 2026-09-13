@@ -61,10 +61,13 @@ const MAX_ARTISTS_PER_RESOLVE = 100;
  *
  * **Must stay equal to MAX_ARTISTS_PER_REQUEST in request-catalog.ts**, which slices anything
  * longer — asking for 100 would silently crawl 25. Everything beyond this is left to the
- * six-hourly sweep rather than fanned out across four concurrent invocations: a newly stored
- * artist has a Bandcamp link, which puts them in `getStaleCatalogCandidates`' pool as
- * never-catalogued, and that tier is ranked above the refresh tail. So the rest arrive within a
- * day or so, at the sweep's pace rather than all at once, and no one has to press anything.
+ * twice-daily sweep rather than fanned out across four concurrent invocations: a newly stored
+ * artist has a Bandcamp link and a `collection_items.artist_slug` pointing at them, which is
+ * what `getStaleCatalogCandidates` reads to count them as *collected* — one of the three kinds
+ * of demand that earn a first catalogue there, ranked above the refresh tail. So the rest arrive
+ * within a day or so, at the sweep's pace rather than all at once, and no one has to press
+ * anything. Owning a record is the sweep's strongest signal; don't let this pass stop writing
+ * the slug.
  */
 const MAX_CATALOG_REQUESTS = 25;
 
