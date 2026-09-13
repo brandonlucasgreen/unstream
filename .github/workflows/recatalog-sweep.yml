@@ -2,8 +2,8 @@ name: Release catalogue sweep
 
 # Builds and refreshes release catalogues in the background.
 #
-# Every other catalog trigger is demand-driven: a save, a search, a button. So an artist who is
-# catalogued once and not searched again quietly stops producing release alerts, and their
+# Every other catalog trigger is demand-driven: a save, a collection import, an artist's own
+# button. So an artist who is catalogued once quietly stops producing release alerts, and their
 # artist page keeps showing the releases they had that day. See api/functions/recatalog-sweep.ts.
 #
 # A GitHub Actions cron rather than a scheduled Netlify function: there are no scheduled Netlify
@@ -19,13 +19,19 @@ name: Release catalogue sweep
 # catalogues from the backlog — the expensive case, nine indexes on `releases` per row. Restore
 # `0 1,7,13,19 * * *` once the Supabase disk I/O warning has stayed quiet for a month.
 #
-# Measured against the pool on 2026-08-02 (2,564 artists with a catalogue-able link, 9 of them
-# saved by anybody), 50 a day means:
+# Since 2026-09-13 the sweep builds a first catalogue only for artists somebody has saved, claimed
+# or has in a connected collection, and refreshes whatever is already catalogued; the rest of the
+# pool is reported as `awaitingDemand` and left alone (disk I/O round 5 — the pool was growing by
+# ~46 searched artists a day against a sweep of 50, so nearly every slot was a first-time crawl).
+# At 50 a day that means:
 #
-#   - Saved artists come round as soon as their 7-day cooldown expires. They sort first, and
-#     there are single figures of them, so an alert never waits behind the backfill.
-#   - The rest rotate roughly every seven weeks, which is acceptable for artist-page freshness.
-#   - The never-catalogued tail drains over about six weeks rather than three.
+#   - Saved, claimed and collected artists come round as soon as their 7-day cooldown expires.
+#     They sort first, and there are a few hundred of them at most, so an alert never waits.
+#   - Already-catalogued artists rotate roughly every twelve weeks, mostly as cheap diffed
+#     re-reads; a release page is only re-fetched every 90 days (DETAIL_REFRESH_DAYS).
+#   - `awaitingDemand` growing in the log is search traffic, not a backlog. `catalogueable`
+#     collapsing, or `eligible` at 0 while `inCooldown` doesn't explain it, still means a broken
+#     selection query.
 #
 # What it costs the sites we crawl: the background function paces itself at one second between
 # artists and one second between release-page fetches, and stops starting them nine minutes into

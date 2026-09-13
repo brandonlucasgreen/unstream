@@ -829,6 +829,10 @@ export interface StaleCatalogCandidate {
   artistId: string;
   /** Somebody has this artist saved, so an alert depends on this catalogue being current. */
   saved: boolean;
+  /** The artist has a verified claim on their profile, so the catalogue is their own promotion. */
+  claimed: boolean;
+  /** Somebody's connected Bandcamp collection holds one of their records. */
+  collected: boolean;
   /** How many people have them saved. A tiebreak only — see the sort below. */
   savers: number;
   /** Null means no catalog run has ever claimed them: this is coverage, not refresh. */
@@ -850,6 +854,16 @@ export type StaleCatalogResult =
       catalogueable: number;
       /** How many of those are saved by somebody. */
       savedArtists: number;
+      /** How many of those have a verified claim. */
+      claimedArtists: number;
+      /** How many of those appear in somebody's connected collection. */
+      collectedArtists: number;
+      /**
+       * In the pool but never successfully catalogued, and nobody has saved, claimed or
+       * collected them — so the sweep leaves them alone. The searched-but-unwanted tail,
+       * counted so the log shows it rather than hiding it inside `eligible`.
+       */
+      awaitingDemand: number;
       /** Dropped because they were catalogued inside the cooldown. */
       inCooldown: number;
       /** Eligible right now, of which only `limit` fit in this batch. */
@@ -868,6 +882,9 @@ export type StaleCatalogResult =
  * and turn the failure counters into noise.
  */
 const CATALOGUEABLE_PLATFORMS = ['bandcamp', 'discogs', 'faircamp', 'jamcoop', 'mirlo'] as const;
+
+/** Slugs per `.in()` when resolving collection artists — well inside PostgREST's URL and row caps. */
+const COLLECTED_SLUG_CHUNK = 100;
 
 /**
  * Whether a stored link is something the catalog pass can actually crawl.
@@ -930,19 +947,30 @@ export async function readAllPages<T>(
 /**
  * The artists whose release catalogue most needs building or refreshing.
  *
- * **The pool is every artist with something to crawl, not just saved artists.** It was
- * saved-only when this shipped, on the reasoning that a save is what makes someone expect an
- * alert. The numbers killed that: 9 distinct saved artists against 2,564 with a catalogue-able
- * link, so the sweep's entire universe fit inside a single batch and it would have sat idle
- * almost every run. Alerts are also not the only consumer — `/a/:slug` renders a release list
- * for any catalogued artist, and those pages exist because somebody *searched*, so a stale
- * catalogue there is a visibly out-of-date artist page.
+ * **The sweep refreshes what is stored and builds only what somebody asked for.** An artist
+ * gets a *first* catalogue here only if a fan has saved them, a fan's connected Bandcamp
+ * collection holds one of their records, or the artist has a verified claim; an artist already
+ * catalogued keeps being refreshed whoever they are, because their page is showing prices and
+ * a stale price is a transparency problem.
+ *
+ * The pool used to be every artist with a catalogue-able link, so that `/a/:slug` could show
+ * releases for anyone ever searched. That made the pool a function of search traffic:
+ * `persistSearchResults` stores a link row for every artist a search resolves, and measured
+ * 2026-09-12 the pool was growing by ~46 artists a day against a sweep of 50, so 21–23 of every
+ * 25 picked were first-time catalogues — the expensive case, forever — and the Supabase disk
+ * I/O warning came back a week after round 4 halved the cadence. Search still decided what got
+ * catalogued, one step removed from the `searched` trigger round 3 removed. Full arithmetic in
+ * docs/specs/supabase-disk-io-investigation.md ("Round 5"). The product judgement behind
+ * gating on demand rather than on page views: a big artist's discography is a click away on
+ * Bandcamp or Qobuz, and the release pages earn their keep for the small, claimed artists
+ * promoting their own work.
  *
  * Ordering, in priority order:
  *
- *   1. **Saved artists first.** An alert is a promise to a person, so they can never starve
- *      behind the backfill of everyone else. There are few enough of them that this costs the
- *      rest of the pool almost nothing.
+ *   1. **Saved, collected and claimed artists first.** An alert is a promise to a person, a
+ *      collection is a record somebody paid for, and a claimed catalogue is the artist's own
+ *      promotion, so none of them can starve behind the refresh of everyone else. There are few
+ *      enough of them that this costs the rest of the pool almost nothing.
  *   2. **Then never catalogued.** No state row at all means we have no releases for them, which
  *      is worse than having slightly old ones.
  *   3. **Then stalest `last_attempted_at`.** Staleness is what makes alerts go quiet and artist
@@ -980,7 +1008,17 @@ export async function getStaleCatalogCandidates(limit: number): Promise<StaleCat
   }
 
   if (pool.size === 0) {
-    return { ok: true, candidates: [], catalogueable: 0, savedArtists: 0, inCooldown: 0, eligible: 0 };
+    return {
+      ok: true,
+      candidates: [],
+      catalogueable: 0,
+      savedArtists: 0,
+      claimedArtists: 0,
+      collectedArtists: 0,
+      awaitingDemand: 0,
+      inCooldown: 0,
+      eligible: 0,
+    };
   }
 
   // `deleted` is a tombstone, not a hard delete (migration 017) — an unsaved artist keeps a row
@@ -1000,6 +1038,50 @@ export async function getStaleCatalogCandidates(limit: number): Promise<StaleCat
   const savers = new Map<string, number>();
   for (const row of saved.rows) {
     if (row.artist_id) savers.set(row.artist_id, (savers.get(row.artist_id) ?? 0) + 1);
+  }
+
+  // A verified claim only. A profile row exists from the moment someone starts the claim wizard,
+  // and until verification passes it is a stranger's assertion, not the artist's demand.
+  const profiles = await readAllPages<{ artist_id: string | null }>(
+    (from, to) =>
+      client
+        .from('artist_profiles')
+        .select('artist_id')
+        .not('verified_at', 'is', null)
+        .range(from, to),
+    'claimed artist profiles'
+  );
+  if (!profiles.ok) return profiles;
+
+  const claimed = new Set<string>();
+  for (const row of profiles.rows) {
+    if (row.artist_id) claimed.add(row.artist_id);
+  }
+
+  // Owning a record is the strongest statement of interest there is, and the collection import
+  // only asks for the first 25 artists of a sync directly (MAX_CATALOG_REQUESTS in
+  // collection-matching.ts) — the rest reach the crawler through here. Items carry a slug, not
+  // an artist id, so the slugs are resolved in chunks small enough for one PostgREST request.
+  const items = await readAllPages<{ artist_slug: string | null }>(
+    (from, to) =>
+      client
+        .from('collection_items')
+        .select('artist_slug')
+        .not('artist_slug', 'is', null)
+        .range(from, to),
+    'collection items'
+  );
+  if (!items.ok) return items;
+
+  const collectedSlugs = [...new Set(items.rows.map(r => r.artist_slug).filter((s): s is string => !!s))];
+  const collected = new Set<string>();
+  for (let i = 0; i < collectedSlugs.length; i += COLLECTED_SLUG_CHUNK) {
+    const { data, error } = await client
+      .from('artists')
+      .select('id')
+      .in('slug', collectedSlugs.slice(i, i + COLLECTED_SLUG_CHUNK));
+    if (error) return { ok: false, reason: `collection artists read failed: ${error.message}` };
+    for (const row of (data as { id: string }[]) ?? []) collected.add(row.id);
   }
 
   interface StateRow {
@@ -1027,25 +1109,40 @@ export async function getStaleCatalogCandidates(limit: number): Promise<StaleCat
   const cooldownCutoff = Date.now() - RECATALOG_COOLDOWN_HOURS * 3600_000;
   const candidates: StaleCatalogCandidate[] = [];
   let inCooldown = 0;
+  let awaitingDemand = 0;
 
   for (const artistId of pool) {
     const row = state.get(artistId);
+    const count = savers.get(artistId) ?? 0;
+    const isSaved = count > 0;
+    const isClaimed = claimed.has(artistId);
+    const isCollected = collected.has(artistId);
+
+    // Never successfully catalogued and nobody asking: not this sweep's job. A row with only
+    // failed attempts counts as never catalogued — there is nothing stored to keep fresh, and
+    // retrying it for nobody is how the searched-but-unwanted tail keeps costing writes.
+    if (!row?.last_catalogued_at && !isSaved && !isClaimed && !isCollected) {
+      awaitingDemand++;
+      continue;
+    }
     if (row?.last_catalogued_at && new Date(row.last_catalogued_at).getTime() > cooldownCutoff) {
       inCooldown++;
       continue;
     }
-    const count = savers.get(artistId) ?? 0;
     candidates.push({
       artistId,
-      saved: count > 0,
+      saved: isSaved,
+      claimed: isClaimed,
+      collected: isCollected,
       savers: count,
       lastAttemptedAt: row?.last_attempted_at ?? null,
       releasesFound: row?.releases_found ?? null,
     });
   }
 
+  const wanted = (c: StaleCatalogCandidate) => c.saved || c.claimed || c.collected;
   candidates.sort((a, b) => {
-    if (a.saved !== b.saved) return a.saved ? -1 : 1;
+    if (wanted(a) !== wanted(b)) return wanted(a) ? -1 : 1;
     if (a.lastAttemptedAt === null || b.lastAttemptedAt === null) {
       if (a.lastAttemptedAt !== b.lastAttemptedAt) return a.lastAttemptedAt === null ? -1 : 1;
     } else {
@@ -1061,6 +1158,9 @@ export async function getStaleCatalogCandidates(limit: number): Promise<StaleCat
     candidates: candidates.slice(0, limit),
     catalogueable: pool.size,
     savedArtists: [...savers.keys()].filter(id => pool.has(id)).length,
+    claimedArtists: [...claimed].filter(id => pool.has(id)).length,
+    collectedArtists: [...collected].filter(id => pool.has(id)).length,
+    awaitingDemand,
     inCooldown,
     eligible: candidates.length,
   };

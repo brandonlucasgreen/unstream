@@ -423,3 +423,218 @@ still draining and the cadence is the lever.
 **If the warning is urgent right now**, the no-deploy relief valve from the previous section
 still stands: delete `RELEASE_CATALOG_ENABLED` from the Netlify Functions environment and pause
 the sweep workflow. Everything in Tier A can then land before turning it back on.
+
+---
+
+# Round 5 (2026-09-13): the advisor's findings, and why the pool never drains
+
+**Trigger:** the disk I/O budget warning returned a week after round 4 (#515) landed. This time
+the owner asked Supabase's AI assistant to diagnose it. It ran `pg_stat_statements` but the
+project's permission settings withheld the rows from it, so it fell back to the performance
+advisor and reported three things: two missing foreign-key indexes, 22 RLS policies that call
+`auth.uid()` per row, and nine unused indexes. This section checks each against the code, then
+records what the sweep's own logs say about where the I/O is actually going.
+
+## The advisor's three findings, checked
+
+**1. Missing FK indexes on `saved_artists.artist_id` and `verification_requests.user_id`.** The
+foreign keys exist (`saved_artists.artist_id` is `ON DELETE SET NULL` since migration 014;
+`verification_requests.user_id` cascades from `auth.users`). But the advisor doesn't know how big
+the tables are. `saved_artists` had 69 live rows with an `artist_id` on 2026-09-12 (the sweep's
+`savedArtists` count) and already carries five indexes; `verification_requests` holds a handful of
+rows, one per claim attempt. Either table is one or two 8 KB heap pages, so a "sequential scan" is
+a single block read from a page that is always cached. The only queries filtering on those
+columns are `getActiveSavers` (once per newsworthy release) and the merge tool. An index here
+would be pure write cost. **Skip both.**
+
+**2. Rewrite RLS policies to `(select auth.uid())`.** The code has 23 such policies (`saved_artists`
+4, `usernames` 4, `release_feed_tokens` 4, `notification_preferences` 3, `collection_items` 3,
+`listening_signals` 2, and one each on `verification_requests`, `artist_profiles`,
+`artist_analytics`). The rewrite is correct Postgres advice — it turns a per-row function call
+into an InitPlan evaluated once per statement. It is also irrelevant here: **no production query
+runs under RLS.** Every function reads and writes through the service-role client
+(`getClient()` in `db.ts`), which bypasses RLS; the anon key appears only in `middleware.ts`, and
+only for `auth.getUser(token)`; there is no `supabase.from(...)` anywhere in `apps/web/src`, the
+Mac app goes through the functions, and the extension's `lib/supabase.js` talks to `/auth/v1`
+alone. Those policies are a backstop that has never been evaluated against a real row. Even where
+they do run, per-row `auth.uid()` costs CPU, not disk. **Do it as hygiene** (one migration, no
+product effect) so the advisor stops reporting it, but it changes nothing on the I/O graph.
+
+**3. Nine unused indexes.** The advisor is right that these exist and half of them are genuinely
+dead, but every table it names is small and rarely written, so the write amplification it
+describes is real and negligible. From the code, per table:
+
+| Table | Index | Verdict |
+|---|---|---|
+| `saved_artists` | `idx_saved_artists_user_id` | Drop — strict prefix of four other `(user_id, …)` indexes on the same table |
+| `saved_artists` | `idx_saved_artists_user_artist` | Drop — built for the `(user_id, artist_id)` key migration 014 replaced; every query keys on `artist_slug` |
+| `artist_merge_overrides` | `idx_merge_overrides_urls` (GIN) | Drop — `getMergeOverrides` reads the whole table into the 60-second memo; nothing queries `platform_urls` containment |
+| `release_catalog_state` | `idx_release_catalog_state_catalogued` | Drop — the cooldown is evaluated in JavaScript over the whole table (`getStaleCatalogCandidates`) or per `artist_id` (`claimArtistForCatalog`). Keep `_attempted`: the hourly-cap count uses it |
+| `release_feed_tokens` | `idx_release_feed_tokens_token` | Drop — `token` is `UNIQUE`, which already indexes it; the migration comment even says so |
+| `email_log` | `idx_email_log_created_at` | Drop — `email_log` is insert-only from `notifications.ts`; nothing reads by date |
+| `api_keys` | `idx_api_keys_prefix` | **Keep.** `authenticateApiKey` filters `key_prefix` and `is_active = true`, matching the partial index. Zero scans means zero authenticated v1 calls since the stats reset, not a dead index |
+| `listening_signals` | `idx_listening_signals_user` | Keep — `me-listening` filters on `user_id`; a tiny table just makes the planner prefer a seq scan |
+
+Confirm each with query 5 (`pg_stat_user_indexes`) before dropping. None of this moves the budget.
+
+**The honest summary of the advisor's output:** every recommendation is correct as SQL and
+targets tables measured in kilobytes. The database's I/O is where rounds 3 and 4 said it was, in
+the release tables and `app_events`, and the one thing that would have shown that — the
+`pg_stat_statements` ranking — is exactly what the assistant couldn't see. The owner can: the
+SQL editor shows results the assistant is denied. Queries 1–5 above are the measurement.
+
+## What the sweep logs say: the pool grows as fast as the sweep drains it
+
+The sweep reports its selection every run. Three consecutive runs from GitHub Actions:
+
+| Run (UTC) | `catalogueable` | `eligible` | `neverAttempted` in the batch of 25 |
+|---|---|---|---|
+| 2026-09-11 16:50 | 4,424 | 4,037 | 23 |
+| 2026-09-12 05:17 | 4,446 | 4,070 | 21 |
+| 2026-09-12 15:56 | 4,456 | 4,124 | 0 (a saved-artist batch: 25 due for their 7-day refresh) |
+
+Two things follow.
+
+**The pool is not static.** It was 2,564 on 2026-08-02 and 4,456 on 2026-09-12: +1,892 in 41
+days, about 46 a day, and about 30 per 12 hours between the runs above. The sweep catalogues 50
+a day. Round 3 estimated "a month or two" of latency for a searched artist on the assumption
+that the pool was a fixed backlog to drain. It isn't, because `persistSearchResults` writes an
+`artists` row and its links for every artist a search resolves, and any of them with a Bandcamp,
+Discogs, Faircamp, jam.coop or Mirlo link joins the pool. **Search still decides what gets
+catalogued** — it just does so through the sweep instead of the removed `searched` trigger — and
+search traffic is the one input with no feedback loop to the database's capacity. That is the
+same shape round 3 identified, one step removed.
+
+**Almost every sweep slot is the expensive case.** 21–23 of 25 in a non-saved batch have never
+been attempted, and a first-time catalogue is the one that inserts rows into `releases` (seven
+indexes after round 4), `release_sources` and `release_offers`, and fetches up to 40 detail pages.
+Round 4's diffing (`persistReleases`, `persistReleaseDetail`, `persistEnrichment`) makes a
+*re*-catalogue nearly free; it cannot make a first catalogue free. So halving the cadence in
+round 4 halved the write load, and the warning came back anyway, because 50 first-time catalogues
+a day is still 50 first-time catalogues a day, indefinitely.
+
+The product reasoning for the wide pool ("Why the sweep's pool isn't saved-only", engineering
+history) was that `/a/:slug` renders a release list for any catalogued artist and those pages
+exist because somebody searched. That is true and it is also the whole cost: cataloguing an
+artist nobody has saved, claimed or imported serves a page whose main visitor is a crawler (the
+CDN holds it for a day). Artists first means cataloguing where a fan is actually waiting.
+
+## A note on the instance
+
+The free tier is a Nano: up to 0.5 GB of memory shared between Postgres, PostgREST, Auth and the
+pooler, a shared CPU, and a disk that can burst above its baseline for short periods before being
+throttled back to it. The "budget" in the warning is that burst allowance. Reads that miss the
+buffer cache spend it just like writes, and on 0.5 GB the buffer cache is small, so **database
+size against RAM is a question in its own right** (query 1). If the release trio, `app_events`
+and the trigram GIN on `artists.name` no longer fit, ordinary indexed reads become disk reads and
+shrinking the working set is the fix, not just cutting writes.
+
+## Measure first (the owner, ten minutes, no deploy)
+
+The assistant couldn't see the rows; the SQL editor can. Before changing anything:
+
+1. Run queries 1–5 from the sections above and paste the results into the next round of this
+   document. Query 1 answers "does the database fit in memory"; query 2 answers "which tables are
+   being written"; query 4 is the ranking the assistant was denied.
+2. Open Reports → Database and put the Disk IO consumption graph next to the clock. Spikes at
+   **01:00 and 13:00 UTC** lasting up to ten minutes are the sweep. A blip at **03:00–03:20 UTC**
+   is the two `pg_cron` jobs. A raised floor that follows traffic is search-time reads and
+   `app_events`. Which of those shapes the graph shows decides which tier below matters most.
+3. Glance at the memory and swap graphs for the same window. Swap traffic is disk I/O.
+
+## Proposal, in the order to do it
+
+**Tier 1 — decouple the sweep pool from search traffic. The structural fix.**
+
+Change `getStaleCatalogCandidates` so that a *first-time* catalogue only happens for an artist
+someone has demonstrated they care about: saved by any fan, holding a claimed profile, or reached
+by a collection import (that path already catalogues directly). Artists that already have a
+`release_catalog_state` row stay in the pool for their refresh, so nothing catalogued so far goes
+stale. Concretely the pool becomes
+`(saved ∪ claimed ∪ has-state-row) ∩ catalogueable` instead of `catalogueable`. It is a
+~30-line change in `db.ts` plus one more paged read of `artist_profiles`, with a unit test in the
+existing `__tests__` pattern, and the sweep's summary gains a `firstTimeEligible` count so the
+workflow log shows the backlog shrinking to zero.
+
+What it costs: the `/a/:slug` page of an artist nobody has saved or claimed shows no releases,
+exactly as every artist page did before 2026-07-31. Claimed artists keep their own "catalogue
+now" button. If empty pages turn out to matter, the follow-up is demand by page view — add the
+artist slug to the `page_view` event the web app already sends and let the sweep admit artists
+viewed in the last 30 days — which is still bounded by real people opening real pages rather
+than by search volume.
+
+What it buys: first-time catalogues drop from ~50/day forever to the rate at which fans save new
+artists (69 saved artists in total after four months). The sweep's steady state becomes the
+cheap re-catalogue path round 4 already optimised. This is the only change in the list that turns
+the write load from a function of traffic into a constant.
+
+**Tier 2 — bound `app_events` (round 4's Tier C).**
+
+Add `app_events_daily (day, event_type, app, context_key, context_value, count)`; have the
+nightly job aggregate rows older than 90 days into it and delete them, replacing the
+`session_hash` scrub UPDATE. The five `analytics_*` functions read `rollup UNION raw`. Every
+dashboard number is a count by type/app/day/platform, so nothing the dashboard shows is lost, and
+the row-level history older than 90 days was already anonymous (the scrub nulled the only
+per-visitor field). Turns the one table with no retention into a constant-size working set and
+ends the second rewrite of every row it has ever received. This is the change that matters if
+query 1 says the database no longer fits in memory.
+
+**Tier 3 — the advisor's hygiene, one migration, zero product effect.**
+
+Rewrite the 23 `auth.uid()` policies to `(select auth.uid())`; drop the six indexes marked
+"Drop" in the table above once query 5 confirms `idx_scan = 0`; leave the two FK indexes
+un-added, with this section as the reason. Plain `DROP INDEX`, not `CONCURRENTLY`, for the same
+reason as round 4's migration. Worth doing so the next diagnosis isn't cluttered with findings
+that don't matter, and it is the only part of the assistant's output that adds anything.
+
+**Tier 4 — only if the measurements point at it.**
+
+- `idx_releases_match (artist_id, release_type, match_key)` → `(artist_id, match_key)`, since
+  release type left identity on 2026-08-29. One fewer wide index on the hottest insert table.
+- If query 3 shows `heap_blks_read` dominating on `releases`/`release_sources`: the artist page's
+  nested `releases → release_sources → release_offers` select with `count: 'exact'` is the read to
+  look at, though the CDN's one-day cache already bounds it to ~800 pages a day.
+
+**The relief valve is unchanged:** delete `RELEASE_CATALOG_ENABLED` from the Netlify Functions
+environment and disable the sweep workflow's schedule. Everything above can land with the tap
+off and the tap turned back on afterwards.
+
+## What this round asked the owner to decide, and the answer
+
+One thing: whether an artist page for an artist nobody has saved or claimed may show no
+releases. The owner's reasoning, 2026-09-13: most searches are for large artists whose
+discography is a click away on Bandcamp or Qobuz, so there is little value in mirroring it;
+the release pages earn their keep for small, claimed artists promoting their own work as an
+alternative to Linktree, Odesli or a distributor's smart links. The scraper was built to compete
+with Odesli and for SEO and hasn't demonstrably done either. So: yes.
+
+## What landed (2026-09-13)
+
+Tiers 1 and 3, on `claude/unstream-disk-io-optimization-z7qp1x`:
+
+| # | Change | Where |
+|---|---|---|
+| 1 | `getStaleCatalogCandidates` builds a first catalogue only for saved, claimed or collected artists; already-catalogued artists keep refreshing; the rest are counted as `awaitingDemand` | `api/functions/db.ts`, tests in `__tests__/recatalog-sweep-selection.test.ts` |
+| 1 | The sweep summary gains `claimedArtists`, `collectedArtists`, `awaitingDemand` | `api/functions/recatalog-sweep.ts`, workflow comment |
+| 3 | 23 RLS policies rewritten to `(select auth.uid())`; six dead indexes dropped; the two FK indexes deliberately not added | `supabase/migrations/20260913120000_rls-initplan-and-dead-indexes.sql` |
+
+Two refinements to the Tier 1 proposal above, found while implementing it:
+
+- **Collections are a third kind of demand.** `resolveCollectionArtists` asks for only the
+  first 25 artists of a sync directly and relies on the sweep for the rest (its own comment
+  says so). Without `collection_items.artist_slug` in the demand set those artists would have
+  sat in `awaitingDemand` forever and the gap report would have quietly stopped filling in.
+- **A state row with only failures is "never catalogued".** An unsaved artist whose every
+  attempt failed has nothing stored to keep fresh, so they leave the pool too, instead of being
+  retried for nobody on an exponential backoff.
+
+The selection now costs four paged reads plus one `in()` per hundred distinct collection slugs,
+twice a day — still a rounding error next to one first-time catalogue.
+
+What to watch: the sweep log's `awaitingDemand` should be most of the pool and may grow with
+traffic, which is fine; `eligible` should fall to the few hundred saved, claimed, collected and
+previously-catalogued artists; and the Supabase disk I/O graph over the following two weeks is
+the measurement. If it still doesn't settle, the next dial is to stop refreshing artists with
+no demand signal (drop the `last_catalogued_at` clause from the gate), and after that Tier 2.
+The migration applies itself via `supabase-migrate.yml` on merge; check that run went green, and
+run query 5 afterwards to confirm the dropped indexes were the zero-scan ones.

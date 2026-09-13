@@ -96,7 +96,16 @@ export async function handler(event: {
     return { statusCode: 503, body: JSON.stringify({ error: selection.reason }) };
   }
 
-  const { candidates, catalogueable, savedArtists, inCooldown, eligible } = selection;
+  const {
+    candidates,
+    catalogueable,
+    savedArtists,
+    claimedArtists,
+    collectedArtists,
+    awaitingDemand,
+    inCooldown,
+    eligible,
+  } = selection;
 
   // Every catalogue-able artist being inside their cooldown is a good, quiet outcome, not a
   // failure — so that case is a 200. The counts are what tell the two apart in the workflow log:
@@ -106,6 +115,14 @@ export async function handler(event: {
     requested: candidates.length,
     catalogueable,
     savedArtists,
+    claimedArtists,
+    collectedArtists,
+    /**
+     * Searched but never saved, claimed, collected or catalogued — the tail the sweep
+     * deliberately leaves alone. Expected to be most of the pool; it growing is search traffic,
+     * not a problem.
+     */
+    awaitingDemand,
     inCooldown,
     eligible,
     /** Of this batch, how many are saved — the artists an alert actually depends on. */
