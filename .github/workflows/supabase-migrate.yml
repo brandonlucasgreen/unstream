@@ -22,6 +22,17 @@ name: Supabase migrations
 #
 # The failure is loud in Actions and invisible everywhere else. Check this workflow went green
 # after any merge that adds a migration.
+#
+# `ERROR: deadlock detected (SQLSTATE 40P01)` is the other failure this has produced, and it is
+# transient. The CLI applies each migration in one transaction, so a migration that touches
+# several tables (policy rewrites take an exclusive lock on each) takes its locks one table at a
+# time, and a concurrent query that already holds one of them while waiting for another deadlocks
+# it. Postgres aborts one side; here it was the migration, which rolled back completely and was
+# not recorded — nothing half-applied, safe to run again. It happened on 2026-09-13 at 01:02 UTC,
+# two minutes into the release-catalogue sweep (recatalog-sweep.yml, 01:00 and 13:00 UTC), whose
+# background function runs multi-table reads for up to fifteen minutes. The push step below
+# retries, with a pause long enough for the other side's statement to finish; a merge landing in
+# those windows is the likeliest way to need it.
 
 on:
   push:
@@ -73,4 +84,19 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: supabase db push --linked --include-all --password "$SUPABASE_DB_PASSWORD"
+        run: |
+          # Three attempts, a minute apart. A deadlock or lock timeout rolls the whole migration
+          # back, so a retry starts clean; a genuine SQL error fails the same way three times and
+          # costs two minutes. A "remote version not found locally" refusal happens before any
+          # apply and also just repeats — the fix for that is in the header comment, not here.
+          for attempt in 1 2 3; do
+            if supabase db push --linked --include-all --password "$SUPABASE_DB_PASSWORD"; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "::warning::db push failed (attempt $attempt of 3); retrying in 60s"
+              sleep 60
+            fi
+          done
+          echo "::error::db push failed on all 3 attempts"
+          exit 1
