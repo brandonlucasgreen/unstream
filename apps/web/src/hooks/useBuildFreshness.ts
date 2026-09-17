@@ -17,6 +17,14 @@ const POLL_INTERVAL_MS = 60 * 60 * 1000
  * in background tabs, so a tab that sat in the app switcher for a week fires no interval at all
  * — but it does fire `visibilitychange` the moment the person returns to it, which is exactly
  * when they're about to navigate into a chunk that no longer exists.
+ *
+ * The mount check's own verdict is never shown as 'stale', only recorded. A brand-new tab can
+ * still boot an old service-worker precache — the worker installed on an earlier visit serves
+ * its cached shell before its own update check has run — which reads as a day behind the instant
+ * the page paints, even though this tab has not been open long enough to be the long-lived-tab
+ * case the banner exists for. Requiring a second check (the hourly poll, or a visibilitychange)
+ * to confirm 'stale' before it renders means the banner only reaches a tab that's actually
+ * stayed behind, not one still finishing its first paint.
  */
 export function useBuildFreshness(): { isStale: boolean; dismiss: () => void } {
   const [verdict, setVerdict] = useState<FreshnessVerdict>('unknown')
@@ -37,22 +45,32 @@ export function useBuildFreshness(): { isStale: boolean; dismiss: () => void } {
     // switched back and forth before the in-flight probe resolves) would otherwise fire a
     // second fetch on top of the first instead of just skipping it.
     let inFlight = false
+    // Only the mount check gets this suppression; every later check is free to settle 'stale'.
+    let bootCheckDone = false
 
     const check = async () => {
       // Once stale, stop asking. The answer can only change by this tab reloading, which ends
       // this component's life anyway.
       if (settled || inFlight) return
       inFlight = true
+      const isBootCheck = !bootCheckDone
       try {
         const deployed = await fetchDeployedBuild(controller.signal)
         if (controller.signal.aborted) return
         // A null probe yields 'unknown', which leaves the banner hidden. Not folded into
         // 'fresh': see the note on FreshnessVerdict.
         const next = freshnessVerdict(running, deployed, Date.now())
-        if (next === 'stale') settled = true
-        setVerdict(next)
+        if (next === 'stale' && isBootCheck) {
+          // Leave `settled` false and the verdict at whatever it was — 'unknown' on first
+          // render — so a later check still runs and can confirm it.
+          setVerdict('unknown')
+        } else {
+          if (next === 'stale') settled = true
+          setVerdict(next)
+        }
       } finally {
         inFlight = false
+        bootCheckDone = true
       }
     }
 
