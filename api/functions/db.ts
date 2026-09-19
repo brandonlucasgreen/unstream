@@ -179,6 +179,11 @@ interface ArtistProfile {
 
 interface ArtistResult {
   id: string;
+  // The artist's canonical stored slug. Cards must link with this, never a slug
+  // derived from a search query — getArtistBySlug matches tolerantly (e.g. query
+  // "me:she" → slug "me-she" matches stored slug "meshe"), so only this value is
+  // guaranteed to resolve at /a/<slug>.
+  slug: string;
   name: string;
   artist?: string;
   type: 'artist' | 'album' | 'track';
@@ -3820,6 +3825,7 @@ function artistRowToResult(row: ArtistRow, links: LinkRow[], profileData: Profil
 
   return {
     id: row.slug,
+    slug: row.slug,
     name: row.name,
     type: 'artist',
     imageUrl: profile?.customImageUrl || row.image_url || undefined,
@@ -4223,6 +4229,20 @@ async function filterUnchangedLinks(
 }
 
 /**
+ * The fields persistSearchResults reads from a search result card. Deliberately
+ * structural: its one production caller passes AggregatedResult (search-utils)
+ * cards, not ArtistResult rows, and these are the only fields the write path
+ * touches — it derives its own slug from `name` rather than trusting a card's.
+ */
+interface PersistableResult {
+  type: 'artist' | 'album' | 'track';
+  name: string;
+  imageUrl?: string;
+  matchConfidence?: string;
+  platforms: { sourceId: string; url: string; latestRelease?: unknown }[];
+}
+
+/**
  * Persist the artists and links a search turned up.
  *
  * **This does not request release cataloging, deliberately.** It used to: every search handed
@@ -4244,7 +4264,7 @@ async function filterUnchangedLinks(
  * Do not reintroduce a search-time trigger without a per-run budget that is measured against
  * the disk I/O headroom, not just against what Bandcamp will tolerate.
  */
-export async function persistSearchResults(results: ArtistResult[]): Promise<void> {
+export async function persistSearchResults(results: PersistableResult[]): Promise<void> {
   const client = getClient();
   if (!client) return;
 

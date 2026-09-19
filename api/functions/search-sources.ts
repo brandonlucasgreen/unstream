@@ -1875,13 +1875,18 @@ async function searchAllPlatforms(query: string, mode: SearchMode): Promise<{ re
 // frontend can link to the pre-generated /artist/ page. Unverified rows are
 // rejected — that confidence level is where junk from name-only matches
 // accumulates.
+//
+// The card's slug is the row's canonical one, never the query-derived slug the
+// caller searched under: getArtistBySlug matches tolerantly (query "me:she" →
+// slug "me-she" → stored slug "meshe"), and a card linking to the query slug
+// 404s at /a/me-she — the 2026-09-19 bug report from me:she.
 export function toStoredResult(
   dbArtist: Awaited<ReturnType<typeof getArtistBySlug>>,
-  slug: string,
 ): AggregatedResult | null {
   if (!dbArtist) return null;
   const claimed = dbArtist.matchConfidence === 'claimed';
   if (!claimed && dbArtist.matchConfidence !== 'verified') return null;
+  const slug = dbArtist.slug;
   return {
     // The known- prefix marks a card served from the DB rather than resolved
     // live; the persist step skips these so re-serving stored data can't
@@ -1972,7 +1977,7 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     // kid-lightbulbs profile instead of a generic scraped card.
     const slug = artistSlug(normalizedQuery);
     const claimedExactPromise: Promise<AggregatedResult | null> = getArtistBySlug(slug)
-      .then(dbArtist => dbArtist?.matchConfidence === 'claimed' ? toStoredResult(dbArtist, slug) : null)
+      .then(dbArtist => dbArtist?.matchConfidence === 'claimed' ? toStoredResult(dbArtist) : null)
       .catch(err => {
         console.error('[DB] Claimed artist lookup failed:', err);
         return null;
@@ -1987,7 +1992,7 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       : findKnownArtistSlugsByName(normalizedQuery)
         .then(async slugs => {
           const bySlug = await getArtistsBySlugs(slugs);
-          return slugs.map(s => toStoredResult(bySlug.get(s) ?? null, s));
+          return slugs.map(s => toStoredResult(bySlug.get(s) ?? null));
         })
         .then(list => list.filter((r): r is AggregatedResult => r !== null))
         .catch(err => {
