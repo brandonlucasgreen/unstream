@@ -864,6 +864,14 @@ export type StaleCatalogResult =
        * counted so the log shows it rather than hiding it inside `eligible`.
        */
       awaitingDemand: number;
+      /**
+       * Already catalogued, but nobody has saved, claimed or collected them — so the sweep
+       * has stopped *refreshing* them (disk I/O round 6, 2026-09-19). Their `release_catalog_state`
+       * row stays and their page keeps rendering the frozen catalogue; the prices on it just
+       * stop being updated. Counted separately from `awaitingDemand` so the log shows how many
+       * catalogues froze rather than folding them into the never-catalogued tail.
+       */
+      frozenCatalogues: number;
       /** Dropped because they were catalogued inside the cooldown. */
       inCooldown: number;
       /** Eligible right now, of which only `limit` fit in this batch. */
@@ -947,11 +955,15 @@ export async function readAllPages<T>(
 /**
  * The artists whose release catalogue most needs building or refreshing.
  *
- * **The sweep refreshes what is stored and builds only what somebody asked for.** An artist
- * gets a *first* catalogue here only if a fan has saved them, a fan's connected Bandcamp
- * collection holds one of their records, or the artist has a verified claim; an artist already
- * catalogued keeps being refreshed whoever they are, because their page is showing prices and
- * a stale price is a transparency problem.
+ * **The sweep's attention is demand-gated: a save, a verified claim, or a connected
+ * collection.** An artist gets a *first* catalogue here only if a fan has saved them, a fan's
+ * connected Bandcamp collection holds one of their records, or the artist has a verified
+ * claim (disk I/O round 5, 2026-09-13) — and since round 6 (2026-09-19) the same three
+ * signals gate the *refresh* too. An already-catalogued artist nobody follows is frozen
+ * rather than re-crawled: their `release_catalog_state` row stays and their page keeps
+ * rendering the stored catalogue, but its prices stop being updated. The alternative was
+ * keeping every artist search ever resolved in the 7-day rotation forever, and the I/O from
+ * that rotation wedged the instance on 2026-09-19.
  *
  * The pool used to be every artist with a catalogue-able link, so that `/a/:slug` could show
  * releases for anyone ever searched. That made the pool a function of search traffic:
@@ -969,8 +981,9 @@ export async function readAllPages<T>(
  *
  *   1. **Saved, collected and claimed artists first.** An alert is a promise to a person, a
  *      collection is a record somebody paid for, and a claimed catalogue is the artist's own
- *      promotion, so none of them can starve behind the refresh of everyone else. There are few
- *      enough of them that this costs the rest of the pool almost nothing.
+ *      promotion, so none of them can starve behind the refresh of anyone else. The demand
+ *      gate currently makes this the whole batch; the tier stays so that relaxing the gate
+ *      (page-view demand, say) can never silently deprioritise fans.
  *   2. **Then never catalogued.** No state row at all means we have no releases for them, which
  *      is worse than having slightly old ones.
  *   3. **Then stalest `last_attempted_at`.** Staleness is what makes alerts go quiet and artist
@@ -1016,6 +1029,7 @@ export async function getStaleCatalogCandidates(limit: number): Promise<StaleCat
       claimedArtists: 0,
       collectedArtists: 0,
       awaitingDemand: 0,
+      frozenCatalogues: 0,
       inCooldown: 0,
       eligible: 0,
     };
@@ -1110,6 +1124,7 @@ export async function getStaleCatalogCandidates(limit: number): Promise<StaleCat
   const candidates: StaleCatalogCandidate[] = [];
   let inCooldown = 0;
   let awaitingDemand = 0;
+  let frozenCatalogues = 0;
 
   for (const artistId of pool) {
     const row = state.get(artistId);
@@ -1118,11 +1133,24 @@ export async function getStaleCatalogCandidates(limit: number): Promise<StaleCat
     const isClaimed = claimed.has(artistId);
     const isCollected = collected.has(artistId);
 
-    // Never successfully catalogued and nobody asking: not this sweep's job. A row with only
-    // failed attempts counts as never catalogued — there is nothing stored to keep fresh, and
-    // retrying it for nobody is how the searched-but-unwanted tail keeps costing writes.
-    if (!row?.last_catalogued_at && !isSaved && !isClaimed && !isCollected) {
-      awaitingDemand++;
+    // The demand gate. Until 2026-09-19 (disk I/O round 6) an already-catalogued artist kept
+    // being refreshed whoever they were, which left the recurring refresh bill a function of
+    // search traffic: every artist a search ever resolved stayed in the 7-day rotation
+    // forever, the sustained I/O from that rotation wedged the instance on 2026-09-19, and
+    // unlike round 5's first-catalogue gate this tail could never drain. Now nobody's save,
+    // claim or collection means no sweep attention at all. Their state row stays and their
+    // page keeps rendering the frozen catalogue — prices go stale, the page does not empty —
+    // a stale price on a page nobody follows, weighed against an indefinite refresh bill for
+    // that same page. Saving the artist still catalogues immediately, whatever is frozen.
+    if (!isSaved && !isClaimed && !isCollected) {
+      // A row with only failed attempts counts as never catalogued — there is nothing stored
+      // to keep fresh, and retrying it for nobody is how the searched-but-unwanted tail keeps
+      // costing writes (round 5). Everything else is a frozen catalogue.
+      if (row?.last_catalogued_at) {
+        frozenCatalogues++;
+      } else {
+        awaitingDemand++;
+      }
       continue;
     }
     if (row?.last_catalogued_at && new Date(row.last_catalogued_at).getTime() > cooldownCutoff) {
@@ -1161,6 +1189,7 @@ export async function getStaleCatalogCandidates(limit: number): Promise<StaleCat
     claimedArtists: [...claimed].filter(id => pool.has(id)).length,
     collectedArtists: [...collected].filter(id => pool.has(id)).length,
     awaitingDemand,
+    frozenCatalogues,
     inCooldown,
     eligible: candidates.length,
   };
