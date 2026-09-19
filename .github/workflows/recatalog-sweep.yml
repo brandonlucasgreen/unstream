@@ -20,18 +20,19 @@ name: Release catalogue sweep
 # `0 1,7,13,19 * * *` once the Supabase disk I/O warning has stayed quiet for a month.
 #
 # Since 2026-09-13 the sweep builds a first catalogue only for artists somebody has saved, claimed
-# or has in a connected collection, and refreshes whatever is already catalogued; the rest of the
-# pool is reported as `awaitingDemand` and left alone (disk I/O round 5 — the pool was growing by
-# ~46 searched artists a day against a sweep of 50, so nearly every slot was a first-time crawl).
-# At 50 a day that means:
+# or has in a connected collection (disk I/O round 5 — the pool was growing by ~46 searched
+# artists a day against a sweep of 50, so nearly every slot was a first-time crawl). Since
+# 2026-09-19 the same demand signals gate the refresh too (round 6, after the instance wedged):
+# an artist already catalogued whom nobody follows stops being refreshed — their page keeps
+# rendering the frozen catalogue — and is reported as `frozenCatalogues`. At 50 a day that means:
 #
 #   - Saved, claimed and collected artists come round as soon as their 7-day cooldown expires.
-#     They sort first, and there are a few hundred of them at most, so an alert never waits.
-#   - Already-catalogued artists rotate roughly every twelve weeks, mostly as cheap diffed
-#     re-reads; a release page is only re-fetched every 90 days (DETAIL_REFRESH_DAYS).
-#   - `awaitingDemand` growing in the log is search traffic, not a backlog. `catalogueable`
-#     collapsing, or `eligible` at 0 while `inCooldown` doesn't explain it, still means a broken
-#     selection query.
+#     They are the whole queue now, and there are a few hundred of them at most, so an alert
+#     never waits.
+#   - `awaitingDemand` (never catalogued) and `frozenCatalogues` (catalogued, now frozen) growing
+#     in the log is search traffic and the gate working, not a backlog. `catalogueable`
+#     collapsing, or `eligible` at 0 while the saved/claimed/collected counts and `inCooldown`
+#     don't explain it, still means a broken selection query.
 #
 # What it costs the sites we crawl: the background function paces itself at one second between
 # artists and one second between release-page fetches, and stops starting them nine minutes into

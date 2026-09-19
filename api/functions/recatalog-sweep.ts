@@ -11,9 +11,9 @@
 // stop.
 //
 // Alerts are not the only thing that goes stale. `/a/:slug` renders a release list for any
-// catalogued artist, and those pages exist because somebody *searched* — so an unrefreshed
-// catalogue is also a visibly out-of-date artist page. Hence the pool is every artist with
-// something to crawl, not only the saved ones; see `getStaleCatalogCandidates`.
+// catalogued artist — but since the demand gate (disk I/O rounds 5 and 6) the sweep builds
+// and refreshes only what somebody asked for: saved, claimed or collected artists. Everyone
+// else keeps whatever catalogue they already have, frozen; see `getStaleCatalogCandidates`.
 //
 // This sweep is the missing half. Invoked by .github/workflows/recatalog-sweep.yml — there are
 // no scheduled Netlify functions in this repo, and a GitHub Actions cron is the precedent.
@@ -103,14 +103,17 @@ export async function handler(event: {
     claimedArtists,
     collectedArtists,
     awaitingDemand,
+    frozenCatalogues,
     inCooldown,
     eligible,
   } = selection;
 
-  // Every catalogue-able artist being inside their cooldown is a good, quiet outcome, not a
-  // failure — so that case is a 200. The counts are what tell the two apart in the workflow log:
-  // `catalogueable` collapsing, or `eligible` sitting at 0 while `inCooldown` doesn't account
-  // for the pool, is the shape of a broken selection rather than a caught-up one.
+  // Every demand artist being inside their cooldown is a good, quiet outcome, not a failure —
+  // so that case is a 200. The counts are what tell the two apart in the workflow log: with the
+  // demand gate most of the pool is `awaitingDemand` + `frozenCatalogues` and a small `eligible`
+  // is expected, but `catalogueable` collapsing, or `eligible` at 0 while `savedArtists`,
+  // `claimedArtists`, `collectedArtists` and `inCooldown` don't account for it, is the shape of
+  // a broken selection rather than a caught-up one.
   const summary = {
     requested: candidates.length,
     catalogueable,
@@ -123,6 +126,12 @@ export async function handler(event: {
      * not a problem.
      */
     awaitingDemand,
+    /**
+     * Already catalogued but with no save, claim or collection — frozen by the demand gate
+     * (disk I/O round 6), so their pages keep showing a catalogue that no longer refreshes.
+     * This number stepping up when the gate lands is the change taking effect, not a bug.
+     */
+    frozenCatalogues,
     inCooldown,
     eligible,
     /** Of this batch, how many are saved — the artists an alert actually depends on. */

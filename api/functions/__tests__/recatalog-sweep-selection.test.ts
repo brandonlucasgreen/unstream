@@ -275,9 +275,11 @@ describe('getStaleCatalogCandidates — who gets a first catalogue', () => {
     expect(queries.filter(q => q.table === 'artists')).toHaveLength(3); // 100 + 100 + 30
   });
 
-  it('keeps refreshing an artist already catalogued even when nobody has saved them', async () => {
-    // Their page is showing prices. Freezing the catalogue would leave a stale price on a page
-    // that claims to know it — a transparency problem, not a saving.
+  it('freezes an already-catalogued artist nobody follows instead of refreshing them', async () => {
+    // Round 5 kept refreshing these on the grounds that their page shows prices; round 6
+    // (2026-09-19) accepts the stale price, because the alternative is keeping every artist
+    // search ever resolved in the 7-day rotation forever. Their catalogue stays visible —
+    // frozen, not deleted — and the count is the change's own observable in the sweep log.
     tables.artist_links = [link('catalogued-unwanted')];
     tables.release_catalog_state = [catalogued('catalogued-unwanted', STALE)];
 
@@ -285,8 +287,25 @@ describe('getStaleCatalogCandidates — who gets a first catalogue', () => {
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.candidates.map(c => c.artistId)).toEqual(['catalogued-unwanted']);
+    expect(result.candidates).toEqual([]);
     expect(result.awaitingDemand).toBe(0);
+    expect(result.frozenCatalogues).toBe(1);
+  });
+
+  it('keeps refreshing a saved artist\'s stale catalogue — demand unfreezes', async () => {
+    // The other half of the trade: a fan is waiting on this artist, so the refresh keeps
+    // running whatever the gate does to everyone else.
+    tables.artist_links = [link('catalogued-wanted')];
+    tables.saved_artists = [saved('catalogued-wanted')];
+    tables.release_catalog_state = [catalogued('catalogued-wanted', STALE)];
+
+    const result = await getStaleCatalogCandidates(10);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.candidates.map(c => c.artistId)).toEqual(['catalogued-wanted']);
+    expect(result.candidates[0].saved).toBe(true);
+    expect(result.frozenCatalogues).toBe(0);
   });
 
   it('drops an unsaved artist whose every attempt has failed', async () => {
@@ -408,7 +427,10 @@ describe('getStaleCatalogCandidates — who is in the pool', () => {
   });
 
   it('drops artists still inside the re-catalog cooldown, and counts them', async () => {
+    // Both saved: with the demand gate an unsaved artist would never reach the cooldown
+    // check, and the cooldown is exactly what a *wanted* artist lives on between refreshes.
     tables.artist_links = [link('fresh'), link('stale')];
+    tables.saved_artists = [saved('fresh'), saved('stale')];
     tables.release_catalog_state = [
       state('fresh', 2, { hoursAgo: 2, releasesFound: 12 }),
       catalogued('stale', STALE),
@@ -457,13 +479,19 @@ describe('getStaleCatalogCandidates — who is in the pool', () => {
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.candidates[0].saved).toBe(false);
+    // A tombstone is an *unsave*, so the artist is treated as having no demand at all: not
+    // merely deprioritised but frozen, catalogue and all.
+    expect(result.candidates).toEqual([]);
     expect(result.savedArtists).toBe(0);
+    expect(result.frozenCatalogues).toBe(1);
   });
 });
 
 describe('getStaleCatalogCandidates — ordering', () => {
-  it('puts saved artists ahead of the unsaved, however fresh they are', async () => {
+  it('never lets a wanted artist wait behind a frozen one, however staler the frozen one is', async () => {
+    // The frozen artist's catalogue is 25x older, and it changes nothing: the gate removes
+    // them from the queue entirely, so a wanted artist can't starve behind refreshes nobody
+    // asked for. That was the original point of this ordering test, one step earlier.
     tables.artist_links = [link('saved-recent'), link('unsaved-ancient'), link('saved-never')];
     tables.saved_artists = [saved('saved-recent'), saved('saved-never')];
     tables.release_catalog_state = [
@@ -475,13 +503,8 @@ describe('getStaleCatalogCandidates — ordering', () => {
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    // An alert is a promise to a person, so a saved artist can never starve behind the refresh
-    // of everyone else — not even behind an artist whose catalogue is far older.
-    expect(result.candidates.map(c => c.artistId)).toEqual([
-      'saved-never',
-      'saved-recent',
-      'unsaved-ancient',
-    ]);
+    expect(result.candidates.map(c => c.artistId)).toEqual(['saved-never', 'saved-recent']);
+    expect(result.frozenCatalogues).toBe(1);
   });
 
   it('puts claimed artists in the priority group with saved ones', async () => {
@@ -498,12 +521,13 @@ describe('getStaleCatalogCandidates — ordering', () => {
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    // Saved and claimed are the same tier; staleness orders within it; the unsaved refresh waits.
+    // Saved and claimed are the same tier; staleness orders within it. The unsaved artist is
+    // frozen, not merely deprioritised.
     expect(result.candidates.map(c => c.artistId)).toEqual([
       'saved-middling',
       'claimed-recent',
-      'unsaved-ancient',
     ]);
+    expect(result.frozenCatalogues).toBe(1);
   });
 
   it('puts collected artists in the priority group too', async () => {
@@ -517,10 +541,8 @@ describe('getStaleCatalogCandidates — ordering', () => {
 
     const result = await getStaleCatalogCandidates(10);
 
-    expect(result.ok && result.candidates.map(c => c.artistId)).toEqual([
-      'bought-recent',
-      'unsaved-ancient',
-    ]);
+    expect(result.ok && result.candidates.map(c => c.artistId)).toEqual(['bought-recent']);
+    expect(result.ok && result.frozenCatalogues).toBe(1);
   });
 
   it('puts never-catalogued artists first within a group, then the stalest attempt', async () => {
@@ -548,7 +570,7 @@ describe('getStaleCatalogCandidates — ordering', () => {
   });
 
   it('breaks ties on savers, but never lets popularity outrank staleness', async () => {
-    tables.artist_links = ['popular-fresh', 'lonely-stale', 'also-fresh'].map(id => link(id));
+    tables.artist_links = ['popular-fresh', 'lonely-stale', 'also-fresh', 'frozen-fresh'].map(id => link(id));
     tables.saved_artists = [
       saved('popular-fresh'),
       saved('popular-fresh'),
@@ -558,6 +580,7 @@ describe('getStaleCatalogCandidates — ordering', () => {
     tables.release_catalog_state = [
       state('popular-fresh', 200),
       catalogued('also-fresh', 200),
+      catalogued('frozen-fresh', 200),
       state('lonely-stale', 4_000),
     ];
 
@@ -565,18 +588,21 @@ describe('getStaleCatalogCandidates — ordering', () => {
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    // Both saved artists outrank the unsaved one; between them staleness decides, so the
-    // artist a single fan saved beats the one three fans saved.
+    // Both saved artists outrank each other only by staleness, so the artist a single fan
+    // saved beats the one three fans saved; the unsaved catalogued ones are frozen out of
+    // the queue entirely, whatever their saver count would have been.
     expect(result.candidates.map(c => c.artistId)).toEqual([
       'lonely-stale',
       'popular-fresh',
-      'also-fresh',
     ]);
     expect(result.candidates[1].savers).toBe(3);
+    expect(result.frozenCatalogues).toBe(2);
   });
 
   it('returns at most the requested batch, and reports the pool behind it', async () => {
+    // Saved, or the demand gate freezes them and there is no queue to slice.
     tables.artist_links = Array.from({ length: 40 }, (_, i) => link(`artist-${i}`));
+    tables.saved_artists = Array.from({ length: 40 }, (_, i) => saved(`artist-${i}`));
     tables.release_catalog_state = Array.from({ length: 40 }, (_, i) =>
       catalogued(`artist-${i}`, STALE + i)
     );
@@ -593,6 +619,7 @@ describe('getStaleCatalogCandidates — ordering', () => {
 
   it('carries the previous release count, so a run can be read against it afterwards', async () => {
     tables.artist_links = [link('a')];
+    tables.saved_artists = [saved('a')];
     tables.release_catalog_state = [
       state('a', 400, { hoursAgo: RECATALOG_COOLDOWN_HOURS + 10, releasesFound: 20 }),
     ];
@@ -692,6 +719,7 @@ describe('getStaleCatalogCandidates — failure is not emptiness', () => {
       claimedArtists: 0,
       collectedArtists: 0,
       awaitingDemand: 0,
+      frozenCatalogues: 0,
       inCooldown: 0,
       eligible: 0,
     });
