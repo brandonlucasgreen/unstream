@@ -75,14 +75,16 @@ errors, skip it and rely on the first three.)
 
 ```sql
 -- 1. Biggest tables, and how much of that is indexes.
-SELECT relname AS table,
-       pg_size_pretty(pg_total_relation_size(relid))                             AS total,
-       pg_size_pretty(pg_relation_size(relid))                                   AS heap,
-       pg_size_pretty(pg_total_relation_size(relid) - pg_relation_size(relid))   AS indexes,
-       n_live_tup AS live_rows
-FROM pg_catalog.pg_statio_user_tables
-JOIN pg_stat_user_tables USING (relid)
-ORDER BY pg_total_relation_size(relid) DESC
+-- Both views expose relname/relid, so every reference is alias-qualified; a bare `relname`
+-- here is ambiguous and errors.
+SELECT s.relname AS table,
+       pg_size_pretty(pg_total_relation_size(s.relid))                             AS total,
+       pg_size_pretty(pg_relation_size(s.relid))                                   AS heap,
+       pg_size_pretty(pg_total_relation_size(s.relid) - pg_relation_size(s.relid)) AS indexes,
+       t.n_live_tup AS live_rows
+FROM pg_catalog.pg_statio_user_tables s
+JOIN pg_stat_user_tables t USING (relid)
+ORDER BY pg_total_relation_size(s.relid) DESC
 LIMIT 20;
 
 -- 2. Write volume and vacuum pressure per table since stats were last reset.
@@ -669,21 +671,26 @@ over those two weeks.
 
 ## The pack
 
-Paste the whole block into the Supabase SQL editor. `pg_stat_statements` is enabled by default;
+Paste the whole block into the Supabase SQL editor, or run it from a checkout of this repo with
+`supabase db query --linked --output json -f <file>.sql` (must be run from the repo root, where
+`supabase/config.toml` lives, and each statement separately — the CLI returns one result set per
+call; that is how the baseline below was taken). `pg_stat_statements` is enabled by default;
 if query 4 errors, skip it and rely on the rest. All `pg_stat_*` counters are **cumulative since
 stats were last reset**, not a window — so paste today's numbers into this document, and the
 two-week comparison is the diff against them.
 
 ```sql
 -- 1. Biggest tables, and how much of that is indexes.
-SELECT relname AS table,
-       pg_size_pretty(pg_total_relation_size(relid))                             AS total,
-       pg_size_pretty(pg_relation_size(relid))                                   AS heap,
-       pg_size_pretty(pg_total_relation_size(relid) - pg_relation_size(relid))   AS indexes,
-       n_live_tup AS live_rows
-FROM pg_catalog.pg_statio_user_tables
-JOIN pg_stat_user_tables USING (relid)
-ORDER BY pg_total_relation_size(relid) DESC
+-- Both views expose relname/relid, so every reference is alias-qualified; a bare `relname`
+-- here is ambiguous and errors.
+SELECT s.relname AS table,
+       pg_size_pretty(pg_total_relation_size(s.relid))                             AS total,
+       pg_size_pretty(pg_relation_size(s.relid))                                   AS heap,
+       pg_size_pretty(pg_total_relation_size(s.relid) - pg_relation_size(s.relid)) AS indexes,
+       t.n_live_tup AS live_rows
+FROM pg_catalog.pg_statio_user_tables s
+JOIN pg_stat_user_tables t USING (relid)
+ORDER BY pg_total_relation_size(s.relid) DESC
 LIMIT 20;
 
 -- 2. Write volume and vacuum pressure per table since stats were last reset.
@@ -770,8 +777,86 @@ sweep run is the marker inside it. Look for:
   `idx_listening_signals_user`) do. Their absence plus the kept pair is the confirmation; the
   drops themselves can't be re-measured once gone.
 - **The sweep logs:** open the recent `Release catalogue sweep` runs in Actions (the table above
-  lists the IDs) and read the `Sweep OK: {…}` line of each. Since 2026-09-13, `eligible` should
-  have fallen to the few hundred saved, claimed, collected and previously-catalogued artists,
-  and `awaitingDemand` should be most of the pool and growing — that growth is search traffic
-  and is fine. `catalogueable` collapsing, or `eligible` at 0 while `inCooldown` and the
-  saved/claimed/collected counts don't explain it, still means a broken selection.
+  lists the IDs) and read the `Sweep OK: {…}` line of each. Round 5 gated only *first*
+  catalogues, so `eligible` does **not** fall to the few hundred saved/claimed/collected artists —
+  the ~4,000 artists catalogued before that gate stay in the refresh pool forever, which is
+  exactly the premise of this round's refresh demand-gate. What to expect instead:
+  `awaitingDemand` growing (that growth is search traffic, and is fine), and the
+  previously-catalogued bulk sitting in `eligible`. `catalogueable` collapsing, or `eligible`
+  at 0 while `inCooldown` and the saved/claimed/collected counts don't explain it, still means
+  a broken selection. The measured numbers are in the baseline below.
+
+## The baseline (2026-09-19, pre-merge)
+
+Taken with the CLI route above at ~13:00 UTC, before the rollup (#524) and the refresh
+demand-gate (#523) merged — the "pre" half of the pre/post comparison; rerun the pack two
+weeks after both land and diff against this.
+
+**The counters were reset by the Sep 19 compute restart.** Every table shows
+`autovacuum_count = 0` and the whole `app_events` insert count since reset is 107, so all
+cumulative numbers below measure *from the restart onward* — a clean origin, better than a
+mid-life baseline would have been, but it means `idx_scan` and write counts carry only a few
+hours of history and `n_live_tup` estimates are unreliable until an analyze runs. Treat
+"zero scans" as "not used since the restart", not "never used".
+
+**Query 1 — the whole database is 98 MB.** That lands in the pack's *refutes* column: small
+totals mean the wedge leans platform flakiness over working-set pressure, and shrinking
+tables buys little I/O. The two structural changes remain worth their other benefits
+(retention, a bounded sweep), but the Disk IO graph for the Sep 18–19 window is what actually
+settles the wedge's cause.
+
+| Table | Total | Heap | Indexes |
+|---|---|---|---|
+| app_events | 20 MB | 11 MB | 9312 kB |
+| releases | 18 MB | 8384 kB | 9912 kB |
+| release_sources | 14 MB | 6560 kB | 7784 kB |
+| artist_links | 13 MB | 8936 kB | 4672 kB |
+| release_offers | 9576 kB | 4952 kB | 4624 kB |
+| artists | 3512 kB | 1672 kB | 1840 kB |
+
+`app_events` specifics for the rollup: **61,675 rows, 10,779 already past 90 days** (oldest
+2026-04-12), so the first night's rollup moves ~11k rows and every row after that is
+write-once.
+
+**Query 2 (write volume, since the restart):** `app_events` 107 inserts and `artist_analytics`
+85 lead, then `artist_links` 28 ins / 5 upd / 28 del — nothing like the volumes round 4
+measured, consistent with a fresh counter. Re-read in two weeks for the real comparison.
+
+**Query 3 (cache hits):** healthy ratios on the big tables — `releases` 287k hits vs 1k disk
+reads, `artist_links` 104k vs 1.1k. The weakest are `app_events` (~2:1) and
+`bandcamp_slug_probes` (~1:1, but it is a cache table read mostly on misses by design).
+
+**Query 4 (statements):** the top block-I/O statements are the release/`artist_links` reads
+that back search and artist pages (one at 42 calls / 23s total / 1098 disk reads), with the
+`app_events` INSERT path the largest block-*dirtier* (99 dirtied across 108 calls). The
+sweep's writes had not run since the restart at capture time.
+
+**Query 5 (indexes):** the round 5 confirmation holds — none of the six dropped indexes
+appear, and both deliberately-kept ones (`idx_api_keys_prefix`, `idx_listening_signals_user`)
+are present. `idx_app_events_unscrubbed` (1320 kB, the scrub's partial index) is still there
+with zero scans — #524's migration drops it, which is that PR's reclaim visible in advance.
+
+**The sweep logs (round 5 follow-up, corrected):** `eligible` did *not* fall to a few
+hundred — it sits at ~4,000, because round 5 gated only first catalogues and the
+pre-gate-catalogued artists keep refreshing. `awaitingDemand` grows at ~18/day, which is the
+search-traffic shape the pack predicted:
+
+| Run (UTC) | catalogueable | awaitingDemand | eligible | inCooldown |
+|---|---|---|---|---|
+| 09-14 18:17 | 4558 | 166 | 4087 | 305 |
+| 09-15 05:36 | 4566 | 174 | 4082 | 310 |
+| 09-15 17:25 | 4569 | 177 | 4092 | 300 |
+| 09-16 05:31 | 4584 | 192 | 4067 | 325 |
+| 09-16 17:23 | 4595 | 203 | 4067 | 325 |
+| 09-17 05:37 | 4602 | 210 | 4067 | 325 |
+| 09-17 17:23 | 4629 | 237 | 4067 | 325 |
+| 09-18 05:25 | 4641 | 249 | 4042 | 350 |
+| 09-18 16:51 | 4650 | 258 | 4047 | 345 |
+| 09-19 05:21 | — (failed — the wedge; see the run table above) | | | |
+
+(`savedArtists` 69 and `claimedArtists` 134 are flat throughout; `collectedArtists` 0.)
+
+**The post-merge observable, then:** once #523 lands, the first sweep's `eligible` should
+collapse to roughly the saved/claimed/collected few hundred, and the new `frozenCatalogues`
+count should jump to the ~4,000 this baseline shows leaving the refresh pool. If `eligible`
+stays in the thousands, the gate didn't take.
