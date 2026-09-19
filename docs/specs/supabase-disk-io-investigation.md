@@ -638,3 +638,140 @@ the measurement. If it still doesn't settle, the next dial is to stop refreshing
 no demand signal (drop the `last_catalogued_at` clause from the gate), and after that Tier 2.
 The migration applies itself via `supabase-migrate.yml` on merge; check that run went green, and
 run query 5 afterwards to confirm the dropped indexes were the zero-scan ones.
+
+---
+
+# Round 6 (2026-09-19): the measurement pack
+
+**Trigger:** the instance wedged. On 2026-09-19 the database was up with TCP 5432 open but
+PostgREST never answering — artist profiles and search unusable for hours — until a compute
+restart brought it back (slow recovery is normal on nano; services return one by one, Realtime
+first). Diagnosis: sustained disk I/O pressure, i.e. the failure mode this document's round 5
+"note on the instance" predicted — once the working set outgrows the tiny buffer cache,
+ordinary indexed reads become disk reads, and an I/O-throttled Postgres accepts connections but
+can't answer queries. The Supabase status page also carried a recent "Unresponsive Nano
+projects" incident, so platform flakiness on nano is real too; sustained pressure raises our
+susceptibility to it either way.
+
+Timeline markers, from the sweep's own Actions history:
+
+| Run | Scheduled (UTC) | Result |
+|---|---|---|
+| 35310764343 | 2026-09-18 05:25 | success |
+| 35370905703 | 2026-09-18 16:51 | success — last healthy run |
+| 35423732838 | 2026-09-19 05:21 | **failure** — the wedge marker; the sweep was a victim, not the trigger |
+
+This round lands two structural changes and this measurement pack, which is the pre/post
+measurement for both: the `app_events` daily rollup with 90-day retention (round 4 Tier C /
+round 5 Tier 2), and demand-gating the catalog *refresh* (round 5's named next dial). Run the
+pack before merging them, and again two weeks after. The arbiter is the Supabase Disk IO graph
+over those two weeks.
+
+## The pack
+
+Paste the whole block into the Supabase SQL editor. `pg_stat_statements` is enabled by default;
+if query 4 errors, skip it and rely on the rest. All `pg_stat_*` counters are **cumulative since
+stats were last reset**, not a window — so paste today's numbers into this document, and the
+two-week comparison is the diff against them.
+
+```sql
+-- 1. Biggest tables, and how much of that is indexes.
+SELECT relname AS table,
+       pg_size_pretty(pg_total_relation_size(relid))                             AS total,
+       pg_size_pretty(pg_relation_size(relid))                                   AS heap,
+       pg_size_pretty(pg_total_relation_size(relid) - pg_relation_size(relid))   AS indexes,
+       n_live_tup AS live_rows
+FROM pg_catalog.pg_statio_user_tables
+JOIN pg_stat_user_tables USING (relid)
+ORDER BY pg_total_relation_size(relid) DESC
+LIMIT 20;
+
+-- 2. Write volume and vacuum pressure per table since stats were last reset.
+SELECT relname AS table,
+       n_tup_ins AS inserts, n_tup_upd AS updates, n_tup_del AS deletes,
+       n_dead_tup AS dead_rows,
+       autovacuum_count, autoanalyze_count,
+       last_autovacuum
+FROM pg_stat_user_tables
+ORDER BY (n_tup_ins + n_tup_upd + n_tup_del) DESC
+LIMIT 20;
+
+-- 3. Reads that missed the cache and went to disk.
+SELECT relname AS table,
+       heap_blks_read AS heap_disk_reads, heap_blks_hit AS heap_cache_hits,
+       idx_blks_read  AS idx_disk_reads,  idx_blks_hit  AS idx_cache_hits
+FROM pg_statio_user_tables
+ORDER BY (heap_blks_read + idx_blks_read) DESC
+LIMIT 20;
+
+-- 4. The statements doing the most block I/O.
+SELECT calls,
+       round(total_exec_time::numeric, 0) AS total_ms,
+       shared_blks_read  AS disk_reads,
+       shared_blks_dirtied AS blocks_dirtied,
+       shared_blks_written AS blocks_written,
+       left(query, 160) AS query
+FROM pg_stat_statements
+ORDER BY (shared_blks_read + shared_blks_dirtied) DESC
+LIMIT 25;
+
+-- 5. Index size and how often each has been used since stats were reset.
+SELECT s.relname AS table, s.indexrelname AS index,
+       pg_size_pretty(pg_relation_size(s.indexrelid)) AS size,
+       s.idx_scan AS scans,
+       i.indisunique AS is_unique
+FROM pg_stat_user_indexes s
+JOIN pg_index i ON i.indexrelid = s.indexrelid
+ORDER BY s.relname, s.idx_scan;
+```
+
+What each answers, and which result confirms which diagnosis:
+
+| # | What it answers | Confirms | Refutes |
+|---|---|---|---|
+| 1 | Does the database fit in memory? Total size against 0.5 GB of shared RAM. | `releases` + `release_sources` + `release_offers` and `app_events` at the top — the working set is the round 5 "note on the instance" failure mode, and the wedge is that made acute. | Small totals — then the wedge was platform flakiness, and shrinking tables buys nothing. |
+| 2 | Which tables are being written? | The `releases` trio dominating `inserts`; `app_events` dominating `inserts` with a `n_tup_upd` bump matching the scrub's nightly rewrite. | `artist_links` high in `updates` — that would mean enrichment churn came back (round 4 §2's diff fix regressed). |
+| 3 | Which tables no longer fit the buffer cache? | Large `heap_blks_read`/`idx_blks_read` next to small `hit` counts on the big tables — reads are now disk reads, the wedge's mechanism. | High hit ratios everywhere — reads aren't the term; look at query 4 for a write-side statement instead. |
+| 4 | Which statements move the disk? The ranking round 5's advisor was denied. | The sweep's inserts/updates and the dashboard's aggregates near the top. | Search-time statements dominating — then the fan-out reads are the term, and the rollup/retention is the right lever anyway. |
+| 5 | Which indexes earn their writes? `idx_scan = 0` on a non-unique index is a drop candidate. | See the round 5 follow-ups below. | — |
+
+## Reading the graphs
+
+Reports → Database, Disk IO consumption graph next to the clock:
+
+- **Spikes at 01:00 and 13:00 UTC** (up to ten minutes, twice daily) are the release catalogue
+  sweep (`recatalog-sweep.yml`, every 12 hours since round 4).
+- **A blip around 03:00–03:20 UTC** is the two nightly `pg_cron` jobs — the saved-artists
+  tombstone GC at 03:00 and the `app_events` job at 03:20.
+- **A raised floor that follows traffic** is search-time reads plus `app_events` inserts. Which
+  of those shapes the graph shows decides which lever matters most.
+- Open the **memory and swap graphs for the same window**: swap traffic *is* disk I/O.
+
+## The Sep 18–19 window specifically
+
+The wedge is timestamped, so compare this window rather than the general shape: from the last
+healthy sweep at **16:51 UTC Sep 18** to the restart on **Sep 19**. The failed **05:21 UTC**
+sweep run is the marker inside it. Look for:
+
+- The Disk IO floor rising through Sep 18's evening (UTC) rather than returning to baseline
+  after each sweep spike — sustained pressure, not bursts.
+- I/O **pinned at a flat baseline rate** for hours before the wedge: that is what throttling
+  looks like once the burst allowance is spent, and it reads as "quiet" if you only glance for
+  spikes.
+- Memory climbing across the window and swap-in/swap-out traffic appearing before 05:21 — the
+  buffer cache losing and the instance starting to page.
+
+## Round 5 follow-ups, same sitting
+
+- **Query 5:** the six indexes round 5 dropped should no longer appear at all —
+  `idx_saved_artists_user_id`, `idx_saved_artists_user_artist`, `idx_merge_overrides_urls`,
+  `idx_release_catalog_state_catalogued`, `idx_release_feed_tokens_token`,
+  `idx_email_log_created_at` — while the two deliberately kept (`idx_api_keys_prefix`,
+  `idx_listening_signals_user`) do. Their absence plus the kept pair is the confirmation; the
+  drops themselves can't be re-measured once gone.
+- **The sweep logs:** open the recent `Release catalogue sweep` runs in Actions (the table above
+  lists the IDs) and read the `Sweep OK: {…}` line of each. Since 2026-09-13, `eligible` should
+  have fallen to the few hundred saved, claimed, collected and previously-catalogued artists,
+  and `awaitingDemand` should be most of the pool and growing — that growth is search traffic
+  and is fine. `catalogueable` collapsing, or `eligible` at 0 while `inCooldown` and the
+  saved/claimed/collected counts don't explain it, still means a broken selection.
