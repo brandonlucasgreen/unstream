@@ -860,3 +860,26 @@ search-traffic shape the pack predicted:
 collapse to roughly the saved/claimed/collected few hundred, and the new `frozenCatalogues`
 count should jump to the ~4,000 this baseline shows leaving the refresh pool. If `eligible`
 stays in the thousands, the gate didn't take.
+
+## The post-merge observables, confirmed (2026-09-20)
+
+Both changes landed on 2026-09-19 (#523 demand gate, #524 rollup) and both observables
+checked out on their first night:
+
+The first two sweeps under the gate, from the workflow log — the gate took. `eligible`
+collapsed from ~4,000 to 14–29 (the demand-backed few: 70 saved + 134 claimed artists,
+most in cooldown), and `frozenCatalogues` landed at 4,217 — the catalogued-but-unfollowed
+majority is now frozen rather than re-crawled. The 05:21 UTC 09-19 failure in the table
+above was pre-merge.
+
+| Run (UTC) | catalogueable | awaitingDemand | eligible | frozenCatalogues | inCooldown | requested |
+|---|---|---|---|---|---|---|
+| 09-19 16:10 | 4674 | 282 | 29 | 4217 | 146 | 25 |
+| 09-20 05:34 | 4688 | 296 | 14 | 4217 | 161 | 14 |
+
+The rollup: `rollup-app-events`' first scheduled run (2026-09-20 03:20 UTC) succeeded.
+`app_events` dropped 61,675 → 53,179 rows (oldest now 2026-06-22 — the 90-day cutoff,
+so the deletion ran), and `app_events_daily` holds 1,161 rows.
+
+The next full pack run (~2026-10-03) diffs table sizes against the pre-merge baseline
+above; until then, round 6 is closed.
