@@ -14,17 +14,17 @@ export function Footer() {
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <Link to="/changelog" className="hover:text-text-primary transition-colors">Changelog</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
+          <Link to="/press" className="hover:text-text-primary transition-colors">Press kit</Link>
+          <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <Link to="/support" className="hover:text-text-primary transition-colors">Support Unstream</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <Link to="/faq" className="hover:text-text-primary transition-colors">FAQ</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
-          <Link to="/press" className="hover:text-text-primary transition-colors">Press kit</Link>
-          <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <Link to="/contact" className="hover:text-text-primary transition-colors">Contact</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
-          <Link to="/privacy-policy" className="hover:text-text-primary transition-colors">Privacy policy</Link>
-          <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <Link to="/terms" className="hover:text-text-primary transition-colors">Terms of use</Link>
+          <span className="text-text-muted/40 text-xs">&#x2022;</span>
+          <Link to="/privacy-policy" className="hover:text-text-primary transition-colors">Privacy policy</Link>
         </nav>
       </div>
     </footer>
