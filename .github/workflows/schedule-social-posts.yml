@@ -30,6 +30,7 @@ jobs:
         env:
           BUFFER_ACCESS_TOKEN: ${{ secrets.BUFFER_ACCESS_TOKEN }}
           BUFFER_ORG_ID: ${{ secrets.BUFFER_ORG_ID }}
+          # Positional, comma-separated: threads,bluesky,instagram,linkedin (an empty slot skips that platform)
           BUFFER_CHANNEL_IDS: ${{ secrets.BUFFER_CHANNEL_IDS }}
           # Needed for the artist_slug_aliases lookup that re-points retired manifest slugs (and
           # for the verified-artist pool to read Supabase directly). If unset the script warns
