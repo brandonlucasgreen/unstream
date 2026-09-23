@@ -20,7 +20,8 @@
  * Environment:
  *   BUFFER_ACCESS_TOKEN   - Required for --schedule and --channels
  *   BUFFER_ORG_ID         - Required for --channels
- *   BUFFER_CHANNEL_IDS    - Required for --schedule (comma-separated: threads,bluesky,instagram)
+ *   BUFFER_CHANNEL_IDS    - Required for --schedule (comma-separated: threads,bluesky,instagram,linkedin).
+ *                           Positional; leave a slot empty to skip that platform (e.g. "t,b,,l").
  *   SUPABASE_URL          - Optional (falls back to production API)
  *   SUPABASE_SERVICE_KEY  - Optional (falls back to production API)
  */
@@ -122,6 +123,7 @@ interface PostDraft {
     threads: string;
     bluesky: string;
     instagram: string;
+    linkedin: string;
   };
 }
 
@@ -293,6 +295,11 @@ function getContentContext(platforms: ArtistPlatform[], artistName: string) {
  *            Community hashtags at end.
  *   Instagram: Caption under the artist image. Can breathe a bit more.
  *              Personal but slightly more structured.
+ *   LinkedIn: The Unstream company page. Same substance, more formal register:
+ *             complete sentences, sentence case, proper punctuation, no slang or
+ *             "i built" (the page speaks as Unstream). Plain artist names — a
+ *             LinkedIn mention needs a company/member URN, not an @handle.
+ *             A few CamelCase hashtags at the end.
  */
 function generateDrafts(
   artist: { name: string; slug: string; imageUrl: string | null },
@@ -318,10 +325,12 @@ function generateDrafts(
   const tName = tTag || artist.name;
   const bName = bTag || artist.name;
   const iName = iTag || artist.name;
+  const lName = artist.name;
 
   let threads: string;
   let bluesky: string;
   let instagram: string;
+  let linkedin: string;
 
   if (artistType === 'indie') {
     // --- INDIE / VERIFIED ---
@@ -340,6 +349,13 @@ function generateDrafts(
         instagram = ctx.topPlatformName
           ? `${iName} has a verified page on Unstream.\n\nYou can buy their music directly on ${ctx.topPlatformName}${ctx.payout ? ` where they keep ${ctx.payout}` : ''} — or check all their links in one place.\n\n${unstreamUrl}`
           : `${iName} has a verified page on Unstream — every link you need to support them directly, no streaming required.\n\n${unstreamUrl}`;
+        if (ctx.topPlatformName && ctx.payout) {
+          linkedin = `${lName} has claimed their verified page on Unstream. Their music is available on ${ctx.topPlatformName}, where ${ctx.payout} of every sale goes directly to the artist.\n\nThat is the idea behind Unstream: making it easy to find where your money does the most for the people who made the music.\n\n${unstreamUrl}`;
+        } else if (ctx.topPlatformName) {
+          linkedin = `${lName} has claimed their verified page on Unstream. You can buy their music directly on ${ctx.topPlatformName}, and every one of their direct-support links is collected in one place.\n\n${unstreamUrl}`;
+        } else {
+          linkedin = `${lName} has claimed their verified page on Unstream, which collects every place you can support them directly, without a streaming service in the middle.\n\n${unstreamUrl}`;
+        }
         break;
 
       case 1: // payout angle, conversational
@@ -347,10 +363,12 @@ function generateDrafts(
           threads = `${tName} keeps ${ctx.payout} of every sale on ${ctx.topPlatformName}. on Spotify they'd get about $0.003 per stream. pretty big difference.\n\n${unstreamUrl}`;
           bluesky = `${bName} on ${ctx.topPlatformName}: ${ctx.payout} per sale. On Spotify: ~$0.003 per stream. That adds up.\n\n${unstreamUrl}`;
           instagram = `${iName} keeps ${ctx.payout} of every sale on ${ctx.topPlatformName}.\n\nOn Spotify they'd get about $0.003 per stream.\n\nOne album purchase does more than thousands of streams.\n\n${unstreamUrl}`;
+          linkedin = `${lName} keeps ${ctx.payout} of every sale on ${ctx.topPlatformName}. On Spotify, they would earn roughly $0.003 per stream.\n\nA single album purchase does more for an independent artist than thousands of streams.\n\n${unstreamUrl}`;
         } else {
           threads = `you can buy ${tName}'s music directly and they get most of the money. or you can stream it and they get fractions of a penny. worth thinking about.\n\n${unstreamUrl}`;
           bluesky = `You can buy ${bName}'s music directly — they get way more than streaming would ever pay them.\n\n${unstreamUrl}`;
           instagram = `You can buy ${iName}'s music directly and they get most of the money.\n\nOr you can stream it and they get fractions of a penny.\n\nAll their links: ${unstreamUrl}`;
+          linkedin = `When you buy ${lName}'s music directly, most of the money goes to them. When you stream it, they receive a fraction of a cent per play.\n\nAll of their direct-support links are on Unstream.\n\n${unstreamUrl}`;
         }
         break;
 
@@ -359,11 +377,13 @@ function generateDrafts(
           threads = `${tName} has music on ${ctx.topPlatformName} you can buy directly${ctx.payout ? ` — they keep ${ctx.payout}` : ''}. that's what direct support looks like.\n\n${unstreamUrl}`;
           bluesky = `${bName} has music on ${ctx.topPlatformName} — buy it where the money goes to the artist.\n\n${unstreamUrl}`;
           instagram = `${iName} has music on ${ctx.topPlatformName} you can buy directly${ctx.payout ? ` — they keep ${ctx.payout} of every sale` : ''} instead of adding another fraction-of-a-penny stream.\n\n${unstreamUrl}`;
+          linkedin = `${lName} has music on ${ctx.topPlatformName} that you can buy directly${ctx.payout ? `, and they keep ${ctx.payout} of every sale` : ''}. That does far more for the artist than another stream worth a fraction of a cent.\n\n${unstreamUrl}`;
         } else {
           // fallback: warm recommendation
           threads = `been looking at ${tName}'s page on Unstream — they've got ${ctx.directPlatforms.length || 'a few'} places where you can buy their stuff directly. worth a look 👀\n\n${unstreamUrl}`;
           bluesky = `${bName} on Unstream — all their direct-support links in one spot.\n\n${unstreamUrl}`;
           instagram = `${iName} has a verified page on Unstream with all their direct-support links.\n\nSkip the stream, support them for real.\n\n${unstreamUrl}`;
+          linkedin = `${lName} has a verified page on Unstream that lists every place you can buy their music directly.\n\n${unstreamUrl}`;
         }
         break;
 
@@ -371,6 +391,7 @@ function generateDrafts(
         threads = `if you like ${tName}, go buy their music instead of streaming it. they have a page on Unstream with all their direct links.\n\n${unstreamUrl}`;
         bluesky = `If you like ${bName}, buy their music instead of streaming it.\n\n${unstreamUrl}`;
         instagram = `If you like ${iName}, you can support them directly instead of streaming.\n\nAll their links in one place:\n${unstreamUrl}`;
+        linkedin = `If you enjoy ${lName}'s music, consider buying it rather than streaming it. Their verified Unstream page lists every place to support them directly.\n\n${unstreamUrl}`;
     }
   } else {
     // --- PROMINENT / MUSICBRAINZ ---
@@ -386,15 +407,18 @@ function generateDrafts(
           bluesky = `Did you know you can buy ${bName}'s music directly? Way more goes to them than streaming.\n\n${unstreamUrl}`;
         }
         instagram = `You probably already listen to ${iName}.\n\nBut did you know you can buy their music directly${ctx.topPlatformName ? ` on ${ctx.topPlatformName}` : ''}? ${ctx.payout ? `They get ${ctx.payout} of every sale` : 'They get way more of your money'} compared to what streaming pays.\n\n${unstreamUrl}`;
+        linkedin = `You may already listen to ${lName}, but did you know you can also buy their music directly${ctx.topPlatformName ? ` on ${ctx.topPlatformName}` : ''}? ${ctx.payout ? `They receive ${ctx.payout} of every sale, compared with a fraction of a cent per stream.` : 'A purchase earns them far more than the fraction of a cent they receive per stream.'}\n\n${unstreamUrl}`;
         break;
 
       case 1: // the math
         if (ctx.topPlatformName && ctx.payout) {
           threads = `one ${ctx.topPlatformName} purchase of a ${artist.name} album does more for them than mass streaming it for years. they keep ${ctx.payout}. on streaming apps, they get about $0.003 every time you press play.\n\n${unstreamUrl}`;
           bluesky = `One ${ctx.topPlatformName} purchase of ${bName} > years of streaming. ${ctx.payout} vs ~$0.003/play.\n\n${unstreamUrl}`;
+          linkedin = `A single ${ctx.topPlatformName} purchase of a ${lName} album does more for them than years of streaming. They keep ${ctx.payout} of the sale; streaming services pay them roughly $0.003 each time you press play.\n\n${unstreamUrl}`;
         } else {
           threads = `one album purchase does more for ${tName} than streaming them for years. on streaming apps they get about $0.003 every time you press play. buying it? they keep most of it.\n\n${unstreamUrl}`;
           bluesky = `One album purchase does more for ${bName} than years of streaming. ~$0.003 per play vs keeping most of the sale.\n\n${unstreamUrl}`;
+          linkedin = `A single album purchase does more for ${lName} than years of streaming. Streaming services pay roughly $0.003 per play, while a direct purchase lets the artist keep most of the sale.\n\n${unstreamUrl}`;
         }
         instagram = `One album purchase does more for ${iName} than streaming them for years.\n\nStreaming: ~$0.003 per play\nBuying${ctx.topPlatformName ? ` on ${ctx.topPlatformName}` : ''}: ${ctx.payout ? `${ctx.payout} goes to them` : 'they keep most of it'}\n\n${unstreamUrl}`;
         break;
@@ -404,10 +428,12 @@ function generateDrafts(
           threads = `${tName} has music on ${ctx.topPlatformName} that you can buy directly${ctx.payout ? ` — they keep ${ctx.payout} of every sale` : ''}. way better than what streaming pays them.\n\n${unstreamUrl}`;
           bluesky = `${bName} has music on ${ctx.topPlatformName} you can buy directly. ${ctx.payout ? `${ctx.payout} to the artist.` : 'Way more than streaming pays.'}\n\n${unstreamUrl}`;
           instagram = `${iName} has music on ${ctx.topPlatformName} that you can buy directly${ctx.payout ? ` — they keep ${ctx.payout} of every sale` : ''}.\n\nWay better than what streaming pays them.\n\n${unstreamUrl}`;
+          linkedin = `${lName} has music on ${ctx.topPlatformName} that you can buy directly${ctx.payout ? `, and they keep ${ctx.payout} of every sale` : ''}. That is considerably more than streaming pays them.\n\n${unstreamUrl}`;
         } else {
           threads = `you can buy ${tName}'s music directly online and they get way more out of it than streaming would ever pay them. worth knowing about.\n\n${unstreamUrl}`;
           bluesky = `You can buy ${bName}'s music directly. They get way more than streaming pays.\n\n${unstreamUrl}`;
           instagram = `You can buy ${iName}'s music directly online and they get way more than the fractions of a penny streaming pays.\n\nAll their links: ${unstreamUrl}`;
+          linkedin = `You can buy ${lName}'s music directly online, and they earn considerably more from a purchase than streaming would ever pay them.\n\n${unstreamUrl}`;
         }
         break;
 
@@ -415,9 +441,11 @@ function generateDrafts(
         if (ctx.topPlatformName) {
           threads = `${tName} is on ${ctx.topPlatformName}. you can buy their music there and they get ${ctx.payout || 'most of it'}. if you're a fan, that's a pretty good way to show it.\n\n${unstreamUrl}`;
           bluesky = `${bName} is on ${ctx.topPlatformName}. Buy their music there. Or stream it for ~$0.003. Your call.\n\n${unstreamUrl}`;
+          linkedin = `${lName} is on ${ctx.topPlatformName}. When you buy their music there, they receive ${ctx.payout ? `${ctx.payout} of the sale` : 'most of the sale'}. For fans who want to support them, it is one of the most effective ways to do it.\n\n${unstreamUrl}`;
         } else {
           threads = `you can buy ${tName}'s music directly online — they get way more out of it than streaming. if you're a fan, it's worth looking into.\n\n${unstreamUrl}`;
           bluesky = `You can buy ${bName}'s music directly — they get way more than streaming pays.\n\n${unstreamUrl}`;
+          linkedin = `You can buy ${lName}'s music directly online, and they earn far more from it than streaming pays. If you are a fan, it is worth a look.\n\n${unstreamUrl}`;
         }
         instagram = `${iName} is on ${ctx.topPlatformName || 'platforms where artists keep most of the money'}.\n\nYou can buy their music directly${ctx.payout ? ` and they get ${ctx.payout}` : ''}. Or you can stream it for fractions of a penny. Your call.\n\n${unstreamUrl}`;
     }
@@ -440,6 +468,12 @@ function generateDrafts(
   igTags.push('#buymusic');
   instagram += `\n\n${igTags.join(' ')}`;
 
+  // LinkedIn: a few CamelCase hashtags — more than three or four reads as spam there
+  const liTags = ['#MusicIndustry', '#SupportArtists'];
+  if (artistType === 'indie') liTags.push('#IndependentMusic');
+  if (ctx.latestRelease) liTags.push('#NewMusic');
+  linkedin += `\n\n${liTags.join(' ')}`;
+
   // Threads: no hashtags in post body (use Tags feature via Buffer metadata).
   // The Threads topic "Music Threads" is applied at schedule time, not in text.
 
@@ -451,7 +485,11 @@ function generateDrafts(
     console.warn(`  ⚠ Threads draft for ${artist.name} over limit (${threads.length}/500) — needs manual trim`);
   }
 
-  return { threads, bluesky, instagram };
+  if (linkedin.length > 3000) {
+    console.warn(`  ⚠ LinkedIn draft for ${artist.name} over limit (${linkedin.length}/3000) — needs manual trim`);
+  }
+
+  return { threads, bluesky, instagram, linkedin };
 }
 
 // --- Promo post generation ---
@@ -495,8 +533,10 @@ function generateFeaturePost(feature: ShippedFeature): PostDraft['posts'] {
   const threads = `new on Unstream: ${feature.description}\n\n${url}`;
   const bluesky = `New on Unstream: ${feature.description}\n\n${url}\n\n#musicsky #fairtrademusic #supportartists`;
   const instagram = `New on Unstream:\n\n${feature.description}\n\n${url}\n\n#music #fairtrademusic #supportartists #indiemusic #buymusic`;
+  // feature.description is already written in full sentences, which LinkedIn needs
+  const linkedin = `New on Unstream: ${feature.description}\n\n${url}\n\n#MusicIndustry #SupportArtists #IndependentMusic`;
 
-  return { threads, bluesky, instagram };
+  return { threads, bluesky, instagram, linkedin };
 }
 
 /**
@@ -523,49 +563,57 @@ function generatePromoPost(weekNumber: number): { posts: PostDraft['posts']; fea
   let threads: string;
   let bluesky: string;
   let instagram: string;
+  let linkedin: string;
 
   switch (angle) {
     case 0: // what it does
       threads = `i built a free tool that searches 17+ platforms to help you find where to buy music directly from artists. no account, no tracking, no paywall.\n\n${url}`;
       bluesky = `Free tool that searches 17+ platforms to find where to buy music directly from artists. No account needed.\n\n${url}`;
       instagram = `Unstream searches 17+ alternative music platforms to help you find where to buy music directly from artists.\n\nNo account. No tracking. No paywall. Just a way to get more money to the people who make the music.\n\n${url}`;
+      linkedin = `Unstream is a free tool that searches more than 17 platforms to show you where to buy music directly from artists. There is no account to create, no tracking and no paywall.\n\n${url}`;
       break;
 
     case 1: // the why
       threads = `the average Spotify stream pays an artist about $0.003. one Bandcamp purchase can equal thousands of streams. that's why i made Unstream — it finds where you can buy an artist's music directly.\n\n${url}`;
       bluesky = `$0.003 per Spotify stream. One Bandcamp purchase = thousands of streams. That's why Unstream exists.\n\n${url}`;
       instagram = `The average Spotify stream pays an artist about $0.003.\n\nOne album purchase on Bandcamp is worth thousands of streams.\n\nUnstream helps you find where to buy music directly from the artists you love.\n\n${url}`;
+      linkedin = `The average Spotify stream pays an artist about $0.003, while a single Bandcamp purchase can be worth thousands of streams. That gap is why Unstream exists: it shows you where to buy an artist's music directly.\n\n${url}`;
       break;
 
     case 2: // artist pages
       threads = `artists can claim their page on Unstream for free — it puts all your direct-support links in one place. Bandcamp, Faircamp, Mirlo, Patreon, whatever you've got.\n\n${url}/artists`;
       bluesky = `Artists: claim your free page on Unstream. All your direct-support links in one place.\n\n${url}/artists`;
       instagram = `If you're an artist, you can claim your page on Unstream for free.\n\nIt puts all your direct-support links in one place — Bandcamp, Faircamp, Mirlo, Patreon, whatever you've got.\n\n${url}/artists`;
+      linkedin = `Artists can claim their Unstream page for free. It brings every direct-support link together in one place, whether that is Bandcamp, Faircamp, Mirlo, Patreon or anywhere else.\n\n${url}/artists`;
       break;
 
     case 3: // open source / indie
       threads = `Unstream is free, open source, and built by one person. no VC funding, no data harvesting, no premium tier. the whole point is getting more money to artists, not less.\n\n${url}`;
       bluesky = `Unstream is free, open source, and built by one person. The whole point is getting more money to artists.\n\n${url}`;
       instagram = `Unstream is free, open source, and built by one person.\n\nNo VC funding. No data harvesting. No premium tier.\n\nThe whole point is getting more money to artists, not less.\n\n${url}`;
+      linkedin = `Unstream is free, open source and built by one person. It has no venture funding, no data harvesting and no premium tier. The goal is to get more money to artists, not less.\n\n${url}`;
       break;
 
     case 4: // how it works
       threads = `search for any artist on Unstream and it checks 17+ platforms — Bandcamp, Faircamp, Mirlo, Qobuz, and more — in a few seconds. shows you where to buy their music directly — with payout percentages so you know where your money goes.\n\n${url}`;
       bluesky = `Search any artist on Unstream → it checks 17+ platforms and shows where to buy their music directly, with payout percentages.\n\n${url}`;
       instagram = `Search for any artist on Unstream.\n\nIt checks 17+ platforms — Bandcamp, Faircamp, Mirlo, Qobuz, and more — in seconds — and shows you where to buy their music directly, with transparent payout percentages.\n\n${url}`;
+      linkedin = `Search for any artist on Unstream, and within a few seconds it checks more than 17 platforms, including Bandcamp, Faircamp, Mirlo and Qobuz. The results show where you can buy their music directly, with payout percentages so you know where your money goes.\n\n${url}`;
       break;
 
     default: // the pitch, earnest
       threads = `if you listen to music and care about the people who make it, this might be useful to you. Unstream finds where you can support any artist directly instead of streaming.\n\n${url}`;
       bluesky = `If you care about the people who make the music you listen to — Unstream finds where to support them directly.\n\n${url}`;
       instagram = `If you listen to music and care about the people who make it, this might be useful.\n\nUnstream finds where you can support any artist directly instead of streaming.\n\nFree. No account needed.\n\n${url}`;
+      linkedin = `If you listen to music and care about the people who make it, Unstream may be useful to you. It finds where you can support any artist directly instead of streaming.\n\n${url}`;
   }
 
   // Hashtags
   bluesky += '\n\n#musicsky #fairtrademusic #supportartists #indiemusic';
   instagram += '\n\n#music #fairtrademusic #supportartists #indiemusic #buymusic #bandcamp';
+  linkedin += '\n\n#MusicIndustry #SupportArtists #IndependentMusic';
 
-  return { posts: { threads, bluesky, instagram } };
+  return { posts: { threads, bluesky, instagram, linkedin } };
 }
 
 // --- Data loading ---
@@ -899,7 +947,7 @@ async function listChannels() {
     console.log(`  ${c.service} — ${c.name} (ID: ${c.id})`);
   }
   console.log('\nSet these IDs in the BUFFER_CHANNEL_IDS env var (comma-separated).');
-  console.log('Order: threads,bluesky,instagram\n');
+  console.log('Order: threads,bluesky,instagram,linkedin\n');
 }
 
 interface CreatePostOpts {
@@ -990,6 +1038,12 @@ ${draft.posts.bluesky}
 ## Instagram
 
 ${draft.posts.instagram}
+
+---
+
+## LinkedIn (${draft.posts.linkedin.length}/3000 chars)
+
+${draft.posts.linkedin}
 
 ---
 
@@ -1223,11 +1277,11 @@ async function main() {
     }
     if (!channelIdsStr) {
       console.error('\n✗ BUFFER_CHANNEL_IDS not set. Run with --channels to find your IDs.');
-      console.error('  Set as: BUFFER_CHANNEL_IDS=threads_id,bluesky_id,instagram_id');
+      console.error('  Set as: BUFFER_CHANNEL_IDS=threads_id,bluesky_id,instagram_id,linkedin_id');
       process.exit(1);
     }
 
-    const [threadsId, blueskyId, instagramId] = channelIdsStr.split(',');
+    const [threadsId, blueskyId, instagramId, linkedinId] = channelIdsStr.split(',').map(id => id.trim());
     const saveToDraft = !doPublish;
 
     if (saveToDraft) {
@@ -1279,6 +1333,16 @@ async function main() {
           result.status = 'draft (needs image)';
         }
         results.push({ platform: 'Instagram', ...result });
+      }
+      if (linkedinId) {
+        const result = await createBufferPost({
+          channelId: linkedinId,
+          text: draft.posts.linkedin,
+          dueAt,
+          imageUrl: draft.imageUrl,
+          saveToDraft,
+        });
+        results.push({ platform: 'LinkedIn', ...result });
       }
 
       const ok = results.every(r => r.success);
