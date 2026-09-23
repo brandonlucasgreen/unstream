@@ -159,6 +159,11 @@ const HIGHLIGHT_PLATFORMS = new Set([
   'bandwagon', 'jamcoop', 'patreon', 'kofi', 'buymeacoffee',
 ]);
 
+// Patronage platforms don't sell music, so they can't headline a post — every angle's copy says
+// some variant of "buy their music on X", and "buy their music on Patreon" is false. They still
+// count toward directPlatforms.
+const PATRONAGE_PLATFORMS = new Set(['patreon', 'kofi', 'buymeacoffee']);
+
 // Payout percentages for context (human-readable for social posts)
 const PAYOUT_PCT: Record<string, string> = {
   bandcamp: '82%',
@@ -262,7 +267,8 @@ function getContentContext(platforms: ArtistPlatform[], artistName: string) {
     .filter(p => HIGHLIGHT_PLATFORMS.has(p.sourceId) && !p.url.includes('duckduckgo'))
     .map(p => p.sourceId);
 
-  const topPlatform = directPlatforms[0];
+  // Artists with only patronage links get topPlatform = undefined, i.e. the no-platform fallback copy
+  const topPlatform = directPlatforms.find(id => !PATRONAGE_PLATFORMS.has(id));
   const topPlatformName = topPlatform ? (PLATFORM_NAMES[topPlatform] || topPlatform) : null;
   const payout = topPlatform ? PAYOUT_PCT[topPlatform] : null;
 
@@ -379,11 +385,14 @@ function generateDrafts(
           instagram = `${iName} has music on ${ctx.topPlatformName} you can buy directly${ctx.payout ? ` — they keep ${ctx.payout} of every sale` : ''} instead of adding another fraction-of-a-penny stream.\n\n${unstreamUrl}`;
           linkedin = `${lName} has music on ${ctx.topPlatformName} that you can buy directly${ctx.payout ? `, and they keep ${ctx.payout} of every sale` : ''}. That does far more for the artist than another stream worth a fraction of a cent.\n\n${unstreamUrl}`;
         } else {
-          // fallback: warm recommendation
-          threads = `been looking at ${tName}'s page on Unstream — they've got ${ctx.directPlatforms.length || 'a few'} places where you can buy their stuff directly. worth a look 👀\n\n${unstreamUrl}`;
+          // fallback: warm recommendation. No platform sells music here (none listed, or only
+          // patronage), so this says "support", not "buy".
+          const n = ctx.directPlatforms.length;
+          const places = n === 0 ? 'a few places' : n === 1 ? 'a place' : `${n} places`;
+          threads = `been looking at ${tName}'s page on Unstream — they've got ${places} where you can support them directly. worth a look 👀\n\n${unstreamUrl}`;
           bluesky = `${bName} on Unstream — all their direct-support links in one spot.\n\n${unstreamUrl}`;
           instagram = `${iName} has a verified page on Unstream with all their direct-support links.\n\nSkip the stream, support them for real.\n\n${unstreamUrl}`;
-          linkedin = `${lName} has a verified page on Unstream that lists every place you can buy their music directly.\n\n${unstreamUrl}`;
+          linkedin = `${lName} has a verified page on Unstream that lists every place you can support them directly.\n\n${unstreamUrl}`;
         }
         break;
 
