@@ -51,7 +51,7 @@ describe('membership-portal', () => {
     expect(JSON.parse(res.body).url).toBe('https://billing.stripe.com/p/session/test');
     expect(mocks.createPortal).toHaveBeenCalledWith({
       customer: 'cus_1',
-      return_url: 'https://unstream.stream/open-studio',
+      return_url: 'https://unstream.stream/open-house',
     });
   });
 

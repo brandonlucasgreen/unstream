@@ -440,7 +440,7 @@
   to = "/.netlify/functions/release-detail"
   status = 200
 
-# Open Studio membership (docs/specs/open-studio-membership-spec.md). Checkout and the
+# Open House membership (docs/specs/open-house-membership-spec.md). Checkout and the
 # Customer Portal are hosted by Stripe, so these are the only routes it needs: the member's own
 # status, the two redirect-URL makers, the Stripe webhook, and the public aggregate.
 [[redirects]]
@@ -464,8 +464,8 @@
   status = 200
 
 [[redirects]]
-  from = "/api/open-studio"
-  to = "/.netlify/functions/open-studio"
+  from = "/api/open-house"
+  to = "/.netlify/functions/open-house"
   status = 200
 
 [[redirects]]

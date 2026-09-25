@@ -8,7 +8,7 @@ vi.mock('../membership', async (importOriginal) => ({
 }));
 vi.mock('../../lib/sentry', () => ({ Sentry: { captureException: mocks.captureException } }));
 
-import { handler } from '../open-studio';
+import { handler } from '../open-house';
 
 type Res = { statusCode: number; headers: Record<string, string>; body: string };
 
@@ -33,7 +33,7 @@ function member(i: number) {
   };
 }
 
-describe('open-studio', () => {
+describe('open-house', () => {
   beforeEach(() => vi.resetAllMocks());
 
   it('publishes aggregates only, CDN-cached', async () => {

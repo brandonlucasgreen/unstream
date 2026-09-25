@@ -172,5 +172,5 @@ Brandon: skip treating these features as premium — make them all free. The ~$1
 Paddle/Lemon Squeezy licence check and the "free vs paid" split above are **dropped**. The Support
 List, Shortcuts, widget and export ship free. Unstream's revenue now comes from the optional Open
 Books membership, which gates nothing in the Mac app — see
-[open-studio-membership-spec.md](open-studio-membership-spec.md) §6. Open questions 3 and 5 above
+[open-house-membership-spec.md](open-house-membership-spec.md) §6. Open questions 3 and 5 above
 are moot.

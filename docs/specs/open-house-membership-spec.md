@@ -1,14 +1,15 @@
 ---
 status: Idea
 ---
-# Open Studio Membership — spec
+# Open House Membership — spec
 
 **Written:** 2026-09-25
 **Status:** Draft. Brandon answered the pricing, sign-in and Liberapay questions on 2026-09-25 (§10);
 the rest of §10 is still open.
-**Name:** *Open Studio* (Brandon, 2026-09-25), replacing the working title "Open Books", which read
-as accounting. It's the artist opening their studio doors so you can see how the work gets made,
-which here means the bill. It names both the page (`/open-studio`) and the membership.
+**Name:** *Open House* (Brandon, 2026-09-25), replacing the working titles "Open Books" (read as
+accounting) and "Open Studio". Doors open, come in and look around, which here means the bill.
+It also nods to house shows, the most artist-direct gig there is. It names both the page
+(`/open-house`) and the membership.
 **Replaces:** the Liberapay button on `/support` and in the Mac app.
 **Companion:** [artist-tips-spec.md](artist-tips-spec.md) — shares the Stripe account decision in §3; phased after this.
 **Changes:** drops the paid Mac tier in [mac-app-premium-spec.md](mac-app-premium-spec.md) and
@@ -34,7 +35,7 @@ bet is that saying exactly that, with the numbers public, converts better than a
 that ~20–30 people will pay a few dollars a month for it.
 
 **The framing is low-stakes and altruistic.** Nothing core is ever gated. Members get a few
-thank-you perks and the satisfaction of seeing the bill covered. The Open Studio page is the
+thank-you perks and the satisfaction of seeing the bill covered. The Open House page is the
 product; the perks are a receipt.
 
 ---
@@ -71,7 +72,7 @@ Massachusetts' 6.25% on SaaS.
 **Tips come later** ([artist-tips-spec.md](artist-tips-spec.md)), and when they do, the same account
 becomes the Connect platform (Standard accounts, direct charges — the artist is merchant of record
 and Unstream never holds the money). One dashboard, one set of keys, one payout, one place to read
-"what did Unstream earn this month" for the Open Studio page. Whether Managed Payments and Connect
+"what did Unstream earn this month" for the Open House page. Whether Managed Payments and Connect
 can coexist on one account gets checked when the Connect platform is set up; if not, membership
 moves to the Lemon Squeezy fallback below.
 
@@ -110,7 +111,7 @@ re-check before choosing prices**):
 ### The Liberapay tension
 
 Liberapay takes 0% (it runs on its own donations; card processing still applies). Anything replacing
-it is visibly more expensive per dollar. Don't hide that — the Open Studio page shows payment
+it is visibly more expensive per dollar. Don't hide that — the Open House page shows payment
 processing as its own cost line, so a member can see exactly what Stripe kept. Transparency is the
 point of the page; it has to apply to the page's own plumbing.
 
@@ -118,7 +119,7 @@ point of the page; it has to apply to the page's own plumbing.
 
 Merchants of record sell products; they don't process donations. The thing sold is a
 **membership** with perks, not a donation, and copy must say so — "Become a member", not "Donate".
-The altruism lives in the Open Studio framing, not in the payment category.
+The altruism lives in the Open House framing, not in the payment category.
 
 ---
 
@@ -135,14 +136,14 @@ The altruism lives in the Open Studio framing, not in the payment category.
 | **iOS** | Not offered in-app. The iOS StoreKit tip jar stays exactly as it is (`TipJarView.swift`, App Review 3.1.1). No iOS perks exist, so there's nothing to unlock and no IAP to build. §10 Q1. |
 | **Liberapay** | **Six-month wind-down** (Brandon, 2026-09-25). §9. |
 | **Grandfathering** | Manual. Liberapay patrons and StoreKit tippers get a `grandfathered` membership granted by an admin script on request. §9. |
-| **Open Studio data** | Costs: a JSON file in `data/` Brandon edits monthly. Revenue: live aggregates from the webhook-maintained `memberships` table, plus a hand-closed monthly ledger. §5. |
+| **Open House data** | Costs: a JSON file in `data/` Brandon edits monthly. Revenue: live aggregates from the webhook-maintained `memberships` table, plus a hand-closed monthly ledger. §5. |
 | **Surplus** | Goes to Brandon, and the page says so in those words. |
 
 ---
 
-## 5. The Open Studio page
+## 5. The Open House page
 
-Route `/open-studio`, linked from `/support`, the footer and every membership ask. SPA page, like
+Route `/open-house`, linked from `/support`, the footer and every membership ask. SPA page, like
 `SupportPage.tsx`; no edge renderer (one route, one renderer).
 
 ### What it shows
@@ -164,7 +165,7 @@ revenue line.
 
 ### Data
 
-**Costs and closed months — `data/open-studio/ledger.json`**, edited by hand once a month:
+**Costs and closed months — `data/open-house/ledger.json`**, edited by hand once a month:
 
 ```json
 {
@@ -182,7 +183,7 @@ revenue line.
 Served from `/data/**` like guides and the changelog. `data/` is deliberately not in
 `netlify-ignore-build.sh`'s skip list, so editing it deploys.
 
-**Live figures — `GET /api/open-studio`** returns `{ activeMembers, monthlyRevenue, byPlan }`
+**Live figures — `GET /api/open-house`** returns `{ activeMembers, monthlyRevenue, byPlan }`
 computed from `memberships` at request time. **No Redis**: a `Cache-Control: public,
 s-maxage=3600` header lets Netlify's CDN absorb it, which costs zero Upstash commands. The page
 labels these as "live, updated hourly" and the ledger as "closed" so the two can never be confused.
@@ -212,7 +213,7 @@ Thank-you perks, never gates on anything core. In order of how cheap they are:
 | **Early betas** — Mac and extension builds before release | Enthusiasts | Near zero — a "Betas" section on `/settings`, shown to members, linking the latest beta DMG / extension zip. No gating inside the apps. |
 | **Roadmap vote** — a short list Brandon picks, one vote per member per quarter | Everyone | Small; could start as a Discord role instead |
 
-**The perks are deliberately thin.** The membership is sold on the Open Studio page — "here's the
+**The perks are deliberately thin.** The membership is sold on the Open House page — "here's the
 bill, help cover it" — not on what it unlocks. If that doesn't convert, better perks wouldn't have
 either without gating something that should be free.
 
@@ -224,7 +225,7 @@ perks**. The Support List, Shortcuts, widget and export ship free when they ship
 
 - no licence keys, no entitlement check, no `/api/me/membership` call from the Mac app;
 - no sign-in requirement for any Mac feature beyond what saved-artist sync already needs;
-- the Mac app asks for membership the same way the web does (§7) — a link to Open Studio — and
+- the Mac app asks for membership the same way the web does (§7) — a link to Open House — and
   that's all.
 
 What it costs: the ~$15 SKU was the one revenue line with evidence behind it (two people said
@@ -240,7 +241,7 @@ At moments of value, dismissible, never nagging.
 | Moment | Surface | Copy direction |
 |---|---|---|
 | After a click-out on a Bandcamp Friday | Web results, Mac popover | "You just sent money to an artist. Unstream costs $52 a month to run — here's the bill." |
-| Footer of the release-alert email | Email | One line + Open Studio link. Never the subject, never above the release. |
+| Footer of the release-alert email | Email | One line + Open House link. Never the subject, never above the release. |
 | After the extension detects an artist | Extension popup | Only after the 10th detection, once. |
 | Artist dashboard | Web | A quiet card: "Unstream is run by one musician. Here's what it costs." |
 | `/support` | Web | The main surface. Replaces the Liberapay button. |
@@ -251,7 +252,7 @@ At moments of value, dismissible, never nagging.
   the account when signed in, in `localStorage` otherwise (try/catch; a throwing storage just
   means the ask shows).
 - At most one ask per user per 30 days across all surfaces.
-- Every ask links to Open Studio first, checkout second. The numbers do the persuading.
+- Every ask links to Open House first, checkout second. The numbers do the persuading.
 - Never in search results themselves, never before the support links, never in a blocking modal.
 
 ---
@@ -290,10 +291,10 @@ memberships
 | Function | Route | Auth | Notes |
 |---|---|---|---|
 | `me-membership.ts` | `GET /api/me/membership` | Bearer | `{ active, plan, currentPeriodEnd }`. Follows the `me-*` pattern: added to `api/tsconfig.json`'s include, test in `__tests__/`. `account` rate limit. |
-| `membership-checkout.ts` | `POST /api/membership/checkout` | Bearer | `{ plan }` → creates a Checkout Session (`mode: subscription` or `payment` for lifetime, `client_reference_id: userId`, success/cancel back to `/open-studio`) → `{ url }`. Refuses if already active. Typecheck include + test. `account` rate limit. |
+| `membership-checkout.ts` | `POST /api/membership/checkout` | Bearer | `{ plan }` → creates a Checkout Session (`mode: subscription` or `payment` for lifetime, `client_reference_id: userId`, success/cancel back to `/open-house`) → `{ url }`. Refuses if already active. Typecheck include + test. `account` rate limit. |
 | `membership-portal.ts` | `POST /api/membership/portal` | Bearer | Customer Portal session → `{ url }`. Typecheck include + test. |
 | `membership-webhook.ts` | `POST /api/membership/webhook` | Stripe signature | See below. Typecheck include + test. **No rate limiter** — the signature is the auth, and it saves Redis commands. |
-| `open-studio.ts` | `GET /api/open-studio` | Public | Aggregates, CDN-cached (§5). |
+| `open-house.ts` | `GET /api/open-house` | Public | Aggregates, CDN-cached (§5). |
 
 ### Webhook
 
@@ -329,7 +330,7 @@ account — then delete its row. Say this in the function's header comment.
 
 ### Mac app
 
-`TipJarView.swift` macOS branch: Liberapay link → "Become a member" link to `/open-studio`. The
+`TipJarView.swift` macOS branch: Liberapay link → "Become a member" link to `/open-house`. The
 iOS branch doesn't change. Nothing else in the Mac app changes.
 
 ---
@@ -338,7 +339,7 @@ iOS branch doesn't change. Nothing else in the Mac app changes.
 
 - **Liberapay:** retire the button on `/support` and in the Mac app; keep a small "Already give on
   Liberapay? That still counts" line linking to it for six months, and count Liberapay receipts on
-  Open Studio meanwhile. Brandon messages current patrons once with the Open Studio link and an offer
+  Open House meanwhile. Brandon messages current patrons once with the Open House link and an offer
   of a grandfathered membership. Then close it. (Decided 2026-09-25.)
 - **iOS StoreKit tippers:** consumable purchases carry no identity Unstream can check, so there's no
   automatic path. A line in the iOS settings screen — "Tipped before? Email and I'll add member
@@ -374,27 +375,27 @@ Nothing left blocks the build. **Before launch:**
 
 Smallest shippable first.
 
-1. **Open Studio page, costs only.** `ledger.json` + `/open-studio`, linked from `/support`. No
+1. **Open House page, costs only.** `ledger.json` + `/open-house`, linked from `/support`. No
    payments. Tests whether the numbers read well, and it's the honest precondition for asking.
-2. **Membership on the web.** Migration, the five functions, checkout from `/open-studio` and
+2. **Membership on the web.** Migration, the five functions, checkout from `/open-house` and
    `/support`, Customer Portal, badge on `/u/:handle` and artist pages. Liberapay wind-down starts
    (§9). Grandfather grants.
-3. **Mac link swap.** `TipJarView` macOS branch → Open Studio. Ships with the next Mac release.
+3. **Mac link swap.** `TipJarView` macOS branch → Open House. Ships with the next Mac release.
 4. **The asks** (§7), one surface at a time, starting with `/support` and the release-alert footer.
 5. **Betas section and roadmap vote**, once there are members to offer them to.
-6. **Tip-fee income on Open Studio** — once [tips](artist-tips-spec.md) exist.
+6. **Tip-fee income on Open House** — once [tips](artist-tips-spec.md) exist.
 
-### Build status — 2026-09-25 (branch `claude/open-studio-membership`)
+### Build status — 2026-09-25 (branch `claude/open-house-membership`)
 
 Built: Phase 1 and most of Phase 2. That covers the migration, the five functions with tests,
-`/open-studio`, the `/support` swap to membership with the Liberapay wind-down line, the footer
+`/open-house`, the `/support` swap to membership with the Liberapay wind-down line, the footer
 link and `scripts/grant-membership.ts`. **Not built yet:** the member badge on `/u/:handle` and
 artist pages, the Mac link swap (Phase 3), the asks (Phase 4), and the betas section and roadmap
 vote (Phase 5).
 
 **Before launch, in this order:**
 
-1. Check every figure in `data/open-studio/ledger.json` against a real invoice, then set
+1. Check every figure in `data/open-house/ledger.json` against a real invoice, then set
    `"draft": false`. The page shows a "draft figures" banner until then.
 2. In Stripe (test mode first):
    - Turn on Managed Payments.
@@ -421,16 +422,16 @@ vote (Phase 5).
 | Concern | Where |
 |---|---|
 | Migration | `supabase/migrations/YYYYMMDDHHMMSS_memberships.sql` — RLS on, no policies, comment why |
-| Functions | `api/functions/me-membership.ts`, `membership-checkout.ts`, `membership-portal.ts`, `membership-webhook.ts`, `open-studio.ts` |
+| Functions | `api/functions/me-membership.ts`, `membership-checkout.ts`, `membership-portal.ts`, `membership-webhook.ts`, `open-house.ts` |
 | Typecheck + tests | `api/tsconfig.json` `include`; `api/functions/__tests__/` — webhook signature, base64 body, replay idempotency, unknown user |
-| Routes | `netlify.toml` `[[redirects]]` for `/api/membership/*`, `/api/me/membership`, `/api/open-studio` — before the SPA catch-all |
+| Routes | `netlify.toml` `[[redirects]]` for `/api/membership/*`, `/api/me/membership`, `/api/open-house` — before the SPA catch-all |
 | CSP | **No change** — hosted Checkout and Portal are navigations |
 | SSRF | `api/functions/middleware.ts` `ALLOWED_OUTBOUND_HOSTNAMES` += `api.stripe.com` |
-| Ledger | `data/open-studio/ledger.json` |
-| Pages | `apps/web/src/pages/OpenStudioPage.tsx` (new, lazy in `main.tsx`); `SupportPage.tsx` (Liberapay → membership) |
+| Ledger | `data/open-house/ledger.json` |
+| Pages | `apps/web/src/pages/OpenHousePage.tsx` (new, lazy in `main.tsx`); `SupportPage.tsx` (Liberapay → membership) |
 | Badge | `api/edge/u-handle.ts`, `api/functions/public-saved-artists.ts`; artist badge in `api/edge/artist-page-static.ts` |
 | Mac | `apps/mac/Unstream/Views/Shared/TipJarView.swift` — macOS branch only, link swap |
 | Betas | `apps/web/src/pages/SettingsPage.tsx` — members-only section |
 | Grants | `scripts/grant-membership.ts` |
-| Copy | `README.md` "All apps are free with no paywall" stays true; add a line pointing to Open Studio membership. |
+| Copy | `README.md` "All apps are free with no paywall" stays true; add a line pointing to Open House membership. |
 | Changelog | `data/shipped-features.json` per phase |

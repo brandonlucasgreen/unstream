@@ -2,7 +2,7 @@
 //
 // POST { plan: 'monthly' | 'annual' | 'lifetime' } — creates a hosted Stripe Checkout Session
 // for the signed-in user and returns { url } to redirect to. Spec:
-// docs/specs/open-studio-membership-spec.md §4 and §8.
+// docs/specs/open-house-membership-spec.md §4 and §8.
 //
 // - Sign-in is required (Brandon, 2026-09-25). The session carries client_reference_id =
 //   user id, so the webhook links the purchase to the account without Unstream ever storing
@@ -80,8 +80,8 @@ export async function handler(event: {
       ...(plan === 'lifetime'
         ? { customer_creation: 'always' as const }
         : { subscription_data: { metadata } }),
-      success_url: `${site}/open-studio?membership=thanks`,
-      cancel_url: `${site}/open-studio`,
+      success_url: `${site}/open-house?membership=thanks`,
+      cancel_url: `${site}/open-house`,
     });
 
     if (!session.url) throw new Error('Checkout session has no url');

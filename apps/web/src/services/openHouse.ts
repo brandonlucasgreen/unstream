@@ -1,10 +1,10 @@
-// Data and arithmetic for the /open-studio page.
+// Data and arithmetic for the /open-house page.
 //
 // Two sources, deliberately kept apart so they can't be confused on the page:
-// - data/open-studio/ledger.json — costs and closed months, edited by hand once a month.
-// - /api/open-studio — live membership aggregates from the webhook-maintained table, CDN-cached
+// - data/open-house/ledger.json — costs and closed months, edited by hand once a month.
+// - /api/open-house — live membership aggregates from the webhook-maintained table, CDN-cached
 //   for an hour.
-// Spec: docs/specs/open-studio-membership-spec.md §5.
+// Spec: docs/specs/open-house-membership-spec.md §5.
 
 export interface LedgerCost {
   item: string;
@@ -34,7 +34,7 @@ export interface Ledger {
   months: LedgerMonth[];
 }
 
-export interface OpenStudioLive {
+export interface OpenHouseLive {
   activeMembers: number | null;
   monthlyRecurringCents: number | null;
   byPlan: Record<'monthly' | 'annual' | 'lifetime' | 'grandfathered', number> | null;
@@ -43,15 +43,15 @@ export interface OpenStudioLive {
 }
 
 export async function fetchLedger(): Promise<Ledger> {
-  const res = await fetch('/data/open-studio/ledger.json');
+  const res = await fetch('/data/open-house/ledger.json');
   if (!res.ok) throw new Error(`ledger ${res.status}`);
   return (await res.json()) as Ledger;
 }
 
-export async function fetchLive(): Promise<OpenStudioLive> {
-  const res = await fetch('/api/open-studio');
-  if (!res.ok) throw new Error(`open-studio ${res.status}`);
-  return (await res.json()) as OpenStudioLive;
+export async function fetchLive(): Promise<OpenHouseLive> {
+  const res = await fetch('/api/open-house');
+  if (!res.ok) throw new Error(`open-house ${res.status}`);
+  return (await res.json()) as OpenHouseLive;
 }
 
 export interface CostTotals {

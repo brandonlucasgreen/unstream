@@ -1,7 +1,7 @@
 // API endpoint: /api/membership/webhook
 //
-// POST — Stripe webhook for Open Studio memberships. Keeps the `memberships` table in step with
-// Stripe. Spec: docs/specs/open-studio-membership-spec.md §8.
+// POST — Stripe webhook for Open House memberships. Keeps the `memberships` table in step with
+// Stripe. Spec: docs/specs/open-house-membership-spec.md §8.
 //
 // - The Stripe signature is the only authentication: no bearer auth, no CORS, and no rate
 //   limiter (which would spend Redis commands on a caller who's already been verified).

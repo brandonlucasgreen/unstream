@@ -1,8 +1,8 @@
 /**
- * Grant a grandfathered Open Studio membership by hand.
+ * Grant a grandfathered Open House membership by hand.
  *
  * For Liberapay patrons and iOS tip-jar tippers, who paid before memberships existed and
- * have no Stripe objects behind them (docs/specs/open-studio-membership-spec.md §9). The
+ * have no Stripe objects behind them (docs/specs/open-house-membership-spec.md §9). The
  * honour system is fine at this scale.
  *
  * Usage:

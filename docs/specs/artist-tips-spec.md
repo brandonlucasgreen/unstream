@@ -5,7 +5,7 @@ status: Idea
 
 **Written:** 2026-09-25
 **Status:** Draft. Unparked 2026-09-25: the lawyer review and LLC are no longer launch gates (§5).
-Phased after [open-studio-membership-spec.md](open-studio-membership-spec.md), and built only if the
+Phased after [open-house-membership-spec.md](open-house-membership-spec.md), and built only if the
 Phase 0 demand test (§9) says so.
 **Supersedes:** [patronage-spec.md](patronage-spec.md) — its Stripe structure (Express + destination
 charges) and migration naming (`migration-006`) are both wrong now. Its UI inventory is still a
@@ -62,7 +62,7 @@ build is saved. With 69 artists saved by any fan (Sept sweep), the likeliest out
 | **Refunds and disputes** | The artist's, in their own Stripe dashboard — they're merchant of record. Refunds return Unstream's fee (`refund_application_fee: true`). |
 | **Currency** | Charged in USD in v1, presented in the fan's currency by Checkout where Stripe supports it. Multi-currency presets later if non-US artists sign up. |
 | **Checkout** | Hosted Stripe Checkout on the artist's account. No Stripe.js, no CSP change. |
-| **Platform account** | Shared with membership — see [membership spec §3](open-studio-membership-spec.md#3-payments-the-shared-decision-both-specs). |
+| **Platform account** | Shared with membership — see [membership spec §3](open-house-membership-spec.md#3-payments-the-shared-decision-both-specs). |
 
 ---
 
@@ -181,7 +181,7 @@ analysis. At that point a lawyer stops being optional.
 An LLC (MA: $500 to form, $500 a year) shields personal assets from claims that terms can't cover:
 a regulator, or a third party who never agreed to them. Given no funds are held and no chargebacks
 are borne, it's something to buy when volume makes the risk worth insuring, not a gate. If formed,
-the fee goes on Open Studio.
+the fee goes on Open House.
 
 ### Gates
 
@@ -322,7 +322,7 @@ After membership Phases 1–2. Each gate is a real gate.
 2. **Artist onboarding only.** Migration, `tips-connect`, `tips-settings`, `account.updated`
    webhook, dashboard states 1–3. Invite a handful of claimed artists to connect; no fan UI yet.
 3. **Web tipping.** `tips-checkout`, `/tip/{slug}`, `/tip/thanks`, button on artist pages and result
-   cards, webhook success/refund/dispute. Tip-fee income added to Open Studio.
+   cards, webhook success/refund/dispute. Tip-fee income added to Open House.
 4. **Mac popover and extension.** The listening-moment button — the reason this exists.
 5. **Support-loop integration.** Signed-in tips mark the artist supported / `patron`.
 
@@ -364,7 +364,7 @@ After membership Phases 1–2. Each gate is a real gate.
 | Registry | `api/shared/platform-registry.ts` — Unstream tips as a patronage entry, payout shown as the live net % |
 | Mac | now-playing card in `Views/macOS/PopoverView.swift`; nothing on iOS |
 | Extension | `apps/extension/` popup |
-| Open Studio | `tipFeeRevenue` in `data/open-studio/ledger.json` and the `/api/open-studio` aggregate |
+| Open House | `tipFeeRevenue` in `data/open-house/ledger.json` and the `/api/open-house` aggregate |
 | Tips approval | `apps/web/src/pages/AdminVerifyPage.tsx`, `api/functions/admin-verify.ts` — first-enable queue (§5) |
 | Terms | `apps/web/src/pages/TermsOfUsePage.tsx` — tips section; artist addendum shown at enable time; `PrivacyPolicyPage.tsx` — what Stripe collects on tips |
 | Old specs | `patronage-spec.md` marked superseded; `unstream-patronage.md` parked |

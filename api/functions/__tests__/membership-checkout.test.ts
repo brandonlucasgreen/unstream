@@ -98,8 +98,8 @@ describe('membership-checkout', () => {
       customer_email: 'fan@example.com',
       metadata: { user_id: 'user-1', plan: 'annual' },
       subscription_data: { metadata: { user_id: 'user-1', plan: 'annual' } },
-      success_url: 'https://unstream.stream/open-studio?membership=thanks',
-      cancel_url: 'https://unstream.stream/open-studio',
+      success_url: 'https://unstream.stream/open-house?membership=thanks',
+      cancel_url: 'https://unstream.stream/open-house',
     });
   });
 

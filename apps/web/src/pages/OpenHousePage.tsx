@@ -15,12 +15,12 @@ import {
   startCheckout,
   type Ledger,
   type MyMembership,
-  type OpenStudioLive,
+  type OpenHouseLive,
   type PurchasablePlan,
-} from '../services/openStudio';
+} from '../services/openHouse';
 
-// /open-studio — what Unstream costs to run, what members cover, and where the surplus goes.
-// Spec: docs/specs/open-studio-membership-spec.md §5. The numbers do the persuading; the
+// /open-house — what Unstream costs to run, what members cover, and where the surplus goes.
+// Spec: docs/specs/open-house-membership-spec.md §5. The numbers do the persuading; the
 // membership is sold on the bill, not on the perks.
 
 const PLANS: { plan: PurchasablePlan; price: string; per: string; note: string }[] = [
@@ -29,14 +29,14 @@ const PLANS: { plan: PurchasablePlan; price: string; per: string; note: string }
   { plan: 'lifetime', price: '$100', per: 'once', note: 'For people who hate subscriptions.' },
 ];
 
-export function OpenStudioPage() {
+export function OpenHousePage() {
   const { session, isLoading: authLoading } = useAuth();
   const [searchParams] = useSearchParams();
   const justJoined = searchParams.get('membership') === 'thanks';
 
   const [ledger, setLedger] = useState<Ledger | null>(null);
   const [ledgerFailed, setLedgerFailed] = useState(false);
-  const [live, setLive] = useState<OpenStudioLive | null>(null);
+  const [live, setLive] = useState<OpenHouseLive | null>(null);
   const [liveFailed, setLiveFailed] = useState(false);
   const [membership, setMembership] = useState<MyMembership | null>(null);
   const [pending, setPending] = useState<PurchasablePlan | 'portal' | null>(null);
@@ -46,7 +46,7 @@ export function OpenStudioPage() {
     fetchLedger()
       .then(setLedger)
       .catch((error) => {
-        Sentry.captureException(error, { extra: { context: 'open-studio.ledger' } });
+        Sentry.captureException(error, { extra: { context: 'open-house.ledger' } });
         setLedgerFailed(true);
       });
     fetchLive()
@@ -90,7 +90,7 @@ export function OpenStudioPage() {
 
       <div className="pt-8 pb-4 px-4">
         <div className="max-w-2xl mx-auto">
-          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary mb-4">Open Studio</h1>
+          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary mb-4">Open House</h1>
           <p className="text-text-secondary text-lg">
             The doors are open: what Unstream costs to run, what members cover, and where
             anything left over goes. Search, support links, saved artists and the apps stay free
