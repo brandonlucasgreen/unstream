@@ -1,7 +1,13 @@
 ---
-status: Idea
+status: Parked
 ---
 # Unstream Patronage
+
+> **Parked 2026-09-25.** Group / pooled patronage is out of scope for now — splitting one payment
+> across many artists needs separate charges and transfers, which makes Unstream hold funds and
+> brings in money-transmission licensing. One-off tips to a single artist are specced in
+> [artist-tips-spec.md](artist-tips-spec.md); support for Unstream itself in
+> [open-books-membership-spec.md](open-books-membership-spec.md).
 
 Tiers:
 - monthly/yearly pass: $2/mo or $20/yr

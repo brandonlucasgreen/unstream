@@ -246,6 +246,9 @@ This is coverage work, not initial-value work, which is why it moved last within
 
 Lemon Squeezy or Stripe, licence check, Sparkle. Grandfather existing tip-jar payers.
 
+**Changed 2026-09-25:** the gate is now Open Books membership, checked by account rather than a
+licence key — see [open-books-membership-spec.md](open-books-membership-spec.md) §6 and §8.
+
 ### Step 7 — Press push · low effort, already drafted
 
 See §5 on timing — this is the one real fork in the sequence.
