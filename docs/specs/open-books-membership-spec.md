@@ -4,7 +4,8 @@ status: Idea
 # Open Books Membership — spec
 
 **Written:** 2026-09-25
-**Status:** Draft. Blocking questions for Brandon are in §10; nothing gets built until they're answered.
+**Status:** Draft. Brandon answered the pricing, sign-in and Liberapay questions on 2026-09-25 (§10);
+the rest of §10 is still open.
 **Replaces:** the Liberapay button on `/support` and in the Mac app.
 **Companion:** [artist-tips-spec.md](artist-tips-spec.md) — shares the payments decision in §3.
 **Changes:** the paid Mac gate in [mac-app-premium-spec.md](mac-app-premium-spec.md) and
@@ -87,19 +88,22 @@ and filing is still on him. For a one-person side project that's the wrong trade
 Fees per charge (**figures from search snippets 2026-09-25; the proxy blocked the pricing pages —
 re-check before choosing prices**):
 
-| | $3 monthly | $30 annual | $100 lifetime |
+| | $3 monthly | $25 annual | $100 lifetime |
 |---|---|---|---|
-| Stripe Billing, direct (2.9% + 30¢, + 0.7% Billing on subscriptions) — *Brandon owes the tax* | 41¢ · 13.6% | $1.38 · 4.6% | $3.20 · 3.2% |
-| **Stripe Managed Payments** (≈ 2.9% + 30¢ + 3.5%) | **49¢ · 16.4%** | **$2.22 · 7.4%** | **$6.70 · 6.7%** |
-| Lemon Squeezy (5% + 50¢, before international/PayPal surcharges) | 65¢ · 21.7% | $2.00 · 6.7% | $5.50 · 5.5% |
-| Paddle (5% + 50¢) | 65¢ · 21.7% | $2.00 · 6.7% | $5.50 · 5.5% |
+| Stripe Billing, direct (2.9% + 30¢, + 0.7% Billing on subscriptions) — *Brandon owes the tax* | 41¢ · 13.6% | $1.20 · 4.8% | $3.20 · 3.2% |
+| **Stripe Managed Payments** (≈ 2.9% + 30¢ + 3.5%) | **49¢ · 16.4%** | **$1.90 · 7.6%** | **$6.70 · 6.7%** |
+| Lemon Squeezy (5% + 50¢, before international/PayPal surcharges) | 65¢ · 21.7% | $1.75 · 7.0% | $5.50 · 5.5% |
+| Paddle (5% + 50¢) | 65¢ · 21.7% | $1.75 · 7.0% | $5.50 · 5.5% |
 
 - **Managed Payments wins at the price points that matter** because its fixed fee is 30¢, not 50¢,
   and it's the same Stripe account as tips. Lemon Squeezy edges it only on annual and lifetime.
 - **The MoR premium over going direct is ~3 points** — about 8¢ on a $3 charge. That's the cost of
   never filing a VAT return. Worth it.
-- **The fixed fee is the real enemy, not the percentage.** Monthly $3 loses ~16%; annual loses ~7%.
-  So the page leads with annual, and monthly is priced so the fee stays under a fifth (§6).
+- **The fixed fee is the real enemy, not the percentage.** Monthly $3 loses ~16%; annual loses ~8%.
+- **But annual earns less per member.** $25/yr is a 31% discount on 12 × $3: net ~$23.10 a year
+  against ~$30.10 for a year of monthly. Leading with annual trades revenue for retention and fewer
+  failed-card churn events. Brandon chose $25 (2026-09-25); the page shows both and doesn't push
+  either. Coverage maths in §2 assumes a mix — ~20 members if all monthly, ~27 if all annual.
 
 ### The Liberapay tension
 
@@ -121,12 +125,13 @@ The altruism lives in the Open Books framing, not in the payment category.
 | | |
 |---|---|
 | **Rails** | Stripe Managed Payments via hosted Checkout; Lemon Squeezy fallback (§3). |
-| **Sign-in** | **Required before checkout.** Recommended — see Q1. Checkout carries `client_reference_id = user_id`, so there's no email-matching or "claim your membership" flow to build, and Unstream never stores a buyer's email. Magic-link sign-in is one email round trip. The likely first members (claimed artists) already have accounts. |
+| **Sign-in** | **Required before checkout** (Brandon, 2026-09-25). Checkout carries `client_reference_id = user_id`, so there's no email-matching or "claim your membership" flow to build, and Unstream never stores a buyer's email. Magic-link sign-in is one email round trip. The likely first members (claimed artists) already have accounts. |
 | **Checkout** | Hosted Stripe Checkout redirect, hosted Customer Portal for cancel/update. No Stripe.js, so **no CSP change** — a top-level navigation to `checkout.stripe.com` isn't governed by `connect-src`/`script-src`. |
-| **Tiers** | $3/mo · $30/yr · $100 lifetime (Subvert's precedent). Annual shown first. Q2. |
+| **Tiers** | **$3/mo · $25/yr · $100 lifetime** (Brandon, 2026-09-25; lifetime follows Subvert's precedent). Both recurring options shown side by side. |
 | **Core stays free** | Search, now-playing, support links, saved artists, release alerts, collections, the public API free tier. A perk may never be something an unpaid user used to have. |
 | **Mac verification** | **Account, not licence key.** The Mac app already signs in (`AuthService.swift`, `SavedArtistsSync.swift`); it asks `GET /api/me/membership` and caches the answer. No licence server, no key to lose. §8. |
-| **iOS** | Not offered in-app. The iOS StoreKit tip jar stays exactly as it is (`TipJarView.swift`, App Review 3.1.1). No iOS perks exist, so there's nothing to unlock and no IAP to build. Q4. |
+| **iOS** | Not offered in-app. The iOS StoreKit tip jar stays exactly as it is (`TipJarView.swift`, App Review 3.1.1). No iOS perks exist, so there's nothing to unlock and no IAP to build. §10 Q1. |
+| **Liberapay** | **Six-month wind-down** (Brandon, 2026-09-25). §9. |
 | **Grandfathering** | Manual. Liberapay patrons and StoreKit tippers get a `grandfathered` membership granted by an admin script on request. §9. |
 | **Open Books data** | Costs: a JSON file in `data/` Brandon edits monthly. Revenue: live aggregates from the webhook-maintained `memberships` table, plus a hand-closed monthly ledger. §5. |
 | **Surplus** | Goes to Brandon, and the page says so in those words. |
@@ -145,7 +150,7 @@ Route `/open-books`, linked from `/support`, the footer and every membership ask
 2. **What members cover** — active member count, monthly-normalised revenue (annual ÷ 12), and a
    coverage bar: `revenue ÷ costs`, capped visually at 100% with the surplus shown beside it.
 3. **Where the surplus goes** — one sentence: to Brandon, who builds this on evenings and weekends.
-   No reserve fund theatre unless Brandon wants one (Q7).
+   No reserve fund theatre unless Brandon wants one (§10 Q4).
 4. **Past months** — the closed ledger: actual costs, actual fees, actual net.
 5. **Other income** — Unstream's tip-fee income once [tips](artist-tips-spec.md) exist; Liberapay
    receipts while it's still live (they're public on Liberapay anyway); iOS tip-jar income net of
@@ -217,7 +222,7 @@ $15 SKU was for, at a price that reflects that it also funds the servers.
 Trade-off, stated plainly: the indie-Mac audience prefers one-time purchases and a licence key
 works without an account. A member-perk model asks Mac users to sign in. The Mac app already has
 sign-in for saved-artist sync, and local-only listening history can stay local — the account
-proves membership, it doesn't upload anything. Q5.
+proves membership, it doesn't upload anything. §10 Q2.
 
 ---
 
@@ -333,7 +338,7 @@ account — then delete its row. Say this in the function's header comment.
 - **Liberapay:** retire the button on `/support` and in the Mac app; keep a small "Already give on
   Liberapay? That still counts" line linking to it for six months, and count Liberapay receipts on
   Open Books meanwhile. Brandon messages current patrons once with the Open Books link and an offer
-  of a grandfathered membership. Then close it. Q3.
+  of a grandfathered membership. Then close it. (Decided 2026-09-25.)
 - **iOS StoreKit tippers:** consumable purchases carry no identity Unstream can check, so there's no
   automatic path. A line in the iOS settings screen — "Tipped before? Email and I'll add member
   perks to your account" — and Brandon grants on the honour system. At this scale, honour is fine.
@@ -344,30 +349,30 @@ account — then delete its row. Say this in the function's header comment.
 
 ## 10. Open questions for Brandon
 
-**Blocking — answer before any build:**
+**Decided 2026-09-25:**
 
-1. **Sign-in required to become a member?** Recommended yes (§4). The cost: someone who just wants
-   to throw $3 at the bill without an account can't. Liberapay's "no account needed" goes away.
-2. **Prices.** $3/mo · $30/yr · $100 lifetime? Monthly loses ~16% to fees at $3; $4/mo drops it to
-   ~14% and makes 15 members cover the bill instead of 20. Annual-first either way.
-3. **Retire Liberapay fully, or keep it as a no-perks option?** Recommended: six-month wind-down
-   (§9). Keeping it forever splits supporters across two systems and two ledgers.
-4. **iOS: say nothing about membership in the iOS app?** Recommended yes. (The 2025 US ruling
+- **Sign-in required** to become a member (§4).
+- **$3/mo · $25/yr · $100 lifetime** (§3, §4).
+- **Liberapay: six-month wind-down** (§9).
+
+**Still blocking — answer before any build:**
+
+1. **iOS: say nothing about membership in the iOS app?** Recommended yes. (The 2025 US ruling
    against Apple allows external purchase links in the US storefront only — not worth the review
    risk for an app that has no member-only features.)
-5. **Mac premium: confirm perks-for-members replaces the ~$15 one-time SKU**, accepting sign-in as
+2. **Mac premium: confirm perks-for-members replaces the ~$15 one-time SKU**, accepting sign-in as
    the price of it (§6).
 
 **Before launch, not before build:**
 
-6. **Stripe confirmation** (shared with tips — one conversation): does Managed Payments accept a
+3. **Stripe confirmation** (shared with tips — one conversation): does Managed Payments accept a
    supporter membership with perks, for a US sole proprietor, on the same account as a Connect
    platform? If any answer is no, the Lemon Squeezy fallback applies.
-7. **Surplus policy.** "It goes to me" is the honest default. Anything more (a 3-month reserve
+4. **Surplus policy.** "It goes to me" is the honest default. Anything more (a 3-month reserve
    first, a share to artists) is optional and Brandon's call.
-8. **Is the artist dashboard an acceptable place to ask?** Artists first says be careful; they're
+5. **Is the artist dashboard an acceptable place to ask?** Artists first says be careful; they're
    also the likeliest members. Recommended: one quiet card, dismissible, never above their analytics.
-9. **LLC.** Doesn't change the membership analysis (Stripe is MoR). Relevant to tips; see that spec.
+6. **LLC.** Doesn't change the membership analysis (Stripe is MoR). Relevant to tips; see that spec.
 
 ---
 

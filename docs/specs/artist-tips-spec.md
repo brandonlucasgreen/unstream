@@ -53,7 +53,7 @@ lawyer's fee is saved. With 69 artists saved by any fan (Sept sweep), the likeli
 | **Eligibility** | Claimed **and** verified artists only (`artist_profiles.verified_at is not null`), who have connected Stripe and switched tips on. Nobody else ever shows a tip button. |
 | **Payment structure** | Stripe Connect **Standard** accounts + **direct charges** + `application_fee_amount` (§3). |
 | **Money handling** | Unstream never holds, pools, or transfers funds. The charge is created on the artist's account. |
-| **Unstream's fee** | **Artist-chosen, 0–5%, default 0%.** Recommended — see Q1. Shown to the fan either way. |
+| **Unstream's fee** | **Artist-chosen, 0–5%, default 0%** (Brandon, 2026-09-25). Shown to the fan either way. |
 | **Amounts** | Presets **$5 / $10 / $20**, custom allowed, **minimum $3**, maximum $500. §4. |
 | **Fan covers fees** | Optional checkbox, **on by default** ("add $0.46 so {artist} gets the full $5"). Ampwall reports ~75% of buyers opt in. |
 | **Fan sign-in** | Not required. If signed in, the tip is linked to the fan's account (privately) to mark the artist supported. §6. |
@@ -97,7 +97,7 @@ Stripe's restricted-business terms say "a tip must be given for a good or servic
 "you may not accept donations on behalf of someone other than yourself." With direct charges the
 *artist* is the one accepting, for music they made, which should be fine. **Confirm in writing
 with Stripe before writing code**, in the same conversation as the membership questions (membership
-spec Q6). Frame the product as **support for an artist's music**, never as a donation or charity.
+spec §10 Q3). Frame the product as **support for an artist's music**, never as a donation or charity.
 
 ### Countries
 
@@ -134,9 +134,9 @@ conversion ~1%**), paid by the artist's account:
   keeps $0 · {Artist} gets $5.00". Transparency is a core value, and it's also what makes a 0%
   default visible as a choice.
 
-### Unstream's fee (Q1)
+### Unstream's fee — decided 2026-09-25: artist-chosen, default 0%
 
-Options, in order of recommendation:
+The options considered:
 
 1. **Artist-chosen 0–5%, default 0%.** Artists first; the artist decides whether to chip in, and the
    fan sees what they chose. Mirlo does artist-set fees (default higher, ~7–10%).
@@ -170,7 +170,7 @@ available. Still:
 ### Entity
 
 An LLC (MA: $500 to form, $500 a year) shields personal assets from a claim against Unstream but
-doesn't change the licensing analysis. Q3 — ask the lawyer whether the risk profile of direct
+doesn't change the licensing analysis. §10 Q2 — ask the lawyer whether the risk profile of direct
 charges justifies it. The annual fee would also appear on Open Books.
 
 ### Tax
@@ -178,7 +178,7 @@ charges justifies it. The annual fee would also appear on Open Books.
 - **VAT/GST on the tip itself:** the artist's concern — they're merchant of record, like Ko-fi.
 - **Unstream's application fee** is Brandon's income (Schedule C, or the LLC's). Whether MA's
   6.25% sales tax on SaaS reaches a platform fee charged to artists is **unresolved — for counsel**.
-  A 0% default fee (Q1) makes it mostly moot.
+  The 0% default fee makes it mostly moot.
 - **DAC7 (EU) / UK platform reporting:** probably doesn't apply to pure tips (arguably no
   "consideration"), but EU/UK artists could trigger it. **Flag for counsel.**
 - 1099-Ks to artists: Stripe files them (Standard accounts).
@@ -217,7 +217,7 @@ In the artist dashboard (`ArtistDashboardPage.tsx`), per claimed profile:
 
 1. **Not connected** — explanation, the fee table in §4, "Connect Stripe" → Account Link.
 2. **Onboarding incomplete** — "Stripe needs a few more details" → fresh Account Link.
-3. **Connected, off** — settings: on/off, Unstream fee 0–5% (if Q1 goes that way), preview of what
+3. **Connected, off** — settings: on/off, Unstream fee 0–5% (default 0), preview of what
    fans see.
 4. **Connected, on** — totals this month and all time (count, gross, net) from the `tips` table,
   and a link to their Stripe dashboard for everything else. No transaction table in v1 — Stripe's
@@ -309,22 +309,21 @@ After membership Phases 1–2. Each gate is a real gate.
 
 ## 10. Open questions for Brandon
 
+**Decided 2026-09-25:** Unstream's fee is artist-chosen, 0–5%, default 0%.
+
 **Blocking — before Phase 0 is judged or anything is built:**
 
-1. **Unstream's fee: artist-chosen 0–5% default 0, fixed 0%, or fixed ≤5%?** Recommended the first.
-   At realistic volume the revenue difference is single dollars a month; the question is really
-   what you want to say to artists.
-2. **Run the Phase 0 demand test first, or build straight after membership?** Recommended test first
+1. **Run the Phase 0 demand test first, or build straight after membership?** Recommended test first
    — it costs a small PR and could save the lawyer's fee.
-3. **Budget for the lawyer review (low four figures) and possibly an LLC ($500 + $500/yr)?** If no,
+2. **Budget for the lawyer review (low four figures) and possibly an LLC ($500 + $500/yr)?** If no,
    tips don't ship — this isn't a gate to skip.
 
 **Later:**
 
-4. **Minimum $3 and presets $5/$10/$20** — agree?
-5. **Should an artist's own tip button replace their Ko-fi link in the patronage list, or sit beside
+3. **Minimum $3 and presets $5/$10/$20** — agree?
+4. **Should an artist's own tip button replace their Ko-fi link in the patronage list, or sit beside
    it?** Recommended beside, ordered first; let the artist hide the others if they want.
-6. **Mirlo overlap.** Mirlo artists already take Stripe-connected payments with Mirlo's fee. Worth a
+5. **Mirlo overlap.** Mirlo artists already take Stripe-connected payments with Mirlo's fee. Worth a
    friendly note to Mirlo before launch so this reads as complementary, not competitive.
 
 ---
