@@ -190,6 +190,7 @@ This list drives the popup's management UI. On `chrome.runtime.onInstalled` and 
 ## Limitations
 
 - Only sites that implement the **Media Session API and populate `artist`** will yield results (the same `title` + `artist` requirement in `common.js getFromMediaSession`). This is the identical constraint that governs the existing generic allowlist — dynamic injection doesn't change it, it just extends where the generic detector can run.
+- Playback is normally read from `playbackState` or a playing DOM `<audio>`/`<video>`. Sites that give neither (xpn.org's live radio player leaves `playbackState` at `"none"` and plays through audio outside the DOM) fall back to `createMetadataPlaybackSignal` in `common.js`: a change in the published track after load counts as playing. The cost is that such a site keeps being reported if its metadata updates while paused.
 - No bespoke DOM scraping for user-added sites. If a popular site needs custom selectors, it should graduate to a dedicated content script in the curated allowlist instead.
 
 ---
