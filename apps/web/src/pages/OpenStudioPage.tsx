@@ -235,7 +235,7 @@ export function OpenStudioPage() {
                 )}
                 <p className="mt-4 text-text-muted text-sm">
                   Payments are handled by Stripe, which keeps roughly 16% of a $3 charge and 8% of a $25
-                  one, and handles sales tax and VAT. That’s shown on the bill too.
+                  one, and handles sales tax and VAT. Past months list exactly what it kept.
                 </p>
               </>
             )}
