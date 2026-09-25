@@ -246,8 +246,10 @@ This is coverage work, not initial-value work, which is why it moved last within
 
 Lemon Squeezy or Stripe, licence check, Sparkle. Grandfather existing tip-jar payers.
 
-**Changed 2026-09-25:** the gate is now Open Books membership, checked by account rather than a
-licence key — see [open-books-membership-spec.md](open-books-membership-spec.md) §6 and §8.
+**Dropped 2026-09-25:** no paid gate. The Mac features ship free; revenue comes from the optional
+Open Books membership, which gates nothing — see
+[open-books-membership-spec.md](open-books-membership-spec.md) §6. The "Free vs paid" row in §3
+no longer holds.
 
 ### Step 7 — Press push · low effort, already drafted
 

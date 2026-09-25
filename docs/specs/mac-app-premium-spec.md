@@ -166,11 +166,11 @@ Two things here are superseded by it:
 
 ---
 
-## Pricing superseded by the membership — 2026-09-25
+## Paid tier dropped — 2026-09-25
 
-The ~$15 one-time SKU and the Paddle/Lemon Squeezy licence check above are **replaced**: premium
-Mac features become thank-you perks for Open Books members, verified by the account the Mac app
-already signs into — no separate SKU, no licence keys. A $100 lifetime membership covers the
-one-time-purchase buyer. Tip-jar payers are grandfathered by hand. See
-[open-books-membership-spec.md](open-books-membership-spec.md) §6 and §8. Open questions 3 and 5
-above are answered there.
+Brandon: skip treating these features as premium — make them all free. The ~$15 one-time SKU, the
+Paddle/Lemon Squeezy licence check and the "free vs paid" split above are **dropped**. The Support
+List, Shortcuts, widget and export ship free. Unstream's revenue now comes from the optional Open
+Books membership, which gates nothing in the Mac app — see
+[open-books-membership-spec.md](open-books-membership-spec.md) §6. Open questions 3 and 5 above
+are moot.

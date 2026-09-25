@@ -7,9 +7,9 @@ status: Idea
 **Status:** Draft. Brandon answered the pricing, sign-in and Liberapay questions on 2026-09-25 (§10);
 the rest of §10 is still open.
 **Replaces:** the Liberapay button on `/support` and in the Mac app.
-**Companion:** [artist-tips-spec.md](artist-tips-spec.md) — shares the payments decision in §3.
-**Changes:** the paid Mac gate in [mac-app-premium-spec.md](mac-app-premium-spec.md) and
-[support-loop-spec.md](support-loop-spec.md) Step 6 becomes a member perk (§6).
+**Companion:** [artist-tips-spec.md](artist-tips-spec.md) — **parked** 2026-09-25; §3 keeps the door open for it.
+**Changes:** drops the paid Mac tier in [mac-app-premium-spec.md](mac-app-premium-spec.md) and
+[support-loop-spec.md](support-loop-spec.md) Step 6 — the Mac features ship free (Brandon, 2026-09-25; §6).
 
 ---
 
@@ -59,24 +59,22 @@ alone is 13–20 members. Coverage is reachable; profit is a stretch goal, not t
 
 ## 3. Payments: the shared decision (both specs)
 
-### Decision: one Stripe account, two products
+### Decision: one Stripe account, membership through Managed Payments
 
-**Brandon's single Stripe account is both:**
+Brandon's Stripe account sells the membership through **Stripe Managed Payments** — Stripe is the
+merchant of record, so Stripe (not Brandon) owes and files EU/UK VAT and US sales tax, including
+Massachusetts' 6.25% on SaaS.
 
-1. the **seller** of the membership, sold through **Stripe Managed Payments** — Stripe is the
-   merchant of record, so Stripe (not Brandon) owes and files EU/UK VAT and US sales tax,
-   including Massachusetts' 6.25% on SaaS; and
-2. the **Connect platform** for tips — Standard accounts, direct charges, where the *artist* is
-   merchant of record and Unstream never holds the money. Detail in
-   [artist-tips-spec.md §3](artist-tips-spec.md#3-payments).
+**Tips are parked** (2026-09-25 — see [artist-tips-spec.md](artist-tips-spec.md)), so the Connect
+half of the original shared decision is dormant, not dead. If tips come back, the same account
+becomes the Connect platform (Standard accounts, direct charges — the artist is merchant of record
+and Unstream never holds the money). One dashboard, one set of keys, one payout, one place to read
+"what did Unstream earn this month" for the Open Books page. Whether Managed Payments and Connect
+can coexist on one account only needs asking then.
 
-One account means one dashboard, one webhook-signing setup, one set of API keys, one payout to
-Brandon, one place to read "what did Unstream earn this month" for the Open Books page.
-
-**Fallback if Stripe says the two can't share an account** (or Managed Payments won't take a
-membership, or isn't open to a US sole proprietor): membership on **Lemon Squeezy** (Stripe-owned,
-still taking signups as of mid-2026, same MoR model), tips stay on Stripe Connect. Two dashboards,
-same shape of code — the membership webhook handler is the only piece that differs.
+**Fallback if Managed Payments won't take a membership, or isn't open to a US sole proprietor:**
+**Lemon Squeezy** (Stripe-owned, still taking signups as of mid-2026, same MoR model). Same shape
+of code — the webhook handler is the only piece that differs.
 
 ### Why a merchant of record, and why this one
 
@@ -96,7 +94,8 @@ re-check before choosing prices**):
 | Paddle (5% + 50¢) | 65¢ · 21.7% | $1.75 · 7.0% | $5.50 · 5.5% |
 
 - **Managed Payments wins at the price points that matter** because its fixed fee is 30¢, not 50¢,
-  and it's the same Stripe account as tips. Lemon Squeezy edges it only on annual and lifetime.
+  and it keeps everything on the Stripe account tips would use if they return. Lemon Squeezy edges
+  it only on annual and lifetime.
 - **The MoR premium over going direct is ~3 points** — about 8¢ on a $3 charge. That's the cost of
   never filing a VAT return. Worth it.
 - **The fixed fee is the real enemy, not the percentage.** Monthly $3 loses ~16%; annual loses ~8%.
@@ -129,7 +128,7 @@ The altruism lives in the Open Books framing, not in the payment category.
 | **Checkout** | Hosted Stripe Checkout redirect, hosted Customer Portal for cancel/update. No Stripe.js, so **no CSP change** — a top-level navigation to `checkout.stripe.com` isn't governed by `connect-src`/`script-src`. |
 | **Tiers** | **$3/mo · $25/yr · $100 lifetime** (Brandon, 2026-09-25; lifetime follows Subvert's precedent). Both recurring options shown side by side. |
 | **Core stays free** | Search, now-playing, support links, saved artists, release alerts, collections, the public API free tier. A perk may never be something an unpaid user used to have. |
-| **Mac verification** | **Account, not licence key.** The Mac app already signs in (`AuthService.swift`, `SavedArtistsSync.swift`); it asks `GET /api/me/membership` and caches the answer. No licence server, no key to lose. §8. |
+| **Mac** | **No member-only features.** Everything in the Mac app is free, including the planned Support List, Shortcuts, widget and export (Brandon, 2026-09-25). The Mac app's only change is the Liberapay link becoming a membership link. §6. |
 | **iOS** | Not offered in-app. The iOS StoreKit tip jar stays exactly as it is (`TipJarView.swift`, App Review 3.1.1). No iOS perks exist, so there's nothing to unlock and no IAP to build. §10 Q1. |
 | **Liberapay** | **Six-month wind-down** (Brandon, 2026-09-25). §9. |
 | **Grandfathering** | Manual. Liberapay patrons and StoreKit tippers get a `grandfathered` membership granted by an admin script on request. §9. |
@@ -152,7 +151,7 @@ Route `/open-books`, linked from `/support`, the footer and every membership ask
 3. **Where the surplus goes** — one sentence: to Brandon, who builds this on evenings and weekends.
    No reserve fund theatre unless Brandon wants one (§10 Q4).
 4. **Past months** — the closed ledger: actual costs, actual fees, actual net.
-5. **Other income** — Unstream's tip-fee income once [tips](artist-tips-spec.md) exist; Liberapay
+5. **Other income** — Unstream's tip-fee income if [tips](artist-tips-spec.md) are ever unparked; Liberapay
    receipts while it's still live (they're public on Liberapay anyway); iOS tip-jar income net of
    Apple's cut.
 
@@ -196,7 +195,7 @@ labels these as "live, updated hourly" and the ledger as "closed" so the two can
 | Apple Developer Program | $8.25 | $99/yr — needed for notarisation and the iOS app |
 | Domain `unstream.stream` | ~$3 | Annual renewal ÷ 12 |
 | Cloudflare / Resend / Buttondown / Sentry | $0 today | List them at $0 — showing what's free is part of the honesty |
-| Lawyer review, LLC | one-off | Shown in the month paid, not amortised — see tips spec |
+| One-off costs (e.g. a lawyer, if tips return) | one-off | Shown in the month paid, not amortised |
 
 ---
 
@@ -207,22 +206,27 @@ Thank-you perks, never gates on anything core. In order of how cheap they are:
 | Perk | Who it's for | Cost to build |
 |---|---|---|
 | **Member badge** on `/u/:handle` and on a claimed artist's page | Fans and artists | Small — a boolean the edge renderers already have the join for |
-| **Early betas** — TestFlight/Sparkle beta channel, extension betas | Enthusiasts | Near zero — a Sparkle beta appcast gated on membership |
+| **Early betas** — Mac and extension builds before release | Enthusiasts | Near zero — a "Betas" section on `/settings`, shown to members, linking the latest beta DMG / extension zip. No gating inside the apps. |
 | **Roadmap vote** — a short list Brandon picks, one vote per member per quarter | Everyone | Small; could start as a Discord role instead |
-| **Mac premium features** as they ship — Support List, Shortcuts, widget, export | Mac users | Already specced in `mac-app-premium-spec.md`; the gate is this membership |
 
-### What changes for the Mac premium plan
+**The perks are deliberately thin.** The membership is sold on the Open Books page — "here's the
+bill, help cover it" — not on what it unlocks. If that doesn't convert, better perks wouldn't have
+either without gating something that should be free.
 
-`mac-app-premium-spec.md` planned a ~$15 one-time paid SKU via Paddle/Lemon Squeezy, and
-`support-loop-spec.md` Step 6 a "paid gate + licence check". **Both become: the features are member
-perks, verified by account** (§8). No separate SKU, no licence keys. A $100 lifetime membership is
-the one-time-purchase option for people who hated subscriptions — it covers the same buyer the
-$15 SKU was for, at a price that reflects that it also funds the servers.
+### The Mac app stays entirely free
 
-Trade-off, stated plainly: the indie-Mac audience prefers one-time purchases and a licence key
-works without an account. A member-perk model asks Mac users to sign in. The Mac app already has
-sign-in for saved-artist sync, and local-only listening history can stay local — the account
-proves membership, it doesn't upload anything. §10 Q2.
+Decided 2026-09-25: the premium plan in `mac-app-premium-spec.md` (a ~$15 one-time SKU) and
+`support-loop-spec.md` Step 6 (a paid gate + licence check) are **dropped, not converted to
+perks**. The Support List, Shortcuts, widget and export ship free when they ship. So:
+
+- no licence keys, no entitlement check, no `/api/me/membership` call from the Mac app;
+- no sign-in requirement for any Mac feature beyond what saved-artist sync already needs;
+- the Mac app asks for membership the same way the web does (§7) — a link to Open Books — and
+  that's all.
+
+What it costs: the ~$15 SKU was the one revenue line with evidence behind it (two people said
+they'd pay). Some of those buyers will become members anyway; the $100 lifetime tier is there for
+anyone who'd rather pay once.
 
 ---
 
@@ -320,16 +324,10 @@ memberships
 context), `stripe listen --forward-to localhost:8888/api/membership/webhook`, and a throwaway
 account — then delete its row. Say this in the function's header comment.
 
-### Mac entitlement
+### Mac app
 
-- `GET /api/me/membership` on launch and every 24h; cache `{ active, validUntil }` in the Keychain
-  where `validUntil = currentPeriodEnd + 7 days` (or far future for lifetime/grandfathered).
-- Offline: trust the cache until `validUntil`. The sandboxed app already makes network calls, so
-  no new entitlements.
-- Signed out: premium features show what they do and a "Members get this" link to Open Books.
-  Never a nag badge on the menu bar icon.
-- `TipJarView.swift` macOS branch: Liberapay link → "Become a member" link to `/open-books`. The
-  iOS branch doesn't change.
+`TipJarView.swift` macOS branch: Liberapay link → "Become a member" link to `/open-books`. The
+iOS branch doesn't change. Nothing else in the Mac app changes.
 
 ---
 
@@ -354,43 +352,33 @@ account — then delete its row. Say this in the function's header comment.
 - **Sign-in required** to become a member (§4).
 - **$3/mo · $25/yr · $100 lifetime** (§3, §4).
 - **Liberapay: six-month wind-down** (§9).
+- **iOS says nothing about membership**; the StoreKit tip jar stays (§4).
+- **Mac features are all free** — no premium tier, no perks gating (§6).
+- **Tips parked** — no legal spend for now ([artist-tips-spec.md](artist-tips-spec.md)).
 
-**Still blocking — answer before any build:**
+Nothing left blocks the build. **Before launch:**
 
-1. **iOS: say nothing about membership in the iOS app?** Recommended yes. (The 2025 US ruling
-   against Apple allows external purchase links in the US storefront only — not worth the review
-   risk for an app that has no member-only features.)
-2. **Mac premium: confirm perks-for-members replaces the ~$15 one-time SKU**, accepting sign-in as
-   the price of it (§6).
-
-**Before launch, not before build:**
-
-3. **Stripe confirmation** (shared with tips — one conversation): does Managed Payments accept a
-   supporter membership with perks, for a US sole proprietor, on the same account as a Connect
-   platform? If any answer is no, the Lemon Squeezy fallback applies.
-4. **Surplus policy.** "It goes to me" is the honest default. Anything more (a 3-month reserve
+1. **Stripe confirmation:** does Managed Payments accept a supporter membership with perks, sold by
+   a US sole proprietor? If no, the Lemon Squeezy fallback applies (§3).
+2. **Surplus policy.** "It goes to me" is the honest default. Anything more (a 3-month reserve
    first, a share to artists) is optional and Brandon's call.
-5. **Is the artist dashboard an acceptable place to ask?** Artists first says be careful; they're
+3. **Is the artist dashboard an acceptable place to ask?** Artists first says be careful; they're
    also the likeliest members. Recommended: one quiet card, dismissible, never above their analytics.
-6. **LLC.** Doesn't change the membership analysis (Stripe is MoR). Relevant to tips; see that spec.
 
 ---
 
 ## 11. Phasing
 
-Smallest shippable first. Membership lands before tips because it's the revenue and has no legal
-gate — Stripe is merchant of record.
+Smallest shippable first.
 
 1. **Open Books page, costs only.** `ledger.json` + `/open-books`, linked from `/support`. No
-   payments. Tests whether the numbers read well, and it's the honest precondition for asking. Can
-   ship the week the answers come in.
+   payments. Tests whether the numbers read well, and it's the honest precondition for asking.
 2. **Membership on the web.** Migration, the five functions, checkout from `/open-books` and
-   `/support`, Customer Portal, badge on `/u/:handle`. Liberapay wind-down starts (§9).
-3. **Mac entitlement + beta channel.** `/api/me/membership` in the Mac app, member-gated Sparkle
-   beta appcast, `TipJarView` macOS link swap. Grandfather grants.
+   `/support`, Customer Portal, badge on `/u/:handle` and artist pages. Liberapay wind-down starts
+   (§9). Grandfather grants.
+3. **Mac link swap.** `TipJarView` macOS branch → Open Books. Ships with the next Mac release.
 4. **The asks** (§7), one surface at a time, starting with `/support` and the release-alert footer.
-5. **Mac premium features as perks**, as each ships per `support-loop-spec.md`.
-6. **Tip-fee income on Open Books** — once [tips](artist-tips-spec.md) exist.
+5. **Betas section and roadmap vote**, once there are members to offer them to.
 
 ---
 
@@ -407,7 +395,8 @@ gate — Stripe is merchant of record.
 | Ledger | `data/open-books/ledger.json` |
 | Pages | `apps/web/src/pages/OpenBooksPage.tsx` (new, lazy in `main.tsx`); `SupportPage.tsx` (Liberapay → membership) |
 | Badge | `api/edge/u-handle.ts`, `api/functions/public-saved-artists.ts`; artist badge in `api/edge/artist-page-static.ts` |
-| Mac | `apps/mac/Unstream/Views/Shared/TipJarView.swift` (macOS branch only), `Services/AuthService.swift` neighbour for entitlement |
+| Mac | `apps/mac/Unstream/Views/Shared/TipJarView.swift` — macOS branch only, link swap |
+| Betas | `apps/web/src/pages/SettingsPage.tsx` — members-only section |
 | Grants | `scripts/grant-membership.ts` |
-| Copy | `README.md` "All apps are free with no paywall" → "Core features are free for good; members get a few thank-you perks." |
+| Copy | `README.md` "All apps are free with no paywall" stays true; add a line pointing to Open Books membership. |
 | Changelog | `data/shipped-features.json` per phase |

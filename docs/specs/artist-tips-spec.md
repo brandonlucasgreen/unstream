@@ -1,11 +1,13 @@
 ---
-status: Idea
+status: Parked
 ---
 # Artist tips — spec
 
 **Written:** 2026-09-25
-**Status:** Draft. Gated on a Stripe policy confirmation and a lawyer review (§5) before any build,
-and phased after [open-books-membership-spec.md](open-books-membership-spec.md).
+**Status:** **Parked 2026-09-25.** Brandon won't fund the lawyer review or LLC that §5 makes a
+launch gate, so tips don't ship. The spec stays as the plan of record if that changes. The Phase 0
+demand test (§9) needs no payments and no legal work, so it can still run on its own merits — its
+click-through numbers are the evidence for unparking.
 **Supersedes:** [patronage-spec.md](patronage-spec.md) — its Stripe structure (Express + destination
 charges) and migration naming (`migration-006`) are both wrong now. Its UI inventory is still a
 useful checklist.
@@ -97,7 +99,7 @@ Stripe's restricted-business terms say "a tip must be given for a good or servic
 "you may not accept donations on behalf of someone other than yourself." With direct charges the
 *artist* is the one accepting, for music they made, which should be fine. **Confirm in writing
 with Stripe before writing code**, in the same conversation as the membership questions (membership
-spec §10 Q3). Frame the product as **support for an artist's music**, never as a donation or charity.
+spec §10 Q1). Frame the product as **support for an artist's music**, never as a donation or charity.
 
 ### Countries
 
@@ -170,8 +172,8 @@ available. Still:
 ### Entity
 
 An LLC (MA: $500 to form, $500 a year) shields personal assets from a claim against Unstream but
-doesn't change the licensing analysis. §10 Q2 — ask the lawyer whether the risk profile of direct
-charges justifies it. The annual fee would also appear on Open Books.
+doesn't change the licensing analysis. Declined for now (§10); if tips return, ask the lawyer
+whether the risk profile of direct charges justifies it. The annual fee would also appear on Open Books.
 
 ### Tax
 
@@ -309,21 +311,18 @@ After membership Phases 1–2. Each gate is a real gate.
 
 ## 10. Open questions for Brandon
 
-**Decided 2026-09-25:** Unstream's fee is artist-chosen, 0–5%, default 0%.
+**Decided 2026-09-25:**
 
-**Blocking — before Phase 0 is judged or anything is built:**
+- Unstream's fee is artist-chosen, 0–5%, default 0%.
+- Phase 0 demand test before any payments build.
+- **No lawyer review or LLC for now → tips parked.** Revisit only with Phase 0 numbers in hand.
 
-1. **Run the Phase 0 demand test first, or build straight after membership?** Recommended test first
-   — it costs a small PR and could save the lawyer's fee.
-2. **Budget for the lawyer review (low four figures) and possibly an LLC ($500 + $500/yr)?** If no,
-   tips don't ship — this isn't a gate to skip.
+**If unparked:**
 
-**Later:**
-
-3. **Minimum $3 and presets $5/$10/$20** — agree?
-4. **Should an artist's own tip button replace their Ko-fi link in the patronage list, or sit beside
+1. **Minimum $3 and presets $5/$10/$20** — agree?
+2. **Should an artist's own tip button replace their Ko-fi link in the patronage list, or sit beside
    it?** Recommended beside, ordered first; let the artist hide the others if they want.
-5. **Mirlo overlap.** Mirlo artists already take Stripe-connected payments with Mirlo's fee. Worth a
+3. **Mirlo overlap.** Mirlo artists already take Stripe-connected payments with Mirlo's fee. Worth a
    friendly note to Mirlo before launch so this reads as complementary, not competitive.
 
 ---
