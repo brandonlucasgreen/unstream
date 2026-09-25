@@ -1,13 +1,12 @@
 ---
-status: Parked
+status: Idea
 ---
 # Artist tips — spec
 
 **Written:** 2026-09-25
-**Status:** **Parked 2026-09-25.** Brandon won't fund the lawyer review or LLC that §5 makes a
-launch gate, so tips don't ship. The spec stays as the plan of record if that changes. The Phase 0
-demand test (§9) needs no payments and no legal work, so it can still run on its own merits — its
-click-through numbers are the evidence for unparking.
+**Status:** Draft. Unparked 2026-09-25: the lawyer review and LLC are no longer launch gates (§5).
+Phased after [open-books-membership-spec.md](open-books-membership-spec.md), and built only if the
+Phase 0 demand test (§9) says so.
 **Supersedes:** [patronage-spec.md](patronage-spec.md) — its Stripe structure (Express + destination
 charges) and migration naming (`migration-006`) are both wrong now. Its UI inventory is still a
 useful checklist.
@@ -43,7 +42,7 @@ What a native tip does that a Ko-fi link can't:
 Surface the artist's *existing* patronage links at the listening moment in the Mac popover and the
 extension, and count click-outs. If people click Ko-fi links from the popover, a one-tap native tip
 will do better and is worth building. If nobody clicks, a native button won't change that, and the
-lawyer's fee is saved. With 69 artists saved by any fan (Sept sweep), the likeliest outcome is
+build is saved. With 69 artists saved by any fan (Sept sweep), the likeliest outcome is
 "not yet" — which is fine, and cheap to learn.
 
 ---
@@ -52,7 +51,7 @@ lawyer's fee is saved. With 69 artists saved by any fan (Sept sweep), the likeli
 
 | | |
 |---|---|
-| **Eligibility** | Claimed **and** verified artists only (`artist_profiles.verified_at is not null`), who have connected Stripe and switched tips on. Nobody else ever shows a tip button. |
+| **Eligibility** | Claimed **and** verified artists only (`artist_profiles.verified_at is not null`), who have connected Stripe, been approved for tips by an admin (§5), and switched tips on. Nobody else ever shows a tip button. |
 | **Payment structure** | Stripe Connect **Standard** accounts + **direct charges** + `application_fee_amount` (§3). |
 | **Money handling** | Unstream never holds, pools, or transfers funds. The charge is created on the artist's account. |
 | **Unstream's fee** | **Artist-chosen, 0–5%, default 0%** (Brandon, 2026-09-25). Shown to the fan either way. |
@@ -93,13 +92,20 @@ Account Links (or OAuth for existing accounts).
 **Out of scope:** separate charges and transfers — the pooled split — which is exactly what the
 parked group pass needed and why it stays parked.
 
-### Stripe's tips/donations policy — confirm before building
+### Stripe's tips/donations policy
 
-Stripe's restricted-business terms say "a tip must be given for a good or service provided" and
-"you may not accept donations on behalf of someone other than yourself." With direct charges the
-*artist* is the one accepting, for music they made, which should be fine. **Confirm in writing
-with Stripe before writing code**, in the same conversation as the membership questions (membership
-spec §10 Q1). Frame the product as **support for an artist's music**, never as a donation or charity.
+Stripe's [tips and donations requirements](https://support.stripe.com/questions/requirements-for-accepting-tips-or-donations)
+say a tip must be for a good or service provided, and you may not accept donations on behalf of
+someone other than yourself. **Brandon's reading (2026-09-25): this fits.** With direct charges the
+*artist* is the one accepting, the tip is plainly labelled as support for a named artist and their
+music, and Unstream isn't collecting for anyone.
+
+That's the gate, with one piece of cheap insurance: describe the model accurately in the Connect
+platform profile when setting up the platform ("artists accept tips for their music through their
+own Stripe accounts; we take an optional artist-chosen fee"). Stripe reviews that profile, so an
+approval is the confirmation; if they push back, that's the moment to find out, before any code
+ships. Copy follows the same rule everywhere: **support for an artist's music**, never "donate" or
+"charity".
 
 ### Countries
 
@@ -152,44 +158,55 @@ than yourself" prohibits. Fans who want to fund Unstream have the membership.
 
 ---
 
-## 5. Legal and tax — pre-launch gates
+## 5. Legal, tax and trust — pre-launch gates
 
-**None of this is legal advice; it's the list for the lawyer.**
+**Not legal advice.** Decided 2026-09-25: no lawyer review or LLC as a launch gate. The structure
+is what carries the risk down, and terms cover the rest. The reasoning, so it can be revisited:
 
-### Money transmission (Massachusetts)
+### Money transmission — why no lawyer gate
 
-M.G.L. c. 169B (Chapter 312 of the Acts of 2024, in force 2026-01-01) licenses money transmitters,
-with an agent-of-the-payee exemption (written agreement with the payee, among other conditions).
-Direct charges mean Unstream never receives, holds or transmits the funds — the strongest position
-available. Still:
+M.G.L. c. 169B (Chapter 312 of the Acts of 2024, in force 2026-01-01) licenses people who receive
+money for transmission. With direct charges on Standard accounts, the fan pays straight into the
+artist's own Stripe account and Stripe moves it under its own licences. Unstream never receives,
+holds or sends the funds, so it arguably isn't transmitting anything, and the agent-of-payee
+exemption only matters if it were. Ko-fi, Mirlo and Liberapay work this way. Chargebacks and fraud
+losses sit with the artist and Stripe (`losses.payments: stripe`); Stripe files the 1099-Ks.
 
-- **Gate: a scoped lawyer review before launch** — likely low four figures. Questions: does
-  facilitating direct charges with an application fee fall outside c.169B entirely; does the artist
-  agreement need agent-of-payee language anyway as belt and braces; anything for other states given
-  artists and fans are everywhere.
-- The review cost goes on the Open Books page in the month it's paid.
+**The structure is load-bearing.** Moving to destination charges, separate charges and transfers,
+or anything that routes money through a Stripe balance Unstream controls would change this
+analysis. At that point a lawyer stops being optional.
 
-### Entity
+### Entity — optional
 
-An LLC (MA: $500 to form, $500 a year) shields personal assets from a claim against Unstream but
-doesn't change the licensing analysis. Declined for now (§10); if tips return, ask the lawyer
-whether the risk profile of direct charges justifies it. The annual fee would also appear on Open Books.
+An LLC (MA: $500 to form, $500 a year) shields personal assets from claims that terms can't cover:
+a regulator, or a third party who never agreed to them. Given no funds are held and no chargebacks
+are borne, it's something to buy when volume makes the risk worth insuring, not a gate. If formed,
+the fee goes on Open Books.
 
-### Tax
+### Gates
+
+1. **Stripe platform approval** with the model described accurately (§3).
+2. **Terms.** A tips section in the terms of use (Unstream isn't a party to the tip; no funds
+   held; the fee the artist chose) and a short **artist tips addendum** accepted when an artist
+   enables tips: they're the seller, refunds and disputes are theirs, the fee is their choice,
+   Unstream can switch tips off for abuse or misrepresentation. Brandon drafts both, taking the
+   structure (not the text) from how Ko-fi and Mirlo word theirs.
+3. **Tighter verification for tips.** The real exposure is someone claiming an artist's profile and
+   collecting tips meant for them. Terms help after the fact; this prevents it. The first time a
+   profile enables tips, it lands in `/admin/verify` for Brandon to approve, showing the claimed
+   artist beside the connected Stripe account's business name and country. Approval sets
+   `tips_approved_at`; checkout refuses without it. At ~134 claimed artists this is a few minutes
+   a month. Any later change of connected Stripe account needs re-approval.
+
+### Tax — accountant questions, not blockers
 
 - **VAT/GST on the tip itself:** the artist's concern — they're merchant of record, like Ko-fi.
-- **Unstream's application fee** is Brandon's income (Schedule C, or the LLC's). Whether MA's
-  6.25% sales tax on SaaS reaches a platform fee charged to artists is **unresolved — for counsel**.
-  The 0% default fee makes it mostly moot.
+- **Unstream's application fee** is Brandon's income (Schedule C). Whether MA's 6.25% sales tax on
+  SaaS reaches a platform fee charged to artists is a question for an accountant. With a 0% default
+  it only arises for artists who opt in, and at a few dollars a month.
 - **DAC7 (EU) / UK platform reporting:** probably doesn't apply to pure tips (arguably no
-  "consideration"), but EU/UK artists could trigger it. **Flag for counsel.**
+  "consideration"), and volume is tiny. Revisit if EU/UK tip volume becomes real.
 - 1099-Ks to artists: Stripe files them (Standard accounts).
-
-### Artist agreement
-
-A short tips addendum accepted when an artist enables tips: they're the seller, refunds and
-disputes are theirs, Unstream's fee (whatever they chose), Unstream can switch tips off for abuse.
-Drafted or reviewed in the same lawyer engagement.
 
 ---
 
@@ -240,6 +257,7 @@ artist_tip_accounts                     -- one per claimed artist who has connec
   artist_id            uuid primary key references artists(id) on delete cascade
   stripe_account_id    text unique not null
   charges_enabled      boolean not null default false   -- mirrored from account.updated
+  tips_approved_at     timestamptz null                 -- admin approval (§5); reset if stripe_account_id changes
   tips_enabled         boolean not null default false   -- the artist's switch
   fee_basis_points     integer not null default 0 check (fee_basis_points between 0 and 500)
   country              text null
@@ -261,7 +279,8 @@ tips                                    -- one per successful charge
 - **Both server-only: RLS enabled, no policies**, with a comment saying so. The artist reads their
   totals and the fan's tip-to-supported link through service-role functions that check ownership.
 - Public eligibility ("does this artist take tips") is a boolean joined into the artist page and
-  search payloads server-side: `tips_enabled and charges_enabled and verified`.
+  search payloads server-side: `tips_enabled and charges_enabled and tips_approved_at is not null
+  and verified`.
 - **No fan PII**: no email, no name, no card data. `fan_user_id` is the only link and it's nullable.
 - Uniqueness on `stripe_charge_id` makes webhook replays no-ops.
 
@@ -298,8 +317,8 @@ After membership Phases 1–2. Each gate is a real gate.
 0. **Demand test, no payments.** Show the artist's existing patronage links (Ko-fi, Patreon, etc.)
    on the Mac popover's now-playing card and the extension popup; count click-outs in existing
    analytics. Run through at least one Bandcamp Friday. **Go/no-go on the numbers.**
-1. **Gates.** Stripe written confirmation (policy, countries, shared account). Lawyer review.
-   Artist addendum drafted. LLC decision.
+1. **Gates (§5).** Stripe platform approval with the model described accurately; terms-of-use tips
+   section and artist addendum drafted; admin tips approval in `/admin/verify`.
 2. **Artist onboarding only.** Migration, `tips-connect`, `tips-settings`, `account.updated`
    webhook, dashboard states 1–3. Invite a handful of claimed artists to connect; no fan UI yet.
 3. **Web tipping.** `tips-checkout`, `/tip/{slug}`, `/tip/thanks`, button on artist pages and result
@@ -315,9 +334,11 @@ After membership Phases 1–2. Each gate is a real gate.
 
 - Unstream's fee is artist-chosen, 0–5%, default 0%.
 - Phase 0 demand test before any payments build.
-- **No lawyer review or LLC for now → tips parked.** Revisit only with Phase 0 numbers in hand.
+- Stripe's tips policy fits — Brandon's reading; platform approval is the confirmation (§3).
+- **No lawyer review or LLC as a gate.** Gates are Stripe approval, terms + artist addendum, and
+  admin approval of each artist's first tips setup (§5).
 
-**If unparked:**
+**Before build:**
 
 1. **Minimum $3 and presets $5/$10/$20** — agree?
 2. **Should an artist's own tip button replace their Ko-fi link in the patronage list, or sit beside
@@ -344,4 +365,6 @@ After membership Phases 1–2. Each gate is a real gate.
 | Mac | now-playing card in `Views/macOS/PopoverView.swift`; nothing on iOS |
 | Extension | `apps/extension/` popup |
 | Open Books | `tipFeeRevenue` in `data/open-books/ledger.json` and the `/api/open-books` aggregate |
+| Tips approval | `apps/web/src/pages/AdminVerifyPage.tsx`, `api/functions/admin-verify.ts` — first-enable queue (§5) |
+| Terms | `apps/web/src/pages/TermsOfUsePage.tsx` — tips section; artist addendum shown at enable time; `PrivacyPolicyPage.tsx` — what Stripe collects on tips |
 | Old specs | `patronage-spec.md` marked superseded; `unstream-patronage.md` parked |

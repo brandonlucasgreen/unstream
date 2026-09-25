@@ -7,7 +7,7 @@ status: Idea
 **Status:** Draft. Brandon answered the pricing, sign-in and Liberapay questions on 2026-09-25 (§10);
 the rest of §10 is still open.
 **Replaces:** the Liberapay button on `/support` and in the Mac app.
-**Companion:** [artist-tips-spec.md](artist-tips-spec.md) — **parked** 2026-09-25; §3 keeps the door open for it.
+**Companion:** [artist-tips-spec.md](artist-tips-spec.md) — shares the Stripe account decision in §3; phased after this.
 **Changes:** drops the paid Mac tier in [mac-app-premium-spec.md](mac-app-premium-spec.md) and
 [support-loop-spec.md](support-loop-spec.md) Step 6 — the Mac features ship free (Brandon, 2026-09-25; §6).
 
@@ -65,12 +65,12 @@ Brandon's Stripe account sells the membership through **Stripe Managed Payments*
 merchant of record, so Stripe (not Brandon) owes and files EU/UK VAT and US sales tax, including
 Massachusetts' 6.25% on SaaS.
 
-**Tips are parked** (2026-09-25 — see [artist-tips-spec.md](artist-tips-spec.md)), so the Connect
-half of the original shared decision is dormant, not dead. If tips come back, the same account
+**Tips come later** ([artist-tips-spec.md](artist-tips-spec.md)), and when they do, the same account
 becomes the Connect platform (Standard accounts, direct charges — the artist is merchant of record
 and Unstream never holds the money). One dashboard, one set of keys, one payout, one place to read
 "what did Unstream earn this month" for the Open Books page. Whether Managed Payments and Connect
-can coexist on one account only needs asking then.
+can coexist on one account gets checked when the Connect platform is set up; if not, membership
+moves to the Lemon Squeezy fallback below.
 
 **Fallback if Managed Payments won't take a membership, or isn't open to a US sole proprietor:**
 **Lemon Squeezy** (Stripe-owned, still taking signups as of mid-2026, same MoR model). Same shape
@@ -151,7 +151,7 @@ Route `/open-books`, linked from `/support`, the footer and every membership ask
 3. **Where the surplus goes** — one sentence: to Brandon, who builds this on evenings and weekends.
    No reserve fund theatre unless Brandon wants one (§10 Q4).
 4. **Past months** — the closed ledger: actual costs, actual fees, actual net.
-5. **Other income** — Unstream's tip-fee income if [tips](artist-tips-spec.md) are ever unparked; Liberapay
+5. **Other income** — Unstream's tip-fee income once [tips](artist-tips-spec.md) exist; Liberapay
    receipts while it's still live (they're public on Liberapay anyway); iOS tip-jar income net of
    Apple's cut.
 
@@ -195,7 +195,7 @@ labels these as "live, updated hourly" and the ledger as "closed" so the two can
 | Apple Developer Program | $8.25 | $99/yr — needed for notarisation and the iOS app |
 | Domain `unstream.stream` | ~$3 | Annual renewal ÷ 12 |
 | Cloudflare / Resend / Buttondown / Sentry | $0 today | List them at $0 — showing what's free is part of the honesty |
-| One-off costs (e.g. a lawyer, if tips return) | one-off | Shown in the month paid, not amortised |
+| One-off costs (e.g. an LLC, if ever formed) | one-off | Shown in the month paid, not amortised |
 
 ---
 
@@ -354,7 +354,7 @@ iOS branch doesn't change. Nothing else in the Mac app changes.
 - **Liberapay: six-month wind-down** (§9).
 - **iOS says nothing about membership**; the StoreKit tip jar stays (§4).
 - **Mac features are all free** — no premium tier, no perks gating (§6).
-- **Tips parked** — no legal spend for now ([artist-tips-spec.md](artist-tips-spec.md)).
+- **Tips unparked** without a lawyer gate — see [artist-tips-spec.md](artist-tips-spec.md) §5.
 
 Nothing left blocks the build. **Before launch:**
 
@@ -379,6 +379,7 @@ Smallest shippable first.
 3. **Mac link swap.** `TipJarView` macOS branch → Open Books. Ships with the next Mac release.
 4. **The asks** (§7), one surface at a time, starting with `/support` and the release-alert footer.
 5. **Betas section and roadmap vote**, once there are members to offer them to.
+6. **Tip-fee income on Open Books** — once [tips](artist-tips-spec.md) exist.
 
 ---
 
