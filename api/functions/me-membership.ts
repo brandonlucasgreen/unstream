@@ -1,8 +1,8 @@
 // API endpoint: /api/me/membership
 //
-// GET — the signed-in user's Open Books membership: { active, plan, status, currentPeriodEnd }.
-// Used by /open-books (to hide the ask from members and offer "manage"), /settings, and later
-// the badge. Spec: docs/specs/open-books-membership-spec.md §8.
+// GET — the signed-in user's Open Studio membership: { active, plan, status, currentPeriodEnd }.
+// Used by /open-studio (to hide the ask from members and offer "manage"), /settings, and later
+// the badge. Spec: docs/specs/open-studio-membership-spec.md §8.
 //
 // Follows the other me-* endpoints: bearer auth resolved once by resolveAccountRequest,
 // hand-rolled permissive CORS, service-role read. In api/tsconfig.json's typecheck include —

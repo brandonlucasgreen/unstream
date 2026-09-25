@@ -110,12 +110,12 @@
     "functions/membership-checkout.ts",
     "functions/membership-portal.ts",
     "functions/membership-webhook.ts",
-    "functions/open-books.ts",
+    "functions/open-studio.ts",
     "functions/__tests__/membership.test.ts",
     "functions/__tests__/me-membership.test.ts",
     "functions/__tests__/membership-checkout.test.ts",
     "functions/__tests__/membership-portal.test.ts",
     "functions/__tests__/membership-webhook.test.ts",
-    "functions/__tests__/open-books.test.ts"
+    "functions/__tests__/open-studio.test.ts"
   ]
 }

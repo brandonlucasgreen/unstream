@@ -7,7 +7,7 @@ status: Parked
 > across many artists needs separate charges and transfers, which makes Unstream hold funds and
 > brings in money-transmission licensing. One-off tips to a single artist are specced in
 > [artist-tips-spec.md](artist-tips-spec.md); support for Unstream itself in
-> [open-books-membership-spec.md](open-books-membership-spec.md).
+> [open-studio-membership-spec.md](open-studio-membership-spec.md).
 
 Tiers:
 - monthly/yearly pass: $2/mo or $20/yr

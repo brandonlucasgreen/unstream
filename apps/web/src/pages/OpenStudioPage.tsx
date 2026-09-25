@@ -15,12 +15,12 @@ import {
   startCheckout,
   type Ledger,
   type MyMembership,
-  type OpenBooksLive,
+  type OpenStudioLive,
   type PurchasablePlan,
-} from '../services/openBooks';
+} from '../services/openStudio';
 
-// /open-books — what Unstream costs to run, what members cover, and where the surplus goes.
-// Spec: docs/specs/open-books-membership-spec.md §5. The numbers do the persuading; the
+// /open-studio — what Unstream costs to run, what members cover, and where the surplus goes.
+// Spec: docs/specs/open-studio-membership-spec.md §5. The numbers do the persuading; the
 // membership is sold on the bill, not on the perks.
 
 const PLANS: { plan: PurchasablePlan; price: string; per: string; note: string }[] = [
@@ -29,14 +29,14 @@ const PLANS: { plan: PurchasablePlan; price: string; per: string; note: string }
   { plan: 'lifetime', price: '$100', per: 'once', note: 'For people who hate subscriptions.' },
 ];
 
-export function OpenBooksPage() {
+export function OpenStudioPage() {
   const { session, isLoading: authLoading } = useAuth();
   const [searchParams] = useSearchParams();
   const justJoined = searchParams.get('membership') === 'thanks';
 
   const [ledger, setLedger] = useState<Ledger | null>(null);
   const [ledgerFailed, setLedgerFailed] = useState(false);
-  const [live, setLive] = useState<OpenBooksLive | null>(null);
+  const [live, setLive] = useState<OpenStudioLive | null>(null);
   const [liveFailed, setLiveFailed] = useState(false);
   const [membership, setMembership] = useState<MyMembership | null>(null);
   const [pending, setPending] = useState<PurchasablePlan | 'portal' | null>(null);
@@ -46,7 +46,7 @@ export function OpenBooksPage() {
     fetchLedger()
       .then(setLedger)
       .catch((error) => {
-        Sentry.captureException(error, { extra: { context: 'open-books.ledger' } });
+        Sentry.captureException(error, { extra: { context: 'open-studio.ledger' } });
         setLedgerFailed(true);
       });
     fetchLive()
@@ -90,11 +90,11 @@ export function OpenBooksPage() {
 
       <div className="pt-8 pb-4 px-4">
         <div className="max-w-2xl mx-auto">
-          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary mb-4">Open Books</h1>
+          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary mb-4">Open Studio</h1>
           <p className="text-text-secondary text-lg">
-            What Unstream costs to run, what members cover, and where anything left over goes.
-            Search, support links, saved artists and the apps stay free whether or not anyone
-            pays.
+            The doors are open: what Unstream costs to run, what members cover, and where
+            anything left over goes. Search, support links, saved artists and the apps stay free
+            whether or not anyone pays.
           </p>
         </div>
       </div>

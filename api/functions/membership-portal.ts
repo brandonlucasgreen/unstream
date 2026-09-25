@@ -2,7 +2,7 @@
 //
 // POST — creates a Stripe Customer Portal session for the signed-in member and returns
 // { url }. The portal is where members cancel, change plan or update a card; Unstream builds
-// none of that itself. Spec: docs/specs/open-books-membership-spec.md §4.
+// none of that itself. Spec: docs/specs/open-studio-membership-spec.md §4.
 
 import { Sentry } from '../lib/sentry';
 import { getMembership } from './membership';
@@ -44,7 +44,7 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
 
     const session = await stripe.billingPortal.sessions.create({
       customer: row.stripe_customer_id,
-      return_url: `${siteUrl()}/open-books`,
+      return_url: `${siteUrl()}/open-studio`,
     });
     return json(200, { url: session.url });
   } catch (error) {

@@ -1,15 +1,15 @@
--- Migration: Open Books memberships
+-- Migration: Open Studio memberships
 --
 -- One row per member: the optional supporter membership that replaces the Liberapay link
--- (docs/specs/open-books-membership-spec.md §8). Stripe Managed Payments is the merchant of
+-- (docs/specs/open-studio-membership-spec.md §8). Stripe Managed Payments is the merchant of
 -- record and holds everything about the buyer — email, name, card, tax location. This table
 -- holds only what Unstream needs to answer two questions: "is this user a member?" (badge,
 -- betas, never hiding the ask from someone who already gave) and "how many members, paying
--- what?" (the aggregate on /open-books).
+-- what?" (the aggregate on /open-studio).
 --
 -- SERVER-ONLY: RLS is enabled with NO policies, deliberately. Every read and write goes
 -- through the service-role client in Netlify functions (me-membership, membership-webhook,
--- open-books), which bypasses RLS; anon and authenticated get nothing. A signed-in user reads
+-- open-studio), which bypasses RLS; anon and authenticated get nothing. A signed-in user reads
 -- their own status via /api/me/membership, never from the table directly.
 --
 -- One row per user, keyed on user_id: you are a member or you aren't. Plan changes, renewals
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS public.memberships (
   stripe_subscription_id TEXT UNIQUE,
 
   -- What the member pays per period, in the smallest currency unit. Only for the aggregate on
-  -- /open-books; null for grandfathered rows, which pay nothing through Stripe.
+  -- /open-studio; null for grandfathered rows, which pay nothing through Stripe.
   amount_cents INTEGER CHECK (amount_cents IS NULL OR amount_cents >= 0),
   currency TEXT,
 
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS public.memberships (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- The /open-books aggregate reads every non-canceled row; a partial index keeps that a tiny
+-- The /open-studio aggregate reads every non-canceled row; a partial index keeps that a tiny
 -- scan however many canceled rows accumulate.
 CREATE INDEX IF NOT EXISTS idx_memberships_live
   ON public.memberships(status) WHERE status <> 'canceled';
@@ -63,4 +63,4 @@ CREATE TRIGGER memberships_updated_at
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 COMMENT ON TABLE public.memberships IS
-  'Open Books memberships. Server-only: RLS on, no policies. Stripe holds all buyer PII.';
+  'Open Studio memberships. Server-only: RLS on, no policies. Stripe holds all buyer PII.';

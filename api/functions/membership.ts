@@ -1,7 +1,7 @@
-// Open Books membership state: the rules for "is this user a member?", the mapping from Stripe
+// Open Studio membership state: the rules for "is this user a member?", the mapping from Stripe
 // objects to a `memberships` row, and the table's reads and writes.
 //
-// Spec: docs/specs/open-books-membership-spec.md §8. The table is server-only (RLS on, no
+// Spec: docs/specs/open-studio-membership-spec.md §8. The table is server-only (RLS on, no
 // policies), so everything here runs through the service-role client.
 //
 // The mapping functions are pure and take plain shapes rather than Stripe types, so the rules
@@ -144,7 +144,7 @@ export function rowFromLifetimePurchase(
 }
 
 // ---------------------------------------------------------------------------
-// Aggregates for /open-books
+// Aggregates for /open-studio
 // ---------------------------------------------------------------------------
 
 /**
@@ -153,7 +153,7 @@ export function rowFromLifetimePurchase(
  */
 export const MIN_PUBLIC_MEMBER_COUNT = 5;
 
-export interface OpenBooksLive {
+export interface OpenStudioLive {
   /** Null when there are fewer than MIN_PUBLIC_MEMBER_COUNT members. */
   activeMembers: number | null;
   /** Recurring revenue normalised to a month (annual ÷ 12), in USD cents. Null below the threshold. */
@@ -171,7 +171,7 @@ export interface OpenBooksLive {
  * than amortised into a number that would imply it recurs. Non-USD rows are counted but not
  * summed — prices are set in USD and a mixed-currency total would be wrong silently.
  */
-export function summariseMemberships(rows: MembershipRow[], now: Date = new Date()): OpenBooksLive {
+export function summariseMemberships(rows: MembershipRow[], now: Date = new Date()): OpenStudioLive {
   const active = rows.filter((row) => isMembershipActive(row, now));
   if (active.length < MIN_PUBLIC_MEMBER_COUNT) {
     return { activeMembers: null, monthlyRecurringCents: null, byPlan: null, belowThreshold: true };

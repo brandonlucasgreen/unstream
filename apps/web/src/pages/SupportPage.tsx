@@ -36,7 +36,7 @@ export function SupportPage() {
               />
             </div>
             <Link
-              to="/open-books"
+              to="/open-studio"
               className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-accent-primary text-white hover:bg-accent-primary/90 transition-colors font-semibold text-lg shadow-lg"
             >
               See what it costs, and become a member
@@ -44,7 +44,7 @@ export function SupportPage() {
             <p className="text-text-muted text-sm mt-4">
               From $3 a month. Optional, and it gates nothing.
             </p>
-            {/* Liberapay wind-down (open-books-membership-spec.md §9): kept for existing patrons
+            {/* Liberapay wind-down (open-studio-membership-spec.md §9): kept for existing patrons
                 until about March 2027, then removed. */}
             <p className="text-text-muted text-sm mt-2">
               Already give on{' '}

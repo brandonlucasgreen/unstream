@@ -1,8 +1,8 @@
-// API endpoint: /api/open-books
+// API endpoint: /api/open-studio
 //
-// GET — the live half of the Open Books page: member count, monthly recurring revenue and a
+// GET — the live half of the Open Studio page: member count, monthly recurring revenue and a
 // per-plan breakdown, aggregated from `memberships`. Costs and closed months come from
-// data/open-books/ledger.json instead. Spec: docs/specs/open-books-membership-spec.md §5.
+// data/open-studio/ledger.json instead. Spec: docs/specs/open-studio-membership-spec.md §5.
 //
 // Aggregate only, never per-member: below MIN_PUBLIC_MEMBER_COUNT the counts are withheld so
 // one person's payment can't be read off the total.
@@ -33,7 +33,7 @@ export async function handler(event: { httpMethod: string }) {
       body: JSON.stringify({ ...summary, generatedAt: new Date().toISOString() }),
     };
   } catch (error) {
-    Sentry.captureException(error, { extra: { context: 'open-books.live' } });
+    Sentry.captureException(error, { extra: { context: 'open-studio.live' } });
     // Not cached: a failed read must not sit on the CDN for an hour looking like "no members".
     return {
       statusCode: 503,

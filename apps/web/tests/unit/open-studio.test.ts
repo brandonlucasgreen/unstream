@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import ledger from '../../../../data/open-books/ledger.json';
-import { costTotals, coveragePercent, formatUsd, type Ledger } from '../../src/services/openBooks';
+import ledger from '../../../../data/open-studio/ledger.json';
+import { costTotals, coveragePercent, formatUsd, type Ledger } from '../../src/services/openStudio';
 
 describe('costTotals', () => {
   it('separates what is paid today from the full bill off every free tier', () => {
@@ -38,7 +38,7 @@ describe('formatUsd', () => {
   });
 });
 
-describe('data/open-books/ledger.json', () => {
+describe('data/open-studio/ledger.json', () => {
   // The page trusts this file's shape; a hand edit that breaks it should fail CI, not the page.
   const data = ledger as Ledger;
 
