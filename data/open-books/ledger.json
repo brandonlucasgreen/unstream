@@ -1,0 +1,50 @@
+{
+  "draft": true,
+  "updated": "2026-09-25",
+  "currency": "USD",
+  "costs": [
+    {
+      "item": "Supabase Pro",
+      "monthly": 25,
+      "paying": false,
+      "why": "The database. The free tier is a 0.5 GB instance that stopped answering for hours on 19 September."
+    },
+    {
+      "item": "Supabase compute (Small)",
+      "monthly": 5,
+      "paying": false,
+      "why": "More memory for the database, if the $10 compute credit in Pro isn't enough."
+    },
+    {
+      "item": "Netlify Personal",
+      "monthly": 9,
+      "paying": false,
+      "why": "Hosting and builds. Previews of changes were switched off to stay inside the free allowance."
+    },
+    {
+      "item": "Upstash Redis",
+      "monthly": 3,
+      "paying": false,
+      "why": "Caching and rate limiting. The free tier ran out in August."
+    },
+    {
+      "item": "Apple Developer Program",
+      "monthly": 8.25,
+      "paying": true,
+      "why": "$99 a year. Required to sign the Mac app and ship the iOS app."
+    },
+    {
+      "item": "unstream.stream domain",
+      "monthly": 3,
+      "paying": true,
+      "why": "The yearly renewal, divided by twelve."
+    },
+    {
+      "item": "Sentry, Resend, Buttondown, GoatCounter",
+      "monthly": 0,
+      "paying": true,
+      "why": "Error reports, email, the newsletter and analytics. All free at this size, and listed so you can see that."
+    }
+  ],
+  "months": []
+}

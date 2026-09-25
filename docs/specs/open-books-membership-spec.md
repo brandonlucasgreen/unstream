@@ -381,6 +381,36 @@ Smallest shippable first.
 5. **Betas section and roadmap vote**, once there are members to offer them to.
 6. **Tip-fee income on Open Books** — once [tips](artist-tips-spec.md) exist.
 
+### Build status — 2026-09-25 (branch `claude/open-books-membership`)
+
+Built: Phase 1 and most of Phase 2. That covers the migration, the five functions with tests,
+`/open-books`, the `/support` swap to membership with the Liberapay wind-down line, the footer
+link and `scripts/grant-membership.ts`. **Not built yet:** the member badge on `/u/:handle` and
+artist pages, the Mac link swap (Phase 3), the asks (Phase 4), and the betas section and roadmap
+vote (Phase 5).
+
+**Before launch, in this order:**
+
+1. Check every figure in `data/open-books/ledger.json` against a real invoice, then set
+   `"draft": false`. The page shows a "draft figures" banner until then.
+2. In Stripe (test mode first):
+   - Turn on Managed Payments.
+   - Create one product with three prices: $3/month, $25/year, and $100 one-time.
+   - Configure the Customer Portal to allow cancelling and switching between monthly and annual.
+   - Add a webhook endpoint at `https://unstream.stream/api/membership/webhook` for
+     `checkout.session.completed`, `checkout.session.async_payment_succeeded` and
+     `customer.subscription.created`/`.updated`/`.deleted`.
+3. Netlify env vars, **production context only** for live keys:
+   - `STRIPE_SECRET_KEY` — a restricted key with Checkout Sessions write, Billing Portal
+     write and Subscriptions read.
+   - `STRIPE_MEMBERSHIP_WEBHOOK_SECRET`.
+   - `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_ANNUAL`, `STRIPE_PRICE_LIFETIME`.
+
+   Locally, use test-mode values or leave them out; don't leave them blank (the empty-value
+   shadow).
+4. Run one test-mode purchase end to end with `stripe listen`, then delete the test row.
+5. Merge. `supabase-migrate.yml` applies `20260925180000_memberships.sql`; check it goes green.
+
 ---
 
 ## 12. Repo touchpoints

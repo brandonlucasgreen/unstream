@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 
@@ -34,19 +35,28 @@ export function SupportPage() {
                 className="w-32 h-32 rounded-full object-cover shrink-0"
               />
             </div>
-            <a
-              href="https://www.liberapay.com/brandonlucasgreen"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-[#FFDD00] text-gray-900 hover:bg-[#F5D000] transition-colors font-semibold text-lg shadow-lg"
+            <Link
+              to="/open-books"
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-accent-primary text-white hover:bg-accent-primary/90 transition-colors font-semibold text-lg shadow-lg"
             >
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M2.32 0A2.321 2.321 0 0 0 0 2.32v19.36A2.321 2.321 0 0 0 2.32 24h19.36A2.32 2.32 0 0 0 24 21.68V2.32A2.32 2.32 0 0 0 21.68 0zm9.208 3.98l-2.27 9.405a2.953 2.953 0 0 0-.073.539.853.853 0 0 0 .09.432.7.7 0 0 0 .334.302c.157.077.378.126.661.147l-.49 2.008c-.772 0-1.38-.1-1.82-.3-.441-.203-.757-.477-.947-.826a2.391 2.391 0 0 1-.278-1.2c.005-.452.068-.933.188-1.445l2.074-8.67zm3.9 3.888c.61 0 1.135.092 1.576.277.44.185.802.438 1.085.76.283.32.493.696.629 1.126.136.43.204.89.204 1.379v.001c0 .794-.13 1.52-.392 2.179a5.16 5.16 0 0 1-1.086 1.706 4.84 4.84 0 0 1-1.665 1.118c-.648.267-1.353.4-2.114.4-.37 0-.74-.033-1.11-.098l-.735 2.956H9.403l2.71-11.298c.435-.13.934-.248 1.494-.351a10.045 10.045 0 0 1 1.821-.155zm-.31 2.041a4.67 4.67 0 0 0-.98.098l-1.143 4.752c.185.044.413.065.685.065.425 0 .812-.079 1.16-.237a2.556 2.556 0 0 0 .89-.661c.244-.283.435-.623.571-1.02a4.03 4.03 0 0 0 .204-1.315c0-.468-.104-.865-.31-1.192-.207-.326-.566-.49-1.077-.49z"/>
-              </svg>
-              Support via Liberapay
-            </a>
+              See what it costs, and become a member
+            </Link>
             <p className="text-text-muted text-sm mt-4">
-              One-time or monthly. No account needed.
+              From $3 a month. Optional, and it gates nothing.
+            </p>
+            {/* Liberapay wind-down (open-books-membership-spec.md §9): kept for existing patrons
+                until about March 2027, then removed. */}
+            <p className="text-text-muted text-sm mt-2">
+              Already give on{' '}
+              <a
+                href="https://liberapay.com/brandonlucasgreen"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent-primary hover:underline"
+              >
+                Liberapay
+              </a>
+              ? That still counts.
             </p>
           </div>
 
