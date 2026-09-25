@@ -246,6 +246,11 @@ This is coverage work, not initial-value work, which is why it moved last within
 
 Lemon Squeezy or Stripe, licence check, Sparkle. Grandfather existing tip-jar payers.
 
+**Dropped 2026-09-25:** no paid gate. The Mac features ship free; revenue comes from the optional
+Open Books membership, which gates nothing — see
+[open-books-membership-spec.md](open-books-membership-spec.md) §6. The "Free vs paid" row in §3
+no longer holds.
+
 ### Step 7 — Press push · low effort, already drafted
 
 See §5 on timing — this is the one real fork in the sequence.

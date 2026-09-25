@@ -1,7 +1,13 @@
 ---
-status: Idea
+status: Superseded
 ---
 # Artist Patronage Phase 1: One-Time Tips via Stripe Connect
+
+> **Superseded 2026-09-25 by [artist-tips-spec.md](artist-tips-spec.md).** Two things here are now
+> wrong: Stripe Connect **Express + destination charges** (the new spec uses Standard accounts +
+> direct charges, so the artist is merchant of record and Unstream never holds funds), and the
+> `migration-006-*.sql` naming (migrations are timestamp-prefixed in `supabase/migrations/`). The
+> component inventory below is still a useful checklist. Kept for history — don't build from it.
 
 ## Context
 

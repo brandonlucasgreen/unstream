@@ -163,3 +163,14 @@ Two things here are superseded by it:
   the Bandcamp client exists.
 - **Mac distribution is decided: outside the App Store**, paid via Stripe or Lemon Squeezy. The
   sandbox question is therefore moot, not open.
+
+---
+
+## Paid tier dropped — 2026-09-25
+
+Brandon: skip treating these features as premium — make them all free. The ~$15 one-time SKU, the
+Paddle/Lemon Squeezy licence check and the "free vs paid" split above are **dropped**. The Support
+List, Shortcuts, widget and export ship free. Unstream's revenue now comes from the optional Open
+Books membership, which gates nothing in the Mac app — see
+[open-books-membership-spec.md](open-books-membership-spec.md) §6. Open questions 3 and 5 above
+are moot.
