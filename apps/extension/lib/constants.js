@@ -31,6 +31,7 @@ export const SOURCE_CONFIG = {
   patreon: { icon: '🎨', name: 'Patreon' },
   kofi: { icon: '☕', name: 'Ko-fi' },
   buymeacoffee: { icon: '☕', name: 'Buy Me a Coffee' },
+  liberapay: { icon: '🤝', name: 'Liberapay' },
   ampwall: { icon: '🔊', name: 'Ampwall' },
   hoopla: { icon: '🎧', name: 'Hoopla' },
   freegal: { icon: '🎵', name: 'Freegal' },

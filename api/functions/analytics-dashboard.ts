@@ -4,6 +4,7 @@
 import { getClient } from './db';
 import { authenticateAdmin, buildCorsHeaders } from './middleware';
 import { Sentry } from '../lib/sentry';
+import { PLATFORMS } from '../shared/platform-registry';
 
 // Row shapes returned by the analytics_* functions added in
 // supabase/migrations/20260823120000_analytics-dashboard-aggregates.sql.
@@ -12,6 +13,23 @@ interface ByAppRow { app: string; event_type: string; events: number }
 interface PlatformRow { platform: string; clicks: number }
 interface StreamingRow { service: string; activations: number }
 interface SuccessRow { completed: number; with_results: number }
+interface AppPlatformRow { app: string; platform: string; clicks: number }
+
+// The tips demand test (docs/specs/artist-tips-spec.md §9 Phase 0) counts clicks on patronage
+// links, and the platform registry decides what counts as patronage — so a platform added to
+// that category shows up here without touching this file or the SQL.
+//
+// Each platform is matched under two spellings because the clients disagree about what they
+// record in context.platform: the Mac app, the extension and the web app's claimed-artist path
+// send the source id (`kofi`), while the web app's unclaimed path sends the lowercased display
+// name (`ko-fi`, `buy me a coffee`). Both map back to the source id below, so one platform is
+// one row on the dashboard.
+const PATRONAGE_ALIASES: Record<string, string> = {};
+for (const [id, meta] of Object.entries(PLATFORMS)) {
+  if (meta.category !== 'patronage') continue;
+  PATRONAGE_ALIASES[id] = id;
+  PATRONAGE_ALIASES[meta.name.toLowerCase()] = id;
+}
 
 export async function handler(event: {
   httpMethod: string;
@@ -62,6 +80,7 @@ export async function handler(event: {
       byApp30d,
       platforms30d,
       streamingServices30d,
+      patronageByApp30d,
     ] = await Promise.all([
       // Searches today
       client
@@ -101,6 +120,12 @@ export async function handler(event: {
 
       // Extension streaming service breakdown (last 30 days), most-active first
       client.rpc('analytics_streaming_services', { p_since: ago30 }),
+
+      // Patronage clicks by app and platform (last 30 days): the tips demand test
+      client.rpc('analytics_platform_clicks_by_app', {
+        p_since: ago30,
+        p_platforms: Object.keys(PATRONAGE_ALIASES),
+      }),
     ]);
 
     // Any failure fails the whole response. Supabase returns { error } rather than throwing, and
@@ -110,6 +135,7 @@ export async function handler(event: {
     const queryErrors = [
       searchesToday.error, searches7d.error, searches30d.error, searchSuccess7d.error,
       daily30d.error, byApp30d.error, platforms30d.error, streamingServices30d.error,
+      patronageByApp30d.error,
     ].filter(Boolean);
     if (queryErrors.length > 0) {
       const messages = queryErrors.map(e => e?.message).join('; ');
@@ -170,6 +196,28 @@ export async function handler(event: {
     // --- Streaming service breakdown ---
     const streamingServices = (streamingServices30d.data || []) as StreamingRow[];
 
+    // --- Patronage clicks (tips demand test) ---
+    // `all_clicks` is the app's total platform clicks from the by-app breakdown, so the panel
+    // can show patronage as a share of everything that app's users clicked.
+    const patronageAppMap: Record<string, number> = {};
+    const patronagePlatformMap: Record<string, number> = {};
+    let patronageTotal = 0;
+    for (const row of (patronageByApp30d.data || []) as AppPlatformRow[]) {
+      const platform = PATRONAGE_ALIASES[row.platform] ?? row.platform;
+      patronageAppMap[row.app] = (patronageAppMap[row.app] ?? 0) + row.clicks;
+      patronagePlatformMap[platform] = (patronagePlatformMap[platform] ?? 0) + row.clicks;
+      patronageTotal += row.clicks;
+    }
+    const patronageClicks = {
+      total: patronageTotal,
+      by_app: [...new Set([...Object.keys(appMap), ...Object.keys(patronageAppMap)])]
+        .map(app => ({ app, clicks: patronageAppMap[app] ?? 0, all_clicks: appMap[app]?.clicks ?? 0 }))
+        .sort((a, b) => b.clicks - a.clicks),
+      by_platform: Object.entries(patronagePlatformMap)
+        .map(([platform, clicks]) => ({ platform, clicks }))
+        .sort((a, b) => b.clicks - a.clicks),
+    };
+
     // --- Success rate ---
     const success = ((searchSuccess7d.data || []) as SuccessRow[])[0];
     const successRate7d = success && success.completed > 0
@@ -192,6 +240,7 @@ export async function handler(event: {
         by_app: byApp,
         platforms,
         streaming_services: streamingServices,
+        patronage_clicks: patronageClicks,
       }),
     };
   } catch (err) {

@@ -34,6 +34,12 @@ interface StreamingStat {
   activations: number;
 }
 
+interface PatronageClicks {
+  total: number;
+  by_app: { app: string; clicks: number; all_clicks: number }[];
+  by_platform: PlatformStat[];
+}
+
 interface DashboardData {
   summary: {
     searches_today: number;
@@ -47,6 +53,7 @@ interface DashboardData {
   by_app: AppStat[];
   platforms: PlatformStat[];
   streaming_services: StreamingStat[];
+  patronage_clicks: PatronageClicks;
 }
 
 // ─── Bar chart ───────────────────────────────────────────────────────────────
@@ -291,13 +298,21 @@ export function AdminAnalyticsPage() {
 
   if (!data) return null;
 
-  const { summary, daily, by_app, platforms, streaming_services } = data;
+  const { summary, daily, by_app, platforms, streaming_services, patronage_clicks } = data;
 
   const appRows = by_app.map(a => ({
     app: a.app,
     searches: a.searches,
     clicks: a.clicks,
     total: a.searches + a.clicks,
+  }));
+
+  // Patronage as a share of each app's platform clicks, so a small absolute number can still be
+  // read against how much that app is used.
+  const patronageAppRows = patronage_clicks.by_app.map(a => ({
+    app: a.app,
+    clicks: a.clicks,
+    share: a.all_clicks > 0 ? `${Math.round((a.clicks / a.all_clicks) * 100)}%` : '—',
   }));
 
   return (
@@ -402,6 +417,34 @@ export function AdminAnalyticsPage() {
                 ]}
                 emptyLabel="No extension activations yet"
               />
+            </div>
+
+            {/* Tips demand test: docs/specs/artist-tips-spec.md §9 Phase 0 */}
+            <div className="bg-surface-secondary rounded-xl border border-border p-5">
+              <h2 className="font-display text-sm font-semibold text-text-primary">Patronage clicks (30d)</h2>
+              <p className="text-text-muted text-xs mt-1 mb-4">
+                {patronage_clicks.total.toLocaleString()} clicks on Ko-fi, Patreon and other patronage
+                links · the tips demand test
+              </p>
+              <DataTable
+                rows={patronageAppRows as unknown as Record<string, unknown>[]}
+                columns={[
+                  { key: 'app', label: 'App' },
+                  { key: 'clicks', label: 'Clicks', align: 'right' },
+                  { key: 'share', label: 'Share of app clicks', align: 'right' },
+                ]}
+                emptyLabel="No app data yet"
+              />
+              <div className="mt-4">
+                <DataTable
+                  rows={patronage_clicks.by_platform as unknown as Record<string, unknown>[]}
+                  columns={[
+                    { key: 'platform', label: 'Platform' },
+                    { key: 'clicks', label: 'Clicks', align: 'right' },
+                  ]}
+                  emptyLabel="No patronage clicks yet"
+                />
+              </div>
             </div>
           </div>
 

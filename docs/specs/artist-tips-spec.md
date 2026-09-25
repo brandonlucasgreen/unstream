@@ -317,6 +317,30 @@ After membership Phases 1–2. Each gate is a real gate.
 0. **Demand test, no payments.** Show the artist's existing patronage links (Ko-fi, Patreon, etc.)
    on the Mac popover's now-playing card and the extension popup; count click-outs in existing
    analytics. Run through at least one Bandcamp Friday. **Go/no-go on the numbers.**
+
+   **Shipped 2026-09-25.** Most of this already existed: the Mac popover (now-playing and search,
+   macOS and iOS) and the extension popup both render an artist's verified patronage links and
+   send a `platform_click` event per click. Two changes closed the gap:
+   - The extension popup shows at most eight platforms and used to take the first eight in result
+     order, so a Patreon or Ko-fi link could fall behind a row of stores. Patronage links now
+     always keep their place (`apps/extension/lib/popup-platforms.js`); the Mac app has no cap and
+     needed no change.
+   - `/admin/analytics` has a **Patronage clicks (30d)** panel: clicks on patronage-category
+     platforms (from `platform-registry.ts`), by app with each app's share of its own platform
+     clicks, and by platform. Backed by `analytics_platform_clicks_by_app`
+     (`20260925120000_analytics-platform-clicks-by-app.sql`).
+
+   **Reading it.** The listening-moment rows are `mac` and `extension`; `web` is the baseline for
+   the same links outside the listening moment. Caveats: `mac` covers the iOS app too (the
+   universal app reports `mac`), and neither client separates a now-playing click from a manual
+   search, so these are upper bounds on "clicked while listening". Artist identity isn't recorded,
+   so one enthusiastic fan and twenty fans look alike.
+
+   **Suggested threshold (a suggestion, not a decision):** read the 30-day window that contains
+   the 2 October Bandcamp Friday. **Go** if `mac` + `extension` show at least 25 patronage clicks
+   *and* patronage is at least 5% of those apps' platform clicks; **no-go** under 10; anything
+   between, run another 30 days. The absolute floor keeps a handful of clicks from reading as a
+   signal; the share keeps a busy month from inflating one.
 1. **Gates (§5).** Stripe platform approval with the model described accurately; terms-of-use tips
    section and artist addendum drafted; admin tips approval in `/admin/verify`.
 2. **Artist onboarding only.** Migration, `tips-connect`, `tips-settings`, `account.updated`

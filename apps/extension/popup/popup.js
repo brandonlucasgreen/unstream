@@ -2,6 +2,7 @@
 
 import { isBandcampFriday } from '../lib/bandcamp-friday.js';
 import { ALLOWED_RELEASE_DOMAINS, SOURCE_CONFIG, PAYOUT_PERCENTAGES } from '../lib/constants.js';
+import { pickVisiblePlatforms } from '../lib/popup-platforms.js';
 import { releaseSlugsFromUrl } from '../lib/release-display.js';
 import { releaseSummaryLine } from '../lib/release-alerts.js';
 import { renderReleaseGuide, guideMessage, guideLink } from '../lib/release-guide.js';
@@ -788,7 +789,7 @@ function renderResults(results) {
 
   const bcFriday = isBandcampFriday();
   const fragment = document.createDocumentFragment();
-  nonSocialPlatforms.slice(0, 8).forEach(platform => {
+  pickVisiblePlatforms(nonSocialPlatforms, 8).forEach(platform => {
     const config = SOURCE_CONFIG[platform.sourceId] || { icon: '🔗', name: platform.sourceId };
     const link = document.createElement('a');
     link.href = platform.url;

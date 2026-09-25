@@ -67,6 +67,14 @@ const RPC_DATA: Record<string, unknown[]> = {
     { service: 'youtube', activations: 1200 },
     { service: 'spotify', activations: 300 },
   ],
+  // `ko-fi` is what the web app's unclaimed-artist path records for a Ko-fi click (the lowercased
+  // display name); everything else records the source id `kofi`.
+  analytics_platform_clicks_by_app: [
+    { app: 'extension', platform: 'kofi', clicks: 40 },
+    { app: 'mac', platform: 'patreon', clicks: 25 },
+    { app: 'web', platform: 'ko-fi', clicks: 10 },
+    { app: 'web', platform: 'kofi', clicks: 5 },
+  ],
 };
 
 function get(headers: Record<string, string | undefined> = {}) {
@@ -95,6 +103,7 @@ describe('aggregation happens in Postgres', () => {
       'analytics_daily_events',
       'analytics_events_by_app',
       'analytics_platform_clicks',
+      'analytics_platform_clicks_by_app',
       'analytics_search_success',
       'analytics_streaming_services',
     ]);
@@ -133,6 +142,76 @@ describe('aggregation happens in Postgres', () => {
     );
     const d = await body();
     expect(d.summary.success_rate_7d).toBeNull();
+  });
+});
+
+describe('patronage clicks (tips demand test)', () => {
+  function patronageArgs() {
+    const call = mocks.mockRpc.mock.calls.find(c => c[0] === 'analytics_platform_clicks_by_app');
+    return call?.[1] as { p_since: string; p_platforms: string[] };
+  }
+
+  it('asks for exactly the registry’s patronage platforms, under both spellings', async () => {
+    const { PLATFORMS } = await import('../../shared/platform-registry');
+    await get();
+    const requested = patronageArgs().p_platforms;
+    for (const [id, meta] of Object.entries(PLATFORMS)) {
+      const expected = meta.category === 'patronage';
+      expect(requested.includes(id)).toBe(expected);
+      expect(requested.includes(meta.name.toLowerCase())).toBe(expected);
+    }
+    expect(requested).toContain('kofi');
+    expect(requested).toContain('ko-fi');
+    expect(requested).not.toContain('bandcamp');
+  });
+
+  it('reads the same 30-day window as the rest of the dashboard', async () => {
+    await get();
+    const since = Date.parse(patronageArgs().p_since);
+    const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+    expect(Math.abs(Date.now() - thirtyDays - since)).toBeLessThan(60_000);
+  });
+
+  it('breaks the clicks down by app and by platform, folding the web spelling into the id', async () => {
+    const d = await body();
+    expect(d.patronage_clicks.total).toBe(80);
+    expect(d.patronage_clicks.by_platform).toEqual([
+      { platform: 'kofi', clicks: 55 },
+      { platform: 'patreon', clicks: 25 },
+    ]);
+    expect(d.patronage_clicks.by_app).toEqual([
+      { app: 'extension', clicks: 40, all_clicks: 0 },
+      { app: 'mac', clicks: 25, all_clicks: 0 },
+      { app: 'web', clicks: 15, all_clicks: 2100 },
+    ]);
+  });
+
+  it('lists every app at zero rather than hiding them when nobody clicked', async () => {
+    mocks.mockRpc.mockImplementation((fn: string) =>
+      Promise.resolve({
+        data: fn === 'analytics_platform_clicks_by_app' ? [] : RPC_DATA[fn] ?? [],
+        error: null,
+      })
+    );
+    const d = await body();
+    expect(d.patronage_clicks.total).toBe(0);
+    expect(d.patronage_clicks.by_platform).toEqual([]);
+    expect(d.patronage_clicks.by_app.map((a: { app: string }) => a.app).sort())
+      .toEqual(['extension', 'mac', 'web']);
+  });
+
+  it('500s rather than reporting zero patronage clicks when the query fails', async () => {
+    mocks.mockRpc.mockImplementation((fn: string) =>
+      Promise.resolve(
+        fn === 'analytics_platform_clicks_by_app'
+          ? { data: null, error: { message: 'function does not exist' } }
+          : { data: RPC_DATA[fn] ?? [], error: null }
+      )
+    );
+    const res = await get();
+    // A zero here would read as "nobody wants to tip" — the go/no-go answer — when the
+    // migration simply hadn't applied.
+    expect(res.statusCode).toBe(500);
   });
 });
 
