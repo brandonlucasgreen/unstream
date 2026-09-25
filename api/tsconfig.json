@@ -103,6 +103,19 @@
     "functions/desktop-appcast.ts",
     "functions/desktop-version.ts",
     "functions/__tests__/desktop-appcast.test.ts",
-    "functions/analytics-dashboard.ts"
+    "functions/analytics-dashboard.ts",
+    "functions/membership.ts",
+    "functions/stripe-client.ts",
+    "functions/me-membership.ts",
+    "functions/membership-checkout.ts",
+    "functions/membership-portal.ts",
+    "functions/membership-webhook.ts",
+    "functions/open-books.ts",
+    "functions/__tests__/membership.test.ts",
+    "functions/__tests__/me-membership.test.ts",
+    "functions/__tests__/membership-checkout.test.ts",
+    "functions/__tests__/membership-portal.test.ts",
+    "functions/__tests__/membership-webhook.test.ts",
+    "functions/__tests__/open-books.test.ts"
   ]
 }

@@ -381,6 +381,11 @@ export const ALLOWED_OUTBOUND_HOSTNAMES = new Set([
   // Discord
   'discord.com',
   'discordapp.com',
+  // Payments — Open Books membership. Only the Stripe SDK calls this, through the allowlisted
+  // fetch in stripe-client.ts. Checkout and the Customer Portal (checkout.stripe.com,
+  // billing.stripe.com) are browser redirects and are never fetched server-side, so they
+  // don't belong here.
+  'api.stripe.com',
 ]);
 
 /**

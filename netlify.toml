@@ -440,6 +440,34 @@
   to = "/.netlify/functions/release-detail"
   status = 200
 
+# Open Books membership (docs/specs/open-books-membership-spec.md). Checkout and the
+# Customer Portal are hosted by Stripe, so these are the only routes it needs: the member's own
+# status, the two redirect-URL makers, the Stripe webhook, and the public aggregate.
+[[redirects]]
+  from = "/api/me/membership"
+  to = "/.netlify/functions/me-membership"
+  status = 200
+
+[[redirects]]
+  from = "/api/membership/checkout"
+  to = "/.netlify/functions/membership-checkout"
+  status = 200
+
+[[redirects]]
+  from = "/api/membership/portal"
+  to = "/.netlify/functions/membership-portal"
+  status = 200
+
+[[redirects]]
+  from = "/api/membership/webhook"
+  to = "/.netlify/functions/membership-webhook"
+  status = 200
+
+[[redirects]]
+  from = "/api/open-books"
+  to = "/.netlify/functions/open-books"
+  status = 200
+
 [[redirects]]
   from = "/plus"
   to = "/support"
