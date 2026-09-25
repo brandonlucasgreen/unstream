@@ -40,6 +40,42 @@ window.Unstream = (function() {
     return false;
   }
 
+  // Playback signal for sites that publish Media Session metadata but give no
+  // other sign of playing: playbackState left at "none", and audio played
+  // through an element that isn't in the DOM (so isMediaElementPlaying can't
+  // see it). xpn.org's live radio player is the case that prompted this.
+  //
+  // For those sites a *change* in the published track is taken to mean
+  // "playing". The metadata present when the script starts is not enough on its
+  // own, because some players fill it from the station's on-air feed before the
+  // listener presses play. The signal stays off for any site that sets
+  // playbackState itself, or once a DOM media element has been seen playing,
+  // since those sites tell us the truth through the normal signals.
+  //
+  // Trade-off: once latched, a site whose metadata keeps updating after the
+  // listener pauses will still be reported, and MUSIC_STOPPED only fires if the
+  // site clears its metadata.
+  function createMetadataPlaybackSignal() {
+    const trackKey = (track) => (track ? `${track.artist}\u0000${track.title}` : null);
+    const initialKey = trackKey(getFromMediaSession());
+    let latched = false;
+    let sawElementPlaying = false;
+
+    return {
+      noteElementPlaying() {
+        sawElementPlaying = true;
+      },
+      isPlaying() {
+        if (sawElementPlaying) return false;
+        if (!('mediaSession' in navigator) || navigator.mediaSession.playbackState !== 'none') return false;
+        const key = trackKey(getFromMediaSession());
+        if (key === null) return false;
+        if (key !== initialKey) latched = true;
+        return latched;
+      }
+    };
+  }
+
   // Guard against multiple pollers if the content script is re-injected
   let activePollerSource = null;
 
@@ -101,5 +137,11 @@ window.Unstream = (function() {
     };
   }
 
-  return { createPoller, getFromMediaSession, isMediaSessionPlaying, isMediaElementPlaying };
+  return {
+    createPoller,
+    createMetadataPlaybackSignal,
+    getFromMediaSession,
+    isMediaSessionPlaying,
+    isMediaElementPlaying
+  };
 })();

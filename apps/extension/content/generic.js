@@ -3,7 +3,13 @@
 
 (function() {
   'use strict';
-  const { createPoller, getFromMediaSession, isMediaSessionPlaying, isMediaElementPlaying } = window.Unstream;
+  const {
+    createPoller,
+    createMetadataPlaybackSignal,
+    getFromMediaSession,
+    isMediaSessionPlaying,
+    isMediaElementPlaying
+  } = window.Unstream;
 
   const DOMAIN_SOURCE_MAP = {
     'tidal.com': 'tidal',
@@ -68,8 +74,17 @@
     return getFromMediaSession() || (IS_FAIRCAMP ? getFromFaircamp() : null);
   }
 
+  // Fallback for players that publish metadata but no playback state (see
+  // createMetadataPlaybackSignal in common.js).
+  const metadataPlayback = createMetadataPlaybackSignal();
+
   function isPlaying() {
-    return isMediaSessionPlaying() || isMediaElementPlaying('audio, video');
+    if (isMediaSessionPlaying()) return true;
+    if (isMediaElementPlaying('audio, video')) {
+      metadataPlayback.noteElementPlaying();
+      return true;
+    }
+    return metadataPlayback.isPlaying();
   }
 
   createPoller({ getNowPlaying, isPlaying, source: getSourceName() });
