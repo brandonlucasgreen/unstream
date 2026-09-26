@@ -7,21 +7,22 @@ import StoreKit
 /// Support-Unstream control.
 ///
 /// The two platforms deliberately differ. The Mac app ships as a direct GitHub
-/// release, so it links straight to Liberapay — no platform takes a cut, which is
-/// the position Unstream argues for everywhere else. The iOS app ships through the
+/// release, so it links to the /support page, where the Stripe options (and, during
+/// the wind-down, Liberapay) live — no app store takes a cut, which is the position
+/// Unstream argues for everywhere else. The iOS app ships through the
 /// App Store, where App Review guideline 3.1.1 requires in-app purchase for tipping
 /// the developer and an external donation link is grounds for rejection, so it keeps
 /// StoreKit. Don't "simplify" this into one path.
 struct TipJarView: View {
     #if os(macOS)
-    private static let donateURL = URL(string: "https://liberapay.com/brandonlucasgreen")!
+    private static let supportURL = URL(string: "https://unstream.stream/support")!
 
     var body: some View {
         HStack {
-            Link(destination: Self.donateURL) {
-                Label("Donate via Liberapay", systemImage: "heart.fill")
+            Link(destination: Self.supportURL) {
+                Label("Support Unstream", systemImage: "heart.fill")
             }
-            .accessibilityLabel("Donate via Liberapay, opens in your browser")
+            .accessibilityLabel("Support Unstream, opens in your browser")
 
             Spacer()
         }

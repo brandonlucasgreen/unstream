@@ -1,7 +1,12 @@
 ---
-status: Idea
+status: Superseded
 ---
 # Open Books Membership — spec
+
+> **Superseded 2026-09-26 by [support-page-spec.md](support-page-spec.md).** The membership below was
+> built (renamed along the way to Open Studio, then Open House) and dropped in PR #535 in favour of a
+> reworked `/support` page with three Stripe Payment Links: no accounts, no table, no webhook, no
+> perks. Kept for the reasoning on rails, fees and tax; don't build from it.
 
 **Written:** 2026-09-25
 **Status:** Draft. Brandon answered the pricing, sign-in and Liberapay questions on 2026-09-25 (§10);
