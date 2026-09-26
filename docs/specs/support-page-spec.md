@@ -16,9 +16,10 @@ more machinery than the ask needs.
 `/support` says three things plainly, in Brandon's voice:
 
 1. He builds Unstream in his spare time and has been able to run it basically for free.
-2. It's growing and outgrowing free services. Here's roughly what the paid versions cost: Supabase,
-   Upstash and the Apple Developer Program. Netlify is left off, because Brandon manages that cost by
-   deploying less.
+2. It's growing and outgrowing free services. Here's roughly what the paid versions cost: the
+   database, caching & performance optimization, and the Apple Developer Program. Vendors aren't
+   named (2026-09-26), because Brandon is exploring alternatives. Netlify is left off, because
+   Brandon manages that cost by deploying less.
 3. How to help: one Ko-fi button for one-off or monthly contributions, plus the existing non-money
    ways (star, share, report bugs).
 
@@ -39,7 +40,7 @@ and the page says so.
 
 ## 3. Open questions for Brandon
 
-1. **The cost figures** in `support.ts` are rough (Supabase ~$25–30, Upstash a few dollars, Apple
+1. **The cost figures** in `support.ts` are rough (database ~$25–30, caching a few dollars, Apple
    ~$8). Check them before this ships, since the page makes a claim about them.
 2. **PayPal on the button caption.** The caption says "One-time or monthly". If PayPal is connected
    on Ko-fi, add "Cards and PayPal", which matters for international supporters.

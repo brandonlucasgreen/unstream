@@ -8,8 +8,10 @@
 export const KOFI_URL = 'https://ko-fi.com/bgreenlol';
 
 export interface UpcomingCost {
+  /** What it pays for, in plain words. Vendors aren't named: Brandon is still choosing them. */
   service: string;
-  what: string;
+  /** Optional detail shown after the name. */
+  what?: string;
   /** Rough monthly cost once on the paid tier. */
   monthly: string;
 }
@@ -21,7 +23,7 @@ export interface UpcomingCost {
  * managed by deploying less.
  */
 export const UPCOMING_COSTS: UpcomingCost[] = [
-  { service: 'Supabase', what: 'the database', monthly: '~$25–30' },
-  { service: 'Upstash', what: 'caching and rate limits', monthly: 'a few dollars' },
+  { service: 'Database', monthly: '~$25–30' },
+  { service: 'Caching & performance optimization', monthly: 'a few dollars' },
   { service: 'Apple Developer Program', what: 'signing the Mac and iOS apps', monthly: '~$8' },
 ];

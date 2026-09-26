@@ -45,7 +45,8 @@ export function SupportPage() {
               {UPCOMING_COSTS.map((cost) => (
                 <li key={cost.service} className="py-3 flex justify-between gap-4">
                   <span className="text-text-primary">
-                    {cost.service} <span className="text-text-muted">— {cost.what}</span>
+                    {cost.service}
+                    {cost.what && <span className="text-text-muted"> — {cost.what}</span>}
                   </span>
                   <span className="text-text-primary tabular-nums shrink-0">{cost.monthly}/mo</span>
                 </li>
