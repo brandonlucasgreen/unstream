@@ -1,16 +1,8 @@
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
-import {
-  LIBERAPAY_URL,
-  MANAGE_SUPPORT_URL,
-  SUPPORT_OPTIONS,
-  UPCOMING_COSTS,
-  stripeSupportReady,
-} from '../data/support';
+import { KOFI_URL, UPCOMING_COSTS } from '../data/support';
 
 export function SupportPage() {
-  const stripeReady = stripeSupportReady();
-
   return (
     <div className="min-h-screen">
 
@@ -64,69 +56,22 @@ export function SupportPage() {
             <h2 id="help-heading" className="font-display text-xl font-semibold text-text-primary mb-3">
               How you can help
             </h2>
-            <p className="text-text-secondary mb-4">
+            <p className="text-text-secondary mb-6">
               If you use and like Unstream, I'd appreciate a one-time or recurring contribution.
               Payments will go directly toward improving the service and helping more music fans
               discover it.
             </p>
-            <div className="grid gap-3 sm:grid-cols-3">
-              {SUPPORT_OPTIONS.map((option) => {
-                const body = (
-                  <>
-                    <span className="text-text-muted text-sm">{option.label}</span>
-                    <span className="text-text-primary text-xl font-semibold mt-1">{option.price}</span>
-                    <span className="text-text-secondary text-sm mt-2 flex-1">{option.note}</span>
-                    <span className={`mt-4 font-medium ${option.url ? 'text-accent-primary' : 'text-text-muted'}`}>
-                      {option.url ? 'Chip in →' : 'Not live yet'}
-                    </span>
-                  </>
-                );
-                const className = 'rounded-xl border border-border bg-bg-card p-4 flex flex-col';
-                return option.url ? (
-                  <a key={option.id} href={option.url} className={`${className} hover:border-accent-primary transition-colors`}>
-                    {body}
-                  </a>
-                ) : (
-                  <div key={option.id} className={`${className} opacity-60`} aria-disabled="true">
-                    {body}
-                  </div>
-                );
-              })}
+            <div className="text-center">
+              <a
+                href={KOFI_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-[#FF5E5B] text-white hover:bg-[#F04E4B] transition-colors font-semibold text-lg shadow-lg"
+              >
+                Support Unstream on Ko-fi
+              </a>
+              <p className="text-text-muted text-sm mt-4">One-time or monthly.</p>
             </div>
-            <p className="text-text-muted text-sm mt-4">
-              Payments go through Stripe, which keeps about 40¢ of a $3 payment.
-              {MANAGE_SUPPORT_URL && (
-                <>
-                  {' '}Already chipping in?{' '}
-                  <a href={MANAGE_SUPPORT_URL} className="text-accent-primary hover:underline">
-                    Change or cancel it
-                  </a>
-                  .
-                </>
-              )}
-            </p>
-            {stripeReady ? (
-              // Liberapay wind-down: kept for existing patrons until about March 2027.
-              <p className="text-text-muted text-sm mt-2">
-                Already give on{' '}
-                <a href={LIBERAPAY_URL} target="_blank" rel="noopener noreferrer" className="text-accent-primary hover:underline">
-                  Liberapay
-                </a>
-                ? That still counts.
-              </p>
-            ) : (
-              // Until the Stripe links exist, Liberapay stays the way to actually give.
-              <div className="mt-6 text-center">
-                <a
-                  href={LIBERAPAY_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-[#FFDD00] text-gray-900 hover:bg-[#F5D000] transition-colors font-semibold shadow-lg"
-                >
-                  Support via Liberapay for now
-                </a>
-              </div>
-            )}
           </section>
 
           <div className="bg-surface-secondary rounded-2xl p-8 border border-border">

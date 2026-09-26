@@ -5,7 +5,7 @@ status: Superseded
 
 > **Superseded 2026-09-26 by [support-page-spec.md](support-page-spec.md).** The membership below was
 > built (renamed along the way to Open Studio, then Open House) and dropped in PR #535 in favour of a
-> reworked `/support` page with three Stripe Payment Links: no accounts, no table, no webhook, no
+> reworked `/support` page that links to Ko-fi: no accounts, no table, no webhook, no
 > perks. Kept for the reasoning on rails, fees and tax; don't build from it.
 
 **Written:** 2026-09-25

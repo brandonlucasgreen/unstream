@@ -7,9 +7,8 @@ import StoreKit
 /// Support-Unstream control.
 ///
 /// The two platforms deliberately differ. The Mac app ships as a direct GitHub
-/// release, so it links to the /support page, where the Stripe options (and, during
-/// the wind-down, Liberapay) live — no app store takes a cut, which is the position
-/// Unstream argues for everywhere else. The iOS app ships through the
+/// release, so it links to the /support page, which points at Ko-fi — no app store
+/// takes a cut, which is the position Unstream argues for everywhere else. The iOS app ships through the
 /// App Store, where App Review guideline 3.1.1 requires in-app purchase for tipping
 /// the developer and an external donation link is grounds for rejection, so it keeps
 /// StoreKit. Don't "simplify" this into one path.
