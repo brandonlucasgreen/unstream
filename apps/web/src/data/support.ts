@@ -43,12 +43,13 @@ export interface UpcomingCost {
 }
 
 /**
- * The free tiers Unstream is outgrowing. Rough figures, stated as such on the page; check them
- * against real invoices before changing the copy around them. (The Apple Developer Program is
- * already paid, and the page says so separately.)
+ * What running Unstream costs once it's off the free tiers, plus the Apple membership it
+ * already pays for. Rough figures, stated as such on the page; check them against real
+ * invoices before changing the copy around them. Netlify is left out on purpose: that cost is
+ * managed by deploying less.
  */
 export const UPCOMING_COSTS: UpcomingCost[] = [
   { service: 'Supabase', what: 'the database', monthly: '~$25–30' },
-  { service: 'Netlify', what: 'hosting and builds', monthly: '~$9–20' },
   { service: 'Upstash', what: 'caching and rate limits', monthly: 'a few dollars' },
+  { service: 'Apple Developer Program', what: 'signing the Mac and iOS apps', monthly: '~$8' },
 ];

@@ -25,22 +25,18 @@ export function SupportPage() {
       {/* Content */}
       <main className="px-4 pb-16">
         <div className="max-w-2xl mx-auto">
-          <div className="flex flex-col-reverse items-center gap-5 mb-10 sm:flex-row">
-            <div className="flex-1 space-y-4 text-text-secondary text-lg leading-relaxed">
-              <p>
-                Unstream is free to use because its mission is to expand &amp; deepen support for artists.
-                Search, support links, saved artists and the apps stay free whether or not anyone pays.
-              </p>
-              <p>
-                I'm Brandon — an indie musician and tech worker. I build and run Unstream on my own
-                time, and so far it has cost almost nothing, because it runs on free tiers.
-              </p>
-            </div>
-            <img
-              src="/brandon-lucas-green.webp"
-              alt="Brandon Lucas Green"
-              className="w-32 h-32 rounded-full object-cover shrink-0"
-            />
+          <div className="space-y-4 text-text-secondary text-lg leading-relaxed mb-10">
+            <p>
+              Unstream is free to use because its mission is to expand &amp; deepen support for artists.
+              Search, support links, saved artists and the apps stay free whether or not anyone pays.
+            </p>
+            <p>
+              <a href="https://bgreen.lol" target="_blank" rel="noopener noreferrer" className="text-accent-primary hover:underline">
+                I'm Brandon
+              </a>{' '}
+              — an indie musician and tech worker. I build and run Unstream in my spare time, and
+              because Unstream has been small, I'm able to keep it running basically for free.
+            </p>
           </div>
 
           <section aria-labelledby="costs-heading" className="mb-10">
@@ -48,8 +44,9 @@ export function SupportPage() {
               That's about to change
             </h2>
             <p className="text-text-secondary mb-4">
-              Unstream is outgrowing those free tiers. The database has already fallen over once from
-              running out of room. Moving to paid plans looks roughly like this:
+              Unstream is growing, which is exciting! But it's starting to outgrow free services. The
+              database has already gone down a few times as I've added features and more people have
+              started to use it. Moving to paid services to run Unstream looks roughly like this:
             </p>
             <ul className="divide-y divide-border border-y border-border">
               {UPCOMING_COSTS.map((cost) => (
@@ -61,10 +58,6 @@ export function SupportPage() {
                 </li>
               ))}
             </ul>
-            <p className="text-text-muted text-sm mt-3">
-              Roughly $40–60 a month, on top of the $99 a year I already pay Apple to sign the Mac
-              and iOS apps.
-            </p>
           </section>
 
           <section aria-labelledby="help-heading" className="mb-10">
@@ -72,7 +65,9 @@ export function SupportPage() {
               How you can help
             </h2>
             <p className="text-text-secondary mb-4">
-              About 20 people at $3 a month covers the lot. Anything past that goes to me.
+              If you use and like Unstream, I'd appreciate a one-time or recurring contribution.
+              Payments will go directly toward improving the service and helping more music fans
+              discover it.
             </p>
             <div className="grid gap-3 sm:grid-cols-3">
               {SUPPORT_OPTIONS.map((option) => {

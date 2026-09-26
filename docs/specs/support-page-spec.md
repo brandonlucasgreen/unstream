@@ -16,8 +16,9 @@ more machinery than the ask needs. Brandon: simpler, but just as effective.
 `/support` says three things plainly, in Brandon's voice:
 
 1. Unstream runs on his own time, and so far on free tiers.
-2. That's about to change. Here are the services it's outgrowing, roughly what they'll cost, and
-   the Apple fee already being paid.
+2. That's about to change: it's growing and outgrowing free services. Here's roughly what the
+   paid versions cost (Supabase, Upstash and the Apple Developer Program). Netlify is left off,
+   because Brandon manages that cost by deploying less.
 3. How to help: three Stripe options, plus the existing non-money ways (star, share, report bugs).
 
 There's no separate page, no member count, no perks and no accounts. The core product stays free,
@@ -65,8 +66,8 @@ it, and if a public number is wanted later, a hand-edited line in `support.ts` i
    whether no-perk support to an individual owes VAT or sales tax anywhere is a question for an
    accountant, not code. If the answer is "treat it as a sale", switch the links to Managed Payments
    in the dashboard; nothing in the repo changes.
-2. **The cost figures** in `support.ts` are rough (Supabase ~$25–30, Netlify ~$9–20, Upstash a few
-   dollars). Check them before this ships, since the page makes a claim about them.
+2. **The cost figures** in `support.ts` are rough (Supabase ~$25–30, Upstash a few dollars, Apple
+   ~$8). Check them before this ships, since the page makes a claim about them.
 
 ## 6. Repo touchpoints
 
