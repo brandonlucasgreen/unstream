@@ -1,5 +1,6 @@
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
+import { PlatformIcon } from '../components/PlatformIcon';
 import { KOFI_URL, UPCOMING_COSTS } from '../data/support';
 
 export function SupportPage() {
@@ -66,9 +67,12 @@ export function SupportPage() {
                 href={KOFI_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-[#FF5E5B] text-white hover:bg-[#F04E4B] transition-colors font-semibold text-lg shadow-lg"
+                className="inline-flex items-center gap-3 px-6 sm:px-8 py-4 rounded-xl bg-[#FF5E5B] text-white hover:bg-[#F04E4B] transition-colors font-semibold text-lg shadow-lg"
               >
-                Support Unstream on Ko-fi
+                <span aria-hidden="true">
+                  <PlatformIcon sourceId="kofi" color="currentColor" emoji="" className="w-6 h-6" />
+                </span>
+                <span className="whitespace-nowrap">Support Unstream on Ko-fi</span>
               </a>
               <p className="text-text-muted text-sm mt-4">One-time or monthly.</p>
             </div>
