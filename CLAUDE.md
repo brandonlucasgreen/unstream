@@ -146,7 +146,7 @@ grep -r "PLATFORM_INFO" api/edge/ apps/web/src/
 
 ### Local dev: the full stack, and the fast shim
 
-**Use `npm run dev` — the real one — by default.** It is the *only* way to exercise the real backend before merging, because #451 disabled Deploy Previews outright; treat a gap in it as a real gap.
+**Use `npm run dev` — the real one — by default.** It is the *only* way to exercise the real backend before merging, because Deploy Previews are opt-in per push (see Deployment); treat a gap in it as a real gap.
 
 | | `npm run dev` (`netlify dev`, :8888) | `npm run dev:fast` (Vite, :5173) |
 |---|---|---|
@@ -273,7 +273,7 @@ Pushes to `main` trigger Netlify builds (`npm run build`). Functions deploy from
 
 **Not every push deploys.** `netlify.toml`'s `ignore` setting runs `scripts/netlify-ignore-build.sh`, which cancels the build when a push touches only paths Netlify never publishes — `apps/mac/`, `apps/extension/`, `supabase/`, `docs/`, `.github/`, `README.md`, `CLAUDE.md`. **Its exit code is inverted: 0 cancels, 1 builds**, and every branch defaults to deploying, because a skipped deploy leaves production silently stale. `data/` and `scripts/` are deliberately absent, since `data/` is copied into `dist/` and `scripts/` generates the manifests, feeds and sitemap — so if you add a path whose contents reach the built site, check it isn't shadowed.
 
-**Deploy Previews are off.** `[context.deploy-preview]` cancels them (`ignore = "exit 0"`), so a PR gets no preview URL and its Netlify checks don't run — configuration, not breakage. **`npm run dev` is therefore the only way to exercise the real backend before merging.**
+**Deploy Previews are opt-in per push.** `[context.deploy-preview]` runs `scripts/netlify-ignore-preview.sh`, which cancels the preview unless the PR's head commit message contains `[preview]` — so by default a PR gets no preview URL and its Netlify checks don't run (configuration, not breakage). #451 turned them off because they ate the build allowance; add the marker only to the push you actually want to open on a phone or share. A preview runs the real functions against **production** Supabase, same as `npm run dev`. Without the marker, **`npm run dev` is the only way to exercise the real backend before merging.**
 
 GitHub Actions: `ci.yml` (typecheck + both suites — the gate that used to live in the Netlify build) · `supabase-migrate.yml` · `schedule-social-posts.yml` (weekly, committed back) · `semantic-revert-check.yml` (runs `scripts/semantic-revert-check.py` to flag changes that quietly undo earlier fixes — take it seriously; bug loops in `docs/postmortems/UNS-100-bifurcation-retro.md`) · `upstash-keepalive.yml` · `recatalog-sweep.yml` (every 12h).
 
