@@ -1,5 +1,7 @@
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
+import { PlatformIcon } from '../components/PlatformIcon';
+import { KOFI_URL, UPCOMING_COSTS } from '../data/support';
 
 export function SupportPage() {
   return (
@@ -15,42 +17,68 @@ export function SupportPage() {
 
       {/* Content */}
       <main className="px-4 pb-16">
-        <div className="max-w-2xl mx-auto text-center">
-          <div className="mb-8">
-            <div className="flex items-center gap-5 mb-6 text-left">
-              <div className="flex-1">
-                <p className="text-text-secondary text-lg mb-6">
-                  Unstream is free to use because its mission is to expand &amp; deepen support for artists.
-                </p>
-                <p className="text-text-secondary text-lg leading-relaxed">
-                  I'm Brandon. I'm an indie musician and tech worker, and I run Unstream. If you find
-                  it a helpful tool for supporting your favorite artists, consider chipping in to
-                  help me keep it running.
-                </p>
-              </div>
-              <img
-                src="/brandon-lucas-green.webp"
-                alt="Brandon Lucas Green"
-                className="w-32 h-32 rounded-full object-cover shrink-0"
-              />
-            </div>
-            <a
-              href="https://www.liberapay.com/brandonlucasgreen"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-[#FFDD00] text-gray-900 hover:bg-[#F5D000] transition-colors font-semibold text-lg shadow-lg"
-            >
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M2.32 0A2.321 2.321 0 0 0 0 2.32v19.36A2.321 2.321 0 0 0 2.32 24h19.36A2.32 2.32 0 0 0 24 21.68V2.32A2.32 2.32 0 0 0 21.68 0zm9.208 3.98l-2.27 9.405a2.953 2.953 0 0 0-.073.539.853.853 0 0 0 .09.432.7.7 0 0 0 .334.302c.157.077.378.126.661.147l-.49 2.008c-.772 0-1.38-.1-1.82-.3-.441-.203-.757-.477-.947-.826a2.391 2.391 0 0 1-.278-1.2c.005-.452.068-.933.188-1.445l2.074-8.67zm3.9 3.888c.61 0 1.135.092 1.576.277.44.185.802.438 1.085.76.283.32.493.696.629 1.126.136.43.204.89.204 1.379v.001c0 .794-.13 1.52-.392 2.179a5.16 5.16 0 0 1-1.086 1.706 4.84 4.84 0 0 1-1.665 1.118c-.648.267-1.353.4-2.114.4-.37 0-.74-.033-1.11-.098l-.735 2.956H9.403l2.71-11.298c.435-.13.934-.248 1.494-.351a10.045 10.045 0 0 1 1.821-.155zm-.31 2.041a4.67 4.67 0 0 0-.98.098l-1.143 4.752c.185.044.413.065.685.065.425 0 .812-.079 1.16-.237a2.556 2.556 0 0 0 .89-.661c.244-.283.435-.623.571-1.02a4.03 4.03 0 0 0 .204-1.315c0-.468-.104-.865-.31-1.192-.207-.326-.566-.49-1.077-.49z"/>
-              </svg>
-              Support via Liberapay
-            </a>
-            <p className="text-text-muted text-sm mt-4">
-              One-time or monthly. No account needed.
+        <div className="max-w-2xl mx-auto">
+          <div className="space-y-4 text-text-secondary text-lg leading-relaxed mb-10">
+            <p>
+              Unstream is free to use because its mission is to expand &amp; deepen support for artists.
+              Search, support links, saved artists and the apps stay free whether or not anyone pays.
+            </p>
+            <p>
+              <a href="https://bgreen.lol" target="_blank" rel="noopener noreferrer" className="text-accent-primary hover:underline">
+                I'm Brandon
+              </a>{' '}
+              — an indie musician and tech worker. I build and run Unstream in my spare time, and
+              because Unstream has been small, I've been able to run it basically for free.
             </p>
           </div>
 
-          <div className="text-left bg-surface-secondary rounded-2xl p-8 border border-border">
+          <section aria-labelledby="costs-heading" className="mb-10">
+            <h2 id="costs-heading" className="font-display text-xl font-semibold text-text-primary mb-3">
+              That's about to change
+            </h2>
+            <p className="text-text-secondary mb-4">
+              Unstream is growing, which is exciting! But it's starting to outgrow free services. The
+              database has already gone down a few times as I've added features and more people have
+              started to use it. Moving to paid services to run Unstream looks roughly like this:
+            </p>
+            <ul className="divide-y divide-border border-y border-border">
+              {UPCOMING_COSTS.map((cost) => (
+                <li key={cost.service} className="py-3 flex justify-between gap-4">
+                  <span className="text-text-primary">
+                    {cost.service} <span className="text-text-muted">— {cost.what}</span>
+                  </span>
+                  <span className="text-text-primary tabular-nums shrink-0">{cost.monthly}/mo</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section aria-labelledby="help-heading" className="mb-10">
+            <h2 id="help-heading" className="font-display text-xl font-semibold text-text-primary mb-3">
+              How you can help
+            </h2>
+            <p className="text-text-secondary mb-6">
+              If you use and like Unstream, I'd appreciate a one-time or recurring contribution.
+              Payments will go directly toward improving the service and helping more music fans
+              discover it.
+            </p>
+            <div className="text-center">
+              <a
+                href={KOFI_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 px-6 sm:px-8 py-4 rounded-xl bg-[#FF5E5B] text-white hover:bg-[#F04E4B] transition-colors font-semibold text-lg shadow-lg"
+              >
+                <span aria-hidden="true">
+                  <PlatformIcon sourceId="kofi" color="currentColor" emoji="" className="w-6 h-6" />
+                </span>
+                <span className="whitespace-nowrap">Support Unstream on Ko-fi</span>
+              </a>
+              <p className="text-text-muted text-sm mt-4">One-time or monthly.</p>
+            </div>
+          </section>
+
+          <div className="bg-surface-secondary rounded-2xl p-8 border border-border">
             <h3 className="font-display text-xl font-semibold text-text-primary mb-4">Other ways to help</h3>
             <ul className="space-y-3 text-text-secondary">
               <li className="flex items-start gap-3">
