@@ -15,13 +15,17 @@
 # per-path script above, is what keeps the site inside the free tier.
 #
 # Context settings override the [build] ones, so previews get this instead of the
-# script. Same inverted exit code: 0 cancels the build.
+# per-path script. Same inverted exit code: 0 cancels the build.
 #
-# To get previews back — which is the right move once local dev can stand in for them,
-# since this removes the last chance to exercise the real backend before merging —
-# delete this block. Nothing else depends on it.
+# Previews are opt-in per push rather than off outright: put `[preview]` in the head
+# commit's message and that push gets one. Everything else is still cancelled, so the
+# cost is only the pushes someone actually wants to look at. See the script for why only
+# the head commit counts, and note a preview runs against production Supabase.
+#
+# To get previews back for every PR — the right move once local dev can stand in for
+# them — replace the command with the per-path script, or delete this block.
 [context.deploy-preview]
-  ignore = "exit 0"
+  ignore = "bash scripts/netlify-ignore-preview.sh"
 
 # `netlify dev` — the local full stack, and what `npm run dev` runs. Serves the real functions
 # and edge functions on :8888 in front of Vite, so local behaviour matches production instead of
