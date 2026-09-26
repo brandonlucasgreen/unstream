@@ -10,12 +10,17 @@ describe('support page data', () => {
     expect(url.pathname).toBe('/bgreenlol');
   });
 
-  it('lists each cost with a service, what it is for and a rough monthly figure', () => {
+  it('lists each cost with a name and a rough monthly figure', () => {
     expect(UPCOMING_COSTS.length).toBeGreaterThan(0);
     for (const cost of UPCOMING_COSTS) {
       expect(cost.service).not.toBe('');
-      expect(cost.what).not.toBe('');
       expect(cost.monthly).not.toBe('');
     }
+  });
+
+  // Vendors are being reconsidered, so the page names what the money pays for, not who.
+  it('does not name infrastructure vendors', () => {
+    const text = UPCOMING_COSTS.map((cost) => `${cost.service} ${cost.what ?? ''}`).join(' ');
+    expect(text).not.toMatch(/supabase|upstash|redis|netlify/i);
   });
 });
