@@ -35,7 +35,7 @@ export function SupportPage() {
                 I'm Brandon
               </a>{' '}
               — an indie musician and tech worker. I build and run Unstream in my spare time, and
-              because Unstream has been small, I'm able to keep it running basically for free.
+              because Unstream has been small, I've been able to run it basically for free.
             </p>
           </div>
 
