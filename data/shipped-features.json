@@ -110,5 +110,12 @@
     "description": "Releases now have their own pages: every format and price we can find, on every platform that carries them, with an estimate of how much of it reaches the artist. Release alerts point here now instead of sending you straight to one shop.",
     "date": "2026-08-02",
     "announced": true
+  },
+  {
+    "id": "extension-radio-detection",
+    "title": "Artist detection on radio and more sites",
+    "description": "The browser extension now works on more of the web, especially online radio. Listening to a station like WXPN in your browser? Open the extension on the station's site, turn on detection, and Unstream finds each artist as the songs change. It isn't limited to a built-in list: it works on any site that tells your browser what's playing, so it's worth trying wherever you listen.",
+    "date": "2026-09-25",
+    "announced": false
   }
 ]
