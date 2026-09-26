@@ -1,7 +1,7 @@
-# Moving the database to a VPS (auth stays on Supabase)
+# Moving the database to a Hetzner VPS (auth stays on Supabase)
 
 **Date:** 2026-09-26
-**Status:** Proposal. Nothing is bought, built, or changed yet.
+**Status:** Decided: a 2 GB Hetzner box in Ashburn. Nothing is bought, built or changed yet.
 **Why:** the free Nano instance is the ceiling: 0.5 GB shared between Postgres, PostgREST,
 Auth and the pooler, and a disk that throttles after bursts. It wedged on 2026-09-19, and six
 rounds of I/O work (`supabase-disk-io-investigation.md`) have been rationing around it. The
@@ -11,63 +11,67 @@ database itself is 98 MB.
 
 - **What moves:** Postgres and PostgREST (the REST layer `supabase-js` talks to), which are the
   parts that wedge. **What stays:** Supabase Auth on the hosted free project, Netlify functions and
-  edge functions, Upstash, and the apps.
+  edge functions, Upstash (for now, see §9), and the apps.
 - **No client changes, nobody logs out.** The web app, Mac app and extension only use Supabase for
   sign-in. Every table read and write already goes through Netlify functions with the service
   key, so the database never has to be reachable from a browser.
 - **The code change is small.** A separate env var pair for data, about 20 call sites, shipped
   first as a no-op.
 - **Cutover means setting two env vars and redeploying. Rollback means unsetting them.**
-- **Read §1 before buying anything.** After Hetzner's 2026 price rises, a US VPS costs about the
-  same as Supabase Pro.
+- **Cost:** about $25 a month, the same as Supabase Pro.
 
 ---
 
-## 1. Price check: decide before shopping
+## 1. The decision, and what was ruled out
 
-I couldn't reach Hetzner's site from the sandbox this was written in. These figures are
+I couldn't reach Hetzner's site from the sandbox this was written in. The prices below are
 third-party reports from September 2026, so **confirm them in the Hetzner console**.
 
-| Option | RAM | ~Monthly | Latency to Netlify functions | You run it? |
-|---|---|---|---|---|
-| Supabase free (today) | 0.5 GB shared | $0 | — | No |
-| Supabase Pro (includes a Micro instance) | 1 GB | $25 | unchanged | No |
-| Supabase Pro + Small compute | 2 GB | ~$30 | unchanged | No |
-| **Hetzner Ashburn, 2 vCPU / 2 GB** | 2 GB | ~$20.50 (+ backups) | ~10–15 ms | Yes |
-| **Hetzner Ashburn, 3 vCPU / 4 GB** | 4 GB | ~$26–37 (+ backups) | ~10–15 ms | Yes |
-| Hetzner Germany/Finland, 2 vCPU / 4 GB | 4 GB | ~€5.50–8 | ~90–110 ms **per query** | Yes |
-| DigitalOcean / Akamai, 4 GB, US East | 4 GB | ~$24 | ~10–20 ms | Yes |
+| Option | RAM | ~Monthly | Disk I/O budget | Latency to Netlify functions | You run it? |
+|---|---|---|---|---|---|
+| Supabase free (today) | 0.5 GB shared | $0 | burst, then throttled | — | No |
+| Supabase Pro (Micro) | 1 GB | $25 | burst, then throttled | unchanged | No |
+| Supabase Pro + Small | 2 GB | ~$30 | burst, then throttled | unchanged | No |
+| **Hetzner Ashburn, 2 vCPU / 2 GB (chosen)** | 2 GB | **~$20.50 + $4 backups** | **none** | ~10–15 ms | Yes |
+| Hetzner Germany/Finland | 4 GB | ~€5.50–8 | none | ~90–110 ms per query | Yes |
+| Mac Studio at home | 32 GB | ~$0 | none | depends on your line | Yes |
 
-**Why the prices are what they are.** Hetzner raised US prices twice in 2026 (April and June 15),
-renamed the shared plans (CPX11 → CPX22 and so on), and cut US included traffic to about 1 TB.
-Traffic is irrelevant here, since database responses are tiny. Latency figures assume Netlify's
-default functions region, `us-east-2` (Ohio). Check site settings → Functions → Region.
+**Why Hetzner Ashburn, at about the same price as Supabase Pro:**
+- **No disk I/O budget.** The 09-19 outage was a throttled disk, and every Supabase instance
+  size up to Small still has that burst-then-throttle limit. Local fast disk has none.
+- **Twice the RAM of Pro.** At 2 GB the whole 98 MB database lives in memory.
+- **Room for more.** The same box can later take over Redis from Upstash (§9), whose monthly
+  command cap is the other limit the codebase rations around.
+- **Full Postgres control,** and the data sits on Hetzner rather than Supabase-on-AWS.
 
-**How to choose:**
+**What was ruled out:**
+- **Hetzner EU:** every query would cross the Atlantic.
+- **The Mac Studio:** FileVault blocks an unattended restart after a power cut, latency depends on
+  your home line, and it would share a machine with personal data.
+- **Supabase Pro:** still the fallback if running a server stops being worth it. Reversing this
+  plan is the same two-env-var flip.
 
-- **If the goal is saving money, Supabase Pro + Small (~$30) is at price parity with Hetzner
-  US, and costs you no ops time.** 2 GB holds a 98 MB database entirely in memory, which ends the
-  disk I/O problem. This is the honest default.
-- **Hetzner Ashburn** is worth it if you want what a managed plan doesn't give you: 4 GB for
-  about the same money, no burst budget at all, and full control of Postgres. The cost is the ops
-  work in §9.
-- **Hetzner EU** is the only option that is actually cheap, but every query crosses the
-  Atlantic. An endpoint making five sequential queries gets about half a second slower. Not
-  recommended.
+**Pricing notes.** Hetzner raised US prices twice in 2026 (April and June 15), renamed its shared
+plans in June, and cut US included traffic to 1 TB a month. Traffic is irrelevant here, since
+database responses are tiny. The latency figures assume Netlify's default functions region,
+`us-east-2` (Ohio); check site settings → Functions → Region.
 
-Everything from §3 onward works on any Ubuntu VPS in US East. Only §2 is Hetzner-specific.
+**Why 2 GB is enough:** Postgres gets 512 MB of dedicated cache for a 98 MB database, and the OS
+page cache covers the rest. The whole stack (Postgres, PostgREST, Caddy, OS) fits in about
+1.2 GB. If the database grows past about 1 GB, or Redis moves onto the box, rescale to 4 GB in
+the Hetzner console. That takes a reboot of a minute or two, and your data stays put.
 
 ---
 
-## 2. Shopping list (Hetzner Ashburn)
+## 2. Shopping list
 
 | # | Item | Choice | ~Cost | Notes |
 |---|---|---|---|---|
 | 1 | Hetzner Cloud account | — | $0 | New accounts can hit ID verification; sign up a few days early. |
-| 2 | Server | Shared vCPU, **4 GB RAM**, location **Ashburn (ash)**, Ubuntu 24.04 | ~$26–37 | 2 GB works but leaves little headroom once Postgres gets 1 GB. Skip dedicated-vCPU (CCX): CPU isn't the problem. |
-| 3 | IPv4 address | Keep the default primary IPv4 | small line item | Netlify's functions reach out over IPv4; an IPv6-only box is unreachable from them. |
-| 4 | Hetzner Backups | Enable on the server | +20% of server | 7 rolling daily snapshots. This is the *second* layer, not the backup plan (see #6). |
-| 5 | Hetzner Cloud Firewall | Inbound TCP 80 + 443 only | $0 | Sits outside the VM, so Docker can't punch holes in it (see §5). |
+| 2 | Server | Shared AMD, **2 vCPU / 2 GB RAM / 40 GB disk**, location **Ashburn (ash)**, Ubuntu 24.04 | ~$20.50 | This plan was sold as CPX11 before the June 2026 renaming; pick whatever the console now calls the 2 GB shared-AMD plan in Ashburn. Skip dedicated vCPU (CCX): CPU isn't the problem. **Tick "keep disk size" if you ever rescale**, so you can scale back down. |
+| 3 | IPv4 address | Keep the default primary IPv4 | small line item, if any | Netlify's functions reach out over IPv4; an IPv6-only box is unreachable from them. |
+| 4 | Hetzner Backups | Enable on the server | +20% (~$4) | 7 rolling daily snapshots. This is the *second* layer, not the backup plan (see #6). |
+| 5 | Hetzner Cloud Firewall | Inbound TCP 80 + 443 only | $0 | Sits outside the server, so Docker can't punch holes in it (see §5). |
 | 6 | Offsite backup bucket | Cloudflare R2 *or* Backblaze B2 | $0 | Both have 10 GB free; a compressed dump is tens of MB. Keeping it off Hetzner means one provider's bad day can't take both copies. |
 | 7 | Tailscale | Personal (free) | $0 | SSH access, plus how GitHub Actions reaches Postgres to run migrations. No port 22 or 5432 open to the internet. |
 | 8 | DNS record | `db.unstream.stream` → server IPv4 (A record) | $0 | Wherever `unstream.stream` DNS already lives. |
@@ -76,7 +80,7 @@ Everything from §3 onward works on any Ubuntu VPS in US East. Only §2 is Hetzn
 | 11 | Database GUI | DBeaver / pgAdmin (free), or TablePlus (paid) | $0 | Replaces the Supabase SQL editor for data queries, over Tailscale. |
 | 12 | Encryption key for dumps | `age` keypair, private key in your password manager | $0 | Dumps contain emails (`artist_profiles`, `verification_requests`, `email_log`). |
 
-**Total: roughly $32–45 a month**, depending on the confirmed server price.
+**Total: about $25 a month**, pending the confirmed server price.
 
 ---
 
@@ -168,32 +172,39 @@ Today one `SUPABASE_URL` serves both auth and data. Split them:
      - **no `PGRST_DB_ANON_ROLE`**, so requests without a valid key are refused outright
      - `PGRST_OPENAPI_MODE=disabled`, so the schema isn't published
      - `PGRST_ADMIN_SERVER_PORT=3001`
-     - `PGRST_DB_POOL=20`
+     - `PGRST_DB_POOL=10`
    - `caddy`: `db.unstream.stream` → `/rest/v1/*` strip-prefix proxied to `rest:3000`;
      `/health` → `rest:3001/ready` (200 only when PostgREST can reach Postgres); everything else
      404.
 4. **Keys:** generate a fresh 64-character JWT secret and mint one long-lived `service_role` JWT
    from it. That token is `DATA_API_SERVICE_KEY`. **Don't reuse hosted's keys.** No anon key is
    needed at all.
-5. **Postgres settings for 4 GB:**
-   - `shared_buffers=1GB`
-   - `effective_cache_size=3GB`
-   - `work_mem=16MB`
-   - `maintenance_work_mem=256MB`
-   - `max_connections=50`
+5. **Postgres settings for 2 GB:**
+   - `shared_buffers=512MB`
+   - `effective_cache_size=1280MB`
+   - `work_mem=8MB`
+   - `maintenance_work_mem=128MB`
+   - `max_connections=30` (PostgREST's pool of 10, pg_cron, and room for admin sessions)
    - `pg_stat_statements` on
    - `cron.database_name=postgres`
-6. **Backups:** a cron job every 6 hours runs `pg_dump -Fc`, encrypts with `age`, uploads with
+
+   Also give every container a memory limit in the compose file (Postgres ~900 MB, PostgREST
+   ~200 MB, Caddy ~100 MB), so one runaway process can't starve the others.
+6. **Swap:** add a 2 GB swap file with `vm.swappiness=10`. Hetzner images ship without swap. On a
+   2 GB box, swap is what turns a memory spike into a slow minute instead of the kernel killing
+   Postgres. If the swap-use graph is ever more than flat, that's the signal to rescale to 4 GB.
+7. **Backups:** a cron job every 6 hours runs `pg_dump -Fc`, encrypts with `age`, uploads with
    `rclone` to R2/B2, then pings Healthchecks. A bucket lifecycle rule keeps 14 days of 6-hourly
    dumps plus 12 weeklies. Enable Hetzner Backups too. Worst-case data loss is 6 hours; add WAL
    archiving (wal-g) later only if that turns out to matter.
-7. **Restore drill:** a monthly cron pulls the latest dump, restores it into a throwaway
+8. **Restore drill:** a monthly cron pulls the latest dump, restores it into a throwaway
    container, checks row counts against live, and pings Healthchecks. **A backup nobody has
    restored is a hope, not a backup.**
-8. **Monitoring:**
+9. **Monitoring:**
    - UptimeRobot on `/health`, every 1–5 minutes.
    - Healthchecks on the backup job and the drill.
-   - A daily disk check that pings Healthchecks only while usage is under 80%, so silence means
+   - A daily check that pings Healthchecks only while disk use is under 80% *and* swap use is
+     under 25%, so silence means
      trouble.
 
 ---
@@ -283,21 +294,41 @@ trigger" stays in force until someone deliberately re-measures and rewrites it.
 
 ---
 
-## 9. What you're signing up for
+## 9. Later, optional: move Redis off Upstash onto the box
+
+Not part of the migration. Do it only if Upstash's monthly command cap becomes a problem again,
+and only after the database has run cleanly for a month.
+
+- **No code change if it goes through a REST proxy.** The codebase uses `@upstash/redis` and
+  `@upstash/ratelimit`, which speak Upstash's REST protocol, not plain Redis. Run Redis alongside
+  an Upstash-compatible proxy such as `serverless-redis-http`, then change the two Upstash env
+  vars. Opening a plain Redis connection on every function invocation would be slower.
+- **Verify in rehearsal that `@upstash/ratelimit`'s Lua scripts work through the proxy.** The
+  proxy is the bit to prove, not Redis itself.
+- **Memory.** Cap Redis at 256 MB. The cache and dedup writes set TTLs (`cache.ts:92`,
+  `ratelimit.ts:495`), so use `volatile-lru` eviction, after confirming nothing else writes keys
+  without one. If Redis and Postgres together push swap above flat, rescale to 4 GB.
+- **What it buys:** CLAUDE.md's four Redis rules exist because of the command budget. With no
+  budget they become good hygiene rather than survival. Keep them anyway; they're also latency
+  wins.
+
+---
+
+## 10. What you're signing up for
 
 | Supabase did this | Now it's… |
 |---|---|
 | Patching OS and Postgres | `unattended-upgrades` for the OS; pinned images bumped quarterly, rehearsed against a restored dump first. Postgres major upgrades are a dump/restore into a new container. |
-| Backups | §5.6. The monthly drill tells you they work. |
+| Backups | §5.7. The monthly drill tells you they work. |
 | Noticing it's down | UptimeRobot pages you. The usual fix is a reboot from the Hetzner console or phone app. |
-| Disk, memory | The disk heartbeat, plus Hetzner's graphs. |
+| Disk, memory | The disk-and-swap heartbeat, plus Hetzner's graphs. Outgrowing 2 GB is a console rescale, not a migration. |
 | Security perimeter | The Hetzner firewall, key-only SSH over Tailscale, no public Postgres, no anon role, OpenAPI disabled. **Rotating the JWT secret** means minting a new service key, updating Netlify, then swapping PostgREST's secret: a minute of failed requests unless you stage it. |
 
 Expect about 30 minutes a month when nothing's wrong.
 
 ---
 
-## 10. Risks and open questions
+## 11. Risks and open questions
 
 - **Hetzner's US price.** §1 is third-party data; confirm it before §2.
 - **VPS down means deploys fail.** `scripts/generate-sitemap.ts` reads the database during
@@ -307,6 +338,8 @@ Expect about 30 minutes a month when nothing's wrong.
   if one happens only sign-in breaks; search and public pages keep working. Supabase pauses
   inactive free projects. Clients refreshing tokens should keep it active, but a weekly ping job
   (like `upstash-keepalive.yml`) is cheap insurance.
+- **2 GB is a floor, not a ceiling.** Watch swap, not RAM: Linux fills free RAM with page cache,
+  so "memory used" graphs always look full. Rescaling is a console click and a short reboot.
 - **Netlify functions region.** The latency numbers assume `us-east-2`. Confirm in site settings.
 - **Version pairing.** A PostgREST major version that differs from hosted's could change edge
   behaviour `supabase-js` relies on (count headers, upsert conflict handling). Match it, and let
