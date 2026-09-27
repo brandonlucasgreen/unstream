@@ -2,9 +2,9 @@
 //
 // The rules exist to keep the ask occasional and easy to ignore:
 // - Never in someone's first two weeks. Ask only once Unstream has had a chance to be useful.
-// - Once it appears, it stays for three days of popup opens, then goes quiet for 60 days
+// - Once it appears, it stays for a day of popup opens, then goes quiet for 30 days
 //   whether or not anyone touched it.
-// - "Not now" or opening Ko-fi means 60 days of quiet. "I already support Unstream" means a year:
+// - "Not now" or opening Ko-fi means 30 days of quiet. "I already support Unstream" means a year:
 //   Ko-fi doesn't tell us who has given, so people have to tell us themselves.
 // - Never on a Bandcamp Friday, when the whole point is buying from artists.
 //
@@ -15,8 +15,8 @@ const DAY = 24 * 60 * 60 * 1000;
 
 export const SUPPORT_REMINDER_KEY = 'supportReminder';
 export const FIRST_ASK_DELAY_DAYS = 14;
-export const VISIBLE_DAYS = 3;
-export const SNOOZE_DAYS = 60;
+export const VISIBLE_DAYS = 1;
+export const SNOOZE_DAYS = 30;
 export const ALREADY_SUPPORT_DAYS = 365;
 
 /**

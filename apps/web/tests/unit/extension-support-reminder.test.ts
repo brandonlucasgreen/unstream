@@ -14,6 +14,16 @@ import {
 const DAY = 24 * 60 * 60 * 1000;
 const T0 = Date.UTC(2026, 9, 1, 12);
 
+// The cadence Brandon chose (2026-09-27). Changing it should be a decision, not a side effect.
+describe('support reminder cadence', () => {
+  it('waits two weeks, shows for a day, then 30 days of quiet; a year for existing supporters', () => {
+    expect(FIRST_ASK_DELAY_DAYS).toBe(14);
+    expect(VISIBLE_DAYS).toBe(1);
+    expect(SNOOZE_DAYS).toBe(30);
+    expect(ALREADY_SUPPORT_DAYS).toBe(365);
+  });
+});
+
 describe('supportReminderDecision', () => {
   it('never asks on first sight, and schedules the first ask two weeks out', () => {
     const { show, state } = supportReminderDecision(undefined, T0, false);
@@ -73,7 +83,7 @@ describe('supportReminderDecision', () => {
 });
 
 describe('snoozeSupportReminder', () => {
-  it('"Not now" or opening Ko-fi means 60 days of quiet', () => {
+  it('"Not now" or opening Ko-fi means 30 days of quiet', () => {
     const state = snoozeSupportReminder(T0);
     expect(state).toEqual({ nextDueAt: T0 + SNOOZE_DAYS * DAY, shownAt: null });
     expect(supportReminderDecision(state, T0 + (SNOOZE_DAYS * DAY - 1), false).show).toBe(false);
