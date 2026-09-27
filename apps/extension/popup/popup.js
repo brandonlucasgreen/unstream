@@ -16,6 +16,12 @@ import {
   isBuiltInSite,
   MAX_CUSTOM_SITES,
 } from '../lib/custom-sites.js';
+import {
+  SUPPORT_REMINDER_KEY,
+  ALREADY_SUPPORT_DAYS,
+  supportReminderDecision,
+  snoozeSupportReminder,
+} from '../lib/support-reminder.js';
 
 const API_BASE = 'https://unstream.stream/api';
 
@@ -52,6 +58,7 @@ const elements = {
   // Discover tab
   nowPlaying: document.getElementById('now-playing'),
   idleState: document.getElementById('idle-state'),
+  supportReminder: document.getElementById('support-reminder'),
   detectSiteSection: document.getElementById('detect-site-section'),
   detectTitle: document.getElementById('detect-title'),
   detectDesc: document.getElementById('detect-desc'),
@@ -650,6 +657,9 @@ async function init() {
     showNowPlaying(currentTrack);
     await loadResults(currentTrack.artist);
     await loadEnrichment(currentTrack.artist);
+  } else {
+    // Only in the idle state: an artist on screen always comes first.
+    await setupSupportReminder();
   }
 
   // Show per-site detection control for the active tab, and the managed list
@@ -667,6 +677,30 @@ async function init() {
 
   // Setup event listeners
   setupEventListeners();
+}
+
+// The occasional "consider supporting Unstream" callout. Rules in lib/support-reminder.js.
+async function setupSupportReminder() {
+  const now = Date.now();
+  const { [SUPPORT_REMINDER_KEY]: stored } = await chrome.storage.local.get(SUPPORT_REMINDER_KEY);
+  const { show, state } = supportReminderDecision(stored, now, isBandcampFriday());
+  if (state !== stored) await chrome.storage.local.set({ [SUPPORT_REMINDER_KEY]: state });
+  if (!show) return;
+
+  const snooze = async (days) => {
+    elements.supportReminder.classList.add('hidden');
+    await chrome.storage.local.set({ [SUPPORT_REMINDER_KEY]: snoozeSupportReminder(Date.now(), days) });
+  };
+  document.getElementById('support-reminder-close').addEventListener('click', () => snooze());
+  // Save before the tab opens: opening one closes the popup, which can cut off the write.
+  const kofiLink = document.getElementById('support-reminder-kofi');
+  kofiLink.addEventListener('click', async (e) => {
+    e.preventDefault();
+    await snooze();
+    chrome.tabs.create({ url: kofiLink.href });
+  });
+  document.getElementById('support-reminder-already').addEventListener('click', () => snooze(ALREADY_SUPPORT_DAYS));
+  elements.supportReminder.classList.remove('hidden');
 }
 
 // Show now playing

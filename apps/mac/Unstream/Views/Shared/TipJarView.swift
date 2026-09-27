@@ -7,21 +7,28 @@ import StoreKit
 /// Support-Unstream control.
 ///
 /// The two platforms deliberately differ. The Mac app ships as a direct GitHub
-/// release, so it links to the /support page, which points at Ko-fi — no app store
-/// takes a cut, which is the position Unstream argues for everywhere else. The iOS app ships through the
+/// release, so it links straight to Ko-fi, the same page /support's button opens — no
+/// app store takes a cut, which is the position Unstream argues for everywhere else. The iOS app ships through the
 /// App Store, where App Review guideline 3.1.1 requires in-app purchase for tipping
 /// the developer and an external donation link is grounds for rejection, so it keeps
 /// StoreKit. Don't "simplify" this into one path.
 struct TipJarView: View {
     #if os(macOS)
-    private static let supportURL = URL(string: "https://unstream.stream/support")!
+    private static let kofiURL = URL(string: "https://ko-fi.com/bgreenlol")!
 
     var body: some View {
         HStack {
-            Link(destination: Self.supportURL) {
-                Label("Support Unstream", systemImage: "heart.fill")
+            Link(destination: Self.kofiURL) {
+                Label {
+                    Text("Support Unstream on Ko-fi")
+                } icon: {
+                    Image("KofiIcon")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 16, height: 16)
+                }
             }
-            .accessibilityLabel("Support Unstream, opens in your browser")
+            .accessibilityLabel("Support Unstream on Ko-fi, opens in your browser")
 
             Spacer()
         }
