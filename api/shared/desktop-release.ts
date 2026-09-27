@@ -37,11 +37,11 @@ export const MAC_RELEASE: MacRelease = {
   shortVersion: '3.6.2',
   build: '18',
   url: 'https://github.com/brandonlucasgreen/unstream/releases/download/v3.6.2/Unstream-3.6.2.dmg',
-  lengthBytes: 4193790,
-  edSignature: 'SvFh6BQF9eSHySmDMiyf+tSHzaJjhFzpGpTTY8bUrE3wsYeDKmggy5EYIPhyqsa1CDtJlo2A/4++B/mHBFwOAw==',
+  lengthBytes: 4214276,
+  edSignature: '1a6LFp7DEyANz4dsbpTNRQ1WES+Ys9n9zuqPV3bZh2+50gQ9zo5OPkqAbDM28OQ5a8Zk+kdU9iFyfhb39/EWBg==',
   publishedAt: '2026-09-27T00:00:00Z',
   minimumSystemVersion: '13.0',
-  releaseNotes: 'Support Unstream now links to Ko-fi.',
+  releaseNotes: 'Support Unstream now links to Ko-fi, with an occasional reminder you can dismiss.',
   releasesPageUrl: 'https://github.com/brandonlucasgreen/unstream/releases',
 };
 
