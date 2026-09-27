@@ -34,15 +34,14 @@ export interface MacRelease {
 }
 
 export const MAC_RELEASE: MacRelease = {
-  shortVersion: '3.6.1',
-  build: '17',
-  url: 'https://github.com/brandonlucasgreen/unstream/releases/download/v3.6.1/Unstream-3.6.1.dmg',
-  lengthBytes: 4301800,
-  edSignature: 'dPBq5G6415V6qaPj9byMyeENv97VS7rnjZXUeXutb5vaj2QLAQkhg/gVUqxtxJa1YEoVVWiFDpTv/EmDKXEQCw==',
-  publishedAt: '2026-09-06T00:00:00Z',
+  shortVersion: '3.6.2',
+  build: '18',
+  url: 'https://github.com/brandonlucasgreen/unstream/releases/download/v3.6.2/Unstream-3.6.2.dmg',
+  lengthBytes: 4193790,
+  edSignature: 'SvFh6BQF9eSHySmDMiyf+tSHzaJjhFzpGpTTY8bUrE3wsYeDKmggy5EYIPhyqsa1CDtJlo2A/4++B/mHBFwOAw==',
+  publishedAt: '2026-09-27T00:00:00Z',
   minimumSystemVersion: '13.0',
-  releaseNotes:
-    'Unstream now updates itself instead of sending you to GitHub. Also fixes magic-link sign-in.',
+  releaseNotes: 'Support Unstream now links to Ko-fi.',
   releasesPageUrl: 'https://github.com/brandonlucasgreen/unstream/releases',
 };
 
