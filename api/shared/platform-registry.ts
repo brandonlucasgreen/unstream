@@ -182,6 +182,8 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     payoutPercent: '92-97%',
     searchOnly: true,
     homepageUrl: 'https://ko-fi.com',
+    aiPolicy: 'formal',
+    aiPolicyUrl: 'https://help.ko-fi.com/hc/en-us/articles/19789627403293-Ko-fi-s-stance-on-AI',
   },
   liberapay: {
     name: 'Liberapay',

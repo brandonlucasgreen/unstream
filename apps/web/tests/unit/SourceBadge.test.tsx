@@ -31,6 +31,26 @@ describe('SourceBadge AI policy badge', () => {
     vi.clearAllMocks();
   });
 
+  it('shows the badge on a non-marketplace platform that has a policy', () => {
+    const kofiSource = {
+      id: 'kofi',
+      name: 'Ko-fi',
+      color: '#29abe0',
+      icon: '🍵',
+      category: 'patronage',
+      aiPolicy: 'formal',
+      aiPolicyUrl: 'https://help.ko-fi.com/hc/en-us/articles/19789627403293-Ko-fi-s-stance-on-AI',
+    } as Source;
+    render(<SourceBadge source={kofiSource} url="https://ko-fi.com/some-artist" />);
+    expect(screen.getByText('AI policy')).toBeTruthy();
+  });
+
+  it('shows no badge on a platform without a policy', () => {
+    const { aiPolicy: _aiPolicy, aiPolicyUrl: _aiPolicyUrl, ...rest } = bandcampSource;
+    render(<SourceBadge source={rest as Source} url="https://bandcamp.com/some-artist" />);
+    expect(screen.queryByText('AI policy')).toBeNull();
+  });
+
   it('does not nest an <a> inside the platform link', () => {
     render(<SourceBadge source={bandcampSource} url="https://bandcamp.com/some-artist" />);
     const outerLink = screen.getByText('Bandcamp').closest('a');

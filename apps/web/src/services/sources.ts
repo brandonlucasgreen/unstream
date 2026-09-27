@@ -126,6 +126,8 @@ export const sources: Record<SourceId, Source> = {
     searchOnly: true,
     homepageUrl: 'https://ko-fi.com',
     artistPayoutPercent: '92-97%',
+    aiPolicy: 'formal',
+    aiPolicyUrl: 'https://help.ko-fi.com/hc/en-us/articles/19789627403293-Ko-fi-s-stance-on-AI',
   },
   hoopla: {
     id: 'hoopla',
