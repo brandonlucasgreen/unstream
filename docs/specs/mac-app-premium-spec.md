@@ -62,7 +62,7 @@ The app already watches what's playing. Let it keep score. The list is then deri
 ### State, and where it comes from
 
 - `bought` — set automatically from the Bandcamp collection import, or manually
-- `patron` — later, from Unstream patronage once it ships
+- `patron` — later, from Unstream patronage once it ships ([artist-patronage-spec.md](artist-patronage-spec.md) §3.3)
 - `not interested` — permanently dismissed, no nagging. Essential: a list that can't be
   pruned becomes a guilt machine, and guilt doesn't convert.
 

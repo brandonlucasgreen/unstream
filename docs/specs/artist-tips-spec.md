@@ -1,13 +1,19 @@
 ---
-status: Idea
+status: Superseded
 ---
 # Artist tips — spec
+
+> **Superseded 2026-09-27 by [artist-patronage-spec.md](artist-patronage-spec.md),** which keeps this
+> spec's Stripe structure (Standard accounts, direct charges) and legal reasoning and adds the tab, goals,
+> Play my city and Year in support. Two things here are stale: the dependency on the Open Books
+> membership (dropped in #535) and the Phase 0 click-out test. Kept for the Stripe comparison (§3) and
+> the legal reasoning (§5); don't build from it.
 
 **Written:** 2026-09-25
 **Status:** Draft. Unparked 2026-09-25: the lawyer review and LLC are no longer launch gates (§5).
 Phased after [open-books-membership-spec.md](open-books-membership-spec.md), and built only if the
 Phase 0 demand test (§9) says so.
-**Supersedes:** [patronage-spec.md](patronage-spec.md) — its Stripe structure (Express + destination
+**Supersedes:** `patronage-spec.md` (deleted 2026-09-27) — its Stripe structure (Express + destination
 charges) and migration naming (`migration-006`) are both wrong now. Its UI inventory is still a
 useful checklist.
 **Not:** the group pass in [unstream-patronage.md](unstream-patronage.md), which stays parked.
