@@ -44,8 +44,8 @@ export function SourceBadge({ source, url, isDirectLink, displayName, onClick }:
   const isBCFriday = source.id === 'bandcamp' && isBandcampFriday();
   const displayPayout = isBCFriday ? '~97%' : source.artistPayoutPercent;
   const hasPayoutPercent = !!source.artistPayoutPercent;
-  // Only show AI policy badges on marketplaces and decentralized platforms
-  const hasAiPolicy = (source.category === 'marketplace' || source.category === 'decentralized') && (source.aiPolicy === 'formal' || source.aiPolicy === 'discouraged');
+  // Shown for any platform that publishes an AI policy (set in the registry)
+  const hasAiPolicy = source.aiPolicy === 'formal' || source.aiPolicy === 'discouraged';
 
   const openAiPolicy = () => {
     analytics.trackPlatformClick(`${label} AI policy`);
