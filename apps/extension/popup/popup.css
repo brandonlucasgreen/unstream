@@ -849,11 +849,13 @@ body {
 
 /* Donate Button */
 .donate-btn {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   padding: 8px 16px;
-  background: #F7B731;
+  background: #FF5E5B;
   border-radius: 8px;
-  color: #1F2937;
+  color: #FFFFFF;
   font-size: 13px;
   font-weight: 500;
   text-decoration: none;
@@ -862,7 +864,7 @@ body {
 }
 
 .donate-btn:hover {
-  background: #F0A500;
+  background: #F04E4B;
 }
 
 /* Search Box */
