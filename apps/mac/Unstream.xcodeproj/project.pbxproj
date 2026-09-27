@@ -76,8 +76,10 @@
 		CDC7954A307466412F1510F7 /* ReleaseDetailTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F9816B25DDD3F9083C4796 /* ReleaseDetailTests.swift */; };
 		D9BD96BE052427D253DC2B97 /* MusicLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1398F260541794BA531DCA87 /* MusicLibrary.swift */; };
 		DAE01DF2F57D1D3074895182 /* SavedArtistsSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = B733B6764210C3CAE08F12E0 /* SavedArtistsSync.swift */; };
+		775A1C6488563A0D95879686 /* ArtistInterestStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC426BD2C23A450405F98F26 /* ArtistInterestStore.swift */; };
 		DAF5726D4B93EA321E5D4643 /* MediaObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 385B09E1C63EAE37830E8A04 /* MediaObserver.swift */; platformFilters = (macos, ); };
 		DBADE16054FA85BD2B41A041 /* SupportReminderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F23652EA5014C08DC2CA1249 /* SupportReminderView.swift */; platformFilters = (macos, ); };
+		EF5907C3389995E53DEBE83A /* ArtistInterestButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0D10E2D163AD597A2143223 /* ArtistInterestButtons.swift */; platformFilters = (macos, ); };
 		DEAB976819E6E900B9C1114A /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC148A11F868801384A78672 /* AppState.swift */; };
 		E4239CF7D84048CD92446197 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590FD31A0B703B21FFCCBEA7 /* ShareViewController.swift */; };
 		E7D6B491DE0D9B5CB5ACF98C /* SyncedArtistsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CDBA3376D2900CCBE870B2 /* SyncedArtistsView.swift */; };
@@ -186,6 +188,7 @@
 		B245CC3DBF71C4B066A96632 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		B4745357EE3AD119D3F7B059 /* BandcampFriday.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandcampFriday.swift; sourceTree = "<group>"; };
 		B733B6764210C3CAE08F12E0 /* SavedArtistsSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedArtistsSync.swift; sourceTree = "<group>"; };
+		FC426BD2C23A450405F98F26 /* ArtistInterestStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtistInterestStore.swift; sourceTree = "<group>"; };
 		BAF3C1FFEBBA8D8B753BDB0B /* NewReleasesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewReleasesListView.swift; sourceTree = "<group>"; };
 		BC8C8A39D8800BDBA893E0EA /* NowPlaying.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlaying.swift; sourceTree = "<group>"; };
 		BE9E59C365D8F116C435B8BC /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
@@ -202,6 +205,7 @@
 		EEEE83E95439F19BFC679216 /* ScrobbleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrobbleManager.swift; sourceTree = "<group>"; };
 		EF4E58F91C106A97A5179125 /* PopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverView.swift; sourceTree = "<group>"; };
 		F23652EA5014C08DC2CA1249 /* SupportReminderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportReminderView.swift; sourceTree = "<group>"; };
+		F0D10E2D163AD597A2143223 /* ArtistInterestButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtistInterestButtons.swift; sourceTree = "<group>"; };
 		F7F3423CC7E1B40B24DC4BC7 /* IndieArtistSuggestionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndieArtistSuggestionsView.swift; sourceTree = "<group>"; };
 		F8C60F297D83E962E0D769E7 /* SupportListTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportListTab.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -242,6 +246,7 @@
 				673FC4B1F41A233725896DB8 /* ReleaseCheckAPI.swift */,
 				8A74C90B5D9AAB9C4BE4A2BC /* ReleaseDetailService.swift */,
 				B733B6764210C3CAE08F12E0 /* SavedArtistsSync.swift */,
+				FC426BD2C23A450405F98F26 /* ArtistInterestStore.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -417,6 +422,7 @@
 				9B2D53C4C4BBA92385BF4F0A /* SettingsView.swift */,
 				1CDD15E71A80A31952A7720C /* ShortcutRecorderView.swift */,
 				F23652EA5014C08DC2CA1249 /* SupportReminderView.swift */,
+				F0D10E2D163AD597A2143223 /* ArtistInterestButtons.swift */,
 			);
 			path = macOS;
 			sourceTree = "<group>";
@@ -618,6 +624,7 @@
 				8916C6D428EE94E16E491566 /* ReleasesTab.swift in Sources */,
 				75EF27233764A8174CBE4753 /* SafariView.swift in Sources */,
 				DAE01DF2F57D1D3074895182 /* SavedArtistsSync.swift in Sources */,
+				775A1C6488563A0D95879686 /* ArtistInterestStore.swift in Sources */,
 				917C407BBA300BE70B9BDEFB /* ScrobbleManager.swift in Sources */,
 				8A4181366EB270C58A708C65 /* SearchBarView.swift in Sources */,
 				8C94768621D55383151FD59F /* SearchResponse.swift in Sources */,
@@ -634,6 +641,7 @@
 				2DAD19C15BCCBCC785AC823F /* SupportListView.swift in Sources */,
 				58812848E0C7D0D21F9044BF /* SupportReminder.swift in Sources */,
 				DBADE16054FA85BD2B41A041 /* SupportReminderView.swift in Sources */,
+				EF5907C3389995E53DEBE83A /* ArtistInterestButtons.swift in Sources */,
 				E7D6B491DE0D9B5CB5ACF98C /* SyncedArtistsView.swift in Sources */,
 				0F9D0A7FD89742003BD8D140 /* TipJarStore.swift in Sources */,
 				EAD31F1949071C4F694741C3 /* TipJarView.swift in Sources */,

@@ -131,6 +131,14 @@ struct ArtistResultView: View {
                 }
             }
 
+            // "I'd tip them" / Play my city — only where the artist has a row to record against.
+            // macOS only: no patronage surface ships on iOS (artist-patronage-spec.md §7).
+            #if os(macOS)
+            if let slug = artist.pageSlug {
+                ArtistInterestButtons(slug: slug, artistName: artist.name, interest: artist.interest)
+            }
+            #endif
+
             // The way from "I found them" to "here's what their records cost".
             //
             // Only shown when the search placed the artist — `pageSlug` is nil for an unverified

@@ -69,6 +69,8 @@ export interface ArtistLocation {
   countryCode?: string;
 }
 
+import type { InterestCounts } from '../../../../api/shared/artist-interest';
+
 // Search result from the unified API
 export interface SearchResult {
   id: string;
@@ -101,6 +103,8 @@ export interface SearchResult {
   wikipediaUrl?: string;
   // Geographic location from MusicBrainz, Bandcamp, or Mirlo enrichment
   location?: ArtistLocation;
+  // "I'd tip them" / Play my city counts at or above the public threshold. Absent when none.
+  interest?: InterestCounts;
 }
 
 // API response from /api/search/sources

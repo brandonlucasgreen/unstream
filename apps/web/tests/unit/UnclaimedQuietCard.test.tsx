@@ -19,6 +19,11 @@ vi.mock('src/components/PlatformIcon', () => ({
   PlatformIcon: ({ sourceId }: any) => <span data-testid={`platform-icon-${sourceId}`}>{sourceId}</span>,
 }));
 
+// The "I'd tip them" / Play my city row needs a signed-in context; it has its own test.
+vi.mock('src/components/ArtistSupportActions', () => ({
+  ArtistSupportActions: () => <div data-testid="artist-support-actions" />,
+}));
+
 // Mock SocialIcon
 vi.mock('src/components/SocialIcon', () => ({
   SocialIcon: ({ platform }: any) => <span data-testid={`social-icon-${platform}`}>{platform}</span>,

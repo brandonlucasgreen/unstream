@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { ArtistAnalytics } from './ArtistAnalytics';
+import { ArtistDemandPanel } from './ArtistDemandPanel';
 
 // The artist half of the dashboard: the profiles this user has claimed, with their stats.
 //
@@ -125,6 +126,7 @@ export function ClaimedArtistsSection() {
               </div>
             </div>
             <ArtistAnalytics slug={profile.slug} />
+            <ArtistDemandPanel slug={profile.slug} />
           </div>
         ))}
       </div>

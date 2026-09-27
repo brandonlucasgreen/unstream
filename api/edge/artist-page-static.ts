@@ -5,6 +5,7 @@ import { isBandcampFriday } from "../shared/bandcamp-friday.ts";
 import { mainLinkDividerIndexes } from "../shared/link-dividers.ts";
 import { leadingOfferSummary, orderedSourcePlatforms, formatReleaseDate, releaseTypeLabel } from "../shared/release-display.ts";
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
+import { PUBLIC_CITY_LIMIT, PUBLIC_INTEREST_THRESHOLD, formatCityCounts, isEmptyInterest, parseInterestRow, type InterestCounts } from "../shared/artist-interest.ts";
 
 /**
  * How many releases to list before summarising the rest.
@@ -235,6 +236,7 @@ export default async function handler(request: Request, context: Context) {
     let links: any[];
     let releases: ReleaseRow[] = [];
     let releaseCount = 0;
+    let interest: InterestCounts | null = null;
 
     try {
       const { data: artistData } = await supabase
@@ -321,6 +323,19 @@ export default async function handler(request: Request, context: Context) {
 
       releases = (releasesData as ReleaseRow[]) || [];
       releaseCount = count ?? releases.length;
+
+      // "I'd tip them" / Play my city counts, at the public threshold — the same RPC and the same
+      // threshold /api/artist-page uses, so crawlers and the SPA show the same numbers. A failure
+      // just leaves them off; it's decoration, not the page.
+      const { data: interestData } = await supabase
+        .rpc('get_artist_interest_counts', {
+          p_slugs: [artist.slug],
+          p_min: PUBLIC_INTEREST_THRESHOLD,
+          p_limit: PUBLIC_CITY_LIMIT,
+        })
+        .abortSignal(controller.signal);
+      const interestRow = Array.isArray(interestData) ? interestData[0] : null;
+      interest = interestRow ? parseInterestRow(interestRow) : null;
     } catch (e: any) {
       // Timeout or error — fall through to SPA
       clearTimeout(timeoutId);
@@ -402,6 +417,13 @@ export default async function handler(request: Request, context: Context) {
         ${payoutLabel}${bcFridayLabel}
       </a>`;
     }).join('');
+
+    // Plain text, counts only: the SPA owns the buttons (one route, one renderer).
+    const interestHtml = !interest || isEmptyInterest(interest) ? '' : `
+      <div style="margin-top:24px;font-size:14px;color:var(--muted)">
+        ${interest.tipCount > 0 ? `<p>${interest.tipCount} fans want to tip ${artistName}.</p>` : ''}
+        ${interest.cities.length > 0 ? `<p>Most wanted in: ${escapeHtml(formatCityCounts(interest.cities))}</p>` : ''}
+      </div>`;
 
     const socialLinksHtml = socialPlatforms.length > 0 ? `
       <div style="margin-top:24px">
@@ -510,6 +532,7 @@ export default async function handler(request: Request, context: Context) {
         <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px${featuredEmbedHtml ? ';margin-top:24px' : ''}">Support directly</h2>
         <div style="display:grid;gap:8px">${platformLinksHtml}</div>
       ` : ''}
+      ${interestHtml}
       ${socialLinksHtml}
       ${releasesHtml}
     </div>
@@ -611,6 +634,7 @@ export default async function handler(request: Request, context: Context) {
         <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Support directly</h2>
         <div style="display:grid;gap:8px">${platformLinksHtml}</div>
       ` : ''}
+      ${interestHtml}
       ${socialLinksHtml}
       ${releasesHtml}
       <div style="margin-top:24px;padding:16px;border-radius:12px;border:1px solid var(--border);text-align:center">

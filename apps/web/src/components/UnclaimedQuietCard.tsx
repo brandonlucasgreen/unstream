@@ -2,6 +2,7 @@ import { Fragment, useState } from 'react';
 import type { ArtistPagePayload } from '../types/artist-page';
 import { sources } from '../services/sources';
 import { analytics } from '../services/analytics';
+import { ArtistSupportActions } from './ArtistSupportActions';
 import { ReleasesSection } from './ReleasesSection';
 import { SocialIcon } from './SocialIcon';
 import { SourceBadge } from './SourceBadge';
@@ -134,6 +135,20 @@ export function UnclaimedQuietCard({ payload, slug, justClaimed, onSave, onUnsav
           </div>
         </div>
       )}
+
+      {/* "I'd tip them" / Play my city, with the public counts (spec §3.5, §3.6). */}
+      <div className="pb-8">
+        <h2 className="text-[11px] uppercase tracking-wider text-text-muted mb-3">
+          Tell {artist.name} you're here
+        </h2>
+        <ArtistSupportActions
+          slug={payload.artist.slug}
+          artistName={payload.artist.name}
+          interest={payload.interest}
+          variant="page"
+          claimHref={`/claim/${payload.artist.slug}`}
+        />
+      </div>
 
       {/* Social Links */}
       {socialLinks.length > 0 && (

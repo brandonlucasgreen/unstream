@@ -8,6 +8,7 @@ import { LoginInterstitial } from './LoginInterstitial';
 import { ResultCardSocial } from './ResultCardSocial';
 import { ResultCardActions } from './ResultCardActions';
 import { AdminRemoveLinkDialog } from './AdminRemoveLinkDialog';
+import { ArtistSupportActions } from './ArtistSupportActions';
 
 import {
   categorizePlatforms,
@@ -117,6 +118,10 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect, onLink
 
   const hasRelease = !!latestRelease && platformsWithRelease.length > 0;
 
+  // "I'd tip them" / Play my city lead the patronage row (spec §3.1: the Tip button sits there,
+  // first). Only for an artist with a page slug — the interest is recorded against that row.
+  const supportSlug = result.type === 'artist' ? (result.claimedSlug || result.knownSlug) : undefined;
+
   return (
     <div className="result-card group relative">
       <ResultCardHeader
@@ -166,11 +171,19 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect, onLink
               onRemoveLink={handleRemoveLink}
             />
           )}
-          {categorized.patronage.length > 0 && (
+          {(categorized.patronage.length > 0 || supportSlug) && (
             <ResultCardPlatforms
               platforms={categorized.patronage}
               category="patronage"
               onRemoveLink={handleRemoveLink}
+              leading={supportSlug && (
+                <ArtistSupportActions
+                  slug={supportSlug}
+                  artistName={result.name}
+                  interest={result.interest}
+                  variant="card"
+                />
+              )}
             />
           )}
           {categorized.decentralized.length > 0 && (

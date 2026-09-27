@@ -10,6 +10,11 @@ import type { ArtistPagePayload } from 'src/types/artist-page';
 // rather than asserting whatever today happens to be. Both dates are Pacific noon, the
 // timezone isBandcampFriday() compares in. Keep them in step with BANDCAMP_FRIDAY_DATES in
 // src/utils/bandcamp-friday.ts when that list is updated for a new year.
+// The "I'd tip them" / Play my city row needs a signed-in context; it has its own test.
+vi.mock('src/components/ArtistSupportActions', () => ({
+  ArtistSupportActions: () => <div data-testid="artist-support-actions" />,
+}));
+
 const ORDINARY_FRIDAY = new Date('2026-08-14T12:00:00-07:00');
 const BANDCAMP_FRIDAY = new Date('2026-08-07T12:00:00-07:00');
 

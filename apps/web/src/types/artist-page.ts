@@ -1,3 +1,5 @@
+import type { InterestCounts } from '../../../../api/shared/artist-interest';
+
 export interface ArtistPagePayload {
   artist: {
     id: string;
@@ -49,4 +51,6 @@ export interface ArtistPagePayload {
   /** Total before the cap, so the UI can say how many are not shown. */
   releaseCount?: number;
   bandcampFriday: boolean;
+  /** "I'd tip them" / Play my city counts at or above the public threshold. Older cached responses omit it. */
+  interest?: InterestCounts;
 }
