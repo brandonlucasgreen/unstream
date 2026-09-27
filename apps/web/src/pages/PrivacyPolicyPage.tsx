@@ -27,7 +27,7 @@ export function PrivacyPolicyPage() {
         <div className="max-w-3xl mx-auto">
           <article className="prose prose-lg dark:prose-invert max-w-none prose-a:text-accent-primary text-text-primary">
             <h2 className="font-display text-3xl font-semibold text-text-primary mb-6">Privacy Policy</h2>
-            <p className="text-text-muted text-sm mb-8">Last updated: August 8, 2026</p>
+            <p className="text-text-muted text-sm mb-8">Last updated: September 27, 2026</p>
 
             <div className="mb-10 p-5 rounded-lg bg-bg-secondary border border-border not-prose">
               <h3 className="font-display text-xl font-semibold text-text-primary mb-3">The short version</h3>
@@ -224,7 +224,7 @@ export function PrivacyPolicyPage() {
                 <li><strong>GoatCounter</strong> — cookie-free website analytics.</li>
                 <li><strong>Sentry</strong> — error reports, configured not to send IP addresses, cookies or request headers, and with the query string stripped from the page address.</li>
                 <li><strong>Buttondown</strong> — the newsletter, if you subscribe.</li>
-                <li><strong>Buy Me a Coffee</strong> and <strong>Apple</strong> — support and in-app purchases. We never see your payment details.</li>
+                <li><strong>Ko-fi</strong> and <strong>Apple</strong> — support and in-app purchases. We never see your payment details.</li>
                 <li><strong>Discord</strong> — if you use the Unstream bot in a Discord server.</li>
               </ul>
               <P>

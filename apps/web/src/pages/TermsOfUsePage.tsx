@@ -24,7 +24,7 @@ export function TermsOfUsePage() {
         <div className="max-w-3xl mx-auto">
           <article className="prose prose-lg dark:prose-invert max-w-none prose-a:text-accent-primary text-text-primary">
             <h2 className="font-display text-3xl font-semibold text-text-primary mb-6">Terms of Use</h2>
-            <p className="text-text-muted text-sm mb-8">Last updated: August 8, 2026</p>
+            <p className="text-text-muted text-sm mb-8">Last updated: September 27, 2026</p>
 
             <div className="mb-10 p-5 rounded-lg bg-bg-secondary border border-border not-prose">
               <h3 className="font-display text-xl font-semibold text-text-primary mb-3">The short version</h3>
@@ -380,12 +380,12 @@ export function TermsOfUsePage() {
 
             <Section n={13} title="Donations and support purchases">
               <P>
-                Unstream is free. If you choose to support it, you can do so through Buy Me a Coffee or make an in-app
+                Unstream is free. If you choose to support it, you can do so through Ko-fi or make an in-app
                 support purchase in the Apple apps. Both are voluntary, and neither buys you a feature, a service
                 level, priority support, or influence over what we build.
               </P>
               <P>
-                We don't handle your payment details. Buy Me a Coffee and Apple process those payments under their own terms,
+                We don't handle your payment details. Ko-fi and Apple process those payments under their own terms,
                 and refunds go through them, not us. Donations are generally non-refundable, and Unstream is not a
                 charity — donations aren't tax-deductible.
               </P>

@@ -256,7 +256,7 @@ function renderPage(query: string, results: SearchResult[], error?: string): str
         <span class="footer-dot">&#x2022;</span>
         <a href="mailto:support@unstream.stream">Support</a>
         <span class="footer-dot">&#x2022;</span>
-        <a href="https://liberapay.com/brandonlucasgreen/donate" target="_blank" rel="noopener noreferrer">Donate</a>
+        <a href="/support">Donate</a>
         <span class="footer-dot">&#x2022;</span>
         <a href="/privacy-policy">Privacy</a>
         <span class="footer-dot">&#x2022;</span>
