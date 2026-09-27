@@ -350,7 +350,7 @@ export interface MergeResult {
  * loser row in place and the merge can simply be re-run. `dryRun` reports the same step list without
  * writing, and is the default for every caller.
  *
- * The seven tables carrying `artist_id`, and what each needs:
+ * The tables carrying `artist_id`, and what each needs:
  *   artist_links           UNIQUE(artist_id, platform) — the winner's link wins a platform clash
  *   artist_analytics       plain reassign; history from both rows should sum
  *   artist_profiles        UNIQUE(artist_id) — only moves when the winner has none
@@ -358,6 +358,7 @@ export interface MergeResult {
  *   releases               UNIQUE(artist_id, slug) — only titles the winner lacks move over
  *   saved_artists          no FK, keyed by (user_id, artist_slug) — the SLUG must be rewritten
  *   verification_requests  plain reassign
+ *   tip_interest, city_interest  PK(artist_id, user_id) — a fan's winner-side row wins a clash
  */
 export async function mergeArtistPair(
   client: SupabaseClient,
@@ -482,6 +483,28 @@ export async function mergeArtistPair(
   if (!dryRun && (vr ?? []).length > 0) {
     await client.from('verification_requests')
       .update({ artist_id: winner.id }).eq('artist_id', loser.id);
+  }
+
+  // --- tip_interest / city_interest: PRIMARY KEY (artist_id, user_id), ON DELETE CASCADE. A fan
+  // who tapped only the loser moves over; one who tapped both keeps their winner-side row (for a
+  // city, the one they set on the artist that survives). Without this the delete below would
+  // cascade their taps away and the claim hook ("14 fans want to tip you") would shrink on merge.
+  for (const table of ['tip_interest', 'city_interest'] as const) {
+    const { data: onLoser } = await client.from(table).select('user_id').eq('artist_id', loser.id);
+    const { data: onWinner } = await client.from(table).select('user_id').eq('artist_id', winner.id);
+    const tappedWinner = new Set((onWinner ?? []).map((r: { user_id: string }) => r.user_id));
+    const movable = (onLoser ?? [])
+      .map((r: { user_id: string }) => r.user_id)
+      .filter((u: string) => !tappedWinner.has(u));
+    note(table, 'reassign', movable.length);
+    note(table, 'drop (fan had already tapped the winner)', (onLoser ?? []).length - movable.length);
+    if (!dryRun && movable.length > 0) {
+      const { error } = await client.from(table)
+        .update({ artist_id: winner.id })
+        .eq('artist_id', loser.id)
+        .in('user_id', movable);
+      if (error) return { ...base, steps, refused: `${table}: ${error.message}` };
+    }
   }
 
   // --- saved_artists: keyed by (user_id, artist_slug) with NO foreign key, and artist_id is

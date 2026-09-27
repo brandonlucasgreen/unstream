@@ -17,6 +17,12 @@ const mocks = vi.hoisted(() => ({
   captureMessage: vi.fn(),
   isPublishedArtistSlug: vi.fn(),
   resolveArtistSlugAlias: vi.fn(),
+  getArtistInterestCounts: vi.fn(),
+}));
+
+vi.mock('../interest-counts', () => ({
+  getArtistInterestCounts: mocks.getArtistInterestCounts,
+  PUBLIC_COUNTS: { min: 3, limit: 5 },
 }));
 
 vi.mock('../db', () => ({
@@ -76,6 +82,7 @@ describe('GET /api/artist-page', () => {
     mocks.checkSentryDedup.mockResolvedValue(true);
     mocks.isPublishedArtistSlug.mockReturnValue(false);
     mocks.resolveArtistSlugAlias.mockResolvedValue({ canonical: null, failed: false });
+    mocks.getArtistInterestCounts.mockResolvedValue(new Map());
   });
 
   it('returns 200 with links for an unclaimed artist', async () => {
@@ -351,6 +358,27 @@ describe('GET /api/artist-page', () => {
       const res = await call('not-an-artist');
 
       expect(res.statusCode).toBe(404);
+    });
+  });
+
+  describe("\"I'd tip them\" and Play my city counts", () => {
+    it('carries the public counts, read with the public threshold', async () => {
+      mocks.getArtistProfileBySlug.mockResolvedValue({ bundle: { artist: artistRow(), profile: null, links }, failed: false });
+      mocks.getArtistInterestCounts.mockResolvedValue(new Map([
+        ['funkadelic', { tipCount: 14, cities: [{ label: 'Boston', count: 12 }] }],
+      ]));
+      const res = await call('funkadelic');
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body).interest).toEqual({ tipCount: 14, cities: [{ label: 'Boston', count: 12 }] });
+      expect(mocks.getArtistInterestCounts).toHaveBeenCalledWith(['funkadelic'], { min: 3, limit: 5 });
+    });
+
+    it('still renders the page when the counts read fails', async () => {
+      mocks.getArtistProfileBySlug.mockResolvedValue({ bundle: { artist: artistRow(), profile: null, links }, failed: false });
+      mocks.getArtistInterestCounts.mockResolvedValue(null);
+      const res = await call('funkadelic');
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body).interest).toEqual({ tipCount: 0, cities: [] });
     });
   });
 });

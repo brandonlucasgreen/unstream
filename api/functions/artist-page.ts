@@ -12,6 +12,7 @@ import { isBandcampFriday } from '../shared/bandcamp-friday';
 import { leadingOfferSummary, orderedSourcePlatforms } from '../shared/release-display';
 import { mainLinkDividerIndexes } from '../shared/link-dividers';
 import { sanitizeEmbed } from './artist-profile';
+import { getArtistInterestCounts, PUBLIC_COUNTS } from './interest-counts';
 
 const CORS_HEADERS: Record<string, string> = {
   'Content-Type': 'application/json',
@@ -167,7 +168,13 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     // here bounds the payload, not what a fan can reach: six pages, which covers every catalogue
     // measured so far (16 for Sufjan Stevens, 13 for Explosions in the Sky, 33 for the largest
     // live Mirlo artist). Beyond it the list says how many more exist rather than fetching them.
-    const { releases, total: releaseCount } = await getArtistReleases(artistRow.id, 60);
+    // "I'd tip them" and Play my city counts, at or above the public threshold (the RPC applies
+    // it). Fetched alongside the releases; a failed read renders the page without them, reported
+    // inside getArtistInterestCounts rather than shown as "nobody asked".
+    const [{ releases, total: releaseCount }, interestCounts] = await Promise.all([
+      getArtistReleases(artistRow.id, 60),
+      getArtistInterestCounts([artistRow.slug], PUBLIC_COUNTS),
+    ]);
 
     // "from $8 · ≈$6.80 to artist", and the platforms ordered artist-paying-first.
     //
@@ -211,6 +218,7 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       releases: releasesWithSummary,
       releaseCount,
       bandcampFriday: bcFriday,
+      interest: interestCounts?.get(artistRow.slug) ?? { tipCount: 0, cities: [] },
     };
 
     return {

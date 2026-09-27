@@ -5,6 +5,7 @@ import { cacheGetOrFetch, cachePrefetch, artistCacheKey, type PrefetchedCache } 
 import { persistSearchResults, getArtistBySlug, getArtistsBySlugs, artistSlug, getMergeOverrides, getLinkSuppressions, findKnownArtistSlugsByName } from './db';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
+import { getArtistInterestCounts, PUBLIC_COUNTS } from './interest-counts';
 import { parseMirloArtistSearch } from './search-parsers';
 import {
   type SourceId,
@@ -38,6 +39,8 @@ import {
   bandcampSubdomainOf,
   bandcampSubdomainConflicts,
   musicBrainzArtistQuery,
+  attachInterestCounts,
+  resultPageSlug,
 } from './search-utils';
 
 // Import shared enrichment functions
@@ -2065,6 +2068,14 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     // prevent. One definition, on the server.
     //
     attachArtistPageSlugs(finalResults);
+
+    // Public "I'd tip them" / Play my city counts, so a result card can show them without a
+    // request per card. One RPC for the whole page, read after the slugs exist.
+    const artistSlugs = finalResults
+      .filter(r => r.type === 'artist')
+      .map(resultPageSlug)
+      .filter((s): s is string => !!s);
+    attachInterestCounts(finalResults, await getArtistInterestCounts(artistSlugs, PUBLIC_COUNTS));
 
     const response: SearchResponse = {
       query, // Return original query for display

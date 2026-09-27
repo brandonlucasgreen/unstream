@@ -1,5 +1,6 @@
 // Pure utility functions and types extracted from search-sources.ts
 // No HTTP, cache, or database dependencies.
+import { isEmptyInterest, type InterestCounts } from '../shared/artist-interest';
 
 export type SourceId =
   | 'bandcamp'
@@ -101,6 +102,9 @@ export interface AggregatedResult {
   };
   wikipediaSummary?: string;
   wikipediaUrl?: string;
+  // "I'd tip them" and Play my city counts at or above the public threshold
+  // (docs/specs/artist-patronage-spec.md §3.5, §3.6). Absent when there's nothing to show.
+  interest?: InterestCounts;
 }
 
 export interface SearchResponse {
@@ -1151,3 +1155,24 @@ export function filterAndSort(results: AggregatedResult[], query: string): Aggre
   return filtered;
 }
 
+
+/** The slug an artist result's page lives at, if it has one. */
+export function resultPageSlug(result: AggregatedResult): string | undefined {
+  return result.claimedSlug || result.knownSlug;
+}
+
+/**
+ * Put each artist's public interest counts on their result, in place. `counts` is null when the
+ * read failed; results then go out without counts, the same as an artist nobody has asked about.
+ */
+export function attachInterestCounts(
+  results: AggregatedResult[],
+  counts: Map<string, InterestCounts> | null,
+): void {
+  if (!counts || counts.size === 0) return;
+  for (const result of results) {
+    const slug = resultPageSlug(result);
+    const found = slug ? counts.get(slug) : undefined;
+    if (found && !isEmptyInterest(found)) result.interest = found;
+  }
+}

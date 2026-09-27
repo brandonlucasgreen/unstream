@@ -204,6 +204,12 @@
   to = "/.netlify/functions/saved-artists"
   status = 200
 
+# Artist patronage phase 1: "I'd tip them" and Play my city (docs/specs/artist-patronage-spec.md).
+[[redirects]]
+  from = "/api/artist-interest"
+  to = "/.netlify/functions/artist-interest"
+  status = 200
+
 [[redirects]]
   from = "/api/me/settings"
   to = "/.netlify/functions/me-settings"

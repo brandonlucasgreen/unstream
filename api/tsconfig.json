@@ -103,6 +103,12 @@
     "functions/desktop-appcast.ts",
     "functions/desktop-version.ts",
     "functions/__tests__/desktop-appcast.test.ts",
-    "functions/analytics-dashboard.ts"
+    "functions/analytics-dashboard.ts",
+    "shared/artist-interest.ts",
+    "functions/interest-counts.ts",
+    "functions/artist-interest.ts",
+    "functions/artist-page.ts",
+    "functions/__tests__/artist-interest.test.ts",
+    "functions/__tests__/artist-interest-shared.test.ts"
   ]
 }

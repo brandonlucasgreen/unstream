@@ -57,8 +57,13 @@ function makeClient() {
             for (const r of hit) Object.assign(r, patch);
             return Promise.resolve({ data: null, error: null });
           };
-          return { eq: (c: string, v: unknown) => { filters.push([c, v]); return apply(); },
-                   in: (c: string, v: unknown[]) => { ins.push([c, v]); return apply(); } };
+          // Chainable like PostgREST's builder: filters accumulate, and awaiting applies them.
+          const chain = {
+            eq: (c: string, v: unknown) => { filters.push([c, v]); return chain; },
+            in: (c: string, v: unknown[]) => { ins.push([c, v]); return chain; },
+            then: (res: (r: unknown) => unknown, rej?: (e: unknown) => unknown) => apply().then(res, rej),
+          };
+          return chain;
         },
         delete() {
           const apply = () => {
@@ -365,6 +370,28 @@ describe('mergeArtistPair — what it writes', () => {
 
     // UNIQUE(user_id, artist_slug) would reject the rewrite.
     expect(tables.saved_artists.map(s => s.id)).toEqual(['winner-save']);
+  });
+
+  it("moves a fan's \"I'd tip them\" and city taps, keeping the winner-side row on a clash", async () => {
+    const pair = await provenancePair();
+    tables.tip_interest = [
+      { artist_id: 'l', user_id: 'u1' },
+      { artist_id: 'l', user_id: 'u2' },
+      { artist_id: 'w', user_id: 'u2' },
+    ];
+    tables.city_interest = [
+      { artist_id: 'l', user_id: 'u1', city_key: 'leeds', city_label: 'Leeds' },
+      { artist_id: 'l', user_id: 'u2', city_key: 'york', city_label: 'York' },
+      { artist_id: 'w', user_id: 'u2', city_key: 'boston', city_label: 'Boston' },
+    ];
+    await mergeArtistPair(client, pair, { dryRun: false });
+
+    // u1 only tapped the loser: follows the merge. u2 tapped both: the PK would reject a move, so
+    // the loser row stays behind for the cascade and the winner row (Boston) is what counts.
+    expect(tables.tip_interest.filter(r => r.artist_id === 'w').map(r => r.user_id).sort()).toEqual(['u1', 'u2']);
+    expect(tables.city_interest.find(r => r.user_id === 'u1')?.artist_id).toBe('w');
+    expect(tables.city_interest.find(r => r.user_id === 'u2' && r.artist_id === 'w')?.city_label).toBe('Boston');
+    expect(tables.city_interest.find(r => r.user_id === 'u2' && r.city_label === 'York')?.artist_id).toBe('l');
   });
 
   it('reassigns a profile only when the winner has none', async () => {
