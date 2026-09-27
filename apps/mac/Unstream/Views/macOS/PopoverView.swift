@@ -30,6 +30,7 @@ struct PopoverView: View {
     @ObservedObject private var updater = SparkleUpdater.shared
     @State private var selectedTab: PopoverTab = .search
     @State private var showSignIn = false
+    @State private var showSupportReminder = false
     @State private var pollTask: Task<Void, Never>?
     /// Where the popover has drilled to. Empty means the normal Search/Saved tabs.
     ///
@@ -69,6 +70,9 @@ struct PopoverView: View {
             showSignIn = false
             route = []
             focusSearchField()
+            // Decided per open, and only when the empty state is what's showing: an artist on
+            // screen always comes first, and a hidden callout shouldn't use up its turn.
+            showSupportReminder = appState.displayMode == .empty && SupportReminderStore.evaluate()
         }
         .onChange(of: selectedTab) { tab in
             if tab == .search { focusSearchField() }
@@ -295,6 +299,9 @@ struct PopoverView: View {
 
                         case .empty:
                             EmptyStateView()
+                            if showSupportReminder {
+                                SupportReminderView(isVisible: $showSupportReminder)
+                            }
                         }
                     }
                 }
