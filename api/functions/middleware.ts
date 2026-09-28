@@ -381,6 +381,10 @@ export const ALLOWED_OUTBOUND_HOSTNAMES = new Set([
   // Discord
   'discord.com',
   'discordapp.com',
+  // Stripe, for artist tips (api/functions/stripe.ts). Only the API host: Checkout, onboarding and
+  // the dashboard are hosted pages the fan or artist's browser opens, never fetched server-side,
+  // and there is no Stripe.js — see docs/specs/artist-patronage-spec.md §4.
+  'api.stripe.com',
 ]);
 
 /**

@@ -18,6 +18,13 @@ const mocks = vi.hoisted(() => ({
   isPublishedArtistSlug: vi.fn(),
   resolveArtistSlugAlias: vi.fn(),
   getArtistInterestCounts: vi.fn(),
+  getTipsLiveSlugs: vi.fn(),
+  getGoals: vi.fn(),
+}));
+
+vi.mock('../tips-db', () => ({
+  getTipsLiveSlugs: mocks.getTipsLiveSlugs,
+  getGoals: mocks.getGoals,
 }));
 
 vi.mock('../interest-counts', () => ({
@@ -28,6 +35,7 @@ vi.mock('../interest-counts', () => ({
 vi.mock('../db', () => ({
   getArtistProfileBySlug: mocks.getArtistProfileBySlug,
   getArtistReleases: mocks.getArtistReleases,
+  getClient: () => ({}),
   resolveArtistSlugAlias: mocks.resolveArtistSlugAlias,
 }));
 
@@ -83,6 +91,8 @@ describe('GET /api/artist-page', () => {
     mocks.isPublishedArtistSlug.mockReturnValue(false);
     mocks.resolveArtistSlugAlias.mockResolvedValue({ canonical: null, failed: false });
     mocks.getArtistInterestCounts.mockResolvedValue(new Map());
+    mocks.getTipsLiveSlugs.mockResolvedValue(new Set());
+    mocks.getGoals.mockResolvedValue([]);
   });
 
   it('returns 200 with links for an unclaimed artist', async () => {
@@ -379,6 +389,23 @@ describe('GET /api/artist-page', () => {
       const res = await call('funkadelic');
       expect(res.statusCode).toBe(200);
       expect(JSON.parse(res.body).interest).toEqual({ tipCount: 0, cities: [] });
+    });
+  });
+
+  describe('tips', () => {
+    it('says the artist is taking tips, with their open goals', async () => {
+      mocks.getArtistProfileBySlug.mockResolvedValue({ bundle: { artist: artistRow(), profile: null, links }, failed: false });
+      mocks.getTipsLiveSlugs.mockResolvedValue(new Set(['funkadelic']));
+      mocks.getGoals.mockResolvedValue([{ id: 'g1', title: 'Vinyl', targetCents: 240000, raisedCents: 500, cityLabel: null, status: 'open' }]);
+      const body = JSON.parse((await call('funkadelic')).body);
+      expect(body.tips).toEqual({ enabled: true, goals: [expect.objectContaining({ title: 'Vinyl', raisedCents: 500 })] });
+    });
+
+    it('shows no goals and no Tip for an artist not taking tips', async () => {
+      mocks.getArtistProfileBySlug.mockResolvedValue({ bundle: { artist: artistRow(), profile: null, links }, failed: false });
+      const body = JSON.parse((await call('funkadelic')).body);
+      expect(body.tips).toEqual({ enabled: false, goals: [] });
+      expect(mocks.getGoals).not.toHaveBeenCalled();
     });
   });
 });

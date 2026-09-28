@@ -8,7 +8,7 @@ import {
   isEmptyInterest,
   parseInterestRow,
 } from '../../shared/artist-interest';
-import { attachInterestCounts, type AggregatedResult } from '../search-utils';
+import { attachInterestCounts, attachTipsEnabled, type AggregatedResult } from '../search-utils';
 
 describe('cleanCityLabel', () => {
   it('trims and collapses whitespace', () => {
@@ -89,5 +89,17 @@ describe('attachInterestCounts', () => {
     attachInterestCounts([r], null);
     attachInterestCounts([r], new Map([['big-thief', { tipCount: 0, cities: [] }]]));
     expect(r.interest).toBeUndefined();
+  });
+});
+
+describe('attachTipsEnabled', () => {
+  it('flags only results whose page slug is taking tips', () => {
+    const taking = { id: 'a', name: 'A', type: 'artist' as const, platforms: [], claimedSlug: 'a' };
+    const not = { id: 'b', name: 'B', type: 'artist' as const, platforms: [], knownSlug: 'b' };
+    attachTipsEnabled([taking, not], new Set(['a']));
+    expect(taking).toHaveProperty('tipsEnabled', true);
+    expect(not).not.toHaveProperty('tipsEnabled');
+    attachTipsEnabled([not], null);
+    expect(not).not.toHaveProperty('tipsEnabled');
   });
 });

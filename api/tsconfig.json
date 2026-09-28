@@ -109,6 +109,21 @@
     "functions/artist-interest.ts",
     "functions/artist-page.ts",
     "functions/__tests__/artist-interest.test.ts",
-    "functions/__tests__/artist-interest-shared.test.ts"
+    "functions/__tests__/artist-interest-shared.test.ts",
+    "shared/tips.ts",
+    "functions/stripe.ts",
+    "functions/tips-db.ts",
+    "functions/tips-http.ts",
+    "functions/tips-connect.ts",
+    "functions/tips-settings.ts",
+    "functions/tips-checkout.ts",
+    "functions/tips-webhook.ts",
+    "functions/admin-tips.ts",
+    "functions/__tests__/tips-math.test.ts",
+    "functions/__tests__/stripe-client.test.ts",
+    "functions/__tests__/tips-checkout.test.ts",
+    "functions/__tests__/tips-webhook.test.ts",
+    "functions/__tests__/tips-connect-settings.test.ts",
+    "functions/__tests__/admin-tips.test.ts"
   ]
 }

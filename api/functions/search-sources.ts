@@ -6,6 +6,7 @@ import { persistSearchResults, getArtistBySlug, getArtistsBySlugs, artistSlug, g
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
 import { getArtistInterestCounts, PUBLIC_COUNTS } from './interest-counts';
+import { getTipsLiveSlugs } from './tips-db';
 import { parseMirloArtistSearch } from './search-parsers';
 import {
   type SourceId,
@@ -40,6 +41,7 @@ import {
   bandcampSubdomainConflicts,
   musicBrainzArtistQuery,
   attachInterestCounts,
+  attachTipsEnabled,
   resultPageSlug,
 } from './search-utils';
 
@@ -2069,13 +2071,18 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     //
     attachArtistPageSlugs(finalResults);
 
-    // Public "I'd tip them" / Play my city counts, so a result card can show them without a
-    // request per card. One RPC for the whole page, read after the slugs exist.
+    // Public "I'd tip them" / Play my city counts and who is taking tips, so a result card can
+    // show them without a request per card. One read of each for the whole page.
     const artistSlugs = finalResults
       .filter(r => r.type === 'artist')
       .map(resultPageSlug)
       .filter((s): s is string => !!s);
-    attachInterestCounts(finalResults, await getArtistInterestCounts(artistSlugs, PUBLIC_COUNTS));
+    const [interest, tipsLive] = await Promise.all([
+      getArtistInterestCounts(artistSlugs, PUBLIC_COUNTS),
+      getTipsLiveSlugs(artistSlugs),
+    ]);
+    attachInterestCounts(finalResults, interest);
+    attachTipsEnabled(finalResults, tipsLive);
 
     const response: SearchResponse = {
       query, // Return original query for display

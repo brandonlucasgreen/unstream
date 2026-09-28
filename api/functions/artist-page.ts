@@ -3,7 +3,7 @@
 // and releases for an unclaimed one.
 // This is the data source for the React SPA artist page (UNS-102).
 
-import { getArtistProfileBySlug, getArtistReleases, resolveArtistSlugAlias } from './db';
+import { getArtistProfileBySlug, getArtistReleases, getClient, resolveArtistSlugAlias } from './db';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { Sentry } from '../lib/sentry';
 import { isPublishedArtistSlug } from '../shared/published-artist-slugs';
@@ -13,6 +13,7 @@ import { leadingOfferSummary, orderedSourcePlatforms } from '../shared/release-d
 import { mainLinkDividerIndexes } from '../shared/link-dividers';
 import { sanitizeEmbed } from './artist-profile';
 import { getArtistInterestCounts, PUBLIC_COUNTS } from './interest-counts';
+import { getGoals, getTipsLiveSlugs } from './tips-db';
 
 const CORS_HEADERS: Record<string, string> = {
   'Content-Type': 'application/json',
@@ -171,10 +172,13 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     // "I'd tip them" and Play my city counts, at or above the public threshold (the RPC applies
     // it). Fetched alongside the releases; a failed read renders the page without them, reported
     // inside getArtistInterestCounts rather than shown as "nobody asked".
-    const [{ releases, total: releaseCount }, interestCounts] = await Promise.all([
+    const [{ releases, total: releaseCount }, interestCounts, tipsLive] = await Promise.all([
       getArtistReleases(artistRow.id, 60),
       getArtistInterestCounts([artistRow.slug], PUBLIC_COUNTS),
+      getTipsLiveSlugs([artistRow.slug]),
     ]);
+    const tipsEnabled = tipsLive?.has(artistRow.slug) ?? false;
+    const goals = tipsEnabled ? await readOpenGoals(artistRow.id) : [];
 
     // "from $8 · ≈$6.80 to artist", and the platforms ordered artist-paying-first.
     //
@@ -219,6 +223,8 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       releaseCount,
       bandcampFriday: bcFriday,
       interest: interestCounts?.get(artistRow.slug) ?? { tipCount: 0, cities: [] },
+      // Tip links to /tip/{slug} when true; "I'd tip them" otherwise. Goals only while taking tips.
+      tips: { enabled: tipsEnabled, goals },
     };
 
     return {
@@ -240,5 +246,16 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       headers: CORS_HEADERS,
       body: JSON.stringify({ error: 'Internal server error' }),
     };
+  }
+}
+/** Open goals for the page. Decoration: a failed read shows none rather than failing the page. */
+async function readOpenGoals(artistId: string) {
+  const client = getClient();
+  if (!client) return [];
+  try {
+    return await getGoals(client, artistId, { openOnly: true });
+  } catch (err) {
+    Sentry.captureException(err, { extra: { context: 'artist-page.goals' } });
+    return [];
   }
 }

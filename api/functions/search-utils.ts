@@ -105,6 +105,9 @@ export interface AggregatedResult {
   // "I'd tip them" and Play my city counts at or above the public threshold
   // (docs/specs/artist-patronage-spec.md §3.5, §3.6). Absent when there's nothing to show.
   interest?: InterestCounts;
+  // The artist takes tips on Unstream right now, so the card shows Tip instead of "I'd tip them".
+  // Absent otherwise.
+  tipsEnabled?: true;
 }
 
 export interface SearchResponse {
@@ -1174,5 +1177,14 @@ export function attachInterestCounts(
     const slug = resultPageSlug(result);
     const found = slug ? counts.get(slug) : undefined;
     if (found && !isEmptyInterest(found)) result.interest = found;
+  }
+}
+
+/** Mark the results whose artist is taking tips, in place. `live` is null when the read failed. */
+export function attachTipsEnabled(results: AggregatedResult[], live: Set<string> | null): void {
+  if (!live || live.size === 0) return;
+  for (const result of results) {
+    const slug = resultPageSlug(result);
+    if (slug && live.has(slug)) result.tipsEnabled = true;
   }
 }
