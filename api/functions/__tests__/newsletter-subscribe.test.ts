@@ -65,14 +65,32 @@ describe('newsletter-subscribe handler', () => {
   it('does not send a subscriber type, so Buttondown runs its double opt-in', async () => {
     fetchMock.mockResolvedValue(buttondownReply(201, { id: 'abc' }));
 
-    await handler(post({ email: 'fan@example.com', source: 'guides' }));
+    await handler(post({ email: 'fan@example.com', source: 'platforms' }));
 
     const sent = JSON.parse(fetchMock.mock.calls[0][1].body);
     // `type: 'regular'` would bypass the confirmation email and let anyone subscribe an
     // address they don't own. Its absence is the feature.
     expect(sent).not.toHaveProperty('type');
     expect(sent.email_address).toBe('fan@example.com');
-    expect(sent.tags).toEqual(['guides']);
+    expect(sent.tags).toEqual(['platforms']);
+  });
+
+  it('tags account signups by who signed up', async () => {
+    fetchMock.mockResolvedValue(buttondownReply(201, { id: 'abc' }));
+
+    await handler(post({ email: 'artist@example.com', source: 'artist' }));
+    await handler(post({ email: 'fan@example.com', source: 'unstream' }));
+
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).tags).toEqual(['artist']);
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body).tags).toEqual(['unstream']);
+  });
+
+  it('no longer accepts the retired guides source', async () => {
+    fetchMock.mockResolvedValue(buttondownReply(201, { id: 'abc' }));
+
+    await handler(post({ email: 'fan@example.com', source: 'guides' }));
+
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).not.toHaveProperty('tags');
   });
 
   it('drops an unrecognised source rather than forwarding it as a tag', async () => {

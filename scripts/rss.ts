@@ -1,10 +1,12 @@
 /**
  * Shared RSS 2.0 helpers for the build-time feed generators.
  *
- * Three feeds are written into apps/web/public at build time — dispatch.xml,
- * changelog.xml and guides.xml. They had one hand-rolled XML builder each until
- * the second one was added; this module is the single copy, so a fix to date
- * formatting or escaping lands in every feed at once.
+ * Two feeds are written into apps/web/public at build time — dispatch.xml and
+ * changelog.xml. (guides.xml was a third until the guides were retired on
+ * 2026-09-27; the last generated copy stays in public/, frozen.) They had one
+ * hand-rolled XML builder each until the second one was added; this module is
+ * the single copy, so a fix to date formatting or escaping lands in every feed
+ * at once.
  *
  * RSS 2.0 rather than Atom because the consumers are feed readers and
  * Buttondown's RSS-to-email import, and RSS 2.0 is what both treat as the

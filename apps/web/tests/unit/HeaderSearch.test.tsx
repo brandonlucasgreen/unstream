@@ -56,7 +56,7 @@ describe('HeaderSearch', () => {
   }
 
   it('navigates to /?q= on submit, from any page', () => {
-    renderAt('/guides/some-guide');
+    renderAt('/platforms');
     const input = screen.getByRole('combobox');
     fireEvent.change(input, { target: { value: 'radiohead' } });
     fireEvent.submit(input.closest('form')!);

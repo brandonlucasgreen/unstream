@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { signInWithMagicLink } from '../services/auth';
+import { subscribeToNewsletter, markNewsletterPromptAnswered } from '../services/newsletter';
 import { useAuth } from '../contexts/AuthContext';
 
 import { Header } from '../components/Header';
@@ -24,6 +25,7 @@ export function ClaimPage() {
 
   const [step, setStep] = useState<ClaimStep>('email');
   const [email, setEmail] = useState('');
+  const [subscribe, setSubscribe] = useState(false);
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [verifyUrl, setVerifyUrl] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -100,6 +102,13 @@ export function ClaimPage() {
     if (error) {
       setError(error);
     } else {
+      // Fire-and-forget, like the login page: a newsletter failure never holds up a claim.
+      if (subscribe) {
+        markNewsletterPromptAnswered('subscribed');
+        subscribeToNewsletter(email, 'artist').catch((e) => {
+          Sentry.captureException(e, { extra: { context: 'ClaimPage.newsletter' } });
+        });
+      }
       setStep('check-email');
     }
   }
@@ -374,6 +383,8 @@ export function ClaimPage() {
               email={email}
               setEmail={setEmail}
               loading={loading}
+              subscribe={subscribe}
+              setSubscribe={setSubscribe}
               onSubmit={handleSendMagicLink}
             />
           )}

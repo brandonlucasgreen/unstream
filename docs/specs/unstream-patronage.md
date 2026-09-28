@@ -1,13 +1,13 @@
 ---
-status: Parked
+status: Superseded
 ---
 # Unstream Patronage
 
-> **Parked 2026-09-25.** Group / pooled patronage is out of scope for now — splitting one payment
-> across many artists needs separate charges and transfers, which makes Unstream hold funds and
-> brings in money-transmission licensing. One-off tips to a single artist are specced in
-> [artist-tips-spec.md](artist-tips-spec.md); support for Unstream itself in
-> [open-books-membership-spec.md](open-books-membership-spec.md).
+> **Superseded 2026-09-27 by [artist-patronage-spec.md](artist-patronage-spec.md).** The monthly pass
+> returns as the tab and the monthly split (§3.2–3.3 there), without pooling: fans' support accrues as
+> ledger entries, and each artist is charged directly on the fan's charge date, so Unstream never holds
+> the money. The pooled design below would have needed separate charges and transfers and a
+> money-transmission licence. Kept for history.
 
 Tiers:
 - monthly/yearly pass: $2/mo or $20/yr

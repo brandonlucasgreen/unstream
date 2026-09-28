@@ -3,7 +3,7 @@
 // contain the right substrings.
 import { describe, it, expect } from 'vitest';
 
-// The build-time feed generators (changelog.xml, guides.xml, dispatch.xml) share this module.
+// The build-time feed generators (changelog.xml, dispatch.xml) share this module.
 // It lives in scripts/ because it only ever runs at build time, but its output is a public
 // contract with feed readers and with Buttondown's RSS import, so it's tested with the rest.
 import { escapeXml, toRfc822, parseFrontmatter, buildRssFeed } from '../../../../scripts/rss';

@@ -130,10 +130,6 @@
   function = "noscript-search"
 
 [[edge_functions]]
-  path = "/guides/*"
-  function = "guide-page"
-
-[[edge_functions]]
   path = "/u/*"
   # /u/{handle}/releases.ics and .xml are feeds, not the shared-list HTML page.
   excludedPattern = "^/u/[^/]+/releases\\.(ics|xml)$"
@@ -147,6 +143,10 @@
 
 [[edge_functions]]
   path = "/contact"
+  function = "static-page-meta"
+
+[[edge_functions]]
+  path = "/platforms"
   function = "static-page-meta"
 
 [[redirects]]
@@ -447,6 +447,39 @@
 [[redirects]]
   from = "/plus"
   to = "/support"
+  status = 301
+
+# The guides section was retired on 2026-09-27. They were written for SEO, drew no traffic, and
+# weren't in Brandon's voice. What was documentation moved into the product (/platforms, /faq), and
+# the rest was deleted. Every old URL gets a permanent redirect to the nearest thing that replaced
+# it, so inbound links and bookmarks still land somewhere. Specific slugs first, then the catch-all.
+#
+# These only reach returning visitors because vite.config.ts keeps /guides in the service worker's
+# navigateFallbackDenylist; without that the worker answers with the cached SPA shell and the
+# redirect never runs. /guides.xml is left in apps/web/public/ as a frozen feed.
+[[redirects]]
+  from = "/guides/why-i-built-unstream"
+  to = "https://dispatch.kidlightbulbs.com/archive/introducing-unstream-a-simple-way-to-search/"
+  status = 301
+
+[[redirects]]
+  from = "/guides/every-platform-unstream-supports-compared"
+  to = "/platforms"
+  status = 301
+
+[[redirects]]
+  from = "/guides/bandcamp-and-beyond-alternative-music-platforms-worth-knowing"
+  to = "/platforms"
+  status = 301
+
+[[redirects]]
+  from = "/guides/*"
+  to = "/faq"
+  status = 301
+
+[[redirects]]
+  from = "/guides"
+  to = "/platforms"
   status = 301
 
 # Build assets must 404 when they're missing, instead of falling through to the SPA

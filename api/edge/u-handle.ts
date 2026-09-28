@@ -273,7 +273,7 @@ export default async function handler(request: Request, context: Context) {
       <nav style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px">
         <a href="/artists" style="color:var(--muted);text-decoration:none">Indie Artist Index</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
-        <a href="/guides" style="color:var(--muted);text-decoration:none">Guides</a>
+        <a href="/platforms" style="color:var(--muted);text-decoration:none">Platforms</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
         <a href="/changelog" style="color:var(--muted);text-decoration:none">Changelog</a>
         <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
