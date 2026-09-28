@@ -96,7 +96,7 @@ export function ArtistDashboardPage() {
             <h1 className="text-2xl font-bold">Your Artist Profiles</h1>
           </div>
 
-          <NewsletterPrompt email={session?.user?.email} source="artist" />
+          <NewsletterPrompt email={session?.user?.email} accountCreatedAt={session?.user?.created_at} source="artist" />
 
           {error && (
             <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">

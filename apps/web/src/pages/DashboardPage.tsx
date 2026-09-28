@@ -65,7 +65,7 @@ export function DashboardPage() {
         <div className="max-w-6xl mx-auto space-y-8">
           <h1 className="text-2xl font-bold">Dashboard</h1>
 
-          <NewsletterPrompt email={session?.user?.email} source="unstream" />
+          <NewsletterPrompt email={session?.user?.email} accountCreatedAt={session?.user?.created_at} source="unstream" />
 
           <ClaimedArtistsSection />
 
