@@ -6,7 +6,7 @@ import { Footer } from '../components/Footer';
 import { Skeleton, SkeletonScreen } from '../components/Skeleton';
 import { ArticleListSkeleton } from '../components/LoadingSkeletons';
 import { NewsletterSignup } from '../components/NewsletterSignup';
-import { LIGHTBULBS_ON_BLURB } from '../data/newsletter';
+import { LIGHTBULBS_ON_HEADING, LIGHTBULBS_ON_BLURB } from '../data/newsletter';
 import { DEFAULT_PAGE_TITLE } from '../data/seo';
 
 interface ChangelogEntry {
@@ -81,7 +81,7 @@ export function ChangelogPage() {
           <div className="mb-10 bg-surface-secondary rounded-xl p-6 border border-border">
             <NewsletterSignup
               source="changelog"
-              heading="Get new features in your inbox"
+              heading={LIGHTBULBS_ON_HEADING}
               blurb={LIGHTBULBS_ON_BLURB}
               feedUrl="/changelog.xml"
             />

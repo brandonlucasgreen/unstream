@@ -223,7 +223,7 @@ export function PrivacyPolicyPage() {
                 <li><strong>Upstash</strong> — the temporary cache and rate-limiting store.</li>
                 <li><strong>GoatCounter</strong> — cookie-free website analytics.</li>
                 <li><strong>Sentry</strong> — error reports, configured not to send IP addresses, cookies or request headers, and with the query string stripped from the page address.</li>
-                <li><strong>Buttondown</strong> — Brandon's newsletter, Lightbulbs On, which carries Unstream's updates. Only if you subscribe, through a signup form, the checkbox when you claim a profile, or the one-time invitation on your dashboard.</li>
+                <li><strong>Buttondown</strong> — Brandon's newsletter, [lightbulbs on], which carries Unstream's updates. Only if you subscribe, through a signup form, the checkbox when you claim a profile, or the one-time invitation on your dashboard.</li>
                 <li><strong>Ko-fi</strong> and <strong>Apple</strong> — support and in-app purchases. We never see your payment details.</li>
                 <li><strong>Discord</strong> — if you use the Unstream bot in a Discord server.</li>
               </ul>

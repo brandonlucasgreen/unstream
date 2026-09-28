@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { NewsletterSignup } from '../components/NewsletterSignup';
-import { LIGHTBULBS_ON_BLURB } from '../data/newsletter';
+import { LIGHTBULBS_ON_HEADING, LIGHTBULBS_ON_BLURB } from '../data/newsletter';
 
 /**
  * Contact.
@@ -67,7 +67,7 @@ export function ContactPage() {
           <div className="bg-surface-secondary rounded-xl p-6 border border-border">
             <NewsletterSignup
               source="contact"
-              heading="Or just keep in touch"
+              heading={LIGHTBULBS_ON_HEADING}
               blurb={LIGHTBULBS_ON_BLURB}
               feedUrl="/changelog.xml"
               feedLabel="changelog feed"

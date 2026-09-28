@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import * as Sentry from '@sentry/react';
-import { LIGHTBULBS_ON_BLURB } from '../data/newsletter';
+import { LIGHTBULBS_ON_NAME, LIGHTBULBS_ON_HEADING, LIGHTBULBS_ON_BLURB } from '../data/newsletter';
 import type { NewsletterSource } from './NewsletterSignup';
 import {
   subscribeToNewsletter,
@@ -48,13 +48,16 @@ export function NewsletterPrompt({ email, source }: NewsletterPromptProps) {
     <div className="rounded-xl border border-border bg-surface-secondary p-4 flex flex-col sm:flex-row sm:items-center gap-3">
       {status === 'done' ? (
         <p className="text-sm text-text-secondary" aria-live="polite">
-          Check your inbox for a confirmation email from Lightbulbs On.
+          Check your inbox for a confirmation email from {LIGHTBULBS_ON_NAME}.
         </p>
       ) : (
         <>
-          <p className="text-sm text-text-secondary flex-1">
-            {status === 'error' ? 'Something went wrong. Please try again.' : LIGHTBULBS_ON_BLURB}
-          </p>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-text-primary">{LIGHTBULBS_ON_HEADING}</p>
+            <p className="text-sm text-text-secondary">
+              {status === 'error' ? 'Something went wrong. Please try again.' : LIGHTBULBS_ON_BLURB}
+            </p>
+          </div>
           <div className="flex gap-2 shrink-0">
             <button
               type="button"

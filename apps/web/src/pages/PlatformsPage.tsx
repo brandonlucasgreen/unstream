@@ -5,7 +5,7 @@ import { Footer } from '../components/Footer';
 import { NewsletterSignup } from '../components/NewsletterSignup';
 import { sources, sourceCategories } from '../services/sources';
 import { DEFAULT_PAGE_TITLE } from '../data/seo';
-import { LIGHTBULBS_ON_BLURB } from '../data/newsletter';
+import { LIGHTBULBS_ON_HEADING, LIGHTBULBS_ON_BLURB } from '../data/newsletter';
 import type { Source } from '../types';
 
 /**
@@ -84,7 +84,7 @@ export function PlatformsPage() {
           ))}
 
           <div className="bg-surface-secondary rounded-xl p-6 border border-border">
-            <NewsletterSignup source="platforms" heading="Lightbulbs On" blurb={LIGHTBULBS_ON_BLURB} />
+            <NewsletterSignup source="platforms" heading={LIGHTBULBS_ON_HEADING} blurb={LIGHTBULBS_ON_BLURB} />
           </div>
         </div>
       </main>

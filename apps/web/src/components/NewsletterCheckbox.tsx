@@ -1,4 +1,4 @@
-import { LIGHTBULBS_ON_BLURB } from '../data/newsletter';
+import { LIGHTBULBS_ON_HEADING, LIGHTBULBS_ON_BLURB } from '../data/newsletter';
 
 interface NewsletterCheckboxProps {
   checked: boolean;
@@ -23,7 +23,9 @@ export function NewsletterCheckbox({ checked, onChange }: NewsletterCheckboxProp
         onChange={(e) => onChange(e.target.checked)}
         className="mt-0.5 accent-accent-primary"
       />
-      <span>{LIGHTBULBS_ON_BLURB}</span>
+      <span>
+        <span className="font-medium text-text-primary">{LIGHTBULBS_ON_HEADING}.</span> {LIGHTBULBS_ON_BLURB}
+      </span>
     </label>
   );
 }
