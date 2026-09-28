@@ -84,7 +84,9 @@ COMMENT ON TABLE artist_goals IS
 -- ---------------------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS tip_payments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  artist_id uuid NOT NULL REFERENCES artists(id) ON DELETE CASCADE,
+  -- RESTRICT, not CASCADE, on this table and the ledger: deleting an artist row (an admin merge,
+  -- a cleanup script) must fail loudly rather than silently erase a record of real payments.
+  artist_id uuid NOT NULL REFERENCES artists(id) ON DELETE RESTRICT,
   stripe_account_id text NOT NULL,
   -- Unique so a replayed webhook event is a no-op: the second insert hits this and is skipped.
   stripe_payment_intent_id text NOT NULL UNIQUE,
@@ -124,7 +126,7 @@ COMMENT ON TABLE tip_payments IS
 CREATE TABLE IF NOT EXISTS support_entries (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
-  artist_id uuid NOT NULL REFERENCES artists(id) ON DELETE CASCADE,
+  artist_id uuid NOT NULL REFERENCES artists(id) ON DELETE RESTRICT,
   amount_cents integer NOT NULL CHECK (amount_cents > 0),
   source text NOT NULL CHECK (source IN ('checkout')),
   goal_id uuid REFERENCES artist_goals(id) ON DELETE SET NULL,

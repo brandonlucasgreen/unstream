@@ -184,6 +184,16 @@ Three traps, all producing a *silently wrong* result rather than an error:
 - **Guides.** Markdown in `data/guides/` with YAML frontmatter (title, description, pillar, published/draft); manifest generated at build time by `scripts/generate-guides-manifest.ts`. Pillars: artist-economics, platform-discovery, how-to, builder.
 - **Admin tools.** Admins (checked by email) merge duplicate results at `/admin/merge`, review verification at `/admin/verify`, and view `/admin/analytics`. Merge overrides live in Supabase (migrations 004–005), are respected during disambiguation, and can be managed with `npx tsx scripts/merge-override.ts`.
 
+### Artist patronage (tips, "I'd tip them", Play my city)
+
+Spec: `docs/specs/artist-patronage-spec.md`. **Money never sits in Unstream's Stripe balance except Unstream's own application fee** — every payment is a direct charge on the artist's own Standard connected account (§2 "The line"). Don't build anything that holds, pools, forwards or conditionally releases money; that's money transmission.
+
+- **Phase 1 (no money):** `tip_interest` / `city_interest`, `/api/artist-interest`, counts via `get_artist_interest_counts` (public threshold of three applied *inside* the RPC as `p_min`). Rules shared with Deno in `api/shared/artist-interest.ts`.
+- **Phase 2 (one-off tips):** `stripe.ts` (fetch client behind the SSRF allowlist, signature check), `tips-db.ts` (`tipEligibility` is the single definition of "can take a tip"), `tips-connect|settings|checkout|webhook.ts`, `admin-tips.ts`. Fee math in `api/shared/tips.ts`, used by server and tip page alike; the server recomputes every figure.
+- **`livemode` on every Stripe-backed row.** `npm run dev` writes to production Supabase with a test key, so accounts are keyed `(artist_id, livemode)` and every read filters on the key's mode (`isLiveMode()`). Test keys in every Netlify context but Production.
+- **Tips ship dark:** with no `STRIPE_SECRET_KEY`, the dashboard panel renders nothing and every card shows "I'd tip them".
+- **Phase 3 (the tab) is gated** on `docs/specs/artist-patronage-phase3-gate.md` — run `scripts/stripe-verify-clone.ts` in test mode first.
+
 ### Release dedup: what identity is, and what the date is for
 
 One release exists on several platforms, described differently by each. **Under-merge, never over-merge** — a false merge asserts an artist made a record they didn't, and nobody would ever catch it. Three tiers:
