@@ -10,6 +10,7 @@ import { SavedArtistsSection } from '../components/SavedArtistsSection';
 import { CollectionSection } from '../components/CollectionSection';
 import { RecentReleasesSection, type RecentRelease } from '../components/RecentReleasesSection';
 import { ReleaseFeedControls } from '../components/ReleaseFeedControls';
+import { WelcomeBanner } from '../components/WelcomeBanner';
 import { NewsletterPrompt } from '../components/NewsletterPrompt';
 
 /**
@@ -65,7 +66,9 @@ export function DashboardPage() {
         <div className="max-w-6xl mx-auto space-y-8">
           <h1 className="text-2xl font-bold">Dashboard</h1>
 
-          <NewsletterPrompt email={session?.user?.email} accountCreatedAt={session?.user?.created_at} source="unstream" />
+          <WelcomeBanner />
+
+          <NewsletterPrompt email={session?.user?.email} source="unstream" />
 
           <ClaimedArtistsSection />
 

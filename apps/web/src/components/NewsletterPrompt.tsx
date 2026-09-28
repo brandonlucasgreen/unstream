@@ -10,29 +10,17 @@ import {
 
 interface NewsletterPromptProps {
   email: string | undefined;
-  /** The account's `created_at` from Supabase, used only to decide whether to say welcome. */
-  accountCreatedAt: string | undefined;
   source: Extract<NewsletterSource, 'artist' | 'unstream'>;
-}
-
-const NEW_ACCOUNT_WINDOW_MS = 24 * 60 * 60 * 1000;
-
-/** True for an account created in the last day: the prompt then greets them as new. */
-export function isNewAccount(createdAt: string | undefined, now: number = Date.now()): boolean {
-  if (!createdAt) return false;
-  const created = Date.parse(createdAt);
-  if (Number.isNaN(created)) return false;
-  return now - created >= 0 && now - created < NEW_ACCOUNT_WINDOW_MS;
 }
 
 /**
  * A one-time Lightbulbs On invitation on /dashboard and /artist-dashboard. It's how fans are asked
  * at all (the sign-in page doesn't ask, see NewsletterCheckbox) and how accounts from before the
  * claim-flow checkbox are asked. Shown until they subscribe or say no thanks, then never again on
- * this browser. An account less than a day old gets it as a welcome, since for them this is the
- * sign-up moment.
+ * this browser. A brand-new account sees it under WelcomeBanner on /dashboard, which does the
+ * greeting, so this card doesn't say welcome itself.
  */
-export function NewsletterPrompt({ email, accountCreatedAt, source }: NewsletterPromptProps) {
+export function NewsletterPrompt({ email, source }: NewsletterPromptProps) {
   const [answered, setAnswered] = useState(newsletterPromptAnswered);
   const [status, setStatus] = useState<'idle' | 'submitting' | 'done' | 'error'>('idle');
 
@@ -64,14 +52,9 @@ export function NewsletterPrompt({ email, accountCreatedAt, source }: Newsletter
         </p>
       ) : (
         <>
-          <div className="flex-1">
-            {isNewAccount(accountCreatedAt) && status !== 'error' && (
-              <p className="text-sm font-semibold text-text-primary">Welcome to Unstream.</p>
-            )}
-            <p className="text-sm text-text-secondary">
-              {status === 'error' ? 'Something went wrong. Please try again.' : LIGHTBULBS_ON_BLURB}
-            </p>
-          </div>
+          <p className="text-sm text-text-secondary flex-1">
+            {status === 'error' ? 'Something went wrong. Please try again.' : LIGHTBULBS_ON_BLURB}
+          </p>
           <div className="flex gap-2 shrink-0">
             <button
               type="button"
