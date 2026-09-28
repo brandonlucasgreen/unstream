@@ -37,7 +37,7 @@ function seedTippableArtist(overrides: Record<string, unknown> = {}) {
     charges_enabled: true, tips_approved_at: '2026-09-01', tips_enabled: true, fee_basis_points: 0,
     ...overrides,
   }];
-  db.tables.artist_goals = [{ id: '11111111-1111-4111-8111-111111111111', artist_id: 'artist-1', title: 'Vinyl', target_cents: 240000, city_label: null, status: 'open', created_at: '2026-09-01' }];
+  db.tables.artist_goals = [{ id: '11111111-1111-4111-8111-111111111111', artist_id: 'artist-1', title: 'Vinyl', target_cents: 240000, status: 'open', created_at: '2026-09-01' }];
 }
 
 beforeEach(() => {

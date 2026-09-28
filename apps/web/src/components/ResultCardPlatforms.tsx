@@ -9,7 +9,7 @@ interface ResultCardPlatformsProps {
   compact?: boolean;
   /** Admin-only: when set, each badge gets a remove control. */
   onRemoveLink?: (platform: PlatformLink) => void;
-  /** Rendered under the heading, before the pills — the patronage row's Tip / "I'd tip them". */
+  /** Rendered under the heading, before the pills — the patronage row's Tip button. */
   leading?: React.ReactNode;
 }
 

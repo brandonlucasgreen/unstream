@@ -478,6 +478,13 @@ when, not about build time.
 
 ## 11. Decisions and open questions
 
+**Decided (Brandon, 2026-09-28):**
+
+- **Phase 1 is dropped: no "I'd tip them" and no Play my city.** "I'd tip them" is a vaporware demand
+  test when many artists already list a Ko-fi or Patreon, and Play my city is hollow without far more
+  traffic and a much richer artist dashboard. Build starts at Phase 2. §3.5, §3.6 and the Phase 1 rows
+  elsewhere in this spec are superseded; goals carry no city.
+
 **Decided (Brandon, 2026-09-27):**
 
 - Patronage inside the Unstream apps is the core. It's a straight pass-through to the artist, Ko-fi-style,

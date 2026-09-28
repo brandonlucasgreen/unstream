@@ -3,7 +3,7 @@
 //   GET ?slug=   state, switch, fee, goals with progress, totals (this month and all time)
 //   PUT          { slug, action, ... }
 //     action 'update'      { tipsEnabled?: boolean, feeBasisPoints?: 0–500 }
-//     action 'createGoal'  { title, targetCents, cityLabel? }   (three open goals at most)
+//     action 'createGoal'  { title, targetCents }   (three open goals at most)
 //     action 'closeGoal'   { goalId }
 //
 // Every call checks, server-side, that the caller owns a verified claim on the artist.
@@ -23,7 +23,6 @@ import {
   estimatedStripeFeeCents,
   isValidFeeBasisPoints,
 } from '../shared/tips';
-import { cityKey, cleanCityLabel } from '../shared/artist-interest';
 import { Sentry } from '../lib/sentry';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -190,11 +189,6 @@ async function createGoal(client: SupabaseClient, artistId: string, body: Record
   if (typeof target !== 'number' || !Number.isInteger(target) || target < 100 || target > 10000000) {
     return respond(400, { error: 'Set a target between $1 and $100,000' });
   }
-  let city: string | null = null;
-  if (body.cityLabel !== undefined && body.cityLabel !== null && body.cityLabel !== '') {
-    city = cleanCityLabel(body.cityLabel);
-    if (!city) return respond(400, { error: 'Enter a city (up to 100 characters)' });
-  }
 
   const { count, error: countError } = await client.from('artist_goals')
     .select('id', { count: 'exact', head: true })
@@ -206,8 +200,6 @@ async function createGoal(client: SupabaseClient, artistId: string, body: Record
     artist_id: artistId,
     title,
     target_cents: target,
-    city_key: city ? cityKey(city) : null,
-    city_label: city,
   });
   if (error) throw new Error(`artist_goals insert failed: ${error.message}`);
   return respond(200, { goals: await getGoals(client, artistId, { openOnly: false }) });

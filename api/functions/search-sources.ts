@@ -5,7 +5,6 @@ import { cacheGetOrFetch, cachePrefetch, artistCacheKey, type PrefetchedCache } 
 import { persistSearchResults, getArtistBySlug, getArtistsBySlugs, artistSlug, getMergeOverrides, getLinkSuppressions, findKnownArtistSlugsByName } from './db';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
-import { getArtistInterestCounts, PUBLIC_COUNTS } from './interest-counts';
 import { getTipsLiveSlugs } from './tips-db';
 import { parseMirloArtistSearch } from './search-parsers';
 import {
@@ -40,7 +39,6 @@ import {
   bandcampSubdomainOf,
   bandcampSubdomainConflicts,
   musicBrainzArtistQuery,
-  attachInterestCounts,
   attachTipsEnabled,
   resultPageSlug,
 } from './search-utils';
@@ -2071,18 +2069,13 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     //
     attachArtistPageSlugs(finalResults);
 
-    // Public "I'd tip them" / Play my city counts and who is taking tips, so a result card can
-    // show them without a request per card. One read of each for the whole page.
+    // Which of these artists take tips, so a result card can show Tip without a request per
+    // card. One read for the whole page; an empty set, with no read, while tips are off.
     const artistSlugs = finalResults
       .filter(r => r.type === 'artist')
       .map(resultPageSlug)
       .filter((s): s is string => !!s);
-    const [interest, tipsLive] = await Promise.all([
-      getArtistInterestCounts(artistSlugs, PUBLIC_COUNTS),
-      getTipsLiveSlugs(artistSlugs),
-    ]);
-    attachInterestCounts(finalResults, interest);
-    attachTipsEnabled(finalResults, tipsLive);
+    attachTipsEnabled(finalResults, await getTipsLiveSlugs(artistSlugs));
 
     const response: SearchResponse = {
       query, // Return original query for display

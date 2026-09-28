@@ -131,11 +131,11 @@ struct ArtistResultView: View {
                 }
             }
 
-            // "I'd tip them" / Play my city — only where the artist has a row to record against.
-            // macOS only: no patronage surface ships on iOS (artist-patronage-spec.md §7).
+            // Tip, for an artist taking tips on Unstream. macOS only: no patronage surface ships on
+            // iOS (artist-patronage-spec.md §7).
             #if os(macOS)
-            if let slug = artist.pageSlug {
-                ArtistInterestButtons(slug: slug, artistName: artist.name, interest: artist.interest, tipsEnabled: artist.tipsEnabled == true)
+            if artist.tipsEnabled == true, let slug = artist.pageSlug {
+                ArtistTipButton(slug: slug, artistName: artist.name)
             }
             #endif
 

@@ -9,7 +9,7 @@ import type { TipGoal } from '../types/artist-page';
 const STARTING_POINTS = [
   'Help me press this on vinyl',
   'Help me mix and master the next record',
-  'Help me play your city',
+  'Help me play Boston',
   'Studio days',
   'Van repairs',
 ];
@@ -24,7 +24,6 @@ interface Props {
 export function TipGoalsEditor({ token, slug, goals, onChange }: Props) {
   const [title, setTitle] = useState('');
   const [target, setTarget] = useState('');
-  const [city, setCity] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const open = goals.filter(g => g.status === 'open');
@@ -37,10 +36,9 @@ export function TipGoalsEditor({ token, slug, goals, onChange }: Props) {
       const { goals: next } = await createGoal(token, slug, {
         title: title.trim(),
         targetCents: Math.round(Number(target) * 100),
-        cityLabel: city.trim() || undefined,
       });
       onChange(next);
-      setTitle(''); setTarget(''); setCity('');
+      setTitle(''); setTarget('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not add that goal');
     } finally {
@@ -95,14 +93,6 @@ export function TipGoalsEditor({ token, slug, goals, onChange }: Props) {
               placeholder="Target ($)"
               aria-label="Target in dollars"
               className="w-32 px-3 py-2 text-sm bg-bg-primary border border-border rounded-lg"
-            />
-            <input
-              value={city}
-              onChange={e => setCity(e.target.value)}
-              maxLength={100}
-              placeholder="City (optional)"
-              aria-label="City, for a tour-stop goal"
-              className="flex-1 min-w-32 px-3 py-2 text-sm bg-bg-primary border border-border rounded-lg"
             />
             <button type="submit" disabled={busy || !title.trim() || !target} className="px-3 py-2 text-sm rounded-lg bg-accent-primary text-white disabled:opacity-50">
               Add goal

@@ -4,7 +4,6 @@ import * as Sentry from '@sentry/react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { GoalProgress } from '../components/GoalProgress';
-import { ArtistSupportActions } from '../components/ArtistSupportActions';
 import { useAuth } from '../contexts/AuthContext';
 import { formatUsd, tipBreakdown } from '../../../../api/shared/tips';
 import type { TipGoal } from '../types/artist-page';
@@ -119,8 +118,7 @@ export function TipPage() {
 
               {!data.takingTips ? (
                 <div className="p-4 rounded-xl border border-border space-y-3">
-                  <p className="text-sm">{data.artist.name} isn't taking tips on Unstream yet. Tell them you would:</p>
-                  <ArtistSupportActions slug={data.artist.slug} artistName={data.artist.name} variant="card" />
+                  <p className="text-sm">{data.artist.name} isn't taking tips on Unstream yet.</p>
                   <Link to={`/a/${data.artist.slug}`} className="text-sm text-accent-primary hover:underline">
                     See where else to support them →
                   </Link>

@@ -167,7 +167,7 @@ describe('tips-settings', () => {
     expect((await put({ slug: 'kid-lightbulbs', action: 'createGoal', title: '', targetCents: 1000 })).statusCode).toBe(400);
     expect((await put({ slug: 'kid-lightbulbs', action: 'createGoal', title: 'x'.repeat(81), targetCents: 1000 })).statusCode).toBe(400);
     expect((await put({ slug: 'kid-lightbulbs', action: 'createGoal', title: 'Vinyl', targetCents: 50 })).statusCode).toBe(400);
-    expect((await put({ slug: 'kid-lightbulbs', action: 'createGoal', title: 'Vinyl', targetCents: 1000, cityLabel: '<b>' })).statusCode).toBe(400);
+    expect((await put({ slug: 'kid-lightbulbs', action: 'createGoal', title: '<b>Vinyl</b>', targetCents: 1000 })).statusCode).toBe(400);
   });
 
   it('checks ownership on every call', async () => {

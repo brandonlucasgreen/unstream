@@ -69,8 +69,6 @@ export interface ArtistLocation {
   countryCode?: string;
 }
 
-import type { InterestCounts } from '../../../../api/shared/artist-interest';
-
 // Search result from the unified API
 export interface SearchResult {
   id: string;
@@ -103,9 +101,7 @@ export interface SearchResult {
   wikipediaUrl?: string;
   // Geographic location from MusicBrainz, Bandcamp, or Mirlo enrichment
   location?: ArtistLocation;
-  // "I'd tip them" / Play my city counts at or above the public threshold. Absent when none.
-  interest?: InterestCounts;
-  // The artist takes tips on Unstream right now: show Tip (→ /tip/{slug}) instead of "I'd tip them".
+  // The artist takes tips on Unstream right now: show Tip (→ /tip/{slug}).
   tipsEnabled?: boolean;
 }
 

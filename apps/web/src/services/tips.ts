@@ -50,7 +50,7 @@ export function updateTipSettings(token: string, slug: string, patch: { tipsEnab
   return call(token, '/api/tips/settings', { method: 'PUT', body: JSON.stringify({ slug, action: 'update', ...patch }) });
 }
 
-export function createGoal(token: string, slug: string, goal: { title: string; targetCents: number; cityLabel?: string }): Promise<{ goals: TipGoal[] }> {
+export function createGoal(token: string, slug: string, goal: { title: string; targetCents: number }): Promise<{ goals: TipGoal[] }> {
   return call(token, '/api/tips/settings', { method: 'PUT', body: JSON.stringify({ slug, action: 'createGoal', ...goal }) });
 }
 

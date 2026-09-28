@@ -17,7 +17,6 @@ const mocks = vi.hoisted(() => ({
   captureMessage: vi.fn(),
   isPublishedArtistSlug: vi.fn(),
   resolveArtistSlugAlias: vi.fn(),
-  getArtistInterestCounts: vi.fn(),
   getTipsLiveSlugs: vi.fn(),
   getGoals: vi.fn(),
 }));
@@ -27,10 +26,6 @@ vi.mock('../tips-db', () => ({
   getGoals: mocks.getGoals,
 }));
 
-vi.mock('../interest-counts', () => ({
-  getArtistInterestCounts: mocks.getArtistInterestCounts,
-  PUBLIC_COUNTS: { min: 3, limit: 5 },
-}));
 
 vi.mock('../db', () => ({
   getArtistProfileBySlug: mocks.getArtistProfileBySlug,
@@ -90,7 +85,6 @@ describe('GET /api/artist-page', () => {
     mocks.checkSentryDedup.mockResolvedValue(true);
     mocks.isPublishedArtistSlug.mockReturnValue(false);
     mocks.resolveArtistSlugAlias.mockResolvedValue({ canonical: null, failed: false });
-    mocks.getArtistInterestCounts.mockResolvedValue(new Map());
     mocks.getTipsLiveSlugs.mockResolvedValue(new Set());
     mocks.getGoals.mockResolvedValue([]);
   });
@@ -371,32 +365,11 @@ describe('GET /api/artist-page', () => {
     });
   });
 
-  describe("\"I'd tip them\" and Play my city counts", () => {
-    it('carries the public counts, read with the public threshold', async () => {
-      mocks.getArtistProfileBySlug.mockResolvedValue({ bundle: { artist: artistRow(), profile: null, links }, failed: false });
-      mocks.getArtistInterestCounts.mockResolvedValue(new Map([
-        ['funkadelic', { tipCount: 14, cities: [{ label: 'Boston', count: 12 }] }],
-      ]));
-      const res = await call('funkadelic');
-      expect(res.statusCode).toBe(200);
-      expect(JSON.parse(res.body).interest).toEqual({ tipCount: 14, cities: [{ label: 'Boston', count: 12 }] });
-      expect(mocks.getArtistInterestCounts).toHaveBeenCalledWith(['funkadelic'], { min: 3, limit: 5 });
-    });
-
-    it('still renders the page when the counts read fails', async () => {
-      mocks.getArtistProfileBySlug.mockResolvedValue({ bundle: { artist: artistRow(), profile: null, links }, failed: false });
-      mocks.getArtistInterestCounts.mockResolvedValue(null);
-      const res = await call('funkadelic');
-      expect(res.statusCode).toBe(200);
-      expect(JSON.parse(res.body).interest).toEqual({ tipCount: 0, cities: [] });
-    });
-  });
-
   describe('tips', () => {
     it('says the artist is taking tips, with their open goals', async () => {
       mocks.getArtistProfileBySlug.mockResolvedValue({ bundle: { artist: artistRow(), profile: null, links }, failed: false });
       mocks.getTipsLiveSlugs.mockResolvedValue(new Set(['funkadelic']));
-      mocks.getGoals.mockResolvedValue([{ id: 'g1', title: 'Vinyl', targetCents: 240000, raisedCents: 500, cityLabel: null, status: 'open' }]);
+      mocks.getGoals.mockResolvedValue([{ id: 'g1', title: 'Vinyl', targetCents: 240000, raisedCents: 500, status: 'open' }]);
       const body = JSON.parse((await call('funkadelic')).body);
       expect(body.tips).toEqual({ enabled: true, goals: [expect.objectContaining({ title: 'Vinyl', raisedCents: 500 })] });
     });

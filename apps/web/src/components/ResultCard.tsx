@@ -8,7 +8,7 @@ import { LoginInterstitial } from './LoginInterstitial';
 import { ResultCardSocial } from './ResultCardSocial';
 import { ResultCardActions } from './ResultCardActions';
 import { AdminRemoveLinkDialog } from './AdminRemoveLinkDialog';
-import { ArtistSupportActions } from './ArtistSupportActions';
+import { TipButton } from './TipButton';
 
 import {
   categorizePlatforms,
@@ -118,9 +118,9 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect, onLink
 
   const hasRelease = !!latestRelease && platformsWithRelease.length > 0;
 
-  // "I'd tip them" / Play my city lead the patronage row (spec §3.1: the Tip button sits there,
-  // first). Only for an artist with a page slug — the interest is recorded against that row.
-  const supportSlug = result.type === 'artist' ? (result.claimedSlug || result.knownSlug) : undefined;
+  // The Tip button leads the patronage row (spec §3.1: it sits there, first), only for an artist
+  // taking tips on Unstream.
+  const tipSlug = result.type === 'artist' && result.tipsEnabled ? (result.claimedSlug || result.knownSlug) : undefined;
 
   return (
     <div className="result-card group relative">
@@ -171,20 +171,12 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect, onLink
               onRemoveLink={handleRemoveLink}
             />
           )}
-          {(categorized.patronage.length > 0 || supportSlug) && (
+          {(categorized.patronage.length > 0 || tipSlug) && (
             <ResultCardPlatforms
               platforms={categorized.patronage}
               category="patronage"
               onRemoveLink={handleRemoveLink}
-              leading={supportSlug && (
-                <ArtistSupportActions
-                  slug={supportSlug}
-                  artistName={result.name}
-                  interest={result.interest}
-                  tipsEnabled={result.tipsEnabled}
-                  variant="card"
-                />
-              )}
+              leading={tipSlug && <div><TipButton slug={tipSlug} artistName={result.name} /></div>}
             />
           )}
           {categorized.decentralized.length > 0 && (

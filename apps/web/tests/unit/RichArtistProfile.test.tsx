@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { RichArtistProfile } from 'src/components/RichArtistProfile';
 import { isBandcampFriday } from 'src/utils/bandcamp-friday';
 import type { ArtistPagePayload } from 'src/types/artist-page';
@@ -10,11 +11,6 @@ import type { ArtistPagePayload } from 'src/types/artist-page';
 // rather than asserting whatever today happens to be. Both dates are Pacific noon, the
 // timezone isBandcampFriday() compares in. Keep them in step with BANDCAMP_FRIDAY_DATES in
 // src/utils/bandcamp-friday.ts when that list is updated for a new year.
-// The "I'd tip them" / Play my city row needs a signed-in context; it has its own test.
-vi.mock('src/components/ArtistSupportActions', () => ({
-  ArtistSupportActions: () => <div data-testid="artist-support-actions" />,
-}));
-
 const ORDINARY_FRIDAY = new Date('2026-08-14T12:00:00-07:00');
 const BANDCAMP_FRIDAY = new Date('2026-08-07T12:00:00-07:00');
 
@@ -307,5 +303,23 @@ describe('RichArtistProfile', () => {
     render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" onSave={vi.fn()} disabledSave />);
     const btn = screen.getByText('Save').closest('button');
     expect(btn?.disabled).toBe(true);
+  });
+
+  describe('tips', () => {
+    it('shows no Tip section for an artist not taking tips', () => {
+      render(<RichArtistProfile payload={{ ...basePayload, tips: { enabled: false, goals: [] } }} slug="kid-lightbulbs" />);
+      expect(screen.queryByText('Tip directly')).toBeNull();
+    });
+
+    it('links Tip and each open goal to the tip page', () => {
+      const payload = {
+        ...basePayload,
+        tips: { enabled: true, goals: [{ id: 'g1', title: 'Vinyl', targetCents: 240000, raisedCents: 120000, status: 'open' as const }] },
+      };
+      render(<MemoryRouter><RichArtistProfile payload={payload} slug="kid-lightbulbs" /></MemoryRouter>);
+      expect(screen.getByText('Tip Kid Lightbulbs').closest('a')?.getAttribute('href')).toBe('/tip/kid-lightbulbs');
+      expect(screen.getByText('Vinyl').closest('a')?.getAttribute('href')).toBe('/tip/kid-lightbulbs?goal=g1');
+      expect(screen.getByText('$1,200.00 of $2,400.00')).toBeTruthy();
+    });
   });
 });

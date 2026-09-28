@@ -10,7 +10,6 @@ vi.mock('react-router-dom', () => ({
 vi.mock('src/contexts/AuthContext', () => ({ useAuth: () => ({ session: null }) }));
 vi.mock('src/components/Header', () => ({ Header: () => null }));
 vi.mock('src/components/Footer', () => ({ Footer: () => null }));
-vi.mock('src/components/ArtistSupportActions', () => ({ ArtistSupportActions: () => <div data-testid="id-tip-them" /> }));
 vi.mock('@sentry/react', () => ({ captureException: vi.fn() }));
 
 import { TipPage } from 'src/pages/TipPage';
@@ -62,17 +61,17 @@ describe('TipPage', () => {
 
   it('says the goal is unconditional', async () => {
     fetchMock.mockResolvedValue(new Response(JSON.stringify(page({
-      goals: [{ id: 'g1', title: 'Vinyl', targetCents: 240000, raisedCents: 1000, cityLabel: null, status: 'open' }],
+      goals: [{ id: 'g1', title: 'Vinyl', targetCents: 240000, raisedCents: 1000, status: 'open' }],
     }))));
     render(<TipPage />);
     expect(await screen.findByText(/Tips go to Kid Lightbulbs straight away, whether or not the goal is met\./)).toBeTruthy();
   });
 
-  it('offers "I\'d tip them" for an artist not taking tips', async () => {
+  it('says so for an artist not taking tips, and points to their page', async () => {
     fetchMock.mockResolvedValue(new Response(JSON.stringify({ artist: page().artist, takingTips: false })));
     render(<TipPage />);
     expect(await screen.findByText(/isn't taking tips on Unstream yet/)).toBeTruthy();
-    expect(screen.getByTestId('id-tip-them')).toBeTruthy();
+    expect(screen.getByText(/See where else to support them/).getAttribute('href')).toBe('/a/kid-lightbulbs');
     expect(screen.queryByText(/Pay/)).toBeNull();
   });
 });

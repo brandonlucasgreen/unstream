@@ -17,7 +17,6 @@ import { ClaimReviewStep } from '../components/ClaimReviewStep';
 import { ClaimDoneStep } from '../components/ClaimDoneStep';
 
 import type { ClaimStep, ReviewLink } from '../components/ClaimPageTypes';
-import { ClaimDemandNote } from '../components/ClaimDemandNote';
 
 export function ClaimPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -361,8 +360,6 @@ export function ClaimPage() {
               Verify your identity to get a permanent artist page on Unstream.
             </p>
           </div>
-
-          {slug && <ClaimDemandNote slug={slug} />}
 
           <ClaimStepIndicator step={step} authenticated={authenticated} />
 

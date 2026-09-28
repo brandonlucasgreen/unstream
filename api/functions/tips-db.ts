@@ -30,7 +30,6 @@ export interface GoalRow {
   artist_id: string;
   title: string;
   target_cents: number;
-  city_label: string | null;
   status: 'open' | 'closed';
   created_at: string;
   closed_at: string | null;
@@ -41,7 +40,6 @@ export interface Goal {
   title: string;
   targetCents: number;
   raisedCents: number;
-  cityLabel: string | null;
   status: 'open' | 'closed';
 }
 
@@ -118,7 +116,7 @@ export async function tipEligibility(slug: string): Promise<Eligibility> {
  * Which of these slugs can take a tip right now — for the Tip button on search results and the
  * artist page. The same conditions as `tipEligibility`, in two batched reads. Returns an empty set
  * when Stripe isn't configured (tips off) and null when the read fails, which callers treat as
- * "show I'd tip them" while it's reported.
+ * "no Tip button" while it's reported.
  */
 export async function getTipsLiveSlugs(slugs: string[]): Promise<Set<string> | null> {
   const unique = [...new Set(slugs.filter(Boolean))].slice(0, 50);
@@ -162,7 +160,7 @@ export async function getTipsLiveSlugs(slugs: string[]): Promise<Set<string> | n
 export async function getGoals(client: SupabaseClient, artistId: string, opts: { openOnly: boolean }): Promise<Goal[]> {
   let query = client
     .from('artist_goals')
-    .select('id, artist_id, title, target_cents, city_label, status, created_at, closed_at')
+    .select('id, artist_id, title, target_cents, status, created_at, closed_at')
     .eq('artist_id', artistId)
     .order('created_at', { ascending: false })
     .limit(opts.openOnly ? 3 : 20);
@@ -187,7 +185,6 @@ export async function getGoals(client: SupabaseClient, artistId: string, opts: {
     title: r.title,
     targetCents: r.target_cents,
     raisedCents: raised.get(r.id) ?? 0,
-    cityLabel: r.city_label,
     status: r.status,
   }));
 }

@@ -36,16 +36,6 @@ struct MusicBrainzResponse: Codable {
     let socialLinks: [SocialLink]?
 }
 
-struct CityCount: Codable, Hashable {
-    let label: String
-    let count: Int
-}
-
-struct InterestCounts: Codable, Hashable {
-    let tipCount: Int
-    let cities: [CityCount]
-}
-
 struct ArtistResult: Codable, Identifiable {
     let id: String
     let name: String
@@ -61,11 +51,8 @@ struct ArtistResult: Codable, Identifiable {
     let knownSlug: String?
     let matchConfidence: String?
     let location: ArtistLocation?
-    /// "I'd tip them" / Play my city counts at or above the public threshold (three). Absent when
-    /// nobody has asked yet, and on responses from deploys older than artist patronage phase 1.
-    var interest: InterestCounts? = nil
     /// The artist takes tips on Unstream now: the row shows Tip, which opens `/tip/{slug}` in the
-    /// browser (spec §7), instead of "I'd tip them".
+    /// browser (artist-patronage-spec.md §7). Absent on older deploys.
     var tipsEnabled: Bool? = nil
 
     /// Where this artist's page lives, claimed or not. Nil means the search couldn't place them —

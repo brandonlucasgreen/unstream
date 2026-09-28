@@ -64,8 +64,6 @@ CREATE TABLE IF NOT EXISTS artist_goals (
   artist_id uuid NOT NULL REFERENCES artists(id) ON DELETE CASCADE,
   title text NOT NULL CHECK (char_length(title) BETWEEN 1 AND 80),
   target_cents integer NOT NULL CHECK (target_cents BETWEEN 100 AND 10000000),
-  city_key text,
-  city_label text,
   release_id uuid REFERENCES releases(id) ON DELETE SET NULL,
   status text NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'closed')),
   created_at timestamptz NOT NULL DEFAULT now(),

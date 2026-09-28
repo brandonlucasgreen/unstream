@@ -1,8 +1,10 @@
 import { Fragment, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import type { ArtistPagePayload } from '../types/artist-page';
 import { sources } from '../services/sources';
 import { analytics } from '../services/analytics';
-import { ArtistSupportActions } from './ArtistSupportActions';
+import { TipButton } from './TipButton';
+import { GoalProgress } from './GoalProgress';
 import { ReleasesSection } from './ReleasesSection';
 import { SocialIcon } from './SocialIcon';
 import { SourceBadge } from './SourceBadge';
@@ -356,20 +358,24 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
           </div>
         )}
 
-        {/* "I'd tip them" / Play my city, with the public counts (spec §3.5, §3.6). */}
-        <div className="mt-6">
-          <h2 className="text-[11px] uppercase tracking-wider text-text-muted mb-3">
-            Tell {payload.artist.name} you're here
-          </h2>
-          <ArtistSupportActions
-            slug={payload.artist.slug}
-            artistName={payload.artist.name}
-            interest={payload.interest}
-            tipsEnabled={payload.tips?.enabled}
-            goals={payload.tips?.goals}
-            variant="page"
-          />
-        </div>
+        {/* Tips on Unstream, with the artist's open goals (spec §3.1, §3.4). Only while they take tips. */}
+        {payload.tips?.enabled && (
+          <div className="mt-6 space-y-3">
+            <h2 className="text-[11px] uppercase tracking-wider text-text-muted">
+              Tip directly
+            </h2>
+            <TipButton slug={payload.artist.slug} artistName={payload.artist.name} />
+            {payload.tips.goals.map(goal => (
+              <Link
+                key={goal.id}
+                to={`/tip/${payload.artist.slug}?goal=${goal.id}`}
+                className="block rounded-lg p-2 -mx-2 hover:bg-bg-hover transition-colors"
+              >
+                <GoalProgress goal={goal} />
+              </Link>
+            ))}
+          </div>
+        )}
 
         {/* Social Links */}
         {socialLinks.length > 0 && (

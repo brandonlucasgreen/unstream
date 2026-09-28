@@ -104,12 +104,7 @@
     "functions/desktop-version.ts",
     "functions/__tests__/desktop-appcast.test.ts",
     "functions/analytics-dashboard.ts",
-    "shared/artist-interest.ts",
-    "functions/interest-counts.ts",
-    "functions/artist-interest.ts",
     "functions/artist-page.ts",
-    "functions/__tests__/artist-interest.test.ts",
-    "functions/__tests__/artist-interest-shared.test.ts",
     "shared/tips.ts",
     "functions/stripe.ts",
     "functions/tips-db.ts",
@@ -124,6 +119,7 @@
     "functions/__tests__/tips-checkout.test.ts",
     "functions/__tests__/tips-webhook.test.ts",
     "functions/__tests__/tips-connect-settings.test.ts",
-    "functions/__tests__/admin-tips.test.ts"
+    "functions/__tests__/admin-tips.test.ts",
+    "functions/__tests__/attach-tips-enabled.test.ts"
   ]
 }

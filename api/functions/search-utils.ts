@@ -1,6 +1,5 @@
 // Pure utility functions and types extracted from search-sources.ts
 // No HTTP, cache, or database dependencies.
-import { isEmptyInterest, type InterestCounts } from '../shared/artist-interest';
 
 export type SourceId =
   | 'bandcamp'
@@ -102,11 +101,8 @@ export interface AggregatedResult {
   };
   wikipediaSummary?: string;
   wikipediaUrl?: string;
-  // "I'd tip them" and Play my city counts at or above the public threshold
-  // (docs/specs/artist-patronage-spec.md §3.5, §3.6). Absent when there's nothing to show.
-  interest?: InterestCounts;
-  // The artist takes tips on Unstream right now, so the card shows Tip instead of "I'd tip them".
-  // Absent otherwise.
+  // The artist takes tips on Unstream right now, so the card shows a Tip button
+  // (docs/specs/artist-patronage-spec.md §3.1). Absent otherwise.
   tipsEnabled?: true;
 }
 
@@ -1162,22 +1158,6 @@ export function filterAndSort(results: AggregatedResult[], query: string): Aggre
 /** The slug an artist result's page lives at, if it has one. */
 export function resultPageSlug(result: AggregatedResult): string | undefined {
   return result.claimedSlug || result.knownSlug;
-}
-
-/**
- * Put each artist's public interest counts on their result, in place. `counts` is null when the
- * read failed; results then go out without counts, the same as an artist nobody has asked about.
- */
-export function attachInterestCounts(
-  results: AggregatedResult[],
-  counts: Map<string, InterestCounts> | null,
-): void {
-  if (!counts || counts.size === 0) return;
-  for (const result of results) {
-    const slug = resultPageSlug(result);
-    const found = slug ? counts.get(slug) : undefined;
-    if (found && !isEmptyInterest(found)) result.interest = found;
-  }
 }
 
 /** Mark the results whose artist is taking tips, in place. `live` is null when the read failed. */

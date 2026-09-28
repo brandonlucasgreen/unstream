@@ -204,13 +204,7 @@
   to = "/.netlify/functions/saved-artists"
   status = 200
 
-# Artist patronage phase 1: "I'd tip them" and Play my city (docs/specs/artist-patronage-spec.md).
-[[redirects]]
-  from = "/api/artist-interest"
-  to = "/.netlify/functions/artist-interest"
-  status = 200
-
-# Artist patronage phase 2: one-off tips through the artist's own Stripe account.
+# Artist patronage: one-off tips through the artist's own Stripe account (docs/specs/artist-patronage-spec.md).
 # The webhook is a Stripe *Connect* endpoint (STRIPE_CONNECT_WEBHOOK_SECRET).
 [[redirects]]
   from = "/api/tips/connect"
