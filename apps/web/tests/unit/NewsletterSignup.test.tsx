@@ -32,13 +32,13 @@ describe('NewsletterSignup', () => {
   it('posts the email and the source to our own API', async () => {
     mockFetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ status: 'pending' }) });
 
-    renderSignup({ source: 'guides' });
+    renderSignup({ source: 'platforms' });
     submit('fan@example.com');
 
     await waitFor(() => expect(mockFetch).toHaveBeenCalled());
     const [url, init] = mockFetch.mock.calls[0];
     expect(url).toBe('/api/newsletter/subscribe');
-    expect(JSON.parse(init.body)).toEqual({ email: 'fan@example.com', source: 'guides' });
+    expect(JSON.parse(init.body)).toEqual({ email: 'fan@example.com', source: 'platforms' });
   });
 
   it('asks the subscriber to confirm rather than claiming they are subscribed', async () => {

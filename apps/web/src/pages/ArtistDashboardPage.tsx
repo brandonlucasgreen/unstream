@@ -9,6 +9,7 @@ import { PasswordSection } from '../components/PasswordSection';
 import { Footer } from '../components/Footer';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { DashboardSkeleton } from '../components/LoadingSkeletons';
+import { NewsletterPrompt } from '../components/NewsletterPrompt';
 
 interface ClaimedProfile {
   id: string;
@@ -94,6 +95,8 @@ export function ArtistDashboardPage() {
           <div>
             <h1 className="text-2xl font-bold">Your Artist Profiles</h1>
           </div>
+
+          <NewsletterPrompt email={session?.user?.email} source="artist" />
 
           {error && (
             <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">

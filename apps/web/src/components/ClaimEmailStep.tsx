@@ -1,13 +1,16 @@
 import { LegalConsent } from './LegalConsent';
+import { NewsletterCheckbox } from './NewsletterCheckbox';
 
 interface ClaimEmailStepProps {
   email: string;
   setEmail: (email: string) => void;
   loading: boolean;
+  subscribe: boolean;
+  setSubscribe: (subscribe: boolean) => void;
   onSubmit: (e: React.FormEvent) => void;
 }
 
-export function ClaimEmailStep({ email, setEmail, loading, onSubmit }: ClaimEmailStepProps) {
+export function ClaimEmailStep({ email, setEmail, loading, subscribe, setSubscribe, onSubmit }: ClaimEmailStepProps) {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div>
@@ -24,6 +27,7 @@ export function ClaimEmailStep({ email, setEmail, loading, onSubmit }: ClaimEmai
           className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary"
         />
       </div>
+      <NewsletterCheckbox checked={subscribe} onChange={setSubscribe} />
       <button
         type="submit"
         disabled={loading}

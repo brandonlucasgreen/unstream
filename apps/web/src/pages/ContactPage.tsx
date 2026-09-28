@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { NewsletterSignup } from '../components/NewsletterSignup';
+import { LIGHTBULBS_ON_BLURB } from '../data/newsletter';
 
 /**
  * Contact.
@@ -67,7 +68,7 @@ export function ContactPage() {
             <NewsletterSignup
               source="contact"
               heading="Or just keep in touch"
-              blurb="New features, new platforms, and occasional writing on how to support music. No more than a couple of emails a month."
+              blurb={LIGHTBULBS_ON_BLURB}
               feedUrl="/changelog.xml"
               feedLabel="changelog feed"
             />

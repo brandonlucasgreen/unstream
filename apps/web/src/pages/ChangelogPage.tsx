@@ -6,6 +6,7 @@ import { Footer } from '../components/Footer';
 import { Skeleton, SkeletonScreen } from '../components/Skeleton';
 import { ArticleListSkeleton } from '../components/LoadingSkeletons';
 import { NewsletterSignup } from '../components/NewsletterSignup';
+import { LIGHTBULBS_ON_BLURB } from '../data/newsletter';
 import { DEFAULT_PAGE_TITLE } from '../data/seo';
 
 interface ChangelogEntry {
@@ -81,7 +82,7 @@ export function ChangelogPage() {
             <NewsletterSignup
               source="changelog"
               heading="Get new features in your inbox"
-              blurb="Plus updates on what we're working on, tips, and occasional writing on how to support music."
+              blurb={LIGHTBULBS_ON_BLURB}
               feedUrl="/changelog.xml"
             />
           </div>

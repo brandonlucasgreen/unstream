@@ -1,13 +1,18 @@
 // API endpoint: /api/newsletter/subscribe
-// POST — adds an email address to the Unstream newsletter on Buttondown.
-// Body: { email: string, source?: 'changelog' | 'guides' | 'contact' }
+// POST — adds an email address to Brandon's newsletter, Lightbulbs On, on Buttondown.
+// Body: { email: string, source?: 'changelog' | 'contact' | 'platforms' | 'artist' | 'unstream' }
+//
+// Unstream has no newsletter of its own: its updates go out in Lightbulbs On with Brandon's other
+// projects, and every signup form says so (apps/web/src/data/newsletter.ts). The source becomes a
+// Buttondown tag. The inline forms tag where the signup happened (changelog, contact, platforms);
+// the account paths tag who signed up — `artist` from the claim flow and the artist dashboard's
+// one-time prompt, `unstream` from account creation and the fan dashboard's prompt — so an issue
+// that's only about artist features can go to artists.
 //
 // Deliberately not offered from /settings: that page already has its own opt-out toggles for
 // product email (see notification_preferences / NotificationPreferences.tsx), and pairing that
 // with an opt-*in* newsletter form in the same section read as "you still need to sign up for
-// this" even to people already getting product email. Buttondown signup lives only where
-// someone has just shown interest in a specific kind of content — guides, changelog — or has
-// come to /contact, which is by definition someone who wants to hear back.
+// this" even to people already getting product email.
 //
 // Why a proxy rather than Buttondown's own embed: the embed needs third-party script and
 // frame hosts in the CSP and can't be styled to match the site. Going through a function
@@ -43,7 +48,7 @@ const UPSTREAM_TIMEOUT_MS = 8000;
 // Tags let Buttondown segment by where somebody signed up. `source` is client-supplied and
 // Buttondown creates tags on demand, so anything off this list is dropped rather than
 // forwarded — otherwise a stranger with curl could fill the account with junk tags.
-const ALLOWED_SOURCES = new Set(['changelog', 'guides', 'contact']);
+const ALLOWED_SOURCES = new Set(['changelog', 'contact', 'platforms', 'artist', 'unstream']);
 
 // Deliberately loose. Address syntax is far more permissive than any regex people actually
 // write, and the confirmation email is the real check — this only catches obvious typos and
