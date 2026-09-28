@@ -5,9 +5,9 @@
 // Unstream has no newsletter of its own: its updates go out in Lightbulbs On with Brandon's other
 // projects, and every signup form says so (apps/web/src/data/newsletter.ts). The source becomes a
 // Buttondown tag. The inline forms tag where the signup happened (changelog, contact, platforms);
-// the account paths tag who signed up — `artist` from the claim flow and the artist dashboard's
-// one-time prompt, `unstream` from account creation and the fan dashboard's prompt — so an issue
-// that's only about artist features can go to artists.
+// the account paths tag who signed up — `artist` from the claim flow's checkbox and the artist
+// dashboard's one-time prompt, `unstream` from the fan dashboard's prompt — so an issue that's only
+// about artist features can go to artists.
 //
 // Deliberately not offered from /settings: that page already has its own opt-out toggles for
 // product email (see notification_preferences / NotificationPreferences.tsx), and pairing that

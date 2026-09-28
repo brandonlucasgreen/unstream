@@ -6,8 +6,13 @@ interface NewsletterCheckboxProps {
 }
 
 /**
- * The opt-in shown where someone gives us their email to sign in or claim a profile.
- * Unticked by default: signing up for Unstream is not signing up for a newsletter.
+ * The opt-in on the claim flow's email step. Unticked by default: claiming a profile is not
+ * signing up for a newsletter.
+ *
+ * Deliberately not on /login. That page is both sign-up and sign-in, and it can't tell which
+ * before the person is authenticated without revealing whether an address has an account
+ * (account enumeration). New fans get the one-time NewsletterPrompt on /dashboard instead, which
+ * they land on straight after their first sign-in.
  */
 export function NewsletterCheckbox({ checked, onChange }: NewsletterCheckboxProps) {
   return (

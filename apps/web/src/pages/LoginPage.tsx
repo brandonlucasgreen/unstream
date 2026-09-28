@@ -9,8 +9,6 @@ import { Footer } from '../components/Footer';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
 import { LegalConsent } from '../components/LegalConsent';
-import { NewsletterCheckbox } from '../components/NewsletterCheckbox';
-import { subscribeToNewsletter, markNewsletterPromptAnswered } from '../services/newsletter';
 
 type ViewMode = 'form' | 'magicLinkSent' | 'resetSent';
 
@@ -31,16 +29,6 @@ export function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [view, setView] = useState<ViewMode>('form');
-  const [subscribe, setSubscribe] = useState(false);
-
-  // Fire-and-forget: a newsletter failure is reported, never shown, and never blocks sign-in.
-  function subscribeIfChecked(address: string) {
-    if (!subscribe) return;
-    markNewsletterPromptAnswered('subscribed');
-    subscribeToNewsletter(address, 'unstream').catch((e) => {
-      Sentry.captureException(e, { extra: { context: 'LoginPage.newsletter' } });
-    });
-  }
 
   useEffect(() => {
     if (!authLoading && session) {
@@ -57,8 +45,6 @@ export function LoginPage() {
       const { error: authError } = await signInWithPassword(email.trim(), password);
       if (authError) {
         setError(authError);
-      } else {
-        subscribeIfChecked(email.trim());
       }
       setLoading(false);
     } catch (e) {
@@ -84,7 +70,6 @@ export function LoginPage() {
       if (authError) {
         setError(authError);
       } else {
-        subscribeIfChecked(trimmed);
         setView('magicLinkSent');
       }
       setLoading(false);
@@ -182,7 +167,6 @@ export function LoginPage() {
                         className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary"
                       />
                     </div>
-                    <NewsletterCheckbox checked={subscribe} onChange={setSubscribe} />
                     <div>
                       <label htmlFor="password" className="block text-sm font-medium mb-1">
                         Password
