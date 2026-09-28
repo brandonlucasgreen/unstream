@@ -3,6 +3,7 @@
 
 import { createClient, type SupabaseClient, type Session, type AuthError } from '@supabase/supabase-js';
 import * as Sentry from '@sentry/react';
+import { WELCOME_DISMISSED_KEY } from '../utils/welcome';
 
 let client: SupabaseClient | null = null;
 
@@ -123,6 +124,22 @@ export async function updatePassword(newPassword: string): Promise<{ error: stri
     password: newPassword,
     data: { has_password: true },
   });
+  return { error: error?.message ?? null };
+}
+
+/**
+ * Record on the account that the dashboard welcome was dismissed. `data` is merged into
+ * `user_metadata` by Supabase, so this leaves `has_password` alone. The resulting
+ * USER_UPDATED event is what refreshes `user` in AuthContext.
+ */
+export async function dismissWelcome(): Promise<{ error: string | null }> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return { error: 'Auth not configured' };
+
+  const { error } = await supabase.auth.updateUser({
+    data: { [WELCOME_DISMISSED_KEY]: new Date().toISOString() },
+  });
+  if (error) reportAuthFailure('dismissWelcome', error);
   return { error: error?.message ?? null };
 }
 

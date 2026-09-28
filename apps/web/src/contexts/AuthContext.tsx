@@ -200,7 +200,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const handleSignInWithMagicLink = useCallback(async (email: string) => {
     const supabase = getSupabaseClient();
     if (!supabase) throw new Error('Auth not available');
-    const { error } = await supabase.auth.signInWithOtp({ email });
+    // This is the sign-up path for most fans (the save-artist prompt), so where the link lands
+    // is their first impression. With no `emailRedirectTo` Supabase falls back to the Site URL,
+    // which dropped new accounts on the home page with no sign they'd signed up. /login is the
+    // redirect LoginPage already uses, and it forwards a session straight to /dashboard, where
+    // WelcomeBanner greets them. The pending save survives the hop: it's applied from
+    // localStorage on whichever page the session arrives.
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/login` },
+    });
     if (error) {
       Sentry.captureMessage('Magic link sign-in failed', {
         level: 'warning',
