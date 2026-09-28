@@ -181,6 +181,7 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect, onLink
                   slug={supportSlug}
                   artistName={result.name}
                   interest={result.interest}
+                  tipsEnabled={result.tipsEnabled}
                   variant="card"
                 />
               )}

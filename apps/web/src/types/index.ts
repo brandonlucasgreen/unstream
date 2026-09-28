@@ -105,6 +105,8 @@ export interface SearchResult {
   location?: ArtistLocation;
   // "I'd tip them" / Play my city counts at or above the public threshold. Absent when none.
   interest?: InterestCounts;
+  // The artist takes tips on Unstream right now: show Tip (→ /tip/{slug}) instead of "I'd tip them".
+  tipsEnabled?: boolean;
 }
 
 // API response from /api/search/sources

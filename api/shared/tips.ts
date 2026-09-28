@@ -78,9 +78,10 @@ export function isValidFeeBasisPoints(bps: unknown): bps is number {
   return typeof bps === 'number' && Number.isInteger(bps) && bps >= 0 && bps <= MAX_FEE_BASIS_POINTS;
 }
 
-/** "$5.46" */
+/** "$5.46", "$2,400.00" */
 export function formatUsd(cents: number): string {
-  return `$${(cents / 100).toFixed(2)}`;
+  const [whole, fraction] = (cents / 100).toFixed(2).split('.');
+  return `$${whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}.${fraction}`;
 }
 
 /**

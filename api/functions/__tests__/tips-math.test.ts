@@ -89,5 +89,7 @@ describe('bounds', () => {
 
   it('formats dollars', () => {
     expect(formatUsd(546)).toBe('$5.46');
+    expect(formatUsd(240000)).toBe('$2,400.00');
+    expect(formatUsd(10000000)).toBe('$100,000.00');
   });
 });

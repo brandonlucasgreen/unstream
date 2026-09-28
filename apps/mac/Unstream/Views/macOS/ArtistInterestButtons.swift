@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 /// "I'd tip them" and Play my city on a result row (docs/specs/artist-patronage-spec.md §3.5,
 /// §3.6, §7). Native buttons calling the API with the fan's session — no web view.
@@ -8,6 +9,8 @@ struct ArtistInterestButtons: View {
     let slug: String
     let artistName: String
     let interest: InterestCounts?
+    /// Tip opens the web tip page — hosted Stripe Checkout on the artist's account — in the browser.
+    var tipsEnabled: Bool = false
 
     @ObservedObject private var store = ArtistInterestStore.shared
     @ObservedObject private var auth = AuthService.shared
@@ -24,12 +27,19 @@ struct ArtistInterestButtons: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 8) {
-                Button(action: toggleTip) {
-                    Label(wouldTip ? "You'd tip them" : "I'd tip them",
-                          systemImage: wouldTip ? "checkmark.circle.fill" : "heart.circle")
+                if tipsEnabled {
+                    Button(action: openTipPage) {
+                        Label("Tip", systemImage: "heart.fill")
+                    }
+                    .help("Tip \(artistName) in your browser. The payment goes straight to their Stripe account.")
+                } else {
+                    Button(action: toggleTip) {
+                        Label(wouldTip ? "You'd tip them" : "I'd tip them",
+                              systemImage: wouldTip ? "checkmark.circle.fill" : "heart.circle")
+                    }
+                    .disabled(busy)
+                    .help("\(artistName) isn't taking tips on Unstream yet. Tell them you would — nothing is charged.")
                 }
-                .disabled(busy)
-                .help("\(artistName) isn't taking tips on Unstream yet. Tell them you would — nothing is charged.")
 
                 Button(action: openCity) {
                     Label(myCity.map { "Play \($0)" } ?? "Play my city",
@@ -65,7 +75,7 @@ struct ArtistInterestButtons: View {
     /// "14 fans would tip · Most wanted in Boston (12)". Counts arrive already thresholded.
     private var countsSummary: String? {
         var parts: [String] = []
-        if let tipCount = interest?.tipCount, tipCount > 0 {
+        if !tipsEnabled, let tipCount = interest?.tipCount, tipCount > 0 {
             parts.append("\(tipCount) fans would tip")
         }
         if let cities = interest?.cities, !cities.isEmpty {
@@ -97,6 +107,12 @@ struct ArtistInterestButtons: View {
             }
         }
         .padding(14)
+    }
+
+    private func openTipPage() {
+        let path = slug.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? slug
+        guard let url = URL(string: "https://unstream.stream/tip/\(path)") else { return }
+        NSWorkspace.shared.open(url)
     }
 
     private func toggleTip() {

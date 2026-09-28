@@ -365,6 +365,8 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
             slug={payload.artist.slug}
             artistName={payload.artist.name}
             interest={payload.interest}
+            tipsEnabled={payload.tips?.enabled}
+            goals={payload.tips?.goals}
             variant="page"
           />
         </div>

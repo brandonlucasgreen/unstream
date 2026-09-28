@@ -64,6 +64,9 @@ struct ArtistResult: Codable, Identifiable {
     /// "I'd tip them" / Play my city counts at or above the public threshold (three). Absent when
     /// nobody has asked yet, and on responses from deploys older than artist patronage phase 1.
     var interest: InterestCounts? = nil
+    /// The artist takes tips on Unstream now: the row shows Tip, which opens `/tip/{slug}` in the
+    /// browser (spec §7), instead of "I'd tip them".
+    var tipsEnabled: Bool? = nil
 
     /// Where this artist's page lives, claimed or not. Nil means the search couldn't place them —
     /// an unverified result, which nothing persists, so there is no page to open.

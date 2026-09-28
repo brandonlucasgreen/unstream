@@ -53,4 +53,15 @@ export interface ArtistPagePayload {
   bandcampFriday: boolean;
   /** "I'd tip them" / Play my city counts at or above the public threshold. Older cached responses omit it. */
   interest?: InterestCounts;
+  /** Whether the artist takes tips now, and their open goals. Older cached responses omit it. */
+  tips?: { enabled: boolean; goals: TipGoal[] };
+}
+
+export interface TipGoal {
+  id: string;
+  title: string;
+  targetCents: number;
+  raisedCents: number;
+  cityLabel: string | null;
+  status: 'open' | 'closed';
 }

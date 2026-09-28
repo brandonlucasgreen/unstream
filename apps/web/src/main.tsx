@@ -53,6 +53,8 @@ const ExtensionPage = lazyWithRetry(() => import('./pages/ExtensionPage.tsx').th
 const ImportPage = lazyWithRetry(() => import('./pages/ImportPage.tsx').then(m => ({ default: m.ImportPage })))
 const FaqPage = lazyWithRetry(() => import('./pages/FaqPage.tsx').then(m => ({ default: m.FaqPage })))
 const SettingsPage = lazyWithRetry(() => import('./pages/SettingsPage.tsx').then(m => ({ default: m.SettingsPage })))
+const TipPage = lazyWithRetry(() => import('./pages/TipPage.tsx').then(m => ({ default: m.TipPage })))
+const TipThanksPage = lazyWithRetry(() => import('./pages/TipThanksPage.tsx').then(m => ({ default: m.TipThanksPage })))
 const PublicSavedArtistsPage = lazyWithRetry(() => import('./pages/PublicSavedArtistsPage.tsx').then(m => ({ default: m.PublicSavedArtistsPage })))
 const AdminAnalyticsPage = lazyWithRetry(() => import('./pages/AdminAnalyticsPage.tsx').then(m => ({ default: m.AdminAnalyticsPage })))
 
@@ -132,6 +134,8 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/changelog" element={<ChangelogPage />} />
               <Route path="/faq" element={<FaqPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/tip/thanks" element={<TipThanksPage />} />
+              <Route path="/tip/:slug" element={<TipPage />} />
               <Route path="/u/:handle" element={<PublicSavedArtistsPage />} />
             </Routes>
           </Suspense>

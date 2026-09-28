@@ -135,7 +135,7 @@ struct ArtistResultView: View {
             // macOS only: no patronage surface ships on iOS (artist-patronage-spec.md §7).
             #if os(macOS)
             if let slug = artist.pageSlug {
-                ArtistInterestButtons(slug: slug, artistName: artist.name, interest: artist.interest)
+                ArtistInterestButtons(slug: slug, artistName: artist.name, interest: artist.interest, tipsEnabled: artist.tipsEnabled == true)
             }
             #endif
 

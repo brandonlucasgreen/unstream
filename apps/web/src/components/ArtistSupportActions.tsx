@@ -9,10 +9,13 @@ import {
   type InterestCounts,
 } from '../services/artistInterest';
 import { formatCityCounts } from '../../../../api/shared/artist-interest';
+import { GoalProgress } from './GoalProgress';
+import type { TipGoal } from '../types/artist-page';
 
-// "I'd tip them" and Play my city (docs/specs/artist-patronage-spec.md §3.5, §3.6), for a result
-// card and the artist page. No money moves here: "I'd tip them" records that a fan would tip an
-// artist who can't take tips yet, and the count is what prompts the artist to claim their profile.
+// Tip / "I'd tip them" and Play my city (docs/specs/artist-patronage-spec.md §3.1, §3.5, §3.6), for
+// a result card and the artist page. No money moves in this component: Tip is a link to /tip/{slug},
+// where hosted Stripe Checkout takes over. For an artist who can't take tips yet, "I'd tip them"
+// records that a fan would, and the count is what prompts the artist to claim their profile.
 
 interface ArtistSupportActionsProps {
   slug: string;
@@ -22,6 +25,10 @@ interface ArtistSupportActionsProps {
   variant: 'card' | 'page';
   /** Page variant, unclaimed artist: where "Claim your profile" goes. */
   claimHref?: string;
+  /** The artist takes tips now: Tip replaces "I'd tip them". */
+  tipsEnabled?: boolean;
+  /** Page variant: the artist's open goals, shown while they take tips. */
+  goals?: TipGoal[];
 }
 
 const pillClass =
@@ -29,7 +36,7 @@ const pillClass =
 const idleClass = 'border-border text-text-primary hover:bg-bg-hover';
 const activeClass = 'border-accent-primary/40 bg-accent-primary/10 text-accent-primary';
 
-export function ArtistSupportActions({ slug, artistName, interest, variant, claimHref }: ArtistSupportActionsProps) {
+export function ArtistSupportActions({ slug, artistName, interest, variant, claimHref, tipsEnabled = false, goals = [] }: ArtistSupportActionsProps) {
   const { session } = useAuth();
   const mine = useMyInterest(session);
   const [signInPrompt, setSignInPrompt] = useState(false);
@@ -70,6 +77,15 @@ export function ArtistSupportActions({ slug, artistName, interest, variant, clai
   return (
     <div className="space-y-2" onClick={e => e.stopPropagation()}>
       <div className="flex flex-wrap gap-2">
+        {tipsEnabled ? (
+          <Link
+            to={`/tip/${slug}`}
+            className={`${pillClass} border-accent-primary bg-accent-primary text-white hover:bg-accent-primary/90`}
+          >
+            <span aria-hidden="true">♥</span>
+            Tip {artistName}
+          </Link>
+        ) : (
         <button
           type="button"
           onClick={toggleTip}
@@ -84,6 +100,7 @@ export function ArtistSupportActions({ slug, artistName, interest, variant, clai
             <span className="text-text-muted">· {tipCount}</span>
           )}
         </button>
+        )}
         <button
           type="button"
           onClick={openCity}
@@ -126,9 +143,19 @@ export function ArtistSupportActions({ slug, artistName, interest, variant, clai
         <p className="text-xs text-text-muted">Most wanted in: {formatCityCounts(cities.slice(0, 3))}</p>
       )}
 
+      {variant === 'page' && tipsEnabled && goals.length > 0 && (
+        <div className="space-y-3 pt-1">
+          {goals.map(goal => (
+            <Link key={goal.id} to={`/tip/${slug}?goal=${goal.id}`} className="block rounded-lg p-2 -mx-2 hover:bg-bg-hover transition-colors">
+              <GoalProgress goal={goal} />
+            </Link>
+          ))}
+        </div>
+      )}
+
       {variant === 'page' && (tipCount > 0 || cities.length > 0) && (
         <div className="text-sm text-text-secondary space-y-1">
-          {tipCount > 0 && (
+          {tipCount > 0 && !tipsEnabled && (
             <p>
               {tipCount} fans want to tip {artistName}.
               {claimHref && (

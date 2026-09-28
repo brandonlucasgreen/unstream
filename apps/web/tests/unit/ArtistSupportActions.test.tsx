@@ -94,4 +94,21 @@ describe('ArtistSupportActions', () => {
     expect(screen.queryByText(/fans want to tip/)).toBeNull();
     expect(screen.queryByText(/Most wanted in/)).toBeNull();
   });
+
+  it('links to the tip page instead of "I\'d tip them" when the artist takes tips', () => {
+    render(<ArtistSupportActions slug="kid-lightbulbs" artistName="Kid Lightbulbs" variant="card" tipsEnabled />);
+    expect(screen.getByText('Tip Kid Lightbulbs').closest('a')?.getAttribute('href')).toBe('/tip/kid-lightbulbs');
+    expect(screen.queryByText("I'd tip them")).toBeNull();
+  });
+
+  it('shows open goals on the page, each linking to a tip towards it', () => {
+    render(
+      <ArtistSupportActions
+        slug="kid-lightbulbs" artistName="Kid Lightbulbs" variant="page" tipsEnabled
+        goals={[{ id: 'g1', title: 'Vinyl', targetCents: 240000, raisedCents: 120000, cityLabel: null, status: 'open' }]}
+      />,
+    );
+    expect(screen.getByText('Vinyl').closest('a')?.getAttribute('href')).toBe('/tip/kid-lightbulbs?goal=g1');
+    expect(screen.getByText('$1,200.00 of $2,400.00')).toBeTruthy();
+  });
 });
