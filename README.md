@@ -41,9 +41,9 @@ Claimed artists get access to an analytics dashboard showing search appearances,
 
 To claim a profile, search for your artist name and click "Is this you?" on your result card.
 
-## Guides
+## Platforms
 
-Unstream publishes [guides](https://unstream.stream/guides) covering artist economics, platform discovery, and how-to content for fans. Topics include streaming payout breakdowns, Bandcamp Friday explained, how to build a music library without streaming, and more.
+[unstream.stream/platforms](https://unstream.stream/platforms) lists every platform Unstream searches, grouped by how you support the artist, with the artist's payout on each. Payout sources are in the [FAQ](https://unstream.stream/faq).
 
 ## Apps
 
@@ -68,13 +68,12 @@ unstream/
 │   └── extension/          # Browser extension (Chrome + Firefox)
 ├── api/
 │   ├── functions/          # Serverless API (search, auth, analytics, embeds, admin)
-│   ├── edge/               # Edge functions (OG metadata, artist page SSR, guide SSR)
+│   ├── edge/               # Edge functions (OG metadata, artist and release page SSR, link previews)
 │   ├── search/             # Search modules (Bandcamp, MusicBrainz, multi-source)
 │   └── embed/              # Bandcamp embed resolver
-├── scripts/                # Data generation (artist list, artist data, sitemap, social posts, guides)
+├── scripts/                # Data generation (artist list, artist data, sitemap, social posts, feeds)
 ├── data/
-│   ├── artists/            # Pre-generated artist SEO data (JSON)
-│   └── guides/             # Markdown guide posts with YAML frontmatter
+│   └── artists/            # Pre-generated artist SEO data (JSON)
 └── public/                 # Static assets (icons, images, robots.txt, sitemap)
 ```
 
@@ -83,7 +82,7 @@ unstream/
 ```bash
 npm install
 npm run dev          # Start Vite dev server
-npm run build        # Full build (guides manifest + typecheck + tests + Vite + sitemap)
+npm run build        # Full build (feeds + sitemap + typecheck + Vite)
 npm run lint         # Run ESLint
 npm run test         # Run unit and integration tests
 npm run test:unit    # Unit tests only

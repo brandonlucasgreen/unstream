@@ -10,7 +10,7 @@ export function Footer() {
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <Link to="/known-artists" className="hover:text-text-primary transition-colors">Artists You Know</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
-          <Link to="/guides" className="hover:text-text-primary transition-colors">Guides</Link>
+          <Link to="/platforms" className="hover:text-text-primary transition-colors">Platforms</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <Link to="/changelog" className="hover:text-text-primary transition-colors">Changelog</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>

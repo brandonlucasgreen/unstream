@@ -1,7 +1,7 @@
 import { Context } from "https://edge.netlify.com";
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
 
-// Link-preview metadata for the hand-written static pages — currently /press and /contact.
+// Link-preview metadata for the hand-written static pages — currently /press, /contact and /platforms.
 //
 // These pages set document.title and the description in a useEffect, which is invisible to anything
 // that doesn't run JS. Without this, every unfurl of unstream.stream/press showed the homepage's
@@ -23,6 +23,11 @@ const PAGES: Record<string, PageMeta> = {
     title: "Press kit — Unstream",
     description:
       "Boilerplate, facts, screenshots, and logos for Unstream — a free, open-source tool that shows music fans where to buy directly from artists, and how much of their money reaches them.",
+  },
+  "/platforms": {
+    title: "Platforms — Unstream",
+    description:
+      "Every platform Unstream searches, from Bandcamp to your local library, with how much of each sale reaches the artist.",
   },
   "/contact": {
     title: "Contact — Unstream",

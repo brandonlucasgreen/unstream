@@ -120,7 +120,7 @@ export function Header() {
         { to: '/settings', label: 'Settings' },
       ]
     : [
-        { to: '/guides', label: 'Guides' },
+        { to: '/platforms', label: 'Platforms' },
         { to: '/faq', label: 'FAQ' },
         { to: '/press', label: 'Press kit' },
         { to: '/contact', label: 'Contact' },

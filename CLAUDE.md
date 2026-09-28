@@ -32,11 +32,11 @@ These inform engineering trade-offs, not just marketing copy — when a decision
 Only the non-obvious parts; `ls` covers the rest.
 
 - **`api/functions/`** — Netlify serverless functions, **the live backend**: `search-sources.ts` (Phase 1 orchestration, the big one), `search-musicbrainz.ts` (Phase 2), `search-utils.ts` + `search-parsers.ts` (pure, unit-testable logic), `middleware.ts` (CORS, auth, validation, SSRF allowlist), `cache.ts`, `ratelimit.ts`, `db.ts` (service-role Supabase), `__tests__/`.
-- **`api/edge/`** — `og-metadata`, `artist-page-static`, `release-page`, `guide-page`, `noscript-search`, `u-handle`. **`api/search/`** — only `bandcamp-probe.ts` and `enrichment.ts` are live (see below). **`api/shared/`** — `platform-registry.ts`, `bandcamp-friday.ts`, `release-display.ts`, `desktop-release.ts`.
+- **`api/edge/`** — `og-metadata`, `artist-page-static`, `release-page`, `noscript-search`, `u-handle`, `static-page-meta`. **`api/search/`** — only `bandcamp-probe.ts` and `enrichment.ts` are live (see below). **`api/shared/`** — `platform-registry.ts`, `bandcamp-friday.ts`, `release-display.ts`, `desktop-release.ts`.
 - **`apps/web/`** — the SPA: `src/services/sources.ts` is platform config + search client, `src/contexts/AuthContext` holds auth and saved artists, `public/` carries the generated `sitemap.xml` / `dispatch.xml`, `tests/` is `unit/` + `integration/` + `fixtures/`.
 - **`apps/web/server/`** — dev-only API served by Vite, **not production**. See "Local dev".
 - **`apps/mac/`** — universal Apple app (macOS menu bar + iOS), SwiftUI. **`project.yml` is the XcodeGen definition and the source of truth for targets — edit it, not the `.xcodeproj`.** **`apps/extension/`** — MV3 extension, one content script per streaming site, two manifests.
-- **`data/`** — `artists/` (~790 pre-generated SEO JSON) + `artists-manifest.json` (feeds sitemap and social posts), `guides/`, `dispatch/` (archive), `social-posts/`, `shipped-features.json` (served to `/changelog`); **`scripts/`** generates all of it plus the feeds and sitemap.
+- **`data/`** — `artists/` (~790 pre-generated SEO JSON) + `artists-manifest.json` (feeds sitemap and social posts), `dispatch/` (archive), `social-posts/`, `shipped-features.json` (served to `/changelog`); **`scripts/`** generates all of it plus the feeds and sitemap.
 - **`docs/`** — `engineering-history.md`, `specs/`, `postmortems/`, `openapi.yaml`. **`netlify.toml`** — edge routes, `/api/*` redirects, headers/CSP.
 
 ## Commands
@@ -63,7 +63,7 @@ npm run sentry:sourcemaps
 npm run migrate:link|migrate:dry-run|migrate:list        # Supabase CLI, --linked
 ```
 
-`npm run build` runs, in order: guides manifest → dispatch feed → changelog feed → guides feed → sitemap → root `tsc -b` → `apps/web` `tsc -b` → `vite build`. Any failure blocks the deploy, so a type error can't ship.
+`npm run build` runs, in order: dispatch feed → changelog feed → sitemap → root `tsc -b` → `apps/web` `tsc -b` → `vite build`. Any failure blocks the deploy, so a type error can't ship.
 
 **Every generator must run before `vite build`, and that ordering is load-bearing.** `vite build` fills the published `apps/web/dist` by copying `apps/web/public/`, so anything written there afterwards is never published. Put new generators **before** `cd apps/web`, and verify against the deployed artifact — the log prints success either way. (This shipped a frozen sitemap for four weeks.)
 
@@ -155,7 +155,7 @@ grep -r "PLATFORM_INFO" api/edge/ apps/web/src/
 | `netlify.toml` redirects, headers, routing | **applied** | ignored |
 | Supabase data | **production** | none |
 | Auth (sign-in, sessions, admin) | **works** | dead — "Auth not configured" |
-| `/data/**` (guides, changelog) | served | 404s as the SPA shell |
+| `/data/**` (changelog) | served | 404s as the SPA shell |
 | Boot | ~15s | ~1s |
 
 `dev:fast` is for pure CSS/layout iteration. Anything touching data, auth, an API response, SEO markup or routing needs `npm run dev`.
@@ -181,7 +181,8 @@ Three traps, all producing a *silently wrong* result rather than an error:
 - **Account settings.** `/settings` is backed by the `me-*` functions (`me-settings`, `me-username`, `me-location`, `me-password`) plus `user-sharing.ts`. These are the only files in `api/tsconfig.json`'s typecheck include and each has a test in `api/functions/__tests__/` — **follow that pattern for new account endpoints.**
 - **Public API (v1).** Documented in `docs/openapi.yaml`, surfaced on `/developers`, routed in `netlify.toml`: `/api/v1/search`, `/artist/*`, `/resolve`, `/platforms`, `/status`, `/keys`. Keys are stored hashed (migration 007); key-bearing requests get permissive CORS, anonymous ones are restricted to `unstream.stream`.
 - **Discord bot.** `discord-interaction.ts` verifies signatures (tweetnacl) and dispatches to `discord-search-background.ts`; commands are registered with `scripts/discord-register-commands.ts`.
-- **Guides.** Markdown in `data/guides/` with YAML frontmatter (title, description, pillar, published/draft); manifest generated at build time by `scripts/generate-guides-manifest.ts`. Pillars: artist-economics, platform-discovery, how-to, builder.
+- **Platforms and FAQ, not guides.** The guides section was retired on 2026-09-27: SEO pieces that drew no traffic and weren't in Brandon's voice. What was documentation became `/platforms` (generated from `sources.ts`, so it can't drift from the registry) and FAQ entries in `apps/web/src/data/faq.ts` (mirrored by hand in `apps/web/public/faq.txt`). Old `/guides/*` URLs are 301s in `netlify.toml`; `/guides.xml` is a frozen copy in `apps/web/public/`. Don't bring back long-form content here; Brandon's writing lives in his newsletter.
+- **Newsletter.** Unstream has no newsletter of its own. Updates go out in Brandon's newsletter, Lightbulbs On (Buttondown), and every signup names it (`apps/web/src/data/newsletter.ts`). Signups go through `newsletter-subscribe.ts` (double opt-in), from the inline forms, an unticked checkbox on sign-in and claim, and a one-time dashboard prompt. The source becomes a Buttondown tag: `artist` for artists, `unstream` for fans.
 - **Admin tools.** Admins (checked by email) merge duplicate results at `/admin/merge`, review verification at `/admin/verify`, and view `/admin/analytics`. Merge overrides live in Supabase (migrations 004–005), are respected during disambiguation, and can be managed with `npx tsx scripts/merge-override.ts`.
 
 ### Release dedup: what identity is, and what the date is for
@@ -221,7 +222,7 @@ The Mac app ships as a direct GitHub release and updates itself with Sparkle 2 (
 
 ### Edge functions (SSR/SEO)
 
-Routed in `netlify.toml`: `/` → `og-metadata`; `/artist/*` and `/a/*` → `artist-page-static`; `/search` → `noscript-search`; `/guides/*` → `guide-page`; `/u/*` → `u-handle`.
+Routed in `netlify.toml`: `/` → `og-metadata`; `/artist/*` and `/a/*` → `artist-page-static`; `/search` → `noscript-search`; `/u/*` → `u-handle`; `/press`, `/contact`, `/platforms` → `static-page-meta` (link previews only).
 
 `/artists` is SPA-only after UNS-98; `artist-directory-page` was removed. Edge functions run on Deno and import from URLs (`edge.netlify.com`, `esm.sh`) — they can't import from `api/functions/`, so shared constants get duplicated or pulled from `api/shared/`.
 
