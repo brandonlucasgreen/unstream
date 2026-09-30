@@ -94,6 +94,7 @@ interface FormState {
   currentSlug: string;
   newSlug: string;
   bio: string;
+  showBio: boolean;
   featuredEmbed: string;
   imageUrl: string | null;
   customImageUrl: string | null;
@@ -130,6 +131,7 @@ const initialFormState: FormState = {
   currentSlug: '',
   newSlug: '',
   bio: '',
+  showBio: true,
   featuredEmbed: '',
   imageUrl: null,
   customImageUrl: null,
@@ -199,6 +201,7 @@ export function ArtistEditPage() {
             imageUrl: data.imageUrl || null,
             customImageUrl: data.profile?.customImageUrl || null,
             bio: data.profile?.bio ?? '',
+            showBio: data.profile?.showBio !== false,
             featuredEmbed: data.profile?.featuredEmbed ?? '',
             links: existingLinks,
             city: data.location?.city ?? '',
@@ -343,6 +346,7 @@ export function ArtistEditPage() {
           newSlug: form.newSlug !== form.currentSlug ? form.newSlug : undefined,
           newName: form.artistName !== form.originalName ? form.artistName.trim() : undefined,
           bio: form.bio,
+          showBio: form.showBio,
           featuredEmbed: form.featuredEmbed || null,
           customImageUrl: form.customImageUrl,
           location: { city: form.city, country: form.country },
@@ -592,6 +596,20 @@ export function ArtistEditPage() {
               placeholder="Tell fans about your music..."
               className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary resize-none"
             />
+            <label className="flex items-start gap-2 pt-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.showBio}
+                onChange={e => set('showBio', e.target.checked)}
+                className="w-4 h-4 mt-0.5 rounded accent-accent-primary flex-shrink-0"
+              />
+              <span className="text-sm">
+                Show a bio on search results
+                <span className="block text-xs text-text-muted">
+                  If you haven't written one, we'll use your Bandcamp, Discogs or Wikipedia bio.
+                </span>
+              </span>
+            </label>
           </section>
 
           {/* Location */}

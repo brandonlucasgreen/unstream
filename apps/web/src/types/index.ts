@@ -96,9 +96,14 @@ export interface SearchResult {
   claimedSlug?: string;
   // Slug for an unclaimed-but-known artist's pre-generated page (/artist/{slug})
   knownSlug?: string;
-  // Wikipedia bio summary from MusicBrainz enrichment
+  // Deprecated: superseded by `bio`, which covers every source. Kept until the backend stops
+  // sending it.
   wikipediaSummary?: string;
   wikipediaUrl?: string;
+  // Short bio for the card, picked on the server. Mirrors api/shared/artist-bio.ts.
+  bio?: ArtistBio;
+  // A claimed artist turned bios off; Phase 2 must not fill one in.
+  bioSuppressed?: boolean;
   // Geographic location from MusicBrainz, Bandcamp, or Mirlo enrichment
   location?: ArtistLocation;
 }
@@ -108,6 +113,17 @@ export interface SearchResponse {
   query: string;
   results: SearchResult[];
   hasPendingEnrichment?: boolean; // True if MusicBrainz data should be fetched separately
+}
+
+// A short artist bio — one source, never stitched together. `text` is plain text with
+// paragraphs separated by a blank line; render it as text, never as HTML.
+export interface ArtistBio {
+  text: string;
+  source: 'unstream' | 'bandcamp' | 'discogs' | 'wikipedia';
+  // Where the full bio lives. Always present — it's the "read more" link.
+  sourceUrl: string;
+  // The server cut a long bio short, so the full text is only at sourceUrl.
+  truncated: boolean;
 }
 
 // Social link from MusicBrainz
@@ -128,6 +144,8 @@ export interface MusicBrainzData {
   wikipediaSummary?: string | null;
   wikipediaUrl?: string | null;
   location?: ArtistLocation;
+  // Only fills a card with none — see mergeWithMusicBrainzData.
+  bio?: ArtistBio | null;
 }
 
 // Search state

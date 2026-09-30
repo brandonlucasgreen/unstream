@@ -87,3 +87,32 @@ describe('toStoredResult', () => {
     expect(result!.platforms[1].displayName).toBeUndefined();
   });
 });
+describe('toStoredResult bios', () => {
+  it("gives a claimed card the artist's own bio, linked to their page", () => {
+    const result = toStoredResult(dbArtist({
+      matchConfidence: 'claimed',
+      slug: 'kid-lightbulbs',
+      profile: { bio: 'Experimental rock.', showBio: true, verified: true },
+    }));
+    expect(result!.bio).toEqual({
+      text: 'Experimental rock.',
+      source: 'unstream',
+      sourceUrl: 'https://unstream.stream/a/kid-lightbulbs',
+      truncated: false,
+    });
+  });
+
+  it('marks a claimed card whose artist turned bios off, with no bio at all', () => {
+    const result = toStoredResult(dbArtist({
+      matchConfidence: 'claimed',
+      profile: { bio: 'Experimental rock.', showBio: false, verified: true },
+    }));
+    expect(result!.bio).toBeUndefined();
+    expect(result!.bioSuppressed).toBe(true);
+  });
+
+  it('never gives an unclaimed card a profile bio', () => {
+    const result = toStoredResult(dbArtist({ profile: { bio: 'Not theirs to show.', showBio: true, verified: false } }));
+    expect(result!.bio).toBeUndefined();
+  });
+});

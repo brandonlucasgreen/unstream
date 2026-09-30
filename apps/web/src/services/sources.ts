@@ -676,6 +676,7 @@ export function buildMusicBrainzFallbackResult(
     location: mbData.location,
     wikipediaSummary: mbData.wikipediaSummary || undefined,
     wikipediaUrl: mbData.wikipediaUrl || undefined,
+    bio: mbData.bio || undefined,
   };
 }
 
@@ -899,7 +900,18 @@ export function mergeWithMusicBrainzData(
       unverifiedReason: upgradedConfidence === 'unverified' ? result.unverifiedReason : undefined,
       wikipediaSummary: mbData.wikipediaSummary || undefined,
       wikipediaUrl: mbData.wikipediaUrl || undefined,
+      bio: result.bio ?? (canFillBio(result, mbNormalized) ? mbData.bio ?? undefined : undefined),
       location: mbData.location || result.location,
     };
   });
+}
+
+// Phase 2's bio only fills a gap: Phase 1's sources outrank it, so a bio already on screen is
+// never replaced. A claimed card is never filled — the artist may have turned bios off — and the
+// name must match exactly, since the match above is loose enough to pair "Ruby" with
+// "Synthetic Ruby".
+function canFillBio(result: import('../types').SearchResult, mbNormalized: string): boolean {
+  return !result.bioSuppressed &&
+    result.matchConfidence !== 'claimed' &&
+    normalizeForComparison(result.name) === mbNormalized;
 }

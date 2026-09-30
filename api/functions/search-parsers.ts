@@ -287,6 +287,28 @@ export function parseBandcampImage(html: string): string | null {
 }
 
 /**
+ * Read the artist's own bio from a Bandcamp page's sidebar, as plain text.
+ *
+ * Artist, /music and release pages all carry the band sidebar, with the bio in
+ * `<p id="bio-text">`. Bandcamp shows the first few lines and hides the rest in a
+ * `.peekaboo-text` span behind a "more" link, with a `.peekaboo-ellipsis` "..." between —
+ * the hidden span is real bio text and is kept; the ellipsis is page chrome and is dropped.
+ *
+ * Returns '' when the page has no bio, never null: the probe cache stores '' for "checked,
+ * nothing there" and keeps NULL for "never checked" (rows cached before bios existed).
+ * Free — the probe already has this HTML in hand.
+ */
+export function parseBandcampBio(html: string): string {
+  const bioElement = parse(html).querySelector('#bio-text');
+  if (!bioElement) return '';
+  const withBreaks = bioElement.innerHTML
+    .replace(/<span[^>]*class="[^"]*\bpeekaboo-ellipsis\b[^"]*"[^>]*>[\s\S]*?<\/span>/gi, '')
+    .replace(/<br\s*\/?>/gi, '\n');
+  // Re-parsing the fragment strips the remaining tags and decodes entities (&amp; &#39; …).
+  return parse(withBreaks).textContent.trim();
+}
+
+/**
  * Parse Bandcamp /music page HTML to extract release titles.
  *
  * Falls back to the sidebar discography for the single-release layout, for the
