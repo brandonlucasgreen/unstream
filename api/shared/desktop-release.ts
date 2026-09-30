@@ -34,14 +34,14 @@ export interface MacRelease {
 }
 
 export const MAC_RELEASE: MacRelease = {
-  shortVersion: '3.6.2',
-  build: '18',
-  url: 'https://github.com/brandonlucasgreen/unstream/releases/download/v3.6.2/Unstream-3.6.2.dmg',
-  lengthBytes: 4214129,
-  edSignature: 'KmQrZlm0IZwoNCqF8SJo0E9Jry7frBxb3YendUXdL7HPFAGiluA1TbcpKUHA55oaoSbxWmurC1/65lLTTZIyCQ==',
-  publishedAt: '2026-09-27T00:00:00Z',
+  shortVersion: '3.7.0',
+  build: '19',
+  url: 'https://github.com/brandonlucasgreen/unstream/releases/download/v3.7.0/Unstream-3.7.0.dmg',
+  lengthBytes: 4251022,
+  edSignature: 'SSr/pOF/9T+XywQ3nkZzK2IUchiulvGRgb5uH29H3ocylwhkKYJIfZO0pc59oF7t3xnC/MXBd65bslU6U6QIDg==',
+  publishedAt: '2026-09-30T00:00:00Z',
   minimumSystemVersion: '13.0',
-  releaseNotes: 'Support Unstream now links to Ko-fi, with an occasional reminder you can dismiss.',
+  releaseNotes: 'Search results can now show a short artist bio, and the popover has larger text, more spacing and bigger click targets.',
   releasesPageUrl: 'https://github.com/brandonlucasgreen/unstream/releases',
 };
 
