@@ -134,6 +134,15 @@ Catalog triggers are all demand-driven — a save, an artist's own button, the a
 
 **Paging, not `.limit()`.** PostgREST caps every response at 1,000 rows whatever limit you ask for, and truncates *silently* — a `.select()` over `artist_links` returns 1,000 of ~3,900 rows and looks successful. Use `readAllPages` (or `.range()` in a loop) for any read whose table can exceed 1,000 rows.
 
+### Artist bios
+
+A search or detection result carries one `bio` (`{ text, source, sourceUrl, truncated }`), picked **on the server** by `api/shared/artist-bio.ts` in this order: claimed profile → Bandcamp sidebar → Discogs profile → Wikipedia (via MusicBrainz's Wikidata relation). Clients only render it, as plain text, and label the source by platform ("From the artist" for a claimed bio). Spec: `docs/specs/artist-bio-excerpt-spec.md`. Four rules:
+
+- **`artist_profiles.show_bio = false` means no bio at all**, not a fallback. It shows up on the card as `bioSuppressed`, and clients never fill a claimed card from Phase 2.
+- **Phase 2 fills a gap, never replaces.** Phase 1's sources outrank Phase 2's, and a fill requires an exact name match.
+- **`bandcamp_slug_probes.bio`: `''` means checked-and-empty, `NULL` means never checked.** Keep the two distinct.
+- **A bio source that didn't answer is not "no bio".** `bioFetchFailed` keeps that result out of the long cache.
+
 ### Platform registry
 
 `api/shared/platform-registry.ts` is the single source of truth for platform metadata: name, color, icon, category (marketplace, patronage, decentralized, library, official, social), payout percentage, AI policy, `CATEGORY_ORDER`. Add or change platforms there rather than hardcoding elsewhere, then check for stale copies:

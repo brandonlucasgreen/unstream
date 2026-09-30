@@ -154,7 +154,15 @@ actor UnstreamAPI {
                 }
             }
 
-            return ArtistResult(id: result.id, name: result.name, type: result.type, imageUrl: result.imageUrl, platforms: newPlatforms, claimedSlug: result.claimedSlug, knownSlug: result.knownSlug, matchConfidence: result.matchConfidence, location: result.location)
+            // Phase 2's bio only fills a gap: Phase 1's sources outrank it, so it never replaces
+            // one already on screen. A claimed card is never filled — the artist may have turned
+            // bios off — and the name must match exactly, because the loose match above would
+            // otherwise hand "Ruby" the biography of "Synthetic Ruby".
+            let fillsBio = result.bio == nil && result.bioSuppressed != true &&
+                result.matchConfidence != "claimed" && resultNormalized == mbNormalized
+            let bio = fillsBio ? mbData.bio : result.bio
+
+            return ArtistResult(id: result.id, name: result.name, type: result.type, imageUrl: result.imageUrl, platforms: newPlatforms, claimedSlug: result.claimedSlug, knownSlug: result.knownSlug, matchConfidence: result.matchConfidence, location: result.location, bio: bio, bioSuppressed: result.bioSuppressed)
         }
     }
 

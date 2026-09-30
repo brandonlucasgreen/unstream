@@ -1,5 +1,5 @@
 ---
-status: Approved
+status: Built
 ---
 # Artist bio excerpt on search and detection results
 
@@ -129,3 +129,15 @@ The order follows the client priority: the backend first, because every client d
 ## Decisions log
 
 - **2026-09-30 (Brandon):** claimed artists can turn the bio off, with no fallthrough. Short real bios are shown: no character minimum, three words is enough. The source line names the platform, except a claimed profile's own bio, which says "From the artist".
+
+## Implementation notes (2026-09-30)
+
+Built as specced, with these differences. Each was found while building:
+
+- **Legacy probe rows are re-probed once.** This reverses "we don't re-fetch to backfill". Accepted Bandcamp probe rows never expire, so without a re-probe the most-searched artists would never get a Bandcamp bio. An accepted row with `bio IS NULL` is probed again the next time someone searches for it. The new row replaces the old one only if it comes back accepted, so a timeout or bot challenge can't cost an artist their Bandcamp link. The cost is one Bandcamp request and one upsert per previously cached artist, once, spread across normal search traffic.
+- **Where each bio attaches is decided by links, not by name.** A Bandcamp bio attaches by the card's own Bandcamp subdomain. A Discogs bio attaches only to a card that still carries that Discogs link. Bios attach after admin link suppressions run, so removing a wrong link also removes its bio. The Phase 2 response drops a bio whose source URL is suppressed.
+- **Client fill needs an exact name match.** The clients' Phase 2 merge matches names loosely ("Ruby" ≈ "Synthetic Ruby"). Filling the bio requires the normalized names to be equal.
+- **v1 search strips `bio` and `bioSuppressed`** (`search-sources-v1.ts`), because v1 is out of scope.
+- **A bio source that didn't answer doesn't get the 30-minute cache.** In Phase 1 the MusicBrainz result is kept only for the 60-second failure TTL; in Phase 2 it isn't cached at all. This covers Discogs, Wikipedia, and the Bandcamp page, and uses `bioFetchFailed`.
+- **Mac:** the bio view lives inside `ArtistResultView.swift`, not in a new file, because `Unstream.xcodeproj` is committed and adding a file means regenerating it with XcodeGen.
+

@@ -63,6 +63,7 @@ struct ArtistResultView: View {
     private let nameFont: Font = .system(size: 14, weight: .semibold)
     private let locationFont: Font = .system(size: 11)
     private let reportFont: Font = .system(size: 11)
+    private let bioLineLimit = 3
     #else
     private let headerIconButtonSize: CGFloat = 14
     private let heartIconSize: CGFloat = 14
@@ -70,6 +71,8 @@ struct ArtistResultView: View {
     private let nameFont: Font = .headline
     private let locationFont: Font = .caption
     private let reportFont: Font = .caption
+    // The menu-bar popover is the tightest space the app has.
+    private let bioLineLimit = 2
     #endif
 
     var body: some View {
@@ -112,6 +115,10 @@ struct ArtistResultView: View {
                 #if os(macOS)
                 .help(isSaved ? "Remove from Saved Artists" : "Add to Saved Artists")
                 #endif
+            }
+
+            if let bio = artist.bio {
+                ArtistBioView(bio: bio, collapsedLineLimit: bioLineLimit, onOpenSource: openBioSource)
             }
 
             // Verified platforms section
@@ -359,6 +366,14 @@ struct ArtistResultView: View {
         return "Here's how you can support \(artist.name) directly:"
     }
 
+    private func openBioSource(_ url: URL) {
+        #if os(macOS)
+        NSWorkspace.shared.open(url)
+        #else
+        safariItem = SafariURL(url: url)
+        #endif
+    }
+
     private func reportIssue(artist: ArtistResult) {
         let platformList = artist.platforms.map { "- \($0.sourceId): \($0.url ?? "N/A")" }.joined(separator: "\n")
         let subject = "Issue Report: \(artist.name)"
@@ -384,6 +399,83 @@ struct ArtistResultView: View {
         #endif
     }
 
+}
+
+/// The artist's bio, clamped to a few lines with an inline "More", and always a link to where
+/// it came from. Nothing opens until the reader asks.
+private struct ArtistBioView: View {
+    let bio: ArtistBio
+    let collapsedLineLimit: Int
+    let onOpenSource: (URL) -> Void
+
+    @State private var isExpanded = false
+    @State private var fullHeight: CGFloat = 0
+    @State private var clampedHeight: CGFloat = 0
+
+    /// "More" only when the clamp is actually hiding something. Measured rather than guessed
+    /// from a character count, which would be wrong at every other width and text size.
+    private var isClamped: Bool { fullHeight > clampedHeight + 1 }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(bio.text)
+                .font(.caption)
+                .foregroundColor(.primary.opacity(0.85))
+                .lineLimit(isExpanded ? nil : collapsedLineLimit)
+                .fixedSize(horizontal: false, vertical: true)
+                .textSelection(.enabled)
+                .background(heightReader { clampedHeight = $0 })
+                .background(
+                    // The same text unclamped, invisible, to learn how tall it would be.
+                    Text(bio.text)
+                        .font(.caption)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .hidden()
+                        .background(heightReader { fullHeight = $0 })
+                        .accessibilityHidden(true)
+                )
+
+            HStack(spacing: 10) {
+                if isClamped || isExpanded {
+                    Button(isExpanded ? "Less" : "More") { isExpanded.toggle() }
+                        .buttonStyle(.plain)
+                        .foregroundColor(.accentColor)
+                        .accessibilityLabel(isExpanded ? "Show less of the bio" : "Show the whole bio")
+                }
+                if let url = URL(string: bio.sourceUrl) {
+                    Button { onOpenSource(url) } label: {
+                        Label(bio.truncated ? "\(bio.sourceLabel) · Read more" : bio.sourceLabel, systemImage: "arrow.up.right")
+                            .labelStyle(TrailingIconLabelStyle())
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundColor(.secondary)
+                    .linkActions(url: url, openTitle: "Open Bio Source", onOpen: { onOpenSource(url) })
+                    #if os(macOS)
+                    .help(bio.sourceUrl)
+                    #endif
+                }
+            }
+            .font(.caption2)
+        }
+    }
+
+    private func heightReader(_ update: @escaping (CGFloat) -> Void) -> some View {
+        GeometryReader { proxy in
+            Color.clear
+                .onAppear { update(proxy.size.height) }
+                .onChange(of: proxy.size.height) { height in update(height) }
+        }
+    }
+}
+
+/// "From Bandcamp ↗" — the arrow after the words, as a link-out reads.
+private struct TrailingIconLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 2) {
+            configuration.title
+            configuration.icon.imageScale(.small)
+        }
+    }
 }
 
 // Simple flow layout for platform badges

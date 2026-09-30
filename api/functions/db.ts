@@ -228,7 +228,6 @@ interface LinkRow {
 
 export interface ArtistProfileRow {
   bio: string | null;
-  show_bio: boolean;
   custom_image_url: string | null;
   featured_embed: string | null;
   verified_at: string | null;
@@ -283,7 +282,7 @@ export async function getArtistProfileBySlug(slug: string): Promise<ArtistProfil
     const [profileResult, linksResult] = await Promise.all([
       client
         .from('artist_profiles')
-        .select('bio, show_bio, custom_image_url, featured_embed, verified_at, link_dividers')
+        .select('bio, custom_image_url, featured_embed, verified_at, link_dividers')
         .eq('artist_id', artistId)
         .single(),
       client
