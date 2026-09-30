@@ -27,13 +27,14 @@ struct PlatformBadge: View {
     private let payoutFont: Font = .system(size: 12, weight: .semibold)
     private let fridayFont: Font = .system(size: 12, weight: .bold)
     #else
-    private let iconSize: CGFloat = 10
-    private let paddingH: CGFloat = 8
-    private let paddingV: CGFloat = 4
-    private let spacing: CGFloat = 4
-    private let labelFont: Font = .caption.weight(.medium)
-    private let payoutFont: Font = .caption2.weight(.semibold)
-    private let fridayFont: Font = .caption2.weight(.bold)
+    // About 26 points tall: a comfortable target at the size of a small macOS button.
+    private let iconSize: CGFloat = 12
+    private let paddingH: CGFloat = 10
+    private let paddingV: CGFloat = 5
+    private let spacing: CGFloat = 5
+    private let labelFont: Font = .callout.weight(.medium)
+    private let payoutFont: Font = .subheadline.weight(.semibold)
+    private let fridayFont: Font = .subheadline.weight(.bold)
     #endif
 
     var body: some View {

@@ -33,10 +33,10 @@ struct SupportListView: View {
                         .font(.title2)
                         .foregroundColor(.secondary)
                     Text("No artists saved yet")
-                        .font(.caption)
+                        .font(.smallText)
                         .foregroundColor(.secondary)
                     Text("Search for artists and tap the heart to add them here.")
-                        .font(.caption2)
+                        .font(.smallerText)
                         .foregroundColor(.secondary.opacity(0.7))
                         .multilineTextAlignment(.center)
                 }
@@ -48,10 +48,10 @@ struct SupportListView: View {
                         .font(.title2)
                         .foregroundColor(.secondary)
                     Text("No matches found")
-                        .font(.caption)
+                        .font(.smallText)
                         .foregroundColor(.secondary)
                     Text("Try a different search term.")
-                        .font(.caption2)
+                        .font(.smallerText)
                         .foregroundColor(.secondary.opacity(0.7))
                         .multilineTextAlignment(.center)
                 }
@@ -148,16 +148,31 @@ struct SupportEntryView: View {
     private let heartIconSize: CGFloat = 20
     private let nameFont: Font = .system(size: 14, weight: .semibold)
     private let locationFont: Font = .system(size: 11)
+    private let photoSize: CGFloat = 36
+    private let cardPadding: CGFloat = 10
+    private let cardCornerRadius: CGFloat = 8
+    private let sectionSpacing: CGFloat = 8
+    private let badgeSpacing: CGFloat = 6
+    private let headerButtonSpacing: CGFloat = 10
+    private let headerSpacerMinLength: CGFloat? = nil
     #else
-    private let iconButtonSize: CGFloat = 14
-    private let refreshIconSize: CGFloat = 12
-    private let heartIconSize: CGFloat = 14
-    private let nameFont: Font = .headline
-    private let locationFont: Font = .caption
+    // Same card metrics as a search result, so a saved artist looks like the thing you saved.
+    private let iconButtonSize: CGFloat = 28
+    private let refreshIconSize: CGFloat = 14
+    private let heartIconSize: CGFloat = 15
+    private let nameFont: Font = .title3.weight(.semibold)
+    private let locationFont: Font = .callout
+    private let photoSize: CGFloat = 44
+    private let cardPadding: CGFloat = 14
+    private let cardCornerRadius: CGFloat = 12
+    private let sectionSpacing: CGFloat = 10
+    private let badgeSpacing: CGFloat = 8
+    private let headerButtonSpacing: CGFloat = 0
+    private let headerSpacerMinLength: CGFloat? = 0
     #endif
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: sectionSpacing) {
             HStack(spacing: 10) {
                 // Artist photo
                 artistPhoto
@@ -174,41 +189,43 @@ struct SupportEntryView: View {
                 }
                 .textSelection(.enabled)
 
-                Spacer()
+                Spacer(minLength: headerSpacerMinLength)
 
-                if isRefreshing {
-                    ProgressView()
-                        .scaleEffect(0.6)
-                        .frame(width: iconButtonSize, height: iconButtonSize)
-                } else {
-                    Button(action: onRefresh) {
-                        Image(systemName: "arrow.clockwise")
-                            .foregroundColor(.secondary)
-                            .font(.system(size: refreshIconSize))
+                HStack(spacing: headerButtonSpacing) {
+                    if isRefreshing {
+                        ProgressView()
+                            .scaleEffect(0.6)
+                            .frame(width: iconButtonSize, height: iconButtonSize)
+                    } else {
+                        Button(action: onRefresh) {
+                            Image(systemName: "arrow.clockwise")
+                                .foregroundColor(.secondary)
+                                .font(.system(size: refreshIconSize))
+                                .frame(width: iconButtonSize, height: iconButtonSize)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Refresh platforms for \(entry.artistName)")
+                        #if os(macOS)
+                        .opacity(isHovering ? 1 : 0.3)
+                        .help("Refresh platforms")
+                        #endif
+                    }
+
+                    Button(action: onRemove) {
+                        Image(systemName: "heart.fill")
+                            .foregroundColor(.red)
+                            .font(.system(size: heartIconSize))
                             .frame(width: iconButtonSize, height: iconButtonSize)
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Refresh platforms for \(entry.artistName)")
+                    .accessibilityLabel("Remove \(entry.artistName) from Saved Artists")
                     #if os(macOS)
-                    .opacity(isHovering ? 1 : 0.3)
-                    .help("Refresh platforms")
+                    .opacity(isHovering ? 1 : 0.5)
+                    .help("Remove from Saved Artists")
                     #endif
                 }
-
-                Button(action: onRemove) {
-                    Image(systemName: "heart.fill")
-                        .foregroundColor(.red)
-                        .font(.system(size: heartIconSize))
-                        .frame(width: iconButtonSize, height: iconButtonSize)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Remove \(entry.artistName) from Saved Artists")
-                #if os(macOS)
-                .opacity(isHovering ? 1 : 0.5)
-                .help("Remove from Saved Artists")
-                #endif
             }
 
             // New release indicators, one per unread release
@@ -217,7 +234,7 @@ struct SupportEntryView: View {
             }
 
             if !entry.platforms.isEmpty {
-                FlowLayout(spacing: 6) {
+                FlowLayout(spacing: badgeSpacing) {
                     ForEach(entry.platforms) { platform in
                         SavedPlatformBadge(platform: platform)
                     }
@@ -226,12 +243,12 @@ struct SupportEntryView: View {
 
             // Added date
             Text("Added \(entry.dateAdded.formatted(.relative(presentation: .named)))")
-                .font(.caption2)
+                .font(.smallerText)
                 .foregroundColor(.secondary.opacity(0.7))
         }
-        .padding(10)
+        .padding(cardPadding)
         .background(cardBackgroundColor)
-        .cornerRadius(8)
+        .cornerRadius(cardCornerRadius)
         // The refresh and remove buttons are hover-dimmed, so the context menu is the
         // non-hover path to both — required for keyboard and VoiceOver users.
         .contextMenu {
@@ -275,13 +292,13 @@ struct SupportEntryView: View {
                         .resizable().foregroundColor(.secondary.opacity(0.5))
                 }
             }
-            .frame(width: 36, height: 36)
+            .frame(width: photoSize, height: photoSize)
             .clipShape(Circle())
         } else {
             Image(systemName: "person.circle.fill")
                 .resizable()
                 .foregroundColor(.secondary.opacity(0.5))
-                .frame(width: 36, height: 36)
+                .frame(width: photoSize, height: photoSize)
         }
     }
 }
@@ -314,13 +331,14 @@ struct SavedPlatformBadge: View {
     private let badgePaddingV: CGFloat = 10
     private let badgeSpacing: CGFloat = 6
     #else
-    private let socialBadgeSize: CGFloat = 28
-    private let socialIconSize: CGFloat = 14
-    private let badgeIconSize: CGFloat = 10
-    private let badgeFont: Font = .caption.weight(.medium)
-    private let badgePaddingH: CGFloat = 8
-    private let badgePaddingV: CGFloat = 4
-    private let badgeSpacing: CGFloat = 4
+    // Matches PlatformBadge and SocialIconButton on the Mac.
+    private let socialBadgeSize: CGFloat = 32
+    private let socialIconSize: CGFloat = 16
+    private let badgeIconSize: CGFloat = 12
+    private let badgeFont: Font = .callout.weight(.medium)
+    private let badgePaddingH: CGFloat = 10
+    private let badgePaddingV: CGFloat = 5
+    private let badgeSpacing: CGFloat = 5
     #endif
 
     var body: some View {
@@ -401,9 +419,9 @@ struct NewReleaseBadge: View {
     private let paddingH: CGFloat = 12
     private let paddingV: CGFloat = 10
     #else
-    private let labelFont: Font = .caption.weight(.medium)
-    private let paddingH: CGFloat = 8
-    private let paddingV: CGFloat = 4
+    private let labelFont: Font = .callout.weight(.medium)
+    private let paddingH: CGFloat = 10
+    private let paddingV: CGFloat = 5
     #endif
 
     var body: some View {
